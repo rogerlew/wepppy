@@ -1,0 +1,16 @@
+<ul class="navbar-nav navbar-right">
+  <li class="nav-item active">
+    <a class="nav-link" href="/weppcloud/runs">Runs</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="/weppcloud/profile">Profile</a>
+  </li>
+  <li class="nav-item active">
+    <a class="nav-link" href="/weppcloud/logout">Logout</a>
+  </li>
+  {% if current_user.has_role('Root') %}
+  <li class="nav-item active">
+    <a class="nav-link" href="/weppcloud/usermod">Usermod</a>
+  </li>
+  {% endif %}
+</ul>

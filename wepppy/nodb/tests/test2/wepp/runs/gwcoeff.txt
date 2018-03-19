@@ -1,0 +1,5 @@
+200	Surface runoff concentration (mg/l)
+0.04	Subsurface lateral flow concentration (mg/l)
+0	Baseflow concentration (mg/l)
+1	Sediment concentration (mg/kg)
+

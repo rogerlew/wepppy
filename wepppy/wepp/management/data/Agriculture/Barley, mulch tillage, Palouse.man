@@ -1,0 +1,200 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+1 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+Bar_8319
+Barley
+JML, 3/28/01
+(null)
+1  #landuse
+WeppWillSet
+5.20000 3.00000 35.00000 4.00000 6.40000 60.00000 0.00000 0.15200 1.00000 0.00640
+0.80000 1.00000 0.65000 0.99000 3.00000 1700.00000 0.42000 1.00000
+2  # mfo - <non fragile>
+0.00850 0.00850 15.00000 0.25000 0.00500 1.50000 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+5  # Number of operation scenarios
+
+
+FIEL0001
+`Field Cultivation'
+From converted V92.2 file `ANSI1.MAN'
+NOTE: MFO values are the min and max of original values.
+1  #landuse
+0.2500 0.2500 0
+4 # pcode - other 
+0.0250 0.1500 0.2500 0.2500 0.0150 1.0000 0.1000 
+
+ANHYDROS
+`Anhydrous applicator'
+(from WEPP distribution database)
+
+1  #landuse
+0.4500 0.2000 0
+4 # pcode - other 
+0.0250 0.7500 0.4500 0.2000 0.0130 0.1500 0.0000 
+
+HASPTCT
+`Harrow-springtooth (coil tine)'
+(from WEPP distribution database)
+
+1  #landuse
+0.2500 0.1500 0
+4 # pcode - other 
+0.0250 0.0500 0.2500 0.1500 0.0150 1.0000 0.0250 
+
+DRDDO
+`Drill with double disk opener'
+(from WEPP distribution database)
+
+1  #landuse
+0.3000 0.1000 20
+2 # pcode - drill
+0.0250 0.2000 0.3000 0.1000 0.0120 0.8500 0.0250 
+
+CHISCOST
+`Chisel plow with coulters and straight chisel spike pt'
+(from WEPP distribution database)
+
+1  #landuse
+0.6500 0.4000 0
+4 # pcode - other 
+0.0500 0.3000 0.6500 0.4000 0.0230 1.0000 0.1500 
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Aft_12889
+After harvest of  Barley in August
+50  initial residue cover
+150 mm of rain since last tillage in fall prior
+1  #landuse
+1.10000 0.00000 75 150 0.00000 0.50000
+1 # iresd  <Bar_8319>
+1 # mang annual
+152.39999 0.08001 0.50000 0.04999 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.33627 0.16813
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+5 # ntill - number of operations
+  91  # mdate  --- 4 / 1 
+  1  # op --- FIEL0001
+      0.050  # depth
+      2  # type
+  95  # mdate  --- 4 / 5 
+  2  # op --- ANHYDROS
+      0.050  # depth
+      2  # type
+  95  # mdate  --- 4 / 5 
+  3  # op --- HASPTCT
+      0.050  # depth
+      2  # type
+  100  # mdate  --- 4 / 10 
+  4  # op --- DRDDO
+      0.050  # depth
+      2  # type
+  288  # mdate  --- 10 / 15 
+  5  # op --- CHISCOST
+      0.050  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15
+   100  # planting date --- 4 /10
+   1.2000  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index

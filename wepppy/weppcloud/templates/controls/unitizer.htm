@@ -1,0 +1,35 @@
+<h6>Global Preference</h6>
+<dl class="dl-horizontal">
+    <dd>
+        <label class="radio">
+        <input type="radio" value="0" name="uni_main_selector" > SI</label>
+    </dd>
+    <dd>
+        <label class="radio">
+        <input type="radio" value="1" name="uni_main_selector" > English</label>
+    </dd>
+</dl>
+<h6>Unit Preferences</h6>
+<div style="height:300px;border:1px solid #ccc;overflow:auto;">
+    <dl class="dl-horizontal">
+        {% for unitclass in precisions %}
+        <dt><label for="unitizer_{{unitclass}}_radio">{{unitclass}}</label></dt>
+        <dd>
+            {% for units in precisions[unitclass] %}
+            <label class="radio">
+            <input type="radio" value="{{ cls_units(units) }}" name="unitizer_{{unitclass}}_radio" 
+            {{ 'checked' if unitizer.preferences[unitclass] == units }}>{{ str_units(units) | safe }}</label>
+            {% endfor %}
+        </dd>
+        {% endfor %}
+    </dl>
+</div>
+<script>
+
+function setGlobalUnitizerPreference(pref)
+{
+    {% for unitclass in precisions %}
+    $("[name^=unitizer_{{unitclass}}_radio]")[pref].checked = true;
+    {% endfor %}
+}
+</script>

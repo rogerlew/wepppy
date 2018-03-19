@@ -1,0 +1,149 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+50 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+No Growth No Senescence
+Based on Grass
+W. Elliot  March 2017
+(null)
+1  #landuse
+WeppWillSet
+14.00000 23.00000 0.00000 10.00000 4.99968 30.00000 0.10000 0.15200 1.00000 0.00220
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 0.51004
+2  # mfo - <non fragile>
+0.00000 0.00000 25.00000 0.00000 0.00600 0.29998 0.33000 0.33997 14 32.00000
+1.10000 9.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+1  # Number of operation scenarios
+
+
+Reset Random Roughness
+
+W. Elliot March, 2017
+
+1  #landuse
+0.0000 0.0000 0
+4 # pcode - other 
+0.0000 0.0000 0.0000 0.0000 0.0600 1.0000 0.0010 
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Cable Thinning
+Assume 93  Cover
+W. Elliot March, 2017
+Use Young Forest Soil
+1  #landuse
+1.10000 0.40000 200 92 0.00000 0.93000
+1 # iresd  <No__0664>
+3 # mang fallow
+500.10001 0.02000 0.93000 0.02000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.20000 0.00000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+Reset Random Roughness on Day 2
+W Elliot, March, 2017
+
+1  # landuse  - cropland
+1 # ntill - number of operations
+  2  # mdate  --- 1 / 2 
+  1  # op --- Reset Random Roughness
+      0.050  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   365  # harvest date --- 12 / 31
+   1  # planting date --- 1 /1
+   0.0000  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+

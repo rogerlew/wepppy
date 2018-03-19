@@ -1,0 +1,84 @@
+<h5>Station</h5>
+<dl class="dl-horizontal">
+    <dt>Station Description:</dt>
+    <dd>{{ station_meta.desc }}</dd>
+    <dt>Station ID:</dt>
+    <dd>{{ station_meta.id }}</dd>    
+    <dt>Location:</dt>
+    <dd>{{ station_meta.longitude }}, {{ station_meta.latitude }}</dd>
+    <dt>Elevation:</dt>
+    <dd>{{ station_meta.elevation * 0.3048}} m</dd>
+</dl>
+<h5>Global Climate</h5>
+<dl class="dl-horizontal">
+    <dd><a href="../view/climate/{{ climate.par_fn }}" target="_blank">{{ climate.par_fn }}</a></dd>
+    <dd><a href="../view/climate/{{ climate.cli_fn }}" target="_blank">{{ climate.cli_fn }}</a></dd>
+</dl>
+{% if climate.monthlies is not none %}
+ <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Jan</th>
+        <th>Feb</th>
+        <th>Mar</th>
+        <th>Apr</th>
+        <th>May</th>
+        <th>Jun</th>
+        <th>Jul</th>
+        <th>Aug</th>
+        <th>Sep</th>
+        <th>Oct</th>
+        <th>Nov</th>
+        <th>Dec</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>P MEAN</td>
+        {% for v in climate.monthlies.ppts %}
+        <td class="text-right">{{ unitizer(v, 'in') | safe  }}</td>
+        {% endfor %}
+        <td>{{ unitizer_units('in') | safe }}</td>
+      </tr>
+      <tr>
+        <td>T MAX</td>
+        {% for v in climate.monthlies.tmaxs %}
+        <td class="text-right">{{ unitizer(v, 'degf') | safe }}</td>
+        {% endfor %}
+        <td>{{ unitizer_units('degf') | safe }}</td>
+      </tr>
+      <tr>
+        <td>T MIN</td>
+        {% for v in climate.monthlies.tmins %}
+        <td class="text-right">{{ unitizer(v, 'degf') | safe }}</td>
+        {% endfor %}
+        <td>{{ unitizer_units('degf') | safe }}</td>
+      </tr>
+    </tbody>
+</table>
+{% endif %}
+{% if climate.climate_mode == 1 %}
+<h5>Localized Climates</h5>
+ <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Subcatchment</th>
+        <th>PAR</th>
+        <th>CLI</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for (topaz_id, par_fn), cli_fn in 
+       climate.sub_par_fns.items() | 
+       zip(climate.sub_cli_fns.values()) %}
+      <tr>
+        <td>{{ topaz_id }}</td>
+        <td><a href="../view/climate/{{ par_fn }}" target="_blank">{{ par_fn }}</a></td>
+        <td><a href="../view/climate/{{ cli_fn }}" target="_blank">{{ cli_fn }}</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}

@@ -1,0 +1,134 @@
+ TOPAZ SOFTWARE : TOPAZ PARAMETERIZATION SOFTWARE SYSTEM                       
+ PROGRAM DEDNM : DIGITAL ELEVATION DRAINAGE NETWORK MODEL PROGRAM              
+                 VERSION 3.10, APRIL 1999                                      
+
+ J. GARBRECHT, USDA-ARS, EL RENO, OKLAHOMA, USA.                               
+ L. MARTZ, UNIVERSITY OF SASKATCHEWAN, SASKATOON, CANADA.                      
+
+
+ TITLE OF CURRENT TOPAZ APPLICATION:
+
+  DATE: 23 AUGUST 1999     WEPP WEB INTERFACE   DEDNM VERSION 3.1              
+  APPLICATION FOR TESTING AND VERIFICATION WEPP WEB GIS; INPUT FILE            
+  TESTING AND CALIBRATION.                                                     
+
+
+
+ TABLE OF RASTER-NETWORK SUBCATCHMENT INFORMATION AS COMPUTED BY PROGRAM DEDNM
+
+
+
+ NOTE: FOR COMPLEX JUNCTION NODES ONLY THE SUBCATCHMENT INFORMATION
+ PERTAINING TO THE FIRST NODE NUMBER IS GIVEN.  SUBSEQUENT NODES
+ ARE HYPOTHETICAL NODES AND HAVE NO CORRESPONDING SUBCATCHMENT INFORMATION.
+
+
+ CHAN. CHAN. CHAN.      SUBCATCHMENT AREA IN NUMBER OF CELLS
+ CNTR. ORDER INDEX     SOURCE   LEFT   RIGHT  CHANNEL   TOTAL
+----------------------------------------------------------------
+
+    1     1     48       112      68     336      20     536
+    2     1     49       126      62      37      10     235
+    3     1     40       113     245     195      25     578
+    4     1     46       117      54     172      13     356
+    5     1     50       120      83     193      16     412
+    6     1     51       134     294     214      21     663
+    7     1     39       205      22      32       9     268
+    8     1     37       132      89      36      15     272
+    9     1     16       111     404      51      16     582
+   10     1     15       136      96      26      11     269
+   11     1     35       151      33      51       9     244
+   12     1     53       121     142      75       8     346
+   13     1     41       117      31      11       8     167
+   14     1     54       111     223     245      15     594
+   15     1     13       112      19      85      12     228
+   16     1     30       136     362     229      26     753
+   17     1     17       122      73      71      15     281
+   18     1     57       112     152     213      21     498
+   19     1     25       116     125     185      25     451
+   20     1     62       118      46      15      12     191
+   21     1     20       127     242     430      46     845
+   22     1     59       134     123     177      18     452
+   23     1      8       119     120      23      17     279
+   24     1     61       123     167      40      14     344
+   25     1     63       168      93     200      25     486
+   26     1      7       115      93     126       8     342
+   27     1     65       197     217     215      35     664
+   28     1     60       123     212     346      28     709
+   29     1     67       118       5      40       7     170
+   30     1     66       113      79      60      17     269
+   31     1      5       117      11      11       7     146
+   32     1     73       113      30     346      13     502
+   33     1     79       120       8      12       6     146
+   34     1     74       143     141      48      15     347
+   35     1     81       187     115     138      20     460
+   36     1     76       111      40       0       7     158
+   37     1     77       121     108       8      11     248
+   38     1     75       124      39      35      14     212
+   39     1     80       166     251     128      26     571
+   40     1     82       147      78      83      15     323
+   41     1     88       170     383     325      47     925
+   42     1     83       111      33       9      11     164
+   43     1     86       122      55      85      11     273
+   44     1     89       123     178     610      60     971
+   45     1     90       116     200     107      19     442
+   46     2     47        -1     122      66      14     202
+   47     2     45        -1      25      30       9      64
+   48     2     44        -1      14     104       5     123
+   49     2     43        -1     291     317      34     642
+   50     2     38        -1     203      39       9     251
+   51     2     36        -1     127      55      10     192
+   52     2     34        -1     137     143      16     296
+   53     2     33        -1      23     109      13     145
+   54     2     52        -1     330     126      22     478
+   55     2     14        -1     293     228      14     535
+   56     2     12        -1      69     202      10     281
+   57     2     11        -1     815     751      88    1654
+   58     2     58        -1     192      63      16     271
+   59     2     56        -1      15      43       4      62
+   60     2     55        -1     383     385      37     805
+   61     2     64        -1      74      80      23     177
+   62     2      6        -1     107     126      24     257
+   63     2      4        -1     218     800      45    1063
+   64     2     72        -1      71     112      14     197
+   65     2     70        -1       0      41       5      46
+   66     2     69        -1     351     281      46     678
+   67     2     78        -1      19      15       4      38
+   68     2     87        -1      55      43       9     107
+   69     2     85        -1      74     161      15     250
+   70     2     84        -1     218     253      34     505
+   71     3     42        -1     261      72      15     348
+   72     3     32        -1      35     115       6     156
+   73     3     31        -1      33      78       8     119
+   74     3     29        -1      30      13       5      48
+   75     3     28        -1      16      51       4      71
+   76     3     27        -1       8     141       6     155
+   77     3     26        -1     120      83       9     212
+   78     3     24        -1     111      68       6     185
+   79     3     23        -1     117     166      11     294
+   80     3     68        -1     108     113      22     243
+   81     4     22        -1     226     188      20     434
+   82     4     19        -1     106     227      16     349
+   83     4     18        -1      95      86      11     192
+   84     4     10        -1      14      35       5      54
+   85     4      9        -1     179     156      17     352
+   86     4      3        -1      21      35       7      63
+   87     4      2        -1      15     146       3     164
+   88     4      1        -1      -1      -1      -1      -1
+   -1
+
+ ** NOTE **
+
+ - BECAUSE THERE MAY BE JUNCTIONS WITH MULTIPLE TRIBUTARIES, THE NUMBER
+   OF SUBCATCHMENTS MAY BE SMALLER THAN THE THEORETICALLY EXPECTED NUMBER.
+
+ - THE LAST LINE OF DATA DOES NOT REPRESENT A SUBCATCHMENT.
+   IT REPRESENTS THE WATERSHED OUTLET CELL.
+
+ - THE SUBCATCHMENT AREAS INTO THE OUTLET CELL ARE ACCOUNTED FOR IN THE
+   LAST CHANNEL LINK (PREVIOUS TO LAST DATA LINE).
+   AS A RESULT, THE VALUE OF THE SUBCATCHMENT AREAS OF THE LAST CHANNEL
+   LINK INCLUDE, IN ADDITION TO THEIR OWN SUBCATCHMENT AREAS, THE SUBCATCHMENT
+   AREAS INTO THE OUTLET CELL.
+
+ - VALUE OF -1 INDICATES TERM NOT APPLICABLE.

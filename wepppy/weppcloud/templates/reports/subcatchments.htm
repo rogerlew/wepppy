@@ -1,0 +1,17 @@
+ <dl class="dl-horizontal">
+    <dt>Hillslope Count:</dt>
+    <dd>{{ watershed.sub_n }}</dd>
+    <dt>Channel Count:</dt>
+    <dd>{{ watershed.chn_n }}</dd>
+    <dt>Total Area:</dt>
+    <dd>
+        <div class="row">
+            <div class="col-md-1"> 
+                {{  unitizer(watershed.totalarea, 'm^2') | safe  }} 
+            </div>
+            <div class="col-md-1"> 
+            {{ unitizer_units('m^2') | safe }}
+            </div>
+        </div>
+    </dd>
+</dl>

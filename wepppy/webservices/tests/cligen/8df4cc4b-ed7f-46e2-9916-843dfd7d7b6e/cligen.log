@@ -1,0 +1,583 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ 49105.par                                                                                                                                                                                                                                                       
+
+ Weather Generator Options
+ ------- --------- -------
+
+ 1 - Single Year Simulation - Screen
+ 2 - Multiple Year - Screen Output
+ 3 - Multiple Year Simulation - CREAMS - GLEAMS Output File
+ 4 - Selected Single Storm WEPP - Output File
+ 5 - Multiple Year - WEPP Output File
+ 6 - Read Observed P and Temp and Generate Missing Data
+ 7 - Single Design Storm - TR 55 Storm Type WEPP Output File
+ 8 - Exit Weather Generator Program
+
+ Enter generator option (1-8): 
+
+ Enter beginning simulation year (positive integer value; e.g. 1 ): 
+
+ Enter number of years to simulate: 
+
+ Enter output file name (ex. Indy.cli): Station No.   -1
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           1  Mlevel=   5.00000000      SDlevel=   82.6503067      Days:           1
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           1  Mlevel=   5.00000000      SDlevel=   87.6772079      Days:           1
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           1  Mlevel=   5.00000000      SDlevel=   87.2930984      Days:           1
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           1  Mlevel=   1.00000000      SDlevel=   94.4812927      Days:           1
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           1  Mlevel=   5.00000000      SDlevel=   83.3498535      Days:           1
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           1  Mlevel=   60.0000000      SDlevel=   99.7926102      Days:          30
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           2  Mlevel=   10.0000000      SDlevel=   95.0748444      Days:           2
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           2  Mlevel=   5.00000000      SDlevel=   93.0707932      Days:           2
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           2  Mlevel=   1.00000000      SDlevel=   96.2144547      Days:           2
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           2  Mlevel=   10.0000000      SDlevel=   92.6876221      Days:           2
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:           2  Mlevel=   5.00000000      SDlevel=   92.6486359      Days:           2
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           2  Mlevel=   90.0000000      SDlevel=   72.3682404      Days:          60
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           3  Mlevel=   30.0000000      SDlevel=   100.000000      Days:          90
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           3  Mlevel=   10.0000000      SDlevel=   100.000000      Days:          90
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           3  Mlevel=   10.0000000      SDlevel=   99.9160995      Days:          90
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           3  Mlevel=   20.0000000      SDlevel=   100.000000      Days:          90
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           3  Mlevel=   5.00000000      SDlevel=   100.000000      Days:          90
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           4  Mlevel=   5.00000000      SDlevel=   100.000000      Days:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           4  Mlevel=   5.00000000      SDlevel=   100.000000      Days:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           4  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           4  Mlevel=   30.0000000      SDlevel=   100.000000      Days:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           4  Mlevel=   30.0000000      SDlevel=   100.000000      Days:         120
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:           4  Mlevel=   5.00000000      SDlevel=   56.9461479      Days:           8
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:           4  Mlevel=   5.00000000      SDlevel=   56.5487251      Days:           8
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:           4  Mlevel=   10.0000000      SDlevel=   54.5260201      Days:           8
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:           4  Mlevel=   5.00000000      SDlevel=   55.6938286      Days:           8
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:           4  Mlevel=   10.0000000      SDlevel=   55.3994904      Days:           8
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           5  Mlevel=   20.0000000      SDlevel=   62.9769936      Days:           3
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           5  Mlevel=   40.0000000      SDlevel=   56.1707611      Days:           3
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           5  Mlevel=   40.0000000      SDlevel=   52.3295288      Days:           3
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           5  Mlevel=   10.0000000      SDlevel=   61.9914055      Days:           3
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           5  Mlevel=   1.00000000      SDlevel=   53.0820503      Days:           3
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           7  Year:           5  N:         155
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           5  Mlevel=   30.0000000      SDlevel=   100.000000      Days:         150
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           5  Mlevel=   5.00000000      SDlevel=   99.9995804      Days:         150
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           5  Mlevel=   1.00000000      SDlevel=   99.9897766      Days:         150
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           5  Mlevel=   30.0000000      SDlevel=   99.9999847      Days:         150
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           5  Mlevel=   20.0000000      SDlevel=   99.9999542      Days:         150
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           9  Year:           6  N:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           6  Mlevel=   50.0000000      SDlevel=   99.9971848      Days:         180
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           9  Year:           6  N:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           6  Mlevel=   50.0000000      SDlevel=   99.9971848      Days:         180
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           9  Year:           6  N:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           6  Mlevel=   50.0000000      SDlevel=   99.9971848      Days:         180
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           9  Year:           6  N:         120
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           6  Mlevel=   50.0000000      SDlevel=   99.9971848      Days:         180
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           6  Mlevel=   0.00000000      SDlevel=   99.9255219      Days:         180
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           9  Year:           7  N:         150
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           7  Mlevel=   5.00000000      SDlevel=   99.9375839      Days:         210
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           9  Year:           7  N:         150
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           7  Mlevel=   5.00000000      SDlevel=   99.9375839      Days:         210
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           7  Mlevel=   50.0000000      SDlevel=   99.6615906      Days:         210
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           7  Mlevel=   40.0000000      SDlevel=   99.8848419      Days:         210
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:           7  Mlevel=   1.00000000      SDlevel=   99.9451904      Days:         210
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           8  Mlevel=   5.00000000      SDlevel=   62.1648331      Days:           6
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           8  Mlevel=   1.00000000      SDlevel=   66.1257019      Days:           6
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           8  Mlevel=   20.0000000      SDlevel=   58.3852768      Days:           6
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           8  Mlevel=   1.00000000      SDlevel=   65.5812531      Days:           6
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:           8  Mlevel=   20.0000000      SDlevel=   58.2021942      Days:           6
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          13  Mlevel=   20.0000000      SDlevel=   53.4686584      Days:          10
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          13  Mlevel=   40.0000000      SDlevel=   52.5552139      Days:          10
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          13  Mlevel=   30.0000000      SDlevel=   52.7406921      Days:          10
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          13  Mlevel=   30.0000000      SDlevel=   53.0569420      Days:          10
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          13  Mlevel=   40.0000000      SDlevel=   50.2282257      Days:          10
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          14  Mlevel=   40.0000000      SDlevel=   64.1739883      Days:          11
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          14  Mlevel=   40.0000000      SDlevel=   62.7391891      Days:          11
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          14  Mlevel=   30.0000000      SDlevel=   62.9743805      Days:          11
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          14  Mlevel=   30.0000000      SDlevel=   59.9681244      Days:          11
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          14  Mlevel=   20.0000000      SDlevel=   57.7858047      Days:          11
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          15  Mlevel=   20.0000000      SDlevel=   69.0072556      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          15  Mlevel=   10.0000000      SDlevel=   68.5038757      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          15  Mlevel=   30.0000000      SDlevel=   68.2933807      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          15  Mlevel=   20.0000000      SDlevel=   69.8579559      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          15  Mlevel=   20.0000000      SDlevel=   69.8496094      Days:          12
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          16  Mlevel=   20.0000000      SDlevel=   69.8496094      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          16  Mlevel=   20.0000000      SDlevel=   69.8496094      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          16  Mlevel=   20.0000000      SDlevel=   69.8496094      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          16  Mlevel=   20.0000000      SDlevel=   69.8496094      Days:          12
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:          16  Mlevel=   20.0000000      SDlevel=   69.8496094      Days:          12
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          20  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          20  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          20  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          20  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          20  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          21  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          21  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          21  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          21  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          21  N:         107
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          22  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          22  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          22  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          22  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          22  N:         111
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          23  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          23  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          23  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          23  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          23  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          24  N:         119
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          24  N:         119
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          24  N:         119
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          24  N:         119
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          24  N:         119
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          25  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          25  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          25  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          25  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          25  N:         122
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          26  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          26  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          26  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          26  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          26  N:         128
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          27  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          27  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          27  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          27  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          27  N:         129
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          28  N:         134
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          28  N:         134
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          28  N:         134
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          28  N:         134
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          28  N:         134
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          29  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          29  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          29  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          29  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          29  N:         138
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          30  N:         146
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          30  N:         146
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          30  N:         146
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          30  N:         146
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:          30  N:         146
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          33  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          33  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          33  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          33  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          33  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          34  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          34  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          34  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          34  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          34  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          35  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          35  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          35  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          35  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          35  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          36  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          36  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          36  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          36  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          36  N:         107
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          37  N:         110
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          37  N:         110
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          37  N:         110
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          37  N:         110
+ FAILED K-S -- Parm:Time to Peak    Mon:          11  Year:          37  N:         110
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           4  Year:          72  Mlevel=   50.0000000      SDlevel=   51.0622025      Days:         265
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           4  Year:          72  Mlevel=   50.0000000      SDlevel=   50.8820534      Days:         265
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           4  Year:          72  Mlevel=   50.0000000      SDlevel=   50.9814262      Days:         265
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           4  Year:          72  Mlevel=   50.0000000      SDlevel=   50.8424110      Days:         265
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           4  Year:          72  Mlevel=   50.0000000      SDlevel=   51.1625290      Days:         265
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           4  Year:          72  Mlevel=   70.0000000      SDlevel=   43.5787926      Days:        2160
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:          72  N:         265
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          81  Mlevel=   40.0000000      SDlevel=   51.6282158      Days:         114
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          81  Mlevel=   30.0000000      SDlevel=   52.5723381      Days:         114
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          81  Mlevel=   30.0000000      SDlevel=   53.0747414      Days:         114
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          81  Mlevel=   30.0000000      SDlevel=   51.9842033      Days:         114
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          81  Mlevel=   40.0000000      SDlevel=   52.5019226      Days:         114
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          83  Mlevel=   50.0000000      SDlevel=   52.4168205      Days:         119
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          83  Mlevel=   50.0000000      SDlevel=   52.4149551      Days:         119
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          83  Mlevel=   50.0000000      SDlevel=   52.4118767      Days:         119
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          83  Mlevel=   50.0000000      SDlevel=   52.4100838      Days:         119
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:          83  Mlevel=   50.0000000      SDlevel=   52.4195023      Days:         119
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          91  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          91  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          91  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          91  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          91  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          92  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          92  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          92  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          92  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          92  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          93  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          93  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          93  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          93  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          93  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          94  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          94  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          94  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          94  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          94  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          95  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          95  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          95  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          95  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          95  N:         105
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          95  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          95  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          95  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          95  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          95  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          96  N:         106
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          96  N:         106
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          96  N:         106
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          96  N:         106
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:          96  N:         106
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          96  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          96  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          96  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          96  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          96  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          97  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          97  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          97  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          97  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          97  N:         103
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          98  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          98  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          98  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          98  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          98  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          99  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          99  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          99  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          99  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:          99  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:         100  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:         100  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:         100  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:         100  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:         100  N:         105
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.

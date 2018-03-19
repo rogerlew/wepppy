@@ -1,0 +1,10 @@
+ <dl class="dl-horizontal">
+    <dt>Actual Outlet Location(lon, lat):</dt>
+    <dd>{{outlet.actual_loc[0]}}, {{outlet.actual_loc[1]}}</dd>
+    <dt>Pixel Coords (x, y):</dt>
+    <dd>{{outlet.pixel_coords[0]}}, {{outlet.pixel_coords[1]}}</dd>
+    <dt>Requested Location (lon, lat):</dt>
+    <dd>{{outlet.requested_loc[0]}}, {{outlet.requested_loc[1]}}</dd>
+    <dt>Distance between requested and actual:</dt>
+    <dd>{{outlet.distance_from_requested * 1000 }} m</dd>
+</dl>

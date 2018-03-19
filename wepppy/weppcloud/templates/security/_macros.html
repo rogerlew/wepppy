@@ -1,0 +1,24 @@
+{% macro render_field_with_errors(field) %}
+  <div class="form-group">
+    <label for="{{field.name}}">{{field.label}}</label>  {{ field(**kwargs)|safe }}
+    {% if field.errors %}
+      <ul>
+      {% for error in field.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  </div >
+{% endmacro %}
+
+{% macro render_checkbox_with_errors(field) %}
+  <div class="form-check">
+    <label class="form-check-label" for="{{field.name}}">
+      {{field(**kwargs)}}
+      {{field.label.text | safe}}</label>
+  </div>
+{% endmacro %}
+
+{% macro render_field(field) %}
+  <p>{{ field(**kwargs)|safe }}</p>
+{% endmacro %}

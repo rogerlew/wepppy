@@ -1,0 +1,20 @@
+ <table class="table">
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>Description</th>
+        <th>Management File</th>
+        <th>Coverage %</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for row in report %}
+      <tr>
+        <td><a href="../view/management/{{ row.key }}"  target="_blank">{{ row.key }}</a></td>
+        <td>{{ row.desc }}</td>
+        <td>{{ row.man_fn }}</td>
+        <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
+      </tr>
+  {% endfor %}
+    </tbody>
+  </table>

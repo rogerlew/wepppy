@@ -1,0 +1,219 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}climate_form{% endblock %}
+{% block form_title %}Climate Options{% endblock %}
+{% block inputs %}
+    <h3>Select Station</h3>
+    <div class="form-group row">
+        <div class="col-sm-1">
+            <h5>Filter</h5>
+        </div>
+        <div class="col-sm-2">
+            <label class="radio-inline">
+            <input type="radio" value="0" id="climatestation_mode0" 
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}> Closest</label>
+        </div>
+        <div class="col-sm-4">
+            <label class="radio-inline">
+            <input type="radio" value="1" id="climatestation_mode1" 
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}> Heuristic Ranking</label>
+        </div>
+    </div>    
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <select class="form-control" id="climate_station_selection" name="climate_station_selection">
+            </select>
+        </div>
+        <div class="col-sm-3">
+            <a href="#" id="climate_par_link">View PAR</a>
+        </div>
+    </div>
+    <div id="climate_monthlies"></div>
+    <h4>Climate Method</h4>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <label class="radio"><input type="radio" value="0" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> Single Climate for Watershed</label><br/>
+            <label class="radio"><input type="radio" value="0" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> Single Climate PRISM</label><br/>
+            {% if current_user.has_role("Dev")%}
+            <label class="radio"><input type="radio" value="1" id="climate_mode1" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 1] }}> Determine per Hillslope (PRISM / Daymet)</label><br/>
+            {% endif %}
+            <label class="radio"><input type="radio" value="2" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (Daymet)</label><br/>
+            <label class="radio"><input type="radio" value="3" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5)</label><br/>
+            <label class="radio"><input type="radio" value="4" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label>
+        </div>
+    </div>
+    <div class="form-group row" id="input_years_container">
+        <div class="col-sm-4">
+            <label for="input_years">Number of years to simulate: </label>
+        </div>
+        <div class="col-sm-4">
+            <input id="input_years" name="input_years" class="form-control mr-sm-3" type="text" 
+            value="{{ climate.input_years }}" aria-label="Years to simulate">
+        </div>
+    </div>
+    <div id="climate_mode0_controls">
+        <h5>Single Climate for Watershed Parameters ("Vanilla" Cligen)</h5>
+    </div>
+    <div id="climate_mode1_controls">
+        <h5>Determine per Hillslope (PRISM / Daymet) Parameters</h5>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_p_mean">Mean P: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_mean" value="0" {{ ('', 'checked')[climate.localized_p_mean == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_mean" value="1" {{ ('', 'checked')[climate.localized_p_mean == 1] }} > Daymet</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_mean" value="2" {{ ('', 'checked')[climate.localized_p_mean == 2] }} > PRISM</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_p_std">Std P: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_std" value="0" {{ ('', 'checked')[climate.localized_p_std == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_std" value="1" {{ ('', 'checked')[climate.localized_p_std == 1] }} > Daymet</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_p_skew">Skew P: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_skew" value="0" {{ ('', 'checked')[climate.localized_p_skew == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_skew" value="1" {{ ('', 'checked')[climate.localized_p_skew == 1] }} > Daymet</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_p_ww">P(W/W): </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_ww" value="0" {{ ('', 'checked')[climate.localized_p_ww == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_ww" value="1" {{ ('', 'checked')[climate.localized_p_ww == 1] }} > Daymet</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_p_wd">P(W/D): </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_wd" value="0" {{ ('', 'checked')[climate.localized_p_wd == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_wd" value="1" {{ ('', 'checked')[climate.localized_p_wd == 1] }} > Daymet</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_tmax">T Max: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_tmax" value="0" {{ ('', 'checked')[climate.localized_tmax == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2" >&nbsp;</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_tmax" value="2" {{ ('', 'checked')[climate.localized_tmax == 2] }} > PRISM</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_tmin">T Max: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_tmin" value="0" {{ ('', 'checked')[climate.localized_tmin == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2" >&nbsp;</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_tmin" value="2" {{ ('', 'checked')[climate.localized_tmin == 2] }} > PRISM</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_solrad">Solar Rad: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_solrad" value="0" {{ ('', 'checked')[climate.localized_solrad == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_solrad" value="1" {{ ('', 'checked')[climate.localized_solrad == 1] }} > Daymet</label>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="localized_dewpoint">Dewpoint: </label>
+            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_dewpoint" value="0" {{ ('', 'checked')[climate.localized_dewpoint == 0] }} > Station (non-spatial)</label>
+            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_dewpoint" value="1" {{ ('', 'checked')[climate.localized_dewpoint == 1] }} > Daymet</label>
+        </div>
+    </div>
+    <div id="climate_mode2_controls">
+        <h5>Observed (Daymet)</h5>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="observed_start_year">Start Year [1980-2016]: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="observed_start_year" 
+                name="observed_start_year" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.observed_start_year }}" aria-label="Start Year" >
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="observed_end_year">End Year [1980-2016]: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="observed_end_year" 
+                name="observed_end_year" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.observed_end_year }}" aria-label="End Year">
+            </div>
+        </div>
+    </div>
+    <div id="climate_mode3_controls">
+        <h5>Future (CMIP5)</h5>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="future_start_year">Start Year [2006-2099]: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="future_start_year" 
+                name="future_start_year" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.future_start_year }}" aria-label="Start Year">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="future_end_year">End Year [2006-2099]: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="future_end_year" 
+                name="future_end_year" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.future_end_year }}" aria-label="End Year">
+            </div>
+        </div>
+    </div>
+    <div id="climate_mode4_controls">
+        <h5>Single Storm (Cligen)</h5>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label for="ss_storm_date">Enter Month Day and Year of Storm (mo da yr): </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="ss_storm_date" 
+                name="ss_storm_date" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.ss_storm_date }}" placeholder="M D Y" 
+                aria-label="Storm Date">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label for="ss_design_storm_amount_inches">Enter Design Storm Amount in Inches (e.g. 6.30) </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="ss_design_storm_amount_inches" 
+                name="ss_design_storm_amount_inches" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.ss_design_storm_amount_inches }}" placeholder="" 
+                aria-label="Design Storm Amount in inches">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label for="ss_duration_of_storm_in_hours">Enter Storm Duration in Hours (e.g. 6) </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="ss_duration_of_storm_in_hours" 
+                name="ss_duration_of_storm_in_hours" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.ss_duration_of_storm_in_hours }}" placeholder="" 
+                aria-label="Duration of storm in hour">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label for="ss_time_to_peak_intensity_pct">Enter Time to Peak Intensity (% Duration e.g. .4) </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="ss_time_to_peak_intensity_pct" 
+                name="ss_time_to_peak_intensity_pct" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.ss_time_to_peak_intensity_pct }}" placeholder="" 
+                aria-label="Time to peak intensity %">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label for="ss_max_intensity_inches_per_hour">Enter Maximum Intensity Inches/Hour (e.g. 3.0) </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="ss_max_intensity_inches_per_hour" 
+                name="ss_max_intensity_inches_per_hour" class="form-control mr-sm-3" type="text" 
+                value="{{ climate.ss_max_intensity_inches_per_hour }}" placeholder="" 
+                aria-label="Max intensity inches per hour">
+            </div>
+        </div>
+    </div>
+    <div class="form-group row" id="btn_build_climate_container">
+        <div class="col-sm-4">
+            <button id="btn_build_climate" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Build Climate</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_build_climate"></small>
+        </div>
+    </div>
+{% endblock %}

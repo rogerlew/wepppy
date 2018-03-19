@@ -1,0 +1,172 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+1 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+ski_1897
+Skid Trail
+modified by John Laflen, 10-27-02
+W. Elliot 9/94
+1  #landuse
+WeppWillSet
+14.00000 3.00000 40.00000 5.00000 5.00000 5.00000 0.00000 0.05080 0.30000 0.01000
+0.25000 0.10000 0.66000 0.99000 3.00000 0.00000 0.42000 0.30000
+2  # mfo - <non fragile>
+0.00740 0.00740 20.00000 0.10000 0.06000 0.10000 0.33000 0.05000 30 35.00000
+0.00000 0.10000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+1  # Number of operation scenarios
+
+
+Rem_9695      # ResidueRemoval
+Removal of litter-85 
+JML 6/2002
+Created by John M. Laflen to simulate removal of litter et al.
+1  # landuse <CROPLAND>
+0 0 0  # place holder for interrill frag,non-frag, rows
+11 # res removal - no disturb
+0 0 0 0 0 0 0
+0.99   # amount removed
+
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Ski_6991
+Initial Conditions for a skid trail
+W. Elliot 01/99
+
+1  #landuse
+1.30000 0.05000 100 110 0.00000 1.00000
+1 # iresd  <ski_1897>
+2 # mang perennial
+199.99960 0.10000 1.00000 0.10000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.10000 0.10000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+1 # ntill - number of operations
+  182  # mdate  --- 7 / 1 
+  1  # op --- NO-DISTURB Res R
+      0.000  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+2  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 2
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+2 # management <perennial>
+   0 # senescence date 
+   0 # perennial plant date --- 0 /0
+   182 # perennial stop growth date --- 7/1
+   1.2000  # row width
+   1 # crop management - <cutting>
+      1 # number of cuttings 
+         181 # cutting date --- 6/30
+#
+# Yearly scenario 2 of 2
+#
+Year 2 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+2 # management <perennial>
+   0 # senescence date 
+   244 # perennial plant date --- 9 /1
+   0 # perennial stop growth date --- 0/0
+   1.2000  # row width
+   3  # neither cut or grazed
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index

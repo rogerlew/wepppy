@@ -1,0 +1,29 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}build_channels_form{% endblock %}
+{% block form_title %}Channel Delineation{% endblock %}
+{% block inputs %}
+    <input type="hidden" id="map_center" name="map_center" />
+    <input type="hidden" id="map_zoom" name="map_zoom" />
+    <input type="hidden" id="map_bounds" name="map_bounds" />
+    <input type="hidden" id="map_distance" name="map_distance" />
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_mcl">Minimum Channel Length (m)</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_mcl" name="mcl" class="form-control mr-sm-3" type="text" value="{{ topaz.mcl }}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_csa">Critical Source Area (ha)</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_csa" name="csa" class="form-control mr-sm-3" type="text" value="{{ topaz.csa }}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group">
+        <button id="btn_build_channels" class="col-sm-4 btn btn-outline-success my-2 my-sm-0" type="button">Build Channels</button>
+        <small id="hint_build_channels" class="text-muted"></small>
+    </div>
+{% endblock %}

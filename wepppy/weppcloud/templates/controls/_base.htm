@@ -1,0 +1,16 @@
+<form  id="{% block form_id %}{% endblock %}" action="javascript:void(0);">
+    <div class="form-group row">
+        <h3>{% block form_title %}{% endblock %}</h3>
+    </div>
+    {% block inputs %}{% endblock %}
+    <h6>Status</h6>
+    <div class="alert alert-info" style="line-height: 30px; height: 30px; padding-top: 0;">
+        <pre><small id="status" class="text-muted"></small></pre>
+    </div>
+    <h6>Summary</h6>
+    <div class="alert alert-success" style="background:white">
+        <div id="info"></div>
+    </div>
+    <div id="stacktrace" class="alert alert-warning">
+    </div>
+</form>

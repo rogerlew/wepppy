@@ -1,0 +1,28 @@
+<header>
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="/weppcloud">WeppCloud  {{ ('&mdash;' if ron.configname != '') | safe }} {{ ron.configname }} </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+    <form class="form-inline my-2 my-lg-0" id="setname_form" action="javascript:void(0);" >
+      <input class="form-control mr-sm-2" id="input_name" name="name" type="text" placeholder="Untitled Project"
+       value="{{ ron.name }}" aria-label="Name">
+      <button class="btn btn-outline-success my-2 my-sm-0" id="btn_setname" name="setname" type="button">
+        Set Name
+      </button>
+    </form>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+      </li>
+      <li class="nav-item">
+        <a href='create_fork' class="nav-link" target="_blank"><span class="oi oi-fork" title="Fork this project"></span></a>
+      </li>
+    </ul>
+    {% if user.is_authenticated %}
+    {% include "user/navbar.html" %}
+    {% endif %}
+    </div>
+  </nav>
+</header>

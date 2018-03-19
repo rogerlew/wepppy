@@ -1,0 +1,161 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+1 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+Bar_8319
+Barley
+JML, 3/28/01
+(null)
+1  #landuse
+WeppWillSet
+5.20000 3.00000 35.00000 4.00000 6.40000 60.00000 0.00000 0.15200 1.00000 0.00640
+0.80000 1.00000 0.65000 0.99000 3.00000 1700.00000 0.42000 1.00000
+2  # mfo - <non fragile>
+0.00850 0.00850 15.00000 0.25000 0.00500 1.50000 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+2  # Number of operation scenarios
+
+
+ANHYDROS
+`Anhydrous applicator'
+(from WEPP distribution database)
+
+1  #landuse
+0.4500 0.2000 0
+4 # pcode - other 
+0.0250 0.7500 0.4500 0.2000 0.0130 0.1500 0.0000 
+
+DRNTSRFC
+`Drill, no-till in standing stubble-fluted coulters'
+(from WEPP distribution database)
+
+1  #landuse
+0.3000 0.2000 0
+4 # pcode - other 
+0.0250 0.2000 0.3000 0.2000 0.0120 0.6000 0.0000 
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Aft_14120
+After harvest of  Barley in August
+90  initial residue cover
+375 mm of rain since last tillage in fall prior
+1  #landuse
+1.10000 0.00000 265 150 0.00000 0.90000
+1 # iresd  <Bar_8319>
+1 # mang annual
+375.00000 0.01000 0.90000 0.01000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.33630 0.16810
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+2 # ntill - number of operations
+  95  # mdate  --- 4 / 5 
+  1  # op --- ANHYDROS
+      0.050  # depth
+      2  # type
+  100  # mdate  --- 4 / 10 
+  2  # op --- DRNTSRFC
+      0.050  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15
+   100  # planting date --- 4 /10
+   1.2000  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index

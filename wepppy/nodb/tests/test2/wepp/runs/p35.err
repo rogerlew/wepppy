@@ -1,0 +1,169 @@
+
+
+
+
+  ********************************************************************
+  *                                                                  *
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                                                                  *
+  *                    HILLSLOPE PROFILE - WATERSHED                 *
+  *                           EROSION MODEL                          *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                 MAXIMUM WATERSHED CHANNELS: 1000                 *
+  *                                                                  *
+  *                                                                  *
+  *                          VERSION 2016.600                        *
+  *                                                                  *
+  *                        June 30,       2016                       *
+  *                                                                  *
+  *                                                                  *
+  *                                                                  *
+  ********************************************************************
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+ Metric units selected
+
+
+ Do you wish to drop out of the model upon invalid input and
+ write over identical output file names? (batch mode)
+
+ Enter N to run watershed option (not a SHELL option).
+
+ Enter Y or N --> [Y]
+
+ Continuous or single event option
+ ---------------------------------
+ 1 - continuous simulation
+ 2 - single storm
+
+ Enter option (1 or 2) --> [1]
+
+
+ Model version option
+ --------------------
+ 1 - hillslope version (single hillslope only)
+ 2 - hillslope/watershed version
+     (multiple hillslopes, channels, and impoundments)
+ 3 - watershed version (channels and impoundments)
+     (option 2 or 3 must be previously selected)
+
+ Enter option (1,2 or 3) --> [1] 
+
+ Do you want hillslope pass file output (Y/N)? [N] --> 
+
+  Enter name of hillslope pass file -->                            
+
+ file name read in: ../output/H35.pass.dat                             
+
+ Soil loss output options for continuous simulation
+ ---- ---- ------ ------- --- ---------- ----------
+ [1] - Abbreviated annual
+  2  - Detailed annual
+  3  - Abbreviated event by event
+  4  - Detailed event by event
+  5  - Monthly
+ --------------------------------------------------
+ Enter Soil Loss output option [1]
+
+
+ Do you want initial condition scenario output (Y/N)? [N] --> 
+
+  Enter file name for soil loss output -->                         
+
+ file name read in: ../output/H35.loss.dat                             
+
+ Do you want water balance output (Y/N)? [N] --> 
+
+ Do you want crop output (Y/N)? [N] --> 
+
+ Do you want soil output (Y/N)? [N] --> 
+
+  Enter file name for soil output -->                              
+
+ file name read in: ../output/H35.soil.dat                             
+
+ Do you want distance and sediment loss output (Y/N)? [N] --> 
+
+  Enter file name for plotting output -->                          
+
+ file name read in: ../output/H35.plot.dat                             
+
+ Do you want large graphics output (Y/N)? [N] --> 
+
+ Do you want event by event output (Y/N)? [N] --> 
+
+ Do you want element output (Y/N)? [N] --> 
+
+ Do you want final summary output (Y/N)? [N] --> 
+
+ Do you want daily winter output (Y/N)? [N] --> 
+
+ Do you want plant yield output (Y/N)? [N] --> 
+
+  Enter name of file containing management data -->                
+
+ file name read in: p35.man                                            
+  0.500000000000000       0.500000000000000       0.500000000000000     
+
+  Enter name of file containing slope data -->                     
+
+ file name read in: p35.slp                                            
+
+  Enter name of file containing storm data -->                     
+
+ file name read in: p35.cli                                            
+
+  Enter name of file containing soil data -->                      
+
+ file name read in: p35.sol                                            
+ Please enter the irrigation option
+ ----------------------------------
+ [0] no irrigation
+  1  sprinkler, fixed date
+  2  sprinkler, depletion level
+  3  sprinkler, combination
+  4  furrow,    fixed date
+  5  furrow,    depletion
+  6  furrow,    combination
+ -----------------------------------
+ Enter irrigation option [0]
+
+
+ NO IRRIGATION SELECTED.
+
+
+  Enter number of years to simulate --> 
+
+  To bypass erosion calculations for very small events, enter 1
+  Otherwise, to route all events enter 0   (Small events have
+  runoff less than 10 mm and peak runoff less than 10 mm/hr) [0] -->
+
+     
+ SIMULATION YEAR =           1
+ OPERATION ON PLANE           1  ON DAY           2
+     
+ SIMULATION YEAR =           2
+ OPERATION ON PLANE           1  ON DAY           2
+     
+ SIMULATION YEAR =           3
+ OPERATION ON PLANE           1  ON DAY           2
+     
+ SIMULATION YEAR =           4
+ OPERATION ON PLANE           1  ON DAY           2
+     
+ SIMULATION YEAR =           5
+ OPERATION ON PLANE           1  ON DAY           2
+
+ Hillslope SUCCESSFUL simulation - returning to DOS
+
+
+ WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY
