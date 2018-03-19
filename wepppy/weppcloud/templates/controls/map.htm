@@ -1,0 +1,133 @@
+    <form  id="setloc_form" action="javascript:void(0);">
+      <div class="form-group row">
+        <div class="col-sm-5">
+           <input id="input_centerloc" name="centerloc" class="form-control mr-sm-3" type="text" placeholder="Lon, Lat, [Zoom]" aria-label="Lon, Lat">
+        </div>
+        <div class="col-sm-2">
+           <button id="btn_setloc" name="setloc" class="btn btn-outline-success my-2 my-sm-0" type="button">Go</button>
+        </div>
+        <!--
+        <div class="col-sm-2">
+           <button id="btn_currentloc" name="currentloc" class="btn btn-outline-success my-2 my-sm-0" type="button">My Location</button>
+        </div>-->
+      </div> 
+    </form>
+    <div class="row">
+      <div class="col-md-8 px-1">
+        <div id="mapid"></div>
+        <div class="row">
+          <div class="col-xs-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+          <div class="col-xs-6"><span id="mapstatus" class="text-muted"/></div>
+          <div class="col-xs-2"><span>&nbsp;</span><span id="mouseelev" class="text-muted"/></div>
+        </div>
+      </div>
+      <div class="col-md-4 px-1">
+       <!-- Nav tabs -->
+       <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#sub_layer_selection" role="tab">
+              <span class="oi oi-layers"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#drilldown" role="tab">
+              <span class="oi oi-magnifying-glass"></span>
+            </a>
+          </li>
+          {% if ron.enable_landuse_change %}
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#modify" role="tab">
+              <span class="oi oi-wrench"></span>
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
+            <span class="oi oi-rain"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#results" role="tab">
+              <span class="oi oi-pie-chart"></span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#config" role="tab">
+              <span class="oi oi-cog"></span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <div class="tab-pane active" id="sub_layer_selection" role="tabpanel">
+            <h6>Subcatchment Colormapping</h6>
+            <div class="radio radio-primary">
+                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_default" value="default" checked>
+                <label for="sub_cmap_radio1">
+                    Default
+                </label>
+            </div>
+            <div class="radio radio-primary">
+                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_slp_asp" value="slp_asp" disabled>
+                <label for="sub_cmap_radio2">
+                    Slope/Aspect
+                </label>
+            </div>
+            <div class="radio radio-primary">
+                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_lc" value="dom_lc" disabled>
+                <label for="sub_cmap_radio2">
+                    Dominant Landcover
+                </label>
+            </div>
+            <div class="radio radio-primary">
+                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_soil" value="dom_soil" disabled>
+                <label for="sub_cmap_radio3">
+                    Dominant Soil
+                </label>
+            </div>
+          </div>
+          <div class="tab-pane" id="drilldown" role="tabpanel">
+            <i>Select a channel or hillslope to view information</i>
+          </div>
+          <div class="tab-pane" id="spatialclimate" role="tabpanel">
+            <h6>Spatial Climate</h6>
+          </div>
+          {% if ron.enable_landuse_change %}
+          <div class="tab-pane" id="modify" role="tabpanel">
+              {% include 'controls/modify_landuse.htm' %}
+          </div>
+          {% endif %}
+          <div class="tab-pane" id="results" role="tabpanel">
+            <h6>WEPP Results</h6>
+            <div class="radio radio-primary">
+                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_runoff" value="sub_runoff" >
+                <label for="wepp_res_radio1">
+                    Runoff
+                </label>
+                <br/>
+                <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="50" value="2">
+            </div>
+            <div class="radio radio-primary">
+                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_loss" value="sub_loss" >
+                <label for="wepp_res_radio2">
+                    Soil Loss/Deposition
+                </label>
+                <br/>
+                <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="10" value="0.5">
+            </div>
+            <div class="radio radio-primary">
+                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_phosphorus" value="sub_phosphorus" >
+                <label for="wepp_res_radio2">
+                    Total Phosphorus
+                </label>
+                <br/>
+                <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="2">
+            </div>
+          </div>
+          <div class="tab-pane" id="config" role="tabpanel">
+              {% include 'controls/unitizer.htm' %}
+          </div>
+        </div>
+      </div>
+    </div>

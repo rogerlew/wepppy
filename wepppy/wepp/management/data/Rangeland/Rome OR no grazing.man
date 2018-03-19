@@ -1,0 +1,126 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+1 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+Big_15014
+Big Sacaton Grassland
+Prepared by John Laflen
+(null)
+1  #landuse
+WeppWillSet
+2.00000 5.00000 10.00056 10.00000 4.99968 30.00000 0.05000 0.15200 0.70000 0.00220
+0.85000 0.90000 0.40000 0.99000 0.00000 0.00000 0.90000 1.49989
+2  # mfo - <non fragile>
+0.00000 0.00000 25.00000 0.50000 0.00600 0.29998 0.33000 0.10000 14 32.00000
+-40.00000 2.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+0  # Number of operation scenarios
+
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Big_15575
+Big Sacaton Grassland-sparse vegetation
+(null)
+(null)
+1  #landuse
+1.30000 0.40000 20000 20000 0.00000 0.10000
+1 # iresd  <Big_15014>
+2 # mang perennial
+508000.00000 0.00152 0.10000 0.00152 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.05604 0.00000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+0  # Number of Surface Effects Scenarios
+
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+0  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+2 # management <perennial>
+   0 # senescence date 
+   0 # perennial plant date --- 0 /0
+   0 # perennial stop growth date --- 0/0
+   0.0000  # row width
+   3  # neither cut or grazed
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index

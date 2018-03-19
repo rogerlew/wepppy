@@ -1,0 +1,33 @@
+<form  id="modify_landuse_form" action="javascript:void(0);">
+    <h6>Modify Landuse</h6>
+    <div class="form-check">
+        <label class="form-check-label">
+            <input id="checkbox_modify_landuse" type="checkbox" class="form-check-input">
+            Click Selection
+        </label>
+    </div>
+    <div class="form-group row">
+        <textarea id="textarea_modify_landuse" class="form-control" rows="3" placeholder="Topaz Ids" required readonly></textarea>
+    </div>
+    <div class="form-group row">
+        <label for="selection_modify_landuse">Select landuse:</label>
+        <select class="form-control" id="selection_modify_landuse">
+            {% for opt in landuseoptions %}
+            <option value="{{ opt["Key"] }}">{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <button id="btn_modify_landuse" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Modify Landuse</button>
+        </div>
+    </div>
+    <div class="form-group-row">
+        <p>Rebuild the soils after changing managements.</p>
+    </div>
+    <div class="alert alert-info" style="line-height: 30px; height: 30px; padding-top: 0;">
+        <pre><small id="status" class="text-muted"></small></pre>
+    </div>
+    <div id="stacktrace" class="alert alert-warning">
+    </div>
+</form>

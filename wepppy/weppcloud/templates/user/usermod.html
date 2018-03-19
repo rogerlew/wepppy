@@ -1,0 +1,86 @@
+{% extends "security/_layout.html"%}
+{% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+{% block title %}
+usermod
+{% endblock %}
+{% block content %}
+{% if user.has_role('Root') %}
+<!--suppress HtmlUnknownAttribute -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js">
+</script>
+<table class="table" id="allusers">
+  <thead>
+    <tr>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>email</th>
+      <th>Last Login</th>
+      <th>Login Count</th>
+      <th>PowerUser</th>
+      <th>Admin</th>
+      <th>Dev</th>
+      <th>Root</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in get_all_users() %}
+    <tr>
+      <td>{{ user.first_name }}</td>
+      <td>{{ user.last_name }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.last_login_at }}</td>
+      <td>{{ user.login_count }}</td>
+      <td>
+        <input type="checkbox" class="form-check-input" name="usermod_PowerUser_{{ user.id }}"
+               {% if user.has_role('PowerUser') %}checked{% endif %}/>
+      </td>
+      <td>
+        <input type="checkbox" class="form-check-input" name="usermod_Admin_{{ user.id }}"
+               {% if user.has_role('Admin') %}checked{% endif %}/>
+      </td>
+      <td>
+        <input type="checkbox" class="form-check-input" name="usermod_Dev_{{ user.id }}"
+               {% if user.has_role('Dev') %}checked{% endif %}/>
+      </td>
+      <td>
+        <input type="checkbox" class="form-check-input" name="usermod_Root_{{ user.id }}"
+               {% if user.has_role('Root') %}checked{% endif %} {% if current_user == user %}disabled{% endif %}/>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<script type="text/javascript" >
+$(document).ready(function() {
+	$("#allusers").DataTable();
+
+	$( "input[name^='usermod_']" ).change(function() {
+	    var res = this.name.split("_");
+	    console.log(res);
+	    var user_id = parseInt(res[2], 10);
+	    var role = res[1];
+	    var role_state = this.checked;
+
+	    $.post({
+            url: "/tasks/usermod/",
+            data: JSON.stringify({
+                user_id: user_id,
+                role: role,
+                role_state: role_state
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+            },
+            fail: function (error) {
+                console.log(error);
+            }
+        });
+    });
+});
+</script>
+{% endif %}
+{% endblock %}
+

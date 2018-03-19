@@ -1,0 +1,171 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+1 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+CORNl
+low production level, 80 bu/acre for Jefferson Iowa
+J. M. Laflen, Feb 28, 1998
+
+1  #landuse
+WeppWillSet
+3.60000 3.00000 24.00000 10.00000 2.30000 55.00000 0.00000 0.30400 0.65000 0.05100
+0.80000 0.98000 0.65000 0.99000 0.00000 1700.00000 0.50000 2.60000
+2  # mfo - <non fragile>
+0.00650 0.00650 25.00000 0.25000 0.21900 1.52000 0.25000 0.00000 30 0.00000
+0.00000 3.50000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+1  # Number of operation scenarios
+
+
+FCSTACDP
+`Field cultivator, secondary tillage, after duckfoot points
+(from WEPP distribution database)
+Maximum depth of 10 cm (4 inches)
+1  #landuse
+0.6000 0.3500 0
+4 # pcode - other 
+0.0250 0.3000 0.6000 0.3500 0.0150 1.0000 0.0500 
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+fal_13380
+No residue or canopy cover
+Low roughness
+fallow system specified here
+1  #landuse
+1.10000 0.00000 200 2000 0.00000 0.00000
+1 # iresd  <CORNl>
+3 # mang fallow
+500.00000 0.02000 0.00000 0.02000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.00000 0.00000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+5 # ntill - number of operations
+  135  # mdate  --- 5 / 15 
+  1  # op --- FCSTACDP
+      0.102  # depth
+      2  # type
+  166  # mdate  --- 6 / 15 
+  1  # op --- FCSTACDP
+      0.102  # depth
+      2  # type
+  196  # mdate  --- 7 / 15 
+  1  # op --- FCSTACDP
+      0.102  # depth
+      2  # type
+  227  # mdate  --- 8 / 15 
+  1  # op --- FCSTACDP
+      0.102  # depth
+      2  # type
+  258  # mdate  --- 9 / 15 
+  1  # op --- FCSTACDP
+      0.102  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+1  # Number of contour scenarios
+
+
+0.5_9922
+0.5  Contour
+WEPP distribution database
+example created by jrf
+1  #landuse
+0.00500 0.10000 20.00000 1.00000
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+1  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   365  # harvest date --- 12 / 31
+   1  # planting date --- 1 /1
+   0.0000  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index

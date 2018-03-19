@@ -1,0 +1,20 @@
+ <table class="table">
+    <thead>
+      <tr>
+        <th>Mukey</th>
+        <th>Description</th>
+        <th>Coverage %</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in report %}
+      {% if row.pct_coverage > 0.0 %}
+      <tr>
+        <td><a href="../view/soil/{{ row.mukey }}"  target="_blank">{{ row.mukey }}</a></td>
+        <td>{{ row.desc }}</td>
+        <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>

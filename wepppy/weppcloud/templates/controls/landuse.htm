@@ -1,0 +1,31 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}landuse_form{% endblock %}
+{% block form_title %}Landuse Options{% endblock %}
+{% block inputs %}
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <label class="radio-inline"><input type="radio" value="0" id="landuse_mode0" name="landuse_mode"> Determine Per Hillslope</label>
+        </div>
+        <div class="col-sm-6">
+            <label class="radio-inline"><input type="radio" value="1" id="landuse_mode1" name="landuse_mode"> Single Landuse for Watershed</label>
+        </div>
+    </div>
+    <div id="landuse_mode0_controls" class="form-group row">
+        <div class="col-sm-4">
+            <button id="btn_build_landuse" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Build Landuse</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_build_landuse"></small>
+        </div>
+    </div>
+    <div id="landuse_mode1_controls" class="form-group row">
+        <div class="col-sm-5">
+            <label for="landuse_single_selection">Select landuse:</label>
+            <select class="form-control" id="landuse_single_selection">
+                {% for opt in landuseoptions %}
+                <option value="{{ opt["Key"] }}">{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endblock %}

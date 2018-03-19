@@ -1,0 +1,53 @@
+STOP Program terminated by user -  returning to DOS
+
+
+
+
+  ********************************************************************
+  *                                                                  *
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                                                                  *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                                                                  *
+  *                                                                  *
+  *                           VERSION  4.3                           *
+  *                                                                  *
+  *                            July  1998                            *
+  *                                                                  *
+  *                                                                  *
+  ********************************************************************
+
+
+  Press Enter to Continue
+
+ Enter the name of your CLIGEN parameter file: 
+
+ Do you want to view data found for station
+
+ POMEROY WA                                6610 (y/n)?: 
+
+ Weather Generator Options
+ ------- --------- -------
+
+ 1 - Single Year Simulation - Screen
+ 2 - Multiple Year - Screen Output
+ 3 - Multiple Year Simulation - CREAMS - GLEAMS Output File
+ 4 - Selected Single Storm WEPP - Output File
+ 5 - Multiple Year - WEPP Output File
+ 6 - Read Observed P and Temp and Generate Missing Data
+ 7 - Single Design Storm - TR 55 Storm Type WEPP Output File
+ 8 - Exit Weather Generator Program
+
+ Enter generator option (1-8): 
+
+ Enter beginning simulation year (positive integer value; e.g. 1 ): 
+
+ Enter number of years to simulate: 
+
+ Enter output file name (ex. Indy.cli): Station No.    1
+
+ Do you want to continue (y/n)? 

@@ -1,0 +1,30 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}soil_form{% endblock %}
+{% block form_title %}Soil Options{% endblock %}
+{% block inputs %}
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <label class="radio-inline">
+            <input type="radio" value="0" id="soil_mode0" name="soil_mode"> Determine Per Hillslope</label>
+        </div>
+        <div class="col-sm-6">
+            <label class="radio-inline">
+            <input type="radio" value="1" id="soil_mode1" name="soil_mode"> Single Soil for Watershed</label>
+        </div>
+    </div>
+    <div id="soil_mode0_controls" class="form-group row">
+        <div class="col-sm-4">
+            <button id="btn_build_soil" 
+              class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
+              type="button">Build Soil</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_build_soil"></small>
+        </div>
+    </div>
+    <div id="soil_mode1_controls" class="form-group row">
+        <div class="col-sm-5">
+            <p>Use dominant soil</p>
+        </div>
+    </div>
+{% endblock %}

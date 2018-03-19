@@ -1,0 +1,62 @@
+{% extends "security/_layout.html"%}
+{% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+{% block title %}
+User Profile
+{% endblock %}
+{% block content %}
+  <dl class="dl-horizontal">
+    <dt>Name:</dt>
+    <dd>{{ user.first_name }} {{ user.last_name }}</dd>
+    <dt>e-mail:</dt>
+    <dd>{{ user.email }}</dd>
+    <dt>Roles:</dt>
+    <dd>
+      {% for role in user.roles %}
+        {{ role.name }}{% if not loop.last %},
+        {% endif %}
+      {% endfor %}
+    </dd>
+      <dd><a href='/change'>Change Password</a></dd>
+  </dl>
+
+  {% if user.has_role('Dev') %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<h4>Developer Settings</h4>
+<p>Modify PowerUser Role</p>
+<input type="checkbox"
+       name="usermod_PowerUser_{{ user.id }}"
+       id="usermod_PowerUser_{{ user.id }}"
+       {% if user.has_role('PowerUser') %}checked{% endif %}>
+<label class="form-check-label" for="usermod_PowerUser_{{ user.id }}">Is PowerUser</label>
+
+<script type="text/javascript" >
+$(document).ready(function() {
+	$( "input[name^='usermod_']" ).change(function() {
+	    var res = this.name.split("_");
+	    console.log(res);
+	    var user_id = parseInt(res[2], 10);
+	    var role = res[1];
+	    var role_state = this.checked;
+
+	    $.post({
+            url: "/tasks/usermod/",
+            data: JSON.stringify({
+                user_id: user_id,
+                role: role,
+                role_state: role_state
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+            },
+            fail: function (error) {
+                console.log(error);
+            }
+        });
+    });
+});
+</script>
+  {% endif %}
+{% endblock %}
+

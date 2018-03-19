@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>WeppCloud {{ ron.configname }} </title>
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+      integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/open-iconic-bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin=""></script>    
+<script  type="text/javascript">
+{% include 'js/controllers.js'%}
+{% include 'js/on_document_ready.js'%}
+</script>
+</head>
+<body>
+<!-----------------------------------------------------------------------------
+ Header (header.htm)
+ ----------------------------------------------------------------------------->
+{% include 'header.htm'%}
+<div role="main" class="container">
+<!-----------------------------------------------------------------------------
+ Map (controls/map.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/map.htm'%}
+{% if 'baer' in ron.mods %}
+    <!-----------------------------------------------------------------------------
+     Baer (controls/baer_upload.htm)
+     ----------------------------------------------------------------------------->
+    {% include 'controls/baer_upload.htm'%}
+{% endif %}
+<!-----------------------------------------------------------------------------
+ Channel Delineation (controls/channel_delineation.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/channel_delineation.htm'%}
+<!-----------------------------------------------------------------------------
+ Set Outlet (controls/set_outlet.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/set_outlet.htm'%}
+<!-----------------------------------------------------------------------------
+ Subcatchment Delineation (controls/subcatchments.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/subcatchments.htm'%}
+<!-----------------------------------------------------------------------------
+ Land Management (controls/landuse.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/landuse.htm'%}
+<!-----------------------------------------------------------------------------
+ Soil (controls/soil.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/soil.htm'%}
+<!-----------------------------------------------------------------------------
+ Soil (controls/climate.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/climate.htm'%}
+<!-----------------------------------------------------------------------------
+ Soil (controls/climate.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/wepp.htm'%}
+{% if user.is_authenticated %}
+<!-----------------------------------------------------------------------------
+ Team (controls/team.htm)
+ ----------------------------------------------------------------------------->
+{% include 'controls/team.htm'%}
+{% endif %}
+</div> <!--main container -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+     integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+     integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+  </body>
+  
+<!---
+copy color table to landcov
+fix stacktrace for failures
+report of landuse
+soils
+climates
+wepp running
+
+iconic
+
+puzzle piece
+<span class="oi oi-puzzle-piece"></span>
+
+rain
+<span class="oi oi-rain"></span>
+
+question mark
+<span class="oi oi-question-mark"></span>
+
+reload
+<span class="oi oi-reload"></span>
+
+wrench
+<span class="oi oi-wrench"></span>
+
+tags
+<span class="oi oi-tags"></span>
+
+cloudy
+<span class="oi oi-tags"></span>
+
+cog
+<span class="oi oi-cog"></span>
+
+cloud download
+<span class="oi oi-cloud-download"></span>
+
+could upload
+<span class="oi oi-cloud-upload"></span>
+
+layers
+<span class="oi oi-layers"></span>
+
+map
+<span class="oi oi-map"></span>
+
+magnifying-glass - detailed subcatchment 
+<span class="oi oi-magnifying-glass"></span>
+
+fork - clone run 
+<span class="oi oi-fork"></span>
+
+pie chart - results
+<span class="oi oi-pie-chart"></span>
+
+
+
+-->
+</html>

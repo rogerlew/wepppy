@@ -1,0 +1,64 @@
+<h5>Breaks</h5>
+<div class="form-group row">
+    <div class="col-sm-4">
+        <label for="baer_brk0">No Burn &le; </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="baer_brk0" name="baer_brk0" class="form-control mr-sm-3" type="text" 
+        value="{{ baer.breaks[0] }}">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-4">
+        <label for="baer_brk1">Low Severity Fire &le; </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="baer_brk1" name="baer_brk1" class="form-control mr-sm-3" type="text" 
+        value="{{ baer.breaks[1] }}">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-4">
+        <label for="baer_brk2">Moderate Severity Fire &le; </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="baer_brk2" name="baer_brk2" class="form-control mr-sm-3" type="text" 
+        value="{{ baer.breaks[2] }}">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-4">
+        <label for="baer_brk3">High Severity Fire &le; </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="baer_brk3" name="baer_brk3" class="form-control mr-sm-3" type="text" 
+        value="{{ baer.breaks[3] }}">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-4">
+        <button id="btn_modify_baer_classes" 
+          class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
+          type="button">Modify Fire Classes</button>
+    </div>
+    <div class="col-sm-5">
+        <small id="hint_modify_baer_classes"></small>
+    </div>
+</div>
+<h5>Classifications by Pixel Value</h5>
+ <table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>Pixel</th>
+            <th>SBS Class</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in baer.class_map %}
+        <tr>
+            <td> {{ x[0] }}</td>
+            <td>{{ x[1] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

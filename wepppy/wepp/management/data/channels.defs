@@ -1,0 +1,131 @@
+DITCH 1
+Ditch
+Insloped road ditch modeled as a channel
+**Make sure erodibility and shear stress match soil file.
+L. Tysdal 2/98
+2 1 1 1
+1.000000 0.025000
+0.040000 0.000300 3.998194 0.500000 5.000000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"grass.rot"
+
+GRADED 1
+Graded
+Insloped road ditch modeled as a channel
+**Make sure erodibility and shear stress match soil file.
+L. Tysdal 2/98
+2 1 1 1
+1.000000 0.025000
+0.040000 0.010000 1.800000 0.500000 5.000000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+UNGRADED 1
+Ungraded
+Insloped road ditch modeled as a channel
+**Make sure erodibility and shear stress match soil file.
+L. Tysdal 2/98
+2 1 1 1
+1.000000 0.025000
+0.040000 0.000300 4.000000 0.500000 5.000000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+WATERWAY 1
+Waterway
+Waterway channel below culvert
+**Make sure erodibility and shear stress match soil file
+L. Tysdal 2/98
+2 1 1 1
+19.990000 0.040000
+0.300000 0.000400 2.000000 0.500000 0.100000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+OnEarth 1
+Earth Channel
+Waterway channel with soil base
+**Make sure erodibility and shear stress match soil file
+Bill Eliot based on L. Tysdal 2/98
+2 1 1 0
+19.990000 0.040000
+0.300000 0.000600 2.001500 0.500000 0.100000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+OnGravel 1
+Gravel Channel
+Waterway channel with gravel base
+**Make sure erodibility and shear stress match soil file
+Bill Eliot based on L. Tysdal 2/98
+2 1 1 0
+19.990000 0.040000
+0.300000 0.000600 10.000000 0.500000 0.100000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+OnRock 1
+Rock Channel
+Waterway channel with rock base
+**Make sure erodibility and shear stress match soil file
+Bill Eliot based on L. Tysdal 2/98
+2 1 1 0
+19.990000 0.040000
+0.300000 0.000600 100.000000 0.500000 0.100000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+OnRock 2
+Rock Channel
+Waterway channel with rock base
+**Make sure erodibility and shear stress match soil file
+Bill Eliot based on L. Tysdal 2/98
+2 1 1 0
+19.990000 0.040000
+0.3 0.20854 100.0 0.1 0.1
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"fallow.rot"
+
+Dit_5713 1
+Ditch in forest
+Waterway channel below culvert
+**Make sure erodibility and shear stress match soil file
+J. Laflen, 2/03
+2 1 1 0
+19.990000 0.040000
+0.300000 0.000400 2.001491 0.500000 0.100006
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"Forest\Disturbed WEPP Management\Forest.rot"
+
+For_0060 1
+Forest road ditch
+Model of a cut road ditch-triangular, discharging into a culvert (control structure)
+J laflen, 2/03
+Sides slope 15% and 100%, inverse slope =3.83
+1 1 1 0
+3.830000 0.025000
+0.040000 0.001000 1.000746 0.500000 1.000000
+0.020000 4.000000 0.020000
+0.000000 0.000000 0.000000
+"Forest\Road WEPP Management\Road-insloped bare ditch.rot"
+
+Wat_8397 1
+Waterway through forest
+Waterway through forest
+**Make sure erodibility and shear stress match soil file
+J. Laflen, 2/03
+2 1 1 0
+19.990000 0.040000
+0.300000 0.001000 1.000000 0.500000 0.100000
+0.020000 4.000000 0.040000
+0.000000 0.000000 0.000000
+"Forest\Road WEPP Management\Forest buffer.rot"

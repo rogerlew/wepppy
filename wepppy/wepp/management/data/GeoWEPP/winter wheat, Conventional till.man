@@ -1,0 +1,222 @@
+98.4
+#
+#
+#
+#
+
+1 # number of OFE's
+1 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
+
+Whe_27068
+`Wheat; Winter - for State of Washington
+JML, 3-28-01
+(null)
+1  #landuse
+WeppWillSet
+5.20000 3.00000 35.00196 3.00000 5.40026 60.00000 0.00000 0.15200 1.00000 0.00640
+0.80000 1.00000 0.65000 0.99000 3.00000 1700.00000 0.40000 1.00001
+2  # mfo - <non fragile>
+0.00850 0.00850 15.00000 0.25000 0.00500 1.49989 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+6  # Number of operation scenarios
+
+
+MOPLUF
+`Plow, Moldboard with uphill furrow(Pacific NW only)'
+(from WEPP distribution database)
+
+1  #landuse
+0.8000 0.6000 0
+4 # pcode - other 
+0.0500 0.4000 0.8000 0.6000 0.0430 1.0000 0.1500 
+
+DIOFF10
+`Disk, offset-heavy plowing>10" spacing'
+(from WEPP distribution database)
+
+1  #landuse
+0.8500 0.6000 0
+4 # pcode - other 
+0.0500 0.2000 0.8500 0.6000 0.0380 1.0000 0.1000 
+
+FIEL0001
+`Field Cultivation'
+From converted V92.2 file `ANSI1.MAN'
+NOTE: MFO values are the min and max of original values.
+1  #landuse
+0.2500 0.2500 0
+4 # pcode - other 
+0.0250 0.1500 0.2500 0.2500 0.0150 1.0000 0.1000 
+
+HASP
+`Harrow-spike tooth'
+(from WEPP distribution database)
+
+1  #landuse
+0.3000 0.2000 0
+4 # pcode - other 
+0.0250 0.0500 0.3000 0.2000 0.0150 1.0000 0.0250 
+
+HASPTCT
+`Harrow-springtooth (coil tine)'
+(from WEPP distribution database)
+
+1  #landuse
+0.2500 0.1500 0
+4 # pcode - other 
+0.0250 0.0500 0.2500 0.1500 0.0150 1.0000 0.0250 
+
+DRDDO
+`Drill with double disk opener'
+(from WEPP distribution database)
+
+1  #landuse
+0.3000 0.1000 20
+2 # pcode - drill
+0.0250 0.2000 0.3000 0.1000 0.0120 0.8500 0.0250 
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Aft_31305
+For continuous winter wheat, no till.  Wheat was planted Oct 1
+90   residue cover
+175 mm of rain since last tillage in fall prior
+1  #landuse
+1.10000 0.20000 90 150 0.00000 0.90000
+1 # iresd  <Whe_27068>
+1 # mang annual
+175.00600 0.02000 0.90000 0.01000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.40005 0.10000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+From WEPP database
+Your name, phone
+(null)
+1  # landuse  - cropland
+8 # ntill - number of operations
+  244  # mdate  --- 9 / 1 
+  1  # op --- MOPLUF
+      0.050  # depth
+      2  # type
+  258  # mdate  --- 9 / 15 
+  2  # op --- DIOFF10
+      0.050  # depth
+      2  # type
+  261  # mdate  --- 9 / 18 
+  3  # op --- FIEL0001
+      0.050  # depth
+      2  # type
+  261  # mdate  --- 9 / 18 
+  4  # op --- HASP
+      0.050  # depth
+      2  # type
+  263  # mdate  --- 9 / 20 
+  3  # op --- FIEL0001
+      0.050  # depth
+      2  # type
+  263  # mdate  --- 9 / 20 
+  4  # op --- HASP
+      0.050  # depth
+      2  # type
+  268  # mdate  --- 9 / 25 
+  5  # op --- HASPTCT
+      0.050  # depth
+      2  # type
+  274  # mdate  --- 10 / 1 
+  6  # op --- DRDDO
+      0.050  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   213  # harvest date --- 8 / 1
+   274  # planting date --- 10 /1
+   1.2000  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      1	# year index

@@ -1,0 +1,54 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ 106152.par                                                                                                                                                                                                                                                      
+
+ Weather Generator Options
+ ------- --------- -------
+
+ 1 - Single Year Simulation - Screen
+ 2 - Multiple Year - Screen Output
+ 3 - Multiple Year Simulation - CREAMS - GLEAMS Output File
+ 4 - Selected Single Storm WEPP - Output File
+ 5 - Multiple Year - WEPP Output File
+ 6 - Read Observed P and Temp and Generate Missing Data
+ 7 - Single Design Storm - TR 55 Storm Type WEPP Output File
+ 8 - Exit Weather Generator Program
+
+ Enter generator option (1-8): 
+
+ Enter beginning simulation year (positive integer value; e.g. 1 ): 
+
+ Enter number of years to simulate: 
+
+ Enter output file name (ex. Indy.cli): Station No.   -1
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:          24  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:          24  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:          24  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:          24  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:          24  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

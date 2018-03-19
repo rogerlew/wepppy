@@ -1,0 +1,5 @@
+wepppy/ssurgo/data/*
+wepppy/scripts/*
+wepppy/validation/*
+*.pyc
+venv/*

@@ -1,0 +1,17 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}team_form{% endblock %}
+{% block form_title %}Project Collaborators{% endblock %}
+{% block inputs %}
+    <div class="form-group row">
+        <div class="col-sm-3">
+            <label for="adduser-email">Add Collaborator to Project</label>
+        </div>
+        <div class="col-sm-5">
+            <input id="adduser-email" name="adduser-email" class="form-control mr-sm-3"
+                   type="text" placeholder="e-mail" aria-label="email">
+        </div>
+        <div class="col-sm-2">
+            <button id="btn_adduser" class="btn btn-outline-success" type="button">Add User</button>
+        </div>
+    </div>
+{% endblock %}

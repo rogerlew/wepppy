@@ -1,0 +1,17 @@
+5.30000
+   2   0   0
+  Station:  MAJURO WB AP PI                                CLIGEN VER. 5.30000 -r:    0 -I: 0
+ Latitude Longitude Elevation (m) Obs. Years   Beginning year  Years simulated Command Line:
+     7.08  -171.38           3          39           1              -1          -iPI914460.PAR 
+ Observed monthly ave max temperature (C)
+  29.4  29.7  29.8  29.8  29.9  29.9  29.9  30.1  30.2  30.2  30.0  29.6
+ Observed monthly ave min temperature (C)
+  24.7  24.9  24.8  24.7  24.8  24.6  24.5  24.6  24.7  24.6  24.7  24.7
+ Observed monthly ave solar radiation (Langleys/day)
+ 551.0 599.0 620.0 610.0 581.0 576.0 570.0 603.0 627.0 620.0 571.0 534.0
+ Observed monthly ave precipitation (mm)
+ 197.6 162.8 219.6 262.7 296.6 300.3 329.2 298.5 318.9 357.4 334.5 271.7
+ da mo year  prcp  dur   tp     ip  tmax  tmin  rad  w-vl w-dir  tdew
+             (mm)  (h)               (C)   (C) (l/d) (m/s)(Deg)   (C)
+ 15  4    1 160.0  6.00 0.40   2.86  28.7  24.1 591.  6.3   92.  16.4
+  

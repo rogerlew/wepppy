@@ -1,0 +1,627 @@
+98.4
+1 # number of ofes or channels
+100 # sim_years
+
+#############################
+#   Plant Growth Section    #
+#############################
+None # ncrop
+# PlantLoops
+alfalfa2
+`Alfalfa - Medium Fertilization Level'
+(from WEPP distribution database)
+(null)
+1 # landuse
+WeppWillSet
+14.00000 23.00000 13.00000 4.00000 5.00000 30.00000 0.10000 0.15200 0.70000 0.00450
+0.85000 0.90000 0.65000 0.99000 12.00000 0.00000 0.90000 0.80000
+2
+0.01500 0.01500 20.00000 0.00000 0.00600 2.43000 0.33000 0.60000 14 32.00000
+0.50000 6.00000 0.00000
+
+ALFALFA
+Alfalfa
+J. M. Laflen
+Set minimum temperature to 0.5 degrees C  -  dcf
+1 # landuse
+WeppWillSet
+14.00000 23.00000 13.00159 4.00000 4.99968 30.00000 0.10000 0.14999 0.90000 0.00450
+0.85000 0.90000 0.65000 0.99000 12.00000 0.00000 0.90000 0.80011
+1
+0.01500 0.01500 20.00000 0.25000 0.00600 2.40008 0.33000 0.60002 14 32.00000
+0.50000 6.00000 0.00000
+
+#############################
+#     Operation Section     #
+#############################
+None # nop
+# OpLoops
+MOPL
+`Plow, Moldboard', 8"
+(from WEPP distribution database)
+(null)
+1 # landuse
+0.98000 0.95000 0
+4 
+0.05000 0.40000 0.98000 0.95000 0.04300 1.00000 0.15000
+
+FIEL0001
+`Field Cultivation'
+From converted V92.2 file `ANSI1.MAN'
+NOTE: MFO values are the min and max of original values
+1 # landuse
+0.25000 0.25000 0
+4 
+0.02500 0.15000 0.25000 0.25000 0.01500 1.00000 0.10000
+
+DITAFI9
+`Disk, tandem-finishing 7-9" spacing'
+(from WEPP distribution database)
+(null)
+1 # landuse
+0.70000 0.50000 0
+4 
+0.05000 0.20000 0.70000 0.50000 0.02600 1.00000 0.05000
+
+DRDDO
+`Drill with double disk opener'
+(from WEPP distribution database)
+(null)
+1 # landuse
+0.30000 0.10000 20
+2 
+0.02500 0.20000 0.30000 0.10000 0.01200 0.85000 0.02500
+
+#############################
+# Initial Condition Section
+#############################
+None # nini
+# IniLoops
+Con_17029
+Continuous alfalfa - initial conditions
+No-till year 1, cutting harvest in years 1-5
+55 percent residue levels.
+1 # landuse
+1.10000 0.50000 1600 1600 0.00000 0.55000 
+1 
+2 
+5000.00000 0.02000 0.55000 0.02000 0.00000 
+1 
+0.00000 0.00000 0.10000 0.20000 0.00000 
+0.50000 0.20000
+
+#############################
+#  Surface Effects Section  #
+#############################
+None # nseq
+# SurfLoops
+Year 1
+From WEPP database
+Your name, phone
+(null)
+1 # landuse
+4 # ntill
+# Loops
+# SurfLoopCropland   
+   105 # mdate
+   1 # op
+     0.20300 # tildep
+     1 # typtil
+
+# SurfLoopCropland   
+   121 # mdate
+   2 # op
+     0.10200 # tildep
+     2 # typtil
+
+# SurfLoopCropland   
+   125 # mdate
+   3 # op
+     0.05100 # tildep
+     2 # typtil
+
+# SurfLoopCropland   
+   130 # mdate
+   4 # op
+     0.05100 # tildep
+     2 # typtil
+
+#############################
+#      Contour Section      #
+#############################
+None # ncnt
+# ContourLoops
+
+#############################
+#      Drainage Section     #
+#############################
+None # ndrain
+# DrainLoops
+
+#############################
+#       Yearly Section      #
+#############################
+None # nscen
+# YearLoops
+Year 1
+(null)
+(null)
+(null)
+1 # landuse
+2
+0
+0
+0
+2
+   0 # jdharv
+   0 # jdplt
+   0 # jdstop
+   0.00000 # rw
+   1 # mgtopt
+   3
+   # Loops
+152
+
+196
+
+244
+
+
+
+Year 2
+(null)
+(null)
+(null)
+1 # landuse
+2
+1
+0
+0
+2
+   0 # jdharv
+   0 # jdplt
+   105 # jdstop
+   0.00000 # rw
+   3 # mgtopt
+   
+   
+
+
+Year 3
+(null)
+(null)
+(null)
+1 # landuse
+2
+1
+0
+0
+2
+   0 # jdharv
+   130 # jdplt
+   0 # jdstop
+   0.00000 # rw
+   1 # mgtopt
+   1
+   # Loops
+248
+
+
+
+#############################
+#     Management Section    #
+#############################
+Manage
+description 1
+description 2
+description 3
+1 # number of ofes in the rotation
+# Initial Condition Scenario indices used for each OFE
+# Loops
+1
+1 # number of times the rotation is repeated
+# Loops
+100 # number of years in a single rotation
+# Loops
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   1 # number of crops per year
+      1 # yearly index
+
+# Loops
+   2 # number of crops per year
+      2 # yearly index
+
+
+

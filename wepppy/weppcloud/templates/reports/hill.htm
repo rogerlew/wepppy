@@ -1,0 +1,26 @@
+<dl class="dl-horizontal">
+    <dt>{{ d.meta.hill_type }} ID</dt>
+    <dd>{{ d.meta.topaz_id }}</dd>
+    <dt>Width</dt>
+    <dd>{{ d.watershed.width|round }} m</dd>
+    <dt>Length</dt>
+    <dd>{{ d.watershed.length|round }} m</dd>
+    <dt>Area</dt>
+    <dd>{{ d.watershed.area * 0.0001|round(3) }} ha</dd>
+    <dt>Slope</dt>
+    <dd>{{ d.watershed.slope_scalar|round(3) }}</dd>
+    <dt>Aspect</dt>
+    <dd>{{ d.watershed.aspect|round(0) }}</dd>
+    <dt>Dominate Landuse</dt>
+    <dd>{% if d.landuse is not none %}
+        {{ d.landuse.desc }} 
+        (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)
+        {% endif %}
+    </dd>
+    <dt>Dominate Soil</dt>
+    <dd>{% if d.soil is not none %}
+        {{ d.soil.desc }} 
+        (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)
+        {% endif %}
+    </dd>
+</dl>
