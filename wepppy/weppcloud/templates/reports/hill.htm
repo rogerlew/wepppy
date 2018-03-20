@@ -11,13 +11,13 @@
     <dd>{{ d.watershed.slope_scalar|round(3) }}</dd>
     <dt>Aspect</dt>
     <dd>{{ d.watershed.aspect|round(0) }}</dd>
-    <dt>Dominate Landuse</dt>
+    <dt>Dominant Landuse</dt>
     <dd>{% if d.landuse is not none %}
         {{ d.landuse.desc }} 
         (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)
         {% endif %}
     </dd>
-    <dt>Dominate Soil</dt>
+    <dt>Dominant Soil</dt>
     <dd>{% if d.soil is not none %}
         {{ d.soil.desc }} 
         (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)

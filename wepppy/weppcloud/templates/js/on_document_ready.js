@@ -1,3 +1,4 @@
+"use strict";
 
 $(document).ready(function () {
 
@@ -8,6 +9,7 @@ $(document).ready(function () {
      * Controller Singletons
      * =====================
      */
+
     var project = Project.getInstance();
     var team = Team.getInstance();
     var map = Map.getInstance();
@@ -29,8 +31,7 @@ $(document).ready(function () {
     soil.hideStacktrace();
     climate.hideStacktrace();
     wepp.hideStacktrace();
-    
-    
+
     /*
      * Project Initialization
      * ======================
@@ -39,7 +40,7 @@ $(document).ready(function () {
     //
     // Bindings
     //
-    $("#input_name").keyup(function(event) {
+    $("#input_name").keyup(function (event) {
         if (event.keyCode === 13) {
             $("#btn_setname").click();
         }
@@ -53,24 +54,23 @@ $(document).ready(function () {
     //
     // Units
     //
-    
+
     $("[name^=unitizer_]").change(function () {
         project.unitChangeEvent();
     });
-    
+
     $("[name=uni_main_selector]").change(function () {
         var pref = $("input[name='uni_main_selector']:checked").val();
         pref = parseInt(pref, 10);
-        
+
         // this lives in the controller/unitizer.js template
         // so it can be generated dynamically
-        setGlobalUnitizerPreference(pref); 
-        
+        setGlobalUnitizerPreference(pref);
+
         // sync with server
         project.unitChangeEvent();
     });
-    
-    
+
     /*
      * Map Initialization
      * ==================
@@ -81,14 +81,14 @@ $(document).ready(function () {
     //
 
     // emulate click if user hits enter while in the entry field
-    $("#input_centerloc").keyup(function(event) {
+    $("#input_centerloc").keyup(function (event) {
         if (event.keyCode === 13) {
             $("#btn_setloc").click();
         }
     });
 
     // parse the entry and fly to requested location/zoom
-    $("#btn_setloc").click(function (){
+    $("#btn_setloc").click(function () {
         var loc = $("#input_centerloc").val();
         loc = loc.split(",");
         var lon = parseFloat(loc[0]);
@@ -101,7 +101,7 @@ $(document).ready(function () {
 
         map.flyTo([lat, lon], zoom);
     });
-    
+
     /* requires https
     $("#btn_currentloc").click(function (){
         console.log('btn_currentloc');
@@ -115,7 +115,7 @@ $(document).ready(function () {
         }
     });
     */
-    
+
     //
     // Initial Configuration
     //
@@ -123,26 +123,25 @@ $(document).ready(function () {
 
     // call map.onMapChange to update mapStatus
     map.onMapChange();
-    
+
     if ({{ (ron.boundary != None) | tojson }}) {
         var boundary = null;
         $.get({
             url: "{{ ron.boundary }}",
             cache: false,
-            success: function (response) {
+            success: function success(response) {
                 boundary = L.geoJSON(response, {
-                                style: {
-                                    color: "#FF0000",
-                                    opacity: 1,
-                                    weight: 2,
-                                    fillColor: "#FFFFFF",
-                                    fillOpacity: 0.0
-                                }
+                    style: {
+                        color: "#FF0000",
+                        opacity: 1,
+                        weight: 2,
+                        fillColor: "#FFFFFF",
+                        fillOpacity: 0.0
+                    }
                 });
                 boundary.addTo(map);
             }
         });
-        
     }
 
     {% if 'baer' in ron.mods %}
@@ -150,40 +149,39 @@ $(document).ready(function () {
      * Baer mod
      * ======================
      */
-     
+
     var baer = Baer.getInstance();
     baer.hideStacktrace();
-    
+
     $("#btn_upload_sbs").click(function () {
         baer.upload_sbs();
     });
-    
-    
+
     baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
         setTimeout(baer.show_sbs, 4000);
         setTimeout(baer.load_modify_class, 4000);
-        
-        setTimeout(function() {
+
+        setTimeout(function () {
             $("#btn_modify_baer_classes").click(function () {
                 baer.modify_classes();
             });
         }, 6000);
     });
-    
+
     baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
         setTimeout(baer.show_sbs, 2000);
         setTimeout(baer.load_modify_class, 2000);
-        
-        setTimeout(function() {
+
+        setTimeout(function () {
             $("#btn_modify_baer_classes").click(function () {
                 baer.modify_classes();
             });
         }, 4000);
     });
-    
+
     baer.show_sbs();
     {% endif %}
-    
+
     /*
      * Channel Initialization
      * ======================
@@ -214,14 +212,12 @@ $(document).ready(function () {
     //
     // Initial Configuration
     //
-    channel_ctrl.zoom_min = {{ topaz.zoom_min }}
-
+    channel_ctrl.zoom_min = {{ topaz.zoom_min }};
     if ({{ topaz.has_channels | tojson }}) {
         channel_ctrl.report();
     }
-
     if ({{ topaz.has_channels | tojson }} && !({{ topaz.has_subcatchments | tojson }})) {
-        channel_ctrl.show();
+       channel_ctrl.show();
     }
 
     /*
@@ -242,16 +238,15 @@ $(document).ready(function () {
         var loc = $("#input_setoutlet_entry").val().split(",");
         var lng = parseFloat(loc[0]);
         var lat = parseFloat(loc[1]);
-        var ev = {latlng: L.latLng(lat, lng)};
+        var ev = { latlng: L.latLng(lat, lng) };
         outlet.put(ev);
     });
 
     // Bind radio to the set outlet mode on change
-    $("[name='setoutlet_mode']").change(function (){
+    $("[name='setoutlet_mode']").change(function () {
         var mode = parseInt($("input[name='setoutlet_mode']:checked").val(), 10);
         outlet.setMode(mode);
     });
-
 
     //
     // Outlet Event Bindings
@@ -279,18 +274,14 @@ $(document).ready(function () {
 
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
-    $("[name='sub_cmap_radio']").change(function (){
-        sub_ctrl.setColorMap(
-            $("input[name='sub_cmap_radio']:checked").val()
-        );
+    $("[name='sub_cmap_radio']").change(function () {
+        sub_ctrl.setColorMap($("input[name='sub_cmap_radio']:checked").val());
     });
 
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
-    $("[name='wepp_sub_cmap_radio']").change(function (){
-        sub_ctrl.setColorMap(
-            $("input[name='wepp_sub_cmap_radio']:checked").val()
-        );
+    $("[name='wepp_sub_cmap_radio']").change(function () {
+        sub_ctrl.setColorMap($("input[name='wepp_sub_cmap_radio']:checked").val());
     });
 
     //
@@ -312,17 +303,17 @@ $(document).ready(function () {
         console.log('wepp_sub_cmap_range_phosphorus');
         sub_ctrl.renderPhosphorus();
     });
-    
+
     $('#wepp_sub_cmap_range_runoff').on('input', function () {
         console.log('wepp_sub_cmap_range_runoff');
         sub_ctrl.renderRunoff();
     });
-    
+
     $('#wepp_sub_cmap_range_loss').on('input', function () {
         console.log('wepp_sub_cmap_range_loss');
         sub_ctrl.renderLoss();
     });
-    
+
     // load subcatchments
     if ({{ topaz.has_subcatchments | tojson }}) {
         sub_ctrl.show();
@@ -339,17 +330,16 @@ $(document).ready(function () {
     //
     // Bindings
     //
-    $("[name='landuse_mode']").change(function (){
+    $("[name='landuse_mode']").change(function () {
         landuse.setMode();
     });
 
     $("#landuse_single_selection").on("change", function () {
         landuse.setMode();
-    })
+    });
 
     $("#btn_build_landuse").click(landuse.build);
-    
-    
+
     //
     // Landuse Event Bindings
     //
@@ -363,7 +353,6 @@ $(document).ready(function () {
     //
     landuse.restore(-1, 0);
 
-
     // load landuse
     if ( {{ landuse.has_landuse | tojson }} ) {
         landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
@@ -373,42 +362,40 @@ $(document).ready(function () {
      * Modify Landuse Initialization
      * ======================
      */
-    
+
     //
     // Bindings
     //
     $("#checkbox_modify_landuse").on("change", function () {
         lc_modify.toggle();
-    })
-    
-    $("#btn_modify_landuse").click(lc_modify.modify);
+    });
 
+    $("#btn_modify_landuse").click(lc_modify.modify);
 
     lc_modify.form.on("LANDCOVER_MODIFY_TASK_COMPLETED", function () {
         if (sub_ctrl.getCmapMode() === "dom_lc") {
             sub_ctrl.setColorMap("dom_lc");
         }
         landuse.report();
-    }); 
-    
+    });
+
     /*
      * Soil Initialization
      * ======================
      */
 
-     //
-     // Bindings
-     //
-    $("[name='soil_mode']").change(function (){
+    //
+    // Bindings
+    //
+    $("[name='soil_mode']").change(function () {
         soil.setMode();
     });
 
     $("#soil_single_selection").on("change", function () {
         soil.setMode();
-    })
+    });
 
     $("#btn_build_soil").click(soil.build);
-
 
     //
     // Subcatchment Event Bindings
@@ -423,7 +410,6 @@ $(document).ready(function () {
     //
     soil.restore(-1);
 
-
     // load soil
     if ( {{ soils.has_soils | tojson }} ) {
         soil.form.trigger("SOIL_BUILD_TASK_COMPLETED");
@@ -435,28 +421,28 @@ $(document).ready(function () {
      * ======================
      */
 
-     //
-     // Bindings
-     //
-    $("[name='climate_mode']").change(function (){
+    //
+    // Bindings
+    //
+    $("[name='climate_mode']").change(function () {
         climate.setMode();
     });
 
-    $("[name='climatestation_mode']").change(function (){
+    $("[name='climatestation_mode']").change(function () {
         climate.setStationMode();
     });
 
     $("#climate_station_selection").on("change", function () {
         climate.setStation();
-    })
+    });
 
     $("#btn_build_climate").click(climate.build);
 
-    $('#climate_par_link').click(function(e) {
+    $('#climate_par_link').click(function (e) {
         e.preventDefault();
 
         var station_id = $("#climate_station_selection").val();
-        var url = `http://wepp1.nkn.uidaho.edu/webservices/cligen/fetchpar/${station_id}`;
+        var url = "http://wepp1.nkn.uidaho.edu/webservices/cligen/fetchpar/" + station_id;
         var win = window.open(url, '_blank');
         if (win) {
             win.focus();
@@ -481,14 +467,12 @@ $(document).ready(function () {
         climate.report();
     });
 
-
     //
     // Initial Configuration
     //
 
 
-    climate.showHideControls(-1)
-
+    climate.showHideControls(-1);
     // load climate
     if ( {{ climate.has_climate | tojson }} ) {
         climate.refreshStationSelection();
@@ -496,21 +480,21 @@ $(document).ready(function () {
         climate.viewStationMonthlies();
     }
 
-     /*
-     * Wepp Initialization
-     * ======================
-     */
+    /*
+    * Wepp Initialization
+    * ======================
+    */
 
-     //
-     // Bindings
-     //
-    $("[name='wepp_mode']").change(function (){
+    //
+    // Bindings
+    //
+    $("[name='wepp_mode']").change(function () {
         wepp.setMode();
     });
 
     $("#wepp_single_selection").on("change", function () {
         wepp.setMode();
-    })
+    });
 
     $("#btn_run_wepp").click(wepp.run);
 
@@ -521,7 +505,6 @@ $(document).ready(function () {
     //
     // Initial Configuration
     //
-
     // show report if wepp has run
     if ( {{ wepp.has_run | tojson }} ) {
         wepp.report();
@@ -532,9 +515,9 @@ $(document).ready(function () {
      * ======================
      */
 
-     //
-     // Bindings
-     //
+    //
+    // Bindings
+    //
     $("#btn_adduser").click(team.adduser);
 
     team.form.on("TEAM_ADDUSER_TASK_COMPLETED", function () {
@@ -555,21 +538,20 @@ $(document).ready(function () {
      * =================
      */
 
-    map.on("click", function(ev) {
+    map.on("click", function (ev) {
         outlet.setClickHandler(ev);
         // add additional events here
     });
 
-    map.on("zoom", function(ev) {
+    map.on("zoom", function (ev) {
         map.onMapChange();
         channel_ctrl.onMapChange();
         // add additional events here
     });
 
-    map.on("move", function(ev) {
+    map.on("move", function (ev) {
         map.onMapChange();
         channel_ctrl.onMapChange();
         // add additional events here
     });
-
 });
