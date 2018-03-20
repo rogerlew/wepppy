@@ -22,28 +22,28 @@ function pass() {
  */
 function controlBase() {
     return {
-        pushResponseStacktrace: function (self, response) {
+        pushResponseStacktrace: function pushResponseStacktrace(self, response) {
             self.stacktrace.show();
             self.stacktrace.text("");
 
             if (response.Error !== undefined) {
-                self.stacktrace.append(`<h6>${response.Error}</h6>`);
+                self.stacktrace.append("<h6>" + response.Error + "</h6>");
             }
 
             if (response.StackTrace !== undefined) {
-                self.stacktrace.append(`<pre><small class="text-muted">${response.StackTrace}</small></pre>`);
+                self.stacktrace.append("<pre><small class=\"text-muted\">" + response.StackTrace + "</small></pre>");
             }
 
-            if ((response.Error === undefined) && (response.StackTrace === undefined)) {
-                self.stacktrace.append(`<pre><small class="text-muted">${response}</small></pre>`);
+            if (response.Error === undefined && response.StackTrace === undefined) {
+                self.stacktrace.append("<pre><small class=\"text-muted\">" + response + "</small></pre>");
             }
         },
-        pushErrorStacktrace: function (self, jqXHR, textStatus, errorThrown) {
+        pushErrorStacktrace: function pushErrorStacktrace(self, jqXHR, textStatus, errorThrown) {
             self.stacktrace.show();
             self.stacktrace.text("");
-            self.stacktrace.append(`<h6>${jqXHR.status}</h6>`);
-            self.stacktrace.append(`<pre><small class="text-muted">${textStatus}</small></pre>`);
-            self.stacktrace.append(`<pre><small class="text-muted">${errorThrown}</small></pre>`);
+            self.stacktrace.append("<h6>" + jqXHR.status + "</h6>");
+            self.stacktrace.append("<pre><small class=\"text-muted\">" + textStatus + "</small></pre>");
+            self.stacktrace.append("<pre><small class=\"text-muted\">" + errorThrown + "</small></pre>");
         }
     };
 }
@@ -52,7 +52,7 @@ function controlBase() {
  * Project
  * ----------------------------------------------------------------------------
  */
-var Project = (function () {
+var Project = function () {
     var instance;
 
     function createInstance() {
@@ -63,96 +63,90 @@ var Project = (function () {
             $.post({
                 url: "../tasks/setname/",
                 data: $("#setname_form").serialize(),
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         $("#input_name").val(name);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (error) {
+                fail: function fail(error) {
                     console.log(error);
                 }
             });
         };
-        
+
         function replaceAll(str, find, replace) {
             return str.replace(new RegExp(find, 'g'), replace);
         }
-        
+
         that.unitChangeEvent = function () {
             var self = instance;
-            
+
             var prefs = $("[name^=unitizer_]");
-            
+
             var unit_preferences = {};
-            for (var i=0; i < prefs.length; i++) {
+            for (var i = 0; i < prefs.length; i++) {
                 var name = prefs[i].name;
-                                   
-                var units= $(`input[name='${name}']:checked`).val();
-                
-                name = name.replace('unitizer_', '')
-                           .replace('_radio', '');
-                   
+
+                var units = $("input[name='" + name + "']:checked").val();
+
+                name = name.replace('unitizer_', '').replace('_radio', '');
+
                 units = replaceAll(units, '_', '/');
                 units = replaceAll(units, '-sqr', '^2');
                 units = replaceAll(units, '-cube', '^3');
-                
+
                 unit_preferences[name] = units;
             }
-            
+
             $.post({
                 url: "../tasks/set_unit_preferences/",
                 data: unit_preferences,
-                success: function (response) {
-                    if (response.Success === true) {
-                    } else {
-                    }
+                success: function success(response) {
+                    if (response.Success === true) {} else {}
                 },
-                fail: function (error) {
+                fail: function fail(error) {
                     console.log(error);
                 }
             });
-            
+
             self.set_preferred_units();
         };
-        
-        
+
         that.set_preferred_units = function () {
             var units = undefined;
             var prefs = $("[name^=unitizer_]");
-            for (var i=0; i < prefs.length; i++) {
+            for (var i = 0; i < prefs.length; i++) {
                 var name = prefs[i].name;
-                var radios = $(`input[name='${name}']`);
-                for (var j=0; j < radios.length; j++) {
+                var radios = $("input[name='" + name + "']");
+                for (var j = 0; j < radios.length; j++) {
                     units = radios[j].value;
-                    $(`.units-${units}`).addClass("invisible");
+                    $(".units-" + units).addClass("invisible");
                 }
-                units = $(`input[name='${name}']:checked`).val();
-                $(`.units-${units}`).removeClass("invisible");
+                units = $("input[name='" + name + "']:checked").val();
+                $(".units-" + units).removeClass("invisible");
             }
-        }
-    
+        };
+
         return that;
     }
-    
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Team
  * ----------------------------------------------------------------------------
  */
-var Team = (function () {
+var Team = function () {
     var instance;
 
     function createInstance() {
@@ -171,14 +165,14 @@ var Team = (function () {
             $.post({
                 url: "../tasks/adduser/",
                 data: $("#team_form").serialize(),
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("TEAM_ADDUSER_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (error) {
+                fail: function fail(error) {
                     console.log(error);
                 }
             });
@@ -188,17 +182,17 @@ var Team = (function () {
             var self = instance;
             $.post({
                 url: "../tasks/removeuser/",
-                data: JSON.stringify({user_id: user_id}),
+                data: JSON.stringify({ user_id: user_id }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("TEAM_REMOVEUSER_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (error) {
+                fail: function fail(error) {
                     console.log(error);
                 }
             });
@@ -210,43 +204,40 @@ var Team = (function () {
             $.get({
                 url: "../report/users/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
 
-        
         return that;
     }
-    
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Map
  * ----------------------------------------------------------------------------
  */
-var Map = (function () {
+var Map = function () {
     var instance;
 
     function createInstance() {
 
         // Use leaflet map
         var that = L.map("mapid");
-        
+
         that.scrollWheelZoom.disable();
 
         //
@@ -260,16 +251,16 @@ var Map = (function () {
             var self = instance;
 
             $.post({
-                url: `http://wepp1.nkn.uidaho.edu/webservices/elevationquery/`,
-                data: JSON.stringify({lat: ev.latlng.lat, lng: ev.latlng.lng}),
+                url: "http://wepp1.nkn.uidaho.edu/webservices/elevationquery/",
+                data: JSON.stringify({ lat: ev.latlng.lat, lng: ev.latlng.lng }),
                 dataType: "json",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     var elev = response.Elevation.toFixed(1);
-                    self.mouseelev.show().text(`| Elevation: ${elev} m`);
+                    self.mouseelev.show().text("| Elevation: " + elev + " m");
                     self.isFetchingElevation = false;
                 },
-                fail: function (error) {
+                fail: function fail(error) {
                     console.log(error);
                     that.isFetchingElevation = false;
                 }
@@ -284,7 +275,6 @@ var Map = (function () {
                 self.fetchElevation(ev);
             }
         });
-
 
         that.on("mouseout", function () {
             var self = instance;
@@ -331,7 +321,7 @@ var Map = (function () {
             var zoom = self.getZoom();
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
-            $("#mapstatus").text(`Center: ${lng}, ${lat} | Zoom: ${zoom}`);
+            $("#mapstatus").text("Center: " + lng + ", " + lat + " | Zoom: " + zoom);
         };
 
         that.hillQuery = function (query_url) {
@@ -339,10 +329,10 @@ var Map = (function () {
             $.get({
                 url: query_url,
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.drilldown.html(response);
                 },
-                fail: function (error) {
+                fail: function fail(error) {
                     console.log(error);
                 }
             });
@@ -350,35 +340,34 @@ var Map = (function () {
 
         that.chnQuery = function (topazID) {
             var self = instance;
-            var query_url = `../report/chn_summary/${topazID}/`;
+            var query_url = "../report/chn_summary/" + topazID + "/";
             self.hillQuery(query_url);
         };
 
         that.subQuery = function (topazID) {
             var self = instance;
-            var query_url = `../report/sub_summary/${topazID}/`;
+            var query_url = "../report/sub_summary/" + topazID + "/";
             self.hillQuery(query_url);
         };
-        
+
         return that;
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Baer
  * ----------------------------------------------------------------------------
  */
-var Baer = (function () {
+var Baer = function () {
     var instance;
 
     function createInstance() {
@@ -392,38 +381,38 @@ var Baer = (function () {
             self.stacktrace.hide();
         };
         that.baer_map = null;
-        
-        that.upload_sbs = function() {
+
+        that.upload_sbs = function () {
             var self = instance;
-            
+
             var task_msg = "Uploading SBS";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
-            
+
             var formData = new FormData($('#sbs_upload_form')[0]);
-        
+
             $.post({
                 url: "../tasks/upload_sbs/",
                 data: formData,
                 contentType: false,
                 cache: false,
                 processData: false,
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("SBS_UPLOAD_TASK_COMPLETE");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.remove_sbs = function () {
             var self = instance;
             var map = Map.getInstance();
@@ -437,119 +426,111 @@ var Baer = (function () {
 
         that.load_modify_class = function () {
             var self = instance;
-            
+
             $.get({
                 url: "../view/modify_burn_class/",
                 cache: false,
-                success: function (response) {
-                    self.info.html(response);                    
+                success: function success(response) {
+                    self.info.html(response);
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.modify_classes = function () {
-            
+
             var self = instance;
-            var data = [parseInt($('#baer_brk0').val(), 10),
-                        parseInt($('#baer_brk1').val(), 10),
-                        parseInt($('#baer_brk2').val(), 10),
-                        parseInt($('#baer_brk3').val(), 10)];
-                        
+            var data = [parseInt($('#baer_brk0').val(), 10), parseInt($('#baer_brk1').val(), 10), parseInt($('#baer_brk2').val(), 10), parseInt($('#baer_brk3').val(), 10)];
+
             var task_msg = "Modifying Class Breaks";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
-            
-                        
+
             $.post({
                 url: "../tasks/modify_burn_class/",
-                data: JSON.stringify({classes: data}),
+                data: JSON.stringify({ classes: data }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("MODIFY_BURN_CLASS_TASK_COMPLETE");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.show_sbs = function () {
             var self = instance;
             var map = Map.getInstance();
-            
+
             self.remove_sbs();
-            
+
             var task_msg = "Querying SBS map";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
-            
+
             $.get({
                 url: "../query/baer_wgs_map/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
-                        
+                        self.status.html(task_msg + "... Success");
+
                         var bounds = response.Content.bounds;
                         var imgurl = response.Content.imgurl + "?v=" + Date.now();
                         console.log(bounds);
-                        
-                        self.baer_map = L.imageOverlay(imgurl, bounds, {opacity:0.7});                        
+
+                        self.baer_map = L.imageOverlay(imgurl, bounds, { opacity: 0.7 });
                         self.baer_map.addTo(map);
                         map.ctrls.addOverlay(self.baer_map, "Burn Severity Map");
-                        
+
                         map.flyToBounds(self.baer_map._bounds);
-                        
-                        
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         return that;
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
-        
+}();
 
 /* ----------------------------------------------------------------------------
  * Channel Delineation
  * ----------------------------------------------------------------------------
  */
-var ChannelDelineation = (function () {
+var ChannelDelineation = function () {
     var instance;
 
     function createInstance() {
         var that = controlBase();
         that.zoom_min = 12;
-        that.data = null;  // JSON from Flask
+        that.data = null; // JSON from Flask
         that.polys = null; // Leaflet geoJSON layer
         that.topIds = [];
         that.labels = L.layerGroup();
@@ -575,7 +556,6 @@ var ChannelDelineation = (function () {
             self.stacktrace.hide();
         };
 
-
         that.remove = function () {
             var self = instance;
             var map = Map.getInstance();
@@ -598,7 +578,7 @@ var ChannelDelineation = (function () {
                 url: "../query/has_dem/",
                 cache: false,
                 success: onSuccessCallback,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -618,7 +598,6 @@ var ChannelDelineation = (function () {
                 self.fetch_dem();
             } else {
                 self.stacktrace.text("has_dem state is unknown");
-
             }
         };
 
@@ -629,21 +608,21 @@ var ChannelDelineation = (function () {
             var task_msg = "Fetching DEM";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/fetch_dem/",
                 data: self.form.serialize(),
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("FETCH_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -656,21 +635,21 @@ var ChannelDelineation = (function () {
             var task_msg = "Delineating channels";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/build_channels/",
                 data: self.form.serialize(),
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("BUILD_CHANNELS_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -698,9 +677,7 @@ var ChannelDelineation = (function () {
                 $("#hint_build_channels").text("");
             } else {
                 $("#btn_build_channels").prop("disabled", true);
-                $("#hint_build_channels").text(
-                    "Area is too large, zoom must be \u2265 " + self.zoom_min.toString()
-                );
+                $("#hint_build_channels").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
             }
         };
 
@@ -711,7 +688,7 @@ var ChannelDelineation = (function () {
             var task_msg = "Identifying topaz_pass";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // Ask the Cloud what pass we are on. If the subcatchments have been
@@ -720,15 +697,15 @@ var ChannelDelineation = (function () {
             $.get({
                 url: "../query/topaz_pass/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     response = parseInt(response, 10);
                     if ($.inArray(response, [0, 1, 2]) === -1) {
-                        self.pushResponseStacktrace(self, {Error: "Error Determining TOPAZ Pass"});
+                        self.pushResponseStacktrace(self, { Error: "Error Determining TOPAZ Pass" });
                         return;
                     }
 
                     if (response === 0) {
-                        self.pushResponseStacktrace(self, {Error: "Channels not delineated"});
+                        self.pushResponseStacktrace(self, { Error: "Channels not delineated" });
                         return;
                     }
 
@@ -737,13 +714,12 @@ var ChannelDelineation = (function () {
                     } else {
                         self.show_2();
                     }
-                    self.status.html(`${task_msg}... Success`);
+                    self.status.html(task_msg + "... Success");
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
-
         };
 
         // Topaz Pass 1
@@ -755,13 +731,13 @@ var ChannelDelineation = (function () {
             var task_msg = "Displaying Channel Map";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.get({
                 url: "../resources/netful.json",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     var map = Map.getInstance();
                     self.data = response;
                     self.polys = L.geoJSON(self.data.features, {
@@ -771,9 +747,9 @@ var ChannelDelineation = (function () {
                     self.polys.addTo(map);
                     map.ctrls.addOverlay(self.polys, "Channels");
 
-                    self.status.html(`${task_msg}... Success`);
+                    self.status.html(task_msg + "... Success");
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -781,9 +757,9 @@ var ChannelDelineation = (function () {
 
         that.on1EachFeature = function (feature, layer) {
             layer.on({
-                click: function (ev) {
+                click: function click(ev) {
                     var topaz_id = ev.target.feature.properties.TopazID;
-//                    console.log(feature, topaz_id);
+                    //                    console.log(feature, topaz_id);
                 }
             });
         };
@@ -797,7 +773,7 @@ var ChannelDelineation = (function () {
                 url: "../resources/channels.json",
                 cache: false,
                 success: self.on2Success,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -823,10 +799,10 @@ var ChannelDelineation = (function () {
         that.on2EachFeature = function (feature, layer) {
             var self = instance;
             layer.on({
-                zoomend: function () {
+                zoomend: function zoomend() {
                     self.polys.setStyle(self.style);
                 },
-                click: function (ev) {
+                click: function click(ev) {
                     var topaz_id = ev.target.feature.properties.TopazID;
                     var map = Map.getInstance();
                     map.chnQuery(topaz_id);
@@ -842,7 +818,7 @@ var ChannelDelineation = (function () {
                     icon: L.divIcon({
                         iconSize: null,
                         className: "label",
-                        html: `<div style="${self.labelStyle}">${topId}</div>`
+                        html: "<div style=\"" + self.labelStyle + "\">" + topId + "</div>"
                     })
                 });
                 self.topIds.push(topId);
@@ -856,10 +832,10 @@ var ChannelDelineation = (function () {
             $.get({
                 url: "../report/channel/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -869,21 +845,20 @@ var ChannelDelineation = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Set Outlet
  * ----------------------------------------------------------------------------
  */
-var Outlet = (function () {
+var Outlet = function () {
     var instance;
 
     function createInstance() {
@@ -915,22 +890,20 @@ var Outlet = (function () {
             var task_msg = "Displaying Outlet...";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.get({
                 url: "../query/outlet/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     var map = Map.getInstance();
 
-                    self.outletMarker
-                        .setLatLng([response.lat, response.lng])
-                        .addTo(map);
+                    self.outletMarker.setLatLng([response.lat, response.lng]).addTo(map);
                     map.ctrls.addOverlay(self.outletMarker, "Outlet");
-                    self.status.html(`${task_msg}... Success`);
+                    self.status.html(task_msg + "... Success");
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -938,10 +911,10 @@ var Outlet = (function () {
             $.get({
                 url: "../report/outlet/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -965,29 +938,26 @@ var Outlet = (function () {
             var task_msg = "Attempting to set outlet";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
-            self.popup
-                .setLatLng(ev.latlng)
-                .setContent("finding nearest channel...")
-                .openOn(map);
+            self.popup.setLatLng(ev.latlng).setContent("finding nearest channel...").openOn(map);
 
             var lat = ev.latlng.lat;
             var lng = ev.latlng.lng;
 
             $.post({
                 url: "../tasks/setoutlet/",
-                data: {latitude: lat, longitude: lng},
-                success: function (response) {
+                data: { latitude: lat, longitude: lng },
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("SETOUTLET_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1012,10 +982,12 @@ var Outlet = (function () {
         that.setMode = function (mode) {
             var self = instance;
             self.mode = parseInt(mode, 10);
-            if (self.mode === 0) { // Enter lng, lat
+            if (self.mode === 0) {
+                // Enter lng, lat
                 $("#setoutlet_mode0_controls").show();
                 $("#setoutlet_mode1_controls").hide();
-            } else { // user cursor
+            } else {
+                // user cursor
                 $("#setoutlet_mode0_controls").hide();
                 $("#setoutlet_mode1_controls").show();
                 self.setCursorSelection(false);
@@ -1026,21 +998,20 @@ var Outlet = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Subcatchment Delineation
  * ----------------------------------------------------------------------------
  */
-var SubcatchmentDelineation = (function () {
+var SubcatchmentDelineation = function () {
     var instance;
 
     function createInstance() {
@@ -1080,7 +1051,7 @@ var SubcatchmentDelineation = (function () {
                 url: "../resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1108,7 +1079,7 @@ var SubcatchmentDelineation = (function () {
             var map = Map.getInstance();
 
             layer.on({
-                click: function (ev) {
+                click: function click(ev) {
                     var topaz_id = ev.target.feature.properties.TopazID;
                     var map = Map.getInstance();
                     map.subQuery(topaz_id);
@@ -1123,7 +1094,7 @@ var SubcatchmentDelineation = (function () {
                     icon: L.divIcon({
                         iconSize: null,
                         className: "label",
-                        html: `<div style="${self.labelStyle}">${topId}</div>`
+                        html: "<div style=\"" + self.labelStyle + "\">" + topId + "</div>"
                     })
                 });
                 self.topIds.push(topId);
@@ -1142,7 +1113,7 @@ var SubcatchmentDelineation = (function () {
                 throw "Map.enableColorMap received unexpected parameter: " + cmap_name;
             }
         };
-        
+
         that.getCmapMode = function () {
             if ($("#sub_cmap_radio_dom_lc").prop("checked")) {
                 return "dom_lc";
@@ -1153,7 +1124,7 @@ var SubcatchmentDelineation = (function () {
             } else {
                 return "default";
             }
-        }
+        };
 
         that.setColorMap = function (cmap_name) {
             var self = instance;
@@ -1196,7 +1167,7 @@ var SubcatchmentDelineation = (function () {
                 url: "../query/watershed/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1209,7 +1180,7 @@ var SubcatchmentDelineation = (function () {
                 url: "../query/landuse/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1222,7 +1193,7 @@ var SubcatchmentDelineation = (function () {
                 url: "../query/soils/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1233,36 +1204,36 @@ var SubcatchmentDelineation = (function () {
         //
         that.dataPhosphorus = null;
         that.rangePhosphorus = $('#wepp_sub_cmap_range_phosphorus');
-        that.cmapperPhosphorus = createColormap({colormap:'viridis', nshades:64})
-        
+        that.cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
+
         that.cmapPhosphorus = function () {
             var self = instance;
             $.get({
                 url: "../query/wepp/phosphorus/subcatchments/",
                 cache: false,
-                success: function (data) {
+                success: function success(data) {
                     if (data === null) {
                         throw "query returned null";
                     }
-                    self.dataPhosphorus = data
+                    self.dataPhosphorus = data;
                     self.renderPhosphorus();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.renderPhosphorus = function () {
             console.log('in renderPhosphorus');
-            
+
             var self = instance;
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataPhosphorus[topId].total_p);
                 var r = parseFloat(self.rangePhosphorus.val());
                 var c = self.cmapperPhosphorus.map(v / r);
-                
+
                 layer.setStyle({
                     color: c,
                     weight: 1,
@@ -1273,42 +1244,42 @@ var SubcatchmentDelineation = (function () {
             });
         };
         // end Phosphorus
-        
+
         //
         // Runoff
         //
         that.dataRunoff = null;
         that.rangeRunoff = $('#wepp_sub_cmap_range_runoff');
-        that.cmapperRunoff = createColormap({colormap:'summer', nshades:64})
-        
+        that.cmapperRunoff = createColormap({ colormap: 'summer', nshades: 64 });
+
         that.cmapRunoff = function () {
             var self = instance;
             $.get({
                 url: "../query/wepp/runoff/subcatchments/",
                 cache: false,
-                success: function (data) {
+                success: function success(data) {
                     if (data === null) {
                         throw "query returned null";
                     }
-                    self.dataRunoff = data
+                    self.dataRunoff = data;
                     self.renderRunoff();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.renderRunoff = function () {
             console.log('in renderRunoff');
-            
+
             var self = instance;
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataRunoff[topId].runoff);
                 var r = parseFloat(self.rangeRunoff.val());
                 var c = self.cmapperRunoff.map(v / r);
-                
+
                 layer.setStyle({
                     color: c,
                     weight: 1,
@@ -1319,42 +1290,42 @@ var SubcatchmentDelineation = (function () {
             });
         };
         // end Runoff
-        
+
         //
         // Loss
         //
         that.dataLoss = null;
         that.rangeLoss = $('#wepp_sub_cmap_range_loss');
-        that.cmapperLoss = createColormap({colormap:'rainbow', nshades:64})
-        
+        that.cmapperLoss = createColormap({ colormap: 'rainbow', nshades: 64 });
+
         that.cmapLoss = function () {
             var self = instance;
             $.get({
                 url: "../query/wepp/loss/subcatchments/",
                 cache: false,
-                success: function (data) {
+                success: function success(data) {
                     if (data === null) {
                         throw "query returned null";
                     }
-                    self.dataLoss = data
+                    self.dataLoss = data;
                     self.renderLoss();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.renderLoss = function () {
             console.log('in renderLoss');
-            
+
             var self = instance;
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataLoss[topId].loss);
                 var r = parseFloat(self.rangeLoss.val());
-                var c = self.cmapperLoss.map((v / r) / 2.0 + 0.5);
-                
+                var c = self.cmapperLoss.map(v / r / 2.0 + 0.5);
+
                 layer.setStyle({
                     color: c,
                     weight: 1,
@@ -1365,7 +1336,7 @@ var SubcatchmentDelineation = (function () {
             });
         };
         // end Loss
-        
+
         that.cmapCallback = function (lcjson) {
             var self = instance;
 
@@ -1376,7 +1347,7 @@ var SubcatchmentDelineation = (function () {
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var color = lcjson[topId].color;
-                
+
                 layer.setStyle({
                     color: "#FFFFFF",
                     weight: 1,
@@ -1397,7 +1368,7 @@ var SubcatchmentDelineation = (function () {
             var task_msg = "Building Subcatchments";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             if (self.polys !== null) {
@@ -1410,15 +1381,15 @@ var SubcatchmentDelineation = (function () {
 
             $.post({
                 url: "../tasks/build_subcatchments/",
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("BUILD_SUBCATCHMENTS_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1429,20 +1400,20 @@ var SubcatchmentDelineation = (function () {
             var task_msg = "Abstracting Watershed";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/abstract_watershed/",
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("WATERSHED_ABSTRACTION_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1454,18 +1425,18 @@ var SubcatchmentDelineation = (function () {
             var task_msg = "Fetching Summary";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.get({
                 url: "../report/watershed/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
-                    self.status.html(`${task_msg}... Success`);
+                    self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1475,21 +1446,20 @@ var SubcatchmentDelineation = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Landuse
  * ----------------------------------------------------------------------------
  */
-var Landuse = (function () {
+var Landuse = function () {
     var instance;
 
     function createInstance() {
@@ -1508,20 +1478,20 @@ var Landuse = (function () {
             var task_msg = "Building landuse";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/build_landuse/",
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1532,10 +1502,10 @@ var Landuse = (function () {
             $.get({
                 url: "../report/landuse/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1543,8 +1513,8 @@ var Landuse = (function () {
 
         that.restore = function (landuse_mode, landuse_single_selection) {
             var self = instance;
-            $(`#landuse_mode${landuse_mode}`).prop("checked", true);
-            $(`#landuse_single_selection`).val(`${landuse_single_selection}`);
+            $("#landuse_mode" + landuse_mode).prop("checked", true);
+            $("#landuse_single_selection").val("" + landuse_single_selection);
 
             self.showHideControls(landuse_mode);
         };
@@ -1559,24 +1529,24 @@ var Landuse = (function () {
             mode = parseInt(mode, 10);
             var landuse_single_selection = $("#landuse_single_selection").val();
 
-            var task_msg = `Setting Mode to ${mode} (${landuse_single_selection})`;
+            var task_msg = "Setting Mode to " + mode + " (" + landuse_single_selection + ")";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync landuse with nodb
             $.post({
                 url: "../tasks/set_landuse_mode/",
-                data: {"mode": mode, "landuse_single_selection": landuse_single_selection},
-                success: function (response) {
+                data: { "mode": mode, "landuse_single_selection": landuse_single_selection },
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1585,34 +1555,37 @@ var Landuse = (function () {
 
         that.showHideControls = function (mode) {
             // show the appropriate controls
-            if (mode === -1) { // neither
+            if (mode === -1) {
+                // neither
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").hide();
-            } else if (mode === 0) { // gridded
+            } else if (mode === 0) {
+                // gridded
                 $("#landuse_mode0_controls").show();
                 $("#landuse_mode1_controls").hide();
-            } else if (mode === 1) { // single
+            } else if (mode === 1) {
+                // single
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").show();
             } else {
                 throw "ValueError: unknown mode";
             }
         };
-        
+
         return that;
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
+}();
 
-var LanduseModify = (function () {
+var LanduseModify = function () {
     var instance;
 
     function createInstance() {
@@ -1631,7 +1604,6 @@ var LanduseModify = (function () {
         that.data = null; // Leaflet geoJSON layer
         that.polys = null; // Leaflet geoJSON layer
         that.selected = null;
-        
 
         that.style = {
             color: "white",
@@ -1640,24 +1612,24 @@ var LanduseModify = (function () {
             fillColor: "#FFEDA0",
             fillOpacity: 0.0
         };
-        
+
         that.selectedstyle = {
             color: "red",
             opacity: 1,
             weight: 2,
             fillOpacity: 0.0
         };
-        
+
         that.mouseoverstyle = {
             weight: 2,
             color: '#666',
             dashArray: '',
             fillOpacity: 0.0
         };
-        
+
         that.toggle = function () {
             var self = instance;
-            
+
             if (self.checkbox.prop("checked") === true) {
                 self.showModifyMap();
                 self.selected = new Set();
@@ -1665,7 +1637,7 @@ var LanduseModify = (function () {
                 self.hideModifyMap();
             }
         };
-        
+
         that.showModifyMap = function () {
             var self = instance;
             self.data = null;
@@ -1673,7 +1645,7 @@ var LanduseModify = (function () {
                 url: "../resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1685,7 +1657,6 @@ var LanduseModify = (function () {
             map.removeLayer(self.polys);
             self.data = null;
             self.polys = null;
-            
         };
 
         that.onShowSuccess = function (response) {
@@ -1697,16 +1668,14 @@ var LanduseModify = (function () {
                 onEachFeature: self.onEachFeature
             });
             self.polys.addTo(map);
-
         };
 
-        
         that.onEachFeature = function (feature, layer) {
             var self = instance;
             var map = Map.getInstance();
 
             layer.on({
-                mouseover: function (e) {
+                mouseover: function mouseover(e) {
                     var layer = e.target;
 
                     layer.setStyle(self.mouseoverstyle);
@@ -1715,19 +1684,18 @@ var LanduseModify = (function () {
                         layer.bringToFront();
                     }
                 },
-                mouseout: function (e) {
+                mouseout: function mouseout(e) {
                     var topaz_id = e.target.feature.properties.TopazID;
                     if (self.selected.has(topaz_id)) {
                         layer.setStyle(self.selectedstyle);
                     } else {
                         layer.setStyle(self.style);
                     }
-                    
                 },
-                click: function (e) {
+                click: function click(e) {
                     var layer = e.target;
                     var topaz_id = e.target.feature.properties.TopazID;
-                    
+
                     if (self.selected.has(topaz_id)) {
                         self.selected.delete(topaz_id);
                         layer.setStyle(self.style);
@@ -1735,37 +1703,35 @@ var LanduseModify = (function () {
                         self.selected.add(topaz_id);
                         layer.setStyle(self.selectedstyle);
                     }
-                    
+
                     that.textarea.val(Array.from(self.selected).join());
                 }
             });
         };
 
-        
         that.modify = function () {
             var self = instance;
             var task_msg = "Modifying landuse";
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.hideStacktrace();
 
             $.post({
                 url: "../tasks/modify_landuse/",
-                data: {topaz_ids: self.textarea.val(),
-                       landuse: self.selection.val()},
-                success: function (response) {
+                data: { topaz_ids: self.textarea.val(),
+                    landuse: self.selection.val() },
+                success: function success(response) {
                     if (response.Success === true) {
                         self.textarea.val("");
                         self.checkbox.prop("checked", false);
                         self.hideModifyMap();
-                        self.status.html(`${task_msg}... Success`);
-                        
+                        self.status.html(task_msg + "... Success");
+
                         self.form.trigger("LANDCOVER_MODIFY_TASK_COMPLETED");
-                        
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1775,21 +1741,20 @@ var LanduseModify = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Soil
  * ----------------------------------------------------------------------------
  */
-var Soil = (function () {
+var Soil = function () {
     var instance;
 
     function createInstance() {
@@ -1808,20 +1773,20 @@ var Soil = (function () {
             var task_msg = "Building soil";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/build_soil/",
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("SOIL_BUILD_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1832,10 +1797,10 @@ var Soil = (function () {
             $.get({
                 url: "../report/soils/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1843,7 +1808,7 @@ var Soil = (function () {
 
         that.restore = function (soil_mode) {
             var self = instance;
-            $(`#soil_mode${soil_mode}`).prop("checked", true);
+            $("#soil_mode" + soil_mode).prop("checked", true);
 
             self.showHideControls(soil_mode);
         };
@@ -1858,24 +1823,24 @@ var Soil = (function () {
             mode = parseInt(mode, 10);
             var soil_single_selection = $("#soil_single_selection").val();
 
-            var task_msg = `Setting Mode to ${mode}`;
+            var task_msg = "Setting Mode to " + mode;
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync soil with nodb
             $.post({
                 url: "../tasks/set_soil_mode/",
-                data: {"mode": mode, "soil_single_selection": soil_single_selection},
-                success: function (response) {
+                data: { "mode": mode, "soil_single_selection": soil_single_selection },
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1884,13 +1849,16 @@ var Soil = (function () {
 
         that.showHideControls = function (mode) {
             // show the appropriate controls
-            if (mode === -1) { // neither
+            if (mode === -1) {
+                // neither
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").hide();
-            } else if (mode === 0) { // gridded
+            } else if (mode === 0) {
+                // gridded
                 $("#soil_mode0_controls").show();
                 $("#soil_mode1_controls").hide();
-            } else if (mode === 1) { // single
+            } else if (mode === 1) {
+                // single
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").show();
             } else {
@@ -1902,21 +1870,20 @@ var Soil = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 /* ----------------------------------------------------------------------------
  * Climate
  * ----------------------------------------------------------------------------
  */
-var Climate = (function () {
+var Climate = function () {
     var instance;
 
     function createInstance() {
@@ -1940,25 +1907,25 @@ var Climate = (function () {
                 mode = $("input[name='climatestation_mode']:checked").val();
             }
 
-            var task_msg = `Setting Station Mode to ${mode}`;
+            var task_msg = "Setting Station Mode to " + mode;
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync climate with nodb
             $.post({
                 url: "../tasks/set_climatestation_mode/",
-                data: {"mode": mode},
-                success: function (response) {
+                data: { "mode": mode },
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATIONMODE_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -1973,23 +1940,23 @@ var Climate = (function () {
             }
             mode = parseInt(mode, 10);
 
-            var task_msg = `Fetching Stations ${mode}`;
+            var task_msg = "Fetching Stations " + mode;
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             if (mode === 0) {
                 // sync climate with nodb
                 $.get({
                     url: "../view/closest_stations/",
-                    data: {"mode": mode},
-                    success: function (response) {
+                    data: { "mode": mode },
+                    success: function success(response) {
                         self.stationselection.html(response);
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
-                    fail: function (jqXHR, textStatus, errorThrown) {
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
                 });
@@ -1997,13 +1964,13 @@ var Climate = (function () {
                 // sync climate with nodb
                 $.get({
                     url: "../view/heuristic_stations/",
-                    data: {"mode": mode},
-                    success: function (response) {
+                    data: { "mode": mode },
+                    success: function success(response) {
                         self.stationselection.html(response);
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
-                    fail: function (jqXHR, textStatus, errorThrown) {
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
                 });
@@ -2013,30 +1980,30 @@ var Climate = (function () {
                 throw "Unknown mode for stationselection";
             }
         };
-        
+
         that.setStation = function () {
             var self = instance;
 
             var station = $("#climate_station_selection").val();
 
-            var task_msg = `Setting station ${station}`;
+            var task_msg = "Setting station " + station;
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/set_climatestation/",
-                data: {"station": station},
-                success: function (response) {
+                data: { "station": station },
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2047,37 +2014,37 @@ var Climate = (function () {
             var project = Project.getInstance();
             $.get({
                 url: "../view/climate_monthlies/",
-                success: function (response) {
+                success: function success(response) {
                     $("#climate_monthlies").html(response);
                     project.set_preferred_units();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
         };
-        
+
         that.build = function () {
             var self = instance;
             var task_msg = "Building climate";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/build_climate/",
                 data: self.form.serialize(),
-                success: function (response) {
+                success: function success(response) {
                     console.log(response);
                     if (response.Success === true) {
                         self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2089,11 +2056,11 @@ var Climate = (function () {
             $.get({
                 url: "../report/climate/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                     project.set_preferred_units();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2109,24 +2076,24 @@ var Climate = (function () {
             mode = parseInt(mode, 10);
             var climate_single_selection = $("#climate_single_selection").val();
 
-            var task_msg = `Setting Mode to ${mode} (${climate_single_selection})`;
+            var task_msg = "Setting Mode to " + mode + " (" + climate_single_selection + ")";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync climate with nodb
             $.post({
                 url: "../tasks/set_climate_mode/",
-                data: {"mode": mode, "climate_single_selection": climate_single_selection},
-                success: function (response) {
+                data: { "mode": mode, "climate_single_selection": climate_single_selection },
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2136,7 +2103,8 @@ var Climate = (function () {
         that.showHideControls = function (mode) {
 
             // show the appropriate controls
-            if (mode === -1) { // none selected
+            if (mode === -1) {
+                // none selected
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode1_controls").hide();
@@ -2144,7 +2112,8 @@ var Climate = (function () {
                 $("#climate_mode3_controls").hide();
                 $("#climate_mode4_controls").hide();
                 $("#btn_build_climate_container").hide();
-            } else if (mode === 0) { // single
+            } else if (mode === 0) {
+                // single
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").show();
                 $("#climate_mode1_controls").hide();
@@ -2152,7 +2121,8 @@ var Climate = (function () {
                 $("#climate_mode3_controls").hide();
                 $("#climate_mode4_controls").hide();
                 $("#btn_build_climate_container").show();
-            } else if (mode === 1) { // localized
+            } else if (mode === 1) {
+                // localized
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode1_controls").show();
@@ -2160,7 +2130,8 @@ var Climate = (function () {
                 $("#climate_mode3_controls").hide();
                 $("#climate_mode4_controls").hide();
                 $("#btn_build_climate_container").show();
-            } else if (mode === 2) { // observed
+            } else if (mode === 2) {
+                // observed
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode1_controls").hide();
@@ -2168,7 +2139,8 @@ var Climate = (function () {
                 $("#climate_mode3_controls").hide();
                 $("#climate_mode4_controls").hide();
                 $("#btn_build_climate_container").show();
-            } else if (mode === 3) { // future
+            } else if (mode === 3) {
+                // future
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode1_controls").hide();
@@ -2176,7 +2148,8 @@ var Climate = (function () {
                 $("#climate_mode3_controls").show();
                 $("#climate_mode4_controls").hide();
                 $("#btn_build_climate_container").show();
-            } else if (mode === 4) { // single storm
+            } else if (mode === 4) {
+                // single storm
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode1_controls").hide();
@@ -2193,20 +2166,20 @@ var Climate = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
+}();
 
 /* ----------------------------------------------------------------------------
  * Wepp
  * ----------------------------------------------------------------------------
  */
-var Wepp = (function () {
+var Wepp = function () {
     var instance;
 
     function createInstance() {
@@ -2226,19 +2199,18 @@ var Wepp = (function () {
         that.baseflow = $("#wepp_form #baseflow");
         that.sediment = $("#wepp_form #sediment");
 
-        that.updatePhosphorus = function() {
+        that.updatePhosphorus = function () {
 
             $.get({
                 url: "../query/wepp/phosphorus_opts/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.surf_runoff.value(response.surf_runoff);
                     self.lateral_flow.value(response.lateral_flow);
                     self.baseflow.value(response.baseflow);
                     self.sediment.value(response.sediment);
-
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2249,25 +2221,25 @@ var Wepp = (function () {
             var task_msg = "Submitting wepp run";
 
             self.info.text("");
-            self.status.html(`${task_msg}...`);
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
                 url: "../tasks/run_wepp/",
                 data: self.form.serialize(),
-                success: function (response) {
+                success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(`${task_msg}... Success`);
+                        self.status.html(task_msg + "... Success");
                         self.form.trigger("WEPP_RUN_TASK_COMPLETED");
-//                        self.form.trigger("WEPP_RUN_SUBMITTED_COMPLETED");
-//                        self.status.html(`${task_msg}... Success`);
-//                        self.status_url = response.status_url;
-//                        self.status_loop();
+                        //                        self.form.trigger("WEPP_RUN_SUBMITTED_COMPLETED");
+                        //                        self.status.html(`${task_msg}... Success`);
+                        //                        self.status_url = response.status_url;
+                        //                        self.status_loop();
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2279,11 +2251,11 @@ var Wepp = (function () {
             $.get({
                 url: "../report/wepp/loss/",
                 cache: false,
-                success: function (response) {
+                success: function success(response) {
                     self.info.html(response);
                     project.set_preferred_units();
                 },
-                fail: function (jqXHR, textStatus, errorThrown) {
+                fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
@@ -2296,12 +2268,12 @@ var Wepp = (function () {
             if (self.status_url !== null) {
                 $.get({
                     url: self.status_url,
-                    success: function (response) {
-                        
+                    success: function success(response) {
+
                         console.log(response);
-                        
+
                         if (response.state === "PENDING") {
-                            self.status.html(response.info); 
+                            self.status.html(response.info);
                             attempts += 1;
                             if (attempts > 1000) {
                                 self.status_url = null;
@@ -2314,13 +2286,13 @@ var Wepp = (function () {
                             });
                             self.status_url = null;
                         } else if (response.state === "SUCCESS") {
-                            self.status.html(response.info); 
+                            self.status.html(response.info);
                             self.status_url = null;
                             self.form.trigger("WEPP_RUN_TASK_COMPLETED");
                         } else if (response.state === "PROGRESS") {
-                            self.status.html(response.info); 
+                            self.status.html(response.info);
                         } else {
-                            console.log(response)
+                            console.log(response);
                             throw "Unknown response from server";
                         }
                     }
@@ -2334,14 +2306,13 @@ var Wepp = (function () {
     }
 
     return {
-        getInstance: function () {
+        getInstance: function getInstance() {
             if (!instance) {
                 instance = createInstance();
             }
             return instance;
         }
     };
-}());
-
+}();
 
 // end-of-file controller.js -----------------------------------------

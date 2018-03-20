@@ -21,13 +21,13 @@ class LandcoverMap:
         self.lc_types = list(set(self.data.flatten()))
         self.fname = fname
 
-    def _get_dominate(self, indices):
+    def _get_dominant(self, indices):
         x = self.data[indices]
         return int(Counter(x).most_common()[0][0])
         
     def build_lcgrid(self, subwta_fn, lcgrid_fn=None):
         """
-        Generates a dominate lc map based on the subcatchment
+        Generates a dominant lc map based on the subcatchment
         ids identified in the subwta_fn map
         """
         assert _exists(subwta_fn)
@@ -42,7 +42,7 @@ class LandcoverMap:
                 
             _id = int(_id)
             indices = np.where(subwta == _id)
-            dom = self._get_dominate(indices)
+            dom = self._get_dominant(indices)
             lcgrid[indices] = dom
                 
             domlc_d[str(_id)] = str(dom)

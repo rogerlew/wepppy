@@ -536,10 +536,11 @@ class Climate(NoDbBase):
 
                 assert end_year >= start_year
                 assert end_year - start_year <= CLIMATE_MAX_YEARS
+                self._input_years = end_year - start_year + 1
 
             self._observed_start_year = start_year
             self._observed_end_year = end_year
-            self._input_years = end_year - start_year + 1
+
 
             self.dump_and_unlock()
 
@@ -572,10 +573,10 @@ class Climate(NoDbBase):
 
                 assert end_year >= start_year
                 assert end_year - start_year <= CLIMATE_MAX_YEARS
+                self._input_years = end_year - start_year + 1
 
             self._future_start_year = start_year
             self._future_end_year = end_year
-            self._input_years = end_year - start_year + 1
 
             self.dump_and_unlock()
 

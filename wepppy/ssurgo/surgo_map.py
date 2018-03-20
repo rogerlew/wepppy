@@ -46,9 +46,9 @@ class SurgoMap:
         self.mukeys = list(set(self.data.flatten()))
         self.fname = fname
 
-    def _get_dominate(self, indices=None, valid_mukeys=None):
+    def _get_dominant(self, indices=None, valid_mukeys=None):
         """
-        Determines the dominate mukey for the given indices. If
+        Determines the dominant mukey for the given indices. If
         indices is None then the entire maps is examined
         """
     
@@ -73,7 +73,7 @@ class SurgoMap:
         
     def build_soilgrid(self, subwta_fn, soilgrid_fn=None, bounds_fn=None, valid_mukeys=None):
         """
-        Generates a dominate soil map based on the subcatchment
+        Generates a dominant soil map based on the subcatchment
         ids identified in the subwta_fn map
         
         if valid_mukeys is None assumes all the keys in the map are valid
@@ -100,12 +100,12 @@ class SurgoMap:
         
         # determine dom for the watershed
         if bounds_fn is None:
-            dom_dom = self._get_dominate(valid_mukeys=valid_mukeys)
+            dom_dom = self._get_dominant(valid_mukeys=valid_mukeys)
         else:
             assert _exists(bounds_fn)
             bounds, transform2, proj2 = read_arc(bounds_fn, dtype=np.int32)
             indices = np.where(bounds == 1)
-            dom_dom = self._get_dominate(indices, valid_mukeys)
+            dom_dom = self._get_dominant(indices, valid_mukeys)
             
         if dom_dom is None:
             raise NoValidSoilsException()
@@ -117,7 +117,7 @@ class SurgoMap:
                 continue
                 
             indices = np.where(subwta == _id)
-            dom = self._get_dominate(indices, valid_mukeys)
+            dom = self._get_dominant(indices, valid_mukeys)
             if dom is None:
                 dom = dom_dom
             
