@@ -26,7 +26,7 @@ from wepppy.wepp.management import (
 )
 
 from wepppy.all_your_base import isfloat
-from wepppy.wepp.out import LossReport
+from wepppy.wepp.out import LossReport, EbeReport
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -570,7 +570,17 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return LossReport(loss_pw0)
-        
+
+    def report_ebe(self):
+        output_dir = self.output_dir
+        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
+        loss_rpt = LossReport(loss_pw0)
+
+        ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
+        ebe_rpt = EbeReport(ebe_pw0)
+        ebe_rpt.run_return_periods(loss_rpt)
+        return  ebe_rpt
+
     def query_sub_phosphorus(self):
         wd = self.wd
         translator = Watershed.getInstance(wd).translator_factory()

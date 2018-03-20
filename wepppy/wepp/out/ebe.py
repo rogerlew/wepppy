@@ -25,8 +25,14 @@ class EbeReport(object):
         # values
         lines = lines[i0+1:]
 
-        header = ['da', 'mo', 'year', 'prcp_depth(mm)', 'runoff_vol(m^3)', 'peak_runoff(m^3/s)', 'sediment_yld(kg)',
-                  'solub_react_p(kg)', 'particulate_p(kg)', 'total_p(kg)']
+        header = ['da', 'mo', 'year',
+                  'Precipitation Depth (mm)',
+                  'Runoff Volume (m^3)',
+                  'Peak Runoff (m^3/s)',
+                  'Sediment Yield (kg)',
+                  'Soluble Reactive P (kg)',
+                  'Particulate P (kg)',
+                  'Total P (kg)']
 
         units = [int, int, int, float, float, float, float, float, float, float]
 
@@ -40,14 +46,27 @@ class EbeReport(object):
         self.df = df
         self.years = int(max(df['year']))
         self.header = header
+        self.return_periods = None
+        self.num_events = None
+        self.wsarea = None
+        self.units_d = {
+          'Precipitation Depth': 'mm',
+          'Runoff Volume': 'm^3',
+          'Peak Runoff': 'm^3/s',
+          'Runoff': 'mm',
+          'Sediment Yield': 'kg',
+          'Soluble Reactive P': 'kg',
+          'Particulate P': 'kg',
+          'Total P': 'kg'
+        }
+        
 
-    def return_periods(self, loss_rtp: LossReport, recurence=[2, 5, 10, 25]):
+    def run_return_periods(self, loss_rtp: LossReport, recurence=[2, 5, 10, 25]):
 
         df = self.df
         header = self.header
         years = self.years
         wsarea = loss_rtp.wsarea
-        print(wsarea)
 
         recurence = sorted(recurence)
 
@@ -80,22 +99,37 @@ class EbeReport(object):
 
         for col_name in [v for v in header if v not in ['da', 'mo', 'year']]:
             df2 = df.sort_values(by=col_name, ascending=False)
+
+            col_name = col_name.split('(')[0].strip()
             results[col_name] = {}
+            if col_name == 'Runoff Volume':
+                results['Runoff'] = {}
 
             for retperiod, indx in rec.items():
                 row = dict(df2.iloc[indx])
-                row = dict((k, float(v)) for k, v in row.items())
+                row = dict((k.split('(')[0].strip(), float(v)) for k, v in row.items())
+
+                row['Runoff'] = round(row['Runoff Volume'] / (wsarea * 10000.0) * 1000.0, 2)
+
                 results[col_name][retperiod] = row
 
-        return results
+                if col_name == 'Runoff Volume':
+                    results['Runoff'][retperiod] = row
+
+        self.return_periods = results
+        self.num_events = df.shape[0]
+        self.wsarea = wsarea
+
 
 if __name__ == "__main__":
     from pprint import  pprint
 
     loss_rtp = LossReport('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
     ebe_rpt = EbeReport('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2events.txt')
-    print(ebe_rpt.years)
-    results = ebe_rpt.return_periods(loss_rtp)
-    pprint(results)
+    ebe_rpt.run_return_periods(loss_rtp)
+    pprint(ebe_rpt.years)
+    pprint(ebe_rpt.num_events)
+    pprint(ebe_rpt.return_periods)
+    pprint(ebe_rpt.wsarea)
 
 #    report = EbeReport('/home/weppdev/PycharmProjects/wepppy/wepppy/validation/blackwood_MultPRISM/wepp/output/ebe_pw0.txt')
