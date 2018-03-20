@@ -2,11 +2,26 @@
     <dt>{{ d.meta.hill_type }} ID</dt>
     <dd>{{ d.meta.topaz_id }}</dd>
     <dt>Width</dt>
-    <dd>{{ d.watershed.width|round }} m</dd>
+    <dd>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-md-2">{{ unitizer(d.watershed.width,"m") | safe }}</div>
+            <div class="col-md-1">{{ unitizer_units("m") | safe }}</div>
+        </div>
+    </dd>
     <dt>Length</dt>
-    <dd>{{ d.watershed.length|round }} m</dd>
+    <dd>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-md-2">{{ unitizer(d.watershed.length,"m") | safe }}</div>
+            <div class="col-md-1">{{ unitizer_units("m") | safe }}</div>
+        </div>
+    </dd>
     <dt>Area</dt>
-    <dd>{{ d.watershed.area * 0.0001|round(3) }} ha</dd>
+    <dd>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-md-2">{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</div>
+            <div class="col-md-1">{{ unitizer_units("ha") | safe }}</div>
+        </div>
+    </dd>
     <dt>Slope</dt>
     <dd>{{ d.watershed.slope_scalar|round(3) }}</dd>
     <dt>Aspect</dt>

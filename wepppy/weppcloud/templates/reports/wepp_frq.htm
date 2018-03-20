@@ -1,0 +1,71 @@
+<h5>Return Period Analysis</h5>
+    <br>The Return period of the events are estimated by applying Weibull formula on annual maxima series:</br>
+    <div style="margin-left: 50px">
+        <i>T</i> = (<i>N</i> + 1)/<i>m</i>,</br>
+    where <i>T</i> is the return period, <i>N</i> is the number of simulation years, and <i>m</i> is the rank of he annual maxima event.</div>
+    </p>
+<dl class="dl-horizontal">
+    <dt>Years in Simulation</dt>
+    <dd>{{ report.years }}</dd>
+    <dt>Events in Simulation</dt>
+    <dd>{{ report.num_events }}</dd>
+</dl>
+
+{% for key in ['Precipitation Depth', 'Runoff', 'Peak Runoff',
+               'Sediment Yield', 'Soluble Reactive P', 'Particulate P', 'Total P'] %}
+  <h6><b>{{ key }}</b></h6>
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Recurrence Interval</th>
+        <th>Year</th>
+        <th>Month</th>
+        <th>Day</th>
+        <th class="{{ 'table-active' if key == 'Precipitation Depth' }}">Precipitation</th>
+        <th class="{{ 'table-active' if key == 'Runoff' }}">Runoff</th>
+        <th class="{{ 'table-active' if key == 'Peak Runoff' }}">Peak</th>
+        <th class="{{ 'table-active' if key == 'Sediment Yield' }}">Sediment Yield</th>
+        <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
+        <th class="{{ 'table-active' if key == 'Particulate P' }}">Particulate P</th>
+        <th class="{{ 'table-active' if key == 'Total P' }}">Total P</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>years</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer_units(report.units_d['Precipitation Depth']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer_units(report.units_d['Runoff']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Peak Runoff' }}">{{ unitizer_units(report.units_d['Peak Runoff']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer_units(report.units_d['Sediment Yield']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive P']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer_units(report.units_d['Particulate P']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
+      </tr>
+    {% for rec_interval in report.return_periods[key] %}
+      <tr>
+        <td>{{ rec_interval }}</td>
+        <td>{{ report.return_periods[key][rec_interval]['year'] | int }}</td>
+        <td>{{ report.return_periods[key][rec_interval]['mo'] | int }}</td>
+        <td>{{ report.return_periods[key][rec_interval]['da'] | int }}</td>
+        <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer(report.return_periods[key][rec_interval]['Precipitation Depth'],
+                        report.units_d['Precipitation Depth']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer(report.return_periods[key][rec_interval]['Runoff'],
+                        report.units_d['Runoff']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Peak Runoff' }}">{{ unitizer(report.return_periods[key][rec_interval]['Peak Runoff'],
+                        report.units_d['Peak Runoff']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer(report.return_periods[key][rec_interval]['Sediment Yield'],
+                        report.units_d['Sediment Yield']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Soluble Reactive P'],
+                        report.units_d['Soluble Reactive P']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Particulate P'],
+                        report.units_d['Particulate P']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Total P'],
+                        report.units_d['Total P']) | safe }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}

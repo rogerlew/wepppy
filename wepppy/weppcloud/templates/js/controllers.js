@@ -331,6 +331,8 @@ var Map = function () {
                 cache: false,
                 success: function success(response) {
                     self.drilldown.html(response);
+                    var project = Project.getInstance();
+                    project.set_preferred_units();
                 },
                 fail: function fail(error) {
                     console.log(error);
@@ -2253,6 +2255,19 @@ var Wepp = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                    project.set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+
+            $.get({
+                url: "../report/wepp/frq/",
+                cache: false,
+                success: function success(response) {
+                    self.info.append(response);
                     project.set_preferred_units();
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {

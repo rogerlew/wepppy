@@ -1616,6 +1616,18 @@ def report_wepp_loss(runid):
                            report=report,
                            translator=translator)
 
+@app.route('/runs/<string:runid>/report/wepp/frq')
+@app.route('/runs/<string:runid>/report/wepp/frq/')
+def report_wepp_frq(runid):
+    wd = get_wd(runid)
+    report = Wepp.getInstance(wd).report_ebe()
+    translator = Watershed.getInstance(wd).translator_factory()
+
+    return render_template('reports/wepp_frq.htm',
+                           report=report,
+                           translator=translator)
+
+
 
 @app.route('/runs/<string:runid>/query/wepp/runoff/subcatchments')
 @app.route('/runs/<string:runid>/query/wepp/runoff/subcatchments/')

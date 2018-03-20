@@ -59,6 +59,14 @@ converters = {
         ('m^3/yr', 'ft^3/yr'): lambda v: v * 35.3146667,
         ('ft^3/yr', 'm^3/yr'): lambda v: v * 0.0283168
     },
+    'flow': {
+        ('m^3/s', 'ft^3/min'): lambda v: v * 2118.88,
+        ('m^3/s', 'ft^3/s'): lambda v: v * 35.3147,
+        ('ft^3/min', 'm^3/s'): lambda v: v * 0.000471947,
+        ('ft^3/min', 'ft^3/s'): lambda v: v * 0.0166667,
+        ('ft^3/s', 'm^3/s'): lambda v: v * 0.0283168,
+        ('ft^3/s', 'ft^3/min'): lambda v: v * 60.0
+    },
     'sm-surface-density': {
         ('kg/ha', 'lb/acre'): lambda v: v * 0.892179,
         ('kg/ha', 'kg/m^2'): lambda v: v * 0.0001,
@@ -130,6 +138,11 @@ precisions = OrderedDict([
     ('volume-annual', OrderedDict([
         ('m^3/yr', 0),
         ('ft^3/yr', 0)])
+     ),
+    ('flow', OrderedDict([
+        ('m^3/s', 2),
+        ('ft^3/min', 0),
+        ('ft^3/s', 2)])
      ),
     ('sm-surface-density', OrderedDict([
         ('kg/ha', 3),
