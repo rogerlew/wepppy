@@ -6,7 +6,7 @@ from posixpath import join as urljoin
 
 from wepppy.ssurgo import SoilSummary
 
-_soilbuilder_url = "http://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/"
+_soilbuilder_url = "https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/"
 
 
 def validatemukeys(mukeys):
