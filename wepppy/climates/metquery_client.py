@@ -6,7 +6,7 @@ import numpy as np
 from wepppy.all_your_base import c_to_f
 
 
-_metquery_url = "http://wepp1.nkn.uidaho.edu/webservices/metquery/"
+_metquery_url = "https://wepp1.nkn.uidaho.edu/webservices/metquery/"
 
 
 def _metquery_retrieve_monthly(dataset, lng, lat, method):
