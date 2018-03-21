@@ -124,7 +124,7 @@ def try_parse_float(f):
         return 0.0
 
 
-wmesque_url = 'http://wepp1.nkn.uidaho.edu/webservices/wmesque/'
+wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
 
 
 def wmesque_retrieve(dataset, extent, fname, cellsize):
@@ -449,7 +449,7 @@ class Julian(object):
 
 
 def elevationquery(lng, lat):
-    url = 'http://wepp1.nkn.uidaho.edu/webservices/elevationquery'
+    url = 'https://wepp1.nkn.uidaho.edu/webservices/elevationquery'
     r = requests.post(url, params=dict(lat=lat, lng=lng))
         
     if r.status_code != 200:

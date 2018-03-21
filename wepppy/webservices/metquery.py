@@ -52,7 +52,7 @@ app = Flask(__name__)
 @app.route('/monthly/catalog/')
 def query_monthly_catalog():
     """
-    http://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/catalog/
+    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/catalog/
     """
     return jsonify(monthly_catalog)
 
@@ -60,8 +60,8 @@ def query_monthly_catalog():
 @app.route('/monthly/', methods=['GET', 'POST'])
 def query_monthly():
     """
-    http://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
-    http://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
+    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
+    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})

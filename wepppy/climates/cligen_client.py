@@ -7,7 +7,7 @@ import time
 
 from wepppy.all_your_base import isint, isfloat
 
-_cligen_url = "http://wepp1.nkn.uidaho.edu/webservices/cligen/"
+_cligen_url = "https://wepp1.nkn.uidaho.edu/webservices/cligen/"
 
 
 def fetch_multiple_year(par, years,  lng=None, lat=None,
@@ -17,7 +17,7 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
                         dewpoint=None, solrad=None,
                         returnjson=True, randseed=None):
     """
-    http://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
+    https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
 
     """
 

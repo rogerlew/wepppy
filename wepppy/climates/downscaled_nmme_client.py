@@ -96,7 +96,7 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name):
                                variable_name=variable_name)
    
     # query server
-    referer = 'http://wepp1.nkn.uidaho.edu'
+    referer = 'https://wepp1.nkn.uidaho.edu'
     s = requests.Session()
     r = s.get(url,  headers={'referer': referer})
     
