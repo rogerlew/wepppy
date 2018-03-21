@@ -251,7 +251,7 @@ var Map = function () {
             var self = instance;
 
             $.post({
-                url: "http://wepp1.nkn.uidaho.edu/webservices/elevationquery/",
+                url: "https://wepp1.nkn.uidaho.edu/webservices/elevationquery/",
                 data: JSON.stringify({ lat: ev.latlng.lat, lng: ev.latlng.lng }),
                 dataType: "json",
                 cache: false,
