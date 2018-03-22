@@ -4,12 +4,15 @@ import shutil
 
 from os.path import join as _join
 from os.path import exists as _exists
+import shutil
+
 
 # non-standard
 from jinja2 import Template
 
 import wepppy
 from wepppy.wepp.management import _management_dir
+
 
 #
 # export
@@ -73,3 +76,13 @@ def export_winwepp(wd):
                     
     shutil.make_archive(_join(export_dir, 'Data'), 
                         'zip', export_winwepp_dir)
+
+
+def archive_project(wd):
+    archive_path = wd
+    if archive_path.endswith('/') or archive_path.endswith('\\'):
+        archive_path = archive_path[:-1]
+
+    shutil.make_archive(archive_path, 'zip', wd)
+
+    return archive_path + '.zip'

@@ -3,6 +3,9 @@ import os
 
 from os.path import exists as _exists
 from os.path import join as _join
+from os.path import join as _split
+
+import shutil
 
 # non-standard
 import jsonpickle
@@ -113,6 +116,20 @@ class Ron(NoDbBase):
                     
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
+
+                try:
+                    sbs_map = config.get('landuse', 'sbs_map')
+                except:
+                    sbs_map = None
+
+                if sbs_map is not None:
+                    assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
+
+                    baer = wepppy.nodb.mods.Baer.getInstance(wd)
+
+                    sbs_path = _join(baer.baer_dir, 'sbs.tif')
+                    shutil.copyfile(sbs_map, sbs_path)
+                    baer.validate(sbs_path)
 
             self.dump_and_unlock()
 
