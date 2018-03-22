@@ -463,7 +463,10 @@ class Wepp(NoDbBase):
         if len(versions) > 1:
             raise Exception('Do not know how to merge '
                             'soils of different versions')
-            
+
+        if len(versions) == 0:
+            raise Exception('Could not find any soils for channels.')
+
         version = versions.pop()
             
         if '7778' in version:
