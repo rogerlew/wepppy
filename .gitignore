@@ -3,3 +3,4 @@ wepppy/scripts/*
 wepppy/validation/*
 *.pyc
 venv/*
+devnotes.txt
