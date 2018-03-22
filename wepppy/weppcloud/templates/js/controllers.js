@@ -253,6 +253,7 @@ var Map = function () {
             $.post({
                 url: "https://wepp1.nkn.uidaho.edu/webservices/elevationquery/",
                 data: JSON.stringify({ lat: ev.latlng.lat, lng: ev.latlng.lng }),
+                contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 cache: false,
                 success: function success(response) {
@@ -2202,6 +2203,7 @@ var Wepp = function () {
         that.sediment = $("#wepp_form #sediment");
 
         that.updatePhosphorus = function () {
+            var self = instance;
 
             $.get({
                 url: "../query/wepp/phosphorus_opts/",
