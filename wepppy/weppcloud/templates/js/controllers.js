@@ -285,12 +285,12 @@ var Map = function () {
         // define the base layer and add it to the map
         // does not require an API key
         // https://stackoverflow.com/a/32391908
-        that.googleTerrain = L.tileLayer("http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+        that.googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
             maxZoom: 20,
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
-        that.googleSat = L.tileLayer("http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+        that.googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
             maxZoom: 20,
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
