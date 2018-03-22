@@ -35,7 +35,9 @@
     <!-----------------------------------------------------------------------------
      Baer (controls/baer_upload.htm)
      ----------------------------------------------------------------------------->
-    {% include 'controls/baer_upload.htm'%}
+    {% if 'lt' not in ron.mods %}
+        {% include 'controls/baer_upload.htm'%}
+    {% endif %}
 {% endif %}
 <!-----------------------------------------------------------------------------
  Channel Delineation (controls/channel_delineation.htm)
