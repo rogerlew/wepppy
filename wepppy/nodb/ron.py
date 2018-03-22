@@ -22,6 +22,8 @@ from wepppy.all_your_base import (
 from .base import NoDbBase, TriggerEvents
 
 
+_thisdir = os.path.dirname(__file__)
+
 class Map(object):
     def __init__(self, extent, center, zoom, cellsize=30.0):
         assert len(extent) == 4
@@ -123,6 +125,7 @@ class Ron(NoDbBase):
                     sbs_map = None
 
                 if sbs_map is not None:
+                    sbs_map = _join(_thisdir, sbs_map)
                     assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
 
                     baer = wepppy.nodb.mods.Baer.getInstance(wd)
