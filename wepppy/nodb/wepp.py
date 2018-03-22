@@ -409,12 +409,13 @@ class Wepp(NoDbBase):
         runs_dir = self.runs_dir
         
         chn_n = watershed.chn_n
-        chn_key = 'OnRock 2'
+
         fp = open(_join(runs_dir, 'pw0.chn'), 'w')
         fp.write('99.1\r\n{chn_n}\r\n4\r\n1.500000\r\n'
                  .format(chn_n=chn_n))
         
-        for topaz_id, _ in watershed.chn_iter():
+        for topaz_id, chn_summary in watershed.chn_iter():
+            chn_key = chn_summary.channel_type
             chn_d = get_channel(chn_key)
             contents = chn_d['contents']
             fp.write(contents)

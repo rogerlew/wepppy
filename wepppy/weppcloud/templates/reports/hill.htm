@@ -1,6 +1,11 @@
 <dl class="dl-horizontal">
     <dt>{{ d.meta.hill_type }} ID</dt>
     <dd>{{ d.meta.topaz_id }}</dd>
+
+    {% if d.meta.hill_type == "Channel"%}
+    <dt>Cell Width</dt>
+    <dd>{{ d.watershed.cell_width }}</dd>
+    {% else %}
     <dt>Width</dt>
     <dd>
         <div class="row" style="padding-bottom: 20px;">
@@ -8,6 +13,7 @@
             <div class="col-md-1">{{ unitizer_units("m") | safe }}</div>
         </div>
     </dd>
+    {% endif %}
     <dt>Length</dt>
     <dd>
         <div class="row" style="padding-bottom: 20px;">
@@ -38,4 +44,11 @@
         (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)
         {% endif %}
     </dd>
+    {% if d.meta.hill_type == "Channel"%}
+    <dt>Order</dt>
+    <dd>{{ d.watershed.order }}</dd>
+    <dt>Channel Type</dt>
+    <dd>
+        <a href="../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></dd>
+    {% endif %}
 </dl>

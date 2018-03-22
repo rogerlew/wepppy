@@ -2258,6 +2258,8 @@ var Wepp = function () {
                 success: function success(response) {
                     self.info.html(response);
                     project.set_preferred_units();
+                    $('#wepploss_tbl').DataTable({iDisplayLength: -1});
+
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
