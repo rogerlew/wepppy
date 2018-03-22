@@ -675,13 +675,22 @@ var ChannelDelineation = function () {
             $("#map_bounds").val(extent);
             $("#map_distance").val(distance);
 
-            if (zoom >= self.zoom_min) {
-                $("#btn_build_channels").prop("disabled", false);
-                $("#hint_build_channels").text("");
-            } else {
-                $("#btn_build_channels").prop("disabled", true);
-                $("#hint_build_channels").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
-            }
+            var ispoweruser = false;
+
+            $.get({
+                url: "../../../ispoweruser/",
+                success: function success(response) {
+                    ispoweruser = response;
+                }
+            }).always(function() {
+                if (zoom >= self.zoom_min || ispoweruser) {
+                    $("#btn_build_channels").prop("disabled", false);
+                    $("#hint_build_channels").text("");
+                } else {
+                    $("#btn_build_channels").prop("disabled", true);
+                    $("#hint_build_channels").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
+                }
+            });
         };
 
         that.show = function () {
