@@ -411,7 +411,8 @@ class SummaryBase(object):
         return ' '.join(["%0.6f, %0.3f" % (d, s) for d, s in zip(_d, _s)])
         
     def as_dict(self):
-        return dict(
+        d = dict(
+            fname=self.fname,
             topaz_id=self.topaz_id,
             wepp_id=self.wepp_id,
             length=self.length,
@@ -421,8 +422,17 @@ class SummaryBase(object):
             direction=self.direction,
             slope_scalar=self.slope_scalar,
             color=self.color,
-            centroid=self.centroid.lnglat,
+            centroid=self.centroid.lnglat
         )
+
+        try:
+            d['order'] = self.order
+            d['channel_type'] = self.channel_type
+            d['cell_width'] = self.cell_width
+        except:
+            pass
+
+        return d
 
 
 class HillSummary(SummaryBase):
@@ -460,7 +470,8 @@ class ChannelSummary(SummaryBase):
         
     @property
     def channel_type(self) -> str:
-        return ('OnGravel', 'OnEarth')[int([None, 0, 0, 0, 0, 1, 1, 1][self.order])]
+        return 'OnRock 2'
+#        return ('OnGravel', 'OnEarth')[int([None, 0, 0, 0, 0, 1, 1, 1][self.order])]
 
     @property
     def cell_width(self) -> int:
@@ -1211,6 +1222,7 @@ class WatershedAbstraction:
         self._read_netw_tab()
         network = self.network
         translator = self.translator
+
 
         # now we are going to define the lines of the structure file
         # this doesn't handle impoundments

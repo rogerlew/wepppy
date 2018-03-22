@@ -40,10 +40,12 @@
             value="{{ wepp.baseflow_opts.bfthreshold }}" aria-label="Watershed groundwater baseflow threshold area">
         </div>
     </div>
-    
-    <h5>Phosphorus Processing (Optional)</h5>
+
     {% if "lt" in ron.mods %}
+    <h5>Phosphorus Processing</h5>
     <p><i>Phosphorus coefficients determined by lt mod</i></p>
+    {% else %}
+    <h5>Pollutant Processing (Optional)</h5>
     {%- endif -%}
     <div class="form-group row" id="surf_runoff_container">
         <div class="col-sm-4">
