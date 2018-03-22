@@ -282,6 +282,12 @@ def usermod():
     return render_template('user/usermod.html', user=current_user)
 
 
+@app.route('/ispoweruser')
+@app.route('/ispoweruser/')
+def ispoweruser():
+    return jsonify(current_user.has_role('PowerUser'))
+
+
 @app.route('/tasks/usermod/', methods=['POST'])
 @roles_required('Root')
 def task_usermod():
