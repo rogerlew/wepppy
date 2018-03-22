@@ -45,6 +45,7 @@ from wepppy.watershed_abstraction import (
     ChannelRoutingError,
 )
 from wepppy.wepp import management
+
 from wepppy.wepp.runner import (
     run_watershed,
     run_hillslope
@@ -861,7 +862,8 @@ def report_outlet(runid):
     wd = get_wd(runid)
     
     return render_template('reports/outlet.htm',
-                           outlet=Topaz.getInstance(wd).outlet)
+                           outlet=Topaz.getInstance(wd).outlet,
+                           ron=Ron.getInstance(wd))
 
 
 # noinspection PyBroadException
@@ -1155,8 +1157,21 @@ def report_landuse(runid):
     wd = get_wd(runid)
     return render_template('reports/landuse.htm',
                            report=Landuse.getInstance(wd).report)
-                           
-                           
+
+@app.route('/runs/<string:runid>/view/channel_def/<chn_key>')
+@app.route('/runs/<string:runid>/view/channel_def/<chn_key>/')
+def view_channel_def(runid, chn_key):
+    wd = get_wd(runid)
+    assert wd is not None
+
+    try:
+        chn_d = management.get_channel(chn_key)
+    except KeyError:
+        return error_factory('Could not find channel def with key "%s"' % chn_key)
+
+    return jsonify(chn_d)
+
+
 @app.route('/runs/<string:runid>/view/management/<int:key>')
 @app.route('/runs/<string:runid>/view/management/<int:key>/')
 def view_management(runid, key):
