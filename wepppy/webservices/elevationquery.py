@@ -9,12 +9,14 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import math
-import os
-import json
+
+from os.path import join as _join
+
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request
 
 geodata_dir = '/geodata/'
+
 
 def safe_float_parse(x):
     """
@@ -28,6 +30,7 @@ def safe_float_parse(x):
         
 app = Flask(__name__)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def query_elevation():
     if request.method not in ['GET', 'POST']:
@@ -38,28 +41,15 @@ def query_elevation():
         lng = request.args.get('lng', None)
         srs = request.args.get('srs', None)
     else: # POST
-        d = request.get_json()
-        if d is None:
-            d2 = request.get_data()
-            
-        if d is None and d2 is None:
-            return jsonify({'Error': 'No POST data or JSON'})
-        
-        if d2 is not None:
-            try:
-                d = json.loads(d2)
-            except:
-                return jsonify({'Error': 'Expecting json with lat and lng'})
-                
-        lat = d.get('lat', None)
-        lng = d.get('lng', None)
-        srs = d.get('srs', None)
+        lat = request.json.get('lat', None)
+        lng = request.json.get('lng', None)
+        srs = request.json.get('srs', None)
 
     if lat is None:
         return jsonify({'Error': 'lat not supplied'})
 
     if lng is None:
-        return jsonity({'Error': 'lng not supplied'})
+        return jsonify({'Error': 'lng not supplied'})
 
     lat = safe_float_parse(lat)
     lng = safe_float_parse(lng)
@@ -98,7 +88,8 @@ def query_elevation():
                     'Units': 'm',
                     'Longitude': lng,
                     'Latitude': lat})
-                    
+
+
 if __name__ == '__main__':
     app.run()
 
