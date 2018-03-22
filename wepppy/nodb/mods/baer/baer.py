@@ -312,18 +312,38 @@ class Baer(NoDbBase):
                 return i + 130
                 
             sbs = SoilBurnSeverityMap(baer_cropped, _classify)
+            print(landuse.domlc_d)
 
-            landuse.domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
+            domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
+
+            ron = Ron.getInstance(wd)
+            if 'lt' in ron.mods:
+                for k, sbs in domlc_d.items():
+                    if sbs in ['131', '132']:
+                        landuse.domlc_d[k] = '106'
+                    elif sbs in ['133']:
+                        landuse.domlc_d[k] = '105'
+
+            else:
+                landuse.domlc_d = domlc_d
+
+            print(landuse.domlc_d)
             
             landuse.dump_and_unlock()
             landuse = landuse.getInstance(wd)
             landuse.build_managements()
+
         except Exception:
             self.unlock('-f')
             raise
         
     def modify_soils(self):
         wd = self.wd
+
+        ron = Ron.getInstance(wd)
+        if 'lt' in ron.mods:
+            return
+
         soils_dir = self.soils_dir
         baer_soils_dir = self.baer_soils_dir
         

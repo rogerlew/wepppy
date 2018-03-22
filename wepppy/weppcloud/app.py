@@ -645,8 +645,19 @@ def create_fork(runid, config):
             
     # redirect to fork
     return redirect('runs/%s/%s/' % (new_runid, config))
-            
-    
+
+
+@app.route('/runs/<runid>/<config>/archive')
+@app.route('/runs/<runid>/<config>/archive/')
+def archive(runid, config):
+    # get working dir of original directory
+    wd = get_wd(runid)
+
+    from wepppy.export import archive_project
+    archive_path = archive_project(wd)
+    return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
+
+
 @app.route('/runs/<runid>/<config>/')
 def runs0(runid, config):
     assert config is not None

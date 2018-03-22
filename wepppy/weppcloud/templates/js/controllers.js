@@ -2207,10 +2207,10 @@ var Wepp = function () {
                 url: "../query/wepp/phosphorus_opts/",
                 cache: false,
                 success: function success(response) {
-                    self.surf_runoff.value(response.surf_runoff);
-                    self.lateral_flow.value(response.lateral_flow);
-                    self.baseflow.value(response.baseflow);
-                    self.sediment.value(response.sediment);
+                    self.surf_runoff.val(response.surf_runoff);
+                    self.lateral_flow.val(response.lateral_flow);
+                    self.baseflow.val(response.baseflow);
+                    self.sediment.val(response.sediment);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);

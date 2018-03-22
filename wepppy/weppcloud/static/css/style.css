@@ -10,7 +10,7 @@ body {
 
 .container {
   width: auto;
-  max-width: 960px;
+  max-width: 1280px;
   padding: 0 15px;
 }
 
@@ -29,9 +29,9 @@ code {
   background-color: #f5f5f5;
 }
 #mapid {
-    min-height: 512px;
-    height: 512px;
-    width: 512px; 
+    min-height: 700px;
+    height: 700px;
+    width: 700px;
     padding-bottom: 20px;
 }
 .text-muted {
