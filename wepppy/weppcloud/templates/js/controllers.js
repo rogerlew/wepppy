@@ -2218,10 +2218,10 @@ var Wepp = function () {
                 url: "../query/wepp/phosphorus_opts/",
                 cache: false,
                 success: function success(response) {
-                    self.surf_runoff.val(response.surf_runoff);
-                    self.lateral_flow.val(response.lateral_flow);
-                    self.baseflow.val(response.baseflow);
-                    self.sediment.val(response.sediment);
+                    self.surf_runoff.val(response.surf_runoff.toFixed(4));
+                    self.lateral_flow.val(response.lateral_flow.toFixed(4));
+                    self.baseflow.val(response.baseflow.toFixed(4));
+                    self.sediment.val(response.sediment.toFixed(0));
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2267,7 +2267,8 @@ var Wepp = function () {
                 success: function success(response) {
                     self.info.html(response);
                     project.set_preferred_units();
-                    $('#wepploss_tbl').DataTable({iDisplayLength: -1});
+                    $('#wepploss_chn_tbl').DataTable({iDisplayLength: -1});
+                    $('#wepploss_sub_tbl').DataTable({iDisplayLength: -1});
 
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {

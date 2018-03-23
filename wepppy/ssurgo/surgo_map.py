@@ -98,7 +98,7 @@ class SurgoMap:
                 
         top_ids = sorted(list(set(subwta.flatten())))
 
-        assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 1, 'subwta does not contain channels'
+        assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 0, 'subwta does not contain channels: %s' % str(top_ids)
         
         # determine dom for the watershed
         if bounds_fn is None:
@@ -145,7 +145,7 @@ class SurgoMap:
             
             assert _exists(soilgrid_fn)
 
-        assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 1, 'lost channels in domsoil_d'
+        assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'lost channels in domsoil_d'
 
         return domsoil_d
     
