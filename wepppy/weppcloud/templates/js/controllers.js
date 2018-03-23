@@ -1046,7 +1046,7 @@ var SubcatchmentDelineation = function () {
             "fillOpacity": 0.3
         };
 
-        that.labelStyle = "text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
+        that.labelStyle = "font-size: smaller; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
 
         that.data = null; // JSON from Flask
         that.polys = null; // Leaflet geoJSON layer
