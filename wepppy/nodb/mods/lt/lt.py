@@ -176,6 +176,8 @@ class LakeTahoe(NoDbBase):
         # noinspection PyBroadException
         try:
             domsoil_d = soils.domsoil_d
+
+            assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 1, 'no soils in domsoil_d'
             
             landuse = Landuse.getInstance(wd)
             domlc_d = landuse.domlc_d
@@ -208,7 +210,9 @@ class LakeTahoe(NoDbBase):
             for k in _soils:
                 coverage = 100.0 * _soils[k].area / watershed.totalarea
                 _soils[k].pct_coverage = coverage
-                        
+
+            assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 1, 'lost channels in domsoil_d'
+
             soils.soils = _soils            
             soils.domsoil_d = domsoil_d
             soils.dump_and_unlock()
