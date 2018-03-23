@@ -97,6 +97,8 @@ class SurgoMap:
         subwta, transform, proj = read_arc(subwta_fn, dtype=np.int32)
                 
         top_ids = sorted(list(set(subwta.flatten())))
+
+        assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 1, 'subwta does not contain channels'
         
         # determine dom for the watershed
         if bounds_fn is None:
@@ -115,6 +117,8 @@ class SurgoMap:
         for _id in top_ids:
             if _id == 0:
                 continue
+
+            print('findding soil for ', _id)
                 
             indices = np.where(subwta == _id)
             dom = self._get_dominant(indices, valid_mukeys)
@@ -140,7 +144,9 @@ class SurgoMap:
             del dst  # Writes and closes file
             
             assert _exists(soilgrid_fn)
-            
+
+        assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 1, 'lost channels in domsoil_d'
+
         return domsoil_d
     
     def spatialize_var(self, func, dst_fname, drivername='GTiff'):
