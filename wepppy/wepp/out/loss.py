@@ -43,17 +43,6 @@ unit_consistency_map = {
 }
 
 
-def parse_cell(v):
-    if '.' in v:
-        return float(v)
-
-    # noinspection PyBroadException
-    try:
-        return int(v)
-    except Exception:
-        return v
-
-
 class LossReport(object):
     def __init__(self, fn):
 
@@ -103,8 +92,28 @@ class LossReport(object):
             if len(L) == 0:
                 return data
                 
-            L = [parse_cell(v) for v in L.split()]
-            data.append(dict(zip(hdr, L)))
+            row = []
+
+            for v in L.split():
+                if v.count('.') == 2:
+
+                    indx = v.find('.')
+                    tok0 = v[:indx+3]
+                    tok1 = v[indx+3:]
+
+                    row.append(float(tok0))
+                    row.append(float(tok1))
+
+                elif '.' in v:
+                    row.append(float(v))
+                else:
+                    # noinspection PyBroadException
+                    try:
+                        row.append(int(v))
+                    except Exception:
+                        row.append(v)
+
+            data.append(dict(zip(hdr, row)))
 
     def _parse_out(self, lines):
         """
@@ -147,7 +156,15 @@ class LossReport(object):
                 units = None
             
             key = key.strip()
-            v = parse_cell(v.strip())
+
+            if '.' in v:
+                v = float(v)
+            else:
+                # noinspection PyBroadException
+                try:
+                    v = int(v)
+                except Exception:
+                    v = v.strip()
 
             if key == 'Total contributing area to outlet':
                 self.wsarea = v
