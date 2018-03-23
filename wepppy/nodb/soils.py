@@ -184,6 +184,11 @@ class Soils(NoDbBase):
                 mukey = statsgoSpatial.identify_mukey_point(lng, lat)
                 domsoil_d[str(topaz_id)] = str(mukey)
 
+            for topaz_id, chn in watershed.chn_iter():
+                lng, lat = sub.centroid.lnglat
+                mukey = statsgoSpatial.identify_mukey_point(lng, lat)
+                domsoil_d[str(topaz_id)] = str(mukey)
+
             mukeys = set(domsoil_d.values())
             surgo_c = SurgoSoilCollection(mukeys, use_statsgo=True)
             surgo_c.makeWeppSoils()
@@ -251,8 +256,11 @@ class Soils(NoDbBase):
                 )
             except NoValidSoilsException:
                 self.dump_and_unlock()
+
+                print('building statsgo')
                 self.build_statsgo()
                 return
+
 
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
 
