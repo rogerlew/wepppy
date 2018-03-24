@@ -681,7 +681,7 @@ def runs0(runid, config):
 
     if current_user.has_role('Admin'):
         should_abort = False
-#blblblblbfdgdg
+
     if should_abort:
         abort(404)
 
@@ -1110,6 +1110,17 @@ def task_abstract_watershed(runid):
 
     return success_factory()
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/sub_intersection/', methods=['POST'])
+def sub_intersection(runid):
+    wd = get_wd(runid)
+
+    extent = request.json.get('extent', None)
+
+    top = Topaz.getInstance(wd)
+    topaz_ids = top.sub_intersection(extent)
+    return jsonify(topaz_ids)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/set_landuse_mode/', methods=['POST'])
