@@ -197,7 +197,34 @@ class Landuse(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-            
+
+    def modify_coverage(self, dom, cover, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            dom = str(dom)
+            assert dom in self.managements
+
+            assert cover in ['cancov', 'inrcov', 'rilcov']
+
+            value = float(value)
+            assert value >= 0.0
+            assert value <= 1.0
+
+            if cover in 'cancov':
+                self.managements[dom].cancov_override = value
+            elif cover in 'inrcov':
+                self.managements[dom].inrcov_override = value
+            elif cover in 'rilcov':
+                self.managements[dom].rilcov_override = value
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def build_managements(self):
         self.lock()
 

@@ -20,7 +20,6 @@ from wepppy.wepp.runner import (
     run_watershed
 )
 from wepppy.wepp.management import (
-    get_management, 
     get_channel,
     merge_managements,
 )
@@ -274,11 +273,11 @@ class Wepp(NoDbBase):
         runs_dir = self.runs_dir
         
         if landuse.mode == LanduseMode.Gridded:
-            for topaz_id, man in landuse.sub_iter():
+            for topaz_id, man_summary in landuse.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
                 dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
                 
-                management = get_management(man.key)
+                management = man_summary.get_management()
                 multi = management.build_multiple_year_man(years)
                 fn_contents = str(multi)
                 
@@ -534,7 +533,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         from collections import Counter
         mankey = Counter(keys).most_common()[0][0]
 
-        chn_man = get_management(mankey)
+        chn_man = landuse.managements[str(mankey)].get_management()
         chn_man.make_multiple_ofe(len(keys))
 
         if years > 1:
