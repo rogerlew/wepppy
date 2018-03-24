@@ -291,17 +291,13 @@ class Wepp(NoDbBase):
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         runs_dir = self.runs_dir
-        
-        if soils.mode == SoilsMode.Gridded:
-            for topaz_id, soil in soils.sub_iter():
-                wepp_id = translator.wepp(top=int(topaz_id))
-                src_fn = _join(soils_dir, soil.fname)
-                dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-                shutil.copyfile(src_fn, dst_fn)
-                
-        else:
-            raise NotImplementedError('Single soil not implemented')
-            
+
+        for topaz_id, soil in soils.sub_iter():
+            wepp_id = translator.wepp(top=int(topaz_id))
+            src_fn = _join(soils_dir, soil.fname)
+            dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
+            shutil.copyfile(src_fn, dst_fn)
+
     def _prep_climates(self, translator):
         watershed = Watershed.getInstance(self.wd)
         climate = Climate.getInstance(self.wd)
