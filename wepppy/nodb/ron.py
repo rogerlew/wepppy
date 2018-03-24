@@ -64,7 +64,7 @@ class Map(object):
         ne = [t, r]
         return str([sw, ne])
 
-        
+
 class RonNoDbLockedException(Exception):
     pass
 

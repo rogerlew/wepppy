@@ -1631,6 +1631,7 @@ var LanduseModify = function () {
         };
 
         that.checkbox = $('#checkbox_modify_landuse');
+        that.checkbox_box_select = $('#checkbox_box_select_modify_landuse');
         that.textarea = $('#textarea_modify_landuse');
         that.selection = $('#selection_modify_landuse');
         that.data = null; // Leaflet geoJSON layer
@@ -1659,19 +1660,130 @@ var LanduseModify = function () {
             fillOpacity: 0.0
         };
 
+        that.ll0 = null;
+        that.selectionRect = null;
+
+        that.boxSelectionModeMouseDown = function (evt) {
+            var self = instance;
+            self.ll0 = evt.latlng;
+        };
+
+        that.boxSelectionModeMouseMove = function (evt) {
+            var self = instance;
+            var map = Map.getInstance();
+
+            if (self.ll0 === null) {
+                if (self.selectedRect !== null) {
+                    map.removeLayer(that.selectionRect);
+                    self.selectionRect = null;
+                }
+                return;
+            }
+
+            var bounds = L.latLngBounds(self.ll0, evt.latlng);
+
+            if (self.selectionRect === null) {
+                self.selectionRect = L.rectangle(bounds, {color: 'blue', weight: 1}).addTo(map);
+            } else {
+                self.selectionRect.setLatLngs([bounds.getSouthWest(), bounds.getSouthEast(),
+                                               bounds.getNorthEast(), bounds.getNorthWest()]);
+                self.selectionRect.redraw();
+            }
+
+        };
+
+        that.find_layer_id = function (topaz_id) {
+            var self = instance;
+
+            for (var id in self.polys._layers) {
+                var topaz_id2 = self.polys._layers[id].feature.properties.TopazID;
+
+                if (topaz_id === topaz_id2) {
+                    return id;
+                }
+            }
+            return undefined;
+        }
+
+        that.boxSelectionModeMouseUp = function (evt) {
+            var self = instance;
+
+            var map = Map.getInstance();
+
+            var llend = evt.latlng;
+            var bounds = L.latLngBounds(self.ll0, llend);
+
+            var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
+
+            $.post({
+                url: "../tasks/sub_intersection/",
+                data: JSON.stringify({ extent: extent }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(topaz_ids) {
+
+                    for (var i = 0; i < topaz_ids.length; i++) {
+                        var topaz_id = topaz_ids[i];
+                        var id = self.find_layer_id(topaz_id);
+
+                        if (id == undefined) {
+                            continue;
+                        }
+
+                        var layer = self.polys._layers[id];
+
+                        if (self.selected.has(topaz_id)) {
+                            self.selected.delete(topaz_id);
+                            layer.setStyle(self.style);
+                        } else {
+                            self.selected.add(topaz_id);
+                            layer.setStyle(self.selectedstyle);
+                        }
+                    }
+
+                    that.textarea.val(Array.from(self.selected).join());
+
+                    map.removeLayer(that.selectionRect);
+                    that.selectionRect = null;
+
+                },
+                fail: function fail(error) {
+                    console.log(error);
+                }
+            }).always(function() {
+                that.ll0 = null;
+            });
+        };
+
         that.toggle = function () {
             var self = instance;
 
             if (self.checkbox.prop("checked") === true) {
-                self.showModifyMap();
-                self.selected = new Set();
+                if (self.polys == null) {
+                    self.showModifyMap();
+                }
+                if (self.selected == null) {
+                    self.selected = new Set();
+                }
             } else {
-                self.hideModifyMap();
+                if (self.checkbox_box_select.prop("checked") === false) {
+                    self.hideModifyMap();
+                }
             }
         };
 
         that.showModifyMap = function () {
             var self = instance;
+
+            var map = Map.getInstance();
+            map.boxZoom.disable();
+
+            map.on('mousedown', self.boxSelectionModeMouseDown);
+            map.on('mousemove', self.boxSelectionModeMouseMove);
+            map.on('mouseup', self.boxSelectionModeMouseUp);
+
             self.data = null;
             $.get({
                 url: "../resources/subcatchments.json",
@@ -1686,9 +1798,16 @@ var LanduseModify = function () {
         that.hideModifyMap = function () {
             var self = instance;
             var map = Map.getInstance();
+
+            map.boxZoom.enable();
+            map.off('mousedown', self.boxSelectionModeMouseDown);
+            map.off('mousemove', self.boxSelectionModeMouseMove);
+            map.off('mouseup', self.boxSelectionModeMouseUp);
             map.removeLayer(self.polys);
+
             self.data = null;
             self.polys = null;
+            self.ll0 = null;
         };
 
         that.onShowSuccess = function (response) {
@@ -1750,7 +1869,7 @@ var LanduseModify = function () {
             $.post({
                 url: "../tasks/modify_landuse/",
                 data: { topaz_ids: self.textarea.val(),
-                    landuse: self.selection.val() },
+                        landuse: self.selection.val() },
                 success: function success(response) {
                     if (response.Success === true) {
                         self.textarea.val("");
