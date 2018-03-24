@@ -2287,26 +2287,25 @@ var Wepp = function () {
                 success: function success(response) {
                     self.info.html(response);
                     project.set_preferred_units();
-                    $('#wepploss_chn_tbl').DataTable({iDisplayLength: -1});
-                    $('#wepploss_sub_tbl').DataTable({iDisplayLength: -1});
+                    //$('#wepploss_chn_tbl').DataTable({iDisplayLength: -1});
+                    //$('#wepploss_sub_tbl').DataTable({iDisplayLength: -1});
 
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            });
-
-
-            $.get({
-                url: "../report/wepp/frq/",
-                cache: false,
-                success: function success(response) {
-                    self.info.append(response);
-                    project.set_preferred_units();
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
+            }).always(function() {
+                $.get({
+                    url: "../report/wepp/frq/",
+                    cache: false,
+                    success: function success(response) {
+                        self.info.append(response);
+                        project.set_preferred_units();
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             });
         };
 
