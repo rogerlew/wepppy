@@ -4,6 +4,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import jsonpickle
+import utm
 
 from wepppy.topaz import TopazRunner
 from wepppy.all_your_base import read_arc
@@ -51,6 +52,10 @@ class Topaz(NoDbBase):
             self._utmproj4 = None
             self._utmextent = None
 
+            self.cellsize = None
+            self.num_cols = None
+            self.num_rows = None
+
             topaz_wd = self.topaz_wd
             if not _exists(topaz_wd):
                 os.mkdir(topaz_wd)
@@ -93,11 +98,60 @@ class Topaz(NoDbBase):
     @property
     def utmproj4(self):
         return self._utmproj4
+
+    @property
+    def utmzone(self):
+        assert 'utm' in self._utmproj4
+        return int([tok for tok in self._utmproj4.split() if tok.startswith('+zone=')][0].replace('+zone=', ''))
         
     @property
     def utmextent(self):
         return self._utmextent
-        
+
+    def longlat_to_pixel(self, long, lat):
+        """
+        return the x,y pixel coords of long, lat
+        """
+
+        ul_x, lr_y, lr_x, ul_y,  = self.utmextent
+
+        # unpack variables for instance
+        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
+
+        # find easting and northing
+        x, y, _, _ = utm.from_latlon(lat, long, self.utmzone)
+
+        # assert this makes sense with the stored extent
+        assert round(x) >= round(ul_x), (x, ul_x)
+        assert round(x) <= round(lr_x), (x, lr_x)
+        assert round(y) >= round(lr_y), (y, lr_y)
+        assert round(y) <= round(ul_y), (y, ul_y)
+
+        # determine pixel coords
+        _x = int(round((x - ul_x) / cellsize))
+        _y = int(round((ul_y - y) / cellsize))
+
+        # sanity check on the coords
+        assert 0 <= _x < num_cols, str(x)
+        assert 0 <= _y < num_rows, str(y)
+
+        return _x, _y
+
+    def sub_intersection(self, extent):
+        assert extent[0] < extent[2]
+        assert extent[1] < extent[3]
+
+        x0, y0 = self.longlat_to_pixel(extent[0], extent[3])
+        xend, yend = self.longlat_to_pixel(extent[2], extent[1])
+
+        assert x0 < xend
+        assert y0 < yend
+
+        data, transform, proj = read_arc(self.subwta_arc)
+        topaz_ids = set(data[x0:xend, y0:yend].flatten())
+        topaz_ids.discard(0)
+        return sorted(topaz_ids)
+
     #
     # channels
     #
@@ -121,6 +175,10 @@ class Topaz(NoDbBase):
 
             data, transform, proj = read_arc(self.netful_arc)
             n, m = data.shape
+
+            self.num_cols = n
+            self.num_rows = m
+            self.cellsize = top_runner.cellsize
             
             xmin = transform[0]
             ymin = transform[3] + transform[5] * m
