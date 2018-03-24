@@ -13,18 +13,21 @@
         </div>
     </div>
     <div id="soil_mode0_controls" class="form-group row">
-        <div class="col-sm-4">
-            <button id="btn_build_soil" 
-              class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
-              type="button">Build Soil</button>
-        </div>
-        <div class="col-sm-5">
-            <small id="hint_build_soil"></small>
-        </div>
     </div>
     <div id="soil_mode1_controls" class="form-group row">
         <div class="col-sm-5">
-            <p>Use dominant soil</p>
+            <label for="soil_single_selection">Mukey for single soil:</label>
+            <input type="text" class="form-control" id="soil_single_selection" value="{{ soils.single_selection }}"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <button id="btn_build_soil"
+              class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+              type="button">Build Soils</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_build_soil"></small>
         </div>
     </div>
 {% endblock %}
