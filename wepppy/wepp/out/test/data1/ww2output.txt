@@ -1,0 +1,1739 @@
+ Yearly  average watershed    values;Abbreviated                        
+
+
+          USDA WATER EROSION PREDICTION PROJECT
+          -------------------------------------
+
+          HILLSLOPE PROFILE AND WATERSHED MODEL
+                     VERSION  2014.200
+           February 11,     2014
+
+
+               TO REPORT PROBLEMS OR TO BE PUT ON THE MAILING
+               LIST FOR FUTURE WEPP MODEL RELEASES, PLEASE CONTACT:
+
+                    WEPP TECHNICAL SUPPORT
+                    USDA-AGRICULTURAL RESEARCH SERVICE
+                    NATIONAL SOIL EROSION RESEARCH LABORATORY
+                    275 SOUTH RUSSELL STREET
+                    WEST LAFAYETTE, IN 47907-2077  USA
+
+                    PHONE: (765) 494-8673
+                      FAX: (765) 494-5948
+                    email:  wepp@ecn.purdue.edu
+                      URL:  http://topsoil.nserl.purdue.edu
+
+
+     WATERSHED INPUT DATA FILES - VERSION  2014.200
+      February 11,     2014
+
+
+WATERSHED PASS: ../output/pass_pw0.txt                            
+WAT. STRUCTURE: pw0.str                                           
+  WAT. CHANNEL: pw0.chn                                           
+   IMPOUNDMENT: pw0.imp                                           
+    MANAGEMENT: pw0.man                                           
+ MAN. PRACTICE: description 1                                               
+                description 2                                               
+                description 3                                               
+         SLOPE: pw0.slp                                           
+       CLIMATE: pw0.cli                                           
+       Station:  TAHOE CA                                       CLIGEN VERSION  4.30
+          SOIL: pw0.sol                                           
+
+ *** CAUTION ***
+ SOIL FILE FORMAT IS NON-STANDARD WEPP 
+ User is solely responsible for entering CORRECT 
+ values for BD, SSC, THETFC, THETDR
+ *** CAUTION ***
+
+      CHANNEL  1 Ellispea            ST-FSL              
+      CHANNEL  2 Ellispea            ST-FSL              
+      CHANNEL  3 Melody-R            SPM                 
+      CHANNEL  4 Ellispea            ST-FSL              
+      CHANNEL  5 Melody-R            SPM                 
+      CHANNEL  6 Watah pe            PEAT                
+      CHANNEL  7 Watah pe            PEAT                
+      CHANNEL  8 Watah pe            PEAT                
+      CHANNEL  9 Melody-R            SPM                 
+      CHANNEL 10 Sky grav            SPM                 
+      CHANNEL 11 Watah pe            PEAT                
+      CHANNEL 12 Melody-R            SPM                 
+      CHANNEL 13 Watah pe            PEAT                
+      CHANNEL 14 Ellispea            ST-FSL              
+      CHANNEL 15 Ellispea            ST-FSL              
+      CHANNEL 16 Melody-R            SPM                 
+      CHANNEL 17 Melody-R            SPM                 
+      CHANNEL 18 Sky-Melo            SPM                 
+      CHANNEL 19 Sky-Melo            SPM                 
+      CHANNEL 20 Sky-Melo            SPM                 
+      CHANNEL 21 Ellispea            ST-FSL              
+      CHANNEL 22 Sky-Melo            SPM                 
+      CHANNEL 23 Melody-R            SPM                 
+      CHANNEL 24 Oxyaquic            MPM                 
+      CHANNEL 25 Watah pe            PEAT                
+      CHANNEL 26 Watah pe            PEAT                
+      CHANNEL 27 Sky-Melo            SPM                 
+      CHANNEL 28 Sky-Melo            SPM                 
+      CHANNEL 29 Oxyaquic            MPM                 
+      CHANNEL 30 Watah pe            PEAT                
+      CHANNEL 31 Watah pe            PEAT                
+      CHANNEL 32 Watah pe            PEAT                
+      CHANNEL 33 Ellispea            ST-FSL              
+      CHANNEL 34 Waca ver            SPM                 
+      CHANNEL 35 Ellispea            ST-FSL              
+      CHANNEL 36 Ellispea            ST-FSL              
+
+
+                  WATERSHED STRUCTURE INPUT FILE
+                  ------------------------------
+
+Hillslope Elements: 1-  72
+
+                            (CONTRIBUTING ELEMENTS MATRIX)
+                       HILLSLOPE          CHANNEL        IMPOUNDMENT
+ELEM.    ELEMENT
+ #     FED    NUM    L     R     T     L     R     T     L     R     T
+---    ---    ---   ---   ---   ---   ---   ---   ---   ---   ---   ---
+
+  73   CHANNEL   1   H71   H70   H72                                     
+  74   CHANNEL   2   H68         H69                                     
+  75   CHANNEL   3   H67   H65   H66                                     
+  76   CHANNEL   4         H64   H63                                     
+  77   CHANNEL   5   H61   H60   H62                                     
+  78   CHANNEL   6   H51   H50   H52                                     
+  79   CHANNEL   7   H47   H48   H49                                     
+  80   CHANNEL   8   H46               C6    C7                          
+  81   CHANNEL   9   H59   H57   H58                                     
+  82   CHANNEL  10   H54   H55   H56                                     
+  83   CHANNEL  11         H53         C9    C10                         
+  84   CHANNEL  12   H43   H44   H45                                     
+  85   CHANNEL  13   H42               C8    C12   C11                   
+  86   CHANNEL  14   H41   H40         C5    C13                         
+  87   CHANNEL  15   H39   H38         C4    C14                         
+  88   CHANNEL  16         H36   H37                                     
+  89   CHANNEL  17   H33   H34   H35                                     
+  90   CHANNEL  18         H32         C16   C17                         
+  91   CHANNEL  19         H31   H30                                     
+  92   CHANNEL  20   H29               C18   C19                         
+  93   CHANNEL  21         H28         C15   C20                         
+  94   CHANNEL  22   H26   H27   H25                                     
+  95   CHANNEL  23   H23   H24         C21   C22                         
+  96   CHANNEL  24   H21   H22   H20                                     
+  97   CHANNEL  25   H18   H19         C23   C24                         
+  98   CHANNEL  26               H17                                     
+  99   CHANNEL  27         H16   H15                                     
+ 100   CHANNEL  28               H14                                     
+ 101   CHANNEL  29   H13               C27   C28                         
+ 102   CHANNEL  30   H12               C26   C29                         
+ 103   CHANNEL  31   H10   H11         C25   C30                         
+ 104   CHANNEL  32   H8    H9          C3    C31                         
+ 105   CHANNEL  33   H7    H6          C2    C32                         
+ 106   CHANNEL  34   H4          H5                                      
+ 107   CHANNEL  35   H3                C33   C34                         
+ 108   CHANNEL  36   H2    H1          C1    C35                         
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     1
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       19802.0        2407.2       19262.0           0.0           0.0           0.0           0.6           0.0           0.6
+Hill      2           0.0          39.7       10863.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      3           0.0          18.2       16161.2           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      4        7834.5         476.4        7380.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      5           0.0          54.4       18979.9           0.0           0.0           0.0           0.4           0.0           0.4
+Hill      6       21443.6        3097.2       16562.3        5243.0           0.0        5242.9           0.6           5.4           6.0
+Hill      7       12231.5        3865.2       14221.4           0.0           0.0           0.0           0.5           0.0           0.5
+Hill      8           0.0          71.1       46339.3           0.0           0.0           0.0           0.9           0.0           0.9
+Hill      9        2684.7        2599.6        3600.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     10           0.0           0.0        2085.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11        8096.3        1241.7        6841.1         500.0           0.0         500.0           0.2           0.5           0.8
+Hill     12           0.0          39.0        1174.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          44.8         541.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          45.4       15538.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     15           0.0          36.9       14864.5           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     16           0.0         135.9       17919.3           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     17           0.0          22.2       18037.9           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     18           0.0          41.4       42795.7           0.0           0.0           0.0           0.8           0.0           0.8
+Hill     19        5553.4        2720.2        5940.9         617.7           0.0         617.7           0.2           0.6           0.8
+Hill     20           0.0          24.4       23445.5           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     21           0.0         206.2        2244.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         339.1       10100.3           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     23           0.0          36.7       13533.9           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     24        1962.5        1155.2        2160.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     25           0.0           0.0        8280.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     26           0.0         497.6       15049.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     27           0.0           0.0        8100.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     28         632.9         239.2         720.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          19.8       19113.4           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     30       10204.4         933.6        8101.3        2904.6           0.0        2904.7           0.3           3.0           3.3
+Hill     31           0.0          93.1        1119.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32         937.3        1878.4        1800.2           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     33           0.0         882.4         540.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        1526.4        2366.7        2520.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     35           0.0          35.6       18033.2           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     36           0.0          55.1        1156.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0          52.4       25460.7           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     38        2482.1        1358.7        3060.2           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     39         340.8        1097.2        1080.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40        9824.5         457.7        7201.1        4700.8           0.0        4700.7           0.3           4.8           5.1
+Hill     41           0.0           8.7        1595.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          12.3        7333.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43        7620.0        5160.4        8641.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     44           0.0         361.4       34988.8           0.0           0.0           0.0           0.7           0.0           0.7
+Hill     45           0.0          41.8       17659.7           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     46           0.0           0.0        1049.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         128.5       65568.3           0.0           0.0           0.0           1.3           0.0           1.3
+Hill     48           0.0         115.0       13450.2           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     49           0.0           0.0       10980.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     50           0.0         226.0       14654.5           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     51           0.0         101.9       14857.5           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     52           0.0           0.0        8820.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     53           0.0         121.4        2705.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     54           0.0          47.8        3709.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     55           0.0           0.0        4500.0           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     56           0.0           0.0        7920.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     57         354.3        2168.7        1620.2           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     58        9657.0        1783.0        8281.3        3551.3           0.0        3551.4           0.3           3.6           3.9
+Hill     59           0.0         214.8       12716.3           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     60        3575.8        4647.8        5220.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     61           0.0         327.0       20599.9           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     62           0.0         128.7       22375.3           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     63           0.0          58.6       18013.2           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     64       18965.3        2185.0       14222.0         777.8           0.0         777.8           0.5           0.8           1.3
+Hill     65        2378.8        3000.3        3420.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     66       10956.4        2221.0        9361.3        5169.0           0.0        5169.0           0.3           5.3           5.6
+Hill     67        9512.5        4356.5       10081.7        1922.3           0.0        1922.3           0.4           2.0           2.3
+Hill     68         468.2         185.1         540.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       10528.2        1213.7        8821.6        2357.4           0.0        2357.4           0.3           2.4           2.7
+Hill     70         849.2        1960.2        2160.2           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     71         902.0        2848.3        3060.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     72        9957.2        1146.6        8281.4        2277.0           0.0        2277.0           0.3           2.3           2.6
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      31113.6          13.9       11593.3       31124.8          34.3           0.5          14.2          14.7
+Channel     2      21716.5           5.4        3001.5       21742.0          24.2           0.3           5.5           5.8
+Channel     3      55242.9          23.4       16224.2       55244.8          27.0           0.8          23.9          24.8
+Channel     4      53208.0          13.4       12654.4       53396.7          73.2           0.9          13.8          14.6
+Channel     5      56546.5          25.0       24980.6       56820.9          55.7           1.1          25.6          26.6
+Channel     6      35996.1          15.0       14986.6       38460.5         218.2           0.9          15.3          16.2
+Channel     7      86019.2          30.2       30240.1       89924.5         359.6           1.9          31.0          32.8
+Channel     8     123115.4          49.0        3727.1      123097.1         119.3           3.0          50.2          53.2
+Channel     9      36577.7          18.2       14610.8       36738.0          63.4           0.6          18.6          19.2
+Channel    10      14177.5          12.0       12012.7       15876.8          87.7           0.4          12.3          12.7
+Channel    11      49048.9          52.6       22400.8       53113.4         389.1           1.2          53.9          55.1
+Channel    12      74018.3          34.9       34914.9       74397.3          99.9           1.4          35.8          37.1
+Channel    13     253608.7         143.8        7198.6      253556.4          50.8           5.8         147.3         153.1
+Channel    14     329359.7          48.0           0.0      329275.6           0.8           7.1          49.2          56.3
+Channel    15     391879.3          95.8       34262.9      392026.2          47.8           8.2          98.1         106.3
+Channel    16      26370.4          17.1       17089.6       26627.9          99.8           0.5          17.5          18.0
+Channel    17      25670.6           8.2        8224.8       25860.9         101.8           0.5           8.4           8.9
+Channel    18      53787.6          38.1       12761.0       56356.4         144.8           1.1          39.0          40.1
+Channel    19      19148.8           9.5        6579.4       20180.8          64.8           0.3           9.7          10.1
+Channel    20      90769.9          54.6        7023.1       91930.6          85.5           2.0          56.0          57.9
+Channel    21     484298.6         156.6        6012.4      484328.5         132.8          10.4         160.3         170.7
+Channel    22      28237.4          24.7       24717.0       31406.7         111.0           0.7          25.3          26.0
+Channel    23     531410.2         212.6       31173.9      531373.0          92.3          11.2         217.7         228.9
+Channel    24      32652.9          18.2       18190.5       35940.7         509.1           1.0          18.6          19.6
+Channel    25     618339.5         276.6       45224.6      620942.1          70.3          13.8         283.3         297.0
+Channel    26      17345.1           1.9        1915.6       18009.0         172.5           0.4           2.0           2.3
+Channel    27      30905.2           8.8        8835.2       32726.1         149.9           0.7           9.0           9.8
+Channel    28      13289.7           8.8        8849.1       15169.4         129.2           0.4           9.1           9.4
+Channel    29      43435.8          22.7        5036.0       44728.7         488.7           1.2          23.3          24.4
+Channel    30      61675.3          29.8        5138.4       61963.6          94.2           1.6          30.5          32.1
+Channel    31     697144.3         112.4         258.9      698383.5           7.1          15.4         115.1         130.4
+Channel    32     801824.4         223.5       87795.9      807321.9          42.2          17.7         228.9         246.6
+Channel    33     895107.1         297.5       63267.3      895317.6          91.8          19.2         304.6         323.9
+Channel    34      33033.5           7.5        7524.2       34438.1          65.3           0.6           7.7           8.4
+Channel    35     944403.6         337.1       31814.9      944437.2          69.6          20.3         345.2         365.5
+Channel    36    1027644.1         425.6       74345.9     1027913.4         186.8          21.8         435.8         457.6
+
+  77 storms produced   758.00 mm. of rainfall
+
+ 257 events produced   409.22 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   1903497. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =   1027644. m^3
+Total hillslope soil loss in contributing area  =          30.0 tonnes
+Total channel soil loss                         =         714.6 tonnes
+Total sediment discharge from outlet            =         425.6 tonnes
+Sed. delivery per unit area of watershed        =           1.7 T/ha
+Sediment Delivery Ratio for Watershed           =      0.572
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.033
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.247
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.178
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.228
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.314
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.103
+       silt              0.407
+       sand              0.490
+   organic matter        0.035
+-----------------------------------------
+
+Index of specific surface            =     41.80 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.90
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     2
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       32036.2        6277.8           5.6         782.6           0.0         782.6           0.4           0.8           1.2
+Hill      2           0.0          36.5        7879.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      3           0.0          21.7       11726.3           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      4       13722.6        1320.1           2.3          77.8           0.0          77.8           0.2           0.1           0.3
+Hill      5           0.0          71.8       12071.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      6       34165.7        6313.6           5.0       14982.8           0.0       14982.8           0.5          15.3          15.8
+Hill      7       18615.8        9577.3           4.1         683.2           0.0         683.2           0.3           0.7           1.0
+Hill      8           0.0         177.9       28575.1           0.0           0.0           0.0           0.6           0.0           0.6
+Hill      9        4503.7        4484.1           0.9          31.8           0.0          31.8           0.1           0.0           0.1
+Hill     10           0.0          10.2        1008.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       14196.9        2566.9           2.5        2224.6           0.0        2224.6           0.2           2.3           2.5
+Hill     12           0.0          37.4         737.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          58.1         312.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          33.3       10999.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     15           0.0          26.9       10510.3           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     16           0.0         116.8       10984.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     17           0.0          37.7       11116.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     18           0.0         100.9       26666.7           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     19        9649.1        5040.1           1.8        2251.6           0.0        2251.6           0.2           2.3           2.5
+Hill     20           0.0          63.4       14393.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     21           0.0         214.3        1344.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         238.6        6454.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     23           0.0         117.1        8308.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     24        3376.3        1982.1           0.6          78.1           0.0          78.1           0.1           0.1           0.1
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         275.8        8736.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28         913.8         531.5           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          37.5       11778.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     30       17395.5        2169.1           3.0        6554.5           0.0        6554.5           0.2           6.7           6.9
+Hill     31           0.0          67.7         707.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32        1221.1        3258.8           0.4           1.6           0.0           1.6           0.1           0.0           0.1
+Hill     33           0.0        1499.8           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        2045.6        4174.9           0.6           2.9           0.0           2.9           0.1           0.0           0.1
+Hill     35           0.0          38.6       11593.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     36           0.0          37.0         727.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0          59.5       16228.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     38        3550.4        2833.7           0.6           6.3           0.0           6.3           0.1           0.0           0.1
+Hill     39         374.4        1989.7           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       16396.6         994.3           2.5       10475.1           0.0       10475.2           0.2          10.7          10.9
+Hill     41           0.0          10.7        1023.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          16.2        4546.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43       11158.0        9857.9           2.4          46.2           0.0          46.2           0.2           0.0           0.3
+Hill     44           0.0         167.4       22191.4           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     45           0.0          52.2       11320.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     46           0.0           4.1         514.6           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         243.0       40065.2           0.0           0.0           0.0           0.8           0.0           0.8
+Hill     48           0.0          63.1        9615.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         156.4        9043.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     51           0.0         115.6        9470.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0          89.6        1667.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     54           0.0          54.4        2669.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57         604.6        3516.2           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     58       16800.5        3508.8           2.9        9251.1           0.0        9251.1           0.2           9.5           9.7
+Hill     59           0.0         171.0        8139.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     60        4996.8        8504.7           1.1         137.0           0.0         137.0           0.2           0.1           0.3
+Hill     61           0.0         265.9       13212.8           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     62           0.0          70.7       14045.9           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     63           0.0          32.0       11222.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     64       30204.8        5002.1           4.3        6103.1           0.0        6103.1           0.4           6.2           6.7
+Hill     65        3267.8        5413.1           0.7         100.6           0.0         100.6           0.1           0.1           0.2
+Hill     66       18710.4        4310.5           3.2       13019.4           0.0       13019.3           0.3          13.3          13.6
+Hill     67       16682.9        8778.9           3.2        5158.1           0.0        5158.2           0.3           5.3           5.6
+Hill     68         691.6         425.2           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       19110.1        2631.9           3.3        7519.1           0.0        7519.2           0.3           7.7           8.0
+Hill     70         977.8        3570.2           0.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     71        1279.5        5357.6           0.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     72       17898.6        2452.2           3.1        6726.9           0.0        6726.8           0.2           6.9           7.1
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      31617.5           7.1         382.9       31538.6          27.4           0.8           7.3           8.1
+Channel     2      22865.8           7.7         197.1       22859.6          17.6           0.6           7.9           8.5
+Channel     3      57290.0          19.8        1273.6       57167.3          17.6           1.5          20.3          21.7
+Channel     4      46312.2           6.4         204.1       46422.4          68.7           1.5           6.5           8.1
+Channel     5      40889.3           0.2          17.5       41016.1          55.7           1.8           0.2           1.9
+Channel     6      16911.5           0.0           0.0       18458.5         145.0           1.3           0.0           1.3
+Channel     7      47074.0           0.0           0.0       49588.8         243.4           3.0           0.0           3.0
+Channel     8      64433.3           0.0           0.0       64474.2          91.0           4.5           0.0           4.5
+Channel     9      32606.4          10.4        1097.1       32671.2          61.7           1.1          10.6          11.7
+Channel    10       1098.1           0.0           0.0        2235.9          60.9           0.6           0.0           0.6
+Channel    11      32382.5          10.6         217.2       35049.8         282.4           2.0          10.8          12.8
+Channel    12      54456.3           1.1        1035.6       54651.1         100.6           2.3           1.1           3.4
+Channel    13     155760.3          12.6        9170.3      155782.9          48.0           9.2          12.9          22.1
+Channel    14     215164.6          11.3         602.7      215061.0           0.8          11.5          11.6          23.1
+Channel    15     270165.6          17.7           6.3      270180.4          48.3          13.2          18.1          31.3
+Channel    16      16816.7           0.0           0.0       16958.1         108.8           0.9           0.0           0.9
+Channel    17      19170.8           0.0          47.0       19307.5         109.1           0.8           0.1           0.8
+Channel    18      37656.7           0.1           1.7       40044.0         137.3           1.9           0.1           2.0
+Channel    19      19174.3           7.5         899.8       20056.5          49.6           0.6           7.6           8.3
+Channel    20      67364.2           7.5           1.9       68469.5          81.1           3.5           7.7          11.2
+Channel    21     338928.8          25.5         224.0      338940.3         129.0          16.9          26.1          43.0
+Channel    22       5772.7           0.0           0.0        8312.2          90.5           1.1           0.0           1.1
+Channel    23     358541.5          26.6         980.4      358436.6          91.6          18.4          27.2          45.6
+Channel    24      19578.5           0.0           0.0       22152.8         384.6           1.5           0.0           1.5
+Channel    25     417011.3          28.7        2217.8      419300.5          62.0          22.5          29.4          51.8
+Channel    26      10641.2           0.0           1.1       11080.5         118.8           0.6           0.0           0.6
+Channel    27      19802.0           0.0           0.0       21348.3         129.7           1.2           0.0           1.2
+Channel    28       9032.7           0.0           0.0       10670.6         112.3           0.7           0.0           0.7
+Channel    29      28111.3           0.0           0.0       29106.3         369.4           2.0           0.0           2.0
+Channel    30      39195.2           0.0           0.0       39441.1          71.7           2.6           0.0           2.6
+Channel    31     472808.1          30.3         582.6      473875.0           6.2          25.2          31.0          56.2
+Channel    32     562735.2          37.7        3433.6      567357.8          34.7          30.8          38.6          69.4
+Channel    33     654077.3          63.4        2336.7      654126.5          91.3          31.6          64.9          96.6
+Channel    34      25630.2           0.1          10.9       26855.2          58.7           1.1           0.1           1.2
+Channel    35     691416.0          64.2         614.7      691364.9          75.2          33.4          65.7          99.1
+Channel    36     769036.4          76.2        4068.5      769152.8         197.8          35.9          78.0         114.0
+
+  81 storms produced  1011.10 mm. of rainfall
+
+ 290 events produced   306.24 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   2539084. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =    769036. m^3
+Total hillslope soil loss in contributing area  =          86.2 tonnes
+Total channel soil loss                         =          29.6 tonnes
+Total sediment discharge from outlet            =          76.2 tonnes
+Sed. delivery per unit area of watershed        =           0.3 T/ha
+Sediment Delivery Ratio for Watershed           =      0.658
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.023
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.236
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.159
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.246
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.337
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.088
+       silt              0.385
+       sand              0.526
+   organic matter        0.030
+-----------------------------------------
+
+Index of specific surface            =     36.11 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.78
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     3
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       29686.6        8314.7           8.3          36.4           0.0          36.4           0.4           0.0           0.5
+Hill      2           0.0          34.4       11323.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      3           0.0          19.8       16835.7           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      4       12125.8        1707.3           3.3           7.1           0.0           7.1           0.2           0.0           0.2
+Hill      5           0.0          58.6       17619.4           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      6       31338.9        6543.8           6.1        9747.2           0.0        9747.5           0.4          10.0          10.4
+Hill      7       17147.1       11040.7           5.8           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      8           0.0         189.8       41369.6           0.0           0.0           0.0           0.8           0.0           0.8
+Hill      9        4318.0        4343.1           1.1           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     10           0.0          11.4        1653.8           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       13305.5        2464.0           2.5        1072.4           0.0        1072.4           0.2           1.1           1.3
+Hill     12           0.0          24.8         888.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          37.9         377.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          51.2       16745.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     15           0.0          40.9       15994.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     16           0.0         146.6       16532.8           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     17           0.0          44.5       16264.3           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     18           0.0          99.8       38013.5           0.0           0.0           0.0           0.7           0.0           0.7
+Hill     19        9527.0        4537.3           1.9        1004.8           0.0        1004.8           0.2           1.0           1.2
+Hill     20           0.0          85.9       21370.5           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     21           0.0         188.5        1971.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         333.7        9538.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     23           0.0          98.5       12016.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     24        3198.9        1926.8           0.7          16.1           0.0          16.1           0.1           0.0           0.1
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         514.5       14303.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28         835.0         654.2           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          35.9       17097.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     30       15008.5        2177.8           3.2        3998.8           0.0        3998.8           0.2           4.1           4.3
+Hill     31           0.0          91.1        1048.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32         884.9        3292.2           0.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     33           0.0        1322.4           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        1664.0        4212.6           0.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     35           0.0          46.6       16620.5           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     36           0.0          48.8        1087.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0          53.2       23367.1           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     38        3351.3        3412.6           1.0           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     39         272.2        1982.9           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       14879.7        1085.8           2.8        8420.0           0.0        8419.9           0.2           8.6           8.8
+Hill     41           0.0          13.5        1465.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          18.8        6541.2           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43       10797.8        9209.6           2.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     44           0.0         264.9       33169.6           0.0           0.0           0.0           0.7           0.0           0.7
+Hill     45           0.0          55.2       16297.5           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     46           0.0           3.6         842.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         260.2       59291.7           0.0           0.0           0.0           1.2           0.0           1.2
+Hill     48           0.0          90.6       14661.4           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         239.0       13553.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     51           0.0         102.9       13651.3           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0         131.3        2480.1           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     54           0.0          66.0        3986.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57         309.3        3588.3           0.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     58       15561.0        3422.0           3.0        6851.2           0.0        6851.2           0.2           7.0           7.2
+Hill     59           0.0         171.4       11953.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     60        4300.4        8056.8           1.5           8.5           0.0           8.5           0.1           0.0           0.1
+Hill     61           0.0         189.6       19542.5           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     62           0.0          93.9       21107.0           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     63           0.0          45.5       16953.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     64       28189.2        4610.4           5.2        2630.4           0.0        2630.4           0.4           2.7           3.1
+Hill     65        2935.8        5306.7           0.9           7.3           0.0           7.3           0.1           0.0           0.1
+Hill     66       17048.8        4389.7           3.4        9078.6           0.0        9078.6           0.2           9.3           9.5
+Hill     67       15954.7        8031.7           3.5        3054.5           0.0        3054.5           0.3           3.1           3.4
+Hill     68         632.7         478.0           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       17722.7        2504.3           3.4        4766.6           0.0        4766.6           0.2           4.9           5.1
+Hill     70         965.3        3593.2           0.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     71         921.7        5355.0           1.0           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     72       16636.4        2338.4           3.1        4343.3           0.0        4343.3           0.2           4.4           4.7
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      29876.4           4.3           0.1       29811.8          28.0           1.2           4.5           5.6
+Channel     2      21341.4           4.8           0.0       21338.6          18.3           0.8           4.9           5.7
+Channel     3      53775.7          12.4          40.8       53671.6          17.6           2.1          12.6          14.8
+Channel     4      49611.9           2.8          64.7       49776.5          93.2           2.3           2.8           5.1
+Channel     5      53047.3           0.0           0.0       53250.5          70.6           2.7           0.0           2.7
+Channel     6      24183.6           0.0           0.0       27236.2         277.4           2.0           0.0           2.0
+Channel     7      69035.2           0.0           0.0       73881.4         463.3           4.6           0.0           4.6
+Channel     8      94076.4           0.0           0.0       94059.9         156.5           6.8           0.0           6.8
+Channel     9      34825.7           7.2         316.8       34959.8          79.6           1.6           7.3           8.9
+Channel    10       2046.5           0.0           0.0        3199.4          60.3           0.7           0.0           0.7
+Channel    11      34338.3           7.2          43.6       38230.2         390.3           3.0           7.4          10.4
+Channel    12      69449.0           0.2         157.1       69744.8         125.1           3.5           0.2           3.7
+Channel    13     204492.8           7.6        2291.5      204423.4          66.7          13.8           7.8          21.5
+Channel    14     275116.0           5.7           0.0      274996.6           0.9          17.2           5.8          23.0
+Channel    15     333670.7           8.4           0.1      333753.0          58.4          19.7           8.6          28.4
+Channel    16      24258.9           0.0           0.0       24484.3         132.4           1.4           0.0           1.4
+Channel    17      23651.9           0.0           5.4       23840.0         132.9           1.2           0.0           1.2
+Channel    18      48590.1           0.0           0.0       51797.5         188.2           2.9           0.0           3.0
+Channel    19      16970.9           4.1         104.9       17997.0          62.3           0.9           4.2           5.1
+Channel    20      81116.7           4.1           0.0       82522.6         108.5           5.2           4.2           9.4
+Channel    21     416285.6          12.6          60.3      416299.6         163.4          25.2          12.9          38.1
+Channel    22      10548.2           0.0           0.0       13348.6         103.3           1.8           0.0           1.8
+Channel    23     444149.7          12.9         231.2      444058.2         113.5          27.8          13.2          41.0
+Channel    24      28816.0           0.0           0.0       32873.5         641.1           2.5           0.0           2.5
+Channel    25     521577.9          14.5         647.4      524944.3          96.5          33.6          14.8          48.4
+Channel    26      15397.2           0.0          17.7       16249.5         227.1           1.0           0.0           1.0
+Channel    27      30141.7           0.0           0.0       32368.3         188.8           1.9           0.0           1.9
+Channel    28      13901.6           0.0           0.0       16298.9         166.9           1.2           0.0           1.2
+Channel    29      42794.7           0.0           0.0       44394.7         616.3           3.3           0.0           3.3
+Channel    30      58563.1           0.0           0.0       59045.1         129.9           4.4           0.0           4.4
+Channel    31     595966.2          13.6         171.3      597596.5          10.0          38.4          13.9          52.3
+Channel    32     692648.3          23.1           0.0      699745.6          56.1          45.7          23.7          69.4
+Channel    33     780025.2          38.4         750.0      780166.3         112.7          47.7          39.3          87.0
+Channel    34      29426.6           0.0           0.0       31314.5          91.8           1.7           0.0           1.7
+Channel    35     826373.8          38.6         193.7      826323.1          81.1          52.7          39.5          92.2
+Channel    36     905360.9          43.9         836.2      905576.4         223.1          61.9          44.9         106.8
+
+  81 storms produced   832.20 mm. of rainfall
+
+ 307 events produced   360.53 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   2089828. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =    905361. m^3
+Total hillslope soil loss in contributing area  =          55.0 tonnes
+Total channel soil loss                         =           5.9 tonnes
+Total sediment discharge from outlet            =          43.9 tonnes
+Sed. delivery per unit area of watershed        =           0.2 T/ha
+Sediment Delivery Ratio for Watershed           =      0.719
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.022
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.220
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.151
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.236
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.371
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.084
+       silt              0.363
+       sand              0.553
+   organic matter        0.029
+-----------------------------------------
+
+Index of specific surface            =     34.43 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.74
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     4
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       26157.6        4629.2           5.8         288.1           0.0         288.1           0.4           0.3           0.7
+Hill      2           0.0          55.2        7667.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      3           0.0          30.8       11174.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      4       10459.0        1010.2           2.4          23.6           0.0          23.6           0.1           0.0           0.2
+Hill      5           0.0          67.5       10756.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      6       29409.6        3812.1           4.1       10852.7           0.0       10852.7           0.4          11.1          11.5
+Hill      7       16357.6        6435.1           3.9         457.3           0.0         457.3           0.3           0.5           0.7
+Hill      8           0.0         300.3       25136.1           0.0           0.0           0.0           0.5           0.0           0.5
+Hill      9        4364.7        3149.5           0.6          79.6           0.0          79.6           0.1           0.1           0.2
+Hill     10           0.0          10.4         992.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       12015.3        1373.0           1.8        1566.6           0.0        1566.6           0.2           1.6           1.8
+Hill     12           0.0          32.2         672.6           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          78.3         259.7           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          63.2       10301.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     15           0.0          50.9        9871.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     16           0.0         191.3       10309.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     17           0.0          65.6        9795.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     18           0.0         180.8       23277.2           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     19        9011.4        3007.4           1.3        1738.0           0.0        1738.0           0.1           1.8           1.9
+Hill     20           0.0         110.8       12658.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     21           0.0         286.3        1027.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         367.5        5485.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     23           0.0         128.2        6863.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     24        3136.7        1318.9           0.4          95.8           0.0          95.8           0.1           0.1           0.1
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         397.5        8224.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28         824.9         378.4           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          62.2       10383.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     30       14441.2        1161.7           2.1        4721.9           0.0        4721.9           0.2           4.8           5.0
+Hill     31           0.0         103.4         588.9           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32        1325.8        2465.7           0.3          20.2           0.0          20.2           0.0           0.0           0.1
+Hill     33          48.7        1169.9           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        2176.3        3053.2           0.4          25.1           0.0          25.1           0.1           0.0           0.1
+Hill     35           0.0          41.1       10267.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     36           0.0          55.0         640.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0          84.8       14429.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     38        3253.8        2176.9           0.5          10.4           0.0          10.4           0.1           0.0           0.1
+Hill     39         536.8        1430.9           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       13890.2         550.2           1.9        7807.7           0.0        7807.7           0.2           8.0           8.2
+Hill     41           0.0          15.3         889.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          28.2        4005.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43       11252.9        6058.4           1.7         111.3           0.0         111.3           0.2           0.1           0.3
+Hill     44           0.0         315.5       19596.9           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     45           0.0          74.5       10072.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     46           0.0          13.0         505.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         428.7       34903.6           0.0           0.0           0.0           0.7           0.0           0.7
+Hill     48           0.0         100.0        8840.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         297.6        8299.3           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     51           0.0         163.2        8373.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0         163.8        1478.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     54           0.0          63.5        2377.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57        1025.9        2530.3           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     58       14396.2        1957.2           2.0        6457.6           0.0        6457.6           0.2           6.6           6.8
+Hill     59           0.0         197.5        6981.8           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     60        4792.7        6254.4           0.9         285.1           0.0         285.1           0.1           0.3           0.4
+Hill     61           0.0         270.7       11473.3           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     62           0.0         124.1       12636.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     63           0.0          49.8       10275.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     64       25533.8        2726.2           3.5        3872.0           0.0        3872.0           0.3           4.0           4.3
+Hill     65        3027.1        4066.9           0.6         198.5           0.0         198.5           0.1           0.2           0.3
+Hill     66       16318.6        2540.0           2.2        9143.8           0.0        9143.9           0.2           9.4           9.6
+Hill     67       14275.3        5184.0           2.2        3897.5           0.0        3897.5           0.2           4.0           4.2
+Hill     68         609.7         292.0           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       15440.6        1318.4           2.4        4987.7           0.0        4987.8           0.2           5.1           5.3
+Hill     70        1300.6        2600.8           0.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     71        1520.2        3942.2           0.6           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     72       14662.4        1230.9           2.2        4541.6           0.0        4541.6           0.2           4.7           4.8
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      25307.7           4.8         239.4       25258.0          14.9           1.5           4.9           6.4
+Channel     2      17660.7           5.0          44.8       17660.1          10.9           1.1           5.2           6.2
+Channel     3      45498.3          13.7         325.1       45413.1          10.5           2.6          14.0          16.6
+Channel     4      38362.9           4.0         137.6       38559.3          93.1           2.8           4.1           6.9
+Channel     5      35246.2           0.4          96.6       35519.1          72.3           3.3           0.4           3.7
+Channel     6      14581.7           0.0           0.0       16511.1         174.6           2.5           0.0           2.5
+Channel     7      40092.6           0.0           0.0       43422.5         315.5           5.6           0.0           5.6
+Channel     8      55156.8           0.0           0.0       55178.0         111.6           8.4           0.0           8.4
+Channel     9      26858.1           7.0         525.1       27046.8          79.9           2.0           7.2           9.1
+Channel    10       1017.4           0.0           0.0        1627.5          30.5           0.8           0.0           0.8
+Channel    11      26555.7           7.2         177.5       28337.7         203.6           3.5           7.3          10.8
+Channel    12      46923.2           1.1        1009.0       47316.4         125.8           4.3           1.1           5.5
+Channel    13     132401.1           7.8         230.1      132642.2          65.3          16.8           8.0          24.8
+Channel    14     183110.4           9.2          10.7      182995.3           0.9          21.0           9.5          30.5
+Channel    15     228731.8          13.3          11.6      228861.3          59.0          24.2          13.6          37.8
+Channel    16      14842.7           0.0           0.0       15129.4         127.1           1.7           0.0           1.7
+Channel    17      16502.9           0.1         123.5       16728.9         132.0           1.5           0.2           1.7
+Channel    18      31661.2           0.2          35.3       34539.5         159.4           3.7           0.2           3.9
+Channel    19      15431.6           4.9         186.3       15987.6          33.4           1.2           5.0           6.2
+Channel    20      56014.1           5.1           5.5       57267.7          89.8           6.6           5.2          11.8
+Channel    21     285911.1          18.6         118.5      285950.3         164.8          31.0          19.0          50.0
+Channel    22       5128.5           0.0           0.0        6625.5          49.7           2.0           0.0           2.0
+Channel    23     302470.9          19.3         566.0      302469.3         115.2          34.1          19.7          53.8
+Channel    24      15896.2           0.0           0.0       18999.8         460.5           3.1           0.0           3.1
+Channel    25     350257.2          27.2        6466.2      353483.7          85.9          41.3          27.9          69.2
+Channel    26       9111.1           0.0           3.8        9727.4         162.6           1.2           0.0           1.2
+Channel    27      17974.7           0.0           0.0       19944.3         159.3           2.4           0.0           2.4
+Channel    28       7790.3           0.0           0.0        9692.7         126.7           1.5           0.0           1.5
+Channel    29      24708.1           0.0           0.0       25966.5         453.4           4.4           0.0           4.4
+Channel    30      34164.6           0.0           0.0       34423.8          85.1           5.6           0.0           5.6
+Channel    31     397304.3          21.6         284.8      398750.1           8.1          47.7          22.1          69.7
+Channel    32     469774.2          32.5        4075.8      474893.4          40.4          57.7          33.3          91.0
+Channel    33     543227.5          50.3        1349.8      543464.4          98.7          60.8          51.5         112.2
+Channel    34      20393.6           0.0           0.0       21935.8          70.0           2.1           0.0           2.1
+Channel    35     574802.7          50.7         393.2      574808.2          82.7          66.4          51.9         118.3
+Channel    36     638249.5          58.2        2322.3      638573.7         228.8          76.8          59.6         136.4
+
+  74 storms produced   753.80 mm. of rainfall
+
+ 314 events produced   254.16 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   1892950. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =    638249. m^3
+Total hillslope soil loss in contributing area  =          61.2 tonnes
+Total channel soil loss                         =          18.7 tonnes
+Total sediment discharge from outlet            =          58.2 tonnes
+Sed. delivery per unit area of watershed        =           0.2 T/ha
+Sediment Delivery Ratio for Watershed           =      0.728
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.022
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.190
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.140
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.251
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.396
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.082
+       silt              0.328
+       sand              0.590
+   organic matter        0.028
+-----------------------------------------
+
+Index of specific surface            =     33.34 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.72
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     5
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       23782.7        4790.3           4.9         768.1           0.0         768.1           0.3           0.8           1.1
+Hill      2           0.0          27.2        6133.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill      3           0.0          15.7        9100.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      4       10603.6         985.2           2.1          80.2           0.0          80.2           0.1           0.1           0.2
+Hill      5           0.0          43.0        9742.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      6       27170.7        4693.6           4.0       11158.4           0.0       11158.4           0.4          11.4          11.8
+Hill      7       16581.4        7404.6           3.3        1405.9           0.0        1405.9           0.3           1.4           1.7
+Hill      8           0.0         221.6       24114.9           0.0           0.0           0.0           0.5           0.0           0.5
+Hill      9        4017.4        3128.9           0.7          47.6           0.0          47.6           0.1           0.0           0.1
+Hill     10           0.0           4.2         829.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       10959.4        1890.1           1.8        1852.3           0.0        1852.3           0.2           1.9           2.0
+Hill     12           0.0          23.8         592.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          48.4         236.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          30.9        8640.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     15           0.0          24.9        8270.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     16           0.0          80.0        8858.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     17           0.0          57.6        9238.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     18           0.0         127.6       22327.5           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     19        7870.1        3582.5           1.4        1776.1           0.0        1776.1           0.1           1.8           2.0
+Hill     20           0.0          75.1       11972.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     21           0.0         256.4        1096.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         231.2        5093.0           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     23           0.0         122.0        6963.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     24        2811.9        1401.0           0.5          86.0           0.0          86.0           0.0           0.1           0.1
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         231.2        7629.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28         718.6         418.4           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          45.7        9969.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     30       15054.0        1604.9           2.1        5239.5           0.0        5239.5           0.2           5.4           5.6
+Hill     31           0.0          61.8         550.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32        1149.3        2539.4           0.3           7.8           0.0           7.8           0.0           0.0           0.0
+Hill     33           0.0        1423.9           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        1998.1        3104.6           0.5           8.4           0.0           8.4           0.1           0.0           0.1
+Hill     35           0.0          35.2        9397.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     36           0.0          25.9         577.7           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0          54.5       13164.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     38        3085.7        2019.5           0.4          44.0           0.0          44.0           0.1           0.0           0.1
+Hill     39         312.8        1744.4           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       12791.2         753.6           1.9        7916.6           0.0        7916.7           0.2           8.1           8.3
+Hill     41           0.0          10.1         828.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          24.8        3778.8           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43       10758.0        7980.2           1.8          72.6           0.0          72.6           0.2           0.1           0.3
+Hill     44           0.0         186.2       17409.9           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     45           0.0          47.4        9204.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     46           0.0           4.2         442.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         406.8       33771.8           0.0           0.0           0.0           0.7           0.0           0.7
+Hill     48           0.0          51.7        7549.1           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         149.7        7191.1           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     51           0.0         104.5        7686.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0          84.1        1315.9           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     54           0.0          37.3        2143.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57         544.2        2980.7           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     58       13048.8        2581.2           2.1        7256.2           0.0        7256.2           0.2           7.4           7.6
+Hill     59           0.0          98.4        6439.0           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     60        4511.3        7428.9           1.0         260.0           0.0         260.1           0.1           0.3           0.4
+Hill     61           0.0         170.6       10412.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     62           0.0          67.2       11074.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     63           0.0          26.1        8940.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     64       26648.8        3702.2           3.3        5637.8           0.0        5637.8           0.4           5.8           6.1
+Hill     65        3242.0        4995.1           0.7         222.9           0.0         222.9           0.1           0.2           0.3
+Hill     66       14505.9        3177.1           2.3        9432.1           0.0        9432.0           0.2           9.7           9.9
+Hill     67       12880.1        6366.7           2.5        4266.2           0.0        4266.1           0.2           4.4           4.6
+Hill     68         578.2         327.8           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       14340.9        1921.5           2.4        6219.8           0.0        6219.7           0.2           6.4           6.6
+Hill     70         742.2        2922.1           0.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     71        1121.1        4636.7           0.5           3.3           0.0           3.3           0.1           0.0           0.1
+Hill     72       13608.7        1797.2           2.2        5564.6           0.0        5564.7           0.2           5.7           5.9
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      24891.6           5.6          15.3       24829.6          20.1           1.8           5.7           7.5
+Channel     2      17172.2           6.2           1.0       17169.9          13.4           1.3           6.4           7.6
+Channel     3      45260.6          14.2         137.2       45169.6          15.1           3.1          14.5          17.7
+Channel     4      39119.4           5.9         207.3       39282.1          81.7           3.3           6.0           9.4
+Channel     5      33398.6           0.3          46.8       33612.1          60.3           3.9           0.3           4.2
+Channel     6      13008.3           0.0           0.0       14835.1         179.7           2.9           0.0           2.9
+Channel     7      38307.7           0.0           0.0       41460.4         303.0           6.5           0.0           6.5
+Channel     8      51758.4           0.0           0.0       51748.0         103.9           9.6           0.0           9.6
+Channel     9      25510.3           8.0         699.9       25642.5          68.6           2.3           8.2          10.5
+Channel    10        820.0           0.0           0.0        1527.3          34.9           0.9           0.0           0.9
+Channel    11      24350.4           8.2         189.4       26824.6         234.7           4.2           8.4          12.5
+Channel    12      45209.7           1.1        1074.4       45513.9         107.0           5.1           1.2           6.3
+Channel    13     125094.7          11.7        8889.8      125089.2          48.8          19.5          12.0          31.5
+Channel    14     172962.4          10.0         789.4      172867.5           0.8          24.5          10.3          34.8
+Channel    15     219132.9          16.0           5.5      219216.8          48.3          28.3          16.4          44.7
+Channel    16      13516.7           0.0           0.0       13743.5         111.4           2.0           0.0           2.0
+Channel    17      15744.1           0.1          70.8       15920.1         111.2           1.8           0.1           1.8
+Channel    18      29887.8           0.1           7.4       32713.0         151.6           4.4           0.1           4.5
+Channel    19      16252.7           5.6         343.0       16913.7          38.3           1.4           5.7           7.1
+Channel    20      54704.0           5.7           1.9       55969.4          84.5           7.8           5.8          13.7
+Channel    21     274919.9          21.9         167.9      274951.1         146.9          36.4          22.4          58.8
+Channel    22       4377.7           0.0           0.0        6404.0          68.1           2.4           0.0           2.4
+Channel    23     290615.4          22.7         745.2      290564.0         102.4          40.1          23.3          63.4
+Channel    24      14901.2           0.0           0.0       17604.9         397.9           4.3           0.0           4.3
+Channel    25     336940.6          26.5        4786.9      339196.4          70.8          48.8          27.1          75.9
+Channel    26       8702.6           0.0           0.2        9244.7         145.8           1.4           0.0           1.4
+Channel    27      15044.4           0.0           0.0       16866.2         143.2           2.8           0.0           2.8
+Channel    28       6401.6           0.0           0.0        8143.3         111.3           2.0           0.0           2.0
+Channel    29      20395.2           0.0           0.0       21574.7         403.0           5.7           0.0           5.7
+Channel    30      29459.2           0.0           0.0       29674.7          82.3           7.1           0.0           7.1
+Channel    31     378920.1          25.3         442.1      380023.5           6.8          56.6          25.9          82.5
+Channel    32     450563.8          29.5        4278.3      455306.2          37.7          68.1          30.2          98.3
+Channel    33     523340.5          50.1        1735.2      523498.4          94.4          72.4          51.3         123.7
+Channel    34      19738.6           0.1          13.5       21165.4          63.7           2.4           0.1           2.5
+Channel    35     552137.1          50.7         495.3      552120.5          66.9          78.6          52.0         130.5
+Channel    36     611448.7          59.6        2492.6      611685.8         203.8          90.4          61.1         151.5
+
+  80 storms produced   935.50 mm. of rainfall
+
+ 280 events produced   243.49 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   2349236. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =    611449. m^3
+Total hillslope soil loss in contributing area  =          69.3 tonnes
+Total channel soil loss                         =          27.6 tonnes
+Total sediment discharge from outlet            =          59.6 tonnes
+Sed. delivery per unit area of watershed        =           0.2 T/ha
+Sediment Delivery Ratio for Watershed           =      0.615
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.029
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.233
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.157
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.247
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.335
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.094
+       silt              0.381
+       sand              0.525
+   organic matter        0.032
+-----------------------------------------
+
+Index of specific surface            =     38.16 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.82
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     6
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       53287.8        5759.7           7.2        1001.8           0.0        1001.8           0.7           1.0           1.7
+Hill      2           0.0         168.6       16563.9           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      3           0.0          98.2       24804.0           0.0           0.0           0.0           0.5           0.0           0.5
+Hill      4       20474.7        1216.7           2.9         114.1           0.0         114.1           0.3           0.1           0.4
+Hill      5           0.0         133.7       24327.8           0.0           0.0           0.0           0.5           0.0           0.5
+Hill      6       53039.4        4598.0           4.7       22629.5           0.0       22629.5           0.7          23.2          23.8
+Hill      7       35043.2        7332.4           5.0        1817.0           0.0        1817.0           0.5           1.9           2.4
+Hill      8           0.0         461.2       58327.0           0.0           0.0           0.0           1.1           0.0           1.1
+Hill      9        8795.5        4094.2           0.8          68.2           0.0          68.2           0.1           0.1           0.2
+Hill     10           0.0          24.1        2218.8           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       21869.0        1800.2           2.0        3022.6           0.0        3022.6           0.3           3.1           3.4
+Hill     12           0.0         121.7        1200.6           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0         169.1         471.5           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          91.0       23773.8           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     15           0.0          73.3       22766.8           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     16           0.0         288.3       23403.8           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     17           0.0         101.7       22833.8           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     18           0.0         275.9       53947.8           0.0           0.0           0.0           1.1           0.0           1.1
+Hill     19       16900.4        3955.5           1.5        3232.2           0.0        3232.2           0.2           3.3           3.6
+Hill     20           0.0         170.6       29534.7           0.0           0.0           0.0           0.6           0.0           0.6
+Hill     21           0.0         373.1        2488.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     22           0.0         540.3       13052.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     23           0.0         220.9       16380.2           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     24        5998.1        1677.2           0.5         129.6           0.0         129.6           0.1           0.1           0.2
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         591.2       18962.6           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28        1786.8         456.2           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          97.9       24147.6           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     30       25605.3        1333.6           2.6        9612.7           0.0        9612.7           0.3           9.8          10.2
+Hill     31           0.0         151.0        1415.7           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32        3251.7        3166.7           0.4           7.1           0.0           7.1           0.1           0.0           0.1
+Hill     33           0.0        1933.8           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        5023.0        3887.8           0.6           8.1           0.0           8.1           0.1           0.0           0.1
+Hill     35           0.0          80.6       23234.1           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     36           0.0          84.1        1488.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0         127.9       32466.7           0.0           0.0           0.0           0.6           0.0           0.6
+Hill     38        7105.0        2707.1           0.8          27.1           0.0          27.1           0.1           0.0           0.1
+Hill     39        1308.4        2015.4           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       24099.0         699.1           2.3       15219.4           0.0       15219.3           0.3          15.6          15.9
+Hill     41           0.0          23.4        2047.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          39.9        9341.2           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     43       22548.7        6872.8           2.0         137.6           0.0         137.6           0.3           0.1           0.5
+Hill     44           0.0         540.4       45589.4           0.0           0.0           0.0           0.9           0.0           0.9
+Hill     45           0.0         112.1       22648.7           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     46           0.0          23.5        1138.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         689.0       81548.7           0.0           0.0           0.0           1.6           0.0           1.6
+Hill     48           0.0         150.9       20548.2           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         414.3       19047.8           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     51           0.0         248.4       18796.4           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0         194.6        3483.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     54           0.0         118.3        5516.1           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57        1945.4        3769.4           0.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     58       26240.9        2519.7           2.3       13903.0           0.0       13903.1           0.3          14.2          14.6
+Hill     59           0.0         369.8       16391.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     60       10677.6        7255.4           1.1         394.8           0.0         394.8           0.2           0.4           0.6
+Hill     61           0.0         504.9       26829.9           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     62           0.0         191.1       29192.4           0.0           0.0           0.0           0.6           0.0           0.6
+Hill     63           0.0          67.6       23569.8           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     64       44686.9        3042.3           4.2        7815.1           0.0        7815.1           0.6           8.0           8.6
+Hill     65        6900.6        4675.2           0.7         251.7           0.0         251.7           0.1           0.3           0.4
+Hill     66       29442.3        3261.9           2.6       19971.3           0.0       19971.5           0.4          20.5          20.8
+Hill     67       28763.5        6641.4           2.5        8704.5           0.0        8704.5           0.4           8.9           9.3
+Hill     68        1301.8         339.0           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       28718.2        1711.3           2.6       10560.4           0.0       10560.5           0.4          10.8          11.2
+Hill     70        3227.7        3718.1           0.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     71        4373.3        5045.8           0.7           5.2           0.0           5.2           0.1           0.0           0.1
+Hill     72       26900.1        1632.2           2.5        9920.8           0.0        9920.7           0.3          10.2          10.5
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      45034.9          10.1         192.1       44898.3          17.3           2.3          10.4          12.6
+Channel     2      32092.7          10.6          46.8       32071.3          12.1           1.6          10.9          12.5
+Channel     3      79875.8          29.5         266.9       79686.5          11.1           4.1          30.2          34.3
+Channel     4      71235.2           8.2         263.5       71367.6         103.3           4.4           8.4          12.8
+Channel     5      74517.6           0.5          76.1       74652.4          77.0           5.2           0.5           5.7
+Channel     6      35066.5           0.0           0.0       38009.5         268.9           3.7           0.0           3.7
+Channel     7      97722.9           0.0           0.0      102600.6         485.6           8.7           0.0           8.7
+Channel     8     133915.9           0.0           0.0      133951.0         181.2          12.8           0.0          12.8
+Channel     9      51106.4          14.9         945.3       51223.9          92.1           3.1          15.2          18.3
+Channel    10       3024.9           0.0           0.0        4509.6          75.9           1.7           0.0           1.7
+Channel    11      52842.0          15.2         281.1       56823.5         433.2           6.0          15.5          21.6
+Channel    12      98102.7           1.9        1715.7       98309.7         136.6           6.8           1.9           8.7
+Channel    13     294302.4          19.4       11655.3      294248.0          74.2          26.4          19.9          46.3
+Channel    14     395839.3          16.8         844.1      395697.0           1.0          33.1          17.2          50.3
+Channel    15     480209.5          25.1          12.1      480216.1          64.2          38.1          25.7          63.8
+Channel    16      33955.1           0.0           0.0       34157.0         153.6           2.7           0.0           2.7
+Channel    17      33984.7           0.1         111.4       34155.8         147.4           2.3           0.1           2.5
+Channel    18      70391.6           0.1           6.3       74073.8         215.7           5.8           0.1           6.0
+Channel    19      27274.0          10.1         451.5       27967.6          43.3           1.8          10.3          12.1
+Channel    20     120187.5          10.2           4.2      121790.1         121.8          10.3          10.5          20.7
+Channel    21     602655.3          35.6         217.5      602655.4         180.6          48.6          36.4          85.0
+Channel    22      14170.4           0.0           0.0       18423.0         149.9           3.0           0.0           3.0
+Channel    23     641296.2          36.7         980.0      641102.6         125.7          53.3          37.6          90.8
+Channel    24      41175.1           0.0           0.0       45506.2         672.9           5.4           0.0           5.4
+Channel    25     753875.9          42.2        3714.9      757522.4         107.4          64.6          43.2         107.8
+Channel    26      22013.4           0.0          42.3       22906.2         246.1           1.9           0.0           2.0
+Channel    27      43643.1           0.0           0.0       46228.8         221.4           3.8           0.0           3.8
+Channel    28      20563.5           0.0           0.0       23322.4         186.8           2.6           0.0           2.6
+Channel    29      63044.4           0.0           0.0       64709.4         632.2           7.4           0.0           7.4
+Channel    30      85871.8           0.0           0.0       86307.9         132.2           9.4           0.0           9.4
+Channel    31     863939.5          41.0         234.9      865662.4          11.0          75.3          42.0         117.3
+Channel    32    1007739.1          58.9        5474.5     1015356.4          61.7          90.8          60.3         151.1
+Channel    33    1139822.9          96.1        2158.0     1139906.7         127.0          96.1          98.4         194.5
+Channel    34      43883.9           0.1           9.4       45892.3          95.0           3.2           0.1           3.4
+Channel    35    1208745.4          97.3         944.3     1208632.6          89.2         103.5          99.6         203.1
+Channel    36    1329379.1         111.7        3177.1     1329559.6         257.4         117.0         114.4         231.4
+
+  95 storms produced  1210.80 mm. of rainfall
+
+ 353 events produced   529.38 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   3040572. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =   1329379. m^3
+Total hillslope soil loss in contributing area  =         128.6 tonnes
+Total channel soil loss                         =          33.8 tonnes
+Total sediment discharge from outlet            =         111.7 tonnes
+Sed. delivery per unit area of watershed        =           0.4 T/ha
+Sediment Delivery Ratio for Watershed           =      0.688
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.022
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.229
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.149
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.241
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.359
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.084
+       silt              0.371
+       sand              0.545
+   organic matter        0.029
+-----------------------------------------
+
+Index of specific surface            =     34.24 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.74
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     7
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       28536.0        2570.8           3.4           0.0           0.0           0.0           0.4           0.0           0.4
+Hill      2           0.0          36.7        8718.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      3           0.0          21.5       12956.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      4       11447.1         481.7           1.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill      5           0.0          52.8       13652.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      6       27865.3        3403.4           2.8        8217.6           0.0        8217.7           0.4           8.4           8.8
+Hill      7       18994.7        4316.6           2.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill      8           0.0         155.7       32646.1           0.0           0.0           0.0           0.6           0.0           0.6
+Hill      9        4022.9        3046.6           0.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     10           0.0           0.0        1267.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       11992.1        1313.4           1.2         903.1           0.0         903.0           0.2           0.9           1.1
+Hill     12           0.0          18.6         718.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          31.1         303.9           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          27.7       13009.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     15           0.0          22.7       12442.3           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     16           0.0          90.3       13035.8           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     17           0.0          33.9       12674.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     18           0.0         101.0       30112.0           0.0           0.0           0.0           0.6           0.0           0.6
+Hill     19        8605.1        3045.1           1.0        1048.8           0.0        1048.8           0.1           1.1           1.2
+Hill     20           0.0          55.3       16407.6           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     21           0.0         197.2        1612.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         220.1        7394.1           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     23           0.0          68.6        9947.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     24        2906.4        1286.9           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         492.7       10828.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28         910.3         264.8           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          32.4       13496.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     30       13845.7         927.4           1.4        3453.7           0.0        3453.6           0.2           3.5           3.7
+Hill     31           0.0          61.8         813.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32         864.1        2489.4           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     33           0.0        1192.9           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        1568.5        3085.7           0.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     35           0.0          25.4       13054.4           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     36           0.0          40.7         832.8           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0          40.7       18316.4           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     38        3775.5        1603.6           0.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     39         331.0        1504.6           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       13188.4         468.9           1.3        6823.7           0.0        6823.7           0.2           7.0           7.1
+Hill     41           0.0           7.7        1151.8           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          14.0        5192.8           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43       10475.3        5620.6           1.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     44           0.0         217.4       25538.7           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     45           0.0          44.8       12798.8           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     46           0.0           0.0         643.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         220.6       45652.7           0.0           0.0           0.0           0.9           0.0           0.9
+Hill     48           0.0          58.4       11307.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         137.7       10668.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     51           0.0          98.2       10617.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0          77.1        1963.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     54           0.0          45.4        3066.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57         440.0        2670.5           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     58       14226.7        1820.3           1.4        5866.1           0.0        5866.1           0.2           6.0           6.2
+Hill     59           0.0         145.9        9190.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     60        4002.9        5798.5           0.6           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     61           0.0         202.3       14970.7           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     62           0.0          76.9       16367.2           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     63           0.0          30.2       13177.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     64       23986.3        2303.2           2.2        1795.3           0.0        1795.3           0.3           1.8           2.1
+Hill     65        2690.6        3793.7           0.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     66       15659.6        2368.3           1.6        7977.9           0.0        7977.9           0.2           8.2           8.4
+Hill     67       14733.8        5727.7           1.7        3085.9           0.0        3085.8           0.2           3.2           3.4
+Hill     68         681.0         206.0           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       16116.0        1272.4           1.6        4276.2           0.0        4276.3           0.2           4.4           4.6
+Hill     70        1045.5        2576.4           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     71        1202.5        3980.5           0.3           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     72       14882.3        1213.5           1.5        4002.0           0.0        4002.0           0.2           4.1           4.3
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      24982.5           4.0           0.0       24901.8          13.5           2.6           4.1           6.7
+Channel     2      18287.4           4.3           0.0       18276.3           9.3           1.8           4.4           6.2
+Channel     3      45090.4          11.2           0.1       44975.6          10.5           4.6          11.5          16.0
+Channel     4      39296.8           1.9           0.0       39463.2          74.4           4.9           1.9           6.8
+Channel     5      41145.1           0.0           0.0       41372.3          59.3           6.0           0.0           6.0
+Channel     6      19226.5           0.0           0.0       20953.4         152.9           4.2           0.0           4.2
+Channel     7      53443.5           0.0           0.0       56398.4         281.2           9.9           0.0           9.9
+Channel     8      73275.5           0.0           0.0       73303.0          99.9          14.5           0.0          14.5
+Channel     9      28304.0           5.9           1.4       28442.1          64.5           3.5           6.0           9.5
+Channel    10       1723.1           0.0           0.0        2514.7          39.4           1.8           0.0           1.8
+Channel    11      28843.6           5.9           0.0       30954.6         224.0           6.8           6.0          12.8
+Channel    12      54321.1           0.0           0.0       54622.0         103.2           7.7           0.0           7.7
+Channel    13     161535.3           6.8         944.0      161615.8          54.6          29.9           7.0          36.9
+Channel    14     217572.3           4.3           0.0      217477.6           0.8          37.5           4.4          41.9
+Channel    15     263959.6           6.1           0.0      264067.6          47.4          43.2           6.3          49.4
+Channel    16      18923.6           0.0           0.0       19152.9         109.2           3.0           0.0           3.0
+Channel    17      18714.9           0.0           0.0       18892.0         108.7           2.7           0.0           2.7
+Channel    18      38200.0           0.0           0.0       40618.7         133.0           6.8           0.0           6.8
+Channel    19      14907.1           3.5           0.0       15346.1          27.9           2.0           3.5           5.5
+Channel    20      65352.7           3.5           0.0       66380.6          74.4          12.0           3.5          15.6
+Channel    21     330470.9           9.6           0.0      330498.7         132.0          55.5           9.8          65.3
+Channel    22       8229.8           0.0           0.0       10216.5          67.0           3.4           0.0           3.4
+Channel    23     352906.4           9.6           0.0      352885.2          93.4          60.8           9.8          70.7
+Channel    24      22505.2           0.0           0.0       25096.0         376.6           6.3           0.0           6.3
+Channel    25     414250.4          16.9        6473.8      417042.3          76.0          73.8          17.3          91.1
+Channel    26      12022.3           0.0           0.0       12585.5         145.2           2.2           0.0           2.2
+Channel    27      23501.1           0.0           0.0       25206.0         143.2           4.4           0.0           4.4
+Channel    28      10876.6           0.0           0.0       12478.9         107.3           2.9           0.0           2.9
+Channel    29      33599.0           0.0           0.0       34612.5         363.3           8.4           0.0           8.4
+Channel    30      46053.0           0.0           0.0       46292.4          71.1          10.7           0.0          10.7
+Channel    31     473445.6           9.9          76.1      474783.4           8.0          86.4          10.1          96.6
+Channel    32     552307.4          21.1           0.0      557847.3          42.0         104.6          21.6         126.2
+Channel    33     625033.4          33.6           0.0      625210.0          86.7         110.8          34.4         145.1
+Channel    34      24065.6           0.0           0.0       25299.3          55.6           3.9           0.0           3.9
+Channel    35     662053.7          33.7          92.0      662061.2          67.4         118.9          34.5         153.4
+Channel    36     726587.5          37.7           0.0      726839.5         185.2         133.4          38.6         172.0
+
+  72 storms produced   778.80 mm. of rainfall
+
+ 254 events produced   289.34 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   1955730. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =    726587. m^3
+Total hillslope soil loss in contributing area  =          47.5 tonnes
+Total channel soil loss                         =           7.6 tonnes
+Total sediment discharge from outlet            =          37.7 tonnes
+Sed. delivery per unit area of watershed        =           0.2 T/ha
+Sediment Delivery Ratio for Watershed           =      0.685
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.027
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.210
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.139
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.212
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.412
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.084
+       silt              0.341
+       sand              0.576
+   organic matter        0.029
+-----------------------------------------
+
+Index of specific surface            =     34.11 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.74
+
+
+
+
+
+                  ANNUAL SUMMARY FOR WATERSHED IN YEAR     8
+                  ------------------------------------------
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill      1       26578.8        5219.0           3.8         927.8           0.0         927.8           0.4           1.0           1.3
+Hill      2           0.0          26.2        6761.0           0.0           0.0           0.0           0.1           0.0           0.1
+Hill      3           0.0          14.9       10057.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      4       10913.3        1020.0           1.5          89.8           0.0          89.8           0.1           0.1           0.2
+Hill      5           0.0         105.9        9713.1           0.0           0.0           0.0           0.2           0.0           0.2
+Hill      6       28992.3        5684.9           3.8        9909.6           0.0        9909.8           0.4          10.1          10.6
+Hill      7       16727.3        8331.0           2.7         807.7           0.0         807.7           0.3           0.8           1.1
+Hill      8           0.0         231.5       25450.7           0.0           0.0           0.0           0.5           0.0           0.5
+Hill      9        4002.3        4079.4           0.8          17.2           0.0          17.2           0.1           0.0           0.1
+Hill     10           0.0          20.7         875.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     11       12323.9        2296.1           1.9        1874.5           0.0        1874.5           0.2           1.9           2.1
+Hill     12           0.0          44.3         593.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     13           0.0          56.9         256.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     14           0.0          48.8        9564.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     15           0.0          39.5        9161.6           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     16           0.0         102.2        9574.4           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     17           0.0          52.0       10077.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     18           0.0         137.4       23460.5           0.0           0.0           0.0           0.5           0.0           0.5
+Hill     19        8525.5        4551.3           1.5        2020.1           0.0        2020.0           0.2           2.1           2.2
+Hill     20           0.0          86.8       13219.0           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     21           0.0         271.9         887.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     22           0.0         388.7        4932.2           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     23           0.0         109.5        7245.4           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     24        2955.9        1829.6           0.5          68.1           0.0          68.1           0.1           0.1           0.1
+Hill     25           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     26           0.0         533.3        8248.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     27           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     28         762.0         489.9           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     29           0.0          48.4       10506.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     30       15056.7        1889.2           2.0        3564.7           0.0        3564.7           0.2           3.7           3.8
+Hill     31           0.0          98.2         531.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     32         829.8        3297.1           0.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     33           0.0        1301.3           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     34        1489.0        4277.5           0.5           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     35           0.0          65.3        9523.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     36           0.0          79.3         559.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     37           0.0         103.5       13331.1           0.0           0.0           0.0           0.3           0.0           0.3
+Hill     38        2912.9        2603.9           0.5           6.2           0.0           6.2           0.1           0.0           0.1
+Hill     39         180.9        1860.0           0.2           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     40       13796.7         868.3           1.8        7339.5           0.0        7339.5           0.2           7.5           7.7
+Hill     41           0.0          19.1         845.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     42           0.0          25.9        4116.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     43       10527.7        8603.1           1.7          10.7           0.0          10.7           0.2           0.0           0.2
+Hill     44           0.0         392.5       17790.1           0.0           0.0           0.0           0.4           0.0           0.4
+Hill     45           0.0          90.7        9292.9           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     46           0.0          15.1         437.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     47           0.0         296.7       37084.8           0.0           0.0           0.0           0.7           0.0           0.7
+Hill     48           0.0         115.8        8202.0           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     49           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     50           0.0         201.0        7698.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     51           0.0         198.5        7716.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     52           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     53           0.0         111.7        1399.8           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     54           0.0          93.8        2226.9           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     55           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     56           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     57         287.3        3393.3           0.3           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     58       14555.1        3156.5           2.3        7025.7           0.0        7025.8           0.2           7.2           7.4
+Hill     59           0.0         232.1        6419.7           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     60        3556.8        7769.5           0.9           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     61           0.0         364.3       10427.7           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     62           0.0         158.7       11508.8           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     63           0.0          64.2        9455.5           0.0           0.0           0.0           0.2           0.0           0.2
+Hill     64       24973.9        3972.7           2.7        2762.2           0.0        2762.2           0.3           2.8           3.2
+Hill     65        2427.1        5002.4           0.6           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     66       16033.2        3959.9           2.5        9011.1           0.0        9011.0           0.2           9.2           9.5
+Hill     67       14109.1        7719.7           2.6        4549.2           0.0        4549.1           0.3           4.7           4.9
+Hill     68         555.8         382.4           0.1           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     69       16398.8        2321.2           2.6        6574.6           0.0        6574.6           0.2           6.7           7.0
+Hill     70         622.2        3371.8           0.4           0.0           0.0           0.0           0.0           0.0           0.0
+Hill     71         649.0        5077.4           0.6           0.0           0.0           0.0           0.1           0.0           0.1
+Hill     72       15347.1        2166.4           2.4        5522.4           0.0        5522.4           0.2           5.7           5.9
+
+
+
+Channels         Discharge     Sediment      Soil          Upland        Subsuface Flow    Solub. React.  Particulate  Total
+and              Volume        Yield         Loss          Charge        Volume            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)       (kg)          (m^3)         (m^3)            (kg)           (kg)         (kg)
+------------     ----------    ----------    ----------      ----------      ----------      ----------      ----------      ----------
+
+Channel     1      27290.6           5.5          17.2       27235.9          24.5           2.9           5.7           8.5
+Channel     2      19660.3           6.6           3.0       19659.8          16.3           2.1           6.7           8.8
+Channel     3      49344.0          13.8         131.5       49254.3          16.2           5.2          14.2          19.3
+Channel     4      38279.2           2.9          77.0       38434.2          64.0           5.5           2.9           8.4
+Channel     5      33536.3           0.0           0.0       33741.4          49.6           6.5           0.0           6.5
+Channel     6      14036.0           0.0           0.0       15470.1         126.9           4.6           0.0           4.6
+Channel     7      42770.0           0.0           0.0       45208.6         228.5          10.9           0.0          10.9
+Channel     8      57210.0           0.0           0.0       57236.5          76.9          15.8           0.0          15.8
+Channel     9      27860.8           7.6         533.1       27995.0          58.1           3.8           7.7          11.6
+Channel    10        993.7           0.0           0.0        1680.3          34.7           1.9           0.0           1.9
+Channel    11      26867.5           6.9          76.9       29616.6         255.3           7.4           7.1          14.5
+Channel    12      46325.0           0.2         174.2       46632.9          87.5           8.5           0.2           8.7
+Channel    13     134446.5          56.1       58146.1      134501.5          41.0          32.8          57.4          90.2
+Channel    14     183608.5           6.3         126.3      183529.3           0.8          41.1           6.5          47.5
+Channel    15     229315.1           9.2           0.7      229418.9          43.3          47.4           9.4          56.8
+Channel    16      13766.4           0.0           0.0       13986.5          86.1           3.3           0.0           3.3
+Channel    17      16453.2           0.0          12.9       16627.1          92.0           3.0           0.0           3.0
+Channel    18      31795.5           0.0           0.0       34053.6         121.2           7.4           0.0           7.4
+Channel    19      16553.7           3.7         140.0       17349.4          46.3           2.3           3.8           6.1
+Channel    20      57694.6           3.7           1.8       58743.9          71.6          13.2           3.8          17.0
+Channel    21     288208.2          13.0          46.7      288239.9         119.5          60.9          13.3          74.2
+Channel    22       5958.5           0.0           0.0        7765.5          60.4           3.6           0.0           3.6
+Channel    23     306292.3          13.2         205.5      306280.3          84.4          66.8          13.6          80.3
+Channel    24      16937.2           0.0           0.0       19217.5         328.8           6.9           0.0           6.9
+Channel    25     357108.3          15.0         760.1      359536.0          57.0          80.9          15.4          96.3
+Channel    26       9665.3           0.0           0.0       10062.1         107.0           2.4           0.0           2.4
+Channel    27      17191.0           0.0           0.0       18572.0         112.5           4.9           0.0           4.9
+Channel    28       7794.4           0.0           0.0        9179.7          94.2           3.2           0.0           3.2
+Channel    29      24323.2           0.0           0.0       25190.9         305.6           9.1           0.0           9.1
+Channel    30      34322.4           0.0           0.0       34543.0          60.2          11.6           0.0          11.6
+Channel    31     405731.7          14.1         257.4      406951.8           6.1          94.6          14.4         109.0
+Channel    32     483465.3          25.1        2275.2      488513.0          34.6         116.5          25.7         142.2
+Channel    33     562598.5          42.8         538.7      562788.9          86.6         121.6          43.8         165.4
+Channel    34      20353.6           0.1           6.3       21479.5          51.3           4.2           0.1           4.3
+Channel    35     592953.2          43.3         335.7      592959.1          70.6         130.5          44.3         174.8
+Channel    36     658492.8          50.6         772.8      658748.4         191.4         148.0          51.8         199.8
+
+  78 storms produced   817.80 mm. of rainfall
+
+ 263 events produced   262.22 mm. of runoff  
+     passing through the watershed outlet
+
+
+Delivery From Channel Outlet:
+-------- ---- ------- ------
+
+Total contributing area to outlet               =     251.12 ha
+Total precipitation volume in contributing area =   2053667. m^3
+Total irrigation volume in contributing area    =         0. m^3
+Total water discharge from outlet               =    658493. m^3
+Total hillslope soil loss in contributing area  =          62.1 tonnes
+Total channel soil loss                         =          64.6 tonnes
+Total sediment discharge from outlet            =          50.6 tonnes
+Sed. delivery per unit area of watershed        =           0.2 T/ha
+Sediment Delivery Ratio for Watershed           =      0.399
+
+
+Sediment Particle Information Leaving Channel
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.028
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.230
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.150
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.232
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.361
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.090
+       silt              0.371
+       sand              0.540
+   organic matter        0.031
+-----------------------------------------
+
+Index of specific surface            =     36.49 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.79
+
+
+
+
+
+                    8 YEAR AVERAGE ANNUAL VALUES FOR WATERSHED
+               ------ ---- ------- ------ ------ --- ---------
+
+
+
+                 Runoff        Subrunoff     Baseflow      Soil          Sediment      Sediment      Hillslope    Solub. React.  Particulate  Total
+                 Volume        Volume        Volume        Loss          Deposition    Yield         Area         Phosphorus     Phosphorus   Phosphorus
+Hillslopes       (m^3)         (m^3)         (m^3)         (kg)          (kg)          (kg)          (ha)         (kg)           (kg)         (kg)
+----------       ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------    ----------
+Hill       1      29983.47       4996.08       2412.62        475.61          0.00        475.61      9.63          0.46          0.49          0.94
+Hill       2          0.00         53.06       9488.80          0.00          0.00          0.00      2.79          0.19          0.00          0.19
+Hill       3          0.00         30.11      14102.03          0.00          0.00          0.00      4.14          0.28          0.00          0.28
+Hill       4      12197.58       1027.20        924.60         49.07          0.00         49.07      3.69          0.17          0.05          0.22
+Hill       5          0.00         73.46      14607.81          0.00          0.00          0.00      4.23          0.29          0.00          0.29
+Hill       6      31678.19       4768.33       2074.10      11592.61          0.00      11592.66      8.28          0.47         11.87         12.34
+Hill       7      18962.33       7287.87       1781.03        646.38          0.00        646.39      7.11          0.34          0.66          1.00
+Hill       8          0.00        226.14      35244.83          0.00          0.00          0.00     10.26          0.69          0.00          0.69
+Hill       9       4588.63       3615.68        450.75         30.55          0.00         30.55      1.80          0.10          0.03          0.13
+Hill      10          0.00         10.10       1366.14          0.00          0.00          0.00      0.36          0.03          0.00          0.03
+Hill      11      13094.79       1868.18        856.84       1627.01          0.00       1627.00      3.42          0.19          1.67          1.86
+Hill      12          0.00         42.72        822.06          0.00          0.00          0.00      0.18          0.02          0.00          0.02
+Hill      13          0.00         65.59        344.77          0.00          0.00          0.00      0.09          0.01          0.00          0.01
+Hill      14          0.00         48.94      13571.46          0.00          0.00          0.00      4.14          0.27          0.00          0.27
+Hill      15          0.00         39.50      12985.29          0.00          0.00          0.00      3.96          0.25          0.00          0.25
+Hill      16          0.00        143.92      13827.26          0.00          0.00          0.00      4.05          0.27          0.00          0.27
+Hill      17          0.00         51.90      13754.88          0.00          0.00          0.00      3.96          0.27          0.00          0.27
+Hill      18          0.00        133.09      32575.12          0.00          0.00          0.00      9.45          0.64          0.00          0.64
+Hill      19       9455.25       3804.91        743.91       1711.16          0.00       1711.16      2.97          0.17          1.75          1.92
+Hill      20          0.00         84.05      17875.20          0.00          0.00          0.00      5.13          0.35          0.00          0.35
+Hill      21          0.00        249.23       1583.89          0.00          0.00          0.00      0.54          0.03          0.00          0.03
+Hill      22          0.00        332.39       7756.29          0.00          0.00          0.00      2.34          0.16          0.00          0.16
+Hill      23          0.00        112.70      10157.47          0.00          0.00          0.00      2.97          0.20          0.00          0.20
+Hill      24       3293.34       1572.21        270.48         59.20          0.00         59.20      1.08          0.06          0.06          0.12
+Hill      25          0.00          0.00       1035.01          0.00          0.00          0.00      4.14          0.02          0.00          0.02
+Hill      26          0.00        441.72      11497.82          0.00          0.00          0.00      3.51          0.23          0.00          0.23
+Hill      27          0.00          0.00       1012.50          0.00          0.00          0.00      4.05          0.02          0.00          0.02
+Hill      28        923.02        429.07         90.17          0.00          0.00          0.00      0.36          0.02          0.00          0.02
+Hill      29          0.00         47.48      14561.50          0.00          0.00          0.00      4.23          0.29          0.00          0.29
+Hill      30      15826.42       1524.65       1014.71       5006.29          0.00       5006.29      4.05          0.22          5.13          5.35
+Hill      31          0.00         91.01        846.67          0.00          0.00          0.00      0.27          0.02          0.00          0.02
+Hill      32       1308.00       2798.46        225.34          4.59          0.00          4.59      0.90          0.05          0.00          0.06
+Hill      33          6.08       1340.79         67.54          0.00          0.00          0.00      0.27          0.02          0.00          0.02
+Hill      34       2186.36       3520.39        315.50          5.56          0.00          5.56      1.26          0.07          0.01          0.08
+Hill      35          0.00         46.05      13965.50          0.00          0.00          0.00      4.05          0.27          0.00          0.27
+Hill      36          0.00         53.24        883.64          0.00          0.00          0.00      0.27          0.02          0.00          0.02
+Hill      37          0.00         72.08      19595.40          0.00          0.00          0.00      5.67          0.38          0.00          0.38
+Hill      38       3689.61       2339.51        383.05         11.76          0.00         11.76      1.53          0.08          0.01          0.09
+Hill      39        457.18       1703.14        135.20          0.00          0.00          0.00      0.54          0.03          0.00          0.03
+Hill      40      14858.28        734.73        901.94       8587.85          0.00       8587.84      3.60          0.20          8.79          9.00
+Hill      41          0.00         13.56       1230.59          0.00          0.00          0.00      0.36          0.02          0.00          0.02
+Hill      42          0.00         22.51       5607.06          0.00          0.00          0.00      1.62          0.11          0.00          0.11
+Hill      43      11892.29       7420.38       1081.84         47.29          0.00         47.29      4.32          0.24          0.05          0.29
+Hill      44          0.00        305.68      27034.33          0.00          0.00          0.00      7.92          0.53          0.00          0.53
+Hill      45          0.00         64.84      13661.81          0.00          0.00          0.00      3.96          0.27          0.00          0.27
+Hill      46          0.00          7.95        696.52          0.00          0.00          0.00      0.18          0.01          0.00          0.01
+Hill      47          0.00        334.18      49735.86          0.00          0.00          0.00     14.31          0.98          0.00          0.98
+Hill      48          0.00         93.20      11771.80          0.00          0.00          0.00      3.60          0.23          0.00          0.23
+Hill      49          0.00          0.00       1372.50          0.00          0.00          0.00      5.49          0.03          0.00          0.03
+Hill      50          0.00        227.70      11269.69          0.00          0.00          0.00      3.33          0.22          0.00          0.22
+Hill      51          0.00        141.64      11396.16          0.00          0.00          0.00      3.33          0.22          0.00          0.22
+Hill      52          0.00          0.00       1102.50          0.00          0.00          0.00      4.41          0.02          0.00          0.02
+Hill      53          0.00        121.70       2061.65          0.00          0.00          0.00      0.63          0.04          0.00          0.04
+Hill      54          0.00         65.79       3211.86          0.00          0.00          0.00      0.99          0.06          0.00          0.06
+Hill      55          0.00          0.00        562.50          0.00          0.00          0.00      2.25          0.01          0.00          0.01
+Hill      56          0.00          0.00        990.00          0.00          0.00          0.00      3.96          0.02          0.00          0.02
+Hill      57        688.86       3077.16        202.76          0.00          0.00          0.00      0.81          0.05          0.00          0.05
+Hill      58      15560.79       2593.59       1037.17       7520.28          0.00       7520.31      4.14          0.23          7.70          7.93
+Hill      59          0.00        200.13       9778.92          0.00          0.00          0.00      2.88          0.19          0.00          0.19
+Hill      60       5051.79       6964.50        653.45        135.69          0.00        135.69      2.61          0.15          0.14          0.29
+Hill      61          0.00        286.91      15933.68          0.00          0.00          0.00      4.68          0.32          0.00          0.32
+Hill      62          0.00        113.90      17288.52          0.00          0.00          0.00      5.04          0.34          0.00          0.34
+Hill      63          0.00         46.75      13950.98          0.00          0.00          0.00      4.05          0.27          0.00          0.27
+Hill      64      27898.62       3442.99       1780.94       3924.21          0.00       3924.20      7.11          0.40          4.02          4.42
+Hill      65       3358.74       4531.66        428.12         97.62          0.00         97.62      1.71          0.10          0.10          0.20
+Hill      66      17334.38       3278.56       1172.38      10350.40          0.00      10350.38      4.68          0.26         10.60         10.86
+Hill      67      15863.99       6600.81       1262.48       4329.77          0.00       4329.76      5.04          0.28          4.43          4.72
+Hill      68        689.87        329.44         67.63          0.00          0.00          0.00      0.27          0.01          0.00          0.01
+Hill      69      17296.93       1861.83       1104.97       5907.74          0.00       5907.76      4.41          0.25          6.05          6.30
+Hill      70       1216.30       3039.10        270.40          0.00          0.00          0.00      1.08          0.05          0.00          0.05
+Hill      71       1496.18       4530.44        383.09          1.06          0.00          1.06      1.53          0.07          0.00          0.08
+Hill      72      16236.59       1747.18       1037.30       5362.33          0.00       5362.32      4.14          0.23          5.49          5.72
+
+
+
+Channels         Discharge     Sediment        Soil          Upland        Subsuface Flow   Contributing    Solub. React.  Particulate  Total
+and              Volume        Yield           Loss          Charge        Volume           Area            Phosphorus     Phosphorus   Phosphorus
+Impoundments     (m^3)         (tonne)         (kg)          (m^3)         (m^3)            (ha)            (kg)           (kg)         (kg)
+------------     ----------    ----------      ----------   ----------   ----------          ----------  ----------   ----------   ----------
+
+Channel    1    30014.4       6.9                   1555.1     29949.8      22.5    6.77     0.4       7.1       7.4
+Channel    2    21349.6       6.3                    411.8     21347.2      15.3    4.69     0.3       6.5       6.7
+Channel    3    53922.2      17.2                   2299.9     53822.8      15.7   11.46     0.6      17.6      18.3
+Channel    4    46928.2       5.7                   1701.1     47087.8      81.4   11.18     0.7       5.8       6.5
+Channel    5    46040.9       3.3                   3152.2     46248.1      62.6   12.37     0.8       3.4       4.2
+Channel    6    21626.3       1.9                   1873.3     23741.8     192.9   11.10     0.6       1.9       2.5
+Channel    7    59308.1       3.8                   3780.0     62810.7     335.0   23.44     1.4       3.9       5.2
+Channel    8    81617.7       6.1                    465.9     81631.0     117.5   34.73     2.0       6.3       8.3
+Channel    9    32956.2       9.9                   2341.2     33089.9      71.0    7.86     0.5      10.1      10.6
+Channel   10     3112.6       1.5                   1501.6      4146.4      53.0    7.23     0.2       1.5       1.8
+Channel   11    34403.6      14.2                   2923.3     37368.8     301.6   15.77     0.9      14.6      15.5
+Channel   12    61100.7       5.1                   5010.1     61398.5     110.7   16.26     1.1       5.2       6.2
+Channel   13   182705.2      33.2                  12315.7    182732.4      56.2   68.38     4.1      34.0      38.1
+Channel   14   246591.6      14.0                    296.6    246487.5       0.9   84.72     5.1      14.3      19.4
+Channel   15   302133.0      24.0                   4287.4    302217.6      52.1   98.01     5.9      24.5      30.5
+Channel   16    20306.3       2.1                   2136.2     20529.9     116.0    5.98     0.4       2.2       2.6
+Channel   17    21236.6       1.1                   1074.5     21416.5     116.9    5.60     0.4       1.1       1.5
+Channel   18    42746.3       4.8                   1601.5     45524.6     156.4   12.52     0.9       4.9       5.9
+Channel   19    18214.1       6.1                   1088.1     18974.8      45.7    4.34     0.3       6.2       6.5
+Channel   20    74150.5      11.8                    879.8     75384.3      89.7   21.10     1.6      12.1      13.7
+Channel   21   377709.8      36.7                    855.9    377733.0     146.1  119.48     7.6      37.5      45.1
+Channel   22    10302.9       3.1                   3089.6     12812.7      87.5   11.75     0.4       3.2       3.6
+Channel   23   403460.3      44.2                   4360.3    403396.1     102.3  135.30     8.3      45.3      53.6
+Channel   24    24057.8       2.3                   2273.8     27173.9     471.4    8.05     0.9       2.3       3.2
+Channel   25   471170.1      55.9                   8786.5    473995.9      78.2  155.81    10.1      57.3      67.4
+Channel   26    13112.3       0.2                    247.6     13733.1     165.6    3.97     0.3       0.3       0.6
+Channel   27    24775.4       1.1                   1104.4     26657.5     156.0    8.03     0.6       1.1       1.7
+Channel   28    11206.3       1.1                   1106.1     13119.5     129.4    4.17     0.4       1.1       1.5
+Channel   29    35051.5       2.8                    629.5     36285.5     454.0   12.30     1.1       2.9       4.1
+Channel   30    48663.1       3.7                    642.3     48961.5      90.9   16.46     1.5       3.8       5.3
+Channel   31   535657.5      33.5                    288.5    537003.3       7.9  176.06    11.8      34.3      46.1
+Channel   32   627632.2      56.4                  13416.7    633292.7      43.7  199.65    14.6      57.8      72.3
+Channel   33   715404.0      84.0                   9017.0    715559.9      98.7  219.77    15.2      86.0     101.2
+Channel   34    27065.7       1.0                    945.5     28547.5      68.9    7.94     0.5       1.0       1.5
+Channel   35   756610.7      89.4                   4360.5    756588.4      75.3  231.88    16.3      91.6     107.9
+Channel   36   833274.9     107.9                  11001.9    833506.2     209.3  251.12    18.5     110.5     129.0
+
+  79 storms produced       887.25 mm. of rainfall on an AVERAGE ANNUAL basis
+
+ 289 events produced       331.82 mm. of runoff
+     passing through the watershed outlet on an AVERAGE ANNUAL basis
+
+
+ Average Annual Delivery From Channel Outlet:
+ ------- ------ -------- ---- ------- ------
+
+Total contributing area to outlet                   =                         251.12 ha
+Avg. Ann. Precipitation volume in contributing area =                     2228070.   m^3/yr
+Avg. Ann. irrigation volume in contributing area    =                           0.   m^3/yr
+Avg. Ann. water discharge from outlet               =                      833275.   m^3/yr
+Avg. Ann. total hillslope soil loss                 =                          67.5  tonnes/yr
+Avg. Ann. total channel soil loss                   =                         112.8  tonnes/yr
+Avg. Ann. sediment discharge from outlet            =                         107.9  tonnes/yr
+Avg. Ann. Sed. delivery per unit area of watershed  =                           0.4  T/ha/yr
+Sediment Delivery Ratio for Watershed               =                           0.599
+Avg. Ann. Phosphorus discharge from outlet          =                         129.0  kg/yr
+Avg. Ann. P. delivery per unit area of watershed    =                           0.5  kg/ha/yr
+
+
+Sediment Particle Information Leaving Channel:
+
+-----------------------------------------------------------------------
+                             Particle Composition              Fraction
+Class  Diameter  Specific  ------------------------            In Flow
+         (mm)    Gravity   % Sand   % Silt   % Clay   % O.M.   Exiting
+-------------------------------------------------------------------------------
+  1     0.002      2.60      0.0      0.0    100.0     34.1     0.028
+  2     0.010      2.65      0.0    100.0      0.0      0.0     0.235
+  3     0.030      1.80      0.0     68.2     31.8     10.8     0.164
+  4     0.300      1.60     77.2     16.8      6.0      2.0     0.234
+  5     0.200      2.65    100.0      0.0      0.0      0.0     0.339
+
+
+Distribution of Primary Particles and
+Organic Matter in the Eroded Sediment:
+
+-----------------------------------------
+       type            fraction
+       ----            --------
+       clay              0.095
+       silt              0.386
+       sand              0.519
+   organic matter        0.032
+-----------------------------------------
+
+Index of specific surface            =     38.48 m**2/g of total sediment
+Enrichment ratio of specific surface =      0.83
+
