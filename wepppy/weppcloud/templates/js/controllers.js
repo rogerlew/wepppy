@@ -1509,6 +1509,26 @@ var Landuse = function () {
             });
         };
 
+        that.modify_coverage = function(dom, cover, value) {
+            var data = {
+                dom: dom,
+                cover: cover,
+                value: value
+            };
+
+            $.post({
+                url: "../tasks/modify_landuse_coverage/",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
         that.report = function () {
             var self = instance;
             $.get({

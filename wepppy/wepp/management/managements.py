@@ -374,12 +374,12 @@ class IniLoopCropland(ScenarioBase):
         line = lines.pop(0).split()
         assert len(line) == 6
         self.bdtill = float(line.pop(0))
-        self.cancov = float(line.pop(0))
+        self.cancov = float(line.pop(0)) # canopy cover
         self.daydis = int(line.pop(0))
         self.dsharv = int(line.pop(0))
         self.frdp = float(line.pop(0))
-        self.inrcov = float(line.pop(0))
-        
+        self.inrcov = float(line.pop(0)) # interrill cover
+
         i = int(lines.pop(0))
         self.iresd = scenarioReference_factory(i, SectionType.Plant, root, self)
         
@@ -390,7 +390,7 @@ class IniLoopCropland(ScenarioBase):
         assert len(line) == 5
         self.rfcum = float(line.pop(0))
         self.rhinit = float(line.pop(0))
-        self.rilcov = float(line.pop(0))
+        self.rilcov = float(line.pop(0)) # rill cover
         self.rrinit = float(line.pop(0))
         self.rspace = float(line.pop(0))
         
@@ -1273,17 +1273,51 @@ class ManagementSummary(object):
         self.desc = kwargs["Description"]
         self.color = RGBA(*(kwargs["Color"])).tohex()
         self.area = None
+
         self.pct_coverage = None
-        
+
+        m = get_management(self.key)
+        assert len(m.inis) == 1
+        assert m.inis[0].landuse == 1
+        assert isinstance(m.inis[0].data, IniLoopCropland)
+        self.cancov = m.inis[0].data.cancov
+        self.inrcov = m.inis[0].data.inrcov
+        self.rilcov = m.inis[0].data.rilcov
+
+        self.cancov_override = None
+        self.inrcov_override = None
+        self.rilcov_override = None
+
     @property
     def man_path(self):
         return _join(self.man_dir, self.man_fn)
+
+    def get_management(self):
+        m = get_management(self.key)
+        assert len(m.inis) == 1
+        assert m.inis[0].landuse == 1
+        assert isinstance(m.inis[0].data, IniLoopCropland)
+
+        if self.cancov_override is not None:
+            m.inis[0].data.cancov = self.cancov_override
+
+        if self.inrcov_override is not None:
+            m.inis[0].data.inrcov = self.inrcov_override
+
+        if self.rilcov_override is not None:
+            m.inis[0].data.rilcov = self.rilcov_override
+
+        return m
      
     def as_dict(self):
         return dict(key=self.key, 
                     man_fn=self.man_fn, man_dir=self.man_dir, 
                     desc=self.desc, color=self.color, area=self.area, 
-                    pct_coverage=self.pct_coverage)
+                    pct_coverage=self.pct_coverage,
+                    cancov=self.cancov, inrcov=self.inrcov, rilcov=self.rilcov,
+                    cancov_override=self.cancov_override,
+                    inrcov_override=self.inrcov_override,
+                    rilcov_override=self.rilcov_override)
 
 
 class Management(object):
@@ -1642,7 +1676,7 @@ class InvalidManagementKey(Exception):
         pass
 
         
-def get_management_summary(dom):
+def get_management_summary(dom) -> ManagementSummary:
     """
     Parameters
     ----------
@@ -1663,7 +1697,7 @@ def get_management_summary(dom):
     return ManagementSummary(**d[k])
 
         
-def get_management(dom):
+def get_management(dom) -> Management:
     """
     Parameters
     ----------
@@ -1685,8 +1719,18 @@ def get_management(dom):
 
 
 if __name__ == "__main__":
-    m = get_management(52)
-    print(m)
+    d = load_map()
+
+    for k in d:
+        m = get_management(k)
+        #Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
+
+        assert len(m.inis) == 1
+        assert m.inis[0].landuse == 1
+        assert isinstance(m.inis[0].data, IniLoopCropland)
+        cancov, inrcov, rilcov = m.inis[0].data.cancov, m.inis[0].data.inrcov, m.inis[0].data.rilcov
+
+        print(k, cancov, inrcov, rilcov)
 
     """
     import jsonpickle

@@ -1136,6 +1136,19 @@ def set_landuse_mode(runid):
     return success_factory()
 
 
+@app.route('/runs/<string:runid>/tasks/modify_landuse_coverage', methods=['POST'])
+@app.route('/runs/<string:runid>/tasks/modify_landuse_coverage/', methods=['POST'])
+def modify_landuse_coverage(runid):
+    wd = get_wd(runid)
+
+    dom = request.json.get('dom', None)
+    cover = request.json.get('cover', None)
+    value = request.json.get('value', None)
+
+    Landuse.getInstance(wd).modify_coverage(dom, cover, value)
+
+    return success_factory()
+
 @app.route('/runs/<string:runid>/query/landuse')
 @app.route('/runs/<string:runid>/query/landuse/')
 def query_landuse(runid):
@@ -1178,24 +1191,6 @@ def view_channel_def(runid, chn_key):
     return jsonify(chn_d)
 
 
-@app.route('/runs/<string:runid>/view/management/<int:key>')
-@app.route('/runs/<string:runid>/view/management/<int:key>/')
-def view_management(runid, key):
-    wd = get_wd(runid)
-    assert wd is not None
-
-    man = management.get_management_summary(key)
-    man_path = man.man_path
-    
-    if _exists(man_path):
-        contents = open(man_path).read()    
-    else:
-        contents = 'Management not found'
-        
-    return Response(contents, mimetype='text/plaintext')
-
-
-# noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/build_landuse/', methods=['POST'])
 def task_build_landuse(runid):
     wd = get_wd(runid)
@@ -1207,6 +1202,19 @@ def task_build_landuse(runid):
         return exception_factory('Building Landuse Failed')
 
     return success_factory()
+
+
+@app.route('/runs/<string:runid>/view/management/<key>')
+@app.route('/runs/<string:runid>/view/management/<key>/')
+def view_management(runid, key):
+    wd = get_wd(runid)
+    assert wd is not None
+
+    landuse = Landuse.getInstance(wd)
+    man = landuse.managements[str(key)].get_management()
+    contents = str(man)
+
+    return Response(contents, mimetype='text/plaintext')
 
 
 # noinspection PyBroadException
@@ -1223,7 +1231,7 @@ def task_modify_landuse(runid):
         lccode = str(int(lccode))
     except Exception:
         return exception_factory('Unpacking Modify Landuse Args Faied')
-        
+
     try:
         landuse.modify(topaz_ids, lccode)
     except Exception:

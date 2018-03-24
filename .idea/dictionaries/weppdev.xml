@@ -2,9 +2,11 @@
   <dictionary name="weppdev">
     <words>
       <w>baer</w>
+      <w>cancov</w>
       <w>cligen</w>
       <w>climatestation</w>
       <w>domlc</w>
+      <w>inrcov</w>
       <w>intind</w>
       <w>landuse</w>
       <w>maxima</w>
@@ -13,6 +15,7 @@
       <w>reccount</w>
       <w>recurence</w>
       <w>retperiod</w>
+      <w>rilcov</w>
       <w>skidder</w>
       <w>subcatchments</w>
       <w>weibull</w>

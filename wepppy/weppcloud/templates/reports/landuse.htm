@@ -1,20 +1,57 @@
  <table class="table">
     <thead>
       <tr>
-        <th>Key</th>
-        <th>Description</th>
-        <th>Management File</th>
-        <th>Coverage %</th>
+        <th style="width:5%">Key</th>
+        <th style="width:5%"></th>
+        <th style="width:50%">Description</th>
+        <th style="width:30%">Management File</th>
+        <th style="width:10%">Coverage %</th>
       </tr>
     </thead>
     <tbody>
   {% for row in report %}
       <tr>
         <td><a href="../view/management/{{ row.key }}"  target="_blank">{{ row.key }}</a></td>
+        <td>
+          <button type="button" class="btn" data-toggle="collapse" data-target="#modify_landuse_{{ row.key }}">
+            <span class="oi oi-wrench"></span>
+          </button>
+        </td>
         <td>{{ row.desc }}</td>
         <td>{{ row.man_fn }}</td>
         <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
       </tr>
+      <tr id="modify_landuse_{{ row.key }}" class="collapse out">
+        <td></td>
+        <td></td>
+        <td colspan="2">
+          Canopy:
+          <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'cancov', this.value)">
+            <option value="" {% if row.cancov_override is none %}selected{% endif %}>{{ (row.cancov * 100) | round | int }}% default</option>
+            {% for pct in range(0, 103, 5) %}
+            <option value="{{ pct / 100.0 }}" {% if row.cancov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
+            {% endfor %}
+          </select>
+          Interill:
+          <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'inrcov', this.value)">
+            <option value="" {% if row.inrcov_override is none %}selected{% endif %}>{{ (row.inrcov * 100) | round | int }}% default</option>
+            {% for pct in range(0, 103, 5) %}
+            <option value="{{ pct / 100.0 }}" {% if row.inrcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
+            {% endfor %}
+          </select>
+          Rill:
+          <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'rilcov', this.value)">
+            <option value="" {% if row.rilcov_override is none %}selected{% endif %}>{{ (row.rilcov * 100) | round | int }}% default</option>
+            {% for pct in range(0, 103, 5) %}
+            <option value="{{ pct / 100.0 }}" {% if row.rilcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td></td>
+      </tr>
   {% endfor %}
     </tbody>
   </table>
+
+<tr>
+
