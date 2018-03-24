@@ -1356,9 +1356,27 @@ var SubcatchmentDelineation = function () {
                 throw "query returned null, cannot determine colors";
             }
 
+            for (var id in self.polys._layers) {
+
+                var topId = self.polys._layers[id].feature.properties.TopazID;
+                var color = lcjson[topId].color;
+                console.log(topId, color);
+
+                self.polys._layers[id].setStyle({
+                    color: "#FFFFFF",
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: color,
+                    fillOpacity: 0.9
+                });
+
+                self.polys._layers[id].redraw();
+            }
+            /*
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var color = lcjson[topId].color;
+                console.log(topId, color);
 
                 layer.setStyle({
                     color: "#FFFFFF",
@@ -1367,7 +1385,9 @@ var SubcatchmentDelineation = function () {
                     fillColor: color,
                     fillOpacity: 0.9
                 });
-            });
+
+                layer.redraw();
+            }); */
         };
 
         //

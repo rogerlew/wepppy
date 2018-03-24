@@ -1271,7 +1271,7 @@ class ManagementSummary(object):
         self.man_fn = kwargs["ManagementFile"]
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
         self.desc = kwargs["Description"]
-        self.color = RGBA(*(kwargs["Color"])).tohex()
+        self.color = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
         self.area = None
 
         self.pct_coverage = None
