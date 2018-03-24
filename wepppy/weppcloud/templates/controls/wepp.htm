@@ -53,7 +53,7 @@
         </div>
         <div class="col-sm-4">
             <input id="surf_runoff" name="surf_runoff" class="form-control mr-sm-3" type="text" 
-            value="{{ wepp.phosphorus_opts.surf_runoff }}" aria-label="Surface runoff concentration">
+            value="{{ wepp.phosphorus_opts.surf_runoff | round(4) }}" aria-label="Surface runoff concentration">
         </div>
     </div>
     <div class="form-group row" id="lateral_flow_container">
@@ -62,7 +62,7 @@
         </div>
         <div class="col-sm-4">
             <input id="lateral_flow" name="lateral_flow" class="form-control mr-sm-3" type="text" 
-            value="{{ wepp.phosphorus_opts.lateral_flow }}" aria-label="Subsurface lateral flow concentration">
+            value="{{ wepp.phosphorus_opts.lateral_flow | round(4) }}" aria-label="Subsurface lateral flow concentration">
         </div>
     </div>
     <div class="form-group row" id="baseflow_container">
@@ -71,7 +71,7 @@
         </div>
         <div class="col-sm-4">
             <input id="baseflow" name="baseflow" class="form-control mr-sm-3" type="text" 
-            value="{{ wepp.phosphorus_opts.baseflow }}" aria-label="Baseflow concentration">
+            value="{{ wepp.phosphorus_opts.baseflow | round(4) }}" aria-label="Baseflow concentration">
         </div>
     </div>
     <div class="form-group row" id="sediment_container">
@@ -80,7 +80,7 @@
         </div>
         <div class="col-sm-4">
             <input id="sediment" name="sediment" class="form-control mr-sm-3" type="text" 
-            value="{{ wepp.phosphorus_opts.sediment }}" aria-label="Sediment concentration">
+            value="{{ wepp.phosphorus_opts.sediment | round(0) }}" aria-label="Sediment concentration">
         </div>
     </div>
     <div class="form-group row">
