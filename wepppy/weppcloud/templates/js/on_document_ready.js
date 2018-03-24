@@ -351,7 +351,7 @@ $(document).ready(function () {
     //
     // Initial Configuration
     //
-    landuse.restore(-1, 0);
+    landuse.restore({{ landuse.mode | int }}, 0);
 
     // load landuse
     if ( {{ landuse.has_landuse | tojson }} ) {
@@ -391,7 +391,7 @@ $(document).ready(function () {
         soil.setMode();
     });
 
-    $("#soil_single_selection").on("change", function () {
+    $("#soil_single_selection").on("input", function () {
         soil.setMode();
     });
 
@@ -408,7 +408,7 @@ $(document).ready(function () {
     //
     // Initial Configuration
     //
-    soil.restore(-1);
+    soil.restore({{ soils.mode | int }});
 
     // load soil
     if ( {{ soils.has_soils | tojson }} ) {

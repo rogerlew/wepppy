@@ -48,9 +48,8 @@ class Soils(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            self._mode = SoilsMode.Undefined
+            self._mode = SoilsMode.Gridded
             self._single_selection = 0
-            self._single_man = None
 
             self.domsoil_d = None  # topaz_id keys
             self.soils = None
@@ -132,8 +131,6 @@ class Soils(NoDbBase):
         # noinspection PyBroadException
         try:
             self._single_selection = mukey
-            self._single_man = get_management_summary(mukey)
-
             self.dump_and_unlock()
 
         except Exception:
@@ -148,14 +145,8 @@ class Soils(NoDbBase):
         if mode == SoilsMode.Undefined:
             return False
 
-        elif mode == SoilsMode.Single:
-            return self._single_man is not None
-
-        elif mode == SoilsMode.Gridded:
+        else:
             return self.domsoil_d is not None
-
-        raise Exception('unknown mode, was a mode '
-                        'added to to SoilsMode')
 
     #
     # build
@@ -222,6 +213,60 @@ class Soils(NoDbBase):
             raise
 
     def build(self):
+        if self.mode == SoilsMode.Gridded:
+            self._build_gridded()
+        elif self.mode == SoilsMode.Single:
+            self._build_single()
+
+    def _build_single(self):
+
+        soils_dir = self.soils_dir
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            watershed = Watershed.getInstance(self.wd)
+            mukey = self.single_selection
+            surgo_c = SurgoSoilCollection([mukey])
+            surgo_c.makeWeppSoils()
+            surgo_c.logInvalidSoils(wd=soils_dir)
+
+            assert surgo_c.weppSoils[mukey].valid()
+            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+            soils = {str(k): v for k, v in soils.items()}
+
+            domsoil_d = {}
+            for topaz_id, sub in watershed.sub_iter():
+                domsoil_d[str(topaz_id)] = str(mukey)
+
+            for topaz_id, chn in watershed.chn_iter():
+                domsoil_d[str(topaz_id)] = str(mukey)
+
+            soils[str(mukey)].pct_coverage = 100.0
+
+            # while we are at it we will calculate the pct coverage
+            # for the landcover types in the watershed
+            for topaz_id, k in domsoil_d.items():
+                summary = watershed.sub_summary(topaz_id)
+                if summary is not None:  # subcatchment
+                    soils[k].area += summary["area"]
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.soils = soils
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_gridded(self):
         soils_dir = self.soils_dir
 
         self.lock()
