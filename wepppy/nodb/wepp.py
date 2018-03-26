@@ -171,7 +171,7 @@ class Wepp(NoDbBase):
             
             self.phosphorus_opts = PhosphorusOpts()
             self.baseflow_opts = BaseflowOpts()
-            self.run_flowpaths = True
+            self.run_flowpaths = False
             self.loss_grid_d_path = None
                 
             self.dump_and_unlock()
@@ -714,6 +714,20 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
             )
         
         return d
+
+    def set_run_flowpaths(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.run_flowpaths = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
         
     def query_sub_runoff(self):
         wd = self.wd
