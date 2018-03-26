@@ -366,7 +366,7 @@ class SummaryBase(object):
         if wepp_id is not None:
             wepp_id = int(wepp_id)
         self.wepp_id = wepp_id
-        
+
         self.length = float(kwds['length'])
         self.width = float(kwds['width'])
         self.area = float(kwds['area'])
@@ -381,7 +381,7 @@ class SummaryBase(object):
 
         self.w_slopes = None
         self.slopes = None
-        
+
     @property    
     def num_points(self) -> int:
         npts = len(self.distance_p)
@@ -429,6 +429,12 @@ class SummaryBase(object):
             d['order'] = self.order
             d['channel_type'] = self.channel_type
             d['cell_width'] = self.cell_width
+        except:
+            pass
+
+        try:
+            d['slopes'] = self.slopes
+            d['coords'] = self.coords
         except:
             pass
 
@@ -482,6 +488,7 @@ class FlowpathSummary(SummaryBase):
     def __init__(self, **kwds):
         super(FlowpathSummary, self).__init__(**kwds)
         self.slopes = tuple(kwds['slopes'])
+        self.coords = kwds['coords']
     
     @property
     def fname(self) -> str:
@@ -1098,7 +1105,8 @@ class WatershedAbstraction:
             direction=float(direction),
             slope_scalar=slope_scalar,
             color=color,
-            distance_p=list(distance_p),
+            coords=[(int(x), int(y)) for (x, y) in zip(indx, indy)],
+            distance_p=distance_p.tolist(),
             slopes=slope.tolist(),
             centroid=CentroidSummary(
                 px=_centroid_px,

@@ -1540,9 +1540,11 @@ def submit_task_run_wepp(runid):
         
         #
         # Run Hillslopes
-        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-            wepp_id = translator.wepp(top=int(topaz_id))
-            assert run_hillslope(wepp_id, runs_dir)
+#        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+#            wepp_id = translator.wepp(top=int(topaz_id))
+#            assert run_hillslope(wepp_id, runs_dir)
+
+        wepp.run_hillslopes()
         
         #
         # Prep Watershed
@@ -1737,7 +1739,68 @@ def report_ron_sub_summary(runid, topaz_id):
     ron = Ron.getInstance(wd)
     return render_template('reports/hill.htm',
                            d=ron.sub_summary(topaz_id))
-                     
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/resources/wepp_loss.tif')
+def resources_wepp_loss(runid):
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        loss_grid_wgs = _join(ron.plot_dir, 'loss.WGS.tif')
+
+        if _exists(loss_grid_wgs):
+            return send_file(loss_grid_wgs, mimetype='image/tiff')
+
+        return error_factory('loss_grid_wgs does not exist')
+
+    except Exception:
+        return exception_factory()
+
+#
+# Unitizer
+#
+
+@app.route('/runs/<string:runid>/unitizer')
+@app.route('/runs/<string:runid>/unitizer/')
+def unitizer_route(runid):
+
+    try:
+        wd = get_wd(runid)
+        unitizer = Unitizer.getInstance(wd)
+
+        value = request.args.get('value')
+        in_units = request.args.get('in_units')
+        ctx_processer = unitizer.context_processor_package()
+
+        contents = ctx_processer['unitizer'](float(value), in_units)
+        return success_factory(contents)
+
+        return error_factory('loss_grid_wgs does not exist')
+
+    except Exception:
+        return exception_factory()
+
+@app.route('/runs/<string:runid>/unitizer_units')
+@app.route('/runs/<string:runid>/unitizer_units/')
+def unitizer_units_route(runid):
+
+    try:
+        wd = get_wd(runid)
+        unitizer = Unitizer.getInstance(wd)
+
+        in_units = request.args.get('in_units')
+        ctx_processer = unitizer.context_processor_package()
+
+        contents = ctx_processer['unitizer_units'](in_units)
+        return success_factory(contents)
+
+        return error_factory('loss_grid_wgs does not exist')
+
+    except Exception:
+        return exception_factory()
+
+
 #
 # BAER
 #                           

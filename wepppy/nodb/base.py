@@ -197,7 +197,19 @@ class NoDbBase(object):
     @property
     def output_dir(self):
         return _join(self.wd, 'wepp', 'output')
-        
+
+    @property
+    def fp_runs_dir(self):
+        return _join(self.wd, 'wepp', 'flowpaths', 'runs')
+
+    @property
+    def fp_output_dir(self):
+        return _join(self.wd, 'wepp', 'flowpaths', 'output')
+
+    @property
+    def plot_dir(self):
+        return _join(self.wd, 'wepp', 'plots')
+
     @property
     def export_dir(self):
         return _join(self.wd, 'export')
