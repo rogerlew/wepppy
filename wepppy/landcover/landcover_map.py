@@ -2,6 +2,7 @@ from os.path import exists as _exists
 from collections import Counter
 
 import numpy as np
+from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
@@ -54,7 +55,11 @@ class LandcoverMap:
             dst = driver.Create(lcgrid_fn, num_cols, num_rows,
                                 1, GDT_Byte)
 
-            dst.SetProjection(proj)
+            srs = osr.SpatialReference()
+            srs.ImportFromProj4(proj)
+            wkt = srs.ExportToWkt()
+
+            dst.SetProjection(wkt)
             dst.SetGeoTransform(transform)
             band = dst.GetRasterBand(1)
             band.WriteArray(lcgrid)

@@ -284,6 +284,7 @@ $(document).ready(function () {
         sub_ctrl.setColorMap($("input[name='wepp_sub_cmap_radio']:checked").val());
     });
 
+
     //
     // Subcatchment Event Bindings
     //
@@ -299,19 +300,40 @@ $(document).ready(function () {
         wepp.updatePhosphorus();
     });
 
+    //
+    // Hillslopes
+
+    // Phosphorus
+    render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
+    sub_ctrl.renderPhosphorus();
     $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
-        console.log('wepp_sub_cmap_range_phosphorus');
         sub_ctrl.renderPhosphorus();
     });
 
+    // Runoff
+    render_legend("viridis", "wepp_sub_cmap_canvas_runoff");
+    sub_ctrl.renderRunoff();
     $('#wepp_sub_cmap_range_runoff').on('input', function () {
-        console.log('wepp_sub_cmap_range_runoff');
         sub_ctrl.renderRunoff();
     });
 
+    // Loss
+    render_legend("viridis", "wepp_sub_cmap_canvas_loss");
+    sub_ctrl.renderLoss();
     $('#wepp_sub_cmap_range_loss').on('input', function () {
-        console.log('wepp_sub_cmap_range_loss');
         sub_ctrl.renderLoss();
+    });
+
+
+    //
+    // Gridded
+
+    // Soil Deposition / Loss
+    render_legend("viridis", "wepp_grd_cmap_canvas_loss");
+    sub_ctrl.updateGriddedLoss();
+
+    $('#wepp_grd_cmap_range_loss').on('input', function () {
+        sub_ctrl.updateGriddedLoss();
     });
 
     // load subcatchments

@@ -100,29 +100,79 @@
           {% endif %}
           <div class="tab-pane" id="results" role="tabpanel">
             <h6>WEPP Results</h6>
+            <p>Hillslope</p>
             <div class="radio radio-primary">
                 <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_runoff" value="sub_runoff" >
-                <label for="wepp_res_radio1">
-                    Runoff
+                <label for="wepp_sub_cmap_radio_runoff">
+                    Subrunoff
                 </label>
                 <br/>
-                <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="50" value="2">
+                <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="10000" value="5000" step="0.01">
+                <span id="wepp_sub_cmap_canvas_runoff_units"></span><br/>
+                <div style='width:240px;height:40px'>
+                    <canvas id="wepp_sub_cmap_canvas_runoff" width=200 height=20
+                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+                    <div class="row">
+                        <div class="col-md-4"><span id="wepp_sub_cmap_canvas_runoff_min"></span></div>
+                        <div class="col-md-4" style="text-align: center;"></div>
+                        <div class="col-md-4" style="text-align: right;"><span id="wepp_sub_cmap_canvas_runoff_max"></span></div>
+                    </div>
+                </div>
             </div>
             <div class="radio radio-primary">
                 <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_loss" value="sub_loss" >
-                <label for="wepp_res_radio2">
+                <label for="wepp_sub_cmap_radio_loss">
                     Soil Loss/Deposition
                 </label>
                 <br/>
-                <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="10" value="0.5">
+                <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="10" value="0.5" step="0.01">
+                <span id="wepp_sub_cmap_canvas_loss_units"></span><br/>
+                <div style='width:240px;height:40px'>
+                    <canvas id="wepp_sub_cmap_canvas_loss" width=200 height=20
+                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+                    <div class="row">
+                        <div class="col-md-4"><span id="wepp_sub_cmap_canvas_loss_min"></span></div>
+                        <div class="col-md-4" style="text-align: center;"></div>
+                        <div class="col-md-4" style="text-align: right;"><span id="wepp_sub_cmap_canvas_loss_max"></span></div>
+                    </div>
+                </div>
             </div>
             <div class="radio radio-primary">
                 <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_phosphorus" value="sub_phosphorus" >
-                <label for="wepp_res_radio2">
+                <label for="wepp_sub_cmap_radio_phosphorus">
                     Total Phosphorus
                 </label>
                 <br/>
-                <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="2">
+                <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="1" value="0.4" step="0.001">
+                <span id="wepp_sub_cmap_canvas_phosphorus_units"></span><br/>
+                <div style='width:240px;height:40px'>
+                    <canvas id="wepp_sub_cmap_canvas_phosphorus" width=200 height=20
+                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+                    <div class="row">
+                        <div class="col-md-4"><span id="wepp_sub_cmap_canvas_phosphorus_min"></span></div>
+                        <div class="col-md-4" style="text-align: center;"></div>
+                        <div class="col-md-4" style="text-align: right;"><span id="wepp_sub_cmap_canvas_phosphorus_max"></span></div>
+                    </div>
+                </div>
+            </div>
+            <p>Gridded</p>
+            <div class="radio radio-primary">
+                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_grd_cmap_radio_loss" value="grd_loss" >
+                <label for="wepp_grd_cmap_radio_loss">
+                    Soil Deposition/Loss
+                </label>
+                <br/>
+                <input type="range" id="wepp_grd_cmap_range_loss" min="0.0001" max="10" value="2" step="0.01">
+                <span id="wepp_grd_cmap_range_loss_units"></span><br/>
+                <div style='width:240px;height:40px'>
+                    <canvas id="wepp_grd_cmap_canvas_loss" width=200 height=20
+                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+                    <div class="row">
+                        <div class="col-md-4"><span id="wepp_grd_cmap_range_loss_min"></span></div>
+                        <div class="col-md-4" style="text-align: center;">0</div>
+                        <div class="col-md-4" style="text-align: right;"><span id="wepp_grd_cmap_range_loss_max"></span></div>
+                    </div>
+                </div>
             </div>
           </div>
           <div class="tab-pane" id="config" role="tabpanel">

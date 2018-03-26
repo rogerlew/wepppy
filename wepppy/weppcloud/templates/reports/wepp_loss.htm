@@ -12,11 +12,46 @@
     {% endfor %}
     </tbody>
 </table>
+<h5>Average Annual Summary for Subcatchments</h5>
+<table id="wepploss_sub_tbl" class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Sub</th>
+        <th>Length</th>
+        <th>Area</th>
+        <th>Subrunoff</th>
+        <th>Baseflow</th>
+        <th>Soil Loss</th>
+        <th>Sediment Dep.</th>
+        <th>Sediment Yield</th>
+        <th>Solub. React. P.</th>
+        <th>Particulate P.</th>
+        <th>Total P.</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>&nbsp;</td>
+        {% for unit in report.hill_units[1:] %}
+        <td class="text-center">{{ unitizer_units(unit) | safe }}</td>
+        {% endfor %}
+    </tr>
+    {% for d in report.hill_tbl %}
+      <tr>
+        {% for key, unit in report.hill_hdr |zip(report.hill_units) %}
+        <td class="text-right">{{ unitizer( d[key], unit) | safe }}</td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+</table>
 <h5>Average Annual Summary for Channels</h5>
 <table id="wepploss_chn_tbl" class="table table-condensed">
     <thead>
       <tr>
         <th>Channel</th>
+        <th>Length</th>
+        <th>Area</th>
         <th>Discharge Vol.</th>
         <th>Sediment Yield</th>
         <th>Soil Loss</th>
@@ -26,61 +61,20 @@
         <th>Solub. P.</th>
         <th>React. P.</th>
         <th>Total P.</th>
-        <th>&nbsp;</th>
       </tr>
     </thead>
     <tbody>
     <tr>
         <td>&nbsp;</td>
-        {% for unit in report.chn_units[2:] %}
+        {% for unit in report.chn_units[1:] %}
         <td class="text-center">{{ unitizer_units(unit) | safe }}</td>
         {% endfor %}
-        <td>&nbsp;</td>
     </tr>
     {% for d in report.chn_tbl %}
       <tr>
-        <td>{{ translator.top(chn_enum=d['Channels and Impoundments']) }}</td>
-            {% for key, unit in report.chn_hdr[2:] |zip(report.chn_units[2:]) %}
-            <td class="text-right">{{ unitizer( d[key], unit) | safe }}</td>
-            {% endfor %}
-        <td>&nbsp;</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-</table>
-<h5>Average Annual Summary for Subcatchments</h5>
-<table id="wepploss_sub_tbl" class="table table-condensed">
-    <thead>
-      <tr>
-        <th>Sub</th>
-        <th>Runoff Vol.</th>
-        <th>Subrunoff Vol.</th>
-        <th>Baseflow Vol.</th>
-        <th>Soil Loss</th>
-        <th>Sediment Dep.</th>
-        <th>Sediment Yield</th>
-        <th>Sub Area</th>
-        <th>Solub. React. P.</th>
-        <th>Particulate P.</th>
-        <th>Total P.</th>
-        <th>&nbsp;</th>
-      </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>&nbsp;</td
-        {% for unit in report.hill_units[1:] %}
-        <td class="text-center">{{ unitizer_units(unit) | safe }}</td>
+        {% for key, unit in report.chn_hdr |zip(report.chn_units) %}
+        <td class="text-right">{{ unitizer( d[key], unit) | safe }}</td>
         {% endfor %}
-        <td>&nbsp;</td>
-    </tr>
-    {% for d in report.hill_tbl %}
-      <tr>
-        <td>{{ translator.top(wepp=d['Hillslopes']) }}</td>
-            {% for key, unit in report.hill_hdr[2:] |zip(report.hill_units[2:]) %}
-            <td class="text-right">{{ unitizer( d[key], unit) | safe }}</td>
-            {% endfor %}
-        <td>&nbsp;</td>
       </tr>
     {% endfor %}
     </tbody>

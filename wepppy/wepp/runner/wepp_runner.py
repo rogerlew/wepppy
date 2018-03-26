@@ -26,8 +26,12 @@ def _template_loader(fn):
 
 def hill_template_loader():
     return _template_loader("hillslope.template")
-    
-    
+
+
+def flowpath_template_loader():
+    return _template_loader("flowpath.template")
+
+
 def watershed_template_loader():
     return _template_loader("watershed.template")
     
@@ -37,8 +41,19 @@ def hillstub_template_loader():
 M
 Y
 ../output/H{wepp_id}.pass.dat"""
-    
-    
+
+
+def make_flowpath_run(fp, sim_years, runs_dir):
+    _fp_template = flowpath_template_loader()
+
+    s = _fp_template.format(fp=fp,
+                              sim_years=sim_years)
+
+    fn = _join(runs_dir, '%s.run' % fp)
+    with open(fn, 'w') as fp:
+        fp.write(s)
+
+
 def make_hillslope_run(wepp_id, sim_years, runs_dir):
     _hill_template = hill_template_loader()
     
@@ -88,6 +103,46 @@ def run_hillslope(wepp_id, runs_dir):
                     
     raise Exception('Error running wepp for wepp_id %i\nSee %s'
                     % (wepp_id, log_fn))
+
+
+def run_flowpath(fp, runs_dir):
+    # remember current directory
+    curdir = os.getcwd()
+
+    # change to working directory
+    os.chdir(runs_dir)
+
+    # noinspection PyBroadException
+    try:
+        cmd = [os.path.abspath(_wepp)]
+
+        assert _exists('%s.man' % fp)
+        assert _exists('%s.slp' % fp)
+        assert _exists('%s.cli' % fp)
+        assert _exists('%s.sol' % fp)
+
+        _run = open('%s.run' % fp)
+        _log = open('%s.err' % fp, 'w')
+
+        p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log)
+        p.wait()
+        _run.close()
+        _log.close()
+
+        os.chdir(curdir)
+    except Exception:
+        os.chdir(curdir)
+        raise
+
+    log_fn = _join(runs_dir, '%s.err' % fp)
+    with open(log_fn) as fp:
+        lines = fp.readlines()
+        for L in lines:
+            if 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in L:
+                return True
+
+    raise Exception('Error running wepp for %s\nSee %s'
+                    % (fp, log_fn))
 
 
 def make_watershed_run(sim_years, wepp_ids, runs_dir):
