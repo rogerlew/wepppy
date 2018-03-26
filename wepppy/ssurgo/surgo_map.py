@@ -7,6 +7,7 @@ from collections import Counter
 
 import numpy as np
 
+from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import (
     GDT_Float32,
@@ -132,12 +133,17 @@ class SurgoMap:
         if soilgrid_fn is not None:
             # initialize raster
             num_cols, num_rows = soilgrid.shape
+            proj = self.proj
 
             driver = gdal.GetDriverByName("GTiff")
             dst = driver.Create(soilgrid_fn, num_cols, num_rows,
                                 1, GDT_UInt32)
 
-            dst.SetProjection(self.proj)
+            srs = osr.SpatialReference()
+            srs.ImportFromProj4(proj)
+            wkt = srs.ExportToWkt()
+
+            dst.SetProjection(wkt)
             dst.SetGeoTransform(self.transform)
             dst.GetRasterBand(1).WriteArray(soilgrid)
 
@@ -176,7 +182,12 @@ class SurgoMap:
         # create raster
         driver = gdal.GetDriverByName(drivername)
         dst = driver.Create(dst_fname, num_cols, num_rows, 1, GDT_Float32)
-        dst.SetProjection(proj)
+
+        srs = osr.SpatialReference()
+        srs.ImportFromProj4(proj)
+        wkt = srs.ExportToWkt()
+
+        dst.SetProjection(wkt)
         dst.SetGeoTransform(transform)
         dst.GetRasterBand(1).WriteArray(var_r)
         

@@ -5,6 +5,10 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+from subprocess import Popen, PIPE
+
+import pickle
+
 from glob import glob
 
 import shutil
@@ -12,10 +16,18 @@ import shutil
 # non-standard
 import jsonpickle
 
+import numpy as np
+
+from osgeo import osr
+from osgeo import gdal
+from osgeo.gdalconst import *
+
 # wepppy
 from wepppy.wepp.runner import (
     make_hillslope_run,
     run_hillslope,
+    make_flowpath_run,
+    run_flowpath,
     make_watershed_run,
     run_watershed
 )
@@ -24,8 +36,8 @@ from wepppy.wepp.management import (
     merge_managements,
 )
 
-from wepppy.all_your_base import isfloat
-from wepppy.wepp.out import LossReport, EbeReport
+from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4
+from wepppy.wepp.out import LossReport, EbeReport, PlotFile
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -33,6 +45,7 @@ from .landuse import Landuse, LanduseMode
 from .soils import Soils, SoilsMode
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
+from .topaz import Topaz
 
 
 class BaseflowOpts(object):
@@ -158,6 +171,8 @@ class Wepp(NoDbBase):
             
             self.phosphorus_opts = PhosphorusOpts()
             self.baseflow_opts = BaseflowOpts()
+            self.run_flowpaths = True
+            self.loss_grid_d_path = None
                 
             self.dump_and_unlock()
 
@@ -203,7 +218,7 @@ class Wepp(NoDbBase):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return _exists(loss_pw0)
-    
+
     #
     # hillslopes
     #
@@ -254,11 +269,24 @@ class Wepp(NoDbBase):
         output_dir = self.output_dir
         if not _exists(output_dir):
             os.mkdir(output_dir)
+
+        plot_dir = self.plot_dir
+        if not _exists(plot_dir):
+            os.mkdir(plot_dir)
+
+        fp_runs_dir = self.fp_runs_dir
+        if not _exists(fp_runs_dir):
+            os.makedirs(fp_runs_dir)
+
+        fp_output_dir = self.fp_output_dir
+        if not _exists(fp_output_dir):
+            os.mkdir(fp_output_dir)
             
     def _prep_slopes(self, translator):
         watershed = Watershed.getInstance(self.wd)
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
+        fp_runs_dir = self.fp_runs_dir
         
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
@@ -266,11 +294,20 @@ class Wepp(NoDbBase):
             src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
             shutil.copyfile(src_fn, dst_fn)
+
+            if self.run_flowpaths:
+                for fp in watershed.fps_summary(topaz_id):
+                    fn = '{}.slp'.format(fp)
+                    src_fn = _join(wat_dir, fn)
+                    dst_fn = _join(fp_runs_dir, fn)
+                    shutil.copyfile(src_fn, dst_fn)
             
     def _prep_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
         years = Climate.getInstance(self.wd).input_years
+        watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
+        fp_runs_dir = self.fp_runs_dir
         
         if landuse.mode == LanduseMode.Gridded:
             for topaz_id, man_summary in landuse.sub_iter():
@@ -283,14 +320,23 @@ class Wepp(NoDbBase):
                 
                 with open(dst_fn, 'w') as fp:
                     fp.write(fn_contents)
-                
+
+                if self.run_flowpaths:
+                    for fp in watershed.fps_summary(topaz_id):
+                        dst_fn = _join(fp_runs_dir, '{}.man'.format(fp))
+
+                        with open(dst_fn, 'w') as fp:
+                            fp.write(fn_contents)
+
         else:
             raise NotImplementedError('Single landuse not implemented')
         
     def _prep_soils(self, translator):
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
+        watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
+        fp_runs_dir = self.fp_runs_dir
 
         for topaz_id, soil in soils.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
@@ -298,45 +344,135 @@ class Wepp(NoDbBase):
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
             shutil.copyfile(src_fn, dst_fn)
 
+            if self.run_flowpaths:
+                for fp in watershed.fps_summary(topaz_id):
+                    dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
+                    shutil.copyfile(src_fn, dst_fn)
+
     def _prep_climates(self, translator):
         watershed = Watershed.getInstance(self.wd)
         climate = Climate.getInstance(self.wd)
         cli_dir = self.cli_dir
         runs_dir = self.runs_dir
-    
+        fp_runs_dir = self.fp_runs_dir
+
         if climate.climate_mode == ClimateMode.Localized:
             for topaz_id, cli_fn in climate.sub_cli_fns.items():
                 wepp_id = translator.wepp(top=int(topaz_id))
                 dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
                 cli_path = _join(cli_dir, cli_fn)
                 shutil.copyfile(cli_path, dst_fn)
-                
+
+                if self.run_flowpaths:
+                    for fp in watershed.fps_summary(topaz_id):
+                        dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
+                        shutil.copyfile(cli_path, dst_fn)
+
         else:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
                 dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
                 cli_path = _join(cli_dir, climate.cli_fn)
                 shutil.copyfile(cli_path, dst_fn)
+
+                if self.run_flowpaths:
+                    for fp in watershed.fps_summary(topaz_id):
+                        dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
+                        shutil.copyfile(cli_path, dst_fn)
                 
     def _make_hillslope_runs(self, translator):
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
+        fp_runs_dir = self.fp_runs_dir
         years = Climate.getInstance(self.wd).input_years
-        
+
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
             
             make_hillslope_run(wepp_id, years, runs_dir)
-            
+
+            if self.run_flowpaths:
+                for fp in watershed.fps_summary(topaz_id):
+                    make_flowpath_run(fp, years, fp_runs_dir)
+
     def run_hillslopes(self):
         translator = Watershed.getInstance(self.wd).translator_factory()
         watershed = Watershed.getInstance(self.wd)
+        topaz = Topaz.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
-        
+        fp_runs_dir = self.fp_runs_dir
+
+        if self.run_flowpaths:
+            # data structure to contain flowpath soil loss results
+            # keys are (x, y) pixel locations
+            # values are lists of soil loss/deposition from flow paths
+            loss_grid_d = {}
+
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
             assert run_hillslope(wepp_id, runs_dir)
-     
+            print(wepp_id)
+
+            # run flowpaths if specified
+            if self.run_flowpaths:
+
+                # iterate over the flowpath ids
+                fps_summary = watershed.fps_summary(topaz_id)
+                for fp in fps_summary:
+                    print(fp)
+
+                    # run wepp for flowpath
+                    assert run_flowpath(fp, fp_runs_dir)
+
+                    # read plot file data
+                    plo = PlotFile(_join(self.fp_output_dir, '%s.plot.dat' % fp))
+
+                    # interpolate soil loss to cell locations of flowpath
+                    d = fps_summary[fp].distance_p
+                    loss = plo.interpolate(d)
+
+                    # store non-zero values in loss_grid_d
+                    for L, coord in zip(loss, fps_summary[fp].coords):
+                        if L != 0.0:
+                            if coord in loss_grid_d:
+                                loss_grid_d[coord].append(L)
+                            else:
+                                loss_grid_d[coord] = [L]
+
+        if self.run_flowpaths:
+            self._pickle_loss_grid_d(loss_grid_d)
+            self.make_loss_grid()
+
+    def _pickle_loss_grid_d(self, loss_grid_d):
+        plot_dir = self.plot_dir
+        loss_grid_d_path = _join(plot_dir, 'loss_grid_d.pickle')
+
+        with open(loss_grid_d_path, 'wb') as fp:
+            pickle.dump(loss_grid_d, fp)
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.loss_grid_d_path = loss_grid_d_path
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def loss_grid_d(self):
+        loss_grid_d_path = self.loss_grid_d_path
+
+        assert loss_grid_d_path is not None
+        assert _exists(loss_grid_d_path)
+
+        with open(loss_grid_d_path, 'rb') as fp:
+            _loss_grid_d = pickle.load(fp)
+
+        return _loss_grid_d
+
     #
     # watershed
     #    
@@ -344,31 +480,14 @@ class Wepp(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
-        print('prep_structure')
         self._prep_structure(translator)
-
-        print('prep_channel_slopes')
         self._prep_channel_slopes()
-
-        print('prep_channel_chn')
         self._prep_channel_chn(translator)
-
-        print('prep_impoundment')
         self._prep_impoundment()
-
-        print('prep_channel_soils')
         self._prep_channel_soils(translator)
-
-        print('prep_channel_climate')
         self._prep_channel_climate(translator)
-
-        print('prep_channel_input')
         self._prep_channel_input()
-
-        print('prep_watershed_managements')
         self._prep_watershed_managements(translator)
-
-        print('make_watershed_run')
         self._make_watershed_run(translator)
 
     def _prep_structure(self, translator):
@@ -432,7 +551,6 @@ class Wepp(NoDbBase):
         runs_dir = self.runs_dir
         with open(_join(runs_dir, 'chan.inp'), 'w') as fp:
             fp.write('1 600\n0\n1\n{}\n'.format(total))
-
 
     def _prep_channel_soils(self, translator):
         soils = Soils.getInstance(self.wd)
@@ -568,12 +686,12 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
     def report_loss(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        return LossReport(loss_pw0)
+        return LossReport(loss_pw0, self.wd)
 
     def report_ebe(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        loss_rpt = LossReport(loss_pw0)
+        loss_rpt = LossReport(loss_pw0, self.wd)
 
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = EbeReport(ebe_pw0)
@@ -585,14 +703,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = LossReport(loss_pw0)
+        report = LossReport(loss_pw0, self.wd)
         
         d = {}
         for row in report.hill_tbl:
             topaz_id = translator.top(wepp=row['Hillslopes'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                total_p=row['Total Phosphorus']
+                total_p=row['Total P Density']
             )
         
         return d
@@ -602,14 +720,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = LossReport(loss_pw0)
+        report = LossReport(loss_pw0, self.wd)
         
         d = {}
         for row in report.hill_tbl:
             topaz_id = translator.top(wepp=row['Hillslopes'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                runoff=row['Subrunoff Volume']
+                runoff=row['Subrunoff']
             )
         
         return d
@@ -619,14 +737,51 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = LossReport(loss_pw0)
+        report = LossReport(loss_pw0, self.wd)
         
         d = {}
         for row in report.hill_tbl:
             topaz_id = translator.top(wepp=row['Hillslopes'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                v=row['Soil Loss']
+                v=row['Soil Loss Density']
             )
         
         return d
+
+    def make_loss_grid(self):
+        subwta, transform, proj = read_arc(self.subwta_arc, dtype=np.int32)
+
+        num_cols, num_rows = subwta.shape
+        loss_grid = np.zeros((num_cols, num_rows))
+
+        _loss_grid_d = self.loss_grid_d
+        for (x, y) in _loss_grid_d:
+            loss = np.mean(np.array(_loss_grid_d[(x, y)]))
+            loss_grid[x, y] = loss
+
+        loss_grid_path = _join(self.plot_dir, 'loss.tif')
+        driver = gdal.GetDriverByName("GTiff")
+        dst = driver.Create(loss_grid_path, num_cols, num_rows,
+                            1, GDT_Float32)
+
+        srs = osr.SpatialReference()
+        srs.ImportFromProj4(proj)
+        wkt = srs.ExportToWkt()
+
+        dst.SetProjection(wkt)
+        dst.SetGeoTransform(transform)
+        band = dst.GetRasterBand(1)
+        band.WriteArray(loss_grid.T)
+        del dst
+
+        assert _exists(loss_grid_path)
+
+        loss_grid_wgs = _join(self.plot_dir, 'loss.WGS.tif')
+
+        cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+               '-r', 'near', loss_grid_path, loss_grid_wgs]
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p.wait()
+
+        assert _exists(loss_grid_wgs)

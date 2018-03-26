@@ -34,6 +34,7 @@ class Watershed(NoDbBase):
         # noinspection PyBroadException
         try:
             self._subs_summary = None
+            self._fps_summary = None
             self._structure = None
             self._chns_summary = None
             self._totalarea = None
@@ -134,12 +135,15 @@ class Watershed(NoDbBase):
                 chns_summary[topaz_id] = v
 
             subs_summary = {}
+            fps_summary = {}
             for k, v in _abs.watershed['hillslopes'].items():
                 topaz_id = int(k.replace('hill_', ''))
                 subs_summary[topaz_id] = v
+                fps_summary[topaz_id] = _abs.watershed['flowpaths'][k]
                 
             self._subs_summary = subs_summary
             self._chns_summary = chns_summary
+            self._fps_summary = fps_summary
             self._totalarea = _abs.totalarea
             self._centroid = _abs.centroid.lnglat
             self._outlet_top_id = str(_abs.outlet_top_id)
@@ -176,7 +180,16 @@ class Watershed(NoDbBase):
             return self._subs_summary[topaz_id].as_dict()
         else:
             return None
-        
+
+    def fps_summary(self, topaz_id):
+        if self._fps_summary is None:
+            return None
+
+        if topaz_id in self._fps_summary:
+            return self._fps_summary[topaz_id]
+        else:
+            return None
+
     # gotcha: using __getitem__ breaks jinja's attribute lookup, so...
     def _(self, wepp_id) -> Union[HillSummary, ChannelSummary]:
         translator = self.translator_factory()
