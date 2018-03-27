@@ -222,6 +222,9 @@ class Wepp(NoDbBase):
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return _exists(loss_pw0)
 
+    #
+    # Log methods, TODO: make Mixin
+    #
     def _calc_log_elapsed(self):
         with open(self.status_log) as fp:
             lines = fp.readlines()
@@ -702,7 +705,8 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         mankey = Counter(keys).most_common()[0][0]
 
         chn_man = landuse.managements[str(mankey)].get_management()
-        chn_man.make_multiple_ofe(len(keys))
+        if len(keys) > 1:
+            chn_man.make_multiple_ofe(len(keys))
 
         if years > 1:
             multi = chn_man.build_multiple_year_man(years)
@@ -756,23 +760,6 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         ebe_rpt.run_return_periods(loss_rpt)
         return  ebe_rpt
 
-    def query_sub_phosphorus(self):
-        wd = self.wd
-        translator = Watershed.getInstance(wd).translator_factory()
-        output_dir = self.output_dir
-        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = LossReport(loss_pw0, self.wd)
-        
-        d = {}
-        for row in report.hill_tbl:
-            topaz_id = translator.top(wepp=row['Hillslopes'])
-            d[str(topaz_id)] = dict(
-                topaz_id=topaz_id,
-                total_p=row['Total P Density']
-            )
-        
-        return d
-
     def set_run_flowpaths(self, state):
         assert state in [True, False]
 
@@ -787,7 +774,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
             self.unlock('-f')
             raise
         
-    def query_sub_runoff(self):
+    def query_sub_val(self, measure):
         wd = self.wd
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
@@ -799,38 +786,24 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
             topaz_id = translator.top(wepp=row['Hillslopes'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                runoff=row['Runoff']
-            )
-        
-        return d
-    
-    def query_sub_loss(self):
-        wd = self.wd
-        translator = Watershed.getInstance(wd).translator_factory()
-        output_dir = self.output_dir
-        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = LossReport(loss_pw0, self.wd)
-        
-        d = {}
-        for row in report.hill_tbl:
-            topaz_id = translator.top(wepp=row['Hillslopes'])
-            d[str(topaz_id)] = dict(
-                topaz_id=topaz_id,
-                loss=row['DepLoss']
+                value=row[measure]
             )
         
         return d
 
     def make_loss_grid(self):
-        subwta, transform, proj = read_arc(self.subwta_arc, dtype=np.int32)
+        bound, transform, proj = read_arc(self.bound_arc, dtype=np.int32)
 
-        num_cols, num_rows = subwta.shape
+        num_cols, num_rows = bound.shape
         loss_grid = np.zeros((num_cols, num_rows))
 
         _loss_grid_d = self.loss_grid_d
         for (x, y) in _loss_grid_d:
             loss = np.mean(np.array(_loss_grid_d[(x, y)]))
             loss_grid[x, y] = loss
+
+        indx = np.where(bound == 0.0)
+        loss_grid[indx] = -9999
 
         loss_grid_path = _join(self.plot_dir, 'loss.tif')
         driver = gdal.GetDriverByName("GTiff")
@@ -844,6 +817,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         dst.SetProjection(wkt)
         dst.SetGeoTransform(transform)
         band = dst.GetRasterBand(1)
+        band.SetNoDataValue(-1e38)
         band.WriteArray(loss_grid.T)
         del dst
 

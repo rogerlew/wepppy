@@ -1608,8 +1608,8 @@ def task_set_readonly(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/wepp_status', methods=['POST'])
-@app.route('/runs/<string:runid>/query/wepp_status/', methods=['POST'])
+@app.route('/runs/<string:runid>/query/wepp_status', methods=['GET', 'POST'])
+@app.route('/runs/<string:runid>/query/wepp_status/', methods=['GET', 'POST'])
 def get_wepp_run_status(runid):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
@@ -1810,7 +1810,25 @@ def query_wepp_sub_runoff(runid):
     # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_runoff())
+    return jsonify(wepp.query_sub_val('Runoff'))
+
+
+@app.route('/runs/<string:runid>/query/wepp/subrunoff/subcatchments')
+@app.route('/runs/<string:runid>/query/wepp/subrunoff/subcatchments/')
+def query_wepp_sub_subrunoff(runid):
+    # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+    return jsonify(wepp.query_sub_val('Subrunoff'))
+
+
+@app.route('/runs/<string:runid>/query/wepp/baseflow/subcatchments')
+@app.route('/runs/<string:runid>/query/wepp/baseflow/subcatchments/')
+def query_wepp_sub_baseflow(runid):
+    # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+    return jsonify(wepp.query_sub_val('Baseflow'))
     
     
 @app.route('/runs/<string:runid>/query/wepp/loss/subcatchments')
@@ -1818,7 +1836,7 @@ def query_wepp_sub_runoff(runid):
 def query_wepp_sub_loss(runid):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_loss())
+    return jsonify(wepp.query_sub_val('DepLoss'))
     
     
 @app.route('/runs/<string:runid>/query/wepp/phosphorus/subcatchments')
@@ -1826,7 +1844,7 @@ def query_wepp_sub_loss(runid):
 def query_wepp_sub_phosphorus(runid):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_phosphorus())
+    return jsonify(wepp.query_sub_val('Total P Density'))
     
     
 @app.route('/runs/<string:runid>/query/chn_summary/<topaz_id>')
@@ -1875,6 +1893,28 @@ def resources_wepp_loss(runid):
             return send_file(loss_grid_wgs, mimetype='image/tiff')
 
         return error_factory('loss_grid_wgs does not exist')
+
+    except Exception:
+        return exception_factory()
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/query/bound_coords')
+@app.route('/runs/<string:runid>/query/bound_coords/')
+def query_bound_coords(runid):
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        bound_wgs_json = _join(ron.topaz_wd, 'BOUND.WGS.JSON')
+
+        if _exists(bound_wgs_json):
+            with open(bound_wgs_json) as fp:
+                js = json.load(fp)
+                coords = js['features'][0]['geometry']['coordinates'][0]
+                coords = [ll[::-1] for ll in coords]
+
+                return success_factory(coords)
+
+        return error_factory('Could not determine coords')
 
     except Exception:
         return exception_factory()
