@@ -123,6 +123,7 @@ var Project = function () {
                 $('.disable-readonly').each( function( index, element ){
                     $(this).prop('readonly', false);
                 });
+                Outlet.getInstance().setMode(0);
             }
         };
 
@@ -1412,7 +1413,7 @@ var SubcatchmentDelineation = function () {
         that.labelRunoffMin = $('#wepp_sub_cmap_canvas_runoff_min');
         that.labelRunoffMax = $('#wepp_sub_cmap_canvas_runoff_max');
         that.labelRunoffUnits = $('#wepp_sub_cmap_canvas_runoff_units');
-        that.cmapperRunoff = createColormap({ colormap: 'summer', nshades: 64 });
+        that.cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
 
         that.cmapRunoff = function () {
             var self = instance;
@@ -1494,7 +1495,7 @@ var SubcatchmentDelineation = function () {
         that.labelLossMin = $('#wepp_sub_cmap_canvas_loss_min');
         that.labelLossMax = $('#wepp_sub_cmap_canvas_loss_max');
         that.labelLossUnits = $('#wepp_sub_cmap_canvas_loss_units');
-        that.cmapperLoss = createColormap({ colormap: 'rainbow', nshades: 64 });
+        that.cmapperLoss = createColormap({ colormap: 'portland', nshades: 64 });
 
         that.cmapLoss = function () {
             var self = instance;
@@ -1518,11 +1519,23 @@ var SubcatchmentDelineation = function () {
             var self = instance;
 
             var r = parseFloat(self.rangeLoss.val());
-            self.labelLossMin.html("0.000");
 
             $.get({
                 url: "../unitizer/",
-                data: {value: r, in_units: 'tonne/ha'},
+                data: {value: -1.0 * r, in_units: 'kg/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelLossMin.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "../unitizer/",
+                data: {value: r, in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
                     self.labelLossMax.html(response.Content);
@@ -1535,7 +1548,7 @@ var SubcatchmentDelineation = function () {
 
             $.get({
                 url: "../unitizer_units/",
-                data: {in_units: 'tonne/ha'},
+                data: {in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
                     self.labelLossUnits.html(response.Content);
@@ -1546,6 +1559,7 @@ var SubcatchmentDelineation = function () {
                 }
             });
 
+
             if (self.polys == null) {
                 return;
             }
@@ -1553,7 +1567,7 @@ var SubcatchmentDelineation = function () {
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataLoss[topId].loss);
-                var c = self.cmapperLoss.map(v / r);
+                var c = self.cmapperLoss.map(v / (2.0 * r) + 0.5);
 
                 layer.setStyle({
                     color: c,
@@ -1599,7 +1613,7 @@ var SubcatchmentDelineation = function () {
                     displayMin: 0,
                     displayMax: 1,
                     name: self.gridlabel,
-                    colorScale: 'viridis',
+                    colorScale: 'portland',
                     opacity: 1.0,
                     clampLow: true,
                     clampHigh: true,
@@ -2654,12 +2668,13 @@ var Wepp = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-        that.status_url = null;
 
         that.surf_runoff = $("#wepp_form #surf_runoff");
         that.lateral_flow = $("#wepp_form #lateral_flow");
         that.baseflow = $("#wepp_form #baseflow");
         that.sediment = $("#wepp_form #sediment");
+
+        that.attempts = 0;
 
         that.updatePhosphorus = function () {
             var self = instance;
@@ -2713,17 +2728,17 @@ var Wepp = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
+            that.attempts = 0;
+            setTimeout(self.status_loop, 2000);
+
             $.post({
                 url: "../tasks/run_wepp/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
+                        that.attempts = 9999999;
                         self.status.html(task_msg + "... Success");
                         self.form.trigger("WEPP_RUN_TASK_COMPLETED");
-                        //                        self.form.trigger("WEPP_RUN_SUBMITTED_COMPLETED");
-                        //                        self.status.html(`${task_msg}... Success`);
-                        //                        self.status_url = response.status_url;
-                        //                        self.status_loop();
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -2750,7 +2765,7 @@ var Wepp = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function() {
+            }).always(function () {
                 $.get({
                     url: "../report/wepp/frq/",
                     cache: false,
@@ -2761,47 +2776,42 @@ var Wepp = function () {
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
+                }).always(function() {
+                    $.get({
+                        url: "../report/wepp/log/",
+                        cache: false,
+                        success: function success(response) {
+                            self.info.append(response);
+                        },
+                        fail: function fail(jqXHR, textStatus, errorThrown) {
+                            self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                        }
+                    });
                 });
             });
         };
 
-        var attempts = 0;
+
         that.status_loop = function () {
             var self = instance;
-            attempts = 0;
-            if (self.status_url !== null) {
-                $.get({
-                    url: self.status_url,
-                    success: function success(response) {
 
-                        if (response.state === "PENDING") {
-                            self.status.html(response.info);
-                            attempts += 1;
-                            if (attempts > 1000) {
-                                self.status_url = null;
-                            }
-                        } else if (response.state === "FAILURE") {
-                            self.pushResponseStacktrace(self, {
-                                "Success": false,
-                                "Error": "WEPP Run Failed",
-                                "StackTrace": response.info
-                            });
-                            self.status_url = null;
-                        } else if (response.state === "SUCCESS") {
-                            self.status.html(response.info);
-                            self.status_url = null;
-                            self.form.trigger("WEPP_RUN_TASK_COMPLETED");
-                        } else if (response.state === "PROGRESS") {
-                            self.status.html(response.info);
-                        } else {
-                            console.log(response);
-                            throw "Unknown response from server";
-                        }
+            $.post({
+                url: '../query/wepp_status/',
+                success: function success(response) {
+
+                    if (response.Success === true && self.attempts < 14400) {
+                        self.status.html(response.Content);
+                        self.attempts += 1;
+                    } else {
+                        self.attempts = 9999999;
                     }
-                }).done(function () {
-                    setTimeout(self.status_loop, 2000);
-                });
-            }
+                }
+            }).done(function () {
+                if (self.attempts < 14400) {
+                    setTimeout(self.status_loop, 1000);
+                }
+
+            });
         };
 
         return that;

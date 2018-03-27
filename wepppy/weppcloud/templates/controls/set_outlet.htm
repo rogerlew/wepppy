@@ -2,7 +2,8 @@
 {% block form_id %}setoutlet_form{% endblock %}
 {% block form_title %}Outlet{% endblock %}
 {% block inputs %}
-    <div class="form-group row hide-readonly">
+  <div class="hide-readonly">
+    <div class="form-group row">
         <div class="col-sm-4">
             <label class="radio-inline">
                 <input type="radio" value="0" name="setoutlet_mode" checked> Use Cursor</label>
@@ -12,7 +13,7 @@
                 <input type="radio" value="1"  name="setoutlet_mode"> Specify Lon/Lat</label>
         </div>
     </div>
-    <div id="setoutlet_mode1_controls" class="form-group row hide-readonly">
+    <div id="setoutlet_mode1_controls" class="form-group row">
         <div class="col-sm-5">
             <input id="input_setoutlet_entry" name="setoutlet" class="form-control mr-sm-3" type="text" placeholder="Lon, Lat" aria-label="Lon, Lat">
         </div>
@@ -20,7 +21,7 @@
             <button id="btn_setoutlet_entry" name="setloc" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Specify Lon/Lat</button>
         </div>
     </div>
-    <div id="setoutlet_mode0_controls" class="form-group row hide-readonly">
+    <div id="setoutlet_mode0_controls" class="form-group row">
         <div class="col-sm-4">
             <button id="btn_setoutlet_cursor" name="setloc" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Use Cursor</button>
         </div>
@@ -28,4 +29,5 @@
             <small id="hint_setoutlet_cursor"></small>
         </div>
     </div>
+  </div>
 {% endblock %}

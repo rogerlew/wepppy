@@ -6,6 +6,8 @@ from os.path import exists as _exists
 from os.path import split as _split
 
 from subprocess import Popen, PIPE
+from datetime import datetime
+
 
 import pickle
 
@@ -36,7 +38,7 @@ from wepppy.wepp.management import (
     merge_managements,
 )
 
-from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4
+from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4, parse_datetime
 from wepppy.wepp.out import LossReport, EbeReport, PlotFile
 
 # wepppy submodules
@@ -167,13 +169,14 @@ class Wepp(NoDbBase):
             if not _exists(wepp_dir):
                 os.mkdir(wepp_dir)
 
-            self.clean()
-            
             self.phosphorus_opts = PhosphorusOpts()
             self.baseflow_opts = BaseflowOpts()
             self.run_flowpaths = False
             self.loss_grid_d_path = None
-                
+            self.status_log = _join(self.runs_dir, 'status.log')
+
+            self.clean()
+
             self.dump_and_unlock()
 
         except Exception:
@@ -219,10 +222,41 @@ class Wepp(NoDbBase):
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return _exists(loss_pw0)
 
+    def _calc_log_elapsed(self):
+        with open(self.status_log) as fp:
+            lines = fp.readlines()
+            r0 = parse_datetime(lines[0])
+            t0 = parse_datetime(lines[-1])
+
+        r_elapsed = datetime.now() - r0
+        t_elapsed = datetime.now() - t0
+
+        return r_elapsed, t_elapsed, lines[-1]
+
+    def get_log_last(self):
+        r_elapsed, t_elapsed, s = self._calc_log_elapsed()
+
+        if s.strip().endswith('...'):
+            return '{} ({}s | {}s)'.format(s, t_elapsed.total_seconds(), r_elapsed.total_seconds())
+        else:
+            return s
+
+    def log(self, msg):
+        t0 = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S.%f')
+        with open(self.status_log, 'a') as fp:
+            fp.write('[{}] {}'.format(t0, msg))
+
+    def log_done(self):
+        r_elapsed, t_elapsed, s = self._calc_log_elapsed()
+
+        with open(self.status_log, 'a') as fp:
+            fp.write('done. ({}s | {}s)\n'.format(t_elapsed.total_seconds(), r_elapsed.total_seconds()))
+
     #
     # hillslopes
     #
     def prep_hillslopes(self):
+        self.log('Prepping Hillslopes... ')
     
         translator = Watershed.getInstance(self.wd).translator_factory()
         
@@ -235,6 +269,8 @@ class Wepp(NoDbBase):
         self._prep_frost()
         self._prep_phosphorus()
         self._prep_baseflow()
+
+        self.log_done()
         
     def _prep_frost(self):
         fn = _join(self.runs_dir, 'frost.txt')
@@ -262,6 +298,12 @@ class Wepp(NoDbBase):
             fp.write(self.baseflow_opts.contents)
             
     def clean(self):
+        try:
+            if _exists(self.status_log):
+                os.remove(self.status_log)
+        except:
+            self.status_log = _join(self.runs_dir, 'status.log')
+
         runs_dir = self.runs_dir
         if not _exists(runs_dir):
             os.mkdir(runs_dir)
@@ -392,6 +434,7 @@ class Wepp(NoDbBase):
                     make_flowpath_run(fp, years, fp_runs_dir)
 
     def run_hillslopes(self):
+        self.log('Running Hillslopes')
         translator = Watershed.getInstance(self.wd).translator_factory()
         watershed = Watershed.getInstance(self.wd)
         topaz = Topaz.getInstance(self.wd)
@@ -404,18 +447,23 @@ class Wepp(NoDbBase):
             # values are lists of soil loss/deposition from flow paths
             loss_grid_d = {}
 
-        for topaz_id, _ in watershed.sub_iter():
+        sub_n = watershed.sub_n
+        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+            self.log('  topaz={} (hill {} of {})... '.format(topaz_id, i+1, sub_n))
+
             wepp_id = translator.wepp(top=int(topaz_id))
             assert run_hillslope(wepp_id, runs_dir)
-            print(wepp_id)
+
+            self.log_done()
 
             # run flowpaths if specified
             if self.run_flowpaths:
 
                 # iterate over the flowpath ids
                 fps_summary = watershed.fps_summary(topaz_id)
-                for fp in fps_summary:
-                    print(fp)
+                fp_n = len(fps_summary)
+                for j, fp in enumerate(fps_summary):
+                    self.log('    flowpath={} (hill {} of {}, fp {} of {})... '.format(fp, i+1, sub_n, j + 1, fp_n))
 
                     # run wepp for flowpath
                     assert run_flowpath(fp, fp_runs_dir)
@@ -435,9 +483,15 @@ class Wepp(NoDbBase):
                             else:
                                 loss_grid_d[coord] = [L]
 
+                    self.log_done()
+
         if self.run_flowpaths:
+            self.log('Processing flowpaths... ')
+
             self._pickle_loss_grid_d(loss_grid_d)
             self.make_loss_grid()
+
+            self.log_done()
 
     def _pickle_loss_grid_d(self, loss_grid_d):
         plot_dir = self.plot_dir
@@ -473,6 +527,8 @@ class Wepp(NoDbBase):
     # watershed
     #    
     def prep_watershed(self):
+        self.log('Prepping Watershed... ')
+
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
@@ -485,6 +541,8 @@ class Wepp(NoDbBase):
         self._prep_channel_input()
         self._prep_watershed_managements(translator)
         self._make_watershed_run(translator)
+
+        self.log_done()
 
     def _prep_structure(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -672,12 +730,16 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         make_watershed_run(years, wepp_ids, runs_dir)
         
     def run_watershed(self):
+        self.log('Running Watershed... ')
+
         runs_dir = self.runs_dir
         assert run_watershed(runs_dir)
 
         for fn in glob(_join(self.runs_dir, '*.out')):
             dst_path = _join(self.output_dir, _split(fn)[1])
             shutil.move(fn, dst_path)
+
+        self.log_done()
 
     def report_loss(self):
         output_dir = self.output_dir
@@ -737,7 +799,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
             topaz_id = translator.top(wepp=row['Hillslopes'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                runoff=row['Subrunoff']
+                runoff=row['Runoff']
             )
         
         return d
@@ -754,7 +816,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
             topaz_id = translator.top(wepp=row['Hillslopes'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                v=row['Soil Loss Density']
+                loss=row['DepLoss']
             )
         
         return d
