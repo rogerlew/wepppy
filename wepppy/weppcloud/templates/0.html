@@ -27,55 +27,23 @@
 </script>
 </head>
 <body>
-<!-----------------------------------------------------------------------------
- Header (header.htm)
- ----------------------------------------------------------------------------->
 {% include 'header.htm'%}
 <div role="main" class="container">
-<!-----------------------------------------------------------------------------
- Map (controls/map.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/map.htm'%}
 {% if 'baer' in ron.mods %}
-    <!-----------------------------------------------------------------------------
-     Baer (controls/baer_upload.htm)
-     ----------------------------------------------------------------------------->
-    {% if 'lt' not in ron.mods %}
-        {% include 'controls/baer_upload.htm'%}
-    {% endif %}
+{% if 'lt' not in ron.mods %}
+{% include 'controls/baer_upload.htm'%}
 {% endif %}
-<!-----------------------------------------------------------------------------
- Channel Delineation (controls/channel_delineation.htm)
- ----------------------------------------------------------------------------->
+{% endif %}
 {% include 'controls/channel_delineation.htm'%}
-<!-----------------------------------------------------------------------------
- Set Outlet (controls/set_outlet.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/set_outlet.htm'%}
-<!-----------------------------------------------------------------------------
- Subcatchment Delineation (controls/subcatchments.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/subcatchments.htm'%}
-<!-----------------------------------------------------------------------------
- Land Management (controls/landuse.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/landuse.htm'%}
-<!-----------------------------------------------------------------------------
- Soil (controls/soil.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/soil.htm'%}
-<!-----------------------------------------------------------------------------
- Soil (controls/climate.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/climate.htm'%}
-<!-----------------------------------------------------------------------------
- Soil (controls/climate.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/wepp.htm'%}
+{% include 'controls/export.htm'%}
 {% if user.is_authenticated %}
-<!-----------------------------------------------------------------------------
- Team (controls/team.htm)
- ----------------------------------------------------------------------------->
 {% include 'controls/team.htm'%}
 {% endif %}
 </div> <!--main container -->
@@ -93,63 +61,4 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
      integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
   </body>
-  
-<!---
-copy color table to landcov
-fix stacktrace for failures
-report of landuse
-soils
-climates
-wepp running
-
-iconic
-
-puzzle piece
-<span class="oi oi-puzzle-piece"></span>
-
-rain
-<span class="oi oi-rain"></span>
-
-question mark
-<span class="oi oi-question-mark"></span>
-
-reload
-<span class="oi oi-reload"></span>
-
-wrench
-<span class="oi oi-wrench"></span>
-
-tags
-<span class="oi oi-tags"></span>
-
-cloudy
-<span class="oi oi-tags"></span>
-
-cog
-<span class="oi oi-cog"></span>
-
-cloud download
-<span class="oi oi-cloud-download"></span>
-
-could upload
-<span class="oi oi-cloud-upload"></span>
-
-layers
-<span class="oi oi-layers"></span>
-
-map
-<span class="oi oi-map"></span>
-
-magnifying-glass - detailed subcatchment 
-<span class="oi oi-magnifying-glass"></span>
-
-fork - clone run 
-<span class="oi oi-fork"></span>
-
-pie chart - results
-<span class="oi oi-pie-chart"></span>
-
-
-
--->
 </html>

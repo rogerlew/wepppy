@@ -4,6 +4,7 @@ from datetime import datetime
 
 from os.path import join as _join
 from os.path import exists as _exists
+from os.path import split as _split
 
 import uuid
 import json
@@ -1004,6 +1005,16 @@ def task_fetch_dem(runid):
 
     return success_factory()
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/export/ermit/')
+def export_ermit(runid):
+    from wepppy.export import create_ermit_input
+    wd = get_wd(runid)
+    fn = create_ermit_input(wd)
+    name = _split(fn)[-1]
+    print(name)
+    return send_file(fn, mimetype='text/csv', as_attachment=True, attachment_filename=name)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/build_channels/', methods=['POST'])
