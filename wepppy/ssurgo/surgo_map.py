@@ -119,8 +119,6 @@ class SurgoMap:
             if _id == 0:
                 continue
 
-            print('findding soil for ', _id)
-                
             indices = np.where(subwta == _id)
             dom = self._get_dominant(indices, valid_mukeys)
             if dom is None:

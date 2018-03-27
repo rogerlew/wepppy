@@ -757,6 +757,37 @@ class TopazRunner:
 
         self._json_to_wgs(dst_fn2)
 
+    def _polygonize_bound(self):
+        bound_fn = _join(self.topaz_wd, "BOUND.ARC")
+        dst_fn = _join(self.topaz_wd, "BOUND.JSON")
+
+        assert _exists(bound_fn)
+        src_ds = gdal.Open(bound_fn)
+        srcband = src_ds.GetRasterBand(1)
+
+        drv = ogr.GetDriverByName("GeoJSON")
+        dst_ds = drv.CreateDataSource(dst_fn)
+
+        srs = osr.SpatialReference()
+        srs.ImportFromWkt(src_ds.GetProjectionRef())
+
+        dst_layer = dst_ds.CreateLayer("BOUND", srs=srs)
+        dst_fieldname = 'Watershed'
+
+        fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
+        dst_layer.CreateField(fd)
+        dst_field = 0
+
+        prog_func = None
+
+        gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
+                        callback=prog_func)
+
+        del src_ds
+        del dst_ds
+
+        self._json_to_wgs(dst_fn)
+
     def _json_to_wgs(self, src_fn, verbose=False):
         # create a version in WGS 1984 (long/lat)
         prj_fn = _join(self.topaz_wd, 'NETFUL.PRJ')
@@ -936,3 +967,4 @@ class TopazRunner:
         if polygonize_subwta:
             self._polygonize_subcatchments()
             self._polygonize_channels()
+            self._polygonize_bound()

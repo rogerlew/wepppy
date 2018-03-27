@@ -193,8 +193,8 @@ class NoDbBase(object):
         return _join(self.topaz_wd, 'SUBWTA.ARC')
 
     @property
-    def bounds_arc(self):
-        return _join(self.topaz_wd, 'BOUNDS.ARC')
+    def bound_arc(self):
+        return _join(self.topaz_wd, 'BOUND.ARC')
 
     @property
     def wat_dir(self):

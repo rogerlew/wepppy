@@ -1251,6 +1251,10 @@ var SubcatchmentDelineation = function () {
                 self.cmapSoils();
             } else if (cmap_name === "sub_runoff") {
                 self.cmapRunoff();
+            } else if (cmap_name === "sub_subrunoff") {
+                self.cmapSubrunoff();
+            } else if (cmap_name === "sub_baseflow") {
+                self.cmapBaseflow();
             } else if (cmap_name === "sub_loss") {
                 self.cmapLoss();
             } else if (cmap_name === "sub_phosphorus") {
@@ -1391,7 +1395,7 @@ var SubcatchmentDelineation = function () {
 
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataPhosphorus[topId].total_p);
+                var v = parseFloat(self.dataPhosphorus[topId].value);
                 var c = self.cmapperPhosphorus.map(v / r);
 
                 layer.setStyle({
@@ -1433,10 +1437,46 @@ var SubcatchmentDelineation = function () {
             });
         };
 
+        that.cmapSubrunoff = function () {
+            var self = instance;
+            $.get({
+                url: "../query/wepp/subrunoff/subcatchments/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataRunoff = data;
+                    self.renderRunoff();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.cmapBaseflow = function () {
+            var self = instance;
+            $.get({
+                url: "../query/wepp/baseflow/subcatchments/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataRunoff = data;
+                    self.renderRunoff();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
         that.renderRunoff = function () {
             var self = instance;
 
-            var r = parseFloat(self.rangeRunoff.val());
+            var r = 25.0 * Math.pow(parseFloat(self.rangeRunoff.val()), 2.00);
             self.labelRunoffMin.html("0.000");
 
 
@@ -1473,7 +1513,7 @@ var SubcatchmentDelineation = function () {
 
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataRunoff[topId].runoff);
+                var v = parseFloat(self.dataRunoff[topId].value);
                 var c = self.cmapperRunoff.map(v / r);
 
                 layer.setStyle({
@@ -1495,7 +1535,7 @@ var SubcatchmentDelineation = function () {
         that.labelLossMin = $('#wepp_sub_cmap_canvas_loss_min');
         that.labelLossMax = $('#wepp_sub_cmap_canvas_loss_max');
         that.labelLossUnits = $('#wepp_sub_cmap_canvas_loss_units');
-        that.cmapperLoss = createColormap({ colormap: 'portland', nshades: 64 });
+        that.cmapperLoss = createColormap({ colormap: "electric", nshades: 64 });
 
         that.cmapLoss = function () {
             var self = instance;
@@ -1566,7 +1606,7 @@ var SubcatchmentDelineation = function () {
 
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataLoss[topId].loss);
+                var v = parseFloat(self.dataLoss[topId].value);
                 var c = self.cmapperLoss.map(v / (2.0 * r) + 0.5);
 
                 layer.setStyle({
@@ -1613,12 +1653,12 @@ var SubcatchmentDelineation = function () {
                     displayMin: 0,
                     displayMax: 1,
                     name: self.gridlabel,
-                    colorScale: 'portland',
+                    colorScale: "electric",
                     opacity: 1.0,
                     clampLow: true,
                     clampHigh: true,
                     //vector:true,
-                    arrowSize: 20,
+                    arrowSize: 20
                 }
             ).addTo(map);
             self.updateGriddedLoss();
