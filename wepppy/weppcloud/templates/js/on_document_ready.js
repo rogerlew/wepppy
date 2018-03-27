@@ -256,9 +256,6 @@ $(document).ready(function () {
         outlet.show();
     });
 
-    // Set default outlet selection mode
-    outlet.setMode(0);
-
     // Load outlet from server
     if ({{ topaz.has_outlet | tojson }}) {
         outlet.form.trigger("SETOUTLET_TASK_COMPLETED");
@@ -311,14 +308,14 @@ $(document).ready(function () {
     });
 
     // Runoff
-    render_legend("viridis", "wepp_sub_cmap_canvas_runoff");
+    render_legend("winter", "wepp_sub_cmap_canvas_runoff");
     sub_ctrl.renderRunoff();
     $('#wepp_sub_cmap_range_runoff').on('input', function () {
         sub_ctrl.renderRunoff();
     });
 
     // Loss
-    render_legend("viridis", "wepp_sub_cmap_canvas_loss");
+    render_legend("portland", "wepp_sub_cmap_canvas_loss");
     sub_ctrl.renderLoss();
     $('#wepp_sub_cmap_range_loss').on('input', function () {
         sub_ctrl.renderLoss();
@@ -329,7 +326,7 @@ $(document).ready(function () {
     // Gridded
 
     // Soil Deposition / Loss
-    render_legend("viridis", "wepp_grd_cmap_canvas_loss");
+    render_legend("portland", "wepp_grd_cmap_canvas_loss");
     sub_ctrl.updateGriddedLoss();
 
     $('#wepp_grd_cmap_range_loss').on('input', function () {

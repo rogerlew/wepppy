@@ -164,6 +164,10 @@ def wmesque_retrieve(dataset, extent, fname, cellsize):
     return 1
 
 
+def parse_datetime(s):
+    return datetime.strptime(s[1:s.find(']')], '%Y-%m-%dT%H:%M:%S.%f')
+
+
 wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     
     
