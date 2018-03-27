@@ -9,18 +9,18 @@
         </div>
         <div class="col-sm-2">
             <label class="radio-inline">
-            <input type="radio" value="0" id="climatestation_mode0" 
+            <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
             name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}> Closest</label>
         </div>
         <div class="col-sm-4">
             <label class="radio-inline">
-            <input type="radio" value="1" id="climatestation_mode1" 
+            <input type="radio" value="1" class="disable-readonly" id="climatestation_mode1"
             name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}> Heuristic Ranking</label>
         </div>
     </div>    
     <div class="form-group row">
         <div class="col-sm-5">
-            <select class="form-control" id="climate_station_selection" name="climate_station_selection">
+            <select class="form-control disable-readonly" id="climate_station_selection" name="climate_station_selection">
             </select>
         </div>
         <div class="col-sm-3">
@@ -31,14 +31,14 @@
     <h4>Climate Method</h4>
     <div class="form-group row">
         <div class="col-sm-6">
-            <label class="radio"><input type="radio" value="0" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> Single Climate for Watershed</label><br/>
-            <label class="radio"><input type="radio" value="0" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> Single Climate PRISM</label><br/>
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> Single Climate for Watershed</label><br/>
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> Single Climate PRISM</label><br/>
             {% if current_user.has_role("Dev")%}
-            <label class="radio"><input type="radio" value="1" id="climate_mode1" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 1] }}> Determine per Hillslope (PRISM / Daymet)</label><br/>
+            <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_mode1" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 1] }}> Determine per Hillslope (PRISM / Daymet)</label><br/>
             {% endif %}
-            <label class="radio"><input type="radio" value="2" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (Daymet)</label><br/>
-            <label class="radio"><input type="radio" value="3" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5)</label><br/>
-            <label class="radio"><input type="radio" value="4" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label>
+            <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (Daymet)</label><br/>
+            <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5)</label><br/>
+            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label>
         </div>
     </div>
     <div class="form-group row" id="input_years_container">
@@ -46,7 +46,7 @@
             <label for="input_years">Number of years to simulate: </label>
         </div>
         <div class="col-sm-4">
-            <input id="input_years" name="input_years" class="form-control mr-sm-3" type="text" 
+            <input id="input_years" name="input_years" class="form-control mr-sm-3 disable-readonly" type="text"
             value="{{ climate.input_years }}" aria-label="Years to simulate">
         </div>
     </div>
@@ -112,7 +112,7 @@
             </div>
             <div class="col-sm-4">
                 <input id="observed_start_year" 
-                name="observed_start_year" class="form-control mr-sm-3" type="text" 
+                name="observed_start_year" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.observed_start_year }}" aria-label="Start Year" >
             </div>
         </div>
@@ -122,7 +122,7 @@
             </div>
             <div class="col-sm-4">
                 <input id="observed_end_year" 
-                name="observed_end_year" class="form-control mr-sm-3" type="text" 
+                name="observed_end_year" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.observed_end_year }}" aria-label="End Year">
             </div>
         </div>
@@ -135,7 +135,7 @@
             </div>
             <div class="col-sm-4">
                 <input id="future_start_year" 
-                name="future_start_year" class="form-control mr-sm-3" type="text" 
+                name="future_start_year" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.future_start_year }}" aria-label="Start Year">
             </div>
         </div>
@@ -145,7 +145,7 @@
             </div>
             <div class="col-sm-4">
                 <input id="future_end_year" 
-                name="future_end_year" class="form-control mr-sm-3" type="text" 
+                name="future_end_year" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.future_end_year }}" aria-label="End Year">
             </div>
         </div>
@@ -158,7 +158,7 @@
             </div>
             <div class="col-sm-3">
                 <input id="ss_storm_date" 
-                name="ss_storm_date" class="form-control mr-sm-3" type="text" 
+                name="ss_storm_date" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.ss_storm_date }}" placeholder="M D Y" 
                 aria-label="Storm Date">
             </div>
@@ -169,7 +169,7 @@
             </div>
             <div class="col-sm-3">
                 <input id="ss_design_storm_amount_inches" 
-                name="ss_design_storm_amount_inches" class="form-control mr-sm-3" type="text" 
+                name="ss_design_storm_amount_inches" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.ss_design_storm_amount_inches }}" placeholder="" 
                 aria-label="Design Storm Amount in inches">
             </div>
@@ -180,7 +180,7 @@
             </div>
             <div class="col-sm-3">
                 <input id="ss_duration_of_storm_in_hours" 
-                name="ss_duration_of_storm_in_hours" class="form-control mr-sm-3" type="text" 
+                name="ss_duration_of_storm_in_hours" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.ss_duration_of_storm_in_hours }}" placeholder="" 
                 aria-label="Duration of storm in hour">
             </div>
@@ -191,7 +191,7 @@
             </div>
             <div class="col-sm-3">
                 <input id="ss_time_to_peak_intensity_pct" 
-                name="ss_time_to_peak_intensity_pct" class="form-control mr-sm-3" type="text" 
+                name="ss_time_to_peak_intensity_pct" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.ss_time_to_peak_intensity_pct }}" placeholder="" 
                 aria-label="Time to peak intensity %">
             </div>
@@ -202,13 +202,13 @@
             </div>
             <div class="col-sm-3">
                 <input id="ss_max_intensity_inches_per_hour" 
-                name="ss_max_intensity_inches_per_hour" class="form-control mr-sm-3" type="text" 
+                name="ss_max_intensity_inches_per_hour" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.ss_max_intensity_inches_per_hour }}" placeholder="" 
                 aria-label="Max intensity inches per hour">
             </div>
         </div>
     </div>
-    <div class="form-group row" id="btn_build_climate_container">
+    <div class="form-group row hide=readonly" id="btn_build_climate_container">
         <div class="col-sm-4">
             <button id="btn_build_climate" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Build Climate</button>
         </div>

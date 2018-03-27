@@ -7,9 +7,9 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
     <form class="form-inline my-2 my-lg-0" id="setname_form" action="javascript:void(0);" >
-      <input class="form-control mr-sm-2" id="input_name" name="name" type="text" placeholder="Untitled Project"
+      <input class="form-control mr-sm-2 disable-readonly" id="input_name" name="name" type="text" placeholder="Untitled Project"
        value="{{ ron.name }}" aria-label="Name">
-      <button class="btn btn-outline-success my-2 my-sm-0" id="btn_setname" name="setname" type="button">
+      <button class="btn btn-outline-success my-2 my-sm-0 hide-readonly" id="btn_setname" name="setname" type="button">
         Set Name
       </button>
     </form>
@@ -24,6 +24,20 @@
       </li>
     </ul>
     {% if user.is_authenticated %}
+    <label class="form-check-label">
+      <input id="checkbox_readonly" type="checkbox" class="form-check-input"
+             onchange="Project.getInstance().set_readonly(this.checked);"
+               {% if ron.readonly %}checked{% endif %}>
+        <span style="color: white;">Readonly</span>
+    </label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label class="form-check-label">
+      <input id="checkbox_public" type="checkbox" class="form-check-input"
+             onchange="Project.getInstance().set_public(this.checked);"
+               {% if ron.public %}checked{% endif %}>
+        <span style="color: white;">Public</span>
+    </label>
+    &nbsp;&nbsp;
     {% include "user/navbar.html" %}
     {% endif %}
     </div>

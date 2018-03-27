@@ -5,11 +5,11 @@
     <div class="form-group row">
         <div class="col-sm-4">
             <label class="radio-inline">
-            <input type="radio" value="0" id="soil_mode0" name="soil_mode"> Determine Per Hillslope</label>
+            <input type="radio" value="0" class="disable-readonly" id="soil_mode0" name="soil_mode"> Determine Per Hillslope</label>
         </div>
         <div class="col-sm-6">
             <label class="radio-inline">
-            <input type="radio" value="1" id="soil_mode1" name="soil_mode"> Single Soil for Watershed</label>
+            <input type="radio" value="1" class="disable-readonly" id="soil_mode1" name="soil_mode"> Single Soil for Watershed</label>
         </div>
     </div>
     <div id="soil_mode0_controls" class="form-group row">
@@ -17,10 +17,10 @@
     <div id="soil_mode1_controls" class="form-group row">
         <div class="col-sm-5">
             <label for="soil_single_selection">Mukey for single soil:</label>
-            <input type="text" class="form-control" id="soil_single_selection" value="{{ soils.single_selection }}"/>
+            <input type="text" class="form-control disable-readonly" id="soil_single_selection" value="{{ soils.single_selection }}"/>
         </div>
     </div>
-    <div class="form-group row">
+    <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_build_soil"
               class="btn btn-outline-success my-2 my-sm-0 col-sm-12"

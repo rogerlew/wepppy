@@ -57,9 +57,9 @@ report_chn_hdr = (
     'Upland Charge',
     'Subsuface Volume',
     'Flow Phosphorus',
-    'Solub. Phosphorus',
-    'React. Phosphorus',
-    'Total Particulate'
+    'Solub. React. P Density',
+    'Particulate P Density',
+    'Total P Density'
 )
 
 report_chn_units = (
@@ -75,9 +75,9 @@ chn_hdr = (
     'Upland Charge',
     'Subsuface Volume',
     'Flow Phosphorus',
-    'Solub. Phosphorus',
-    'React. Phosphorus',
-    'Total Particulate'
+    'Solub. React. Phosphorus',
+    'Particulate Phosphorus',
+    'Total Phosphorus'
 )
 
 chn_units = (
@@ -180,14 +180,14 @@ class LossReport(object):
                 self.chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / 1000.0 / area
                 self.chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / 1000.0 / area
 
-                if 'Solub. Phosphorus' in row:
-                    self.chn_tbl[i]['Solub. P Density'] = row['Solub. Phosphorus'] / area
+                if 'Solub. React. Phosphorus' in row:
+                    self.chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
 
-                if 'React. Phosphorus' in row:
-                    self.chn_tbl[i]['React. P Density'] = row['React. Phosphorus'] / area
+                if 'Particulate Phosphorus' in row:
+                    self.chn_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
 
-                if 'Total Particulate' in row:
-                    self.chn_tbl[i]['Total P Density'] = row['Total Particulate'] / area
+                if 'Total Phosphorus' in row:
+                    self.chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
 
                 print(topaz_id, row)
 

@@ -671,6 +671,7 @@ def runs0(runid, config):
 
     wd = get_wd(runid)
     owners = get_run_owners(runid)
+    ron = Ron.getInstance(wd)
 
     should_abort = True
     if current_user in owners:
@@ -682,10 +683,12 @@ def runs0(runid, config):
     if current_user.has_role('Admin'):
         should_abort = False
 
+    if ron.public:
+        should_abort = False
+
     if should_abort:
         abort(404)
 
-    ron = Ron.getInstance(wd)
     topaz = Topaz.getInstance(wd)
     landuse = Landuse.getInstance(wd)
     soils = Soils.getInstance(wd)
@@ -1519,8 +1522,6 @@ def task_build_climate(runid):
 @app.route('/runs/<string:runid>/tasks/set_run_flowpaths/', methods=['POST'])
 def task_set_run_flowpaths(runid):
 
-
-
     try:
         state = request.json.get('run_flowpaths', None)
     except Exception:
@@ -1528,7 +1529,6 @@ def task_set_run_flowpaths(runid):
 
     if state is None:
         return error_factory('state is None')
-
 
     try:
         wd = get_wd(runid)
@@ -1539,6 +1539,72 @@ def task_set_run_flowpaths(runid):
 
     return success_factory()
 
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/set_public', methods=['POST'])
+@app.route('/runs/<string:runid>/tasks/set_public/', methods=['POST'])
+def task_set_public(runid):
+    owners = get_run_owners(runid)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if should_abort:
+        return error_factory('authentication error')
+
+    try:
+        state = request.json.get('public', None)
+    except Exception:
+        return exception_factory('Error parsing state')
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        ron.public = state
+    except Exception:
+        return exception_factory('Error setting state')
+
+    return success_factory()
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/set_readonly', methods=['POST'])
+@app.route('/runs/<string:runid>/tasks/set_readonly/', methods=['POST'])
+def task_set_readonly(runid):
+    owners = get_run_owners(runid)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if should_abort:
+        return error_factory('authentication error')
+
+    try:
+        state = request.json.get('readonly', None)
+    except Exception:
+        return exception_factory('Error parsing state')
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        ron.readonly = state
+    except Exception:
+        return exception_factory('Error setting state')
+
+    return success_factory()
 
 
 # noinspection PyBroadException
