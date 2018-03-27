@@ -1,0 +1,57 @@
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://127.0.0.1:5000/static/js/plotty.js"></script>
+    <script  type="text/javascript">// Generate or load some data (Working with buffer arrays for now)
+function render_legend(cmap, canvasID) {
+    var canvas = $("#" + canvasID);
+    
+    var width = canvas.outerWidth();
+    var height = canvas.outerHeight();
+    var exampledata = new Float32Array(height * width);
+
+    var xoff = width / 3;
+    var yoff = height / 3;
+
+    for (y = 0; y <= height; y++) {
+        for (x = 0; x <= width; x++) {
+            exampledata[(y*width)+x] = x / (width - 1.0);
+        }
+    }
+
+    plot = new plotty.plot({
+        canvas: canvas["0"],
+        data: exampledata, width: width, height: height,
+        domain: [0, 1], colorScale: cmap
+    });
+    plot.render();
+}
+
+function do_onload() {
+  render_legend("greens", "greens_legend");
+  render_legend("yiorrd", "yiorrd_legend");
+  render_legend("bluered", "bluered_legend");
+  render_legend("rdbu", "rdbu_legend");
+  render_legend("picnic", "picnic_legend");
+  render_legend("portland", "portland_legend");
+  render_legend("blackbody", "blackbody_legend");
+  render_legend("earth", "earth_legend");
+  render_legend("electric", "electric_legend");
+  render_legend("magma", "magma_legend");
+  render_legend("plasma", "plasma_legend");
+}
+    </script>
+</head>
+<body onload='do_onload()'>
+  <h3>greens</h3><canvas id="greens_legend" width=200 height=20></canvas>
+  <h3>yiorrd</h3><canvas id="yiorrd_legend" width=200 height=20></canvas>
+  <h3>bluered</h3><canvas id="bluered_legend" width=200 height=20></canvas>
+  <h3>rdbu</h3><canvas id="rdbu_legend" width=200 height=20></canvas>
+  <h3>picnic</h3><canvas id="picnic_legend" width=200 height=20></canvas>
+  <h3>portland</h3><canvas id="portland_legend" width=200 height=20></canvas>
+  <h3>blackbody</h3><canvas id="blackbody_legend" width=200 height=20></canvas>
+  <h3>earth</h3><canvas id="earth_legend" width=200 height=20></canvas>
+  <h3>electric</h3><canvas id="electric_legend" width=200 height=20></canvas>
+  <h3>magma</h3><canvas id="magma_legend" width=200 height=20></canvas>
+  <h3>plasma</h3><canvas id="plasma_legend" width=200 height=20></canvas>
+</body>
