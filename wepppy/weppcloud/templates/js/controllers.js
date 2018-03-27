@@ -76,6 +76,56 @@ var Project = function () {
             });
         };
 
+
+        that.set_public = function (state) {
+            $.post({
+                url: "../tasks/set_public/",
+                data: JSON.stringify({ public: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                },
+                fail: function fail(error) {
+                }
+            });
+        };
+
+        that.set_readonly = function (state) {
+            var self = instance;
+
+            $.post({
+                url: "../tasks/set_readonly/",
+                data: JSON.stringify({ readonly: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    self.set_readonly_controls(state);
+                },
+                fail: function fail(error) {
+                }
+            });
+        };
+
+        that.set_readonly_controls = function (readonly) {
+
+            if (readonly === true) {
+                console.log('hide');
+                $('.hide-readonly').each( function( index, element ){
+                    $(this).hide();
+                });
+                $('.disable-readonly').each( function( index, element ){
+                    $(this).prop('readonly', true);
+                });
+            } else {
+                $('.hide-readonly').each( function( index, element ){
+                    $(this).show();
+                });
+                $('.disable-readonly').each( function( index, element ){
+                    $(this).prop('readonly', false);
+                });
+            }
+        };
+
         function replaceAll(str, find, replace) {
             return str.replace(new RegExp(find, 'g'), replace);
         }
@@ -1313,7 +1363,6 @@ var SubcatchmentDelineation = function () {
                 data: {value: r, in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
-                    console.log(response.Content);
                     self.labelPhosphorusMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
@@ -1395,7 +1444,6 @@ var SubcatchmentDelineation = function () {
                 data: {value: r, in_units: 'mm'},
                 cache: false,
                 success: function success(response) {
-                    console.log(response.Content);
                     self.labelRunoffMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
@@ -1477,7 +1525,6 @@ var SubcatchmentDelineation = function () {
                 data: {value: r, in_units: 'tonne/ha'},
                 cache: false,
                 success: function success(response) {
-                    console.log(response.Content);
                     self.labelLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
@@ -1576,7 +1623,6 @@ var SubcatchmentDelineation = function () {
                 data: {value: v, in_units: 'kg/m^2'},
                 cache: false,
                 success: function success(response) {
-                    console.log(response.Content);
                     self.labelGriddedLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
@@ -2453,7 +2499,6 @@ var Climate = function () {
                 url: "../tasks/build_climate/",
                 data: self.form.serialize(),
                 success: function success(response) {
-                    console.log(response);
                     if (response.Success === true) {
                         self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
                         self.status.html(task_msg + "... Success");
@@ -2728,8 +2773,6 @@ var Wepp = function () {
                 $.get({
                     url: self.status_url,
                     success: function success(response) {
-
-                        console.log(response);
 
                         if (response.state === "PENDING") {
                             self.status.html(response.info);

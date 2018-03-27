@@ -11,7 +11,7 @@
             <label for="input_mcl">Minimum Channel Length (m)</label>
         </div>
         <div class="col-sm-3">
-            <input id="input_mcl" name="mcl" class="form-control mr-sm-3" type="text" value="{{ topaz.mcl }}" aria-label="Lon, Lat">
+            <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.mcl }}" aria-label="Lon, Lat">
         </div>
     </div>
     <div class="form-group row">
@@ -19,10 +19,10 @@
             <label for="input_csa">Critical Source Area (ha)</label>
         </div>
         <div class="col-sm-3">
-            <input id="input_csa" name="csa" class="form-control mr-sm-3" type="text" value="{{ topaz.csa }}" aria-label="Lon, Lat">
+            <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.csa }}" aria-label="Lon, Lat">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group hide-readonly">
         <button id="btn_build_channels" class="col-sm-4 btn btn-outline-success my-2 my-sm-0" type="button">Build Channels</button>
         <small id="hint_build_channels" class="text-muted"></small>
     </div>

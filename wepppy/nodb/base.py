@@ -69,6 +69,9 @@ class NoDbBase(object):
         if self.islocked():
             raise Exception('lock() called on an already locked nodb')
 
+        if self.readonly:
+            raise Exception('lock() called on readonly project')
+
         # noinspection PyUnresolvedReferences
         with open(self._lock, 'w') as fp:
             fp.write(str(time()))
@@ -84,7 +87,50 @@ class NoDbBase(object):
     def islocked(self):
         # noinspection PyUnresolvedReferences
         return _exists(self._lock)
-        
+
+    @property
+    def readonly(self):
+        return _exists(_join(self.wd, 'READONLY'))
+
+    @readonly.setter
+    def readonly(self, value):
+        assert value in [False, True]
+
+        path = _join(self.wd, 'READONLY')
+        if value:
+            with open(path, 'w') as fp:
+                fp.write('')
+
+            assert self.readonly
+
+        else:
+            if self.readonly:
+                os.remove(path)
+
+            assert not self.readonly
+
+    @property
+    def public(self):
+        return _exists(_join(self.wd, 'PUBLIC'))
+
+    @public.setter
+    def public(self, value):
+        assert value in [False, True]
+
+        path = _join(self.wd, 'PUBLIC')
+        if value:
+            with open(path, 'w') as fp:
+                fp.write('')
+
+            assert self.public
+
+        else:
+            if self.public:
+                os.remove(path)
+
+            assert not self.public
+
+
     @property
     def config(self):
         cfg = _join(_config_dir, self._config)
