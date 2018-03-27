@@ -576,4 +576,7 @@ $(document).ready(function () {
         channel_ctrl.onMapChange();
         // add additional events here
     });
+
+    project.set_readonly_controls({{ ron.readonly | tojson }});
+
 });
