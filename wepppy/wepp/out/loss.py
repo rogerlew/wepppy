@@ -3,8 +3,9 @@ report_hill_hdr = (
     'TopazID',
     'Length',
     'Hillslope Area',
+    'Runoff',
     'Subrunoff',
-    'Baseflow',
+    'Baseflow Volume',
     'Soil Loss Density',
     'Sediment Deposition Density',
     'Sediment Yield Density',
@@ -18,10 +19,11 @@ report_hill_units = (
     'm',
     'ha',
     'mm',
+    'mm',
     'm^3',
-    'tonne/ha',
-    'tonne/ha',
-    'tonne/ha',
+    'kg/ha',
+    'kg/ha',
+    'kg/ha',
     'kg/ha',
     'kg/ha',
     'kg/ha'
@@ -154,9 +156,14 @@ class LossReport(object):
                 self.hill_tbl[i]['Runoff'] = row['Runoff Volume'] / area * 1000.0
                 self.hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / area * 1000.0
                 self.hill_tbl[i]['Baseflow'] = row['Baseflow Volume'] / area * 1000.0
-                self.hill_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / 1000.0 / area
-                self.hill_tbl[i]['Sediment Deposition Density'] = row['Sediment Deposition'] / 1000.0  / area
-                self.hill_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / 1000.0 / area
+
+                _loss = row['Soil Loss'] / area
+                _dep = row['Sediment Deposition'] / area
+                _yield = row['Sediment Yield'] / area
+                self.hill_tbl[i]['Soil Loss Density'] = _loss
+                self.hill_tbl[i]['Sediment Deposition Density'] = _dep
+                self.hill_tbl[i]['Sediment Yield Density'] = _yield
+                self.hill_tbl[i]['DepLoss'] = _yield - _dep
 
                 if 'Solub. React. Phosphorus' in row:
                     self.hill_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
@@ -177,8 +184,8 @@ class LossReport(object):
                 self.chn_tbl[i]['TopazID'] = topaz_id
                 self.chn_tbl[i]['Area'] = area
                 self.chn_tbl[i]['Length'] = chn_summary['length']
-                self.chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / 1000.0 / area
-                self.chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / 1000.0 / area
+                self.chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
+                self.chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / area
 
                 if 'Solub. React. Phosphorus' in row:
                     self.chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area

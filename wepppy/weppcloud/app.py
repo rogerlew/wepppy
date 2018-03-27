@@ -1608,6 +1608,33 @@ def task_set_readonly(runid):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/query/wepp_status', methods=['POST'])
+@app.route('/runs/<string:runid>/query/wepp_status/', methods=['POST'])
+def get_wepp_run_status(runid):
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+
+    try:
+        return success_factory(wepp.get_log_last())
+    except:
+        return exception_factory('Could not determine status')
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/report/wepp/log')
+@app.route('/runs/<string:runid>/report/wepp/log/')
+def get_wepp_run_status_full(runid):
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+
+    with open(wepp.status_log) as fp:
+        status_log = fp.read()
+
+    return render_template('reports/wepp_log.htm',
+                           status_log=status_log)
+
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/run_wepp', methods=['POST'])
 @app.route('/runs/<string:runid>/tasks/run_wepp/', methods=['POST'])
 def submit_task_run_wepp(runid):
@@ -1625,6 +1652,7 @@ def submit_task_run_wepp(runid):
         return exception_factory('Error cleaning wepp directories')
     
     try:
+
         watershed = Watershed.getInstance(wd)
         translator = Watershed.getInstance(wd).translator_factory()
         runs_dir = os.path.abspath(wepp.runs_dir)
@@ -1647,7 +1675,7 @@ def submit_task_run_wepp(runid):
         
         #
         # Run Watershed
-        assert run_watershed(runs_dir)
+        wepp.run_watershed()
     except Exception:
         return exception_factory('Error running wepp')
         
@@ -1774,7 +1802,6 @@ def report_wepp_frq(runid):
     return render_template('reports/wepp_frq.htm',
                            report=report,
                            translator=translator)
-
 
 
 @app.route('/runs/<string:runid>/query/wepp/runoff/subcatchments')

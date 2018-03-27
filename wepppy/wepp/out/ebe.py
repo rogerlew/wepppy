@@ -39,6 +39,9 @@ class EbeReport(object):
         data = [[u(v) for v, u in zip(L.split(), units)] for L in lines]
         data = list(map(list, zip(*data)))
 
+        if data == []:
+            raise Exception('{} contains no data'.format(fn))
+
         df = pd.DataFrame()
         for L, colname in zip(data, header):
             df[colname] = L

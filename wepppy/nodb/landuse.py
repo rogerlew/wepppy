@@ -46,7 +46,7 @@ class Landuse(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            self._mode = LanduseMode.Undefined
+            self._mode = LanduseMode.Gridded
             self._single_selection = 0  # No Data
             self._single_man = None
             self.domlc_d = None  # topaz_id keys, ManagementSummary values
