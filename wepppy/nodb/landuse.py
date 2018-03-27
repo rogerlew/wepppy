@@ -129,10 +129,7 @@ class Landuse(NoDbBase):
         if mode == LanduseMode.Undefined:
             return False
 
-        elif mode == LanduseMode.Single:
-            return self._single_man is not None
-
-        elif mode == LanduseMode.Gridded:
+        else:
             return self.domlc_d is not None
 
         return False
@@ -175,17 +172,36 @@ class Landuse(NoDbBase):
             
             self.clean()
 
-            # Get NLCD 2011 from wmesque webservice
-            lc_fn = self.lc_fn
-            wmesque_retrieve('nlcd/2011', _map.extent, lc_fn, _map.cellsize)
+            if self._mode == LanduseMode.Gridded:
+                # Get NLCD 2011 from wmesque webservice
+                lc_fn = self.lc_fn
+                wmesque_retrieve('nlcd/2011', _map.extent, lc_fn, _map.cellsize)
 
-            # create LandcoverMap instance
-            lc = LandcoverMap(lc_fn)
+                # create LandcoverMap instance
+                lc = LandcoverMap(lc_fn)
 
-            # build the grid
-            # domlc_fn map is a property of NoDbBase
-            # domlc_d is a dictionary with topaz_id keys
-            self.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+                # build the grid
+                # domlc_fn map is a property of NoDbBase
+                # domlc_d is a dictionary with topaz_id keys
+                self.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+
+            elif self._mode == LanduseMode.Single:
+                assert self.single_selection is not None
+
+                domlc_d = {}
+
+                watershed = Watershed.getInstance(self.wd)
+                for topaz_id, _ in watershed.sub_iter():
+                    domlc_d[topaz_id] = str(self.single_selection)
+
+                for topaz_id, _ in watershed.chn_iter():
+                    domlc_d[topaz_id] = str(self.single_selection)
+
+                self.domlc_d = domlc_d
+
+            elif self._mode == LanduseMode.Undefined:
+                raise Exception('LanduseMode is not set')
+
             self.dump_and_unlock()
             
             self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)

@@ -1,0 +1,65 @@
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://127.0.0.1:5000/static/js/plotty.js"></script>
+    <script  type="text/javascript">// Generate or load some data (Working with buffer arrays for now)
+function render_legend(cmap, canvasID) {
+    var canvas = $("#" + canvasID);
+    
+    var width = canvas.outerWidth();
+    var height = canvas.outerHeight();
+    var exampledata = new Float32Array(height * width);
+
+    var xoff = width / 3;
+    var yoff = height / 3;
+
+    for (y = 0; y <= height; y++) {
+        for (x = 0; x <= width; x++) {
+            exampledata[(y*width)+x] = x / (width - 1.0);
+        }
+    }
+
+    plot = new plotty.plot({
+        canvas: canvas["0"],
+        data: exampledata, width: width, height: height,
+        domain: [0, 1], colorScale: cmap
+    });
+    plot.render();
+}
+
+function do_onload() {
+  render_legend("viridis", "viridis_legend");
+  render_legend("inferno", "inferno_legend");
+  render_legend("rainbow", "rainbow_legend");
+  render_legend("jet", "jet_legend");
+  render_legend("hsv", "hsv_legend");
+  render_legend("hot", "hot_legend");
+  render_legend("cool", "cool_legend");
+  render_legend("spring", "spring_legend");
+  render_legend("summer", "summer_legend");
+  render_legend("autumn", "autumn_legend");
+  render_legend("winter", "winter_legend");
+  render_legend("bone", "bone_legend");
+  render_legend("copper", "copper_legend");
+  render_legend("greys", "greys_legend");
+  render_legend("yignbu", "yignbu_legend");
+}
+    </script>
+</head>
+<body onload='do_onload()'>
+  <h3>viridis</h3><canvas id="viridis_legend" width=200 height=20></canvas>
+  <h3>inferno</h3><canvas id="inferno_legend" width=200 height=20></canvas>
+  <h3>rainbow</h3><canvas id="rainbow_legend" width=200 height=20></canvas>
+  <h3>jet</h3><canvas id="jet_legend" width=200 height=20></canvas>
+  <h3>hsv</h3><canvas id="hsv_legend" width=200 height=20></canvas>
+  <h3>hot</h3><canvas id="hot_legend" width=200 height=20></canvas>
+  <h3>cool</h3><canvas id="cool_legend" width=200 height=20></canvas>
+  <h3>spring</h3><canvas id="spring_legend" width=200 height=20></canvas>
+  <h3>summer</h3><canvas id="summer_legend" width=200 height=20></canvas>
+  <h3>autumn</h3><canvas id="autumn_legend" width=200 height=20></canvas>
+  <h3>winter</h3><canvas id="winter_legend" width=200 height=20></canvas>
+  <h3>bone</h3><canvas id="bone_legend" width=200 height=20></canvas>
+  <h3>copper</h3><canvas id="copper_legend" width=200 height=20></canvas>
+  <h3>greys</h3><canvas id="greys_legend" width=200 height=20></canvas>
+  <h3>yignbu</h3><canvas id="yignbu_legend" width=200 height=20></canvas>
+</body>

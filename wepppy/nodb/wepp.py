@@ -308,29 +308,25 @@ class Wepp(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
-        
-        if landuse.mode == LanduseMode.Gridded:
-            for topaz_id, man_summary in landuse.sub_iter():
-                wepp_id = translator.wepp(top=int(topaz_id))
-                dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
-                
-                management = man_summary.get_management()
-                multi = management.build_multiple_year_man(years)
-                fn_contents = str(multi)
-                
-                with open(dst_fn, 'w') as fp:
-                    fp.write(fn_contents)
 
-                if self.run_flowpaths:
-                    for fp in watershed.fps_summary(topaz_id):
-                        dst_fn = _join(fp_runs_dir, '{}.man'.format(fp))
+        for topaz_id, man_summary in landuse.sub_iter():
+            wepp_id = translator.wepp(top=int(topaz_id))
+            dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
 
-                        with open(dst_fn, 'w') as fp:
-                            fp.write(fn_contents)
+            management = man_summary.get_management()
+            multi = management.build_multiple_year_man(years)
+            fn_contents = str(multi)
 
-        else:
-            raise NotImplementedError('Single landuse not implemented')
-        
+            with open(dst_fn, 'w') as fp:
+                fp.write(fn_contents)
+
+            if self.run_flowpaths:
+                for fp in watershed.fps_summary(topaz_id):
+                    dst_fn = _join(fp_runs_dir, '{}.man'.format(fp))
+
+                    with open(dst_fn, 'w') as fp:
+                        fp.write(fn_contents)
+
     def _prep_soils(self, translator):
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
