@@ -7,7 +7,7 @@ from os.path import split as _split
 
 from subprocess import Popen, PIPE
 from datetime import datetime
-
+import time
 
 import pickle
 
@@ -825,7 +825,12 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
 
         loss_grid_wgs = _join(self.plot_dir, 'loss.WGS.tif')
 
+        if _exists(loss_grid_wgs):
+            os.remove(loss_grid_wgs)
+            time.sleep(1)
+
         cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+               '-srcnodata', '-9999', '-dstnodata', '-9999',
                '-r', 'near', loss_grid_path, loss_grid_wgs]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
