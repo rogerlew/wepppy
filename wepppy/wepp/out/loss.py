@@ -153,9 +153,9 @@ class LossReport(object):
                 area = row['Hillslope Area']
                 self.hill_tbl[i]['TopazID'] = topaz_id
                 self.hill_tbl[i]['Length'] = sub_summary['length']
-                self.hill_tbl[i]['Runoff'] = row['Runoff Volume'] / area * 1000.0
-                self.hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / area * 1000.0
-                self.hill_tbl[i]['Baseflow'] = row['Baseflow Volume'] / area * 1000.0
+                self.hill_tbl[i]['Runoff'] = row['Runoff Volume'] / (area * 1000.0)
+                self.hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / (area * 1000.0)
+                self.hill_tbl[i]['Baseflow'] = row['Baseflow Volume'] / (area * 1000.0)
 
                 _loss = row['Soil Loss'] / area
                 _dep = row['Sediment Deposition'] / area
@@ -195,8 +195,6 @@ class LossReport(object):
 
                 if 'Total Phosphorus' in row:
                     self.chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
-
-                print(topaz_id, row)
 
     def _parse_tbl(self, lines, hdr):
         data = []

@@ -315,7 +315,7 @@ $(document).ready(function () {
     });
 
     // Loss
-    render_legend("portland", "wepp_sub_cmap_canvas_loss");
+    render_legend("electric", "wepp_sub_cmap_canvas_loss");
     sub_ctrl.renderLoss();
     $('#wepp_sub_cmap_range_loss').on('input', function () {
         sub_ctrl.renderLoss();
@@ -326,7 +326,7 @@ $(document).ready(function () {
     // Gridded
 
     // Soil Deposition / Loss
-    render_legend("portland", "wepp_grd_cmap_canvas_loss");
+    render_legend("electric", "wepp_grd_cmap_canvas_loss");
     sub_ctrl.updateGriddedLoss();
 
     $('#wepp_grd_cmap_range_loss').on('input', function () {
