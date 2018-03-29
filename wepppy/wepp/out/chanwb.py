@@ -49,6 +49,7 @@ def nse(Qm, Qo):
     return 1.0 - np.sum((Qm - Qo) ** 2.0) / \
                  np.sum((Qo - np.mean(Qo)) ** 2.0)
 
+
 def r_square(Qm, Qo):
     assert Qm.shape == Qo.shape
 
