@@ -124,6 +124,12 @@ class LakeTahoe(NoDbBase):
         with open(_join(wd, 'lt.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, LakeTahoe), db
+
+            if os.path.abspath(wd) != os.path.abspath(db.wd):
+                db.wd = wd
+                db.lock()
+                db.dump_and_unlock()
+
             return db
 
     @property

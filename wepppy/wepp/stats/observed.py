@@ -4,6 +4,7 @@ import numpy as np
 
 from wepppy.all_your_base import try_parse, parse_units
 
+
 class ObservedTimeseries:
     def __init__(self, fname):
 

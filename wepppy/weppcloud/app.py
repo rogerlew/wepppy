@@ -34,6 +34,9 @@ from wtforms import StringField
 import what3words
 
 import wepppy
+
+from wepppy.all_your_base import isfloat
+
 from wepppy.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
     WatershedBoundaryTouchesEdgeError,
@@ -510,6 +513,11 @@ def utility_processor():
 @app.context_processor
 def units_processor():
     return Unitizer.context_processor_package()
+
+
+@app.context_processor
+def isfloat_processor():
+    return dict(isfloat=isfloat)
 
 
 @app.context_processor
@@ -1638,11 +1646,14 @@ def get_wepp_run_status_full(runid):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
-    with open(wepp.status_log) as fp:
-        status_log = fp.read()
+    try:
+        with open(wepp.status_log) as fp:
+            status_log = fp.read()
 
-    return render_template('reports/wepp_log.htm',
-                           status_log=status_log)
+        return render_template('reports/wepp_log.htm',
+                               status_log=status_log)
+    except
+        return exception_factory('Error reading status.log')
 
 
 # noinspection PyBroadException

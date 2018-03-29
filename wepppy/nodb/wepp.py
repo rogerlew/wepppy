@@ -105,16 +105,16 @@ def validate_phosphorus_txt(fn):
 class PhosphorusOpts(object):
     def __init__(self):
         # Surface runoff concentration (mg/l)
-        self.surf_runoff = ''  # 0.0118000004441
+        self.surf_runoff = None  # 0.0118000004441
         
         # Subsurface lateral flow concentration (mg/l)
-        self.lateral_flow = ''  # 0.0109999999404
+        self.lateral_flow = None  # 0.0109999999404
         
         # Baseflow concentration (mg/l)
-        self.baseflow = ''  # 0.0196000002325
+        self.baseflow = None  # 0.0196000002325
         
         # Sediment concentration (mg/kg)
-        self.sediment = ''  # 1024
+        self.sediment = None  # 1024
 
     def parse_inputs(self, kwds):
         # noinspection PyBroadException
@@ -192,6 +192,12 @@ class Wepp(NoDbBase):
         with open(_join(wd, 'wepp.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Wepp)
+
+            if os.path.abspath(wd) != os.path.abspath(db.wd):
+                db.wd = wd
+                db.lock()
+                db.dump_and_unlock()
+
             return db
 
     @property

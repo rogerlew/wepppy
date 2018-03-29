@@ -71,20 +71,16 @@ class Soils(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd, mode='r'):
-        if mode in ['w', 'wf']:
-            lock = _join(wd, 'soils.nodb.lock')
-            islocked = _exists(lock)
-
-            if mode == 'w' and islocked:
-                raise SoilsNoDbLockedException
-
-            elif mode == 'wf' and islocked:
-                os.remove(lock)
-
+    def getInstance(wd):
         with open(_join(wd, 'soils.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Soils)
+
+            if os.path.abspath(wd) != os.path.abspath(db.wd):
+                db.wd = wd
+                db.lock()
+                db.dump_and_unlock()
+
             return db
 
     @property
