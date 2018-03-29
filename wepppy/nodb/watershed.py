@@ -61,6 +61,12 @@ class Watershed(NoDbBase):
         with open(_join(wd, 'watershed.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Watershed)
+
+            if os.path.abspath(wd) != os.path.abspath(db.wd):
+                db.wd = wd
+                db.lock()
+                db.dump_and_unlock()
+
             return db
 
     @property

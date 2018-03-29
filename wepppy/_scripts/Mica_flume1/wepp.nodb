@@ -1,0 +1,1 @@
+{"py/object": "wepppy.nodb.wepp.Wepp", "_config": "0.cfg", "_mods": [], "baseflow_opts": {"py/object": "wepppy.nodb.wepp.BaseflowOpts", "bfcoeff": 0.04, "bfthreshold": 1, "dscoeff": 0, "gwstorage": 200}, "phosphorus_opts": {"py/object": "wepppy.nodb.wepp.PhosphorusOpts", "baseflow": "", "lateral_flow": "", "sediment": "", "surf_runoff": ""}, "wd": "Mica_flume1"}

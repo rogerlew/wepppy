@@ -61,7 +61,8 @@
         </div>
         <div class="col-sm-4">
             <input id="surf_runoff" name="surf_runoff" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.phosphorus_opts.surf_runoff }}" aria-label="Surface runoff concentration">
+            value="{% if isfloat(wepp.phosphorus_opts.surf_runoff) %}{{ "%.4f" | format(wepp.phosphorus_opts.surf_runoff) }}{% endif %}"
+            aria-label="Surface runoff concentration">
         </div>
     </div>
     <div class="form-group row" id="lateral_flow_container">
@@ -70,7 +71,8 @@
         </div>
         <div class="col-sm-4">
             <input id="lateral_flow" name="lateral_flow" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.phosphorus_opts.lateral_flow }}" aria-label="Subsurface lateral flow concentration">
+            value="{% if isfloat(wepp.phosphorus_opts.lateral_flow) %}{{ "%.4f" | format(wepp.phosphorus_opts.lateral_flow) }}{% endif %}"
+            aria-label="Subsurface lateral flow concentration">
         </div>
     </div>
     <div class="form-group row" id="baseflow_container">
@@ -79,7 +81,8 @@
         </div>
         <div class="col-sm-4">
             <input id="baseflow" name="baseflow" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.phosphorus_opts.baseflow }}" aria-label="Baseflow concentration">
+            value="{% if isfloat(wepp.phosphorus_opts.baseflow) %}{{ "%.4f" | format(wepp.phosphorus_opts.baseflow) }}{% endif %}"
+            aria-label="Baseflow concentration">
         </div>
     </div>
     <div class="form-group row" id="sediment_container">
@@ -88,7 +91,8 @@
         </div>
         <div class="col-sm-4">
             <input id="sediment" name="sediment" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.phosphorus_opts.sediment }}" aria-label="Sediment concentration">
+            value="{% if isfloat(wepp.phosphorus_opts.sediment) %}{{ wepp.phosphorus_opts.sediment | round }}{% endif %}"
+            aria-label="Sediment concentration">
         </div>
     </div>
     <div class="form-group row hide-readonly">
