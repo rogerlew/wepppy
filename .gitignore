@@ -4,3 +4,4 @@ wepppy/validation/*
 *.pyc
 venv/*
 devnotes.txt
+.idea/workspace.xml
