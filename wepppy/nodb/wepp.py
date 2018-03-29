@@ -318,6 +318,10 @@ class Wepp(NoDbBase):
         plot_dir = self.plot_dir
         if not _exists(plot_dir):
             os.mkdir(plot_dir)
+            
+        stats_dir = self.stats_dir
+        if not _exists(stats_dir):
+            os.mkdir(stats_dir)
 
         fp_runs_dir = self.fp_runs_dir
         if not _exists(fp_runs_dir):

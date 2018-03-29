@@ -4,6 +4,8 @@ from collections import OrderedDict
 import numpy as np
 import os
 
+from wepppy.all_your_base import parse_units
+
 uint_types = ['OFE (#)', 'J', 'Y', 'M', 'D']
 vars_collapse_ofe = ['Y', 'J', 'M', 'D', 'Date', 'P (mm)', 'P (mm)', 'Q (mm)', 'latqcc (mm)']
 vars_collapse_time = ['Area (m^2)']
@@ -14,18 +16,6 @@ def parse_float(x):
         return float(x)
     except:
         return float('nan')
-
-
-def parse_units(colname):
-    try:
-        colsplit = colname.strip().split()
-        if len(colsplit) < 2:
-            return None
-        return colsplit[-1].replace('(', '').replace(')', '')
-    except IndexError:
-        return None
-
-    return None
 
 
 class AnnualWaterBalanceReport:

@@ -257,6 +257,10 @@ class NoDbBase(object):
         return _join(self.wd, 'wepp', 'plots')
 
     @property
+    def stats_dir(self):
+        return _join(self.wd, 'wepp', 'stats')
+
+    @property
     def export_dir(self):
         return _join(self.wd, 'export')
         
