@@ -1803,6 +1803,17 @@ def report_wepp_loss(runid):
                            report=report,
                            translator=translator)
 
+
+@app.route('/runs/<string:runid>/report/wepp/watbal')
+@app.route('/runs/<string:runid>/report/wepp/watbal/')
+def report_wepp_watbal(runid):
+    wd = get_wd(runid)
+    report = Wepp.getInstance(wd).report_watbal()
+
+    return render_template('reports/wepp_watbal.htm',
+                           report=report)
+
+
 @app.route('/runs/<string:runid>/report/wepp/frq')
 @app.route('/runs/<string:runid>/report/wepp/frq/')
 def report_wepp_frq(runid):
