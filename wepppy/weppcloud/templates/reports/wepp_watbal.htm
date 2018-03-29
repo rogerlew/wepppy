@@ -1,0 +1,32 @@
+<h5>Water Balance Summary</h5>
+ <table class="table table-condensed">
+    <thead>
+      <tr>
+        {% for colname in report.hdr %}
+        <th>{{ colname }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      {% for units in report.units %}
+        {% if units is none%}
+        <td>&nbsp;</td>
+        {% else %}
+        <td>{{ unitizer_units(units) | safe }}</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% for row in report %}
+    <tr>
+    {% for value, units in row %}
+        {% if loop.first %}
+        <td>{{ value | round | int}}</td>
+        {% else %}
+       <td>{{ unitizer(value, units) | safe }}</td>
+        {% endif %}
+    {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -39,7 +39,7 @@ from wepppy.wepp.management import (
 )
 
 from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4, parse_datetime
-from wepppy.wepp.out import LossReport, EbeReport, PlotFile
+from wepppy.wepp.out import LossReport, EbeReport, PlotFile, Chnwb, AnnualWaterBalanceReport
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -758,7 +758,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = EbeReport(ebe_pw0)
         ebe_rpt.run_return_periods(loss_rpt)
-        return  ebe_rpt
+        return ebe_rpt
+
+    def report_watbal(self):
+        output_dir = self.output_dir
+        chnwb_pw0 = _join(output_dir, 'chnwb.txt')
+
+        wat = Chnwb(chnwb_pw0)
+        return AnnualWaterBalanceReport(wat)
 
     def set_run_flowpaths(self, state):
         assert state in [True, False]

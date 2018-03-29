@@ -2819,7 +2819,7 @@ var Wepp = function () {
                     }
                 }).always(function() {
                     $.get({
-                        url: "../report/wepp/log/",
+                        url: "../report/wepp/watbal/",
                         cache: false,
                         success: function success(response) {
                             self.info.append(response);
@@ -2827,7 +2827,18 @@ var Wepp = function () {
                         fail: function fail(jqXHR, textStatus, errorThrown) {
                             self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                         }
-                    });
+                    }).always(function() {
+                        $.get({
+                            url: "../report/wepp/log/",
+                            cache: false,
+                            success: function success(response) {
+                                self.info.append(response);
+                            },
+                            fail: function fail(jqXHR, textStatus, errorThrown) {
+                                self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                            }
+                        });
+                    });;
                 });
             });
         };

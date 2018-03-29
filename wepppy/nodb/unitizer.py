@@ -248,7 +248,10 @@ class Unitizer(NoDbBase):
                 return str(int(v))
 
             fmt = '%.{}f'.format(int(p))
-            return fmt % float(v)
+            try:
+                return fmt % float(v)
+            except:
+                return str(v)
 
         def determine_unitclass(in_units):
             for k, v in precisions.items():
@@ -315,7 +318,11 @@ class Unitizer(NoDbBase):
                     continue
                 f = converters[unitclass][(in_units, u)]
                 p = precisions[unitclass][u]
-                v = tostring(f(value), p)
+                try:
+                    v = tostring(f(value), p)
+                except:
+                    v = '<i>%s</i>' % str(value)
+
                 s += '<div class="unitizer units-{u} invisible{oc}">{v}</div>' \
                     .format(u=cls_units(u), oc=oc, v=v)
 
