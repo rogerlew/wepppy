@@ -124,6 +124,17 @@ def try_parse_float(f):
         return 0.0
 
 
+def parse_units(colname):
+    try:
+        colsplit = colname.strip().split()
+        if len(colsplit) < 2:
+            return None
+        return colsplit[-1].replace('(', '').replace(')', '')
+    except IndexError:
+        return None
+
+    return None
+
 wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
 
 
