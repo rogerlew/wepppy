@@ -32,7 +32,6 @@ class TriggerEvents(Enum):
 # .nodb are jsonpickle files
 # The .nodb is used to distinguish these from regular json datafiles
 
-
 class NoDbBase(object):
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
