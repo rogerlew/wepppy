@@ -144,6 +144,15 @@ class Soils(NoDbBase):
         else:
             return self.domsoil_d is not None
 
+    @property
+    def legend(self):
+        mukeys = sorted(set(self.domsoil_d.values()))
+        soils = [self.soils[mukey] for mukey in mukeys]
+        descs = [soil.desc for soil in soils]
+        colors = [soil.color for soil in soils]
+
+        return list(zip(mukeys, descs, colors))
+
     #
     # build
     #

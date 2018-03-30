@@ -328,7 +328,17 @@ class Landuse(NoDbBase):
             return self.managements[domlc_d[topaz_id]].as_dict()
         else:
             return None
-        
+
+    @property
+    def legend(self):
+        doms = sorted(set(self.domlc_d.values()))
+        mans = [self.managements[dom] for dom in doms]
+        descs = [man.desc for man in mans]
+        colors = [man.color for man in mans]
+
+        return list(zip(doms, descs, colors))
+
+
     def sub_summary(self, topaz_id):
         return self._x_summary(topaz_id)
         
