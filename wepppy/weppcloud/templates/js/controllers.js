@@ -297,6 +297,7 @@ var Map = function () {
         that.isFetchingElevation = false;
         that.mouseelev = $("#mouseelev");
         that.drilldown = $("#drilldown");
+        that.sub_legend = $("#sub_legend");
 
         that.fetchElevation = function (ev) {
             var self = instance;
@@ -1243,6 +1244,7 @@ var SubcatchmentDelineation = function () {
 
             if (cmap_name === "default") {
                 self.cmap();
+                Map.getInstance().sub_legend.html("");
             } else if (cmap_name === "slp_asp") {
                 self.cmapSlpAsp();
             } else if (cmap_name === "dom_lc") {
@@ -1295,6 +1297,20 @@ var SubcatchmentDelineation = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function () {
+                var self = instance;
+
+                $.get({
+                    url: "../resources/legends/slope_aspect/",
+                    cache: false,
+                    success: function (response) {
+                        var map = Map.getInstance();
+                        map.sub_legend.html(response);
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             });
         };
 
@@ -1308,6 +1324,20 @@ var SubcatchmentDelineation = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function () {
+                var self = instance;
+
+                $.get({
+                    url: "../resources/legends/landuse/",
+                    cache: false,
+                    success: function (response) {
+                        var map = Map.getInstance();
+                        map.sub_legend.html(response);
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             });
         };
 
@@ -1321,6 +1351,20 @@ var SubcatchmentDelineation = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function () {
+                var self = instance;
+
+                $.get({
+                    url: "../resources/legends/soil/",
+                    cache: false,
+                    success: function (response) {
+                        var map = Map.getInstance();
+                        map.sub_legend.html(response);
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             });
         };
 

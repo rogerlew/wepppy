@@ -1189,6 +1189,32 @@ def query_landuse(runid):
     return jsonify(Landuse.getInstance(wd).domlc_d)
 
 
+@app.route('/runs/<string:runid>/resources/legends/slope_aspect')
+@app.route('/runs/<string:runid>/resources/legends/slope_aspect/')
+def resources_slope_aspect_legend(runid):
+    wd = get_wd(runid)
+
+    return render_template('legends/slope_aspect.htm')
+
+
+@app.route('/runs/<string:runid>/resources/legends/landuse')
+@app.route('/runs/<string:runid>/resources/legends/landuse/')
+def resources_landuse_legend(runid):
+    wd = get_wd(runid)
+
+    return render_template('legends/landuse.htm',
+                           legend=Landuse.getInstance(wd).legend)
+
+
+@app.route('/runs/<string:runid>/resources/legends/soil')
+@app.route('/runs/<string:runid>/resources/legends/soil/')
+def resources_soil_legend(runid):
+    wd = get_wd(runid)
+
+    return render_template('legends/soil.htm',
+                           legend=Soils.getInstance(wd).legend)
+
+
 @app.route('/runs/<string:runid>/query/landuse/subcatchments')
 @app.route('/runs/<string:runid>/query/landuse/subcatchments/')
 def query_landuse_subcatchments(runid):
