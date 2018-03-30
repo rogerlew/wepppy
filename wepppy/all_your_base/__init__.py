@@ -135,6 +135,16 @@ def parse_units(colname):
 
     return None
 
+class RowData:
+    def __init__(self, row):
+        self.row = row
+
+    def __iter__(self):
+        for colname in self.row:
+            value = self.row[colname]
+            units = parse_units(colname)
+            yield value, units
+
 wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
 
 
