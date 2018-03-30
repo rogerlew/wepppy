@@ -1,6 +1,7 @@
 
 report_hill_hdr = (
     'TopazID',
+    'Landuse',
     'Length',
     'Hillslope Area',
     'Runoff',
@@ -15,6 +16,7 @@ report_hill_hdr = (
 )
 
 report_hill_units = (
+    None,
     None,
     'm',
     'ha',
@@ -141,6 +143,7 @@ class LossReport(object):
         if wd is not None:
             import wepppy
 
+            landuse = wepppy.nodb.Landuse.getInstance(wd)
             watershed = wepppy.nodb.Watershed.getInstance(wd)
             translator = watershed.translator_factory()
 
@@ -152,6 +155,7 @@ class LossReport(object):
                 sub_summary = watershed.sub_summary(str(topaz_id))
                 area = row['Hillslope Area']
                 self.hill_tbl[i]['TopazID'] = topaz_id
+                self.hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
                 self.hill_tbl[i]['Length'] = sub_summary['length']
                 self.hill_tbl[i]['Runoff'] = row['Runoff Volume'] / (area * 1000.0)
                 self.hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / (area * 1000.0)
