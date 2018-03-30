@@ -204,4 +204,4 @@ def run_watershed(runs_dir):
             if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in L:
                 return True
                     
-    raise Exception('Error running wepp for watershed \nSee %s' % log_fn)
+    raise Exception('Error running wepp for watershed \nSee <a href="../view/wepprun/pw0.err">%s</a>' % log_fn)

@@ -44,7 +44,7 @@
         <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer_units(report.units_d['Particulate P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
       </tr>
-    {% for rec_interval in report.return_periods[key] %}
+    {% for rec_interval in report.intervals %}
       <tr>
         <td>{{ rec_interval }}</td>
         <td>{{ report.return_periods[key][rec_interval]['year'] | int }}</td>

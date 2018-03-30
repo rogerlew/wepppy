@@ -1652,7 +1652,7 @@ def get_wepp_run_status_full(runid):
 
         return render_template('reports/wepp_log.htm',
                                status_log=status_log)
-    except
+    except:
         return exception_factory('Error reading status.log')
 
 
