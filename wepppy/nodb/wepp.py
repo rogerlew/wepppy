@@ -39,7 +39,8 @@ from wepppy.wepp.management import (
 )
 
 from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4, parse_datetime
-from wepppy.wepp.out import LossReport, EbeReport, PlotFile, Chnwb, AnnualWaterBalanceReport
+from wepppy.wepp.out import LossReport, Ebe, PlotFile, Chnwb
+from wepppy.wepp.stats import ChanWatbal, HillslopeWatbal, ReturnPeriods
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -350,7 +351,8 @@ class Wepp(NoDbBase):
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
             shutil.copyfile(src_fn, dst_fn)
 
-            if self.run_flowpaths:
+            # use getattr for old runs that don't have a run_flowpaths attribute
+            if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     fn = '{}.slp'.format(fp)
                     src_fn = _join(wat_dir, fn)
@@ -375,7 +377,7 @@ class Wepp(NoDbBase):
             with open(dst_fn, 'w') as fp:
                 fp.write(fn_contents)
 
-            if self.run_flowpaths:
+            if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.man'.format(fp))
 
@@ -395,7 +397,7 @@ class Wepp(NoDbBase):
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
             shutil.copyfile(src_fn, dst_fn)
 
-            if self.run_flowpaths:
+            if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
                     shutil.copyfile(src_fn, dst_fn)
@@ -414,7 +416,7 @@ class Wepp(NoDbBase):
                 cli_path = _join(cli_dir, cli_fn)
                 shutil.copyfile(cli_path, dst_fn)
 
-                if self.run_flowpaths:
+                if getattr(self, 'run_flowpaths', False):
                     for fp in watershed.fps_summary(topaz_id):
                         dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
                         shutil.copyfile(cli_path, dst_fn)
@@ -426,7 +428,7 @@ class Wepp(NoDbBase):
                 cli_path = _join(cli_dir, climate.cli_fn)
                 shutil.copyfile(cli_path, dst_fn)
 
-                if self.run_flowpaths:
+                if getattr(self, 'run_flowpaths', False):
                     for fp in watershed.fps_summary(topaz_id):
                         dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
                         shutil.copyfile(cli_path, dst_fn)
@@ -442,7 +444,7 @@ class Wepp(NoDbBase):
             
             make_hillslope_run(wepp_id, years, runs_dir)
 
-            if self.run_flowpaths:
+            if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     make_flowpath_run(fp, years, fp_runs_dir)
 
@@ -454,7 +456,7 @@ class Wepp(NoDbBase):
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
 
-        if self.run_flowpaths:
+        if getattr(self, 'run_flowpaths', False):
             # data structure to contain flowpath soil loss results
             # keys are (x, y) pixel locations
             # values are lists of soil loss/deposition from flow paths
@@ -470,7 +472,7 @@ class Wepp(NoDbBase):
             self.log_done()
 
             # run flowpaths if specified
-            if self.run_flowpaths:
+            if getattr(self, 'run_flowpaths', False):
 
                 # iterate over the flowpath ids
                 fps_summary = watershed.fps_summary(topaz_id)
@@ -498,7 +500,7 @@ class Wepp(NoDbBase):
 
                     self.log_done()
 
-        if self.run_flowpaths:
+        if getattr(self, 'run_flowpaths', False):
             self.log('Processing flowpaths... ')
 
             self._pickle_loss_grid_d(loss_grid_d)
@@ -766,16 +768,16 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         loss_rpt = LossReport(loss_pw0, self.wd)
 
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
-        ebe_rpt = EbeReport(ebe_pw0)
-        ebe_rpt.run_return_periods(loss_rpt)
-        return ebe_rpt
+        ebe_rpt = Ebe(ebe_pw0)
+
+        return ReturnPeriods(ebe_rpt, loss_rpt)
 
     def report_watbal(self):
         output_dir = self.output_dir
         chnwb_pw0 = _join(output_dir, 'chnwb.txt')
 
         wat = Chnwb(chnwb_pw0)
-        return AnnualWaterBalanceReport(wat)
+        return ChanWatbal(wat)
 
     def set_run_flowpaths(self, state):
         assert state in [True, False]
