@@ -12,7 +12,8 @@ No                              # Do you want initial condition scenario output
 Yes                             # Water balance output
 ../output/chnwb.txt             #
 No                              # Crop output
-No                              # Soil output
+Yes                             # Soil output
+../output/soil_pw0.txt          #
 Yes                             # Channel erosion plotting (not implmemented)
 ../output/plot_pw0.txt          #
 No                              # Large watershed graphics output
