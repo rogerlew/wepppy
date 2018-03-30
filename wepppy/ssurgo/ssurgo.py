@@ -726,7 +726,7 @@ Any comments:
 1  1                                        
 'Urban_1'\t\t'Urban'\t1\t0.16\t0.75\t4649000\t0.0140\t2.648\t0.0000
 210\t1.4\t100.8\t10\t 0.242\t 0.1145\t 66.8\t7\t3\t11.3\t55.5
-1\t13\t10000\t100.8'''
+1\t10000\t100.8'''
         
     def _build_water(self):
         return '''7778\n''' + self.description + '''
@@ -734,7 +734,7 @@ Any comments:
 1  1                                        
 'Water_1'\t'Water'\t1\t0.16\t0.75\t4649000\t0.0140\t5.0\t0.0000
 210\t1.4\t100.0\t10\t0.242\t0.1145\t66.8\t7\t3\t11.3\t55.5
-1\t13\t10000\t0'''
+1\t10000\t0'''
 
     def write(self, wd='./', overwrite=True, fname=None, db_build=False) -> SoilSummary:
         assert _exists(wd), wd
@@ -863,9 +863,9 @@ Any comments:
             depth = 0.0
 
         if self.res_lyr_i is None:
-            s.append('1 13 10000.0 %0.5f' % ksat_last)
+            s.append('1 10000.0 %0.5f' % ksat_last)
         else:
-            s.append('1 13 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))
+            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))
             
         return '\n'.join(s)
     

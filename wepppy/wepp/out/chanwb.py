@@ -43,20 +43,6 @@ class Chanwb:
         self.units = [None, None, None, None, 'm^3', 'm^3', 'm^3', 'm^3', 'm^3', 'm^3']
 
 
-def nse(Qm, Qo):
-    assert Qm.shape == Qo.shape
-
-    return 1.0 - np.sum((Qm - Qo) ** 2.0) / \
-                 np.sum((Qo - np.mean(Qo)) ** 2.0)
-
-
-def r_square(Qm, Qo):
-    assert Qm.shape == Qo.shape
-
-    slope, intercept, r_value, p_value, std_err = stats.linregress(Qm, Qo)
-    return r_value ** 2.0
-
-
 if __name__ == "__main__":
     chnwat = Chanwb('/geodata/weppcloud_runs/f26c3690-c491-478f-90f9-f6710abb2618/wepp/runs/chanwb.out')
 
