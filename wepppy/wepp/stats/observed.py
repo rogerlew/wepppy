@@ -28,5 +28,38 @@ class ObservedTimeseries:
         self.units = units
 
 
+def validate(Qm, Qo):
+    assert Qm.shape == Qo.shape
+    assert len(Qo.shape) == 1
+
+
+def nse(Qm, Qo):
+    validate(Qm, Qo)
+
+    return 1.0 - np.sum((Qm - Qo) ** 2.0) / \
+                 np.sum((Qo - np.mean(Qo)) ** 2.0)
+
+
+def r_square(Qm, Qo):
+    validate(Qm, Qo)
+
+    slope, intercept, r_value, p_value, std_err = stats.linregress(Qm, Qo)
+    return r_value ** 2.0
+
+
+def dv(Qm, Qo):
+    validate(Qm, Qo)
+
+    return np.mean((Qo - Qm) / Qo * 100.0)
+
+
+def mse(Qm, Qo):
+    validate(Qm, Qo)
+
+    n = Qo.shape[1]
+    return np.mean((Qo - Qm) ** 2.0)
+
+
+
 if __name__ == "__main__":
     obs = ObservedTimeseries('tests/blackwood_observed.csv')
