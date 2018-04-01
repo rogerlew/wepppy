@@ -50,10 +50,12 @@ from wepppy.watershed_abstraction import (
 )
 from wepppy.wepp import management
 
-from wepppy.wepp.runner import (
-    run_watershed,
-    run_hillslope
+from wepppy.wepp.stats import (
+    OutletSummary,
+    HillSummary,
+    ChannelSummary
 )
+
 from wepppy.nodb import (
     Ron,
     Topaz,
@@ -61,7 +63,7 @@ from wepppy.nodb import (
     Landuse, LanduseMode, 
     Soils, SoilsMode, 
     Climate, ClimateStationMode,
-    Wepp,
+    Wepp, WeppPost,
     Unitizer
 )
 
@@ -1563,6 +1565,28 @@ def task_build_climate(runid):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/set_hourly_seepage', methods=['POST'])
+@app.route('/runs/<string:runid>/tasks/set_hourly_seepage/', methods=['POST'])
+def task_set_hourly_seepage(runid):
+
+    try:
+        state = request.json.get('hourly_seepage', None)
+    except Exception:
+        return exception_factory('Error parsing state')
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        wepp = Wepp.getInstance(wd)
+        wepp.set_hourly_seepage(state)
+    except Exception:
+        return exception_factory('Error setting state')
+
+    return success_factory()
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/set_run_flowpaths', methods=['POST'])
 @app.route('/runs/<string:runid>/tasks/set_run_flowpaths/', methods=['POST'])
 def task_set_run_flowpaths(runid):
@@ -1666,18 +1690,31 @@ def get_wepp_run_status(runid):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/report/wepp/results')
+@app.route('/runs/<string:runid>/report/wepp/results/')
+def report_wepp_results(runid):
+
+    try:
+        return render_template('controls/wepp_reports.htm')
+    except:
+        return exception_factory('Error reading status.log')
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/report/wepp/log')
 @app.route('/runs/<string:runid>/report/wepp/log/')
 def get_wepp_run_status_full(runid):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
+    ron = Ron.getInstance(wd)
 
     try:
         with open(wepp.status_log) as fp:
             status_log = fp.read()
 
-        return render_template('reports/wepp_log.htm',
-                               status_log=status_log)
+        return render_template('reports/wepp/log.htm',
+                               status_log=status_log,
+                               ron=ron,
+                               user=current_user)
     except:
         return exception_factory('Error reading status.log')
 
@@ -1829,38 +1866,111 @@ def query_wepp_phos_opts(runid):
     return jsonify(phos_opts)
 
 
-@app.route('/runs/<string:runid>/report/wepp/loss')
-@app.route('/runs/<string:runid>/report/wepp/loss/')
+@app.route('/runs/<string:runid>/report/wepp/summary')
+@app.route('/runs/<string:runid>/report/wepp/summary/')
 def report_wepp_loss(runid):
     wd = get_wd(runid)
-    report = Wepp.getInstance(wd).report_loss()
+    ron = Ron.getInstance(wd)
+    loss = Wepp.getInstance(wd).report_loss()
+    out_rpt = OutletSummary(loss)
+    hill_rpt = HillSummary(loss)
+    chn_rpt = ChannelSummary(loss)
     translator = Watershed.getInstance(wd).translator_factory()
 
-    return render_template('reports/wepp_loss.htm',
-                           report=report,
-                           translator=translator)
+    return render_template('reports/wepp/summary.htm',
+                           out_rpt=out_rpt,
+                           hill_rpt=hill_rpt,
+                           chn_rpt=chn_rpt,
+                           translator=translator,
+                           ron=ron,
+                           user=current_user)
 
 
-@app.route('/runs/<string:runid>/report/wepp/watbal')
-@app.route('/runs/<string:runid>/report/wepp/watbal/')
-def report_wepp_watbal(runid):
+@app.route('/runs/<string:runid>/report/wepp/yearly_watbal')
+@app.route('/runs/<string:runid>/report/wepp/yearly_watbal/')
+def report_wepp_yearly_watbal(runid):
     wd = get_wd(runid)
-    report = Wepp.getInstance(wd).report_watbal()
+    ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    hill_rpt = wepp.report_hill_watbal()
+    chn_rpt = wepp.report_chn_watbal()
 
-    return render_template('reports/wepp_watbal.htm',
-                           report=report)
+    return render_template('reports/wepp/yearly_watbal.htm',
+                           hill_rpt=hill_rpt,
+                           chn_rpt=chn_rpt,
+                           ron=ron,
+                           user=current_user)
 
-
-@app.route('/runs/<string:runid>/report/wepp/frq')
-@app.route('/runs/<string:runid>/report/wepp/frq/')
-def report_wepp_frq(runid):
+@app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal')
+@app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal/')
+def report_wepp_avg_annual_watbal(runid):
     wd = get_wd(runid)
-    report = Wepp.getInstance(wd).report_ebe()
+    ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    hill_rpt = wepp.report_hill_watbal()
+    chn_rpt = wepp.report_chn_watbal()
+
+    return render_template('reports/wepp/avg_annual_watbal.htm',
+                           hill_rpt=hill_rpt,
+                           chn_rpt=chn_rpt,
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/resources/wepp/daily_streamflow.csv')
+def resources_wepp_streamflow(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    wepppost = WeppPost.getInstance(wd)
+    fn = _join(ron.export_dir, 'daily_streamflow.csv')
+    wepppost.export_streamflow(fn)
+
+    assert _exists(fn)
+
+    return send_file(fn, mimetype='text/csv', attachment_filename='daily_streamflow.csv')
+
+
+@app.route('/runs/<string:runid>/plot/wepp/streamflow')
+@app.route('/runs/<string:runid>/plot/wepp/streamflow/')
+def plot_wepp_streamflow(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    hill_rpt = wepp.report_hill_watbal()
+    chn_rpt = wepp.report_chn_watbal()
+
+    return render_template('reports/wepp/daily_streamflow_graph.htm',
+                           ron=ron,
+                           user=current_user)
+
+@app.route('/runs/<string:runid>/report/wepp/return_periods')
+@app.route('/runs/<string:runid>/report/wepp/return_periods/')
+def report_wepp_return_periods(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    report = Wepp.getInstance(wd).report_return_periods()
     translator = Watershed.getInstance(wd).translator_factory()
 
-    return render_template('reports/wepp_frq.htm',
+    return render_template('reports/wepp/return_periods.htm',
                            report=report,
-                           translator=translator)
+                           translator=translator,
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/report/wepp/frq_flood')
+@app.route('/runs/<string:runid>/report/wepp/frq_flood/')
+def report_wepp_frq_flood(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    report = Wepp.getInstance(wd).report_frq_flood()
+    translator = Watershed.getInstance(wd).translator_factory()
+
+    return render_template('reports/wepp/frq_flood.htm',
+                           report=report,
+                           translator=translator,
+                           ron=ron,
+                           user=current_user)
 
 
 @app.route('/runs/<string:runid>/query/wepp/runoff/subcatchments')

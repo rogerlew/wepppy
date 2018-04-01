@@ -1,92 +1,4 @@
 
-report_hill_hdr = (
-    'TopazID',
-    'Landuse',
-    'Length',
-    'Hillslope Area',
-    'Runoff',
-    'Subrunoff',
-    'Baseflow Volume',
-    'Soil Loss Density',
-    'Sediment Deposition Density',
-    'Sediment Yield Density',
-    'Solub. React. P Density',
-    'Particulate P Density',
-    'Total P Density'
-)
-
-report_hill_units = (
-    None,
-    None,
-    'm',
-    'ha',
-    'mm',
-    'mm',
-    'm^3',
-    'kg/ha',
-    'kg/ha',
-    'kg/ha',
-    'kg/ha',
-    'kg/ha',
-    'kg/ha'
-)
-
-hill_hdr = (
-    'Type',
-    'Hillslopes',
-    'Runoff Volume',
-    'Subrunoff Volume',
-    'Baseflow Volume',
-    'Soil Loss',
-    'Sediment Deposition',
-    'Sediment Yield',
-    'Hillslope Area',
-    'Solub. React. Phosphorus',
-    'Particulate Phosphorus',
-    'Total Phosphorus'
-)
-
-hill_units = (
-    None, None, 'm^3', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'ha', 'kg', 'kg', 'kg'
-)
-
-
-report_chn_hdr = (
-    'TopazID',
-    'Length',
-    'Area',
-    'Discharge Volume',
-    'Sediment Yield',
-    'Soil Loss',
-    'Upland Charge',
-    'Subsuface Volume',
-    'Flow Phosphorus',
-    'Solub. React. P Density',
-    'Particulate P Density',
-    'Total P Density'
-)
-
-report_chn_units = (
-    None, 'm', 'ha', 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'm^3', 'kg', 'kg', 'kg'
-)
-
-chn_hdr = (
-    'Type',
-    'Channels and Impoundments',
-    'Discharge Volume',
-    'Sediment Yield',
-    'Soil Loss',
-    'Upland Charge',
-    'Subsuface Volume',
-    'Flow Phosphorus',
-    'Solub. React. Phosphorus',
-    'Particulate Phosphorus',
-    'Total Phosphorus'
-)
-
-chn_units = (
-    None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'kg'
-)
 
 unit_consistency_map = {
     'T/ha/yr': 'tonne/ha/yr',
@@ -96,7 +8,7 @@ unit_consistency_map = {
 }
 
 
-class LossReport(object):
+class Loss(object):
     def __init__(self, fn, wd=None):
 
         # read the loss report
@@ -129,21 +41,53 @@ class LossReport(object):
         chn0 = header_indx[1] + 2 # channel and outlet summary
         out0 = header_indx[2] + 2 # have a blank line before the data
 
-        self.hill_tbl = self._parse_tbl(lines[hill0:], hill_hdr)
+        self.hill_hdr = (
+            'Type',
+            'Hillslopes',
+            'Runoff Volume',
+            'Subrunoff Volume',
+            'Baseflow Volume',
+            'Soil Loss',
+            'Sediment Deposition',
+            'Sediment Yield',
+            'Hillslope Area',
+            'Solub. React. Phosphorus',
+            'Particulate Phosphorus',
+            'Total Phosphorus'
+        )
 
-        self.chn_tbl = self._parse_tbl(lines[chn0:], chn_hdr)
+        self.hill_units = (
+            None, None, 'm^3', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'ha', 'kg', 'kg', 'kg'
+        )
+
+        self.chn_hdr = (
+            'Type',
+            'Channels and Impoundments',
+            'Discharge Volume',
+            'Sediment Yield',
+            'Soil Loss',
+            'Upland Charge',
+            'Subsuface Volume',
+            'Flow Phosphorus',
+            'Solub. React. Phosphorus',
+            'Particulate Phosphorus',
+            'Total Phosphorus'
+        )
+
+        self.chn_units = (
+            None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'kg'
+        )
+
+        self.hill_tbl = self._parse_tbl(lines[hill0:], self.hill_hdr)
+
+        self.chn_tbl = self._parse_tbl(lines[chn0:], self.chn_hdr)
         self.out_tbl = self._parse_out(lines[out0:])
-
-        self.hill_hdr = report_hill_hdr
-        self.chn_hdr = report_chn_hdr
-        
-        self.hill_units = report_hill_units
-        self.chn_units = report_chn_units
 
         if wd is not None:
             import wepppy
 
             landuse = wepppy.nodb.Landuse.getInstance(wd)
+            soils = wepppy.nodb.Soils.getInstance(wd)
             watershed = wepppy.nodb.Watershed.getInstance(wd)
             translator = watershed.translator_factory()
 
@@ -154,8 +98,10 @@ class LossReport(object):
                 topaz_id = translator.top(wepp=wepp_id)
                 sub_summary = watershed.sub_summary(str(topaz_id))
                 area = row['Hillslope Area']
+                self.hill_tbl[i]['WeppID'] = wepp_id
                 self.hill_tbl[i]['TopazID'] = topaz_id
                 self.hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
+                self.hill_tbl[i]['Soil'] = soils.domsoil_d[str(topaz_id)]
                 self.hill_tbl[i]['Length'] = sub_summary['length']
                 self.hill_tbl[i]['Runoff'] = row['Runoff Volume'] / (area * 1000.0)
                 self.hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / (area * 1000.0)
@@ -185,6 +131,7 @@ class LossReport(object):
                 topaz_id = translator.top(chn_enum=wepp_id)
                 chn_summary = watershed.chn_summary(str(topaz_id))
                 area = chn_summary['area'] / 10000.0
+                self.chn_tbl[i]['WeppID'] = wepp_id
                 self.chn_tbl[i]['TopazID'] = topaz_id
                 self.chn_tbl[i]['Area'] = area
                 self.chn_tbl[i]['Length'] = chn_summary['length']
@@ -287,7 +234,8 @@ class LossReport(object):
 
 
 if __name__ == "__main__":
-    report = LossReport('/geodata/weppcloud_runs/bb967f25-9fd6-4641-b737-bb10a1cf7843/wepp/output/loss_pw0.txt',
+    loss = Loss('/geodata/weppcloud_runs/bb967f25-9fd6-4641-b737-bb10a1cf7843/wepp/output/loss_pw0.txt',
                         '/geodata/weppcloud_runs/bb967f25-9fd6-4641-b737-bb10a1cf7843/')
-    print(report.hill_tbl)
-    print(report.chn_tbl)
+    #print(loss.hill_tbl)
+    #print(loss.chn_tbl)
+    print(loss.out_tbl)

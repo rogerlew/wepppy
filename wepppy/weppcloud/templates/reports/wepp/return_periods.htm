@@ -1,19 +1,21 @@
-<h5>Return Period Analysis</h5>
-    <br>The Return period of the events are estimated by applying Weibull formula on annual maxima series:</br>
-    <div style="margin-left: 50px">
-        <i>T</i> = (<i>N</i> + 1)/<i>m</i>,</br>
-    where <i>T</i> is the return period, <i>N</i> is the number of simulation years, and <i>m</i> is the rank of he annual maxima event.</div>
-    </p>
+{% extends "reports/_page_container.htm" %}
+{% block report_content %}
+<h2>WEPP Return Period Analysis</h5>
+<p>
+<br>The Return period of the events are estimated by applying Weibull formula on annual maxima series:</br>
+<div style="margin-left: 50px">
+    <i>T</i> = (<i>N</i> + 1)/<i>m</i>,</br>
+where <i>T</i> is the return period, <i>N</i> is the number of simulation years, and <i>m</i> is the rank of he annual maxima event.</div>
 <dl class="dl-horizontal">
     <dt>Years in Simulation</dt>
     <dd>{{ report.years }}</dd>
     <dt>Events in Simulation</dt>
     <dd>{{ report.num_events }}</dd>
 </dl>
-
+<br/>
 {% for key in ['Precipitation Depth', 'Runoff', 'Peak Runoff',
                'Sediment Yield', 'Soluble Reactive P', 'Particulate P', 'Total P'] %}
-  <h6><b>{{ key }}</b></h6>
+  <h5><b>{{ key }}</b></h5>
   <table class="table table-condensed">
     <thead>
       <tr>
@@ -69,3 +71,4 @@
     </tbody>
   </table>
 {% endfor %}
+{% endblock %}

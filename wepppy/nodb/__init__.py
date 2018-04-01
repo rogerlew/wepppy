@@ -36,7 +36,12 @@ from .climate import (
 from .wepp import (
     Wepp, 
     WeppNoDbLockedException
-)    
+)
+
+from .wepppost import (
+    WeppPost,
+    WeppPostNoDbLockedException
+)
 from .unitizer import (
     Unitizer, 
     UnitizerNoDbLockedException

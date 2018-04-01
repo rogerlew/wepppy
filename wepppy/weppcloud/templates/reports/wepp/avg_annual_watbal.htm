@@ -1,0 +1,68 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_content %}
+<h2>Water Balance Average Annual Summary</h5>
+<h5>Hillslopes</h5>
+ <table class="table table-condensed">
+    <thead>
+      <tr>
+        {% for colname in hill_rpt.avg_annual_header %}
+        <th>{{ colname }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      {% for units in hill_rpt.avg_annual_units %}
+        {% if units is none%}
+        <td>&nbsp;</td>
+        {% else %}
+        <td>{{ unitizer_units(units) | safe }}</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% for row in hill_rpt.avg_annual_iter() %}
+    <tr>
+    {% for value, units in row %}
+        {% if loop.first %}
+        <td>{{ value | round | int}}</td>
+        {% else %}
+       <td>{{ unitizer(value, units) | safe }}</td>
+        {% endif %}
+    {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<h5>Channels</h5>
+ <table class="table table-condensed">
+    <thead>
+      <tr>
+        {% for colname in chn_rpt.avg_annual_header %}
+        <th>{{ colname }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      {% for units in chn_rpt.avg_annual_units %}
+        {% if units is none%}
+        <td>&nbsp;</td>
+        {% else %}
+        <td>{{ unitizer_units(units) | safe }}</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% for row in chn_rpt.avg_annual_iter() %}
+    <tr>
+    {% for value, units in row %}
+        {% if loop.first %}
+        <td>{{ value | round | int}}</td>
+        {% else %}
+       <td>{{ unitizer(value, units) | safe }}</td>
+        {% endif %}
+    {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

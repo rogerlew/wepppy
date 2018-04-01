@@ -3,19 +3,20 @@ Yes                             # not watershed option
 1                               # hillslope version
 1                               # storm option, 1=abbreviated annual soil loss output option for continuous simulation
 Yes                             # pass file output
-../output/H{wepp_id}.pass.dat   # name of hillslope pass file
+../output/H{wepp_id}.pass.dat   #
 1                               # abbreviated annual soil loss output option for continuous simulation
 No                              # initial condition scenario output
-../output/H{wepp_id}.loss.dat   # name of hillslope loss file
+../output/H{wepp_id}.loss.dat   #
 Yes                             # water balance output
 ../output/H{wepp_id}.wat.dat    #
 No                              # crop output
 Yes                             # soil output
-../output/H{wepp_id}.soil.dat   # name of hillslope loss file
+../output/H{wepp_id}.soil.dat   #
 Yes                             # distance and sediment loss
-../output/H{wepp_id}.plot.dat   # name of hillslope plot file
+../output/H{wepp_id}.plot.dat   #
 No                              # large graphics output
-No                              # event by event output
+Yes                             # event by event output
+../output/H{wepp_id}.ebe.dat    #
 No                              # element output
 No                              # final summary output
 No                              # daily winter output

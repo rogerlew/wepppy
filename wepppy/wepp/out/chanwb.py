@@ -44,9 +44,7 @@ class Chanwb:
 
 
 if __name__ == "__main__":
-    chnwat = Chanwb('/geodata/weppcloud_runs/f26c3690-c491-478f-90f9-f6710abb2618/wepp/runs/chanwb.out')
+    chnwat = Chanwb('/geodata/weppcloud_runs/f26c3690-c491-478f-90f9-f6710abb2618/wepp/output/chanwb.out')
 
-    print(chnwat.data['Outflow'])
-    print(r_square(np.array([1, 2, 3, 4, 5, 6]),
-                   np.array([1, 1.5, 3, 4, 5, 6])[::-1]))
+    print(chnwat.data.keys())
 
