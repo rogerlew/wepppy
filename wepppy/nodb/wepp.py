@@ -24,6 +24,8 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
+import wepppy
+
 # wepppy
 from wepppy.wepp.runner import (
     make_hillslope_run,
@@ -39,16 +41,18 @@ from wepppy.wepp.management import (
 )
 
 from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4, parse_datetime
-from wepppy.wepp.out import LossReport, Ebe, PlotFile, Chnwb
-from wepppy.wepp.stats import ChanWatbal, HillslopeWatbal, ReturnPeriods
+from wepppy.wepp.out import Loss, Ebe, PlotFile, Chnwb
+from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods
 
 # wepppy submodules
+from wepppy.wepp.stats.frq_flood import FrqFlood
 from .base import NoDbBase, TriggerEvents
 from .landuse import Landuse, LanduseMode
 from .soils import Soils, SoilsMode
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
 from .topaz import Topaz
+from .wepppost import  WeppPost
 
 
 class BaseflowOpts(object):
@@ -173,6 +177,7 @@ class Wepp(NoDbBase):
             self.phosphorus_opts = PhosphorusOpts()
             self.baseflow_opts = BaseflowOpts()
             self.run_flowpaths = False
+            self.wepp_ui = False
             self.loss_grid_d_path = None
             self.status_log = _join(self.runs_dir, 'status.log')
 
@@ -279,9 +284,20 @@ class Wepp(NoDbBase):
         self._prep_frost()
         self._prep_phosphorus()
         self._prep_baseflow()
+        self._prep_wepp_ui()
 
         self.log_done()
-        
+
+    def _prep_wepp_ui(self):
+        fn = _join(self.runs_dir, 'wepp_ui.txt')
+
+        if self.wepp_ui:
+            with open(fn, 'w') as fp:
+                fp.write('')
+        else:
+            if _exists(fn):
+                os.remove(fn)
+
     def _prep_frost(self):
         fn = _join(self.runs_dir, 'frost.txt')
         with open(fn, 'w') as fp:
@@ -449,7 +465,7 @@ class Wepp(NoDbBase):
                     make_flowpath_run(fp, years, fp_runs_dir)
 
     def run_hillslopes(self):
-        self.log('Running Hillslopes')
+        self.log('Running Hillslopes\n')
         translator = Watershed.getInstance(self.wd).translator_factory()
         watershed = Watershed.getInstance(self.wd)
         topaz = Topaz.getInstance(self.wd)
@@ -746,6 +762,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         make_watershed_run(years, wepp_ids, runs_dir)
         
     def run_watershed(self):
+        wd  = self.wd
         self.log('Running Watershed... ')
 
         runs_dir = self.runs_dir
@@ -755,29 +772,54 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
             dst_path = _join(self.output_dir, _split(fn)[1])
             shutil.move(fn, dst_path)
 
+        if not _exists(_join(wd, 'wepppost.nodb')):
+            WeppPost(wd, '0.cfg')
+
+        self.log_done()
+
+        self.log('Running WeppPost... ')
+        wepppost = WeppPost.getInstance(wd)
+        wepppost.run_post()
+        self.log_done()
+
+        self.log('Calculating hill streamflow measures... ')
+        wepppost.calc_hill_streamflow()
+        self.log_done()
+
+        self.log('Calculating channel streamflow measures... ')
+        wepppost.calc_channel_streamflow()
         self.log_done()
 
     def report_loss(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        return LossReport(loss_pw0, self.wd)
+        return Loss(loss_pw0, self.wd)
 
-    def report_ebe(self):
+    def report_return_periods(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        loss_rpt = LossReport(loss_pw0, self.wd)
+        loss_rpt = Loss(loss_pw0, self.wd)
 
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = Ebe(ebe_pw0)
 
         return ReturnPeriods(ebe_rpt, loss_rpt)
 
-    def report_watbal(self):
+    def report_frq_flood(self):
         output_dir = self.output_dir
-        chnwb_pw0 = _join(output_dir, 'chnwb.txt')
+        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
+        loss_rpt = Loss(loss_pw0, self.wd)
 
-        wat = Chnwb(chnwb_pw0)
-        return ChanWatbal(wat)
+        ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
+        ebe_rpt = Ebe(ebe_pw0)
+
+        return FrqFlood(ebe_rpt, loss_rpt)
+
+    def report_hill_watbal(self):
+        return HillslopeWatbal(self.wd)
+
+    def report_chn_watbal(self):
+        return ChannelWatbal(self.wd)
 
     def set_run_flowpaths(self, state):
         assert state in [True, False]
@@ -792,13 +834,27 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         except Exception:
             self.unlock('-f')
             raise
+
+    def set_hourly_seepage(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.wepp_ui = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
         
     def query_sub_val(self, measure):
         wd = self.wd
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = LossReport(loss_pw0, self.wd)
+        report = Loss(loss_pw0, self.wd)
         
         d = {}
         for row in report.hill_tbl:

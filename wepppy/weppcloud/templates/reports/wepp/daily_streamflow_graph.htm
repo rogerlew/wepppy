@@ -1,0 +1,268 @@
+{% extends "reports/_page_container.htm" %}
+{% block head_content %}
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .025;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+  clip-path: url(#clip);
+}
+
+</style>
+{%  endblock %}
+{% block report_content %}
+<h2>Daily Runoff/Lateral Flow/Baseflow</h5>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+<div id="area1"></div>
+<script>
+
+
+var margin = {top: 10, right: 100, bottom: 150, left: 40},
+    margin2 = {top: 430, right: 100, bottom: 70, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 550 - margin.top - margin.bottom,
+    height2 = 550 - margin2.top - margin2.bottom;
+
+var parseDate = d3.time.format("%Y%m%d").parse;
+
+var x = d3.time.scale()
+               .range([0, width]);
+
+var x_c = d3.time.scale()
+               .range([0, width]);
+
+var y = d3.scale.linear()
+                .range([height, 0]);
+
+var y_c = d3.scale.linear()
+                .range([height2, 0]);
+
+var color = d3.scale.category10();
+
+var xAxis = d3.svg.axis()
+                  .scale(x)
+                  .orient("bottom");
+
+var xAxis_c = d3.svg.axis()
+                  .scale(x_c)
+                  .orient("bottom");
+
+var yAxis = d3.svg.axis()
+                  .scale(y)
+                  .orient("left");
+
+var yAxis_c = d3.svg.axis()
+                  .scale(y_c)
+                  .orient("left")
+                  .ticks(2);
+
+var brush = d3.svg.brush()
+    .x(x_c)
+	.extent([0,1])
+    .on("brush", brushed);
+
+var line = d3.svg.line()
+    .defined(function(d) { return d.datavalue != -9999; })
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.datavalue); });
+
+var line_c = d3.svg.line()
+    .defined(function(d) { return d.datavalue != -9999; })
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y_c(d.datavalue); });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom);
+
+svg.append("defs").append("clipPath")
+    .attr("id", "clip")
+  .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
+var focus = svg.append("g")
+    .attr("class", "focus")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+var context = svg.append("g")
+    .attr("class", "context")
+    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+
+d3.csv("../../../resources/wepp/daily_streamflow.csv", function(error, data) {
+  if (error) throw error;
+
+  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+
+  data.forEach(function(d) {
+    d.date = parseDate(d.date);
+  });
+
+  var sites = color.domain().map(function(name) {
+    return {
+      name: name,
+      values: data.map(function(d) {
+        return {date: d.date, datavalue: +d[name]};
+      })
+    };
+  });
+
+  x.domain(d3.extent(data, function(d) { return d.date; }));
+  y.domain([
+    d3.min(sites, function(c) {
+        return d3.min(c.values,
+            function(v) {
+            if (v.datavalue >= 0)
+                return v.datavalue;
+            else
+                return 0;
+        });
+    }),
+    d3.max(sites, function(c) {
+        return d3.max(c.values,
+            function(v) {
+            return v.datavalue;
+        });
+    })
+  ]);
+
+  x_c.domain(x.domain());
+  y_c.domain(y.domain());
+
+  focus.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  focus.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Streamflow (mm)");
+
+  var site = focus.selectAll(".site")
+      .data(sites)
+    .enter().append("g")
+      .attr("class", "site");
+
+  site.append("path")
+      .attr("class", "line")
+      .attr("d", function(d) { return line(d.values); })
+      .style("stroke", function(d) { return color(d.name); });
+
+  var c = 0
+  site.append("text")
+      .datum(function(d) {
+          return {
+              name: d.name,
+              value: d.values[d.values.length - 1]
+          };
+      })
+      .attr("transform",
+          function(d) {
+          c = c + 1;
+          return "translate(" + x(d.value.date) + "," + (y(d.value.datavalue) - c * 20 ) + ")";
+      })
+      .attr("x", 3)
+      .attr("dy", ".35em")
+      .style("stroke", function(d) {
+          return color(d.name);
+      })
+      .text(function(d) {
+          return d.name;
+      });
+
+
+  context.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height2 + ")")
+      .call(xAxis_c);
+
+  context.append("g")
+      .attr("class", "y axis")
+      .call(yAxis_c)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end");
+
+
+  var site_c = context.selectAll(".site")
+      .data(sites)
+    .enter().append("g")
+      .attr("class", "site");
+
+  site_c.append("path")
+      .attr("class", "line")
+      .attr("d", function(d) { return line_c(d.values); })
+      .style("stroke", function(d) { return color(d.name); });
+
+  site_c.append("text")
+      .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+      .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.datavalue) + ")"; })
+      .attr("x", 3)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.name; });
+
+  context.append("g")
+      .attr("class", "x brush")
+      .call(brush)
+    .selectAll("rect")
+      .attr("y", -6)
+      .attr("height", height2 + 7);
+
+  context.select('.resize.e').append("image")
+        .attr("y", -6)
+		.attr("x", -6)
+		.attr("width", 10)
+		.attr("height", 56)
+		.attr("xlink:href", 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAABkCAYAAAC/zKGXAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCRkM5NDZEQUMxNjgxMUUyQkFCRDlDRTY4NUE3QTUwOCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCRkM5NDZEQkMxNjgxMUUyQkFCRDlDRTY4NUE3QTUwOCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkJGQzk0NkQ4QzE2ODExRTJCQUJEOUNFNjg1QTdBNTA4IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkJGQzk0NkQ5QzE2ODExRTJCQUJEOUNFNjg1QTdBNTA4Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+XphmPQAAAMlJREFUeNrs1zEOgyAUBuCHEwnEdDOcgcSFE7B4TO+hF/AoxkUGHVgI7bMTLbSMTfP+xPCEL4CJy2MxRsDM8/wsXjIMA7sKhNM0xXVd43EcyYNzuIaGYdH3PYQQchvCA8O+79Dgi5QSSlFKXWMDlSFIkCBBggR/C3LOYVmWuh3bti3it6NLOHvHHC5+jLX2OzTGgPf+M8yhBOKi1jqL6O8hSJAgQYL/Ds/zLAJsmzEMm2zs1oUQ0HVdgrZtA+ccjON4Y7Wt/V2AAQBKumn/ZlmxawAAAABJRU5ErkJggg==');
+
+  context.select('.resize.w').append("image")
+        .attr("y", -6)
+		.attr("x", -6)
+		.attr("width", 10)
+		.attr("height", 56)
+		.attr("xlink:href", 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAABkCAYAAAC/zKGXAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCRkM5NDZENkMxNjgxMUUyQkFCRDlDRTY4NUE3QTUwOCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCRkM5NDZEN0MxNjgxMUUyQkFCRDlDRTY4NUE3QTUwOCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjBDN0U1NUY1QzE2NTExRTJCQUJEOUNFNjg1QTdBNTA4IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjBDN0U1NUY2QzE2NTExRTJCQUJEOUNFNjg1QTdBNTA4Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+742mAAAAAMdJREFUeNrs1zEKhDAQBdCJlaDIdsEzCDaeIE2OmXvoBTxKsEkKLWwku18rVyMpF3Y+hEz0ERhIMyKEQMgwDEfxFa212AvAvu+DtTbM83xa+IZ/MAJF27a0bdvdhfTB5JyjDIeyLCmWuq73PaPEMGTIkCFDhr8Nx3GkPM+fIVBVVc833qELjKELVEqlNbOuK3Vdl9Z1DN92Ddw0zb7z62HIkCFDhv8Al2WJAozNiMCQjWm9KAqSUp7QNE3kvSdjzEukjvZvAQYAMrpp/zkqYZgAAAAASUVORK5CYII=');
+});
+
+function brushed() {
+  x.domain(brush.empty() ? x_c.domain() : brush.extent());
+  focus.selectAll('.line')
+       .attr("d", function(d) { return line(d.values); });
+
+  focus.select(".x.axis")
+       .call(xAxis);
+}
+</script>
+{%  endblock %}

@@ -124,6 +124,14 @@ def try_parse_float(f):
         return 0.0
 
 
+def parse_name(colname):
+    units = parse_units(colname)
+    if units is None:
+        return colname
+
+    return colname.replace('({})'.format(units), '').strip()
+
+
 def parse_units(colname):
     try:
         colsplit = colname.strip().split()

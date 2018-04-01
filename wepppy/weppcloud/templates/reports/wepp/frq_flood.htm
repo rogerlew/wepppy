@@ -1,0 +1,54 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_content %}
+<h2>Flood Frequency</h2>
+<p>
+<br/>
+WEPP Watershed Simulation for Representative Hillslopes and Channels (watershed method, off-site assessment)
+<br/>
+Event of return period T is estimated by applying Chow's frequency factor method and Gumbel's distribution with on the
+annual maxima series following Patra (2000).
+</p>
+<div style="margin-left: 50px">
+<i>X<sub>T</sub></i> = mean + standard_deviation * K_factor,
+    K_factor = -(0.45005 + 0.7797 ln(ln(<i>T</i>/(<i>T</i> - 1)))
+    <i>T</i> is the return period
+    <i>X<sub>T</sub></i> is the estimated value of the event of return period <i>T</i>
+</div>
+<p>
+Watershed event by event output are used and frequency analysis on precipitation, runoff, peak runoff, and sediment
+yield are conducted separately.
+</p>
+<dl class="dl-horizontal">
+    <dt>Years in Simulation</dt>
+    <dd>{{ report.years }}</dd>
+    <dt>Events in Simulation</dt>
+    <dd>{{ report.num_events }}</dd>
+</dl>
+<table class="table table-condensed">
+  <thead>
+    <tr>
+    {% for colname in report.hdr %}
+      <th>{{ colname }}</th>
+    {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+    {% for units in report.units %}
+      {% if units is none %}
+      <td>&nbsp;</td>
+      {% else %}
+      <td>{{ unitizer_units(units) | safe }}</td>
+      {% endif %}
+    {% endfor %}
+    </tr>
+    {% for row in report %}
+    <tr>
+      {% for value, units in row %}
+      <td>{{ unitizer(value, units) | safe }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

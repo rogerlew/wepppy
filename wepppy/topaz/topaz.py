@@ -650,12 +650,30 @@ class TopazRunner:
             raise
 
     def _run_dednm(self, _pass=1, verbose=False):
+        topaz_wd = self.topaz_wd
+        
+        if _pass == 2:
+            if _exists(_join(topaz_wd, 'CATWIN.TAB')):
+                os.remove(_join(topaz_wd, 'CATWIN.TAB'))
+            if _exists(_join(topaz_wd, 'BOUND.OUT')):
+                os.remove(_join(topaz_wd, 'BOUND.OUT'))
+            
         output = self._run_subprocess('./dednm', (None, '1')[_pass == 2], verbose)
 
-        with open(_join(self.topaz_wd, 'dednm.log'), 'w') as fp:
+        with open(_join(topaz_wd, 'dednm.log'), 'w') as fp:
             fp.write('\n'.join(output))
 
-        if 'STOP NORMAL PROGRAM TERMINATION.' in output[-1]:
+        if _pass == 1 and \
+           _exists(_join(topaz_wd, 'FLOPAT.OUT')) and \
+           _exists(_join(topaz_wd, 'FLOVEC.OUT')) and \
+           _exists(_join(topaz_wd, 'NETFUL.OUT')) and \
+           _exists(_join(topaz_wd, 'RELIEF.OUT')):
+            return output
+
+        elif _pass == 2 and \
+            _exists(_join(topaz_wd, 'CHNJNT.ARC')) and \
+            _exists(_join(topaz_wd, 'CATWIN.TAB')) and \
+            _exists(_join(topaz_wd, 'BOUND.OUT')):
             return output
 
         for i in range(len(output)-1):
@@ -669,13 +687,39 @@ class TopazRunner:
 
         raise DednmCrashedException(output)
 
-    def _run_rasfor(self, verbose=False):
+    def _run_rasfor(self, _pass=1, verbose=False):
+
+        if _pass == 1:
+            if _exists(_join(self.topaz_wd, 'FLOPAT.ARC')):
+                os.remove(_join(self.topaz_wd, 'FLOPAT.ARC'))
+            if _exists(_join(self.topaz_wd, 'FLOVEC.ARC')):
+                os.remove(_join(self.topaz_wd, 'FLOVEC.ARC'))
+            if _exists(_join(self.topaz_wd, 'NETFUL.ARC')):
+                os.remove(_join(self.topaz_wd, 'NETFUL.ARC'))
+            if _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
+                os.remove(_join(self.topaz_wd, 'RELIEF.ARC'))
+        elif _pass == 2:
+            if _exists(_join(self.topaz_wd, 'TASPEC.ARC')):
+                os.remove(_join(self.topaz_wd, 'TASPEC.ARC'))
+            if _exists(_join(self.topaz_wd, 'SUBWTA.ARC')):
+                os.remove(_join(self.topaz_wd, 'SUBWTA.ARC'))
+
         output = self._run_subprocess('./rasfor', None, verbose)
 
         with open(_join(self.topaz_wd, 'rasfor.log'), 'w') as fp:
             fp.write('\n'.join(output))
 
-        if output[-1] == 'STOP NORMAL PROGRAM TERMINATION.':
+        if _pass == 1 and \
+           _exists(_join(self.topaz_wd, 'FLOPAT.ARC')) and \
+           _exists(_join(self.topaz_wd, 'FLOVEC.ARC')) and \
+           _exists(_join(self.topaz_wd, 'NETFUL.ARC')) and \
+           _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
+            return output
+
+        elif _pass == 2 and \
+           _exists(_join(self.topaz_wd, 'TASPEC.ARC')) and \
+           _exists(_join(self.topaz_wd, 'SUBWTA.ARC')) and \
+           _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
             return output
 
         raise RasforCrashedException(output)
@@ -692,12 +736,28 @@ class TopazRunner:
         raise RasbinCrashedException(output)
 
     def _run_raspro(self, verbose=False):
+        topaz_wd = self.topaz_wd
+
+        if _exists(_join(topaz_wd, 'RASPRO.RPT')):
+            os.remove(_join(topaz_wd, 'RASPRO.RPT'))
+
+        topaz_wd = self.topaz_wd
         output = self._run_subprocess('./raspro', None, verbose)
 
         with open(_join(self.topaz_wd, 'raspro.log'), 'w') as fp:
             fp.write('\n'.join(output))
 
-        if output[-1] == 'STOP NORMAL PROGRAM TERMINATION.':
+        if _exists(_join(topaz_wd, 'UPAREA.OUT')) and \
+           _exists(_join(topaz_wd, 'TSLOPE.OUT')) and \
+           _exists(_join(topaz_wd, 'TASPEC.OUT')) and \
+           _exists(_join(topaz_wd, 'SUBWTB.OUT')) and \
+           _exists(_join(topaz_wd, 'SUBWTA.OUT')) and \
+           _exists(_join(topaz_wd, 'SUBBDB.OUT')) and \
+           _exists(_join(topaz_wd, 'SUBBDA.OUT')) and \
+           _exists(_join(topaz_wd, 'SMOOTH.OUT')) and \
+           _exists(_join(topaz_wd, 'SBCT.TAB')) and \
+           _exists(_join(topaz_wd, 'RELIEF.OUT')) and \
+           _exists(_join(topaz_wd, 'RASPRO.RPT')):
             return output
 
         # the last line of raspro sometimes gets truncated for an unknown
@@ -896,9 +956,9 @@ class TopazRunner:
         self._create_dnmcnt_input(1)
 
         self._run_dednm()
-        time.sleep(.2)
+        time.sleep(0.2)
         self._run_rasfor()
-        time.sleep(.2)
+        time.sleep(0.2)
         self.create_prjs()
         self._clean_dir(True)
 
@@ -956,11 +1016,11 @@ class TopazRunner:
         self._create_dnmcnt_input(2, outlet_px)
 
         # sleep seems to prevent rasfor from crashing
-        self._run_dednm(2)
-        time.sleep(.2)
+        self._run_dednm(_pass=2)
+        time.sleep(0.2)
         self._run_raspro()
-        time.sleep(.2)
-        self._run_rasfor()
+        time.sleep(0.2)
+        self._run_rasfor(_pass=2)
         self.create_prjs()
         self._clean_dir(True)
 

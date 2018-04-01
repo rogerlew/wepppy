@@ -7,53 +7,24 @@
     <meta name="author" content="">
     <title>WeppCloud {{ ron.configname }} </title>
     <!-- Style Sheets -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
-    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
       integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/open-iconic-bootstrap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
-            integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
-            crossorigin=""></script>
 <script  type="text/javascript">
-{% include 'js/controllers.js'%}
-{% include 'js/on_document_ready.js'%}
 </script>
+{% block head_content %}{% endblock %}
 </head>
 <body>
 {% include 'header.htm'%}
-<div role="main" class="container">
-{% include 'controls/map.htm'%}
-{% if 'baer' in ron.mods %}
-{% if 'lt' not in ron.mods %}
-{% include 'controls/baer_upload.htm'%}
-{% endif %}
-{% endif %}
-{% include 'controls/channel_delineation.htm'%}
-{% include 'controls/set_outlet.htm'%}
-{% include 'controls/subcatchments.htm'%}
-{% include 'controls/landuse.htm'%}
-{% include 'controls/soil.htm'%}
-{% include 'controls/climate.htm'%}
-{% include 'controls/wepp.htm'%}
-<div id="wepp-results"></div>
-{% include 'controls/export.htm'%}
-{% if user.is_authenticated %}
-{% include 'controls/team.htm'%}
-{% endif %}
+<div role="main" class="container-full">
+{% block report_content %}{% endblock %}
 </div> <!--main container -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-    <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff-vector-arrows.js') }}"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
      integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"

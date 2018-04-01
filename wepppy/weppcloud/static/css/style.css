@@ -8,6 +8,22 @@ body {
   margin-bottom: 30px;
 }
 
+.table-nonfluid {
+   width: auto !important;
+}
+
+.container-full {
+  width: auto;
+  max-width: 95%;
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body > .container-full {
+  padding: 60px 0 0;
+}
+
 .container {
   width: auto;
   max-width: 1280px;

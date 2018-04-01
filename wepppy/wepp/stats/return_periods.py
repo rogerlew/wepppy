@@ -1,17 +1,23 @@
 from collections import OrderedDict
 import  numpy as np
-from wepppy.all_your_base import parse_units, RowData
+from wepppy.all_your_base import parse_units, RowData, parse_name
 
-from wepppy.wepp.out import LossReport, Ebe
+from wepppy.wepp.out import Loss, Ebe
 
 
 class ReturnPeriods:
-    def __init__(self, ebe: Ebe, loss_rtp: LossReport, recurence=[2, 5, 10, 25]):
+    def __init__(self, ebe: Ebe, loss: Loss, recurence=[2, 5, 10, 20, 25]):
 
         df = ebe.df
-        header = ebe.header
-        years = ebe.years
-        wsarea = loss_rtp.wsarea
+        header = list(df.keys())
+        header.remove('da')
+        header.remove('mo')
+        header.remove('year')
+
+        self.header = header
+        self.years = years = ebe.years
+        self.wsarea = wsarea = loss.wsarea
+        self.recurence = recurence = sorted(recurence)
 
         recurence = sorted(recurence)
 
@@ -42,12 +48,12 @@ class ReturnPeriods:
 
         results = {}
 
-        for col_name in [v for v in header if v not in ['da', 'mo', 'year']]:
-            df2 = df.sort_values(by=col_name, ascending=False)
+        for colname in header:
+            df2 = df.sort_values(by=colname, ascending=False)
 
-            col_name = col_name.split('(')[0].strip()
-            results[col_name] = {}
-            if col_name == 'Runoff Volume':
+            colname = parse_name(colname)
+            results[colname] = {}
+            if colname == 'Runoff Volume':
                 results['Runoff'] = {}
 
             for retperiod, indx in rec.items():
@@ -56,14 +62,13 @@ class ReturnPeriods:
 
                 row['Runoff'] = round(row['Runoff Volume'] / (wsarea * 10000.0) * 1000.0, 2)
 
-                results[col_name][retperiod] = row
+                results[colname][retperiod] = row
 
-                if col_name == 'Runoff Volume':
+                if colname == 'Runoff Volume':
                     results['Runoff'][retperiod] = row
 
         self.return_periods = results
         self.num_events = df.shape[0]
-        self.wsarea = wsarea
         self.intervals = sorted(rec.keys())
         self.units_d = ebe.units_d
 
@@ -71,7 +76,7 @@ class ReturnPeriods:
 if __name__ == "__main__":
     from pprint import  pprint
 
-    loss_rpt = LossReport('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
+    loss_rpt = Loss('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
     ebe_rpt = Ebe('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2events.txt')
 
     ret_rpt = ReturnPeriods(ebe_rpt, loss_rpt)

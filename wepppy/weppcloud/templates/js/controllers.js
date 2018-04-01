@@ -2778,6 +2778,32 @@ var Wepp = function () {
             });
         };
 
+        that.set_hourly_seepage = function (state) {
+            var self = instance;
+            var task_msg = "Setting hourly_seepage (" + state + ")";
+
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "../tasks/set_hourly_seepage/",
+                data: JSON.stringify({ hourly_seepage: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(error) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+        };
+        
         that.set_flowpaths = function (state) {
             var self = instance;
             var task_msg = "Setting run_flowpaths (" + state + ")";
@@ -2836,57 +2862,20 @@ var Wepp = function () {
 
         that.report = function () {
             var self = instance;
-            var project = Project.getInstance();
+
             $.get({
-                url: "../report/wepp/loss/",
+                url: "../report/wepp/results/",
                 cache: false,
                 success: function success(response) {
-                    self.info.html(response);
-                    project.set_preferred_units();
-                    //$('#wepploss_chn_tbl').DataTable({iDisplayLength: -1});
-                    //$('#wepploss_sub_tbl').DataTable({iDisplayLength: -1});
-
+                    $('#wepp-results').html(response);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function () {
-                $.get({
-                    url: "../report/wepp/frq/",
-                    cache: false,
-                    success: function success(response) {
-                        self.info.append(response);
-                        project.set_preferred_units();
-                    },
-                    fail: function fail(jqXHR, textStatus, errorThrown) {
-                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                    }
-                }).always(function() {
-                    $.get({
-                        url: "../report/wepp/watbal/",
-                        cache: false,
-                        success: function success(response) {
-                            self.info.append(response);
-                        },
-                        fail: function fail(jqXHR, textStatus, errorThrown) {
-                            self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                        }
-                    }).always(function() {
-                        $.get({
-                            url: "../report/wepp/log/",
-                            cache: false,
-                            success: function success(response) {
-                                self.info.append(response);
-                            },
-                            fail: function fail(jqXHR, textStatus, errorThrown) {
-                                self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                            }
-                        });
-                    });;
-                });
             });
-        };
 
+
+        };
 
         that.status_loop = function () {
             var self = instance;
