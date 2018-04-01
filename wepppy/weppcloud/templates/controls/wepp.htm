@@ -11,6 +11,16 @@
         Run Flowpaths
     </label>
     <br/><br/>
+    {% if user.has_role('PowerUser') %}
+    <h5>Hourly Seepage</h5>
+    <label class="form-check-label">
+        <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+               onchange="Wepp.getInstance().set_hourly_seepage(this.checked);"
+               {% if wepp.wepp_ui %}checked{% endif %}>
+        Run hourly seepage
+    </label>
+    <br/><br/>
+    {% endif %}
     <h5>Baseflow Processing</h5>
     <div class="form-group row" id="gwstorage_container">
         <div class="col-sm-4">

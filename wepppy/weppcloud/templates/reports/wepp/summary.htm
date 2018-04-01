@@ -1,0 +1,70 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_content %}
+<h2>WEPP Results Summary</h2>
+<h5>Average Annual Delivery From Channel Outlet</h5>
+<div>
+{% for name, value, units in out_rpt %}
+  <div class="row">
+    <div class="col-md-4">{{ name }}</div>
+    <div class="col-md-1 text-right">{{ unitizer(value, units) | safe }}</div>
+    <div class="col-md-1" style="width: 100px;">{{ unitizer_units(units) | safe }}</div>
+  </div>
+{% endfor %}
+</div>
+<br/>
+<h5>Average Annual Summary for Subcatchments</h5>
+<table class="table table-condensed">
+  <thead>
+    <tr>
+    {% for name in hill_rpt.hdr %}
+      <th>{{ name }}</th>
+    {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+    {% for units in hill_rpt.units %}
+      {% if units is none %}
+      <td>&nbsp;</td>
+      {% else %}
+      <td>{{ unitizer_units(units) | safe }}</td>
+      {% endif %}
+    {% endfor %}
+    </tr>
+    {% for row in hill_rpt %}
+    <tr>
+      {% for value, units in row %}
+        <td>{{ unitizer(value, units) | safe }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h5>Average Annual Summary for Channels</h5>
+<table class="table table-condensed">
+  <thead>
+    <tr>
+    {% for name in chn_rpt.hdr %}
+      <th>{{ name }}</th>
+    {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+    {% for units in chn_rpt.units %}
+      {% if units is none %}
+      <td>&nbsp;</td>
+      {% else %}
+      <td>{{ unitizer_units(units) | safe }}</td>
+      {% endif %}
+    {% endfor %}
+    </tr>
+    {% for row in chn_rpt %}
+    <tr>
+      {% for value, units in row %}
+        <td>{{ unitizer(value, units) | safe }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endblock %}

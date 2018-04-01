@@ -1,6 +1,6 @@
 import pandas as pd
 
-from wepppy.wepp.out import LossReport
+from wepppy.wepp.out import Loss
 
 
 class Ebe(object):
@@ -64,7 +64,7 @@ class Ebe(object):
 if __name__ == "__main__":
     from pprint import  pprint
 
-    loss_rtp = LossReport('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
+    loss_rtp = Loss('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
     ebe_rpt = Ebe('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2events.txt')
     pprint(ebe_rpt.years)
     pprint(ebe_rpt.df)

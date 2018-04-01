@@ -99,6 +99,10 @@ class Ron(NoDbBase):
             dem_dir = self.dem_dir
             if not _exists(dem_dir):
                 os.mkdir(dem_dir)
+
+            export_dir = self.export_dir
+            if not _exists(export_dir):
+                os.mkdir(export_dir)
                 
             # initialize the other controllers here
             # this will create the other .nodb files
@@ -112,6 +116,7 @@ class Ron(NoDbBase):
             wepppy.nodb.Climate(wd, cfg_fn)
             wepppy.nodb.Wepp(wd, cfg_fn)
             wepppy.nodb.Unitizer(wd, cfg_fn)
+            wepppy.nodb.WeppPost(wd, cfg_fn)
             
             if "lt" in self.mods:
                 wepppy.nodb.mods.LakeTahoe(wd, cfg_fn)
