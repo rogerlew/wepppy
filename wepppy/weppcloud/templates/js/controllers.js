@@ -2839,7 +2839,7 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             self.attempts = 0;
-            setTimeout(self.status_loop, 2000);
+            setTimeout(self.status_loop, 5000);
 
             $.post({
                 url: "../tasks/run_wepp/",
@@ -2888,11 +2888,11 @@ var Wepp = function () {
                         self.status.html(response.Content);
                         self.attempts += 1;
                     } else {
-                        self.attempts = 9999999;
+                        self.attempts += 1000;
                     }
                 }
             }).done(function () {
-                if (self.attempts < 14400) {
+                if (self.attempts < 32000) {
                     setTimeout(self.status_loop, 1000);
                 }
 
