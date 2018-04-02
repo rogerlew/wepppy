@@ -69,10 +69,10 @@ class WeppTopTranslator:
             return int(chn_id.split('_')[1])
 
         if chn_enum is not None:
-            wepp = self.wepp(chn_enum=chn_enum)
+            wepp = self.wepp(chn_enum=int(chn_enum))
 
         if wepp is not None:
-            return _wepp2top[wepp]
+            return _wepp2top[int(wepp)]
 
         return None
 
@@ -82,7 +82,7 @@ class WeppTopTranslator:
         hillslope_n = self.hillslope_n
 
         if chn_enum is not None:
-            return chn_enum + hillslope_n
+            return int(chn_enum) + hillslope_n
 
         if sub_id is not None:
             top = self.top(sub_id=sub_id)
@@ -91,7 +91,7 @@ class WeppTopTranslator:
             top = self.top(chn_id=chn_id)
 
         if top is not None:
-            return _top2wepp[top]
+            return _top2wepp[int(top)]
 
         return None
 
@@ -103,7 +103,7 @@ class WeppTopTranslator:
             wepp = self.wepp(chn_id=chn_id)
 
         if top is not None:
-            wepp = self.wepp(top=top)
+            wepp = self.wepp(top=int(top))
 
         if wepp == 0:
             return 0
@@ -121,7 +121,7 @@ class WeppTopTranslator:
         if top is not None:
             return str(top).endswith('4')
         else:
-            return str(self.top(wepp=wepp)).endswith('4')
+            return str(self.top(wepp=int(wepp))).endswith('4')
 
     def has_top(self, top):
         return top in self._top2wepp
