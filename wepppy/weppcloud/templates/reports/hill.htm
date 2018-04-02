@@ -1,11 +1,12 @@
 <dl class="dl-horizontal">
-    <dt>{{ d.meta.hill_type }} ID</dt>
-    <dd>{{ d.meta.topaz_id }}</dd>
-
     {% if d.meta.hill_type == "Channel"%}
+    <dt>{{ d.meta.hill_type }} ID</dt>
+    <dd>TopazID: {{ d.meta.topaz_id }}, WeppID: {{ d.meta.wepp_id }}, ChnEnum: {{ d.meta.chn_enum }}</dd>
     <dt>Cell Width</dt>
     <dd>{{ d.watershed.cell_width }}</dd>
     {% else %}
+    <dt>{{ d.meta.hill_type }} ID</dt>
+    <dd>TopazID: {{ d.meta.topaz_id }}, WeppID: {{ d.meta.wepp_id }}</dd>
     <dt>Width</dt>
     <dd>
         <div class="row" style="padding-bottom: 20px;">
