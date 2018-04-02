@@ -283,16 +283,21 @@ class Ron(NoDbBase):
     def sub_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
         watershed = wepppy.nodb.Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
         climate = wepppy.nodb.Climate.getInstance(wd)
         landuse = wepppy.nodb.Landuse.getInstance(wd)
         
         if topaz_id is None:
-            translator = watershed.translator_factory()
             topaz_id = translator.top(wepp=wepp_id)
+
+        if wepp_id is None:
+            wepp_id = translator.wepp(top=topaz_id)
+
             
         return dict(
-            meta=dict(hill_type='Hillslope', topaz_id=topaz_id),
+            meta=dict(hill_type='Hillslope', topaz_id=topaz_id,
+                      wepp_id=wepp_id),
             watershed=watershed.sub_summary(topaz_id),
             soil=soils.sub_summary(topaz_id),
             climate=climate.sub_summary(topaz_id),
@@ -302,16 +307,22 @@ class Ron(NoDbBase):
     def chn_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
         watershed = wepppy.nodb.Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
         climate = wepppy.nodb.Climate.getInstance(wd)
         landuse = wepppy.nodb.Landuse.getInstance(wd)
-        
+
         if topaz_id is None:
-            translator = watershed.translator_factory()
             topaz_id = translator.top(wepp=wepp_id)
-            
+
+        if wepp_id is None:
+            wepp_id = translator.wepp(top=topaz_id)
+
+        chn_enum = translator.chn_enum(top=topaz_id)
+
         return dict(
-            meta=dict(hill_type='Channel', topaz_id=topaz_id),
+            meta=dict(hill_type='Channel', topaz_id=topaz_id,
+                      wepp_id=wepp_id, chn_enum=chn_enum),
             watershed=watershed.chn_summary(topaz_id),
             soil=soils.chn_summary(topaz_id),
             climate=climate.chn_summary(topaz_id),
