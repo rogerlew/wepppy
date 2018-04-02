@@ -78,18 +78,6 @@ class ChannelWatbal(ReportBase):
             chnwb_data = chnwb_fp.readlines()[25:]
 
         m = len(chnwb_data)
-        chn_daily = {}
-        chn_daily['J'] = np.zeros(m, dtype=np.int)
-        chn_daily['Y'] = np.zeros(m, dtype=np.int)
-        chn_daily['Precipitation (m^3)'] = np.zeros(m)
-        chn_daily['Streamflow (m^3)'] = np.zeros(m)
-        chn_daily['Transpiration + Evaporation (m^3)'] = np.zeros(m)
-        chn_daily['Percolation (m^3)'] = np.zeros(m)
-        chn_daily['Total Soil Water Storage (m^3)'] = np.zeros(m)
-        chn_daily['Lateral Flow (m^3)'] = np.zeros(m)
-        chn_daily['Base Flow (m^3)'] = np.zeros(m)
-
-        self.chn_header = list(chn_daily.keys())
 
         for i, wl in enumerate(chnwb_data):
             OFE, J, Y, P, RM, Q, Ep, Es, Er, Dp, UpStrmQ, \
@@ -101,19 +89,8 @@ class ChannelWatbal(ReportBase):
 
             topaz_id = translator.top(chn_enum=OFE)
 
-            chn_daily['J'][i] = J
-            chn_daily['Y'][i] = Y
-
             areas[topaz_id] = Area
             years.add(Y)
-
-            chn_daily['Precipitation (m^3)'][i] += P * 0.001 * Area
-            chn_daily['Streamflow (m^3)'][i] += Q * 0.001 * Area
-            chn_daily['Transpiration + Evaporation (m^3)'][i] += (Ep + Es + Er) * 0.001 * Area
-            chn_daily['Percolation (m^3)'][i] += Dp * 0.001 * Area
-            chn_daily['Total Soil Water Storage (m^3)'][i] += TSW * 0.001 * Area
-            chn_daily['Lateral Flow (m^3)'][i] += latqcc * 0.001 * Area
-            chn_daily['Base Flow (m^3)'] += Dp * 0.001 * Area
 
             if topaz_id not in d:
                 d[topaz_id] = {'Precipitation (mm)': {},
@@ -138,14 +115,11 @@ class ChannelWatbal(ReportBase):
                 d[topaz_id]['Total Soil Water Storage (mm)'][Y] += TSW
                 d[topaz_id]['Baseflow (mm)'][Y] += Base
 
-
         self.chanwb = Chanwb(chanwb_fn)
         self.years = sorted(years)
         self.data = d
-        self.chn_daily = chn_daily
         self.areas = areas
         self.wsarea = float(np.sum(list(areas.values())))
-#        self.chn_daily = chn_daily
         self.last_top = topaz_id
 
     @property
@@ -182,14 +156,6 @@ class ChannelWatbal(ReportBase):
 
             yield RowData(row)
 
-    def daily_iter(self):
-        daily = self.chn_daily
-        chn_header = self.chn_header
-
-        n = len(daily['J'])
-        for i in range(n):
-            yield RowData(dict([(k, daily[k][i]) for k in chn_header]))
-
     @property
     def yearly_header(self):
         return ['Year'] + list(self.hdr)
@@ -208,12 +174,16 @@ class ChannelWatbal(ReportBase):
         for y in years:
             row = dict([('Year', y)] + [(k, 0.0) for k in header])
 
+            for k in header:
+                row[k] = 0.0
+
             for topaz_id in data:
                 for k in header:
-                    row[k] = data[topaz_id][k][y] * 0.001 * areas[topaz_id]
+                    row[k] += data[topaz_id][k][y] * 0.001 * areas[topaz_id]
 
             for k in header:
                 row[k] /= wsarea
+                row[k] *= 1000.0
 
             yield RowData(row)
 

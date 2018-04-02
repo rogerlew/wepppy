@@ -20,6 +20,11 @@
             <input type="text" class="form-control disable-readonly" id="soil_single_selection" value="{{ soils.single_selection }}"/>
         </div>
     </div>
+    {% if "lt" in ron.mods or "baer" in ron.mods %}
+    <div>
+    <p><i>Hillslopes with burn severity landuses will have soils altered to model burn severity.</i></p>
+    </div>
+    {%- endif -%}
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_build_soil"

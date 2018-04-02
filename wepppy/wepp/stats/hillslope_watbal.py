@@ -24,7 +24,6 @@ class HillslopeWatbal(ReportBase):
             assert _exists(_join(output_dir, 'H{}.wat.dat'.format(wepp_id)))
 
         d = {}
-        hill_daily = None
         areas = {}
         years = set()
 
@@ -41,21 +40,6 @@ class HillslopeWatbal(ReportBase):
             with open(wat_fn) as wat_fp:
                 wat_data = wat_fp.readlines()[23:]
 
-            if hill_daily is None:
-                m = len(wat_data)
-                hill_daily = {}
-                hill_daily['J'] = np.zeros(m, dtype=np.int)
-                hill_daily['Y'] = np.zeros(m, dtype=np.int)
-                hill_daily['Precipitation (m^3)'] = np.zeros(m)
-                hill_daily['Streamflow (m^3)'] = np.zeros(m)
-                hill_daily['Transpiration + Evaporation (m^3)'] = np.zeros(m)
-                hill_daily['Percolation (m^3)'] = np.zeros(m)
-                hill_daily['Total Soil Water Storage (m^3)'] = np.zeros(m)
-                hill_daily['Lateral Flow (m^3)'] = np.zeros(m)
-                hill_daily['Base Flow (m^3)'] = np.zeros(m)
-
-                self.hill_header = list(hill_daily.keys())
-
             for i, wl in enumerate(wat_data):
                 OFE, J, Y, P, RM, Q, Ep, Es, Er, Dp, UpStrmQ, \
                 SubRIn, latqcc, TSW, frozwt, SnowWater, QOFE, Tile, Irr, Area = wl.split()
@@ -65,20 +49,10 @@ class HillslopeWatbal(ReportBase):
                     float(TSW), float(Area)
 
                 if i == 0:
-                    hill_daily['J'][i] = J
-                    hill_daily['Y'][i] = Y
                     areas[topaz_id] = Area
 
                 if wepp_id == 1:
                     years.add(Y)
-
-                hill_daily['Precipitation (m^3)'][i] += P * 0.001 * Area
-                hill_daily['Streamflow (m^3)'][i] += Q * 0.001 * Area
-                hill_daily['Transpiration + Evaporation (m^3)'][i] += (Ep + Es + Er) * 0.001 * Area
-                hill_daily['Percolation (m^3)'][i] += Dp * 0.001 * Area
-                hill_daily['Total Soil Water Storage (m^3)'][i] += TSW * 0.001 * Area
-                hill_daily['Lateral Flow (m^3)'][i] += latqcc * 0.001 * Area
-                hill_daily['Base Flow (m^3)'] += Dp * 0.001 * Area
 
                 if Y not in d[topaz_id]['Precipitation (mm)']:
                     d[topaz_id]['Precipitation (mm)'][Y] = P
@@ -97,20 +71,11 @@ class HillslopeWatbal(ReportBase):
         self.data = d
         self.areas = areas
         self.wsarea = float(np.sum(list(areas.values())))
-        self.hill_daily = hill_daily
         self.last_top = topaz_id
 
     @property
     def header(self):
         return list(self.data[self.last_top].keys())
-
-    def daily_iter(self):
-        daily = self.hill_daily
-        hill_header = self.hill_header
-
-        n = len(daily['J'])
-        for i in range(n):
-            yield RowData(dict([(k, daily[k][i]) for k in hill_header]))
 
     @property
     def yearly_header(self):
@@ -130,12 +95,16 @@ class HillslopeWatbal(ReportBase):
         for y in years:
             row = dict([('Year', y)] + [(k, 0.0) for k in header])
 
+            for k in header:
+                row[k] = 0.0
+
             for topaz_id in data:
                 for k in header:
-                    row[k] = data[topaz_id][k][y] * 0.001 * areas[topaz_id]
+                    row[k] += data[topaz_id][k][y] * 0.001 * areas[topaz_id]
 
             for k in header:
                 row[k] /= wsarea
+                row[k] *= 1000.0
 
             yield RowData(row)
 
