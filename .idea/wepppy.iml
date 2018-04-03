@@ -13,6 +13,10 @@
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />
   </component>
+  <component name="ReSTService">
+    <option name="workdir" value="$MODULE_DIR$/doc" />
+    <option name="DOC_DIR" value="$MODULE_DIR$/doc" />
+  </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
     <option name="TEMPLATE_FOLDERS">

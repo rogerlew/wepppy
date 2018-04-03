@@ -1,0 +1,272 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>climates Package &#8212; wepppy 20180403 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="climates-package">
+<h1>climates Package<a class="headerlink" href="#climates-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-wepppy.climates.cligen_client">
+<span id="cligen-client-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">cligen_client</span></code> Module<a class="headerlink" href="#module-wepppy.climates.cligen_client" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="wepppy.climates.cligen_client.fetch_multiple_year">
+<code class="descclassname">wepppy.climates.cligen_client.</code><code class="descname">fetch_multiple_year</code><span class="sig-paren">(</span><em>par</em>, <em>years</em>, <em>lng=None</em>, <em>lat=None</em>, <em>p_mean=None</em>, <em>p_std=None</em>, <em>p_skew=None</em>, <em>p_wd=None</em>, <em>p_ww=None</em>, <em>tmax=None</em>, <em>tmin=None</em>, <em>dewpoint=None</em>, <em>solrad=None</em>, <em>returnjson=True</em>, <em>randseed=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.cligen_client.fetch_multiple_year" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=5&amp;lng=-116&amp;lat=47&amp;p_mean=prism&amp;p_std=daymet&amp;p_wd=daymet&amp;p_ww=daymet&amp;tmax=prism&amp;tmin=prism&amp;dewpoint=prism&amp;solrad=daymet">https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=5&amp;lng=-116&amp;lat=47&amp;p_mean=prism&amp;p_std=daymet&amp;p_wd=daymet&amp;p_ww=daymet&amp;tmax=prism&amp;tmin=prism&amp;dewpoint=prism&amp;solrad=daymet</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.cligen_client.future_rcp85">
+<code class="descclassname">wepppy.climates.cligen_client.</code><code class="descname">future_rcp85</code><span class="sig-paren">(</span><em>par</em>, <em>start_year</em>, <em>end_year</em>, <em>lng=None</em>, <em>lat=None</em>, <em>returnjson=True</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.cligen_client.future_rcp85" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.cligen_client.observed_daymet">
+<code class="descclassname">wepppy.climates.cligen_client.</code><code class="descname">observed_daymet</code><span class="sig-paren">(</span><em>par</em>, <em>start_year</em>, <em>end_year</em>, <em>lng=None</em>, <em>lat=None</em>, <em>returnjson=True</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.cligen_client.observed_daymet" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?start_year=1980&amp;end_year=2010&amp;lng=-116&amp;lat=47&amp;returnjson=true">https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?start_year=1980&amp;end_year=2010&amp;lng=-116&amp;lat=47&amp;returnjson=true</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.cligen_client.selected_single_storm">
+<code class="descclassname">wepppy.climates.cligen_client.</code><code class="descname">selected_single_storm</code><span class="sig-paren">(</span><em>par</em>, <em>storm_date</em>, <em>design_storm_amount_inches</em>, <em>duration_of_storm_in_hours</em>, <em>time_to_peak_intensity_pct</em>, <em>max_intensity_inches_per_hour</em>, <em>cliver=5.3</em>, <em>returnjson=True</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.cligen_client.selected_single_storm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.cligen_client.unpack_json_result">
+<code class="descclassname">wepppy.climates.cligen_client.</code><code class="descname">unpack_json_result</code><span class="sig-paren">(</span><em>result</em>, <em>fn_prefix=None</em>, <em>dst_dir='./'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.cligen_client.unpack_json_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function to save the par and climate files
+returned from the cligen webservice to disk.</p>
+<p>fn_prefix specifies the name of the files. e.g. {fn_prefix}.par,
+if fn_prefix is None then the names returned from the webservice are used</p>
+<p>dst_dir specifies the directory to save the result, defaults to working
+directory</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.climates.daymet_singlelocation_client">
+<span id="daymet-singlelocation-client-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">daymet_singlelocation_client</span></code> Module<a class="headerlink" href="#module-wepppy.climates.daymet_singlelocation_client" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="wepppy.climates.daymet_singlelocation_client.retrieve_historical_timeseries">
+<code class="descclassname">wepppy.climates.daymet_singlelocation_client.</code><code class="descname">retrieve_historical_timeseries</code><span class="sig-paren">(</span><em>lon</em>, <em>lat</em>, <em>start_year</em>, <em>end_year</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.daymet_singlelocation_client.retrieve_historical_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.climates.downscaled_nmme_client">
+<span id="downscaled-nmme-client-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">downscaled_nmme_client</span></code> Module<a class="headerlink" href="#module-wepppy.climates.downscaled_nmme_client" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="wepppy.climates.downscaled_nmme_client.parse_datetime">
+<code class="descclassname">wepppy.climates.downscaled_nmme_client.</code><code class="descname">parse_datetime</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.downscaled_nmme_client.parse_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>parses x in yyyy-mm-dd, yyyy-mm-dd, yyyy/mm/dd, or yyyy mm dd
+to datetime object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.downscaled_nmme_client.retrieve_historical_timeseries">
+<code class="descclassname">wepppy.climates.downscaled_nmme_client.</code><code class="descname">retrieve_historical_timeseries</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>start_date</em>, <em>end_date</em>, <em>model='GFDL-ESM2G'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.downscaled_nmme_client.retrieve_historical_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.downscaled_nmme_client.retrieve_rcp45_timeseries">
+<code class="descclassname">wepppy.climates.downscaled_nmme_client.</code><code class="descname">retrieve_rcp45_timeseries</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>start_date</em>, <em>end_date</em>, <em>model='GFDL-ESM2G'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.downscaled_nmme_client.retrieve_rcp45_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.downscaled_nmme_client.retrieve_rcp85_timeseries">
+<code class="descclassname">wepppy.climates.downscaled_nmme_client.</code><code class="descname">retrieve_rcp85_timeseries</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>start_date</em>, <em>end_date</em>, <em>model='GFDL-ESM2G'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.downscaled_nmme_client.retrieve_rcp85_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.climates.metquery_client">
+<span id="metquery-client-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">metquery_client</span></code> Module<a class="headerlink" href="#module-wepppy.climates.metquery_client" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_daymet_prcp_mean">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_daymet_prcp_mean</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='mm/day'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_daymet_prcp_mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_daymet_prcp_pwd">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_daymet_prcp_pwd</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_daymet_prcp_pwd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_daymet_prcp_pww">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_daymet_prcp_pww</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_daymet_prcp_pww" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_daymet_prcp_skew">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_daymet_prcp_skew</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='mm/day'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_daymet_prcp_skew" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_daymet_prcp_std">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_daymet_prcp_std</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='mm/day'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_daymet_prcp_std" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_daymet_srld_mean">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_daymet_srld_mean</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_daymet_srld_mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_prism_monthly_ppt">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_prism_monthly_ppt</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_prism_monthly_ppt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_prism_monthly_tdmean">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_prism_monthly_tdmean</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='f'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_prism_monthly_tdmean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_prism_monthly_tmax">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_prism_monthly_tmax</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='c'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_prism_monthly_tmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_prism_monthly_tmean">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_prism_monthly_tmean</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='f'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_prism_monthly_tmean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.metquery_client.get_prism_monthly_tmin">
+<code class="descclassname">wepppy.climates.metquery_client.</code><code class="descname">get_prism_monthly_tmin</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em>, <em>method='cubic'</em>, <em>units='c'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.metquery_client.get_prism_monthly_tmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.climates.prism">
+<span id="prism-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">prism</span></code> Module<a class="headerlink" href="#module-wepppy.climates.prism" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="wepppy.climates.prism.prism_optimized2">
+<code class="descclassname">wepppy.climates.prism.</code><code class="descname">prism_optimized2</code><span class="sig-paren">(</span><em>par: int</em>, <em>years: int</em>, <em>lng: float</em>, <em>lat: float</em>, <em>wd: str</em>, <em>randseed=None</em>, <em>cliver=None</em>, <em>run_opt=True</em>, <em>x0=None</em>, <em>suffix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.prism.prism_optimized2" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>if _request.method not in [‘GET’, ‘POST’]:</dt>
+<dd>return jsonify({‘Error’: ‘Expecting GET or POST’})</dd>
+<dt>if _request.method == ‘GET’:</dt>
+<dd>d = _request.args</dd>
+<dt>else:  # POST</dt>
+<dd>d = _request.get_json()</dd>
+</dl>
+<p>years = d.get(‘years’, None)
+cliver = d.get(‘cliver’, None)
+returnjson = d.get(‘returnjson’, False)
+randseed = d.get(‘randseed’, None)
+returnjson = bool(returnjson)</p>
+<dl class="docutils">
+<dt>if singleyearmode:</dt>
+<dd>years = 1</dd>
+<dt>if not isint(years):</dt>
+<dd>return jsonify({‘Error’: ‘years as an integer is required “%s”’ % years})</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.climates.prism.prism_revision">
+<code class="descclassname">wepppy.climates.prism.</code><code class="descname">prism_revision</code><span class="sig-paren">(</span><em>cli_fn: str</em>, <em>ws_lng: float</em>, <em>ws_lat: float</em>, <em>hill_lng: float</em>, <em>hill_lat: float</em>, <em>new_cli_fn: str</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.climates.prism.prism_revision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wepppy.climates.cligen.html">cligen Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wepppy.climates.cligen.html#id1"><code class="docutils literal notranslate"><span class="pre">cligen</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wepppy.climates.cligen.html#module-wepppy.climates.cligen.cligen"><code class="docutils literal notranslate"><span class="pre">cligen</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">climates Package</a><ul>
+<li><a class="reference internal" href="#module-wepppy.climates.cligen_client"><code class="docutils literal notranslate"><span class="pre">cligen_client</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.climates.daymet_singlelocation_client"><code class="docutils literal notranslate"><span class="pre">daymet_singlelocation_client</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.climates.downscaled_nmme_client"><code class="docutils literal notranslate"><span class="pre">downscaled_nmme_client</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.climates.metquery_client"><code class="docutils literal notranslate"><span class="pre">metquery_client</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.climates.prism"><code class="docutils literal notranslate"><span class="pre">prism</span></code> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wepppy.climates.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Roger Lew, Mariana Dobre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/wepppy.climates.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

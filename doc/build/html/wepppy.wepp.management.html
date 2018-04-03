@@ -1,0 +1,689 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>management Package &#8212; wepppy 20180403 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="management-package">
+<h1>management Package<a class="headerlink" href="#management-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">management</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-wepppy.wepp.management"></span></div>
+<div class="section" id="module-wepppy.wepp.management.channels">
+<span id="channels-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">channels</span></code> Module<a class="headerlink" href="#module-wepppy.wepp.management.channels" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="wepppy.wepp.management.channels.get_channel">
+<code class="descclassname">wepppy.wepp.management.channels.</code><code class="descname">get_channel</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.channels.get_channel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.channels.load_channels">
+<code class="descclassname">wepppy.wepp.management.channels.</code><code class="descname">load_channels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.channels.load_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads the channel soil managements from the channel.defs file
+These are assigned based on the order of the channel and are
+needed to make the pw0.chn for the watershed run</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.wepp.management.managements">
+<span id="managements-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">managements</span></code> Module<a class="headerlink" href="#module-wepppy.wepp.management.managements" title="Permalink to this headline">¶</a></h2>
+<p>Provides functionality for reading and manipulating WEPP management files</p>
+<p>weppy uses .man files to store managements for each landcover type. The mapping
+of landcover to particular managements is determined by the map.json file in 
+the wepppy/wepp/management/data folder.</p>
+<p>Using the man files eliminates having to deal with using the .db and .rot files
+used with the other versions of WEPP. The .dbs are difficult to management from
+one installation to another, and having multiple dbs with the same condition 
+entries can cause ambiguity. The rotations break if the condition cannot be found
+in the db.</p>
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ContourLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ContourLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ContourLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ContourLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ContourLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ContourLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ContourLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ContourLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ContourLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.DrainLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">DrainLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.DrainLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.DrainLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">DrainLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.DrainLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.DrainLoopRangeland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">DrainLoopRangeland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.DrainLoopRangeland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.DrainLoopRoads">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">DrainLoopRoads</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.DrainLoopRoads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.DrainLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">DrainLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.DrainLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.IniLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">IniLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.IniLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.IniLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">IniLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.IniLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.IniLoopForest">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">IniLoopForest</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.IniLoopForest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.IniLoopRangeland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">IniLoopRangeland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.IniLoopRangeland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.IniLoopRoads">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">IniLoopRoads</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.IniLoopRoads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.IniLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">IniLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.IniLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.wepp.management.managements.InvalidManagementKey">
+<em class="property">exception </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">InvalidManagementKey</code><a class="headerlink" href="#wepppy.wepp.management.managements.InvalidManagementKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>This Key is Unknown and should be defined in the
+wepppy/wepp/management/data/map.json file</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.Loop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">Loop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.Loops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">Loops</code><a class="headerlink" href="#wepppy.wepp.management.managements.Loops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.Loops.find">
+<code class="descname">find</code><span class="sig-paren">(</span><em>loop</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Loops.find" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.Loops.nameof">
+<code class="descname">nameof</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Loops.nameof" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.Management">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">Management</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Management" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents the .man files</p>
+<p>Landcover types are mapped to</p>
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.Management.build_multiple_year_man">
+<code class="descname">build_multiple_year_man</code><span class="sig-paren">(</span><em>sim_years</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Management.build_multiple_year_man" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a copy of Management with ManagementLoop
+set for the specified number of sim_years</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.Management.make_multiple_ofe">
+<code class="descname">make_multiple_ofe</code><span class="sig-paren">(</span><em>nofe</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Management.make_multiple_ofe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.Management.merge_loops">
+<code class="descname">merge_loops</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.Management.merge_loops" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.ncnt">
+<code class="descname">ncnt</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.ncnt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.ncrop">
+<code class="descname">ncrop</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.ncrop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.ndrain">
+<code class="descname">ndrain</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.ndrain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.nini">
+<code class="descname">nini</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.nini" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.nop">
+<code class="descname">nop</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.nop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.nscen">
+<code class="descname">nscen</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.nscen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.Management.nseq">
+<code class="descname">nseq</code><a class="headerlink" href="#wepppy.wepp.management.managements.Management.nseq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ManagementLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ManagementLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The management scenario contains all information associated with a single 
+WEPP simulation. The yearly scenarios are used to build this final scenario.  
+The yearly scenarios were built from the earlier scenarios - plants, tillage 
+sequences, contouring, drainage, and management practices.</p>
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.ManagementLoop.nofes">
+<code class="descname">nofes</code><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementLoop.nofes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.ManagementLoop.nrots">
+<code class="descname">nrots</code><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementLoop.nrots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ManagementLoopMan">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ManagementLoopMan</code><span class="sig-paren">(</span><em>lines</em>, <em>parent</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementLoopMan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.ManagementLoopMan.nyears">
+<code class="descname">nyears</code><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementLoopMan.nyears" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ManagementLoopManLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ManagementLoopManLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>parent</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementLoopManLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ManagementSummary">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ManagementSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.ManagementSummary.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementSummary.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.wepp.management.managements.ManagementSummary.get_management">
+<code class="descname">get_management</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementSummary.get_management" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.ManagementSummary.man_path">
+<code class="descname">man_path</code><a class="headerlink" href="#wepppy.wepp.management.managements.ManagementSummary.man_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.OpLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">OpLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.OpLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.OpLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">OpLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.OpLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.OpLoopForest">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">OpLoopForest</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.OpLoopForest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.OpLoopRangeland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">OpLoopRangeland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.OpLoopRangeland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.OpLoopRoads">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">OpLoopRoads</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.OpLoopRoads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.OpLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">OpLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.OpLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.PlantLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">PlantLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.PlantLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.PlantLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">PlantLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.PlantLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.PlantLoopForest">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">PlantLoopForest</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.PlantLoopForest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.PlantLoopRangeland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">PlantLoopRangeland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.PlantLoopRangeland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.PlantLoopRoads">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">PlantLoopRoads</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.PlantLoopRoads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.PlantLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">PlantLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.PlantLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ScenarioBase">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ScenarioBase</code><a class="headerlink" href="#wepppy.wepp.management.managements.ScenarioBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.ScenarioReference">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">ScenarioReference</code><span class="sig-paren">(</span><em>section_type=None</em>, <em>loop_name=None</em>, <em>root=None</em>, <em>this=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.ScenarioReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+<p>This is used to dynamically find the scenario
+indexes when we build the managements</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SectionType">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SectionType</code><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Contour">
+<code class="descname">Contour</code><em class="property"> = 5</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Contour" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Drain">
+<code class="descname">Drain</code><em class="property"> = 6</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Drain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Ini">
+<code class="descname">Ini</code><em class="property"> = 3</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Ini" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Op">
+<code class="descname">Op</code><em class="property"> = 2</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Op" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Plant">
+<code class="descname">Plant</code><em class="property"> = 1</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Plant" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Surf">
+<code class="descname">Surf</code><em class="property"> = 4</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Surf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.wepp.management.managements.SectionType.Year">
+<code class="descname">Year</code><em class="property"> = 7</em><a class="headerlink" href="#wepppy.wepp.management.managements.SectionType.Year" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SurfLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SurfLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.SurfLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SurfLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SurfLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.SurfLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SurfLoopForest">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SurfLoopForest</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.SurfLoopForest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SurfLoopRangeland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SurfLoopRangeland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.SurfLoopRangeland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SurfLoopRoads">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SurfLoopRoads</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.SurfLoopRoads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.SurfLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">SurfLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.SurfLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loop" title="wepppy.wepp.management.managements.Loop"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loop</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCropland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCropland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCropland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandAnnualFallow">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandAnnualFallow</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandAnnualFallow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowBurn">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandAnnualFallowBurn</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowBurn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowCut">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandAnnualFallowCut</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowCut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowHerb">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandAnnualFallowHerb</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowHerb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowRemove">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandAnnualFallowRemove</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowRemove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowSillage">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandAnnualFallowSillage</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandAnnualFallowSillage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandPerennial">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandPerennial</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandPerennial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandPerennialCut">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandPerennialCut</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandPerennialCut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopCroplandPerennialGraze">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopCroplandPerennialGraze</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopCroplandPerennialGraze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopForest">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopForest</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopForest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopRangeland">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopRangeland</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopRangeland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopRangelandBurn">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopRangelandBurn</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopRangelandBurn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopRangelandGraze">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopRangelandGraze</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopRangelandGraze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopRangelandGrazeLoop">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopRangelandGrazeLoop</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopRangelandGrazeLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopRangelandHerb">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopRangelandHerb</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopRangelandHerb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoopRoads">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoopRoads</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoopRoads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.ScenarioBase" title="wepppy.wepp.management.managements.ScenarioBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.ScenarioBase</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.wepp.management.managements.YearLoops">
+<em class="property">class </em><code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">YearLoops</code><span class="sig-paren">(</span><em>lines</em>, <em>root</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.YearLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.wepp.management.managements.Loops" title="wepppy.wepp.management.managements.Loops"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.wepp.management.managements.Loops</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.managements.get_management">
+<code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">get_management</code><span class="sig-paren">(</span><em>dom</em><span class="sig-paren">)</span> &#x2192; wepppy.wepp.management.managements.Management<a class="headerlink" href="#wepppy.wepp.management.managements.get_management" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>dom <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>dominant landcover code</dd>
+</dl>
+<dl class="docutils">
+<dt>Management</dt>
+<dd>The object is built from the .man file cooresponding to dom in the
+weppy/wepp/management/data/map.json</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.managements.get_management_summary">
+<code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">get_management_summary</code><span class="sig-paren">(</span><em>dom</em><span class="sig-paren">)</span> &#x2192; wepppy.wepp.management.managements.ManagementSummary<a class="headerlink" href="#wepppy.wepp.management.managements.get_management_summary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>dom <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>dominant landcover code</dd>
+</dl>
+<dl class="docutils">
+<dt>ManagementSummary</dt>
+<dd>The object is built from the .man file cooresponding to dom in the
+weppy/wepp/management/data/map.json</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.managements.load_map">
+<code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">load_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.load_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.managements.merge_managements">
+<code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">merge_managements</code><span class="sig-paren">(</span><em>mans</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.merge_managements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.managements.pad">
+<code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">pad</code><span class="sig-paren">(</span><em>vals</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.pad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.wepp.management.managements.scenarioReference_factory">
+<code class="descclassname">wepppy.wepp.management.managements.</code><code class="descname">scenarioReference_factory</code><span class="sig-paren">(</span><em>i</em>, <em>section_type</em>, <em>root</em>, <em>this</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.wepp.management.managements.scenarioReference_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>builds and returns a ScenarioReference instance</p>
+<p>this is the caller, and is for debugging purposes</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">management Package</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">management</span></code> Package</a></li>
+<li><a class="reference internal" href="#module-wepppy.wepp.management.channels"><code class="docutils literal notranslate"><span class="pre">channels</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.wepp.management.managements"><code class="docutils literal notranslate"><span class="pre">managements</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wepppy.wepp.management.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Roger Lew, Mariana Dobre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/wepppy.wepp.management.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -6,6 +6,7 @@
       <w>cellsize</w>
       <w>cligen</w>
       <w>climatestation</w>
+      <w>colname</w>
       <w>domlc</w>
       <w>domsoil</w>
       <w>ermit</w>
@@ -13,9 +14,11 @@
       <w>hillslopes</w>
       <w>inrcov</w>
       <w>intind</w>
+      <w>julians</w>
       <w>landcover</w>
       <w>landuse</w>
       <w>maxima</w>
+      <w>ndays</w>
       <w>orgind</w>
       <w>plotty</w>
       <w>polygonize</w>
@@ -26,6 +29,7 @@
       <w>retperiod</w>
       <w>rilcov</w>
       <w>skidder</w>
+      <w>streamflow</w>
       <w>subcatchments</w>
       <w>subwta</w>
       <w>tinyqueue</w>
