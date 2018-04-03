@@ -174,7 +174,8 @@ class LakeTahoe(NoDbBase):
         soils_dir = self.soils_dir
         
         lc_dict = read_lc_file(_join(_data_dir, 'landSoilLookup.csv'))
-        soil_type_map = json.load(open(_join(_data_dir, 'lc_soiltype_map.json')))
+        with open(_join(_data_dir, 'lc_soiltype_map.json')) as fp:
+            soil_type_map = json.load(fp)
         
         soils = Soils.getInstance(wd)
         soils.lock()
