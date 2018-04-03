@@ -973,57 +973,46 @@ class Climate(NoDbBase):
             climatestation = self.climatestation
             cli_dir = self.cli_dir
 
-
             sub_par_fns = {}
             sub_cli_fns = {}
 
-            # We can use a with statement to ensure threads are cleaned up promptly
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                # Start the load operations and mark each future with its URL
-                results = {executor.submit(cc.observed_daymet,
-                                           climatestation,
-                                           self._observed_start_year,
-                                           self._observed_end_year,
-                                           ss.centroid.lnglat[0],
-                                           ss.centroid.lnglat[1]):
-                           (topaz_id, ss) for (topaz_id, ss) in watershed._subs_summary.items()}
+            attempts = 0
+            subs = list(watershed._subs_summary.items())
 
-                for res in as_completed(results):
-                    (topaz_id, ss) = results[res]
-                    data = res.result()
+            while attempts < 10 and len(subs) > 0:
+                print('attempt', attempts)
 
-                    fn_base = '{}_{}'.format(topaz_id, climatestation)
-                    par_fn, cli_fn, _ = cc.unpack_json_result(data, fn_base, cli_dir)
+                # We can use a with statement to ensure threads are cleaned up promptly
+                with ThreadPoolExecutor(max_workers=10) as executor:
+                    # Start the load operations and mark each future with its URL
+                    results = {executor.submit(cc.observed_daymet,
+                                               climatestation,
+                                               self._observed_start_year,
+                                               self._observed_end_year,
+                                               ss.centroid.lnglat[0],
+                                               ss.centroid.lnglat[1]):
+                               (topaz_id, ss) for (topaz_id, ss) in subs}
 
-                    if verbose:
-                        print(topaz_id, ss, cli_fn)
+                    for res in as_completed(results):
+                        (topaz_id, ss) = results[res]
+                        try:
+                            data = res.result()
+                            subs.remove((topaz_id, ss))
 
-                    sub_par_fns[topaz_id] = par_fn
-                    sub_cli_fns[topaz_id] = cli_fn
+                            fn_base = '{}_{}'.format(topaz_id, climatestation)
+                            par_fn, cli_fn, _ = cc.unpack_json_result(data, fn_base, cli_dir)
 
-            """
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                if verbose:
-                    print('fetching climate for {}'.format(topaz_id))
+                            if verbose:
+                                print(topaz_id, ss, cli_fn)
 
-                lng, lat = ss.centroid.lnglat
+                            sub_par_fns[topaz_id] = par_fn
+                            sub_cli_fns[topaz_id] = cli_fn
 
-                result = cc.observed_daymet(
-                    climatestation,
-                    self._observed_start_year,
-                    self._observed_end_year,
-                    lng=lng, lat=lat
-                )
+                        except ConnectionError:
+                            pass
 
-                fn_base = '{}_{}'.format(topaz_id, climatestation)
-                par_fn, cli_fn, _ = cc.unpack_json_result(result, fn_base, cli_dir)
+                    attempts += 1
 
-                sub_par_fns[topaz_id] = par_fn
-                sub_cli_fns[topaz_id] = cli_fn
-            """
 
             lng, lat = watershed.centroid
 
