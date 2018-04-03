@@ -3,6 +3,7 @@ from os.path import exists as _exists
 
 from datetime import datetime, timedelta
 
+from collections import OrderedDict
 import  numpy as np
 from wepppy.all_your_base import parse_units, RowData
 
@@ -130,7 +131,7 @@ class ChannelWatbal(ReportBase):
         chanwb = self.chanwb
 
         for i in chanwb.data['Julian']:
-            row = dict([('Y', chanwb.data['Year'][i]),
+            row = OrderedDict([('Y', chanwb.data['Year'][i]),
                         ('J', chanwb.data['Julian'][i]),
                         ('Inflow', chanwb.data['Inflow'][i]),
                         ('Outflow', chanwb.data['Outflow'][i]),
@@ -148,7 +149,7 @@ class ChannelWatbal(ReportBase):
             indx = np.where(chanwb.data['Year'] == y)[0]
             i0, iend = indx[0], indx[-1]
 
-            row = dict([('Y', chanwb.data['Year'][i0]),
+            row = OrderedDict([('Y', chanwb.data['Year'][i0]),
                         ('Inflow', np.sum(chanwb.data['Inflow'][i0:iend])),
                         ('Outflow', np.sum(chanwb.data['Outflow'][i0:iend])),
                         ('Baseflow', np.sum(chanwb.data['Baseflow'][i0:iend])),
@@ -172,7 +173,7 @@ class ChannelWatbal(ReportBase):
         years = self.years
 
         for y in years:
-            row = dict([('Year', y)] + [(k, 0.0) for k in header])
+            row = OrderedDict([('Year', y)] + [(k, 0.0) for k in header])
 
             for k in header:
                 row[k] = 0.0
