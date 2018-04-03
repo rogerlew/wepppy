@@ -1013,6 +1013,7 @@ class Climate(NoDbBase):
 
                     attempts += 1
 
+            assert len(subs) == 0, 'Not all climates were obtained from webservice'
 
             lng, lat = watershed.centroid
 
