@@ -1,5 +1,8 @@
 from os.path import join as _join
 from os.path import exists as _exists
+
+from collections import OrderedDict
+
 from glob import glob
 
 import numpy as np
@@ -93,7 +96,7 @@ class HillslopeWatbal(ReportBase):
         years = self.years
 
         for y in years:
-            row = dict([('Year', y)] + [(k, 0.0) for k in header])
+            row = OrderedDict([('Year', y)] + [(k, 0.0) for k in header])
 
             for k in header:
                 row[k] = 0.0

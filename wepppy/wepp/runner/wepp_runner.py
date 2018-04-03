@@ -164,6 +164,7 @@ def make_watershed_run(sim_years, wepp_ids, runs_dir):
         
     
 def run_watershed(runs_dir):
+
     # remember current directory
     curdir = os.getcwd()
     
@@ -197,11 +198,14 @@ def run_watershed(runs_dir):
         raise
     
     log_fn = _join(runs_dir, 'pw0.err')
-    
-    with open(log_fn) as fp:
-        lines = fp.readlines()
-        for L in lines:
-            if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in L:
-                return True
-                    
+
+    if _exists(_join(runs_dir, '../output/pass_pw0.txt')) and \
+       _exists(_join(runs_dir, '../output/loss_pw0.txt')) and \
+       _exists(_join(runs_dir, '../output/chnwb.txt')) and \
+       _exists(_join(runs_dir, '../output/soil_pw0.txt')) and \
+       _exists(_join(runs_dir, '../output/plot_pw0.txt')) and \
+       _exists(_join(runs_dir, '../output/ebe_pw0.txt')) and \
+       _exists(_join(runs_dir, '../output/pass_pw0.txt')):
+        return True
+
     raise Exception('Error running wepp for watershed \nSee <a href="../view/wepprun/pw0.err">%s</a>' % log_fn)
