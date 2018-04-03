@@ -976,11 +976,13 @@ class Climate(NoDbBase):
             sub_par_fns = {}
             sub_cli_fns = {}
 
+            # For a large watershed this might have to query 600+ climates. The climate webservice has
+            # occasionally timed out, so here we are retrying failed requests to avoid having to abort
+            # the climate building.
             attempts = 0
             subs = list(watershed._subs_summary.items())
 
             while attempts < 10 and len(subs) > 0:
-                print('attempt', attempts)
 
                 # We can use a with statement to ensure threads are cleaned up promptly
                 with ThreadPoolExecutor(max_workers=10) as executor:

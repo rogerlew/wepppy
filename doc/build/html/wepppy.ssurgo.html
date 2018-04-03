@@ -1,0 +1,359 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ssurgo Package &#8212; wepppy 20180403 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ssurgo-package">
+<h1>ssurgo Package<a class="headerlink" href="#ssurgo-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">ssurgo</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-wepppy.ssurgo"></span></div>
+<div class="section" id="module-wepppy.ssurgo.ssurgo">
+<span id="ssurgo-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">ssurgo</span></code> Module<a class="headerlink" href="#module-wepppy.ssurgo.ssurgo" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.ssurgo.ssurgo.Horizon">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">Horizon</code><span class="sig-paren">(</span><em>cokey</em>, <em>layer</em>, <em>defaults=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.Horizon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.Horizon.valid">
+<code class="descname">valid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.Horizon.valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.ssurgo.ssurgo.MajorComponent">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">MajorComponent</code><span class="sig-paren">(</span><em>component</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.MajorComponent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.ssurgo.ssurgo.SoilSummary">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">SoilSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SoilSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SoilSummary.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SoilSummary.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.ssurgo.ssurgo.SsurgoRequestError">
+<em class="property">exception </em><code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">SsurgoRequestError</code><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SsurgoRequestError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Ssurgo request did not return 200 status code</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">SurgoSoilCollection</code><span class="sig-paren">(</span><em>mukeys</em>, <em>use_statsgo=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a collection of soil data</p>
+<dl class="docutils">
+<dt>see the following document for information on the schema:</dt>
+<dd><a class="reference external" href="https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050900.pdf">https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050900.pdf</a></dd>
+</dl>
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><em>table</em>, <em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.dump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.getInValidWeppSoils">
+<code class="descname">getInValidWeppSoils</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List[int]<a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.getInValidWeppSoils" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.getValidWeppSoils">
+<code class="descname">getValidWeppSoils</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List[int]<a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.getValidWeppSoils" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_components">
+<code class="descname">get_components</code><span class="sig-paren">(</span><em>mukey</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_fragvol_r">
+<code class="descname">get_fragvol_r</code><span class="sig-paren">(</span><em>chkey</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_fragvol_r" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_layers">
+<code class="descname">get_layers</code><span class="sig-paren">(</span><em>cokey</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_reskind">
+<code class="descname">get_reskind</code><span class="sig-paren">(</span><em>cokey</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_reskind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_texture">
+<code class="descname">get_texture</code><span class="sig-paren">(</span><em>chkey</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.get_texture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.logInvalidSoils">
+<code class="descname">logInvalidSoils</code><span class="sig-paren">(</span><em>wd='./'</em>, <em>overwrite=True</em>, <em>db_build=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.logInvalidSoils" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.makeWeppSoils">
+<code class="descname">makeWeppSoils</code><span class="sig-paren">(</span><em>initial_ksat=0.75</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.makeWeppSoils" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.SurgoSoilCollection.writeWeppSoils">
+<code class="descname">writeWeppSoils</code><span class="sig-paren">(</span><em>wd='./'</em>, <em>overwrite=True</em>, <em>write_logs=False</em>, <em>db_build=False</em><span class="sig-paren">)</span> &#x2192; Dict[int, wepppy.ssurgo.ssurgo.SoilSummary]<a class="headerlink" href="#wepppy.ssurgo.ssurgo.SurgoSoilCollection.writeWeppSoils" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">WeppSoil</code><span class="sig-paren">(</span><em>ssurgo_c</em>, <em>mukey</em>, <em>initial_ksat=0.75</em>, <em>horizon_defaults={'cec7_r': 11.3</em>, <em>'claytotal_r': 7.0</em>, <em>'dbthirdbar_r': 1.4</em>, <em>'field_cap': 0.242</em>, <em>'ksat_r': 28.0</em>, <em>'om_r': 7.0</em>, <em>'sandtotal_r': 66.8</em>, <em>'sandvf_r': 10.0</em>, <em>'smr': 55.5</em>, <em>'wilt_pt': 0.1145}</em>, <em>res_lyr_ksat_threshold=2.0</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the major component for a given mukey is the component 
+with the highest comppct_r value and a obtained cokey. If no 
+components have a usable cokey then None is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.build_file_contents">
+<code class="descname">build_file_contents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.build_file_contents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.getFirstHorizon">
+<code class="descname">getFirstHorizon</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.getFirstHorizon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.has_horizons">
+<code class="descname">has_horizons</code><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.has_horizons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.has_majorComponent">
+<code class="descname">has_majorComponent</code><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.has_majorComponent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.short_description">
+<code class="descname">short_description</code><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.short_description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.valid">
+<code class="descname">valid</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>wd='./'</em>, <em>overwrite=True</em>, <em>fname=None</em>, <em>db_build=False</em><span class="sig-paren">)</span> &#x2192; wepppy.ssurgo.ssurgo.SoilSummary<a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.ssurgo.WeppSoil.write_log">
+<code class="descname">write_log</code><span class="sig-paren">(</span><em>wd='./'</em>, <em>overwrite=True</em>, <em>fname=None</em>, <em>db_build=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.ssurgo.WeppSoil.write_log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.ssurgo.ssurgo.query_mukeys_in_extent">
+<code class="descclassname">wepppy.ssurgo.ssurgo.</code><code class="descname">query_mukeys_in_extent</code><span class="sig-paren">(</span><em>extent: List[float]</em><span class="sig-paren">)</span> &#x2192; Union[typing.Set[int], NoneType]<a class="headerlink" href="#wepppy.ssurgo.ssurgo.query_mukeys_in_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query ssurgo to determine the mukeys in the extent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>extent</strong> – xmin, ymin, xmax, ymax</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of mukeys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.ssurgo.statsgo_spatial">
+<span id="statsgo-spatial-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">statsgo_spatial</span></code> Module<a class="headerlink" href="#module-wepppy.ssurgo.statsgo_spatial" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.ssurgo.statsgo_spatial.StatsgoSpatial">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.statsgo_spatial.</code><code class="descname">StatsgoSpatial</code><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.StatsgoSpatial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.build_mukey_polys">
+<code class="descname">build_mukey_polys</code><span class="sig-paren">(</span><em>mukey</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.build_mukey_polys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.identify_mukey_point">
+<code class="descname">identify_mukey_point</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.identify_mukey_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.identify_mukeys_extent">
+<code class="descname">identify_mukeys_extent</code><span class="sig-paren">(</span><em>extent</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.identify_mukeys_extent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.mukeys">
+<code class="descname">mukeys</code><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.StatsgoSpatial.mukeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.ssurgo.statsgo_spatial.adapt_array">
+<code class="descclassname">wepppy.ssurgo.statsgo_spatial.</code><code class="descname">adapt_array</code><span class="sig-paren">(</span><em>arr</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.adapt_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.ssurgo.statsgo_spatial.convert_array">
+<code class="descclassname">wepppy.ssurgo.statsgo_spatial.</code><code class="descname">convert_array</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.statsgo_spatial.convert_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.ssurgo.surgo_map">
+<span id="surgo-map-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">surgo_map</span></code> Module<a class="headerlink" href="#module-wepppy.ssurgo.surgo_map" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="wepppy.ssurgo.surgo_map.NoValidSoilsException">
+<em class="property">exception </em><code class="descclassname">wepppy.ssurgo.surgo_map.</code><code class="descname">NoValidSoilsException</code><a class="headerlink" href="#wepppy.ssurgo.surgo_map.NoValidSoilsException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>No valid soils could be found within the catchment boundary</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.ssurgo.surgo_map.SurgoMap">
+<em class="property">class </em><code class="descclassname">wepppy.ssurgo.surgo_map.</code><code class="descname">SurgoMap</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.surgo_map.SurgoMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.ssurgo.surgo_map.SurgoMap.build_soilgrid">
+<code class="descname">build_soilgrid</code><span class="sig-paren">(</span><em>subwta_fn</em>, <em>soilgrid_fn=None</em>, <em>bounds_fn=None</em>, <em>valid_mukeys=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.surgo_map.SurgoMap.build_soilgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a dominant soil map based on the subcatchment
+ids identified in the subwta_fn map</p>
+<p>if valid_mukeys is None assumes all the keys in the map are valid
+if valid_mukeys are provided the keys that are not in valid_mukeys
+are masked before identifying the dominant soil.</p>
+<p>valid_mukeys can be provided by wepppy.wepp.soilbuilder.webClient.validatemukeys</p>
+<p>returns a dict with topaz id keys and mukey values.
+The topaz ids are strings ‘cause javascript.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.ssurgo.surgo_map.SurgoMap.spatialize_var">
+<code class="descname">spatialize_var</code><span class="sig-paren">(</span><em>func</em>, <em>dst_fname</em>, <em>drivername='GTiff'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.ssurgo.surgo_map.SurgoMap.spatialize_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a raster of the variable specified by var</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wepppy.ssurgo.data.html">data Package</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ssurgo Package</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">ssurgo</span></code> Package</a></li>
+<li><a class="reference internal" href="#module-wepppy.ssurgo.ssurgo"><code class="docutils literal notranslate"><span class="pre">ssurgo</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.ssurgo.statsgo_spatial"><code class="docutils literal notranslate"><span class="pre">statsgo_spatial</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.ssurgo.surgo_map"><code class="docutils literal notranslate"><span class="pre">surgo_map</span></code> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wepppy.ssurgo.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Roger Lew, Mariana Dobre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/wepppy.ssurgo.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

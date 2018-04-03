@@ -675,11 +675,12 @@ class Wepp(NoDbBase):
             i = 0
             for chn_enum, soil in soil_c:
                 soil_fn = _join(soils_dir, soil.fname)
-                lines = open(soil_fn).readlines()
-                for i, line in enumerate(lines):
-                    line = ''.join([v.strip() for v in line.split()])
-                    if line == '11':
-                        break
+                with open(soil_fn) as fp:
+                    lines = fp.readlines()
+                    for i, line in enumerate(lines):
+                        line = ''.join([v.strip() for v in line.split()])
+                        if line == '11':
+                            break
                         
 #                fp.write(''.join(lines[i+1:]) + '\n')
                 fp.write("""\

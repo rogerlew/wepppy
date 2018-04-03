@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>topaz Package &#8212; wepppy 20180403 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="topaz-package">
+<h1>topaz Package<a class="headerlink" href="#topaz-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">topaz</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-wepppy.topaz"></span></div>
+<div class="section" id="module-wepppy.topaz.topaz">
+<span id="topaz-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">topaz</span></code> Module<a class="headerlink" href="#module-wepppy.topaz.topaz" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="wepppy.topaz.topaz.DednmCrashedException">
+<em class="property">exception </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">DednmCrashedException</code><a class="headerlink" href="#wepppy.topaz.topaz.DednmCrashedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>dednm crashed for an unknown reason, try again</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.topaz.topaz.MinimumChannelLengthTooShortError">
+<em class="property">exception </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">MinimumChannelLengthTooShortError</code><a class="headerlink" href="#wepppy.topaz.topaz.MinimumChannelLengthTooShortError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>THE VALUE FOR THE MINIMUM CHANNEL LENGTH FOR A CHANNEL TO BE
+CLASSIFIED AS A CHANNEL IS TOO SHORT.</p>
+<p>IT MUST BE LONGER THAN 1.0 METER AND LONGER THAN A CELL SIDE</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.topaz.topaz.RasbinCrashedException">
+<em class="property">exception </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">RasbinCrashedException</code><a class="headerlink" href="#wepppy.topaz.topaz.RasbinCrashedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>rasbin crashed for an unknown reason, try again</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.topaz.topaz.RasforCrashedException">
+<em class="property">exception </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">RasforCrashedException</code><a class="headerlink" href="#wepppy.topaz.topaz.RasforCrashedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>rasfor crashed for an unknown reason, try again</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.topaz.topaz.RasproCrashedException">
+<em class="property">exception </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">RasproCrashedException</code><a class="headerlink" href="#wepppy.topaz.topaz.RasproCrashedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>raspro crashed for an unknown reason, try again</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.topaz.topaz.TopazRunner">
+<em class="property">class </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">TopazRunner</code><span class="sig-paren">(</span><em>topaz_wd</em>, <em>dem</em>, <em>csa=4</em>, <em>mcl=60</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object oriented abstraction for running USDA ARS Topagraphic Parameterization
+(topaz).</p>
+<dl class="docutils">
+<dt>For more infomation on topaz see the manual available here:</dt>
+<dd><a class="reference external" href="https://www.ars.usda.gov/ARSUserFiles/30700510/TOPAZ_User-Manual2.pdf">https://www.ars.usda.gov/ARSUserFiles/30700510/TOPAZ_User-Manual2.pdf</a></dd>
+</dl>
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.build_channels">
+<code class="descname">build_channels</code><span class="sig-paren">(</span><em>create_channels=True</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.build_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>run topaz to build the channels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.build_subcatchments">
+<code class="descname">build_subcatchments</code><span class="sig-paren">(</span><em>outlet_px</em>, <em>polygonize_subwta=True</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.build_subcatchments" title="Permalink to this definition">¶</a></dt>
+<dd><p>run topaz to build the channels and subcatchments</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.create_channels_png">
+<code class="descname">create_channels_png</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.create_channels_png" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.create_prj">
+<code class="descname">create_prj</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.create_prj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a PRJ for a topaz resource based on dem’s projection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.create_prjs">
+<code class="descname">create_prjs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.create_prjs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create prjs for all the .ARC files in the working directory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.find_closest_channel">
+<code class="descname">find_closest_channel</code><span class="sig-paren">(</span><em>long</em>, <em>lat</em>, <em>pixelcoords=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.find_closest_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>find the closest channel give a long and lat or pixel coords
+(pixelcoords=True)</p>
+<dl class="docutils">
+<dt>returns (x, y), distance</dt>
+<dd>where (x, y) are pixel coords and distance is the distance from the
+specified long, lat and distance is the distance from long, lat
+in pixels</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.longlat_to_pixel">
+<code class="descname">longlat_to_pixel</code><span class="sig-paren">(</span><em>long</em>, <em>lat</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.longlat_to_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the x,y pixel coords of long, lat</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.pixel_to_longlat">
+<code class="descname">pixel_to_longlat</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.pixel_to_longlat" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the long/lat (WGS84) coords from pixel coords</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.topaz.topaz.TopazRunner.pixel_to_utm">
+<code class="descname">pixel_to_utm</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.topaz.topaz.TopazRunner.pixel_to_utm" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the utm coords from pixel coords</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.topaz.topaz.WatershedBoundaryTouchesEdgeError">
+<em class="property">exception </em><code class="descclassname">wepppy.topaz.topaz.</code><code class="descname">WatershedBoundaryTouchesEdgeError</code><a class="headerlink" href="#wepppy.topaz.topaz.WatershedBoundaryTouchesEdgeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM.
+IT IS POSSIBLE THAT THE ACTUAL WATERSHED EXTENDS BEYOND THE EDGE OF THE DEM.</p>
+<p>THE WATERSHED MUST BE FULLY DEFINED WITHIN THE DEM AND SHOULD GENERALLY
+NOT TOUCH THE EDGE OF THE DEM OR AN AREA OF INDETERMINATE ELEVATION.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">topaz Package</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">topaz</span></code> Package</a></li>
+<li><a class="reference internal" href="#module-wepppy.topaz.topaz"><code class="docutils literal notranslate"><span class="pre">topaz</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wepppy.topaz.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Roger Lew, Mariana Dobre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/wepppy.topaz.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

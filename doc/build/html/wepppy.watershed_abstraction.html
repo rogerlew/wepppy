@@ -1,0 +1,441 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>watershed_abstraction Package &#8212; wepppy 20180403 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="watershed-abstraction-package">
+<h1>watershed_abstraction Package<a class="headerlink" href="#watershed-abstraction-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">watershed_abstraction</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-wepppy.watershed_abstraction"></span></div>
+<div class="section" id="module-wepppy.watershed_abstraction.slopemodel">
+<span id="slopemodel-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">slopemodel</span></code> Module<a class="headerlink" href="#module-wepppy.watershed_abstraction.slopemodel" title="Permalink to this headline">¶</a></h2>
+<p>this isn’t used by wepppy. hopefully I remember to change this comment if it does get used</p>
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.slopemodel.calc_disturbed_grads">
+<code class="descclassname">wepppy.watershed_abstraction.slopemodel.</code><code class="descname">calc_disturbed_grads</code><span class="sig-paren">(</span><em>hillslope_model</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.slopemodel.calc_disturbed_grads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.slopemodel.calc_ermit_grads">
+<code class="descclassname">wepppy.watershed_abstraction.slopemodel.</code><code class="descname">calc_ermit_grads</code><span class="sig-paren">(</span><em>hillslope_model</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.slopemodel.calc_ermit_grads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.slopemodel.polycurve">
+<code class="descclassname">wepppy.watershed_abstraction.slopemodel.</code><code class="descname">polycurve</code><span class="sig-paren">(</span><em>x</em>, <em>dy</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.slopemodel.polycurve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.watershed_abstraction.watershed_abstraction">
+<span id="watershed-abstraction-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">watershed_abstraction</span></code> Module<a class="headerlink" href="#module-wepppy.watershed_abstraction.watershed_abstraction" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.CentroidSummary">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">CentroidSummary</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.CentroidSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ChannelRoutingError">
+<em class="property">exception </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">ChannelRoutingError</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ChannelRoutingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>THE NETWORK STRUCTURE DELINEATED BY TOPAZ CONTAINS MORE THAN 3 CHANNELS
+AS INPUT TO A SINGLE CHANNEL. WEPP CAN ONLY HANDLE 3 OR LESS CHANNELS
+DRAINING INTO A SINGLE CHANNEL.</p>
+<p>THE CHANNELS SHOULD BE REDELINEATED AFTER ADJUSTING THE MINIMUM CHANNEL
+LENGTH (MCL) AND/OR CRITICAL SOURCE AREA (CSA)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">ChannelSummary</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase" title="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.watershed_abstraction.watershed_abstraction.SummaryBase</span></code></a></p>
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.cell_width">
+<code class="descname">cell_width</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.cell_width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.channel_type">
+<code class="descname">channel_type</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.channel_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.fname">
+<code class="descname">fname</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.fname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.order">
+<code class="descname">order</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary.order" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.FlowpathSummary">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">FlowpathSummary</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.FlowpathSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase" title="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.watershed_abstraction.watershed_abstraction.SummaryBase</span></code></a></p>
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.FlowpathSummary.fname">
+<code class="descname">fname</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.FlowpathSummary.fname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.HillSummary">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">HillSummary</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.HillSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase" title="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.watershed_abstraction.watershed_abstraction.SummaryBase</span></code></a></p>
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.HillSummary.fname">
+<code class="descname">fname</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.HillSummary.fname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">SummaryBase</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.max_points">
+<code class="descname">max_points</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.max_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.num_points">
+<code class="descname">num_points</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.num_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.profile">
+<code class="descname">profile</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.SummaryBase.profile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">WatershedAbstraction</code><span class="sig-paren">(</span><em>wd</em>, <em>wat_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract">
+<code class="descname">abstract</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_channel">
+<code class="descname">abstract_channel</code><span class="sig-paren">(</span><em>chn_id: int</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>define channel abstraction for the purposes of running WEPP</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_channels">
+<code class="descname">abstract_channels</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_channels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_flowpath">
+<code class="descname">abstract_flowpath</code><span class="sig-paren">(</span><em>flowpath</em>, <em>slope</em>, <em>distance</em><span class="sig-paren">)</span> &#x2192; wepppy.watershed_abstraction.watershed_abstraction.FlowpathSummary<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_flowpath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_flowpaths">
+<code class="descname">abstract_flowpaths</code><span class="sig-paren">(</span><em>sub_id: int, flowpaths: List[&lt;built-in function array&gt;], slopes: List[&lt;built-in function array&gt;], distances: List[&lt;built-in function array&gt;]</em><span class="sig-paren">)</span> &#x2192; Tuple[Dict[str, wepppy.watershed_abstraction.watershed_abstraction.FlowpathSummary], List[List[int]]]<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_flowpaths" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_structure">
+<code class="descname">abstract_structure</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_subcatchment">
+<code class="descname">abstract_subcatchment</code><span class="sig-paren">(</span><em>sub_id</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_subcatchment" title="Permalink to this definition">¶</a></dt>
+<dd><p>define subcatchment abstraction for the purposes of running WEPP</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_subcatchments">
+<code class="descname">abstract_subcatchments</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.abstract_subcatchments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.centroid">
+<code class="descname">centroid</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.centroid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.linkdata">
+<code class="descname">linkdata</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.linkdata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.network">
+<code class="descname">network</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.network" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.px_to_lnglat">
+<code class="descname">px_to_lnglat</code><span class="sig-paren">(</span><em>x: int</em>, <em>y: int</em><span class="sig-paren">)</span> &#x2192; Tuple[float, float]<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.px_to_lnglat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.px_to_utm">
+<code class="descname">px_to_utm</code><span class="sig-paren">(</span><em>x: int</em>, <em>y: int</em><span class="sig-paren">)</span> &#x2192; Tuple[float, float]<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.px_to_utm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.structure">
+<code class="descname">structure</code><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.write_slps">
+<code class="descname">write_slps</code><span class="sig-paren">(</span><em>channels=1</em>, <em>subcatchments=1</em>, <em>flowpaths=1</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.WatershedAbstraction.write_slps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes slope files to the specified wat_dir. The channels,
+subcatchments, and flowpaths args specify what slope files
+should be written.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.centroid_px">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">centroid_px</code><span class="sig-paren">(</span><em>indx</em>, <em>indy</em><span class="sig-paren">)</span> &#x2192; Tuple[int, int]<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.centroid_px" title="Permalink to this definition">¶</a></dt>
+<dd><p>given a sets of x and y indices calulates a central [x,y] index</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.compute_direction">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">compute_direction</code><span class="sig-paren">(</span><em>head: List</em>, <em>tail: List</em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.compute_direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.cummnorm_distance">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">cummnorm_distance</code><span class="sig-paren">(</span><em>distance: List[float]</em><span class="sig-paren">)</span> &#x2192; &lt;built-in function array&gt;<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.cummnorm_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>builds and returns cummulative normalized distance array from an array
+of cell-to-cell distances</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.garbrecht_length">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">garbrecht_length</code><span class="sig-paren">(</span><em>distances: List[List[float]]</em><span class="sig-paren">)</span> &#x2192; float<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.garbrecht_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the length of a subcatchment from the flowpaths
+contained within the subcatchment. The length is weighted_flowpaths
+by the flowpaths length relative to its area.</p>
+<p>distances should be an array of distances between cells along the
+flowpath (not cummulative distance)</p>
+<p>eq. 3.4 in Thomas Cochrane’s Dissertation
+#</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.interpolate_slp">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">interpolate_slp</code><span class="sig-paren">(</span><em>distances</em>, <em>slopes</em>, <em>max_points</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.interpolate_slp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.ischannel">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">ischannel</code><span class="sig-paren">(</span><em>topaz_id: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.ischannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.read_geojson">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">read_geojson</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.read_geojson" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.representative_normalized_elevations">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">representative_normalized_elevations</code><span class="sig-paren">(</span><em>x: List[float], dy: List[float]</em><span class="sig-paren">)</span> &#x2192; List[float]<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.representative_normalized_elevations" title="Permalink to this definition">¶</a></dt>
+<dd><p>x should be a normed distance array between 0 and 1
+dy is an array of slopes</p>
+<p>returns normalized elevations (relative to the length of x)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.slp_asp_color">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">slp_asp_color</code><span class="sig-paren">(</span><em>slope: float</em>, <em>aspect: float</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.slp_asp_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="wepppy.watershed_abstraction.watershed_abstraction.write_slp">
+<code class="descclassname">wepppy.watershed_abstraction.watershed_abstraction.</code><code class="descname">write_slp</code><span class="sig-paren">(</span><em>aspect</em>, <em>width</em>, <em>cellsize</em>, <em>length</em>, <em>slope</em>, <em>distance_p</em>, <em>fp</em>, <em>version=97.3</em>, <em>max_points=19</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.watershed_abstraction.write_slp" title="Permalink to this definition">¶</a></dt>
+<dd><p>writes a slope file in the 97.3 format for WEPP</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.watershed_abstraction.wepp_top_translator">
+<span id="wepp-top-translator-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">wepp_top_translator</span></code> Module<a class="headerlink" href="#module-wepppy.watershed_abstraction.wepp_top_translator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator">
+<em class="property">class </em><code class="descclassname">wepppy.watershed_abstraction.wepp_top_translator.</code><code class="descname">WeppTopTranslator</code><span class="sig-paren">(</span><em>top_sub_ids</em>, <em>top_chn_ids</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Utility class to translate between sub_ids, wepp_ids, 
+and topaz_ids, and chn_enums.</p>
+<dl class="docutils">
+<dt>Conventions</dt>
+<dd><dl class="first last docutils">
+<dt>sub_id</dt>
+<dd>string in the “hill_%i” % top format</dd>
+<dt>chn_id</dt>
+<dd>string in the “chn_%i” % top  format</dd>
+<dt>wepp (a.k.a. wepp_id)</dt>
+<dd>integer wepp id (consecutive)</dd>
+<dt>top (a.k.a. topaz_id)</dt>
+<dd>integer topaz
+right hillslopes end with 3
+left hillslopes end with 2
+center hillslopes end with 1
+channels end with 4</dd>
+<dt>chn_enum</dt>
+<dd>integer = wepp - hillslope_n</dd>
+</dl>
+</dd>
+</dl>
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.chn_enum">
+<code class="descname">chn_enum</code><span class="sig-paren">(</span><em>wepp=None</em>, <em>chn_id=None</em>, <em>top=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.chn_enum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.has_top">
+<code class="descname">has_top</code><span class="sig-paren">(</span><em>top</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.has_top" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.is_channel">
+<code class="descname">is_channel</code><span class="sig-paren">(</span><em>top=None</em>, <em>wepp=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.is_channel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_chn_ids">
+<code class="descname">iter_chn_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_chn_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_sub_ids">
+<code class="descname">iter_sub_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_sub_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_wepp_chn_ids">
+<code class="descname">iter_wepp_chn_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_wepp_chn_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_wepp_sub_ids">
+<code class="descname">iter_wepp_sub_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.iter_wepp_sub_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.top">
+<code class="descname">top</code><span class="sig-paren">(</span><em>wepp=None</em>, <em>sub_id=None</em>, <em>chn_id=None</em>, <em>chn_enum=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.top" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.wepp">
+<code class="descname">wepp</code><span class="sig-paren">(</span><em>top=None</em>, <em>sub_id=None</em>, <em>chn_id=None</em>, <em>chn_enum=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.watershed_abstraction.wepp_top_translator.WeppTopTranslator.wepp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">watershed_abstraction Package</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">watershed_abstraction</span></code> Package</a></li>
+<li><a class="reference internal" href="#module-wepppy.watershed_abstraction.slopemodel"><code class="docutils literal notranslate"><span class="pre">slopemodel</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.watershed_abstraction.watershed_abstraction"><code class="docutils literal notranslate"><span class="pre">watershed_abstraction</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.watershed_abstraction.wepp_top_translator"><code class="docutils literal notranslate"><span class="pre">wepp_top_translator</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wepppy.watershed_abstraction.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Roger Lew, Mariana Dobre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/wepppy.watershed_abstraction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
