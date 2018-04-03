@@ -1,0 +1,1456 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>nodb Package &#8212; wepppy 20180403 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nodb-package">
+<h1>nodb Package<a class="headerlink" href="#nodb-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">nodb</span></code> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-wepppy.nodb"></span></div>
+<div class="section" id="module-wepppy.nodb.base">
+<span id="base-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">base</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.base.NoDbBase">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.base.</code><code class="descname">NoDbBase</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.bound_arc">
+<code class="descname">bound_arc</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.bound_arc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.cli_dir">
+<code class="descname">cli_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.cli_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.config">
+<code class="descname">config</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.dem_dir">
+<code class="descname">dem_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.dem_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.dem_fn">
+<code class="descname">dem_fn</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.dem_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.domlc_fn">
+<code class="descname">domlc_fn</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.domlc_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.domsoil_fn">
+<code class="descname">domsoil_fn</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.domsoil_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.base.NoDbBase.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.dump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.base.NoDbBase.dump_and_unlock">
+<code class="descname">dump_and_unlock</code><span class="sig-paren">(</span><em>validate=True</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.dump_and_unlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.export_dir">
+<code class="descname">export_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.export_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.export_winwepp_dir">
+<code class="descname">export_winwepp_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.export_winwepp_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.fp_output_dir">
+<code class="descname">fp_output_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.fp_output_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.fp_runs_dir">
+<code class="descname">fp_runs_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.fp_runs_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.base.NoDbBase.islocked">
+<code class="descname">islocked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.islocked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.lc_dir">
+<code class="descname">lc_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.lc_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.lc_fn">
+<code class="descname">lc_fn</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.lc_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.base.NoDbBase.lock">
+<code class="descname">lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.lock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.mods">
+<code class="descname">mods</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.mods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.netful_arc">
+<code class="descname">netful_arc</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.netful_arc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.output_dir">
+<code class="descname">output_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.output_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.plot_dir">
+<code class="descname">plot_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.plot_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.public">
+<code class="descname">public</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.public" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.readonly">
+<code class="descname">readonly</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.readonly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.runs_dir">
+<code class="descname">runs_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.runs_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.soils_dir">
+<code class="descname">soils_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.soils_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.ssurgo_fn">
+<code class="descname">ssurgo_fn</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.ssurgo_fn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.stats_dir">
+<code class="descname">stats_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.stats_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.subwta_arc">
+<code class="descname">subwta_arc</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.subwta_arc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.topaz_wd">
+<code class="descname">topaz_wd</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.topaz_wd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.base.NoDbBase.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><em>evt</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.base.NoDbBase.unlock">
+<code class="descname">unlock</code><span class="sig-paren">(</span><em>flag=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.unlock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.wat_dir">
+<code class="descname">wat_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.wat_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.wat_js">
+<code class="descname">wat_js</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.wat_js" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.NoDbBase.wepp_dir">
+<code class="descname">wepp_dir</code><a class="headerlink" href="#wepppy.nodb.base.NoDbBase.wepp_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.base.TriggerEvents">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.base.</code><code class="descname">TriggerEvents</code><a class="headerlink" href="#wepppy.nodb.base.TriggerEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="wepppy.nodb.base.TriggerEvents.LANDUSE_DOMLC_COMPLETE">
+<code class="descname">LANDUSE_DOMLC_COMPLETE</code><em class="property"> = 2</em><a class="headerlink" href="#wepppy.nodb.base.TriggerEvents.LANDUSE_DOMLC_COMPLETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.TriggerEvents.ON_INIT_FINISH">
+<code class="descname">ON_INIT_FINISH</code><em class="property"> = 1</em><a class="headerlink" href="#wepppy.nodb.base.TriggerEvents.ON_INIT_FINISH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.TriggerEvents.PREPPING_PHOSPHORUS">
+<code class="descname">PREPPING_PHOSPHORUS</code><em class="property"> = 4</em><a class="headerlink" href="#wepppy.nodb.base.TriggerEvents.PREPPING_PHOSPHORUS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.base.TriggerEvents.SOILS_BUILD_COMPLETE">
+<code class="descname">SOILS_BUILD_COMPLETE</code><em class="property"> = 3</em><a class="headerlink" href="#wepppy.nodb.base.TriggerEvents.SOILS_BUILD_COMPLETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.climate">
+<span id="climate-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">climate</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.climate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.climate.Climate">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.climate.</code><code class="descname">Climate</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.build">
+<code class="descname">build</code><span class="sig-paren">(</span><em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.chn_summary">
+<code class="descname">chn_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.chn_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.climate_mode">
+<code class="descname">climate_mode</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.climate_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.climatestation">
+<code class="descname">climatestation</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.climatestation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.climatestation_meta">
+<code class="descname">climatestation_meta</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.climatestation_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.climatestation_mode">
+<code class="descname">climatestation_mode</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.climatestation_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.closest_stations">
+<code class="descname">closest_stations</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.closest_stations" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns heuristic_stations as jsonifyable dicts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.find_closest_stations">
+<code class="descname">find_closest_stations</code><span class="sig-paren">(</span><em>num_stations=10</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.find_closest_stations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.find_heuristic_stations">
+<code class="descname">find_heuristic_stations</code><span class="sig-paren">(</span><em>num_stations=10</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.find_heuristic_stations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.climate.Climate.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.has_climate">
+<code class="descname">has_climate</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.has_climate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.has_climatestation_mode">
+<code class="descname">has_climatestation_mode</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.has_climatestation_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.heuristic_stations">
+<code class="descname">heuristic_stations</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.heuristic_stations" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns heuristic_stations as dicts</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.input_years">
+<code class="descname">input_years</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.input_years" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_dewpoint">
+<code class="descname">localized_dewpoint</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_dewpoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_p_mean">
+<code class="descname">localized_p_mean</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_p_mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_p_skew">
+<code class="descname">localized_p_skew</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_p_skew" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_p_std">
+<code class="descname">localized_p_std</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_p_std" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_p_wd">
+<code class="descname">localized_p_wd</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_p_wd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_p_ww">
+<code class="descname">localized_p_ww</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_p_ww" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_solrad">
+<code class="descname">localized_solrad</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_solrad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_tmax">
+<code class="descname">localized_tmax</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_tmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.localized_tmin">
+<code class="descname">localized_tmin</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.localized_tmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.Climate.onLoad_refreshStationSelection">
+<code class="descname">onLoad_refreshStationSelection</code><a class="headerlink" href="#wepppy.nodb.climate.Climate.onLoad_refreshStationSelection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.parse_inputs">
+<code class="descname">parse_inputs</code><span class="sig-paren">(</span><em>kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.parse_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.set_future_pars">
+<code class="descname">set_future_pars</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.set_future_pars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.set_localized_pars">
+<code class="descname">set_localized_pars</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.set_localized_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the localized pars.
+must provide named keyword args to avoid mucking this up</p>
+<dl class="docutils">
+<dt>The kwds are coded such that:</dt>
+<dd>0 for station data
+1 for Daymet
+2 for prism</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.set_observed_pars">
+<code class="descname">set_observed_pars</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.set_observed_pars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.set_original_climate_fn">
+<code class="descname">set_original_climate_fn</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.set_original_climate_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the localized pars.
+must provide named keyword args to avoid mucking this up</p>
+<dl class="docutils">
+<dt>The kwds are coded such that:</dt>
+<dd>0 for station data
+1 for Daymet
+2 for prism</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.set_single_storm_pars">
+<code class="descname">set_single_storm_pars</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.set_single_storm_pars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.climate.Climate.sub_summary">
+<code class="descname">sub_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.climate.Climate.sub_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.climate.ClimateMode">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.climate.</code><code class="descname">ClimateMode</code><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.Future">
+<code class="descname">Future</code><em class="property"> = 3</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.Future" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.Localized">
+<code class="descname">Localized</code><em class="property"> = 1</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.Localized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.MultipleObserved">
+<code class="descname">MultipleObserved</code><em class="property"> = 8</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.MultipleObserved" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.Observed">
+<code class="descname">Observed</code><em class="property"> = 2</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.Observed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.ObservedPRISM">
+<code class="descname">ObservedPRISM</code><em class="property"> = 7</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.ObservedPRISM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.Optimized">
+<code class="descname">Optimized</code><em class="property"> = 6</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.Optimized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.Single">
+<code class="descname">Single</code><em class="property"> = 0</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.Single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.SinglePRISM">
+<code class="descname">SinglePRISM</code><em class="property"> = 5</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.SinglePRISM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.SingleStorm">
+<code class="descname">SingleStorm</code><em class="property"> = 4</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.SingleStorm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateMode.Undefined">
+<code class="descname">Undefined</code><em class="property"> = -1</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateMode.Undefined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.climate.ClimateNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.climate.</code><code class="descname">ClimateNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.climate.ClimateNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.climate.ClimateStationMode">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.climate.</code><code class="descname">ClimateStationMode</code><a class="headerlink" href="#wepppy.nodb.climate.ClimateStationMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateStationMode.Closest">
+<code class="descname">Closest</code><em class="property"> = 0</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateStationMode.Closest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateStationMode.Heuristic">
+<code class="descname">Heuristic</code><em class="property"> = 1</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateStationMode.Heuristic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.climate.ClimateStationMode.Undefined">
+<code class="descname">Undefined</code><em class="property"> = -1</em><a class="headerlink" href="#wepppy.nodb.climate.ClimateStationMode.Undefined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.climate.ClimateSummary">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.climate.</code><code class="descname">ClimateSummary</code><a class="headerlink" href="#wepppy.nodb.climate.ClimateSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.landuse">
+<span id="landuse-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">landuse</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.landuse" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.landuse.Landuse">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.landuse.</code><code class="descname">Landuse</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<p>Manager that keeps track of project details
+and coordinates access of NoDb instances.</p>
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.build_managements">
+<code class="descname">build_managements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.build_managements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.chn_iter">
+<code class="descname">chn_iter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.chn_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.chn_summary">
+<code class="descname">chn_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.chn_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.chns_summary">
+<code class="descname">chns_summary</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.chns_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of topaz_id keys and jsonified 
+managements values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.clean">
+<code class="descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.clean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.landuse.Landuse.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.has_landuse">
+<code class="descname">has_landuse</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.has_landuse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.legend">
+<code class="descname">legend</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.legend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.mode">
+<code class="descname">mode</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.modify">
+<code class="descname">modify</code><span class="sig-paren">(</span><em>topaz_ids</em>, <em>landuse</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.modify" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.modify_coverage">
+<code class="descname">modify_coverage</code><span class="sig-paren">(</span><em>dom</em>, <em>cover</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.modify_coverage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.report">
+<code class="descname">report</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of managements sorted by coverage in
+descending order</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.set_mode">
+<code class="descname">set_mode</code><span class="sig-paren">(</span><em>mode</em>, <em>landuse_single_selection</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.set_mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.single_man">
+<code class="descname">single_man</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.single_man" title="Permalink to this definition">¶</a></dt>
+<dd><p>management summary object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.single_selection">
+<code class="descname">single_selection</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.single_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>id of the selected management</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.sub_iter">
+<code class="descname">sub_iter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.sub_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.landuse.Landuse.sub_summary">
+<code class="descname">sub_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.sub_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.Landuse.subs_summary">
+<code class="descname">subs_summary</code><a class="headerlink" href="#wepppy.nodb.landuse.Landuse.subs_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of topaz_id keys and
+management summaries as dicts</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.landuse.LanduseMode">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.landuse.</code><code class="descname">LanduseMode</code><a class="headerlink" href="#wepppy.nodb.landuse.LanduseMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.LanduseMode.Gridded">
+<code class="descname">Gridded</code><em class="property"> = 0</em><a class="headerlink" href="#wepppy.nodb.landuse.LanduseMode.Gridded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.LanduseMode.Single">
+<code class="descname">Single</code><em class="property"> = 1</em><a class="headerlink" href="#wepppy.nodb.landuse.LanduseMode.Single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.landuse.LanduseMode.Undefined">
+<code class="descname">Undefined</code><em class="property"> = -1</em><a class="headerlink" href="#wepppy.nodb.landuse.LanduseMode.Undefined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.landuse.LanduseNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.landuse.</code><code class="descname">LanduseNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.landuse.LanduseNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.ron">
+<span id="ron-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">ron</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.ron" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.ron.Map">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.ron.</code><code class="descname">Map</code><span class="sig-paren">(</span><em>extent</em>, <em>center</em>, <em>zoom</em>, <em>cellsize=30.0</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Map.bounds_str">
+<code class="descname">bounds_str</code><a class="headerlink" href="#wepppy.nodb.ron.Map.bounds_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns extent formatted leaflet</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Map.shape">
+<code class="descname">shape</code><a class="headerlink" href="#wepppy.nodb.ron.Map.shape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Map.ul">
+<code class="descname">ul</code><a class="headerlink" href="#wepppy.nodb.ron.Map.ul" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.ron.Ron">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.ron.</code><code class="descname">Ron</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn='0.cfg'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Ron" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<p>Manager that keeps track of project details
+and coordinates access of NoDb instances.</p>
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.boundary">
+<code class="descname">boundary</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.boundary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.cellsize">
+<code class="descname">cellsize</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.cellsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.center0">
+<code class="descname">center0</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.center0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.ron.Ron.chn_summary">
+<code class="descname">chn_summary</code><span class="sig-paren">(</span><em>topaz_id=None</em>, <em>wepp_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Ron.chn_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.configname">
+<code class="descname">configname</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.configname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.enable_landuse_change">
+<code class="descname">enable_landuse_change</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.enable_landuse_change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.extent">
+<code class="descname">extent</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.extent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.ron.Ron.fetch_dem">
+<code class="descname">fetch_dem</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Ron.fetch_dem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.ron.Ron.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Ron.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.has_dem">
+<code class="descname">has_dem</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.has_dem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.map">
+<code class="descname">map</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.name">
+<code class="descname">name</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.ron.Ron.set_map">
+<code class="descname">set_map</code><span class="sig-paren">(</span><em>extent</em>, <em>center</em>, <em>zoom</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Ron.set_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.ron.Ron.sub_summary">
+<code class="descname">sub_summary</code><span class="sig-paren">(</span><em>topaz_id=None</em>, <em>wepp_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.ron.Ron.sub_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.w3w">
+<code class="descname">w3w</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.w3w" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.ron.Ron.zoom0">
+<code class="descname">zoom0</code><a class="headerlink" href="#wepppy.nodb.ron.Ron.zoom0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.ron.RonNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.ron.</code><code class="descname">RonNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.ron.RonNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.soils">
+<span id="soils-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">soils</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.soils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.soils.Soils">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.soils.</code><code class="descname">Soils</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<p>Manager that keeps track of project details
+and coordinates access of NoDb instances.</p>
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.build">
+<code class="descname">build</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.build_statsgo">
+<code class="descname">build_statsgo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.build_statsgo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.chn_iter">
+<code class="descname">chn_iter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.chn_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.chn_summary">
+<code class="descname">chn_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.chn_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.chns_summary">
+<code class="descname">chns_summary</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.chns_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of topaz_id keys and jsonified soils
+values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.clean">
+<code class="descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.clean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.soils.Soils.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.has_soils">
+<code class="descname">has_soils</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.has_soils" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.legend">
+<code class="descname">legend</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.legend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.mode">
+<code class="descname">mode</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.mode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.report">
+<code class="descname">report</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of managements sorted by coverage in
+descending order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.single_selection">
+<code class="descname">single_selection</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.single_selection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.sub_iter">
+<code class="descname">sub_iter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.sub_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.soils.Soils.sub_summary">
+<code class="descname">sub_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.soils.Soils.sub_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.Soils.subs_summary">
+<code class="descname">subs_summary</code><a class="headerlink" href="#wepppy.nodb.soils.Soils.subs_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a dictionary of topaz_id keys and dictionary soils
+values</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.soils.SoilsMode">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.soils.</code><code class="descname">SoilsMode</code><a class="headerlink" href="#wepppy.nodb.soils.SoilsMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.SoilsMode.Gridded">
+<code class="descname">Gridded</code><em class="property"> = 0</em><a class="headerlink" href="#wepppy.nodb.soils.SoilsMode.Gridded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.SoilsMode.Single">
+<code class="descname">Single</code><em class="property"> = 1</em><a class="headerlink" href="#wepppy.nodb.soils.SoilsMode.Single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.soils.SoilsMode.Undefined">
+<code class="descname">Undefined</code><em class="property"> = -1</em><a class="headerlink" href="#wepppy.nodb.soils.SoilsMode.Undefined" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.soils.SoilsNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.soils.</code><code class="descname">SoilsNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.soils.SoilsNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.topaz">
+<span id="topaz-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">topaz</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.topaz" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.topaz.Outlet">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.topaz.</code><code class="descname">Outlet</code><span class="sig-paren">(</span><em>requested_loc</em>, <em>actual_loc</em>, <em>distance_from_requested</em>, <em>pixel_coords</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Outlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.nodb.topaz.Outlet.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Outlet.as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.topaz.Topaz">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.topaz.</code><code class="descname">Topaz</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<dl class="method">
+<dt id="wepppy.nodb.topaz.Topaz.build_channels">
+<code class="descname">build_channels</code><span class="sig-paren">(</span><em>csa=4</em>, <em>mcl=60</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.build_channels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.topaz.Topaz.build_subcatchments">
+<code class="descname">build_subcatchments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.build_subcatchments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.topaz.Topaz.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.has_channels">
+<code class="descname">has_channels</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.has_channels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.has_outlet">
+<code class="descname">has_outlet</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.has_outlet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.has_subcatchments">
+<code class="descname">has_subcatchments</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.has_subcatchments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.topaz.Topaz.longlat_to_pixel">
+<code class="descname">longlat_to_pixel</code><span class="sig-paren">(</span><em>long</em>, <em>lat</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.longlat_to_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the x,y pixel coords of long, lat</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.outlet">
+<code class="descname">outlet</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.outlet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.topaz.Topaz.set_outlet">
+<code class="descname">set_outlet</code><span class="sig-paren">(</span><em>lng</em>, <em>lat</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.set_outlet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.topaz.Topaz.sub_intersection">
+<code class="descname">sub_intersection</code><span class="sig-paren">(</span><em>extent</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.sub_intersection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.topaz_pass">
+<code class="descname">topaz_pass</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.topaz_pass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.utmextent">
+<code class="descname">utmextent</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.utmextent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.utmproj4">
+<code class="descname">utmproj4</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.utmproj4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.topaz.Topaz.utmzone">
+<code class="descname">utmzone</code><a class="headerlink" href="#wepppy.nodb.topaz.Topaz.utmzone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.topaz.TopazNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.topaz.</code><code class="descname">TopazNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.topaz.TopazNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.unitizer">
+<span id="unitizer-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">unitizer</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.unitizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.unitizer.Unitizer">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.unitizer.</code><code class="descname">Unitizer</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.unitizer.Unitizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<dl class="staticmethod">
+<dt id="wepppy.nodb.unitizer.Unitizer.context_processor_package">
+<em class="property">static </em><code class="descname">context_processor_package</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.unitizer.Unitizer.context_processor_package" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.unitizer.Unitizer.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.unitizer.Unitizer.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.unitizer.Unitizer.preferences">
+<code class="descname">preferences</code><a class="headerlink" href="#wepppy.nodb.unitizer.Unitizer.preferences" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.unitizer.Unitizer.set_preferences">
+<code class="descname">set_preferences</code><span class="sig-paren">(</span><em>kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.unitizer.Unitizer.set_preferences" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.unitizer.UnitizerNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.unitizer.</code><code class="descname">UnitizerNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.unitizer.UnitizerNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.watershed">
+<span id="watershed-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">watershed</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.watershed" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.watershed.Watershed">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.watershed.</code><code class="descname">Watershed</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.watershed.Watershed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.abstract_watershed">
+<code class="descname">abstract_watershed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.abstract_watershed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.centroid">
+<code class="descname">centroid</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.centroid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.chn_iter">
+<code class="descname">chn_iter</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Generator[[wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary, NoneType], NoneType]<a class="headerlink" href="#wepppy.nodb.watershed.Watershed.chn_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.chn_n">
+<code class="descname">chn_n</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.chn_n" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.chn_summary">
+<code class="descname">chn_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span> &#x2192; Generator[[wepppy.watershed_abstraction.watershed_abstraction.ChannelSummary, NoneType], NoneType]<a class="headerlink" href="#wepppy.nodb.watershed.Watershed.chn_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.chns_summary">
+<code class="descname">chns_summary</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.chns_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.fps_summary">
+<code class="descname">fps_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.fps_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.watershed.Watershed.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.get_ws">
+<code class="descname">get_ws</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.get_ws" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.impoundment_n">
+<code class="descname">impoundment_n</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.impoundment_n" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.outlet_top_id">
+<code class="descname">outlet_top_id</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.outlet_top_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.report">
+<code class="descname">report</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.report" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.structure">
+<code class="descname">structure</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.sub_iter">
+<code class="descname">sub_iter</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Generator[[wepppy.watershed_abstraction.watershed_abstraction.HillSummary, NoneType], NoneType]<a class="headerlink" href="#wepppy.nodb.watershed.Watershed.sub_iter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.sub_n">
+<code class="descname">sub_n</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.sub_n" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.sub_summary">
+<code class="descname">sub_summary</code><span class="sig-paren">(</span><em>topaz_id</em><span class="sig-paren">)</span> &#x2192; Dict<a class="headerlink" href="#wepppy.nodb.watershed.Watershed.sub_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.subs_summary">
+<code class="descname">subs_summary</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.subs_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.watershed.Watershed.totalarea">
+<code class="descname">totalarea</code><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.totalarea" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.watershed.Watershed.translator_factory">
+<code class="descname">translator_factory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.watershed.Watershed.translator_factory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.watershed.WatershedNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.watershed.</code><code class="descname">WatershedNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.watershed.WatershedNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.wepp">
+<span id="wepp-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">wepp</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.wepp" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.wepp.BaseflowOpts">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.wepp.</code><code class="descname">BaseflowOpts</code><a class="headerlink" href="#wepppy.nodb.wepp.BaseflowOpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="wepppy.nodb.wepp.BaseflowOpts.contents">
+<code class="descname">contents</code><a class="headerlink" href="#wepppy.nodb.wepp.BaseflowOpts.contents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.BaseflowOpts.parse_inputs">
+<code class="descname">parse_inputs</code><span class="sig-paren">(</span><em>kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.BaseflowOpts.parse_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.wepp.PhosphorusOpts">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.wepp.</code><code class="descname">PhosphorusOpts</code><a class="headerlink" href="#wepppy.nodb.wepp.PhosphorusOpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wepppy.nodb.wepp.PhosphorusOpts.asdict">
+<code class="descname">asdict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.PhosphorusOpts.asdict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.wepp.PhosphorusOpts.contents">
+<code class="descname">contents</code><a class="headerlink" href="#wepppy.nodb.wepp.PhosphorusOpts.contents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.wepp.PhosphorusOpts.isvalid">
+<code class="descname">isvalid</code><a class="headerlink" href="#wepppy.nodb.wepp.PhosphorusOpts.isvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.PhosphorusOpts.parse_inputs">
+<code class="descname">parse_inputs</code><span class="sig-paren">(</span><em>kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.PhosphorusOpts.parse_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wepppy.nodb.wepp.Wepp">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.wepp.</code><code class="descname">Wepp</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.clean">
+<code class="descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.clean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.wepp.Wepp.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.get_log_last">
+<code class="descname">get_log_last</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.get_log_last" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.wepp.Wepp.has_run">
+<code class="descname">has_run</code><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.has_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.log">
+<code class="descname">log</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.log_done">
+<code class="descname">log_done</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.log_done" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.wepp.Wepp.loss_grid_d">
+<code class="descname">loss_grid_d</code><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.loss_grid_d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.make_loss_grid">
+<code class="descname">make_loss_grid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.make_loss_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.parse_inputs">
+<code class="descname">parse_inputs</code><span class="sig-paren">(</span><em>kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.parse_inputs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.prep_hillslopes">
+<code class="descname">prep_hillslopes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.prep_hillslopes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.prep_watershed">
+<code class="descname">prep_watershed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.prep_watershed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.query_sub_val">
+<code class="descname">query_sub_val</code><span class="sig-paren">(</span><em>measure</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.query_sub_val" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.report_chn_watbal">
+<code class="descname">report_chn_watbal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.report_chn_watbal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.report_frq_flood">
+<code class="descname">report_frq_flood</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.report_frq_flood" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.report_hill_watbal">
+<code class="descname">report_hill_watbal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.report_hill_watbal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.report_loss">
+<code class="descname">report_loss</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.report_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.report_return_periods">
+<code class="descname">report_return_periods</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.report_return_periods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.run_hillslopes">
+<code class="descname">run_hillslopes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.run_hillslopes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.run_watershed">
+<code class="descname">run_watershed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.run_watershed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.set_hourly_seepage">
+<code class="descname">set_hourly_seepage</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.set_hourly_seepage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepp.Wepp.set_run_flowpaths">
+<code class="descname">set_run_flowpaths</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.Wepp.set_run_flowpaths" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.wepp.WeppNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.wepp.</code><code class="descname">WeppNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.wepp.WeppNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="wepppy.nodb.wepp.validate_phosphorus_txt">
+<code class="descclassname">wepppy.nodb.wepp.</code><code class="descname">validate_phosphorus_txt</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepp.validate_phosphorus_txt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-wepppy.nodb.wepppost">
+<span id="wepppost-module"></span><h2><code class="xref py py-mod docutils literal notranslate"><span class="pre">wepppost</span></code> Module<a class="headerlink" href="#module-wepppy.nodb.wepppost" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wepppy.nodb.wepppost.WeppPost">
+<em class="property">class </em><code class="descclassname">wepppy.nodb.wepppost.</code><code class="descname">WeppPost</code><span class="sig-paren">(</span><em>wd</em>, <em>cfg_fn</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wepppy.nodb.base.NoDbBase" title="wepppy.nodb.base.NoDbBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">wepppy.nodb.base.NoDbBase</span></code></a></p>
+<p>Manager that keeps track of project details
+and coordinates access of NoDb instances.</p>
+<dl class="method">
+<dt id="wepppy.nodb.wepppost.WeppPost.calc_channel_streamflow">
+<code class="descname">calc_channel_streamflow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.calc_channel_streamflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepppost.WeppPost.calc_hill_streamflow">
+<code class="descname">calc_hill_streamflow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.calc_hill_streamflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="wepppy.nodb.wepppost.WeppPost.dates">
+<code class="descname">dates</code><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.dates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepppost.WeppPost.export_streamflow">
+<code class="descname">export_streamflow</code><span class="sig-paren">(</span><em>fn</em>, <em>source='Channel'</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.export_streamflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="wepppy.nodb.wepppost.WeppPost.getInstance">
+<em class="property">static </em><code class="descname">getInstance</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.getInstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepppost.WeppPost.get_indx">
+<code class="descname">get_indx</code><span class="sig-paren">(</span><em>year</em>, <em>day=None</em>, <em>month=None</em>, <em>julian=None</em><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.get_indx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wepppy.nodb.wepppost.WeppPost.run_post">
+<code class="descname">run_post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPost.run_post" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="wepppy.nodb.wepppost.WeppPostNoDbLockedException">
+<em class="property">exception </em><code class="descclassname">wepppy.nodb.wepppost.</code><code class="descname">WeppPostNoDbLockedException</code><a class="headerlink" href="#wepppy.nodb.wepppost.WeppPostNoDbLockedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wepppy.nodb.mods.html">mods Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="wepppy.nodb.mods.html#id1"><code class="docutils literal notranslate"><span class="pre">mods</span></code> Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wepppy.nodb.mods.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="wepppy.nodb.mods.baer.html">baer Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="wepppy.nodb.mods.baer.html#id1"><code class="docutils literal notranslate"><span class="pre">baer</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wepppy.nodb.mods.baer.html#module-wepppy.nodb.mods.baer.baer"><code class="docutils literal notranslate"><span class="pre">baer</span></code> Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wepppy.nodb.mods.baer.html#module-wepppy.nodb.mods.baer.sbs_map"><code class="docutils literal notranslate"><span class="pre">sbs_map</span></code> Module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="wepppy.nodb.mods.lt.html">lt Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="wepppy.nodb.mods.lt.html#id1"><code class="docutils literal notranslate"><span class="pre">lt</span></code> Package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wepppy.nodb.mods.lt.html#module-wepppy.nodb.mods.lt.lt"><code class="docutils literal notranslate"><span class="pre">lt</span></code> Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">nodb Package</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">nodb</span></code> Package</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.base"><code class="docutils literal notranslate"><span class="pre">base</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.climate"><code class="docutils literal notranslate"><span class="pre">climate</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.landuse"><code class="docutils literal notranslate"><span class="pre">landuse</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.ron"><code class="docutils literal notranslate"><span class="pre">ron</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.soils"><code class="docutils literal notranslate"><span class="pre">soils</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.topaz"><code class="docutils literal notranslate"><span class="pre">topaz</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.unitizer"><code class="docutils literal notranslate"><span class="pre">unitizer</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.watershed"><code class="docutils literal notranslate"><span class="pre">watershed</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.wepp"><code class="docutils literal notranslate"><span class="pre">wepp</span></code> Module</a></li>
+<li><a class="reference internal" href="#module-wepppy.nodb.wepppost"><code class="docutils literal notranslate"><span class="pre">wepppost</span></code> Module</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wepppy.nodb.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Roger Lew, Mariana Dobre.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/wepppy.nodb.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
