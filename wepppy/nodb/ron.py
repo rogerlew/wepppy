@@ -280,6 +280,29 @@ class Ron(NoDbBase):
     #
     # summary
     #
+    def subs_summary(self):
+        wd = self.wd
+        watershed = wepppy.nodb.Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        soils = wepppy.nodb.Soils.getInstance(wd)
+        climate = wepppy.nodb.Climate.getInstance(wd)
+        landuse = wepppy.nodb.Landuse.getInstance(wd)
+
+        summaries = []
+        for wepp_id in translator.iter_wepp_sub_ids():
+            topaz_id = translator.top(wepp=wepp_id)
+
+            summaries.append(
+                dict(meta=dict(hill_type='Hillslope',
+                               topaz_id=topaz_id,
+                               wepp_id=wepp_id),
+                     watershed=watershed.sub_summary(topaz_id),
+                     soil=soils.sub_summary(topaz_id),
+                     climate=climate.sub_summary(topaz_id),
+                     landuse=landuse.sub_summary(topaz_id)))
+
+        return summaries
+
     def sub_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
         watershed = wepppy.nodb.Watershed.getInstance(wd)
@@ -294,7 +317,6 @@ class Ron(NoDbBase):
         if wepp_id is None:
             wepp_id = translator.wepp(top=topaz_id)
 
-            
         return dict(
             meta=dict(hill_type='Hillslope', topaz_id=topaz_id,
                       wepp_id=wepp_id),
@@ -303,7 +325,32 @@ class Ron(NoDbBase):
             climate=climate.sub_summary(topaz_id),
             landuse=landuse.sub_summary(topaz_id)
         )
-        
+
+    def chns_summary(self):
+        wd = self.wd
+        watershed = wepppy.nodb.Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        soils = wepppy.nodb.Soils.getInstance(wd)
+        climate = wepppy.nodb.Climate.getInstance(wd)
+        landuse = wepppy.nodb.Landuse.getInstance(wd)
+
+        summaries = []
+        for wepp_id in translator.iter_wepp_chn_ids():
+            topaz_id = translator.top(wepp=wepp_id)
+            chn_enum = translator.chn_enum(top=topaz_id)
+
+            summaries.append(
+                dict(meta=dict(hill_type='Channel',
+                               topaz_id=topaz_id,
+                               wepp_id=wepp_id,
+                               chn_enum=chn_enum),
+                     watershed=watershed.chn_summary(topaz_id),
+                     soil=soils.chn_summary(topaz_id),
+                     climate=climate.chn_summary(topaz_id),
+                     landuse=landuse.chn_summary(topaz_id)))
+
+        return summaries
+
     def chn_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
         watershed = wepppy.nodb.Watershed.getInstance(wd)

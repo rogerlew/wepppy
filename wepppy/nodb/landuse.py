@@ -324,8 +324,9 @@ class Landuse(NoDbBase):
         if domlc_d is None:
             return None
             
-        if topaz_id in domlc_d:
-            return self.managements[domlc_d[topaz_id]].as_dict()
+        if str(topaz_id) in domlc_d:
+            dom = str(domlc_d[str(topaz_id)])
+            return self.managements[dom].as_dict()
         else:
             return None
 

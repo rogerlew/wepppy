@@ -355,8 +355,8 @@ class Soils(NoDbBase):
         if domsoil_d is None:
             return None
             
-        if topaz_id in domsoil_d:
-            mukey = str(domsoil_d[topaz_id])
+        if str(topaz_id) in domsoil_d:
+            mukey = str(domsoil_d[str(topaz_id)])
             return self.soils[mukey].as_dict()
         else:
             return None

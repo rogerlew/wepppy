@@ -1112,8 +1112,8 @@ class Climate(NoDbBase):
             return None
         
         if self.climate_mode == ClimateMode.Localized:
-            return dict(cli_fn=self.sub_cli_fns[topaz_id],
-                        par_fn=self.sub_par_fns[topaz_id])
+            return dict(cli_fn=self.sub_cli_fns[str(topaz_id)],
+                        par_fn=self.sub_par_fns[str(topaz_id)])
         else:
             return dict(cli_fn=self.cli_fn, par_fn=self.par_fn)
 

@@ -1718,6 +1718,24 @@ def get_wepp_run_status_full(runid):
     except:
         return exception_factory('Error reading status.log')
 
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/report/wepp/prep_details')
+@app.route('/runs/<string:runid>/report/wepp/prep_details/')
+def get_wepp_prep_details(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    try:
+        subcatchments_summary = ron.subs_summary()
+        channels_summary = ron.chns_summary()
+
+        return render_template('reports/wepp/prep_details.htm',
+                               subcatchments_summary=subcatchments_summary,
+                               channels_summary=channels_summary,
+                               user=current_user,
+                               ron=ron)
+    except:
+        return exception_factory('Error building summary')
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/run_wepp', methods=['POST'])
