@@ -605,10 +605,8 @@ POSSIBILITY OF SUCH DAMAGE."""
         
     def _build_description(self):
     
-        source_data = 'Unknown'
-        if isinstance(self.ssurgo_c, SurgoSoilCollection):
-            source_data = 'SSurgo'
-            
+        source_data = self.ssurgo_c.source_data
+
         if self.is_urban or self.is_water:
             self._abbreviated_description()
             return
@@ -819,9 +817,11 @@ Any comments:
         depth = 0.0
         ksat_last = 0.0
         
-        last_valid_i = [i for i, v in enumerate(self.horizons_mask) if v][-1]
-            
+        last_valid_i = [i for i, v in enumerate(self.horizons_mask) if v and not i == self.res_lyr_i][-1]
+
+        total_depth = 0.0
         for i, (h, m) in enumerate(zip(self.horizons, self.horizons_mask)):
+
             if i == self.res_lyr_i:
                 break
                 
@@ -830,20 +830,13 @@ Any comments:
                 continue
             
             hzdepb_r10 = (depth + h.hzdepb_r) * 10.0
-            
+            total_depth += hzdepb_r10
+
             # check if on last layer
-            _i = i + 1
-            
-            if _i < len(self.horizons_mask):
-                while self.horizons_mask[_i] == 0 and _i < len(self.horizons_mask) - 1:
-                    _i += 1
-                
-            if _i == last_valid_i + 1:
-                if hzdepb_r10 < 200.0:
-                    hzdepb_r10 = 200.0
-                else:
-                    # round to nearest 200.0
-                    hzdepb_r10 = round(hzdepb_r10 / 200.0) * 200.0
+            if i == last_valid_i:
+                # make sure the total depth is at least 210 mm
+                if total_depth < 210.0:
+                    hzdepb_r10 = 210.0 - total_depth + hzdepb_r10
                
             s2 = '{hzdepb_r10:0.03f}\t{0.dbthirdbar_r:0.02f}\t{ksat:0.04f}\t'\
                  '{0.anisotropy:0.01f}\t{0.field_cap:0.04f}\t{0.wilt_pt:0.04f}\t'\
@@ -959,8 +952,11 @@ class SurgoSoilCollection(object):
         mukeys = [int(v) for v in mukeys]
         if use_statsgo:
             self.conn = sqlite3.connect(_statsgo_cache_db)
+            self.source_data = 'StatsGo'
         else:
             self.conn = sqlite3.connect(_ssurgo_cache_db)
+            self.source_data = 'Surgo'
+
         self.cur = cur = self.conn.cursor()
         self._initialize_cache_db()
 
@@ -1075,21 +1071,16 @@ class SurgoSoilCollection(object):
         query = 'SELECT {keyname} FROM {table}'.format(keyname=keyname, table=table)
         acquired = [r[0] for r in cur.execute(query)]
 
-        print('acquired',acquired)
-        
         # identify what has previously been attempted and failed
         bad_tbl = 'bad_{table}_{keyname}'\
                   .format(table=table, keyname=keyname)
         query = 'SELECT {keyname} FROM {bad_tbl}'\
                 .format(bad_tbl=bad_tbl, keyname=keyname)
         bad = set([r[0] for r in cur.execute(query)])
-        print('bad',bad)
-        
+
         # identify what needs to be acquired
         needed = set(keys).difference(acquired).difference(bad)
 
-        print('needed',needed)
-        
         # fetch from ssurgo if we needed isn't an empty set
         if len(needed) == 0:
             return 0

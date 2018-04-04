@@ -177,27 +177,6 @@ class Loss(object):
             data.append(dict(zip(hdr, row)))
 
     def _parse_out(self, lines):
-        """
-        Avg.Ann.Precipitation
-        volume in contributing
-        area
-        19640252
-
-        m3 / yr
-        Avg.Ann.irrigation
-        volume in contributing
-        area
-        0
-
-        m3 / yr
-        Avg.Ann.water
-        discharge
-        from outlet
-        53559
-
-        m3 / yr
-        """
-
         data = []
         for L in lines:
             if len(L) == 0:
