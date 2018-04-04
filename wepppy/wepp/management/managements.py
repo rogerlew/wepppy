@@ -1169,18 +1169,24 @@ class ManagementLoopManLoop(object):
     def __init__(self, lines, parent, root):
         self.parent = parent
         self.nycrop = int(lines.pop(0))
-        i = int(lines.pop(0))
-        self.manindx = scenarioReference_factory(i, SectionType.Year, root, self)
+
+        self.manindx = []
+        for j in range(self.nycrop):
+            i = int(lines.pop(0))
+            scn = scenarioReference_factory(i, SectionType.Year, root, self)
+            self.manindx.append(scn)
         
     def _setroot(self, root):
         self.root = root
         self.manindx.root = root
             
     def __str__(self):
-        return """\
-   {0.nycrop} # number of crops per year
-      {0.manindx} # yearly index
-""".format(self)
+        s = ["   {0.nycrop} # number of crops per year".format(self)]
+
+        for scn in self.manindx:
+            s.append("      {} # yearly index".format(scn))
+
+        return '\n'.join(s)
 
 
 class ManagementLoopMan(object):
@@ -1272,6 +1278,7 @@ class ManagementSummary(object):
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
         self.desc = kwargs["Description"]
         self.color = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
+
         self.area = None
 
         self.pct_coverage = None
@@ -1462,7 +1469,7 @@ class Management(object):
         #    - ofes or channels
         # from slowest to fastest
         for i in range(self.man.nrots):
-        
+
             # copy the appropriate ManagementLoopMan
             _man.loops.append(deepcopy(self.man.loops[i]))
             
@@ -1720,6 +1727,19 @@ def get_management(dom) -> Management:
 
 if __name__ == "__main__":
     d = load_map()
+
+    print(d.keys())
+
+    man_sum = get_management_summary(81)
+    print(man_sum.desc)
+
+    m = get_management(81)
+
+    m2 = m.build_multiple_year_man(5)
+    #print(m2)
+
+    import sys
+    sys.exit()
 
     for k in d:
         m = get_management(k)
