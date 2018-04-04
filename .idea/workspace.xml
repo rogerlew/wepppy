@@ -1,144 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="added wepp_id and chn_enum to hillslope report">
-      <change afterPath="$PROJECT_DIR$/doc/Makefile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/environment.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/index.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/modules.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.all_your_base.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.climates.cligen.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.climates.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.export.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.landcover.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.nodb.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.nodb.mods.baer.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.nodb.mods.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.nodb.mods.lt.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.ssurgo.data.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.ssurgo.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.topaz.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.watershed_abstraction.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.webservices.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.wepp.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.wepp.management.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.wepp.out.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.wepp.runner.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.wepp.soilbuilder.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.wepp.stats.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/doctrees/wepppy.weppcloud.doctree" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/.buildinfo" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/.nojekyll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/index.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/modules.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.all_your_base.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.climates.cligen.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.climates.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.export.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.landcover.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.nodb.mods.baer.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.nodb.mods.lt.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.nodb.mods.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.nodb.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.ssurgo.data.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.ssurgo.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.topaz.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.watershed_abstraction.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.webservices.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.wepp.management.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.wepp.out.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.wepp.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.wepp.runner.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.wepp.soilbuilder.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.wepp.stats.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_sources/wepppy.weppcloud.rst.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/ajax-loader.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/alabaster.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/basic.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/comment-bright.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/comment-close.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/comment.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/custom.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/doctools.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/documentation_options.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/down-pressed.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/down.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/file.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/jquery-3.2.1.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/jquery.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/minus.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/plus.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/pygments.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/searchtools.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/underscore-1.3.1.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/underscore.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/up-pressed.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/up.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/_static/websupport.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/genindex.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/modules.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/objects.inv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/py-modindex.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/search.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/searchindex.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.all_your_base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.climates.cligen.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.climates.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.export.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.landcover.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.nodb.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.nodb.mods.baer.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.nodb.mods.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.nodb.mods.lt.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.ssurgo.data.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.ssurgo.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.topaz.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.watershed_abstraction.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.webservices.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.wepp.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.wepp.management.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.wepp.out.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.wepp.runner.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.wepp.soilbuilder.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.wepp.stats.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/build/html/wepppy.weppcloud.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/generate_modules.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/make.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/conf.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/index.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/modules.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/modules.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.all_your_base.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.climates.cligen.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.climates.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.export.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.landcover.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.nodb.mods.baer.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.nodb.mods.lt.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.nodb.mods.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.nodb.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.ssurgo.data.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.ssurgo.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.topaz.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.watershed_abstraction.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.webservices.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.wepp.management.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.wepp.out.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.wepp.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.wepp.runner.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.wepp.soilbuilder.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.wepp.stats.rst" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/source/wepppy.weppcloud.rst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/weppdev.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/wepppy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/wepppy.iml" afterDir="false" />
+    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/prep.htm" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/prep_details.htm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wepppy/nodb/climate.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/climate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/wepp.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/wepp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/nodb/landuse.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/landuse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/nodb/ron.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/ron.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/nodb/soils.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/soils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/nodb/watershed.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/watershed.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -148,18 +21,19 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/wepppy$managements.coverage" NAME="managements Coverage Results" MODIFIED="1521838335723" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management" />
+    <SUITE FILE_PATH="coverage/wepppy$managements.coverage" NAME="managements Coverage Results" MODIFIED="1522803798326" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management" />
     <SUITE FILE_PATH="coverage/wepppy$prism_climate_revision.coverage" NAME="prism_climate_revision Coverage Results" MODIFIED="1519069796248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts/test2" />
     <SUITE FILE_PATH="coverage/wepppy$channel_watbal.coverage" NAME="channel_watbal Coverage Results" MODIFIED="1522554510260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
     <SUITE FILE_PATH="coverage/wepppy$wepppost.coverage" NAME="wepppost Coverage Results" MODIFIED="1522609369798" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
     <SUITE FILE_PATH="coverage/wepppy$ebe.coverage" NAME="ebe Coverage Results" MODIFIED="1522433605591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
+    <SUITE FILE_PATH="coverage/wepppy$validate.coverage" NAME="validate Coverage Results" MODIFIED="1522804136128" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management/tests" />
     <SUITE FILE_PATH="coverage/wepppy$set_wd.coverage" NAME="set_wd Coverage Results" MODIFIED="1522353489135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
     <SUITE FILE_PATH="coverage/wepppy$test3.coverage" NAME="test3 Coverage Results" MODIFIED="1519070666543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/tests/test2" />
     <SUITE FILE_PATH="coverage/wepppy$summary.coverage" NAME="summary Coverage Results" MODIFIED="1522547538003" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
     <SUITE FILE_PATH="coverage/wepppy$watershed.coverage" NAME="watershed Coverage Results" MODIFIED="1522737368795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/validation" />
     <SUITE FILE_PATH="coverage/wepppy$watsed_aggregator.coverage" NAME="watsed_aggregator Coverage Results" MODIFIED="1522384905276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
     <SUITE FILE_PATH="coverage/wepppy$return_periods.coverage" NAME="return_periods Coverage Results" MODIFIED="1522433627187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1522699678400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
+    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1522818721616" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
     <SUITE FILE_PATH="coverage/wepppy$loss.coverage" NAME="loss Coverage Results" MODIFIED="1522525026100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
     <SUITE FILE_PATH="coverage/wepppy$test.coverage" NAME="test Coverage Results" MODIFIED="1522625259878" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
     <SUITE FILE_PATH="coverage/wepppy$scripted_run.coverage" NAME="scripted_run Coverage Results" MODIFIED="1519756361111" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
@@ -172,78 +46,34 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="wepp.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/nodb/wepp.py">
+      <file leaf-file-name="app.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="403">
+              <caret line="1730" selection-start-line="1730" selection-end-line="1730" />
+              <folding>
+                <element signature="e#18#27#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="landuse.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/nodb/landuse.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="346">
+              <caret line="327" column="45" selection-start-line="327" selection-start-column="45" selection-end-line="327" selection-end-column="45" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ron.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/nodb/ron.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="18">
-              <caret line="675" column="41" selection-start-line="675" selection-start-column="41" selection-end-line="675" selection-end-column="41" />
+              <caret line="282" column="20" lean-forward="true" selection-start-line="282" selection-start-column="20" selection-end-line="282" selection-end-column="20" />
               <folding>
-                <element signature="e#19#28#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Makefile" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/doc/Makefile">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="make.bat" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/doc/make.bat">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="11" column="21" lean-forward="true" selection-start-line="11" selection-start-column="21" selection-end-line="11" selection-end-column="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="devnotes.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="128" lean-forward="true" selection-start-line="128" selection-end-line="131" selection-end-column="61" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="build_instructions.md" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/doc/build_instructions.md">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="5" column="3" lean-forward="true" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="index.rst" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/doc/source/index.rst">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="21" selection-start-line="21" selection-end-line="21" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="generate_modules.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/doc/generate_modules.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="158">
-              <caret line="238" column="119" selection-start-line="238" selection-start-column="119" selection-end-line="238" selection-end-column="119" />
-              <folding>
-                <element signature="e#1097#1106#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="conf.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/doc/source/conf.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="17" column="13" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
-              <folding>
-                <element signature="e#564#573#0" expanded="true" />
+                <element signature="e#21#30#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -252,8 +82,8 @@
       <file leaf-file-name="climate.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17208">
-              <caret line="980" column="35" selection-start-line="980" selection-start-column="35" selection-end-line="980" selection-end-column="35" />
+            <state relative-caret-position="562">
+              <caret line="1128" column="34" lean-forward="true" selection-start-line="1128" selection-start-column="34" selection-end-line="1128" selection-end-column="34" />
               <folding>
                 <element signature="e#19#28#0" expanded="true" />
               </folding>
@@ -261,16 +91,75 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="watershed.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/validation/watershed.py">
+      <file leaf-file-name="prep_details.htm" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/prep_details.htm">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2574">
-              <caret line="158" selection-start-line="158" selection-end-line="158" />
+            <state relative-caret-position="234">
+              <caret line="93" column="38" selection-start-line="93" selection-start-column="38" selection-end-line="93" selection-end-column="38" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#447#453#1#HTML" expanded="true" />
+                <element signature="e#469#475#1#HTML" expanded="true" />
+                <element signature="e#636#642#1#HTML" expanded="true" />
+                <element signature="e#658#664#1#HTML" expanded="true" />
+                <element signature="e#680#686#1#HTML" expanded="true" />
+                <element signature="e#636#642#1#HTML" expanded="true" />
+                <element signature="e#1191#1198#1#HTML" expanded="true" />
+                <element signature="e#1415#1422#1#HTML" expanded="true" />
+                <element signature="e#1801#1807#1#HTML" expanded="true" />
+                <element signature="e#1823#1829#1#HTML" expanded="true" />
+                <element signature="e#1845#1851#1#HTML" expanded="true" />
+                <element signature="e#1982#1988#1#HTML" expanded="true" />
+                <element signature="e#2004#2010#1#HTML" expanded="true" />
+                <element signature="e#2026#2032#1#HTML" expanded="true" />
+                <element signature="e#2048#2054#1#HTML" expanded="true" />
+                <element signature="e#2070#2076#1#HTML" expanded="true" />
+                <element signature="e#2092#2098#1#HTML" expanded="true" />
+                <element signature="e#2860#2867#1#HTML" expanded="true" />
+                <element signature="e#3088#3095#1#HTML" expanded="true" />
               </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="prep.htm" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/prep.htm">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="90">
+              <caret line="5" column="6" selection-start-line="5" selection-start-column="6" selection-end-line="5" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="0.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/0.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="331">
+              <caret line="40" column="25" selection-start-line="40" selection-start-column="25" selection-end-line="40" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="wepp.htm" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp.htm">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="662">
+              <caret line="71" column="30" lean-forward="true" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="wepp_reports.htm" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret lean-forward="true" selection-end-line="15" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="unitizer.htm" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/unitizer.htm">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -285,19 +174,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>if user</find>
-      <find>prep</find>
-      <find>run_hourly_seepage</find>
-      <find>flowpath</find>
-      <find>wepp</find>
-      <find>in _</find>
-      <find>in</find>
-      <find>Wepp</find>
-      <find>run_wat</find>
-      <find>self.area</find>
-      <find>areas</find>
-      <find>chn_daily</find>
-      <find>daily_iter</find>
       <find>chn_header</find>
       <find>daily_outlet_iter</find>
       <find>daily</find>
@@ -315,6 +191,19 @@
       <find>_build_climate_multiple_observed</find>
       <find>print</find>
       <find>txt</find>
+      <find>multiple</find>
+      <find>get_management</find>
+      <find>build_multiple_year_man</find>
+      <find>ManagementLoopManLoop</find>
+      <find>build_mult</find>
+      <find>ManagementLoo</find>
+      <find>ManagementSummary</find>
+      <find />
+      <find>status</find>
+      <find>_x_summary</find>
+      <find>wepp/log</find>
+      <find>summary</find>
+      <find>th</find>
     </findStrings>
     <replaceStrings>
       <replace>hill_</replace>
@@ -323,14 +212,14 @@
       <replace>dominant</replace>
       <replace>Dominant</replace>
       <replace>rilcov</replace>
-      <replace>if os.path.abspath(wd) != os.path.abspath(db.wd):</replace>
+      <replace />
       <replace>lateral_flow</replace>
-      <replace>if getattr(self, 'run_flowpaths', False):</replace>
+      <replace />
       <replace>[]</replace>
       <replace>chn_header</replace>
       <replace>np.zeros(m)</replace>
       <replace>chn_daily</replace>
-      <replace>from .report_base import ReportBase</replace>
+      <replace />
       <replace>chn_rpt</replace>
       <replace>topaz_wd</replace>
       <replace>export_dir</replace>
@@ -338,6 +227,7 @@
       <replace>hill_rpt</replace>
       <replace>WeppPost</replace>
       <replace>hourly_seepage</replace>
+      <replace>td</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/wepppy</dir>
@@ -349,14 +239,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/static/css/style.css" />
-        <option value="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" />
-        <option value="$PROJECT_DIR$/wepppy/wepp/out/loss.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/frq.htm" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/chn_yearly_watbal.htm" />
-        <option value="$PROJECT_DIR$/wepppy/wepp/stats/return_periods.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/return_periods.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/frq_flood.htm" />
         <option value="$PROJECT_DIR$/wepppy/wepp/stats/report_base.py" />
         <option value="$PROJECT_DIR$/wepppy/wepp/stats/frq_flood.py" />
@@ -376,15 +258,12 @@
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/_page_container.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/daily_streamflow_graph.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp.htm" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" />
         <option value="$PROJECT_DIR$/wepppy/_scripts/test.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/app.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/soil.htm" />
         <option value="$PROJECT_DIR$/wepppy/wepp/runner/templates/watershed.template" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/hill.htm" />
         <option value="$PROJECT_DIR$/wepppy/watershed_abstraction/wepp_top_translator.py" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/ron.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/wepppost.py" />
         <option value="$PROJECT_DIR$/wepppy/wepp/runner/wepp_runner.py" />
         <option value="$PROJECT_DIR$/wepppy/climates/cligen_client.py" />
@@ -392,7 +271,6 @@
         <option value="$PROJECT_DIR$/wepppy/wepp/stats/hillslope_watbal.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/lt/lt.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/wepp.py" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/climate.py" />
         <option value="$PROJECT_DIR$/doc/conf.py" />
         <option value="$PROJECT_DIR$/doc/source/conf.py" />
         <option value="$PROJECT_DIR$/doc/generate_modules.py" />
@@ -400,6 +278,18 @@
         <option value="$PROJECT_DIR$/doc/Makefile" />
         <option value="$PROJECT_DIR$/wepppy/devnotes.txt" />
         <option value="$PROJECT_DIR$/doc/build_instructions.txt" />
+        <option value="$PROJECT_DIR$/wepppy/wepp/management/managements.py" />
+        <option value="$PROJECT_DIR$/wepppy/wepp/management/data/map.json" />
+        <option value="$PROJECT_DIR$/wepppy/wepp/management/tests/validate.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/soils.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/landuse.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/watershed.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/climate.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/app.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/ron.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/prep.htm" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/prep_details.htm" />
       </list>
     </option>
   </component>
@@ -435,8 +325,34 @@
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="doc" type="462c0819:PsiDirectoryNode" />
-              <item name="build" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="nodb" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="controls" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -464,7 +380,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.watershed">
+  <component name="RunManager" selected="Python.app">
     <configuration name="app" type="PythonConfigurationType" factoryName="Python">
       <module name="wepppy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -484,7 +400,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="channel_watbal" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="managements" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="wepppy" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -492,31 +408,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wepppy/wepp/stats" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wepppy/wepp/management" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/wepp/stats/channel_watbal.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
-    <configuration name="hillslope_watbal" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="wepppy" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wepppy/wepp/stats" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/wepp/stats/hillslope_watbal.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/wepp/management/managements.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -536,6 +433,25 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/_scripts/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="validate" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="wepppy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wepppy/wepp/management/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/wepp/management/tests/validate.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -601,19 +517,19 @@
     <list>
       <item itemvalue="Python.wepppy" />
       <item itemvalue="Python.app" />
-      <item itemvalue="Python.hillslope_watbal" />
-      <item itemvalue="Python.channel_watbal" />
       <item itemvalue="Python.wepppost" />
       <item itemvalue="Python.test" />
       <item itemvalue="Python.watershed" />
+      <item itemvalue="Python.managements" />
+      <item itemvalue="Python.validate" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.validate" />
+        <item itemvalue="Python.managements" />
         <item itemvalue="Python.watershed" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.wepppost" />
-        <item itemvalue="Python.hillslope_watbal" />
-        <item itemvalue="Python.channel_watbal" />
       </list>
     </recent_temporary>
   </component>
@@ -656,19 +572,19 @@
       <option name="project" value="LOCAL" />
       <updated>1522785713296</updated>
     </task>
-    <task id="LOCAL-00005" summary="readme">
-      <created>1521575105089</created>
+    <task id="LOCAL-00005" summary="sphinx-doc">
+      <created>1522785991512</created>
       <option name="number" value="00005" />
       <option name="presentableId" value="LOCAL-00005" />
       <option name="project" value="LOCAL" />
-      <updated>1521575105089</updated>
+      <updated>1522785991512</updated>
     </task>
-    <task id="LOCAL-00006" summary="https">
-      <created>1521671541329</created>
+    <task id="LOCAL-00006" summary="fix #54">
+      <created>1522805212409</created>
       <option name="number" value="00006" />
       <option name="presentableId" value="LOCAL-00006" />
       <option name="project" value="LOCAL" />
-      <updated>1521671541329</updated>
+      <updated>1522805212409</updated>
     </task>
     <task id="LOCAL-00007" summary="https">
       <created>1521671555154</created>
@@ -873,20 +789,21 @@
       <option name="project" value="LOCAL" />
       <updated>1522646381243</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="43" y="25" width="1877" height="968" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="11" weight="0.028742515" />
       <window_info anchor="bottom" id="Python Console" order="8" weight="0.18802395" />
-      <window_info anchor="bottom" x="43" y="57" width="1877" height="936" id="Run" order="2" type="WINDOWED" weight="0.03410475" />
-      <window_info anchor="bottom" id="Terminal" order="9" visible="true" weight="0.33293414" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26324412" />
+      <window_info active="true" anchor="bottom" x="43" y="57" width="1877" height="936" id="Run" order="2" type="WINDOWED" visible="true" weight="0.03410475" />
+      <window_info anchor="bottom" id="Terminal" order="9" visible="true" weight="0.11017964" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26324412" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="4" weight="0.32982844" />
       <window_info anchor="right" id="SciView" order="5" weight="0.32982844" />
@@ -938,8 +855,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="https" />
-    <MESSAGE value="https google maps" />
     <MESSAGE value="lt-fire paths" />
     <MESSAGE value="lt-fire path fix" />
     <MESSAGE value="lt-fire no upload control" />
@@ -963,7 +878,9 @@
     <MESSAGE value="fix #50" />
     <MESSAGE value="#50 catch failed climate build" />
     <MESSAGE value="sphinx doc" />
-    <option name="LAST_COMMIT_MESSAGE" value="sphinx doc" />
+    <MESSAGE value="sphinx-doc" />
+    <MESSAGE value="fix #54" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix #54" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -971,114 +888,13 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/return_periods.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" column="10" lean-forward="true" selection-start-line="18" selection-start-column="2" selection-end-line="20" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="24" column="8" lean-forward="true" selection-start-line="24" selection-start-column="8" selection-end-line="31" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/observed.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="63" column="11" selection-start-line="63" selection-start-column="11" selection-end-line="63" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/topaz/topaz.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="232">
-          <caret line="739" lean-forward="true" selection-start-line="739" selection-end-line="739" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="45" lean-forward="true" selection-start-line="1" selection-start-column="45" selection-end-line="1" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/log.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/frq_flood.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="603">
-          <caret line="37" column="28" lean-forward="true" selection-start-line="37" selection-start-column="28" selection-end-line="37" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="553">
-          <caret line="191" column="10" lean-forward="true" selection-start-line="191" selection-start-column="10" selection-end-line="191" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/all_your_base/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="442" column="30" lean-forward="true" selection-start-line="442" selection-start-column="30" selection-end-line="442" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#51#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/summary.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="35" selection-end-line="8" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="14" column="40" selection-start-line="14" selection-start-column="40" selection-end-line="14" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/runner/templates/hillslope.template">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="21" column="44" lean-forward="true" selection-start-line="21" selection-start-column="44" selection-end-line="21" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/soils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="615">
-          <caret line="153" column="30" selection-start-line="153" selection-start-column="30" selection-end-line="153" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/topaz.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="59" column="35" selection-start-line="59" selection-start-column="33" selection-end-line="59" selection-end-column="35" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="590">
           <caret line="47" column="1" lean-forward="true" selection-start-line="47" selection-start-column="1" selection-end-line="47" selection-end-column="1" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1110,13 +926,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/0.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="41" column="9" lean-forward="true" selection-start-line="41" selection-start-column="9" selection-end-line="41" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="361">
@@ -1138,13 +947,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="662">
-          <caret line="71" column="30" lean-forward="true" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="52182">
@@ -1152,34 +954,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="35658">
-          <caret line="2049" column="41" selection-start-line="2049" selection-start-column="41" selection-end-line="2049" selection-end-column="41" />
-          <folding>
-            <element signature="e#18#27#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/hill.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="3" column="65" selection-start-line="3" selection-start-column="65" selection-end-line="3" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/watershed_abstraction/wepp_top_translator.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2574">
           <caret line="143" selection-start-line="143" selection-end-line="143" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/ron.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5580">
-          <caret line="330" selection-start-line="330" selection-end-line="330" />
         </state>
       </provider>
     </entry>
@@ -1221,6 +999,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="42">
           <caret line="161" column="137" selection-start-line="161" selection-start-column="137" selection-end-line="161" selection-end-column="137" />
+          <folding>
+            <element signature="e#0#33#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1228,6 +1009,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="747">
           <caret line="69" selection-start-line="69" selection-end-line="69" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1271,16 +1055,6 @@
           <caret line="158" selection-start-line="158" selection-end-line="158" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17208">
-          <caret line="980" column="35" selection-start-line="980" selection-start-column="35" selection-end-line="980" selection-end-column="35" />
-          <folding>
-            <element signature="e#19#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1344,6 +1118,171 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="5" column="3" lean-forward="true" selection-start-line="5" selection-start-column="3" selection-end-line="5" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/runner/templates/hillslope.template">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="440">
+          <caret line="28" column="44" lean-forward="true" selection-start-line="28" selection-start-column="44" selection-end-line="28" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/management/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="40" lean-forward="true" selection-start-line="2" selection-start-column="40" selection-end-line="2" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/management/managements.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="1685" column="52" selection-start-line="1685" selection-start-column="35" selection-end-line="1685" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/management/data/map.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="372">
+          <caret line="49" column="47" selection-start-line="49" selection-start-column="47" selection-end-line="49" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/management/tests/validate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="25" selection-end-line="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/hill.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="619">
+          <caret line="53" column="15" selection-start-line="2" selection-start-column="4" selection-end-line="53" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/watershed.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="655">
+          <caret line="236" column="32" lean-forward="true" selection-start-line="236" selection-start-column="32" selection-end-line="236" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/soils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="328">
+          <caret line="357" column="24" selection-start-line="357" selection-start-column="24" selection-end-line="357" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/landuse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="327" column="45" selection-start-line="327" selection-start-column="45" selection-end-line="327" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="562">
+          <caret line="1128" column="34" lean-forward="true" selection-start-line="1128" selection-start-column="34" selection-end-line="1128" selection-end-column="34" />
+          <folding>
+            <element signature="e#19#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="403">
+          <caret line="1730" selection-start-line="1730" selection-end-line="1730" />
+          <folding>
+            <element signature="e#18#27#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/ron.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="282" column="20" lean-forward="true" selection-start-line="282" selection-start-column="20" selection-end-line="282" selection-end-column="20" />
+          <folding>
+            <element signature="e#21#30#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="662">
+          <caret line="71" column="30" lean-forward="true" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/unitizer.htm">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret lean-forward="true" selection-end-line="15" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/prep.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="5" column="6" selection-start-line="5" selection-start-column="6" selection-end-line="5" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/0.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="331">
+          <caret line="40" column="25" selection-start-line="40" selection-start-column="25" selection-end-line="40" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/prep_details.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="93" column="38" selection-start-line="93" selection-start-column="38" selection-end-line="93" selection-end-column="38" />
+          <folding>
+            <element signature="e#447#453#1#HTML" expanded="true" />
+            <element signature="e#469#475#1#HTML" expanded="true" />
+            <element signature="e#636#642#1#HTML" expanded="true" />
+            <element signature="e#658#664#1#HTML" expanded="true" />
+            <element signature="e#680#686#1#HTML" expanded="true" />
+            <element signature="e#636#642#1#HTML" expanded="true" />
+            <element signature="e#1191#1198#1#HTML" expanded="true" />
+            <element signature="e#1415#1422#1#HTML" expanded="true" />
+            <element signature="e#1801#1807#1#HTML" expanded="true" />
+            <element signature="e#1823#1829#1#HTML" expanded="true" />
+            <element signature="e#1845#1851#1#HTML" expanded="true" />
+            <element signature="e#1982#1988#1#HTML" expanded="true" />
+            <element signature="e#2004#2010#1#HTML" expanded="true" />
+            <element signature="e#2026#2032#1#HTML" expanded="true" />
+            <element signature="e#2048#2054#1#HTML" expanded="true" />
+            <element signature="e#2070#2076#1#HTML" expanded="true" />
+            <element signature="e#2092#2098#1#HTML" expanded="true" />
+            <element signature="e#2860#2867#1#HTML" expanded="true" />
+            <element signature="e#3088#3095#1#HTML" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

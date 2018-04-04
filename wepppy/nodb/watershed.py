@@ -182,8 +182,8 @@ class Watershed(NoDbBase):
         if self._subs_summary is None:
             return None
             
-        if topaz_id in self._subs_summary:
-            return self._subs_summary[topaz_id].as_dict()
+        if str(topaz_id) in self._subs_summary:
+            return self._subs_summary[str(topaz_id)].as_dict()
         else:
             return None
 
@@ -218,8 +218,11 @@ class Watershed(NoDbBase):
                 yield topaz_id, v
                 
     def chn_summary(self, topaz_id) -> Generator[ChannelSummary, None, None]:
-        return self._chns_summary[topaz_id].as_dict()
-        
+        if str(topaz_id) in self._chns_summary:
+            return self._chns_summary[str(topaz_id)].as_dict()
+        else:
+            return None
+
     @property
     def chns_summary(self) -> Dict[str, Dict]:
         return {k: v.as_dict() for k, v in self._chns_summary.items()}
