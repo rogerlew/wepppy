@@ -40,12 +40,12 @@
       {% if d.landuse.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.landuse.desc }} (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
+      <td>{{ d.landuse.desc }} (<a href="../../../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
       {% endif %}
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.soil.desc }} (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      <td>{{ d.soil.desc }} (<a href="../../../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
       {% endif %}
     </tr>
     {% endfor %}
@@ -99,14 +99,14 @@
       {% if d.landuse.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.landuse.desc }} (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
+      <td>{{ d.landuse.desc }} (<a href="../../../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
       {% endif %}
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.soil.desc }} (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      <td>{{ d.soil.desc }} (<a href="../../../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
       {% endif %}
-      <td><a href="../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></td>
+      <td><a href="../../../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></td>
     </tr>
     {% endfor %}
   </tbody>
