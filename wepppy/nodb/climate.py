@@ -68,11 +68,10 @@ class Climate(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            self._input_years = 1
+            self._input_years = 5
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
             self._climate_mode = ClimateMode.Undefined
-            self._input_years = 1  # in years
             self._cligen_seed = None
             self._localized_p_mean = 2  # 012
             self._localized_p_std = 0  # 01
