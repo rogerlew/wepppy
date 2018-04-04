@@ -61,12 +61,20 @@ class Test_SurgoSoilCollection(unittest.TestCase):
 
         assert valid == []
 
+    def test_03_min_depth(self):
+        mukeys = [1652031]
+
+        surgo_c = SurgoSoilCollection(mukeys)
+        surgo_c.makeWeppSoils(verbose=True)
+
+        surgo_c.writeWeppSoils(_join(_thisdir, 'testsoils'))
+
 
 class Test_StatsgoSpatial_mukeys(unittest.TestCase):
     def test_01(self):
         statsgospatial = StatsgoSpatial()
         mukey = statsgospatial.identify_mukey_point(-115.201226, 45.372097)
-        surgo_c = SurgoSoilCollection([mukey])
+        surgo_c = SurgoSoilCollection([mukey], use_statsgo=True)
         surgo_c.makeWeppSoils(verbose=True)
         surgo_c.writeWeppSoils(_join(_thisdir, 'testsoils'))
         valid = surgo_c.getValidWeppSoils()
