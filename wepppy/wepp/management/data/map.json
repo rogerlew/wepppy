@@ -47,7 +47,7 @@
 "110": {"Key": 110, "Color": [255,148,218,255], "Description": "Tahoe Prescribed Fire", "ManagementFile": "Tahoe/Tahoe_Prescribed_Fire.man"},
 "111": {"Key": 111, "Color": [85,170,170,255],  "Description": "Tahoe Skid Trail", "ManagementFile": "Tahoe/Tahoe_Skid_Trail.man"},
 "112": {"Key": 112, "Color": [94,60,88,255],    "Description": "Tahoe Yr1 Recovery After Fire", "ManagementFile": "Tahoe/Yr_1_Recovery_After_Fire.man"},
-"113": {"Key": 113, "Color": [175,176,100],     "Description": "Tahoe Yr1 Recovery After Thinning", "ManagementFile": "Tahoe/Yr_1_Recovery_After_Thinning.man"},
+"113": {"Key": 113, "Color": [175,176,100,255], "Description": "Tahoe Yr1 Recovery After Thinning", "ManagementFile": "Tahoe/Yr_1_Recovery_After_Thinning.man"},
 "114": {"Key": 114, "Color": [92,89,109,255],   "Description": "Tahoe Yr2 Recovery After Fire", "ManagementFile": "Tahoe/Yr_2_Recovery_After_Fire.man"},
 "115": {"Key": 115, "Color": [0,255,197,255],   "Description": "Tahoe Skyline/Cable Thinning", "ManagementFile": "Tahoe/Cable_Thinning_93_Cover.man"},
 "116": {"Key": 116, "Color": [0,255,197,255],   "Description": "Tahoe Forwarder Thinning", "ManagementFile": "Tahoe/Forward_Thinning_90_Cover.man"},

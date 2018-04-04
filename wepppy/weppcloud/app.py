@@ -2039,7 +2039,16 @@ def report_ron_chn_summary(runid, topaz_id):
     ron = Ron.getInstance(wd)
     return render_template('reports/hill.htm',
                            d=ron.chn_summary(topaz_id))
-    
+
+@app.route('/runs/<string:runid>/query/topaz_wepp_map')
+@app.route('/runs/<string:runid>/query/topaz_wepp_map/')
+def query_topaz_wepp_map(runid):
+    wd = get_wd(runid)
+    translator = Watershed.getInstance(wd).translator_factory()
+
+    d = dict([(wepp, translator.top(wepp=wepp)) for wepp in translator.iter_wepp_sub_ids()])
+
+    return jsonify(d)
     
 @app.route('/runs/<string:runid>/report/sub_summary/<topaz_id>')
 @app.route('/runs/<string:runid>/report/sub_summary/<topaz_id>/')
