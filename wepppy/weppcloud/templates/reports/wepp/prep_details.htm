@@ -1,0 +1,114 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_content %}
+<h2>WEPP Preparation Details</h2>
+<h5>Subcatchments</h5>
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>TopazID</th>
+      <th>WeppID</th>
+      <th>Width</th>
+      <th>Length</th>
+      <th>Area</th>
+      <th>Slope</th>
+      <th>Aspect</th>
+      <th>Dominant Landuse</th>
+      <th>Dominant Soil</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>{{ unitizer_units("m") | safe }}</td>
+      <td>{{ unitizer_units("m") | safe }}</td>
+      <td>{{ unitizer_units("ha") | safe }}</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    {% for d in subcatchments_summary %}
+    <tr>
+      <td>{{ d.meta.topaz_id }}</td>
+      <td>{{ d.meta.wepp_id }}</td>
+      <td>{{ unitizer(d.watershed.width,"m")  | safe }}</td>
+      <td>{{ unitizer(d.watershed.length,"m") | safe }}</td>
+      <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
+      <td>{{ d.watershed.slope_scalar|round(3) }}</td>
+      <td>{{ d.watershed.aspect|round(0) }}</td>
+      {% if d.landuse.desc is not defined %}
+      <td>&mdash;</td>
+      {% else %}
+      <td>{{ d.landuse.desc }} (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
+      {% endif %}
+      {% if d.soil.desc is not defined %}
+      <td>&mdash;</td>
+      {% else %}
+      <td>{{ d.soil.desc }} (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<br/>
+<h5>Channels</h5>
+<table class="table table-condensed">
+  <thead>
+    <tr>
+      <th>TopazID</th>
+      <th>WeppID</th>
+      <th>ChnEnum</th>
+      <th>Cell Width</th>
+      <th>Order</th>
+      <th>Length</th>
+      <th>Area</th>
+      <th>Slope</th>
+      <th>Aspect</th>
+      <th>Dominant Landuse</th>
+      <th>Dominant Soil</th>
+      <th>Channel Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>px</td>
+      <td>{{ unitizer_units("m") | safe }}</td>
+      <td>{{ unitizer_units("ha") | safe }}</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    {% for d in channels_summary %}
+    <tr>
+      <td>{{ d.meta.topaz_id }}</td>
+      <td>{{ d.meta.wepp_id }}</td>
+      <td>{{ d.meta.chn_enum }}</td>
+      <td>{{ d.watershed.cell_width }}</td>
+      <td>{{ d.watershed.order }}</td>
+      <td>{{ unitizer(d.watershed.length,"m") | safe }}</td>
+      <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
+      <td>{{ d.watershed.slope_scalar|round(3) }}</td>
+      <td>{{ d.watershed.aspect|round(0) }}</td>
+      {% if d.landuse.desc is not defined %}
+      <td>&mdash;</td>
+      {% else %}
+      <td>{{ d.landuse.desc }} (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
+      {% endif %}
+      {% if d.soil.desc is not defined %}
+      <td>&mdash;</td>
+      {% else %}
+      <td>{{ d.soil.desc }} (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      {% endif %}
+      <td><a href="../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
