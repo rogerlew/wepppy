@@ -63,7 +63,7 @@ class TotalWatSed(object):
             d['Aquifer Losses (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.dscoeff)
             d['Reservoir Volume (mm)'].append(d['Reservoir Volume (mm)'][-1] -
                                               d['Baseflow (mm)'][-1] +
-                                              d['Percolation (mm)'][-1] +
+                                              d['Percolation (mm)'][-1] -
                                               d['Aquifer Losses (mm)'][-1])
             d['Baseflow (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.bfcoeff)
 
