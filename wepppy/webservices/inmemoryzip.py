@@ -1,4 +1,3 @@
-
 # https://stackoverflow.com/a/2463818/2371135
 import zipfile
 import StringIO
