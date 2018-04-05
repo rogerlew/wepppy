@@ -1,11 +1,10 @@
+# Copyright (c) 2016-2018, University of Idaho
+# All rights reserved.
 #
-# wepppy.wepp.management
+# Roger Lew (rogerlew.gmail.com)
 #
-# Author: Roger Lew
-#         rogerlew@gmail.com
-#
-# License: BSD Clause-3
-#
+# The project described was supported by NSF award number IIA-1301792
+# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 """
 Provides functionality for reading and manipulating WEPP management files
