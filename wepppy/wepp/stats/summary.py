@@ -50,8 +50,7 @@ class ChannelSummary(ReportBase):
             'Sediment Yield (tonne)',
             'Soil Loss (kg)',
             'Upland Charge (m^3)',
-            'Subsuface Volume (m^3)',
-            'Flow Phosphorus (m^3)',
+            'Subsuface Flow Volume (m^3)',
             'Solub. React. P Density (kg/ha)',
             'Particulate P Density (kg/ha)',
             'Total P Density (kg/ha)'

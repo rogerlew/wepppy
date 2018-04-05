@@ -12,9 +12,12 @@
       <w>ermit</w>
       <w>geotiff</w>
       <w>hillslopes</w>
+      <w>hzdepb</w>
+      <w>indx</w>
       <w>inrcov</w>
       <w>intind</w>
       <w>julians</w>
+      <w>ksat</w>
       <w>landcover</w>
       <w>landuse</w>
       <w>maxima</w>
@@ -32,6 +35,7 @@
       <w>streamflow</w>
       <w>subcatchments</w>
       <w>subwta</w>
+      <w>surgo</w>
       <w>tinyqueue</w>
       <w>viridis</w>
       <w>weibull</w>

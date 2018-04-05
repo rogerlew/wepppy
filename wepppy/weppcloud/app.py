@@ -35,7 +35,7 @@ import what3words
 
 import wepppy
 
-from wepppy.all_your_base import isfloat
+from wepppy.all_your_base import isfloat, isint
 
 from wepppy.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
@@ -1887,18 +1887,32 @@ def query_wepp_phos_opts(runid):
 @app.route('/runs/<string:runid>/report/wepp/summary')
 @app.route('/runs/<string:runid>/report/wepp/summary/')
 def report_wepp_loss(runid):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = [0, 1]
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    loss = Wepp.getInstance(wd).report_loss()
+    loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
     out_rpt = OutletSummary(loss)
     hill_rpt = HillSummary(loss)
     chn_rpt = ChannelSummary(loss)
+    avg_annual_years = loss.avg_annual_years
+    excluded_years = loss.excluded_years
     translator = Watershed.getInstance(wd).translator_factory()
 
     return render_template('reports/wepp/summary.htm',
                            out_rpt=out_rpt,
                            hill_rpt=hill_rpt,
                            chn_rpt=chn_rpt,
+                           avg_annual_years=avg_annual_years,
+                           excluded_years=excluded_years,
                            translator=translator,
                            ron=ron,
                            user=current_user)
@@ -1918,6 +1932,7 @@ def report_wepp_yearly_watbal(runid):
                            chn_rpt=chn_rpt,
                            ron=ron,
                            user=current_user)
+
 
 @app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal')
 @app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal/')

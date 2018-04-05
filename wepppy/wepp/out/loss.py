@@ -1,4 +1,6 @@
+from collections import OrderedDict
 
+from wepppy.all_your_base import find_ranges
 
 unit_consistency_map = {
     'T/ha/yr': 'tonne/ha/yr',
@@ -8,8 +10,176 @@ unit_consistency_map = {
 }
 
 
+def _find_tbl_starts(section_index, lines):
+    """
+    next three tables are the hill, channel, outlet
+    find the table header lines
+
+    :param section_index: integer starting index of section e.g.
+                          "ANNUAL SUMMARY FOR WATERSHED IN YEAR"
+    :param lines: loss_pw0.txt as a list of strings
+    :return: hill0, chn0, out0
+        index to line starting the hill, channel, and outlet table
+    """
+    header_indx = []
+
+    for i, L in enumerate(lines[section_index + 2:]):
+        if L.startswith('----'):
+            header_indx.append(i)
+
+    hill0 = header_indx[0] + 1 + section_index + 2
+    chn0 = header_indx[1] + 2 + section_index + 2  # channel and outlet summary
+    out0 = header_indx[2] + 2 + section_index + 2  # have a blank line before the data
+
+    return hill0, chn0, out0
+
+
+def _parse_tbl(lines, hdr):
+    data = []
+    for L in lines:
+        if len(L) == 0:
+            return data
+
+        row = []
+
+        for v in L.split():
+            if v.count('.') == 2:
+
+                indx = v.find('.')
+                tok0 = v[:indx + 3]
+                tok1 = v[indx + 3:]
+
+                row.append(float(tok0))
+                row.append(float(tok1))
+
+            elif '.' in v:
+                row.append(float(v))
+            else:
+                # noinspection PyBroadException
+                try:
+                    row.append(int(v))
+                except Exception:
+                    row.append(v)
+
+        assert len(hdr) == len(row), (hdr, row, lines[0])
+        data.append(OrderedDict(zip(hdr, row)))
+
+    return data
+
+
+def _parse_out(lines):
+    data = []
+    for L in lines:
+        if len(L) == 0:
+            return data
+
+        assert '=' in L
+        key, v = L.split('=')
+        v = v.split()
+
+        if len(v) == 2:
+            v, units = v
+            units = units.strip()
+            units = unit_consistency_map.get(units, units)
+
+        else:
+            v = v[0]
+            units = None
+
+        key = key.strip()
+
+        if '.' in v:
+            v = float(v)
+        else:
+            # noinspection PyBroadException
+            try:
+                v = int(v)
+            except Exception:
+                v = v.strip()
+
+        data.append(dict(key=key, v=v, units=units))
+
+    return data
+
+
 class Loss(object):
-    def __init__(self, fn, wd=None):
+    hill_hdr = (
+        'Type',
+        'Hillslopes',
+        'Runoff Volume',
+        'Subrunoff Volume',
+        'Baseflow Volume',
+        'Soil Loss',
+        'Sediment Deposition',
+        'Sediment Yield',
+        'Solub. React. Phosphorus',
+        'Particulate Phosphorus',
+        'Total Phosphorus'
+    )
+
+    hill_units = (
+        None, None, 'm^3', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'kg', 'kg', 'kg'
+    )
+
+    hill_avg_hdr = (
+        'Type',
+        'Hillslopes',
+        'Runoff Volume',
+        'Subrunoff Volume',
+        'Baseflow Volume',
+        'Soil Loss',
+        'Sediment Deposition',
+        'Sediment Yield',
+        'Hillslope Area',
+        'Solub. React. Phosphorus',
+        'Particulate Phosphorus',
+        'Total Phosphorus'
+    )
+
+    hill_avg_units = (
+        None, None, 'm^3', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'ha', 'kg', 'kg', 'kg'
+    )
+
+    chn_hdr = (
+        'Type',
+        'Channels and Impoundments',
+        'Discharge Volume',
+        'Sediment Yield',
+        'Soil Loss',
+        'Upland Charge',
+        'Subsuface Flow Volume',
+        'Solub. React. Phosphorus',
+        'Particulate Phosphorus',
+        'Total Phosphorus'
+    )
+
+    chn_units = (
+        None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'kg'
+    )
+
+    chn_avg_hdr = (
+        'Type',
+        'Channels and Impoundments',
+        'Discharge Volume',
+        'Sediment Yield',
+        'Soil Loss',
+        'Upland Charge',
+        'Subsuface Flow Volume',
+        'Contributing Area',
+        'Solub. React. Phosphorus',
+        'Particulate Phosphorus',
+        'Total Phosphorus'
+    )
+
+    chn_avg_units = (
+        None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'ha', 'kg', 'kg', 'kg'
+    )
+
+    def __init__(self, fn, wd=None, exclude_yr_indxs=[0, 1]):
+        hill_hdr = self.hill_hdr
+        hill_avg_hdr = self.hill_avg_hdr
+        chn_hdr = self.chn_hdr
+        chn_avg_hdr = self.chn_avg_hdr
 
         # read the loss report
         with open(fn) as fp:
@@ -18,70 +188,89 @@ class Loss(object):
         # strip trailing and leading white space
         lines = [L.strip() for L in lines]
 
-        # find the average annual
-        i0 = 0
-        for i0, L in enumerate(lines):
-            if 'YEAR AVERAGE ANNUAL VALUES FOR WATERSHED' in L:
-                break
+        # find year indexes
 
-        # restrict lines to just the average annual
-        # values
-        lines = lines[i0+2:]
-
-        # next three tables are the hill, channel, outlet
-        # find the table header lines
-
-        header_indx = []
-
+        yr_indxs = []
+        avg_indx = None
         for i, L in enumerate(lines):
-            if L.startswith('----'):
-                header_indx.append(i)
+            if 'ANNUAL SUMMARY FOR WATERSHED IN YEAR' in L:
+                yr = int(''.join(c for c in L if c in '0123456789'))
+                yr_indxs.append((i, yr))
 
-        hill0 = header_indx[0] + 1
-        chn0 = header_indx[1] + 2 # channel and outlet summary
-        out0 = header_indx[2] + 2 # have a blank line before the data
+            if 'YEAR AVERAGE ANNUAL VALUES FOR WATERSHED' in L:
+                avg_indx = i
 
-        self.hill_hdr = (
-            'Type',
-            'Hillslopes',
-            'Runoff Volume',
-            'Subrunoff Volume',
-            'Baseflow Volume',
-            'Soil Loss',
-            'Sediment Deposition',
-            'Sediment Yield',
-            'Hillslope Area',
-            'Solub. React. Phosphorus',
-            'Particulate Phosphorus',
-            'Total Phosphorus'
-        )
+        num_years = len(yr_indxs)
+        assert avg_indx is not None
+        assert num_years > 0
 
-        self.hill_units = (
-            None, None, 'm^3', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'ha', 'kg', 'kg', 'kg'
-        )
+        years = [yr for i, yr in yr_indxs]
 
-        self.chn_hdr = (
-            'Type',
-            'Channels and Impoundments',
-            'Discharge Volume',
-            'Sediment Yield',
-            'Soil Loss',
-            'Upland Charge',
-            'Subsuface Volume',
-            'Flow Phosphorus',
-            'Solub. React. Phosphorus',
-            'Particulate Phosphorus',
-            'Total Phosphorus'
-        )
+        yearlies = {}
+        for yr_indx, yr in yr_indxs:
+            hill0, chn0, out0 = _find_tbl_starts(yr_indx, lines)
+            hill_tbl = _parse_tbl(lines[hill0:], hill_hdr)
+            chn_tbl = _parse_tbl(lines[chn0:], chn_hdr)
+            out_tbl = _parse_out(lines[out0:])
+            yearlies[yr] = dict(hill_tbl=hill_tbl, chn_tbl=chn_tbl, out_tbl=out_tbl)
 
-        self.chn_units = (
-            None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'kg', 'kg', 'kg'
-        )
+        hill0, chn0, out0 = _find_tbl_starts(avg_indx, lines)
+        hill_tbl = _parse_tbl(lines[hill0:], hill_avg_hdr)
+        chn_tbl = _parse_tbl(lines[chn0:], chn_avg_hdr)
+        out_tbl = _parse_out(lines[out0:])
 
-        self.hill_tbl = self._parse_tbl(lines[hill0:], self.hill_hdr)
+        # remove the years from average
+        avg_years = [yr for yr in years]
+        if exclude_yr_indxs is not None and num_years > len(exclude_yr_indxs):
 
-        self.chn_tbl = self._parse_tbl(lines[chn0:], self.chn_hdr)
-        self.out_tbl = self._parse_out(lines[out0:])
+            # average out years for outlet table
+            for j, d in enumerate(out_tbl):
+                out_tbl[j]['v'] *= num_years
+
+            for indx in exclude_yr_indxs:
+                yr = years[indx]
+
+                for j, d in enumerate(yearlies[yr]['out_tbl']):
+                    out_tbl[j]['v'] -= yearlies[yr]['out_tbl'][j]['v']
+
+            for j, d in enumerate(out_tbl):
+                out_tbl[j]['v'] /= num_years - len(exclude_yr_indxs)
+
+            # average out years for hill table
+            for j, d in enumerate(hill_tbl):
+                for var in hill_hdr[2:]:
+                    hill_tbl[j][var] *= num_years
+
+            for indx in exclude_yr_indxs:
+                yr = years[indx]
+
+                for j, d in enumerate(hill_tbl):
+                    for var in hill_hdr[2:]:
+                        hill_tbl[j][var] -= yearlies[yr]['hill_tbl'][j][var]
+
+            for j, d in enumerate(hill_tbl):
+                for var in hill_hdr[2:]:
+                    hill_tbl[j][var] /= num_years - len(exclude_yr_indxs)
+
+            # average out years for chn table
+            for j, d in enumerate(chn_tbl):
+                for var in chn_hdr[1:]:
+                    chn_tbl[j][var] *= num_years
+
+            for indx in exclude_yr_indxs:
+                yr = years[indx]
+
+                for j, d in enumerate(chn_tbl):
+                    for var in chn_hdr[1:]:
+                        chn_tbl[j][var] -= yearlies[yr]['chn_tbl'][j][var]
+
+            for j, d in enumerate(chn_tbl):
+                for var in chn_hdr[1:]:
+                    chn_tbl[j][var] /= num_years - len(exclude_yr_indxs)
+
+            for indx in exclude_yr_indxs:
+                yr = years[indx]
+                avg_years.remove(yr)
 
         if wd is not None:
             import wepppy
@@ -91,130 +280,88 @@ class Loss(object):
             watershed = wepppy.nodb.Watershed.getInstance(wd)
             translator = watershed.translator_factory()
 
-            for i in range(len(self.hill_tbl)):
-                row = self.hill_tbl[i]
+            for i in range(len(hill_tbl)):
+                row = hill_tbl[i]
                 wepp_id = row['Hillslopes']
 
                 topaz_id = translator.top(wepp=wepp_id)
                 sub_summary = watershed.sub_summary(str(topaz_id))
                 area = row['Hillslope Area']
-                self.hill_tbl[i]['WeppID'] = wepp_id
-                self.hill_tbl[i]['TopazID'] = topaz_id
-                self.hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
-                self.hill_tbl[i]['Soil'] = soils.domsoil_d[str(topaz_id)]
-                self.hill_tbl[i]['Length'] = sub_summary['length']
-                self.hill_tbl[i]['Runoff'] = row['Runoff Volume'] / (area * 1000.0)
-                self.hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / (area * 1000.0)
-                self.hill_tbl[i]['Baseflow'] = row['Baseflow Volume'] / (area * 1000.0)
+                hill_tbl[i]['WeppID'] = wepp_id
+                hill_tbl[i]['TopazID'] = topaz_id
+                hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
+                hill_tbl[i]['Soil'] = soils.domsoil_d[str(topaz_id)]
+                hill_tbl[i]['Length'] = sub_summary['length']
+                hill_tbl[i]['Runoff'] = row['Runoff Volume'] / (area * 1000.0)
+                hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / (area * 1000.0)
+                hill_tbl[i]['Baseflow'] = row['Baseflow Volume'] / (area * 1000.0)
 
                 _loss = row['Soil Loss'] / area
                 _dep = row['Sediment Deposition'] / area
                 _yield = row['Sediment Yield'] / area
-                self.hill_tbl[i]['Soil Loss Density'] = _loss
-                self.hill_tbl[i]['Sediment Deposition Density'] = _dep
-                self.hill_tbl[i]['Sediment Yield Density'] = _yield
-                self.hill_tbl[i]['DepLoss'] = _yield - _dep
+                hill_tbl[i]['Soil Loss Density'] = _loss
+                hill_tbl[i]['Sediment Deposition Density'] = _dep
+                hill_tbl[i]['Sediment Yield Density'] = _yield
+                hill_tbl[i]['DepLoss'] = _yield - _dep
 
                 if 'Solub. React. Phosphorus' in row:
-                    self.hill_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
+                    hill_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
 
                 if 'Particulate Phosphorus' in row:
-                    self.hill_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
+                    hill_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
 
                 if 'Total Phosphorus' in row:
-                    self.hill_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
+                    hill_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
 
-            for i in range(len(self.chn_tbl)):
-                row = self.chn_tbl[i]
+            for i in range(len(chn_tbl)):
+                row = chn_tbl[i]
                 wepp_id = row['Channels and Impoundments']
 
                 topaz_id = translator.top(chn_enum=wepp_id)
                 chn_summary = watershed.chn_summary(str(topaz_id))
                 area = chn_summary['area'] / 10000.0
-                self.chn_tbl[i]['WeppID'] = wepp_id
-                self.chn_tbl[i]['TopazID'] = topaz_id
-                self.chn_tbl[i]['Area'] = area
-                self.chn_tbl[i]['Length'] = chn_summary['length']
-                self.chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
-                self.chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / area
+                chn_tbl[i]['WeppID'] = wepp_id
+                chn_tbl[i]['TopazID'] = topaz_id
+                chn_tbl[i]['Area'] = area
+                chn_tbl[i]['Length'] = chn_summary['length']
+                chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
+                chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / area
 
                 if 'Solub. React. Phosphorus' in row:
-                    self.chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
+                    chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
 
                 if 'Particulate Phosphorus' in row:
-                    self.chn_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
+                    chn_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
 
                 if 'Total Phosphorus' in row:
-                    self.chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
+                    chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
 
-    def _parse_tbl(self, lines, hdr):
-        data = []
-        for L in lines:
-            if len(L) == 0:
-                return data
-                
-            row = []
+        self.hill_tbl = hill_tbl
+        self.chn_tbl = chn_tbl
+        self.out_tbl = out_tbl
+        self.wsarea = [d['v'] for d in out_tbl if d['key'] == 'Total contributing area to outlet'][0]
+        self.yearlies = yearlies
+        self.years = years
+        self.num_years = num_years
+        self.avg_years = avg_years
 
-            for v in L.split():
-                if v.count('.') == 2:
+    @property
+    def avg_annual_years(self):
+        return find_ranges(self.avg_years,
+                           as_str=True)
 
-                    indx = v.find('.')
-                    tok0 = v[:indx+3]
-                    tok1 = v[indx+3:]
-
-                    row.append(float(tok0))
-                    row.append(float(tok1))
-
-                elif '.' in v:
-                    row.append(float(v))
-                else:
-                    # noinspection PyBroadException
-                    try:
-                        row.append(int(v))
-                    except Exception:
-                        row.append(v)
-
-            data.append(dict(zip(hdr, row)))
-
-    def _parse_out(self, lines):
-        data = []
-        for L in lines:
-            if len(L) == 0:
-                return data
-                
-            assert '=' in L
-            key, v = L.split('=')
-            v = v.split()
-            
-            if len(v) == 2:
-                v, units = v
-                units = units.strip()
-                units = unit_consistency_map.get(units, units)
-                
-            else:
-                v = v[0]
-                units = None
-            
-            key = key.strip()
-
-            if '.' in v:
-                v = float(v)
-            else:
-                # noinspection PyBroadException
-                try:
-                    v = int(v)
-                except Exception:
-                    v = v.strip()
-
-            if key == 'Total contributing area to outlet':
-                self.wsarea = v
-
-            data.append(dict(key=key, v=v, units=units))
+    @property
+    def excluded_years(self):
+        return find_ranges(sorted([yr for yr in self.years if yr not in self.avg_years]),
+                           as_str=True)
 
 
 if __name__ == "__main__":
-    loss = Loss('/geodata/weppcloud_runs/bb967f25-9fd6-4641-b737-bb10a1cf7843/wepp/output/loss_pw0.txt',
-                        '/geodata/weppcloud_runs/bb967f25-9fd6-4641-b737-bb10a1cf7843/')
+    loss = Loss('/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/wepp/output/loss_pw0.txt',
+                '/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/',
+                exclude_yr_indxs=[1,2,6,8])
     #print(loss.hill_tbl)
     #print(loss.chn_tbl)
     print(loss.out_tbl)
+    print(loss.avg_annual_years)
+    print(loss.wsarea)
