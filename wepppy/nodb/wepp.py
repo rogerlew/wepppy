@@ -791,10 +791,10 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         wepppost.calc_channel_streamflow()
         self.log_done()
 
-    def report_loss(self):
+    def report_loss(self, exclude_yr_indxs):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        return Loss(loss_pw0, self.wd)
+        return Loss(loss_pw0, self.wd, exclude_yr_indxs=exclude_yr_indxs)
 
     def report_return_periods(self):
         output_dir = self.output_dir
