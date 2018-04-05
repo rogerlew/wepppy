@@ -6,7 +6,7 @@ from operator import itemgetter
 from itertools import groupby
 import shutil
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.request import urlopen
 import requests
 from subprocess import Popen, PIPE
@@ -23,6 +23,16 @@ geodata_dir = '/geodata/'
 
 RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
+
+
+def determine_wateryear(y, j=None, mo=None):
+    if j is not None:
+        mo = int((datetime(int(y), 1, 1) + timedelta(int(j))).month)
+
+    if mo > 9:
+        return y + 1
+
+    return y
 
 
 def find_ranges(iterable, as_str=False):

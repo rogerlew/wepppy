@@ -34,7 +34,8 @@ from .climate import (
     ClimateNoDbLockedException
 )
 from .wepp import (
-    Wepp, 
+    Wepp,
+    PhosphorusOpts,
     WeppNoDbLockedException
 )
 
