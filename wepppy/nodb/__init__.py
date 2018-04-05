@@ -36,6 +36,7 @@ from .climate import (
 from .wepp import (
     Wepp,
     PhosphorusOpts,
+    BaseflowOpts,
     WeppNoDbLockedException
 )
 
