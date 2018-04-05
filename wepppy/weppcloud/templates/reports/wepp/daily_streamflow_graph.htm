@@ -114,7 +114,7 @@ var context = svg.append("g")
     .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 
-d3.csv("../../../resources/wepp/daily_streamflow.csv", function(error, data) {
+d3.csv("../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}", function(error, data) {
   if (error) throw error;
 
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
