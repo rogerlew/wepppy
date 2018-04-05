@@ -117,6 +117,7 @@ class TotalWatSed(object):
             for i, yr in enumerate(d['Year']):
                 wtr.writerow(OrderedDict([(k, d[k][i]) for k in d]))
 
+
 if __name__ == "__main__":
     from pprint import pprint
     fn = '/geodata/weppcloud_runs/ef264d6f-5449-4c6d-bce9-f6d4e5938be3/wepp/output/totalwatsed.txt'
