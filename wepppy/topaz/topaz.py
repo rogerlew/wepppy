@@ -261,26 +261,6 @@ class TopazRunner:
         """
         # open the channel map
         netful_arc = _join(self.topaz_wd, 'NETFUL.ARC')
-
-        """
-        assert exists(netful_arc), \
-            'cannot find channel map'
-
-        
-        # todo refaactor to use read_arc
-
-        with open(netful_arc) as fp:
-            data = fp.readlines()
-            
-        num_cols = int(data[0].split()[-1])
-        num_rows = int(data[1].split()[-1])
-        
-        data = [[int(v) for v in line.split()] for line in data[6:]]
-        data = np.array(data)
-        
-        n, m = data.shape
-        """
-
         data, _transform, _proj = read_arc(netful_arc, dtype=np.int32)
         n, m = data.shape
 
