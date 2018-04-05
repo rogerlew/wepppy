@@ -1,7 +1,8 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_content %}
 <h2>WEPP Results Summary</h2>
-<h5>Average Annual Delivery From Channel Outlet</h5>
+<h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
+    (excluding years {{ excluded_years }})</h5>
 <div>
 {% for name, value, units in out_rpt %}
   <div class="row">
@@ -12,7 +13,8 @@
 {% endfor %}
 </div>
 <br/>
-<h5>Average Annual Summary for Subcatchments</h5>
+<h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
+    (excluding years {{ excluded_years }})</h5>
 <table class="table table-condensed">
   <thead>
     <tr>
@@ -40,7 +42,8 @@
     {% endfor %}
   </tbody>
 </table>
-<h5>Average Annual Summary for Channels</h5>
+<h5>Average Annual Summary for Channels for Years {{ avg_annual_years }}
+    (excluding years {{ excluded_years }})</h5>
 <table class="table table-condensed">
   <thead>
     <tr>

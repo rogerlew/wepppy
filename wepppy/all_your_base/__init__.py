@@ -2,7 +2,8 @@ from .locationinfo import RasterDatasetInterpolator
 
 import os
 from os.path import exists as _exists
-
+from operator import itemgetter
+from itertools import groupby
 import shutil
 
 from datetime import datetime
@@ -16,13 +17,41 @@ import numpy as np
 
 from osgeo import gdal, osr
 
-
 gdal.UseExceptions()
 
 geodata_dir = '/geodata/'
 
 RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
+
+
+def find_ranges(iterable, as_str=False):
+    """Yield range of consecutive numbers."""
+
+    def func(args):
+        index, item = args
+        return index - item
+
+    ranges = []
+    for key, group in groupby(enumerate(iterable), func):
+        group = list(map(itemgetter(1), group))
+        if len(group) > 1:
+            ranges.append((group[0], group[-1]))
+        else:
+            ranges.append(group[0])
+
+    if not as_str:
+        return ranges
+
+    s = []
+
+    for arg in ranges:
+        if isint(arg):
+            s.append(str(arg))
+        else:
+            s.append('{}-{}'.format(*arg))
+
+    return ', '.join(s)
 
 
 def clamp(x: float, minimum: float, maximum: float) -> float:
@@ -54,18 +83,18 @@ def cp_chmod(src, dst, mode):
 def parse_datetime(x):
     if isinstance(x, datetime):
         return x
-        
+
     ymd = x.split('-')
     if len(ymd) != 3:
         ymd = x.split('/')
     if len(ymd) != 3:
         ymd = x.split('.')
-        
+
     y, m, d = ymd
     y = int(y)
     m = int(m)
     d = int(d)
-    
+
     return datetime(y, m, d)
 
 
@@ -158,38 +187,38 @@ wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
 
 def wmesque_retrieve(dataset, extent, fname, cellsize):
     global wmesque_url
-    
+
     assert dataset in ['ned1/2016',
                        'ssurgo/201703',
                        'nlcd/2011']
-    
+
     assert isfloat(cellsize)
-    
+
     assert all([isfloat(v) for v in extent])
     assert len(extent) == 4
-    
+
     extent = ','.join([str(v) for v in extent])
-    
+
     if fname.lower().endswith('.tif'):
         fmt = 'GTiff'
-        
+
     elif fname.lower().endswith('.asc'):
         fmt = 'AAIGrid'
-        
+
     elif fname.lower().endswith('.png'):
         fmt = 'PNG'
-        
+
     else:
         raise ValueError('fname must end with .tif, .asc, or .png')
-    
+
     url = '{wmesque_url}{dataset}/?bbox={extent}&cellsize={cellsize}&format={format}'\
-          .format(wmesque_url=wmesque_url, dataset=dataset, 
+          .format(wmesque_url=wmesque_url, dataset=dataset,
                   extent=extent, cellsize=cellsize, format=fmt)
-                  
+
     output = urlopen(url)
     with open(fname, 'wb') as fp:
         fp.write(output.read())
-        
+
     return 1
 
 
@@ -198,7 +227,7 @@ def parse_datetime(s):
 
 
 wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-    
+
 
 def warp2match(src_filename, match_filename, dst_filename):
     # Source
@@ -227,13 +256,13 @@ def warp2match(src_filename, match_filename, dst_filename):
 def translate_tif_to_asc(fn):
     assert fn.endswith(".tif")
     assert _exists(fn)
-    
+
     fn2 = fn[:-4] + ".asc"
     cmd = ["gdal_translate", "-of", "AAIGrid", fn, fn2]
     Popen(cmd, stdout=PIPE, stderr=PIPE)
 
     assert _exists(fn2)
-    
+
     return fn2
 
 
@@ -248,14 +277,14 @@ def read_raster(fn, dtype=np.float64):
 
 def read_tif(fn, dtype=np.float64):
     """
-    use gdal to read an tif file and return the data and the 
+    use gdal to read an tif file and return the data and the
     transform
     """
     assert _exists(fn), "Cannot open %s" % fn
-    
+
     ds = gdal.Open(fn)
     assert ds is not None
-    
+
     transform = ds.GetGeoTransform()
     data = np.array(ds.GetRasterBand(1).ReadAsArray(), dtype=dtype).T
     wkt_text = ds.GetProjection()
@@ -266,20 +295,20 @@ def read_tif(fn, dtype=np.float64):
     del ds
 
     data = np.array(data, dtype=dtype)
-    
+
     return data, transform, proj
 
 
 def read_arc(fn, dtype=np.float64):
     """
-    use gdal to read an arc file and return the data and the 
+    use gdal to read an arc file and return the data and the
     transform
     """
     assert _exists(fn), "Cannot open %s" % fn
-    
+
     ds = gdal.Open(fn)
     assert ds is not None
-    
+
     transform = ds.GetGeoTransform()
     wkt_text = ds.GetProjection()
     srs = osr.SpatialReference()
@@ -287,7 +316,7 @@ def read_arc(fn, dtype=np.float64):
     proj = srs.ExportToProj4().strip()
 
     del ds
-    
+
     with open(fn) as fp:
         data = fp.readlines()
 
@@ -295,10 +324,10 @@ def read_arc(fn, dtype=np.float64):
     for i in range(len(data)):
         if isfloat(data[i].split()[0]):
             break
-        
+
     data = [[float(v) for v in L.split()] for L in data[i:]]
     data = np.array(data, dtype=dtype).T
-    
+
     return data, transform, proj
 
 
@@ -331,16 +360,16 @@ nodata_value {no_data}
 
 def identify_utm(fn):
     assert _exists(fn), "Cannot open %s" % fn
-    
+
     ds = gdal.Open(fn)
     assert ds is not None
-    
+
     wkt_text = ds.GetProjection()
     srs = osr.SpatialReference()
     srs.ImportFromWkt(wkt_text)
     utm = get_utm_zone(srs)
     del ds
-    
+
     return utm
 
 
@@ -376,7 +405,7 @@ def get_utm_zone(srs):
 
     return utm_zone
 
-    
+
 _AVG_EARTH_RADIUS = 6371  # in km
 _MILES_PER_KILOMETER = 0.621371
 
@@ -390,7 +419,7 @@ def haversine(point1, point2, miles=False):
     if the ``miles`` parameter is set to True.
     """
     global _AVG_EARTH_RADIUS, _MILES_PER_KILOMETER
-    
+
     # unpack latitude/longitude
     lng1, lat1 = point1
     lng2, lat2 = point2
@@ -446,59 +475,59 @@ def _md_to_julian(month, day):
 
 class Julian(object):
     def __init__(self, *args, **kwargs):
-    
+
         # noinspection PyUnusedLocal
         __slots__ = ["julian", "month", "day"]
-        
+
         if len(kwargs) > 0:
             assert "julian" in kwargs
             julian = kwargs['julian']
             assert julian > 0
             assert julian <= 365
-            
+
             assert "month" in kwargs
             assert "day" in kwargs
             month = kwargs['month']
             day = kwargs['day']
-            
+
             _m, _d = _julian_to_md(julian)
             assert _m == month
             assert _d == day
-            
+
             super(Julian, self).__setattr__("julian", julian)
             super(Julian, self).__setattr__("month", month)
             super(Julian, self).__setattr__("day", day)
-        
+
         if len(args) == 1:
             julian = int(args[0])
             assert julian >= 0
             assert julian <= 365
-            
+
             super(Julian, self).__setattr__("julian", julian)
-            
+
             month, day = _julian_to_md(julian)
             super(Julian, self).__setattr__("month", month)
             super(Julian, self).__setattr__("day", day)
-            
+
         elif len(args) == 2:
             month = int(args[0])
             day = int(args[1])
             assert month > 0
             assert month <= 12
-            
+
             assert day > 0
             assert day <= _days[month-1]
-            
+
             super(Julian, self).__setattr__("month", month)
             super(Julian, self).__setattr__("day", day)
-            
+
             julian = _md_to_julian(month, day)
             super(Julian, self).__setattr__("julian", julian)
 
     def __str__(self):
         # noinspection PyUnresolvedReferences
         return str(self.julian)
-        
+
     def __repr__(self):
         # noinspection PyUnresolvedReferences
         return 'Julian(julian=%i, month=%i, day=%i)'\
@@ -508,7 +537,7 @@ class Julian(object):
 def elevationquery(lng, lat):
     url = 'https://wepp1.nkn.uidaho.edu/webservices/elevationquery'
     r = requests.post(url, params=dict(lat=lat, lng=lng))
-        
+
     if r.status_code != 200:
         raise Exception("Encountered error retrieving from elevationquery")
 
@@ -517,10 +546,10 @@ def elevationquery(lng, lat):
         _json = r.json()
     except Exception:
         _json = None
-    
+
     if _json is None:
         raise Exception("Cannot parse json from elevation response")
-        
+
     return _json['Elevation']
 
 
