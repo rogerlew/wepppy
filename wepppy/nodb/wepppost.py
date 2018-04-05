@@ -2,7 +2,7 @@
 import os
 from os.path import exists as _exists
 from os.path import join as _join
-from os.path import join as _split
+from os.path import split as _split
 
 from glob import glob
 
@@ -13,14 +13,10 @@ import jsonpickle
 import numpy as np
 
 # wepppy
-import wepppy
-from wepppy.all_your_base import (
-    isint
-)
+from wepppy.wepp.out import TotalWatSed
 
 # wepppy submodules
 from .base import NoDbBase
-
 
 class WeppPostNoDbLockedException(Exception):
     pass
@@ -169,11 +165,7 @@ class WeppPost(NoDbBase):
             self.unlock('-f')
             raise
 
-    @property
-    def dates(self):
-        return ['%04i%02i%02i' % (yr, mo, da) for yr, mo, da in zip(self._years, self._months, self._days)]
-
-    def export_streamflow(self, fn, source='Channel'):
+    def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=[0, 1]):
         ndays = self._ndays
         if source == 'Channel':
             assert self._chn_streamflow is not None
@@ -186,17 +178,25 @@ class WeppPost(NoDbBase):
         fp = open(fn, 'w')
         fp.write('date,Runoff,Baseflow,Lateral Flow\n')
 
-        dates = self.dates
         runoff = data['Daily Runoff (mm)']
         latqcc = data['Daily Lateral Flow (mm)']
         baseflow = data['Daily Baseflow (mm)']
 
-        assert ndays == len(dates)
         assert ndays == len(runoff)
         assert ndays == len(latqcc)
         assert ndays == len(baseflow)
 
-        for d, r, l, b in zip(dates, runoff, latqcc, baseflow):
+        exclude_years = []
+        if exclude_yr_indxs is not None:
+            years = sorted(set(self._years))
+            for indx in exclude_yr_indxs:
+                exclude_years.append(years[indx])
+
+        for yr, mo, da, r, l, b in zip(self._years, self._months, self._days, runoff, latqcc, baseflow):
+            if yr in exclude_years:
+                continue
+
+            d = '%04i%02i%02i' % (yr, mo, da)
             fp.write('{},{},{},{}\n'.format(d, r, b, l))
         fp.close()
 
@@ -228,73 +228,30 @@ class WeppPost(NoDbBase):
             return i0 + j0 + a
 
     def calc_hill_streamflow(self):
-        ndays = self._ndays
-        hill_areas = self._hill_areas
-        wsarea = self._wsarea
-        ws_ha = wsarea / 10000.0
-        assert isint(ndays)
-
+        from wepppy.nodb import Wepp
+        phosOpts = Wepp.getInstance(self.wd).phosphorus_opts
         output_dir = self.output_dir
+        totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
 
-        ebe_fns = glob(_join(output_dir, 'H*.ebe.dat'))
-        n = len(ebe_fns)
-        assert n > 0, 'run does not contain hill event outputs'
+        watsed = TotalWatSed(totalwatsed_fn, phosOpts=phosOpts)
 
-        for wepp_id in range(1, n + 1):
-            assert _exists(_join(output_dir, 'H{}.ebe.dat'.format(wepp_id)))
+        self._hill_streamflow = {}
+        self._hill_streamflow['Daily Runoff (mm)'] = watsed.d['Runoff (mm)']
+        self._hill_streamflow['Daily Sediment (tonne/ha)'] = watsed.d['Sed. Del Density (tonne/ha)']
+        self._hill_streamflow['Daily Lateral Flow (mm)'] = watsed.d['Lateral Flow (mm)']
+        self._hill_streamflow['Daily Baseflow (mm)'] = watsed.d['Baseflow (mm)']
 
-        runoff = np.zeros((ndays,))
-        sediment = np.zeros((ndays,))
+        if 'Simulated Total P (kg)' in watsed.d:
+            self._hill_streamflow['Daily Total P (kg)'] = watsed.d['Simulated Total P (kg)']
 
-        for wepp_id in range(1, n + 1):
-            wat_fn = _join(output_dir, 'H{}.ebe.dat'.format(wepp_id))
-            area = hill_areas[str(wepp_id)]
+        if 'Simulated Particulate P (kg)' in watsed.d:
+            self._hill_streamflow['Daily Particulate P (kg)'] = watsed.d['Simulated Particulate P (kg)']
 
-            with open(wat_fn) as wat_fp:
-                for i, L in enumerate(wat_fp.readlines()):
-                    if i < 3:
-                        continue
+        if 'Simulated Soluble Reactive P (kg)' in watsed.d:
+            self._hill_streamflow['Daily Soluble Reactive P (kg)'] = watsed.d['Simulated Soluble Reactive P (kg)']
 
-                    day, mo, year, Precp, Runoff, IR_det, Av_det, \
-                    Mx_det, Point, Av_dep, Max_dep, Point, SedDel, ER = L.split()
-
-                    day, mo, year = int(day), int(mo), int(year)
-                    indx = self.get_indx(year, day=day, month=mo)
-                    runoff[indx] += float(Runoff) * 0.001 * area
-                    sediment[indx] += float(SedDel) * area * 0.001
-
-        runoff /= self._wsarea
-        runoff *= 1000
-
-        wat_fns = glob(_join(output_dir, 'H*.wat.dat'))
-        n = len(wat_fns)
-        assert n > 0, 'run does not contain hill wat outputs'
-
-        for wepp_id in range(1, n + 1):
-            assert _exists(_join(output_dir, 'H{}.wat.dat'.format(wepp_id)))
-
-        latqcc = np.zeros((ndays,))
-
-        for wepp_id in range(1, n + 1):
-            wat_fn = _join(output_dir, 'H{}.wat.dat'.format(wepp_id))
-            area = hill_areas[str(wepp_id)]
-
-            with open(wat_fn) as wat_fp:
-                for i, L in enumerate(wat_fp.readlines()):
-                    if i < 23:
-                        continue
-
-                    latqcc[i-23] += float(L[104:112]) * 0.001 * area
-
-        latqcc /= self._wsarea
-        latqcc *= 1000
-
-        self.lock()
-        self._hill_streamflow = {
-            'Daily Runoff (mm)': [float(v) for v in runoff],
-            'Daily Sediment (tonne/ha)': [float(v) for v in sediment],
-            'Daily Lateral Flow (mm)': [float(v) for v in latqcc]}
-        self.dump_and_unlock()
+        if 'Simulated Sed. Del (tonne/day)' in watsed.d:
+            self._hill_streamflow['Daily Sed. Del (tonne/day)'] = watsed.d['Simulated Sed. Del (tonne/day)']
 
     def calc_channel_streamflow(self):
         output_dir = self.output_dir
@@ -323,9 +280,9 @@ class WeppPost(NoDbBase):
                 L.split()
 
                 sed_yield.append(float(_sed_yield) / 1000.0 / ws_ha)
-                solub_reactive_p.append(float(_solub_reactive_p) / ws_ha)
-                particulate_p.append(float(_particulate_p) / ws_ha)
-                total_p.append(float(_total_p) / ws_ha)
+                solub_reactive_p.append(float(_solub_reactive_p))
+                particulate_p.append(float(_particulate_p))
+                total_p.append(float(_total_p))
 
         assert len(sed_yield) == ndays
         assert len(solub_reactive_p) == ndays
@@ -360,11 +317,12 @@ class WeppPost(NoDbBase):
         self._chn_streamflow = {
             'Daily Runoff (mm)': runoff,
             'Daily Sediment (tonne/ha)': sed_yield,
-            'Daily Soluble Reactive P (kg/ha)': solub_reactive_p,
-            'Daily Particulate P (kg/ha)': particulate_p,
-            'Daily Total P (kg/ha)': total_p,
+            'Daily Soluble Reactive P (kg)': solub_reactive_p,
+            'Daily Particulate P (kg)': particulate_p,
+            'Daily Total P (kg)': total_p,
             'Daily Lateral Flow (mm)': latqcc,
-            'Daily Baseflow (mm)': baseflow }
+            'Daily Baseflow (mm)': baseflow
+        }
         self.dump_and_unlock()
 
 if __name__ == "__main__":

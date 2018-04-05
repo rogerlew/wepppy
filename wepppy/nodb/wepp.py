@@ -40,8 +40,20 @@ from wepppy.wepp.management import (
     merge_managements,
 )
 
-from wepppy.all_your_base import isfloat, read_arc, wgs84_proj4, parse_datetime
-from wepppy.wepp.out import Loss, Ebe, PlotFile, Chnwb
+from wepppy.all_your_base import (
+    isfloat,
+    read_arc,
+    wgs84_proj4,
+    parse_datetime
+)
+
+from wepppy.wepp.out import (
+    Loss,
+    Ebe,
+    PlotFile,
+    correct_daily_hillslopes_pl_path
+)
+
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods
 
 # wepppy submodules
@@ -291,7 +303,7 @@ class Wepp(NoDbBase):
     def _prep_wepp_ui(self):
         fn = _join(self.runs_dir, 'wepp_ui.txt')
 
-        if self.wepp_ui:
+        if getattr(self, 'wepp_ui', False):
             with open(fn, 'w') as fp:
                 fp.write('')
         else:
@@ -778,6 +790,10 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
 
         self.log_done()
 
+        self.log('Building totalsedwat.txt... ')
+        self._build_totalsedwat()
+        self.log_done()
+
         self.log('Running WeppPost... ')
         wepppost = WeppPost.getInstance(wd)
         wepppost.run_post()
@@ -790,6 +806,35 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         self.log('Calculating channel streamflow measures... ')
         wepppost.calc_channel_streamflow()
         self.log_done()
+
+    def _build_totalsedwat(self):
+        output_dir = self.output_dir
+        erin_pl = _join(output_dir, 'correct_daily_hillslopes.pl')
+        if not _exists(erin_pl):
+            shutil.copyfile(correct_daily_hillslopes_pl_path, erin_pl)
+
+        # remember current directory
+        curdir = os.getcwd()
+
+        # change to working directory
+        os.chdir(output_dir)
+
+        # noinspection PyBroadException
+        try:
+            cmd = ['perl', 'correct_daily_hillslopes.pl']
+            _log = open('correct_daily_hillslopes.log', 'w')
+
+            p = Popen(cmd, stdout=_log, stderr=_log)
+            p.wait()
+            _log.close()
+
+            assert _exists('totalwatsed.txt'), 'Failed running correct_daily_hillslopes.pl'
+            assert os.stat('totalwatsed.txt').st_size > 0, 'totalwatsed.txt is empty'
+
+            os.chdir(curdir)
+        except Exception:
+            os.chdir(curdir)
+            raise
 
     def report_loss(self, exclude_yr_indxs):
         output_dir = self.output_dir
