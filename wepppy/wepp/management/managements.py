@@ -1485,8 +1485,17 @@ class Management(object):
             for j in range(sim_years):
                 _man.loops[-1].years.append(Loops())
                 for k in range(self.nofe):
-                    _man.loops[-1].years[-1].append(
-                        deepcopy(self.man.loops[i].years[j%yrs][k]))
+                    assert len(_man.loops) > 0
+                    assert len(_man.loops[-1].years) > 0
+                    assert len(self.man.loops) > i
+                    assert len(self.man.loops[i].years) == yrs
+
+                    if len(self.man.loops[i].years[j%yrs]) > k:
+                        manLoopManLoop = deepcopy(self.man.loops[i].years[j%yrs][k])
+                    else:
+                        manLoopManLoop = deepcopy(self.man.loops[i].years[j%yrs][0])
+
+                    _man.loops[-1].years[-1].append(manLoopManLoop)
     
         # now we just need to create a copy of self
         # and copy over the new ManagementLoop and set sim_years

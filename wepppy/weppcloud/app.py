@@ -1954,11 +1954,21 @@ def report_wepp_avg_annual_watbal(runid):
 
 @app.route('/runs/<string:runid>/resources/wepp/daily_streamflow.csv')
 def resources_wepp_streamflow(runid):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = [0, 1]
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepppost = WeppPost.getInstance(wd)
     fn = _join(ron.export_dir, 'daily_streamflow.csv')
-    wepppost.export_streamflow(fn)
+    wepppost.export_streamflow(fn, exclude_yr_indxs=exclude_yr_indxs)
 
     assert _exists(fn)
 
@@ -1983,6 +1993,16 @@ def resources_wepp_totalwatsed(runid):
 @app.route('/runs/<string:runid>/plot/wepp/streamflow')
 @app.route('/runs/<string:runid>/plot/wepp/streamflow/')
 def plot_wepp_streamflow(runid):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = [0, 1]
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
@@ -1990,6 +2010,7 @@ def plot_wepp_streamflow(runid):
     chn_rpt = wepp.report_chn_watbal()
 
     return render_template('reports/wepp/daily_streamflow_graph.htm',
+                           exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
                            ron=ron,
                            user=current_user)
 
