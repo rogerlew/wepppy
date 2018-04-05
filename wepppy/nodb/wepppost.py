@@ -229,11 +229,13 @@ class WeppPost(NoDbBase):
 
     def calc_hill_streamflow(self):
         from wepppy.nodb import Wepp
-        phosOpts = Wepp.getInstance(self.wd).phosphorus_opts
+        wepp = Wepp.getInstance(self.wd)
+        phosOpts = wepp.phosphorus_opts
+        baseflowOpts = wepp.baseflow_opts
         output_dir = self.output_dir
         totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
 
-        watsed = TotalWatSed(totalwatsed_fn, phosOpts=phosOpts)
+        watsed = TotalWatSed(totalwatsed_fn, baseflowOpts, phosOpts=phosOpts)
 
         self._hill_streamflow = {}
         self._hill_streamflow['Daily Runoff (mm)'] = watsed.d['Runoff (mm)']
