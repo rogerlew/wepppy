@@ -50,6 +50,8 @@ from wepppy.watershed_abstraction import (
 )
 from wepppy.wepp import management
 
+from wepppy.wepp.out import TotalWatSed
+
 from wepppy.wepp.stats import (
     OutletSummary,
     HillSummary,
@@ -1961,6 +1963,21 @@ def resources_wepp_streamflow(runid):
     assert _exists(fn)
 
     return send_file(fn, mimetype='text/csv', attachment_filename='daily_streamflow.csv')
+
+
+@app.route('/runs/<string:runid>/resources/wepp/totalwatsed.csv')
+def resources_wepp_totalwatsed(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+    fn = _join(ron.export_dir, 'totalwatsed.csv')
+
+    totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
+                            wepp.baseflow_opts, wepp.phosphorus_opts)
+    totwatsed.export(fn)
+    assert _exists(fn)
+
+    return send_file(fn, mimetype='text/csv', attachment_filename='totalwatsed.csv')
 
 
 @app.route('/runs/<string:runid>/plot/wepp/streamflow')

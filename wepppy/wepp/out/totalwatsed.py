@@ -1,7 +1,9 @@
+from collections import OrderedDict
+import csv
+
 import numpy as np
 
 from wepppy.all_your_base import determine_wateryear
-
 
 class TotalWatSed(object):
 
@@ -15,12 +17,10 @@ class TotalWatSed(object):
              float, float, float, float, float, float, float, float, float]
 
     def __init__(self, fn,
-                 initial_res_volume=200.0,
-                 baseflow_coeff=0.04,
-                 aquifer_coeff=0.0,
+                 baseflowOpts,
                  phosOpts=None):
 
-        from wepppy.nodb import PhosphorusOpts
+        from wepppy.nodb import PhosphorusOpts, BaseflowOpts
         hdr = self.hdr
         types = self.types
 
@@ -28,7 +28,7 @@ class TotalWatSed(object):
         with open(fn) as fp:
             lines = fp.readlines()
 
-        d = dict((k, []) for k in hdr)
+        d = OrderedDict((k, []) for k in hdr)
 
         for L in lines:
             L = L.split()
@@ -55,17 +55,17 @@ class TotalWatSed(object):
         d['Storage (mm)'] = d['Storage Vol (m^3)'] / d['Area (m^2)'] * 1000.0
 
         # calculate Res volume, baseflow, and aquifer losses
-        d['Reservoir Volume (mm)'] = [initial_res_volume]
+        d['Reservoir Volume (mm)'] = [baseflowOpts.gwstorage]
         d['Baseflow (mm)'] = [0.0]
         d['Aquifer Losses (mm)'] = []
 
         for perc in d['Percolation (mm)']:
-            d['Aquifer Losses (mm)'].append(d['Reservoir Volume (mm)'][-1] * aquifer_coeff)
+            d['Aquifer Losses (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.dscoeff)
             d['Reservoir Volume (mm)'].append(d['Reservoir Volume (mm)'][-1] -
                                               d['Baseflow (mm)'][-1] +
                                               d['Percolation (mm)'][-1] +
                                               d['Aquifer Losses (mm)'][-1])
-            d['Baseflow (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflow_coeff)
+            d['Baseflow (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.bfcoeff)
 
         d['Reservoir Volume (mm)'] = np.array(d['Reservoir Volume (mm)'][1:])
         d['Baseflow (mm)'] = np.array(d['Baseflow (mm)'][1:])
@@ -107,14 +107,25 @@ class TotalWatSed(object):
 
         self.d = d
 
+    def export(self, fn):
+        d = self.d
+        with open(fn, 'w') as fp:
+            wtr = csv.DictWriter(fp,
+                                 fieldnames=list(d.keys()),
+                                 lineterminator='\n')
+            wtr.writeheader()
+            for i, yr in enumerate(d['Year']):
+                wtr.writerow(OrderedDict([(k, d[k][i]) for k in d]))
 
 if __name__ == "__main__":
     from pprint import pprint
     fn = '/geodata/weppcloud_runs/ef264d6f-5449-4c6d-bce9-f6d4e5938be3/wepp/output/totalwatsed.txt'
-    from wepppy.nodb import PhosphorusOpts
+    from wepppy.nodb import PhosphorusOpts, BaseflowOpts
     phosOpts = PhosphorusOpts()
     phosOpts.surf_runoff = 0.0118
     phosOpts.lateral_flow = 0.0118
     phosOpts.baseflow = 0.0196
     phosOpts.sediment = 1024
-    print(TotalWatSed(fn, phosOpts=phosOpts).d['Simulated Total P (kg)'])
+    baseflowOpts = BaseflowOpts()
+    totwatsed = TotalWatSed(fn, baseflowOpts, phosOpts=phosOpts)
+    totwatsed.export('/home/weppdev/totwatsed.csv')
