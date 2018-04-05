@@ -1,3 +1,17 @@
+# Copyright (c) 2016-2018, University of Idaho
+# All rights reserved.
+#
+# Roger Lew (rogerlew.gmail.com)
+#
+# The project described was supported by NSF award number IIA-1301792
+# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
+
+"""
+Parses Erin Brooks's totalwatsed.txt files produced from the .wat.txt and .pass.txt hillslope
+WEPP outputs and performs streamflow and water balance calculations.
+
+The calculations were provided by Mariana Dobre.
+"""
 from collections import OrderedDict
 import csv
 
