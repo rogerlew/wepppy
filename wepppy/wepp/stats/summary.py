@@ -21,7 +21,7 @@ class HillSummary(ReportBase):
     def __init__(self, loss: Loss):
         self.data = loss.hill_tbl
 
-        self.header = (
+        self._hdr = (
             'WeppID',
             'TopazID',
             'Landuse',
@@ -39,17 +39,22 @@ class HillSummary(ReportBase):
             'Total P Density (kg/ha)'
         )
 
+    @property
+    def header(self):
+        return [colname.replace(' Density', '') for colname in self._hdr]
+
     def __iter__(self):
         data = self.data
         for i in range(len(data)):
-            yield RowData(OrderedDict([(colname, data[i][parse_name(colname)]) for colname in self.header]))
+            yield RowData(OrderedDict([(colname.replace(' Density', ''),
+                                        data[i][parse_name(colname)]) for colname in self._hdr]))
 
 
 class ChannelSummary(ReportBase):
     def __init__(self, loss: Loss):
         self.data = loss.chn_tbl
 
-        self.header = (
+        self._hdr = (
             'WeppID',
             'TopazID',
             'Length (m)',
@@ -64,10 +69,15 @@ class ChannelSummary(ReportBase):
             'Total P Density (kg/ha)'
         )
 
+    @property
+    def header(self):
+        return [colname.replace(' Density', '') for colname in self._hdr]
+
     def __iter__(self):
         data = self.data
         for i in range(len(data)):
-            yield RowData(OrderedDict([(colname, data[i][parse_name(colname)]) for colname in self.header]))
+            yield RowData(OrderedDict([(colname.replace(' Density', ''),
+                                        data[i][parse_name(colname)]) for colname in self._hdr]))
 
 
 class OutletSummary(ReportBase):
@@ -78,10 +88,10 @@ class OutletSummary(ReportBase):
         for d in self.data:
             if d['units'] is None:
                 name = '{0[key]}'.format(d)
+                value = '%0.3f' % d['v']
             else:
                 name = '{0[key]} ({0[units]})'.format(d)
-
-            value = d['v']
+                value = d['v']
             units = d['units']
 
             yield name, value, units

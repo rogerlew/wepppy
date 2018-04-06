@@ -822,7 +822,6 @@ Any comments:
         s = [s.format(self, majorComponent=self.majorComponent,
                       horizon0=self.horizons[0])]
 
-        depth = 0.0
         ksat_last = 0.0
         
         last_valid_i = [i for i, v in enumerate(self.horizons_mask) if v and not i == self.res_lyr_i][-1]
@@ -837,14 +836,13 @@ Any comments:
                 #  depth += h.hzdepb_r
                 continue
             
-            hzdepb_r10 = (depth + h.hzdepb_r) * 10.0
-            total_depth += hzdepb_r10
+            hzdepb_r10 = h.hzdepb_r * 10.0
 
             # check if on last layer
             if i == last_valid_i:
-                # make sure the total depth is at least 210 mm
-                if total_depth < 210.0:
-                    hzdepb_r10 = 210.0 - total_depth + hzdepb_r10
+                # make sure the total depth is at least 200 mm
+                if hzdepb_r10 < 210.0:
+                    hzdepb_r10 = 210.0
                
             s2 = '{hzdepb_r10:0.03f}\t{0.dbthirdbar_r:0.02f}\t{ksat:0.04f}\t'\
                  '{0.anisotropy:0.01f}\t{0.field_cap:0.04f}\t{0.wilt_pt:0.04f}\t'\
