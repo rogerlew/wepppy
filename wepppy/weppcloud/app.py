@@ -62,7 +62,8 @@ from wepppy.wepp.out import TotalWatSed
 from wepppy.wepp.stats import (
     OutletSummary,
     HillSummary,
-    ChannelSummary
+    ChannelSummary,
+    TotalWatbal
 )
 
 from wepppy.nodb import (
@@ -1933,15 +1934,28 @@ def report_wepp_loss(runid):
 @app.route('/runs/<string:runid>/report/wepp/yearly_watbal')
 @app.route('/runs/<string:runid>/report/wepp/yearly_watbal/')
 def report_wepp_yearly_watbal(runid):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = [0, 1]
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
-    hill_rpt = wepp.report_hill_watbal()
-    chn_rpt = wepp.report_chn_watbal()
+
+    totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
+    totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
+                            phosOpts=wepp.phosphorus_opts)
+    totwatbal = TotalWatbal(totwatsed,
+                            exclude_yr_indxs=exclude_yr_indxs)
 
     return render_template('reports/wepp/yearly_watbal.htm',
-                           hill_rpt=hill_rpt,
-                           chn_rpt=chn_rpt,
+                           rpt=totwatbal,
                            ron=ron,
                            user=current_user)
 
