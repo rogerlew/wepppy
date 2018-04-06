@@ -17,5 +17,5 @@ for var in ['dayl', 'prcp', 'srad', 'srld']:
         if len(fns) > 0:
             cmd = ['gdalbuildvrt', '-separate', '.vrt'] + fns
 
-            print cmd
+            print(cmd)
             call(cmd)
