@@ -366,10 +366,4 @@ class Loss(object):
 
 if __name__ == "__main__":
     loss = Loss('/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/wepp/output/loss_pw0.txt',
-                '/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/',
-                exclude_yr_indxs=[1,2,6,8])
-    #print(loss.hill_tbl)
-    #print(loss.chn_tbl)
-    print(loss.out_tbl)
-    print(loss.avg_annual_years)
-    print(loss.wsarea)
+                '/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/')

@@ -120,8 +120,8 @@ precisions = OrderedDict([
         ('in', 2)])
      ),
     ('area', OrderedDict([
-        ('ha', 3),
-        ('acre', 3),
+        ('ha', 1),
+        ('acre', 1),
         ('m^2', 0)])
      ),
     ('weight', OrderedDict([
