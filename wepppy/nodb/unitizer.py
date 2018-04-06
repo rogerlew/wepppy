@@ -296,6 +296,9 @@ class Unitizer(NoDbBase):
             if in_units is None:
                 return ''
 
+            if in_units == 'pct' or in_units == '%':
+                return '%'
+
             unitclass = determine_unitclass(in_units)
             if unitclass is None:
                 return str(in_units)
@@ -317,6 +320,12 @@ class Unitizer(NoDbBase):
 
             if in_units is None:
                 return str(value)
+
+            if in_units == 'pct' or in_units == '%':
+                try:
+                    return '%0.2f' % float(value)
+                except ValueError:
+                    return '<i>{}</i>'.format(value)
 
             unitclass = determine_unitclass(in_units)
             if unitclass is None:

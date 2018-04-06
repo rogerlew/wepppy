@@ -58,7 +58,7 @@ class TotalWatSed(object):
         d['Area (ha)'] = d['Area (m^2)'] / 10000.0
         d['Cummulative Sed. Del (tonnes)'] = np.cumsum(d['Sed. Del (kg)'] / 1000.0)
         d['Sed. Del Density (tonne/ha)'] = (d['Sed. Del (kg)'] / 1000.0) / d['Area (ha)']
-        d['Precip (mm)'] = d['Precip Vol (m^3)'] / d['Area (m^2)'] * 1000.0
+        d['Precipitation (mm)'] = d['Precip Vol (m^3)'] / d['Area (m^2)'] * 1000.0
         d['Rain + Melt (mm)'] = d['Rain + Melt Vol (m^3)'] / d['Area (m^2)'] * 1000.0
         d['Transpiration (mm)'] = d['Transpiration Vol (m^3)'] / d['Area (m^2)'] * 1000.0
         d['Evaporation (mm)'] = d['Evaporation Vol (m^3)'] / d['Area (m^2)'] * 1000.0
@@ -87,30 +87,30 @@ class TotalWatSed(object):
 
         d['Streamflow (mm)'] = d['Runoff (mm)'] + d['Lateral Flow (mm)'] + d['Baseflow (mm)']
 
-        d['Simulated SWE (mm)'] = [0.0]
-        for p, rm in zip(d['Precip (mm)'], d['Rain + Melt (mm)']):
-            d['Simulated SWE (mm)'].append(p - rm + d['Simulated SWE (mm)'][-1])
-        d['Simulated SWE (mm)'] = np.array(d['Simulated SWE (mm)'][1:])
+        d['SWE (mm)'] = [0.0]
+        for p, rm in zip(d['Precipitation (mm)'], d['Rain + Melt (mm)']):
+            d['SWE (mm)'].append(p - rm + d['SWE (mm)'][-1])
+        d['SWE (mm)'] = np.array(d['SWE (mm)'][1:])
 
-        d['Simulated Sed. Del (tonne/day)'] = d['Sed. Del (kg)'] / 1000.0
+        d['Sed. Del (tonne)'] = d['Sed. Del (kg)'] / 1000.0
 
         if phosOpts is not None:
             assert isinstance(phosOpts, PhosphorusOpts)
             if phosOpts.isvalid:
-                d['Simulated P Load (mg)'] = d['Sed. Del (kg)'] * phosOpts.sediment
-                d['Simulated P Runoff (mg)'] = d['Runoff (mm)'] * phosOpts.surf_runoff * d['Area (ha)']
-                d['Simulated P Lateral (mg)'] = d['Lateral Flow (mm)'] * phosOpts.lateral_flow * d['Area (ha)']
-                d['Simulated P Baseflow (mg)'] = d['Baseflow (mm)'] * phosOpts.baseflow * d['Area (ha)']
-                d['Simulated Total P (kg)'] = (d['Simulated P Load (mg)'] +
-                                               d['Simulated P Runoff (mg)'] +
-                                               d['Simulated P Lateral (mg)'] +
-                                               d['Simulated P Baseflow (mg)']) / 1000.0 / 1000.0
-                d['Simulated Particulate P (kg)'] = d['Simulated P Load (mg)'] / 1000000.0
-                d['Simulated Soluble Reactive P (kg)'] = d['Simulated Total P (kg)'] - d['Simulated Particulate P (kg)']
+                d['P Load (mg)'] = d['Sed. Del (kg)'] * phosOpts.sediment
+                d['P Runoff (mg)'] = d['Runoff (mm)'] * phosOpts.surf_runoff * d['Area (ha)']
+                d['P Lateral (mg)'] = d['Lateral Flow (mm)'] * phosOpts.lateral_flow * d['Area (ha)']
+                d['P Baseflow (mg)'] = d['Baseflow (mm)'] * phosOpts.baseflow * d['Area (ha)']
+                d['Total P (kg)'] = (d['P Load (mg)'] +
+                                               d['P Runoff (mg)'] +
+                                               d['P Lateral (mg)'] +
+                                               d['P Baseflow (mg)']) / 1000.0 / 1000.0
+                d['Particulate P (kg)'] = d['P Load (mg)'] / 1000000.0
+                d['Soluble Reactive P (kg)'] = d['Total P (kg)'] - d['Particulate P (kg)']
 
-                d['Simulated P Total (kg/ha)'] = d['Simulated Total P (kg)'] / d['Area (ha)']
-                d['Simulated Particulate P (kg/ha)'] = d['Simulated Particulate P (kg)'] / d['Area (ha)']
-                d['Simulated Soluble Reactive P (kg/ha)'] = d['Simulated Soluble Reactive P (kg)'] / d['Area (ha)']
+                d['P Total (kg/ha)'] = d['Total P (kg)'] / d['Area (ha)']
+                d['Particulate P (kg/ha)'] = d['Particulate P (kg)'] / d['Area (ha)']
+                d['Soluble Reactive P (kg/ha)'] = d['Soluble Reactive P (kg)'] / d['Area (ha)']
 
         d['Water Year'] = []
         for j, y in zip(d['Julian'], d['Year']):

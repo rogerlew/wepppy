@@ -8,6 +8,7 @@
 
 from wepppy.all_your_base import parse_name, parse_units
 
+
 class ReportBase(object):
     @property
     def hdr(self):
@@ -18,6 +19,3 @@ class ReportBase(object):
     def units(self):
         for colname in self.header:
             yield parse_units(colname)
-
-if __name__ == "__main__":
-    pass
