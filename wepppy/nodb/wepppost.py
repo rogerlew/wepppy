@@ -250,17 +250,17 @@ class WeppPost(NoDbBase):
         self._hill_streamflow['Daily Lateral Flow (mm)'] = watsed.d['Lateral Flow (mm)']
         self._hill_streamflow['Daily Baseflow (mm)'] = watsed.d['Baseflow (mm)']
 
-        if 'Simulated Total P (kg)' in watsed.d:
-            self._hill_streamflow['Daily Total P (kg)'] = watsed.d['Simulated Total P (kg)']
+        if 'Total P (kg)' in watsed.d:
+            self._hill_streamflow['Daily Total P (kg)'] = watsed.d['Total P (kg)']
 
-        if 'Simulated Particulate P (kg)' in watsed.d:
-            self._hill_streamflow['Daily Particulate P (kg)'] = watsed.d['Simulated Particulate P (kg)']
+        if 'Particulate P (kg)' in watsed.d:
+            self._hill_streamflow['Daily Particulate P (kg)'] = watsed.d['Particulate P (kg)']
 
-        if 'Simulated Soluble Reactive P (kg)' in watsed.d:
-            self._hill_streamflow['Daily Soluble Reactive P (kg)'] = watsed.d['Simulated Soluble Reactive P (kg)']
+        if 'Soluble Reactive P (kg)' in watsed.d:
+            self._hill_streamflow['Daily Soluble Reactive P (kg)'] = watsed.d['Soluble Reactive P (kg)']
 
-        if 'Simulated Sed. Del (tonne/day)' in watsed.d:
-            self._hill_streamflow['Daily Sed. Del (tonne/day)'] = watsed.d['Simulated Sed. Del (tonne/day)']
+        if 'Sed. Del (tonne)' in watsed.d:
+            self._hill_streamflow['Daily Sed. Del (tonne/day)'] = watsed.d['Sed. Del (tonne)']
 
     def calc_channel_streamflow(self):
         output_dir = self.output_dir

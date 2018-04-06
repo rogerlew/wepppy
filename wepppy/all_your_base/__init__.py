@@ -184,7 +184,11 @@ def parse_units(colname):
         colsplit = colname.strip().split()
         if len(colsplit) < 2:
             return None
-        return colsplit[-1].replace('(', '').replace(')', '')
+
+        if '(' in colsplit[-1]:
+            return colsplit[-1].replace('(', '').replace(')', '')
+
+        return None
     except IndexError:
         return None
 
