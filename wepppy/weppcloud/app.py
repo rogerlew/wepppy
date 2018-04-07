@@ -1094,21 +1094,6 @@ def task_build_subcatchments(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/query/watershed')
-@app.route('/runs/<string:runid>/query/watershed/')
-def dev_watershed(runid):
-    wd = get_wd(runid)
-    wat_fn = _join(wd, 'watershed', 'wat.json')
-
-    if _exists(wat_fn):
-        with open(wat_fn) as fp:
-            watjs = json.load(fp)
-
-        return jsonify(watjs)
-
-    return jsonify(None)
-
-
 @app.route('/runs/<string:runid>/query/watershed/subcatchments')
 @app.route('/runs/<string:runid>/query/watershed/subcatchments/')
 def query_watershed_summary_subcatchments(runid):
@@ -1731,6 +1716,37 @@ def get_wepp_run_status_full(runid):
     except:
         return exception_factory('Error reading status.log')
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/query/subcatchments_summary')
+@app.route('/runs/<string:runid>/query/subcatchments_summary/')
+def query_subcatchments_summary(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    try:
+        subcatchments_summary = ron.subs_summary()
+
+        return jsonify(subcatchments_summary)
+    except:
+        return exception_factory('Error building summary')
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/query/channels_summary')
+@app.route('/runs/<string:runid>/query/channels_summary/')
+def query_channels_summary(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    try:
+        channels_summary = ron.chns_summary()
+
+        return jsonify(channels_summary)
+    except:
+        return exception_factory('Error building summary')
+    
+    
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/report/wepp/prep_details')
 @app.route('/runs/<string:runid>/report/wepp/prep_details/')

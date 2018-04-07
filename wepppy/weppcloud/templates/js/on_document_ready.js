@@ -576,4 +576,9 @@ $(document).ready(function () {
 
     project.set_readonly_controls({{ ron.readonly | tojson }});
 
+    // konami code!
+    Mousetrap.bind('up up down down left right left right b a', function() {
+        $('#btnPuModal').click();
+    });
+
 });
