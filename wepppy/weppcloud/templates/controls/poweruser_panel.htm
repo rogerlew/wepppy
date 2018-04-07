@@ -1,0 +1,50 @@
+<!-- Modal -->
+<div class="modal fade" id="puModal" role="dialog">
+<div class="modal-dialog">
+  <!-- Modal content-->
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">PowerUser Panel</h4>
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>NoDbs</h5>
+            <div class="list-group">
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/ron">nodb.ron</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/topaz">nodb.topaz</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/watershed">nodb.watershed</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/landuse">nodb.landuse</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/soils">nodb.soils</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/climate">nodb.climate</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/wepp">nodb.wepp</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/wepppost">nodb.wepppost</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/unitizer">nodb.unitizer</a>
+              {% if 'baer' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/baer">nodb.baer</a>
+              {% endif %}
+              {% if 'lt' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="../nodb/lt">nodb.lt</a>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h5>Directory Views</h5>
+            <div class="list-group">
+              <a class="list-group-item list-group-item-action" target="_blank" href="../tree">/</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../view/wepprun">wepp/runs</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../view/weppout">wepp/output</a>
+            </div>
+            <br/>
+            <h5>Data Queries</h5>
+            <div class="list-group">
+              <a class="list-group-item list-group-item-action" target="_blank" href="../query/subcatchments_summary/">subcatchments</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="../query/channels_summary/">channels</a>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
