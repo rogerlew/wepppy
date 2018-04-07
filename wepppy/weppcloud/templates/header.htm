@@ -23,6 +23,11 @@
         <a href='archive' class="nav-link" target="_blank"><span class="oi oi-cloud-download" title="Download this project"></span></a>
       </li>
     </ul>
+    <button class="btn btn-link" type="button" id="btnPuModal"
+            data-toggle="modal" data-target="#puModal"
+            title="up up down down left right left right b a">
+        <span class="oi oi-command"></span></a>
+    </button>
     {% if user.is_authenticated %}
     <label class="form-check-label">
       <input id="checkbox_readonly" type="checkbox" class="form-check-input"

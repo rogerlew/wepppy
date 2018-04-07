@@ -11,7 +11,7 @@ import os
 
 from os.path import exists as _exists
 from os.path import join as _join
-from os.path import join as _split
+from os.path import isdir
 
 import shutil
 
@@ -134,13 +134,15 @@ class Ron(NoDbBase):
 
                 try:
                     sbs_map = config.get('landuse', 'sbs_map')
+                    if sbs_map == '':
+                        sbs_map = None
                 except:
                     sbs_map = None
 
                 if sbs_map is not None:
                     sbs_map = _join(_thisdir, sbs_map)
                     assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
-
+                    assert isdir(sbs_map)
                     baer = wepppy.nodb.mods.Baer.getInstance(wd)
 
                     sbs_path = _join(baer.baer_dir, 'sbs.tif')
