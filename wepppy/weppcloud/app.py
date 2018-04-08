@@ -74,7 +74,8 @@ from wepppy.nodb import (
     Soils, SoilsMode, 
     Climate, ClimateStationMode,
     Wepp, WeppPost,
-    Unitizer
+    Unitizer,
+    Observed
 )
 
 from wepppy.nodb.mods import Baer
@@ -328,94 +329,6 @@ def task_usermod():
 
 
 _thisdir = os.path.dirname(__file__)
-
-
-"""
-#
-# Celery App for ascyncronous long-running processes
-#
-from celery import Celery
-
-def make_celery(app):
-    celery = Celery(
-        app.import_name,
-        task_ignore_result=False,
-        backend='rpc://',
-        broker='pyamqp://'
-    )
-
-    celery.conf.update(app.config)
-    TaskBase = celery.Task
-    class  ContextTask(TaskBase):
-        abstract = True
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
-celery_worker = make_celery(app)
-
-#
-# Running Celery 
-# need to run as www-data (uid=33)
-#  
-# $ sudo celery -A wepppy.weppcloud.app.celery_worker worker --loglevel=DEBUG --uid=33
-#
-
-
-def celery_status_factory(url):
-    return jsonify({'Success': True,
-                    'status_url': url})
-    
-#@celery_worker.task(bind=True, ignore_result=False)
-def run_wepp(self, wd):
-
-    try:
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
-        translator = Watershed.getInstance(wd).translator_factory()
-        runs_dir = os.path.abspath(wepp.runs_dir)
-
-        #
-        # Prep Hillslopes
-        self.update_state(state='PROGRESS',
-                          meta='Prepping hillslopes...')
-        wepp.prep_hillslopes()
-        
-        #
-        # Run Hillslopes
-        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-            wepp_id = translator.wepp(top=int(topaz_id))
-            
-            self.update_state(state='PROGRESS',
-                              meta='Completed %i of %i hillslopes...'
-                                   %( i, watershed.sub_n))
-            assert run_hillslope(wepp_id, runs_dir)
-        
-        #
-        # Prep Watershed
-        self.update_state(state='PROGRESS',
-                          meta='Prepping watershed...')
-        wepp.prep_watershed()
-        
-        #
-        # Run Watershed
-        self.update_state(state='PROGRESS',
-                          meta='Running watershed...')
-        assert wepppy.wepp.runner.run_watershed(runs_dir)
-        
-        self.update_state(state='SUCCESS',
-                          meta='Hillslope and Watershed Runs Completed Sucessfully')
-                          
-        return 'done running %s' % os.path.split(wd)[1]
-    except Exception:
-        self.update_state(state='FAILURE',
-                          meta=traceback.format_exc())
-        
-"""
-
 
 def tree(_dir='.', padding='', print_files=True):
 
@@ -717,6 +630,11 @@ def runs0(runid, config):
     wepp = Wepp.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
 
+    try:
+        observed = Observed.getInstance(wd)
+    except:
+        observed = Observed(wd, "%s.cfg" % config)
+
     landuseoptions = management.load_map().values()
     landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
 
@@ -728,6 +646,7 @@ def runs0(runid, config):
                            topaz=topaz, soils=soils,
                            ron=ron, landuse=landuse, climate=climate,
                            wepp=wepp, unitizer=unitizer,
+                           observed=observed,
                            landuseoptions=landuseoptions,
                            precisions=wepppy.nodb.unitizer.precisions)
 
@@ -1424,10 +1343,18 @@ def set_climatestation(runid):
     return success_factory()
 
 
+@app.route('/runs/<string:runid>/query/climatestation')
 @app.route('/runs/<string:runid>/query/climatestation/')
 def query_climatestation(runid):
     wd = get_wd(runid)
     return jsonify(Climate.getInstance(wd).climatestation)
+
+
+@app.route('/runs/<string:runid>/query/climate_has_observed')
+@app.route('/runs/<string:runid>/query/climate_has_observed/')
+def query_climate_has_observed(runid):
+    wd = get_wd(runid)
+    return jsonify(Climate.getInstance(wd).has_observed)
 
 
 @app.route('/runs/<string:runid>/report/climate/')
@@ -1814,50 +1741,39 @@ def submit_task_run_wepp(runid):
     return success_factory()
 
 
-"""
-    #task = run_wepp.delay(wd)
-    #return celery_status_factory('../status/wepprun/{0}/'.format(task.id))
-    
- 
-@app.route('/runs/<string:runid>/status/wepprun/<task_id>')
-@app.route('/runs/<string:runid>/status/wepprun/<task_id>/')
-def status_wepprun(runid, task_id):
-    task = run_wepp.AsyncResult(task_id)
-    return jsonify({'state': task.state, 
-                    'info': task.info})
-    
-    
-    if task.state == 'PENDING':
-        # job did not start yet
-        response = {
-            'state': task.state,
-            'msg': 'Request state pending or unknown...' }
-        
-    elif task.state == 'PROGRESS':
-        response = {
-            'state': task.state,
-            'msg': task.info.get('msg', None) }
-        
-    elif task.state != 'FAILURE':
-        response = {
-            'state': task.state,
-            'msg': task.info.get('msg', None) }
-            
-    elif task.state != 'SUCCESS':
-        response = {
-            'state': task.state,
-            'msg': task.info.get('msg', None) }
-            
-    else:
-        # something went wrong in the background job
-        response = {
-            'state': task.state,
-            'msg': str(task.info) }
-            
-    return jsonify(response)
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/run_model_fit', methods=['POST'])
+@app.route('/runs/<string:runid>/tasks/run_model_fit/', methods=['POST'])
+def submit_task_run_model_fit(runid):
+    wd = get_wd(runid)
+    observed = Observed.getInstance(wd)
 
-"""
+    textdata = request.json.get('data', None)
 
+    try:
+        observed.parse_textdata(textdata)
+    except Exception:
+        return exception_factory('Error parsing text')
+
+    try:
+        observed.calc_model_fit()
+    except Exception:
+        return exception_factory('Error running model fit')
+
+    return success_factory()
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/report/observed')
+@app.route('/runs/<string:runid>/report/observed/')
+def report_observed(runid):
+    wd = get_wd(runid)
+    observed = Observed.getInstance(wd)
+    ron = Ron.getInstance(wd)
+
+    return render_template('reports/wepp/observed.htm',
+                           results=observed.results,
+                           ron=ron,
+                           user=current_user)
 
 @app.route('/runs/<string:runid>/view/wepprun')
 @app.route('/runs/<string:runid>/view/wepprun/')
@@ -1974,7 +1890,6 @@ def report_wepp_yearly_watbal(runid):
                            rpt=totwatbal,
                            ron=ron,
                            user=current_user)
-
 
 @app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal')
 @app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal/')

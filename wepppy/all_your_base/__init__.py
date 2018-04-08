@@ -148,7 +148,6 @@ def isfloat(f):
     except Exception:
         return False
 
-
 def try_parse(f):
     # noinspection PyBroadException
     try:

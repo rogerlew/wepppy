@@ -6,6 +6,8 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from datetime import datetime
+
 import pandas as pd
 
 from wepppy.wepp.out import Loss
@@ -54,6 +56,8 @@ class Ebe(object):
         for L, colname in zip(data, header):
             df[colname] = L
 
+        df['Sed. Del (kg)'] = df['Sediment Yield (kg)']
+
         self.df = df
         self.years = int(max(df['year']))
         self.header = header
@@ -75,6 +79,6 @@ if __name__ == "__main__":
     loss_rtp = Loss('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2output.txt')
     ebe_rpt = Ebe('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/out/test/data/ww2events.txt')
     pprint(ebe_rpt.years)
-    pprint(ebe_rpt.df)
+    pprint(ebe_rpt.df.keys())
 
 #    report = EbeReport('/home/weppdev/PycharmProjects/wepppy/wepppy/validation/blackwood_MultPRISM/wepp/output/ebe_pw0.txt')

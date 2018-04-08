@@ -44,6 +44,12 @@ from .wepppost import (
     WeppPost,
     WeppPostNoDbLockedException
 )
+
+from .observed import (
+    Observed,
+    ObservedNoDbLockedException
+)
+
 from .unitizer import (
     Unitizer, 
     UnitizerNoDbLockedException

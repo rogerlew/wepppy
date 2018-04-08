@@ -1,0 +1,31 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}observed_form{% endblock %}
+{% block form_title %}Observed Data Model Fit{% endblock %}
+{% block inputs %}
+    <div class="form-group row hide-readonly">
+      <div class="col-sm-6">
+        <h5>Enter Observed Timeseries</h5>
+        <p>Text should contain the following column headers matching <i>totalwatsed</i> e.g.:
+          <ul>
+            <li>Streamflow (mm)</li>
+            <li>Sed. Del (kg)</li>
+            <li>Total P (kg)</li>
+            <li>Soluble Reactive P (kg)</li>
+            <li>Particulate P (kg)</li>
+          </ul>
+          Header and data values should be delimited by commas
+        </p>
+        <textarea id="observed_text" class="form-control" rows="10"></textarea>
+      </div>
+    </div>
+    <div class="form-group row hide-readonly">
+      <div class="col-sm-4">
+        <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+                type="button"
+                onclick="Observed.getInstance().run_model_fit();">Run Model Fit</button>
+      </div>
+      <div class="col-sm-5">
+        <small id="hint_run_wepp"></small>
+      </div>
+    </div>
+{% endblock %}

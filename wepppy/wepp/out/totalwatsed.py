@@ -120,6 +120,7 @@ class TotalWatSed(object):
             d[k] = [float(v) for v in d[k]]
 
         self.d = d
+        self.wsarea = float(d['Area (m^2)'][0])
 
     def export(self, fn):
         d = self.d
