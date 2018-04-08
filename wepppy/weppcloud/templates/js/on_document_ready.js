@@ -21,6 +21,7 @@ $(document).ready(function () {
     var soil = Soil.getInstance();
     var climate = Climate.getInstance();
     var wepp = Wepp.getInstance();
+    var observed = Observed.getInstance();
 
     team.hideStacktrace();
     channel_ctrl.hideStacktrace();
@@ -490,13 +491,17 @@ $(document).ready(function () {
     // Initial Configuration
     //
 
-
+    observed.hideControl();
     climate.showHideControls(-1);
     // load climate
     if ( {{ climate.has_climate | tojson }} ) {
         climate.refreshStationSelection();
         climate.report();
         climate.viewStationMonthlies();
+
+        if ( {{ climate.has_observed | tojson }} ) {
+            observed.showControl();
+        }
     }
 
     /*
@@ -519,6 +524,7 @@ $(document).ready(function () {
 
     wepp.form.on("WEPP_RUN_TASK_COMPLETED", function () {
         wepp.report();
+        observed.onWeppRunCompleted();
     });
 
     //
@@ -527,6 +533,11 @@ $(document).ready(function () {
     // show report if wepp has run
     if ( {{ wepp.has_run | tojson }} ) {
         wepp.report();
+    }
+
+    // show report if wepp has run
+    if ( {{ observed.has_results | tojson }} ) {
+        observed.report();
     }
 
     /*

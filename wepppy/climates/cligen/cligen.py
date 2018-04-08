@@ -154,6 +154,12 @@ class ClimateFile(object):
 
             self.lines[self.data0line + i] = row
 
+    @property
+    def years(self):
+        df = self.as_dataframe()
+        years = [int(v) for v in sorted(set(df['year']))]
+        return years
+
     def as_dataframe(self):
         colnames = self.colnames
         dtypes = self.dtypes

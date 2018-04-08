@@ -25,7 +25,7 @@ import jsonpickle
 # wepppy
 from wepppy.climates import cligen_client as cc
 from wepppy.climates.prism import prism_optimized2, prism_revision
-from wepppy.climates.cligen import CligenStationsManager
+from wepppy.climates.cligen import CligenStationsManager, ClimateFile
 from wepppy.all_your_base import isint, isfloat
 from wepppy.watershed_abstraction import ischannel
 
@@ -184,6 +184,19 @@ class Climate(NoDbBase):
     def onLoad_refreshStationSelection(self):
         return json.dumps(self.climatestation_mode is not
                           ClimateStationMode.Undefined)
+
+    @property
+    def has_observed(self):
+        cli_fn = self.cli_fn
+
+        if cli_fn is None:
+            return False
+
+        cli_path = _join(self.cli_dir, self.cli_fn)
+        cli = ClimateFile(cli_path)
+        years = cli.years
+
+        return all(yr > 1900 for yr in years)
 
     #
     # climatestation
