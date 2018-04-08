@@ -274,3 +274,11 @@ class NoDbBase(object):
     @property
     def export_winwepp_dir(self):
         return _join(self.wd, 'export', 'winwepp')
+
+    @property
+    def observed_dir(self):
+        return _join(self.wd, 'observed')
+
+    @property
+    def observed_fn(self):
+        return _join(self.observed_dir, 'observed.csv')

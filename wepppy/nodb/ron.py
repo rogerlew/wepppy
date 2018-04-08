@@ -125,6 +125,7 @@ class Ron(NoDbBase):
             wepppy.nodb.Wepp(wd, cfg_fn)
             wepppy.nodb.Unitizer(wd, cfg_fn)
             wepppy.nodb.WeppPost(wd, cfg_fn)
+            wepppy.nodb.Observed(wd, cfg_fn)
             
             if "lt" in self.mods:
                 wepppy.nodb.mods.LakeTahoe(wd, cfg_fn)
