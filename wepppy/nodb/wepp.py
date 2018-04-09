@@ -51,8 +51,7 @@ from wepppy.wepp.management import (
 from wepppy.all_your_base import (
     isfloat,
     read_arc,
-    wgs84_proj4,
-    parse_datetime
+    wgs84_proj4
 )
 
 from wepppy.wepp.out import (
@@ -72,8 +71,8 @@ from .soils import Soils, SoilsMode
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
 from .topaz import Topaz
-from .wepppost import  WeppPost
-
+from .wepppost import WeppPost
+from .log_mixin import LogMixin
 
 class BaseflowOpts(object):
     def __init__(self):
@@ -180,7 +179,7 @@ class WeppNoDbLockedException(Exception):
     pass
 
 
-class Wepp(NoDbBase):
+class Wepp(NoDbBase, LogMixin):
     __name__ = 'Wepp'
 
     def __init__(self, wd, cfg_fn):
@@ -199,7 +198,6 @@ class Wepp(NoDbBase):
             self.run_flowpaths = False
             self.wepp_ui = False
             self.loss_grid_d_path = None
-            self.status_log = _join(self.runs_dir, 'status.log')
 
             self.clean()
 
@@ -234,6 +232,10 @@ class Wepp(NoDbBase):
     def _lock(self):
         return _join(self.wd, 'wepp.nodb.lock')
 
+    @property
+    def status_log(self):
+        return _join(self.runs_dir, 'status.log')
+
     def parse_inputs(self, kwds):
         self.lock()
 
@@ -253,39 +255,6 @@ class Wepp(NoDbBase):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return _exists(loss_pw0)
-
-    #
-    # Log methods, TODO: make Mixin
-    #
-    def _calc_log_elapsed(self):
-        with open(self.status_log) as fp:
-            lines = fp.readlines()
-            r0 = parse_datetime(lines[0])
-            t0 = parse_datetime(lines[-1])
-
-        r_elapsed = datetime.now() - r0
-        t_elapsed = datetime.now() - t0
-
-        return r_elapsed, t_elapsed, lines[-1]
-
-    def get_log_last(self):
-        r_elapsed, t_elapsed, s = self._calc_log_elapsed()
-
-        if s.strip().endswith('...'):
-            return '{} ({}s | {}s)'.format(s, t_elapsed.total_seconds(), r_elapsed.total_seconds())
-        else:
-            return s
-
-    def log(self, msg):
-        t0 = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S.%f')
-        with open(self.status_log, 'a') as fp:
-            fp.write('[{}] {}'.format(t0, msg))
-
-    def log_done(self):
-        r_elapsed, t_elapsed, s = self._calc_log_elapsed()
-
-        with open(self.status_log, 'a') as fp:
-            fp.write('done. ({}s | {}s)\n'.format(t_elapsed.total_seconds(), r_elapsed.total_seconds()))
 
     #
     # hillslopes
@@ -445,29 +414,16 @@ class Wepp(NoDbBase):
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
-        if climate.climate_mode == ClimateMode.Localized:
-            for topaz_id, cli_fn in climate.sub_cli_fns.items():
-                wepp_id = translator.wepp(top=int(topaz_id))
-                dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
-                cli_path = _join(cli_dir, cli_fn)
-                shutil.copyfile(cli_path, dst_fn)
+        for topaz_id, _ in watershed.sub_iter():
+            wepp_id = translator.wepp(top=int(topaz_id))
+            dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
+            cli_path = _join(cli_dir, climate.cli_fn)
+            shutil.copyfile(cli_path, dst_fn)
 
-                if getattr(self, 'run_flowpaths', False):
-                    for fp in watershed.fps_summary(topaz_id):
-                        dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
-                        shutil.copyfile(cli_path, dst_fn)
-
-        else:
-            for topaz_id, _ in watershed.sub_iter():
-                wepp_id = translator.wepp(top=int(topaz_id))
-                dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
-                cli_path = _join(cli_dir, climate.cli_fn)
-                shutil.copyfile(cli_path, dst_fn)
-
-                if getattr(self, 'run_flowpaths', False):
-                    for fp in watershed.fps_summary(topaz_id):
-                        dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
-                        shutil.copyfile(cli_path, dst_fn)
+            if getattr(self, 'run_flowpaths', False):
+                for fp in watershed.fps_summary(topaz_id):
+                    dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
+                    shutil.copyfile(cli_path, dst_fn)
                 
     def _make_hillslope_runs(self, translator):
         watershed = Watershed.getInstance(self.wd)

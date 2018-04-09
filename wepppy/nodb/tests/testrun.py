@@ -81,7 +81,7 @@ if __name__ == '__main__':
     climate = Climate.getInstance(wd)
     climate.input_years = 5
     climate.climatestation = stations[0]['id']
-    climate.climate_mode = ClimateMode.Single
+    climate.climate_mode = ClimateMode.Vanilla
 
 #    climate.climate_mode = ClimateMode.Localized
 

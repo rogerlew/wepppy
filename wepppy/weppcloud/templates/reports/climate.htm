@@ -14,6 +14,10 @@
     <dd><a href="../view/climate/{{ climate.par_fn }}" target="_blank">{{ climate.par_fn }}</a></dd>
     <dd><a href="../view/climate/{{ climate.cli_fn }}" target="_blank">{{ climate.cli_fn }}</a></dd>
 </dl>
+<h5>Climate Build Log</h5>
+<p>
+    <a href="../report/climate/log/" target="_blank">View Climate Build Log</a>
+</p>
 {% if climate.monthlies is not none %}
  <table class="table table-condensed">
     <thead>
@@ -58,27 +62,4 @@
       </tr>
     </tbody>
 </table>
-{% endif %}
-{% if climate.climate_mode == 1 %}
-<h5>Localized Climates</h5>
- <table class="table table-condensed">
-    <thead>
-      <tr>
-        <th>Subcatchment</th>
-        <th>PAR</th>
-        <th>CLI</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for (topaz_id, par_fn), cli_fn in 
-       climate.sub_par_fns.items() | 
-       zip(climate.sub_cli_fns.values()) %}
-      <tr>
-        <td>{{ topaz_id }}</td>
-        <td><a href="../view/climate/{{ par_fn }}" target="_blank">{{ par_fn }}</a></td>
-        <td><a href="../view/climate/{{ cli_fn }}" target="_blank">{{ cli_fn }}</a></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
 {% endif %}

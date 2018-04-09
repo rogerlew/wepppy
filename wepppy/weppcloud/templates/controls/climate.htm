@@ -31,14 +31,20 @@
     <h4>Climate Method</h4>
     <div class="form-group row">
         <div class="col-sm-6">
-            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> Single Climate for Watershed</label><br/>
-            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> Single Climate PRISM</label><br/>
-            {% if current_user.has_role("Dev")%}
-            <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_mode1" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 1] }}> Determine per Hillslope (PRISM / Daymet)</label><br/>
-            {% endif %}
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" Cligen</label><br/>
+            <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified</label><br/>
             <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (Daymet)</label><br/>
-            <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5)</label><br/>
+            <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) <i>Experimental</i></label><br/>
             <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label>
+        </div>
+    </div>
+    <div id="climate_spatialmode_controls">
+        <h5>Spatial Mode</h5>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}> Single Climate for Watershed</label><br/>
+                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates (per hillslope)</label><br/>
+            </div>
         </div>
     </div>
     <div class="form-group row" id="input_years_container">
@@ -51,58 +57,10 @@
         </div>
     </div>
     <div id="climate_mode0_controls">
-        <h5>Single Climate for Watershed Parameters ("Vanilla" Cligen)</h5>
+        <h5>"Vanilla" Cligen Parameters</h5>
     </div>
-    <div id="climate_mode1_controls">
-        <h5>Determine per Hillslope (PRISM / Daymet) Parameters</h5>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_p_mean">Mean P: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_mean" value="0" {{ ('', 'checked')[climate.localized_p_mean == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_mean" value="1" {{ ('', 'checked')[climate.localized_p_mean == 1] }} > Daymet</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_mean" value="2" {{ ('', 'checked')[climate.localized_p_mean == 2] }} > PRISM</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_p_std">Std P: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_std" value="0" {{ ('', 'checked')[climate.localized_p_std == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_std" value="1" {{ ('', 'checked')[climate.localized_p_std == 1] }} > Daymet</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_p_skew">Skew P: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_skew" value="0" {{ ('', 'checked')[climate.localized_p_skew == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_skew" value="1" {{ ('', 'checked')[climate.localized_p_skew == 1] }} > Daymet</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_p_ww">P(W/W): </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_ww" value="0" {{ ('', 'checked')[climate.localized_p_ww == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_ww" value="1" {{ ('', 'checked')[climate.localized_p_ww == 1] }} > Daymet</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_p_wd">P(W/D): </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_p_wd" value="0" {{ ('', 'checked')[climate.localized_p_wd == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_p_wd" value="1" {{ ('', 'checked')[climate.localized_p_wd == 1] }} > Daymet</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_tmax">T Max: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_tmax" value="0" {{ ('', 'checked')[climate.localized_tmax == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2" >&nbsp;</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_tmax" value="2" {{ ('', 'checked')[climate.localized_tmax == 2] }} > PRISM</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_tmin">T Max: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_tmin" value="0" {{ ('', 'checked')[climate.localized_tmin == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2" >&nbsp;</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_tmin" value="2" {{ ('', 'checked')[climate.localized_tmin == 2] }} > PRISM</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_solrad">Solar Rad: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_solrad" value="0" {{ ('', 'checked')[climate.localized_solrad == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_solrad" value="1" {{ ('', 'checked')[climate.localized_solrad == 1] }} > Daymet</label>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2" for="localized_dewpoint">Dewpoint: </label>
-            <label class="col-sm-3 radio-inline"><input type="radio" name="localized_dewpoint" value="0" {{ ('', 'checked')[climate.localized_dewpoint == 0] }} > Station (non-spatial)</label>
-            <label class="col-sm-2 radio-inline"><input type="radio" name="localized_dewpoint" value="1" {{ ('', 'checked')[climate.localized_dewpoint == 1] }} > Daymet</label>
-        </div>
+    <div id="climate_mode5_controls">
+        <h5>PRISM Modified Cligen</h5>
     </div>
     <div id="climate_mode2_controls">
         <h5>Observed (Daymet)</h5>
