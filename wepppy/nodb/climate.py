@@ -410,7 +410,11 @@ class Climate(NoDbBase, LogMixin):
         if mode == ClimateMode.Undefined:
             return False
 
-        if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+        spatialmode = getattr(self, 'climate_spatialmode', None)
+        if spatialmode is None:
+            return False
+
+        if spatialmode == ClimateSpatialMode.Multiple:
             return self.sub_par_fns is not None and \
                    self.sub_cli_fns is not None and \
                    self.cli_fn is not None
