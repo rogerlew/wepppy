@@ -502,10 +502,11 @@ $(document).ready(function () {
         climate.refreshStationSelection();
         climate.report();
         climate.viewStationMonthlies();
+    }
 
-        if ( {{ climate.has_observed | tojson }} ) {
-            observed.showControl();
-        }
+    if ( {{ climate.has_observed | tojson }} ||
+         {{ observed.results is not none | tojson }}) {
+        observed.showControl();
     }
 
     /*

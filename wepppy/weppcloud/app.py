@@ -513,6 +513,15 @@ def index():
 @app.route('/create/<config>')
 def create(config):
     runid = str(uuid.uuid4())
+
+    email = getattr(current_user, 'email', '')
+    if email.startswith('rogerlew@'):
+        runid = 'rlew' + runid[4:]
+    elif email.startswith('mdobre@'):
+        runid = 'mdob' + runid[4:]
+    elif request.remote_addr == '127.0.0.1':
+        runid = 'devvm' + runid[5:]
+
     wd = get_wd(runid)
     assert not _exists(wd)
     os.mkdir(wd)
