@@ -646,6 +646,9 @@ class Climate(NoDbBase, LogMixin):
             self._build_climate_optimized(verbose=verbose)
 
     def _build_climate_optimized(self, verbose):
+
+        self.log('  running _build_climate_optimized... \n')
+
         self.lock()
 
         # noinspection PyBroadInspection
@@ -678,12 +681,12 @@ class Climate(NoDbBase, LogMixin):
             )
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.log('  building climates... \n')
                 # build a climate for each subcatchment
                 sub_par_fns = {}
                 sub_cli_fns = {}
                 for topaz_id, ss in watershed._subs_summary.items():
-                    if verbose:
-                        print('fetching climate for {}'.format(topaz_id))
+                    self.log('fetching climate for {}... '.format(topaz_id))
 
                     lng, lat = ss.centroid.lnglat
                     suffix = '_{}'.format(topaz_id)
@@ -696,10 +699,14 @@ class Climate(NoDbBase, LogMixin):
                     sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
                     sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)
 
+                    self.log_done()
+
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
 
+            self.log('  finalizing climate build... ')
             self.dump_and_unlock()
+            self.log_done()
 
         except Exception:
             self.unlock('-f')
