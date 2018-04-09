@@ -448,6 +448,10 @@ $(document).ready(function () {
         climate.setMode();
     });
 
+    $("[name='climate_spatialmode']").change(function () {
+        climate.setSpatialMode();
+    });
+
     $("[name='climatestation_mode']").change(function () {
         climate.setStationMode();
     });
@@ -492,7 +496,7 @@ $(document).ready(function () {
     //
 
     observed.hideControl();
-    climate.showHideControls(-1);
+    climate.showHideControls({{ climate.climate_mode | int }});
     // load climate
     if ( {{ climate.has_climate | tojson }} ) {
         climate.refreshStationSelection();

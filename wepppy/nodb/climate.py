@@ -15,6 +15,8 @@ import json
 from enum import IntEnum
 import random
 
+import shutil
+
 from shutil import copyfile
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -24,7 +26,7 @@ import jsonpickle
 
 # wepppy
 from wepppy.climates import cligen_client as cc
-from wepppy.climates.prism import prism_optimized2, prism_revision
+from wepppy.climates.prism import prism_optimized2
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile
 from wepppy.all_your_base import isint, isfloat
 from wepppy.watershed_abstraction import ischannel
@@ -32,6 +34,7 @@ from wepppy.watershed_abstraction import ischannel
 # wepppy submodules
 from .base import NoDbBase
 from .watershed import Watershed
+from .log_mixin import LogMixin
 
 CLIMATE_MAX_YEARS = 100
 
@@ -56,19 +59,21 @@ class ClimateStationMode(IntEnum):
 
 class ClimateMode(IntEnum):
     Undefined = -1
+    Vanilla = 0     # Single Only
+    Observed = 2    # Daymet, single or multiple
+    Future = 3      # Single Only
+    SingleStorm = 4 # Single Only
+    PRISM = 5       # Single or muliple
+
+
+class ClimateSpatialMode(IntEnum):
+    Undefined = -1
     Single = 0
-    Localized = 1
-    Observed = 2
-    Future = 3
-    SingleStorm = 4
-    SinglePRISM = 5
-    Optimized = 6
-    ObservedPRISM = 7
-    MultipleObserved = 8
+    Multiple = 1
 
 
 # noinspection PyUnusedLocal
-class Climate(NoDbBase):
+class Climate(NoDbBase, LogMixin):
     def __init__(self, wd, cfg_fn):
         super(Climate, self).__init__(wd, cfg_fn)
         
@@ -80,16 +85,8 @@ class Climate(NoDbBase):
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
             self._climate_mode = ClimateMode.Undefined
+            self._climate_spatialmode = ClimateSpatialMode.Single
             self._cligen_seed = None
-            self._localized_p_mean = 2  # 012
-            self._localized_p_std = 0  # 01
-            self._localized_p_skew = 0  # 01
-            self._localized_p_ww = 0  # 01
-            self._localized_p_wd = 0  # 01
-            self._localized_tmax = 2  # 02
-            self._localized_tmin = 2  # 02
-            self._localized_solrad = 1  # 01
-            self._localized_dewpoint = 0  # 01
             self._observed_start_year = ''
             self._observed_end_year = ''
             self._future_start_year = ''
@@ -145,6 +142,46 @@ class Climate(NoDbBase):
     @property
     def _lock(self):
         return _join(self.wd, 'climate.nodb.lock')
+
+    @property
+    def status_log(self):
+        return _join(self.cli_dir, 'status.log')
+
+    @property
+    def observed_start_year(self):
+        return self._observed_start_year
+
+    @property
+    def observed_end_year(self):
+        return self._observed_end_year
+
+    @property
+    def future_start_year(self):
+        return self._future_start_year
+
+    @property
+    def future_end_year(self):
+        return self._future_end_year
+
+    @property
+    def ss_storm_date(self):
+        return self._ss_storm_date
+
+    @property
+    def ss_design_storm_amount_inches(self):
+        return self._ss_design_storm_amount_inches
+
+    @property
+    def ss_duration_of_storm_in_hours(self):
+        return self._ss_duration_of_storm_in_hours
+
+    @property
+    def ss_time_to_peak_intensity_pct(self):
+        return self._ss_time_to_peak_intensity_pct
+
+    @property
+    def ss_max_intensity_inches_per_hour(self):
+        return self._ss_max_intensity_inches_per_hour
 
     #
     # climatestation_mode
@@ -259,6 +296,34 @@ class Climate(NoDbBase):
             raise
 
     #
+    # climate_spatial mode
+    #
+    @property
+    def climate_spatialmode(self):
+        return self._climate_spatialmode
+
+    @climate_spatialmode.setter
+    def climate_spatialmode(self, value):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            if isinstance(value, ClimateSpatialMode):
+                self._climate_spatialmode = value
+
+            elif isinstance(value, int):
+                self._climate_spatialmode = ClimateSpatialMode(value)
+
+            else:
+                raise ValueError('most be ClimateSpatialMode or int')
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    #
     # station search
     #
 
@@ -335,57 +400,17 @@ class Climate(NoDbBase):
         self._input_years = value
 
     #
-    # localization
-    #
-    @property
-    def localized_p_mean(self):
-        return self._localized_p_mean  # 012
-
-    @property
-    def localized_p_std(self):
-        return self._localized_p_std  # 01
-
-    @property
-    def localized_p_skew(self):
-        return self._localized_p_skew  # 01
-
-    @property
-    def localized_p_ww(self):
-        return self._localized_p_ww  # 01
-
-    @property
-    def localized_p_wd(self):
-        return self._localized_p_wd  # 01
-
-    @property
-    def localized_tmax(self):
-        return self._localized_tmax  # 02
-
-    @property
-    def localized_tmin(self):
-        return self._localized_tmin  # 02
-
-    @property
-    def localized_solrad(self):
-        return self._localized_solrad  # 01
-
-    @property
-    def localized_dewpoint(self):
-        return self._localized_dewpoint  # 01
-
-    #
     # has_climate
     #
     @property
     def has_climate(self):
         mode = self.climate_mode
-
         assert isinstance(mode, ClimateMode)
 
         if mode == ClimateMode.Undefined:
             return False
 
-        if self.climate_mode == ClimateMode.Localized:
+        if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             return self.sub_par_fns is not None and \
                    self.sub_cli_fns is not None and \
                    self.cli_fn is not None
@@ -404,7 +429,7 @@ class Climate(NoDbBase):
             if isint(input_years):
                 input_years = int(input_years)
 
-            if climate_mode in [ClimateMode.Single, ClimateMode.Localized]:
+            if climate_mode in [ClimateMode.Vanilla]:
                 assert isint(input_years)
                 assert input_years > 0
                 assert input_years < CLIMATE_MAX_YEARS
@@ -417,18 +442,6 @@ class Climate(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-
-        # mode 1: localized
-        self.set_localized_pars(
-            **dict(p_mean=kwds['localized_p_mean'],
-                   p_std=kwds['localized_p_std'],
-                   p_skew=kwds['localized_p_skew'],
-                   p_ww=kwds['localized_p_ww'],
-                   p_wd=kwds['localized_p_wd'],
-                   solrad=kwds['localized_solrad'],
-                   tmax=kwds['localized_tmax'],
-                   tmin=kwds['localized_tmin'],
-                   dewpoint=kwds['localized_dewpoint']))
 
         # mode 2: observed
         self.set_observed_pars(
@@ -458,78 +471,6 @@ class Climate(NoDbBase):
         # noinspection PyBroadInspection
         try:
             self.orig_cli_fn = kwds['climate_fn']
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    def set_localized_pars(self, **kwds):
-        """
-        set the localized pars.
-        must provide named keyword args to avoid mucking this up
-
-        The kwds are coded such that:
-            0 for station data
-            1 for Daymet
-            2 for prism
-        """
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            p_mean = kwds['p_mean']
-            p_std = kwds['p_std']
-            p_skew = kwds['p_skew']
-            p_ww = kwds['p_ww']
-            p_wd = kwds['p_wd']
-            solrad = kwds['solrad']
-            tmax = kwds['tmax']
-            tmin = kwds['tmin']
-            dewpoint = kwds['dewpoint']
-
-            p_mean = int(p_mean)
-            assert p_mean in [0, 1, 2]
-
-            p_std = int(p_std)
-            assert p_std in [0, 1]
-
-            p_skew = int(p_skew)
-            assert p_skew in [0, 1]
-
-            p_wd = int(p_wd)
-            assert p_wd in [0, 1]
-
-            p_ww = int(p_ww)
-            assert p_ww in [0, 1]
-
-            solrad = int(solrad)
-            assert solrad in [0, 1]
-
-            tmax = int(tmax)
-            assert tmax in [0, 2]
-
-            tmin = int(tmin)
-            assert tmin in [0, 2]
-
-            dewpoint = int(dewpoint)
-            assert dewpoint in [0, 1]
-
-            if p_mean + p_std + p_skew + p_wd + p_ww + \
-               solrad + tmin + tmax + dewpoint == 0:
-                raise Exception('No localizations are defined, \
-                                 run single climate')
-
-            self._localized_p_mean = p_mean
-            self._localized_p_std = p_std
-            self._localized_p_skew = p_skew
-            self._localized_p_wd = p_wd
-            self._localized_p_ww = p_ww
-            self._localized_solrad = solrad
-            self._localized_tmin = tmin
-            self._localized_tmax = tmax
-            self._localized_dewpoint = dewpoint
 
             self.dump_and_unlock()
 
@@ -615,15 +556,15 @@ class Climate(NoDbBase):
 
         # noinspection PyBroadInspection
         try:
-            ss_storm_date = kwds['ss_storm_date']
+            ss_storm_date = kwds['ss_storm_date'][0]
             ss_design_storm_amount_inches = \
-                kwds['ss_design_storm_amount_inches']
+                kwds['ss_design_storm_amount_inches'][0]
             ss_duration_of_storm_in_hours = \
-                kwds['ss_duration_of_storm_in_hours']
+                kwds['ss_duration_of_storm_in_hours'][0]
             ss_max_intensity_inches_per_hour = \
-                kwds['ss_max_intensity_inches_per_hour']
+                kwds['ss_max_intensity_inches_per_hour'][0]
             ss_time_to_peak_intensity_pct = \
-                kwds['ss_time_to_peak_intensity_pct']
+                kwds['ss_time_to_peak_intensity_pct'][0]
 
             try:
                 ss_design_storm_amount_inches = \
@@ -673,23 +614,20 @@ class Climate(NoDbBase):
             raise
 
     def build(self, verbose=False):
+        cli_dir = self.cli_dir
+        if _exists(cli_dir):
+            shutil.rmtree(cli_dir)
+        os.mkdir(cli_dir)
+
         climate_mode = self.climate_mode
 
         # vanilla Cligen
-        if climate_mode == ClimateMode.Single:
-            self._build_climate_single()
-
-        # localized
-        elif climate_mode == ClimateMode.Localized:
-            self._build_climate_localized(verbose=verbose)
+        if climate_mode == ClimateMode.Vanilla:
+            self._build_climate_vanilla()
 
         # observed
         elif climate_mode == ClimateMode.Observed:
             self._build_climate_observed()
-
-        # observed
-        elif climate_mode == ClimateMode.MultipleObserved:
-            self._build_climate_multiple_observed()
 
         # future
         elif climate_mode == ClimateMode.Future:
@@ -700,68 +638,8 @@ class Climate(NoDbBase):
             self._build_climate_single_storm()
 
         # single PRISM
-        elif climate_mode == ClimateMode.SinglePRISM:
-            self._build_climate_single_PRISM()
-
-        # single PRISM
-        elif climate_mode == ClimateMode.Optimized:
+        elif climate_mode == ClimateMode.PRISM:
             self._build_climate_optimized(verbose=verbose)
-
-        # multiple observed PRISM
-        elif climate_mode == ClimateMode.ObservedPRISM:
-            self._build_climate_observed_PRISM(verbose=verbose)
-
-    def _build_climate_observed_PRISM(self, verbose):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            orig_cli_fn = self.orig_cli_fn
-            assert _exists(orig_cli_fn)
-
-            cli_dir = os.path.abspath(self.cli_dir)
-            watershed = Watershed.getInstance(self.wd)
-
-            climatestation = self.climatestation
-            years = self._input_years
-
-            # build a climate for the channels.
-            ws_lng, ws_lat = watershed.centroid
-
-            head, tail = _split(orig_cli_fn)
-            cli_path = _join(cli_dir, tail)
-
-            print('cli_path: ' + cli_path)
-
-            copyfile(orig_cli_fn, cli_path)
-
-            self.par_fn = '.par'
-            self.cli_fn = tail
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                if verbose:
-                    print('fetching climate for {}'.format(topaz_id))
-
-                hill_lng, hill_lat = ss.centroid.lnglat
-                suffix = '_{}'.format(topaz_id)
-                new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
-
-                prism_revision(orig_cli_fn, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
-
-                sub_par_fns[topaz_id] = '.par'
-                sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
-
-            self.sub_par_fns = sub_par_fns
-            self.sub_cli_fns = sub_cli_fns
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _build_climate_optimized(self, verbose):
         self.lock()
@@ -791,28 +669,31 @@ class Climate(NoDbBase):
 
             self.opt_pars = prism_optimized2(
                     par=climatestation,
-                    years=years, lng=lng, lat=lat, wd=cli_dir)
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                if verbose:
-                    print('fetching climate for {}'.format(topaz_id))
-
-                lng, lat = ss.centroid.lnglat
-                suffix = '_{}'.format(topaz_id)
-
-                prism_optimized2(
-                    par=climatestation,
                     years=years, lng=lng, lat=lat, wd=cli_dir,
-                    run_opt=False, x0=self.opt_pars, suffix=suffix)
+                    logger=self
+            )
 
-                sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
-                sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                # build a climate for each subcatchment
+                sub_par_fns = {}
+                sub_cli_fns = {}
+                for topaz_id, ss in watershed._subs_summary.items():
+                    if verbose:
+                        print('fetching climate for {}'.format(topaz_id))
 
-            self.sub_par_fns = sub_par_fns
-            self.sub_cli_fns = sub_cli_fns
+                    lng, lat = ss.centroid.lnglat
+                    suffix = '_{}'.format(topaz_id)
+
+                    prism_optimized2(
+                        par=climatestation,
+                        years=years, lng=lng, lat=lat, wd=cli_dir,
+                        run_opt=False, x0=self.opt_pars, suffix=suffix)
+
+                    sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
+                    sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)
+
+                self.sub_par_fns = sub_par_fns
+                self.sub_cli_fns = sub_cli_fns
 
             self.dump_and_unlock()
 
@@ -820,11 +701,12 @@ class Climate(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_climate_single(self):
+    def _build_climate_vanilla(self):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.log('  running _build_climate_vanilla... ')
             climatestation = self.climatestation
             years = self._input_years
 
@@ -836,131 +718,22 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
             self.dump_and_unlock()
+            self.log_done()
 
         except Exception:
             self.unlock('-f')
             raise
 
-    def _build_climate_single_PRISM(self):
+    def _build_climate_observed(self, verbose=False):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
-            climatestation = self.climatestation
-            years = self._input_years
-
+            self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
-
-            result = cc.fetch_multiple_year(
-                climatestation, years,
-                lng=lng, lat=lat,
-                p_mean='prism', tmax='prism', tmin='prism', p_ww='daymet'
-            )
-
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                result,
-                climatestation,
-                self.cli_dir
-            )
-
-            self.monthlies = monthlies
-            self.par_fn = par_fn
-            self.cli_fn = cli_fn
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    def _build_climate_localized(self, verbose):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            # cligen can accept a 5 digit random number seed
-            # we want to specify this to ensure that the precipitation
-            # events are synchronized across the subcatchments
-            if self._cligen_seed is None:
-                self._cligen_seed = random.randint(0, 99999)
-                self.dump()
-
-            randseed = self._cligen_seed
-
+            climatestation = self.climatestation
             cli_dir = self.cli_dir
-            watershed = Watershed.getInstance(self.wd)
-
-            climatestation = self.climatestation
-            years = self._input_years
-
-            # the climates are built with the wepppy cligen
-            # webservice. The webservice accepts localization
-            # parameters as strings. This assigns parameters
-            # from the localized attributes
-            opts = [None, 'daymet', 'prism']
-
-            p_mean = opts[self._localized_p_mean]
-            p_std = opts[self._localized_p_std]
-            p_skew = opts[self._localized_p_skew]
-            p_wd = opts[self._localized_p_wd]
-            p_ww = opts[self._localized_p_ww]
-            solrad = opts[self._localized_solrad]
-            tmin = opts[self._localized_tmin]
-            tmax = opts[self._localized_tmax]
-            dewpoint = opts[self._localized_dewpoint]
-            kwargs = dict(p_mean=p_mean, p_std=p_std, p_skew=p_skew,
-                          p_wd=p_wd, p_ww=p_ww, tmax=tmax, tmin=tmin,
-                          solrad=solrad, dewpoint=dewpoint,
-                          randseed='%05i' % randseed)
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                if verbose:
-                    print('fetching climate for {}'.format(topaz_id))
-
-                lng, lat = ss.centroid.lnglat
-
-                result = cc.fetch_multiple_year(climatestation, years,
-                                                lng=lng, lat=lat, **kwargs)
-
-                fn_base = '{}_{}'.format(topaz_id, climatestation)
-                par_fn, cli_fn, _ = cc.unpack_json_result(result, fn_base, cli_dir)
-
-                sub_par_fns[topaz_id] = par_fn
-                sub_cli_fns[topaz_id] = cli_fn
-
-            # build a climate for the channels.
-            lng, lat = watershed.centroid
-            result = cc.fetch_multiple_year(climatestation, years,
-                                            lng=lng, lat=lat, **kwargs)
-            fn_base = str(climatestation)
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(result, fn_base, cli_dir)
-
-            self.monthlies = monthlies
-            self.par_fn = par_fn
-            self.cli_fn = cli_fn
-            
-            self.sub_par_fns = sub_par_fns
-            self.sub_cli_fns = sub_cli_fns
-            
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    def _build_climate_observed(self):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            assert self._input_years == (self._observed_end_year - self._observed_start_year) + 1
-
-            watershed = Watershed.getInstance(self.wd)
-            lng, lat = watershed.centroid
-            climatestation = self.climatestation
 
             result = cc.observed_daymet(
                 climatestation,
@@ -977,83 +750,61 @@ class Climate(NoDbBase):
 
             self.monthlies = self.monthlies
             self.cli_fn = cli_fn
-            self.dump_and_unlock()
+            self.par_fn = par_fn
 
-        except Exception:
-            self.unlock('-f')
-            raise
+            self.log_done()
 
-    def _build_climate_multiple_observed(self, verbose=True):
-        self.lock()
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                sub_par_fns = {}
+                sub_cli_fns = {}
 
-        # noinspection PyBroadInspection
-        try:
-            watershed = Watershed.getInstance(self.wd)
-            lng, lat = watershed.centroid
-            climatestation = self.climatestation
-            cli_dir = self.cli_dir
+                # For a large watershed this might have to query 600+ climates. The climate webservice has
+                # occasionally timed out, so here we are retrying failed requests to avoid having to abort
+                # the climate building.
+                attempts = 0
+                subs = list(watershed._subs_summary.items())
 
-            sub_par_fns = {}
-            sub_cli_fns = {}
+                while attempts < 10 and len(subs) > 0:
+                    # We can use a with statement to ensure threads are cleaned up promptly
+                    with ThreadPoolExecutor(max_workers=10) as executor:
+                        # Start the load operations and mark each future with its URL
+                        results = {executor.submit(cc.observed_daymet,
+                                                   climatestation,
+                                                   self._observed_start_year,
+                                                   self._observed_end_year,
+                                                   ss.centroid.lnglat[0],
+                                                   ss.centroid.lnglat[1]):
+                                   (topaz_id, ss) for (topaz_id, ss) in subs}
 
-            # For a large watershed this might have to query 600+ climates. The climate webservice has
-            # occasionally timed out, so here we are retrying failed requests to avoid having to abort
-            # the climate building.
-            attempts = 0
-            subs = list(watershed._subs_summary.items())
+                        for res in as_completed(results):
+                            (topaz_id, ss) = results[res]
 
-            while attempts < 10 and len(subs) > 0:
+                            self.log('    %s... ' % topaz_id)
+                            try:
+                                data = res.result()
+                                subs.remove((topaz_id, ss))
 
-                # We can use a with statement to ensure threads are cleaned up promptly
-                with ThreadPoolExecutor(max_workers=10) as executor:
-                    # Start the load operations and mark each future with its URL
-                    results = {executor.submit(cc.observed_daymet,
-                                               climatestation,
-                                               self._observed_start_year,
-                                               self._observed_end_year,
-                                               ss.centroid.lnglat[0],
-                                               ss.centroid.lnglat[1]):
-                               (topaz_id, ss) for (topaz_id, ss) in subs}
+                                fn_base = '{}_{}'.format(topaz_id, climatestation)
+                                par_fn, cli_fn, _ = cc.unpack_json_result(data, fn_base, cli_dir)
 
-                    for res in as_completed(results):
-                        (topaz_id, ss) = results[res]
-                        try:
-                            data = res.result()
-                            subs.remove((topaz_id, ss))
+                                if verbose:
+                                    print(topaz_id, ss, cli_fn)
 
-                            fn_base = '{}_{}'.format(topaz_id, climatestation)
-                            par_fn, cli_fn, _ = cc.unpack_json_result(data, fn_base, cli_dir)
+                                sub_par_fns[topaz_id] = par_fn
+                                sub_cli_fns[topaz_id] = cli_fn
 
-                            if verbose:
-                                print(topaz_id, ss, cli_fn)
+                            except ConnectionError:
+                                pass
 
-                            sub_par_fns[topaz_id] = par_fn
-                            sub_cli_fns[topaz_id] = cli_fn
+                            self.log_done()
 
-                        except ConnectionError:
-                            pass
+                        attempts += 1
 
-                    attempts += 1
+                assert len(subs) == 0, 'Not all climates were obtained from webservice'
 
-            assert len(subs) == 0, 'Not all climates were obtained from webservice'
+                self.sub_cli_fns = sub_cli_fns
+                self.sub_par_fns = sub_par_fns
 
-            lng, lat = watershed.centroid
-
-            result = cc.observed_daymet(
-                climatestation,
-                self._observed_start_year,
-                self._observed_end_year,
-                lng=lng, lat=lat
-            )
-
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                result,
-                climatestation,
-                self.cli_dir
-            )
-
-            self.monthlies = self.monthlies
-            self.cli_fn = cli_fn
             self.dump_and_unlock()
 
         except Exception:
@@ -1066,18 +817,22 @@ class Climate(NoDbBase):
         # noinspection PyBroadInspection
         try:
 
+            self.log('  running _build_climate_future... \n')
             assert self._input_years == (self._future_end_year - self._future_start_year) + 1
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
             climatestation = self.climatestation
 
+            self.log('  fetching future climate data... ')
             result = cc.future_rcp85(
                 climatestation,
                 self._future_start_year,
                 self._future_end_year,
                 lng=lng, lat=lat
             )
+            self.log_done()
 
+            self.log('  running cligen... ')
             par_fn, cli_fn, monthlies = cc.unpack_json_result(
                 result,
                 climatestation,
@@ -1088,6 +843,7 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
             self.dump_and_unlock()
+            self.log_done()
 
         except Exception:
             self.unlock('-f')
@@ -1101,6 +857,7 @@ class Climate(NoDbBase):
 
         # noinspection PyBroadInspection
         try:
+            self.log('  running _build_climate_single_storm... ')
             climatestation = self.climatestation
 
             result = cc.selected_single_storm(
@@ -1122,6 +879,7 @@ class Climate(NoDbBase):
             self.par_fn = par_fn
             self.cli_fn = cli_fn
             self.dump_and_unlock()
+            self.log_done()
 
         except Exception:
             self.unlock('-f')
@@ -1131,7 +889,7 @@ class Climate(NoDbBase):
         if not self.has_climate:
             return None
         
-        if self.climate_mode == ClimateMode.Localized:
+        if self._climate_spatialmode == ClimateSpatialMode.Multiple:
             return dict(cli_fn=self.sub_cli_fns[str(topaz_id)],
                         par_fn=self.sub_par_fns[str(topaz_id)])
         else:
@@ -1150,8 +908,8 @@ class Climate(NoDbBase):
     def _(self, wepp_id):
         if not self.has_climate:
             raise IndexError
-            
-        if self.climate_mode == ClimateMode.Localized:
+
+        if self._climate_spatialmode == ClimateSpatialMode.Multiple:
             translator = Watershed.getInstance(self.wd).translator_factory()
             topaz_id = str(translator.top(wepp=int(wepp_id)))
             

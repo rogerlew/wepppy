@@ -232,7 +232,7 @@ def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True)
     r = requests.post(url, params=data)
 
     if r.status_code != 200:
-        raise Exception("Encountered error retrieving from cligen")
+        raise Exception("Encountered error retrieving from %s" % url)
 
     if returnjson:
         return json.loads(r.text)

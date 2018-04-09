@@ -1387,6 +1387,25 @@ def set_climate_mode(runid):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/set_climate_spatialmode/', methods=['POST'])
+def set_climate_spatialmode(runid):
+    try:
+        spatialmode = int(request.form.get('spatialmode', None))
+    except Exception:
+        return exception_factory('Could not determine mode')
+
+    wd = get_wd(runid)
+    climate = Climate.getInstance(wd)
+
+    try:
+        climate.climate_spatialmode = spatialmode
+    except Exception:
+        return exception_factory('Building setting climate spatial mode')
+
+    return success_factory()
+
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/view/closest_stations/')
 def view_closest_stations(runid):
     wd = get_wd(runid)
@@ -1602,16 +1621,26 @@ def task_set_readonly(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/wepp_status', methods=['GET', 'POST'])
-@app.route('/runs/<string:runid>/query/wepp_status/', methods=['GET', 'POST'])
-def get_wepp_run_status(runid):
+@app.route('/runs/<string:runid>/query/status/<nodb>', methods=['GET', 'POST'])
+@app.route('/runs/<string:runid>/query/status/<nodb>/', methods=['GET', 'POST'])
+def get_wepp_run_status(runid, nodb):
     wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
 
-    try:
-        return success_factory(wepp.get_log_last())
-    except:
-        return exception_factory('Could not determine status')
+    if nodb == 'wepp':
+        wepp = Wepp.getInstance(wd)
+        try:
+            return success_factory(wepp.get_log_last())
+        except:
+            return exception_factory('Could not determine status')
+
+    elif nodb == 'climate':
+        climate = Climate.getInstance(wd)
+        try:
+            return success_factory(climate.get_log_last())
+        except:
+            return exception_factory('Could not determine status')
+
+    return error_factory('Unknown nodb')
 
 
 # noinspection PyBroadException
@@ -1622,19 +1651,27 @@ def report_wepp_results(runid):
     try:
         return render_template('controls/wepp_reports.htm')
     except:
-        return exception_factory('Error reading status.log')
+        return exception_factory('Error building reports template')
+
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/report/wepp/log')
-@app.route('/runs/<string:runid>/report/wepp/log/')
-def get_wepp_run_status_full(runid):
+@app.route('/runs/<string:runid>/report/<nodb>/log')
+@app.route('/runs/<string:runid>/report/<nodb>/log/')
+def get_wepp_run_status_full(runid, nodb):
     wd = get_wd(runid)
-    wepp = Wepp.getInstance(wd)
     ron = Ron.getInstance(wd)
 
     try:
-        with open(wepp.status_log) as fp:
-            status_log = fp.read()
+        if nodb == 'wepp':
+            wepp = Wepp.getInstance(wd)
+            with open(wepp.status_log) as fp:
+                status_log = fp.read()
+        elif nodb == 'climate':
+            climate = Climate.getInstance(wd)
+            with open(climate.status_log) as fp:
+                status_log = fp.read()
+        else:
+            status_log = 'error'
 
         return render_template('reports/wepp/log.htm',
                                status_log=status_log,
