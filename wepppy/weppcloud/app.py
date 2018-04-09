@@ -80,39 +80,15 @@ from wepppy.nodb import (
 
 from wepppy.nodb.mods import Baer
 
+from wepppy.weppcloud.app_config import config_app
+
 # noinspection PyBroadException
 
 app = Flask(__name__)
 app.jinja_env.filters['zip'] = zip
+app = config_app(app)
 
-# After 'Create app'
-app.config['MAIL_SERVER'] = 'm.outlook.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'cals-wepp@uidaho.edu'
-app.config['MAIL_PASSWORD'] = '17Ohwhatapassword1'
 mail = Mail(app)
-
-
-app.config['DEBUG'] = True
-app.config['SECRET_KEY'] = '03KHPaE>Q6rv`83s{/JQvf1B$NXRL}Z0s7/;3BmFkY9So%yHL!q|TIe;^8Uon5f'
-app.config['SECURITY_PASSWORD_SALT'] = b'$2b$12$jiwYpqsqzEgv4SNIcG.Aqu'
-app.config['SECURITY_PASSWORD_HASH'] = 'bcrypt'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://wepppy:b4n4n4$@localhost/wepppy'
-app.config['SECURITY_POST_LOGIN_VIEW'] = ''
-app.config['SECURITY_EMAIL_SENDER'] = 'cals-wepp@uidaho.edu'
-app.config['SECURITY_CONFIRMABLE'] = True
-app.config['SECURITY_LOGIN_WITHOUT_CONFIRMATION'] = True
-app.config['SECURITY_REGISTERABLE'] = True
-app.config['SECURITY_TRACKABLE'] = True
-app.config['SECURITY_CHANGEABLE'] = True
-app.config['SECURITY_RECOVERABLE'] = True
-
-app.config['W3W_API_KEY'] = 'XBL7LV7I'
-
 
 # Setup Flask-Security
 # Create database connection object
@@ -138,6 +114,17 @@ class Run(db.Model):
     date_created = db.Column(db.DateTime())
     owner_id = db.Column(db.String(255))
     config = db.Column(db.String(255))
+
+    @property
+    def valid(self):
+        wd = get_wd(self.runid)
+        if not _exists(wd):
+            return False
+
+        if not _exists(_join(wd, 'ron.nodb')):
+            return False
+
+        return True
 
     def __eq__(self, other):
         return (self.runid == other or
@@ -473,7 +460,7 @@ def security_processor():
         return datetime.fromtimestamp(last)
 
     def get_all_runs():
-        return Run.query.order_by(Run.date_created).all()
+        return [run for run in Run.query.order_by(Run.date_created).all() if run.valid]
 
     def get_all_users():
         return User.query.order_by(User.last_login_at).all()
