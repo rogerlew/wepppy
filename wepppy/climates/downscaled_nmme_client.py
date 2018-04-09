@@ -102,7 +102,7 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name):
                                model=model, scenario=scenario,
                                variable=variables_d[variable_name], 
                                variable_name=variable_name)
-   
+
     # query server
     referer = 'https://wepp1.nkn.uidaho.edu'
     s = requests.Session()
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     from time import time
     
     t0 = time()
-    df2 = retrieve_rcp85_timeseries(-116, 47, datetime(2018, 1, 1), datetime(2099, 1, 31))
+    df2 = retrieve_rcp45_timeseries(-116, 47, datetime(2018, 1, 1), datetime(2099, 1, 31))
     print(df2)
     print(time() - t0)
     print(df2.keys())

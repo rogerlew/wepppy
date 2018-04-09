@@ -12,47 +12,35 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import math
-import time
-import uuid
 from subprocess import (
-    Popen, PIPE, STDOUT,
-    check_output, TimeoutExpired
+    Popen, PIPE, TimeoutExpired
 )
-from datetime import datetime
+
 import warnings
 from copy import deepcopy
-from flask import Flask, jsonify, request, Response
 
 import numpy as np
 from scipy.optimize import fmin_slsqp
 
-from wepppy.all_your_base import isint, clamp
+from wepppy.all_your_base import clamp
 
 # noinspection PyProtectedMember
 from wepppy.climates.cligen import (
     CligenStationsManager,
     ClimateFile,
     _bin_dir,
-    df_to_prn,
     par_row_formatter
 )
 
 from wepppy.webservices.cligen import _make_clinp
 
-from wepppy.climates.daymet_singlelocation_client \
-    import retrieve_historical_timeseries
-
-from wepppy.climates.downscaled_nmme_client \
-    import retrieve_rcp85_timeseries
 from wepppy.climates.metquery_client import get_prism_monthly_tmin, get_prism_monthly_tmax, get_prism_monthly_ppt, \
     get_daymet_prcp_pwd, get_daymet_prcp_pww, get_daymet_prcp_skew, get_daymet_prcp_std
 
-static_dir = None
-app = Flask(__name__)
 
 # noinspection PyPep8Naming
 def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, randseed=None, cliver=None,
-                     run_opt=True, x0=None, suffix=''):
+                     run_opt=True, x0=None, suffix='', logger=None):
     """
     if _request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -80,12 +68,6 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
     if cliver is None:
         cliver = '5.3'
 
-    # create working directory to build climate
-    _uuid = str(uuid.uuid4())
-    #wd = _join(static_dir, _uuid)
-    #wd = os.path.abspath(wd)
-    #os.mkdir(wd)
-
     curdir = os.path.abspath(os.curdir)
     os.chdir(wd)
 
@@ -93,24 +75,23 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
     stationMeta = stationManager.get_station_fromid(par)
 
     if stationMeta is None:
-        return jsonify({'Error': 'cannot find par'})
+        raise Exception('Cannot find station')
 
     station = stationMeta.get_station()
 
-    print('fetching monthly ppts')
+    if logger is not None:
+        logger.log('  prism_opt2:fetching climates...')
+
     prism_ppts = get_prism_monthly_ppt(lng, lat, units='daily inch')
-    print('fetching monthly tmaxs')
     prism_tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
-    print('fetching monthly tmin')
     prism_tmins = get_prism_monthly_tmin(lng, lat, units='f')
-    print('fetching monthly prcp')
     p_stds = get_daymet_prcp_std(lng, lat, units='inch')
-    print('fetching monthly prcp skew')
     p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
-    print('fetching monthly prcp pww')
     p_wws = get_daymet_prcp_pww(lng, lat)
-    print('fetching monthly prcp pwd')
     p_wds = get_daymet_prcp_pwd(lng, lat)
+
+    if logger is not None:
+        logger.log_done()
 
     if randseed is None:
         randseed = 12345
@@ -199,7 +180,6 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
         error = np.concatenate((error, nwd_err))
         error *= error
         error = math.sqrt(np.sum(error))
-        print(error)
 
         return error
 
@@ -209,21 +189,29 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
     args = wd, station, par, randseed, cliver, prism_ppts, p_stds, p_skew, p_wws, p_wds, prism_tmaxs, prism_tmins, suffix
 
     if run_opt:
+        if logger is not None:
+            logger.log('  prism_opt2:running optimization...')
+
         bounds = [(0.01, 10.0) for i in range(14)]
     #    result = minimize(opt_fun, x0, args=args, bounds=bounds, tol=0.2, method='L-BFGS-B', options=dict(eps=0.1))
         result = fmin_slsqp(opt_fun, x0, args=args, bounds=bounds, epsilon=0.02, full_output=True, iprint=2)
-        print(result)
+
+        if logger is not None:
+            logger.log_done()
 
         cli_fn = '{}.cli'.format(par)
         cli = ClimateFile(cli_fn)
         sim_ppts = cli.header_ppts()
         sim_nwds = cli.count_wetdays()
-        print('cligen\tprism (target)\t% err\tmm err\tnwds\tstation nwds (target)')
-        for s, o, d, s_nwd, o_nwd in zip(sim_ppts, prism_ppts, days_in_mo, sim_nwds, station.nwds):
-            s *= d * 25.4
-            o *= d * 25.4
-            print('{0:02.1f}\t{1:02.1f}\t{2}\t{3}\t{4}\t{5}'
-                  .format(s, o,  int(100 * (s-o)/o), round(s-o), s_nwd, o_nwd))
+
+        if logger is not None:
+            logger.log('Optimization Summary\n')
+            logger.log('cligen\tprism (target)\t% err\tmm err\tnwds\tstation nwds (target)\n')
+            for s, o, d, s_nwd, o_nwd in zip(sim_ppts, prism_ppts, days_in_mo, sim_nwds, station.nwds):
+                s *= d * 25.4
+                o *= d * 25.4
+                logger.log('{0:02.1f}\t{1:02.1f}\t{2}\t{3}\t{4}\t{5}\n'
+                           .format(s, o,  int(100 * (s-o)/o), round(s-o), s_nwd, o_nwd))
 
         #out, fx, its, lmode, smode = result
 
@@ -231,51 +219,16 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
         return tuple([float(v) for v in result[0]])
 
     else:
+        if logger is not None:
+            logger.log('  prism_opt2:no opt build...')
+
         result = opt_fun(x0, *args)
         os.chdir(curdir)
+
+        if logger is not None:
+            logger.log_done()
+
         return result
-
-# noinspection PyPep8Naming
-def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float, hill_lng: float, hill_lat: float, new_cli_fn: str):
-
-    cli = ClimateFile(cli_fn)
-    df = cli.as_dataframe()
-
-    print('fetching monthly ppts')
-    ws_ppts = get_prism_monthly_ppt(ws_lng, ws_lat, units='daily mm')
-    print('fetching monthly tmaxs')
-    ws_tmaxs = get_prism_monthly_tmax(ws_lng, ws_lat, units='c')
-    print('fetching monthly tmin')
-    ws_tmins = get_prism_monthly_tmin(ws_lng, ws_lat, units='c')
-
-    print('fetching monthly ppts')
-    hill_ppts = get_prism_monthly_ppt(hill_lng, hill_lat, units='daily mm')
-    print('fetching monthly tmaxs')
-    hill_tmaxs = get_prism_monthly_tmax(hill_lng, hill_lat, units='c')
-    print('fetching monthly tmin')
-    hill_tmins = get_prism_monthly_tmin(hill_lng, hill_lat, units='c')
-
-    rev_ppt = np.zeros(df.prcp.shape)
-    rev_tmax = np.zeros(df.prcp.shape)
-    rev_tmin = np.zeros(df.prcp.shape)
-
-    dates = []
-
-    for i, (index, row) in enumerate(df.iterrows()):
-        mo = int(row.mo) - 1
-        rev_ppt[i] = float(row.prcp * hill_ppts[mo] / ws_ppts[mo])
-        rev_tmax[i] = float(row.tmax - ws_tmaxs[mo] + hill_tmaxs[mo])
-        rev_tmin[i] = float(row.tmin - ws_tmins[mo] + hill_tmins[mo])
-
-        dates.append(tuple([int(row.year), int(row.mo), int(row.da)]))
-
-    cli.replace_var('prcp', dates, rev_ppt)
-    cli.replace_var('tmax', dates, rev_tmax)
-    cli.replace_var('tmin', dates, rev_tmin)
-
-    print('new_cli_fn: ' + new_cli_fn)
-
-    cli.write(new_cli_fn)
 
 if __name__ == "__main__":
     """
