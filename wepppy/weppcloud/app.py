@@ -1179,8 +1179,10 @@ def view_management(runid, key):
     man = landuse.managements[str(key)].get_management()
     contents = str(man)
 
-    return Response(contents, mimetype='text/plaintext')
-
+    resp = Response(contents)
+    resp.headers[u'Content-Type'] = u'text/plaintext; charset=utf-8'
+    resp.headers[u'Content-Disposition'] = u'inline; filename="%s.man"' % str(key)
+    return resp
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/modify_landuse/', methods=['POST'])
@@ -1267,11 +1269,15 @@ def view_soil(runid, mukey):
     soils_dir = Soils.getInstance(wd).soils_dir
     soil_path = _join(soils_dir, '%s.sol' % mukey)
     if _exists(soil_path):
-        contents = open(soil_path).read()    
+        with open(soil_path) as fp:
+            contents = fp.read()
     else:
         contents = 'Soil not found'
-        
-    return Response(contents, mimetype='text/plaintext')
+
+    resp = Response(contents)
+    resp.headers[u'Content-Type'] = u'text/plaintext; charset=utf-8'
+    resp.headers[u'Content-Disposition'] = u'inline; filename="%s.sol"' % mukey
+    return resp
           
                            
 @app.route('/runs/<string:runid>/tasks/build_soil/', methods=['POST'])
