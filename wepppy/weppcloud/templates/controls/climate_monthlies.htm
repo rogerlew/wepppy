@@ -20,8 +20,8 @@
     <tbody>
       <tr>
         <td>P MEAN</td>
-        {% for v in station.monthlies.ppts %}
-        <td class="text-right">{{ unitizer(v, 'in') | safe  }}</td>
+        {% for v, nwd in station.monthlies.ppts|zip(station.monthlies.nwds) %}
+        <td class="text-right">{{ unitizer(v * nwd, 'in') | safe  }}</td>
         {% endfor %}
         <td>{{ unitizer_units('in') | safe }}</td>
       </tr>

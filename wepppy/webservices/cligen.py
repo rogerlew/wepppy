@@ -195,10 +195,10 @@ def _make_clinp(wd, cliver, years, cli_fn, par_fn):
 
     if cliver in ["5.2", "5.3"]:
         fp.write("5\n1\n{years}\n{cli_fn}\nn\n\n"
-                  .format(years=years, cli_fn=cli_fn))
+                 .format(years=years, cli_fn=cli_fn))
     else:
         fp.write("\n{par_fn}\nn\n5\n1\n{years}\n{cli_fn}\nn\n\n"
-                  .format(par_fn=par_fn, years=years, cli_fn=cli_fn))
+                 .format(par_fn=par_fn, years=years, cli_fn=cli_fn))
 
     fp.close()
 
@@ -322,172 +322,6 @@ from wepppy.climates.cligen import par_row_formatter
 from wepppy.all_your_base import clamp
 from scipy.optimize import fmin_slsqp, minimize
 import numpy as np
-
-
-# noinspection PyPep8Naming
-def prism_optimized2(par: int, years: int, lng: float, lat: float, randseed=None, cliver=None, returnjson=True):
-    """
-    if _request.method not in ['GET', 'POST']:
-        return jsonify({'Error': 'Expecting GET or POST'})
-
-    if _request.method == 'GET':
-        d = _request.args
-    else:  # POST
-        d = _request.get_json()
-
-    years = d.get('years', None)
-    cliver = d.get('cliver', None)
-    returnjson = d.get('returnjson', False)
-    randseed = d.get('randseed', None)
-    returnjson = bool(returnjson)
-
-    if singleyearmode:
-        years = 1
-
-    if not isint(years):
-        return jsonify({'Error': 'years as an integer is required "%s"' % years})
-    """
-
-    days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
-
-    if cliver is None:
-        cliver = '5.3'
-
-    # create working directory to build climate
-    _uuid = str(uuid.uuid4())
-    wd = _join(static_dir, _uuid)
-    wd = os.path.abspath(wd)
-    os.mkdir(wd)
-    os.chdir(wd)
-
-    stationManager = CligenStationsManager()
-    stationMeta = stationManager.get_station_fromid(par)
-
-    if stationMeta is None:
-        return jsonify({'Error': 'cannot find par'})
-
-    station = stationMeta.get_station()
-
-    prism_ppts = get_prism_monthly_ppt(lng, lat, units='daily inch')
-    prism_tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
-    prism_tmins = get_prism_monthly_tmin(lng, lat, units='f')
-    p_stds = get_daymet_prcp_std(lng, lat, units='inch')
-    p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
-    p_wws = get_daymet_prcp_pww(lng, lat)
-    p_wds = get_daymet_prcp_pwd(lng, lat)
-
-    if randseed is None:
-        randseed = 12345
-    randseed = str(randseed)
-
-    def opt_fun(x, *args):
-        wd, station, par, randseed, cliver, prism_ppts, p_stds, p_skew, p_wws, p_wds, prism_tmaxs, prism_tmins = args
-
-        par_fn = '{}.par'.format(par)
-        cli_fn = '{}.cli'.format(par)
-
-        if _exists(par_fn):
-            os.remove(par_fn)
-
-        if _exists(cli_fn):
-            os.remove(cli_fn)
-
-        print(x)
-
-        ppts = x[:12]
-#        pstds = p_stds * x[1]
-
-        pwws = p_wws * x[12]
-        pwws = [clamp(v, 0.01, 0.99) for v in pwws]
-
-        pwds = p_wds * x[13]
-        pwds = [clamp(v, 0.01, 0.99) for v in pwds]
-
-        # p_stds = station.pstds * x[3]
-
-        s2 = deepcopy(station)
-        s2.lines[3] = ' MEAN P  ' + par_row_formatter(ppts) + '\r\n'
-#        s2.lines[4] = ' S DEV P ' + par_row_formatter(pstds) + '\r\n'
-        s2.lines[6] = ' P(W/W)  ' + par_row_formatter(pwws) + '\r\n'
-        s2.lines[7] = ' P(W/D)  ' + par_row_formatter(pwds) + '\r\n'
-        s2.lines[8] = ' TMAX AV ' + par_row_formatter(prism_tmaxs) + '\r\n'
-        s2.lines[9] = ' TMIN AV ' + par_row_formatter(prism_tmins) + '\r\n'
-
-        s2.write(par_fn)
-
-        # create cligen input file
-        _make_clinp(wd, cliver, years, cli_fn, par_fn)
-
-        # build cmd
-        if cliver == "4.3":
-            cmd = [_join(_bin_dir, 'cligen43')]
-        elif cliver == "5.2":
-            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
-        else:
-            cmd = [_join(_bin_dir, 'cligen53'), "-i%s" % par_fn]
-
-        if randseed is not None:
-            cmd.append('-r%s' % randseed)
-
-        # run cligen
-        _clinp = open("clinp.txt")
-
-#        output = check_output(cmd, stdin=_clinp, stderr=STDOUT, timeout=3.0)
-        with Popen(cmd, stdin=_clinp,  stdout=PIPE, stderr=PIPE,
-                   preexec_fn=os.setsid) as process:
-            try:
-                output = process.communicate(timeout=2)[0]
-            except TimeoutExpired:
-                process.kill()
-#                output = process.stdout.read()
-                warnings.warn('Error running cligen')
-                return 1e6
-
-        with open("cligen.log", "wb") as fp:
-            fp.write(output)
-
-        assert _exists(cli_fn)
-
-        cli = ClimateFile(cli_fn)
-
-        sim_ppts = cli.header_ppts()
-        if np.any(np.isnan(sim_ppts)):
-            warnings.warn('Cligen failed to generate precip')
-            return 1e5
-
-        sim_nwds = cli.count_wetdays()
-        nwds = station.nwds
-        nwds = np.array([(v, 0.1)[float(v) == 0.0] for v in nwds])
-
-        error = (sim_ppts - prism_ppts) / prism_ppts
-        nwd_err = (sim_nwds - nwds) / nwds
-
-        error = np.concatenate((error, nwd_err))
-        error *= error
-        error = math.sqrt(np.sum(error))
-        print(error)
-
-        return error
-
-    x0 = np.array(list(prism_ppts) + [1.0, 1.0])
-    args = wd, station, par, randseed, cliver, prism_ppts, p_stds, p_skew, p_wws, p_wds, prism_tmaxs, prism_tmins
-    bounds = [(0.01, 10.0) for i in range(14)]
-#    result = minimize(opt_fun, x0, args=args, bounds=bounds, tol=0.2, method='L-BFGS-B', options=dict(eps=0.1))
-    result = fmin_slsqp(opt_fun, x0, args=args, bounds=bounds, epsilon=0.02, full_output=True, iprint=2)
-    print(result)
-
-    cli_fn = '{}.cli'.format(par)
-    cli = ClimateFile(cli_fn)
-    sim_ppts = cli.header_ppts()
-    sim_nwds = cli.count_wetdays()
-    print('cligen\tprism (target)\t% err\tmm err\tnwds\tstation nwds (target)')
-    for s, o, d, s_nwd, o_nwd in zip(sim_ppts, prism_ppts, days_in_mo, sim_nwds, station.nwds):
-        s *= d * 25.4
-        o *= d * 25.4
-        print('{0:02.1f}\t{1:02.1f}\t{2}\t{3}\t{4}\t{5}'
-              .format(s, o,  int(100 * (s-o)/o), round(s-o), s_nwd, o_nwd))
-
-    #out, fx, its, lmode, smode = result
 
 
 def _make_single_storm_clinp(wd, cli_fn, par_fn, cliver, kwds):
@@ -868,8 +702,6 @@ def future_rcp85(par):
 
 if __name__ == "__main__":
     static_dir = os.path.abspath('tests/cligen')
-    # MOSCOW
-    prism_optimized2(par=106152, years=100, lng=-116, lat=47)
 
 #    import sys
 #    sys.exit()
