@@ -289,6 +289,11 @@ class Station:
                  dewpoint='prism',
                  solrad='daymet'):
 
+        """
+        This could is deprecated and the localization provided by
+        wepppy.climates.prism.prism_mod
+        """
+
         new = deepcopy(self)
 
         if p_mean == 'prism':
@@ -493,30 +498,6 @@ class CligenStationsManager:
             _stations[-1].rank = rank
 
         return _stations
-
-
-"""
-    def get_stations_heuristic_search(self, location, pool=10):
-
-        stations = self.get_closest_stations(location, pool)
-
-        ppts = get_prism_monthly_ppt(*location, units='inch')
-
-        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - ppts)**2.0))
-                              for s in stations])
-        ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
-        ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
-
-
-        _stations = []
-        for i, rank in ppt_ranks:
-            print(i, rank)
-
-            _stations.append(stations[i])
-            _stations[-1].rank = float(rank)
-
-        return _stations
-"""
 
 
 class Cligen:
