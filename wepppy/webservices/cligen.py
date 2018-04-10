@@ -702,15 +702,3 @@ def future_rcp85(par):
 
 if __name__ == "__main__":
     static_dir = os.path.abspath('tests/cligen')
-
-#    import sys
-#    sys.exit()
-
-    # TAHOE
-#    prism_optimized2(par=49105, years=100, lng=-120.07926310342026, lat=38.92748089665569)
-
-    #  BETATAKIN AZ
-#    prism_optimized2(par=20750, years=100, lng=-110.3350738205662, lat=36.57180756866028)
-
-    # HOOD RIVER EXP STA OR
-#    prism_optimized2(par=354003, years=100, lng=-121.8621, lat=45.6436)
