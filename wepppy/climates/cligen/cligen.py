@@ -180,6 +180,10 @@ class ClimateFile(object):
         return pd.DataFrame(data=d)
 
     def header_ppts(self):
+        """
+
+        :return: daily precipitation in daily inches
+        """
         ppts = []
         for ppt in self.lines[12].split():
             try:
@@ -210,11 +214,12 @@ class ClimateFile(object):
         tmins = np.zeros((12,))
 
         for i, row in df.iterrows():
-            prcps[int(row.mo) - 1] += row.prcp
-            tmaxs[int(row.mo) - 1] += row.tmax
-            tmins[int(row.mo) - 1] += row.tmin
+            indx = int(row.mo) - 1
+            prcps[indx] += row.prcp
+            tmaxs[indx] += row.tmax
+            tmins[indx] += row.tmin
 
-        prcps /= nyears * days_in_mo
+        prcps /= nyears
         prcps *= 0.0393701  # convert to inches/month
 
         tmaxs /= nyears * days_in_mo
@@ -224,9 +229,9 @@ class ClimateFile(object):
         tmins = c_to_f(tmins)
 
         return {
-            "ppts": list(prcps),
-            "tmaxs": list(tmaxs),
-            "tmins": list(tmins)
+            "ppts": [float(v) for v in prcps],
+            "tmaxs": [float(v) for v in tmaxs],
+            "tmins": [float(v) for v in tmins]
         }
 
     def write(self, fn):
@@ -264,11 +269,14 @@ class Station:
         assert len(self.tmaxs) == 12
         assert len(self.tmins) == 12
 
-        mdays = np.array([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+        mdays = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
         self.nwds = mdays * (self.pwds / (1.0 - self.pwws + self.pwds))
 
         self.lines = lines
 
+    @property
+    def monthly_ppts(self):
+        return self.ppts * self.nwds
 
     def localize(self, lng, lat,
                  p_mean='prism',
@@ -285,10 +293,12 @@ class Station:
 
         if p_mean == 'prism':
             ppts = get_prism_monthly_ppt(lng, lat, units='daily inch')
+            ppts /= self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
         elif p_mean == 'daymet':
             ppts = get_daymet_prcp_mean(lng, lat, units='daily inch')
+            ppts /= self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
         if p_std == 'daymet':
@@ -391,6 +401,7 @@ class StationMeta:
             station = self.get_station()
             d["monthlies"] = { 
                 "ppts": list(station.ppts),
+                "nwds": list(station.nwds),
                 "tmaxs": list(station.tmaxs),
                 "tmins": list(station.tmins)
             }
@@ -458,18 +469,20 @@ class CligenStationsManager:
         elev_ranks = [(i, err) for i, err in enumerate(stations_elevs)]
         elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
 
-        ppts = get_prism_monthly_ppt(*location, units='daily inch')
+        ppts = get_prism_monthly_ppt(*location, units='inch')
 
-        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().ppts - ppts)**2.0))
+        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - ppts)**2.0))
                               for s in stations])
         ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
         ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
 
         s_ranks = list(range(pool))
-        for ranks in [lat_ranks, elev_ranks, ppt_ranks]:
+        weights = [1, 1, 3]
+        for ranks, w in zip([lat_ranks, elev_ranks, ppt_ranks],
+                            weights):
 
             for score, (i, err) in enumerate(ranks):
-                s_ranks[i] += score
+                s_ranks[i] += score * w
 
         s_ranks = [(i, err) for i, err in enumerate(s_ranks)]
         s_ranks = sorted(s_ranks, key=lambda x: x[1])
@@ -482,8 +495,32 @@ class CligenStationsManager:
         return _stations
 
 
+"""
+    def get_stations_heuristic_search(self, location, pool=10):
+
+        stations = self.get_closest_stations(location, pool)
+
+        ppts = get_prism_monthly_ppt(*location, units='inch')
+
+        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - ppts)**2.0))
+                              for s in stations])
+        ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
+        ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
+
+
+        _stations = []
+        for i, rank in ppt_ranks:
+            print(i, rank)
+
+            _stations.append(stations[i])
+            _stations[-1].rank = float(rank)
+
+        return _stations
+"""
+
+
 class Cligen:
-    def __init__(self, station, wd='./', cliver="4.3"):
+    def __init__(self, station, wd='./', cliver="5.3"):
         assert _exists(wd), 'Working dir does not exist'
         self.wd = wd
 
@@ -517,7 +554,7 @@ class Cligen:
         assert _exists(clinp)
 
     def run_multiple_year(self, years, cli_fname='wepp.cli',
-                          localization=None, verbose=True):
+                          localization=None, verbose=False):
 
         if verbose:
             print("running multiple year")
