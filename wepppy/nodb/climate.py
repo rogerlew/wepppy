@@ -26,7 +26,7 @@ import jsonpickle
 
 # wepppy
 from wepppy.climates import cligen_client as cc
-from wepppy.climates.prism import prism_optimized2
+from wepppy.climates.prism import prism_optimized2, prism_mod
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile
 from wepppy.all_your_base import isint, isfloat
 from wepppy.watershed_abstraction import ischannel
@@ -334,12 +334,10 @@ class Climate(NoDbBase, LogMixin):
         try:
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
-            results = self._closest_stations
-            if results is None:
-                station_manager = CligenStationsManager()
-                results = station_manager\
-                    .get_closest_stations((lng, lat), num_stations)
-                self._closest_stations = results
+            station_manager = CligenStationsManager()
+            results = station_manager\
+                .get_closest_stations((lng, lat), num_stations)
+            self._closest_stations = results
 
             self._climatestation = int(results[0].id)
             self.dump_and_unlock()
@@ -366,12 +364,11 @@ class Climate(NoDbBase, LogMixin):
         try:
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
-            results = self._heuristic_stations
-            if results is None:
-                station_manager = CligenStationsManager()
-                results = station_manager\
-                    .get_stations_heuristic_search((lng, lat), num_stations)
-                self._heuristic_stations = results
+
+            station_manager = CligenStationsManager()
+            results = station_manager\
+                .get_stations_heuristic_search((lng, lat), num_stations)
+            self._heuristic_stations = results
 
             self._climatestation = int(results[0].id)
             self.dump_and_unlock()
@@ -436,7 +433,7 @@ class Climate(NoDbBase, LogMixin):
             if climate_mode in [ClimateMode.Vanilla]:
                 assert isint(input_years)
                 assert input_years > 0
-                assert input_years < CLIMATE_MAX_YEARS
+                assert input_years <= CLIMATE_MAX_YEARS
 
             self._climate_mode = climate_mode
             self._input_years = input_years
@@ -641,9 +638,75 @@ class Climate(NoDbBase, LogMixin):
         elif climate_mode == ClimateMode.SingleStorm:
             self._build_climate_single_storm()
 
-        # single PRISM
+        # PRISM
         elif climate_mode == ClimateMode.PRISM:
-            self._build_climate_optimized(verbose=verbose)
+            self._build_climate_prism(verbose=verbose)
+
+    def _build_climate_prism(self, verbose):
+        self.log('  running _build_climate_prism... \n')
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            # cligen can accept a 5 digit random number seed
+            # we want to specify this to ensure that the precipitation
+            # events are synchronized across the subcatchments
+            if self._cligen_seed is None:
+                self._cligen_seed = random.randint(0, 99999)
+                self.dump()
+
+            randseed = self._cligen_seed
+
+            cli_dir = os.path.abspath(self.cli_dir)
+            watershed = Watershed.getInstance(self.wd)
+
+            climatestation = self.climatestation
+            years = self._input_years
+
+            # build a climate for the channels.
+            lng, lat = watershed.centroid
+
+            self.par_fn = '{}.par'.format(climatestation)
+            self.cli_fn = '{}.cli'.format(climatestation)
+
+            monthlies = prism_mod(par=climatestation,
+                                  years=years, lng=lng, lat=lat, wd=cli_dir,
+                                  logger=self, nwds_method=''
+            )
+            self.monthlies = monthlies
+
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.log('  building climates... \n')
+                # build a climate for each subcatchment
+                sub_par_fns = {}
+                sub_cli_fns = {}
+                for topaz_id, ss in watershed._subs_summary.items():
+                    self.log('fetching climate for {}... '.format(topaz_id))
+
+                    lng, lat = ss.centroid.lnglat
+                    suffix = '_{}'.format(topaz_id)
+
+                    prism_mod(par=climatestation,
+                              years=years, lng=lng, lat=lat, wd=cli_dir,
+                              suffix=suffix, logger=self, nwds_method=''
+                    )
+
+                    sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
+                    sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)
+
+                    self.log_done()
+
+                self.sub_par_fns = sub_par_fns
+                self.sub_cli_fns = sub_cli_fns
+
+            self.log('  finalizing climate build... ')
+            self.dump_and_unlock()
+            self.log_done()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     def _build_climate_optimized(self, verbose):
 
@@ -745,6 +808,8 @@ class Climate(NoDbBase, LogMixin):
             lng, lat = watershed.centroid
             climatestation = self.climatestation
             cli_dir = self.cli_dir
+
+            self._observed_end_year - self._observed_start_year
 
             result = cc.observed_daymet(
                 climatestation,

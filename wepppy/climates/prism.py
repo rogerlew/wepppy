@@ -20,7 +20,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from scipy.optimize import fmin_slsqp
+from scipy.optimize import fmin_slsqp, minimize, fmin_l_bfgs_b
 
 from wepppy.all_your_base import clamp
 
@@ -37,6 +37,180 @@ from wepppy.webservices.cligen import _make_clinp
 from wepppy.climates.metquery_client import get_prism_monthly_tmin, get_prism_monthly_tmax, get_prism_monthly_ppt, \
     get_daymet_prcp_pwd, get_daymet_prcp_pww, get_daymet_prcp_skew, get_daymet_prcp_std
 
+_rowfmt = lambda x : '\t'.join(['%0.2f' % v for v in x])
+
+
+def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
+              nwds_method='Daymet', randseed=None, cliver=None, suffix='', logger=None):
+
+    days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+
+    # determine which version of cligen to use
+    if cliver is None:
+        cliver = '5.3'
+
+    # change to the working directory
+    assert _exists(wd)
+
+    try:
+        curdir = os.path.abspath(os.curdir)
+    except FileNotFoundError:
+        curdir = '../'
+
+    os.chdir(wd)
+
+    stationManager = CligenStationsManager()
+    stationMeta = stationManager.get_station_fromid(par)
+
+    if stationMeta is None:
+        raise Exception('Cannot find station')
+
+    station = stationMeta.get_station()
+    par_monthlies = station.ppts * station.nwds
+
+    if logger is not None:
+        logger.log('  prism_mod:fetching climates...')
+
+    prism_ppts = get_prism_monthly_ppt(lng, lat, units='inch')
+    prism_tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
+    prism_tmins = get_prism_monthly_tmin(lng, lat, units='f')
+    #        p_stds = get_daymet_prcp_std(lng, lat, units='inch')
+    #        p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
+
+    # calculate number of wet days
+    if nwds_method.lower() == 'daymet':
+        p_wws = get_daymet_prcp_pww(lng, lat)
+        p_wds = get_daymet_prcp_pwd(lng, lat)
+        nwds = days_in_mo * (p_wds / (1.0 - p_wws + p_wds))
+
+    else:
+        station_nwds = days_in_mo * (station.pwds / (1.0 - station.pwws + station.pwds))
+        delta = prism_ppts / par_monthlies
+
+        nwds = [float(v)for v in station_nwds]
+
+        # clamp between 50% and 200% of original value
+        # and between 0.1 days and the number of days in the month
+        for i, (d, nwd, days) in enumerate(zip(delta, nwds, days_in_mo)):
+            print(d, nwd, days)
+
+            if d > 1.0:
+                nwd *= 1.0 + (d - 1.0) / 2.0
+            else:
+                nwd *= 1.0 - (1.0 - d) / 2.0
+
+            if nwd < station_nwds[i] / 2.0:
+                nwd = station_nwds[i] / 2.0
+            if nwd < 0.1:
+                nwd = 0.1
+            if nwd > station_nwds[i] * 2.0:
+                nwd = station_nwds[i] * 2.0
+            if nwd > days - 0.1:
+                nwd = days - 0.1
+
+            nwds[i] = nwd
+
+        pw = nwds / days_in_mo
+
+        assert np.all(pw >= 0.0)
+        assert np.all(pw <= 1.0), pw
+#        ratio = station.pwds / station.pwws
+#        p_wws = 1.0 / (1.0 - ratio + ratio / pw)
+#        p_wds = p_wws * ratio
+
+        # ratio = p_wds / (1 - p_wws + p_wds)
+        # y = x * z
+
+        p_wds = -pw / (pw - 2.0)
+        p_wws = 1.0 / (2.0 - pw)
+
+    if logger is not None:
+        logger.log_done()
+
+    if randseed is None:
+        randseed = 12345
+    randseed = str(randseed)
+
+    daily_ppts = prism_ppts / nwds  # in inches / day
+
+    # build par file
+    par_fn = '{}{}.par'.format(par, suffix)
+
+    if _exists(par_fn):
+        os.remove(par_fn)
+
+    # p_stds = station.pstds * x[3]
+
+    s2 = deepcopy(station)
+    s2.lines[3] = ' MEAN P  ' + par_row_formatter(daily_ppts) + '\r\n'
+    #        s2.lines[4] = ' S DEV P ' + par_row_formatter(pstds) + '\r\n'
+    s2.lines[6] = ' P(W/W)  ' + par_row_formatter(p_wws) + '\r\n'
+    s2.lines[7] = ' P(W/D)  ' + par_row_formatter(p_wds) + '\r\n'
+    s2.lines[8] = ' TMAX AV ' + par_row_formatter(prism_tmaxs) + '\r\n'
+    s2.lines[9] = ' TMIN AV ' + par_row_formatter(prism_tmins) + '\r\n'
+
+    s2.write(par_fn)
+
+    # run cligen
+    cli_fn = '{}{}.cli'.format(par, suffix)
+
+    if _exists(cli_fn):
+        os.remove(cli_fn)
+
+    # create cligen input file
+    _make_clinp(wd, cliver, years, cli_fn, par_fn)
+
+    # build cmd
+    if cliver == "4.3":
+        cmd = [_join(_bin_dir, 'cligen43')]
+    elif cliver == "5.2":
+        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+    else:
+        cmd = [_join(_bin_dir, 'cligen53'), "-i%s" % par_fn]
+
+    if randseed is not None:
+        cmd.append('-r%s' % randseed)
+
+    # run cligen
+    _clinp = open("clinp.txt")
+
+    #        output = check_output(cmd, stdin=_clinp, stderr=STDOUT, timeout=3.0)
+    process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE,
+                    preexec_fn=os.setsid)
+
+    output = process.stdout.read()
+
+    with open("cligen.log", "wb") as fp:
+        fp.write(output)
+
+    assert _exists(cli_fn)
+
+    cli = ClimateFile(cli_fn)
+
+    sim_ppts = cli.header_ppts() * days_in_mo
+    if np.any(np.isnan(sim_ppts)):
+        raise Exception('Cligen failed to produce precipitation')
+
+    sim_nwds = cli.count_wetdays()
+
+    if logger is not None:
+        logger.log('Monthly Mean P (in)\n')
+        logger.log('Station : %s\n' % _rowfmt(par_monthlies))
+        logger.log('PRISM   : %s\n' % _rowfmt(prism_ppts))
+        logger.log('Cligen  : %s\n' % _rowfmt(sim_ppts))
+
+        logger.log('Monthly number wet days\n')
+        logger.log('Station : %s\n' % _rowfmt(station.nwds))
+        logger.log('Target  : %s\n' % _rowfmt(nwds))
+        logger.log('Cligen  : %s\n' % _rowfmt(sim_nwds))
+
+        logger.log('Daily P for day precipitation occurs\n')
+        logger.log('Station : %s\n' % _rowfmt(station.ppts))
+        logger.log('Target  : %s\n' % _rowfmt(daily_ppts))
+
+    os.chdir(curdir)
+
+    return cli.calc_monthlies()
 
 # noinspection PyPep8Naming
 def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, randseed=None, cliver=None,
@@ -186,18 +360,20 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
     if x0 is None:
         x0 = np.array(list(prism_ppts) + [1.0, 1.0])
 
-    args = wd, station, par, randseed, cliver, prism_ppts, p_stds, p_skew, p_wws, p_wds, prism_tmaxs, prism_tmins, suffix
+    args = wd, station, par, randseed, cliver, \
+           prism_ppts, p_stds, p_skew, p_wws, p_wds, prism_tmaxs, prism_tmins, suffix
 
     if run_opt:
         if logger is not None:
             logger.log('  prism_opt2:running optimization...')
 
         bounds = [(0.01, 10.0) for i in range(14)]
-    #    result = minimize(opt_fun, x0, args=args, bounds=bounds, tol=0.2, method='L-BFGS-B', options=dict(eps=0.1))
-        result = fmin_slsqp(opt_fun, x0, args=args, bounds=bounds, epsilon=0.02, full_output=True, iprint=2)
+#        result = minimize(opt_fun, x0, args=args, bounds=bounds, tol=0.2, method='L-BFGS-B', options=dict(eps=0.1))
+        result = fmin_slsqp(opt_fun, x0, args=args, bounds=bounds, epsilon=0.001, full_output=True, iprint=2)
 
         if logger is not None:
             logger.log_done()
+            logger.log(str(result) + '\n\n')
 
         cli_fn = '{}.cli'.format(par)
         cli = ClimateFile(cli_fn)
@@ -210,7 +386,7 @@ def prism_optimized2(par: int, years: int, lng: float, lat: float, wd: str, rand
             for s, o, d, s_nwd, o_nwd in zip(sim_ppts, prism_ppts, days_in_mo, sim_nwds, station.nwds):
                 s *= d * 25.4
                 o *= d * 25.4
-                logger.log('{0:02.1f}\t{1:02.1f}\t{2}\t{3}\t{4}\t{5}\n'
+                logger.log('{0:02.1f}\t{1:02.1f}\t{2:02.1f}\t{3:02.1f}\t{4}\t{5}\n'
                            .format(s, o,  int(100 * (s-o)/o), round(s-o), s_nwd, o_nwd))
 
         #out, fx, its, lmode, smode = result

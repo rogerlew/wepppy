@@ -2511,6 +2511,7 @@ var Climate = function () {
                 // sync climate with nodb
                 $.get({
                     url: "../view/closest_stations/",
+                    cache: false,
                     data: { "mode": mode },
                     success: function success(response) {
                         self.stationselection.html(response);
@@ -2526,6 +2527,7 @@ var Climate = function () {
                 $.get({
                     url: "../view/heuristic_stations/",
                     data: { "mode": mode },
+                    cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
                         self.status.html(task_msg + "... Success");
@@ -2575,6 +2577,7 @@ var Climate = function () {
             var project = Project.getInstance();
             $.get({
                 url: "../view/climate_monthlies/",
+                cache: false,
                 success: function success(response) {
                     $("#climate_monthlies").html(response);
                     project.set_preferred_units();
@@ -2742,9 +2745,9 @@ var Climate = function () {
                 $("#climate_mode4_controls").show();
                 $("#btn_build_climate_container").show();
             } else if (mode === 5) {
-                // single storm
+                // prism
                 $("#climate_spatialmode_controls").show();
-                $("#input_years_container").hide();
+                $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").show();
                 $("#climate_mode2_controls").hide();
