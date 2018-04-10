@@ -123,7 +123,7 @@ def _fetch_par_contents(par, _request):
         d = _request.args
     else:  # POST
         d = _request.get_json()
-        
+
     lat = d.get('lat', None)
     lng = d.get('lng', None)
     p_mean = d.get('p_mean', None)

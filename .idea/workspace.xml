@@ -3,9 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/ron.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/ron.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/climates/prism.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/climates/prism.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/data/statsgo/statsgo_tabular.db" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/data/statsgo/statsgo_tabular.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/webservices/cligen.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/webservices/cligen.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,6 +19,7 @@
     <SUITE FILE_PATH="coverage/wepppy$managements.coverage" NAME="managements Coverage Results" MODIFIED="1522803798326" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management" />
     <SUITE FILE_PATH="coverage/wepppy$prism_climate_revision.coverage" NAME="prism_climate_revision Coverage Results" MODIFIED="1519069796248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts/test2" />
     <SUITE FILE_PATH="coverage/wepppy$cligen_client.coverage" NAME="cligen_client Coverage Results" MODIFIED="1523236960123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$monthly_p_calc.coverage" NAME="monthly_p_calc Coverage Results" MODIFIED="1523303671990" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
     <SUITE FILE_PATH="coverage/wepppy$summary.coverage" NAME="summary Coverage Results" MODIFIED="1522547538003" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
     <SUITE FILE_PATH="coverage/wepppy$watershed.coverage" NAME="watershed Coverage Results" MODIFIED="1522737368795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/validation" />
     <SUITE FILE_PATH="coverage/wepppy$watsed_aggregator.coverage" NAME="watsed_aggregator Coverage Results" MODIFIED="1522384905276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
@@ -40,7 +42,7 @@
     <SUITE FILE_PATH="coverage/wepppy$unitizer.coverage" NAME="unitizer Coverage Results" MODIFIED="1522979302377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
     <SUITE FILE_PATH="coverage/wepppy$return_periods.coverage" NAME="return_periods Coverage Results" MODIFIED="1522433627187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
     <SUITE FILE_PATH="coverage/wepppy$Unittests_in_test_ssurgo_py.coverage" NAME="Unittests in test_ssurgo.py Coverage Results" MODIFIED="1522869027350" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
-    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1523262444542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
+    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1523389801942" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
     <SUITE FILE_PATH="coverage/wepppy$loss.coverage" NAME="loss Coverage Results" MODIFIED="1522884774205" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
     <SUITE FILE_PATH="coverage/wepppy$totalsedwat.coverage" NAME="totalsedwat Coverage Results" MODIFIED="1522905792402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
     <SUITE FILE_PATH="coverage/wepppy$scripted_run.coverage" NAME="scripted_run Coverage Results" MODIFIED="1519756361111" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
@@ -52,20 +54,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="runs.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/user/runs.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="17" column="27" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="27" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="app.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="396">
-              <caret line="529" column="4" lean-forward="true" selection-start-line="529" selection-start-column="4" selection-end-line="529" selection-end-column="4" />
+            <state relative-caret-position="317">
+              <caret line="1367" column="59" selection-start-line="1367" selection-start-column="59" selection-end-line="1367" selection-end-column="59" />
               <folding>
                 <element signature="e#254#263#0" expanded="true" />
               </folding>
@@ -73,41 +66,46 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ron.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/wepppy/nodb/ron.py">
+      <file leaf-file-name="climate.htm" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="188">
-              <caret line="145" column="31" selection-start-line="145" selection-start-column="31" selection-end-line="145" selection-end-column="31" />
+            <state relative-caret-position="342">
+              <caret line="43" column="33" lean-forward="true" selection-start-line="43" selection-start-column="33" selection-end-line="43" selection-end-column="33" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="on_document_ready.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
+      <file leaf-file-name="controllers.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="494" column="19" lean-forward="true" selection-start-line="494" selection-start-column="19" selection-end-line="494" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="attr_delete.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/_scripts/runs/attr_delete.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="21" column="33" lean-forward="true" selection-start-line="21" selection-start-column="33" selection-end-line="21" selection-end-column="33" />
+            <state relative-caret-position="410">
+              <caret line="2520" column="73" lean-forward="true" selection-start-line="2520" selection-start-column="73" selection-end-line="2520" selection-end-column="73" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="unpickler.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/venv/lib/python3.6/site-packages/jsonpickle/unpickler.py">
+      <file leaf-file-name="cligen.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="303">
-              <caret line="405" column="25" selection-start-line="405" selection-start-column="25" selection-end-line="405" selection-end-column="25" />
+            <state relative-caret-position="484">
+              <caret line="293" column="39" selection-start-line="293" selection-start-column="39" selection-end-line="293" selection-end-column="39" />
+              <folding>
+                <element signature="e#828#1778#0" />
+                <element signature="e#1813#2081#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cligen.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/webservices/cligen.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="273">
+              <caret line="125" selection-start-line="125" selection-end-line="125" />
             </state>
           </provider>
         </entry>
@@ -115,8 +113,8 @@
       <file leaf-file-name="climate.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="529">
-              <caret line="708" column="27" selection-start-line="708" selection-start-column="27" selection-end-line="708" selection-end-column="27" />
+            <state relative-caret-position="196">
+              <caret line="673" column="20" lean-forward="true" selection-start-line="673" selection-start-column="20" selection-end-line="673" selection-end-column="20" />
               <folding>
                 <element signature="e#273#282#0" expanded="true" />
               </folding>
@@ -124,31 +122,42 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="stats_dev.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/_scripts/stats_dev.py">
+      <file leaf-file-name="prism.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/climates/prism.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+            <state relative-caret-position="178">
+              <caret line="42" column="13" selection-start-line="42" selection-start-column="4" selection-end-line="42" selection-end-column="13" />
+              <folding>
+                <element signature="e#254#263#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="app_config.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app_config.py">
+      <file leaf-file-name="process_daymet.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/_scripts/data_acquisition/daymet/process_daymet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="16" column="71" selection-start-line="16" selection-start-column="71" selection-end-line="16" selection-end-column="71" />
+            <state relative-caret-position="747">
+              <caret line="488" column="76" selection-start-line="488" selection-start-column="76" selection-end-line="488" selection-end-column="76" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="devnotes.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
+      <file leaf-file-name="metquery_client.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/climates/metquery_client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="477">
-              <caret line="52" selection-start-line="52" selection-end-line="52" selection-end-column="19" />
+            <state relative-caret-position="378">
+              <caret line="26" column="8" lean-forward="true" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
             </state>
           </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="metquery.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/webservices/metquery.py">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -163,36 +172,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>status</find>
-      <find>start_year</find>
-      <find>_observed_start_year</find>
-      <find>observed_start_year</find>
-      <find>def observed_start_year</find>
-      <find>input</find>
-      <find>verbose</find>
+      <find>monthly</find>
+      <find>Cligen</find>
       <find>print</find>
-      <find>parse</find>
-      <find>futur</find>
-      <find>future</find>
-      <find>RawConfigParser</find>
-      <find>href</find>
-      <find>runs</find>
-      <find>Run</find>
-      <find>class Run</find>
-      <find>get_all</find>
-      <find>class R</find>
-      <find>has_climate</find>
-      <find>def has_climate(</find>
-      <find>has</find>
+      <find>CLIMATE</find>
+      <find>monthies</find>
+      <find>ClimateFile</find>
+      <find>_build_</find>
+      <find>_build_climate_optimized</find>
+      <find>header_ppts</find>
+      <find>report/climate</find>
+      <find>input_years_container</find>
       <find>prism</find>
-      <find>log</find>
-      <find>as_attachment</find>
-      <find>view/</find>
-      <find>view</find>
-      <find>view/ma</find>
-      <find>view/man</find>
-      <find>observed.sho</find>
-      <find>mdob</find>
+      <find>prism_ppts</find>
+      <find>[i]</find>
+      <find>_clinp</find>
+      <find>process.</find>
+      <find>nwds</find>
+      <find>prism_optimized2</find>
+      <find>.ppts</find>
+      <find>localize</find>
+      <find>cache:</find>
+      <find>cache</find>
+      <find>heuris</find>
+      <find>cl</find>
+      <find>monthlies</find>
+      <find>fetchstation</find>
+      <find>_fetch_par_contents</find>
+      <find>heu</find>
+      <find>fetch_</find>
+      <find>localiz</find>
     </findStrings>
     <replaceStrings>
       <replace>np.zeros(m)</replace>
@@ -237,10 +246,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/wepppy/topaz/topaz.py" />
-        <option value="$PROJECT_DIR$/wepppy/validation/watershed.py" />
-        <option value="$PROJECT_DIR$/wepppy/wepp/out/loss.py" />
-        <option value="$PROJECT_DIR$/wepppy/wepp/stats/summary.py" />
         <option value="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" />
         <option value="$PROJECT_DIR$/wepppy/wepp/stats/__init__.py" />
         <option value="$PROJECT_DIR$/wepppy/wepp/stats/report_base.py" />
@@ -266,16 +271,12 @@
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/observed.htm" />
         <option value="$PROJECT_DIR$/wepppy/nodb/observed.py" />
-        <option value="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm" />
         <option value="$PROJECT_DIR$/wepppy/nodb/log_mixin.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/wepp.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" />
-        <option value="$PROJECT_DIR$/wepppy/climates/prism.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm" />
         <option value="$PROJECT_DIR$/wepppy/climates/cligen_client.py" />
         <option value="$PROJECT_DIR$/wepppy/climates/downscaled_nmme_client.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/user/runs.html" />
         <option value="$PROJECT_DIR$/wepppy/env" />
         <option value="$PROJECT_DIR$/wepppy/env.cfg" />
@@ -283,11 +284,19 @@
         <option value="$PROJECT_DIR$/wepppy/weppcloud/app_config.py" />
         <option value="$PROJECT_DIR$/venv/lib/python3.6/site-packages/jsonpickle/unpickler.py" />
         <option value="$PROJECT_DIR$/wepppy/_scripts/stats_dev.py" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/climate.py" />
         <option value="$PROJECT_DIR$/wepppy/_scripts/runs/attr_delete.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/app.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/ron.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" />
+        <option value="$PROJECT_DIR$/wepppy/_scripts/climate/monthly_p_calc.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate_monthlies.htm" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm" />
+        <option value="$PROJECT_DIR$/wepppy/_scripts/data_acquisition/daymet/process_daymet.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/climate.py" />
+        <option value="$PROJECT_DIR$/wepppy/webservices/cligen.py" />
+        <option value="$PROJECT_DIR$/wepppy/climates/prism.py" />
+        <option value="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" />
       </list>
     </option>
   </component>
@@ -298,16 +307,17 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="43" />
-    <option name="y" value="27" />
-    <option name="width" value="1823" />
-    <option name="height" value="712" />
+    <option name="x" value="687" />
+    <option name="y" value="25" />
+    <option name="width" value="1233" />
+    <option name="height" value="968" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -331,7 +341,21 @@
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="_scripts" type="462c0819:PsiDirectoryNode" />
-              <item name="runs" type="462c0819:PsiDirectoryNode" />
+              <item name="data_acquisition" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="_scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="data_acquisition" type="462c0819:PsiDirectoryNode" />
+              <item name="daymet" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="climates" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
@@ -343,36 +367,7 @@
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="nodb" type="462c0819:PsiDirectoryNode" />
-              <item name="tests" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepp" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepp" type="462c0819:PsiDirectoryNode" />
-              <item name="out" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepp" type="462c0819:PsiDirectoryNode" />
-              <item name="out" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepp" type="462c0819:PsiDirectoryNode" />
-              <item name="stats" type="462c0819:PsiDirectoryNode" />
+              <item name="webservices" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
@@ -386,6 +381,14 @@
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="controls" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
@@ -423,7 +426,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -530,7 +532,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="ebe" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="monthly_p_calc" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="wepppy" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -538,12 +540,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wepppy/wepp/out" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wepppy/_scripts/climate" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/wepp/out/ebe.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wepppy/_scripts/climate/monthly_p_calc.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -591,18 +593,18 @@
       <item itemvalue="Python.wepppy" />
       <item itemvalue="Python.app" />
       <item itemvalue="Python.stats_dev" />
-      <item itemvalue="Python.ebe" />
       <item itemvalue="Python.cligen_client" />
       <item itemvalue="Python.downscaled_nmme_client" />
       <item itemvalue="Python.attr_delete" />
+      <item itemvalue="Python.monthly_p_calc" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.monthly_p_calc" />
         <item itemvalue="Python.attr_delete" />
         <item itemvalue="Python.stats_dev" />
         <item itemvalue="Python.downscaled_nmme_client" />
         <item itemvalue="Python.cligen_client" />
-        <item itemvalue="Python.ebe" />
       </list>
     </recent_temporary>
   </component>
@@ -813,19 +815,19 @@
       <option name="project" value="LOCAL" />
       <updated>1523260084799</updated>
     </task>
-    <task id="LOCAL-00029" summary="fix #44 #45">
-      <created>1522434507923</created>
+    <task id="LOCAL-00029" summary="lt-fire create bug fix, observed control show/hide bug fix">
+      <created>1523291164672</created>
       <option name="number" value="00029" />
       <option name="presentableId" value="LOCAL-00029" />
       <option name="project" value="LOCAL" />
-      <updated>1522434507923</updated>
+      <updated>1523291164672</updated>
     </task>
-    <task id="LOCAL-00030" summary="fix #40 legends for slope/aspect, landuse, and soils">
-      <created>1522439911955</created>
+    <task id="LOCAL-00030" summary="prism climate build, heuristic climate selection">
+      <created>1523390384309</created>
       <option name="number" value="00030" />
       <option name="presentableId" value="LOCAL-00030" />
       <option name="project" value="LOCAL" />
-      <updated>1522439911955</updated>
+      <updated>1523390384310</updated>
     </task>
     <task id="LOCAL-00031" summary="generate watershed soil output">
       <created>1522452165256</created>
@@ -862,7 +864,7 @@
       <option name="project" value="LOCAL" />
       <updated>1522646381243</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -899,15 +901,16 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="43" y="25" width="1877" height="968" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="11" weight="0.028742515" />
-      <window_info anchor="bottom" id="Python Console" order="8" visible="true" weight="0.29101795" />
-      <window_info anchor="bottom" x="43" y="57" width="1877" height="936" id="Run" order="2" type="WINDOWED" visible="true" weight="0.03410475" />
+      <window_info anchor="bottom" id="Python Console" order="8" weight="0.29101795" />
+      <window_info anchor="bottom" x="43" y="57" width="1877" height="936" id="Run" order="2" type="WINDOWED" weight="0.03410475" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.0754491" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27635172" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23375204" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="4" weight="0.32982844" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.13772455" />
@@ -928,28 +931,28 @@
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" visible="true" weight="0.12069907" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="13" weight="0.028742515" />
-      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27635172" />
+      <window_info active="true" anchor="bottom" x="43" y="57" width="1877" height="936" id="Run" order="2" type="WINDOWED" visible="true" weight="0.03410475" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22282906" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
-      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" x="981" y="55" width="939" height="938" id="Run" order="2" type="WINDOWED" visible="true" weight="0.03410475" />
+      <window_info anchor="bottom" id="Version Control" order="13" weight="0.028742515" />
       <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.18802395" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32814372" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.13772455" />
       <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
       <window_info anchor="right" id="Database" order="4" weight="0.32982844" />
+      <window_info anchor="bottom" id="Messages" order="8" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.0754491" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="right" id="SciView" order="5" weight="0.32982844" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.19520958" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Messages" order="8" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.19520958" />
+      <window_info anchor="bottom" id="Python Console" order="10" visible="true" weight="0.29101795" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -959,8 +962,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix #51, fix #52" />
-    <MESSAGE value="fix #50" />
     <MESSAGE value="#50 catch failed climate build" />
     <MESSAGE value="sphinx doc" />
     <MESSAGE value="sphinx-doc" />
@@ -984,7 +985,9 @@
     <MESSAGE value="climate modes revised" />
     <MESSAGE value="deployment fixes" />
     <MESSAGE value="wepp.status_log attr to property fix script" />
-    <option name="LAST_COMMIT_MESSAGE" value="wepp.status_log attr to property fix script" />
+    <MESSAGE value="lt-fire create bug fix, observed control show/hide bug fix" />
+    <MESSAGE value="prism climate build, heuristic climate selection" />
+    <option name="LAST_COMMIT_MESSAGE" value="prism climate build, heuristic climate selection" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -992,23 +995,17 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/observed_streamflow.htm">
+    <entry file="file://$PROJECT_DIR$/wepppy/climates/prism.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="32" selection-start-line="2" selection-start-column="32" selection-end-line="2" selection-end-column="32" />
+        <state relative-caret-position="1188">
+          <caret line="95" column="21" selection-start-line="95" selection-start-column="21" selection-end-line="95" selection-end-column="21" />
+          <folding>
+            <element signature="e#254#263#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/_observed_base.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="60" selection-start-line="1" selection-start-column="60" selection-end-line="1" selection-end-column="60" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/_observed_base.htm" />
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/soil.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -1034,9 +1031,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
           <caret line="23" column="8" selection-start-line="23" selection-start-column="8" selection-end-line="23" selection-end-column="8" />
-          <folding>
-            <element signature="e#255#288#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1054,13 +1048,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/observed.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="338">
-          <caret line="37" lean-forward="true" selection-start-line="37" selection-end-line="69" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/observed.py" />
     <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/channel_watbal.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1091">
@@ -1108,9 +1096,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="286">
           <caret line="59" lean-forward="true" selection-start-line="59" selection-end-line="59" />
-          <folding>
-            <element signature="e#254#283#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1139,15 +1124,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="324">
           <caret line="43" column="9" lean-forward="true" selection-start-line="43" selection-start-column="9" selection-end-line="43" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#254#275#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1202,53 +1178,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="2645" column="46" selection-start-line="2645" selection-start-column="46" selection-end-line="2645" selection-end-column="46" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/climates/prism.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="220" column="9" lean-forward="true" selection-start-line="220" selection-start-column="9" selection-end-line="220" selection-end-column="9" />
-          <folding>
-            <element signature="e#254#263#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="18" column="51" selection-start-line="18" selection-start-column="51" selection-end-line="18" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/webservices/cligen.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="376">
-          <caret line="757" column="45" lean-forward="true" selection-start-line="757" selection-start-column="45" selection-end-line="757" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="159" column="52" lean-forward="true" selection-start-line="159" selection-start-column="52" selection-end-line="159" selection-end-column="52" />
-          <folding>
-            <element signature="e#828#1778#0" />
-            <element signature="e#1813#2081#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/climates/downscaled_nmme_client.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="643">
@@ -1263,33 +1192,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="639">
-          <caret line="36" column="211" selection-start-line="36" selection-start-column="211" selection-end-line="36" selection-end-column="211" />
-          <folding>
-            <element signature="e#3580#3693#0#HTML" />
-            <element signature="e#10091#13039#0#HTML" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/user/usermod.html">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/user/profile.html">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/user/navbar.html">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/env">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="20" selection-start-column="20" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/env" />
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/base.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="158">
@@ -1297,16 +1200,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/env.cfg">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="1" column="16" lean-forward="true" selection-start-line="1" selection-start-column="16" selection-end-line="1" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/env.cfg" />
     <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="477">
+        <state relative-caret-position="936">
           <caret line="52" selection-start-line="52" selection-end-line="52" selection-end-column="19" />
         </state>
       </provider>
@@ -1320,14 +1217,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/user/runs.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
+        <state relative-caret-position="306">
           <caret line="17" column="27" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="27" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/venv/lib/python3.6/site-packages/jsonpickle/unpickler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="303">
+        <state relative-caret-position="7128">
           <caret line="405" column="25" selection-start-line="405" selection-start-column="25" selection-end-line="405" selection-end-column="25" />
         </state>
       </provider>
@@ -1335,51 +1232,138 @@
     <entry file="file://$PROJECT_DIR$/wepppy/_scripts/stats_dev.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
-          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="529">
-          <caret line="708" column="27" selection-start-line="708" selection-start-column="27" selection-end-line="708" selection-end-column="27" />
-          <folding>
-            <element signature="e#273#282#0" expanded="true" />
-          </folding>
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/_scripts/runs/attr_delete.py">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="21" column="33" selection-start-line="21" selection-start-column="33" selection-end-line="21" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8892">
+          <caret line="494" column="19" selection-start-line="494" selection-start-column="19" selection-end-line="494" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/ron.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2250">
+          <caret line="145" column="31" selection-start-line="145" selection-start-column="31" selection-end-line="145" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate_monthlies.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="23" column="50" lean-forward="true" selection-start-line="23" selection-start-column="50" selection-end-line="23" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/_scripts/climate/monthly_p_calc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="25" column="64" selection-start-line="25" selection-start-column="64" selection-end-line="25" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/climates/metquery_client.py">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="378">
-          <caret line="21" column="33" lean-forward="true" selection-start-line="21" selection-start-column="33" selection-end-line="21" selection-end-column="33" />
+          <caret line="26" column="8" lean-forward="true" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/webservices/metquery.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/_scripts/data_acquisition/daymet/process_daymet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="747">
+          <caret line="488" column="76" selection-start-line="488" selection-start-column="76" selection-end-line="488" selection-end-column="76" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="410">
+          <caret line="2520" column="73" lean-forward="true" selection-start-line="2520" selection-start-column="73" selection-end-line="2520" selection-end-column="73" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1134">
+          <caret line="63" column="37" selection-start-line="63" selection-start-column="37" selection-end-line="63" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="673" column="20" lean-forward="true" selection-start-line="673" selection-start-column="20" selection-end-line="673" selection-end-column="20" />
+          <folding>
+            <element signature="e#273#282#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="529" column="4" lean-forward="true" selection-start-line="529" selection-start-column="4" selection-end-line="529" selection-end-column="4" />
+        <state relative-caret-position="317">
+          <caret line="1367" column="59" selection-start-line="1367" selection-start-column="59" selection-end-line="1367" selection-end-column="59" />
           <folding>
             <element signature="e#254#263#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="494" column="19" lean-forward="true" selection-start-line="494" selection-start-column="19" selection-end-line="494" selection-end-column="19" />
+        <state relative-caret-position="342">
+          <caret line="43" column="33" lean-forward="true" selection-start-line="43" selection-start-column="33" selection-end-line="43" selection-end-column="33" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/ron.py">
+    <entry file="file://$PROJECT_DIR$/wepppy/webservices/cligen.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="188">
-          <caret line="145" column="31" selection-start-line="145" selection-start-column="31" selection-end-line="145" selection-end-column="31" />
+        <state relative-caret-position="273">
+          <caret line="125" selection-start-line="125" selection-end-line="125" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/climates/prism.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="42" column="13" selection-start-line="42" selection-start-column="4" selection-end-line="42" selection-end-column="13" />
+          <folding>
+            <element signature="e#254#263#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="484">
+          <caret line="293" column="39" selection-start-line="293" selection-start-column="39" selection-end-line="293" selection-end-column="39" />
+          <folding>
+            <element signature="e#828#1778#0" />
+            <element signature="e#1813#2081#0" />
+          </folding>
         </state>
       </provider>
     </entry>
