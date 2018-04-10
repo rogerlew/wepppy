@@ -233,11 +233,3 @@ if __name__ == "__main__":
 <option value="41018">BOWMAN DAM CA                            41018 0 (52.9 km)</option>
 <option value="48218">SIERRAVILLE RS CA                        48218 0 (55.4 km)</option>
     """
-    wd = '/home/weppdev/PycharmProjects/wepppy/wepppy/climates/tests/wd'
-#    prism_optimized2(par=106152, years=100, lng=-116, lat=47, wd=wd)
-
-    x0 = np.array([ 0.36690092,  0.37521019,  0.31532417,  0.29125945,  0.41512125,
-        0.41009472,  0.44130732,  0.46372077,  0.4256049,  0.48817581,
-        0.37101017,  0.41849169,  1.75021999,  1.86826402])
-
-    print(prism_optimized2(par=106152, years=100, lng=-116, lat=47, wd=wd, run_opt=False, x0=x0, suffix='_144'))
