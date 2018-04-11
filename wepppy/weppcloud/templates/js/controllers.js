@@ -76,6 +76,24 @@ var Project = function () {
             });
         };
 
+        that.clear_locks = function() {
+
+            $.get({
+                url: "../tasks/clear_locks/",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success == true) {
+                        alert("Locks have been cleared");
+                    } else {
+                        alert("Error clearing locks");
+                    }
+                },
+                fail: function fail(error) {
+                    alert("Error clearing locks");
+                }
+            });
+        };
+
 
         that.set_public = function (state) {
             $.post({

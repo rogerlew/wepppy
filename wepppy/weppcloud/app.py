@@ -584,6 +584,26 @@ def create_fork(runid, config):
     return redirect('runs/%s/%s/' % (new_runid, config))
 
 
+@app.route('/runs/<runid>/tasks/clear_locks')
+@app.route('/runs/<runid>/tasks/clear_locks/')
+def clear_locks(runid):
+    # get working dir of original directory
+    wd = get_wd(runid)
+
+    try:
+
+        # delete any active locks
+        locks = glob(_join(wd, '*.lock'))
+        for fn in locks:
+            os.remove(fn)
+
+        # redirect to fork
+        return success_factory()
+
+    except:
+        return exception_factory('Error Clearing Locks')
+
+
 @app.route('/runs/<runid>/<config>/archive')
 @app.route('/runs/<runid>/<config>/archive/')
 def archive(runid, config):
