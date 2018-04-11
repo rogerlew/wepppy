@@ -3067,6 +3067,8 @@ var Observed = function () {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... done.");
                         self.report();
+                    } else {
+                        self.pushResponseStacktrace(self, response);
                     }
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
