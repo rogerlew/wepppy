@@ -12,6 +12,8 @@
     <th>MSE</th>
     <th>NSE</th>
     <th>R<sup>2</sup></th>
+    <th> </th>
+    <th> </th>
   </tr>
 </thead>
 <tbody>
@@ -26,6 +28,7 @@
     <td class="text-right">{{ results[hill_or_chn][measure][timeperiod][stat] | round(3) }}</td>
   {% endfor %}
   <td><a href="../../plot/observed/{{ hill_or_chn }}-{{ measure | replace(' ', '_') }}-{{ timeperiod }}/" target="_blank">plot</a></td>
+  <td><a href="../../resources/observed/{{ hill_or_chn }}-{{ measure | replace(' ', '_') }}-{{ timeperiod }}.csv">.csv</a></td>
   </tr>
   {% endfor %}
   {% endfor %}
