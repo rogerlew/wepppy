@@ -42,8 +42,7 @@ def nse(Qm, Qo):
     validate(Qm, Qo)
 
     return float(1.0 - np.sum((Qm - Qo) ** 2.0) / \
-                 np.sum((Qo - np.mean(Qo)) ** 2.0))
-
+                       np.sum((Qo - np.mean(Qo)) ** 2.0))
 
 def r_square(Qm, Qo):
     validate(Qm, Qo)
@@ -179,54 +178,54 @@ class Observed(NoDbBase):
     def calc_model_fit(self):
         assert self.has_observed
 
+        results = OrderedDict()
+        df = pd.read_csv(self.observed_fn)
+
+        #
+        # Hillslopes
+        #
+
+        # load hilslope simulation results
+        wepp = Wepp.getInstance(self.wd)
+        totwatsed_fn = _join(self.output_dir, 'totalwatsed.txt')
+        totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
+                                phosOpts=wepp.phosphorus_opts)
+        sim = totwatsed.d
+        year0 = sorted(set(sim['Year']))[0]
+        results['Hillslopes'] = self.run_measures(df, sim, 'Hillslopes')
+
+        #
+        # Channels
+        #
+
+        ebe = Ebe(_join(self.output_dir, 'ebe_pw0.txt'))
+        chanwb = Chanwb(_join(self.output_dir, 'chanwb.out'))
+
+        sim = ebe.df
+        juls = []
+        #print(sim['year'] )
+        sim['Year'] = sim['year'] + year0 - 1
+        #print(sim['Year'])
+        for mo, da, yr in zip(sim['mo'], sim['da'], sim['Year']):
+            mo = int(mo)
+            da = int(da)
+            yr = int(yr)
+            try:
+                jul = (datetime(yr, mo, da) - datetime(yr, 1, 1)).days
+            except ValueError:
+                jul = (datetime(yr, mo, da - 1) - datetime(yr, 1, 1)).days
+
+            juls.append(jul)
+
+        sim['Julian'] = juls
+        sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
+
+        results['Channels'] = self.run_measures(df, sim, 'Channels')
+
         self.lock()
 
         # noinspection PyBroadException
         try:
-
-            results = OrderedDict()
-            df = pd.read_csv(self.observed_fn)
-
-            #
-            # Hillslopes
-            #
-
-            # load hilslope simulation results
-            wepp = Wepp.getInstance(self.wd)
-            totwatsed_fn = _join(self.output_dir, 'totalwatsed.txt')
-            totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                                    phosOpts=wepp.phosphorus_opts)
-            sim = totwatsed.d
-            year0 = sim['Year']
-
-            results['Hillslopes'] = self.run_measures(df, sim)
-
-            #
-            # Channels
-            #
-
-            ebe = Ebe(_join(self.output_dir, 'ebe_pw0.txt'))
-            chanwb = Chanwb(_join(self.output_dir, 'chanwb.out'))
-
-            sim = ebe.df
-            juls = []
-            sim['Year'] = sim['year'] + year0 - 1
-            for mo, da, yr in zip(sim['mo'], sim['da'], sim['Year']):
-                mo = int(mo)
-                da = int(da)
-                yr = int(yr)
-                try:
-                    jul = (datetime(yr, mo, da) - datetime(yr, 1, 1)).days
-                except ValueError:
-                    jul = (datetime(yr, mo, da - 1) - datetime(yr, 1, 1)).days
-
-                juls.append(jul)
-
-            sim['Julian'] = juls
-            sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
-
-            results['Channels'] = self.run_measures(df, sim)
-
             self.results = results
 
             self.dump_and_unlock()
@@ -235,24 +234,35 @@ class Observed(NoDbBase):
             self.unlock('-f')
             raise
 
-    def run_measures(self, obs, sim):
+    def run_measures(self, obs, sim, hillorChannel):
 
         results = OrderedDict()
         for m in self.measures:
             if m not in obs:
                 continue
 
-            res = self.run_measure(obs, sim, m)
+            res = self.run_measure(obs, sim, m, hillorChannel)
 
             results[m] = res
 
         return results
 
-    def run_measure(self, obs, sim, measure):
+    def run_measure(self, obs, sim, measure, hillorChannel):
         sim_dates = dict([((int(j), int(yr)), i) for i, (j, yr) in
                           enumerate(zip(sim['Julian'], sim['Year']))])
 
-        Qm, Qo = [], []
+
+        sim_years = sorted(set(int(yr) for yr in sim['Year']))
+        print(sim_years)
+
+        years = sorted(set(int(yr) for yr in obs['Year']))
+        print(set(sim_years).intersection(years))
+        wtr_yr_d = dict((yr, i) for i, yr in enumerate(years))
+        last_yr = years[-1]
+
+        Qm, Qo, dates = [], [], []
+        Qm_yearly, Qo_yearly = np.zeros(len(years)), np.zeros(len(years))
+
         for i, v in enumerate(obs[measure]):
             if math.isnan(v):
                 continue
@@ -267,13 +277,48 @@ class Observed(NoDbBase):
 
             Qm.append(sim[measure][j])
             Qo.append(v)
+            dates.append(str(obs['Date'][i]))
+
+            wtr_yr = yr
+
+            if jul > 273:
+                wtr_yr += 1
+
+            if wtr_yr <= last_yr:
+                k = wtr_yr_d[wtr_yr]
+                Qm_yearly[k] += Qm[-1]
+                Qo_yearly[k] += Qo[-1]
+
+        self._write_measure(Qm, Qo, dates, measure, hillorChannel, 'Daily')
+        self._write_measure(Qm_yearly, Qo_yearly, years, measure, hillorChannel, 'Yearly')
 
         Qm = np.array(Qm)
         Qo = np.array(Qo)
 
         return {
-            'NSE': nse(Qm, Qo),
-            'R^2': r_square(Qm, Qo),
-            'DV': dv(Qm, Qo),
-            'MSE': mse(Qm, Qo)
+            'Daily': {
+                'NSE': nse(Qm, Qo),
+                'R^2': r_square(Qm, Qo),
+                'DV': dv(Qm, Qo),
+                'MSE': mse(Qm, Qo)
+            },
+            'Yearly': {
+                'NSE': nse(Qm_yearly, Qo_yearly),
+                'R^2': r_square(Qm_yearly, Qo_yearly),
+                'DV': dv(Qm_yearly, Qo_yearly),
+                'MSE': mse(Qm_yearly, Qo_yearly)
+            }
         }
+
+    def _write_measure(self, Qm, Qo, dates, measure, hillorChannel, dailyorYearly):
+        assert len(Qm) == len(Qo)
+        assert len(Qm) == len(dates)
+
+        fn = '%s-%s-%s.csv' % (hillorChannel, measure, dailyorYearly)
+        fn = fn.replace(' ', '_')
+        fn = _join(self.observed_dir, fn)
+        with open(fn, 'w') as fn:
+            fn.write('date,Qm,Qo\n')
+
+            for m, o, d in zip(Qm, Qo, dates):
+                fn.write('%s,%f,%f\n' % (d, m, o))
