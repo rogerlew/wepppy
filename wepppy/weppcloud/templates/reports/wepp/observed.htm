@@ -1,20 +1,35 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_content %}
 <h2>Observed Data Model Fit Results</h2>
+{% for timeperiod in ['Daily', 'Yearly'] %}
+<t3><b>{{ timeperiod }}</b></t3>
 <table class="table table-nonfluid">
-{% for hill_or_chn in results %}
-{% set hill_or_chn_loop = loop %}
-{% for measure in results[hill_or_chn] %}
-{% set measure_loop = loop %}
-{% for stat in results[hill_or_chn][measure] %}
+<thead>
   <tr>
-    <td>{% if measure_loop.first and loop.first%}<b>{{ hill_or_chn }}</b>{% endif %}</td>
-      <td>{% if loop.first %}{{ measure }}{% endif %}</td>
-      <td>{{ stat }}</td>
-      <td class="text-right">{{ results[hill_or_chn][measure][stat] | round(3) }}</td>
+    <th> </th>
+    <th>Measure</th>
+    <th>DV</th>
+    <th>MSE</th>
+    <th>NSE</th>
+    <th>R<sup>2</sup></th>
   </tr>
-{% endfor %}
-{% endfor %}
-{% endfor %}
+</thead>
+<tbody>
+  {% for hill_or_chn in results %}
+  {% set hill_or_chn_loop = loop %}
+  {% for measure in results[hill_or_chn] %}
+  {% set measure_loop = loop %}
+  <tr>
+  <td>{% if measure_loop.first and loop.first%}<b>{{ hill_or_chn }}</b>{% endif %}</td>
+  <td>{% if loop.first %}{{ measure }}{% endif %}</td>
+  {% for stat in results[hill_or_chn][measure][timeperiod] %}
+    <td class="text-right">{{ results[hill_or_chn][measure][timeperiod][stat] | round(3) }}</td>
+  {% endfor %}
+  <td><a href="../../plot/observed/{{ hill_or_chn }}-{{ measure | replace(' ', '_') }}-{{ timeperiod }}/" target="_blank">plot</a></td>
+  </tr>
+  {% endfor %}
+  {% endfor %}
+</tbody>
 </table>
+{% endfor %}
 {% endblock %}
