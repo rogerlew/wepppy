@@ -100,13 +100,11 @@ def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
     else:
         station_nwds = days_in_mo * (station.pwds / (1.0 - station.pwws + station.pwds))
         delta = prism_ppts / par_monthlies
-
         nwds = [float(v)for v in station_nwds]
 
         # clamp between 50% and 200% of original value
         # and between 0.1 days and the number of days in the month
         for i, (d, nwd, days) in enumerate(zip(delta, nwds, days_in_mo)):
-            print(d, nwd, days)
 
             if d > 1.0:
                 nwd *= 1.0 + (d - 1.0) / 2.0
@@ -119,8 +117,8 @@ def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
                 nwd = 0.1
             if nwd > station_nwds[i] * 2.0:
                 nwd = station_nwds[i] * 2.0
-            if nwd > days - 0.1:
-                nwd = days - 0.1
+            if nwd > days - 0.25:
+                nwd = days - 0.25
 
             nwds[i] = nwd
 
@@ -129,8 +127,9 @@ def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
         assert np.all(pw >= 0.0)
         assert np.all(pw <= 1.0), pw
 
-        p_wds = -pw / (pw - 2.0)
-        p_wws = 1.0 / (2.0 - pw)
+        ratio = station.pwds / station.pwws
+        p_wws = 1.0 / (1.0 - ratio + ratio / pw)
+        p_wds = ((p_wws - 1.0) * pw) / (pw - 1.0)
 
     if logger is not None:
         logger.log_done()
@@ -211,6 +210,12 @@ def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
         logger.log('Station : %s\n' % _rowfmt(station.nwds))
         logger.log('Target  : %s\n' % _rowfmt(nwds))
         logger.log('Cligen  : %s\n' % _rowfmt(sim_nwds))
+
+        logger.log('p(w|w) and p(w|d)\n')
+        logger.log('Station p(w|w) : %s\n' % _rowfmt(station.pwws))
+        logger.log('Cligen p(w|w)  : %s\n' % _rowfmt(p_wws))
+        logger.log('Station p(w|d) : %s\n' % _rowfmt(station.pwds))
+        logger.log('Cligen p(w|d)  : %s\n' % _rowfmt(p_wds))
 
         logger.log('Daily P for day precipitation occurs\n')
         logger.log('Station : %s\n' % _rowfmt(station.ppts))
