@@ -87,6 +87,11 @@ class ClimateFile(object):
         with open(cli_fn) as fp:
             lines = fp.readlines()
 
+        _ = lines[4].split()
+        self.lat = float(_[0])
+        self.lng = float(_[1])
+        self.elevation = float(_[2])
+
         i = 0
         for i, L in enumerate(lines):
             if 'da mo year' in L:
@@ -212,10 +217,12 @@ class ClimateFile(object):
         prcps = np.zeros((12,))
         tmaxs = np.zeros((12,))
         tmins = np.zeros((12,))
+        nwds = np.zeros((12,))
 
         for i, row in df.iterrows():
             indx = int(row.mo) - 1
             prcps[indx] += row.prcp
+            nwds[indx] += (0.0, 1.0)[row.prcp > 0.0]
             tmaxs[indx] += row.tmax
             tmins[indx] += row.tmin
 
@@ -228,10 +235,24 @@ class ClimateFile(object):
         tmins /= nyears * days_in_mo
         tmins = c_to_f(tmins)
 
+        nwds /= nyears
+
         return {
             "ppts": [float(v) for v in prcps],
             "tmaxs": [float(v) for v in tmaxs],
-            "tmins": [float(v) for v in tmins]
+            "tmins": [float(v) for v in tmins],
+            "nwds": [float(v) for v in nwds]
+        }
+
+    def calc_intensity(self):
+        ppts = sorted(self.as_dataframe().prcp)
+        print(np.where(np.array(ppts) > 0.0))
+        n = len(ppts)
+        return {
+            "99": float(ppts[int(round(0.99 * n))]),
+            "95": float(ppts[int(round(0.95 * n))]),
+            "90": float(ppts[int(round(0.9 * n))]),
+            "pct_wet": len(np.where(np.array(ppts) > 0.0)[0]) / n
         }
 
     def write(self, fn):

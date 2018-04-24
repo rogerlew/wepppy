@@ -8,10 +8,10 @@
   <tr>
     <th> </th>
     <th>Measure</th>
-    <th>DV</th>
-    <th>MSE</th>
     <th>NSE</th>
     <th>R<sup>2</sup></th>
+    <th>DV</th>
+    <th>MSE</th>
     <th> </th>
     <th> </th>
   </tr>
@@ -23,7 +23,7 @@
   {% set measure_loop = loop %}
   <tr>
   <td>{% if measure_loop.first and loop.first%}<b>{{ hill_or_chn }}</b>{% endif %}</td>
-  <td>{% if loop.first %}{{ measure }}{% endif %}</td>
+  <td>{{ measure }}</td>
   {% for stat in results[hill_or_chn][measure][timeperiod] %}
     <td class="text-right">{{ results[hill_or_chn][measure][timeperiod][stat] | round(3) }}</td>
   {% endfor %}

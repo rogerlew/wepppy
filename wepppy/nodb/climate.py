@@ -26,7 +26,7 @@ import jsonpickle
 
 # wepppy
 from wepppy.climates import cligen_client as cc
-from wepppy.climates.prism import prism_mod
+from wepppy.climates.prism import prism_mod, prism_revision
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile
 from wepppy.all_your_base import isint, isfloat
 from wepppy.watershed_abstraction import ischannel
@@ -86,6 +86,7 @@ class Climate(NoDbBase, LogMixin):
             self._climatestation = None
             self._climate_mode = ClimateMode.Undefined
             self._climate_spatialmode = ClimateSpatialMode.Single
+            self._do_prism_revision = True
             self._cligen_seed = None
             self._observed_start_year = ''
             self._observed_end_year = ''
@@ -146,6 +147,10 @@ class Climate(NoDbBase, LogMixin):
     @property
     def status_log(self):
         return _join(self.cli_dir, 'status.log')
+
+    @property
+    def do_prism_revision(self):
+        return self._do_prism_revision
 
     @property
     def observed_start_year(self):
@@ -732,23 +737,25 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def _build_climate_observed(self, verbose=False):
+        do_prism_revision = self.do_prism_revision
+
         self.lock()
 
         # noinspection PyBroadInspection
         try:
             self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
-            lng, lat = watershed.centroid
+            ws_lng, ws_lat = watershed.centroid
             climatestation = self.climatestation
             cli_dir = self.cli_dir
 
-            self._observed_end_year - self._observed_start_year
+            self._input_years = self._observed_end_year - self._observed_start_year
 
             result = cc.observed_daymet(
                 climatestation,
                 self._observed_start_year,
                 self._observed_end_year,
-                lng=lng, lat=lat
+                lng=ws_lng, lat=ws_lat
             )
 
             par_fn, cli_fn, monthlies = cc.unpack_json_result(
@@ -757,7 +764,7 @@ class Climate(NoDbBase, LogMixin):
                 self.cli_dir
             )
 
-            self.monthlies = self.monthlies
+            self.monthlies = monthlies
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
@@ -813,6 +820,58 @@ class Climate(NoDbBase, LogMixin):
 
                 self.sub_cli_fns = sub_cli_fns
                 self.sub_par_fns = sub_par_fns
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_climate_observed_cli_PRISM(self, verbose):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            orig_cli_fn = self.orig_cli_fn
+            assert _exists(orig_cli_fn)
+
+            cli_dir = os.path.abspath(self.cli_dir)
+            watershed = Watershed.getInstance(self.wd)
+
+            climatestation = self.climatestation
+            years = self._input_years
+
+            # build a climate for the channels.
+            ws_lng, ws_lat = watershed.centroid
+
+            head, tail = _split(orig_cli_fn)
+            cli_path = _join(cli_dir, tail)
+
+            print('cli_path: ' + cli_path)
+
+            copyfile(orig_cli_fn, cli_path)
+
+            self.par_fn = '.par'
+            self.cli_fn = tail
+
+            # build a climate for each subcatchment
+            sub_par_fns = {}
+            sub_cli_fns = {}
+            for topaz_id, ss in watershed._subs_summary.items():
+                if verbose:
+                    print('fetching climate for {}'.format(topaz_id))
+
+                hill_lng, hill_lat = ss.centroid.lnglat
+                suffix = '_{}'.format(topaz_id)
+                new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
+
+                prism_revision(orig_cli_fn, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
+
+                sub_par_fns[topaz_id] = '.par'
+                sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
+
+            self.sub_par_fns = sub_par_fns
+            self.sub_cli_fns = sub_cli_fns
 
             self.dump_and_unlock()
 
