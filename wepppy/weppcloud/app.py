@@ -161,9 +161,15 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
-    runs = db.relationship('Run', secondary=runs_users, lazy='subquery',
+    _runs = db.relationship('Run', secondary=runs_users, lazy='subquery',
                            backref=db.backref('users', lazy=True))
 
+    def addrun(self, run: Run):
+        self._runs.append(run)
+
+    @property
+    def runs(self):
+        return [r for r in self._runs if r.valid]
 
 class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
     def __init__(self, _db, user_model, role_model, run_model):
@@ -193,7 +199,7 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
         :param user: The user to manipulate
         :param run: The run to remove from the user
         """
-        user.runs.append(run)
+        user.addrun(run)
         self.put(user)
         self.commit()
 
@@ -317,9 +323,9 @@ def task_usermod():
 
 _thisdir = os.path.dirname(__file__)
 
-def tree(_dir='.', padding='', print_files=True):
 
-    def _tree(__dir, _padding, _print_files):
+def htmltree(_dir='.', padding='', print_files=True, recurse=False):
+    def _tree(__dir, _padding, _print_files, recurse=False):
         # Original from Written by Doug Dahms
         # http://code.activestate.com/recipes/217212/
         #
@@ -328,7 +334,8 @@ def tree(_dir='.', padding='', print_files=True):
         from os import listdir, sep
         from os.path import abspath, basename, isdir
         
-        s = [_padding[:-1] + '+-' + basename(abspath(__dir)) + '/' + 'n']
+        s = [_padding[:-1] + '+-' + basename(abspath(__dir)) + '\n']
+        f = []
         _padding += ' '
         if _print_files:
             files = listdir(__dir)
@@ -338,47 +345,18 @@ def tree(_dir='.', padding='', print_files=True):
         for file in sorted(files):
             count += 1
             path = __dir + sep + file
-            if isdir(path):
+            if isdir(path) and recurse:
                 if count == len(files):
-                    s.extend(tree(path, _padding + ' ', _print_files))
+                    s.extend(htmltree(path, _padding + ' ', _print_files) + '\n')
                 else:
-                    s.extend(tree(path, _padding + '|', _print_files))
+                    s.extend(htmltree(path, _padding + '|', _print_files) + '\n')
             else:
-                s.append(_padding + '+-' + file + 'n')
-        
-        return s
-        
-    return ''.join(_tree(_dir, padding, print_files))
-    
-    
-def htmltree(_dir='.', padding='', print_files=True):
-    def _tree(__dir, _padding, _print_files):
-        # Original from Written by Doug Dahms
-        # http://code.activestate.com/recipes/217212/
-        #
-        # Adapted to return string instead of printing to stdout
-        
-        from os import listdir, sep
-        from os.path import abspath, basename, isdir
-        
-        s = [_padding[:-1] + '+-' + basename(abspath(__dir)) + '/' + 'n']
-        _padding += ' '
-        if _print_files:
-            files = listdir(__dir)
-        else:
-            files = [x for x in listdir(__dir) if isdir(__dir + sep + x)]
-        count = 0
-        for file in sorted(files):
-            count += 1
-            path = __dir + sep + file
-            if isdir(path):
-                if count == len(files):
-                    s.extend(tree(path, _padding + ' ', _print_files))
+                if isdir(path):
+                    s.append(_padding + '+-<a href="{file}">{file}</a>\n'.format(file=file))
                 else:
-                    s.extend(tree(path, _padding + '|', _print_files))
-            else:
-                s.append(_padding + '+-<a href="{file}">{file}</a>\n'.format(file=file))
-        
+                    f.append(_padding + '>-<a href="{file}">{file}</a>\n'.format(file=file))
+
+        s.extend(f)
         return s
         
     return ''.join(_tree(_dir, padding, print_files))
@@ -851,45 +829,91 @@ def task_setoutlet(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/nodb')
-@app.route('/runs/<string:runid>/nodb/')
-def dev_nodb(runid):
-    """
-    return the nodb in its jsonpickle representation
-    """
-    wd = get_wd(runid)
-    with open(_join(wd, 'ron.nodb')) as fp:
-        nodbjs = json.load(fp)
+def browse_response(path, show_up=True):
+    if not _exists(path):
+        return error_factory('path does not exist')
 
-    return jsonify(nodbjs)
+    path_lower = path.lower()
+
+    if os.path.isdir(path):
+        up = ''
+        if show_up:
+            up = '<a href="../">Up</a>\n'
+
+        c = '<pre>\n{}{}</pre>'\
+            .format(up, htmltree(path))
+
+        return Response(c, mimetype='text/html')
+
+    elif path_lower.endswith('.tif') or path_lower.endswith('.png'):
+        basename = path.split()[-1]
+        return send_file(path, attachment_filename=basename)
+
+    else:
+        with open(path) as fp:
+            try:
+                contents = fp.read()
+            except UnicodeDecodeError:
+                return error_factory('Cannot return this binary file.')
+
+        if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
+            jsobj = json.loads(contents)
+            return jsonify(jsobj)
+
+        if path_lower.endswith('.xml'):
+            r = Response(response=contents, status=200, mimetype="text/xml")
+            r.headers["Content-Type"] = "text/xml; charset=utf-8"
+            return r
+
+        if path_lower.endswith('.arc'):
+            c = '<pre style="font-size:xx-small;">\n{}</pre>'.format(contents)
+            return Response(c, mimetype='text/html')
+
+        r = Response(response=contents, status=200, mimetype="text/plain")
+        r.headers["Content-Type"] = "text/plain; charset=utf-8"
+        return r
 
 
-@app.route('/runs/<string:runid>/nodb/<child>')
-@app.route('/runs/<string:runid>/nodb/<child>/')
-def dev_nodb_child(runid, child):
-    """
-    return the nodb in its jsonpickle representation
-    """
-    wd = get_wd(runid)
-
-    fn = _join(wd, child + '.nodb')
-    if _exists(fn):
-        with open(fn) as fp:
-            nodbjs = json.load(fp)
-
-        return jsonify(nodbjs)
-
-    return jsonify(None)
-
-
-@app.route('/runs/<string:runid>/tree')
-@app.route('/runs/<string:runid>/tree/')
+@app.route('/runs/<string:runid>/browse')
+@app.route('/runs/<string:runid>/browse/')
 def dev_tree(runid):
     """
     recursive list the file strucuture of the working directory
     """
     wd = get_wd(runid)
-    return Response(tree(wd), mimetype='text/plaintext')
+    return browse_response(wd, show_up=False)
+
+@app.route('/runs/<string:runid>/browse/<dir>/')
+def dev_tree1(runid, dir):
+    """
+    recursive list the file strucuture of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir))
+    assert dir.startswith(wd)
+    return browse_response(dir)
+
+
+@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/')
+def dev_tree2(runid, dir, dir2):
+    """
+    recursive list the file strucuture of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2))
+    assert dir.startswith(wd)
+    return browse_response(dir)
+
+
+@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/')
+def dev_tree32(runid, dir, dir2, dir3):
+    """
+    recursive list the file strucuture of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3))
+    assert dir.startswith(wd)
+    return browse_response(dir)
 
 
 @app.route('/runs/<string:runid>/query/has_dem')
@@ -1870,52 +1894,6 @@ def resources_observed_data(runid, file):
 
     assert _exists(fn)
     return send_file(fn, mimetype='text/csv', attachment_filename=file)
-
-
-@app.route('/runs/<string:runid>/view/wepprun')
-@app.route('/runs/<string:runid>/view/wepprun/')
-def view_wepp_run_tree(runid):
-    wd = get_wd(runid)
-    runs_dir = Wepp.getInstance(wd).runs_dir
-    c = '<pre>%s</pre>' % htmltree(runs_dir)
-    return Response(c, mimetype='text/html')
-    
-    
-@app.route('/runs/<string:runid>/view/wepprun/<string:fn>')
-def view_wepp_run(runid, fn):
-    wd = get_wd(runid)
-    runs_dir = Wepp.getInstance(wd).runs_dir
-    
-    fn = _join(runs_dir, fn)
-    if _exists(fn):
-        contents = open(fn).read()
-    else:
-        contents = '-'
-        
-    return Response(contents, mimetype='text/plaintext')
-        
-        
-@app.route('/runs/<string:runid>/view/weppout')
-@app.route('/runs/<string:runid>/view/weppout/')
-def view_wepp_out_tree(runid):
-    wd = get_wd(runid)
-    output_dir = Wepp.getInstance(wd).output_dir
-    c = '<pre>%s</pre>' % htmltree(output_dir)
-    return Response(c, mimetype='text/html')
-    
-    
-@app.route('/runs/<string:runid>/view/weppout/<string:fn>')
-def view_wepp_out(runid, fn):
-    wd = get_wd(runid)
-    output_dir = Wepp.getInstance(wd).output_dir
-    
-    fn = _join(output_dir, fn)
-    if _exists(fn):
-        contents = open(fn).read()
-    else:
-        contents = '-'
-        
-    return Response(contents, mimetype='text/plaintext')
 
 
 @app.route('/runs/<string:runid>/query/wepp/phosphorus_opts')
