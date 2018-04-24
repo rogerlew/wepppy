@@ -51,7 +51,7 @@ class Chanwb:
         self.units = [None, None, None, None, 'm^3', 'm^3', 'm^3', 'm^3', 'm^3', 'm^3']
 
     def calc_streamflow(self, wsarea):
-        return self.data['Outflow'] / wsarea
+        return self.data['Outflow'] / wsarea * 1000.0
 
 if __name__ == "__main__":
     chnwat = Chanwb('/geodata/weppcloud_runs/f26c3690-c491-478f-90f9-f6710abb2618/wepp/output/chanwb.out')

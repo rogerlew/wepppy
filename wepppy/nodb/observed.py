@@ -180,6 +180,7 @@ class Observed(NoDbBase):
 
         results = OrderedDict()
         df = pd.read_csv(self.observed_fn)
+        print(df.keys())
 
         #
         # Hillslopes
@@ -202,22 +203,7 @@ class Observed(NoDbBase):
         chanwb = Chanwb(_join(self.output_dir, 'chanwb.out'))
 
         sim = ebe.df
-        juls = []
-        #print(sim['year'] )
         sim['Year'] = sim['year'] + year0 - 1
-        #print(sim['Year'])
-        for mo, da, yr in zip(sim['mo'], sim['da'], sim['Year']):
-            mo = int(mo)
-            da = int(da)
-            yr = int(yr)
-            try:
-                jul = (datetime(yr, mo, da) - datetime(yr, 1, 1)).days
-            except ValueError:
-                jul = (datetime(yr, mo, da - 1) - datetime(yr, 1, 1)).days
-
-            juls.append(jul)
-
-        sim['Julian'] = juls
         sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
 
         results['Channels'] = self.run_measures(df, sim, 'Channels')
@@ -248,15 +234,10 @@ class Observed(NoDbBase):
         return results
 
     def run_measure(self, obs, sim, measure, hillorChannel):
-        sim_dates = dict([((int(j), int(yr)), i) for i, (j, yr) in
-                          enumerate(zip(sim['Julian'], sim['Year']))])
-
-
-        sim_years = sorted(set(int(yr) for yr in sim['Year']))
-        print(sim_years)
+        sim_dates = dict([((int(yr), int(mo), int(da)), i) for i, (yr, mo, da) in
+                          enumerate(zip(sim['Year'], sim['mo'], sim['da']))])
 
         years = sorted(set(int(yr) for yr in obs['Year']))
-        print(set(sim_years).intersection(years))
         wtr_yr_d = dict((yr, i) for i, yr in enumerate(years))
         last_yr = years[-1]
 
@@ -268,9 +249,11 @@ class Observed(NoDbBase):
                 continue
 
             jul = int(obs['Julian'][i])
+            mo = int(obs['Month'][i])
+            da = int(obs['Day'][i])
             yr = int(obs['Year'][i])
 
-            j = sim_dates.get((jul, yr), None)
+            j = sim_dates.get((yr, mo, da), None)
 
             if j is None:
                 continue
@@ -295,20 +278,19 @@ class Observed(NoDbBase):
         Qm = np.array(Qm)
         Qo = np.array(Qo)
 
-        return {
-            'Daily': {
-                'NSE': nse(Qm, Qo),
-                'R^2': r_square(Qm, Qo),
-                'DV': dv(Qm, Qo),
-                'MSE': mse(Qm, Qo)
-            },
-            'Yearly': {
-                'NSE': nse(Qm_yearly, Qo_yearly),
-                'R^2': r_square(Qm_yearly, Qo_yearly),
-                'DV': dv(Qm_yearly, Qo_yearly),
-                'MSE': mse(Qm_yearly, Qo_yearly)
-            }
-        }
+        return OrderedDict([
+            ('Daily', OrderedDict([
+                ('NSE', nse(Qm, Qo)),
+                ('R^2', r_square(Qm, Qo)),
+                ('DV', dv(Qm, Qo)),
+                ('MSE', mse(Qm, Qo))])),
+            ('Yearly', OrderedDict([
+                ('NSE', nse(Qm_yearly, Qo_yearly)),
+                ('R^2', r_square(Qm_yearly, Qo_yearly)),
+                ('DV', dv(Qm_yearly, Qo_yearly)),
+                ('MSE', mse(Qm_yearly, Qo_yearly))
+            ]))
+        ])
 
     def _write_measure(self, Qm, Qo, dates, measure, hillorChannel, dailyorYearly):
         assert len(Qm) == len(Qo)
@@ -318,7 +300,7 @@ class Observed(NoDbBase):
         fn = fn.replace(' ', '_')
         fn = _join(self.observed_dir, fn)
         with open(fn, 'w') as fn:
-            fn.write('date,Qm,Qo\n')
+            fn.write('date,Modeled,Observed\n')
 
             for m, o, d in zip(Qm, Qo, dates):
                 fn.write('%s,%f,%f\n' % (d, m, o))

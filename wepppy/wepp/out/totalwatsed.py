@@ -15,6 +15,8 @@ The calculations were provided by Mariana Dobre.
 from collections import OrderedDict
 import csv
 
+from datetime import datetime, timedelta
+
 import numpy as np
 
 from wepppy.all_your_base import determine_wateryear
@@ -76,8 +78,7 @@ class TotalWatSed(object):
         for perc in d['Percolation (mm)']:
             d['Aquifer Losses (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.dscoeff)
             d['Reservoir Volume (mm)'].append(d['Reservoir Volume (mm)'][-1] -
-                                              d['Baseflow (mm)'][-1] +
-                                              d['Percolation (mm)'][-1] -
+                                              d['Baseflow (mm)'][-1] + perc -
                                               d['Aquifer Losses (mm)'][-1])
             d['Baseflow (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.bfcoeff)
 
@@ -113,11 +114,20 @@ class TotalWatSed(object):
                 d['Soluble Reactive P (kg/ha)'] = d['Soluble Reactive P (kg)'] / d['Area (ha)']
 
         d['Water Year'] = []
+        d['mo'] = []
+        d['da'] = []
         for j, y in zip(d['Julian'], d['Year']):
+            j, y = int(j), int(y)
+            date = datetime(y, 1, 1) + timedelta(j - 1)
+            d['mo'].append(int(date.month))
+            d['da'].append(int(date.day))
             d['Water Year'].append(determine_wateryear(y, j=j))
 
         for k in d:
-            d[k] = [float(v) for v in d[k]]
+            if k in ['Water Year', 'Year', 'Julian', 'mo', 'da']:
+                d[k] = [int(v) for v in d[k]]
+            else:
+                d[k] = [float(v) for v in d[k]]
 
         self.d = d
         self.wsarea = float(d['Area (m^2)'][0])
