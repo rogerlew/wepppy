@@ -81,7 +81,7 @@ class RasterDatasetInterpolator:
 
     def get_location_info(self, lng, lat, method='cubic'):
         e, n = transform(self.wgs84, self.proj,  lng, lat)
-        assert (e, n) in self
+        assert (e, n) in self, ((e, n), (self.left, self.right, self.lower, self.upper))
         
         x, y = self.get_px_coord(e, n)
         w, h = self.ds.RasterXSize, self.ds.RasterYSize
