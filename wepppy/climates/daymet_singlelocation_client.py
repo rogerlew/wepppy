@@ -32,18 +32,38 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
           '&measuredParams=tmax,tmin,dayl,prcp,srad,swe,vp'\
           '&year={years}'\
           .format(lat=lat, lon=lon, years=years)
-          
-    r = requests.get(url)
-    
+
+    attempts = 0
+    txt = None
+    while txt is None and attempts < 10:
+        r = requests.get(url)
+
+        lines = r.text.split('\n')
+        skip = 0
+        for L in lines:
+            if L.lower().startswith('year'):
+                break
+
+            skip += 1
+
+        if skip >= len(lines):
+            continue
+
+        txt = r.text.replace('YEAR,', 'year,')\
+                    .replace('DAY,', 'yday,')
+
+    if txt is None:
+        raise Exception('Error retrieving from daymet:\n' + r.text)
+
     # create a virtual file to create pandas dataframe
     fp = io.StringIO()
-    fp.write(r.text)
+    fp.write(txt)
     fp.seek(0)
-    
+
     # create dataframe
-    df = pd.read_csv(fp, header=6)
-    df.index = pd.to_datetime(df.year.astype(str) + '-' + 
-                              df.yday.astype(str), format="%Y-%j")
+    df = pd.read_csv(fp, header=skip)
+    df.index = pd.to_datetime(df.year.astype(int).astype(str) + '-' +
+                              df.yday.astype(int).astype(str), format="%Y-%j")
     df.columns = [c.replace(' ', '') for c in df.columns]
     
     # return dataframe
