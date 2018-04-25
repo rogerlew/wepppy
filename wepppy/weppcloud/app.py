@@ -161,15 +161,9 @@ class User(db.Model, UserMixin):
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
 
-    _runs = db.relationship('Run', secondary=runs_users, lazy='subquery',
+    runs = db.relationship('Run', secondary=runs_users, lazy='subquery',
                            backref=db.backref('users', lazy=True))
 
-    def addrun(self, run: Run):
-        self._runs.append(run)
-
-    @property
-    def runs(self):
-        return [r for r in self._runs if r.valid]
 
 class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
     def __init__(self, _db, user_model, role_model, run_model):
@@ -199,7 +193,7 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
         :param user: The user to manipulate
         :param run: The run to remove from the user
         """
-        user.addrun(run)
+        user.runs.append(run)
         self.put(user)
         self.commit()
 
