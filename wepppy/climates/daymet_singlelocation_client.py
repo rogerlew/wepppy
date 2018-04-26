@@ -46,6 +46,8 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 
             skip += 1
 
+        attempts += 1
+
         if skip >= len(lines):
             continue
 
