@@ -10,7 +10,7 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import subprocess
 import shutil
 import math
@@ -23,7 +23,8 @@ from wepppy.all_your_base import (
     isfloat,
     clamp,
     elevationquery,
-    haversine
+    haversine,
+    RasterDatasetInterpolator
 )
 from wepppy.climates.metquery_client import *
 
@@ -31,7 +32,6 @@ _thisdir = os.path.dirname(__file__)
 _db = _join(_thisdir, 'stations.db')
 _stations_dir = _join(_thisdir, 'stations')
 _bin_dir = _join(_thisdir, 'bin')
-
 
 def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     """
@@ -41,6 +41,7 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     columns are formatted as
     {month} {day} {year} {p_in_tenthinches} {tmax} {tmin}
     """
+
     if 'mm' in p_key:
         df[p_key] /= 25.4
 
@@ -51,18 +52,54 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
 
     fp = open(prn_fn, 'w')
     mo, da, yr = 0, 0, 0
+    p, tmax, tmin = '', '', ''
     for index, row in df.iterrows():
 
-        if yr % 4 == 0 and mo == 12 and da == 30:
-            da = 31
-            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
-                     .format(mo, da, yr, p, tmax, tmin))
-
         mo, da, yr = int(index.month), int(index.day), int(index.year)
-        p, tmax, tmin = int(row[p_key]), int(row[tmax_key]), int(row[tmin_key])
+        p, tmax, tmin = row[p_key], row[tmax_key], row[tmin_key]
+
+        if math.isnan(p) or math.isnan(tmax) or math.isnan(tmin):
+            print('encountered nan df writing ', prn_fn)
+            continue
+
+        p, tmax, tmin = int(p), int(tmax), int(tmin)
 
         fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                  .format(mo, da, yr, p, tmax, tmin))
+    fp.close()
+
+def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn):
+
+    fp = open(prn_fn, 'w')
+    for year in range(start_year, end_year + 1):
+
+        d = {}
+        for varname in ['prcp', 'tmin', 'tmax']:
+            fn = observed_data[(varname, year)]
+            rdi = RasterDatasetInterpolator(fn)
+            d[varname] = rdi.get_location_info(lng=lng, lat=lat)
+
+        d['prcp'] = np.array(d['prcp'])
+        d['prcp'] /= 25.4
+        d['prcp'] *= 100.0
+        d['prcp'] = np.round(d['prcp'])
+
+        d['tmax'] = np.array(d['tmax'])
+        d['tmax'] = np.round(c_to_f(d['tmax']))
+
+        d['tmin'] = np.array(d['tmin'])
+        d['tmin'] = np.round(c_to_f(d['tmin']))
+
+        for i, (prcp, tmin, tmax) in enumerate(zip(d['prcp'], d['tmin'], d['tmax'])):
+            date = datetime(year, 1, 1) + timedelta(i)
+
+            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                     .format(date.month, date.day, date.year, int(prcp), int(tmax), int(tmin)))
+
+        if year % 4 == 0:
+            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                     .format(date.month, date.day, date.year, int(prcp), int(tmax), int(tmin)))
+
     fp.close()
 
 
@@ -606,13 +643,71 @@ class Cligen:
             os.remove(cli_fname)
 
         _clinp = open("clinp.txt")
-        _log = open("cligen.log", "w")
+        _log = open("cligen_{}.log".format(cli_fname[:-4]), "w")
         p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log)
         p.wait()
         _clinp.close()
         _log.close()
 
         assert _exists(cli_fname)
+
+        # change to back to original directory
+        os.chdir(curdir)
+
+    def run_observed(self, prn_fn, cli_fn='wepp.cli',
+                     verbose=False):
+
+        if verbose:
+            print("running observed")
+
+        if self.cliver not in ['5.2', '5.3']:
+            raise NotImplementedError('Cligen version must be greater than 5')
+
+        if self.cliver == '5.2':
+            cligen_bin = _join(_bin_dir, 'cligen52')
+        else:
+            cligen_bin = _join(_bin_dir, 'cligen53')
+
+        assert _exists(cligen_bin)
+
+        assert cli_fn.endswith('.cli')
+
+        station_meta = self.station
+
+        # no prism adjustment is specified
+        # just copy the par into the working directory
+        par_fn = _join(self.wd, station_meta.par)
+
+        if not _exists(par_fn):
+            shutil.copyfile(station_meta.parpath, par_fn)
+
+        assert _exists(par_fn)
+        _, par = os.path.split(par_fn)
+
+        # remember current directory
+        curdir = os.getcwd()
+
+        # change to working directory
+        os.chdir(self.wd)
+
+        # delete cli file if it exists
+        if _exists(cli_fn):
+            os.remove(cli_fn)
+
+        cmd = [cligen_bin,
+               "-i%s" % par,
+               "-O%s" % prn_fn,
+               "-o%s" % cli_fn,
+               "-t6", "-I2"]
+
+        print(cmd)
+        # run cligen
+        _log = open("cligen_{}.log".format(cli_fn[:-4]), "w")
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log)
+        p.wait()
+        _log.close()
+
+        assert _exists(cli_fn)
 
         # change to back to original directory
         os.chdir(curdir)

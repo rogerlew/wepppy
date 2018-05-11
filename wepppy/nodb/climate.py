@@ -8,16 +8,20 @@
 
 # standard library
 import os
+import math
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 import json
 from enum import IntEnum
 import random
+import datetime
 
+import pandas as pd
 import shutil
 
 from shutil import copyfile
+import multiprocessing
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -26,15 +30,21 @@ import jsonpickle
 
 # wepppy
 from wepppy.climates import cligen_client as cc
+from wepppy.climates.metquery_client import get_daily
 from wepppy.climates.prism import prism_mod, prism_revision
-from wepppy.climates.cligen import CligenStationsManager, ClimateFile
-from wepppy.all_your_base import isint, isfloat
+from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn
+from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator
 from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules
 from .base import NoDbBase
 from .watershed import Watershed
+from .ron import Ron
 from .log_mixin import LogMixin
+
+NCPU = math.floor(multiprocessing.cpu_count() * 0.8)
+if NCPU < 1:
+    NCPU = 1
 
 CLIMATE_MAX_YEARS = 100
 
@@ -70,6 +80,30 @@ class ClimateSpatialMode(IntEnum):
     Undefined = -1
     Single = 0
     Multiple = 1
+
+
+def build_observed(kwds):
+    lng = kwds['lng']
+    lat = kwds['lat']
+    observed_data = kwds['observed_data']
+    start_year = kwds['start_year']
+    end_year = kwds['end_year']
+    prn_fn = kwds['prn_fn']
+    cli_dir = kwds['cli_dir']
+    cli_fn = kwds['cli_fn']
+    climatestation = kwds['climatestation']
+
+    build_daymet_prn(lng=lng, lat=lat,
+                     observed_data=observed_data,
+                     start_year=start_year, end_year=end_year,
+                     prn_fn=_join(cli_dir, prn_fn))
+
+    stationManager = CligenStationsManager()
+    stationMeta = stationManager.get_station_fromid(climatestation)
+    cligen = Cligen(stationMeta, wd=cli_dir)
+    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+
+    return cli_fn
 
 
 # noinspection PyUnusedLocal
@@ -501,11 +535,11 @@ class Climate(NoDbBase, LogMixin):
             if self.climate_mode == ClimateMode.Observed:
                 assert isint(start_year)
                 assert start_year >= 1980
-                assert start_year <= 2016
+                assert start_year <= 2017
 
                 assert isint(end_year)
                 assert end_year >= 1980
-                assert end_year <= 2016
+                assert end_year <= 2017
 
                 assert end_year >= start_year
                 assert end_year - start_year <= CLIMATE_MAX_YEARS
@@ -513,7 +547,6 @@ class Climate(NoDbBase, LogMixin):
 
             self._observed_start_year = start_year
             self._observed_end_year = end_year
-
 
             self.dump_and_unlock()
 
@@ -743,80 +776,84 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
-            self.log('  running _build_climate_observed (watershed)... ')
+            self.log('  running _build_climate_observed (watershed)... \n')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
-            climatestation = self.climatestation
+
             cli_dir = self.cli_dir
+            start_year, end_year = self._observed_start_year, self._observed_end_year
+            self._input_years = end_year - start_year
 
-            self._input_years = self._observed_end_year - self._observed_start_year
+            stationManager = CligenStationsManager()
+            climatestation = self.climatestation
+            stationMeta = stationManager.get_station_fromid(climatestation)
 
-            result = cc.observed_daymet(
-                climatestation,
-                self._observed_start_year,
-                self._observed_end_year,
-                lng=ws_lng, lat=ws_lat
-            )
+            par_fn = stationMeta.par
+            cligen = Cligen(stationMeta, wd=cli_dir)
 
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                result,
-                climatestation,
-                self.cli_dir
-            )
+            ron = Ron.getInstance(self.wd)
+            bbox = ron.map.extent
+            bbox = [bbox[0] - 0.02, bbox[1] - 0.02,
+                    bbox[2] + 0.02, bbox[3] + 0.02]
+            bbox = ','.join(str(v) for v in bbox)
 
-            self.monthlies = monthlies
+            observed_data = {}
+            daymet_base = self.config.get('climate', 'daymet_observed')
+            for varname in ['prcp', 'tmin', 'tmax']:
+                for year in range(start_year, end_year + 1):
+                    dataset = _join(daymet_base, varname)
+                    print(dataset)
+                    self.log('  fetching {} for year {}... '.format(dataset, year))
+                    dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
+                    get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
+                    observed_data[(varname, year)] = dst
+                    self.log_done()
+
+            cli_fn = 'wepp.cli'
+            self.log('  building {}... '.format(cli_fn))
+            prn_fn = 'ws.prn'
+            build_daymet_prn(lng=ws_lng, lat=ws_lat,
+                             observed_data=observed_data,
+                             start_year=start_year, end_year=end_year,
+                             prn_fn=_join(cli_dir, prn_fn))
+
+            cligen.run_observed(prn_fn, cli_fn=cli_fn)
+
+            climate = ClimateFile(_join(cli_dir, cli_fn))
+            self.monthlies = climate.calc_monthlies()
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
             self.log_done()
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                pool = multiprocessing.Pool(NCPU)
                 sub_par_fns = {}
                 sub_cli_fns = {}
+                args = []
+                for (topaz_id, ss) in watershed._subs_summary.items():
+                    fn_base = '{}_{}'.format(topaz_id, climatestation)
+                    cli_fn = '{}.cli'.format(fn_base)
 
-                # For a large watershed this might have to query 600+ climates. The climate webservice has
-                # occasionally timed out, so here we are retrying failed requests to avoid having to abort
-                # the climate building.
-                attempts = 0
-                subs = list(watershed._subs_summary.items())
+                    lng, lat = ss.centroid.lnglat
+                    prn_fn = '{}.prn'.format(fn_base)
 
-                while attempts < 10 and len(subs) > 0:
-                    # We can use a with statement to ensure threads are cleaned up promptly
-                    with ThreadPoolExecutor(max_workers=10) as executor:
-                        # Start the load operations and mark each future with its URL
-                        results = {executor.submit(cc.observed_daymet,
-                                                   climatestation,
-                                                   self._observed_start_year,
-                                                   self._observed_end_year,
-                                                   ss.centroid.lnglat[0],
-                                                   ss.centroid.lnglat[1]):
-                                   (topaz_id, ss) for (topaz_id, ss) in subs}
+                    kwds = dict(lng=lng, lat=lat,
+                                observed_data=observed_data,
+                                start_year=start_year, end_year=end_year,
+                                prn_fn=prn_fn, cli_dir=cli_dir,
+                                cli_fn=cli_fn,
+                                climatestation=climatestation)
 
-                        for res in as_completed(results):
-                            (topaz_id, ss) = results[res]
+                    args.append(kwds)
+                    sub_par_fns[topaz_id] = par_fn
+                    sub_cli_fns[topaz_id] = cli_fn
 
-                            self.log('    %s... ' % topaz_id)
-                            try:
-                                data = res.result()
-                                subs.remove((topaz_id, ss))
-
-                                fn_base = '{}_{}'.format(topaz_id, climatestation)
-                                par_fn, cli_fn, _ = cc.unpack_json_result(data, fn_base, cli_dir)
-
-                                if verbose:
-                                    print(topaz_id, ss, cli_fn)
-
-                                sub_par_fns[topaz_id] = par_fn
-                                sub_cli_fns[topaz_id] = cli_fn
-
-                            except ConnectionError:
-                                pass
-
-                            self.log_done()
-
-                        attempts += 1
-
-                assert len(subs) == 0, 'Not all climates were obtained from webservice'
+                for cli_fn in pool.imap_unordered(build_observed, args):
+#                for kwds in args:
+#                    cli_fn = build_observed(kwds)
+                    print(cli_fn)
+                    self.log('  done running {}\n'.format(cli_fn))
 
                 self.sub_cli_fns = sub_cli_fns
                 self.sub_par_fns = sub_par_fns

@@ -154,7 +154,7 @@ class WeppPost(NoDbBase):
 
             self._outletchn = int(L[21:28])
 
-            assert len(_julians) == len(_days)
+            assert len(_julians) == len(_days), (len(_julians), len(_days))
 
             self._chn_areas = _chn_areas
             self._hill_areas = _hill_areas
