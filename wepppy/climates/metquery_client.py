@@ -200,8 +200,29 @@ def get_prism_monthly_ppt(lng, lat, method='cubic', units=None):
     return vals
 
 
+def get_daily(dataset, bbox, year, dst):
+    global _metquery_url
+
+    r = requests.post(urljoin(_metquery_url, 'daily'),
+                      params=dict(dataset=dataset,
+                                  bbox=bbox,
+                                  year=year))
+
+    if r.status_code != 200:
+        raise Exception("Encountered error retrieving from metquery")
+
+    with open(dst, 'wb') as fp:
+        fp.write(r.content)
+
+
 if __name__ == "__main__":
+
+    import sys
     from pprint import pprint
+
+    get_daily('daymet/prcp', '-117,39,-116.9,39.1', 1980, 'tests/daymet_prcp_1980_ws.nc4')
+
+    sys.exit()
     
     _lng = -115.67
     _lat = 45.27

@@ -455,15 +455,11 @@ def single_storm(par):
         r.headers["Content-Type"] = "text/plain; charset=utf-8"
         return r
 
-
+"""
 # noinspection PyPep8Naming
 @app.route('/observed_daymet/<par>', methods=['GET', 'POST'])
 @app.route('/observed_daymet/<par>/', methods=['GET', 'POST'])
 def observed_daymet(par):
-    """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?lng=-116&lat=46.5&start_year=1984&end_year=1988
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?lng=-116&lat=46.5&start_year=1984&end_year=1988&returnjson=True
-    """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 
@@ -579,7 +575,7 @@ def observed_daymet(par):
         r = Response(response=climate.contents, status=200, mimetype="text/plain")
         r.headers["Content-Type"] = "text/plain; charset=utf-8"
         return r
-
+"""
 
 # noinspection PyPep8Naming
 @app.route('/future_rcp85/<par>', methods=['GET', 'POST'])

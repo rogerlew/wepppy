@@ -27,19 +27,30 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     assert 1980 <= end_year <= int(time.strftime("%Y"))-1
     
     # request data
-    url = 'https://daymet.ornl.gov/data/send/saveData'\
+    url = 'https://daymet.ornl.gov/single-pixel/api/data'\
           '?lat={lat}&lon={lon}'\
-          '&measuredParams=tmax,tmin,dayl,prcp,srad,swe,vp'\
           '&year={years}'\
           .format(lat=lat, lon=lon, years=years)
 
     attempts = 0
     txt = None
     while txt is None and attempts < 10:
+        print('fetching')
         r = requests.get(url)
 
+        if r.status_code is not 200:
+            print('status_code', r.status_code)
+            attempts += 1
+            continue
+
         lines = r.text.split('\n')
-        skip = 0
+
+        if len(lines) < (start_year - end_year) * 365:
+            print('lines:', len(lines))
+            attempts += 1
+            continue
+
+        skip = -1
         for L in lines:
             if L.lower().startswith('year'):
                 break
@@ -47,9 +58,6 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
             skip += 1
 
         attempts += 1
-
-        if skip >= len(lines):
-            continue
 
         txt = r.text.replace('YEAR,', 'year,')\
                     .replace('DAY,', 'yday,')
@@ -64,10 +72,16 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 
     # create dataframe
     df = pd.read_csv(fp, header=skip)
-    df.index = pd.to_datetime(df.year.astype(int).astype(str) + '-' +
-                              df.yday.astype(int).astype(str), format="%Y-%j")
+
+    try:
+        df.index = pd.to_datetime(df.year.astype(int).astype(str) + '-' +
+                                  df.yday.astype(int).astype(str), format="%Y-%j")
+    except ValueError:
+        print(txt)
+        raise
     df.columns = [c.replace(' ', '') for c in df.columns]
-    
+
+
     # return dataframe
     return df
 
