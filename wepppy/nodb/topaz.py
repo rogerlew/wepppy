@@ -7,12 +7,15 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
-
 from os.path import join as _join
 from os.path import exists as _exists
 
+import math
 import jsonpickle
 import utm
+
+import numpy as np
+import numpy.ma as ma
 
 from wepppy.topaz import TopazRunner
 from wepppy.all_your_base import read_arc
@@ -63,6 +66,12 @@ class Topaz(NoDbBase):
             self.cellsize = None
             self.num_cols = None
             self.num_rows = None
+
+            self.wsarea = None
+            self.area_gt30 = None
+            self.ruggedness = None
+            self.minz = None
+            self.maxz = None
 
             topaz_wd = self.topaz_wd
             if not _exists(topaz_wd):
@@ -261,6 +270,28 @@ class Topaz(NoDbBase):
             outlet_px = self._outlet.pixel_coords
             top_runner.build_subcatchments(outlet_px)
             assert self.has_subcatchments
+
+            cellsize = self.cellsize
+            bound, transform, proj = read_arc(self.bound_arc, dtype=np.int32)
+            wsarea = float(np.sum(bound) * cellsize * cellsize)
+            mask = -1 * bound + 1
+
+            fvslop, transform, proj = read_arc(self.fvslop_arc)
+            fvslop_ma = ma.masked_array(fvslop, mask=mask)
+            indx, indy = ma.where(fvslop_ma > 0.3)
+            area_gt30 = float(len(indx) * cellsize * cellsize)
+
+            relief, transform, proj = read_arc(self.relief_arc)
+            relief_ma = ma.masked_array(relief, mask=mask)
+            minz = float(np.min(relief_ma))
+            maxz = float(np.max(relief_ma))
+            ruggedness = float((maxz - minz) / math.sqrt(wsarea))
+
+            self.wsarea = wsarea
+            self.area_gt30 = area_gt30
+            self.ruggedness = ruggedness
+            self.minz = minz
+            self.maxz = maxz
 
             self.dump_and_unlock()
 

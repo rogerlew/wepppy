@@ -39,10 +39,16 @@ converters = {
     'area': {
         ('ha', 'acre'): lambda v: v * 2.47105,
         ('ha', 'm^2'): lambda v: v * 1000.0,
+        ('ha', 'km^2'): lambda v: v * 0.01,
         ('m^2', 'ha'): lambda v: v * 0.0001,
         ('m^2', 'acre'): lambda v: v * 0.000247105,
+        ('m^2', 'km^2'): lambda v: v * 0.000001,
         ('acre', 'ha'): lambda v: v * 0.404686,
-        ('acre', 'm^2'): lambda v: v * 4046.86266972
+        ('acre', 'm^2'): lambda v: v * 4046.86266972,
+        ('acre', 'km^2'): lambda v: v * 0.00404686,
+        ('km^2', 'ha'): lambda v: v * 100.0,
+        ('km^2', 'm^2'): lambda v: v * 1000000.0,
+        ('km^2', 'acre'): lambda v: v * 247.105,
     },
     'weight': {
         ('tonne', 'ton'): lambda v: v * 1.10231,
@@ -122,7 +128,8 @@ precisions = OrderedDict([
     ('area', OrderedDict([
         ('ha', 1),
         ('acre', 1),
-        ('m^2', 0)])
+        ('m^2', 0),
+        ('km^2', 3)])
      ),
     ('weight', OrderedDict([
         ('tonne', 3),

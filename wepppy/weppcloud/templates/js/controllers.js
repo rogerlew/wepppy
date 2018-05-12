@@ -515,7 +515,12 @@ var Baer = function () {
         that.modify_classes = function () {
 
             var self = instance;
-            var data = [parseInt($('#baer_brk0').val(), 10), parseInt($('#baer_brk1').val(), 10), parseInt($('#baer_brk2').val(), 10), parseInt($('#baer_brk3').val(), 10)];
+            var data = [parseInt($('#baer_brk0').val(), 10),
+                        parseInt($('#baer_brk1').val(), 10),
+                        parseInt($('#baer_brk2').val(), 10),
+                        parseInt($('#baer_brk3').val(), 10)];
+
+            var nodata_vals = $('#baer_nodata').val();
 
             var task_msg = "Modifying Class Breaks";
 
@@ -525,7 +530,7 @@ var Baer = function () {
 
             $.post({
                 url: "../tasks/modify_burn_class/",
-                data: JSON.stringify({ classes: data }),
+                data: JSON.stringify({ classes: data , nodata_vals: nodata_vals}),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -3080,6 +3085,71 @@ var Observed = function () {
         that.report = function () {
             var self = instance;
             self.info.html("<a href='../report/observed/' target='_blank'>View Model Fit Results</a>");
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+
+
+
+/* ----------------------------------------------------------------------------
+ * DebrisFlow
+ * ----------------------------------------------------------------------------
+ */
+var DebrisFlow = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#debris_flow_form");
+        that.info = $("#debris_flow_form #info");
+        that.status = $("#debris_flow_form  #status");
+        that.stacktrace = $("#debris_flow_form #stacktrace");
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.run_model = function() {
+            var self = instance;
+
+            var task_msg = "Running debris_flow model fit";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "../tasks/run_debris_flow/",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... done.");
+                        self.report();
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            self.info.html("<a href='../report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
         };
 
         return that;

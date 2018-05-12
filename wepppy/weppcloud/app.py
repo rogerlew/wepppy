@@ -75,7 +75,8 @@ from wepppy.nodb import (
     Climate, ClimateStationMode,
     Wepp, WeppPost,
     Unitizer,
-    Observed
+    Observed,
+    DebrisFlow
 )
 
 from wepppy.nodb.mods import Baer
@@ -629,6 +630,10 @@ def runs0(runid, config):
     if "lt" in ron.mods:
         landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
 
+    has_sbs = False
+    if "baer" in ron.mods:
+        has_sbs = Baer.getInstance(wd).has_map
+
     return render_template('0.html',
                            user=current_user,
                            topaz=topaz, soils=soils,
@@ -636,7 +641,8 @@ def runs0(runid, config):
                            wepp=wepp, unitizer=unitizer,
                            observed=observed,
                            landuseoptions=landuseoptions,
-                           precisions=wepppy.nodb.unitizer.precisions)
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           has_sbs=has_sbs)
 
 
 # noinspection PyBroadException
@@ -2284,8 +2290,9 @@ def task_baer_class_map(runid):
             return error_factory('No SBS map has been specified')
             
         classes = request.json.get('classes', None)
+        nodata_vals = request.json.get('nodata_vals', None)
         
-        baer.modify_burn_class(classes)
+        baer.modify_burn_class(classes, nodata_vals)
         return success_factory()
     except Exception:
         return exception_factory()
@@ -2336,7 +2343,35 @@ def task_upload_sbs(runid):
         return exception_factory('Failed validating file')
 
     return success_factory(res)
-    
-        
+
+
+@app.route('/runs/<runid>/tasks/run_debris_flow', methods=['POST'])
+@app.route('/runs/<runid>/tasks/run_debris_flow/', methods=['POST'])
+def run_debris_flow(runid):
+    # get working dir of original directory
+    wd = get_wd(runid)
+
+    try:
+        debris_flow = DebrisFlow.getInstance(wd)
+        debris_flow.run_debris_flow()
+        return success_factory()
+
+    except:
+        return exception_factory('Error Running Debris Flow')
+
+
+@app.route('/runs/<string:runid>/report/debris_flow')
+@app.route('/runs/<string:runid>/report/debris_flow/')
+def report_debris_flow(runid):
+    wd = get_wd(runid)
+
+    ron = Ron.getInstance(wd)
+    debris_flow = DebrisFlow.getInstance(wd)
+
+    return render_template('reports/debris_flow.htm',
+                           debris_flow=debris_flow,
+                           ron=ron,
+                           user=current_user)
+
 if __name__ == '__main__':
     app.run(debug=True)

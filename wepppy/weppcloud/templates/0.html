@@ -38,6 +38,9 @@
 {% include 'controls/subcatchments.htm'%}
 {% include 'controls/landuse.htm'%}
 {% include 'controls/soil.htm'%}
+{% if 'debris_flow' in ron.mods %}
+{% include 'controls/debris_flow.htm'%}
+{% endif %}
 {% include 'controls/climate.htm'%}
 {% include 'controls/prep.htm'%}
 {% include 'controls/wepp.htm'%}

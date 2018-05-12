@@ -204,6 +204,14 @@ class NoDbBase(object):
         return _join(self.topaz_wd, 'BOUND.ARC')
 
     @property
+    def fvslop_arc(self):
+        return _join(self.topaz_wd, 'FVSLOP.ARC')
+
+    @property
+    def relief_arc(self):
+        return _join(self.topaz_wd, 'RELIEF.ARC')
+
+    @property
     def wat_dir(self):
         return _join(self.wd, 'watershed')
 
