@@ -25,6 +25,7 @@ from wepppy.wepp.out import TotalWatSed
 # wepppy submodules
 from .base import NoDbBase
 
+
 class WeppPostNoDbLockedException(Exception):
     pass
 
@@ -333,6 +334,7 @@ class WeppPost(NoDbBase):
             'Daily Baseflow (mm)': baseflow
         }
         self.dump_and_unlock()
+
 
 if __name__ == "__main__":
     wd = '/geodata/weppcloud_runs/43bc959e-59b9-4e50-b44a-145abe338bc5/'

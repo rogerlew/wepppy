@@ -7,7 +7,9 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
+import ast
 import shutil
+from collections import Counter
 import jsonpickle
 
 from subprocess import Popen, PIPE
@@ -17,7 +19,7 @@ from os.path import exists as _exists
 import numpy as np
 from osgeo import gdal
         
-from wepppy.all_your_base import wgs84_proj4
+from wepppy.all_your_base import wgs84_proj4, isint
 from wepppy.wepp.soilbuilder.webClient import SoilSummary
 
 from ...landuse import Landuse
@@ -55,6 +57,8 @@ class Baer(NoDbBase):
             self._bounds = None
             self._classes = None
             self._breaks = None
+            self._counts = None
+            self._nodata_vals = None
             self._is256 = None
             
             self.dump_and_unlock()
@@ -124,8 +128,20 @@ class Baer(NoDbBase):
     @property
     def breaks(self):
         return self._breaks
-            
+
+    @property
+    def nodata_vals(self):
+        if self._nodata_vals is None:
+            return ''
+
+        return ', '.join(str(v) for v in self._nodata_vals)
+
     def classify(self, v):
+
+        if self._nodata_vals is not None:
+            if v in self._nodata_vals:
+                return 'No Data'
+
         i = 0
         for i, brk in enumerate(self.breaks):
             if v <= brk:
@@ -165,12 +181,16 @@ class Baer(NoDbBase):
         assert len(breaks) == 4
 
         with open(self.color_tbl_path, 'w') as fp:
+            if self._nodata_vals is not None:
+                for v in self._nodata_vals:
+                    fp.write("{} 0 0 0".format(v))
+
             fp.write("{} 46 203 24\n"
                      "{} 161 250 220\n"
                      "{} 255 161 5\n"
                      "{} 217 34 3\n"
                      "nv 0 0 0".format(*breaks))
-    
+
     def build_color_map(self):
         baer_rgb = self.baer_rgb
         if _exists(baer_rgb):
@@ -190,19 +210,23 @@ class Baer(NoDbBase):
         
     @property
     def class_map(self):
-        return [(v, self.classify(v)) for v in self.classes]
+        return [(v, self.classify(v), self._counts[str(v)]) for v in self.classes]
             
-    def modify_burn_class(self, breaks):
-        assert len(breaks) == 4
-        assert breaks[0] <= breaks[1]
-        assert breaks[1] <= breaks[2]
-        assert breaks[2] <= breaks[3]
-        
+    def modify_burn_class(self, breaks, nodata_vals):
         self.lock()
 
         # noinspection PyBroadException
         try:
+            assert len(breaks) == 4
+            assert breaks[0] <= breaks[1]
+            assert breaks[1] <= breaks[2]
+            assert breaks[2] <= breaks[3]
+
             self._breaks = breaks
+            if nodata_vals.strip() != '':
+                _nodata_vals = ast.literal_eval('[{}]'.format(nodata_vals))
+                assert all(isint(v) for v in _nodata_vals)
+                self._nodata_vals = _nodata_vals
                 
             self.write_color_table()
             self.build_color_map()
@@ -257,8 +281,9 @@ class Baer(NoDbBase):
             # determine classes
             classes = list(set(data.flatten()))
             classes = [int(v) for v in classes]
+            counts = Counter(data.flatten())
             
-            is256 = len(classes) > 6
+            is256 = len(classes) > 6 or max(classes) >= 255
             
             if is256:
                 breaks = [0, 76, 110, 188]
@@ -267,6 +292,7 @@ class Baer(NoDbBase):
             
             self._is256 = is256
             self._classes = classes
+            self._counts = {str(k): v for k, v in counts.items()}
             self._breaks = breaks
             
             self.write_color_table()
@@ -320,13 +346,17 @@ class Baer(NoDbBase):
             # create LandcoverMap instance
             def _classify(v):
                 i = 0
+
+                if self._nodata_vals is not None:
+                    if v in self._nodata_vals:
+                        return 130
+
                 for i, brk in enumerate(self.breaks):
                     if v <= brk:
                         break
                 return i + 130
                 
             sbs = SoilBurnSeverityMap(baer_cropped, _classify)
-            print(landuse.domlc_d)
 
             domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
 
@@ -341,8 +371,6 @@ class Baer(NoDbBase):
             else:
                 landuse.domlc_d = domlc_d
 
-            print(landuse.domlc_d)
-            
             landuse.dump_and_unlock()
             landuse = landuse.getInstance(wd)
             landuse.build_managements()

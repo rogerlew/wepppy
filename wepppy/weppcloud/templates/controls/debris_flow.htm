@@ -1,0 +1,15 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}debris_flow_form{% endblock %}
+{% block form_title %}Debris Flow Analysis{% endblock %}
+{% block inputs %}
+    <div class="form-group row hide-readonly">
+      <div class="col-sm-4">
+        <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+                type="button"
+                onclick="DebrisFlow.getInstance().run_model();">Run Model</button>
+      </div>
+      <div class="col-sm-5">
+        <small id="hint_run_wepp"></small>
+      </div>
+    </div>
+{% endblock %}

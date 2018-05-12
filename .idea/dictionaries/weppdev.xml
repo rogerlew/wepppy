@@ -4,9 +4,12 @@
       <w>baer</w>
       <w>cancov</w>
       <w>cellsize</w>
+      <w>chanwb</w>
+      <w>chnwb</w>
       <w>cligen</w>
       <w>climatestation</w>
       <w>colname</w>
+      <w>debrisflow</w>
       <w>domlc</w>
       <w>domsoil</w>
       <w>ermit</w>
@@ -14,18 +17,29 @@
       <w>hillslopes</w>
       <w>hzdepb</w>
       <w>indx</w>
+      <w>indxs</w>
       <w>inrcov</w>
       <w>intind</w>
+      <w>jend</w>
+      <w>jndx</w>
       <w>julians</w>
       <w>ksat</w>
       <w>landcover</w>
       <w>landuse</w>
+      <w>latqcc</w>
       <w>maxima</w>
+      <w>mukey</w>
       <w>ndays</w>
+      <w>nodata</w>
+      <w>nodb</w>
       <w>orgind</w>
+      <w>outletchn</w>
+      <w>phos</w>
       <w>plotty</w>
       <w>polygonize</w>
+      <w>precip</w>
       <w>proj</w>
+      <w>quantiles</w>
       <w>rankind</w>
       <w>reccount</w>
       <w>recurence</w>
@@ -34,6 +48,7 @@
       <w>skidder</w>
       <w>spatialmode</w>
       <w>streamflow</w>
+      <w>subcatchment</w>
       <w>subcatchments</w>
       <w>subwta</w>
       <w>surgo</w>
@@ -41,6 +56,7 @@
       <w>totalsedwat</w>
       <w>totalwatsed</w>
       <w>totwatsed</w>
+      <w>vals</w>
       <w>viridis</w>
       <w>wateryear</w>
       <w>weibull</w>
