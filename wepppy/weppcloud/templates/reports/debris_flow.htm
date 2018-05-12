@@ -1,0 +1,116 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_content %}
+<h2>Debris Flow Model Results</h2>
+<h3>Model Parameters</h3>
+<table class="table table-nonfluid">
+<thead>
+<tr>
+    <th>Parameter</th>
+    <th>Value</th>
+    <th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>Area with slope &ge; 30% (A)</td>
+    <td>{{ unitizer(debris_flow.A, 'km^2') | safe }}</td>
+    <td>{{ unitizer_units('km^2') | safe }}</td>
+</tr>
+<tr>
+    <td>Percent A</td>
+    <td>{{ unitizer(debris_flow.A_pct, '%') | safe }}</td>
+    <td>{{ unitizer_units('%') | safe }}</td>
+</tr>
+<tr>
+    <td>Area with moderate or high severity fire (B)</td>
+    <td>{{ unitizer(debris_flow.B, 'km^2') | safe }}</td>
+    <td>{{ unitizer_units('km^2') | safe }}</td>
+</tr>
+<tr>
+    <td>Percent B</td>
+    <td>{{ unitizer(debris_flow.B_pct, '%') | safe }}</td>
+    <td>{{ unitizer_units('%') | safe }}</td>
+</tr>
+<tr>
+    <td>Clay content of top horizon</td>
+    <td>{{ unitizer(debris_flow.C, '%') | safe }}</td>
+    <td>{{ unitizer_units('%') | safe }}</td>
+</tr>
+<tr>
+    <td>Assumed liquid limit of soil (LL)</td>
+    <td>{{ unitizer(debris_flow.LL, '%') | safe }}</td>
+    <td>{{ unitizer_units('%') | safe }}</td>
+</tr>
+<tr>
+    <td>Watershed roughness (R)</td>
+    <td>{{debris_flow.R | round(3)}}</td>
+    <td> </td>
+</tr>
+</tbody>
+</table>
+<h3>Model Results</h3>
+{% if debris_flow.volume is none %}
+    <p><i>No NOAA Precipitation Frequency Data Exists for this Location</i></p>
+{% else %}
+<table class="table">
+    <thead>
+    <tr>
+        <th>Duration</th>
+        {% for duration in debris_flow.durations %}
+        {% if duration in debris_flow.rpt_durations %}
+        <th>{{ duration }}</th>
+        {% endif %}
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for rec_interval in debris_flow.rec_intervals %}
+        {% if rec_interval in debris_flow.rpt_rec_intervals %}
+        <tr>
+        <td>{{ rec_interval }}</td>
+        {% set rec_loop = loop %}
+        {% for duration in debris_flow.durations %}
+            {% if duration in debris_flow.rpt_durations %}
+            {% set volume = debris_flow.volume[loop.index - 1][rec_loop.index - 1] %}
+            {% set prob = 100 * debris_flow.prob_occurrence[loop.index - 1][rec_loop.index - 1] %}
+
+            <td {% if prob >= 50.0 %}class="alert alert-danger" {% endif %}>{{ volume | round }}<br/>({{ prob | round }})</td>
+            {% endif %}
+        {% endfor %}
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+<div>
+<h3>Model Calculations</h3>
+<h5>Volume Calculation:</h5>
+<pre>
+v = exp(7.2 + 0.6 * log(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
+
+where,
+    A (in km2) is the area of the basin having slopes greater than or equal to 30%,
+    B (in km2) is the area of the basin burned at high and moderate severity,
+    T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
+      the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
+</pre>
+<h5>Probability of Occurrence Calculation:</h5>
+<pre>
+prob_occurrence = exp(x) / (1.0 + exp(x))
+x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
+
+where,
+    A_pct is the percentage of the basin area with gradients greater than or equal to 30%,
+    R is basin ruggedness,
+    B_pct is the percentage of the basin area burned at high and moderate severity,
+    I is average storm rainfall intensity (in mm/h),
+    C is clay content (in %),
+    LL is the liquid limit.
+</pre>
+<h5>Reference</h5>
+<p style="max-width: 720px;">S. H. Cannon, J. E. Gartner M. G. Rupert, C Parrett (January, 2010). Predicting the probability
+and volume of postwildfire debris flows in the intermountain western United States.
+    <i>Geological Society of America Bulletin 122</i> (1):127-144. DOI10.1130/B26459.1</p>
+</div>
+{% endblock %}

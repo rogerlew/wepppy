@@ -61,6 +61,7 @@ class Soils(NoDbBase):
 
             self.domsoil_d = None  # topaz_id keys
             self.soils = None
+            self.clay_pct = None
             self._subs_summary = None
             self._chns_summary = None
 
@@ -214,6 +215,8 @@ class Soils(NoDbBase):
             # store the soils dict
             self.domsoil_d = domsoil_d
             self.soils = soils
+            self.clay_pct = self._calc_clay_pct(surgo_c)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
@@ -230,6 +233,31 @@ class Soils(NoDbBase):
             self._build_gridded()
         elif self.mode == SoilsMode.Single:
             self._build_single()
+
+    def _calc_clay_pct(self, surgo_c):
+        clay_d = {}
+        for mukey, soil in surgo_c.weppSoils.items():
+            horizon0 = soil.getFirstHorizon()
+            if horizon0 is None:
+                clay_d[str(mukey)] = 0.0
+            else:
+                clay_d[str(mukey)] = float(horizon0.claytotal_r)
+
+        domsoil_d = self.domsoil_d
+        assert clay_d is not None
+        assert domsoil_d is not None
+
+        totalarea = 0.0
+        wsum = 0.0
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, ss in watershed.sub_iter():
+            mukey = domsoil_d[str(topaz_id)]
+            clay = clay_d[str(mukey)]
+            area = ss.area
+            wsum += area * clay
+            totalarea += area
+
+        return wsum / totalarea
 
     def _build_single(self):
 
@@ -268,6 +296,8 @@ class Soils(NoDbBase):
             # store the soils dict
             self.domsoil_d = domsoil_d
             self.soils = soils
+            self.clay_pct = self._calc_clay_pct(surgo_c)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
@@ -319,7 +349,6 @@ class Soils(NoDbBase):
                 self.build_statsgo()
                 return
 
-
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
 
             # while we are at it we will calculate the pct coverage
@@ -336,6 +365,8 @@ class Soils(NoDbBase):
             # store the soils dict
             self.domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
             self.soils = {str(k): v for k, v in soils.items()}
+            self.clay_pct = self._calc_clay_pct(surgo_c)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)

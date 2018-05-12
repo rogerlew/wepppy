@@ -22,6 +22,7 @@ $(document).ready(function () {
     var climate = Climate.getInstance();
     var wepp = Wepp.getInstance();
     var observed = Observed.getInstance();
+    var debris_flow = DebrisFlow.getInstance();
 
     team.hideStacktrace();
     channel_ctrl.hideStacktrace();
@@ -32,6 +33,14 @@ $(document).ready(function () {
     soil.hideStacktrace();
     climate.hideStacktrace();
     wepp.hideStacktrace();
+    try {
+        observed.hideStacktrace();
+    } catch (e) { }
+
+    try {
+        debris_flow.hideStacktrace();
+    } catch (e) { }
+
 
     /*
      * Project Initialization
@@ -180,7 +189,11 @@ $(document).ready(function () {
         }, 4000);
     });
 
-    baer.show_sbs();
+    if ({{ has_sbs | tojson}})
+    {
+        baer.show_sbs();
+        baer.load_modify_class();
+    }
     {% endif %}
 
     /*

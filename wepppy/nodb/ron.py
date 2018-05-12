@@ -150,6 +150,9 @@ class Ron(NoDbBase):
                     shutil.copyfile(sbs_map, sbs_path)
                     baer.validate(sbs_path)
 
+            if "debris_flow" in self.mods:
+                wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.ON_INIT_FINISH)

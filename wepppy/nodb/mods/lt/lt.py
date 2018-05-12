@@ -157,7 +157,6 @@ class LakeTahoe(NoDbBase):
             self.determine_phosphorus()
 
     def remap_landuse(self):
-        print('remapping landuse')
 
         with open(_join(_data_dir, 'landcover_map.json')) as fp:
             lc_map = json.load(fp)

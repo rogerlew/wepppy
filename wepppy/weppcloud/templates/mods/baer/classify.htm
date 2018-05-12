@@ -37,6 +37,15 @@
 </div>
 <div class="form-group row">
     <div class="col-sm-4">
+        <label for="baer_brk3">No Data = </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="baer_nodata" name="baer_nodata" class="form-control mr-sm-3" type="text"
+        value="{{ baer.nodata_vals }}">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-4">
         <button id="btn_modify_baer_classes" 
           class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
           type="button">Modify Fire Classes</button>
@@ -49,8 +58,9 @@
  <table class="table table-condensed">
     <thead>
         <tr>
-            <th>Pixel</th>
+            <th>Pixel Value</th>
             <th>SBS Class</th>
+            <th>Pixel Count</th>
         </tr>
     </thead>
     <tbody>
@@ -58,6 +68,7 @@
         <tr>
             <td> {{ x[0] }}</td>
             <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
         </tr>
         {% endfor %}
     </tbody>
