@@ -52,6 +52,8 @@
 {% if debris_flow.volume is none %}
     <p><i>No NOAA Precipitation Frequency Data Exists for this Location</i></p>
 {% else %}
+<p>Table values report: volume in m^3 (probabiity of occurrence in %)</p>
+<p>Cells with probabilities &ge; 50% are highlighted.</p>
 <table class="table">
     <thead>
     <tr>

@@ -442,7 +442,6 @@ class Landuse(NoDbBase):
         for topaz_id, ss in watershed.sub_iter():
             area = ss.area
             dom = str(domlc_d[str(topaz_id)])
-            print(dom)
 
             if dom in ['105', '133']:
                 high += area

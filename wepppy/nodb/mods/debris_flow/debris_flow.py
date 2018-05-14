@@ -65,8 +65,7 @@ class DebrisFlow(NoDbBase):
 
             self.rpt_rec_intervals = [2, 5, 10, 25, 50, 100, 200]
             self.rpt_durations = ['15-min', '30-min', '60-min', '2-hour', '3-hour', '6-hour', '12-hour',
-                                  '24-hour', '2-day', '3-day', '4-day', '7-day', '10-day', '20-day',
-                                  '30-day', '45-day', '60-day']
+                                  '24-hour', '2-day', '3-day', '4-day', '7-day']
             self.dump_and_unlock()
 
         except Exception:
