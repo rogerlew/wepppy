@@ -30,7 +30,8 @@ from .climate import (
     Climate, 
     ClimateSummary, 
     ClimateStationMode, 
-    ClimateMode, 
+    ClimateMode,
+    ClimateSpatialMode,
     ClimateNoDbLockedException
 )
 from .wepp import (
