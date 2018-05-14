@@ -802,7 +802,6 @@ class Climate(NoDbBase, LogMixin):
             for varname in ['prcp', 'tmin', 'tmax']:
                 for year in range(start_year, end_year + 1):
                     dataset = _join(daymet_base, varname)
-                    print(dataset)
                     self.log('  fetching {} for year {}... '.format(dataset, year))
                     dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
                     get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
@@ -852,7 +851,6 @@ class Climate(NoDbBase, LogMixin):
                 for cli_fn in pool.imap_unordered(build_observed, args):
 #                for kwds in args:
 #                    cli_fn = build_observed(kwds)
-                    print(cli_fn)
                     self.log('  done running {}\n'.format(cli_fn))
 
                 self.sub_cli_fns = sub_cli_fns
@@ -884,7 +882,6 @@ class Climate(NoDbBase, LogMixin):
             head, tail = _split(orig_cli_fn)
             cli_path = _join(cli_dir, tail)
 
-            print('cli_path: ' + cli_path)
 
             copyfile(orig_cli_fn, cli_path)
 
