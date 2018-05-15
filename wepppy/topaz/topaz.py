@@ -19,6 +19,7 @@ from glob import glob
 import shutil
 
 from imageio import imread
+
 from osgeo import gdal, ogr, osr
 from pyproj import Proj, transform
 import utm
@@ -549,83 +550,62 @@ class TopazRunner:
         deep loops that take a long time to complete
         """
 
-        # for the topaz executables to work we need to call them from the
-        # working directory. We don't want to change the wd on the user so we
-        # remember the current directory, then change it back when we are
-        # done or if we bomb.
-
-        # remember current directory
-        curdir = os.getcwd()
-
-        # change to topaz working directory
-        os.chdir(self.topaz_wd)
-
         if verbose:
-            print('cmd: %s\ncwd: %s\n' % (cmd, os.getcwd()))
+            print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
 
         # need to use try catch to make sure we have a chance to switch the
         # working directory back
         lines = []
 
-        # noinspection PyBroadException
-        try:
-            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd)
 
-            # on pass 2 we need to write '1' to standard input
-            if stdin is not None:
-                p.stdin.write(stdin.encode("utf-8"))
+        # on pass 2 we need to write '1' to standard input
+        if stdin is not None:
+            p.stdin.write(stdin.encode("utf-8"))
+            p.stdin.close()
+
+        abort_count = 0
+
+        while p.poll() is None:
+            output = p.stdout.readline().decode("utf-8")
+            output = output.strip()
+
+            if output != '':
+                lines.append(output)
+
+            if verbose:
+                sys.stdout.write(output + '\n')
+                sys.stdout.flush()
+
+            # If the input dem is large it give a warning and prompts whether or not it should continue
+            if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
+                p.stdin.write('1')
                 p.stdin.close()
 
-            abort_count = 0
+            # This comes up if the outlet isn't a channel and we are trying to build
+            # subcatchments. The build_subcatchments method preprocesses the outlet
+            # to find a channel, so this shouldn't happen (unless something else breaks)
+            #
+            # It comes up once even if the outlet is a hillslope that is why we write '1'
+            # to the stdin if we are on pass 2.
+            if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
+                abort_count += 1
 
-            while p.poll() is None:
-                output = p.stdout.readline().decode("utf-8")
-                output = output.strip()
+            # This occurs if the watershed extends beyond the dem. There isn't a way
+            # of checking that, and novice users have a hard time recognizing this
+            # condition from the channel map
+            if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
+                abort_count += 1
 
-                if output != '':
-                    lines.append(output)
+            # if the abort count is greater than 2, then abort
+            if abort_count > 2:
+                p.kill()
 
-                if verbose:
-                    sys.stdout.write(output + '\n')
-                    sys.stdout.flush()
+        p.stdin.close()
+        p.stdout.close()
 
-                # If the input dem is large it give a warning and prompts whether or not it should continue
-                if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
-                    p.stdin.write('1')
-                    p.stdin.close()
-
-                # This comes up if the outlet isn't a channel and we are trying to build
-                # subcatchments. The build_subcatchments method preprocesses the outlet
-                # to find a channel, so this shouldn't happen (unless something else breaks)
-                #
-                # It comes up once even if the outlet is a hillslope that is why we write '1'
-                # to the stdin if we are on pass 2.
-                if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                    abort_count += 1
-
-                # This occurs if the watershed extends beyond the dem. There isn't a way
-                # of checking that, and novice users have a hard time recognizing this
-                # condition from the channel map
-                if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
-                    abort_count += 1
-
-                # if the abort count is greater than 2, then abort
-                if abort_count > 2:
-                    p.kill()
-
-            p.stdin.close()
-            p.stdout.close()
-
-            # reset the directory
-            os.chdir(curdir)
-
-            # return output as list of strings
-            return [line for line in lines if line != '']
-
-        except Exception:
-            self.output = lines
-            os.chdir(curdir)
-            raise
+        # return output as list of strings
+        return [line for line in lines if line != '']
 
     def _run_dednm(self, _pass=1, verbose=False):
         topaz_wd = self.topaz_wd
@@ -952,12 +932,10 @@ class TopazRunner:
 
         cmd = ['gdalbuildvrt', 'NETFUL.VRT', 'NETFUL.ARC']
 
-        curdir = os.getcwd()
-        os.chdir(self.topaz_wd)
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=topaz_wd)
         p.wait()
 
-        with open('NETFUL.VRT') as fp:
+        with open(_join(topaz_wd, 'NETFUL.VRT')) as fp:
             vrt = fp.read()
 
         vrt = vrt.replace('  </VRTRasterBand>', """\
@@ -967,7 +945,7 @@ class TopazRunner:
     </ColorTable>
   </VRTRasterBand>""")
 
-        with open('NETFUL.VRT', 'w') as fp:
+        with open(_join(topaz_wd, 'NETFUL.VRT'), 'w') as fp:
             fp.write(vrt)
 
         cmd = ['gdal_translate',
@@ -976,10 +954,9 @@ class TopazRunner:
                '-expand', 'RGBA',
                '-outsize', '200%', '200%',
                'NETFUL.VRT', 'NETFUL.PNG']
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=topaz_wd)
         p.wait()
 
-        os.chdir(curdir)
 
     def build_subcatchments(self, outlet_px, polygonize_subwta=True):
         """

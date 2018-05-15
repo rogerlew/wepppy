@@ -1,1 +1,0 @@
-{"py/object": "wepppy.nodb.wepp.Wepp", "_config": "lt.cfg", "wd": "test2", "phosphorus_opts": {"py/object": "wepppy.nodb.wepp.PhosphorusOpts", "surf_runoff": "", "lateral_flow": "", "sediment": "", "baseflow": ""}, "baseflow_opts": {"py/object": "wepppy.nodb.wepp.BaseflowOpts", "bfcoeff": 0.04, "bfthreshold": 1, "gwstorage": 200, "dscoeff": 0}, "_mods": ["lt"]}

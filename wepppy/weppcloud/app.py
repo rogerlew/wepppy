@@ -1002,7 +1002,6 @@ def export_ermit(runid):
     wd = get_wd(runid)
     fn = create_ermit_input(wd)
     name = _split(fn)[-1]
-    print(name)
     return send_file(fn, mimetype='text/csv', as_attachment=True, attachment_filename=name)
 
 
