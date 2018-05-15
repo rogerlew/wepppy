@@ -847,8 +847,6 @@ class Climate(NoDbBase, LogMixin):
                     sub_cli_fns[topaz_id] = cli_fn
 
                 for cli_fn in pool.imap_unordered(build_observed, args):
-#                for kwds in args:
-#                    cli_fn = build_observed(kwds)
                     self.log('  done running {}\n'.format(cli_fn))
 
                 self.sub_cli_fns = sub_cli_fns
