@@ -178,7 +178,7 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def status_log(self):
-        return _join(self.cli_dir, 'status.log')
+        return os.path.abspath(_join(self.cli_dir, 'status.log'))
 
     @property
     def do_prism_revision(self):
@@ -888,8 +888,6 @@ class Climate(NoDbBase, LogMixin):
             sub_par_fns = {}
             sub_cli_fns = {}
             for topaz_id, ss in watershed._subs_summary.items():
-                if verbose:
-                    print('fetching climate for {}'.format(topaz_id))
 
                 hill_lng, hill_lat = ss.centroid.lnglat
                 suffix = '_{}'.format(topaz_id)

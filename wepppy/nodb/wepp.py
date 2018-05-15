@@ -242,7 +242,7 @@ class Wepp(NoDbBase, LogMixin):
 
     @property
     def status_log(self):
-        return _join(self.runs_dir, 'status.log')
+        return os.path.abspath(_join(self.runs_dir, 'status.log'))
 
     def parse_inputs(self, kwds):
         self.lock()
@@ -467,13 +467,10 @@ class Wepp(NoDbBase, LogMixin):
 
         sub_n = watershed.sub_n
         for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-            self.log('  submitting topaz={} (hill {} of {})... '.format(topaz_id, i+1, sub_n))
-
+            self.log('  submitting topaz={} (hill {} of {})\n'.format(topaz_id, i+1, sub_n))
             wepp_id = translator.wepp(top=int(topaz_id))
             futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir)))
             futures[-1].add_done_callback(oncomplete)
-
-            self.log_done()
 
             # run flowpaths if specified
             if run_flowpaths:
@@ -482,7 +479,8 @@ class Wepp(NoDbBase, LogMixin):
                 fps_summary = watershed.fps_summary(topaz_id)
                 fp_n = len(fps_summary)
                 for j, fp in enumerate(fps_summary):
-                    self.log('    submitting flowpath={} (hill {} of {}, fp {} of {})... '.format(fp, i+1, sub_n, j + 1, fp_n))
+                    self.log('    submitting flowpath={} (hill {} of {}, fp {} of {})... '
+                             .format(fp, i+1, sub_n, j + 1, fp_n))
 
                     # run wepp for flowpath
                     futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir)))
@@ -806,28 +804,16 @@ Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
         if not _exists(erin_pl):
             shutil.copyfile(correct_daily_hillslopes_pl_path, erin_pl)
 
-        # remember current directory
-        curdir = os.getcwd()
+        cmd = ['perl', 'correct_daily_hillslopes.pl']
+        _log = open(_join(output_dir, 'correct_daily_hillslopes.log'), 'w')
 
-        # change to working directory
-        os.chdir(output_dir)
+        p = Popen(cmd, stdout=_log, stderr=_log, cwd=output_dir)
+        p.wait()
+        _log.close()
 
-        # noinspection PyBroadException
-        try:
-            cmd = ['perl', 'correct_daily_hillslopes.pl']
-            _log = open('correct_daily_hillslopes.log', 'w')
-
-            p = Popen(cmd, stdout=_log, stderr=_log)
-            p.wait()
-            _log.close()
-
-            assert _exists('totalwatsed.txt'), 'Failed running correct_daily_hillslopes.pl'
-            assert os.stat('totalwatsed.txt').st_size > 0, 'totalwatsed.txt is empty'
-
-            os.chdir(curdir)
-        except Exception:
-            os.chdir(curdir)
-            raise
+        totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
+        assert _exists(totalwatsed_fn), 'Failed running correct_daily_hillslopes.pl'
+        assert os.stat(totalwatsed_fn).st_size > 0, 'totalwatsed.txt is empty'
 
     def report_loss(self, exclude_yr_indxs=[0, 1]):
         output_dir = self.output_dir

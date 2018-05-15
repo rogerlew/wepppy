@@ -1,7 +1,10 @@
 import os
+from os.path import exists as _exists
+from os.path import join as _join
+
 from struct import *
 
-from _1_build import load_mukeys
+from ._1_build import load_mukeys
 
 if __name__ == "__main__":
     mukeys = load_mukeys()
@@ -37,11 +40,11 @@ if __name__ == "__main__":
     fp_d.close()
     fp_m.close()
     
-    print 'valid\t', len(valid)
-    print 'invalid\t', len(invalid)
-    print 'unknown\t', len(unknown)
-    print 'total\t', len(valid) + len(invalid) + len(unknown)
-    print
-    print 'min\t', min(asint)
-    print 'min\t', max(asint)
-    print mukeys[:10]
+    print('valid\t', len(valid))
+    print('invalid\t', len(invalid))
+    print('unknown\t', len(unknown))
+    print('total\t', len(valid) + len(invalid) + len(unknown))
+
+    print('min\t', min(asint))
+    print('min\t', max(asint))
+    print(mukeys[:10])

@@ -1,1 +1,0 @@
-{"py/object": "wepppy.nodb.topaz.Topaz", "_config": "lt.cfg", "mcl": 60, "csa": 4, "_outlet": {"py/object": "wepppy.nodb.topaz.Outlet", "pixel_coords": {"py/tuple": [75, 83]}, "distance_from_requested": 0, "requested_loc": {"py/tuple": [-120.124881887, 38.9473711556]}, "actual_loc": {"py/tuple": [-120.12488188735963, 38.947371155563665]}}, "wd": "test2", "_mods": ["lt"]}

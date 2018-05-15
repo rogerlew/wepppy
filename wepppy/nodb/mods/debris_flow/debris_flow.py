@@ -104,7 +104,6 @@ class DebrisFlow(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            print(self.wd)
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
             pf = fetch_pf(lat=lat, lng=lng)
