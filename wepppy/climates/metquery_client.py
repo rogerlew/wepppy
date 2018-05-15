@@ -208,7 +208,9 @@ def get_daily(dataset, bbox, year, dst):
                                   bbox=bbox,
                                   year=year))
 
-    if r.status_code != 200:
+    if r.status_code == 418:
+        raise Exception(r.content)
+    elif r.status_code != 200:
         raise Exception("Encountered error retrieving from metquery")
 
     with open(dst, 'wb') as fp:
