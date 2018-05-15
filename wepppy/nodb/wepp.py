@@ -8,12 +8,16 @@
 
 # standard library
 import os
-
+import math
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
 from subprocess import Popen, PIPE
+import multiprocessing
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_EXCEPTION
+
+
 from datetime import datetime
 import time
 
@@ -73,6 +77,10 @@ from .watershed import Watershed
 from .topaz import Topaz
 from .wepppost import WeppPost
 from .log_mixin import LogMixin
+
+NCPU = math.floor(multiprocessing.cpu_count() * 0.8)
+if NCPU < 1:
+    NCPU = 1
 
 class BaseflowOpts(object):
     def __init__(self):
@@ -447,33 +455,55 @@ class Wepp(NoDbBase, LogMixin):
         topaz = Topaz.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
+        run_flowpaths = getattr(self, 'run_flowpaths', False)
 
-        if getattr(self, 'run_flowpaths', False):
-            # data structure to contain flowpath soil loss results
-            # keys are (x, y) pixel locations
-            # values are lists of soil loss/deposition from flow paths
-            loss_grid_d = {}
+        pool = ThreadPoolExecutor(NCPU)
+        futures = []
+
+        def oncomplete(wepprun):
+            status, _id, elapsed_time = wepprun.result()
+            assert status
+            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
         for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-            self.log('  topaz={} (hill {} of {})... '.format(topaz_id, i+1, sub_n))
+            self.log('  submitting topaz={} (hill {} of {})... '.format(topaz_id, i+1, sub_n))
 
             wepp_id = translator.wepp(top=int(topaz_id))
-            assert run_hillslope(wepp_id, runs_dir)
+            futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir)))
+            futures[-1].add_done_callback(oncomplete)
 
             self.log_done()
 
             # run flowpaths if specified
-            if getattr(self, 'run_flowpaths', False):
+            if run_flowpaths:
 
                 # iterate over the flowpath ids
                 fps_summary = watershed.fps_summary(topaz_id)
                 fp_n = len(fps_summary)
                 for j, fp in enumerate(fps_summary):
-                    self.log('    flowpath={} (hill {} of {}, fp {} of {})... '.format(fp, i+1, sub_n, j + 1, fp_n))
+                    self.log('    submitting flowpath={} (hill {} of {}, fp {} of {})... '.format(fp, i+1, sub_n, j + 1, fp_n))
 
                     # run wepp for flowpath
-                    assert run_flowpath(fp, fp_runs_dir)
+                    futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir)))
+                    futures[-1].add_done_callback(oncomplete)
+
+                    self.log_done()
+
+        wait(futures, return_when=FIRST_EXCEPTION)
+
+        # Flowpath post-processing
+        if run_flowpaths:
+            self.log('    building loss grid')
+
+            # data structure to contain flowpath soil loss results
+            # keys are (x, y) pixel locations
+            # values are lists of soil loss/deposition from flow paths
+            loss_grid_d = {}
+
+            for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                fps_summary = watershed.fps_summary(topaz_id)
+                for j, fp in enumerate(fps_summary):
 
                     # read plot file data
                     plo = PlotFile(_join(self.fp_output_dir, '%s.plot.dat' % fp))
@@ -490,9 +520,8 @@ class Wepp(NoDbBase, LogMixin):
                             else:
                                 loss_grid_d[coord] = [L]
 
-                    self.log_done()
+            self.log_done()
 
-        if getattr(self, 'run_flowpaths', False):
             self.log('Processing flowpaths... ')
 
             self._pickle_loss_grid_d(loss_grid_d)

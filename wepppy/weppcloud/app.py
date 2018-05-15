@@ -916,6 +916,16 @@ def dev_tree32(runid, dir, dir2, dir3):
     return browse_response(dir)
 
 
+@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
+def dev_tree432(runid, dir, dir2, dir3, dir4):
+    """
+    recursive list the file strucuture of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
+    assert dir.startswith(wd)
+    return browse_response(dir)
+
 @app.route('/runs/<string:runid>/query/has_dem')
 @app.route('/runs/<string:runid>/query/has_dem/')
 def query_has_dem(runid):

@@ -219,7 +219,7 @@ def query_daily():
     try:
         crop_nc(fname, bbox, dst)
     except Exception:
-        return exception_factory('Error cropping dataset.')
+        return exception_factory('Error cropping dataset.'), 418
 
     response = make_response(send_file(dst))
     response.headers['Content-Type'] = 'application/octet-stream'
