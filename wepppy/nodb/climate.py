@@ -23,8 +23,6 @@ import shutil
 from shutil import copyfile
 import multiprocessing
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
 # non-standard
 import jsonpickle
 

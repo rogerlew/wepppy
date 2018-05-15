@@ -10,6 +10,8 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
+from time import time
+
 import subprocess
 
 _thisdir = os.path.dirname(__file__)
@@ -74,6 +76,8 @@ def make_hillslope_run(wepp_id, sim_years, runs_dir):
 
 
 def run_hillslope(wepp_id, runs_dir):
+    t0 = time()
+
     # remember current directory
     curdir = os.getcwd()
     
@@ -107,13 +111,15 @@ def run_hillslope(wepp_id, runs_dir):
         lines = fp.readlines()
         for L in lines:
             if 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in L:
-                return True
+                return True, wepp_id, time() - t0
                     
     raise Exception('Error running wepp for wepp_id %i\nSee %s'
                     % (wepp_id, log_fn))
 
 
-def run_flowpath(fp, runs_dir):
+def run_flowpath(flowpath, runs_dir):
+    t0 = time()
+
     # remember current directory
     curdir = os.getcwd()
 
@@ -124,13 +130,13 @@ def run_flowpath(fp, runs_dir):
     try:
         cmd = [os.path.abspath(_wepp)]
 
-        assert _exists('%s.man' % fp)
-        assert _exists('%s.slp' % fp)
-        assert _exists('%s.cli' % fp)
-        assert _exists('%s.sol' % fp)
+        assert _exists('%s.man' % flowpath)
+        assert _exists('%s.slp' % flowpath)
+        assert _exists('%s.cli' % flowpath)
+        assert _exists('%s.sol' % flowpath)
 
-        _run = open('%s.run' % fp)
-        _log = open('%s.err' % fp, 'w')
+        _run = open('%s.run' % flowpath)
+        _log = open('%s.err' % flowpath, 'w')
 
         p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log)
         p.wait()
@@ -142,15 +148,15 @@ def run_flowpath(fp, runs_dir):
         os.chdir(curdir)
         raise
 
-    log_fn = _join(runs_dir, '%s.err' % fp)
+    log_fn = _join(runs_dir, '%s.err' % flowpath)
     with open(log_fn) as fp:
         lines = fp.readlines()
         for L in lines:
             if 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in L:
-                return True
+                return True, flowpath, time() - t0
 
     raise Exception('Error running wepp for %s\nSee %s'
-                    % (fp, log_fn))
+                    % (flowpath, log_fn))
 
 
 def make_watershed_run(sim_years, wepp_ids, runs_dir):
@@ -172,6 +178,7 @@ def make_watershed_run(sim_years, wepp_ids, runs_dir):
         
     
 def run_watershed(runs_dir):
+    t0 = time()
 
     # remember current directory
     curdir = os.getcwd()
@@ -214,6 +221,6 @@ def run_watershed(runs_dir):
        _exists(_join(runs_dir, '../output/plot_pw0.txt')) and \
        _exists(_join(runs_dir, '../output/ebe_pw0.txt')) and \
        _exists(_join(runs_dir, '../output/pass_pw0.txt')):
-        return True
+        return True, time() - t0
 
     raise Exception('Error running wepp for watershed \nSee <a href="../browse/wepp/runs/pw0.err">%s</a>' % log_fn)
