@@ -87,7 +87,6 @@ def format_convert(src, _format):
     else:
         cmd = 'gdal_translate -of %s %s %s' % (_format, src, dst)
 
-    print(cmd)
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     output = p.stdout \
               .read() \

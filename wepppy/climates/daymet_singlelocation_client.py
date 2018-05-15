@@ -35,18 +35,15 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     attempts = 0
     txt = None
     while txt is None and attempts < 10:
-        print('fetching')
         r = requests.get(url)
 
         if r.status_code is not 200:
-            print('status_code', r.status_code)
             attempts += 1
             continue
 
         lines = r.text.split('\n')
 
         if len(lines) < (start_year - end_year) * 365:
-            print('lines:', len(lines))
             attempts += 1
             continue
 

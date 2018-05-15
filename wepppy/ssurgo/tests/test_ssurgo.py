@@ -30,7 +30,6 @@ class Test_query_mukeys_in_extent(unittest.TestCase):
         extent = [-115.201226, 45.372097, -115.20, 45.373]
 
         mukeys = query_mukeys_in_extent(extent)
-        #print(mukeys)
 
         for _v in [2518587]:
             assert _v in mukeys

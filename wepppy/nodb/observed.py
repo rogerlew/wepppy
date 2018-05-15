@@ -180,7 +180,6 @@ class Observed(NoDbBase):
 
         results = OrderedDict()
         df = pd.read_csv(self.observed_fn)
-        print(df.keys())
 
         #
         # Hillslopes

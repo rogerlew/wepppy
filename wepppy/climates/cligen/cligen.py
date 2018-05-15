@@ -632,27 +632,21 @@ class Cligen:
         else:
             cmd = [self.cligen43]
 
-        # remember current directory
-        curdir = os.getcwd()
-
         # change to working directory
-        os.chdir(self.wd)
+        cli_dir = self.wd
 
         # delete cli file if it exists
-        if _exists(cli_fname):
-            os.remove(cli_fname)
+        if _exists(_join(cli_dir, cli_fname)):
+            os.remove(_join(cli_dir, cli_fname))
 
-        _clinp = open("clinp.txt")
-        _log = open("cligen_{}.log".format(cli_fname[:-4]), "w")
-        p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log)
+        _clinp = open(_join(cli_dir, "clinp.txt"))
+        _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fname[:-4])), "w")
+        p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait()
         _clinp.close()
         _log.close()
 
         assert _exists(cli_fname)
-
-        # change to back to original directory
-        os.chdir(curdir)
 
     def run_observed(self, prn_fn, cli_fn='wepp.cli',
                      verbose=False):
@@ -684,15 +678,12 @@ class Cligen:
         assert _exists(par_fn)
         _, par = os.path.split(par_fn)
 
-        # remember current directory
-        curdir = os.getcwd()
-
         # change to working directory
-        os.chdir(self.wd)
+        cli_dir = self.wd
 
         # delete cli file if it exists
-        if _exists(cli_fn):
-            os.remove(cli_fn)
+        if _exists(_join(cli_dir, cli_fn)):
+            os.remove(_join(cli_dir, cli_fn))
 
         cmd = [cligen_bin,
                "-i%s" % par,
@@ -700,17 +691,13 @@ class Cligen:
                "-o%s" % cli_fn,
                "-t6", "-I2"]
 
-        print(cmd)
         # run cligen
         _log = open("cligen_{}.log".format(cli_fn[:-4]), "w")
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait()
         _log.close()
 
-        assert _exists(cli_fn)
-
-        # change to back to original directory
-        os.chdir(curdir)
+        assert _exists(_join(cli_dir, cli_fn))
 
 
 if __name__ == "__main__":

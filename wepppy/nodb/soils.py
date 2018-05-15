@@ -344,8 +344,6 @@ class Soils(NoDbBase):
                 )
             except NoValidSoilsException:
                 self.dump_and_unlock()
-
-                print('building statsgo')
                 self.build_statsgo()
                 return
 

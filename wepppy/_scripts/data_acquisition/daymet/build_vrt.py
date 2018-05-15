@@ -16,6 +16,4 @@ for var in ['dayl', 'prcp', 'srad', 'srld']:
         fns = glob('*.tif')
         if len(fns) > 0:
             cmd = ['gdalbuildvrt', '-separate', '.vrt'] + fns
-
-            print(cmd)
             call(cmd)

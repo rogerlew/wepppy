@@ -78,34 +78,21 @@ def make_hillslope_run(wepp_id, sim_years, runs_dir):
 def run_hillslope(wepp_id, runs_dir):
     t0 = time()
 
-    # remember current directory
-    curdir = os.getcwd()
-    
-    # change to working directory
-    os.chdir(runs_dir)
+    cmd = [os.path.abspath(_wepp)]
 
-    # noinspection PyBroadException
-    try:
-        cmd = [os.path.abspath(_wepp)]
-            
-        assert _exists('p%i.man' % wepp_id)
-        assert _exists('p%i.slp' % wepp_id)
-        assert _exists('p%i.cli' % wepp_id)
-        assert _exists('p%i.sol' % wepp_id)
-            
-        _run = open('p%i.run' % wepp_id)
-        _log = open('p%i.err' % wepp_id, 'w')
-        
-        p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log)
-        p.wait()
-        _run.close()
-        _log.close()
-        
-        os.chdir(curdir)
-    except Exception:
-        os.chdir(curdir)
-        raise
-        
+    assert _exists(_join(runs_dir, 'p%i.man' % wepp_id))
+    assert _exists(_join(runs_dir, 'p%i.slp' % wepp_id))
+    assert _exists(_join(runs_dir, 'p%i.cli' % wepp_id))
+    assert _exists(_join(runs_dir, 'p%i.sol' % wepp_id))
+
+    _run = open(_join(runs_dir, 'p%i.run' % wepp_id))
+    _log = open(_join(runs_dir, 'p%i.err' % wepp_id), 'w')
+
+    p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log, cwd=runs_dir)
+    p.wait()
+    _run.close()
+    _log.close()
+
     log_fn = _join(runs_dir, 'p%i.err' % wepp_id)
     with open(log_fn) as fp:
         lines = fp.readlines()
@@ -120,33 +107,20 @@ def run_hillslope(wepp_id, runs_dir):
 def run_flowpath(flowpath, runs_dir):
     t0 = time()
 
-    # remember current directory
-    curdir = os.getcwd()
+    cmd = [os.path.abspath(_wepp)]
 
-    # change to working directory
-    os.chdir(runs_dir)
+    assert _exists(_join(runs_dir, '%s.man' % flowpath))
+    assert _exists(_join(runs_dir, '%s.slp' % flowpath))
+    assert _exists(_join(runs_dir, '%s.cli' % flowpath))
+    assert _exists(_join(runs_dir, '%s.sol' % flowpath))
 
-    # noinspection PyBroadException
-    try:
-        cmd = [os.path.abspath(_wepp)]
+    _run = open(_join(runs_dir, '%s.run' % flowpath))
+    _log = open(_join(runs_dir, '%s.err' % flowpath), 'w')
 
-        assert _exists('%s.man' % flowpath)
-        assert _exists('%s.slp' % flowpath)
-        assert _exists('%s.cli' % flowpath)
-        assert _exists('%s.sol' % flowpath)
-
-        _run = open('%s.run' % flowpath)
-        _log = open('%s.err' % flowpath, 'w')
-
-        p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log)
-        p.wait()
-        _run.close()
-        _log.close()
-
-        os.chdir(curdir)
-    except Exception:
-        os.chdir(curdir)
-        raise
+    p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log, cwd=runs_dir)
+    p.wait()
+    _run.close()
+    _log.close()
 
     log_fn = _join(runs_dir, '%s.err' % flowpath)
     with open(log_fn) as fp:
@@ -180,37 +154,24 @@ def make_watershed_run(sim_years, wepp_ids, runs_dir):
 def run_watershed(runs_dir):
     t0 = time()
 
-    # remember current directory
-    curdir = os.getcwd()
-    
-    # change to working directory
-    os.chdir(runs_dir)
+    cmd = [os.path.abspath(_wepp)]
 
-    # noinspection PyBroadException
-    try:
-        cmd = [os.path.abspath(_wepp)]
-        
-        assert _exists('pw0.str')
-        assert _exists('pw0.chn')
-        assert _exists('pw0.imp')
-        assert _exists('pw0.man')
-        assert _exists('pw0.slp')
-        assert _exists('pw0.cli')
-        assert _exists('pw0.sol')
-        assert _exists('pw0.run')
-            
-        _run = open('pw0.run')
-        _log = open('pw0.err', 'w')
-        
-        p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log)
-        p.wait()
-        _run.close()
-        _log.close()
-        
-        os.chdir(curdir)
-    except Exception:
-        os.chdir(curdir)
-        raise
+    assert _exists(_join(runs_dir, 'pw0.str'))
+    assert _exists(_join(runs_dir, 'pw0.chn'))
+    assert _exists(_join(runs_dir, 'pw0.imp'))
+    assert _exists(_join(runs_dir, 'pw0.man'))
+    assert _exists(_join(runs_dir, 'pw0.slp'))
+    assert _exists(_join(runs_dir, 'pw0.cli'))
+    assert _exists(_join(runs_dir, 'pw0.sol'))
+    assert _exists(_join(runs_dir, 'pw0.run'))
+
+    _run = open(_join(runs_dir, 'pw0.run'))
+    _log = open(_join(runs_dir, 'pw0.err'), 'w')
+
+    p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log, cwd=runs_dir)
+    p.wait()
+    _run.close()
+    _log.close()
     
     log_fn = _join(runs_dir, 'pw0.err')
 
