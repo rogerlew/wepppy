@@ -44,12 +44,26 @@ def load_channels():
     return d
 
 
-def get_channel(key):
+def get_channel(key, erodibility=None, critical_shear=None):
     d = load_channels()
-    return d[key]
+    chan = d[key]
+
+    if erodibility is not None or critical_shear is not None:
+        contents = chan['contents'].split('\n')
+
+        line8 = contents[8].split()
+        if erodibility is not None:
+            line8[1] = str(erodibility)
+        if critical_shear is not None:
+            line8[2] = str(critical_shear)
+        contents[8] = ' '.join(line8)
+
+        chan['contents'] = '\n'.join(contents)
+
+    return chan
 
 
 if __name__ == "__main__":
     load_channels()
     
-    pprint(get_channel('DITCH 1'))
+    pprint(get_channel('OnRock 2', erodibility=99, critical_shear=110))
