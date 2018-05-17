@@ -12,6 +12,11 @@
 </thead>
 <tbody>
 <tr>
+    <td>Watershed Area</td>
+    <td>{{unitizer(debris_flow.wsarea, 'm^2') | safe }}</td>
+    <td>{{ unitizer_units('m^2') | safe }}</td>
+</tr>
+<tr>
     <td>Area with slope &ge; 30% (A)</td>
     <td>{{ unitizer(debris_flow.A, 'km^2') | safe }}</td>
     <td>{{ unitizer_units('km^2') | safe }}</td>
@@ -57,7 +62,7 @@
 <table class="table">
     <thead>
     <tr>
-        <th>Duration</th>
+        <th>Recurrence Interval (years)</th>
         {% for duration in debris_flow.durations %}
         {% if duration in debris_flow.rpt_durations %}
         <th>{{ duration }}</th>
@@ -77,6 +82,36 @@
             {% set prob = 100 * debris_flow.prob_occurrence[loop.index - 1][rec_loop.index - 1] %}
 
             <td {% if prob >= 50.0 %}class="alert alert-danger" {% endif %}>{{ volume | round }}<br/>({{ prob | round }})</td>
+            {% endif %}
+        {% endfor %}
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+<p>Table values report: Rainfall Intensity in mm (Total precipitation in mm/hour)</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Recurrence Interval (years)</th>
+        {% for duration in debris_flow.durations %}
+        {% if duration in debris_flow.rpt_durations %}
+        <th>{{ duration }}</th>
+        {% endif %}
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for rec_interval in debris_flow.rec_intervals %}
+        {% if rec_interval in debris_flow.rpt_rec_intervals %}
+        <tr>
+        <td>{{ rec_interval }}</td>
+        {% set rec_loop = loop %}
+        {% for duration in debris_flow.durations %}
+            {% if duration in debris_flow.rpt_durations %}
+            {% set intensity = debris_flow.I[loop.index - 1][rec_loop.index - 1] %}
+            {% set total = debris_flow.T[loop.index - 1][rec_loop.index - 1] %}
+            <td >{{ intensity | round }}<br/>({{ total | round }})</td>
             {% endif %}
         {% endfor %}
         </tr>

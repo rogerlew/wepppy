@@ -58,6 +58,7 @@ def fetch_pf(lat, lng):
 
 if __name__ == '__main__':
     import numpy as np
+    from pprint import pprint
 
     def _duration_in_hours(duration):
         x, unit = duration.split('-')
@@ -69,7 +70,7 @@ if __name__ == '__main__':
             return x*24.0
         return x
 
-    pf = fetch_pf(lat=40.7367, lon=-110.5428)
+    pf = fetch_pf(lat=38.94443015887001, lng=-120.0772405129294)
     T = np.array(pf['quantiles']) * 25.4
     I = np.array(pf['quantiles']) * 25.4
     durations = pf['durations']
@@ -82,9 +83,9 @@ if __name__ == '__main__':
     T = T.tolist()
 
 
-    print(T)
-    print(I)
-    print(type(T[0][0]))
+    pprint(T)
+    pprint(I)
+    pprint(type(T[0][0]))
 
 
 
