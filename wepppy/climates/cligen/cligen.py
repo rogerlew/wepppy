@@ -692,7 +692,7 @@ class Cligen:
                "-t6", "-I2"]
 
         # run cligen
-        _log = open("cligen_{}.log".format(cli_fn[:-4]), "w")
+        _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fn[:-4])), "w")
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait()
         _log.close()

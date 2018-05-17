@@ -155,6 +155,12 @@ class WeppPost(NoDbBase):
 
             self._outletchn = int(L[21:28])
 
+            if len(_julians) == 0:
+                raise IOError('chanwb.out does not contain data')
+
+            if len(_days) == 0:
+                raise IOError('ebe_pw0.txt does not contain data')
+
             assert len(_julians) == len(_days), (len(_julians), len(_days))
 
             self._chn_areas = _chn_areas
