@@ -66,6 +66,16 @@ class DebrisFlow(NoDbBase):
             self.rpt_rec_intervals = [2, 5, 10, 25, 50, 100, 200]
             self.rpt_durations = ['15-min', '30-min', '60-min', '2-hour', '3-hour', '6-hour', '12-hour',
                                   '24-hour', '2-day', '3-day', '4-day', '7-day']
+
+            self.A = None
+            self.B = None
+            self.A_pct = None
+            self.B_pct = None
+            self.C = None
+            self.LL = None
+            self.R = None
+            self.wsarea = None
+
             self.dump_and_unlock()
 
         except Exception:
@@ -116,7 +126,7 @@ class DebrisFlow(NoDbBase):
 
                 for i, d in enumerate(durations):
                     hours = _duration_in_hours(d)
-                    I[i, :] /= hours
+                    T[i, :] /= hours
 
                 self.pf = pf
                 self.I = I.tolist()
@@ -160,6 +170,7 @@ class DebrisFlow(NoDbBase):
             self.C = C
             self.LL = LL
             self.R = R
+            self.wsarea = topaz.wsarea
 
             self.dump_and_unlock()
 
