@@ -560,7 +560,7 @@ class Wepp(NoDbBase, LogMixin):
     #
     # watershed
     #    
-    def prep_watershed(self):
+    def prep_watershed(self, erodibility=None, critical_shear=None):
         self.log('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -568,9 +568,9 @@ class Wepp(NoDbBase, LogMixin):
 
         self._prep_structure(translator)
         self._prep_channel_slopes()
-        self._prep_channel_chn(translator)
+        self._prep_channel_chn(translator, erodibility, critical_shear)
         self._prep_impoundment()
-        self._prep_channel_soils(translator)
+        self._prep_channel_soils(translator, erodibility, critical_shear)
         self._prep_channel_climate(translator)
         self._prep_channel_input()
         self._prep_watershed_managements(translator)
@@ -604,7 +604,7 @@ class Wepp(NoDbBase, LogMixin):
         shutil.copyfile(_join(wat_dir, 'channels.slp'),
                         _join(runs_dir, 'pw0.slp'))
                         
-    def _prep_channel_chn(self, translator):
+    def _prep_channel_chn(self, translator, erodibility, critical_shear):
         assert translator is not None
 
         watershed = Watershed.getInstance(self.wd)
@@ -618,8 +618,9 @@ class Wepp(NoDbBase, LogMixin):
         
         for topaz_id, chn_summary in watershed.chn_iter():
             chn_key = chn_summary.channel_type
-            chn_d = get_channel(chn_key)
+            chn_d = get_channel(chn_key, erodibility, critical_shear)
             contents = chn_d['contents']
+
             fp.write(contents)
             fp.write('\n')
         fp.close()
@@ -640,7 +641,7 @@ class Wepp(NoDbBase, LogMixin):
         with open(_join(runs_dir, 'chan.inp'), 'w') as fp:
             fp.write('1 600\n0\n1\n{}\n'.format(total))
 
-    def _prep_channel_soils(self, translator):
+    def _prep_channel_soils(self, translator, erodibility, critical_shear):
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         runs_dir = self.runs_dir
@@ -669,7 +670,12 @@ class Wepp(NoDbBase, LogMixin):
             raise Exception('Could not find any soils for channels.')
 
         version = versions.pop()
-            
+
+        if erodibility is None:
+            erodibility = 0.20854
+        if critical_shear is None:
+            critical_shear = 100.000
+
         if '7778' in version:
             # iterate over soils and append them together
             fp = open(_join(runs_dir, 'pw0.sol'), 'w')
@@ -687,11 +693,11 @@ class Wepp(NoDbBase, LogMixin):
                         
 #                fp.write(''.join(lines[i+1:]) + '\n')
                 fp.write("""\
-Bidart_1 MPM 1 0.02 0.75 4649000 0.20854 100.000
+Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20
 1 10000 0.0001
-""")
-                    
+""".format(erodibility=erodibility, critical_shear=critical_shear))
+
             fp.close()
             
         else:
