@@ -1,4 +1,7 @@
 <h5>Station</h5>
+{% if station_meta == none %}
+    <p><i>Station information is not available</i></p>
+{% else %}
 <dl class="dl-horizontal">
     <dt>Station Description:</dt>
     <dd>{{ station_meta.desc }}</dd>
@@ -9,6 +12,7 @@
     <dt>Elevation:</dt>
     <dd>{{ station_meta.elevation * 0.3048}} m</dd>
 </dl>
+{% endif %}
 <h5>Global Climate</h5>
 <dl class="dl-horizontal">
     <dd><a href="../view/climate/{{ climate.par_fn }}" target="_blank">{{ climate.par_fn }}</a></dd>

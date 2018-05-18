@@ -16,6 +16,7 @@ import json
 from enum import IntEnum
 import random
 import datetime
+from glob import glob
 
 import pandas as pd
 import shutil
@@ -72,6 +73,8 @@ class ClimateMode(IntEnum):
     Future = 3      # Single Only
     SingleStorm = 4 # Single Only
     PRISM = 5       # Single or muliple
+    ObservedDb = 6
+    FutureDb = 7
 
 
 class ClimateSpatialMode(IntEnum):
@@ -118,7 +121,6 @@ class Climate(NoDbBase, LogMixin):
             self._climatestation = None
             self._climate_mode = ClimateMode.Undefined
             self._climate_spatialmode = ClimateSpatialMode.Single
-            self._do_prism_revision = True
             self._cligen_seed = None
             self._observed_start_year = ''
             self._observed_end_year = ''
@@ -143,6 +145,22 @@ class Climate(NoDbBase, LogMixin):
             cli_dir = self.cli_dir
             if not _exists(cli_dir):
                 os.mkdir(cli_dir)
+
+            config = self.config
+            _observed_clis_wc = config.get('climate', 'observed_clis_wc')
+            if _observed_clis_wc == 'None':
+                _observed_clis_wc = None
+            else:
+                assert _exists(_observed_clis_wc), _observed_clis_wc
+                
+            _future_clis_wc = config.get('climate', 'future_clis_wc')
+            if _future_clis_wc == 'None':
+                _future_clis_wc = None
+            else:
+                assert _exists(_future_clis_wc)
+                
+            self._observed_clis_wc = _observed_clis_wc
+            self._future_clis_wc = _future_clis_wc
 
             self.dump_and_unlock()
 
@@ -181,9 +199,21 @@ class Climate(NoDbBase, LogMixin):
         return os.path.abspath(_join(self.cli_dir, 'status.log'))
 
     @property
-    def do_prism_revision(self):
-        return self._do_prism_revision
+    def observed_clis(self):
+        wc = getattr(self, '_observed_clis_wc', None)
+        if wc is None:
+            return None
+        
+        return glob(_join(wc, '*.cli'))
 
+    @property
+    def future_clis(self):
+        wc = getattr(self, '_future_clis_wc', None)
+        if wc is None:
+            return None
+
+        return glob(_join(wc, '*.cli'))
+    
     @property
     def observed_start_year(self):
         return self._observed_start_year
@@ -472,6 +502,14 @@ class Climate(NoDbBase, LogMixin):
                 assert input_years > 0
                 assert input_years <= CLIMATE_MAX_YEARS
 
+            if climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
+                if climate_mode == ClimateMode.ObservedDb:
+                    cli_path = kwds['climate_observed_selection']
+                else:
+                    cli_path = kwds['climate_future_selection']
+                assert _exists(cli_path)
+                self.orig_cli_fn = cli_path
+
             self._climate_mode = climate_mode
             self._input_years = input_years
 
@@ -493,9 +531,8 @@ class Climate(NoDbBase, LogMixin):
 
         # mode 4: single storm
         self.set_single_storm_pars(**kwds)
-
+    """
     def set_original_climate_fn(self, **kwds):
-        """
         set the localized pars.
         must provide named keyword args to avoid mucking this up
 
@@ -503,7 +540,7 @@ class Climate(NoDbBase, LogMixin):
             0 for station data
             1 for Daymet
             2 for prism
-        """
+        
         self.lock()
 
         # noinspection PyBroadInspection
@@ -515,7 +552,7 @@ class Climate(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-
+    """
     def set_observed_pars(self, **kwds):
         self.lock()
 
@@ -678,6 +715,67 @@ class Climate(NoDbBase, LogMixin):
         elif climate_mode == ClimateMode.PRISM:
             self._build_climate_prism(verbose=verbose)
 
+        elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
+            assert self.orig_cli_fn is not None
+            self._build_climate_observed_cli_PRISM(verbose=verbose)
+
+    def _build_climate_observed_cli_PRISM(self, verbose):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.log('Copying original climate file...')
+            orig_cli_fn = self.orig_cli_fn
+            cli_dir = self.cli_dir
+            assert _exists(orig_cli_fn)
+
+            cli_dir = os.path.abspath(self.cli_dir)
+            watershed = Watershed.getInstance(self.wd)
+
+            cli_fn = _split(orig_cli_fn)[1]
+            cli_path = _join(cli_dir, cli_fn)
+            copyfile(orig_cli_fn, cli_path)
+            assert _exists(cli_path)
+            self.log_done()
+
+            # build a climate for the channels.
+            ws_lng, ws_lat = watershed.centroid
+
+            self.par_fn = '.par'
+            self.cli_fn = cli_fn
+
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                # build a climate for each subcatchment
+                sub_par_fns = {}
+                sub_cli_fns = {}
+                for topaz_id, ss in watershed._subs_summary.items():
+                    self.log('    Using prism to spatialize {}...'.format(topaz_id))
+
+                    hill_lng, hill_lat = ss.centroid.lnglat
+                    suffix = '_{}'.format(topaz_id)
+                    new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
+
+                    prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
+
+                    sub_par_fns[topaz_id] = '.par'
+                    sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
+
+                    self.log_done()
+
+                self.sub_par_fns = sub_par_fns
+                self.sub_cli_fns = sub_cli_fns
+
+            self.log('Calculating monthlies...')
+            cli = ClimateFile(cli_path)
+            self.monthlies = cli.calc_monthlies()
+            self.log_done()
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def _build_climate_prism(self, verbose):
         self.log('  running _build_climate_prism... \n')
 
@@ -768,7 +866,6 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def _build_climate_observed(self, verbose=False):
-        do_prism_revision = self.do_prism_revision
 
         self.lock()
 
@@ -851,55 +948,6 @@ class Climate(NoDbBase, LogMixin):
 
                 self.sub_cli_fns = sub_cli_fns
                 self.sub_par_fns = sub_par_fns
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    def _build_climate_observed_cli_PRISM(self, verbose):
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            orig_cli_fn = self.orig_cli_fn
-            assert _exists(orig_cli_fn)
-
-            cli_dir = os.path.abspath(self.cli_dir)
-            watershed = Watershed.getInstance(self.wd)
-
-            climatestation = self.climatestation
-            years = self._input_years
-
-            # build a climate for the channels.
-            ws_lng, ws_lat = watershed.centroid
-
-            head, tail = _split(orig_cli_fn)
-            cli_path = _join(cli_dir, tail)
-
-
-            copyfile(orig_cli_fn, cli_path)
-
-            self.par_fn = '.par'
-            self.cli_fn = tail
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-
-                hill_lng, hill_lat = ss.centroid.lnglat
-                suffix = '_{}'.format(topaz_id)
-                new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
-
-                prism_revision(orig_cli_fn, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
-
-                sub_par_fns[topaz_id] = '.par'
-                sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
-
-            self.sub_par_fns = sub_par_fns
-            self.sub_cli_fns = sub_cli_fns
 
             self.dump_and_unlock()
 

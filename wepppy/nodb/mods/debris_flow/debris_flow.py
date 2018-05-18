@@ -14,6 +14,7 @@ import jsonpickle
 import numpy as np
 
 # wepppy
+from wepppy.all_your_base import isfloat
 from wepppy.climates.noaa_precip_freqs_client import fetch_pf
 
 # wepppy submodules
@@ -126,7 +127,7 @@ class DebrisFlow(NoDbBase):
 
                 for i, d in enumerate(durations):
                     hours = _duration_in_hours(d)
-                    T[i, :] /= hours
+                    I[i, :] /= hours
 
                 self.pf = pf
                 self.I = I.tolist()
@@ -140,7 +141,7 @@ class DebrisFlow(NoDbBase):
             self.unlock('-f')
             raise
 
-    def run_debris_flow(self):
+    def run_debris_flow(self, cc=None, ll=None):
         self.lock()
 
         # noinspection PyBroadException
@@ -159,8 +160,25 @@ class DebrisFlow(NoDbBase):
                 sbs_coverage['high'] * topaz.wsarea
             B_pct = 100 * B / topaz.wsarea
             B /= 1000 * 1000  # to km^2
-            C = soils.clay_pct
-            LL = 13.25
+
+            if cc is not None:
+                assert isfloat(cc)
+                cc = float(cc)
+                assert cc >= 0.0
+                assert cc <= 100.0
+                C = cc
+            else:
+                C = soils.clay_pct
+
+            if ll is not None:
+                assert isfloat(ll)
+                ll = float(ll)
+                assert ll >= 0.0
+                assert ll <= 100.0
+                LL = ll
+            else:
+                LL = 13.25
+
             R = topaz.ruggedness
 
             self.A = A

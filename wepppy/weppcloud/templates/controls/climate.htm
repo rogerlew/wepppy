@@ -35,7 +35,13 @@
             <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified</label><br/>
             <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (Daymet)</label><br/>
             <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) <i>Experimental</i></label><br/>
-            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label>
+            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label><br/>
+            {% if climate.observed_clis != none %}
+            <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
+            {%  endif %}
+            {% if climate.future_clis != none %}
+            <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
+            {%  endif %}
         </div>
     </div>
     <div id="climate_spatialmode_controls">
@@ -62,6 +68,26 @@
     <div id="climate_mode0_controls">
     </div>
     <div id="climate_mode5_controls">
+    </div>
+    <div id="climate_mode6_controls">
+        <h5>Observed Climate Database</h5>
+        <select class="form-control disable-readonly" id="climate_observed_selection" name="climate_observed_selection">
+            {% if climate.observed_clis != none %}
+            {% for fn in climate.observed_clis %}
+            <option value="{{ fn }}">{{ fn }}</option>
+            {% endfor %}
+            {% endif %}
+        </select>
+    </div>
+    <div id="climate_mode7_controls">
+        <h5>Observed Climate Database</h5>
+        <select class="form-control disable-readonly" id="climate_future_selection" name="climate_future_selection">
+            {% if climate.future_clis != none %}
+            {% for fn in climate.future_clis %}
+            <option value="{{ fn }}">{{ fn }}</option>
+            {% endfor %}
+            {% endif %}
+        </select>
     </div>
     <div id="climate_mode2_controls">
         <h5>Observed (Daymet)</h5>
