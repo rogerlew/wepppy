@@ -30,11 +30,13 @@ from wepppy.wepp.management import _management_dir
 _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
 
+
 def ww2_prw_template_loader():
     fn = _join(_template_dir, "ww2.prw.template")
     with open(fn) as fp:
         return fp.read()
-        
+
+
 def export_winwepp(wd):
     ron = wepppy.nodb.Watershed.getInstance(wd)
     
