@@ -11,7 +11,7 @@ import os
 
 from os.path import join as _join
 from os.path import exists as _exists
-
+from datetime import datetime
 import shutil
 from enum import IntEnum
 
@@ -235,13 +235,21 @@ class Soils(NoDbBase):
             self._build_single()
 
     def _calc_clay_pct(self, surgo_c):
+        fp = open(_join(self.soils_dir, 'clay_rpt.log'), 'w')
+        fp.write('determining clay content for run {}\n'.format(self.wd))
+        fp.write(str(datetime.now()) + '\n\n')
+
         clay_d = {}
         for mukey, soil in surgo_c.weppSoils.items():
             horizon0 = soil.getFirstHorizon()
             if horizon0 is None:
                 clay_d[str(mukey)] = 0.0
+                cokey = None
             else:
                 clay_d[str(mukey)] = float(horizon0.claytotal_r)
+                cokey = horizon0.cokey
+
+            fp.write('mukey={}, cokey={}, clay={}\n'.format(mukey, cokey, clay_d[str(mukey)]))
 
         domsoil_d = self.domsoil_d
         assert clay_d is not None
@@ -257,7 +265,14 @@ class Soils(NoDbBase):
             wsum += area * clay
             totalarea += area
 
-        return wsum / totalarea
+            fp.write('topaz_id={} has mukey={} and area={}\n'.format(topaz_id, mukey, area))
+
+        clay_pct = wsum / totalarea
+
+        fp.write('\nclay_pct={}'.format(clay_pct))
+        fp.close()
+
+        return clay_pct
 
     def _build_single(self):
 
