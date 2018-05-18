@@ -1005,9 +1005,21 @@ def export_ermit(runid):
     return send_file(fn, mimetype='text/csv', as_attachment=True, attachment_filename=name)
 
 
+@app.route('/runs/<runid>/export/arcmap')
+@app.route('/runs/<runid>/export/arcmap/')
+def export_arcmap(runid):
+    # get working dir of original directory
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    ron.export_arc_dir
+
+    from wepppy.export import arc_export, archive_project
+    arc_export(wd)
+    archive_path = archive_project(ron.export_arc_dir)
+    return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+
+
 # noinspection PyBroadException
-
-
 @app.route('/runs/<string:runid>/tasks/build_channels/', methods=['POST'])
 def task_build_channels(runid):
     error, args = _parse_map_change(request.form)
