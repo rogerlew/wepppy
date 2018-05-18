@@ -583,7 +583,12 @@ def archive(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
 
-    from wepppy.export import archive_project
+    from wepppy.export import archive_project, arc_export
+    try:
+        arc_export(wd)
+    except:
+        pass
+
     archive_path = archive_project(wd)
     return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
 
@@ -2388,6 +2393,12 @@ def report_debris_flow(runid):
 
     ron = Ron.getInstance(wd)
     debris_flow = DebrisFlow.getInstance(wd)
+
+    cc = request.args.get('cc', None)
+    ll = request.args.get('ll', None)
+
+    if cc is not None or ll is not None:
+        debris_flow.run_debris_flow(cc=cc, ll=ll)
 
     return render_template('reports/debris_flow.htm',
                            debris_flow=debris_flow,
