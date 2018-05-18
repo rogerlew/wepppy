@@ -284,6 +284,10 @@ class NoDbBase(object):
         return _join(self.wd, 'export', 'winwepp')
 
     @property
+    def export_arc_dir(self):
+        return _join(self.wd, 'export', 'arcmap')
+
+    @property
     def observed_dir(self):
         return _join(self.wd, 'observed')
 
