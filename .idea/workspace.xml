@@ -2,26 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/climate_y2k_fix.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/EchoPeak_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/FallenLeaf_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/Hagens_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/Heavenly_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/MarletteLake_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/Rubicon_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/TahoeCity_daily.cli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily/y2k_fixed/WardCreek_daily.cli" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/climate.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/climate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/configs/13.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/configs/13.cfg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/configs/lt-fire.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/configs/lt-fire.cfg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/configs/lt.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/configs/lt.cfg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/soils.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/soils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -97,8 +78,8 @@
       <file leaf-file-name="debris_flow.htm" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="469">
-              <caret line="237" column="3" selection-start-line="237" selection-start-column="3" selection-end-line="237" selection-end-column="3" />
+            <state relative-caret-position="199">
+              <caret line="168" column="62" selection-start-line="168" selection-start-column="62" selection-end-line="168" selection-end-column="62" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#form#0;n#div#0;n#!!top" expanded="true" />
               </folding>
@@ -157,8 +138,8 @@
       <file leaf-file-name="debris_flow.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2909">
-              <caret line="174" column="30" selection-start-line="174" selection-start-column="30" selection-end-line="174" selection-end-column="30" />
+            <state relative-caret-position="435">
+              <caret line="192" column="23" selection-start-line="192" selection-start-column="23" selection-end-line="192" selection-end-column="23" />
               <folding>
                 <element signature="e#253#264#0" expanded="true" />
               </folding>
@@ -212,8 +193,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>set_climate_mode</find>
-      <find>parse</find>
       <find>observed</find>
       <find>tasks/build_cl</find>
       <find>set_original_climate_fn</find>
@@ -242,6 +221,8 @@
       <find>isflo</find>
       <find>^</find>
       <find>report/de</find>
+      <find>Math.</find>
+      <find>_duration_in_hours</find>
     </findStrings>
     <replaceStrings>
       <replace>chn_rpt</replace>
@@ -942,7 +923,14 @@
       <option name="project" value="LOCAL" />
       <updated>1526661749668</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="observed climates, debris flow fix #71">
+      <created>1526682067454</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1526682067454</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -979,6 +967,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="43" y="25" width="1877" height="968" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50027305" side_tool="true" weight="0.36167663" />
@@ -1053,7 +1042,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="management build bug fix" />
     <MESSAGE value="res volume calc fix" />
     <MESSAGE value="google analytics" />
     <MESSAGE value="copyright, author header on .py" />
@@ -1078,7 +1066,8 @@
     <MESSAGE value="wepp hillslopes and flowpaths run in parallel" />
     <MESSAGE value="specify default channel erod and cs" />
     <MESSAGE value="arcmap export" />
-    <option name="LAST_COMMIT_MESSAGE" value="arcmap export" />
+    <MESSAGE value="observed climates, debris flow fix #71" />
+    <option name="LAST_COMMIT_MESSAGE" value="observed climates, debris flow fix #71" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1417,16 +1406,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2909">
-          <caret line="174" column="30" selection-start-line="174" selection-start-column="30" selection-end-line="174" selection-end-column="30" />
-          <folding>
-            <element signature="e#253#264#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/climate.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="50">
@@ -1441,10 +1420,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="192" column="23" selection-start-line="192" selection-start-column="23" selection-end-line="192" selection-end-column="23" />
+          <folding>
+            <element signature="e#253#264#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="469">
-          <caret line="237" column="3" selection-start-line="237" selection-start-column="3" selection-end-line="237" selection-end-column="3" />
+        <state relative-caret-position="199">
+          <caret line="168" column="62" selection-start-line="168" selection-start-column="62" selection-end-line="168" selection-end-column="62" />
           <folding>
             <element signature="n#style#0;n#div#0;n#form#0;n#div#0;n#!!top" expanded="true" />
           </folding>
