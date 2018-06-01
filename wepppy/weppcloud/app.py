@@ -483,6 +483,15 @@ def index():
     return render_template('index.htm', user=current_user)
 
 
+@app.route('/lt')
+@app.route('/lt/')
+def lt_index():
+    if current_user.is_authenticated:
+        if not current_user.roles:
+            user_datastore.add_role_to_user(current_user.email, 'User')
+    return render_template('lt/index.htm', user=current_user)
+
+
 @app.route('/create/<config>')
 def create(config):
     runid = str(uuid.uuid4())
@@ -2404,6 +2413,13 @@ def report_debris_flow(runid):
                            debris_flow=debris_flow,
                            ron=ron,
                            user=current_user)
+
+
+@app.route('/combined_ws_viewer')
+@app.route('/combined_ws_viewer/')
+def combined_ws_viewer():
+    return render_template('combined_ws_viewer.htm')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

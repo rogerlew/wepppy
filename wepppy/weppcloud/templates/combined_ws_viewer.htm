@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>WeppCloud - Combined Watershed Viewer </title>
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+      integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/open-iconic-bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+            integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+            crossorigin=""></script>
+<script type="text/javascript">
+function getURLParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1];
+        }
+    }
+}
+
+function render_legend_cmap(cmap, canvasID) {
+    var canvas = $("#" + canvasID);
+
+    var width = canvas.outerWidth();
+    var height = canvas.outerHeight();
+    var data = new Float32Array(height * width);
+
+    for (var y = 0; y <= height; y++) {
+        for (var x = 0; x <= width; x++) {
+            data[(y*width)+x] = x / (width - 1.0);
+        }
+    }
+
+    var plot = new plotty.plot({
+        canvas: canvas["0"],
+        data: data, width: width, height: height,
+        domain: [0, 1], colorScale: cmap
+    });
+    plot.render();
+}
+
+$(document).ready(function () {
+
+    var center = getURLParameter("center");
+    if (center === undefined) {
+        center = [39.0, -99.0];
+    } else {
+        center = decodeURIComponent((center + '').replace(/\+/g, '%20'));
+        center = JSON.parse(center);
+    }
+
+    var zoom = getURLParameter("zoom");
+    if (zoom === undefined) {
+        zoom = 5;
+    } else {
+        zoom = JSON.parse(zoom);
+    }
+
+    var map = L.map('map').setView(center, zoom);
+
+    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"]
+    });
+
+    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"]
+    });
+
+    var baseMaps = {
+      "Satellite": googleSat,
+      "Terrain": googleTerrain,
+    };
+
+    var overlayMaps = {};
+
+    googleSat.addTo(map);
+    googleTerrain.addTo(map);
+
+    var ctrls = L.control.layers(baseMaps, overlayMaps);
+    ctrls.addTo(map);
+
+    var ws = getURLParameter("ws");
+    if (ws !== undefined) {
+        ws = decodeURIComponent((ws + '').replace(/\+/g, '%20'));
+        ws = JSON.parse(ws);
+    }
+
+    var varopts = getURLParameter("varopts");
+    if (varopts !== undefined) {
+        varopts = decodeURIComponent((varopts + '').replace(/\+/g, '%20'));
+        varopts = JSON.parse(varopts);
+    }
+
+    var varname = getURLParameter("varname");
+    if (varname === undefined) {
+        varname = Object.keys(varopts)[0];
+    }
+
+    var tolerance = varopts[varname];
+    var units = '';
+    var numvars = Object.keys(varopts).length;
+
+    var defaultStyle = {
+        "color": "#ff7800",
+        "weight": 2,
+        "opacity": 0.65,
+        "fillColor": "#ff7800",
+        "fillOpacity": 0.3
+    };
+
+    var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
+    var cmapperLoss = createColormap({ colormap: "electric", nshades: 64 });
+    var cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
+
+    var cmap, r;
+    var vmin = 0.0;
+    var vmax;
+    var cmapname;
+    function prep_render() {
+
+        if (varname === 'runoff' || varname === 'subrunoff' || varname === 'baseflow') {
+            r = 25.0 * Math.pow(tolerance, 2.00);
+            cmap = function (v) {
+                return cmapperRunoff.map(v / r);
+            };
+            vmax = tolerance;
+            cmapname = 'winter';
+            units = 'mm';
+        } else if (varname === 'loss') {
+            r = tolerance;
+            cmap = function (v) {
+                return cmapperLoss.map(v / (2.0 * r) + 0.5);
+            };
+            vmin = -tolerance;
+            vmax = tolerance;
+            cmapname = 'electric';
+            units = 'kg/ha';
+        } else if (varname === 'phosphorus') {
+            r = tolerance;
+            if (r < 1) {
+                r = Math.pow(r, 2.0);
+            }
+            cmap = function (v) {
+                return cmapperPhosphorus.map(v / r);
+            };
+            vmax = tolerance;
+            cmapname = 'viridis';
+            units = 'kg/ha';
+        }
+    }
+
+    function set_tolerance() {
+        tolerance = parseFloat($('#tolerance-input').val());
+        prep_render();
+        render_legend();
+        render();
+    }
+
+    var Legend = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+        initialize: function (options) {
+            // constructor
+        },
+        onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+            container.style.backgroundColor = 'white';
+            container.style.width = '240px';
+            container.style.height = '150px';
+            container.innerHTML =
+                '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
+                '<div>' + units + '</div>' +
+                '<canvas id="legend_canvas" width=180 height=20 ' +
+                'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                '<div class="row">' +
+                '<div class="col-md-4"><span id="legend_vmin">' + vmin + '</span></div>' +
+                '<div class="col-md-4" style="text-align: center;">0</div>' +
+                '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + vmax + '</span></div>' +
+                '</div>' +
+                '<div class="row" style="padding-top: 18px;">' +
+                '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + tolerance + '"></div>' +
+                '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                '</div>' +
+                '</div>';
+
+            return container;
+        },
+        onRemove: function (map) {
+            // when removed
+        }
+    });
+
+    var legend;
+
+    function render_legend() {
+        if (legend !== undefined) {
+            legend.remove();
+        }
+        legend = new Legend();
+        map.addControl(legend);
+        render_legend_cmap(cmapname, 'legend_canvas');
+        $('#set-tolerance-btn').on('click', set_tolerance);
+
+    }
+
+    var VarSelection = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+        initialize: function (options) {
+            // constructor
+        },
+        onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+            container.style.backgroundColor = 'white';
+            container.style.width = '240px';
+            container.style.height = (30 + 28 * numvars)  + 'px';
+
+            let html  = '<div style="padding-left: 10px; padding-top: 5px;">';
+            html += '<h6>Select Variable</h6>';
+
+            for (let key in varopts) {
+
+                html += '<div class="radio"><label><input type="radio" id="varRadio" name="varRadio" value="' + key + '"';
+
+                if (key === varname) {
+                    html += 'checked';
+                }
+                html += '>' + key + '</label></div>';
+            }
+            html += '</div>';
+            container.innerHTML = html;
+            return container;
+        },
+        onRemove: function (map) {
+            // when removed
+        }
+    });
+
+    var varSelection = new VarSelection();
+    map.addControl(varSelection);
+
+
+    $('input[type=radio][name=varRadio]').change(function() {
+        varname = this.value;
+        tolerance = varopts[varname];
+        data = undefined;
+
+        prep_render();
+        render_legend();
+        render();
+    });
+
+    var polys = {};
+    var data;
+    var popup;
+
+    function render() {
+        if (data === undefined) {
+            map.spin(true);
+            let i = 0;
+            for (let w of ws) {
+                let runid = w.runid;
+                data = {};
+
+                $.get({
+                    url: "../runs/" + runid + "/query/wepp/" + varname + "/subcatchments/",
+                    success: function success(_data) {
+                        if (_data === null) {
+                            throw "query returned null";
+                        }
+                        data[runid] = _data;
+                        _render(runid, _data);
+
+                        i += 1;
+                        if (i === ws.length) {
+                            map.spin(false);
+                        }
+                    },
+                    fail: function fail(error) {
+                        data[runid] = null;
+                        map.spin(false);
+                    }
+                });
+            }
+        } else {
+            for (let w of ws) {
+                let runid = w.runid;
+                _render(runid, data[runid]);
+            }
+        }
+    }
+
+    function _render(runid, _data) {
+        polys[runid].eachLayer(function (layer) {
+            const topId = layer.feature.properties.TopazID;
+            const v = parseFloat(_data[topId].value);
+            const c = cmap(v);
+
+            layer.setStyle({
+                color: c,
+                weight: 1,
+                opacity: 0.9,
+                fillColor: c,
+                fillOpacity: 0.9
+            });
+        });
+    }
+
+
+    if (ws !== null) {
+        for (let w of ws) {
+            let runid = w.runid;
+            let cfg = w.cfg;
+            polys[runid] = {};
+
+            $.get({
+                url: "../runs/" + runid + "/resources/subcatchments.json",
+                async: false,
+                success: function (response) {
+                    polys[runid] = L.geoJSON(response.features, {
+                        style: defaultStyle,
+                        onEachFeature: function (feature, layer) {
+                            layer.on({
+                                click: function click(ev) {
+                                    var topaz_id = ev.target.feature.properties.TopazID;
+                                    var query_url = "../runs/" + runid + "/report/sub_summary/" + topaz_id + "/";
+                                    $.get({
+                                        url: query_url,
+                                        success: function success(response) {
+                                            if (popup !== undefined) {
+                                                popup.remove();
+                                            }
+                                            const content =
+                                                '<h5>' + runid + '</h5>' +
+                                                response +
+                                                '<a href="../runs/' + runid + '/' + cfg + '/">View Watershed Run</a>';
+
+                                            popup = L.popup()
+                                                .setLatLng(ev.latlng)
+                                                .setContent(content)
+                                                .openOn(map);
+
+                                        },
+                                        fail: function fail(error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    polys[runid].name = runid;
+                    polys[runid].addTo(map);
+                    ctrls.addOverlay(polys[runid], runid);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+
+        prep_render();
+        render_legend();
+        render();
+    }
+});
+</script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+  </head>
+  <body>
+       <div id="map"></div>
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/spin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/plotty.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-spin.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
+    <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff-vector-arrows.js') }}"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+     integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+     integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
+{% include("_analytics.htm") %}
+  </body>
+</html>

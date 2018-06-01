@@ -231,7 +231,7 @@ class Topaz(NoDbBase):
     def has_outlet(self):
         return self._outlet is not None
 
-    def set_outlet(self, lng, lat):
+    def set_outlet(self, lng, lat, pixelcoords=False):
         self.lock()
 
         # noinspection PyBroadException
@@ -239,7 +239,7 @@ class Topaz(NoDbBase):
             top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
-            (x, y), distance = top_runner.find_closest_channel(lng, lat)
+            (x, y), distance = top_runner.find_closest_channel(lng, lat, pixelcoords=pixelcoords)
 
             _lng, _lat = top_runner.pixel_to_longlat(x, y)
 
@@ -271,16 +271,19 @@ class Topaz(NoDbBase):
             top_runner.build_subcatchments(outlet_px)
             assert self.has_subcatchments
 
+            # calculate descriptive statistics
             cellsize = self.cellsize
             bound, transform, proj = read_arc(self.bound_arc, dtype=np.int32)
             wsarea = float(np.sum(bound) * cellsize * cellsize)
             mask = -1 * bound + 1
 
+            # determine area with slope > 30
             fvslop, transform, proj = read_arc(self.fvslop_arc)
             fvslop_ma = ma.masked_array(fvslop, mask=mask)
             indx, indy = ma.where(fvslop_ma > 0.3)
             area_gt30 = float(len(indx) * cellsize * cellsize)
 
+            # determine ruggedness of watershed
             relief, transform, proj = read_arc(self.relief_arc)
             relief_ma = ma.masked_array(relief, mask=mask)
             minz = float(np.min(relief_ma))
