@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -9,198 +9,101 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
     integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <!-- Custom styles for this template -->
-    <style>
-a,
-a:focus,
-a:hover {
-  color: #fff;
-}
-.btn-secondary,
-.btn-secondary:hover,
-.btn-secondary:focus {
-  color: #333;
-  text-shadow: none; /* Prevent inheritance from `body` */
-  background-color: #fff;
-  border: .05rem solid #fff;
-}
-html,
-body {
-  height: 100%;
-  background-color: #333;
-}
-body {
-  color: #fff;
-  text-align: center;
-  text-shadow: 0 .05rem .1rem rgba(0,0,0,.5);
-}
-
-/* Extra markup and styles for table-esque vertical and horizontal centering */
-.site-wrapper {
-  display: table;
-  width: 100%;
-  height: 100%; /* For at least Firefox */
-  min-height: 100%;
-  box-shadow: inset 0 0 5rem rgba(0,0,0,.5);
-}
-.site-wrapper-inner {
-  display: table-cell;
-  vertical-align: top;
-}
-.cover-container {
-  margin-right: auto;
-  margin-left: auto;
-}
-
-/* Padding for spacing */
-.inner {
-  padding: 2rem;
-}
-.masthead {
-  margin-bottom: 2rem;
-}
-
-.masthead-brand {
-  margin-bottom: 0;
-}
-.nav-masthead .nav-link {
-  padding: .25rem 0;
-  font-weight: 700;
-  color: rgba(255,255,255,.5);
-  background-color: transparent;
-  border-bottom: .25rem solid transparent;
-}
-.nav-masthead .nav-link:hover,
-.nav-masthead .nav-link:focus {
-  border-bottom-color: rgba(255,255,255,.25);
-}
-.nav-masthead .nav-link + .nav-link {
-  margin-left: 1rem;
-}
-.nav-masthead .active {
-  color: #fff;
-  border-bottom-color: #fff;
-}
-@media (min-width: 48em) {
-  .masthead-brand {
-    float: left;
-  }
-  .nav-masthead {
-    float: right;
-  }
-}
-.cover {
-  padding: 0 1.5rem;
-}
-.cover .btn-lg {
-  padding: .75rem 1.25rem;
-  font-weight: 700;
-}
-.mastfoot {
-  color: rgba(255,255,255,.5);
-}
-@media (min-width: 40em) {
-  /* Pull out the header and footer */
-  .masthead {
-    position: fixed;
-    top: 0;
-  }
-  .mastfoot {
-    position: fixed;
-    bottom: 0;
-  }
-
-  /* Start the vertical centering */
-  .site-wrapper-inner {
-    vertical-align: middle;
-  }
-
-  /* Handle the widths */
-  .masthead,
-  .mastfoot,
-  .cover-container {
-    width: 100%; /* Must be percentage or pixels for horizontal alignment */
-  }
-}
-@media (min-width: 62em) {
-  .masthead,
-  .mastfoot,
-  .cover-container {
-    width: 42rem;
-  }
-}
-</style>
   </head>
   <body>
-    <div class="site-wrapper">
-      <div class="site-wrapper-inner">
-        <div class="cover-container">
-          <header class="masthead clearfix">
-            <div class="inner">
-              <h3 class="masthead-brand">WeppCloud</h3>
-              <nav class="nav nav-masthead">
-                {% if user.is_anonymous %}
-                <a class="nav-link" href="login">Login</a>
-                <a class="nav-link" href="register">Register</a>
-                {% else %}
-                <a class="nav-link" href="runs">My Runs</a>
-                <a class="nav-link" href="profile">Profile</a>
-                <a class="nav-link" href="logout">Logout</a>
-                {% if current_user.has_role('Root') %}
-                <a class="nav-link" href="usermod">Usermod</a>
-                {% endif %}
-                {% endif %}
-              </nav>
-            </div>
-          </header>
-          <main role="main" class="inner cover">
-            <div class="row">
-              <div class="col-md-4">
-                <h3 class="cover-heading">WeppCloud</h3>
-                <p class="lead">
-                  <a href="create/0" class="btn btn-lg btn-secondary">Start WEPP Run</a>
-                </p>
-              </div>
-              
-              <div class="col-md-4">
-                <h3 class="cover-heading">LakeTahoe</h3>
-                <p class="lead">
-                  <a href="create/lt" class="btn btn-lg btn-secondary">Start WEPP Run</a>
-                </p>
-              </div>
-
-
-              <div class="col-md-4">
-                <h3 class="cover-heading">LakeTahoe-Fire</h3>
-                <p class="lead">
-                  <a href="create/lt-fire" class="btn btn-lg btn-secondary">Start WEPP Run</a>
-                </p>
-              </div>
-
-              <div class="col-md-4">
-                <h3 class="cover-heading">WEPP-PEP</h3>
-                <p class="lead">
-                  <a href="create/baer" class="btn btn-lg btn-secondary">Start WEPP Run</a>
-                </p>
-              </div>
-            </div>
-          </main>
-          <!--footer class="mastfoot">
-            <div class="inner">
-              <p>Cover template for <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
-            </div>
-          </footer-->
+  <header>
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="../weppcloud">WeppCloud</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+      </li>
+      {% if user.is_anonymous %}
+      <li><a class="nav-link" href="login">Login</a></li>
+      <li><a class="nav-link" href="register">Register</a></li>
+      {% else %}
+      <li><a class="nav-link" href="runs">My Runs</a></li>
+      <li><a class="nav-link" href="profile">Profile</a></li>
+      <li><a class="nav-link" href="logout">Logout</a></li>
+      {% if current_user.has_role('Root') %}
+      <li><a class="nav-link" href="usermod">Usermod</a></li>
+      {% endif %}
+      {% endif %}
+    </ul>
+    <button class="btn btn-link" type="button" id="btnPuModal"
+            data-toggle="modal" data-target="#puModal"
+            title="up up down down left right left right b a">
+        <span class="oi oi-command"></span></a>
+    </button>
+    </div>
+  </nav>
+</header>
+    <div role="main" class="container">
+      <div style="height: 60px;"></div>
+      <div style="height: 2em;"></div>
+      <div class="jumbotron">
+        <div class="col-sm-8 mx-auto">
+          <h1>WeppCloud</h1>
+          <p>Run WEPP anywhere in the continental U.S. Elevation data from USGS National Elevation Set. TOPAZ for
+             watershed delineation. Soils are build using SURGO/STATSGO. Landcover from USGS National Landcover dataset.
+             Climates from CLIGEN.
+          </p>
+          <p>
+            <a class="btn btn-primary" href="create/0" role="button">Start WEPP Run</a>
+          </p>
         </div>
       </div>
+      <div style="height: 2em;"></div>
+      <div class="jumbotron">
+        <div class="col-sm-8 mx-auto">
+          <h1>WEPP-PEP</h1>
+          <p>The WEPP Post-Fire Erosion Prediction (PEP) allows users to upload a burn severity map and predict erosion
+             based on fire severity.
+          </p>
+          <p>
+            <a class="btn btn-primary" href="create/baer" role="button">Start WEPP Run</a>
+          </p>
+        </div>
+      </div>
+      <div style="height: 2em;"></div>
+      <div class="jumbotron">
+        <div class="col-sm-8 mx-auto">
+          <h1>Lake Tahoe / West Tahoe Project</h1>
+          <p>The Lake Tahoe Project incorporates region specific soil, phosphorus, and estimated soil burn severity.
+          </p>
+          <p>
+            <a class="btn btn-primary" href="lt" role="button">View Results and Run WEPP</a>
+          </p>
+        </div>
+      </div>
+      <div style="height: 2em;"></div>
+      <div>
+        <h3>Acknowledgements, Sponsors, and Collaborators:</h3>
+        <div style="text-align: center;">
+            <a href="https://www.uidaho.edu/"><img src="{{  url_for('static', filename='images/ui-main-horizontal.jpg') }}" height="47" style="margin: 10px;"/></a>
+            <a href="https://www.idahoecosystems.org/"><img src="{{  url_for('static', filename='images/miles_short_logo.png') }}" height="47" style="margin: 10px;"/></a>
+            <a href="https://www.northwestknowledge.net/"><img src="{{  url_for('static', filename='images/ui-nkn-logo-hz.png') }}" height="47" style="margin: 10px;"/></a>
+            <a href="https://www.usda.gov/"><img src="{{  url_for('static', filename='images/USDA_logo.png') }}" height="47" style="margin: 10px;"/></a>
+            <a href="https://www.fs.fed.us/"><img src="{{  url_for('static', filename='images/usfslogo.png') }}" height="47" style="margin: 10px;"/></a>
+            <img src="{{  url_for('static', filename='images/arsalone.gif') }}" height="47" style="margin: 10px;"/>
+        </div>
+      </div>
+      <div style="height: 2em;"></div>
+      <div>This work was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award number IIA-1301792.</div>
+      <div style="height: 2em;"></div>
     </div>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
      integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
      integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
