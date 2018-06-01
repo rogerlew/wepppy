@@ -621,6 +621,15 @@ class TopazRunner:
         with open(_join(topaz_wd, 'dednm.log'), 'w') as fp:
             fp.write('\n'.join(output))
 
+        for i in range(len(output)-1):
+            line = output[i]
+
+            if 'THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM' in line:
+                raise WatershedBoundaryTouchesEdgeError()
+            if 'THE VALUE FOR THE MINIMUM CHANNEL LENGTH FOR A CHANNEL TO BE' in line and \
+               'CLASSIFIED AS A CHANNEL IS TOO SHORT.' in output[i+1]:
+                raise MinimumChannelLengthTooShortError()
+
         if _pass == 1 and \
            _exists(_join(topaz_wd, 'FLOPAT.OUT')) and \
            _exists(_join(topaz_wd, 'FLOVEC.OUT')) and \
@@ -633,15 +642,6 @@ class TopazRunner:
             _exists(_join(topaz_wd, 'CATWIN.TAB')) and \
             _exists(_join(topaz_wd, 'BOUND.OUT')):
             return output
-
-        for i in range(len(output)-1):
-            line = output[i]
-
-            if 'THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM' in line:
-                raise WatershedBoundaryTouchesEdgeError()
-            if 'THE VALUE FOR THE MINIMUM CHANNEL LENGTH FOR A CHANNEL TO BE' in line and \
-               'CLASSIFIED AS A CHANNEL IS TOO SHORT.' in output[i+1]:
-                raise MinimumChannelLengthTooShortError()
 
         raise DednmCrashedException(output)
 
