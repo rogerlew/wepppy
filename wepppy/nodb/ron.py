@@ -11,6 +11,7 @@ import os
 
 from os.path import exists as _exists
 from os.path import join as _join
+from os.path import split as _split
 from os.path import isdir
 
 import shutil
@@ -132,23 +133,22 @@ class Ron(NoDbBase):
                     
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
+                sbs_map = config.get('landuse', 'sbs_map')
 
-                try:
-                    sbs_map = config.get('landuse', 'sbs_map')
-                    if sbs_map == '':
-                        sbs_map = None
-                except:
-                    sbs_map = None
+                print('sbs', os.path.abspath(sbs_map))
 
                 if sbs_map is not None:
-                    sbs_map = _join(_thisdir, sbs_map)
+                    #sbs_map = _join(_thisdir, sbs_map)
                     assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
                     assert not isdir(sbs_map)
                     baer = wepppy.nodb.mods.Baer.getInstance(wd)
 
                     sbs_path = _join(baer.baer_dir, 'sbs.tif')
                     shutil.copyfile(sbs_map, sbs_path)
-                    baer.validate(sbs_path)
+                    print('map copied')
+                    print(baer.baer_path)
+
+                    baer.validate(_split(sbs_path)[-1])
 
             if "debris_flow" in self.mods:
                 wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)
