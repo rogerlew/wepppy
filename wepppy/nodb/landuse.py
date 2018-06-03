@@ -60,7 +60,7 @@ class Landuse(NoDbBase):
             self.domlc_d = None  # topaz_id keys, ManagementSummary values
             self.managements = None
 
-            self._sbs_map = config.get('landuse', 'sbs_map')
+            #self._sbs_map = config.get('landuse', 'sbs_map')
             self.sbs_coverage = None
 
             lc_dir = self.lc_dir
