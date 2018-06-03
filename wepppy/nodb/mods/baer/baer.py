@@ -242,9 +242,11 @@ class Baer(NoDbBase):
 
         # noinspection PyBroadException
         try:
+            print('baer path', self.baer_path)
             self._baer_fn = fn
             baer_path = self.baer_path
-            assert _exists(baer_path)
+            print('baer path', baer_path)
+            assert _exists(baer_path), baer_path
             
             ds = gdal.Open(baer_path)
             assert ds is not None
