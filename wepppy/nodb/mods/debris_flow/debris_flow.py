@@ -8,6 +8,7 @@
 import math
 import os
 from os.path import join as _join
+from os.path import exists as _exists
 
 # non-standard
 import jsonpickle
@@ -93,6 +94,9 @@ class DebrisFlow(NoDbBase):
         with open(_join(wd, 'debris_flow.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, DebrisFlow), db
+
+            if _exists(_join(wd, 'READONLY')):
+                return db
 
             if os.path.abspath(wd) != os.path.abspath(db.wd):
                 db.wd = wd

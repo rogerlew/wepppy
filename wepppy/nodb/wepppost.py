@@ -75,6 +75,9 @@ class WeppPost(NoDbBase):
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, WeppPost), db
 
+            if _exists(_join(wd, 'READONLY')):
+                return db
+
             if os.path.abspath(wd) != os.path.abspath(db.wd):
                 db.wd = wd
                 db.lock()
@@ -128,6 +131,7 @@ class WeppPost(NoDbBase):
                 wat_fn = _join(output_dir, 'H{}.wat.dat'.format(wepp_id))
 
                 with open(wat_fn) as wat_fp:
+                    ofe = None
                     for i, L in enumerate(wat_fp.readlines()):
                         if i == 23:
                             L = L.split()
@@ -179,7 +183,7 @@ class WeppPost(NoDbBase):
             self.unlock('-f')
             raise
 
-    def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=[0, 1]):
+    def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=(0, 1)):
         ndays = self._ndays
         if source == 'Channel':
             assert self._chn_streamflow is not None
@@ -292,8 +296,8 @@ class WeppPost(NoDbBase):
         sed_yield, solub_reactive_p, particulate_p, total_p = [], [], [], []
         with open(ebe_fn) as fp:
             for L in fp.readlines()[9:]:
-                day, mo, year, p, _runoff, peak_runoff, _sed_yield, _solub_reactive_p, _particulate_p, _total_p = \
-                L.split()
+                day, mo, year, p, _runoff, peak_runoff, _sed_yield, _solub_reactive_p, _particulate_p, _total_p \
+                    = L.split()
 
                 sed_yield.append(float(_sed_yield) / 1000.0 / ws_ha)
                 solub_reactive_p.append(float(_solub_reactive_p))
@@ -340,11 +344,3 @@ class WeppPost(NoDbBase):
             'Daily Baseflow (mm)': baseflow
         }
         self.dump_and_unlock()
-
-
-if __name__ == "__main__":
-    wd = '/geodata/weppcloud_runs/43bc959e-59b9-4e50-b44a-145abe338bc5/'
-#    wd = '/geodata/weppcloud_runs/Blackwood_forStats/'
-    post = WeppPost.getInstance(wd)
-    #post.calc_hill_streamflow()
-    post.calc_channel_streamflow()

@@ -172,7 +172,7 @@ $(document).ready(function () {
 
     var Legend = L.Control.extend({
         options: {
-            position: 'bottomright'
+            position: 'bottomleft'
         },
         initialize: function (options) {
             // constructor
@@ -222,7 +222,7 @@ $(document).ready(function () {
 
     var VarSelection = L.Control.extend({
         options: {
-            position: 'bottomright'
+            position: 'bottomleft'
         },
         initialize: function (options) {
             // constructor
@@ -244,7 +244,24 @@ $(document).ready(function () {
                 if (key === varname) {
                     html += 'checked';
                 }
-                html += '>' + key + '</label></div>';
+
+                if (key === 'runoff') {
+                    html += '> Runoff</label></div>';
+                }
+                else if (key === 'subrunoff') {
+                    html += '> Subrunoff</label></div>';
+                }
+                else if (key === 'baseflow') {
+                    html += '> Baseflow</label></div>';
+                }
+                else if (key === 'phosphorus') {
+                    html += '> Total Phosphorus</label></div>';
+                }
+                else if (key === 'loss') {
+                    html += '> Soil Deposition/Loss</label></div>';
+                } else {
+                    html += '> ' + key + '</label></div>';
+                }
             }
             html += '</div>';
             container.innerHTML = html;
@@ -257,6 +274,37 @@ $(document).ready(function () {
 
     var varSelection = new VarSelection();
     map.addControl(varSelection);
+
+
+    var TitleBox = L.Control.extend({
+        options: {
+            position: 'bottomright'
+        },
+        initialize: function (options) {
+            // constructor
+        },
+        onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+            container.style.backgroundColor = 'transparent';
+            container.style.borderColor = 'transparent';
+            container.style.width = '500px';
+            container.style.height = '40px';
+
+            container.innerHTML = '<h4 style="text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;">' + title + '</h4>';
+            return container;
+        },
+        onRemove: function (map) {
+            // when removed
+        }
+    });
+
+    var title = getURLParameter("title");
+    if (title !== undefined) {
+        title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
+        var titleBox = new TitleBox();
+        map.addControl(titleBox);
+    }
 
 
     $('input[type=radio][name=varRadio]').change(function() {
