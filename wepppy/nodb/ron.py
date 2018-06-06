@@ -135,7 +135,8 @@ class Ron(NoDbBase):
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
                 sbs_map = config.get('landuse', 'sbs_map')
 
-                print('sbs', os.path.abspath(sbs_map))
+                if sbs_map == '':
+                    sbs_map = None
 
                 if sbs_map is not None:
                     #sbs_map = _join(_thisdir, sbs_map)
@@ -145,8 +146,6 @@ class Ron(NoDbBase):
 
                     sbs_path = _join(baer.baer_dir, 'sbs.tif')
                     shutil.copyfile(sbs_map, sbs_path)
-                    print('map copied')
-                    print(baer.baer_path)
 
                     baer.validate(_split(sbs_path)[-1])
 
@@ -170,6 +169,9 @@ class Ron(NoDbBase):
         with open(_join(wd, 'ron.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Ron), db
+
+            if _exists(_join(wd, 'READONLY')):
+                return db
 
             if os.path.abspath(wd) != os.path.abspath(db.wd):
                 db.wd = wd

@@ -111,6 +111,9 @@ class Observed(NoDbBase):
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Observed), db
 
+            if _exists(_join(wd, 'READONLY')):
+                return db
+
             if os.path.abspath(wd) != os.path.abspath(db.wd):
                 db.wd = wd
                 db.lock()

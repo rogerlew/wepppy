@@ -225,6 +225,9 @@ class Wepp(NoDbBase, LogMixin):
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Wepp)
 
+            if _exists(_join(wd, 'READONLY')):
+                return db
+
             if os.path.abspath(wd) != os.path.abspath(db.wd):
                 db.wd = wd
                 db.lock()
