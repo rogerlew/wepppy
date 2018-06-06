@@ -78,6 +78,9 @@ class Baer(NoDbBase):
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Baer), db
 
+            if _exists(_join(wd, 'READONLY')):
+                return db
+
             if os.path.abspath(wd) != os.path.abspath(db.wd):
                 db.wd = wd
                 db.lock()
@@ -242,10 +245,8 @@ class Baer(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            print('baer path', self.baer_path)
             self._baer_fn = fn
             baer_path = self.baer_path
-            print('baer path', baer_path)
             assert _exists(baer_path), baer_path
             
             ds = gdal.Open(baer_path)

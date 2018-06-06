@@ -530,11 +530,20 @@ def create_fork(runid, config):
     owners = get_run_owners(runid)
 
     should_abort = True
+
     if current_user in owners:
         should_abort = False
 
     if current_user.has_role('Admin'):
         should_abort = False
+
+    if len(owners) == 0:
+        should_abort = False
+
+    else:
+        ron = Ron.getInstance(wd)
+        if ron.public:
+            should_abort = False
 
     if should_abort:
         abort(404)
@@ -561,7 +570,15 @@ def create_fork(runid, config):
     locks = glob(_join(new_wd, '*.lock'))
     for fn in locks:
         os.remove(fn)
-            
+
+    fn = _join(new_wd, 'READONLY')
+    if _exists(fn):
+        os.remove(fn)
+
+    fn = _join(new_wd, 'PUBLIC')
+    if _exists(fn):
+        os.remove(fn)
+
     # redirect to fork
     return redirect('runs/%s/%s/' % (new_runid, config))
 
