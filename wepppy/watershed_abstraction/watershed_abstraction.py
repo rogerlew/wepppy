@@ -457,7 +457,7 @@ class HillSummary(SummaryBase):
         
     @property
     def fname(self) -> str:
-        return 'hill%i.slp' % self.topaz_id
+        return 'hill_%i.slp' % self.topaz_id
 
 
 class ChannelSummary(SummaryBase):
@@ -472,7 +472,7 @@ class ChannelSummary(SummaryBase):
     
     @property
     def fname(self) -> str:
-        return 'chn%i.slp' % self.topaz_id
+        return 'chn_%i.slp' % self.topaz_id
           
     @property
     def order(self) -> int:
