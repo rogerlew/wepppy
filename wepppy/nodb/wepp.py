@@ -331,28 +331,34 @@ class Wepp(NoDbBase, LogMixin):
             self.status_log = _join(self.runs_dir, 'status.log')
 
         runs_dir = self.runs_dir
-        if not _exists(runs_dir):
-            os.mkdir(runs_dir)
+        if _exists(runs_dir):
+            shutil.rmtree(runs_dir)
+        os.mkdir(runs_dir)
             
         output_dir = self.output_dir
-        if not _exists(output_dir):
-            os.mkdir(output_dir)
+        if _exists(output_dir):
+            shutil.rmtree(output_dir)
+        os.mkdir(output_dir)
 
         plot_dir = self.plot_dir
-        if not _exists(plot_dir):
-            os.mkdir(plot_dir)
+        if _exists(plot_dir):
+            shutil.rmtree(plot_dir)
+        os.mkdir(plot_dir)
             
         stats_dir = self.stats_dir
-        if not _exists(stats_dir):
-            os.mkdir(stats_dir)
+        if _exists(stats_dir):
+            shutil.rmtree(stats_dir)
+        os.mkdir(stats_dir)
 
         fp_runs_dir = self.fp_runs_dir
-        if not _exists(fp_runs_dir):
-            os.makedirs(fp_runs_dir)
+        if _exists(fp_runs_dir):
+            shutil.rmtree(fp_runs_dir)
+        os.makedirs(fp_runs_dir)
 
         fp_output_dir = self.fp_output_dir
-        if not _exists(fp_output_dir):
-            os.mkdir(fp_output_dir)
+        if _exists(fp_output_dir):
+            shutil.rmtree(fp_output_dir)
+        os.mkdir(fp_output_dir)
             
     def _prep_slopes(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -383,6 +389,7 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
 
         for topaz_id, man_summary in landuse.sub_iter():
+            print(topaz_id, man_summary)
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
 

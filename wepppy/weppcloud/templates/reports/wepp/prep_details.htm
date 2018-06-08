@@ -12,8 +12,10 @@
       <th>Area</th>
       <th>Slope</th>
       <th>Aspect</th>
+      <th>Slope File</th>
       <th>Dominant Landuse</th>
       <th>Dominant Soil</th>
+      <th>Climate File</th>
     </tr>
   </thead>
   <tbody>
@@ -23,6 +25,7 @@
       <td>{{ unitizer_units("m") | safe }}</td>
       <td>{{ unitizer_units("m") | safe }}</td>
       <td>{{ unitizer_units("ha") | safe }}</td>
+      <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
@@ -37,6 +40,7 @@
       <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
       <td>{{ d.watershed.slope_scalar|round(3) }}</td>
       <td>{{ d.watershed.aspect|round(0) }}</td>
+      <td><a href="../../../browse/watershed/{{ d.watershed.fname }}" target="_blank">{{ d.watershed.fname }}</a></td>
       {% if d.landuse.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
@@ -45,7 +49,12 @@
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.soil.desc }} (<a href="../../../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      <td>{{ d.soil.desc }} (<a href="../../../browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      {% endif %}
+      {% if d.climate.cli_fn is not defined %}
+      <td>&mdash;</td>
+      {% else %}
+      <td><a href="../../../browse/climate/{{ d.climate.cli_fn }}" target="_blank">{{ d.climate.cli_fn }}</a></td>
       {% endif %}
     </tr>
     {% endfor %}
@@ -65,9 +74,11 @@
       <th>Area</th>
       <th>Slope</th>
       <th>Aspect</th>
+      <th>Slope File</th>
       <th>Dominant Landuse</th>
       <th>Dominant Soil</th>
       <th>Channel Type</th>
+      <th>Climate File</th>
     </tr>
   </thead>
   <tbody>
@@ -78,6 +89,8 @@
       <td>px</td>
       <td>{{ unitizer_units("m") | safe }}</td>
       <td>{{ unitizer_units("ha") | safe }}</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
@@ -96,6 +109,7 @@
       <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
       <td>{{ d.watershed.slope_scalar|round(3) }}</td>
       <td>{{ d.watershed.aspect|round(0) }}</td>
+      <td><a href="../../../browse/watershed/{{ d.watershed.fname }}" target="_blank">{{ d.watershed.fname }}</a></td>
       {% if d.landuse.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
@@ -104,9 +118,14 @@
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.soil.desc }} (<a href="../../../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)</td>
+      <td>{{ d.soil.desc }} (<a href="../../../browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)</td>
       {% endif %}
       <td><a href="../../../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></td>
+      {% if d.climate.cli_fn is not defined %}
+      <td>&mdash;</td>
+      {% else %}
+      <td><a href="../../../browse/climate/{{ d.climate.cli_fn }}" target="_blank">{{ d.climate.cli_fn }}</a></td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>

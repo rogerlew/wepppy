@@ -1,4 +1,4 @@
-from wepppy.all_your_base import shapefile
+
 import sys
 from os.path import exists as _exists
 from os.path import join as _join
@@ -14,6 +14,7 @@ from osgeo import gdal, osr, ogr
 import pyproj
 
 from wepppy.all_your_base import wgs84_proj4, read_raster
+from wepppy.all_your_base import shapefile
 from wepppy.nodb import Ron, Topaz
 
 def build_mask(points, georef_fn):
@@ -126,6 +127,7 @@ class WatershedBoundaryDataset:
             topaz.build_channels(csa=10, mcl=200)
 
             print('find raster indices')
+            print('"', topaz.utmproj4, '"')
             utm_proj = pyproj.Proj(topaz.utmproj4)
             wgs_proj = pyproj.Proj(wgs84_proj4)
             points = [pyproj.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]

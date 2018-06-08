@@ -23,8 +23,7 @@ from math import radians, sin, cos, asin, sqrt
 
 import numpy as np
 
-from osgeo import gdal, osr
-
+from osgeo import gdal, osr, ogr
 gdal.UseExceptions()
 
 geodata_dir = '/geodata/'
@@ -378,6 +377,62 @@ nodata_value {no_data}
                                      no_data=no_data,
                                      data=data_string))
 
+def build_mask(points, georef_fn):
+
+    # This function is based loosely off of Frank's tests for
+    # gdal.RasterizeLayer.
+    # https://svn.osgeo.org/gdal/trunk/autotest/alg/rasterize.py
+
+    # open the reference
+    # we use this to find the size, projection,
+    # spatial reference, and geotransform to
+    # project the subcatchment to
+    ds = gdal.Open(georef_fn)
+
+    pszProjection = ds.GetProjectionRef()
+    if pszProjection is not None:
+        srs = osr.SpatialReference()
+        if srs.ImportFromWkt(pszProjection) == gdal.CE_None:
+            pszPrettyWkt = srs.ExportToPrettyWkt(False)
+
+
+    geoTransform = ds.GetGeoTransform()
+
+    # initialize a new raster in memory
+    driver = gdal.GetDriverByName('MEM')
+    target_ds = driver.Create('',
+                              ds.RasterXSize,
+                              ds.RasterYSize,
+                              1, gdal.GDT_Byte)
+    target_ds.SetGeoTransform(geoTransform)
+    target_ds.SetProjection(pszProjection)
+
+    # close the reference
+    ds = None
+
+    # Create a memory layer to rasterize from.
+    rast_ogr_ds = ogr.GetDriverByName('Memory') \
+        .CreateDataSource('wrk')
+    rast_mem_lyr = rast_ogr_ds.CreateLayer('poly', srs=srs)
+
+    # Add a polygon.
+    coords = ','.join(['%f %f' % (lng, lat) for lng, lat in points])
+    wkt_geom = 'POLYGON((%s))' % coords
+    feat = ogr.Feature(rast_mem_lyr.GetLayerDefn())
+    feat.SetGeometryDirectly(ogr.Geometry(wkt=wkt_geom))
+    rast_mem_lyr.CreateFeature(feat)
+
+    # Run the rasterization algorithm
+    err = gdal.RasterizeLayer(target_ds, [1], rast_mem_lyr,
+                              burn_values=[255])
+    rast_ogr_ds = None
+    rast_mem_lyr = None
+
+    band = target_ds.GetRasterBand(1)
+    data = band.ReadAsArray().T
+
+    # find nonzero indices and return
+    return -1 * (data / 255.0) + 1
 
 def identify_utm(fn):
     assert _exists(fn), "Cannot open %s" % fn

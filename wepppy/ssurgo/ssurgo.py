@@ -71,7 +71,7 @@ def _makeSOAPrequest(query):
     r = requests.post(_ssurgo_url, data=body, headers=headers)
 
     if r.status_code != 200:
-        raise SsurgoRequestError
+        raise SsurgoRequestError((r.content, query))
 
     return r.content
 
@@ -580,7 +580,6 @@ POSSIBILITY OF SUCH DAMAGE."""
                 self.res_lyr_ksat = ksat_min * 0.01
                 break
 
-
         # determine number of layers
         n = 0
         for i, (h, m) in enumerate(zip(horizons, horizons_mask)):
@@ -733,17 +732,42 @@ Any comments:
 'Urban_1'\t\t'Urban'\t1\t0.16\t0.75\t4649000\t0.0140\t2.648\t0.0000
 210\t1.4\t100.8\t10\t 0.242\t 0.1145\t 66.8\t7\t3\t11.3\t55.5
 1\t10000\t100.8'''
-        
+
+    def _build_urban_v2006_2(self):
+        return '''2006.2\n''' + self.description + '''        
+Any comments:                               
+1  1                                        
+'Urban_1'\t\t'Urban'\t1\t0.16\t0.75\t4649000\t0.0140\t2.648\t100.8
+210\t 66.8\t7\t3\t11.3\t55.5
+1\t10000\t100.8'''
+
     def _build_water(self):
         return '''7778\n''' + self.description + '''
 Any comments:                                   
 1  1                                        
-'Water_1'\t'Water'\t1\t0.16\t0.75\t4649000\t0.0140\t5.0\t0.0000
+'Water_1'\t'Water'\t1\t0.16\t0.75\t4649000\t0.0140\t5.0\t100.0
 210\t1.4\t100.0\t10\t0.242\t0.1145\t66.8\t7\t3\t11.3\t55.5
 1\t10000\t0'''
 
-    def write(self, wd='./', overwrite=True, fname=None, db_build=False) -> SoilSummary:
+    def _build_water_v2006_2(self):
+        return '''2006.2\n''' + self.description + '''
+Any comments:                                   
+1  1                                        
+'Water_1'\t'Water'\t1\t0.16\t0.75\t4649000\t0.0140\t5.0\t0.0000
+210\t66.8\t7\t3\t11.3\t55.5
+1\t10000\t0'''
+
+    def write(self, wd='./', overwrite=True, fname=None, db_build=False, version='7778') -> SoilSummary:
+        assert version in ['7778', '2006.2']
         assert _exists(wd), wd
+
+        if version == '7778':
+            return self._write7778(wd, overwrite, fname, db_build)
+
+        else:
+            return self._write2006_2(wd, overwrite, fname, db_build)
+
+    def _write7778(self, wd, overwrite, fname, db_build):
         txt = self.build_file_contents()
         txt = txt.replace('\r\n', '\n').replace('\r', '\n')
         txt = '\r\n'.join(txt.splitlines())
@@ -765,6 +789,39 @@ Any comments:
             else:
                 return
         
+        with open(fpath, 'w') as fp:
+            fp.write(txt)
+
+        return SoilSummary(
+            Mukey=int(mukey),
+            FileName=fname,
+            soils_dir=wd,
+            BuildDate=str(datetime.now()),
+            Description=self.short_description
+        )
+
+    def _write2006_2(self, wd, overwrite, fname, db_build):
+        txt = self.build_file_contents_v2006_2()
+        txt = txt.replace('\r\n', '\n').replace('\r', '\n')
+        txt = '\r\n'.join(txt.splitlines())
+
+        mukey = str(self.mukey)
+
+        if db_build:
+            wd = _join(wd, mukey[:3])
+            if not _exists(wd):
+                os.mkdir(wd)
+
+        if fname is None:
+            fname = '%s.sol' % mukey
+        fpath = _join(wd, fname)
+
+        if _exists(fpath):
+            if overwrite:
+                os.remove(fpath)
+            else:
+                return
+
         with open(fpath, 'w') as fp:
             fp.write(txt)
 
@@ -867,7 +924,71 @@ Any comments:
             s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))
             
         return '\n'.join(s)
-    
+
+    def build_file_contents_v2006_2(self):
+        assert self.valid()
+
+        if self.is_urban:
+            return self._build_urban_v2006_2()
+
+        if self.is_water:
+            return self._build_water_v2006_2()
+
+        s = "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} 1\n" \
+            "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t" \
+            "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t" \
+            "{0.initial_ksat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t" \
+            "{horizon0.shear:0.4f}\t{ksat:0.4f}"
+
+        s = [s.format(self, majorComponent=self.majorComponent,
+                      horizon0=self.horizons[0],
+                      ksat=self.horizons[0].ksat_r * 3.6)]
+
+        ksat_last = 0.0
+
+        last_valid_i = [i for i, v in enumerate(self.horizons_mask) if v and not i == self.res_lyr_i][-1]
+
+        total_depth = 0.0
+        for i, (h, m) in enumerate(zip(self.horizons, self.horizons_mask)):
+
+            if i == self.res_lyr_i:
+                break
+
+            if m == 0:
+                #  depth += h.hzdepb_r
+                continue
+
+            hzdepb_r10 = h.hzdepb_r * 10.0
+
+            # check if on last layer
+            if i == last_valid_i:
+                # make sure the total depth is at least 200 mm
+                if hzdepb_r10 < 210.0:
+                    hzdepb_r10 = 210.0
+
+            s2 = '{hzdepb_r10:0.03f}\t'\
+                 '{0.sandtotal_r:0.2f}\t{0.claytotal_r:0.2f}\t{0.om_r:0.2f}\t' \
+                 '{0.cec7_r:0.2f}\t{0.smr:0.2f}' \
+                .format(h, hzdepb_r10=hzdepb_r10)
+            ksat_last = h.ksat_r * 3.6
+
+            # make the layers easier to read by making cols fixed width
+            # aligning to the right.
+            s2 = '{0:>9}\t' \
+                 '{1:>7}\t{2:>7}\t{3:>7}\t' \
+                 '{4:>7}\t{5:>7}'.format(*s2.split())
+
+
+            s.append('\t' + s2)
+            depth = 0.0
+
+        if self.res_lyr_i is None:
+            s.append('1 10000.0 %0.5f' % ksat_last)
+        else:
+            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))
+
+        return '\n'.join(s)
+
 
 def _fetch_components(mukeys):
     """
@@ -1055,11 +1176,12 @@ class SurgoSoilCollection(object):
         return list(self.invalidSoils.keys())
 
     def writeWeppSoils(self, wd='./', overwrite=True,
-                       write_logs=False, db_build=False) -> Dict[int, SoilSummary]:
+                       write_logs=False, db_build=False,
+                       version='7778') -> Dict[int, SoilSummary]:
         assert self.weppSoils is not None
         soils = {}
         for weppSoil in self.weppSoils.values():
-            soil = weppSoil.write(wd, overwrite, db_build=db_build)
+            soil = weppSoil.write(wd, overwrite, db_build=db_build, version=version)
             soils[soil.mukey] = soil
             if write_logs:
                 weppSoil.write_log(wd, overwrite, db_build=db_build)
