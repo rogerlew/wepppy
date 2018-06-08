@@ -8,14 +8,20 @@ from wepppy.ssurgo import SurgoSoilCollection, StatsgoSpatial
 
 if __name__ == "__main__":
 
+    assert _exists('dom_mukeys_by_county.csv')
+    assert _exists('failed_counties.txt')
+
+    # clean soils directory
     if _exists('soils'):
         shutil.rmtree('soils')
 
     os.mkdir('soils')
 
+    # read the input table from file
     with open('dom_mukeys_by_county.csv') as fp:
         records = fp.readlines()
 
+    # read the mukeys from input table
     mukeys = []
     for rec in records:
         rec = rec.split(',')
@@ -25,6 +31,7 @@ if __name__ == "__main__":
         except:
             print(rec)
 
+    # build wepp soils 100 at a time to not overload surgo SOAP server
     invalid_mukeys = set()
     for i in range(int(len(mukeys)/100)):
         print(i)
@@ -41,6 +48,8 @@ if __name__ == "__main__":
         print(surgo_c.invalidSoils.keys())
         invalid_mukeys.union(surgo_c.invalidSoils.keys())
 
+    # for invalid soils build statsgo soils
+    # first need to dtermine statsgo mukeys from county centroids
     statsgoSpatial = StatsgoSpatial()
     statsgo_mukeys = set()
     county_lookup = {}
@@ -66,7 +75,7 @@ if __name__ == "__main__":
 
         county_lookup[fips] = s_mukey
 
-
+    # now we can build the statsgo soils
     invalid_statsgo_mukeys = set()
     for i in range(int(len(statsgo_mukeys)/100)):
         print(i)
@@ -85,6 +94,7 @@ if __name__ == "__main__":
 
     print(invalid_statsgo_mukeys)
 
+    # build soil lookup table for database
     for s_mukey in invalid_statsgo_mukeys:
         for fips in county_lookup:
             if county_lookup[fips] == s_mukey:
