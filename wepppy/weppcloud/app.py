@@ -1284,10 +1284,9 @@ def view_management(runid, key):
     man = landuse.managements[str(key)].get_management()
     contents = str(man)
 
-    resp = Response(contents)
-    resp.headers[u'Content-Type'] = u'text/plaintext; charset=utf-8'
-    resp.headers[u'Content-Disposition'] = u'inline; filename="%s.man"' % str(key)
-    return resp
+    r = Response(response=contents, status=200, mimetype="text/plain")
+    r.headers["Content-Type"] = "text/plain; charset=utf-8"
+    return r
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/modify_landuse/', methods=['POST'])
@@ -1366,24 +1365,6 @@ def report_soils(runid):
     return render_template('reports/soils.htm',
                            report=Soils.getInstance(wd).report)
 
-
-@app.route('/runs/<string:runid>/view/soil/<mukey>')
-@app.route('/runs/<string:runid>/view/soil/<mukey>/')
-def view_soil(runid, mukey):
-    wd = get_wd(runid)
-    soils_dir = Soils.getInstance(wd).soils_dir
-    soil_path = _join(soils_dir, '%s.sol' % mukey)
-    if _exists(soil_path):
-        with open(soil_path) as fp:
-            contents = fp.read()
-    else:
-        contents = 'Soil not found'
-
-    resp = Response(contents)
-    resp.headers[u'Content-Type'] = u'text/plaintext; charset=utf-8'
-    resp.headers[u'Content-Disposition'] = u'inline; filename="%s.sol"' % mukey
-    return resp
-          
                            
 @app.route('/runs/<string:runid>/tasks/build_soil/', methods=['POST'])
 def task_build_soil(runid):
@@ -1526,20 +1507,6 @@ def view_closest_stations(runid):
 
     return Response('n'.join(options), mimetype='text/html')
     
-    
-@app.route('/runs/<string:runid>/view/climate/<fn>')
-@app.route('/runs/<string:runid>/view/climate/<fn>/')
-def view_climate(runid, fn):
-    wd = get_wd(runid)
-    cli_dir = Climate.getInstance(wd).cli_dir
-    cli_path = _join(cli_dir, fn)
-    if _exists(cli_path):
-        contents = open(cli_path).read()    
-    else:
-        contents = 'Climate not found'
-        
-    return Response(contents, mimetype='text/plaintext')
-
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/view/heuristic_stations/')

@@ -42,7 +42,7 @@
     <dt>Dominant Soil</dt>
     <dd>{% if d.soil is not none %}
         {{ d.soil.desc }} 
-        (<a href="../view/soil/{{ d.soil.mukey }}/" target="_blank">{{ d.soil.mukey }}</a>)
+        (<a href="../browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)
         {% endif %}
     </dd>
     {% if d.meta.hill_type == "Channel"%}
