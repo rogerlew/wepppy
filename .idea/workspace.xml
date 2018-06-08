@@ -2,20 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/ssurgo/county_db/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/wepp.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/wepp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/watershed_abstraction/watershed_abstraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/watershed_abstraction/watershed_abstraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/watershed_boundary_dataset/usgs_wbd.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/watershed_boundary_dataset/usgs_wbd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/climate.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/hill.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/hill.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/soils.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/soils.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/prep_details.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/prep_details.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -105,8 +94,8 @@
       <file leaf-file-name="_0_determine_dominate_mukeys.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="311">
-              <caret line="49" column="4" selection-start-line="49" selection-start-column="4" selection-end-line="49" selection-end-column="42" />
+            <state relative-caret-position="478">
+              <caret line="126" lean-forward="true" selection-start-line="126" selection-end-line="126" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -117,8 +106,8 @@
       <file leaf-file-name="_1_build_database.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="103" column="48" selection-start-line="103" selection-start-column="48" selection-end-line="103" selection-end-column="48" />
+            <state relative-caret-position="249">
+              <caret line="96" column="42" selection-start-line="96" selection-start-column="42" selection-end-line="96" selection-end-column="42" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -334,8 +323,8 @@
         <option value="$PROJECT_DIR$/wepppy/ssurgo/county_db/2_failed.py" />
         <option value="$PROJECT_DIR$/wepppy/ssurgo/county_db/make_db.py" />
         <option value="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" />
-        <option value="$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py" />
         <option value="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" />
+        <option value="$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py" />
         <option value="$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py" />
       </list>
     </option>
@@ -624,20 +613,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1517788948644</updated>
-    </task>
-    <task id="LOCAL-00001" summary="fix #51, fix #52">
-      <created>1522734981958</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1522734981958</updated>
-    </task>
-    <task id="LOCAL-00002" summary="fix #50">
-      <created>1522737442163</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1522737442163</updated>
     </task>
     <task id="LOCAL-00003" summary="#50 catch failed climate build">
       <created>1522737687360</created>
@@ -968,7 +943,21 @@
       <option name="project" value="LOCAL" />
       <updated>1528057013776</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="county soil db, wepp 2006.2 soil file building">
+      <created>1528500712685</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1528500712686</updated>
+    </task>
+    <task id="LOCAL-00051" summary="county soil db, wepp 2006.2 soil file building">
+      <created>1528500740726</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1528500740726</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1005,6 +994,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="43" y="25" width="1877" height="968" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="12" weight="0.32982087" />
       <window_info anchor="bottom" id="Event Log" order="14" sideWeight="0.50027305" side_tool="true" weight="0.36167663" />
@@ -1065,7 +1055,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="topaz.py removed abandoned code" />
     <MESSAGE value="data acquisition and processing, cleaned up _scripts folder" />
     <MESSAGE value="ha default to .1, surgo min depth fix #56" />
     <MESSAGE value="total yearly water balance report" />
@@ -1090,7 +1079,8 @@
     <MESSAGE value="lt index, acknowledgements" />
     <MESSAGE value="cda interface resources" />
     <MESSAGE value="lt-fire batch fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="lt-fire batch fixes" />
+    <MESSAGE value="county soil db, wepp 2006.2 soil file building" />
+    <option name="LAST_COMMIT_MESSAGE" value="county soil db, wepp 2006.2 soil file building" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1465,8 +1455,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="49" column="4" selection-start-line="49" selection-start-column="4" selection-end-line="49" selection-end-column="42" />
+        <state relative-caret-position="478">
+          <caret line="126" lean-forward="true" selection-start-line="126" selection-end-line="126" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
@@ -1475,8 +1465,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="103" column="48" selection-start-line="103" selection-start-column="48" selection-end-line="103" selection-end-column="48" />
+        <state relative-caret-position="249">
+          <caret line="96" column="42" selection-start-line="96" selection-start-column="42" selection-end-line="96" selection-end-column="42" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

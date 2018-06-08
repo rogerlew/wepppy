@@ -32,30 +32,33 @@ def centroid_px(indx, indy):
     return (int(round(float(np.mean(indx)))),
             int(round(float(np.mean(indy)))))
 
-if __name__ == "__main__":
-    cellsize = 90
 
+if __name__ == "__main__":
+    cellsize = 90  # cellsize used to determine dominate mukey
+
+    # clean the build directory
     if _exists('build'):
         shutil.rmtree('build')
 
     os.mkdir('build')
 
+    # load the shapefile containing U.S. counties
     shp = "data/cb_2017_us_county_500k/cb_2017_us_county_500k"
     sf = shapefile.Reader(shp)
-    print(sf.shapeType)
-    print(sf.fields)
     header = [field[0] for field in sf.fields][1:]
 
-    fp = open('dom_mukeys_by_county.csv', 'w')
-    fpe = open('failed_counties.txt', 'w')
+    # loop through counties to determine dominate landuse
+    fp = open('dom_mukeys_by_county.csv', 'w')  # successful results get stored here
+    fpe = open('failed_counties.txt', 'w')  # problems get stored here by AFFGEOID
     for i, shape in enumerate(sf.iterShapes()):
         try:
+            # unpack record
             record = {k: v for k, v in zip(header, sf.record(i))}
             print(record)
-
             fips = record['AFFGEOID']
 
-            print('setting map')
+            # determine bounds for surgo map
+            print('fetch surgo map')
             bbox = shape.bbox
             pad = max(abs(bbox[0] - bbox[2]), abs(bbox[1] - bbox[3])) * 0.05
             map_center = (bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0
@@ -63,30 +66,36 @@ if __name__ == "__main__":
             bbox = [l - pad, b - pad, r + pad, t + pad]
             print(bbox)
 
+            # fetch map
             ssurgo_fn = _join('build', '%s.tif' % fips)
 
             wmesque_retrieve('ssurgo/201703', bbox,
                              ssurgo_fn, cellsize)
 
+            # read in map
             mukey_map, transform, utmproj4 = read_raster(ssurgo_fn)
 
+            # transform coordinates in shape file to utm
             utm_proj = pyproj.Proj(utmproj4)
             wgs_proj = pyproj.Proj(wgs84_proj4)
             points = [pyproj.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]
             assert len(points) > 0
 
+            # build a mask for the polygon of the county
             mask = build_mask(points, ssurgo_fn)
 
     #        plt.figure()
     #        plt.imshow(mask)
     #        plt.savefig(_join('build', 'ma_%s.png' % fips))
 
+            # extract the mukeys inside the polygon
             indx, indy = np.where(mask == 0.0)
             assert len(indx) > 0
             assert len(indy) > 0
 
             incounty = mukey_map[(indx, indy)]
 
+            # find the centroid of the county in case we need to use statsgo later on
             c_px, c_py = centroid_px(indx, indy)
             c_lng, c_lat = px_to_lnglat(transform, c_px, c_py, utm_proj, wgs_proj)
             assert c_lng > l
@@ -94,6 +103,7 @@ if __name__ == "__main__":
             assert c_lat > b
             assert c_lat < t
 
+            # determine dominate mukey
             n = mask.shape[0]*mask.shape[1]
             print(incounty.shape, n, incounty.shape[0]/n)
             counter = Counter(incounty)
@@ -104,9 +114,7 @@ if __name__ == "__main__":
                     break
             print('mukey', dom_mukey)
 
-            if dom_mukey is None:
-                raise Exception('Failed to determine MUKEY')
-
+            # if we succeeded store mukey to file
             fp.write('{STATEFP},{COUNTYFP},{COUNTYNS},{AFFGEOID},{GEOID}'
                      ',{NAME},{LSAD},{ALAND},{AWATER},{mukey},{c_lng},{c_lat}\n'
                      .format(**record, mukey=dom_mukey, c_lng=c_lng, c_lat=c_lat))
