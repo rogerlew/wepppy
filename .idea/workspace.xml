@@ -2,47 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/wepppy/fswepp/ermit/ermit_runner.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/watershed_abstraction/slope_file.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/watershed_abstraction/tests/data/test01.slp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/watershed_abstraction/tests/test_slope.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/wepp/soilsdb/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/weppdev.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/weppdev.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/climates/noaa_precip_freqs_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/climates/noaa_precip_freqs_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/export/arc_export.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/export/arc_export.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/export/ermit_input.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/export/ermit_input.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/landuse.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/landuse.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/phosphorus/P_baseflow.tif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/phosphorus/P_lateral_flow.tif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/phosphorus/P_sediment.tif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/phosphorus/P_surf_runoff.tif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/soils.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/soils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/wepp.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/wepp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.cpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.dbf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.prj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.shp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.shp.ea.iso.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.shp.iso.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.shp.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/county_db/data/cb_2017_us_county_500k/cb_2017_us_county_500k.shx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/topaz/topaz.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/topaz/topaz.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/watershed_abstraction/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/watershed_abstraction/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/bin/wepp" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/bin/wepp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/management/data/map.json" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/management/data/map.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/management/managements.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/management/managements.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/out/loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/out/loss.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/soil.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/soil.htm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/mods/baer/classify.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/mods/baer/classify.htm" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -124,7 +85,16 @@
         <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="260">
-              <caret line="116" column="49" selection-start-line="116" selection-start-column="49" selection-end-line="116" selection-end-column="49" />
+              <caret line="116" column="119" selection-start-line="116" selection-start-column="119" selection-end-line="116" selection-end-column="119" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="devnotes.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="374">
+              <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
             </state>
           </provider>
         </entry>
@@ -146,15 +116,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1584">
               <caret line="108" column="7" selection-start-line="108" selection-start-column="7" selection-end-line="108" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="watershed_abstraction.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/watershed_abstraction/watershed_abstraction.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="12276">
-              <caret line="702" column="39" selection-start-line="702" selection-start-column="39" selection-end-line="702" selection-end-column="39" />
             </state>
           </provider>
         </entry>
@@ -605,20 +566,6 @@
       <option name="presentableId" value="Default" />
       <updated>1517788948644</updated>
     </task>
-    <task id="LOCAL-00004" summary="sphinx doc">
-      <created>1522785713296</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1522785713296</updated>
-    </task>
-    <task id="LOCAL-00005" summary="sphinx-doc">
-      <created>1522785991512</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1522785991512</updated>
-    </task>
     <task id="LOCAL-00006" summary="fix #54">
       <created>1522805212409</created>
       <option name="number" value="00006" />
@@ -948,7 +895,21 @@
       <option name="project" value="LOCAL" />
       <updated>1528501325693</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="fix #87, fix #85">
+      <created>1532968572991</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1532968572993</updated>
+    </task>
+    <task id="LOCAL-00054" summary="fix #87, fix #85, fix #86">
+      <created>1532968620881</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1532968620881</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1046,8 +1007,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="data acquisition and processing, cleaned up _scripts folder" />
-    <MESSAGE value="ha default to .1, surgo min depth fix #56" />
     <MESSAGE value="total yearly water balance report" />
     <MESSAGE value="fix #60, nodb.wepp.report_loss exclude_yr_indx default" />
     <MESSAGE value="poweruser panel" />
@@ -1071,7 +1030,9 @@
     <MESSAGE value="cda interface resources" />
     <MESSAGE value="lt-fire batch fixes" />
     <MESSAGE value="county soil db, wepp 2006.2 soil file building" />
-    <option name="LAST_COMMIT_MESSAGE" value="county soil db, wepp 2006.2 soil file building" />
+    <MESSAGE value="fix #87, fix #85" />
+    <MESSAGE value="fix #87, fix #85, fix #86" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix #87, fix #85, fix #86" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1093,7 +1054,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/dom_mukeys_by_county.csv" />
     <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/2_failed.py" />
     <entry file="file://$PROJECT_DIR$/wepppy/all_your_base/shapefile.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -1420,10 +1380,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="260">
-          <caret line="116" column="49" selection-start-line="116" selection-start-column="49" selection-end-line="116" selection-end-column="49" />
+          <caret line="116" column="119" selection-start-line="116" selection-start-column="119" selection-end-line="116" selection-end-column="119" />
         </state>
       </provider>
     </entry>
