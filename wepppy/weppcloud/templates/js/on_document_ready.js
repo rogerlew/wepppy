@@ -386,6 +386,8 @@ $(document).ready(function () {
     //
     landuse.restore({{ landuse.mode | int }}, 0);
 
+    $('#landuse_single_selection').val('{{ landuse.single_selection }}').prop('selected', true);
+
     // load landuse
     if ( {{ landuse.has_landuse | tojson }} ) {
         landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
@@ -428,6 +430,10 @@ $(document).ready(function () {
         soil.setMode();
     });
 
+    $("#soil_single_dbselection").on("change", function () {
+        soil.setMode();
+    });
+
     $("#btn_build_soil").click(soil.build);
 
     //
@@ -443,6 +449,10 @@ $(document).ready(function () {
     //
     soil.restore({{ soils.mode | int }});
 
+    if ({{ (soils.single_dbselection != none) | tojson }})
+    {
+        $('#soil_single_dbselection').val('{{ soils.single_dbselection }}').prop('selected', true);
+    }
     // load soil
     if ( {{ soils.has_soils | tojson }} ) {
         soil.form.trigger("SOIL_BUILD_TASK_COMPLETED");
@@ -609,5 +619,11 @@ $(document).ready(function () {
     Mousetrap.bind('up up down down left right left right b a', function() {
         $('#btnPuModal').click();
     });
+
+    Mousetrap.bind('f8', function() {
+        window.scrollTo(0, 0);
+    });
+
+
 
 });

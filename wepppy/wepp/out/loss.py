@@ -263,6 +263,7 @@ class Loss(object):
             # average out years for chn table
             for j, d in enumerate(chn_tbl):
                 for var in chn_hdr[1:]:
+                    print(var, num_years)
                     chn_tbl[j][var] *= num_years
 
             for indx in exclude_yr_indxs:
@@ -365,5 +366,7 @@ class Loss(object):
 
 
 if __name__ == "__main__":
-    loss = Loss('/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/wepp/output/loss_pw0.txt',
-                '/geodata/weppcloud_runs/5ce45883-4649-46de-b2d2-e924a9564966/')
+    loss = Loss('/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/wepp/output/loss_pw0.txt',
+                '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/')
+
+    print(loss.excluded_years)

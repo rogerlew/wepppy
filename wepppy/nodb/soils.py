@@ -11,6 +11,7 @@ import os
 
 from os.path import join as _join
 from os.path import exists as _exists
+from os.path import split as _split
 from datetime import datetime
 import shutil
 from enum import IntEnum
@@ -19,11 +20,11 @@ from enum import IntEnum
 import jsonpickle
 
 # wepppy
-from wepppy.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException
+from wepppy.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
 from wepppy.wepp.soilbuilder.webClient import validatemukeys, fetchsoils
 from wepppy.watershed_abstraction import ischannel
 from wepppy.all_your_base import wmesque_retrieve
-from wepppy.wepp.management import get_management_summary
+from wepppy.wepp.soilsdb import load_db, get_soil
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -39,6 +40,7 @@ class SoilsMode(IntEnum):
     Undefined = -1
     Gridded = 0
     Single = 1
+    SingleDb = 2
 
 
 # noinspection PyPep8Naming
@@ -58,6 +60,7 @@ class Soils(NoDbBase):
         try:
             self._mode = SoilsMode.Gridded
             self._single_selection = 0
+            self._single_dbselection = None
 
             self.domsoil_d = None  # topaz_id keys
             self.soils = None
@@ -145,6 +148,23 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
+    @property
+    def single_dbselection(self):
+        return getattr(self, '_single_dbselection', None)
+
+    @single_dbselection.setter
+    def single_dbselection(self, sol):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._single_dbselection = sol
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+        
     @property
     def has_soils(self):
         mode = self.mode
@@ -236,6 +256,8 @@ class Soils(NoDbBase):
             self._build_gridded()
         elif self.mode == SoilsMode.Single:
             self._build_single()
+        elif self.mode == SoilsMode.SingleDb:
+            self._build_singledb()
 
     def _calc_clay_pct(self, surgo_c):
         fp = open(_join(self.soils_dir, 'clay_rpt.log'), 'w')
@@ -323,6 +345,67 @@ class Soils(NoDbBase):
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
 
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_singledb(self):
+
+        wd = self.wd
+
+        if self.single_dbselection is None:
+            self.single_dbselection = load_db()[0]
+            self = self.getInstance(wd)
+
+        soils_dir = self.soils_dir
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            watershed = Watershed.getInstance(wd)
+            key = self.single_dbselection
+
+            sol = get_soil(key)
+            fn = _split(sol)[-1]
+
+            soils = {key: SoilSummary(
+                Mukey=key,
+                FileName=fn,
+                soils_dir=soils_dir,
+                BuildDate=str(datetime.now()),
+                Description=key
+            )}
+
+            shutil.copyfile(sol, _join(soils_dir, fn))
+
+            domsoil_d = {}
+            for topaz_id, sub in watershed.sub_iter():
+                domsoil_d[str(topaz_id)] = key
+
+            for topaz_id, chn in watershed.chn_iter():
+                domsoil_d[str(topaz_id)] = key
+
+            soils[key].pct_coverage = 100.0
+
+            # while we are at it we will calculate the pct coverage
+            # for the landcover types in the watershed
+            for topaz_id, k in domsoil_d.items():
+                summary = watershed.sub_summary(topaz_id)
+                if summary is not None:  # subcatchment
+                    soils[k].area += summary["area"]
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.soils = soils
+            self.clay_pct = None
+
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
         except Exception:
             self.unlock('-f')
             raise

@@ -328,7 +328,9 @@ var Map = function () {
                 cache: false,
                 success: function success(response) {
                     var elev = response.Elevation.toFixed(1);
-                    self.mouseelev.show().text("| Elevation: " + elev + " m");
+                    var lng = coordRound(ev.latlng.lng);
+                    var lat = coordRound(ev.latlng.lat);
+                    self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + lng + ", " + lat);
                     self.isFetchingElevation = false;
                 },
                 fail: function fail(error) {
@@ -2406,6 +2408,7 @@ var Soil = function () {
             }
             mode = parseInt(mode, 10);
             var soil_single_selection = $("#soil_single_selection").val();
+            var soil_single_dbselection = $("#soil_single_dbselection").val();
 
             var task_msg = "Setting Mode to " + mode;
 
@@ -2416,7 +2419,11 @@ var Soil = function () {
             // sync soil with nodb
             $.post({
                 url: "../tasks/set_soil_mode/",
-                data: { "mode": mode, "soil_single_selection": soil_single_selection },
+                data: {
+                    "mode": mode,
+                    "soil_single_selection": soil_single_selection,
+                    "soil_single_dbselection": soil_single_dbselection
+                },
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... Success");
@@ -2437,14 +2444,22 @@ var Soil = function () {
                 // neither
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").hide();
+                $("#soil_mode2_controls").hide();
             } else if (mode === 0) {
                 // gridded
                 $("#soil_mode0_controls").show();
                 $("#soil_mode1_controls").hide();
+                $("#soil_mode2_controls").hide();
             } else if (mode === 1) {
                 // single
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").show();
+                $("#soil_mode2_controls").hide();
+            } else if (mode === 2) {
+                // single
+                $("#soil_mode0_controls").hide();
+                $("#soil_mode1_controls").hide();
+                $("#soil_mode2_controls").show();
             } else {
                 throw "ValueError: unknown mode";
             }

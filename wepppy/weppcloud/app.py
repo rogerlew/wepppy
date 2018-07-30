@@ -55,7 +55,7 @@ from wepppy.climates.cligen import (
 from wepppy.watershed_abstraction import (
     ChannelRoutingError,
 )
-from wepppy.wepp import management
+from wepppy.wepp import management, soilsdb
 
 from wepppy.wepp.out import TotalWatSed
 
@@ -665,6 +665,7 @@ def runs0(runid, config):
     if "baer" in ron.mods:
         has_sbs = Baer.getInstance(wd).has_map
 
+    soildboptions = soilsdb.load_db()
     return render_template('0.html',
                            user=current_user,
                            topaz=topaz, soils=soils,
@@ -672,6 +673,7 @@ def runs0(runid, config):
                            wepp=wepp, unitizer=unitizer,
                            observed=observed,
                            landuseoptions=landuseoptions,
+                           soildboptions=soildboptions,
                            precisions=wepppy.nodb.unitizer.precisions,
                            has_sbs=has_sbs)
 
@@ -1322,6 +1324,10 @@ def set_soil_mode(runid):
         mode = int(request.form.get('mode', None))
         single_selection = \
             int(request.form.get('soil_single_selection', None))
+
+        single_dbselection = \
+            request.form.get('soil_single_dbselection', None)
+
     except Exception:
         exception_factory('mode and soil_single_selection must be provided')
 
@@ -1331,6 +1337,8 @@ def set_soil_mode(runid):
         soils = Soils.getInstance(wd)
         soils.mode = SoilsMode(mode)
         soils.single_selection = single_selection
+        soils.single_dbselection = single_dbselection
+
     except Exception:
         exception_factory('error setting soils mode')
 

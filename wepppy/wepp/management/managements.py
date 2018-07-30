@@ -324,7 +324,11 @@ class OpLoopCropland(ScenarioBase):
         
         line = lines.pop(0).split()
         self.pcode = int(line.pop(0))
-        assert self.pcode in [1, 2, 3, 4]
+
+        if self.root.datver == '98.4':
+            assert self.pcode in [1, 2, 3, 4, 10, 11, 12, 13], self.pcode
+        else:
+            assert self.pcode in [1, 2, 3, 4], self.pcode
         
         self.cltpos = ''
         if self.pcode == 3:
@@ -340,13 +344,31 @@ class OpLoopCropland(ScenarioBase):
         self.rro = float(line.pop(0))
         self.surdis = float(line.pop(0))
         self.tdmean = float(line.pop(0))
+
+        if self.pcode > 5:
+            line = lines.pop(0).split()
+
+            if self.pcode in [11, 13]:
+                self.frmove = float(line.pop(0))
+
+            if self.pcode in [10, 12]:
+                self.iresad = int(line.pop(0))
+                self.amtres = int(line.pop(0))
         
     def __str__(self):
-        return """\
+        s = """\
 {0.mfo1:0.5f} {0.mfo2:0.5f} {0.numof}
 {0.pcode} {0.cltpos}
 {0.rho:0.5f} {0.rint:0.5f} {0.rmfo1:0.5f} {0.rmfo2:0.5f} {0.rro:0.5f} {0.surdis:0.5f} {0.tdmean:0.5f}
 """.format(self)
+
+        if self.pcode in [11, 13]:
+            s += """{0.frmove:0.5f}\n""".format(self)
+
+        if self.pcode in [10, 12]:
+            s += """{0.iresad} {0.amtres}\n""".format(self)
+
+        return s
 
 
 class OpLoopRangeland(ScenarioBase):
@@ -389,7 +411,7 @@ class IniLoopCropland(ScenarioBase):
         assert len(line) == 5
         self.rfcum = float(line.pop(0))
         self.rhinit = float(line.pop(0))
-        self.rilcov = float(line.pop(0)) # rill cover
+        self.rilcov = float(line.pop(0))  # rill cover
         self.rrinit = float(line.pop(0))
         self.rspace = float(line.pop(0))
         
@@ -624,6 +646,9 @@ class YearLoopCroplandAnnualFallow(ScenarioBase):
         self.rw = float(lines.pop(0))
         self.resmgt = resmgt = int(lines.pop(0))
         assert resmgt in [1, 2, 3, 4, 5, 6]
+
+        if self.root.datver == '98.4':
+            assert resmgt != 5
         
         if resmgt == 1:
             self.data = YearLoopCroplandAnnualFallowHerb(lines, root)
@@ -1708,7 +1733,7 @@ def get_management_summary(dom) -> ManagementSummary:
     k = str(dom)
     if not k in d:
         raise InvalidManagementKey
-        
+
     return ManagementSummary(**d[k])
 
         
@@ -1746,10 +1771,8 @@ if __name__ == "__main__":
     m2 = m.build_multiple_year_man(5)
     #print(m2)
 
-    import sys
-    sys.exit()
-
     for k in d:
+        print(k)
         m = get_management(k)
         #Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
 

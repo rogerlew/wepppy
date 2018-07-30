@@ -123,11 +123,11 @@ def readSlopeFile(fname):
     upper_top, upper_bottom, lower_top, lower_bottom = \
         calc_disturbed_grads(hillslope_model)
 
-    # How slopes are cacluated on WEPP interface
+    # How slopes are calculated on WEPP interface
     total_slope = sum(slopes)
     top = slopes[0]
     bottom = slopes[-1]
-    if (len(slopes) > 2):
+    if len(slopes) > 2:
         middle = total_slope / (nSegments - 2.0)
     else:
         middle = total_slope / 2.0

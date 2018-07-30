@@ -371,12 +371,22 @@ colors = [
 
 class SoilSummary(object):
     def __init__(self, **kwargs):
-        self.mukey = int(kwargs["Mukey"])
+        mukey = kwargs.get("Mukey", None)
+        assert mukey is not None
+
+        if isint(mukey):
+            self.mukey = int(mukey)
+            self.color = colors[self.mukey % len(colors)]
+
+        else:
+            self.mukey = mukey
+            self.color = colors[sum(str.encode(mukey)) % len(colors)]
+
         self.fname = kwargs["FileName"]
         self.soils_dir = kwargs["soils_dir"]
         self.build_date = kwargs["BuildDate"]
         self.desc = kwargs["Description"]
-        self.color = colors[self.mukey % len(colors)]
+
         self.area = 0.0
         self.pct_coverage = None
 

@@ -55,21 +55,25 @@
     </div>
 </div>
 <h5>Classifications by Pixel Value</h5>
- <table class="table table-condensed">
-    <thead>
-        <tr>
-            <th>Pixel Value</th>
-            <th>SBS Class</th>
-            <th>Pixel Count</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for x in baer.class_map %}
-        <tr>
-            <td> {{ x[0] }}</td>
-            <td>{{ x[1] }}</td>
-            <td>{{ x[2] }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div><a href="#baer_px_classes" data-toggle="collapse">View Classifications by Pixel</a>
+    <div id="baer_px_classes" class="collapse">
+         <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Pixel Value</th>
+                    <th>SBS Class</th>
+                    <th>Pixel Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for x in baer.class_map %}
+                <tr>
+                    <td> {{ x[0] }}</td>
+                    <td>{{ x[1] }}</td>
+                    <td>{{ x[2] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
