@@ -427,10 +427,12 @@ class TopazRunner:
         single column ascii file named DEDNM.INP for topaz
         """
         data = imread(self.dem)
+        data = data.flatten()
+        data = np.clip(data, 1.0, 9999.0)
 
         dednm_inp = 'DEDNM.INP'
         fid = open(_join(self.topaz_wd, dednm_inp), 'w')
-        fid.write('\n'.join(map(_str_dem_val, data.flatten())))
+        fid.write('\n'.join(map(_str_dem_val, data)))
         fid.close()
 
         self.dednm_inp = dednm_inp

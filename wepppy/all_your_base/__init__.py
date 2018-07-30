@@ -147,6 +147,7 @@ def isfloat(f):
     except Exception:
         return False
 
+
 def try_parse(f):
     # noinspection PyBroadException
     try:
@@ -251,24 +252,24 @@ wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
 
 def warp2match(src_filename, match_filename, dst_filename):
     # Source
-    src = gdal.Open(src_filename, gdalconst.GA_ReadOnly)
+    src = gdal.Open(src_filename, gdal.GA_ReadOnly)
     src_proj = src.GetProjection()
     src_geotrans = src.GetGeoTransform()
 
     # We want a section of source that matches this:
-    match_ds = gdal.Open(match_filename, gdalconst.GA_ReadOnly)
+    match_ds = gdal.Open(match_filename, gdal.GA_ReadOnly)
     match_proj = match_ds.GetProjection()
     match_geotrans = match_ds.GetGeoTransform()
     wide = match_ds.RasterXSize
     high = match_ds.RasterYSize
 
     # Output / destination
-    dst = gdal.GetDriverByName('GTiff').Create(dst_filename, wide, high, 1, gdalconst.GDT_Byte)
+    dst = gdal.GetDriverByName('GTiff').Create(dst_filename, wide, high, 1, gdal.GDT_Byte)
     dst.SetGeoTransform( match_geotrans )
     dst.SetProjection( match_proj)
 
     # Do the work
-    gdal.ReprojectImage(src, dst, src_proj, match_proj, gdalconst.GRA_NearestNeighbour)
+    gdal.ReprojectImage(src, dst, src_proj, match_proj, gdal.GRA_NearestNeighbour)
 
     del dst  # Flush
 

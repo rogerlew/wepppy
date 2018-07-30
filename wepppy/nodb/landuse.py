@@ -133,6 +133,22 @@ class Landuse(NoDbBase):
         """
         return self._single_selection
 
+    @single_selection.setter
+    def single_selection(self, landuse_single_selection):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            k = landuse_single_selection
+            self._single_selection = k
+            self._single_man = get_management_summary(k)
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     @property
     def single_man(self):
         """
@@ -152,24 +168,6 @@ class Landuse(NoDbBase):
 
         return False
 
-    #
-    # set mode
-    #
-    def set_mode(self, mode, landuse_single_selection):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-            k = landuse_single_selection
-            self._mode = LanduseMode(mode)
-            self._single_selection = k
-            self._single_man = get_management_summary(k)
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
     #
     # build
     #
@@ -457,6 +455,9 @@ class Landuse(NoDbBase):
 
             totalarea += area
 
+        if totalarea == 0.0:
+            totalarea = 0.001
+            
         self.sbs_coverage = {'noburn': noburn/totalarea,
                              'low': low/totalarea,
                              'moderate': moderate/ totalarea,
