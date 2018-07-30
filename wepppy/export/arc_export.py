@@ -90,7 +90,6 @@ def arc_export(wd):
     with open(geojson_fn, 'w') as fp:
         json.dump(js, fp)
 
-    print(topaz.utmproj4)
     p = Popen(['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
                'subcatchments.shp', 'subcatchments.json'],
               stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)

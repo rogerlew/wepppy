@@ -281,7 +281,7 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_soils(translator)
         self._prep_climates(translator)
         self._make_hillslope_runs(translator)
-        self._prep_frost()
+        #self._prep_frost()
         self._prep_phosphorus()
         self._prep_baseflow()
         self._prep_wepp_ui()
@@ -389,7 +389,6 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
 
         for topaz_id, man_summary in landuse.sub_iter():
-            print(topaz_id, man_summary)
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
 

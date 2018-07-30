@@ -56,15 +56,16 @@ if __name__ == "__main__":
     for rec in records:
         rec = rec.split(',')
         fips = rec[3]
+        lng, lat = float(rec[-2]), float(rec[-1])
 
         try:
             mukey = int(rec[-3])
         except:
-            county_lookup[fips] = None
+            county_lookup[fips] = (None, None, None, None)
             continue
 
         if mukey not in invalid_mukeys:
-            county_lookup[fips] = mukey
+            county_lookup[fips] = (mukey, 'surgo', lng, lat)
             continue
 
         lng = float(rec[-2])
@@ -73,7 +74,7 @@ if __name__ == "__main__":
         s_mukey = statsgoSpatial.identify_mukey_point(lng, lat)
         statsgo_mukeys.add(s_mukey)
 
-        county_lookup[fips] = s_mukey
+        county_lookup[fips] = (s_mukey, 'statsgo', lng, lat)
 
     # now we can build the statsgo soils
     invalid_statsgo_mukeys = set()
@@ -98,17 +99,18 @@ if __name__ == "__main__":
     for s_mukey in invalid_statsgo_mukeys:
         for fips in county_lookup:
             if county_lookup[fips] == s_mukey:
-                county_lookup[fips] = None
+                county_lookup[fips] = None, None, None, None
 
     with open('soil_lookup.csv', 'w') as fp:
-        fp.write('AFFGEOID,MUKEY\n')
+        fp.write('AFFGEOID,MUKEY,source,lng,lat\n')
 
-        for fips, mukey in county_lookup.items():
-            fp.write('{},{}\n'.format(fips, mukey))
+        for fips, item in county_lookup.items():
+            mukey, src, lng, lat = item
+            fp.write('{},{},{},{},{}\n'.format(fips, mukey, src, lng, lat))
 
         with open('failed_counties.txt') as fpe:
             failed_counties = fpe.readlines()
             failed_counties = [fips.strip(), fips in failed_counties]
 
         for fips in failed_counties:
-            fp.write('{},{}\n'.format(fips, None))
+            fp.write('{},{},{},{},{}\n'.format(fips, None, None, None, None))

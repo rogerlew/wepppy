@@ -83,9 +83,4 @@ if __name__ == '__main__':
     T = T.tolist()
 
 
-    pprint(T)
-    pprint(I)
-    pprint(type(T[0][0]))
-
-
 
