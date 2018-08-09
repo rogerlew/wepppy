@@ -50,6 +50,7 @@
 {% if user.is_authenticated %}
 {% include 'controls/team.htm'%}
 {% endif %}
+{% include 'controls/unitizer_modal.htm'%}
 </div> <!--main container -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>

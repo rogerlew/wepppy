@@ -5,7 +5,7 @@
 <br/>
 WEPP Watershed Simulation for Representative Hillslopes and Channels (watershed method, off-site assessment)
 <br/>
-Event of return period T is estimated by applying Chow's frequency factor method and Gumbel's distribution with on the
+Event of return period T is estimated by applying Chow's frequency factor method and Gumbel's distribution on the
 annual maxima series following Patra (2000).
 </p>
 <div style="margin-left: 50px">
@@ -24,7 +24,11 @@ yield are conducted separately.
     <dt>Events in Simulation</dt>
     <dd>{{ report.num_events }}</dd>
 </dl>
-<table class="table table-condensed">
+<h5>
+Report
+  <a onclick="javascript:copytable('rpt_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+<table class="table table-condensed" id="rpt_tbl">
   <thead>
     <tr>
     {% for colname in report.hdr %}
