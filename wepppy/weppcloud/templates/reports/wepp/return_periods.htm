@@ -15,8 +15,10 @@ where <i>T</i> is the return period, <i>N</i> is the number of simulation years,
 <br/>
 {% for key in ['Precipitation Depth', 'Runoff', 'Peak Runoff',
                'Sediment Yield', 'Soluble Reactive P', 'Particulate P', 'Total P'] %}
-  <h5><b>{{ key }}</b></h5>
-  <table class="table table-condensed">
+  <h5><b>{{ key }}</b>
+  <a onclick="javascript:copytable('{{ key | replace(' ', '') }}_tbl')"><span class="oi oi-clipboard"></span></a>
+  </h5>
+  <table class="table table-condensed" id="{{ key | replace(' ', '') }}_tbl">
     <thead>
       <tr>
         <th>Recurrence Interval</th>

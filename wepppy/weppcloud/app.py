@@ -670,7 +670,8 @@ def runs0(runid, config):
                            user=current_user,
                            topaz=topaz, soils=soils,
                            ron=ron, landuse=landuse, climate=climate,
-                           wepp=wepp, unitizer=unitizer,
+                           wepp=wepp,
+                           unitizer_nodb=unitizer,
                            observed=observed,
                            landuseoptions=landuseoptions,
                            soildboptions=soildboptions,
@@ -1795,7 +1796,11 @@ def get_wepp_prep_details(runid):
         subcatchments_summary = ron.subs_summary()
         channels_summary = ron.chns_summary()
 
+        unitizer = Unitizer.getInstance(wd)
+
         return render_template('reports/wepp/prep_details.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
                                subcatchments_summary=subcatchments_summary,
                                channels_summary=channels_summary,
                                user=current_user,
@@ -1953,6 +1958,7 @@ def report_wepp_loss(runid):
     avg_annual_years = loss.avg_annual_years
     excluded_years = loss.excluded_years
     translator = Watershed.getInstance(wd).translator_factory()
+    unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/wepp/summary.htm',
                            out_rpt=out_rpt,
@@ -1961,6 +1967,8 @@ def report_wepp_loss(runid):
                            avg_annual_years=avg_annual_years,
                            excluded_years=excluded_years,
                            translator=translator,
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            ron=ron,
                            user=current_user)
 
@@ -1988,7 +1996,11 @@ def report_wepp_yearly_watbal(runid):
     totwatbal = TotalWatbal(totwatsed,
                             exclude_yr_indxs=exclude_yr_indxs)
 
+    unitizer = Unitizer.getInstance(wd)
+
     return render_template('reports/wepp/yearly_watbal.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            rpt=totwatbal,
                            ron=ron,
                            user=current_user)
@@ -2002,7 +2014,11 @@ def report_wepp_avg_annual_watbal(runid):
     hill_rpt = wepp.report_hill_watbal()
     chn_rpt = wepp.report_chn_watbal()
 
+    unitizer = Unitizer.getInstance(wd)
+
     return render_template('reports/wepp/avg_annual_watbal.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            hill_rpt=hill_rpt,
                            chn_rpt=chn_rpt,
                            ron=ron,
@@ -2062,11 +2078,12 @@ def plot_wepp_streamflow(runid):
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
-    hill_rpt = wepp.report_hill_watbal()
-    chn_rpt = wepp.report_chn_watbal()
+    
+    unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/wepp/daily_streamflow_graph.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
                            ron=ron,
                            user=current_user)
@@ -2079,7 +2096,11 @@ def report_wepp_return_periods(runid):
     report = Wepp.getInstance(wd).report_return_periods()
     translator = Watershed.getInstance(wd).translator_factory()
 
+    unitizer = Unitizer.getInstance(wd)
+
     return render_template('reports/wepp/return_periods.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            report=report,
                            translator=translator,
                            ron=ron,
@@ -2094,7 +2115,11 @@ def report_wepp_frq_flood(runid):
     report = Wepp.getInstance(wd).report_frq_flood()
     translator = Watershed.getInstance(wd).translator_factory()
 
+    unitizer = Unitizer.getInstance(wd)
+
     return render_template('reports/wepp/frq_flood.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            report=report,
                            translator=translator,
                            ron=ron,
@@ -2401,7 +2426,11 @@ def report_debris_flow(runid):
     if cc is not None or ll is not None:
         debris_flow.run_debris_flow(cc=cc, ll=ll)
 
+    unitizer = Unitizer.getInstance(wd)
+
     return render_template('reports/debris_flow.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
                            debris_flow=debris_flow,
                            ron=ron,
                            user=current_user)

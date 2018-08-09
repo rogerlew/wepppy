@@ -1,8 +1,10 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_content %}
 <h2>Water Balance Average Annual Summary</h5>
-<h5>Hillslopes</h5>
- <table class="table table-condensed">
+<h5>Hillslopes
+  <a onclick="javascript:copytable('hill_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+ <table class="table table-condensed" id="hill_tbl">
     <thead>
       <tr>
         {% for colname in hill_rpt.avg_annual_header %}
@@ -33,8 +35,10 @@
     {% endfor %}
     </tbody>
 </table>
-<h5>Channels</h5>
- <table class="table table-condensed">
+<h5>Channels
+  <a onclick="javascript:copytable('chn_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+ <table class="table table-condensed" id="chn_tbl">
     <thead>
       <tr>
         {% for colname in chn_rpt.avg_annual_header %}

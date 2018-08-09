@@ -452,13 +452,18 @@ class Soils(NoDbBase):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
+            total_area = 0.0
+            for k in soils:
+                soils[k].area = 0.0
+
             for topaz_id, k in domsoil_d.items():
                 summary = watershed.sub_summary(topaz_id)
                 if summary is not None:  # subcatchment
                     soils[k].area += summary["area"]
+                    total_area += summary["area"]
 
             for k in soils:
-                coverage = 100.0 * soils[k].area / watershed.totalarea
+                coverage = 100.0 * soils[k].area / total_area
                 soils[k].pct_coverage = coverage
 
             # store the soils dict

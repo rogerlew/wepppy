@@ -1,8 +1,10 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_content %}
 <h2>WEPP Preparation Details</h2>
-<h5>Subcatchments</h5>
-<table class="table table-condensed">
+<h5>Subcatchments
+  <a onclick="javascript:copytable('sub_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+<table class="table table-condensed" id="sub_tbl">
   <thead>
     <tr>
       <th>TopazID</th>
@@ -61,8 +63,10 @@
   </tbody>
 </table>
 <br/>
-<h5>Channels</h5>
-<table class="table table-condensed">
+<h5>Channels
+  <a onclick="javascript:copytable('chn_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+<table class="table table-condensed" id="chn_tbl">
   <thead>
     <tr>
       <th>TopazID</th>
