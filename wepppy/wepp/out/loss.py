@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 from collections import OrderedDict
+from copy import deepcopy
 
 from wepppy.all_your_base import find_ranges
 
@@ -183,7 +184,7 @@ class Loss(object):
         None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'ha', 'kg', 'kg', 'kg'
     )
 
-    def __init__(self, fn, wd=None, exclude_yr_indxs=[0, 1]):
+    def __init__(self, fn, wd=None, exclude_yr_indxs=[0, 1, 2]):
         hill_hdr = self.hill_hdr
         hill_avg_hdr = self.hill_avg_hdr
         chn_hdr = self.chn_hdr
@@ -220,7 +221,9 @@ class Loss(object):
             hill_tbl = _parse_tbl(lines[hill0:], hill_hdr)
             chn_tbl = _parse_tbl(lines[chn0:], chn_hdr)
             out_tbl = _parse_out(lines[out0:])
-            yearlies[yr] = dict(hill_tbl=hill_tbl, chn_tbl=chn_tbl, out_tbl=out_tbl)
+            yearlies[yr] = dict(hill_tbl=deepcopy(hill_tbl),
+                                chn_tbl=deepcopy(chn_tbl),
+                                out_tbl=deepcopy(out_tbl))
 
         hill0, chn0, out0 = _find_tbl_starts(avg_indx, lines)
         hill_tbl = _parse_tbl(lines[hill0:], hill_avg_hdr)
@@ -228,58 +231,81 @@ class Loss(object):
         out_tbl = _parse_out(lines[out0:])
 
         # remove the years from average
-        avg_years = [yr for yr in years]
         if exclude_yr_indxs is not None and num_years > len(exclude_yr_indxs):
 
             # average out years for outlet table
-            for j, d in enumerate(out_tbl):
-                out_tbl[j]['v'] *= num_years
+            _out_tbl = deepcopy(out_tbl)
+            for j, d in enumerate(_out_tbl):
+                if _out_tbl[j]['key'] == 'Total contributing area to outlet':
+                    continue
+                    
+                _out_tbl[j]['v'] = 0
 
-            for indx in exclude_yr_indxs:
-                yr = years[indx]
+            avg_years = []
+            for i, yr in enumerate(years):
+                if i in exclude_yr_indxs:
+                    continue
 
                 for j, d in enumerate(yearlies[yr]['out_tbl']):
-                    out_tbl[j]['v'] -= yearlies[yr]['out_tbl'][j]['v']
+                    if _out_tbl[j]['key'] == 'Total contributing area to outlet':
+                        continue
 
-            for j, d in enumerate(out_tbl):
-                out_tbl[j]['v'] /= num_years - len(exclude_yr_indxs)
+                    _out_tbl[j]['v'] += yearlies[yr]['out_tbl'][j]['v']
+
+                avg_years.append(yr)
+
+            for j, d in enumerate(_out_tbl):
+                if _out_tbl[j]['key'] == 'Total contributing area to outlet':
+                    continue
+
+                _out_tbl[j]['v'] /= float(len(avg_years))
+
+            out_tbl = _out_tbl
 
             # average out years for hill table
+            _hill_tbl = deepcopy(hill_tbl)
             for j, d in enumerate(hill_tbl):
                 for var in hill_hdr[2:]:
-                    hill_tbl[j][var] *= num_years
+                    hill_tbl[j][var] = 0
 
-            for indx in exclude_yr_indxs:
-                yr = years[indx]
+            avg_years = []
+            for i, yr in enumerate(years):
+                if i in exclude_yr_indxs:
+                    continue
 
                 for j, d in enumerate(hill_tbl):
                     for var in hill_hdr[2:]:
-                        hill_tbl[j][var] -= yearlies[yr]['hill_tbl'][j][var]
+                        _hill_tbl[j][var] += yearlies[yr]['hill_tbl'][j][var]
 
-            for j, d in enumerate(hill_tbl):
-                for var in hill_hdr[2:]:
-                    hill_tbl[j][var] /= num_years - len(exclude_yr_indxs)
+                avg_years.append(yr)
+
+            for var in hill_hdr[2:]:
+                _hill_tbl[j][var] /= float(len(avg_years))
+
+            hill_tbl = _hill_tbl
 
             # average out years for chn table
+            _chn_tbl = deepcopy(chn_tbl)
             for j, d in enumerate(chn_tbl):
-                for var in chn_hdr[1:]:
-                    print(var, num_years)
-                    chn_tbl[j][var] *= num_years
+                for var in chn_hdr[2:]:
+                    chn_tbl[j][var] = 0
 
-            for indx in exclude_yr_indxs:
-                yr = years[indx]
+            avg_years = []
+            for i, yr in enumerate(years):
+                if i in exclude_yr_indxs:
+                    continue
 
                 for j, d in enumerate(chn_tbl):
-                    for var in chn_hdr[1:]:
-                        chn_tbl[j][var] -= yearlies[yr]['chn_tbl'][j][var]
+                    for var in chn_hdr[2:]:
+                        _chn_tbl[j][var] += yearlies[yr]['chn_tbl'][j][var]
 
-            for j, d in enumerate(chn_tbl):
-                for var in chn_hdr[1:]:
-                    chn_tbl[j][var] /= num_years - len(exclude_yr_indxs)
+                avg_years.append(yr)
 
-            for indx in exclude_yr_indxs:
-                yr = years[indx]
-                avg_years.remove(yr)
+            for var in chn_hdr[2:]:
+                _chn_tbl[j][var] /= float(len(avg_years))
+
+            chn_tbl = _chn_tbl
+
 
         if wd is not None:
             import wepppy
@@ -364,9 +390,29 @@ class Loss(object):
         return find_ranges(sorted([yr for yr in self.years if yr not in self.avg_years]),
                            as_str=True)
 
+    def __str__(self):
+        return "Loss(hill_tbl={0.hill_tbl}, chn_tbl={0.chn_tbl}, out_tbl={0.out_tbl}, wsarea={0.wsarea}, "\
+               "yearlies={0.yearlies}, years={0.years}, num_years={0.num_years}, avg_years={0.avg_years})".format(self)
+
 
 if __name__ == "__main__":
     loss = Loss('/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/wepp/output/loss_pw0.txt',
                 '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/')
 
-    print(loss.excluded_years)
+    #print(loss.excluded_years)
+
+    from wepppy.wepp.stats import (
+        OutletSummary,
+        HillSummary,
+        ChannelSummary,
+        TotalWatbal
+    )
+
+    chn_rpt = ChannelSummary(loss)
+
+    for row in chn_rpt:
+        for k, y in zip(chn_rpt.header, row):
+            print(k, y)
+
+#    for d in OutletSummary(loss):
+#        print(d)

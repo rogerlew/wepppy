@@ -3,67 +3,68 @@
   <component name="ChangeListManager">
     <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/baer/baer.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/baer/baer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/data/surgo/surgo_tabular.db" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/data/surgo/surgo_tabular.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/wepp/out/loss.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/out/loss.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/wepppy$managements.coverage" NAME="managements Coverage Results" MODIFIED="1529034228851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management" />
-    <SUITE FILE_PATH="coverage/wepppy$cligen_client.coverage" NAME="cligen_client Coverage Results" MODIFIED="1523236960123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$downscaled_nmme_client.coverage" NAME="downscaled_nmme_client Coverage Results" MODIFIED="1523237888184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$watsed_aggregator.coverage" NAME="watsed_aggregator Coverage Results" MODIFIED="1522384905276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
+    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1533080081122" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
+    <SUITE FILE_PATH="coverage/wepppy$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1528919049275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/soilsdb" />
+    <SUITE FILE_PATH="coverage/wepppy$ebe.coverage" NAME="ebe Coverage Results" MODIFIED="1523213112249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
+    <SUITE FILE_PATH="coverage/wepppy$observed_daymet.coverage" NAME="observed_daymet Coverage Results" MODIFIED="1523840029894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
+    <SUITE FILE_PATH="coverage/wepppy$Unittests_for_test_ssurgo_Test_StatsgoSpatial_mukeys_test_01.coverage" NAME="Unittests for test_ssurgo.Test_StatsgoSpatial_mukeys.test_01 Coverage Results" MODIFIED="1522872295780" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
+    <SUITE FILE_PATH="coverage/wepppy$wepppost.coverage" NAME="wepppost Coverage Results" MODIFIED="1522609369798" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
+    <SUITE FILE_PATH="coverage/wepppy$noaa_precip_freqs_client.coverage" NAME="noaa_precip_freqs_client Coverage Results" MODIFIED="1526057155729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$channel_watbal.coverage" NAME="channel_watbal Coverage Results" MODIFIED="1522554510260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
+    <SUITE FILE_PATH="coverage/wepppy$return_periods.coverage" NAME="return_periods Coverage Results" MODIFIED="1522433627187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
+    <SUITE FILE_PATH="coverage/wepppy$2_failed.coverage" NAME="2_failed Coverage Results" MODIFIED="1528482749844" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/county_db" />
+    <SUITE FILE_PATH="coverage/wepppy$validate.coverage" NAME="validate Coverage Results" MODIFIED="1522804136128" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management/tests" />
+    <SUITE FILE_PATH="coverage/wepppy$loss.coverage" NAME="loss Coverage Results" MODIFIED="1533772753672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
+    <SUITE FILE_PATH="coverage/wepppy$attr_delete.coverage" NAME="attr_delete Coverage Results" MODIFIED="1523259564555" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/runs" />
+    <SUITE FILE_PATH="coverage/wepppy$stats_dev.coverage" NAME="stats_dev Coverage Results" MODIFIED="1523569343711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
+    <SUITE FILE_PATH="coverage/wepppy$monthly_p_calc.coverage" NAME="monthly_p_calc Coverage Results" MODIFIED="1523303671990" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
+    <SUITE FILE_PATH="coverage/wepppy$usgs_wbd.coverage" NAME="usgs_wbd Coverage Results" MODIFIED="1528476075159" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/watershed_boundary_dataset" />
+    <SUITE FILE_PATH="coverage/wepppy$unitizer.coverage" NAME="unitizer Coverage Results" MODIFIED="1522979302377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
+    <SUITE FILE_PATH="coverage/wepppy$scripted_run_daymet.coverage" NAME="scripted_run_daymet Coverage Results" MODIFIED="1526427279610" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/validation" />
+    <SUITE FILE_PATH="coverage/wepppy$locationinfo.coverage" NAME="locationinfo Coverage Results" MODIFIED="1525903051091" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/all_your_base" />
+    <SUITE FILE_PATH="coverage/wepppy$Unittests_in_test_slope_py.coverage" NAME="Unittests in test_slope.py Coverage Results" MODIFIED="1528771875636" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/watershed_abstraction/tests" />
     <SUITE FILE_PATH="coverage/wepppy$watershed.coverage" NAME="watershed Coverage Results" MODIFIED="1525981646857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/validation" />
+    <SUITE FILE_PATH="coverage/wepppy$ermit_runner.coverage" NAME="ermit_runner Coverage Results" MODIFIED="1530030230384" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/fswepp/ermit" />
+    <SUITE FILE_PATH="coverage/wepppy$frq_flood.coverage" NAME="frq_flood Coverage Results" MODIFIED="1522547028684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
+    <SUITE FILE_PATH="coverage/wepppy$daymet_singlelocation_client.coverage" NAME="daymet_singlelocation_client Coverage Results" MODIFIED="1524763995501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$cligen_client.coverage" NAME="cligen_client Coverage Results" MODIFIED="1523236960123" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$hillslope_watbal.coverage" NAME="hillslope_watbal Coverage Results" MODIFIED="1522563598870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
+    <SUITE FILE_PATH="coverage/wepppy$metquery_client.coverage" NAME="metquery_client Coverage Results" MODIFIED="1525968219400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
+    <SUITE FILE_PATH="coverage/wepppy$daymet_timeseries_extraction.coverage" NAME="daymet_timeseries_extraction Coverage Results" MODIFIED="1525409739915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
+    <SUITE FILE_PATH="coverage/wepppy$wepppy.coverage" NAME="wepppy Coverage Results" MODIFIED="1517789998045" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/wepppy$climate_fix.coverage" NAME="climate_fix Coverage Results" MODIFIED="1526664717427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily" />
+    <SUITE FILE_PATH="coverage/wepppy$station_daymet_prism.coverage" NAME="station_daymet_prism Coverage Results" MODIFIED="1523838177975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
+    <SUITE FILE_PATH="coverage/wepppy$totalsedwat.coverage" NAME="totalsedwat Coverage Results" MODIFIED="1522905792402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
+    <SUITE FILE_PATH="coverage/wepppy$scripted_run.coverage" NAME="scripted_run Coverage Results" MODIFIED="1528153753250" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
+    <SUITE FILE_PATH="coverage/wepppy$threadpool_test.coverage" NAME="threadpool_test Coverage Results" MODIFIED="1526418139030" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
+    <SUITE FILE_PATH="coverage/wepppy$Unittests_for_test_ssurgo_Test_SurgoSoilCollection_test_03_min_depth.coverage" NAME="Unittests for test_ssurgo.Test_SurgoSoilCollection.test_03_min_depth Coverage Results" MODIFIED="1522973927200" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
+    <SUITE FILE_PATH="coverage/wepppy$observed.coverage" NAME="observed Coverage Results" MODIFIED="1523212991673" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
+    <SUITE FILE_PATH="coverage/wepppy$Unittests_in_test_ssurgo_py.coverage" NAME="Unittests in test_ssurgo.py Coverage Results" MODIFIED="1522869027350" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
+    <SUITE FILE_PATH="coverage/wepppy$make_db.coverage" NAME="make_db Coverage Results" MODIFIED="1528488731772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/county_db" />
     <SUITE FILE_PATH="coverage/wepppy$test.coverage" NAME="test Coverage Results" MODIFIED="1522625259878" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
     <SUITE FILE_PATH="coverage/wepppy$scripted_run_prism.coverage" NAME="scripted_run_prism Coverage Results" MODIFIED="1519073054809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
-    <SUITE FILE_PATH="coverage/wepppy$observed.coverage" NAME="observed Coverage Results" MODIFIED="1523212991673" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
-    <SUITE FILE_PATH="coverage/wepppy$observed_daymet.coverage" NAME="observed_daymet Coverage Results" MODIFIED="1523840029894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
-    <SUITE FILE_PATH="coverage/wepppy$2_failed.coverage" NAME="2_failed Coverage Results" MODIFIED="1528482749844" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/county_db" />
-    <SUITE FILE_PATH="coverage/wepppy$total_watbal.coverage" NAME="total_watbal Coverage Results" MODIFIED="1522973974418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$Unittests_for_test_ssurgo_Test_SurgoSoilCollection_test_03_min_depth.coverage" NAME="Unittests for test_ssurgo.Test_SurgoSoilCollection.test_03_min_depth Coverage Results" MODIFIED="1522973927200" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
-    <SUITE FILE_PATH="coverage/wepppy$make_db.coverage" NAME="make_db Coverage Results" MODIFIED="1528488731772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/county_db" />
-    <SUITE FILE_PATH="coverage/wepppy$arc_export.coverage" NAME="arc_export Coverage Results" MODIFIED="1526607685137" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/export" />
-    <SUITE FILE_PATH="coverage/wepppy$wepppost.coverage" NAME="wepppost Coverage Results" MODIFIED="1522609369798" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
-    <SUITE FILE_PATH="coverage/wepppy$validate.coverage" NAME="validate Coverage Results" MODIFIED="1522804136128" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management/tests" />
-    <SUITE FILE_PATH="coverage/wepppy$locationinfo.coverage" NAME="locationinfo Coverage Results" MODIFIED="1525903051091" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/all_your_base" />
-    <SUITE FILE_PATH="coverage/wepppy$threadpool_test.coverage" NAME="threadpool_test Coverage Results" MODIFIED="1526418139030" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
     <SUITE FILE_PATH="coverage/wepppy$test3.coverage" NAME="test3 Coverage Results" MODIFIED="1519070666543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/tests/test2" />
-    <SUITE FILE_PATH="coverage/wepppy$unitizer.coverage" NAME="unitizer Coverage Results" MODIFIED="1522979302377" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb" />
-    <SUITE FILE_PATH="coverage/wepppy$return_periods.coverage" NAME="return_periods Coverage Results" MODIFIED="1522433627187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1529034254121" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
-    <SUITE FILE_PATH="coverage/wepppy$ermit_runner.coverage" NAME="ermit_runner Coverage Results" MODIFIED="1530030230384" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/fswepp/ermit" />
-    <SUITE FILE_PATH="coverage/wepppy$loss.coverage" NAME="loss Coverage Results" MODIFIED="1530901489688" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
-    <SUITE FILE_PATH="coverage/wepppy$scripted_run.coverage" NAME="scripted_run Coverage Results" MODIFIED="1528153753250" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
-    <SUITE FILE_PATH="coverage/wepppy$Unittests_for_test_ssurgo_Test_StatsgoSpatial_mukeys_test_01.coverage" NAME="Unittests for test_ssurgo.Test_StatsgoSpatial_mukeys.test_01 Coverage Results" MODIFIED="1522872295780" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
-    <SUITE FILE_PATH="coverage/wepppy$frq_flood.coverage" NAME="frq_flood Coverage Results" MODIFIED="1522547028684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$daymet_timeseries_extraction.coverage" NAME="daymet_timeseries_extraction Coverage Results" MODIFIED="1525409739915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
-    <SUITE FILE_PATH="coverage/wepppy$metquery_client.coverage" NAME="metquery_client Coverage Results" MODIFIED="1525968219400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
-    <SUITE FILE_PATH="coverage/wepppy$prism_climate_revision.coverage" NAME="prism_climate_revision Coverage Results" MODIFIED="1519069796248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts/test2" />
-    <SUITE FILE_PATH="coverage/wepppy$monthly_p_calc.coverage" NAME="monthly_p_calc Coverage Results" MODIFIED="1523303671990" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
-    <SUITE FILE_PATH="coverage/wepppy$noaa_precip_freqs_client.coverage" NAME="noaa_precip_freqs_client Coverage Results" MODIFIED="1526057155729" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
     <SUITE FILE_PATH="coverage/wepppy$summary.coverage" NAME="summary Coverage Results" MODIFIED="1522547538003" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$watsed_aggregator.coverage" NAME="watsed_aggregator Coverage Results" MODIFIED="1522384905276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
+    <SUITE FILE_PATH="coverage/wepppy$total_watbal.coverage" NAME="total_watbal Coverage Results" MODIFIED="1522973974418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
     <SUITE FILE_PATH="coverage/wepppy$watbal_test.coverage" NAME="watbal_test Coverage Results" MODIFIED="1522976425580" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
-    <SUITE FILE_PATH="coverage/wepppy$attr_delete.coverage" NAME="attr_delete Coverage Results" MODIFIED="1523259564555" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/runs" />
-    <SUITE FILE_PATH="coverage/wepppy$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1528919049275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/soilsdb" />
-    <SUITE FILE_PATH="coverage/wepppy$usgs_wbd.coverage" NAME="usgs_wbd Coverage Results" MODIFIED="1528476075159" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/watershed_boundary_dataset" />
-    <SUITE FILE_PATH="coverage/wepppy$stats_dev.coverage" NAME="stats_dev Coverage Results" MODIFIED="1523569343711" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
-    <SUITE FILE_PATH="coverage/wepppy$downscaled_nmme_client.coverage" NAME="downscaled_nmme_client Coverage Results" MODIFIED="1523237888184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
-    <SUITE FILE_PATH="coverage/wepppy$station_daymet_prism.coverage" NAME="station_daymet_prism Coverage Results" MODIFIED="1523838177975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts/climate" />
-    <SUITE FILE_PATH="coverage/wepppy$hillslope_watbal.coverage" NAME="hillslope_watbal Coverage Results" MODIFIED="1522563598870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$Unittests_in_test_slope_py.coverage" NAME="Unittests in test_slope.py Coverage Results" MODIFIED="1528771875636" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/watershed_abstraction/tests" />
-    <SUITE FILE_PATH="coverage/wepppy$channel_watbal.coverage" NAME="channel_watbal Coverage Results" MODIFIED="1522554510260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
-    <SUITE FILE_PATH="coverage/wepppy$ebe.coverage" NAME="ebe Coverage Results" MODIFIED="1523213112249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
-    <SUITE FILE_PATH="coverage/wepppy$daymet_singlelocation_client.coverage" NAME="daymet_singlelocation_client Coverage Results" MODIFIED="1524763995501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/climates" />
-    <SUITE FILE_PATH="coverage/wepppy$climate_fix.coverage" NAME="climate_fix Coverage Results" MODIFIED="1526664717427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/mods/lt/data/tahoe/observed/Daily" />
     <SUITE FILE_PATH="coverage/wepppy$set_wd.coverage" NAME="set_wd Coverage Results" MODIFIED="1522353489135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts" />
-    <SUITE FILE_PATH="coverage/wepppy$Unittests_in_test_ssurgo_py.coverage" NAME="Unittests in test_ssurgo.py Coverage Results" MODIFIED="1522869027350" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/ssurgo/tests" />
-    <SUITE FILE_PATH="coverage/wepppy$totalsedwat.coverage" NAME="totalsedwat Coverage Results" MODIFIED="1522905792402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
-    <SUITE FILE_PATH="coverage/wepppy$wepppy.coverage" NAME="wepppy Coverage Results" MODIFIED="1517789998045" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/wepppy$scripted_run_daymet.coverage" NAME="scripted_run_daymet Coverage Results" MODIFIED="1526427279610" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/validation" />
+    <SUITE FILE_PATH="coverage/wepppy$prism_climate_revision.coverage" NAME="prism_climate_revision Coverage Results" MODIFIED="1519069796248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/scripts/test2" />
+    <SUITE FILE_PATH="coverage/wepppy$arc_export.coverage" NAME="arc_export Coverage Results" MODIFIED="1526607685137" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/export" />
     <SUITE FILE_PATH="coverage/wepppy$chanwb.coverage" NAME="chanwb Coverage Results" MODIFIED="1523212984906" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
+    <SUITE FILE_PATH="coverage/wepppy$managements.coverage" NAME="managements Coverage Results" MODIFIED="1529034228851" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/management" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -79,30 +80,79 @@
     <expand />
     <select />
   </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="1400155578">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="1" />
+          <entry key="project.open.time.18" value="2" />
+          <entry key="project.open.time.2" value="1" />
+          <entry key="project.opened" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="htm" value="59" />
+          <entry key="html" value="9" />
+          <entry key="py" value="825" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="HTML" value="68" />
+          <entry key="Python" value="825" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="htm" value="1" />
+          <entry key="py" value="3" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="HTML" value="1" />
+          <entry key="Python" value="3" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="index.htm" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="260">
-              <caret line="116" column="119" selection-start-line="116" selection-start-column="119" selection-end-line="116" selection-end-column="119" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="devnotes.txt" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+            <state relative-caret-position="230">
+              <caret line="134" column="265" selection-start-line="134" selection-start-column="41" selection-end-line="134" selection-end-column="265" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="climate.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/wepppy/wepp/out/loss.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1853">
+              <caret line="417" column="14" selection-start-line="417" selection-start-column="9" selection-end-line="417" selection-end-column="14" />
+              <folding>
+                <element signature="e#254#289#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="279">
+              <caret line="64" column="25" selection-start-line="64" selection-start-column="18" selection-end-line="64" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
+            <state relative-caret-position="16398">
               <caret line="943" selection-start-line="943" selection-end-line="943" />
               <folding>
                 <element signature="e#273#282#0" expanded="true" />
@@ -111,7 +161,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cligen.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1584">
@@ -120,25 +170,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="topaz.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/topaz/topaz.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7560">
-              <caret line="445" selection-start-line="445" selection-end-line="445" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="wepppy.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/doc/build/html/wepppy.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="864">
-              <caret line="48" column="103" selection-start-line="48" selection-start-column="103" selection-end-line="48" selection-end-column="103" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="wepppy.webservices.html" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/doc/build/html/wepppy.webservices.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1332">
@@ -147,7 +179,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="prism.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/climates/prism.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1206">
@@ -159,20 +191,29 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="wepp.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/wepp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
+            <state relative-caret-position="1458">
               <caret line="150" column="33" selection-start-line="150" selection-start-column="33" selection-end-line="150" selection-end-column="33" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="app.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="20088">
-              <caret line="1191" column="43" selection-start-line="1191" selection-start-column="43" selection-end-line="1191" selection-end-column="43" />
+            <state relative-caret-position="298">
+              <caret line="1941" column="48" lean-forward="true" selection-start-line="1941" selection-start-column="48" selection-end-line="1941" selection-end-column="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/summary.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-128">
+              <caret line="53" column="8" selection-start-line="53" selection-start-column="8" selection-end-line="53" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -191,16 +232,7 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>SoilSummary</find>
-      <find>load_db</find>
-      <find>Select landuse</find>
-      <find>set_landuse_mode</find>
-      <find>def write</find>
-      <find>11</find>
-      <find>version</find>
-      <find>imngmt</find>
       <find>single_selection</find>
-      <find>print</find>
       <find>print(</find>
       <find>sediment0</find>
       <find>whatprob</find>
@@ -221,6 +253,15 @@
       <find>build_observed</find>
       <find>phosphorus_opts</find>
       <find>class Phosp</find>
+      <find>remap_landuse</find>
+      <find>self.baer_path</find>
+      <find>baer_cropped</find>
+      <find>chn_rpt</find>
+      <find>class RowData</find>
+      <find>summary</find>
+      <find>summary/</find>
+      <find>ChannelSummary</find>
+      <find>print</find>
     </findStrings>
     <replaceStrings>
       <replace>PRISM</replace>
@@ -268,10 +309,7 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/wepppy/nodb/configs/cda.cfg" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/configs/0.cfg" />
         <option value="$PROJECT_DIR$/wepppy/nodb/configs/lt-fire.cfg" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/mods/baer/baer.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/watershed.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/ron.py" />
         <option value="$PROJECT_DIR$/wepppy/scripts/set_wd.py" />
@@ -315,10 +353,13 @@
         <option value="$PROJECT_DIR$/wepppy/fswepp/ermit/runner.py" />
         <option value="$PROJECT_DIR$/wepppy/fswepp/ermit/ermit_runner.py" />
         <option value="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" />
-        <option value="$PROJECT_DIR$/wepppy/wepp/out/loss.py" />
         <option value="$PROJECT_DIR$/wepppy/topaz/topaz.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/wepp.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/static/css/style.css" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/mods/baer/baer.py" />
+        <option value="$PROJECT_DIR$/wepppy/wepp/out/loss.py" />
       </list>
     </option>
   </component>
@@ -327,9 +368,6 @@
   <component name="JsGulpfileManager">
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
-  </component>
-  <component name="NodePackageJsonFileManager">
-    <packageJsonPaths />
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="47" />
@@ -359,13 +397,6 @@
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -426,6 +457,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="app" type="PythonConfigurationType" factoryName="Python">
       <module name="wepppy" />
@@ -445,6 +479,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="ermit_runner" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="wepppy" />
@@ -464,6 +501,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="loss" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="wepppy" />
@@ -483,6 +523,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="managements" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="wepppy" />
@@ -502,6 +545,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="wepppy" type="PythonConfigurationType" factoryName="Python" singleton="true">
       <module name="wepppy" />
@@ -521,6 +567,9 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="Unittests in test_slope.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="wepppy" />
@@ -535,6 +584,7 @@
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;$PROJECT_DIR$/wepppy/watershed_abstraction/tests/test_slope.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.wepppy" />
@@ -565,13 +615,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1517788948644</updated>
-    </task>
-    <task id="LOCAL-00006" summary="fix #54">
-      <created>1522805212409</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1522805212409</updated>
     </task>
     <task id="LOCAL-00007" summary="watershed prep details summary">
       <created>1522818802321</created>
@@ -909,7 +952,14 @@
       <option name="project" value="LOCAL" />
       <updated>1532968620881</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="fix #87, fix #85, fix #86">
+      <created>1532968728676</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1532968728676</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -946,58 +996,57 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="43" y="25" width="1877" height="968" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info anchor="bottom" id="TODO" order="12" weight="0.32982087" />
-      <window_info anchor="bottom" id="Event Log" order="14" sideWeight="0.50027305" side_tool="true" weight="0.36167663" />
-      <window_info anchor="bottom" id="Database Changes" order="17" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="21" weight="0.028742515" />
-      <window_info anchor="bottom" id="Python Console" order="18" weight="0.13532934" />
-      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="4" sideWeight="0.49972692" weight="0.27904192" />
-      <window_info anchor="bottom" id="Terminal" order="19" visible="true" weight="0.2778443" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20262152" />
-      <window_info anchor="bottom" id="Docker" order="20" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="4" weight="0.3294766" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.13675214" />
-      <window_info anchor="right" id="SciView" order="5" weight="0.32932824" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20917532" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="5" weight="0.46586826" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.12069907" />
-      <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.13675214" />
+      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.49972692" visible="true" weight="0.2804296" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.46586826" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
+      <window_info anchor="bottom" id="Messages" order="7" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50027305" side_tool="true" weight="0.36167663" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.13532934" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.27738094" />
+      <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="13" weight="0.028742515" />
+      <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
+      <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection Results" order="22" visible="true" weight="0.32934132" />
-      <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
-      <window_info anchor="bottom" id="Messages" order="13" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Cvs" order="6" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.12069907" />
+      <window_info anchor="right" id="Database" order="4" weight="0.3294766" />
+      <window_info anchor="right" id="SciView" order="5" weight="0.32932824" />
     </layout>
     <layout-to-restore>
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.12069907" />
-      <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.28126708" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.13675214" />
+      <window_info active="true" anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.49972692" visible="true" weight="0.26706588" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.46586826" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
+      <window_info anchor="bottom" id="Messages" order="7" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50027305" side_tool="true" weight="0.36167663" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.302994" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.26789588" />
+      <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="13" weight="0.028742515" />
+      <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
+      <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32982087" />
-      <window_info anchor="bottom" id="Version Control" order="13" weight="0.028742515" />
-      <window_info active="true" anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.49972692" visible="true" weight="0.26706588" />
-      <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.13675214" />
-      <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.12069907" />
       <window_info anchor="right" id="Database" order="4" weight="0.3294766" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.26789588" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.46586826" />
-      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50027305" side_tool="true" weight="0.36167663" />
       <window_info anchor="right" id="SciView" order="5" weight="0.32932824" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Messages" order="7" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.302994" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1050,32 +1099,9 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="9" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/2_failed.py" />
-    <entry file="file://$PROJECT_DIR$/wepppy/all_your_base/shapefile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="339" selection-start-line="339" selection-end-line="339" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/_0_determine_dominate_mukeys.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="478">
-          <caret line="126" selection-start-line="126" selection-end-line="126" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/ssurgo/county_db/_1_build_database.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="514">
-          <caret line="116" selection-start-line="116" selection-end-line="116" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
@@ -1235,13 +1261,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/0.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="28" column="35" selection-start-line="28" selection-start-column="35" selection-end-line="28" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/wepp/runner/wepp_runner.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -1304,13 +1323,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/out/loss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4734">
-          <caret line="265" column="40" selection-start-line="265" selection-start-column="40" selection-end-line="265" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/watershed_abstraction/watershed_abstraction.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12276">
@@ -1332,6 +1344,51 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/0.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" column="107" selection-start-line="14" selection-start-column="107" selection-end-line="14" selection-end-column="107" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2070">
+          <caret line="115" column="89" selection-start-line="115" selection-start-column="89" selection-end-line="115" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/baer/baer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2808">
+          <caret line="179" column="50" selection-start-line="179" selection-start-column="50" selection-end-line="179" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/static/css/style.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="28" column="16" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16398">
+          <caret line="943" selection-start-line="943" selection-end-line="943" />
+          <folding>
+            <element signature="e#273#282#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1584">
+          <caret line="108" column="7" selection-start-line="108" selection-start-column="7" selection-end-line="108" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/doc/build/html/wepppy.webservices.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1332">
@@ -1349,48 +1406,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20088">
-          <caret line="1191" column="43" selection-start-line="1191" selection-start-column="43" selection-end-line="1191" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1584">
-          <caret line="108" column="7" selection-start-line="108" selection-start-column="7" selection-end-line="108" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="943" selection-start-line="943" selection-end-line="943" />
-          <folding>
-            <element signature="e#273#282#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/wepp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
+        <state relative-caret-position="1458">
           <caret line="150" column="33" selection-start-line="150" selection-start-column="33" selection-end-line="150" selection-end-column="33" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/devnotes.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
+        <state relative-caret-position="230">
+          <caret line="134" column="265" selection-start-line="134" selection-start-column="41" selection-end-line="134" selection-end-column="265" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
-          <caret line="116" column="119" selection-start-line="116" selection-start-column="119" selection-end-line="116" selection-end-column="119" />
+        <state relative-caret-position="279">
+          <caret line="64" column="25" selection-start-line="64" selection-start-column="18" selection-end-line="64" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/stats/summary.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-128">
+          <caret line="53" column="8" selection-start-line="53" selection-start-column="8" selection-end-line="53" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="298">
+          <caret line="1941" column="48" lean-forward="true" selection-start-line="1941" selection-start-column="48" selection-end-line="1941" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/wepp/out/loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1853">
+          <caret line="417" column="14" selection-start-line="417" selection-start-column="9" selection-end-line="417" selection-end-column="14" />
+          <folding>
+            <element signature="e#254#289#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
