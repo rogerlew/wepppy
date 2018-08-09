@@ -177,7 +177,7 @@ class Baer(NoDbBase):
         
     @property
     def baer_cropped(self):
-        return _join(self.baer_dir, 'baer.tif')
+        return _join(self.baer_dir, 'baer.cropped.tif')
         
     def write_color_table(self):
         breaks = self.breaks
