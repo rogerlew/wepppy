@@ -1,0 +1,1 @@
+managements for BAER are installed in wepppy.wepp.managements
