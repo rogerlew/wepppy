@@ -271,6 +271,7 @@ class Landuse(NoDbBase):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
+            total_area = 0.0
             for topaz_id, k in domlc_d.items():
                 summary = watershed.sub_summary(str(topaz_id))
                 if summary is None:
@@ -284,8 +285,10 @@ class Landuse(NoDbBase):
                 else:
                     managements[k].area += summary["area"]
 
+                total_area += summary["area"]
+
             for k in managements:
-                coverage = 100.0 * managements[k].area / watershed.totalarea
+                coverage = 100.0 * managements[k].area / total_area
                 managements[k].pct_coverage = coverage
                         
             # store the managements dict

@@ -425,14 +425,19 @@ class Baer(NoDbBase):
                 _domsoil_d[topaz_id] = dom
                     
             # need to recalculate the pct_coverages
+            total_area = 0.0
+            for k in _soils:
+                _soils[k].area = 0.0
+
             watershed = Watershed.getInstance(self.wd)
             for topaz_id, k in _domsoil_d.items():
                 summary = watershed.sub_summary(str(topaz_id))
                 if summary is not None:
                     _soils[k].area += summary["area"]
+                    total_area += summary["area"]
 
             for k in _soils:
-                coverage = 100.0 * _soils[k].area / watershed.totalarea
+                coverage = 100.0 * _soils[k].area / total_area
                 _soils[k].pct_coverage = coverage
                         
             soils.soils = _soils            

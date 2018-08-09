@@ -14,8 +14,10 @@
 </div>
 <br/>
 <h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
-    (excluding years {{ excluded_years }})</h5>
-<table class="table table-condensed">
+    (excluding years {{ excluded_years }})
+    <a onclick="javascript:copytable('hill_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+<table class="table table-condensed" id="hill_tbl">
   <thead>
     <tr>
     {% for name in hill_rpt.hdr %}
@@ -43,8 +45,10 @@
   </tbody>
 </table>
 <h5>Average Annual Summary for Channels for Years {{ avg_annual_years }}
-    (excluding years {{ excluded_years }})</h5>
-<table class="table table-condensed">
+    (excluding years {{ excluded_years }})
+    <a onclick="javascript:copytable('chn_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+<table class="table table-condensed" id="chn_tbl">
   <thead>
     <tr>
     {% for name in chn_rpt.hdr %}

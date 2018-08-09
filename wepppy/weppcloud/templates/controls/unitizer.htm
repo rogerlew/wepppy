@@ -18,7 +18,7 @@
             {% for units in precisions[unitclass] %}
             <label class="radio">
             <input type="radio" value="{{ cls_units(units) }}" name="unitizer_{{unitclass}}_radio" 
-            {{ 'checked' if unitizer.preferences[unitclass] == units }}>{{ str_units(units) | safe }}</label>
+            {{ 'checked' if unitizer_nodb.preferences[unitclass] == units }}>{{ str_units(units) | safe }}</label>
             {% endfor %}
         </dd>
         {% endfor %}
