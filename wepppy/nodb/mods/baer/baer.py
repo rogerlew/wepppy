@@ -19,7 +19,7 @@ from os.path import exists as _exists
 import numpy as np
 from osgeo import gdal
         
-from wepppy.all_your_base import wgs84_proj4, isint
+from wepppy.all_your_base import wgs84_proj4, isint, read_arc
 from wepppy.wepp.soilbuilder.webClient import SoilSummary
 
 from ...landuse import Landuse
@@ -60,6 +60,8 @@ class Baer(NoDbBase):
             self._counts = None
             self._nodata_vals = None
             self._is256 = None
+
+            self.sbs_coverage = None
             
             self.dump_and_unlock()
 
@@ -178,6 +180,19 @@ class Baer(NoDbBase):
     @property
     def baer_cropped(self):
         return _join(self.baer_dir, 'baer.cropped.tif')
+
+    @property
+    def legend(self):
+        keys = [130, 131, 132, 133]
+
+        descs = ['No Burn',
+                'Low Severity Burn',
+                'Medium Severity Burn',
+                'High Severity Burn']
+
+        colors = ['#00734A', '#4DE600', '#FFFF00', '#FF0000']
+
+        return list(zip(keys, descs, colors))
         
     def write_color_table(self):
         breaks = self.breaks
@@ -188,10 +203,10 @@ class Baer(NoDbBase):
                 for v in self._nodata_vals:
                     fp.write("{} 0 0 0".format(v))
 
-            fp.write("{} 46 203 24\n"
-                     "{} 161 250 220\n"
-                     "{} 255 161 5\n"
-                     "{} 217 34 3\n"
+            fp.write("{} 0 115 74\n"
+                     "{} 77 230 0\n"
+                     "{} 255 255 0\n"
+                     "{} 255 0 0\n"
                      "nv 0 0 0".format(*breaks))
 
     def build_color_map(self):
@@ -360,6 +375,7 @@ class Baer(NoDbBase):
                 return i + 130
                 
             sbs = SoilBurnSeverityMap(baer_cropped, _classify)
+            self._calc_sbs_coverage(sbs.data)
 
             domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
 
@@ -383,7 +399,6 @@ class Baer(NoDbBase):
             raise
         
     def modify_soils(self):
-        print(self._config)
 
         wd = self.wd
 
@@ -454,4 +469,32 @@ class Baer(NoDbBase):
             
         except Exception:
             soils.unlock('-f')
+            raise
+
+    def _calc_sbs_coverage(self, sbs):
+
+        self.lock()
+
+        try:
+
+            topaz = Topaz.getInstance(self.wd)
+            bounds, transform, proj = read_arc(topaz.bound_arc)
+
+            assert bounds.shape == sbs.shape
+
+            c = Counter(sbs[np.where(bounds == 1.0)])
+
+            total_px = float(sum(c.values()))
+
+            self.sbs_coverage = {
+                                 'noburn': c[130] / total_px,
+                                 'low': c[131] / total_px,
+                                 'moderate': c[132] / total_px,
+                                 'high': c[133] / total_px,
+                                 }
+
+            self.dump_and_unlock()
+
+        except:
+            self.unlock('-f')
             raise
