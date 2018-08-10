@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="surgo_spatializer">
+    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="fix #73">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/debris_flow/debris_flow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/soils.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/soils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/data/surgo/surgo_tabular.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/ssurgo/ssurgo.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -103,7 +98,7 @@
           <entry key="html" value="11" />
           <entry key="js" value="472" />
           <entry key="py" value="3142" />
-          <entry key="txt" value="63" />
+          <entry key="txt" value="72" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
@@ -111,7 +106,7 @@
           <entry key="HTML" value="857" />
           <entry key="Ini" value="5" />
           <entry key="JavaScript" value="472" />
-          <entry key="PLAIN_TEXT" value="63" />
+          <entry key="PLAIN_TEXT" value="72" />
           <entry key="Python" value="3141" />
           <entry key="SQL" value="1" />
         </counts>
@@ -166,8 +161,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="263">
-              <caret line="87" column="73" selection-start-line="87" selection-start-column="73" selection-end-line="87" selection-end-column="73" />
+            <state relative-caret-position="185">
+              <caret line="98" column="35" lean-forward="true" selection-start-line="98" selection-start-column="35" selection-end-line="98" selection-end-column="35" />
               <folding>
                 <element signature="n#style#0;n#td#0;n#tr#0;n#table#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#td#1;n#tr#0;n#table#0;n#!!top" expanded="true" />
@@ -723,20 +718,6 @@
       <option name="presentableId" value="Default" />
       <updated>1517788948644</updated>
     </task>
-    <task id="LOCAL-00012" summary="totalwatsed">
-      <created>1522904378868</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1522904378869</updated>
-    </task>
-    <task id="LOCAL-00013" summary="totalwatsed export">
-      <created>1522907097198</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1522907097198</updated>
-    </task>
     <task id="LOCAL-00014" summary="management build bug fix">
       <created>1522909813548</created>
       <option name="number" value="00014" />
@@ -1066,7 +1047,21 @@
       <option name="project" value="LOCAL" />
       <updated>1533934161703</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="fix #73">
+      <created>1533935813497</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1533935813497</updated>
+    </task>
+    <task id="LOCAL-00062" summary="fix #73">
+      <created>1533935830328</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1533935830328</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1103,14 +1098,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="43" y="25" width="1877" height="968" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2949208" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.13675214" />
-      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.49972692" visible="true" weight="0.2804296" />
+      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.49972692" visible="true" weight="0.48090693" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.46586826" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -1164,7 +1158,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="climate modes revised" />
     <MESSAGE value="deployment fixes" />
     <MESSAGE value="wepp.status_log attr to property fix script" />
     <MESSAGE value="lt-fire create bug fix, observed control show/hide bug fix" />
@@ -1189,7 +1182,8 @@
     <MESSAGE value="baer-exp for Robin" />
     <MESSAGE value="baer-exp for Robin, typo fixes" />
     <MESSAGE value="surgo_spatializer" />
-    <option name="LAST_COMMIT_MESSAGE" value="surgo_spatializer" />
+    <MESSAGE value="fix #73" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix #73" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1566,8 +1560,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/debris_flow.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="263">
-          <caret line="87" column="73" selection-start-line="87" selection-start-column="73" selection-end-line="87" selection-end-column="73" />
+        <state relative-caret-position="185">
+          <caret line="98" column="35" lean-forward="true" selection-start-line="98" selection-start-column="35" selection-end-line="98" selection-end-column="35" />
           <folding>
             <element signature="n#style#0;n#td#0;n#tr#0;n#table#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#td#1;n#tr#0;n#table#0;n#!!top" expanded="true" />
