@@ -37,6 +37,10 @@ converters = {
         ('mm', 'in'): lambda v: v * 0.0393701,
         ('in', 'mm'): lambda v: v * 25.4
     },
+    'xs-distance-rate': {
+        ('mm/hour', 'in/hour'): lambda v: v * 0.0393701,
+        ('in/hour', 'mm/hour'): lambda v: v * 25.4
+    },
     'area': {
         ('ha', 'acre'): lambda v: v * 2.47105,
         ('ha', 'm^2'): lambda v: v * 1000.0,
@@ -69,7 +73,11 @@ converters = {
     },
     'volume': {
         ('m^3', 'ft^3'): lambda v: v * 35.3146667,
-        ('ft^3', 'm^3'): lambda v: v * 0.0283168
+        ('ft^3', 'm^3'): lambda v: v * 0.0283168,
+        ('m^3', 'yd^3'): lambda v: v * 1.30795,
+        ('ft^3', 'yd^3'): lambda v: v * 0.037037,
+        ('yd^3', 'm^3'): lambda v: v * 0.764555,
+        ('yd^3', 'ft^3'): lambda v: v * 27.0
     },
     'volume-annual': {
         ('m^3/yr', 'ft^3/yr'): lambda v: v * 35.3146667,
@@ -86,26 +94,46 @@ converters = {
     'sm-surface-density': {
         ('kg/ha', 'lb/acre'): lambda v: v * 0.892179,
         ('kg/ha', 'kg/m^2'): lambda v: v * 0.0001,
+        ('kg/ha', 'lb/mi^2'): lambda v: v * 570.994638,
         ('lb/acre', 'kg/ha'): lambda v: v * 1.12085,
         ('lb/acre', 'kg/m^2'): lambda v: v * 0.000112085116,
+        ('lb/acre', 'lb/mi^2'): lambda v: v * 640,
         ('kg/m^2', 'kg/ha'): lambda v: v * 10000.0,
-        ('kg/m^2', 'lb/acre'): lambda v: v * 8921.79
+        ('kg/m^2', 'lb/acre'): lambda v: v * 8921.79,
+        ('kg/m^2', 'lb/mi^2'): lambda v: v * 5709946.38,
+        ('lb/mi^2', 'kg/ha'): lambda v: v * 0.00175132993,
+        ('lb/mi^2', 'lb/acre'): lambda v: v * 0.0015625,
+        ('lb/mi^2', 'kg/m^2'): lambda v: v * 1.75132993E-7,
     },
     'sm-surface-density-annual': {
         ('kg/ha/yr', 'lb/acre/yr'): lambda v: v * 0.892179,
         ('kg/ha/yr', 'kg/m^2/yr'): lambda v: v * 0.0001,
+        ('kg/ha/yr', 'lb/mi^2/yr'): lambda v: v * 570.994638,
         ('lb/acre/yr', 'kg/ha/yr'): lambda v: v * 1.12085,
         ('lb/acre/yr', 'kg/m^2/yr'): lambda v: v * 0.000112085116,
+        ('lb/acre/yr', 'lb/mi^2/yr'): lambda v: v * 640,
         ('kg/m^2/yr', 'kg/ha/yr'): lambda v: v * 10000.0,
-        ('kg/m^2/yr', 'lb/acre/yr'): lambda v: v * 8921.79
+        ('kg/m^2/yr', 'lb/acre/yr'): lambda v: v * 8921.79,
+        ('kg/m^2/yr', 'lb/mi^2/yr'): lambda v: v * 5709946.38,
+        ('lb/mi^2/yr', 'kg/ha/yr'): lambda v: v * 0.00175132993,
+        ('lb/mi^2/yr', 'lb/acre/yr'): lambda v: v * 0.0015625,
+        ('lb/mi^2/yr', 'kg/m^2/yr'): lambda v: v * 1.75132993E-7,
     },
     'surface-density': {
         ('tonne/ha', 'ton/acre'): lambda v: v * 0.44609,
-        ('ton/acre', 'tonne/ha'): lambda v: v * 2.24170010536
+        ('tonne/ha', 'ton/mi^2'): lambda v: v * 285.497319,
+        ('ton/acre', 'tonne/ha'): lambda v: v * 2.24170010536,
+        ('ton/acre', 'ton/mi^2'): lambda v: v * 640,
+        ('ton/mi^2', 'tonne/ha'): lambda v: v * 0.00350265986,
+        ('ton/mi^2', 'ton/acre'): lambda v: v * 0.0015625,
     },
     'surface-density-annual': {
         ('tonne/ha/yr', 'ton/acre/yr'): lambda v: v * 0.44609,
-        ('ton/acre/yr', 'tonne/ha/yr'): lambda v: v * 2.24170010536
+        ('tonne/ha/yr', 'ton/mi^2/yr'): lambda v: v * 285.497319,
+        ('ton/acre/yr', 'tonne/ha/yr'): lambda v: v * 2.24170010536,
+        ('ton/acre/yr', 'ton/mi^2/yr'): lambda v: v * 640,
+        ('ton/mi^2/yr', 'tonne/ha/yr'): lambda v: v * 0.00350265986,
+        ('ton/mi^2/yr', 'ton/acre/yr'): lambda v: v * 0.0015625,
     }
 }
 
@@ -125,6 +153,10 @@ precisions = OrderedDict([
     ('xs-distance', OrderedDict([
         ('mm', 1),
         ('in', 2)])
+     ),
+    ('xs-distance-rate', OrderedDict([
+        ('mm/hour', 1),
+        ('in/hour', 2)])
      ),
     ('area', OrderedDict([
         ('ha', 1),
@@ -164,20 +196,24 @@ precisions = OrderedDict([
     ('sm-surface-density', OrderedDict([
         ('kg/ha', 3),
         ('lb/acre', 3),
-        ('kg/m^2', 1)])
+        ('kg/m^2', 1),
+        ('lb/mi^2', 1)])
      ),
     ('sm-surface-density-annual', OrderedDict([
         ('kg/ha/yr', 3),
         ('lb/acre/yr', 3),
-        ('kg/m^2/yr', 3)])
+        ('kg/m^2/yr', 3),
+        ('lb/mi^2/yr', 3)])
      ),
     ('surface-density', OrderedDict([
         ('tonne/ha', 1),
-        ('ton/acre', 1)])
+        ('ton/acre', 1),
+        ('ton/mi^2', 1)])
      ),
     ('surface-density-annual', OrderedDict([
         ('tonne/ha/yr', 2),
-        ('ton/acre/yr', 2)])
+        ('ton/acre/yr', 2),
+        ('ton/mi^2/yr', 2)])
      )
 ])
 
@@ -302,7 +338,7 @@ class Unitizer(NoDbBase):
             return str(units).replace('^2', '<sup>2</sup>') \
                 .replace('^3', '<sup>3</sup>')
 
-        def unitizer_units(in_units, other_classes=None):
+        def unitizer_units(in_units, other_classes=None, parentheses=False):
 
             if in_units is None:
                 return ''
@@ -316,18 +352,27 @@ class Unitizer(NoDbBase):
 
             oc = str_other_class(other_classes)
 
-            s = '<div class="unitizer units-{u0} {oc}">{u1}</div>' \
-                .format(u0=cls_units(in_units), u1=str_units(in_units), oc=oc)
+            if parentheses:
+                s = '<div class="unitizer units-{u0} {oc}">({u1})</div>' \
+                    .format(u0=cls_units(in_units), u1=str_units(in_units), oc=oc)
+            else:
+                s = '<div class="unitizer units-{u0} {oc}">{u1}</div>' \
+                    .format(u0=cls_units(in_units), u1=str_units(in_units), oc=oc)
 
             for u in precisions[unitclass].keys():
                 if u == in_units:
                     continue
-                s += '<div class="unitizer units-{u0} invisible{oc}">{u1}</div>' \
-                    .format(u0=cls_units(u), u1=str_units(u), oc=oc)
+
+                if parentheses:
+                    s += '<div class="unitizer units-{u0} invisible{oc}">({u1})</div>' \
+                        .format(u0=cls_units(u), u1=str_units(u), oc=oc)
+                else:
+                    s += '<div class="unitizer units-{u0} invisible{oc}">{u1}</div>' \
+                        .format(u0=cls_units(u), u1=str_units(u), oc=oc)
 
             return '<div class="unitizer-wrapper">{}</div>'.format(s)
 
-        def unitizer(value, in_units, other_classes=None):
+        def unitizer(value, in_units, other_classes=None, parentheses=False):
 
             if in_units is None:
                 return str(value)
@@ -345,8 +390,12 @@ class Unitizer(NoDbBase):
             oc = str_other_class(other_classes)
 
             p = precisions[unitclass][in_units]
-            s = '<div class="unitizer units-{u} {oc}">{v}</div>' \
-                .format(u=cls_units(in_units), oc=oc, v=tostring(value, p))
+            if parentheses:
+                s = '<div class="unitizer units-{u} {oc}">({v})</div>' \
+                    .format(u=cls_units(in_units), oc=oc, v=tostring(value, p))
+            else:
+                s = '<div class="unitizer units-{u} {oc}">{v}</div>' \
+                    .format(u=cls_units(in_units), oc=oc, v=tostring(value, p))
 
             for u in precisions[unitclass].keys():
                 if u == in_units:
@@ -358,8 +407,12 @@ class Unitizer(NoDbBase):
                 except:
                     v = '<i>%s</i>' % str(value)
 
-                s += '<div class="unitizer units-{u} invisible{oc}">{v}</div>' \
-                    .format(u=cls_units(u), oc=oc, v=v)
+                if parentheses:
+                    s += '<div class="unitizer units-{u} invisible{oc}">({v})</div>' \
+                        .format(u=cls_units(u), oc=oc, v=v)
+                else:
+                    s += '<div class="unitizer units-{u} invisible{oc}">{v}</div>' \
+                        .format(u=cls_units(u), oc=oc, v=v)
 
             return '<div class="unitizer-wrapper">{}</div>'.format(s)
 

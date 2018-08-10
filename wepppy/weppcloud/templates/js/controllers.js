@@ -595,6 +595,20 @@ var Baer = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function () {
+                var self = instance;
+
+                $.get({
+                    url: "../resources/legends/sbs/",
+                    cache: false,
+                    success: function (response) {
+                        var map = Map.getInstance();
+                        map.sub_legend.html(response);
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             });
         };
 

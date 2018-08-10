@@ -1229,6 +1229,14 @@ def resources_soil_legend(runid):
                            legend=Soils.getInstance(wd).legend)
 
 
+@app.route('/runs/<string:runid>/resources/legends/sbs')
+@app.route('/runs/<string:runid>/resources/legends/sbs/')
+def resources_sbs_legend(runid):
+    wd = get_wd(runid)
+
+    return render_template('legends/landuse.htm',
+                           legend=Baer.getInstance(wd).legend)
+
 @app.route('/runs/<string:runid>/query/landuse/subcatchments')
 @app.route('/runs/<string:runid>/query/landuse/subcatchments/')
 def query_landuse_subcatchments(runid):
