@@ -1,7 +1,7 @@
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
-# Roger Lew (rogerlew.gmail.com)
+# Roger Lew (rogerlew@gmail.com)
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
@@ -401,16 +401,7 @@ class SoilSummary(object):
 # noinspection PyPep8Naming,PyProtectedMember
 class WeppSoil:
     def __init__(self, ssurgo_c, mukey, initial_ksat=0.75, 
-                 horizon_defaults=OrderedDict([('sandtotal_r', 66.8),
-                                               ('claytotal_r', 7.0),
-                                               ('om_r', 7.0),
-                                               ('cec7_r', 11.3),
-                                               ('sandvf_r', 10.0),
-                                               ('ksat_r', 28.0),
-                                               ('dbthirdbar_r', 1.4),
-                                               ('smr', 55.5),
-                                               ('field_cap', 0.242),
-                                               ('wilt_pt', 0.1145)]),
+                 horizon_defaults=None,
                  res_lyr_ksat_threshold=2.0):
                       
         assert mukey in ssurgo_c.mukeys        
@@ -1162,11 +1153,21 @@ class SurgoSoilCollection(object):
             writer.writerow(c)
         csvfile.close()
 
-    def makeWeppSoils(self, initial_ksat=0.75, verbose=False):
+    def makeWeppSoils(self, initial_ksat=0.75, verbose=False,
+                      horizon_defaults=OrderedDict([('sandtotal_r', 66.8),
+                                               ('claytotal_r', 7.0),
+                                               ('om_r', 7.0),
+                                               ('cec7_r', 11.3),
+                                               ('sandvf_r', 10.0),
+                                               ('ksat_r', 28.0),
+                                               ('dbthirdbar_r', 1.4),
+                                               ('smr', 55.5),
+                                               ('field_cap', 0.242),
+                                               ('wilt_pt', 0.1145)])):
         weppSoils = {}
         invalidSoils = {}
         for mukey in self.mukeys:
-            weppSoil = WeppSoil(self, mukey, initial_ksat)
+            weppSoil = WeppSoil(self, mukey, initial_ksat, horizon_defaults=horizon_defaults)
 
             if weppSoil.valid():
                 weppSoils[mukey] = weppSoil

@@ -1,7 +1,7 @@
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
-# Roger Lew (rogerlew.gmail.com)
+# Roger Lew (rogerlew@gmail.com)
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
@@ -383,6 +383,8 @@ class Baer(NoDbBase):
             raise
         
     def modify_soils(self):
+        print(self._config)
+
         wd = self.wd
 
         ron = Ron.getInstance(wd)
@@ -391,12 +393,18 @@ class Baer(NoDbBase):
 
         soils_dir = self.soils_dir
         baer_soils_dir = self.baer_soils_dir
-        
-        soils_dict = {"130": "20-yr forest sandy loam.sol",
-                      "131": "Low severity fire-sandy loam.sol",
-                      "132": "Low severity fire-sandy loam.sol",
-                      "133": "High severity fire-sandy loam.sol"}
-        
+
+        if self._config == 'baer-exp.cfg':
+            soils_dict = {"130": "20-yr forest sandy loam.sol",
+                          "131": "Low severity fire-sandy loam.sol",
+                          "132": "High severity fire-sandy loam.sol",
+                          "133": "High severity fire-sandy loam.sol"}
+        else:
+            soils_dict = {"130": "20-yr forest sandy loam.sol",
+                          "131": "Low severity fire-sandy loam.sol",
+                          "132": "Low severity fire-sandy loam.sol",
+                          "133": "High severity fire-sandy loam.sol"}
+
         _soils = {}
         for k, fn in soils_dict.items():
             _soils[k] = SoilSummary(
