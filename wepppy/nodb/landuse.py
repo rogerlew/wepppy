@@ -61,7 +61,6 @@ class Landuse(NoDbBase):
             self.managements = None
 
             #self._sbs_map = config.get('landuse', 'sbs_map')
-            self.sbs_coverage = None
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
@@ -224,7 +223,6 @@ class Landuse(NoDbBase):
 
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
-            self._calc_sbs_coverage()
             self.build_managements()
         except Exception:
             self.unlock('-f')
@@ -293,7 +291,6 @@ class Landuse(NoDbBase):
                         
             # store the managements dict
             self.managements = managements
-            self._calc_sbs_coverage()
             self.dump_and_unlock()
             
         except Exception:
@@ -435,34 +432,3 @@ class Landuse(NoDbBase):
             return self.managements[key]
             
         raise IndexError
-
-    def _calc_sbs_coverage(self):
-        domlc_d = self.domlc_d
-        assert domlc_d is not None
-
-        totalarea = 0.0
-        noburn, low, moderate, high = 0.0,  0.0,  0.0,  0.0
-        watershed = Watershed.getInstance(self.wd)
-        for topaz_id, ss in watershed.sub_iter():
-            area = ss.area
-            dom = str(domlc_d[str(topaz_id)])
-
-            if dom in ['105', '133']:
-                high += area
-            elif dom in ['132']:
-                moderate += area
-            elif dom in ['106', '131']:
-                low += area
-            else:
-                noburn += area
-
-            totalarea += area
-
-        if totalarea == 0.0:
-            totalarea = 0.001
-            
-        self.sbs_coverage = {'noburn': noburn/totalarea,
-                             'low': low/totalarea,
-                             'moderate': moderate/ totalarea,
-                             'high': high / totalarea,
-                             }

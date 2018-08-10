@@ -10,6 +10,9 @@ from osgeo.gdalconst import (
     GDT_UInt32
 )
 
+spatial_vars = ('Ksat', 'Cly', 'Snd', 'OM', 'BlkDns', 'DpthB',
+                'Hydrc', 'Drng', 'WTDp', 'FldFrq', 'WS25', 'WS150',
+                'HydGr', 'DrngCl', 'SolThk')
 
 def classifier_factory(lookup):
     return lambda x: (lookup.get(x, -9999), -9999)[x == -9999]
@@ -71,9 +74,11 @@ class SurgoSpatializer(object):
             return classifier(x)
         return -9999
 
-    @staticmethod
-    def drainage_classifier(self):
-        return classifier_factory(
+    def spatialize_var(self, var, dst_fname, drivername='GTiff', nodata_value=-9999):
+        """
+        Creates a raster of the variable specified by var
+        """
+        drainage_classifier = classifier_factory(
             {"Very poorly drained": 0,
              "Poorly drained": 1,
              "Somewhat poorly drained": 2,
@@ -82,10 +87,6 @@ class SurgoSpatializer(object):
              "Somewhat excessively drained": 5,
              "Excessively drained": 6})
 
-    def spatialize_var(self, var, dst_fname, drivername='GTiff', nodata_value=-9999):
-        """
-        Creates a raster of the variable specified by var
-        """
         _spatial_vars = dict([
             ('Ksat', lambda mukey: self.getFirstHorizonVar(mukey, 'ksat_r')),
             ('Cly', lambda mukey: self.getFirstHorizonVar(mukey, 'claytotal_r')),
@@ -96,7 +97,7 @@ class SurgoSpatializer(object):
             ('Hydrc', lambda mukey: self.getMajorComponentVar(mukey, 'hydricrating',
                                                               classifier_factory({'No': 0, 'Yes': 1}))),
             ('Drng', lambda mukey: self.getMajorComponentVar(mukey, 'drainagecl',
-                                                             self.drainage_classifier)),
+                                                             drainage_classifier)),
             ('WTDp', lambda mukey: self.getMajorComponentVar(mukey, 'wtdepannmin')),
             ('FldFrq', lambda mukey: self.getMajorComponentVar(mukey, 'flodfreqdcd',
                                                                classifier_factory(
@@ -107,7 +108,7 @@ class SurgoSpatializer(object):
                                                               classifier_factory(
                 {"A": 0, "B": 1, "A/D": 2, "C": 3, "C/D": 4, "B/D": 5, "D": 6}))),
             ('DrngCl', lambda mukey: self.getMajorComponentVar(mukey, 'drclassdcd',
-                                                               self.drainage_classifier)),
+                                                               drainage_classifier)),
             ('SolThk', lambda mukey: self.getHorizonsVar(mukey, 'hzdepb_r', np.sum))
         ])
 

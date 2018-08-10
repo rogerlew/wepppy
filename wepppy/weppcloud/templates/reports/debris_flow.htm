@@ -112,7 +112,16 @@ function run_user_precip() {
 </div>
 </form>
 <h3>Model Results</h3>
-<p>Table values report: volume in m<sup>3</sup> (probabiity of occurrence in %)</p>
+<table>
+  <tr>
+      <td style="vertical-align:bottom;">Volume</td>
+      <td style="padding-left: 1em;">{{ unitizer_units('m^3') | safe }}&nbsp;</td>
+  </tr>
+  <tr>
+      <td style="vertical-align:bottom;">Probability of Occurence</td>
+      <td style="vertical-align:bottom; padding-left: 1em;">(%)&nbsp;</td>
+  </tr>
+</table>
 <p>Cells with probabilities &ge; 50% are highlighted.</p>
 <table class="table">
     <thead>
@@ -135,8 +144,8 @@ function run_user_precip() {
             {% if duration in debris_flow.rpt_durations %}
             {% set volume = debris_flow.volume[loop.index - 1][rec_loop.index - 1] %}
             {% set prob = 100 * debris_flow.prob_occurrence[loop.index - 1][rec_loop.index - 1] %}
-
-            <td {% if prob >= 50.0 %}class="alert alert-danger" {% endif %}>{{ volume | round }}<br/>({{ prob | round }})</td>
+            <td {% if prob >= 50.0 %} class="alert alert-danger" {% endif %} title="Within a {{ rec_interval }}-year period, there is a {{ prob | round }}% probability of having a debris flow event with {{ volume | round }} m^3 in volume.">
+                {{ unitizer(volume, 'm^3') | safe }}&nbsp;<br/>({{ prob | round }})</td>
             {% endif %}
         {% endfor %}
         </tr>
@@ -144,7 +153,17 @@ function run_user_precip() {
     {% endfor %}
     </tbody>
 </table>
-<p>Table values report: Rainfall Intensity in mm/hour (Total precipitation in mm)</p>
+
+<table>
+  <tr>
+      <td style="vertical-align:bottom;">Rainfall intensity</td>
+      <td style="padding-left: 1em;">{{ unitizer_units('mm/hour') | safe }}&nbsp;</td>
+  </tr>
+  <tr>
+      <td style="vertical-align:bottom;">Total precipitation</td>
+      <td style="padding-left: 1em;">{{ unitizer_units('mm', parentheses=True) | safe }}&nbsp;</td>
+  </tr>
+</table>
 <table class="table">
     <thead>
     <tr>
@@ -166,7 +185,7 @@ function run_user_precip() {
             {% if duration in debris_flow.rpt_durations %}
             {% set intensity = debris_flow.I[loop.index - 1][rec_loop.index - 1] %}
             {% set total = debris_flow.T[loop.index - 1][rec_loop.index - 1] %}
-            <td >{{ intensity | round }}<br/>({{ total | round }})</td>
+            <td >{{ unitizer(intensity, 'mm/hour') | safe }}&nbsp;<br/>{{ unitizer(total, 'mm', parentheses=True) | safe }}&nbsp;</td>
             {% endif %}
         {% endfor %}
         </tr>

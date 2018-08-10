@@ -23,7 +23,7 @@ from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.soils import Soils
 from wepppy.nodb.topaz import Topaz
-from wepppy.nodb.landuse import Landuse
+from wepppy.nodb.mods import Baer
 
 
 def _duration_in_hours(duration):
@@ -153,13 +153,13 @@ class DebrisFlow(NoDbBase):
             wd = self.wd
             soils = Soils.getInstance(wd)
             topaz = Topaz.getInstance(wd)
-            landuse = Landuse.getInstance(wd)
+            baer = Baer.getInstance(wd)
 
             A = topaz.area_gt30
             A_pct = 100 * A / topaz.wsarea
             A /= 1000 * 1000  # to km^2
 
-            sbs_coverage = landuse.sbs_coverage
+            sbs_coverage = baer.sbs_coverage
             B = sbs_coverage['moderate'] * topaz.wsarea + \
                 sbs_coverage['high'] * topaz.wsarea
             B_pct = 100 * B / topaz.wsarea
