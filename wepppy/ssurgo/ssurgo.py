@@ -179,6 +179,7 @@ class Horizon:
         self.cec7_r = None
         self.sandvf_r = None
         self.om_r = None
+        self.ll_r = None
 
         self.hzdepb_r = None
         self.desgnmaster = None
@@ -1023,7 +1024,7 @@ def _fetch_chorizon(cokeys):
             'dbthirdbar_r, ksat_r, sandtotal_r, claytotal_r, ' \
             'om_r, cec7_r, awc_l, fraggt10_r, frag3to10_r, ' \
             'desgnmaster, sieveno10_r, wthirdbar_r, wfifteenbar_r, ' \
-            'sandvf_r ' \
+            'sandvf_r, ll_r ' \
             'FROM chorizon ' \
             'WHERE cokey IN (%s) ORDER BY cokey' % keys
 
@@ -1292,7 +1293,8 @@ class SurgoSoilCollection(object):
                            cec7_r REAL, awc_l REAL, fraggt10_r REAL, 
                            frag3to10_r REAL, desgnmaster TEXT, 
                            sieveno10_r REAL, wthirdbar_r REAL, 
-                           wfifteenbar_r REAL, sandvf_r  REAL)''')
+                           wfifteenbar_r REAL, sandvf_r  REAL,
+                           ll_r  REAL)''')
             cur.execute('''CREATE INDEX cokey_chkey ON chorizon(cokey, chkey)''')
                            
         if not self._cache_tbl_exists('chfrags'):
