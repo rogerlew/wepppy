@@ -174,6 +174,9 @@ class DebrisFlow(NoDbBase):
             else:
                 C = soils.clay_pct
 
+            if not isfloat(C):
+                C = 7.0
+
             if ll is not None:
                 assert isfloat(ll)
                 ll = float(ll)
@@ -181,6 +184,9 @@ class DebrisFlow(NoDbBase):
                 assert ll <= 100.0
                 LL = ll
             else:
+                LL = soils.liquid_limit  # 13.25
+
+            if not isfloat(LL):
                 LL = 13.25
 
             R = topaz.ruggedness
