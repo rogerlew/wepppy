@@ -1,7 +1,7 @@
 # Copyright (c) 2016-2018, University of Idaho
 # All rights reserved.
 #
-# Roger Lew (rogerlew.gmail.com)
+# Roger Lew (rogerlew@gmail.com)
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
@@ -32,7 +32,6 @@ __version__ = 'v.0.1.0'
 _thisdir = os.path.dirname(__file__)
 _ssurgo_cache_db = _join(_thisdir, ':memory:')  # 'ssurgo_cache.db')
 _statsco_cache_db = _join(_thisdir, 'statsco.db')
-
 
 class NoValidSoilsException(Exception):
     """
@@ -160,41 +159,3 @@ class SurgoMap:
         assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'lost channels in domsoil_d'
 
         return domsoil_d
-    
-    def spatialize_var(self, func, dst_fname, drivername='GTiff'):
-        """
-        Creates a raster of the variable specified by var
-        """
-        data, mukeys = self.data, self.mukeys
-        num_cols, num_rows = data.shape
-        proj, transform = self.proj, self.transform
-        
-        # create empty array to hold data
-        var_r = np.zeros(data.shape)
-        
-        # iterate over mukeys and fill data
-        meta = Counter()
-        for mukey in mukeys:
-            indx = np.where(data == mukey)
-            value = func(mukey)
-            var_r[indx] = value
-            
-            meta[value] += len(indx[0])
-            
-        with open(dst_fname + '.meta', 'w') as fid:
-            fid.write(json.dumps(meta, sort_keys=True,
-                      indent=4, separators=(',', ': ')))
-                
-        # create raster
-        driver = gdal.GetDriverByName(drivername)
-        dst = driver.Create(dst_fname, num_cols, num_rows, 1, GDT_Float32)
-
-        srs = osr.SpatialReference()
-        srs.ImportFromProj4(proj)
-        wkt = srs.ExportToWkt()
-
-        dst.SetProjection(wkt)
-        dst.SetGeoTransform(transform)
-        dst.GetRasterBand(1).WriteArray(var_r)
-        
-        del dst  # Writes and closes file
