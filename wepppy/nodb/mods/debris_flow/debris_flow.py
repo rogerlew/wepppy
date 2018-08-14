@@ -172,7 +172,7 @@ class DebrisFlow(NoDbBase):
                 assert cc <= 100.0
                 C = cc
             else:
-                C = soils.clay_pct
+                C = getattr(soils, "clay_pct", None)
 
             if not isfloat(C):
                 C = 7.0
@@ -184,7 +184,7 @@ class DebrisFlow(NoDbBase):
                 assert ll <= 100.0
                 LL = ll
             else:
-                LL = soils.liquid_limit  # 13.25
+                LL = getattr(soils, "liquid_limit", None)
 
             if not isfloat(LL):
                 LL = 13.25

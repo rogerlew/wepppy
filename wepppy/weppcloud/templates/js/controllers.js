@@ -368,7 +368,7 @@ var Map = function () {
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
-        that.nlcd = L.tileLayer.wms("https://raster.nationalmap.gov/arcgis/services/LandCover/USGS_EROS_LandCover_NLCD/MapServer/WMSServer?", {
+        that.nlcd = L.tileLayer.wms("https://www.mrlc.gov/arcgis/services/LandCover/USGS_EROS_LandCover_NLCD/MapServer/WMSServer/?", {
             layers: "1",
             format: "image/png",
             transparent: true

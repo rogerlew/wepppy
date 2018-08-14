@@ -47,6 +47,13 @@
         });
 
         project.unitChangeEvent();
+
+
+        // konami code!
+        Mousetrap.bind('up up down down left right left right b a', function() {
+            $('#btnPuModal').click();
+        });
+
     });
 
 </script>
@@ -57,6 +64,7 @@
 <div role="main" class="container-full">
 {% block report_content %}{% endblock %}
 {% include 'controls/unitizer_modal.htm'%}
+{% include 'controls/poweruser_panel.htm'%}
 </div> <!--main container -->
 
     <!-- Placed at the end of the document so the pages load faster -->

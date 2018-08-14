@@ -168,25 +168,15 @@ $(document).ready(function () {
     });
 
     baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
+        console.log("SBS_UPLOAD_TASK_COMPLETE");
         setTimeout(baer.show_sbs, 4000);
         setTimeout(baer.load_modify_class, 4000);
-
-        setTimeout(function () {
-            $("#btn_modify_baer_classes").click(function () {
-                baer.modify_classes();
-            });
-        }, 6000);
     });
 
     baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
+        console.log("MODIFY_BURN_CLASS_TASK_COMPLETE");
         setTimeout(baer.show_sbs, 2000);
-        setTimeout(baer.load_modify_class, 2000);
-
-        setTimeout(function () {
-            $("#btn_modify_baer_classes").click(function () {
-                baer.modify_classes();
-            });
-        }, 4000);
+        setTimeout(baer.load_modify_class, 4000);
     });
 
     if ({{ has_sbs | tojson}})

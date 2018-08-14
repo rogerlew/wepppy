@@ -46,9 +46,7 @@ _statsgo_cache_db = _join(_thisdir, 'data', 'statsgo', 'statsgo_tabular.db')
 _ssurgo_url = 'https://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx'
 _query_template = '''\
 <?xml version="1.0" encoding="utf-8"?>
-<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                 xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
   <soap12:Body>
     <RunQuery xmlns="http://SDMDataAccess.nrcs.usda.gov/Tabular/SDMTabularService.asmx">
       <Query>{query}</Query>
@@ -66,9 +64,9 @@ class SsurgoRequestError(Exception):
 # noinspection PyPep8Naming
 def _makeSOAPrequest(query):
     global _ssurgo_url, _query_template
-    headers = {'content-type': 'text/xml'}
+    headers = {'Content-Type': 'application/soap+xml; charset=utf-8'}
     body = _query_template.format(query=query)
-    r = requests.post(_ssurgo_url, data=body, headers=headers)
+    r = requests.post(_ssurgo_url, data=body, headers=headers, timeout=30)
 
     if r.status_code != 200:
         raise SsurgoRequestError((r.content, query))
