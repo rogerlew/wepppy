@@ -46,10 +46,10 @@
       <div style="height: 60px;"></div>
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
-        <div class="col-sm-3">
+        <div class="col-lg-3">
             <img src="{{  url_for('static', filename='images/interfaces/0.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
         </div>
-        <div class="col-sm-8">
+        <div class="col-lg-8">
           <h1>WeppCloud</h1>
           <p>Run WEPP anywhere in the continental U.S. Elevation data from USGS National Elevation Set. TOPAZ for
              watershed delineation. Soils are build using SURGO/STATSGO. Landcover from USGS National Landcover dataset.
@@ -63,10 +63,10 @@
       </div>
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
-        <div class="col-sm-3">
+        <div class="col-lg-3">
             <img src="{{  url_for('static', filename='images/interfaces/baer.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
         </div>
-        <div class="col-sm-8">
+        <div class="col-lg-8">
           <h1>WEPP-PEP</h1>
           <p>The WEPP Post-Fire Erosion Prediction (PEP) allows users to upload a burn severity map and predict erosion
              based on fire severity.
@@ -79,10 +79,10 @@
       <div style="height: 2em;"></div>
       <h1>Site Specific Resources</h1>
       <div class="jumbotron row">
-        <div class="col-sm-3">
+        <div class="col-lg-3">
             <img src="{{  url_for('static', filename='images/interfaces/lt.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
         </div>
-        <div class="col-sm-8">
+        <div class="col-lg-8">
           <h1>Lake Tahoe / West Tahoe Project</h1>
           <p>The Lake Tahoe Project incorporates region specific soil, phosphorus, and estimated soil burn severity.
           </p>
@@ -93,10 +93,10 @@
       </div>
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
-        <div class="col-sm-3">
+        <div class="col-lg-3">
             <img src="{{  url_for('static', filename='images/interfaces/cda.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
         </div>
-        <div class="col-sm-8">
+        <div class="col-lg-8">
           <h1>Coeur d'Alene Lake Interface</h1>
           <p>Provides access to running WEPP in the Coeur d'Alene Lake Basin.
           </p>
@@ -113,6 +113,7 @@
             <tr><th>Date</th><th>Notable Change</th></tr>
           </thead>
           <tbody>
+            <tr><td>August 13, 2018</td><td>Debris flow enhancements (liquid limit from surgo, SBS area based on <grid></grid>).</td></tr>
             <tr><td>July 31, 2018</td><td>Fixed layout bug with screens with 1280px width.</td></tr>
             <tr><td>July 30, 2018</td><td>Updated phosphorus maps for Lake Tahoe. New WEPP binary to fix missing chanwb
                                           output. Bug fix for hillslope delineation in locations below 1m in elevation.</td></tr>
