@@ -65,6 +65,7 @@ class Soils(NoDbBase):
             self.domsoil_d = None  # topaz_id keys
             self.soils = None
             self.clay_pct = None
+            self.liquid_limit = None
             self._subs_summary = None
             self._chns_summary = None
 
