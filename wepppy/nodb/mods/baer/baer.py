@@ -22,8 +22,8 @@ from osgeo import gdal
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc
 from wepppy.wepp.soilbuilder.webClient import SoilSummary
 
-from ...landuse import Landuse
-from ...soils import Soils
+from ...landuse import Landuse, LanduseMode
+from ...soils import Soils, SoilsMode
 from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
@@ -377,18 +377,19 @@ class Baer(NoDbBase):
             sbs = SoilBurnSeverityMap(baer_cropped, _classify)
             self._calc_sbs_coverage(sbs.data)
 
-            domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
+            if landuse.mode != LanduseMode.Single:
+                domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
 
-            ron = Ron.getInstance(wd)
-            if 'lt' in ron.mods:
-                for k, sbs in domlc_d.items():
-                    if sbs in ['131', '132']:
-                        landuse.domlc_d[k] = '106'
-                    elif sbs in ['133']:
-                        landuse.domlc_d[k] = '105'
+                ron = Ron.getInstance(wd)
+                if 'lt' in ron.mods:
+                    for k, sbs in domlc_d.items():
+                        if sbs in ['131', '132']:
+                            landuse.domlc_d[k] = '106'
+                        elif sbs in ['133']:
+                            landuse.domlc_d[k] = '105'
 
-            else:
-                landuse.domlc_d = domlc_d
+                else:
+                    landuse.domlc_d = domlc_d
 
             landuse.dump_and_unlock()
             landuse = landuse.getInstance(wd)
@@ -432,12 +433,16 @@ class Baer(NoDbBase):
             
             shutil.copyfile(_join(baer_soils_dir, fn),
                             _join(soils_dir, fn))
-        
+
         soils = Soils.getInstance(wd)
-        soils.lock()
+
+        if soils.mode != SoilsMode.Gridded:
+            return
 
         # noinspection PyBroadExpection
         try:
+            soils.lock()
+
             _domsoil_d = {}
             landuse = Landuse.getInstance(wd)
             domlc_d = landuse.domlc_d
