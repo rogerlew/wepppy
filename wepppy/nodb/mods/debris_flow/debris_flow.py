@@ -5,6 +5,7 @@
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
+
 import math
 import os
 from os.path import join as _join
@@ -16,7 +17,8 @@ import numpy as np
 
 # wepppy
 from wepppy.all_your_base import isfloat
-from wepppy.climates.noaa_precip_freqs_client import fetch_pf
+from wepppy.climates import noaa_precip_freqs_client
+from wepppy.climates import holden_wrf_atlas
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase
@@ -64,10 +66,10 @@ class DebrisFlow(NoDbBase):
             self.rec_intervals = None
             self.volume = None
             self.prob_occurrence = None
+            self._datasource = None
 
-            self.rpt_rec_intervals = [2, 5, 10, 25, 50, 100, 200]
-            self.rpt_durations = ['15-min', '30-min', '60-min', '2-hour', '3-hour', '6-hour', '12-hour',
-                                  '24-hour', '2-day', '3-day', '4-day', '7-day']
+            self.rpt_rec_intervals = None
+            self.rpt_durations = None
 
             self.A = None
             self.B = None
@@ -121,7 +123,7 @@ class DebrisFlow(NoDbBase):
         try:
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
-            pf = fetch_pf(lat=lat, lng=lng)
+            pf = noaa_precip_freqs_client.fetch_pf(lat=lat, lng=lng)
             if pf is not None:
 
                 T = np.array(pf['quantiles']) * 25.4
@@ -138,12 +140,46 @@ class DebrisFlow(NoDbBase):
                 self.T = T.tolist()
                 self.durations = durations
                 self.rec_intervals = rec_intervals
+                self._datasource = 'NOAA'
+
+                self.rpt_rec_intervals = rec_intervals
+                self.rpt_durations = durations
+
+            else:
+                pf = holden_wrf_atlas.fetch_pf(lat=lat, lng=lng)
+                if pf is not None:
+
+                    T = np.array(pf['precips'])
+                    I = np.array(pf['precips'])
+                    durations = pf['durations']
+                    rec_intervals = pf['rec_intervals']
+
+                    T.resize((len(durations), len(rec_intervals)))
+                    I.resize((len(durations), len(rec_intervals)))
+
+                    for i, d in enumerate(durations):
+                        hours = _duration_in_hours(d)
+                        I[i, :] /= hours
+
+                    self.pf = pf
+                    self.I = I.tolist()
+                    self.T = T.tolist()
+                    self.durations = durations
+                    self.rec_intervals = rec_intervals
+                    self._datasource = 'Holden WRF Atlas'
+
+                    self.rpt_rec_intervals = rec_intervals
+                    self.rpt_durations = durations
 
             self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
             raise
+
+    @property
+    def datasource(self):
+        return getattr(self, '_datasource', 'NOAA')
 
     def run_debris_flow(self, cc=None, ll=None):
         self.lock()
@@ -159,7 +195,11 @@ class DebrisFlow(NoDbBase):
             A_pct = 100 * A / topaz.wsarea
             A /= 1000 * 1000  # to km^2
 
-            sbs_coverage = baer.sbs_coverage
+            try:
+                sbs_coverage = baer.sbs_coverage
+            except:
+                sbs_coverage = soils.sbs_coverage
+
             B = sbs_coverage['moderate'] * topaz.wsarea + \
                 sbs_coverage['high'] * topaz.wsarea
             B_pct = 100 * B / topaz.wsarea

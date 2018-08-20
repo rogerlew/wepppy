@@ -198,16 +198,17 @@ class Baer(NoDbBase):
         breaks = self.breaks
         assert len(breaks) == 4
 
-        with open(self.color_tbl_path, 'w') as fp:
-            if self._nodata_vals is not None:
-                for v in self._nodata_vals:
-                    fp.write("{} 0 0 0".format(v))
+        _map = dict([('No Data', '0 0 0'),
+                     ('No Burn', '0 115 74'),
+                     ('Low Severity Burn', '77 230 0'),
+                     ('Medium Severity Burn', '255 255 0'),
+                     ('High Severity Burn', '255 0 0')])
 
-            fp.write("{} 0 115 74\n"
-                     "{} 77 230 0\n"
-                     "{} 255 255 0\n"
-                     "{} 255 0 0\n"
-                     "nv 0 0 0".format(*breaks))
+        with open(self.color_tbl_path, 'w') as fp:
+            for v, k, c in self.class_map:
+                fp.write('{} {}\n'.format(v, _map[k]))
+
+            fp.write("nv 0 0 0\n")
 
     def build_color_map(self):
         baer_rgb = self.baer_rgb
@@ -261,6 +262,8 @@ class Baer(NoDbBase):
         # noinspection PyBroadException
         try:
             self._baer_fn = fn
+            self._nodata_vals = None
+
             baer_path = self.baer_path
             assert _exists(baer_path), baer_path
             
@@ -282,7 +285,13 @@ class Baer(NoDbBase):
             assert ds is not None
             
             transform = ds.GetGeoTransform()
-            data = np.array(ds.GetRasterBand(1).ReadAsArray(), dtype=np.int)
+            band = ds.GetRasterBand(1)
+            data = np.array(band.ReadAsArray(), dtype=np.int)
+
+            nodata = band.GetNoDataValue()
+            if nodata is not None:
+                self._nodata_vals = [np.int(nodata)]
+
             del ds
             
             # need the bounds for Leaflet
@@ -299,6 +308,9 @@ class Baer(NoDbBase):
             # determine classes
             classes = list(set(data.flatten()))
             classes = [int(v) for v in classes]
+            if self._nodata_vals is not None:
+                classes = [v for v in classes if v not in self._nodata_vals]
+
             counts = Counter(data.flatten())
             
             is256 = len(classes) > 6 or max(classes) >= 255
@@ -361,20 +373,7 @@ class Baer(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            # create LandcoverMap instance
-            def _classify(v):
-                i = 0
-
-                if self._nodata_vals is not None:
-                    if v in self._nodata_vals:
-                        return 130
-
-                for i, brk in enumerate(self.breaks):
-                    if v <= brk:
-                        break
-                return i + 130
-                
-            sbs = SoilBurnSeverityMap(baer_cropped, _classify)
+            sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals)
             self._calc_sbs_coverage(sbs.data)
 
             if landuse.mode != LanduseMode.Single:

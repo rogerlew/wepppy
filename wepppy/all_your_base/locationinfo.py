@@ -25,6 +25,17 @@ import utm
 from pyproj import Proj, transform
 
 
+class RDIOutOfBoundsException(Exception):
+    """
+    location is not within map bounds
+    """
+
+    __name__ = 'RDIOutOfBoundsException'
+
+    def __init__(self):
+        pass
+
+
 class RasterDatasetInterpolator:
     def __init__(self, fname):
 
@@ -41,7 +52,7 @@ class RasterDatasetInterpolator:
         self.srs = srs = osr.SpatialReference()
         srs.ImportFromWkt(self.wkt_text)
         self.proj4 = srs.ExportToProj4()
-        
+
         self.proj = Proj(self.proj4)
         self.wgs84 = Proj(init='EPSG:4326')
         
@@ -81,8 +92,10 @@ class RasterDatasetInterpolator:
 
     def get_location_info(self, lng, lat, method='cubic'):
         e, n = transform(self.wgs84, self.proj,  lng, lat)
-        assert (e, n) in self, ((e, n), (self.left, self.right, self.lower, self.upper))
-        
+
+        if not (e, n) in self:
+            raise OutOfBoundsException
+
         x, y = self.get_px_coord(e, n)
         w, h = self.ds.RasterXSize, self.ds.RasterYSize
         nbands = self.nbands
