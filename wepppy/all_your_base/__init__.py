@@ -6,7 +6,7 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from .locationinfo import RasterDatasetInterpolator
+from .locationinfo import RasterDatasetInterpolator, RDIOutOfBoundsException
 
 import os
 from os.path import exists as _exists
