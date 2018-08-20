@@ -18,7 +18,20 @@ from wepppy.all_your_base import read_arc, read_raster
 
 
 class SoilBurnSeverityMap:
-    def __init__(self, fname, classify):
+    def __init__(self, fname, breaks, nodata_vals=None):
+
+        def _classify(v, breaks, nodata_vals):
+            i = 0
+
+            if nodata_vals is not None:
+                if v in nodata_vals:
+                    return 130
+
+            for i, brk in enumerate(breaks):
+                if v < brk:
+                    break
+            return i + 130
+
         assert _exists(fname)
         self.fname = fname
 
@@ -27,7 +40,7 @@ class SoilBurnSeverityMap:
         n, m = data.shape
         for i in range(n):
             for j in range(m):
-                data[i, j] = classify(data[i, j])
+                data[i, j] = _classify(data[i, j], breaks, nodata_vals)
                 
         self.data = data
         self.transform = transform
