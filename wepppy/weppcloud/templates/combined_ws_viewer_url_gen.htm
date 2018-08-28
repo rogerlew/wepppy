@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>WeppCloud - Combined Watershed Viewer URL Generator</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+    integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+  <body>
+  <header>
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="../../">WeppCloud</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+      </li>
+      {% if user.is_anonymous %}
+      <li><a class="nav-link" href="../../login">Login</a></li>
+      <li><a class="nav-link" href="../../register">Register</a></li>
+      {% else %}
+      <li><a class="nav-link" href="../../runs">My Runs</a></li>
+      <li><a class="nav-link" href="../../profile">Profile</a></li>
+      <li><a class="nav-link" href="../../logout">Logout</a></li>
+      {% if current_user.has_role('Root') %}
+      <li><a class="nav-link" href="../../usermod">Usermod</a></li>
+      {% endif %}
+      {% endif %}
+    </ul>
+    </div>
+  </nav>
+</header>
+    <div role="main" class="container">
+        <div style="height: 5em;"></div>
+        <h3>Combined Watershed Viewer URL Generator</h3>
+        <form id="url_gen_form"  action="." method="post">
+            <div class="form-group">
+                <label for="title" class="control-label">Title (Optional)</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ title }}">
+            </div>
+            <div class="form-group">
+                    <label for="runids" class="control-label">Run IDs</label>
+                    <textarea id="runids" name="runids" class="form-control" placeholder="comma or space separated runids">{{ runids }}</textarea>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-outline-success" type="submit">Generate URL</button>
+            </div>
+        </form>
+
+        {% if url is not none %}
+            <h3>URL for Combined Watershed Viewer</h3>
+            <a href="{{ url }}">{{ url }}</a>
+        {% endif %}
+    </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+     integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+     integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
+{% include("_analytics.htm") %}
+  </body>
+</html>

@@ -11,6 +11,8 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
+from copy import deepcopy
+
 # non-standard
 import jsonpickle
 import numpy as np
@@ -59,7 +61,6 @@ class DebrisFlow(NoDbBase):
         # noinspection PyBroadException
         try:
             # config = self.config
-            self.pf = None
             self.I = None
             self.T = None
             self.durations = None
@@ -67,9 +68,6 @@ class DebrisFlow(NoDbBase):
             self.volume = None
             self.prob_occurrence = None
             self._datasource = None
-
-            self.rpt_rec_intervals = None
-            self.rpt_durations = None
 
             self.A = None
             self.B = None
@@ -119,57 +117,56 @@ class DebrisFlow(NoDbBase):
 
         self.lock()
 
+        self.T = {}
+        self.I = {}
+        self.durations = {}
+        self.rec_intervals = {}
+
         # noinspection PyBroadException
         try:
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
             pf = noaa_precip_freqs_client.fetch_pf(lat=lat, lng=lng)
             if pf is not None:
+                _datasource = 'NOAA'
 
-                T = np.array(pf['quantiles']) * 25.4
-                I = np.array(pf['quantiles']) * 25.4
-                durations = pf['durations']
-                rec_intervals = pf['rec_intervals']
+                self.T[_datasource] = np.array(pf['quantiles']) * 25.4
+                self.I[_datasource] = np.array(pf['quantiles']) * 25.4
+                self.durations[_datasource] = pf['durations']
+                self.rec_intervals[_datasource] = pf['rec_intervals']
 
-                for i, d in enumerate(durations):
+                for i, d in enumerate(self.durations[_datasource]):
                     hours = _duration_in_hours(d)
-                    I[i, :] /= hours
+                    self.I[_datasource][i, :] /= hours
 
-                self.pf = pf
-                self.I = I.tolist()
-                self.T = T.tolist()
-                self.durations = durations
-                self.rec_intervals = rec_intervals
-                self._datasource = 'NOAA'
+                self.I[_datasource] = self.I[_datasource].tolist()
+                self.T[_datasource] = self.T[_datasource].tolist()
 
-                self.rpt_rec_intervals = rec_intervals
-                self.rpt_durations = durations
+                self._datasource = _datasource
 
-            else:
-                pf = holden_wrf_atlas.fetch_pf(lat=lat, lng=lng)
-                if pf is not None:
+            pf = holden_wrf_atlas.fetch_pf(lat=lat, lng=lng)
+            if pf is not None:
+                _datasource = 'Holden WRF Atlas'
 
-                    T = np.array(pf['precips'])
-                    I = np.array(pf['precips'])
-                    durations = pf['durations']
-                    rec_intervals = pf['rec_intervals']
+                self.T[_datasource] = np.array(pf['precips'])
+                self.I[_datasource] = np.array(pf['precips'])
+                self.durations[_datasource] = pf['durations']
+                self.rec_intervals[_datasource] = pf['rec_intervals']
 
-                    T.resize((len(durations), len(rec_intervals)))
-                    I.resize((len(durations), len(rec_intervals)))
+                shape = (len(self.durations[_datasource]), len(self.rec_intervals[_datasource]))
 
-                    for i, d in enumerate(durations):
-                        hours = _duration_in_hours(d)
-                        I[i, :] /= hours
+                self.T[_datasource].resize(shape)
+                self.I[_datasource].resize(shape)
 
-                    self.pf = pf
-                    self.I = I.tolist()
-                    self.T = T.tolist()
-                    self.durations = durations
-                    self.rec_intervals = rec_intervals
-                    self._datasource = 'Holden WRF Atlas'
+                for i, d in enumerate(self.durations[_datasource]):
+                    hours = _duration_in_hours(d)
+                    self.I[_datasource][i, :] /= hours
 
-                    self.rpt_rec_intervals = rec_intervals
-                    self.rpt_durations = durations
+                if self._datasource is None:
+                    self._datasource = _datasource
+
+                self.I[_datasource] = self.I[_datasource].tolist()
+                self.T[_datasource] = self.T[_datasource].tolist()
 
             self.dump_and_unlock()
 
@@ -181,7 +178,14 @@ class DebrisFlow(NoDbBase):
     def datasource(self):
         return getattr(self, '_datasource', 'NOAA')
 
-    def run_debris_flow(self, cc=None, ll=None):
+    @property
+    def datasources(self):
+        if self.I is None:
+            return None
+
+        return self.I.keys()
+
+    def run_debris_flow(self, cc=None, ll=None, req_datasource=None):
         self.lock()
 
         # noinspection PyBroadException
@@ -247,28 +251,37 @@ class DebrisFlow(NoDbBase):
             if self.T is not None and self.I is not None:
                 self.lock()
 
-                T = np.array(self.T)
-                I = np.array(self.I)
+                self.volume = {}
+                self.prob_occurrence = {}
 
-                # where
-                # A (in km2) is the area of the basin having slopes greater than or equal to 30%,
-                # B (in km2) is the area of the basin burned at high and moderate severity,
-                # T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
-                # the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
-                v = np.exp(7.2 + 0.6 * math.log(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
+                for _datasource in self.T:
 
-                # where
-                # %A is the percentage of the basin area with gradients greater than or equal to 30%,
-                # R is basin ruggedness,
-                # %B is the percentage of the basin area burned at high and moderate severity,
-                # I is average storm rainfall intensity (in mm/h),
-                # C is clay content (in %),
-                # LL is the liquid limit
-                x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
-                prob_occurrence = np.exp(x) / (1.0 + np.exp(x))
+                    T = np.array(self.T[_datasource])
+                    I = np.array(self.I[_datasource])
 
-                self.volume = v.tolist()
-                self.prob_occurrence = prob_occurrence.tolist()
+                    # where
+                    # A (in km2) is the area of the basin having slopes greater than or equal to 30%,
+                    # B (in km2) is the area of the basin burned at high and moderate severity,
+                    # T (in mm) is the total storm rainfall, and 0.3 is a bias correction that changes
+                    # the predicted estimate from a median to a mean value (Helsel and Hirsch, 2002).
+                    v = np.exp(7.2 + 0.6 * math.log(A) + 0.7 * B ** 0.5 + 0.2 * T ** 0.5 + 0.3)
+
+                    # where
+                    # %A is the percentage of the basin area with gradients greater than or equal to 30%,
+                    # R is basin ruggedness,
+                    # %B is the percentage of the basin area burned at high and moderate severity,
+                    # I is average storm rainfall intensity (in mm/h),
+                    # C is clay content (in %),
+                    # LL is the liquid limit
+                    x = -0.7 + 0.03 * A_pct - 1.6 * R + 0.06 * B_pct + 0.07 * I + 0.2 * C - 0.4 * LL
+                    prob_occurrence = np.exp(x) / (1.0 + np.exp(x))
+
+                    self.volume[_datasource] = deepcopy(v.tolist())
+                    self.prob_occurrence[_datasource] = deepcopy(prob_occurrence.tolist())
+
+                if req_datasource is not None:
+                    assert req_datasource in self.volume
+                    self._datasource = req_datasource
 
                 self.dump_and_unlock()
 

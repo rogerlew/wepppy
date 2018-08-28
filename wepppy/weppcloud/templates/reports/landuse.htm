@@ -3,8 +3,7 @@
       <tr>
         <th style="width:5%">Key</th>
         <th style="width:5%"></th>
-        <th style="width:50%">Description</th>
-        <th style="width:30%">Management File</th>
+        <th style="width:80%">Description (Management File)</th>
         <th style="width:10%">Coverage %</th>
       </tr>
     </thead>
@@ -17,8 +16,14 @@
             <span class="oi oi-wrench"></span>
           </button>
         </td>
-        <td>{{ row.desc }}</td>
-        <td>{{ row.man_fn }}</td>
+        <td>
+            <select class="form-control disable-readonly" id="landuse_selection_{{ row.key }}"
+                onchange="Landuse.getInstance().modify_mapping({{ row.key }}, this.value)">
+                {% for opt in landuseoptions %}
+                <option value="{{ opt["Key"] }}" {% if row.key == opt["Key"] %}selected{% endif %}>{{ opt["Description"] }} ({{ opt["ManagementFile"] }})</option>
+                {% endfor %}
+            </select>
+        </td>
         <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
       </tr>
       <tr id="modify_landuse_{{ row.key }}" class="collapse out">
