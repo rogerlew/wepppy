@@ -19,6 +19,8 @@ import shutil
 import traceback
 from glob import glob
 
+import numpy as np
+
 from werkzeug.utils import secure_filename
 
 from flask import (
@@ -1196,6 +1198,20 @@ def modify_landuse_coverage(runid):
 
     return success_factory()
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/tasks/modify_landuse_mapping/', methods=['POST'])
+def task_modify_landuse_mapping(runid):
+    wd = get_wd(runid)
+
+    dom = request.json.get('dom', None)
+    newdom = request.json.get('newdom', None)
+
+    Landuse.getInstance(wd).modify_mapping(dom, newdom)
+
+    return success_factory()
+
+
 @app.route('/runs/<string:runid>/query/landuse')
 @app.route('/runs/<string:runid>/query/landuse/')
 def query_landuse(runid):
@@ -1255,7 +1271,16 @@ def query_landuse_channels(runid):
 @app.route('/runs/<string:runid>/report/landuse/')
 def report_landuse(runid):
     wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    landuseoptions = management.load_map().values()
+    landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
+
+    if "lt" in ron.mods:
+        landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
+
     return render_template('reports/landuse.htm',
+                           landuseoptions=landuseoptions,
                            report=Landuse.getInstance(wd).report)
 
 @app.route('/runs/<string:runid>/view/channel_def/<chn_key>')
@@ -1298,6 +1323,7 @@ def view_management(runid, key):
     r = Response(response=contents, status=200, mimetype="text/plain")
     r.headers["Content-Type"] = "text/plain; charset=utf-8"
     return r
+
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/modify_landuse/', methods=['POST'])
@@ -2430,9 +2456,9 @@ def report_debris_flow(runid):
 
     cc = request.args.get('cc', None)
     ll = request.args.get('ll', None)
-
+    datasource = request.args.get('datasource', None)
     if cc is not None or ll is not None:
-        debris_flow.run_debris_flow(cc=cc, ll=ll)
+        debris_flow.run_debris_flow(cc=cc, ll=ll, req_datasource=datasource)
 
     unitizer = Unitizer.getInstance(wd)
 
@@ -2448,6 +2474,81 @@ def report_debris_flow(runid):
 @app.route('/combined_ws_viewer/')
 def combined_ws_viewer():
     return render_template('combined_ws_viewer.htm')
+
+
+@app.route('/combined_ws_viewer/url_generator', methods=['GET', 'POST'])
+@app.route('/combined_ws_viewer/url_generator/', methods=['GET', 'POST'])
+def combined_ws_viewer_url_gen():
+    if current_user.is_authenticated:
+        if not current_user.roles:
+            user_datastore.add_role_to_user(current_user.email, 'User')
+
+    title = request.form.get('title', '')
+    runids = request.form.get('runids', '')  # devvmfac-3e27-459a-96d4-f1a731fe7502, devvm647-3e1d-4c81-b23f-9700145612c0
+    runids = runids.replace(',', ' ').split()
+
+    ws = []
+    extents = None
+    center_lat = None
+    center_lng = None
+    zoom = None
+    has_phos = True
+
+    for i, runid in enumerate(runids):
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
+
+        has_phos = has_phos and wepp.phosphorus_opts.isvalid
+
+        if i == 0:
+            extents = ron.map.extent
+            zoom = ron.map.zoom
+        else:
+            _l, _b, _r, _t = ron.map.extent
+            l, b, r, t = extents
+
+            if _l < l:
+                extents[0] = l
+
+            if _b < b:
+                extents[1] = b
+
+            if _r > r:
+                extents[2] = r
+
+            if _t > t:
+                extents[3] = t
+
+            if ron.map.zoom < zoom:
+                zoom = ron.map.zoom
+
+        ws.append(dict(runid=runid, cfg=ron.config_stem))
+
+    if extents is not None:
+        center_lng = float(np.mean([extents[0], extents[2]]))
+        center_lat = float(np.mean([extents[1], extents[3]]))
+
+    if zoom is not None:
+        zoom -= 1
+
+    phos_opts = ('', '"phosphorus":1.0,')[has_phos]
+
+    _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
+           'ws={ws}&varopts={{"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,{phos_opts}"loss":4000}}&' \
+           'varname=loss&title={title}'
+
+    url = None
+    if center_lng is not None and \
+       center_lat is not None and \
+       zoom is not None and \
+       len(ws) > 0:
+        url = _url.format(center_lat=center_lat, center_lng=center_lng,
+                          zoom=zoom, ws=json.dumps(ws), title=title,
+                          phos_opts=phos_opts)
+
+    return render_template('combined_ws_viewer_url_gen.htm',
+        url=url, user=current_user, title=title, runids=', '.join(runids))
 
 
 if __name__ == '__main__':

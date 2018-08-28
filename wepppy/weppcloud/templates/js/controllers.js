@@ -1978,6 +1978,28 @@ var Landuse = function () {
             });
         };
 
+        that.modify_mapping = function(dom, newdom) {
+            var self = instance;
+
+            var data = {
+                dom: dom,
+                newdom: newdom
+            };
+
+            $.post({
+                url: "../tasks/modify_landuse_mapping/",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    self.report();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
         that.report = function () {
             var self = instance;
             $.get({

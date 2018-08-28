@@ -5,9 +5,10 @@ function rerun_debris_flow() {
     console.log('run debris flow');
     var cc = $('#clay_content').val();
     var ll = $('#liquid_limit').val();
+    var datasource = $('#datasource_selection').val();
     console.log(cc);
     console.log(ll);
-    window.location = '?cc=' + cc + '&ll=' + ll;
+    window.location = '?cc=' + cc + '&ll=' + ll + '&datasource=' + datasource;
 }
 
 function precisionRound(number, precision) {
@@ -96,8 +97,13 @@ function run_user_precip() {
 </tr>
 <tr>
     <td>Precipitation Datasource</td>
-    <td>{{debris_flow.datasource}}</td>
-    <td> </td>
+    <td>
+        <select class="form-control disable-readonly" id="datasource_selection">
+            {% for _datasource in debris_flow.datasources%}
+                <option value="{{ _datasource }}" {% if debris_flow.datasource == _datasource %}selected{% endif %}>{{ _datasource }}</option>
+            {% endfor %}
+        </select>
+    </td>
 </tr>
 </tbody>
 </table>
@@ -132,29 +138,25 @@ function run_user_precip() {
     <thead>
     <tr>
         <th>Recurrence Interval (years)</th>
-        {% for duration in debris_flow.durations %}
-        {% if duration in debris_flow.rpt_durations %}
+        {% for duration in debris_flow.durations[debris_flow.datasource] %}
         <th>{{ duration }}</th>
-        {% endif %}
         {% endfor %}
     </tr>
     </thead>
     <tbody>
-    {% for rec_interval in debris_flow.rec_intervals %}
-        {% if rec_interval in debris_flow.rpt_rec_intervals %}
+    {% for rec_interval in debris_flow.rec_intervals[debris_flow.datasource] %}
         <tr>
         <td>{{ rec_interval }}</td>
         {% set rec_loop = loop %}
-        {% for duration in debris_flow.durations %}
-            {% if duration in debris_flow.rpt_durations %}
-            {% set volume = debris_flow.volume[loop.index - 1][rec_loop.index - 1] %}
-            {% set prob = 100 * debris_flow.prob_occurrence[loop.index - 1][rec_loop.index - 1] %}
-            <td {% if prob >= 50.0 %} class="alert alert-danger" {% endif %} title="Within a {{ rec_interval }}-year period, there is a {{ prob | round }}% probability of having a debris flow event with {{ volume | round }} m^3 in volume.">
+        {% for duration in debris_flow.durations[debris_flow.datasource] %}
+            {% set volume = debris_flow.volume[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
+            {% set prob = 100 * debris_flow.prob_occurrence[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
+            <td {% if prob >= 50.0 %} class="alert alert-danger" {% endif %}
+                    title="Within a {{ rec_interval }}-year period, there is a {{ prob | round }}%
+                    probability of having a debris flow event with {{ volume | round }} m^3 in volume.">
                 {{ unitizer(volume, 'm^3') | safe }}&nbsp;<br/>({{ prob | round }})</td>
-            {% endif %}
         {% endfor %}
         </tr>
-        {% endif %}
     {% endfor %}
     </tbody>
 </table>
@@ -173,28 +175,24 @@ function run_user_precip() {
     <thead>
     <tr>
         <th>Recurrence Interval (years)</th>
-        {% for duration in debris_flow.durations %}
-        {% if duration in debris_flow.rpt_durations %}
+        {% for duration in debris_flow.durations[debris_flow.datasource] %}
         <th>{{ duration }}</th>
-        {% endif %}
         {% endfor %}
     </tr>
     </thead>
     <tbody>
-    {% for rec_interval in debris_flow.rec_intervals %}
-        {% if rec_interval in debris_flow.rpt_rec_intervals %}
+    {% for rec_interval in debris_flow.rec_intervals[debris_flow.datasource] %}
         <tr>
         <td>{{ rec_interval }}</td>
         {% set rec_loop = loop %}
-        {% for duration in debris_flow.durations %}
-            {% if duration in debris_flow.rpt_durations %}
-            {% set intensity = debris_flow.I[loop.index - 1][rec_loop.index - 1] %}
-            {% set total = debris_flow.T[loop.index - 1][rec_loop.index - 1] %}
+        {% for duration in debris_flow.durations[debris_flow.datasource] %}
+            {% if duration in debris_flow.durations[debris_flow.datasource] %}
+            {% set intensity = debris_flow.I[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
+            {% set total = debris_flow.T[debris_flow.datasource][loop.index - 1][rec_loop.index - 1] %}
             <td >{{ unitizer(intensity, 'mm/hour') | safe }}&nbsp;<br/>{{ unitizer(total, 'mm', parentheses=True) | safe }}&nbsp;</td>
             {% endif %}
         {% endfor %}
         </tr>
-        {% endif %}
     {% endfor %}
     </tbody>
 </table>

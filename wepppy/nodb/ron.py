@@ -16,10 +16,13 @@ from os.path import isdir
 
 import shutil
 
+
 # non-standard
 import jsonpickle
 import utm
 import what3words
+import requests
+
 # wepppy
 import wepppy
 from wepppy.all_your_base import (
@@ -237,7 +240,10 @@ class Ron(NoDbBase):
 
             lng, lat = self.map.center
             w3w_geocoder = what3words.Geocoder(w3w_api_key)
-            self._w3w = w3w_geocoder.reverse(lat=lat, lng=lng)
+            try:
+                self._w3w = w3w_geocoder.reverse(lat=lat, lng=lng)
+            except requests.exceptions.ConnectionError:
+                pass
 
             self.dump_and_unlock()
 

@@ -94,7 +94,7 @@ class RasterDatasetInterpolator:
         e, n = transform(self.wgs84, self.proj,  lng, lat)
 
         if not (e, n) in self:
-            raise OutOfBoundsException
+            raise RDIOutOfBoundsException
 
         x, y = self.get_px_coord(e, n)
         w, h = self.ds.RasterXSize, self.ds.RasterYSize

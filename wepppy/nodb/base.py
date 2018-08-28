@@ -154,6 +154,10 @@ class NoDbBase(object):
 
         return parser
 
+    @property
+    def config_stem(self):
+        return self._config.replace('.cfg', '')
+
     def _load_mods(self):
         cfg = self.config
         mods = cfg.get('nodb', 'mods')

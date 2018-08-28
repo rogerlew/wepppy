@@ -250,7 +250,9 @@ class Loss(object):
                     if _out_tbl[j]['key'] == 'Total contributing area to outlet':
                         continue
 
-                    _out_tbl[j]['v'] += yearlies[yr]['out_tbl'][j]['v']
+                    v = yearlies[yr]['out_tbl'][j]['v']
+                    if set(str(v).strip()) != set('*'):
+                        _out_tbl[j]['v'] += v
 
                 avg_years.append(yr)
 
