@@ -255,6 +255,29 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
+    def modify_mapping(self, dom, newdom):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            dom = str(dom)
+            newdom = str(newdom)
+            assert dom in self.managements
+
+            for topazid in self.domlc_d:
+                if self.domlc_d[topazid] == dom:
+                    self.domlc_d[topazid] = newdom
+
+            self.dump_and_unlock()
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+            self.build_managements()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def build_managements(self):
         self.lock()
 
