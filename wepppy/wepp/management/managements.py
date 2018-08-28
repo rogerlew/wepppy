@@ -962,8 +962,12 @@ class Loops(list):
         return False
 
     def nameof(self, index):
+
+        if len(self) == 0:
+            return None
+
         return self.__getitem__(int(index)-1).name
-            
+
     def _setroot(self, root):
         self.root = root
         for loop in self:

@@ -33,6 +33,7 @@ _db = _join(_thisdir, 'stations.db')
 _stations_dir = _join(_thisdir, 'stations')
 _bin_dir = _join(_thisdir, 'bin')
 
+
 def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     """
     creates a prn file containing daily timeseries data for input to
