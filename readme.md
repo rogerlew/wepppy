@@ -14,4 +14,4 @@ pinumber IIA-1301792.
 
 ### License
 
-BSD-3 Clause
+BSD-3 Clause (see license.txt)
