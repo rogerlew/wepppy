@@ -244,8 +244,8 @@ class LakeTahoe(NoDbBase):
         wepp = Wepp.getInstance(self.wd)
         
         d = {}
-        for opt in ['surf_runoff', 'lateral_flow', 'baseflow', 'sediment']:
-            fn = _join(_data_dir, 'phosphorus', 'P_%s.tif' % opt)
+        for opt in ['runoff', 'lateral', 'baseflow', 'sediment']:
+            fn = _join(_data_dir, 'phosphorus', 'p_%s.tif' % opt)
             assert _exists(fn), fn
             raster = RasterDatasetInterpolator(fn)
             d[opt] = raster.get_location_info(lng, lat)

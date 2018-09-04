@@ -1,0 +1,10 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: FORDSTERROR     Rec. ID: AK0295     Tex.:silt loam           
+1     1
+'FORDSTERROR'       'SIL'    3   .23   .75  5417800.00  .020228   3.50   3.79
+  25.4   27.4   11.5    6.00    22.1     1.9
+ 355.6   45.5    6.5    2.00     6.5    17.0
+ 660.4   49.1    6.5     .67     6.5    27.3

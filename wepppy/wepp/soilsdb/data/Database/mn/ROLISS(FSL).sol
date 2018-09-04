@@ -1,0 +1,10 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: ROLISS          Rec. ID: MN0076     Tex.:fine sandy loam     
+1     1
+'ROLISS'            'FSL'    3   .23   .75  6021164.00  .007117   2.70   8.31
+ 279.4   55.1   15.7    5.00    18.2     5.7
+ 406.4   39.3   26.5    1.67    15.9     5.9
+1524.0   39.3   26.5     .56    15.9     5.9

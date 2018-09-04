@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: BLOOMINGDALE    Rec. ID: TN0176     Tex.:silt loam           
+1     1
+'BLOOMINGDALE'      'SIL'    2   .23   .75  4702762.00  .007896   3.50   1.46
+1016.0    6.4   24.5    2.00    15.8     2.7
+1524.0   37.3   21.5     .67    10.8     5.5

@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: MARPA           Rec. ID: CA0351     Tex.:gravelly loam       
+1     1
+'MARPA'             'GR-L'   2   .23   .75  5314088.00  .006983   3.12   6.08
+ 330.2   41.0   18.9    2.00    16.7    25.3
+ 660.4   45.2   31.0     .67    21.7    50.3

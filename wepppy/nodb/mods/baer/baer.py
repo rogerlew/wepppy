@@ -316,9 +316,9 @@ class Baer(NoDbBase):
             is256 = len(classes) > 6 or max(classes) >= 255
             
             if is256:
-                breaks = [0, 76, 110, 188]
+                breaks = [75, 109, 187, 65535]
             else:
-                breaks = [0, 1, 2, 3]
+                breaks = [1, 2, 3, 65535]
             
             self._is256 = is256
             self._classes = classes

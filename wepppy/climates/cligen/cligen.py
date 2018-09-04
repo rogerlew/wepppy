@@ -28,6 +28,7 @@ from wepppy.all_your_base import (
 )
 from wepppy.climates.metquery_client import *
 
+
 _thisdir = os.path.dirname(__file__)
 _db = _join(_thisdir, 'stations.db')
 _stations_dir = _join(_thisdir, 'stations')
@@ -67,15 +68,24 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
 
         fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                  .format(mo, da, yr, p, tmax, tmin))
+
+        if mo == 12 and da == 30 and yr % 4 == 0:
+            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                     .format(mo, da, yr, p, tmax, tmin))
+
     fp.close()
 
-def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn):
+
+def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verbose=False):
 
     fp = open(prn_fn, 'w')
     for year in range(start_year, end_year + 1):
 
         d = {}
         for varname in ['prcp', 'tmin', 'tmax']:
+            if verbose:
+                print(year, varname)
+
             fn = observed_data[(varname, year)]
             rdi = RasterDatasetInterpolator(fn)
             d[varname] = rdi.get_location_info(lng=lng, lat=lat)
@@ -116,7 +126,9 @@ def _row_formatter(values):
             s.append('%5.2f' % v)
     return ' '.join(s).replace('0.', ' .')
 
+
 days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+
 
 class ClimateFile(object):
     def __init__(self, cli_fn):
@@ -434,7 +446,7 @@ class StationMeta:
 
         self.desc = desc.split(str(self.id))[0].strip()
 
-        self.parpath = _join(_thisdir, "stations", par)
+        self.parpath = _join(_stations_dir, par)
         assert _exists(self.parpath)
 
     def get_station(self):
@@ -477,10 +489,15 @@ class StationMeta:
 
 
 class CligenStationsManager:
-    def __init__(self):
+    def __init__(self, version=None):
 
         # connect to sqlite3 db
-        global _db
+        global _db, _stations_dir
+
+        if str(version) == '2015':
+            _db = _join(_thisdir, '2015_stations.db')
+            _stations_dir = _join(_thisdir, '2015_par_files')
+
         conn = sqlite3.connect(_db)
         c = conn.cursor()
 
@@ -702,7 +719,8 @@ class Cligen:
 
 
 if __name__ == "__main__":
-    stationManager = CligenStationsManager()
-       
-    sm = stationManager.get_station_fromid(48758)
-    print(sm.par)
+    stationManager = CligenStationsManager(version=2015)
+
+    stationMeta = stationManager.get_closest_station((-117, 46))
+
+    print(stationMeta)

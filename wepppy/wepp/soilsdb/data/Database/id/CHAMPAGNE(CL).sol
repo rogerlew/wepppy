@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: CHAMPAGNE       Rec. ID: ID0896     Tex.:clay loam           
+1     1
+'CHAMPAGNE'         'CL'     2   .23   .75  4612853.00  .005068   3.99   5.37
+ 228.6   38.7   29.0    3.00    25.6     8.5
+1524.0   49.4   30.5    1.00    21.4    11.4

@@ -471,17 +471,8 @@ class Climate(NoDbBase, LogMixin):
     #
     @property
     def has_climate(self):
-        mode = self.climate_mode
-        assert isinstance(mode, ClimateMode)
-
-        if mode == ClimateMode.Undefined:
-            return False
-
-        spatialmode = getattr(self, 'climate_spatialmode', None)
-        if spatialmode is None:
-            return False
-
-        if spatialmode == ClimateSpatialMode.Multiple:
+        print(self.climate_spatialmode, self.cli_fn, self.sub_par_fns, self.sub_cli_fns)
+        if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             return self.sub_par_fns is not None and \
                    self.sub_cli_fns is not None and \
                    self.cli_fn is not None
@@ -495,6 +486,14 @@ class Climate(NoDbBase, LogMixin):
         try:
             climate_mode = kwds['climate_mode']
             climate_mode = ClimateMode(int(climate_mode))
+
+            climate_spatialmode = kwds['climate_spatialmode']
+            climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
+
+            if climate_mode == ClimateMode.Vanilla or \
+               climate_mode == ClimateMode.SingleStorm or \
+               climate_mode == ClimateMode.Future:
+                climate_spatialmode = ClimateSpatialMode.Single
 
             input_years = kwds['input_years']
             if isint(input_years):
@@ -514,6 +513,7 @@ class Climate(NoDbBase, LogMixin):
                 self.orig_cli_fn = cli_path
 
             self._climate_mode = climate_mode
+            self._climate_spatialmode = climate_spatialmode
             self._input_years = input_years
 
             self.dump_and_unlock()

@@ -2,16 +2,32 @@
 {% block report_content %}
 <h2>WEPP Results Summary</h2>
 <h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
-    (excluding years {{ excluded_years }})</h5>
-<div>
-{% for name, value, units in out_rpt %}
-  <div class="row">
-    <div class="col-md-4">{{ name }}</div>
-    <div class="col-md-1 text-right">{{ unitizer(value, units) | safe }}</div>
-    <div class="col-md-1" style="width: 100px;">{{ unitizer_units(units) | safe }}</div>
-  </div>
-{% endfor %}
-</div>
+    (excluding years {{ excluded_years }})
+    <a onclick="javascript:copytable('out_tbl')"><span class="oi oi-clipboard"></span></a>
+</h5>
+<table class="table table-condensed" style="width: auto !important;" id="out_tbl">
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>from outlet</th>
+      <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th>per unit area of watershed</th>
+      <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for name, value, units, v_normed, units_normed in out_rpt %}
+      <tr>
+        <td>{{ name }}</td>
+        <td class="text-right">{{ unitizer(value, units) | safe }}</td>
+        <td>{{ unitizer_units(units) | safe }}</td>
+        <td class="text-right">{{ unitizer(v_normed, units_normed) | safe }}</td>
+        <td>{{ unitizer_units(units_normed) | safe }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 <br/>
 <h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
     (excluding years {{ excluded_years }})

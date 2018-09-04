@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: TOTZ            Rec. ID: KY0188     Tex.:loamy fine sand     
+1     1
+'TOTZ'              'LFS'    2   .23   .75  6906291.00  .008650   1.78  14.17
+ 177.8   81.8    5.8    3.00     7.6    17.2
+ 457.2   79.7    7.5    1.00     3.0    21.0

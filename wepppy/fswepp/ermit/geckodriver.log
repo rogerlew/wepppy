@@ -1,0 +1,12 @@
+1529967159668	geckodriver	INFO	geckodriver 0.21.0
+1529967159672	geckodriver	INFO	Listening on 127.0.0.1:43351
+1529967160689	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.T0p57rWOWylc"
+1529967164806	Marionette	INFO	Listening on port 40643
+1529967164835	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://forest.moscowfsl.wsu.edu/, line 29: RangeError: invalid language tag: 06/25/2018 15:52:47
+1529967959000	geckodriver	INFO	geckodriver 0.21.0
+1529967959014	geckodriver	INFO	Listening on 127.0.0.1:49687
+1529967960027	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.81qSRlmdNCBV"
+1529967964369	Marionette	INFO	Listening on port 35835
+1529967964475	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://forest.moscowfsl.wsu.edu/, line 29: RangeError: invalid language tag: 06/25/2018 16:06:07
