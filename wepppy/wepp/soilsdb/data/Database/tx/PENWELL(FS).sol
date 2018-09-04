@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: PENWELL         Rec. ID: TX0228     Tex.:fine sand           
+1     1
+'PENWELL'           'FS'     2   .23   .75  5800466.00  .022163   2.04  17.92
+ 330.2   91.4    4.6     .50     3.2      .6
+2032.0   86.7    7.5     .17     3.8      .6

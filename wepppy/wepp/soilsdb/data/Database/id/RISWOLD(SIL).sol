@@ -1,0 +1,11 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: RISWOLD         Rec. ID: ID1155     Tex.:silt loam           
+1     1
+'RISWOLD'           'SIL'    4   .23   .75  5417800.00  .020228   3.50   4.26
+ 177.8   27.4   11.5    3.00    13.4     3.4
+ 381.0   44.3   17.0    1.00    11.9     3.4
+1066.8   35.4   26.0     .33    18.2    16.4
+1778.0   30.9   30.5     .11    21.4    44.4

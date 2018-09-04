@@ -149,7 +149,7 @@ var Project = function () {
             return str.replace(new RegExp(find, 'g'), replace);
         }
 
-        that.unitChangeEvent = function () {
+            that.unitChangeEvent = function () {
             var self = instance;
 
             var prefs = $("[name^=unitizer_]");
@@ -358,6 +358,18 @@ var Map = function () {
         // define the base layer and add it to the map
         // does not require an API key
         // https://stackoverflow.com/a/32391908
+        //
+        //
+        // h = roads only
+        // m = standard roadmap
+        // p = terrain
+        // r = somehow altered roadmap
+        // s = satellite only
+        // t = terrain only
+        // y = hybrid
+        //
+
+
         that.googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
             maxZoom: 20,
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
@@ -2870,7 +2882,6 @@ var Climate = function () {
             }
         };
 
-        
         that.setSpatialMode = function (mode) {
             var self = instance;
             // mode is an optional parameter

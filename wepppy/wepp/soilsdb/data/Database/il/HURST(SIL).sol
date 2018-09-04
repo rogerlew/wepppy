@@ -1,0 +1,11 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: HURST           Rec. ID: IL0102     Tex.:silt loam           
+1     1
+'HURST'             'SIL'    4   .23   .75  4702762.00  .007896   3.50   1.16
+ 101.6    6.4   24.5    1.50    22.3     1.3
+ 254.0   28.7   24.0     .50    19.2      .0
+1041.4   22.8   41.5     .17    33.2      .0
+1524.0   27.5   32.5     .06    26.0      .0

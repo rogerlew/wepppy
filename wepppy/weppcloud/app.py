@@ -793,6 +793,7 @@ def task_setname(runid):
     return success_factory()
 
 
+@app.route('/runs/<string:runid>/report/tasks/set_unit_preferences/', methods=['POST'])
 @app.route('/runs/<string:runid>/tasks/set_unit_preferences/', methods=['POST'])
 def task_set_unit_preferences(runid):
     wd = get_wd(runid)
@@ -1053,6 +1054,15 @@ def export_arcmap(runid):
     arc_export(wd)
     archive_path = archive_project(ron.export_arc_dir)
     return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/export/winwepp/')
+def export_winwepp(runid):
+    from wepppy.export import export_winwepp
+    wd = get_wd(runid)
+    export_winwepp_path = export_winwepp(wd)
+    return send_file(export_winwepp_path, as_attachment=True, attachment_filename='{}_winwepp.zip'.format(runid))
 
 
 # noinspection PyBroadException

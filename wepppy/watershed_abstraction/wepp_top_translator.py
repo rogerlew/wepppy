@@ -133,6 +133,13 @@ class WeppTopTranslator:
     def has_top(self, top):
         return top in self._top2wepp
 
+    def __iter__(self):
+        for sub_id in self.sub_ids:
+            yield int(sub_id.split('_')[1])
+
+        for chn_id in self.chn_ids:
+            yield int(chn_id.split('_')[1])
+
     def iter_chn_ids(self):
         for chn_id in self.chn_ids:
             yield chn_id

@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
         with open('failed_counties.txt') as fpe:
             failed_counties = fpe.readlines()
-            failed_counties = [fips.strip(), fips in failed_counties]
+            failed_counties = [fips.strip() for fips in failed_counties]
 
         for fips in failed_counties:
             fp.write('{},{},{},{},{}\n'.format(fips, None, None, None, None))
