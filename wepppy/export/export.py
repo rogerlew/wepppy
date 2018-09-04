@@ -47,9 +47,10 @@ def export_winwepp(wd):
         os.mkdir(export_dir)
         
     if _exists(export_winwepp_dir):
-        os.remove(export_winwepp_dir)
+        shutil.rmtree(export_winwepp_dir)
     os.mkdir(export_winwepp_dir)
             
+    ron = wepppy.nodb.Ron.getInstance(wd)
     watershed = wepppy.nodb.Watershed.getInstance(wd)
     climate = wepppy.nodb.Climate.getInstance(wd)
     landuse = wepppy.nodb.Landuse.getInstance(wd)
@@ -57,12 +58,17 @@ def export_winwepp(wd):
     translator = watershed.translator_factory()   
     
     template = Template(ww2_prw_template_loader())
-    ww2 = template.render(watershed=watershed,
+    ww2 = template.render(ron=ron,
+                          watershed=watershed,
                           climate=climate,
                           landuse=landuse,
                           soils=soils,
                           translator=translator,
                           impoundment_defs='')
+
+    ww2 = ww2.split('\n')
+    print(ww2)
+    ww2 = '\n'.join(L for L in ww2 if L != '')
  
     os.mkdir(_join(export_winwepp_dir, 'projects'))
     with open(_join(export_winwepp_dir, 
@@ -83,10 +89,12 @@ def export_winwepp(wd):
                     
     with open(_join(cligen_dir, 'countries.txt'), 'w') as fp:
         fp.write("no beeping")
-    
-                    
-    shutil.make_archive(_join(export_dir, 'Data'), 
+
+    export_winwepp_path = _join(export_dir, '{}_winwepp'.format(wd))
+    shutil.make_archive(export_winwepp_path,
                         'zip', export_winwepp_dir)
+
+    return export_winwepp_path + '.zip'
 
 
 def archive_project(wd):

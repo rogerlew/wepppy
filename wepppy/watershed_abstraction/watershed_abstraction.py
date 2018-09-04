@@ -24,7 +24,8 @@ from scipy.stats import circmean
 from wepppy.all_your_base import (
     isfloat,
     read_arc,
-    wgs84_proj4
+    wgs84_proj4,
+    centroid_px
 )
 from .wepp_top_translator import WeppTopTranslator
 
@@ -87,14 +88,6 @@ def representative_normalized_elevations(x: List[float], dy: List[float]) -> Lis
         y.append(y[-1] - step * dy[i])
 
     return y
-
-
-def centroid_px(indx, indy) -> Tuple[int, int]:
-    """
-    given a sets of x and y indices calulates a central [x,y] index
-    """
-    return (int(round(float(np.mean(indx)))),
-            int(round(float(np.mean(indy)))))
 
 
 def read_geojson(fname):
@@ -286,8 +279,13 @@ def _weighted_slope_average(flowpaths, slopes, distances, max_points=19):
 
 
 def compute_direction(head: List, tail: List) -> float:
-    return atan2(tail[1] - head[1],
-                 head[0] - tail[0]) * (180.0 / pi) - 180.0
+    a = atan2(tail[1] - head[1],
+              head[0] - tail[0]) * (180.0 / pi) - 180.0
+
+    if a < 0:
+        return a + 360.0
+
+    return a
 
 
 slope_template = """\
@@ -404,14 +402,16 @@ class SummaryBase(object):
     def profile(self) -> str:
         max_points = self.max_points
         distance_p = self.distance_p
-        
+
         try:
             slopes = self.w_slopes
+            if slopes is None:
+                slopes = self.slopes
         except AttributeError:
             slopes = self.slopes
-            
+
         _d, _s = distance_p, slopes
-             
+
         npts = len(_d)
         if npts > max_points:
             _d, _s = interpolate_slp(_d, _s, max_points)
@@ -466,9 +466,17 @@ class ChannelSummary(SummaryBase):
         self.slopes = tuple(kwds['slopes'])
         self._order = kwds.get('order', None)
         self.isoutlet = kwds['isoutlet']
-        self.head = tuple(kwds['head'])
-        self.tail = tuple(kwds['tail'])
+        self.head = kwds['head']
+        self.tail = kwds['tail']
         self.chn_enum = int(kwds['chn_enum'])
+
+    @property
+    def head_coord(self):
+        return tuple([int(v) for v in self.head])
+
+    @property
+    def tail_coord(self):
+        return tuple([int(v) for v in self.tail])
     
     @property
     def fname(self) -> str:
@@ -484,8 +492,8 @@ class ChannelSummary(SummaryBase):
         
     @property
     def channel_type(self) -> str:
-        return 'OnRock 2'
-#        return ('OnGravel', 'OnEarth')[int([None, 0, 0, 0, 0, 1, 1, 1][self.order])]
+        return 'OnGravel 1'
+        return ('OnRock 2', 'OnGravel 1', 'OnEarth 1')[int([None, 0, 0, 0, 1, 1, 1, 2][self.order])]
 
     @property
     def cell_width(self) -> int:

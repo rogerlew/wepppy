@@ -225,27 +225,27 @@ where,
 <h3>User Specified T and I</h3>
 <form>
 <div style="width:1024px">
-<div class="form-group row">
-    <div class="col-sm-6">
-        <label for="user_I">Intensity mm/Hour (e.g. 30.0) </label>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <label for="user_I">Intensity mm/Hour (e.g. 30.0) </label>
+        </div>
+        <div class="col-sm-3">
+            <input id="user_I" class="form-control mr-sm-3 disable-readonly" type="text"
+            value="30.0" placeholder=""
+            aria-label="Max intensity mm per hour">
+        </div>
     </div>
-    <div class="col-sm-3">
-        <input id="user_I" class="form-control mr-sm-3 disable-readonly" type="text"
-        value="30.0" placeholder=""
-        aria-label="Max intensity mm per hour">
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <label for="user_I">Total Precipitation mm (e.g. 100.0) </label>
+        </div>
+        <div class="col-sm-3">
+            <input id="user_T" class="form-control mr-sm-3 disable-readonly" type="text"
+            value="100.0" placeholder=""
+            aria-label="Total Precipitation in mm">
+        </div>
     </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-6">
-        <label for="user_I">Total Precipitation mm (e.g. 100.0) </label>
-    </div>
-    <div class="col-sm-3">
-        <input id="user_T" class="form-control mr-sm-3 disable-readonly" type="text"
-        value="100.0" placeholder=""
-        aria-label="Total Precipitation in mm">
-    </div>
-</div>
-<div class="form-group">
+    <div class="form-group">
     <div class="col-sm-4">
         <button id="run_debris_flow"
                 class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
@@ -256,26 +256,26 @@ where,
         <small></small>
     </div>
 </div>
-<div id="user_results">
-<H5>User Specified T and I Results</H5>
-<div class="form-group row">
-    <div class="col-sm-6">
-        <label>Volume in (m<sup>3</sup>)</label>
-    </div>
-    <div class="col-sm-3">
-        <div id="user_v"></div>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-6">
-        <label>Probability of Occurrence (%)</label>
-    </div>
-    <div class="col-sm-3">
-        <div id="user_prob"></div>
-    </div>
 </div>
 </form>
-</div>
+<div id="user_results">
+    <H5>User Specified T and I Results</H5>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <label>Volume in (m<sup>3</sup>)</label>
+        </div>
+        <div class="col-sm-3">
+            <div id="user_v"></div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <label>Probability of Occurrence (%)</label>
+        </div>
+        <div class="col-sm-3">
+            <div id="user_prob"></div>
+        </div>
+    </div>
 </div>
 <h5>Reference</h5>
 <p style="max-width: 720px;">S. H. Cannon, J. E. Gartner M. G. Rupert, C Parrett (January, 2010). Predicting the probability

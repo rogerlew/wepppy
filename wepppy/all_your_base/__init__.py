@@ -6,6 +6,8 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from typing import Tuple, List, Dict, Union
+
 from .locationinfo import RasterDatasetInterpolator, RDIOutOfBoundsException
 
 import os
@@ -31,6 +33,13 @@ geodata_dir = '/geodata/'
 RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
 
+
+def centroid_px(indx, indy) -> Tuple[int, int]:
+    """
+    given a sets of x and y indices calulates a central [x,y] index
+    """
+    return (int(round(float(np.mean(indx)))),
+            int(round(float(np.mean(indy)))))
 
 def determine_wateryear(y, j=None, mo=None):
     if j is not None:

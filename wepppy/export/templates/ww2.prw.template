@@ -17,37 +17,38 @@ Channels {
    Number = {{ watershed.chn_n }}
 {%- for wepp_id in translator.iter_wepp_chn_ids() %}
    C{{ watershed._(wepp_id).chn_enum }} {
-      Head = {{  watershed._(wepp_id).head }}
-      Tail = {{  watershed._(wepp_id).tail }}
+      Head = {{  watershed._(wepp_id).head_coord }}
+      Tail = {{  watershed._(wepp_id).tail_coord }}
       Direction = {{  watershed._(wepp_id).direction }}
       Length = {{  watershed._(wepp_id).length }}
       Width = {{  watershed._(wepp_id).width }}
       Definition = "{{ watershed._(wepp_id).channel_type }}"
       Soil = "{{ soils._(wepp_id).fname }}"
       Profile = {
-   {{ watershed._(wepp_id).aspect }} {{  watershed._(wepp_id).width }}
-   {{ watershed._(wepp_id).num_points }} 
-   {{ watershed._(wepp_id).profile }}
+255 {{  watershed._(wepp_id).width / ron.cellsize }}
+{{ watershed._(wepp_id).num_points }} {{ watershed._(wepp_id).aspect }}
+{{ watershed._(wepp_id).profile }}
       }
-      Outlet = {{ watershed._(wepp_id).isoutlet }}
+      Outlet = {{ watershed._(wepp_id).isoutlet | tojson }}
    }
 {%- endfor %}
 }
 Impoundments {
    Number = {{watershed.impoundment_n}}
 {{impoundment_defs}}
+}
 Hillslopes {
    Number = {{watershed.sub_n}}
 {% for wepp_id in translator.iter_wepp_sub_ids() %}
    H{{ wepp_id }} {
-      File = "ww2_H{{ wepp_id }}" {
-Landuse = 1
-Length = {{ watershed._(wepp_id).length }}
-Profile {
-   Data {
-    {{ watershed._(wepp_id).aspect }} {{  watershed._(wepp_id).width }}
-    {{ watershed._(wepp_id).num_points }} 
-    {{ watershed._(wepp_id).profile }}
+       File = "ww2_H{{ wepp_id }}" {
+       Landuse = 1
+       Length = {{ watershed._(wepp_id).length }}
+       Profile {
+          Data {
+255 {{  watershed._(wepp_id).width }}
+{{ watershed._(wepp_id).num_points }} {{ watershed._(wepp_id).length }}
+{{ watershed._(wepp_id).profile }}
    }
 }
 Climate {
@@ -77,16 +78,16 @@ RunOptions {
    SimulationYears = {{ climate.input_years}}
    SmallEventByPass = 1
 }
-      }
-      Head = {{ watershed._(wepp_id).pourpoint }}
-      Direction = {{ watershed._(wepp_id).direction }}
-      Angle = 90
-      Base = {{ watershed._(wepp_id).width }}
-      Height = {{ watershed._(wepp_id).length }}
-      Polygon = 4 {
-         (0,0) (0,1) (1,1) (1,0)
-      }
-   }
+}
+   Head = {{ watershed._(wepp_id).pourpoint }}
+   Direction = {{ watershed._(wepp_id).direction }}
+   Angle = {{ watershed._(wepp_id).aspect }}
+   Base = {{ watershed._(wepp_id).width }}
+   Height = {{ watershed._(wepp_id).length }}
+   Polygon = 4 {
+       (0,0) (0,1) (1,1) (1,0)
+}
+}
 {%- endfor %}
 }
 Network {

@@ -20,6 +20,8 @@ import jsonpickle
 # weppy submodules
 from .base import NoDbBase
 
+from wepppy.all_your_base import isfloat
+
 converters = {
     'temperature': {
         ('degf', 'degc'): lambda v: (v - 32.0) / 1.8,
@@ -40,6 +42,10 @@ converters = {
     'xs-distance-rate': {
         ('mm/hour', 'in/hour'): lambda v: v * 0.0393701,
         ('in/hour', 'mm/hour'): lambda v: v * 25.4
+    },
+    'xs-annual': {
+        ('mm/yr', 'in/yr'): lambda v: v * 0.0393701,
+        ('in/yr', 'mm/yr'): lambda v: v * 25.4
     },
     'area': {
         ('ha', 'acre'): lambda v: v * 2.47105,
@@ -81,7 +87,11 @@ converters = {
     },
     'volume-annual': {
         ('m^3/yr', 'ft^3/yr'): lambda v: v * 35.3146667,
-        ('ft^3/yr', 'm^3/yr'): lambda v: v * 0.0283168
+        ('ft^3/yr', 'm^3/yr'): lambda v: v * 0.0283168,
+        ('m^3/yr', 'yd^3/yr'): lambda v: v * 1.30795,
+        ('ft^3/yr', 'yd^3/yr'): lambda v: v * 0.037037,
+        ('yd^3/yr', 'm^3/yr'): lambda v: v * 0.764555,
+        ('yd^3/yr', 'ft^3/yr'): lambda v: v * 27.0
     },
     'flow': {
         ('m^3/s', 'ft^3/min'): lambda v: v * 2118.88,
@@ -158,6 +168,10 @@ precisions = OrderedDict([
         ('mm/hour', 1),
         ('in/hour', 2)])
      ),
+    ('xs-annual', OrderedDict([
+        ('mm/yr', 1),
+        ('in/yr', 2)])
+     ),
     ('area', OrderedDict([
         ('ha', 1),
         ('acre', 1),
@@ -182,10 +196,12 @@ precisions = OrderedDict([
      ),
     ('volume', OrderedDict([
         ('m^3', 0),
+        ('yd^3', 0),
         ('ft^3', 0)])
      ),
     ('volume-annual', OrderedDict([
         ('m^3/yr', 0),
+        ('yd^3/yr', 0),
         ('ft^3/yr', 0)])
      ),
     ('flow', OrderedDict([
@@ -374,7 +390,13 @@ class Unitizer(NoDbBase):
 
         def unitizer(value, in_units, other_classes=None, parentheses=False):
 
+            if value is None:
+                return ''
+
             if in_units is None:
+                if isfloat(value):
+                    return '%0.3f' % float(value)
+
                 return str(value)
 
             if in_units == 'pct' or in_units == '%':

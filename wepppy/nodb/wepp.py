@@ -9,6 +9,7 @@
 # standard library
 import os
 import math
+from enum import IntEnum
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -81,6 +82,11 @@ from .log_mixin import LogMixin
 NCPU = math.floor(multiprocessing.cpu_count() * 0.8)
 if NCPU < 1:
     NCPU = 1
+
+
+class ChannelRoutingMethod(IntEnum):
+    Creams = 2
+    MuskingumCunge = 4
 
 class BaseflowOpts(object):
     def __init__(self):
@@ -303,7 +309,12 @@ class Wepp(NoDbBase, LogMixin):
         with open(fn, 'w') as fp:
             fp.write('1  1  1\n')
             fp.write('1.0   1.0  1.0   0.5\n\n')
-        
+
+    def _prep_tcr(self):
+        fn = _join(self.runs_dir, 'tcr.txt')
+        with open(fn, 'w') as fp:
+            fp.write('\n')
+
     def _prep_phosphorus(self):
 
         # noinspection PyMethodFirstArgAssignment
@@ -582,6 +593,7 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_channel_soils(translator, erodibility, critical_shear)
         self._prep_channel_climate(translator)
         self._prep_channel_input()
+        #self._prep_tcr()
         self._prep_watershed_managements(translator)
         self._make_watershed_run(translator)
 
@@ -613,7 +625,8 @@ class Wepp(NoDbBase, LogMixin):
         shutil.copyfile(_join(wat_dir, 'channels.slp'),
                         _join(runs_dir, 'pw0.slp'))
                         
-    def _prep_channel_chn(self, translator, erodibility, critical_shear):
+    def _prep_channel_chn(self, translator, erodibility, critical_shear,
+                          channel_routing_method=ChannelRoutingMethod.MuskingumCunge):
         assert translator is not None
 
         watershed = Watershed.getInstance(self.wd)
@@ -622,9 +635,14 @@ class Wepp(NoDbBase, LogMixin):
         chn_n = watershed.chn_n
 
         fp = open(_join(runs_dir, 'pw0.chn'), 'w')
-        fp.write('99.1\r\n{chn_n}\r\n4\r\n1.500000\r\n'
-                 .format(chn_n=chn_n))
-        
+
+        if channel_routing_method == ChannelRoutingMethod.MuskingumCunge:
+            fp.write('99.1\r\n{chn_n}\r\n4\r\n1.500000\r\n'
+                     .format(chn_n=chn_n))
+        else:
+            fp.write('99.1\r\n{chn_n}\r\n2\r\n1.00000\r\n'
+                     .format(chn_n=chn_n))
+
         for topaz_id, chn_summary in watershed.chn_iter():
             chn_key = chn_summary.channel_type
             chn_d = get_channel(chn_key, erodibility, critical_shear)
@@ -747,6 +765,8 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
             chn_man = mans_c[0]
             
         """
+
+        # Look at all the channel managements and use the most common channel type for all the channels
         keys = [man.key for topaz_id, man in landuse.chn_iter()]
         from collections import Counter
         mankey = Counter(keys).most_common()[0][0]

@@ -1,0 +1,10 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: SATAGO          Rec. ID: MI0437     Tex.:silt loam           
+1     1
+'SATAGO'            'SIL'    3   .23   .75  5056855.00  .010498   3.50   3.09
+ 101.6   16.9   18.1    2.00    10.8     1.4
+ 558.8   37.8   26.5     .67    10.6     7.6
+1168.4   37.8   26.5     .22    10.6     8.1

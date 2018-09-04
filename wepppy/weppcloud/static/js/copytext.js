@@ -54,9 +54,9 @@ function setClipboardText(text) {
 }
 
 function _fmt(s) {
-    return s.replace('&nbsp;', '')
+    return s.replace(/\u00a0/g, '')
             .replace('</sup>', '')
-            .replace('<sup>', '^')
+            .replace('<sup>', '^');
 }
 
 function copytable(tbl_id) {
@@ -87,7 +87,7 @@ function copytable(tbl_id) {
         text.push(rowtext.join('\t'));
     }
 
-    text = text.join('\n');
+    text = text.join('\n').replace(/&nbsp;/g,'');
 
     var title = $('#' + tbl_id).prev()[0].innerHTML;
     var i = title.indexOf("<a onclick");

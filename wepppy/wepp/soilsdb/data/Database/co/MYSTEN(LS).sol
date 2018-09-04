@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: MYSTEN          Rec. ID: CO0297     Tex.:loamy sand          
+1     1
+'MYSTEN'            'LS'     2   .23   .75  4834685.00  .007705   2.20  16.45
+  50.8   86.8    2.5    1.50     3.9    12.8
+1524.0   88.0    4.0     .50     2.4    28.5

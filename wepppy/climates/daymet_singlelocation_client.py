@@ -84,5 +84,6 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 
 
 if __name__ == "__main__":
-    df2 = retrieve_historical_timeseries(-116, 47, 2015, 2016)
+    df2 = retrieve_historical_timeseries(-75.78, 37.59, 1980, 2017)
     print(len(df2.index))
+    print(df2.keys())
