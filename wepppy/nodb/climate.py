@@ -41,7 +41,7 @@ from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.8)
+NCPU = math.floor(multiprocessing.cpu_count() * 0.6)
 if NCPU < 1:
     NCPU = 1
 
@@ -116,7 +116,7 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
-            self._input_years = 5
+            self._input_years = 30
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
             self._climate_mode = ClimateMode.Undefined

@@ -66,7 +66,7 @@ from wepppy.wepp.out import (
     correct_daily_hillslopes_pl_path
 )
 
-from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods
+from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
 
 # wepppy submodules
 from wepppy.wepp.stats.frq_flood import FrqFlood
@@ -79,7 +79,7 @@ from .topaz import Topaz
 from .wepppost import WeppPost
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.8)
+NCPU = math.floor(multiprocessing.cpu_count() * 0.6)
 if NCPU < 1:
     NCPU = 1
 
@@ -143,16 +143,16 @@ def validate_phosphorus_txt(fn):
 class PhosphorusOpts(object):
     def __init__(self):
         # Surface runoff concentration (mg/l)
-        self.surf_runoff = None  # 0.0118000004441
+        self.surf_runoff = 0.004
         
         # Subsurface lateral flow concentration (mg/l)
-        self.lateral_flow = None  # 0.0109999999404
+        self.lateral_flow = 0.005
         
         # Baseflow concentration (mg/l)
-        self.baseflow = None  # 0.0196000002325
+        self.baseflow = 0.006
         
         # Sediment concentration (mg/kg)
-        self.sediment = None  # 1024
+        self.sediment = 800
 
     def parse_inputs(self, kwds):
         # noinspection PyBroadException
@@ -699,9 +699,9 @@ class Wepp(NoDbBase, LogMixin):
         version = versions.pop()
 
         if erodibility is None:
-            erodibility = 0.20854
+            erodibility = 1E-6
         if critical_shear is None:
-            critical_shear = 100.000
+            critical_shear = 50.0
 
         if '7778' in version:
             # iterate over soils and append them together
@@ -875,6 +875,9 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 
         return FrqFlood(ebe_rpt, loss_rpt)
 
+    def report_sediment_delivery(self):
+        return SedimentDelivery(self.wd)
+
     def report_hill_watbal(self):
         return HillslopeWatbal(self.wd)
 
@@ -917,13 +920,33 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         report = Loss(loss_pw0, self.wd)
         
         d = {}
-        for row in report.hill_tbl:
-            topaz_id = translator.top(wepp=row['Hillslopes'])
+        try:
+            for row in report.hill_tbl:
+                topaz_id = translator.top(wepp=row['Hillslopes'])
+                d[str(topaz_id)] = dict(
+                    topaz_id=topaz_id,
+                    value=row[measure]
+                )
+        except:
+            return None
+
+        return d
+
+    def query_chn_val(self, measure):
+        wd = self.wd
+        translator = Watershed.getInstance(wd).translator_factory()
+        output_dir = self.output_dir
+        loss_pw0 = _join(output_dir, 'loss_pw0.txt')
+        report = Loss(loss_pw0, self.wd)
+
+        d = {}
+        for row in report.chn_tbl:
+            topaz_id = translator.top(chn_enum=row['Channels and Impoundments'])
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
                 value=row[measure]
             )
-        
+
         return d
 
     def make_loss_grid(self):

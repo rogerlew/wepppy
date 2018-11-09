@@ -4,3 +4,4 @@ from .return_periods import ReturnPeriods
 from .summary import HillSummary, ChannelSummary, OutletSummary
 from .report_base import ReportBase
 from .total_watbal import TotalWatbal
+from .sediment_delivery import SedimentDelivery, SedimentClassInfo
