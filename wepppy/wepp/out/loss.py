@@ -412,7 +412,10 @@ class Loss(object):
         self.yearlies = yearlies
         self.years = years
         self.num_years = num_years
-        self.avg_years = avg_years
+        if avg_years is None:
+            self.avg_years = years
+        else:
+            self.avg_years = avg_years
 
     @property
     def avg_annual_years(self):
