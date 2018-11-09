@@ -14,17 +14,17 @@
 1  # Number of plant scenarios
 
 
-Tah_6892
+Tah_2997
 With no Senescence or decomposition
 (null)
 W. Elliot 05/10
 1  #landuse
 WeppWillSet
-14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
-0.50000 1.00000 0.45000 0.99000 17.00000 0.00000 0.42000 0.20000
+14.00000 3.00000 0.00000 2.00000 4.99968 5.00000 0.00000 0.29998 1.00000 0.00500
+0.50000 1.00000 0.50000 0.99000 17.00000 0.00000 0.42000 0.27940
 2  # mfo - <non fragile>
-0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
--40.00000 2.00000 0.00000
+0.00000 0.00000 20.00000 0.10000 0.49988 0.29998 0.33000 0.19997 90 37.77778
+-40.00000 3.00000 0.00000
 
 #######################
 # Operation Section   #
@@ -33,14 +33,14 @@ WeppWillSet
 1  # Number of operation scenarios
 
 
-Tah_3875
-
+Tah_3755
+(null)
 W. Elliot 05/10
-
+(null)
 1  #landuse
 0.0000 0.0000 0
-4 # pcode - other 
-0.0000 0.0000 0.0000 0.0000 0.0500 1.0000 0.1000 
+4 # pcode - other
+0.0000 0.0000 0.0000 0.0000 0.0450 1.0000 0.0254
 
 
 
@@ -51,18 +51,18 @@ W. Elliot 05/10
 1  # Number of initial scenarios
 
 
-Tah_4436
+Tah_3471
 For no growth, no decomp, no senescence
-
+(null)
 W. Elliot  05/10
 1  #landuse
-1.10000 0.05000 330 1000 0.00000 0.30000
-1 # iresd  <Tah_6892>
+1.10000 0.12000 330 1000 0.00000 0.35000
+1 # iresd  <Tah_2997>
 2 # mang perennial
-400.00000 0.06000 0.30000 0.06000 0.00000
+400.04999 0.04826 0.35000 0.06000 0.00000
 1  # rtyp - temporary
 0.00000 0.00000 0.00000 0.00000 0.00000
-0.20000 0.20000
+0.14998 0.14998
 
 
 
@@ -83,8 +83,8 @@ Your name, phone
 
 1  # landuse  - cropland
 1 # ntill - number of operations
-  2  # mdate  --- 1 / 2 
-  1  # op --- Tah_3875
+  2  # mdate  --- 1 / 2
+  1  # op --- Tah_3755
       0.010  # depth
       2  # type
 
@@ -111,7 +111,7 @@ Your name, phone
 #
 # Yearly scenario 1 of 1
 #
-Year 1 
+Year 1
 
 
 
@@ -121,7 +121,7 @@ Year 1
 0  # contour scenario
 0  # drainage scenario
 2 # management <perennial>
-   0 # senescence date 
+   0 # senescence date
    0 # perennial plant date --- 0 /0
    0 # perennial stop growth date --- 0/0
    0.0000  # row width

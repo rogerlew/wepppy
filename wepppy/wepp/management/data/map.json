@@ -40,6 +40,7 @@
 "103": {"Key": 103, "Color": [155,223,160,255], "Description": "Tahoe Bunch Grass", "ManagementFile": "Tahoe/Tahoe_Bunch_Grass.man"},
 "104": {"Key": 104, "Color": [230,240,151,255], "Description": "Tahoe Shrub", "ManagementFile": "Tahoe/Tahoe_Shrub.man"},
 "105": {"Key": 105, "Color": [255,0,0,255],  "Description": "Tahoe High Severity Fire", "ManagementFile": "Tahoe/Tahoe_High_Severity_Fire.man"},
+"118": {"Key": 118, "Color": [255,255,0,255],   "Description": "Tahoe Moderate Severity Fire", "ManagementFile": "Tahoe/Tahoe_Moderate_Severity_Fire.man"},
 "106": {"Key": 106, "Color": [77,230,0,255],   "Description": "Tahoe Low Severity Fire", "ManagementFile": "Tahoe/Tahoe_Low_Severity_Fire.man"},
 "107": {"Key": 107, "Color": [0,255,197,255],   "Description": "Tahoe Young Forest", "ManagementFile": "Tahoe/Tahoe_Thin_or_Young_Forest.man"},
 "108": {"Key": 108, "Color": [236,155,53,255],  "Description": "Tahoe Mulch", "ManagementFile": "Tahoe/Tahoe_Mulch.man"},

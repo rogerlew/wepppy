@@ -143,18 +143,20 @@ def write_slp(aspect, width, cellsize, length, slope, distance_p, fp, version=97
     if npts > max_points:
         _d, _s = interpolate_slp(distance_p, slope, max_points)
         npts = len(_d)
-        
+
     if version == 97.3:
         _slp = '97.3\n{nofes}\n{aspect} {width}\n{npts} {length}\n{defs} '
         defs = ' '.join(['%0.4f, %0.5f' % ds for ds in zip(_d, _s)])
 
+        fp.write(_slp.format(nofes=nofes, aspect=aspect, width=width,
+                             npts=npts, length=length, defs=defs))
+
     else:
-        width /= cellsize
-        _slp = '{aspect} {width}\n{npts} {length}\n{defs} \n'
+        _slp = '{aspect} {cellsize}\n{npts} {length}\n{defs} \n'
         defs = ' '.join(['%0.4f %0.5f' % ds for ds in zip(_d, _s)])
 
-    fp.write(_slp.format(nofes=nofes, aspect=aspect, width=width,
-                         npts=npts, length=length, defs=defs))
+        fp.write(_slp.format(nofes=nofes, aspect=aspect, cellsize=float(cellsize),
+                             npts=npts, length=length, defs=defs))
 
 
 def _identify_subflows(flowpaths: List[np.array]) -> List[List[int]]:
@@ -459,6 +461,10 @@ class HillSummary(SummaryBase):
     def fname(self) -> str:
         return 'hill_%i.slp' % self.topaz_id
 
+    @property
+    def pourpoint_coord(self):
+        return str(tuple([int(v) for v in self.pourpoint])).replace(' ', '')
+
 
 class ChannelSummary(SummaryBase):
     def __init__(self, **kwds):
@@ -472,12 +478,12 @@ class ChannelSummary(SummaryBase):
 
     @property
     def head_coord(self):
-        return tuple([int(v) for v in self.head])
+        return str(tuple([int(v) for v in self.head])).replace(' ', '')
 
     @property
     def tail_coord(self):
-        return tuple([int(v) for v in self.tail])
-    
+        return str(tuple([int(v) for v in self.tail])).replace(' ', '')
+
     @property
     def fname(self) -> str:
         return 'chn_%i.slp' % self.topaz_id
@@ -492,7 +498,7 @@ class ChannelSummary(SummaryBase):
         
     @property
     def channel_type(self) -> str:
-        return 'OnGravel 1'
+        return 'OnRock 2'
         return ('OnRock 2', 'OnGravel 1', 'OnEarth 1')[int([None, 0, 0, 0, 1, 1, 1, 2][self.order])]
 
     @property
@@ -656,7 +662,7 @@ class WatershedAbstraction:
         self.abstract_subcatchments(verbose=verbose)
         self.abstract_structure(verbose=verbose)
 
-    def write_slps(self, channels=1, subcatchments=1, flowpaths=1):
+    def write_slps(self, channels=1, subcatchments=1, flowpaths=1, cell_width=None):
         """
         Writes slope files to the specified wat_dir. The channels,
         subcatchments, and flowpaths args specify what slope files
@@ -664,7 +670,7 @@ class WatershedAbstraction:
         """
         out_dir = self.wat_dir
         if channels:
-            self._make_channel_slps(out_dir)
+            self._make_channel_slps(out_dir, cell_width=cell_width)
 
         if subcatchments:
             self._write_subcatchment_slps(out_dir)
@@ -672,10 +678,9 @@ class WatershedAbstraction:
         if flowpaths:
             self._write_flowpath_slps(out_dir)
 
-    def _make_channel_slps(self, out_dir):
+    def _make_channel_slps(self, out_dir, cell_width=None):
         ws = self.watershed
         translator = self.translator
-        cellsize = self.cellsize
 
         chn_enums = ws["channels"].keys()
         chn_enums = sorted([translator.chn_enum(chn_id=v) for v in chn_enums])
@@ -692,13 +697,18 @@ class WatershedAbstraction:
             chn_id = 'chn_%i' % top
             d = ws['channels'][chn_id]
 
+            if cell_width is None:
+                _cell_width = d.cell_width
+            else:
+                _cell_width = cell_width
+
             slp_fn = _join(out_dir, '%s.slp' % chn_id)
             fp = open(slp_fn, 'w')
-            write_slp(d.aspect, d.width, cellsize, d.length,
+            write_slp(d.aspect, d.width, _cell_width, d.length,
                       d.slopes, d.distance_p, fp, 97.3)
             fp.close()
 
-            write_slp(d.aspect, d.width, cellsize, d.length,
+            write_slp(d.aspect, d.width, _cell_width, d.length,
                       d.slopes, d.distance_p, fp2, 99.1)
 
         fp2.close()
@@ -796,6 +806,7 @@ class WatershedAbstraction:
 
                 order = data[chnum]["order"]
                 self.watershed["channels"][chn_id].order = order
+                # self.watershed["channels"][chn_id].width = self.cellsize / order
 
             if chnout_id == chn_id0:
                 continue

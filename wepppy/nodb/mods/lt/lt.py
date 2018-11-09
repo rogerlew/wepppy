@@ -159,19 +159,27 @@ class LakeTahoe(NoDbBase):
         elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
             self.determine_phosphorus()
 
+    @property
+    def lt_doms(self):
+        lc_dict = read_lc_file(_join(_data_dir, 'landSoilLookup.csv'))
+        return set([lc_dict[k].LndcvrID for k in lc_dict])
+
     def remap_landuse(self):
 
         with open(_join(_data_dir, 'landcover_map.json')) as fp:
             lc_map = json.load(fp)
+
+        lt_doms = self.lt_doms
 
         landuse = Landuse.getInstance(self.wd)
         landuse.lock()
 
         # noinspection PyBroadException
         try:
-                
+
             for topaz_id, dom in landuse.domlc_d.items():
-                landuse.domlc_d[topaz_id] = lc_map[dom]
+                if int(dom) not in lt_doms:
+                    landuse.domlc_d[topaz_id] = lc_map[dom]
             
             landuse.dump_and_unlock()
             
@@ -242,19 +250,26 @@ class LakeTahoe(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
         lng, lat = watershed.centroid
         wepp = Wepp.getInstance(self.wd)
-        
+
+        #d = {}
+        #for opt in ['runoff', 'lateral', 'baseflow', 'sediment']:
+        #    fn = _join(_data_dir, 'phosphorus', 'p_%s.tif' % opt)
+        #    assert _exists(fn), fn
+        #    raster = RasterDatasetInterpolator(fn)
+        #    d[opt] = raster.get_location_info(lng, lat)
+
         d = {}
-        for opt in ['runoff', 'lateral', 'baseflow', 'sediment']:
-            fn = _join(_data_dir, 'phosphorus', 'p_%s.tif' % opt)
-            assert _exists(fn), fn
-            raster = RasterDatasetInterpolator(fn)
-            d[opt] = raster.get_location_info(lng, lat)
+        d['surf_runoff'] = 0.004
+        d['lateral_flow'] = 0.005
+        d['baseflow'] = 0.006
+        d['sediment'] = 800
 
         # noinspection PyBroadException
         try:
             wepp.lock()
             wepp.phosphorus_opts.parse_inputs(d)
             wepp.dump_and_unlock()
+            print('set phosopts')
         except Exception:
             wepp.unlock('-f')
             raise

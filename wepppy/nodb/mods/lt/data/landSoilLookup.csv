@@ -1,6 +1,7 @@
 Code,LndcvrID,WEPP_Type,New_WEPPman,ManName,Albedo,iniSatLev,interErod,rillErod,critSh,effHC,soilDepth,Sand,Clay,OM,CEC
 1111,111,Granitic,Tahoe_Skid_Trail.rot,Skid,0.2,0.75,2700000,0.001,4,10,300,90,2,4,3
 1105,105,Granitic,Tahoe_High_Severity_Fire.rot,HighF,0.1,0.75,1800000,0.0005,4,15,300,90,2,3,3
+1118,118,Granitic,Tahoe_Moderate_Severity_Fire.rot,ModF,0.15,0.75,1000000,0.0003,4,20,300,90,2,4,3
 1106,106,Granitic,Tahoe_Low_Severity_Fire.rot,LowF,0.15,0.75,1000000,0.0003,4,20,300,90,2,4,3
 1101,101,Granitic,Tahoe_Sod_Grass.rot,Sod_G,0.15,0.75,750000,0.0001,4,25,350,90,2,4,3
 1103,103,Granitic,Tahoe_Bunch_Grass.rot,BnchG,0.15,0.75,600000,8E-05,4,30,400,90,2,5,3

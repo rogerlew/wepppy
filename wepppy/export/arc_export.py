@@ -54,6 +54,12 @@ def arc_export(wd):
     weppout['Baseflow'] = wepp.query_sub_val('Baseflow')
     weppout['DepLoss'] = wepp.query_sub_val('DepLoss')
     weppout['Total P Density'] = wepp.query_sub_val('Total P Density')
+    weppout['Solub. React. P Density'] = wepp.query_sub_val('Solub. React. P Density')
+    weppout['Particulate P Density'] = wepp.query_sub_val('Particulate P Density')
+
+    weppout['Soil Loss Density'] = wepp.query_sub_val('Soil Loss Density')
+    weppout['Sediment Deposition Density'] = wepp.query_sub_val('Sediment Deposition Density')
+    weppout['Sediment Yield Density'] = wepp.query_sub_val('Sediment Yield Density')
 
     for i, f in enumerate(js['features']):
         topaz_id = str(f['properties']['TopazID'])
@@ -81,8 +87,20 @@ def arc_export(wd):
         f['properties']['Runoff(mm)'] = weppout['Runoff'][topaz_id]['value']
         f['properties']['Subrun(mm)'] = weppout['Subrunoff'][topaz_id]['value']
         f['properties']['BaseF(mm)'] = weppout['Baseflow'][topaz_id]['value']
-        f['properties']['DepLos(mm)'] = weppout['DepLoss'][topaz_id]['value']
-        f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
+        f['properties']['DepLos(kg)'] = weppout['DepLoss'][topaz_id]['value']
+
+        f['properties']['SoiLos(kg)'] = weppout['Soil Loss Density'][topaz_id]['value']
+        f['properties']['SedDep(kg)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
+        f['properties']['SedYld(kg)'] = weppout['Sediment Yield Density'][topaz_id]['value']
+
+        if weppout['Total P Density'] is not None:
+            f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
+
+        if weppout['Solub. React. P Density'] is not None:
+            f['properties']['SRP(kg/ha)'] = weppout['Solub. React. P Density'][topaz_id]['value']
+
+        if weppout['Particulate P Density'] is not None:
+            f['properties']['PP(kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
 
         js['features'][i] = f
 
@@ -107,7 +125,22 @@ def arc_export(wd):
     with open(sub_json) as fp:
         js = json.load(fp)
 
-    chns_summary = {str(ss['meta']['topaz_id']):ss for ss in ron.chns_summary()}
+    # Discharge Volume
+    # Sediment Yield
+    # Soil Loss
+    # SRP
+    # PP
+    # TP
+
+    chns_summary = {str(ss['meta']['topaz_id']): ss for ss in ron.chns_summary()}
+
+    weppout= {}
+    weppout['Discharge Volume'] = wepp.query_chn_val('Discharge Volume')
+    weppout['Sediment Yield'] = wepp.query_chn_val('Sediment Yield')
+    weppout['Soil Loss'] = wepp.query_chn_val('Soil Loss')
+    weppout['Total P Density'] = wepp.query_chn_val('Total P Density')
+    weppout['Solub. React. P Density'] = wepp.query_chn_val('Solub. React. P Density')
+    weppout['Particulate P Density'] = wepp.query_chn_val('Particulate P Density')
 
     for i, f in enumerate(js['features']):
         topaz_id = str(f['properties']['TopazID'])
@@ -118,9 +151,23 @@ def arc_export(wd):
         f['properties']['wepp_id'] = ss['meta']['wepp_id']
         f['properties']['width(m)'] = ss['watershed']['width']
         f['properties']['length(m)'] = ss['watershed']['length']
-        f['properties']['area(ha)'] = ss['watershed']['area'] * 0.0001
+        _area = ss['watershed']['area'] * 0.0001
+        f['properties']['area(ha)'] = _area
         f['properties']['slope'] = ss['watershed']['slope_scalar']
         f['properties']['aspect'] = ss['watershed']['aspect']
+
+        f['properties']['DisVol(m^3/ha)'] = weppout['Discharge Volume'][topaz_id]['value'] / _area
+        f['properties']['SedYield(tonne/ha)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
+        f['properties']['SoilLoss(kg/ha)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
+
+        if weppout['Total P Density'] is not None:
+            f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
+
+        if weppout['Solub. React. P Density'] is not None:
+            f['properties']['SRP(kg/ha)'] = weppout['Solub. React. P Density'][topaz_id]['value']
+
+        if weppout['Particulate P Density'] is not None:
+            f['properties']['PP(kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
 
         try:
             f['properties']['landuse'] = ss['landuse']['desc']
@@ -148,5 +195,5 @@ def arc_export(wd):
 
 
 if __name__ == '__main__':
-    wd = '/home/weppdev/PycharmProjects/wepppy/wepppy/validation/Watershed_1'
+    wd = '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f'
     arc_export(wd)
