@@ -119,7 +119,7 @@ if __name__ == '__main__':
                      map_zoom=14,
                      outlet=[-120.10916060023823, 39.004865203316534],
                      landuse=None,
-                     cs=50, erod=0.000001),
+                     cs=50, erod=0.000001, chn_cell_width=1.0),
         #         dict(wd='SimFire_Watershed_16',
         #              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
         #              map_center=[-120.14408111572267, 39.003177506910475],
@@ -169,8 +169,8 @@ if __name__ == '__main__':
             shutil.rmtree(wd)
         os.mkdir(wd)
 
-        ron = Ron(wd, "lt-fire.cfg")
-        #ron = Ron(wd, "lt.cfg")
+        #ron = Ron(wd, "lt-fire.cfg")
+        ron = Ron(wd, "lt.cfg")
         #ron = Ron(wd, "0.cfg")
         ron.name = wd
         ron.set_map(extent, map_center, zoom=map_zoom)
@@ -183,7 +183,7 @@ if __name__ == '__main__':
         topaz.build_subcatchments()
 
         wat = Watershed.getInstance(wd)
-        wat.abstract_watershed()
+        wat.abstract_watershed(cell_width=proj['chn_cell_width'])
         translator = wat.translator_factory()
         topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
         print('topaz_ids:', topaz_ids)

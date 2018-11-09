@@ -6,7 +6,8 @@ No                              # pass file output
 1                               # abbreviated annual soil loss output option for continuous simulation
 No                              # initial condition scenario output
 ../output/{fp}.loss.dat         # name of hillslope loss file
-No                              # water balance output
+Yes                             # water balance output
+../output/{fp}.wat.dat          # name of water balance output file
 No                              # crop output
 No                              # soil output
 Yes                             # distance and sediment loss

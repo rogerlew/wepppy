@@ -9,7 +9,7 @@
 from collections import OrderedDict
 from copy import deepcopy
 
-from wepppy.all_your_base import find_ranges
+from wepppy.all_your_base import find_ranges, isfloat
 
 unit_consistency_map = {
     'T/ha/yr': 'tonne/ha/yr',
@@ -184,11 +184,12 @@ class Loss(object):
         None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'ha', 'kg', 'kg', 'kg'
     )
 
-    def __init__(self, fn, wd=None, exclude_yr_indxs=[0, 1, 2]):
+    def __init__(self, fn, wd=None, exclude_yr_indxs=None):
         hill_hdr = self.hill_hdr
         hill_avg_hdr = self.hill_avg_hdr
         chn_hdr = self.chn_hdr
         chn_avg_hdr = self.chn_avg_hdr
+        avg_years = None
 
         # read the loss report
         with open(fn) as fp:
@@ -268,21 +269,29 @@ class Loss(object):
             _hill_tbl = deepcopy(hill_tbl)
             for j, d in enumerate(hill_tbl):
                 for var in hill_hdr[2:]:
-                    hill_tbl[j][var] = 0
+                    _hill_tbl[j][var] = 0
 
             avg_years = []
+            _avg_years = {}
             for i, yr in enumerate(years):
                 if i in exclude_yr_indxs:
                     continue
 
                 for j, d in enumerate(hill_tbl):
                     for var in hill_hdr[2:]:
-                        _hill_tbl[j][var] += yearlies[yr]['hill_tbl'][j][var]
+
+                        v = yearlies[yr]['hill_tbl'][j][var]
+                        if set(str(v).strip()) != set('*'):
+                            _hill_tbl[j][var] += v
+
+                            if var not in _avg_years:
+                                _avg_years[var] = 0.0
+                            _avg_years[var] += 1.0
 
                 avg_years.append(yr)
 
             for var in hill_hdr[2:]:
-                _hill_tbl[j][var] /= float(len(avg_years))
+                _hill_tbl[j][var] /= _avg_years[var]
 
             hill_tbl = _hill_tbl
 
@@ -290,24 +299,31 @@ class Loss(object):
             _chn_tbl = deepcopy(chn_tbl)
             for j, d in enumerate(chn_tbl):
                 for var in chn_hdr[2:]:
-                    chn_tbl[j][var] = 0
+                    _chn_tbl[j][var] = 0
 
             avg_years = []
+            _avg_years = {}
             for i, yr in enumerate(years):
                 if i in exclude_yr_indxs:
                     continue
 
                 for j, d in enumerate(chn_tbl):
                     for var in chn_hdr[2:]:
-                        _chn_tbl[j][var] += yearlies[yr]['chn_tbl'][j][var]
+
+                        v = yearlies[yr]['chn_tbl'][j][var]
+                        if set(str(v).strip()) != set('*'):
+                            _chn_tbl[j][var] += v
+
+                            if var not in _avg_years:
+                                _avg_years[var] = 0.0
+                            _avg_years[var] += 1.0
 
                 avg_years.append(yr)
 
             for var in chn_hdr[2:]:
-                _chn_tbl[j][var] /= float(len(avg_years))
+                _chn_tbl[j][var] /= _avg_years[var]
 
             chn_tbl = _chn_tbl
-
 
         if wd is not None:
             import wepppy
@@ -329,9 +345,9 @@ class Loss(object):
                 hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
                 hill_tbl[i]['Soil'] = soils.domsoil_d[str(topaz_id)]
                 hill_tbl[i]['Length'] = sub_summary['length']
-                hill_tbl[i]['Runoff'] = row['Runoff Volume'] / (area * 1000.0)
-                hill_tbl[i]['Subrunoff'] = row['Subrunoff Volume'] / (area * 1000.0)
-                hill_tbl[i]['Baseflow'] = row['Baseflow Volume'] / (area * 1000.0)
+                hill_tbl[i]['Runoff'] = 100 * row['Runoff Volume'] / (area * 1000.0)
+                hill_tbl[i]['Subrunoff'] = 100 * row['Subrunoff Volume'] / (area * 1000.0)
+                hill_tbl[i]['Baseflow'] = 100 * row['Baseflow Volume'] / (area * 1000.0)
 
                 _loss = row['Soil Loss'] / area
                 _dep = row['Sediment Deposition'] / area
@@ -361,17 +377,33 @@ class Loss(object):
                 chn_tbl[i]['TopazID'] = topaz_id
                 chn_tbl[i]['Area'] = area
                 chn_tbl[i]['Length'] = chn_summary['length']
-                chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
-                chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / area
+                if isfloat(row['Sediment Yield']):
+                    chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
+                else:
+                    chn_tbl[i]['Sediment Yield Density'] = float('nan')
+
+                if isfloat(row['Soil Loss']):
+                    chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / area
+                else:
+                    chn_tbl[i]['Soil Loss Density'] = float('nan')
 
                 if 'Solub. React. Phosphorus' in row:
-                    chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
+                    if isfloat(row['Solub. React. Phosphorus']):
+                        chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
+                    else:
+                        chn_tbl[i]['Solub. React. P Density'] = float('nan')
 
                 if 'Particulate Phosphorus' in row:
-                    chn_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
+                    if isfloat(row['Particulate Phosphorus']):
+                        chn_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
+                    else:
+                        chn_tbl[i]['Particulate P Density'] = float('nan')
 
                 if 'Total Phosphorus' in row:
-                    chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
+                    if isfloat(row['Total Phosphorus']):
+                        chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
+                    else:
+                        chn_tbl[i]['Total P Density'] = float('nan')
 
         self.hill_tbl = hill_tbl
         self.chn_tbl = chn_tbl
@@ -398,6 +430,8 @@ class Loss(object):
 
 
 if __name__ == "__main__":
+
+
     loss = Loss('/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/wepp/output/loss_pw0.txt',
                 '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/')
 

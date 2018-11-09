@@ -382,8 +382,10 @@ class Baer(NoDbBase):
                 ron = Ron.getInstance(wd)
                 if 'lt' in ron.mods:
                     for k, sbs in domlc_d.items():
-                        if sbs in ['131', '132']:
+                        if sbs in ['131']:
                             landuse.domlc_d[k] = '106'
+                        elif sbs in ['132']:
+                            landuse.domlc_d[k] = '118'
                         elif sbs in ['133']:
                             landuse.domlc_d[k] = '105'
 

@@ -132,6 +132,29 @@ class TotalWatSed(object):
         self.d = d
         self.wsarea = float(d['Area (m^2)'][0])
 
+    @property
+    def num_years(self):
+        return len(set(self.d['Year']))
+
+    @property
+    def sed_delivery(self):
+        return np.sum(self.d['Sed. Del (kg)'])
+
+    @property
+    def class_fractions(self):
+        d = self.d
+
+        sed_delivery = self.sed_delivery
+
+        if sed_delivery == 0.0:
+            return [0.0, 0.0, 0.0, 0.0, 0.0]
+
+        return [np.sum(d['Class 1']) / sed_delivery,
+                np.sum(d['Class 2']) / sed_delivery,
+                np.sum(d['Class 3']) / sed_delivery,
+                np.sum(d['Class 4']) / sed_delivery,
+                np.sum(d['Class 5']) / sed_delivery]
+
     def export(self, fn):
         d = self.d
         with open(fn, 'w') as fp:

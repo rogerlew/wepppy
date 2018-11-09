@@ -7,7 +7,7 @@ Comments {
    {{ watershed.sub_n }} Hillslopes and {{ watershed.chn_n }} Channels from TOPAZ/WEPPPY
 }
 Climate {
-   File = "{{climate.cli_fn}}"
+   File = "wepp.cli"
 }
 Size = (1000,1000)
 Units = Meters
@@ -19,14 +19,14 @@ Channels {
    C{{ watershed._(wepp_id).chn_enum }} {
       Head = {{  watershed._(wepp_id).head_coord }}
       Tail = {{  watershed._(wepp_id).tail_coord }}
-      Direction = {{  watershed._(wepp_id).direction }}
-      Length = {{  watershed._(wepp_id).length }}
-      Width = {{  watershed._(wepp_id).width }}
-      Definition = "{{ watershed._(wepp_id).channel_type }}"
-      Soil = "{{ soils._(wepp_id).fname }}"
+      Direction = {{  watershed._(wepp_id).direction | round(6) }}
+      Length = {{  watershed._(wepp_id).length | round(6) }}
+      Width = {{  watershed._(wepp_id).width / ron.cellsize | round(6)}}
+      Definition = "OnGravel"
+      Soil = "default.sol"
       Profile = {
-255 {{  watershed._(wepp_id).width / ron.cellsize }}
-{{ watershed._(wepp_id).num_points }} {{ watershed._(wepp_id).aspect }}
+255 {{  watershed._(wepp_id).width / ron.cellsize | round(6) }}
+{{ watershed._(wepp_id).num_points }} {{ watershed._(wepp_id).length | round(6) }}
 {{ watershed._(wepp_id).profile }}
       }
       Outlet = {{ watershed._(wepp_id).isoutlet | tojson }}
@@ -43,47 +43,45 @@ Hillslopes {
    H{{ wepp_id }} {
        File = "ww2_H{{ wepp_id }}" {
        Landuse = 1
-       Length = {{ watershed._(wepp_id).length }}
+       Length = {{ watershed._(wepp_id).length | round(6) }}
        Profile {
           Data {
-255 {{  watershed._(wepp_id).width }}
-{{ watershed._(wepp_id).num_points }} {{ watershed._(wepp_id).length }}
+255 {{  watershed._(wepp_id).width | round(6) }}
+{{ watershed._(wepp_id).num_points }} {{ watershed._(wepp_id).length | round(6) }}
 {{ watershed._(wepp_id).profile }}
    }
 }
 Climate {
-   File = "{{ climate._(wepp_id).cli_fn }}"
+   File = "wepp.cli"
 }
 Soil {
    Breaks = 0
    default {
-      Distance = {{ watershed._(wepp_id).length }}
-      File = "{{ soils._(wepp_id).fname }}"
+      Distance = {{ watershed._(wepp_id).length | round(6) }}
+      File = "default.sol"
    }
 }
 Management {
    Breaks = 0
    default {
-      Distance = {{ watershed._(wepp_id).length }}
-      File = "{{ landuse._(wepp_id).man_fn }}"
+      Distance = {{ watershed._(wepp_id).length | round(6) }}
+      File = "grass.rot"
    }
 }
 RunOptions {         
    Version = 1
-   HillSlopePassFile = AutoName
    SoilLossOutputType = 1
    SoilLossOutputFile = AutoName
-   SoilFile = AutoName
    PlotFile = AutoName
    SimulationYears = {{ climate.input_years}}
    SmallEventByPass = 1
 }
 }
-   Head = {{ watershed._(wepp_id).pourpoint }}
-   Direction = {{ watershed._(wepp_id).direction }}
-   Angle = {{ watershed._(wepp_id).aspect }}
-   Base = {{ watershed._(wepp_id).width }}
-   Height = {{ watershed._(wepp_id).length }}
+   Head = {{ watershed._(wepp_id).pourpoint_coord }}
+   Direction = 30
+   Angle = 90
+   Base = {{ watershed._(wepp_id).width | round(6) }}
+   Height = {{ watershed._(wepp_id).length | round(6) }}
    Polygon = 4 {
        (0,0) (0,1) (1,1) (1,0)
 }
@@ -92,27 +90,27 @@ RunOptions {
 }
 Network {
 {%- for def in watershed.structure %}
-    C{{ "6%s"|format(def[0]) }} {{ ' ( ' }}
+   C{{ "6%s"|format(def[0]) }} {{ ' ( ' }}
     {%- for v in def[1:4] -%}
         {%- if v == 0 -%}
             {{ v }}
         {%- else -%}
             H{{ translator.wepp(top=v) }}
-        {%- endif -%} {{ ' , ' }}
+        {%- endif -%} {{ ', ' }}
     {%- endfor -%}
     {%- for v in def[4:7] -%}
         {%- if v == 0 -%}
             {{ v }}
         {%- else -%}
             C{{ translator.chn_enum(top=v) }}
-        {%- endif -%} {{ ' , ' }}
+        {%- endif -%} {{ ', ' }}
     {%- endfor -%}
     {%- for v in def[7:] -%}
         {%- if v == 0 -%}
             {{ v }}
         {%- else -%}
             I{{ translator.chn_enum(top=v) }}
-        {%- endif -%} {{ ' , ' if not loop.last else ' ) ' }}
+        {%- endif -%} {{ ', ' if not loop.last else ' ) ' }}
     {%- endfor -%} 
 {%- endfor %}
 }

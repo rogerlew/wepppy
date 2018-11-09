@@ -1991,7 +1991,7 @@ def report_wepp_loss(runid):
                 exclude_yr_indxs.append(int(yr))
 
     except:
-        exclude_yr_indxs = [0, 1]
+        exclude_yr_indxs = None
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -2165,6 +2165,25 @@ def report_wepp_frq_flood(runid):
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            report=report,
+                           translator=translator,
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/report/wepp/sediment_delivery')
+@app.route('/runs/<string:runid>/report/wepp/sediment_delivery/')
+def report_wepp_sediment_delivery(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    sed_del = Wepp.getInstance(wd).report_sediment_delivery()
+    translator = Watershed.getInstance(wd).translator_factory()
+
+    unitizer = Unitizer.getInstance(wd)
+
+    return render_template('reports/wepp/sediment_delivery.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           sed_del=sed_del,
                            translator=translator,
                            ron=ron,
                            user=current_user)

@@ -138,7 +138,7 @@ class TopazRunner:
     For more infomation on topaz see the manual available here:
         https://www.ars.usda.gov/ARSUserFiles/30700510/TOPAZ_User-Manual2.pdf
     """
-    def __init__(self, topaz_wd, dem, csa=4, mcl=60):
+    def __init__(self, topaz_wd, dem, csa=5, mcl=60):
         """
         provide a path to a directory to store the topaz files a
         path to a dem

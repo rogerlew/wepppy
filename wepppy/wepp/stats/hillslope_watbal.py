@@ -18,6 +18,7 @@ import numpy as np
 from wepppy.all_your_base import parse_units, RowData
 from .report_base import ReportBase
 
+
 class HillslopeWatbal(ReportBase):
     def __init__(self, wd):
         self.wd = wd

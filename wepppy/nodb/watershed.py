@@ -131,7 +131,7 @@ class Watershed(NoDbBase):
     #
     # abstract watershed
     #
-    def abstract_watershed(self):
+    def abstract_watershed(self, cell_width=None):
         self.lock()
 
         # noinspection PyBroadException
@@ -144,7 +144,7 @@ class Watershed(NoDbBase):
 
             _abs = WatershedAbstraction(topaz_wd, wat_dir)
             _abs.abstract()
-            _abs.write_slps()
+            _abs.write_slps(cell_width=cell_width)
             
             chns_summary = {}
             for k, v in _abs.watershed['channels'].items():

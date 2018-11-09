@@ -57,7 +57,7 @@ def make_flowpath_run(fp, sim_years, runs_dir):
     _fp_template = flowpath_template_loader()
 
     s = _fp_template.format(fp=fp,
-                              sim_years=sim_years)
+                            sim_years=sim_years)
 
     fn = _join(runs_dir, '%s.run' % fp)
     with open(fn, 'w') as fp:
