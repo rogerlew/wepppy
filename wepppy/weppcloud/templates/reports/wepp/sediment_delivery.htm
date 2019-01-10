@@ -1,8 +1,9 @@
 {% extends "reports/_page_container.htm" %}
+{% block report_title %}Sediment Delivery{% endblock %}
 {% block report_content %}
 <h2>Sediment Delivery</h2>
 <h5>Sediment Particle Class Information
-    <a onclick="javascript:copytable('class_tbl')"><span class="oi oi-clipboard"></span></a>
+    <a onclick="javascript:copytable('class_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="class_tbl">
   <thead>
@@ -41,7 +42,7 @@
   </tbody>
 </table>
 <h5>Distribution by Sediment Class
-    <a onclick="javascript:copytable('class_fractions')"><span class="oi oi-clipboard"></span></a>
+    <a onclick="javascript:copytable('class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="class_fractions">
   <thead>
@@ -60,7 +61,7 @@
   </tbody>
 </table>
 <h5>Distribution of Primary Particles and Organic Matter
-    <a onclick="javascript:copytable('part_dist')"><span class="oi oi-clipboard"></span></a>
+    <a onclick="javascript:copytable('part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="part_dist">
   <thead>
@@ -89,7 +90,7 @@
   </tbody>
 </table>
 <h5>Distribution by Sediment Class
-    <a onclick="javascript:copytable('hill_class_fractions')"><span class="oi oi-clipboard"></span></a>
+    <a onclick="javascript:copytable('hill_class_fractions')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="hill_class_fractions">
   <thead>
@@ -108,7 +109,7 @@
   </tbody>
 </table>
 <h5>Distribution of Primary Particles and Organic Matter
-    <a onclick="javascript:copytable('hill_part_dist')"><span class="oi oi-clipboard"></span></a>
+    <a onclick="javascript:copytable('hill_part_dist')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="hill_part_dist">
   <thead>

@@ -1,0 +1,46 @@
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US72063.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ pr664276.par                                                                                                                                                                                                                                                    
+ 0500000US72063.prn                                                                                                                                                                                                                                              
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1985  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1985  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1985  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1985  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1985  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           8  Year:        1985  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1985  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1986  N:         132
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1986  N:         132
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1986  N:         132
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1986  N:         132
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1986  N:         132
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           8  Year:        1986  Mlevel=   1.00000000      SDlevel=   69.1868515      Days:         217
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1986  N:         111

@@ -1,8 +1,9 @@
 {% extends "reports/_page_container.htm" %}
+{% block report_title %}Prep Details{% endblock %}
 {% block report_content %}
 <h2>WEPP Preparation Details</h2>
 <h5>Subcatchments
-  <a onclick="javascript:copytable('sub_tbl')"><span class="oi oi-clipboard"></span></a>
+  <a onclick="javascript:copytable('sub_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" id="sub_tbl">
   <thead>
@@ -64,7 +65,7 @@
 </table>
 <br/>
 <h5>Channels
-  <a onclick="javascript:copytable('chn_tbl')"><span class="oi oi-clipboard"></span></a>
+  <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" id="chn_tbl">
   <thead>

@@ -1,0 +1,455 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ mn216654.par                                                                                                                                                                                                                                                    
+ 0500000US27045.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1993  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1993  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1993  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1993  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1993  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           2  Year:        1993  N:         396
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        1993  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1994  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1994  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1994  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1994  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1994  N:         107
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        1994  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1995  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1995  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1995  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1995  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1995  N:         112
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        1995  Mlevel=   60.0000000      SDlevel=   94.4450150      Days:         452
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1996  N:         119
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1996  N:         119
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1996  N:         119
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1996  N:         119
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1996  N:         119
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        1996  Mlevel=   40.0000000      SDlevel=   99.2402344      Days:         481
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1997  N:         125
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1997  N:         125
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1997  N:         125
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1997  N:         125
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1997  N:         125
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        1997  Mlevel=   40.0000000      SDlevel=   99.9883118      Days:         509
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1998  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1998  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1998  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1998  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1998  N:         128
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        1998  Mlevel=   60.0000000      SDlevel=   99.9990845      Days:         537
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        1999  N:         133
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        1999  Mlevel=   10.0000000      SDlevel=   99.9999924      Days:         565
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2000  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2000  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2000  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2000  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2000  N:         139
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2000  Mlevel=   30.0000000      SDlevel=   100.000000      Days:         594
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2001  N:         141
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2001  N:         141
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2001  N:         141
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2001  N:         141
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2001  N:         141
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2001  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2002  N:         148
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2002  N:         148
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2002  N:         148
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2002  N:         148
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2002  N:         148
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2002  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2003  N:         153
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2003  N:         153
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2003  N:         153
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2003  N:         153
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2003  N:         153
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2003  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2004  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2004  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2004  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2004  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2004  N:         158
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           2  Year:        2004  N:         707
+ FAILED K-S -- Parm:Wind Vel.       Mon:           2  Year:        2004  N:         679
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2004  N:         397
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2005  N:         164
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2005  N:         164
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2005  N:         164
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2005  N:         164
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2005  N:         164
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2005  N:         396
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2006  N:         171
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2006  N:         171
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2006  N:         171
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2006  N:         171
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2006  N:         171
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2006  Mlevel=   40.0000000      SDlevel=   100.000000      Days:         763
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2007  N:         176
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2007  N:         176
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2007  N:         176
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2007  N:         176
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2007  N:         176
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2007  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2008  N:         185
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2008  N:         185
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2008  N:         185
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2008  N:         185
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2008  N:         185
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2008  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         820
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2009  N:         197
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2009  N:         197
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2009  N:         197
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2009  N:         197
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2009  N:         197
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2009  Mlevel=   30.0000000      SDlevel=   100.000000      Days:         848
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2010  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2010  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2010  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2010  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2010  N:         199
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2010  N:         396
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2011  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2011  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2011  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2011  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2011  N:         207
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2011  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         904
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2011  N:         207
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2012  N:         211
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2012  N:         211
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2012  N:         211
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2012  N:         211
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2012  N:         211
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2012  Mlevel=   30.0000000      SDlevel=   100.000000      Days:         933
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2012  N:         203
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2013  N:         217
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2013  N:         217
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2013  N:         217
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2013  N:         217
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2013  N:         217
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2013  Mlevel=   50.0000000      SDlevel=   100.000000      Days:         961
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         224
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         224
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         224
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         224
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         224
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           2  Year:        2014  N:         932
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2014  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         235
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2015  N:         396
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2016  N:         238
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2016  N:         238
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2016  N:         238
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2016  N:         238
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2016  N:         238
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           2  Year:        2016  N:         961
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US27045.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           2  Year:        2016  Mlevel=   1.00000000      SDlevel=   100.000000      Days:        1046
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2017  N:         246
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2017  N:         246
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2017  N:         246
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2017  N:         246
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2017  N:         246
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           2  Year:        2017  N:         396
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2017  N:         234
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

@@ -1,0 +1,109 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ ks147542.par                                                                                                                                                                                                                                                    
+ 0500000US20183.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   30.0000000      SDlevel=   51.1251144      Days:          55
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   40.0000000      SDlevel=   51.0856323      Days:          55
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   40.0000000      SDlevel=   51.1640778      Days:          55
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   40.0000000      SDlevel=   51.0950546      Days:          55
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   30.0000000      SDlevel=   51.1535301      Days:          55
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US20183.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

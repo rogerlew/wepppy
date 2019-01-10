@@ -1,9 +1,10 @@
 {% extends "reports/_page_container.htm" %}
+{% block report_title %}Loss Summary{% endblock %}
 {% block report_content %}
 <h2>WEPP Results Summary</h2>
 <h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
-    (excluding years {{ excluded_years }})
-    <a onclick="javascript:copytable('out_tbl')"><span class="oi oi-clipboard"></span></a>
+    <!-- (excluding years {{ excluded_years }}) -->
+    <a onclick="javascript:copytable('out_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" style="width: auto !important;" id="out_tbl">
   <thead>
@@ -30,8 +31,8 @@
 
 <br/>
 <h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
-    (excluding years {{ excluded_years }})
-    <a onclick="javascript:copytable('hill_tbl')"><span class="oi oi-clipboard"></span></a>
+    <!-- (excluding years {{ excluded_years }}) -->
+    <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" id="hill_tbl">
   <thead>
@@ -61,8 +62,8 @@
   </tbody>
 </table>
 <h5>Average Annual Summary for Channels for Years {{ avg_annual_years }}
-    (excluding years {{ excluded_years }})
-    <a onclick="javascript:copytable('chn_tbl')"><span class="oi oi-clipboard"></span></a>
+    <!-- (excluding years {{ excluded_years }}) -->
+    <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed" id="chn_tbl">
   <thead>

@@ -471,7 +471,6 @@ class Climate(NoDbBase, LogMixin):
     #
     @property
     def has_climate(self):
-        print(self.climate_spatialmode, self.cli_fn, self.sub_par_fns, self.sub_cli_fns)
         if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             return self.sub_par_fns is not None and \
                    self.sub_cli_fns is not None and \
@@ -556,6 +555,19 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
     """
+
+    def set_orig_cli_fn(self, cli_fn):
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.orig_cli_fn = cli_fn
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def set_observed_pars(self, **kwds):
         self.lock()
 
@@ -891,8 +903,8 @@ class Climate(NoDbBase, LogMixin):
 
             ron = Ron.getInstance(self.wd)
             bbox = ron.map.extent
-            bbox = [bbox[0] - 0.02, bbox[1] - 0.02,
-                    bbox[2] + 0.02, bbox[3] + 0.02]
+            bbox = [bbox[0] - 0.03, bbox[1] - 0.03,
+                    bbox[2] + 0.03, bbox[3] + 0.03]
             bbox = ','.join(str(v) for v in bbox)
 
             observed_data = {}

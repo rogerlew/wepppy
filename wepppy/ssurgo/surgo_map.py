@@ -59,7 +59,7 @@ class SurgoMap:
         Determines the dominant mukey for the given indices. If
         indices is None then the entire maps is examined
         """
-    
+
         if indices is None:
             x = self.data
             
@@ -67,9 +67,9 @@ class SurgoMap:
             x = self.data[indices]
         
         x = list(x.flatten())
-        
+
         sorted_keys = Counter(x).most_common()[0]
-        
+
         if valid_mukeys is None:
             return sorted_keys[0]
         else:  # not strictly necessary but makes the type checking happy

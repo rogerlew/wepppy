@@ -395,11 +395,11 @@ class IniLoopCropland(ScenarioBase):
         line = lines.pop(0).split()
         assert len(line) == 6
         self.bdtill = float(line.pop(0))
-        self.cancov = float(line.pop(0)) # canopy cover
+        self.cancov = float(line.pop(0))  # canopy cover
         self.daydis = int(line.pop(0))
         self.dsharv = int(line.pop(0))
         self.frdp = float(line.pop(0))
-        self.inrcov = float(line.pop(0)) # interrill cover
+        self.inrcov = float(line.pop(0))  # interrill cover
 
         i = int(lines.pop(0))
         self.iresd = scenarioReference_factory(i, SectionType.Plant, root, self)
@@ -1775,8 +1775,11 @@ if __name__ == "__main__":
     m2 = m.build_multiple_year_man(5)
     #print(m2)
 
+    import csv
+
+    fp = open('weppcloud_managements.csv', 'w')
+    wtr = csv.writer(fp)
     for k in d:
-        print(k)
         m = get_management(k)
         #Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
 
@@ -1785,7 +1788,12 @@ if __name__ == "__main__":
         assert isinstance(m.inis[0].data, IniLoopCropland)
         cancov, inrcov, rilcov = m.inis[0].data.cancov, m.inis[0].data.inrcov, m.inis[0].data.rilcov
 
-        print(k, cancov, inrcov, rilcov)
+        print('{},{},{},{}'.format(k, m.desc, cancov, inrcov, rilcov))
+
+        wtr.writerow([k, m.desc, cancov, inrcov, rilcov])
+
+
+    fp.close()
 
     """
     import jsonpickle

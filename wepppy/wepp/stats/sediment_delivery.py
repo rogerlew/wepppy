@@ -1,3 +1,4 @@
+import csv
 from os.path import join as _join
 
 from collections import OrderedDict
@@ -5,7 +6,7 @@ from collections import OrderedDict
 from wepppy.wepp.out import TotalWatSed
 from wepppy.wepp.out.loss import _parse_tbl
 
-from wepppy.all_your_base import RowData
+from wepppy.all_your_base import RowData, try_parse
 
 
 class SedimentDelivery(object):
@@ -26,7 +27,7 @@ class SedimentDelivery(object):
         indx0 = []
         for i, L in enumerate(lines):
             if 'Avg. Ann. sediment discharge from outlet' in L:
-                sed_discharge = float(L.split()[-2])
+                sed_discharge = try_parse(L.split()[-2])
             if 'Sediment Particle Information Leaving Channel' in L:
                 indx0.append(i)
 
@@ -53,10 +54,10 @@ class SedimentDelivery(object):
         assert lines[23].startswith('organic matter')
 
         particle_distribution = {}
-        particle_distribution['clay'] = float(lines[20].split()[-1])
-        particle_distribution['silt'] = float(lines[21].split()[-1])
-        particle_distribution['sand'] = float(lines[22].split()[-1])
-        particle_distribution['organic matter'] = float(lines[23].split()[-1])
+        particle_distribution['clay'] = try_parse(lines[20].split()[-1])
+        particle_distribution['silt'] = try_parse(lines[21].split()[-1])
+        particle_distribution['sand'] = try_parse(lines[22].split()[-1])
+        particle_distribution['organic matter'] = try_parse(lines[23].split()[-1])
 
         totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
         totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
@@ -73,19 +74,68 @@ class SedimentDelivery(object):
         for k in hill_particle_distribution:
             hill_particle_distribution[k] = sum(hill_particle_distribution[k])
 
+        assert lines[26].startswith('Index of specific surface')
+        assert lines[27].startswith('Enrichment ratio of specific surface')
+
+        specific_surface_index = try_parse(lines[26].split('=')[-1].split()[0])
+        enrichment_ratio_of_spec_surf = try_parse(lines[27].split('=')[-1].split()[0])
+        
         self.class_data = class_data
 
         self.sed_discharge = sed_discharge
         self.class_fractions = class_fractions
         self.particle_distribution = particle_distribution
 
-        self.hill_sed_delivery = totwatsed.sed_delivery / totwatsed.num_years
+        self.hill_sed_delivery = totwatsed.sed_delivery / totwatsed.num_years / 1000.0
         self.hill_class_fractions = hill_class_fractions
         self.hill_particle_distribution = hill_particle_distribution
+
+        self.specific_surface_index = specific_surface_index  # m**2/g of total sediment
+        self.enrichment_ratio_of_spec_surf = enrichment_ratio_of_spec_surf
 
     @property
     def class_info_report(self):
         return SedimentClassInfo(self.class_data)
+
+    def write(self, fp, write_header=True, run_descriptors=None):
+
+        wtr = csv.writer(fp)
+
+        if write_header:
+            hdr = ['Channel Class 1', 'Channel Class 2', 'Channel Class 3', 'Channel Class 4', 'Channel Class 5',
+                   'Channel Clay', 'Channel Silt', 'Channel Sand', 'Channel Organic Matter',
+                   'Hillslopes Class 1', 'Hillslopes Class 2', 'Hillslopes Class 3', 'Hillslopes Class 4', 'Hillslopes Class 5',
+                   'Hillslopes Clay', 'Hillslopes Silt', 'Hillslopes Sand', 'Hillslopes Organic Matter',
+                   'Average Annual Sediment Discharge from Outlet (tonnes/yr)',
+                   'Average Annual Sediment Delivery from Hillslopes (tonnes/yr)',
+                   'Index of specific surface (m**2/g of total sediment)',
+                   'Enrichment ratio of specific surface']
+
+            if run_descriptors is not None:
+                hdr = [cname for cname, desc in run_descriptors] + hdr
+
+            wtr.writerow(hdr)
+
+
+        row = self.class_fractions + \
+              [self.particle_distribution['clay'],
+               self.particle_distribution['silt'],
+               self.particle_distribution['sand'],
+               self.particle_distribution['organic matter']] + \
+              self.hill_class_fractions + \
+              [self.hill_particle_distribution['clay'],
+               self.hill_particle_distribution['silt'],
+               self.hill_particle_distribution['sand'],
+               self.hill_particle_distribution['organic matter']] + \
+              [self.sed_discharge,
+               self.hill_sed_delivery,
+               self.specific_surface_index,
+               self.enrichment_ratio_of_spec_surf]
+
+        if run_descriptors is not None:
+            row = [desc for cname, desc in run_descriptors] + row
+
+        wtr.writerow(row)
 
 
 class SedimentClassInfo(object):
@@ -103,7 +153,7 @@ class SedimentClassInfo(object):
 
 
 if __name__ == "__main__":
-    pc = SedimentDelivery('/geodata/weppcloud_runs/Watershed_11_General/')
+    pc = SedimentDelivery('/geodata/weppcloud_runs/1614413a-fb4e-40b8-a934-9cb5fdd9af1c/')
 
     rpt = pc.class_info_report
     print(rpt.hdr)
@@ -111,3 +161,9 @@ if __name__ == "__main__":
     for rowdata in rpt:
         for colname, (value, units) in zip(rpt.hdr, rowdata):
             print(colname, value, units)
+
+    print(pc.specific_surface_index)
+    print(pc.enrichment_ratio_of_spec_surf)
+
+    fp = open('/home/weppdev/sed.csv', 'w')
+    pc.write(fp)

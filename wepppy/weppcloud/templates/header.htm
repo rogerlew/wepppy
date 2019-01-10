@@ -17,20 +17,20 @@
       <li class="nav-item">
       </li>
       <li class="nav-item">
-        <a href='create_fork' class="nav-link" target="_blank"><span class="oi oi-fork" title="Fork this project"></span></a>
+        <a href='create_fork' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/fork-2x.png') }}"/></a>
       </li>
       <li class="nav-item">
-        <a href='archive' class="nav-link" target="_blank"><span class="oi oi-cloud-download" title="Download this project"></span></a>
+        <a href='archive' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x.png') }}"/></a>
       </li>
     </ul>
     <button class="btn btn-link" type="button" id="btnPuModal"
             data-toggle="modal" data-target="#puModal"
             title="up up down down left right left right b a">
-        <span class="oi oi-command"></span>
+        <img src="{{ url_for('static', filename='open-iconic/png/command-2x.png') }}"/>
     </button>
     <button class="btn btn-link" type="button"
             data-toggle="modal" data-target="#unitizerModal">
-        <span class="oi oi-cog"></span>
+        <img src="{{ url_for('static', filename='open-iconic/png/cog-2x.png') }}"/>
     </button>
     {% if user.is_authenticated %}
     <label class="form-check-label">

@@ -27,29 +27,29 @@
        <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item">
             <a class="nav-link active" data-toggle="tab" href="#sub_layer_selection" role="tab">
-              <span class="oi oi-layers"></span>
+              <img src="{{ url_for('static', filename='open-iconic/png/layers-2x.png') }}"/>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#drilldown" role="tab">
-              <span class="oi oi-magnifying-glass"></span>
+              <img src="{{ url_for('static', filename='open-iconic/png/magnifying-glass-2x.png') }}"/>
             </a>
           </li>
           {% if ron.enable_landuse_change %}
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#modify" role="tab">
-              <span class="oi oi-wrench"></span>
+              <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}"/>
             </a>
           </li>
           {% endif %}
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
-            <span class="oi oi-rain"></span>
+            <img src="{{ url_for('static', filename='open-iconic/png/rain-2x.png') }}"/>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#results" role="tab">
-              <span class="oi oi-pie-chart"></span>
+              <img src="{{ url_for('static', filename='open-iconic/png/pie-chart-2x.png') }}"/>
             </a>
           </li>
         </ul>
