@@ -850,7 +850,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         assert _exists(totalwatsed_fn), 'Failed running correct_daily_hillslopes.pl'
         assert os.stat(totalwatsed_fn).st_size > 0, 'totalwatsed.txt is empty'
 
-    def report_loss(self, exclude_yr_indxs=[0, 1]):
+    def report_loss(self, exclude_yr_indxs=None):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.wd, exclude_yr_indxs=exclude_yr_indxs)

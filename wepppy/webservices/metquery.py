@@ -172,8 +172,7 @@ def query_daily_catalog():
 @app.route('/daily/', methods=['GET', 'POST'])
 def query_daily():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
+    https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -315,5 +314,5 @@ if __name__ == '__main__':
     app.run()
 
 """ 
-curl -sS 'http://127.0.0.1:5000/monthly/?lat=47&lng=-116&dataset=prism/ppt'
+curl -sS 'https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004'
 """

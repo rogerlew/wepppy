@@ -485,15 +485,17 @@ class Soils(NoDbBase):
             try:
                 domsoil_d = sm.build_soilgrid(
                     subwta_arc,
-                    None,
+                    bounds_fn=self.bound_arc,
                     valid_mukeys=valid
                 )
             except NoValidSoilsException:
                 self.dump_and_unlock()
+                print('building statsgo')
                 self.build_statsgo()
                 return
 
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
+            print(set(domsoil_d.values()))
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -520,6 +522,8 @@ class Soils(NoDbBase):
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            print(set(domsoil_d.values()))
 
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb

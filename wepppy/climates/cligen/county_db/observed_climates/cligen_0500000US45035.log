@@ -1,0 +1,57 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ sc381544.par                                                                                                                                                                                                                                                    
+ 0500000US45035.prn                                                                                                                                                                                                                                              
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1993  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1993  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1993  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1993  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1993  N:         103
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1993  Mlevel=   30.0000000      SDlevel=   59.0162201      Days:         434
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         117
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         117
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         117
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         117
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         117
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1994  Mlevel=   30.0000000      SDlevel=   90.1461334      Days:         465
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1995  Mlevel=   20.0000000      SDlevel=   98.6759567      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1995  Mlevel=   5.00000000      SDlevel=   98.7181244      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1995  Mlevel=   10.0000000      SDlevel=   98.3172989      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1995  Mlevel=   5.00000000      SDlevel=   99.5867691      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           3  Year:        1995  Mlevel=   30.0000000      SDlevel=   93.9845734      Days:         496
+*** ERROR *** Could not produce desired level of quality in
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US45035.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+                    << Temp. Dew Pt.   >> random deviates.

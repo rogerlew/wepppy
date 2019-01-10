@@ -67,7 +67,6 @@ def export_winwepp(wd):
                           impoundment_defs='')
 
     ww2 = ww2.split('\n')
-    print(ww2)
     ww2 = '\n'.join(L for L in ww2 if L != '')
  
     os.mkdir(_join(export_winwepp_dir, 'projects'))

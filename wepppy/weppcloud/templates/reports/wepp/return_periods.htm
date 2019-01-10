@@ -1,6 +1,7 @@
 {% extends "reports/_page_container.htm" %}
+{% block report_title %}Return Periods{% endblock %}
 {% block report_content %}
-<h2>WEPP Return Period Analysis</h5>
+<h3>WEPP Return Period Analysis</h3>
 <p>
 <br>The Return period of the events are estimated by applying Weibull formula on annual maxima series:</br>
 <div style="margin-left: 50px">
@@ -16,7 +17,7 @@ where <i>T</i> is the return period, <i>N</i> is the number of simulation years,
 {% for key in ['Precipitation Depth', 'Runoff', 'Peak Runoff',
                'Sediment Yield', 'Soluble Reactive P', 'Particulate P', 'Total P'] %}
   <h5><b>{{ key }}</b>
-  <a onclick="javascript:copytable('{{ key | replace(' ', '') }}_tbl')"><span class="oi oi-clipboard"></span></a>
+  <a onclick="javascript:copytable('{{ key | replace(' ', '') }}_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
   </h5>
   <table class="table table-condensed" id="{{ key | replace(' ', '') }}_tbl">
     <thead>
@@ -73,4 +74,8 @@ where <i>T</i> is the return period, <i>N</i> is the number of simulation years,
     </tbody>
   </table>
 {% endfor %}
+<h4>Additional Resources</h4>
+<h5>Culvert Diameter Size Spreadsheet</h5>
+    <a href="{{ url_for('static', filename='resources/1403_Culvert_Dia_Math.xlsx') }}">Download Spreadsheet (.xlsx)</a>
+    Courtesy of William J. Elliot
 {% endblock %}

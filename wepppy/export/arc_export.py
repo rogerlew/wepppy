@@ -4,16 +4,20 @@ from os.path import join as _join
 from os.path import split as _split
 import shutil
 import json
+import sys
 from subprocess import Popen, PIPE
 from glob import glob
 
-from wepppy.nodb import Ron, Wepp, Topaz
+from wepppy.nodb import Ron, Wepp, Topaz, Watershed
 
 
 def arc_export(wd):
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     topaz = Topaz.getInstance(wd)
+    watershed = Watershed.getInstance(wd)
+    translator = watershed.translator_factory()
+
     name = ron.name
     export_dir = ron.export_arc_dir
     gtiff_dir = _join(export_dir, 'gtiffs')
@@ -114,7 +118,15 @@ def arc_export(wd):
     p.wait()
 
     assert _exists(_join(export_dir, 'subcatchments.shp'))
-    os.remove(geojson_fn)
+
+    p = Popen(['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+               'subcatchments.kml', 'subcatchments.json'],
+              stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
+    p.wait()
+
+    assert _exists(_join(export_dir, 'subcatchments.kml'))
+
+#    os.remove(geojson_fn)
 
     #
     # channels
@@ -141,24 +153,42 @@ def arc_export(wd):
     weppout['Total P Density'] = wepp.query_chn_val('Total P Density')
     weppout['Solub. React. P Density'] = wepp.query_chn_val('Solub. React. P Density')
     weppout['Particulate P Density'] = wepp.query_chn_val('Particulate P Density')
+    weppout['Contributing Area'] = wepp.query_chn_val('Contributing Area')
 
     for i, f in enumerate(js['features']):
         topaz_id = str(f['properties']['TopazID'])
         ss = chns_summary[topaz_id]
+        chn_id = translator.chn_enum(top=topaz_id)
 
         f['properties']['watershed'] = name
         f['properties']['topaz_id'] = topaz_id
+        f['properties']['chn_id'] = chn_id
         f['properties']['wepp_id'] = ss['meta']['wepp_id']
         f['properties']['width(m)'] = ss['watershed']['width']
         f['properties']['length(m)'] = ss['watershed']['length']
         _area = ss['watershed']['area'] * 0.0001
         f['properties']['area(ha)'] = _area
+        f['properties']['cntrb(ha)'] = weppout['Contributing Area'][topaz_id]['value']
         f['properties']['slope'] = ss['watershed']['slope_scalar']
         f['properties']['aspect'] = ss['watershed']['aspect']
 
-        f['properties']['DisVol(m^3/ha)'] = weppout['Discharge Volume'][topaz_id]['value'] / _area
-        f['properties']['SedYield(tonne/ha)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
-        f['properties']['SoilLoss(kg/ha)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
+        try:
+            f['properties']['Dis(m3/ha)'] = weppout['Discharge Volume'][topaz_id]['value'] / _area
+            f['properties']['Dis(m3/ha)'] = round(f['properties']['Dis(m3/ha)'], 3)
+        except:
+            f['properties']['Dis(m3/ha)'] = -9999
+
+        try:
+            f['properties']['SdYd(tn/h)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
+            f['properties']['SdYd(tn/h)'] = round(f['properties']['SdYd(tn/h)'], 3)
+        except:
+            f['properties']['SdYd(tn/h)'] = -9999
+
+        try:
+            f['properties']['SlLs(kg/h)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
+            f['properties']['SlLs(kg/h)'] = round(f['properties']['SlLs(kg/h)'], 3)
+        except:
+            f['properties']['SlLs(kg/h)'] = -9999
 
         if weppout['Total P Density'] is not None:
             f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
@@ -182,18 +212,32 @@ def arc_export(wd):
         js['features'][i] = f
 
     geojson_fn = _join(export_dir, 'channels.json')
+    json_txt = json.dumps(js)
+    json_txt = json_txt.replace('NaN', 'null')
+
     with open(geojson_fn, 'w') as fp:
-        json.dump(js, fp)
+        fp.write(json_txt)
 
     p = Popen(['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
                'channels.shp', 'channels.json'],
               stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
     p.wait()
+    stdout, stderr = p.communicate()
+    print(stdout)
+    print(stderr)
 
     assert _exists(_join(export_dir, 'channels.shp'))
-    os.remove(geojson_fn)
+
+    p = Popen(['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+               'channels.kml', 'channels.json'],
+              stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
+    p.wait()
+
+    assert _exists(_join(export_dir, 'channels.kml'))
+
+#    os.remove(geojson_fn)
 
 
 if __name__ == '__main__':
-    wd = '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f'
+    wd = '/geodata/weppcloud_runs/CurCond_Watershed_1'
     arc_export(wd)

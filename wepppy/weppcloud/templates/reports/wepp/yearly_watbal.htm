@@ -1,7 +1,8 @@
 {% extends "reports/_page_container.htm" %}
+{% block report_title %}Yearly Water Balance{% endblock %}
 {% block report_content %}
 <h2>Water Balance Yearly Summary
-    <a onclick="javascript:copytable('wat_tbl')"><span class="oi oi-clipboard"></span></a>
+    <a onclick="javascript:copytable('wat_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
  <table class="table table-condensed" id="wat_tbl">
     <thead>

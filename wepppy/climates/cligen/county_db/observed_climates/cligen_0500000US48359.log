@@ -1,0 +1,66 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ tx411033.par                                                                                                                                                                                                                                                    
+ 0500000US48359.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        1990  Mlevel=   20.0000000      SDlevel=   51.3244095      Days:          29
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        1990  Mlevel=   30.0000000      SDlevel=   51.5994797      Days:          29
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        1990  Mlevel=   30.0000000      SDlevel=   51.4873276      Days:          29
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        1990  Mlevel=   30.0000000      SDlevel=   51.3805847      Days:          29
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        1990  Mlevel=   20.0000000      SDlevel=   51.2550812      Days:          29
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:          10  Year:        1990  Mlevel=   60.0000000      SDlevel=   19.1747074      Days:         341
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1996  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1996  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1996  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1996  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1996  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1997  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1997  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1997  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1997  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1997  N:         105
+*** ERROR *** Could not produce desired level of quality in
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US48359.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

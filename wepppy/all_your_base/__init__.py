@@ -10,6 +10,7 @@ from typing import Tuple, List, Dict, Union
 
 from .locationinfo import RasterDatasetInterpolator, RDIOutOfBoundsException
 
+import collections
 import os
 from os.path import exists as _exists
 from operator import itemgetter
@@ -34,12 +35,21 @@ RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
 
 
+def flatten(l):
+    for el in l:
+        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
+            yield from flatten(el)
+        else:
+            yield el
+
+
 def centroid_px(indx, indy) -> Tuple[int, int]:
     """
     given a sets of x and y indices calulates a central [x,y] index
     """
     return (int(round(float(np.mean(indx)))),
             int(round(float(np.mean(indy)))))
+
 
 def determine_wateryear(y, j=None, mo=None):
     if j is not None:
