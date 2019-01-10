@@ -165,7 +165,6 @@ if __name__ == '__main__':
         default_landuse = proj['landuse']
 
         if _exists(wd):
-            print()
             shutil.rmtree(wd)
         os.mkdir(wd)
 

@@ -152,6 +152,8 @@ class Ron(NoDbBase):
 
                     baer.validate(_split(sbs_path)[-1])
 
+                    baer.modify_burn_class([0, 1, 2, 3], None)
+
             if "debris_flow" in self.mods:
                 wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)
 

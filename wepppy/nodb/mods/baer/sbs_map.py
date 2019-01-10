@@ -28,7 +28,7 @@ class SoilBurnSeverityMap:
                     return 130
 
             for i, brk in enumerate(breaks):
-                if v < brk:
+                if v <= brk:
                     break
             return i + 130
 

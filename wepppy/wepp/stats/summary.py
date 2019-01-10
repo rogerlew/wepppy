@@ -6,12 +6,13 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+import csv
 from os.path import join as _join
 from os.path import exists as _exists
 from glob import glob
 from collections import OrderedDict
 
-from wepppy.all_your_base import parse_units, parse_name, RowData
+from wepppy.all_your_base import parse_units, parse_name, RowData, flatten
 
 from wepppy.wepp.out import Loss
 from wepppy.wepp.stats.report_base import ReportBase
@@ -30,7 +31,7 @@ class HillSummary(ReportBase):
             'Hillslope Area (ha)',
             'Runoff (mm)',
             'Subrunoff (mm)',
-            'Baseflow Volume (m^3)',
+            'Baseflow (mm)',
             'Soil Loss Density (kg/ha)',
             'Sediment Deposition Density (kg/ha)',
             'Sediment Yield Density (kg/ha)',
@@ -56,9 +57,11 @@ class ChannelSummary(ReportBase):
 
         self._hdr = (
             'WeppID',
+            'WeppChnID',
             'TopazID',
             'Length (m)',
             'Area (ha)',
+            'Contributing Area (ha)',
             'Discharge Volume (m^3)',
             'Sediment Yield (tonne)',
             'Soil Loss (kg)',
@@ -144,6 +147,40 @@ class OutletSummary(ReportBase):
         v_norm = v / area
         units_norm = 'kg/ha/yr'
         yield 'Phosphorus discharge', v, units, v_norm, units_norm
+
+    def write(self, fp, write_header=True, run_descriptors=None):
+
+        wtr = csv.writer(fp)
+
+        _data = list(self.__iter__())
+
+        hdr = []
+        row = []
+        for key, v, units, v_norm, units_norm in _data:
+            hdr.append(key)
+            if units is not None:
+                hdr[-1] += ' (%s)' % units
+
+            row.append(v)
+
+            if v_norm is not None:
+                hdr.append('%s per area' % key)
+                if units_norm is not None:
+                    hdr[-1] += ' (%s)' % units_norm
+
+                row.append(v_norm)
+
+        if write_header:
+
+            if run_descriptors is not None:
+                hdr = [cname for cname, desc in run_descriptors] + hdr
+
+            wtr.writerow(hdr)
+
+        if run_descriptors is not None:
+            row = [desc for cname, desc in run_descriptors] + row
+
+        wtr.writerow(row)
 
 
 if __name__ == "__main__":

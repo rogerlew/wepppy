@@ -232,98 +232,100 @@ class Loss(object):
         out_tbl = _parse_out(lines[out0:])
 
         # remove the years from average
-        if exclude_yr_indxs is not None and num_years > len(exclude_yr_indxs):
+        assert exclude_yr_indxs is None
 
-            # average out years for outlet table
-            _out_tbl = deepcopy(out_tbl)
-            for j, d in enumerate(_out_tbl):
-                if _out_tbl[j]['key'] == 'Total contributing area to outlet':
-                    continue
-                    
-                _out_tbl[j]['v'] = 0
-
-            avg_years = []
-            for i, yr in enumerate(years):
-                if i in exclude_yr_indxs:
-                    continue
-
-                for j, d in enumerate(yearlies[yr]['out_tbl']):
-                    if _out_tbl[j]['key'] == 'Total contributing area to outlet':
-                        continue
-
-                    v = yearlies[yr]['out_tbl'][j]['v']
-                    if set(str(v).strip()) != set('*'):
-                        _out_tbl[j]['v'] += v
-
-                avg_years.append(yr)
-
-            for j, d in enumerate(_out_tbl):
-                if _out_tbl[j]['key'] == 'Total contributing area to outlet':
-                    continue
-
-                _out_tbl[j]['v'] /= float(len(avg_years))
-
-            out_tbl = _out_tbl
-
-            # average out years for hill table
-            _hill_tbl = deepcopy(hill_tbl)
-            for j, d in enumerate(hill_tbl):
-                for var in hill_hdr[2:]:
-                    _hill_tbl[j][var] = 0
-
-            avg_years = []
-            _avg_years = {}
-            for i, yr in enumerate(years):
-                if i in exclude_yr_indxs:
-                    continue
-
-                for j, d in enumerate(hill_tbl):
-                    for var in hill_hdr[2:]:
-
-                        v = yearlies[yr]['hill_tbl'][j][var]
-                        if set(str(v).strip()) != set('*'):
-                            _hill_tbl[j][var] += v
-
-                            if var not in _avg_years:
-                                _avg_years[var] = 0.0
-                            _avg_years[var] += 1.0
-
-                avg_years.append(yr)
-
-            for var in hill_hdr[2:]:
-                _hill_tbl[j][var] /= _avg_years[var]
-
-            hill_tbl = _hill_tbl
-
-            # average out years for chn table
-            _chn_tbl = deepcopy(chn_tbl)
-            for j, d in enumerate(chn_tbl):
-                for var in chn_hdr[2:]:
-                    _chn_tbl[j][var] = 0
-
-            avg_years = []
-            _avg_years = {}
-            for i, yr in enumerate(years):
-                if i in exclude_yr_indxs:
-                    continue
-
-                for j, d in enumerate(chn_tbl):
-                    for var in chn_hdr[2:]:
-
-                        v = yearlies[yr]['chn_tbl'][j][var]
-                        if set(str(v).strip()) != set('*'):
-                            _chn_tbl[j][var] += v
-
-                            if var not in _avg_years:
-                                _avg_years[var] = 0.0
-                            _avg_years[var] += 1.0
-
-                avg_years.append(yr)
-
-            for var in chn_hdr[2:]:
-                _chn_tbl[j][var] /= _avg_years[var]
-
-            chn_tbl = _chn_tbl
+        # if exclude_yr_indxs is not None and num_years > len(exclude_yr_indxs):
+        #
+        #     # average out years for outlet table
+        #     _out_tbl = deepcopy(out_tbl)
+        #     for j, d in enumerate(_out_tbl):
+        #         if _out_tbl[j]['key'] == 'Total contributing area to outlet':
+        #             continue
+        #
+        #         _out_tbl[j]['v'] = 0
+        #
+        #     avg_years = []
+        #     for i, yr in enumerate(years):
+        #         if i in exclude_yr_indxs:
+        #             continue
+        #
+        #         for j, d in enumerate(yearlies[yr]['out_tbl']):
+        #             if _out_tbl[j]['key'] == 'Total contributing area to outlet':
+        #                 continue
+        #
+        #             v = yearlies[yr]['out_tbl'][j]['v']
+        #             if set(str(v).strip()) != set('*'):
+        #                 _out_tbl[j]['v'] += v
+        #
+        #         avg_years.append(yr)
+        #
+        #     for j, d in enumerate(_out_tbl):
+        #         if _out_tbl[j]['key'] == 'Total contributing area to outlet':
+        #             continue
+        #
+        #         _out_tbl[j]['v'] /= float(len(avg_years))
+        #
+        #     out_tbl = _out_tbl
+        #
+        #     # average out years for hill table
+        #     _hill_tbl = deepcopy(hill_tbl)
+        #     for j, d in enumerate(hill_tbl):
+        #         for var in hill_hdr[2:]:
+        #             _hill_tbl[j][var] = 0
+        #
+        #     avg_years = []
+        #     _avg_years = {}
+        #     for i, yr in enumerate(years):
+        #         if i in exclude_yr_indxs:
+        #             continue
+        #
+        #         for j, d in enumerate(hill_tbl):
+        #             for var in hill_hdr[2:]:
+        #
+        #                 v = yearlies[yr]['hill_tbl'][j][var]
+        #                 if set(str(v).strip()) != set('*'):
+        #                     _hill_tbl[j][var] += v
+        #
+        #                     if var not in _avg_years:
+        #                         _avg_years[var] = 0.0
+        #                     _avg_years[var] += 1.0
+        #
+        #         avg_years.append(yr)
+        #
+        #     for var in hill_hdr[2:]:
+        #         _hill_tbl[j][var] /= _avg_years[var]
+        #
+        #     hill_tbl = _hill_tbl
+        #
+        #     # average out years for chn table
+        #     _chn_tbl = deepcopy(chn_tbl)
+        #     for j, d in enumerate(chn_tbl):
+        #         for var in chn_hdr[2:]:
+        #             _chn_tbl[j][var] = 0
+        #
+        #     avg_years = []
+        #     _avg_years = {}
+        #     for i, yr in enumerate(years):
+        #         if i in exclude_yr_indxs:
+        #             continue
+        #
+        #         for j, d in enumerate(chn_tbl):
+        #             for var in chn_hdr[2:]:
+        #
+        #                 v = yearlies[yr]['chn_tbl'][j][var]
+        #                 if set(str(v).strip()) != set('*'):
+        #                     _chn_tbl[j][var] += v
+        #
+        #                     if var not in _avg_years:
+        #                         _avg_years[var] = 0.0
+        #                     _avg_years[var] += 1.0
+        #
+        #         avg_years.append(yr)
+        #
+        #     for var in chn_hdr[2:]:
+        #         _chn_tbl[j][var] /= _avg_years[var]
+        #
+        #     chn_tbl = _chn_tbl
 
         if wd is not None:
             import wepppy
@@ -368,15 +370,20 @@ class Loss(object):
 
             for i in range(len(chn_tbl)):
                 row = chn_tbl[i]
-                wepp_id = row['Channels and Impoundments']
+                chn_id = row['Channels and Impoundments']
 
-                topaz_id = translator.top(chn_enum=wepp_id)
+                topaz_id = translator.top(chn_enum=chn_id)
+                wepp_id = translator.wepp(chn_enum=chn_id)
+
                 chn_summary = watershed.chn_summary(str(topaz_id))
                 area = chn_summary['area'] / 10000.0
-                chn_tbl[i]['WeppID'] = wepp_id
+                chn_tbl[i]['WeppID'] = chn_id
+                chn_tbl[i]['WeppChnID'] = wepp_id
                 chn_tbl[i]['TopazID'] = topaz_id
                 chn_tbl[i]['Area'] = area
+                chn_tbl[i]['Contributing Area'] = row['Contributing Area']
                 chn_tbl[i]['Length'] = chn_summary['length']
+
                 if isfloat(row['Sediment Yield']):
                     chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
                 else:

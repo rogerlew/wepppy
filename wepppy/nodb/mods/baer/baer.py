@@ -242,10 +242,11 @@ class Baer(NoDbBase):
             assert breaks[2] <= breaks[3]
 
             self._breaks = breaks
-            if nodata_vals.strip() != '':
-                _nodata_vals = ast.literal_eval('[{}]'.format(nodata_vals))
-                assert all(isint(v) for v in _nodata_vals)
-                self._nodata_vals = _nodata_vals
+            if nodata_vals is not None:
+                if str(nodata_vals).strip() != '':
+                    _nodata_vals = ast.literal_eval('[{}]'.format(nodata_vals))
+                    assert all(isint(v) for v in _nodata_vals)
+                    self._nodata_vals = _nodata_vals
                 
             self.write_color_table()
             self.build_color_map()
@@ -382,14 +383,25 @@ class Baer(NoDbBase):
                 ron = Ron.getInstance(wd)
                 if 'lt' in ron.mods:
                     for k, sbs in domlc_d.items():
-                        if sbs in ['131']:
-                            landuse.domlc_d[k] = '106'
-                        elif sbs in ['132']:
-                            landuse.domlc_d[k] = '118'
-                        elif sbs in ['133']:
-                            landuse.domlc_d[k] = '105'
+                        # lt shrub
+                        if landuse.domlc_d[k] == '104':
+                            if sbs in ['131']:
+                                landuse.domlc_d[k] = '121'  # lt low shrub
+                            elif sbs in ['132']:
+                                landuse.domlc_d[k] = '120'  # lt medium shrub
+                            elif sbs in ['133']:
+                                landuse.domlc_d[k] = '119'  # lt high shrub
+                        # not shrub
+                        else:
+                            if sbs in ['131']:
+                                landuse.domlc_d[k] = '106'  # lt low forest
+                            elif sbs in ['132']:
+                                landuse.domlc_d[k] = '118'  # lt medium forest
+                            elif sbs in ['133']:
+                                landuse.domlc_d[k] = '105'  # lt high forest
 
                 else:
+                    # TODO: implement shrub wepp-pep managements
                     landuse.domlc_d = domlc_d
 
             landuse.dump_and_unlock()

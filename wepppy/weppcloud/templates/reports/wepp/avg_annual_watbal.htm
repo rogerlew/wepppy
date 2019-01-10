@@ -1,8 +1,9 @@
 {% extends "reports/_page_container.htm" %}
+{% block report_title %}Annual Water Balance{% endblock %}
 {% block report_content %}
 <h2>Water Balance Average Annual Summary</h5>
 <h5>Hillslopes
-  <a onclick="javascript:copytable('hill_tbl')"><span class="oi oi-clipboard"></span></a>
+  <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
  <table class="table table-condensed" id="hill_tbl">
     <thead>
@@ -36,7 +37,7 @@
     </tbody>
 </table>
 <h5>Channels
-  <a onclick="javascript:copytable('chn_tbl')"><span class="oi oi-clipboard"></span></a>
+  <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
  <table class="table table-condensed" id="chn_tbl">
     <thead>

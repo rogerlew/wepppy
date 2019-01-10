@@ -294,7 +294,6 @@ def usermod():
 def ispoweruser():
     return jsonify(current_user.has_role('PowerUser'))
 
-
 @app.route('/tasks/usermod/', methods=['POST'])
 @roles_required('Root')
 def task_usermod():
