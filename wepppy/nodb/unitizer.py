@@ -96,10 +96,7 @@ converters = {
     'flow': {
         ('m^3/s', 'ft^3/min'): lambda v: v * 2118.88,
         ('m^3/s', 'ft^3/s'): lambda v: v * 35.3147,
-        ('ft^3/min', 'm^3/s'): lambda v: v * 0.000471947,
-        ('ft^3/min', 'ft^3/s'): lambda v: v * 0.0166667,
-        ('ft^3/s', 'm^3/s'): lambda v: v * 0.0283168,
-        ('ft^3/s', 'ft^3/min'): lambda v: v * 60.0
+        ('ft^3/s', 'm^3/s'): lambda v: v * 0.0283168
     },
     'sm-surface-density': {
         ('kg/ha', 'lb/acre'): lambda v: v * 0.892179,
@@ -206,7 +203,6 @@ precisions = OrderedDict([
      ),
     ('flow', OrderedDict([
         ('m^3/s', 2),
-        ('ft^3/min', 0),
         ('ft^3/s', 2)])
      ),
     ('sm-surface-density', OrderedDict([
@@ -255,9 +251,9 @@ class Unitizer(NoDbBase):
         # noinspection PyBroadException
         try:
 
-            # make the first in the list the default
+            # make the second in the list the default (English Units)
             self._preferences = \
-                {k: list(v.keys())[0] for k, v in precisions.items()}
+                {k: list(v.keys())[1] for k, v in precisions.items()}
 
             self.dump_and_unlock()
 
