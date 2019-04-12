@@ -1,0 +1,44 @@
+  <h5><b>{{ key }}</b>
+  <a onclick="javascript:copytable('{{ key | replace(' ', '') }}_tbl')">
+      <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/>
+  </a>
+  </h5>
+  <table class="table" id="{{ key | replace(' ', '') }}_tbl" style="width:60%; min-width: 600px; max-width: 1000px;">
+    <thead>
+      <tr>
+        <th style="width: 20%">Recurrence Interval</th>
+        <th style="width: 20%">Year</th>
+        <th style="width: 20%">Month</th>
+        <th style="width: 20%">Day</th>
+        <th style="width: 20%">
+            {% if key == 'Precipitation Depth' %}
+                Precipitation
+            {% elif key == 'Peak Runoff' %}
+                Runoff
+            {% else %}
+                {{ key }}
+            {% endif %}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="width: 20%">years</td>
+        <td style="width: 20%"></td>
+        <td style="width: 20%"></td>
+        <td style="width: 20%"></td>
+        <td style="width: 20%">{{ unitizer_units(report.units_d[key]) | safe }}</td>
+      </tr>
+    {% for rec_interval in report.intervals %}
+      <tr>
+        <td style="width: 20%">{{ rec_interval }}</td>
+        <td style="width: 20%">{{ report.return_periods[key][rec_interval]['year'] | int }}</td>
+        <td style="width: 20%">{{ report.return_periods[key][rec_interval]['mo'] | int }}</td>
+        <td style="width: 20%">{{ report.return_periods[key][rec_interval]['da'] | int }}</td>
+        <td style="width: 20%">{{
+                unitizer(report.return_periods[key][rec_interval][key],
+                         report.units_d[key]) | safe }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>

@@ -599,7 +599,7 @@ POSSIBILITY OF SUCH DAMAGE."""
     def _abbreviated_description(self):
     
         s = ['',
-             '            Hydro TBD Utils ' + __version__ + ' (c) University of Idaho',
+             '            WEPPcloud ' + __version__ + ' (c) University of Idaho',
              '',
              '  Build Date: ' + str(datetime.now()),
              '  Source Data: Default Soil Type',
@@ -619,7 +619,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             return
             
         s = ['',
-             '            Hydro TBD Utils ' + __version__ + ' (c) University of Idaho',
+             '            WEPPcloud ' + __version__ + ' (c) University of Idaho',
              '',
              '  Build Date: ' + str(datetime.now()),
              '  Source Data: ' + source_data,
@@ -744,18 +744,23 @@ Any comments:
     def _build_water(self):
         return '''7778\n''' + self.description + '''
 Any comments:                                   
-1  1                                        
-'Water_1'\t'Water'\t1\t0.16\t0.75\t4649000\t0.0140\t5.0\t100.0
-210\t1.4\t100.0\t10\t0.242\t0.1145\t66.8\t7\t3\t11.3\t55.5
-1\t10000\t0'''
+1 1
+'water_7778_2'		'Water'	1 	0.1600 	0.7500 	1.0000 	0.0100 	999.0000 	0.1000
+	210.000000 	1.400000 	100.000000 	10.000000 	0.242 	0.115 	66.800 	7.000 	3.000 	11.300	55.500
+0 0 0'''
+
+        return '''7778\n''' + self.description + '''
+Any comments:                                   
+1  0                                        
+'Water_1'\t'Water'\t0\t0.0\t0.75\t0\t0.00\t0.0\t000.0
+0\t0\t0'''
 
     def _build_water_v2006_2(self):
         return '''2006.2\n''' + self.description + '''
 Any comments:                                   
-1  1                                        
-'Water_1'\t'Water'\t1\t0.16\t0.75\t4649000\t0.0140\t5.0\t0.0000
-210\t66.8\t7\t3\t11.3\t55.5
-1\t10000\t0'''
+1  0                                        
+'Water_1'\t'Water'\t0 0.000000\t0.750000\t0.000000\t0.000000\t0.000000\t0.000000
+0\t0\t0'''
 
     def write(self, wd='./', overwrite=True, fname=None, db_build=False, version='7778') -> SoilSummary:
         assert version in ['7778', '2006.2']

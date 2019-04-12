@@ -53,7 +53,6 @@ if __name__ == "__main__":
     lats = ds.variables['latitude']
     times = ds.variables['time']
 
-
     for var in ds.variables:
         print(var)
         if 'precip' in var:

@@ -36,6 +36,7 @@ from .base import NoDbBase, TriggerEvents
 
 _thisdir = os.path.dirname(__file__)
 
+
 class Map(object):
     def __init__(self, extent, center, zoom, cellsize=30.0):
         assert len(extent) == 4
@@ -153,6 +154,9 @@ class Ron(NoDbBase):
                     baer.validate(_split(sbs_path)[-1])
 
                     baer.modify_burn_class([0, 1, 2, 3], None)
+
+            if "rred" in self.mods:
+                wepppy.nodb.mods.Rred(wd, cfg_fn)
 
             if "debris_flow" in self.mods:
                 wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)

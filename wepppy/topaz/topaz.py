@@ -322,10 +322,10 @@ class TopazRunner:
         x, y, _, _ = utm.from_latlon(lat, long, self.utm_zone)
 
         # assert this makes sense with the stored extent
-        assert round(x) >= round(ul_x)
-        assert round(x) <= round(lr_x)
-        assert round(y) >= round(lr_y)
-        assert round(y) <= round(ul_y)
+        assert round(x) >= round(ul_x), (x, ul_x)
+        assert round(x) <= round(lr_x), (x, lr_x)
+        assert round(y) >= round(lr_y), (y, lr_y)
+        assert round(y) <= round(y), (y, ul_y)
 
         # determine pixel coords
         _x = int(round((x - ul_x) / cellsize))

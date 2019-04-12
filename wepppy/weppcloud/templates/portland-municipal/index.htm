@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>WEPPcloud</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+    integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+      <style>
+a.disabled {
+  /* Make the disabled links grayish*/
+  color: gray;
+  /* And disable the pointer events */
+  pointer-events: none;
+}
+      </style>
+  </head>
+  <body>
+  <header>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="../">WEPPcloud/Portland-Municipal</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+          </li>
+          {% if user.is_anonymous %}
+          <li><a class="nav-link" href="../login">Login</a></li>
+          <li><a class="nav-link" href="../register">Register</a></li>
+          {% else %}
+          <li><a class="nav-link" href="../runs">My Runs</a></li>
+          <li><a class="nav-link" href="../profile">Profile</a></li>
+          <li><a class="nav-link" href="../logout">Logout</a></li>
+          {% if current_user.has_role('Root') %}
+          <li><a class="nav-link" href="../usermod">Usermod</a></li>
+          {% endif %}
+          {% endif %}
+        </ul>
+        <button class="btn btn-link" type="button" id="btnPuModal"
+                data-toggle="modal" data-target="#puModal"
+                title="up up down down left right left right b a">
+            <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}"/>
+        </button>
+        </div>
+      </nav>
+    </header>
+    <div role="main" class="container">
+    <div style="height: 60px;"></div>
+    <div style="height: 2em;"></div>
+    <h1>Portland Municipal Watersheds</h1>
+    <p>Preliminary (Uncalibrated) runs for the Bullrun Watershed</p>
+    <p>This work is sponsored by the Hazards SEES: Advancing Resilience to Compounding Disasters: An Integrated
+        Natural-Human Systems Assessment of Wildfire Vulnerability Project (NSF Award #1520873)</p>
+    <hr>
+
+    <h2>Aggregated WEPP Results by Scenario</h2>
+    <div style="margin-left: 1.5em;">
+        <h3>Current conditions and managements</h3>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=10&center=[45.436756308219316,-121.98875427246095]&ws=[{"runid": "NorthFork", "cfg": "0"}, {"runid": "LittleSandy", "cfg": "0"}, {"runid": "FirCreek", "cfg": "0"}, {"runid": "CedarCreek", "cfg": "0"}, {"runid": "BRnearMultnoma", "cfg": "0"}, {"runid": "BlazedAlder", "cfg": "0"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":200}&varname=loss&title=Seattle Municipal Watersheds'>View Watershed Results</a>
+        <!-- a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=10&center=[47.5,-121.53]&ws=[{"cfg": "0", "runid": "CedarRiver"}, {"cfg": "0", "runid": "Tolt_NorthFork"}, {"cfg": "0", "runid": "Taylor_Creek"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"loss":200}&varname=loss&title=Seattle Municipal Watersheds'></a-->
+        <div style="height: 1em;"></div>
+    </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+     integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+     integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
+{% include("_analytics.htm") %}
+    </div>
+  </body>
+</html>

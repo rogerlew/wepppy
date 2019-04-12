@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>WeppCloud</title>
+    <title>WEPPcloud</title>
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
     integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -16,7 +16,7 @@
   <header>
   <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="../weppcloud">WeppCloud</a>
+    <a class="navbar-brand" href="../weppcloud">WEPPcloud</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -39,7 +39,7 @@
     <button class="btn btn-link" type="button" id="btnPuModal"
             data-toggle="modal" data-target="#puModal"
             title="up up down down left right left right b a">
-        <img src="{{ url_for('static', filename='open-iconic/png/command-2x.png') }}"/>
+        <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}"/>
     </button>
     </div>
   </nav>
@@ -52,7 +52,7 @@
             <img src="{{  url_for('static', filename='images/interfaces/0.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
         </div>
         <div class="col-lg-8">
-          <h1>WeppCloud</h1>
+          <h1>WEPPcloud</h1>
           <p>Run WEPP anywhere in the continental U.S. Elevation data from USGS National Elevation Set. TOPAZ for
              watershed delineation. Soils are build using SURGO/STATSGO. Landcover from USGS National Landcover dataset.
              Climates from CLIGEN.
@@ -107,9 +107,23 @@
           </p>
         </div>
       </div>
+      <div class="jumbotron row">
+        <div class="col-lg-3">
+            <img src="{{  url_for('static', filename='images/interfaces/widlfire_credit_NOAA_DanBorsum.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
+        </div>
+        <div class="col-lg-8">
+          <h1>Hazard SEES - FireEarth Project</h1>
+          <p>Data portals related to the Hazard SEES - FireEarth Project
+          </p>
+          <p>
+            <a class="btn btn-primary" href="portland-municipal" role="button">Portland Municipal Watersheds</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a class="btn btn-primary" href="seattle-municipal" role="button">Seattle Municipal Watersheds</a>
+          </p>
+        </div>
+      </div>
       <div style="height: 2em;"></div>
       <div>
-        <h3>WeppCloud Utilities</h3>
+        <h3>WEPPcloud Utilities</h3>
           <a href="combined_ws_viewer/url_generator/">Combined Watershed Viewer URL Generator</a>
       </div>
       <div style="height: 2em;"></div>
@@ -120,6 +134,13 @@
             <tr><th>Date</th><th>Notable Change</th></tr>
           </thead>
           <tbody>
+            <tr><td>March 29, 2019</td><td>Various usability enhancements. 10-min and 30-min peak rainfall intensities
+                                           added to return period analysis. soil fix for channels and hillslopes with
+                                           dominate water.</td></tr>
+            <tr><td>February 14, 2019</td><td>Hazard SEES - FireEarth Data Portals added.</td></tr>
+            <tr><td>January 14, 2019</td><td>Miscellaneous interface improvements and bug fixes.</td></tr>
+            <tr><td>December 3, 2018</td><td>Bug fix for building DAYMET Climates with small extents.</td></tr>
+            <tr><td>November 2, 2018</td><td>Changed default parameters for running TOPAZ and WEPP.</td></tr>
             <tr><td>August 27, 2018</td><td>Combined Watershed URL Generator. Ability to reassign landuse to different management.
                                             Zack Holden's WRF Precipitation dataset integrated into Debris Flow model
                                             over bounds of [-117.386, 34.694, 48.756, -96.980].</td></tr>

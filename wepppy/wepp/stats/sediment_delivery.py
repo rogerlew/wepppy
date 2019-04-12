@@ -116,7 +116,6 @@ class SedimentDelivery(object):
 
             wtr.writerow(hdr)
 
-
         row = self.class_fractions + \
               [self.particle_distribution['clay'],
                self.particle_distribution['silt'],

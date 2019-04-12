@@ -41,7 +41,7 @@ from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.6)
+NCPU = math.floor(multiprocessing.cpu_count() * 0.3)
 if NCPU < 1:
     NCPU = 1
 
@@ -563,6 +563,7 @@ class Climate(NoDbBase, LogMixin):
         # noinspection PyBroadInspection
         try:
             self.orig_cli_fn = cli_fn
+            self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
@@ -742,6 +743,7 @@ class Climate(NoDbBase, LogMixin):
             self.log('Copying original climate file...')
             orig_cli_fn = self.orig_cli_fn
             cli_dir = self.cli_dir
+            assert orig_cli_fn is not None
             assert _exists(orig_cli_fn)
 
             cli_dir = os.path.abspath(self.cli_dir)
