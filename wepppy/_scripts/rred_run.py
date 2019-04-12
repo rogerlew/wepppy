@@ -109,7 +109,7 @@ if __name__ == '__main__':
              outlet=[-116.32628459650955, 45.22590653656753],
              landuse_mode=LanduseMode.RRED_Burned,
              soils_mode=SoilsMode.RRED_Burned),
-        dict(wd='RRED_RattleSnake_Burned',
+        dict(wd='RRED_RattleSnake_Unburned',
              rred_key='daa1a462de01ca9f022694103ce30a21',
              outlet=[-116.32628459650955, 45.22590653656753],
              landuse_mode=LanduseMode.RRED_Unburned,
