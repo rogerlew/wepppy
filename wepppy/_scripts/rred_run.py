@@ -19,13 +19,12 @@ from osgeo import gdal, osr
 gdal.UseExceptions()
 import sys
 
-if __name__ == '__main__':
-    proj = dict(wd='RRED_test_project',
-                rred_key='daa1a462de01ca9f022694103ce30a21', # emerald creek sbs
-                outlet=[-116.32628459650955, 45.22590653656753])
 
+def run_rred_project(proj):
     wd = proj['wd']
     outlet = proj['outlet']
+    soils_mode = proj['soils_mode']
+    landuse_mode = proj['landuse_mode']
 
     print('cleaning dir')
     if _exists(wd):
@@ -35,10 +34,6 @@ if __name__ == '__main__':
     print('initializing project')
     ron = Ron(wd, "rred.cfg")
     ron.name = wd
-#    ron.set_map(extent, map_center, zoom=map_zoom)
-
-#    print('fetching dem')
-#    ron.fetch_dem()
 
     rred = Rred.getInstance(wd)
     rred.import_project(proj['rred_key'])
@@ -60,13 +55,13 @@ if __name__ == '__main__':
 
     print('building landuse')
     landuse = Landuse.getInstance(wd)
-    landuse.mode = LanduseMode.RRED_Burned
+    landuse.mode = landuse_mode
     landuse.build()
     landuse = Landuse.getInstance(wd)
 
     print('building soils')
     soils = Soils.getInstance(wd)
-    soils.mode = SoilsMode.RRED_Burned
+    soils.mode = soils_mode
     soils.build()
 
     print('building climate')
@@ -105,3 +100,24 @@ if __name__ == '__main__':
 
     print('exporting arcmap resources')
     arc_export(wd)
+
+
+if __name__ == '__main__':
+    projects = [
+        dict(wd='RRED_RattleSnake_Burned',
+             rred_key='daa1a462de01ca9f022694103ce30a21',
+             outlet=[-116.32628459650955, 45.22590653656753],
+             landuse_mode=LanduseMode.RRED_Burned,
+             soils_mode=SoilsMode.RRED_Burned),
+        dict(wd='RRED_RattleSnake_Burned',
+             rred_key='daa1a462de01ca9f022694103ce30a21',
+             outlet=[-116.32628459650955, 45.22590653656753],
+             landuse_mode=LanduseMode.RRED_Unburned,
+             soils_mode=SoilsMode.RRED_Unburned)
+        ]
+
+    for proj in projects:
+        run_rred_project(proj)
+
+
+
