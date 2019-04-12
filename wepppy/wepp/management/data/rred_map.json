@@ -2,7 +2,7 @@
   "0": {"Key": 0,   "Color": [0,0,0,255],       "Description": "No Data", "ManagementFile": "GIS/Bare.man"},
  "11": {"Key": 11,  "Color": [71,107,160,255],  "Description": "Open Water", "ManagementFile": "GeoWEPP/grass.man"},
  "12": {"Key": 12,  "Color": [209,221,249,255], "Description": "Ice/Snow", "ManagementFile": "GeoWEPP/grass.man"},
- "22": {"Key": 22,  "Color": [221,201,201,255], "Description": "Developed - Low Intensity", "ManagementFile": "GeoWEPP/grass.man"},
+ "22": {"Key": 22,  "Color": [221,201,201,255], "Description": "Developed - Low Intensity", "ManagementFile": "GIS/Grass lawn.man"},
  "23": {"Key": 23,  "Color": [216,147,130,255], "Description": "Developed - Roads", "ManagementFile": "GIS/Pavement.man"},
  "31": {"Key": 31,  "Color": [178,173,163,255], "Description": "Barren", "ManagementFile": "GIS/Pavement.man"},
  "40": {"Key": 40,  "Color": [104,170,99,255],  "Description": "Young Forest", "ManagementFile": "GeoWEPP/forest_perrenial.man"},
