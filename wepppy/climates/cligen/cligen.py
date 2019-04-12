@@ -35,6 +35,73 @@ _stations_dir = _join(_thisdir, 'stations')
 _bin_dir = _join(_thisdir, 'bin')
 
 
+def cli2pat(prcp=50, dur=2, tp=0.3, ip=4, max_time=[10, 30, 60]):
+    """
+    Calculates peak intensities for 10, 30, and 60 minute intervals
+    based on storm prcp, duration, tp, and ip.
+
+    Ported from Correy Moffet's R code (Sourced through Bill Elliott).
+
+    :param prcp: precip in mm
+    :param dur:
+    :param tp:
+    :param ip:
+    :param max_time:
+    :return:
+    """
+    if prcp == 0 or dur == 0:
+        return [0.0 for t in max_time]
+
+    if tp <= 0.0:
+        tp = 0.1
+
+    the_b = lambda _b, _tp, _ip: (_ip - _ip * np.exp(-_b * _tp)) / _tp
+    im = prcp/dur
+    max_time = [t / 60.0 for t in max_time]
+    peaks = len(max_time)
+    last_b = 15
+    b = 10
+    while abs(b-last_b) > 0.000001:
+        last_b = b
+        b = the_b(b, tp, ip)
+
+    d = b*tp/(1-tp)
+    starts = [None for i in max_time]
+    ends = [None for i in max_time]
+    dur_peak = [None for i in max_time]
+    I_peak = [None for i in max_time]
+    for p in range(peaks):
+        t_start = tp - max_time[p] / dur
+        t_high = tp
+        t_low = t_start
+        t_end = tp
+        i_start = ip * np.exp(b * (t_start - tp))
+        i_end = ip
+        while abs(i_start - i_end) > 0.000001:
+            if i_start < i_end:
+                t_low = t_start
+            else:
+                t_high = t_start
+            t_start = (t_high + t_low) / 2
+            t_end = t_start + max_time[p] / dur
+            i_start = ip * np.exp(b * (t_start - tp))
+            i_end = ip * np.exp(d * (tp - t_end))
+
+        if t_start < 0:
+            starts[p] = 0
+            ends[p] = 1
+        else:
+            starts[p] = t_start
+            ends[p] = t_end
+
+        dur_peak[p] = ends[p] - starts[p]
+        I_peak[p] = ((ip/b - ip/b * np.exp(b * (starts[p] - tp))) +
+                     (ip/d - ip/d * np.exp(d * (tp - ends[p])))) * \
+                    im / max(dur_peak[p], max_time[p] / dur)
+
+    return I_peak
+
+
 def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     """
     creates a prn file containing daily timeseries data for input to
@@ -215,12 +282,17 @@ class ClimateFile(object):
         years = [int(v) for v in sorted(set(df['year']))]
         return years
 
-    def as_dataframe(self):
+    def as_dataframe(self, calc_peak_intensities=False):
         colnames = self.colnames
         dtypes = self.dtypes
         d = {}
         for name in colnames:
             d[name] = []
+
+        if calc_peak_intensities:
+            d['10-min Peak Intensity (mm/hour)'] = []
+            d['30-min Peak Intensity (mm/hour)'] = []
+            d['60-min Peak Intensity (mm/hour)'] = []
 
         for i, L in enumerate(self.lines[self.data0line:]):
             row = [v.strip() for v in L.split()]
@@ -231,6 +303,13 @@ class ClimateFile(object):
 
             for dtype, name, v in zip(dtypes, colnames, row):
                 d[name].append(dtype(v))
+
+            if calc_peak_intensities:
+                max_time = [10, 30, 60]
+                intensities = cli2pat(prcp=d['prcp'][-1], dur=d['dur'][-1], tp=d['tp'][-1], ip=d['ip'][-1], max_time=max_time)
+                d['10-min Peak Intensity (mm/hour)'].append(intensities[0])
+                d['30-min Peak Intensity (mm/hour)'].append(intensities[1])
+                d['60-min Peak Intensity (mm/hour)'].append(intensities[2])
 
         return pd.DataFrame(data=d)
 
@@ -719,8 +798,26 @@ class Cligen:
 
 
 if __name__ == "__main__":
+
+    import sys
+    from pprint import pprint
+
+    print(cli2pat(prcp=43.2, dur=23.58, tp=0.001, ip=4.12))
+    print(cli2pat(prcp=43.2, dur=23.58, tp=0.01, ip=4.12))
+    print(cli2pat(prcp=43.2, dur=23.58, tp=0.1, ip=4.12))
+
+    cli = ClimateFile('test.cli')
+    pprint(cli.as_dataframe(calc_peak_intensities=True))
+
+
+    sys.exit()
     stationManager = CligenStationsManager(version=2015)
 
     stationMeta = stationManager.get_closest_station((-117, 46))
 
     print(stationMeta)
+
+    def print_tbl(max_times, prcps):
+        print('dur  intensity')
+        for m, p in zip(max_times, prcps):
+            print(m, p)

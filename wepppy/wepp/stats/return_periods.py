@@ -8,15 +8,31 @@
 
 from collections import OrderedDict
 import  numpy as np
+from pandas import DataFrame, Series
 from wepppy.all_your_base import parse_units, RowData, parse_name
 
 from wepppy.wepp.out import Loss, Ebe
 
 
 class ReturnPeriods:
-    def __init__(self, ebe: Ebe, loss: Loss, recurence=[2, 5, 10, 20, 25]):
+    def __init__(self, ebe: Ebe, loss: Loss, cli_df: DataFrame, recurence=[2, 5, 10, 20, 25]):
+        self.has_phosphorus = loss.has_phosphorus
 
         df = ebe.df
+
+        pk_intensity_dict = {}
+        for i, d in cli_df.iterrows():
+            pk_intensity_dict[d['da'], d['mo'], d['year']] = d
+
+        _pk10 =[]
+        _pk30 = []
+        for i, d in df.iterrows():
+            _pk10.append(pk_intensity_dict[d['da'], d['mo'], d['year']]['10-min Peak Intensity (mm/hour)'])
+            _pk30.append(pk_intensity_dict[d['da'], d['mo'], d['year']]['30-min Peak Intensity (mm/hour)'])
+
+        df['10-min Peak Intensity'] = Series(_pk10, index=df.index)
+        df['30-min Peak Intensity'] = Series(_pk30, index=df.index)
+
         header = list(df.keys())
         header.remove('da')
         header.remove('mo')
@@ -50,13 +66,14 @@ class ReturnPeriods:
             if intind < orgind:
                 rec[retperiod] = intind
                 orgind = intind
-                reccount = reccount + 1
+                reccount += 1
 
             i += 1
 
         results = {}
 
         for colname in header:
+
             df2 = df.sort_values(by=colname, ascending=False)
 
             colname = parse_name(colname)
@@ -79,6 +96,8 @@ class ReturnPeriods:
         self.num_events = df.shape[0]
         self.intervals = sorted(rec.keys())
         self.units_d = ebe.units_d
+        self.units_d['10-min Peak Intensity'] = 'mm/hour'
+        self.units_d['30-min Peak Intensity'] = 'mm/hour'
 
 
 if __name__ == "__main__":

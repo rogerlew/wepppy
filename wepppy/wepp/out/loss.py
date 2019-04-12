@@ -62,10 +62,23 @@ def _parse_tbl(lines, hdr):
                 row.append(float(tok1))
 
             elif '.' in v:
-                row.append(float(v))
+
+                if '*' in v:
+                    if v.endswith('*'):
+                        # cases like '1204.543********'
+                        row.append(float(v.replace('*', '')))
+                        row.append('********')
+                    else:
+                        # haven't seen this, flat-files... ugh.
+                        row.append('********')
+                        row.append(float(v.replace('*', '')))
+                else:
+                    row.append(float(v))
+
             else:
                 # noinspection PyBroadException
                 try:
+                    # catches the '********' case
                     row.append(int(v))
                 except Exception:
                     row.append(v)
@@ -184,7 +197,7 @@ class Loss(object):
         None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'ha', 'kg', 'kg', 'kg'
     )
 
-    def __init__(self, fn, wd=None, exclude_yr_indxs=None):
+    def __init__(self, fn, has_phosphorus, wd=None, exclude_yr_indxs=None):
         hill_hdr = self.hill_hdr
         hill_avg_hdr = self.hill_avg_hdr
         chn_hdr = self.chn_hdr
@@ -423,6 +436,8 @@ class Loss(object):
             self.avg_years = years
         else:
             self.avg_years = avg_years
+
+        self.has_phosphorus = has_phosphorus
 
     @property
     def avg_annual_years(self):

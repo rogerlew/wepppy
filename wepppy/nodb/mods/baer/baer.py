@@ -101,7 +101,7 @@ class Baer(NoDbBase):
     @property
     def baer_dir(self):
         return _join(self.wd, 'baer')
-            
+
     @property
     def baer_soils_dir(self):
         return _join(_data_dir, 'soils')
@@ -154,7 +154,7 @@ class Baer(NoDbBase):
                 
         return ('No Burn', 
                 'Low Severity Burn', 
-                'Medium Severity Burn', 
+                'Moderate Severity Burn',
                 'High Severity Burn')[i]
     
     @property
@@ -187,7 +187,7 @@ class Baer(NoDbBase):
 
         descs = ['No Burn',
                 'Low Severity Burn',
-                'Medium Severity Burn',
+                'Moderate Severity Burn',
                 'High Severity Burn']
 
         colors = ['#00734A', '#4DE600', '#FFFF00', '#FF0000']
@@ -201,7 +201,7 @@ class Baer(NoDbBase):
         _map = dict([('No Data', '0 0 0'),
                      ('No Burn', '0 115 74'),
                      ('Low Severity Burn', '77 230 0'),
-                     ('Medium Severity Burn', '255 255 0'),
+                     ('Moderate Severity Burn', '255 255 0'),
                      ('High Severity Burn', '255 0 0')])
 
         with open(self.color_tbl_path, 'w') as fp:

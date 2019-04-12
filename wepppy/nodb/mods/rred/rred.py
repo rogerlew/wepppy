@@ -191,16 +191,17 @@ class Rred(NoDbBase):
         try:
             domsoil_d = lc.build_lcgrid(self.subwta_arc, None)
             soils_summaries = {}
-
             for k, v in domsoil_d.items():
-                domsoil_d[k] = soilsmap[str(v)]
-                soils_summaries[k] = SoilSummary(
-                    Mukey=k,
-                    FileName='%s.sol' % k,
+                sol = soilsmap[str(v)]
+                domsoil_d[k] = sol
+                soils_summaries[sol] = SoilSummary(
+                    Mukey=sol,
+                    FileName='%s.sol' % sol,
                     soils_dir=self.soils_dir,
                     BuildDate=str(datetime.now()),
-                    Description=k
+                    Description='%s - RRED' % v
                 )
+
             soils.domsoil_d = domsoil_d
             soils.soils = soils_summaries
             soils.dump_and_unlock()

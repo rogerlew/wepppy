@@ -210,7 +210,6 @@ def parse_units(colname):
     except IndexError:
         return None
 
-    return None
 
 class RowData:
     def __init__(self, row):
@@ -221,6 +220,7 @@ class RowData:
             value = self.row[colname]
             units = parse_units(colname)
             yield value, units
+
 
 wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
 
@@ -293,17 +293,54 @@ def warp2match(src_filename, match_filename, dst_filename):
     del dst  # Flush
 
 
-def translate_tif_to_asc(fn):
+def translate_tif_to_asc(fn, fn2=None):
     assert fn.endswith(".tif")
     assert _exists(fn)
 
-    fn2 = fn[:-4] + ".asc"
+    if fn2 is None:
+        fn2 = fn[:-4] + ".asc"
+
+    if _exists(fn2):
+        os.remove(fn2)
+
     cmd = ["gdal_translate", "-of", "AAIGrid", fn, fn2]
-    Popen(cmd, stdout=PIPE, stderr=PIPE)
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.wait()
 
     assert _exists(fn2)
 
     return fn2
+
+
+def translate_asc_to_tif(fn, fn2=None):
+    assert fn.endswith(".asc")
+    assert _exists(fn)
+
+    if fn2 is None:
+        fn2 = fn[:-4] + ".tif"
+
+    if _exists(fn2):
+        os.remove(fn2)
+
+    cmd = ["gdal_translate", "-of", "GTiff", fn, fn2]
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.wait()
+
+    assert _exists(fn2), fn2
+
+    return fn2
+
+
+def raster_extent(fn):
+    assert _exists(fn)
+    data = gdal.Open(fn)
+    geoTransform = data.GetGeoTransform()
+    minx = geoTransform[0]
+    maxy = geoTransform[3]
+    maxx = minx + geoTransform[1] * data.RasterXSize
+    miny = maxy + geoTransform[5] * data.RasterYSize
+    data = None
+    return [minx, miny, maxx, maxy]
 
 
 def read_raster(fn, dtype=np.float64):
@@ -397,6 +434,7 @@ nodata_value {no_data}
                                      no_data=no_data,
                                      data=data_string))
 
+
 def build_mask(points, georef_fn):
 
     # This function is based loosely off of Frank's tests for
@@ -453,6 +491,7 @@ def build_mask(points, georef_fn):
 
     # find nonzero indices and return
     return -1 * (data / 255.0) + 1
+
 
 def identify_utm(fn):
     assert _exists(fn), "Cannot open %s" % fn

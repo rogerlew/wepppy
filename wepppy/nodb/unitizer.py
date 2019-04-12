@@ -98,6 +98,10 @@ converters = {
         ('m^3/s', 'ft^3/s'): lambda v: v * 35.3147,
         ('ft^3/s', 'm^3/s'): lambda v: v * 0.0283168
     },
+    'xs-surface-density': {
+        ('kg/ha,3', 'lb/acre,3'): lambda v: v * 0.892179,
+        ('lb/acre,3', 'kg/ha,3'): lambda v: v * 1.12085,
+    },
     'sm-surface-density': {
         ('kg/ha', 'lb/acre'): lambda v: v * 0.892179,
         ('kg/ha', 'kg/m^2'): lambda v: v * 0.0001,
@@ -111,6 +115,10 @@ converters = {
         ('lb/mi^2', 'kg/ha'): lambda v: v * 0.00175132993,
         ('lb/mi^2', 'lb/acre'): lambda v: v * 0.0015625,
         ('lb/mi^2', 'kg/m^2'): lambda v: v * 1.75132993E-7,
+    },
+    'xs-surface-density-annual': {
+        ('kg/ha/yr,3', 'lb/acre/yr,3'): lambda v: v * 0.892179,
+        ('lb/acre/yr,3', 'kg/ha/yr,3'): lambda v: v * 1.12085,
     },
     'sm-surface-density-annual': {
         ('kg/ha/yr', 'lb/acre/yr'): lambda v: v * 0.892179,
@@ -205,15 +213,23 @@ precisions = OrderedDict([
         ('m^3/s', 2),
         ('ft^3/s', 2)])
      ),
+    ('xs-surface-density', OrderedDict([
+        ('kg/ha,3', 3),
+        ('lb/acre,3', 3)])
+     ),
     ('sm-surface-density', OrderedDict([
-        ('kg/ha', 3),
-        ('lb/acre', 3),
+        ('kg/ha', 0),
+        ('lb/acre', 0),
         ('kg/m^2', 1),
         ('lb/mi^2', 1)])
      ),
+    ('xs-surface-density-annual', OrderedDict([
+        ('kg/ha/yr,3', 3),
+        ('lb/acre/yr,3', 3)])
+     ),
     ('sm-surface-density-annual', OrderedDict([
-        ('kg/ha/yr', 3),
-        ('lb/acre/yr', 3),
+        ('kg/ha/yr', 0),
+        ('lb/acre/yr', 0),
         ('kg/m^2/yr', 3),
         ('lb/mi^2/yr', 3)])
      ),
@@ -344,10 +360,13 @@ class Unitizer(NoDbBase):
         def cls_units(units):
             return str(units).replace('/', '_') \
                 .replace('^2', '-sqr') \
-                .replace('^3', '-cube')
+                .replace('^3', '-cube') \
+                .replace(',', '-_')
 
         def str_units(units):
-            return str(units).replace('^2', '<sup>2</sup>') \
+            return str(units)\
+                .split(',')[0] \
+                .replace('^2', '<sup>2</sup>') \
                 .replace('^3', '<sup>3</sup>')
 
         def unitizer_units(in_units, other_classes=None, parentheses=False):
@@ -384,14 +403,27 @@ class Unitizer(NoDbBase):
 
             return '<div class="unitizer-wrapper">{}</div>'.format(s)
 
-        def unitizer(value, in_units, other_classes=None, parentheses=False):
+        def unitizer(value, in_units, other_classes=None, parentheses=False, precision=None):
 
             if value is None:
                 return ''
 
+            if precision is not None:
+                assert float(int(precision)) == float(precision)
+                precision = int(precision)
+
             if in_units is None:
+                if precision is None:
+                    precision = 3
+                    try:
+                        if float(int(value)) == float(value):
+                            precision = 0
+                    except:
+                        pass
+
                 if isfloat(value):
-                    return '%0.3f' % float(value)
+                    fmt = '%0.' + str(precision) + 'f'
+                    return fmt % float(value)
 
                 return str(value)
 
@@ -407,7 +439,11 @@ class Unitizer(NoDbBase):
 
             oc = str_other_class(other_classes)
 
-            p = precisions[unitclass][in_units]
+            if precision is not None:
+                p = precision
+            else:
+                p = precisions[unitclass][in_units]
+
             if parentheses:
                 s = '<div class="unitizer units-{u} {oc}">({v})</div>' \
                     .format(u=cls_units(in_units), oc=oc, v=tostring(value, p))

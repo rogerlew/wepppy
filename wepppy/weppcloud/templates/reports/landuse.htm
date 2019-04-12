@@ -30,21 +30,21 @@
         <td></td>
         <td></td>
         <td colspan="2">
-          Canopy:
+          Canopy Vegetation (Tree/Shrub) Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'cancov', this.value)">
             <option value="" {% if row.cancov_override is none %}selected{% endif %}>{{ (row.cancov * 100) | round | int }}% default</option>
             {% for pct in range(0, 103, 5) %}
             <option value="{{ pct / 100.0 }}" {% if row.cancov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
             {% endfor %}
           </select>
-          Interill:
+          Interrill Ground Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'inrcov', this.value)">
             <option value="" {% if row.inrcov_override is none %}selected{% endif %}>{{ (row.inrcov * 100) | round | int }}% default</option>
             {% for pct in range(0, 103, 5) %}
             <option value="{{ pct / 100.0 }}" {% if row.inrcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
             {% endfor %}
           </select>
-          Rill:
+          Rill Ground Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'rilcov', this.value)">
             <option value="" {% if row.rilcov_override is none %}selected{% endif %}>{{ (row.rilcov * 100) | round | int }}% default</option>
             {% for pct in range(0, 103, 5) %}

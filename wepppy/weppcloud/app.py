@@ -493,6 +493,24 @@ def lt_index():
     return render_template('lt/index.htm', user=current_user)
 
 
+@app.route('/portland-municipal')
+@app.route('/portland-municipal/')
+def portland_index():
+    if current_user.is_authenticated:
+        if not current_user.roles:
+            user_datastore.add_role_to_user(current_user.email, 'User')
+    return render_template('portland-municipal/index.htm', user=current_user)
+
+
+@app.route('/seattle-municipal')
+@app.route('/seattle-municipal/')
+def seattle_index():
+    if current_user.is_authenticated:
+        if not current_user.roles:
+            user_datastore.add_role_to_user(current_user.email, 'User')
+    return render_template('seattle-municipal/index.htm', user=current_user)
+
+
 @app.route('/create/<config>')
 def create(config):
     runid = str(uuid.uuid4())
@@ -1038,7 +1056,7 @@ def export_ermit(runid):
     wd = get_wd(runid)
     fn = create_ermit_input(wd)
     name = _split(fn)[-1]
-    return send_file(fn, mimetype='text/csv', as_attachment=True, attachment_filename=name)
+    return send_file(fn, as_attachment=True, attachment_filename=name)
 
 
 @app.route('/runs/<runid>/export/arcmap')
@@ -2134,6 +2152,9 @@ def plot_wepp_streamflow(runid):
 @app.route('/runs/<string:runid>/report/wepp/return_periods')
 @app.route('/runs/<string:runid>/report/wepp/return_periods/')
 def report_wepp_return_periods(runid):
+
+    extraneous = request.args.get('extraneous', None) == 'true'
+    print(extraneous)
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     report = Wepp.getInstance(wd).report_return_periods()
@@ -2142,6 +2163,7 @@ def report_wepp_return_periods(runid):
     unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/wepp/return_periods.htm',
+                           extraneous=extraneous,
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            report=report,
