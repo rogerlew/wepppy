@@ -7,12 +7,16 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
+import zipfile
 
 from os.path import exists as _exists
 from os.path import join as _join
+from os.path import split as _split
 
 import csv
 from collections import namedtuple
+
+from datetime import datetime
 
 from osgeo import gdal
 import numpy as np
@@ -160,6 +164,9 @@ def create_ermit_input(wd):
     ron = Ron.getInstance(wd)
     name = ron.name.replace(' ', '_')
 
+    if name == '':
+        name = _split(wd)[-1]
+
     # write ermit input file
     header = 'HS_ID TOPAZ_ID UNIT_ID SOIL_TYPE AREA UTREAT USLP_LNG LTREAT UGRD_TP UGRD_BTM LGRD_TP LGRD_BTM LSLP_LNG '\
              'ERM_TSLP ERM_MSLP ERM_BSLP BURNCLASS'.split()
@@ -204,7 +211,37 @@ def create_ermit_input(wd):
 
     fp.close()
 
-    return fn
+    fn2 = _join(export_dir, 'ERMiT_input_{}_meta.txt'.format(name))
+    fp2 = open(fn2, 'w')
+    fp2.write('''\
+ERMiT/Disturbed WEPP GIS Hillslope File
+=======================================
+
+Created by WeppCloud
+Date: {date}
+
+Watershed Name: {name}
+# of Hillslopes: {num_hills}
+# of Channels: {num_chns}
+
+Watershed Centroid Location
+   Latitude: {centroid_lat}
+   Longitude: {centroid_lng}   
+'''.format(date=datetime.now(),
+           name=name,
+           num_hills=watershed.sub_n,
+           num_chns=watershed.chn_n,
+           centroid_lat=watershed.centroid[1],
+           centroid_lng=watershed.centroid[0]))
+    fp2.close()
+
+    zipfn = _join(export_dir, 'ERMiT_input_{}.zip'.format(name))
+    zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
+    zipf.write(fn, _split(fn)[-1])
+    zipf.write(fn2, _split(fn2)[-1])
+    zipf.close()
+
+    return zipfn
 
 
 if __name__ == "__main__":

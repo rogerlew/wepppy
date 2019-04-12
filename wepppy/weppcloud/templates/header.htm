@@ -1,7 +1,7 @@
 <header>
   <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="/weppcloud">WeppCloud  {{ ('&mdash;' if ron.configname != '') | safe }} {{ ron.configname }} </a>
+    <a class="navbar-brand" href="/weppcloud">WEPPcloud  {{ ('&mdash;' if ron.configname != '') | safe }} {{ ron.configname }} </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -17,20 +17,20 @@
       <li class="nav-item">
       </li>
       <li class="nav-item">
-        <a href='create_fork' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/fork-2x.png') }}"/></a>
+        <a href='create_fork' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
-        <a href='archive' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x.png') }}"/></a>
+        <a href='archive' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
       </li>
     </ul>
     <button class="btn btn-link" type="button" id="btnPuModal"
             data-toggle="modal" data-target="#puModal"
             title="up up down down left right left right b a">
-        <img src="{{ url_for('static', filename='open-iconic/png/command-2x.png') }}"/>
+        <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}" />
     </button>
     <button class="btn btn-link" type="button"
             data-toggle="modal" data-target="#unitizerModal">
-        <img src="{{ url_for('static', filename='open-iconic/png/cog-2x.png') }}"/>
+        <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
     </button>
     {% if user.is_authenticated %}
     <label class="form-check-label">

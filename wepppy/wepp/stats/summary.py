@@ -21,8 +21,9 @@ from wepppy.wepp.stats.report_base import ReportBase
 class HillSummary(ReportBase):
     def __init__(self, loss: Loss):
         self.data = loss.hill_tbl
+        self.has_phosphorus = loss.has_phosphorus
 
-        self._hdr = (
+        self._hdr = [
             'WeppID',
             'TopazID',
             'Landuse',
@@ -34,11 +35,14 @@ class HillSummary(ReportBase):
             'Baseflow (mm)',
             'Soil Loss Density (kg/ha)',
             'Sediment Deposition Density (kg/ha)',
-            'Sediment Yield Density (kg/ha)',
-            'Solub. React. P Density (kg/ha)',
-            'Particulate P Density (kg/ha)',
-            'Total P Density (kg/ha)'
-        )
+            'Sediment Yield Density (kg/ha)'
+        ]
+        if self.has_phosphorus:
+            self._hdr.extend([
+                'Solub. React. P Density (kg/ha,3)',
+                'Particulate P Density (kg/ha,3)',
+                'Total P Density (kg/ha,3)'
+            ])
 
     @property
     def header(self):
@@ -54,8 +58,9 @@ class HillSummary(ReportBase):
 class ChannelSummary(ReportBase):
     def __init__(self, loss: Loss):
         self.data = loss.chn_tbl
+        self.has_phosphorus = loss.has_phosphorus
 
-        self._hdr = (
+        self._hdr = [
             'WeppID',
             'WeppChnID',
             'TopazID',
@@ -66,11 +71,14 @@ class ChannelSummary(ReportBase):
             'Sediment Yield (tonne)',
             'Soil Loss (kg)',
             'Upland Charge (m^3)',
-            'Subsuface Flow Volume (m^3)',
-            'Solub. React. P Density (kg/ha)',
-            'Particulate P Density (kg/ha)',
-            'Total P Density (kg/ha)'
-        )
+            'Subsuface Flow Volume (m^3)']
+
+        if self.has_phosphorus:
+            self._hdr.extend([
+                'Solub. React. P Density (kg/ha)',
+                'Particulate P Density (kg/ha)',
+                'Total P Density (kg/ha)'
+            ])
 
     @property
     def header(self):
@@ -88,6 +96,7 @@ class OutletSummary(ReportBase):
         data = loss.out_tbl
         data = dict([(d['key'], d) for d in data])
         self.data = data
+        self.has_phosphorus = loss.has_phosphorus
 
     def __iter__(self):
         key = 'Total contributing area to outlet'
@@ -141,12 +150,13 @@ class OutletSummary(ReportBase):
         v = self.data[key]['v']
         yield 'Sediment delivery ratio for watershed', v, None, None, None
 
-        key = 'Avg. Ann. Phosphorus discharge from outlet'
-        v = self.data[key]['v']
-        units = self.data[key]['units']
-        v_norm = v / area
-        units_norm = 'kg/ha/yr'
-        yield 'Phosphorus discharge', v, units, v_norm, units_norm
+        if self.has_phosphorus:
+            key = 'Avg. Ann. Phosphorus discharge from outlet'
+            v = self.data[key]['v']
+            units = self.data[key]['units']
+            v_norm = v / area
+            units_norm = 'kg/ha/yr'
+            yield 'Phosphorus discharge', v, units, v_norm, units_norm
 
     def write(self, fp, write_header=True, run_descriptors=None):
 

@@ -135,6 +135,7 @@ if __name__ == '__main__':
              map_center=[-120.14596939086915, 39.19740715574304],
              map_zoom=13,
              outlet=[-120.12241504431637, 39.181379503672105],
+             # outlet=[-120.1233, 39.1816],  # [-120.12241504431637, 39.181379503672105],
              landuse=None,
              cs=12, erod=0.000001),
         dict(wd='Watershed_5',
@@ -252,46 +253,49 @@ if __name__ == '__main__':
     ]
 
     scenarios = [
-                dict(wd='SimFire4.2fA2p',
+                dict(wd='SimFire4.2.2',
+                     landuse=None,
+                     cfg='lt-fire'),
+                dict(wd='SimFire4.2fA2p.2.obs_cli',
+                     landuse=None,
+                     cfg='lt-fire-future'),
+                dict(wd='SimFire4.2fA2p.2.fut_cli',
                      landuse=None,
                      cfg='lt-fire-future',
-                     climate='observed'),
-
-                # dict(wd='CurCond4.1',
-                #      landuse=None),
-                # dict(wd='LowSev4.2',
-                #      landuse=[(not_shrub_selector, 106), (shrub_selector, 121)]),
-                # dict(wd='ModSev4.2',
-                #      landuse=[(not_shrub_selector, 118), (shrub_selector, 120)]),
-                # dict(wd='HighSev4.2',
-                #      landuse=[(not_shrub_selector, 105), (shrub_selector, 119)]),
-                # dict(wd='Thinn4.3',
-                #      landuse=[(not_shrub_selector, 107)]),
-                # dict(wd='LowSev4.3',
-                #      landuse=[(not_shrub_selector, 106)]),
-                # dict(wd='LowSev4.4',
-                #      landuse=[(not_shrub_and_not_outcrop_selector, 106),
-                #               (shrub_and_not_outcrop_selector, 121)]),
-                # dict(wd='LowSev4.5',
-                #      landuse=[(not_shrub_and_not_outcrop_selector, 106)]),
-                #
-                # dict(wd='ModSev4.3',
-                #      landuse=[(not_shrub_selector, 118)]),
-                # dict(wd='ModSev4.4',
-                #      landuse=[(not_shrub_and_not_outcrop_selector, 118),
-                #               (shrub_and_not_outcrop_selector, 120)]),
-                # dict(wd='ModSev4.5',
-                #      landuse=[(not_shrub_and_not_outcrop_selector, 118)]),
-                #
-                # dict(wd='HighSev4.3',
-                #      landuse=[(not_shrub_selector, 105)]),
-                # dict(wd='HighSev4.4',
-                #      landuse=[(not_shrub_and_not_outcrop_selector, 105),
-                #               (shrub_and_not_outcrop_selector, 119)]),
-                # dict(wd='HighSev4.5',
-                #      landuse=[(not_shrub_and_not_outcrop_selector, 105)]),
+                     climate='future'),
+                dict(wd='CurCond4.1.2',
+                     landuse=None),
+                dict(wd='LowSev4.2.2',
+                     landuse=[(not_shrub_selector, 106), (shrub_selector, 121)]),
+                dict(wd='ModSev4.2.2',
+                     landuse=[(not_shrub_selector, 118), (shrub_selector, 120)]),
+                dict(wd='HighSev4.2.2',
+                     landuse=[(not_shrub_selector, 105), (shrub_selector, 119)]),
+                dict(wd='Thinn4.3.2',
+                     landuse=[(not_shrub_selector, 107)]),
+                dict(wd='LowSev4.3.2',
+                     landuse=[(not_shrub_selector, 106)]),
+                dict(wd='LowSev4.4.2',
+                     landuse=[(not_shrub_and_not_outcrop_selector, 106),
+                              (shrub_and_not_outcrop_selector, 121)]),
+                dict(wd='LowSev4.5.2',
+                     landuse=[(not_shrub_and_not_outcrop_selector, 106)]),
+                dict(wd='ModSev4.3.2',
+                     landuse=[(not_shrub_selector, 118)]),
+                dict(wd='ModSev4.4.2',
+                     landuse=[(not_shrub_and_not_outcrop_selector, 118),
+                              (shrub_and_not_outcrop_selector, 120)]),
+                dict(wd='ModSev4.5.2',
+                     landuse=[(not_shrub_and_not_outcrop_selector, 118)]),
+                dict(wd='HighSev4.3.2',
+                     landuse=[(not_shrub_selector, 105)]),
+                dict(wd='HighSev4.4.2',
+                     landuse=[(not_shrub_and_not_outcrop_selector, 105),
+                              (shrub_and_not_outcrop_selector, 119)]),
+                dict(wd='HighSev4.5.2',
+                     landuse=[(not_shrub_and_not_outcrop_selector, 105)]),
                 ]
-    
+
     projects = []
 
     wc = sys.argv[-1]
@@ -301,9 +305,9 @@ if __name__ == '__main__':
     for scenario in scenarios:
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
-            projects[-1]['cfg'] = scenario['cfg']
+            projects[-1]['cfg'] = scenario.get('cfg', 'lt')
             projects[-1]['landuse'] = scenario['landuse']
-            projects[-1]['climate'] = scenario['climate']
+            projects[-1]['climate'] = scenario.get('climate', 'observed')
             projects[-1]['wd'] = '%s_%s' % (scenario['wd'], watershed['wd'])
 
     failed = open('failed', 'w')
@@ -416,13 +420,13 @@ if __name__ == '__main__':
             elif climate_mode == 'future':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
-                climate.input_years = 40
+                climate.input_years = 27
                 climate.climatestation = stations[0]['id']
 
-                climate.climate_mode = ClimateMode.FutureDb
-                climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.set_orig_cli_fn('Ward_Creek_A2.cli')
-
+                climate.climate_mode = ClimateMode.Future
+                climate.climate_spatialmode = ClimateSpatialMode.Single
+                climate.set_future_pars(start_year=2018, end_year=2018+27)
+                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             else:
                 raise Exception("Unknown climate_mode")
 

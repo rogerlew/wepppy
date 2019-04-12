@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>WeppCloud</title>
+    <title>WEPPcloud</title>
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
     integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -22,7 +22,7 @@ a.disabled {
   <header>
       <!-- Fixed navbar -->
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="../">WeppCloud/LT</a>
+        <a class="navbar-brand" href="../">WEPPcloud/LT</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -45,7 +45,7 @@ a.disabled {
         <button class="btn btn-link" type="button" id="btnPuModal"
                 data-toggle="modal" data-target="#puModal"
                 title="up up down down left right left right b a">
-            <img src="{{ url_for('static', filename='open-iconic/png/command-2x.png') }}"/>
+            <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}"/>
         </button>
         </div>
       </nav>
@@ -60,45 +60,47 @@ a.disabled {
     <h2>Aggregated WEPP Results by Scenario</h2>
     <div style="margin-left: 1.5em;">
         <h3>Current conditions and managements</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"CurCond4.1_Watershed_1","cfg":"lt"},{"runid":"CurCond4.1_Watershed_14","cfg":"lt"},{"runid":"CurCond4.1_Watershed_10","cfg":"lt"},{"runid":"CurCond4.1_Watershed_11_General","cfg":"lt"},{"runid":"CurCond4.1_Watershed_12_Meeks","cfg":"lt"},{"runid":"CurCond4.1_Watershed_13","cfg":"lt"},{"runid":"CurCond4.1_Watershed_15","cfg":"lt"},{"runid":"CurCond4.1_Watershed_16","cfg":"lt"},{"runid":"CurCond4.1_Watershed_17","cfg":"lt"},{"runid":"CurCond4.1_Watershed_18","cfg":"lt"},{"runid":"CurCond4.1_Watershed_19","cfg":"lt"},{"runid":"CurCond4.1_Watershed_2","cfg":"lt"},{"runid":"CurCond4.1_Watershed_20","cfg":"lt"},{"runid":"CurCond4.1_Watershed_3","cfg":"lt"},{"runid":"CurCond4.1_Watershed_4","cfg":"lt"},{"runid":"CurCond4.1_Watershed_5","cfg":"lt"},{"runid":"CurCond4.1_Watershed_6","cfg":"lt"},{"runid":"CurCond4.1_Watershed_7_Ward","cfg":"lt"},{"runid":"CurCond4.1_Watershed_8","cfg":"lt"},{"runid":"CurCond4.1_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Current conditions and managements'>View Watershed Results</a>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"CurCond4.1.2_Watershed_1","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_14","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_10","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_11_General","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_13","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_15","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_16","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_17","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_18","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_19","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_2","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_20","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_3","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_4","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_5","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_6","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_7_Ward","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_8","cfg":"lt"},{"runid":"CurCond4.1.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Current conditions and managements'>View Watershed Results</a>
         <div style="height: 1em;"></div>
         <h3>Wildfire – current conditions</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"SimFire4.2_Watershed_1","cfg":"lt"},{"runid":"SimFire4.2_Watershed_14","cfg":"lt"},{"runid":"SimFire4.2_Watershed_10","cfg":"lt"},{"runid":"SimFire4.2_Watershed_11_General","cfg":"lt"},{"runid":"SimFire4.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"SimFire4.2_Watershed_13","cfg":"lt"},{"runid":"SimFire4.2_Watershed_15","cfg":"lt"},{"runid":"SimFire4.2_Watershed_16","cfg":"lt"},{"runid":"SimFire4.2_Watershed_17","cfg":"lt"},{"runid":"SimFire4.2_Watershed_18","cfg":"lt"},{"runid":"SimFire4.2_Watershed_19","cfg":"lt"},{"runid":"SimFire4.2_Watershed_2","cfg":"lt"},{"runid":"SimFire4.2_Watershed_20","cfg":"lt"},{"runid":"SimFire4.2_Watershed_3","cfg":"lt"},{"runid":"SimFire4.2_Watershed_4","cfg":"lt"},{"runid":"SimFire4.2_Watershed_5","cfg":"lt"},{"runid":"SimFire4.2_Watershed_6","cfg":"lt"},{"runid":"SimFire4.2_Watershed_7_Ward","cfg":"lt"},{"runid":"SimFire4.2_Watershed_8","cfg":"lt"},{"runid":"SimFire4.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Wildfire – current conditions'>View SimFire4.2_Watershed Results</a>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"SimFire4.2.2_Watershed_1","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_14","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_10","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_11_General","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_13","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_15","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_16","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_17","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_18","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_19","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_2","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_20","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_3","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_4","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_5","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_6","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_7_Ward","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_8","cfg":"lt"},{"runid":"SimFire4.2.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Wildfire – current conditions'>View SimFire4.2.2_Watershed Results</a>
         <div style="height: 1em;"></div>
-        <h3>Wildfire – future conditions</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"SimFire4.2fA2p_Watershed_1","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_14","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_10","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_11_General","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_12_Meeks","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_13","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_15","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_16","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_17","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_18","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_19","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_2","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_20","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_3","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_4","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_5","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_6","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_7_Ward","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_8","cfg":"lt"},{"runid":"SimFire4.2fA2p_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Wildfire – current conditions'>View SimFire4.2fA2p_Watershed Results</a>
+        <h3>Wildfire – future conditions - observed climate</h3>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_1","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_14","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_10","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_11_General","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_12_Meeks","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_13","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_15","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_16","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_17","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_18","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_19","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_2","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_20","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_3","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_4","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_5","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_6","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_7_Ward","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_8","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.obs_cli_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Wildfire – current conditions'>View SimFire4.2fA2p.2.obs_cli_Watershed Results</a>
+        <h3>Wildfire – future conditions - future climate</h3>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_1","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_14","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_10","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_11_General","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_12_Meeks","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_13","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_15","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_16","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_17","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_18","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_19","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_2","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_20","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_3","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_4","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_5","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_6","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_7_Ward","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_8","cfg":"lt"},{"runid":"SimFire4.2fA2p.2.fut_cli_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Wildfire – current conditions'>View SimFire4.2fA2p.2.fut_cli_Watershed Results</a>
     </div>
     <hr>
     <h2>Management-related aggregated WEPP results</h2>
     <div style="margin-left: 1.5em;">
         <h3>Uniform high severity</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"HighSev4.2_Watershed_1","cfg":"lt"},{"runid":"HighSev4.2_Watershed_14","cfg":"lt"},{"runid":"HighSev4.2_Watershed_10","cfg":"lt"},{"runid":"HighSev4.2_Watershed_11_General","cfg":"lt"},{"runid":"HighSev4.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"HighSev4.2_Watershed_13","cfg":"lt"},{"runid":"HighSev4.2_Watershed_15","cfg":"lt"},{"runid":"HighSev4.2_Watershed_16","cfg":"lt"},{"runid":"HighSev4.2_Watershed_17","cfg":"lt"},{"runid":"HighSev4.2_Watershed_18","cfg":"lt"},{"runid":"HighSev4.2_Watershed_19","cfg":"lt"},{"runid":"HighSev4.2_Watershed_2","cfg":"lt"},{"runid":"HighSev4.2_Watershed_20","cfg":"lt"},{"runid":"HighSev4.2_Watershed_3","cfg":"lt"},{"runid":"HighSev4.2_Watershed_4","cfg":"lt"},{"runid":"HighSev4.2_Watershed_5","cfg":"lt"},{"runid":"HighSev4.2_Watershed_6","cfg":"lt"},{"runid":"HighSev4.2_Watershed_7_Ward","cfg":"lt"},{"runid":"HighSev4.2_Watershed_8","cfg":"lt"},{"runid":"HighSev4.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform high severity'>View HighFire_Watershed Results</a>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"HighSev4.2.2_Watershed_1","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_14","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_10","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_11_General","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_13","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_15","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_16","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_17","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_18","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_19","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_2","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_20","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_3","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_4","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_5","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_6","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_7_Ward","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_8","cfg":"lt"},{"runid":"HighSev4.2.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform high severity'>View HighFire_Watershed Results</a>
         <div style="height: 1em;"></div>
         <h3>Uniform moderate severity</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"ModSev4.2_Watershed_1","cfg":"lt"},{"runid":"ModSev4.2_Watershed_14","cfg":"lt"},{"runid":"ModSev4.2_Watershed_10","cfg":"lt"},{"runid":"ModSev4.2_Watershed_11_General","cfg":"lt"},{"runid":"ModSev4.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"ModSev4.2_Watershed_13","cfg":"lt"},{"runid":"ModSev4.2_Watershed_15","cfg":"lt"},{"runid":"ModSev4.2_Watershed_16","cfg":"lt"},{"runid":"ModSev4.2_Watershed_17","cfg":"lt"},{"runid":"ModSev4.2_Watershed_18","cfg":"lt"},{"runid":"ModSev4.2_Watershed_19","cfg":"lt"},{"runid":"ModSev4.2_Watershed_2","cfg":"lt"},{"runid":"ModSev4.2_Watershed_20","cfg":"lt"},{"runid":"ModSev4.2_Watershed_3","cfg":"lt"},{"runid":"ModSev4.2_Watershed_4","cfg":"lt"},{"runid":"ModSev4.2_Watershed_5","cfg":"lt"},{"runid":"ModSev4.2_Watershed_6","cfg":"lt"},{"runid":"ModSev4.2_Watershed_7_Ward","cfg":"lt"},{"runid":"ModSev4.2_Watershed_8","cfg":"lt"},{"runid":"ModSev4.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform moderate severity'>View ModFire_Watershed Results</a>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"ModSev4.2.2_Watershed_1","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_14","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_10","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_11_General","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_13","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_15","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_16","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_17","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_18","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_19","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_2","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_20","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_3","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_4","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_5","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_6","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_7_Ward","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_8","cfg":"lt"},{"runid":"ModSev4.2.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform moderate severity'>View ModFire_Watershed Results</a>
         <div style="height: 1em;"></div>
         <h3>Uniform low severity</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"LowSev4.2_Watershed_1","cfg":"lt"},{"runid":"LowSev4.2_Watershed_14","cfg":"lt"},{"runid":"LowSev4.2_Watershed_10","cfg":"lt"},{"runid":"LowSev4.2_Watershed_11_General","cfg":"lt"},{"runid":"LowSev4.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"LowSev4.2_Watershed_13","cfg":"lt"},{"runid":"LowSev4.2_Watershed_15","cfg":"lt"},{"runid":"LowSev4.2_Watershed_16","cfg":"lt"},{"runid":"LowSev4.2_Watershed_17","cfg":"lt"},{"runid":"LowSev4.2_Watershed_18","cfg":"lt"},{"runid":"LowSev4.2_Watershed_19","cfg":"lt"},{"runid":"LowSev4.2_Watershed_2","cfg":"lt"},{"runid":"LowSev4.2_Watershed_20","cfg":"lt"},{"runid":"LowSev4.2_Watershed_3","cfg":"lt"},{"runid":"LowSev4.2_Watershed_4","cfg":"lt"},{"runid":"LowSev4.2_Watershed_5","cfg":"lt"},{"runid":"LowSev4.2_Watershed_6","cfg":"lt"},{"runid":"LowSev4.2_Watershed_7_Ward","cfg":"lt"},{"runid":"LowSev4.2_Watershed_8","cfg":"lt"},{"runid":"LowSev4.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform low severity'>View LowFire_Watershed Results</a>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"LowSev4.2.2_Watershed_1","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_14","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_10","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_11_General","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_13","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_15","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_16","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_17","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_18","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_19","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_2","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_20","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_3","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_4","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_5","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_6","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_7_Ward","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_8","cfg":"lt"},{"runid":"LowSev4.2.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform low severity'>View LowFire_Watershed Results</a>
         <div style="height: 1em;"></div>
         <h3>Uniform thinning</h3>
-        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"Thinn4.3_Watershed_1","cfg":"lt"},{"runid":"Thinn4.3_Watershed_14","cfg":"lt"},{"runid":"Thinn4.3_Watershed_10","cfg":"lt"},{"runid":"Thinn4.3_Watershed_11_General","cfg":"lt"},{"runid":"Thinn4.3_Watershed_12_Meeks","cfg":"lt"},{"runid":"Thinn4.3_Watershed_13","cfg":"lt"},{"runid":"Thinn4.3_Watershed_15","cfg":"lt"},{"runid":"Thinn4.3_Watershed_16","cfg":"lt"},{"runid":"Thinn4.3_Watershed_17","cfg":"lt"},{"runid":"Thinn4.3_Watershed_18","cfg":"lt"},{"runid":"Thinn4.3_Watershed_19","cfg":"lt"},{"runid":"Thinn4.3_Watershed_2","cfg":"lt"},{"runid":"Thinn4.3_Watershed_20","cfg":"lt"},{"runid":"Thinn4.3_Watershed_3","cfg":"lt"},{"runid":"Thinn4.3_Watershed_4","cfg":"lt"},{"runid":"Thinn4.3_Watershed_5","cfg":"lt"},{"runid":"Thinn4.3_Watershed_6","cfg":"lt"},{"runid":"Thinn4.3_Watershed_7_Ward","cfg":"lt"},{"runid":"Thinn4.3_Watershed_8","cfg":"lt"},{"runid":"Thinn4.3_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform thinning'>View Thin_Watershed Results</a>
+        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/?zoom=11&center=[39.0597,-120.0119]&ws=[{"runid":"Thinn4.3.2_Watershed_1","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_14","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_10","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_11_General","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_12_Meeks","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_13","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_15","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_16","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_17","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_18","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_19","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_2","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_20","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_3","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_4","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_5","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_6","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_7_Ward","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_8","cfg":"lt"},{"runid":"Thinn4.3.2_Watershed_9_Blackwood","cfg":"lt"}]&varopts={"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,"phosphorus":1.0,"loss":4000}&varname=phosphorus&title=Uniform thinning'>View Thin_Watershed Results</a>
         <div style="height: 1em;"></div>
     </div>
     <hr>
     <h2>Summarized All Conditions</h2>
     <div style="margin-left: 1.5em;">
         <h3>Tabled Results by Condition</h3>
-        <a href="{{ url_for('static', filename='mods/lt/results/lt4_out_summary.csv') }}">Aggregated Outlet Summary Results (.csv)</a>
+        <a href="{{ url_for('static', filename='mods/lt/results/lt5_out_summary.csv') }}">Aggregated Outlet Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ url_for('static', filename='mods/lt/results/lt4_hill_summary.csv') }}">Aggregated Hillslopes Summary Results (.csv)</a>
+        <a href="{{ url_for('static', filename='mods/lt/results/lt5_hill_summary.csv') }}">Aggregated Hillslopes Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ url_for('static', filename='mods/lt/results/lt4_chn_summary.csv') }}">Aggregated Channels Summary Results (.csv)</a>
+        <a href="{{ url_for('static', filename='mods/lt/results/lt5_chn_summary.csv') }}">Aggregated Channels Summary Results (.csv)</a>
         <div style="height: 1em;"></div>
-        <a href="{{ url_for('static', filename='mods/lt/results/lt4_sed_del_summary.csv') }}">Aggregated Sediment Delivery Summary Results (.csv)</a>
+        <a href="{{ url_for('static', filename='mods/lt/results/lt5_sed_del_summary.csv') }}">Aggregated Sediment Delivery Summary Results (.csv)</a>
     </div>
     <div style="margin-left: 1.5em;">
         <h3>ESRI Shapefiles by Condition</h3>
-        <a href="{{ url_for('static', filename='mods/lt/results/lt4_shps.zip') }}">Aggregated Shapefiles of Results (.zip)</a>
+        <a href="{{ url_for('static', filename='mods/lt/results/lt5_shps.zip') }}">Aggregated Shapefiles of Results (.zip)</a>
     </div>
     <hr>
     <h2>Run WEPP</h2>
@@ -112,26 +114,26 @@ a.disabled {
             <div><a href="#run-current-man" data-toggle="collapse">Select Watershed</a>
             <div id="run-current-man" class="collapse">
             <ul class="list-group">
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_1/lt/create_fork">Watershed_1</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_2/lt/create_fork">Watershed_2</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_3/lt/create_fork">Watershed_3</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_4/lt/create_fork">Watershed_4</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_5/lt/create_fork">Watershed_5</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_6/lt/create_fork">Watershed_6</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_7_Ward/lt/create_fork">Watershed_7_Ward</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_8/lt/create_fork">Watershed_8</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_9_Blackwood/lt/create_fork">Watershed_9_Blackwood</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_10/lt/create_fork">Watershed_10</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_11_General/lt/create_fork">Watershed_11_General</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_12_Meeks/lt/create_fork">Watershed_12_Meeks</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_13/lt/create_fork">Watershed_13</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_14/lt/create_fork">Watershed_14</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_15/lt/create_fork">Watershed_15</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_16/lt/create_fork">Watershed_16</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_17/lt/create_fork">Watershed_17</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_18/lt/create_fork">Watershed_18</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_19/lt/create_fork">Watershed_19</a></li>
-                <li class="list-group-item"><a href="../runs/CurCond4.1_Watershed_20/lt/create_fork">Watershed_20</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_1/lt/create_fork">Watershed_1</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_2/lt/create_fork">Watershed_2</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_3/lt/create_fork">Watershed_3</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_4/lt/create_fork">Watershed_4</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_5/lt/create_fork">Watershed_5</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_6/lt/create_fork">Watershed_6</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_7_Ward/lt/create_fork">Watershed_7_Ward</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_8/lt/create_fork">Watershed_8</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_9_Blackwood/lt/create_fork">Watershed_9_Blackwood</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_10/lt/create_fork">Watershed_10</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_11_General/lt/create_fork">Watershed_11_General</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_12_Meeks/lt/create_fork">Watershed_12_Meeks</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_13/lt/create_fork">Watershed_13</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_14/lt/create_fork">Watershed_14</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_15/lt/create_fork">Watershed_15</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_16/lt/create_fork">Watershed_16</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_17/lt/create_fork">Watershed_17</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_18/lt/create_fork">Watershed_18</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_19/lt/create_fork">Watershed_19</a></li>
+                <li class="list-group-item"><a href="../runs/CurCond4.1.2_Watershed_20/lt/create_fork">Watershed_20</a></li>
             </ul>
             </div>
             </div>
@@ -146,26 +148,26 @@ a.disabled {
             <div><a href="#run-wf-current" data-toggle="collapse" >Select Watershed</a>
             <div id="run-wf-current" class="collapse">
             <ul class="list-group">
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_1/lt/create_fork">SimFire4.2_Watershed_1</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_2/lt/create_fork">SimFire4.2_Watershed_2</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_3/lt/create_fork">SimFire4.2_Watershed_3</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_4/lt/create_fork">SimFire4.2_Watershed_4</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_5/lt/create_fork">SimFire4.2_Watershed_5</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_6/lt/create_fork">SimFire4.2_Watershed_6</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_7_Ward/lt/create_fork">SimFire4.2_Watershed_7_Ward</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_8/lt/create_fork">SimFire4.2_Watershed_8</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_9_Blackwood/lt/create_fork">SimFire4.2_Watershed_9_Blackwood</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_10/lt/create_fork">SimFire4.2_Watershed_10</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_11_General/lt/create_fork">SimFire4.2_Watershed_11_General</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_12_Meeks/lt/create_fork">SimFire4.2_Watershed_12_Meeks</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_13/lt/create_fork">SimFire4.2_Watershed_13</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_14/lt/create_fork">SimFire4.2_Watershed_14</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_15/lt/create_fork">SimFire4.2_Watershed_15</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_16/lt/create_fork">SimFire4.2_Watershed_16</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_17/lt/create_fork">SimFire4.2_Watershed_17</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_18/lt/create_fork">SimFire4.2_Watershed_18</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_19/lt/create_fork">SimFire4.2_Watershed_19</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2_Watershed_20/lt/create_fork">SimFire4.2_Watershed_20</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_1/lt/create_fork">SimFire4.2.2_Watershed_1</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_2/lt/create_fork">SimFire4.2.2_Watershed_2</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_3/lt/create_fork">SimFire4.2.2_Watershed_3</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_4/lt/create_fork">SimFire4.2.2_Watershed_4</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_5/lt/create_fork">SimFire4.2.2_Watershed_5</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_6/lt/create_fork">SimFire4.2.2_Watershed_6</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_7_Ward/lt/create_fork">SimFire4.2.2_Watershed_7_Ward</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_8/lt/create_fork">SimFire4.2.2_Watershed_8</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_9_Blackwood/lt/create_fork">SimFire4.2.2_Watershed_9_Blackwood</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_10/lt/create_fork">SimFire4.2.2_Watershed_10</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_11_General/lt/create_fork">SimFire4.2.2_Watershed_11_General</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_12_Meeks/lt/create_fork">SimFire4.2.2_Watershed_12_Meeks</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_13/lt/create_fork">SimFire4.2.2_Watershed_13</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_14/lt/create_fork">SimFire4.2.2_Watershed_14</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_15/lt/create_fork">SimFire4.2.2_Watershed_15</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_16/lt/create_fork">SimFire4.2.2_Watershed_16</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_17/lt/create_fork">SimFire4.2.2_Watershed_17</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_18/lt/create_fork">SimFire4.2.2_Watershed_18</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_19/lt/create_fork">SimFire4.2.2_Watershed_19</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2.2_Watershed_20/lt/create_fork">SimFire4.2.2_Watershed_20</a></li>
             </ul>
             </div>
             </div>
@@ -180,26 +182,26 @@ a.disabled {
             <div><a href="#run-wf-thinning" data-toggle="collapse" class="disabled">Select Watershed</a>
             <div id="run-wf-thinning" class="collapse">
             <ul class="list-group">
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_1/lt/create_fork">SimFire4.2fA2p_Watershed_1</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_2/lt/create_fork">SimFire4.2fA2p_Watershed_2</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_3/lt/create_fork">SimFire4.2fA2p_Watershed_3</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_4/lt/create_fork">SimFire4.2fA2p_Watershed_4</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_5/lt/create_fork">SimFire4.2fA2p_Watershed_5</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_6/lt/create_fork">SimFire4.2fA2p_Watershed_6</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_7_Ward/lt/create_fork">SimFire4.2fA2p_Watershed_7_Ward</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_8/lt/create_fork">SimFire4.2fA2p_Watershed_8</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_9_Blackwood/lt/create_fork">SimFire4.2fA2p_Watershed_9_Blackwood</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_10/lt/create_fork">SimFire4.2fA2p_Watershed_10</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_11_General/lt/create_fork">SimFire4.2fA2p_Watershed_11_General</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_12_Meeks/lt/create_fork">SimFire4.2fA2p_Watershed_12_Meeks</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_13/lt/create_fork">SimFire4.2fA2p_Watershed_13</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_14/lt/create_fork">SimFire4.2fA2p_Watershed_14</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_15/lt/create_fork">SimFire4.2fA2p_Watershed_15</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_16/lt/create_fork">SimFire4.2fA2p_Watershed_16</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_17/lt/create_fork">SimFire4.2fA2p_Watershed_17</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_18/lt/create_fork">SimFire4.2fA2p_Watershed_18</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_19/lt/create_fork">SimFire4.2fA2p_Watershed_19</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_20/lt/create_fork">SimFire4.2fA2p_Watershed_20</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_1/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_1</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_2/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_2</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_3/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_3</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_4/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_4</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_5/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_5</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_6/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_6</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_7_Ward/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_7_Ward</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_8/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_8</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_9_Blackwood/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_9_Blackwood</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_10/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_10</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_11_General/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_11_General</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_12_Meeks/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_12_Meeks</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_13/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_13</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_14/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_14</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_15/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_15</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_16/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_16</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_17/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_17</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_18/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_18</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_19/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_19</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_20/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_20</a></li>
             </ul>
             </div>
             </div>
@@ -215,26 +217,26 @@ a.disabled {
             <div><a href="#run-wf-future" data-toggle="collapse">Select Watershed</a>
             <div id="run-wf-future" class="collapse">
             <ul class="list-group">
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_1/lt/create_fork">SimFire4.2fA2p_Watershed_1</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_2/lt/create_fork">SimFire4.2fA2p_Watershed_2</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_3/lt/create_fork">SimFire4.2fA2p_Watershed_3</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_4/lt/create_fork">SimFire4.2fA2p_Watershed_4</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_5/lt/create_fork">SimFire4.2fA2p_Watershed_5</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_6/lt/create_fork">SimFire4.2fA2p_Watershed_6</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_7_Ward/lt/create_fork">SimFire4.2fA2p_Watershed_7_Ward</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_8/lt/create_fork">SimFire4.2fA2p_Watershed_8</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_9_Blackwood/lt/create_fork">SimFire4.2fA2p_Watershed_9_Blackwood</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_10/lt/create_fork">SimFire4.2fA2p_Watershed_10</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_11_General/lt/create_fork">SimFire4.2fA2p_Watershed_11_General</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_12_Meeks/lt/create_fork">SimFire4.2fA2p_Watershed_12_Meeks</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_13/lt/create_fork">SimFire4.2fA2p_Watershed_13</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_14/lt/create_fork">SimFire4.2fA2p_Watershed_14</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_15/lt/create_fork">SimFire4.2fA2p_Watershed_15</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_16/lt/create_fork">SimFire4.2fA2p_Watershed_16</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_17/lt/create_fork">SimFire4.2fA2p_Watershed_17</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_18/lt/create_fork">SimFire4.2fA2p_Watershed_18</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_19/lt/create_fork">SimFire4.2fA2p_Watershed_19</a></li>
-                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p_Watershed_20/lt/create_fork">SimFire4.2fA2p_Watershed_20</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_1/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_1</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_2/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_2</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_3/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_3</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_4/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_4</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_5/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_5</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_6/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_6</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_7_Ward/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_7_Ward</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_8/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_8</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_9_Blackwood/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_9_Blackwood</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_10/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_10</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_11_General/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_11_General</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_12_Meeks/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_12_Meeks</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_13/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_13</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_14/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_14</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_15/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_15</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_16/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_16</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_17/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_17</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_18/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_18</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_19/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_19</a></li>
+                <li class="list-group-item"><a href="../runs/SimFire4.2fA2p.2.obs_cli_Watershed_20/lt/create_fork">SimFire4.2fA2p.2.obs_cli_Watershed_20</a></li>
             </ul></div>
             </div>
         </div>

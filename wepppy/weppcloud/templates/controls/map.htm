@@ -14,7 +14,8 @@
     </form>
     <div class="row">
       <div class="col-md-8 px-1">
-        <div style="color: #666666;">Tip: Press F8 to navigate back to the map.</div>
+        <div style="color: white; background:#666666; position:fixed; bottom:0; left:0; z-index:2; width:100%;">
+            Tip: Press F8 to navigate back to the map.</div>
         <div id="mapid"></div>
         <div class="row">
           <div class="col-xs-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
@@ -87,9 +88,9 @@
           <div class="tab-pane" id="drilldown" role="tabpanel">
             <i>Select a channel or hillslope to view information</i>
           </div>
-          <div class="tab-pane" id="spatialclimate" role="tabpanel">
+          <!-- div class="tab-pane" id="spatialclimate" role="tabpanel">
             <h6>Spatial Climate</h6>
-          </div>
+          </div -->
           {% if ron.enable_landuse_change %}
           <div class="tab-pane" id="modify" role="tabpanel">
               {% include 'controls/modify_landuse.htm' %}
@@ -112,7 +113,7 @@
                     Baseflow
                 </label>
                 <br/>
-                <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="10" value="0.1" step="0.001">
+                <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="10" value="0.1" step="0.1">
                 <span id="wepp_sub_cmap_canvas_runoff_units"></span><br/>
                 <div style='width:240px;height:40px'>
                     <canvas id="wepp_sub_cmap_canvas_runoff" width=200 height=20
@@ -130,7 +131,7 @@
                     Soil Deposition/Loss
                 </label>
                 <br/>
-                <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="100000" value="0.5" step="0.01">
+                <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="100000" value="0.5" step="100">
                 <span id="wepp_sub_cmap_canvas_loss_units"></span><br/>
                 <div style='width:240px;height:40px'>
                     <canvas id="wepp_sub_cmap_canvas_loss" width=200 height=20
@@ -148,7 +149,7 @@
                     Total Phosphorus
                 </label>
                 <br/>
-                <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="0.4" step="0.001">
+                <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="0.4" step="0.1">
                 <span id="wepp_sub_cmap_canvas_phosphorus_units"></span><br/>
                 <div style='width:240px;height:40px'>
                     <canvas id="wepp_sub_cmap_canvas_phosphorus" width=200 height=20
@@ -167,7 +168,7 @@
                     Soil Deposition/Loss
                 </label>
                 <br/>
-                <input type="range" id="wepp_grd_cmap_range_loss" min="0.0001" max="40" value="2" step="0.01">
+                <input type="range" id="wepp_grd_cmap_range_loss" min="0.0001" max="40" value="2" step="0.1">
                 <span id="wepp_grd_cmap_range_loss_units"></span><br/>
                 <div style='width:240px;height:40px'>
                     <canvas id="wepp_grd_cmap_canvas_loss" width=200 height=20

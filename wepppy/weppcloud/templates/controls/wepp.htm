@@ -22,42 +22,47 @@
     <br/><br/>
     {% endif %}
     <h5>Baseflow Processing</h5>
-    <div class="form-group row" id="gwstorage_container">
-        <div class="col-sm-4">
-            <label for="gwstorage">Initial groundwater storage (mm): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="gwstorage" name="gwstorage" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.baseflow_opts.gwstorage }}" aria-label="Initial groundwater storage">
+    <div><a href="#baseflow_processing_con" data-toggle="collapse">Modify Baseflow Processing Parameters</a>
+        <div id="baseflow_processing_con" class="collapse">
+            <div class="form-group row" id="gwstorage_container">
+            <div class="col-sm-4">
+                <label for="gwstorage">Initial groundwater storage (mm): </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="gwstorage" name="gwstorage" class="form-control mr-sm-3" type="text"
+                value="{{ wepp.baseflow_opts.gwstorage }}" aria-label="Initial groundwater storage">
+            </div>
+            </div>
+            <div class="form-group row" id="bfcoeff_container">
+                <div class="col-sm-4">
+                    <label for="bfcoeff">Baseflow coefficient (per day): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="bfcoeff" name="bfcoeff" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.baseflow_opts.bfcoeff }}" aria-label="Baseflow coefficient">
+                </div>
+            </div>
+            <div class="form-group row" id="dscoeff_container">
+                <div class="col-sm-4">
+                    <label for="dscoeff">Deep seepage coefficient (per day): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="dscoeff" name="dscoeff" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.baseflow_opts.dscoeff }}" aria-label="Deep seepage coefficient">
+                </div>
+            </div>
+            <div class="form-group row" id="bfthreshold_container">
+                <div class="col-sm-4">
+                    <label for="bfthreshold">Watershed groundwater baseflow threshold area (ha): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="bfthreshold" name="bfthreshold" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.baseflow_opts.bfthreshold }}" aria-label="Watershed groundwater baseflow threshold area">
+                </div>
+            </div>
         </div>
     </div>
-    <div class="form-group row" id="bfcoeff_container">
-        <div class="col-sm-4">
-            <label for="bfcoeff">Baseflow coefficient (per day): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="bfcoeff" name="bfcoeff" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.baseflow_opts.bfcoeff }}" aria-label="Baseflow coefficient">
-        </div>
-    </div>
-    <div class="form-group row" id="dscoeff_container">
-        <div class="col-sm-4">
-            <label for="dscoeff">Deep seepage coefficient (per day): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="dscoeff" name="dscoeff" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.baseflow_opts.dscoeff }}" aria-label="Deep seepage coefficient">
-        </div>
-    </div>
-    <div class="form-group row" id="bfthreshold_container">
-        <div class="col-sm-4">
-            <label for="bfthreshold">Watershed groundwater baseflow threshold area (ha): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="bfthreshold" name="bfthreshold" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{{ wepp.baseflow_opts.bfthreshold }}" aria-label="Watershed groundwater baseflow threshold area">
-        </div>
-    </div>
+    <br/>
 
     {% if "lt" in ron.mods %}
     <h5>Phosphorus Processing</h5>
@@ -65,46 +70,56 @@
     {% else %}
     <h5>Pollutant Processing (Optional)</h5>
     {%- endif -%}
-    <div class="form-group row" id="surf_runoff_container">
-        <div class="col-sm-4">
-            <label for="surf_runoff">Surface runoff concentration (mg/l): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="surf_runoff" name="surf_runoff" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{% if isfloat(wepp.phosphorus_opts.surf_runoff) %}{{ "%.4f" | format(wepp.phosphorus_opts.surf_runoff) }}{% endif %}"
-            aria-label="Surface runoff concentration">
+    <div><a href="#pollutant_processing_con" data-toggle="collapse">Modify Pollutant/Phosphorus Processing Parameters</a>
+        <div id="pollutant_processing_con" class="collapse">
+            <div class="form-group row" id="surf_runoff_container">
+                <div class="col-sm-4">
+                    <label for="surf_runoff">Surface runoff concentration (mg/l): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="surf_runoff" name="surf_runoff" class="form-control mr-sm-3" type="text"
+                    value="{% if isfloat(wepp.phosphorus_opts.surf_runoff) %}{{ "%.4f" | format(wepp.phosphorus_opts.surf_runoff) }}{% endif %}"
+                    placeholder="e.g. 0.004"
+                    aria-label="Surface runoff concentration">
+                </div>
+            </div>
+            <div class="form-group row" id="lateral_flow_container">
+                <div class="col-sm-4">
+                    <label for="lateral_flow">Subsurface lateral flow concentration (mg/l): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="lateral_flow" name="lateral_flow" class="form-control mr-sm-3" type="text"
+                    value="{% if isfloat(wepp.phosphorus_opts.lateral_flow) %}{{ "%.4f" | format(wepp.phosphorus_opts.lateral_flow) }}{% endif %}"
+                    placeholder="e.g. 0.005"
+                    aria-label="Subsurface lateral flow concentration">
+                </div>
+            </div>
+            <div class="form-group row" id="baseflow_container">
+                <div class="col-sm-4">
+                    <label for="baseflow">Baseflow concentration (mg/l): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="baseflow" name="baseflow" class="form-control mr-sm-3" type="text"
+                    value="{% if isfloat(wepp.phosphorus_opts.baseflow) %}{{ "%.4f" | format(wepp.phosphorus_opts.baseflow) }}{% endif %}"
+                    placeholder="e.g. 0.006"
+                    aria-label="Baseflow concentration">
+                </div>
+            </div>
+            <div class="form-group row" id="sediment_container">
+                <div class="col-sm-4">
+                    <label for="sediment">Sediment concentration (mg/kg): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="sediment" name="sediment" class="form-control mr-sm-3" type="text"
+                    value="{% if isfloat(wepp.phosphorus_opts.sediment) %}{{ wepp.phosphorus_opts.sediment | round }}{% endif %}"
+                    placeholder="e.g. 800"
+                    aria-label="Sediment concentration">
+                </div>
+            </div>
         </div>
     </div>
-    <div class="form-group row" id="lateral_flow_container">
-        <div class="col-sm-4">
-            <label for="lateral_flow">Subsurface lateral flow concentration (mg/l): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="lateral_flow" name="lateral_flow" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{% if isfloat(wepp.phosphorus_opts.lateral_flow) %}{{ "%.4f" | format(wepp.phosphorus_opts.lateral_flow) }}{% endif %}"
-            aria-label="Subsurface lateral flow concentration">
-        </div>
-    </div>
-    <div class="form-group row" id="baseflow_container">
-        <div class="col-sm-4">
-            <label for="baseflow">Baseflow concentration (mg/l): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="baseflow" name="baseflow" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{% if isfloat(wepp.phosphorus_opts.baseflow) %}{{ "%.4f" | format(wepp.phosphorus_opts.baseflow) }}{% endif %}"
-            aria-label="Baseflow concentration">
-        </div>
-    </div>
-    <div class="form-group row" id="sediment_container">
-        <div class="col-sm-4">
-            <label for="sediment">Sediment concentration (mg/kg): </label>
-        </div>
-        <div class="col-sm-4">
-            <input id="sediment" name="sediment" class="form-control mr-sm-3 disable-readonly" type="text"
-            value="{% if isfloat(wepp.phosphorus_opts.sediment) %}{{ wepp.phosphorus_opts.sediment | round }}{% endif %}"
-            aria-label="Sediment concentration">
-        </div>
-    </div>
+    <br/>
+
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_run_wepp" 

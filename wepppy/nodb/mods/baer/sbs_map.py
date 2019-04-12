@@ -43,6 +43,8 @@ class SoilBurnSeverityMap:
                 data[i, j] = _classify(data[i, j], breaks, nodata_vals)
                 
         self.data = data
+        self.breaks = breaks
+        self.nodata_vals = nodata_vals
         self.transform = transform
         self.proj = proj
         self.mukeys = list(set(self.data.flatten()))
@@ -94,3 +96,53 @@ class SoilBurnSeverityMap:
             assert _exists(lcgrid_fn)
             
         return domlc_d
+
+    def export_4class_map(self, fn):
+
+        fname = self.fname
+        assert _exists(fname)
+
+        def _classify(v, breaks, nodata_vals):
+            i = 0
+
+            if nodata_vals is not None:
+                if v in nodata_vals:
+                    return 255
+
+            for i, brk in enumerate(breaks):
+                if v <= brk:
+                    break
+
+            return i + 1
+
+        _data, transform, proj = read_raster(fname, dtype=np.uint8)
+        print(proj)
+        data = np.ones(_data.shape) * 255
+        n, m = _data.shape
+        for i in range(n):
+            for j in range(m):
+                data[i, j] = _classify(_data[i, j], self.breaks, self.nodata_vals)
+
+        num_cols, num_rows = _data.shape
+        driver = gdal.GetDriverByName("GTiff")
+        dst = driver.Create(fn, num_cols, num_rows,
+                            1, GDT_Byte)
+
+        srs = osr.SpatialReference()
+        srs.ImportFromProj4(proj)
+        wkt = srs.ExportToWkt()
+
+        dst.SetProjection(wkt)
+        dst.SetGeoTransform(transform)
+        band = dst.GetRasterBand(1)
+        band.WriteArray(data.T)
+        band.SetNoDataValue(255)
+        del dst
+
+        assert _exists(fn)
+
+
+if __name__ == "__main__":
+    sbs_fn = '/home/weppdev/PycharmProjects/wepppy/wepppy/nodb/mods/baer/test/Rattlesnake.tif'
+    sbs = SoilBurnSeverityMap(sbs_fn, [0, 75, 109, 187])
+    sbs.export_4class_map(sbs_fn.replace('.tif', '.4class.tif'))

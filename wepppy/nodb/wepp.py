@@ -40,6 +40,7 @@ from osgeo.gdalconst import *
 import wepppy
 
 # wepppy
+from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.runner import (
     make_hillslope_run,
     run_hillslope,
@@ -87,6 +88,7 @@ if NCPU < 1:
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
     MuskingumCunge = 4
+
 
 class BaseflowOpts(object):
     def __init__(self):
@@ -141,18 +143,18 @@ def validate_phosphorus_txt(fn):
 
 
 class PhosphorusOpts(object):
-    def __init__(self):
+    def __init__(self, surf_runoff=None, lateral_flow=None, baseflow=None, sediment=None):
         # Surface runoff concentration (mg/l)
-        self.surf_runoff = 0.004
+        self.surf_runoff = surf_runoff
         
         # Subsurface lateral flow concentration (mg/l)
-        self.lateral_flow = 0.005
+        self.lateral_flow = lateral_flow
         
         # Baseflow concentration (mg/l)
-        self.baseflow = 0.006
+        self.baseflow = baseflow
         
         # Sediment concentration (mg/kg)
-        self.sediment = 800
+        self.sediment = sediment
 
     def parse_inputs(self, kwds):
         # noinspection PyBroadException
@@ -207,7 +209,30 @@ class Wepp(NoDbBase, LogMixin):
             if not _exists(wepp_dir):
                 os.mkdir(wepp_dir)
 
-            self.phosphorus_opts = PhosphorusOpts()
+            config = self.config
+
+            try:
+                surf_runoff = config.getfloat('phosphorus_opts', 'surf_runoff')
+            except:
+                surf_runoff = None
+            try:
+                lateral_flow = config.getfloat('phosphorus_opts', 'lateral_flow')
+            except:
+                lateral_flow = None
+            try:
+                baseflow = config.getfloat('phosphorus_opts', 'baseflow')
+            except:
+                baseflow = None
+            try:
+                sediment = config.getfloat('phosphorus_opts', 'sediment')
+            except:
+                sediment = None
+            self.phosphorus_opts = PhosphorusOpts(
+                surf_runoff=surf_runoff,
+                lateral_flow=lateral_flow,
+                baseflow=baseflow,
+                sediment=sediment)
+
             self.baseflow_opts = BaseflowOpts()
             self.run_flowpaths = False
             self.wepp_ui = False
@@ -272,6 +297,10 @@ class Wepp(NoDbBase, LogMixin):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return _exists(loss_pw0)
+
+    @property
+    def has_phosphorus(self):
+        return self.has_run and self.phosphorus_opts.isvalid and _exists(_join(self.runs_dir, 'phosphorus.txt'))
 
     #
     # hillslopes
@@ -672,9 +701,13 @@ class Wepp(NoDbBase, LogMixin):
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         runs_dir = self.runs_dir
-        
-        chn_n = Watershed.getInstance(self.wd).chn_n
-        
+
+        watershed = Watershed.getInstance(self.wd)
+        chn_n = watershed.chn_n
+
+        translator = watershed.translator_factory()
+        outlet_chn_enum = translator.chn_enum(top=watershed.outlet_top_id)
+
         # build list of soils
         soil_c = []
         for topaz_id, soil in soils.chn_iter():
@@ -703,43 +736,33 @@ class Wepp(NoDbBase, LogMixin):
         if critical_shear is None:
             critical_shear = 50.0
 
-        if '7778' in version:
-            # iterate over soils and append them together
-            fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-            fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
-                     .format(chn_n=chn_n))
-            i = 0
-            for chn_enum, soil in soil_c:
-                soil_fn = _join(soils_dir, soil.fname)
-                with open(soil_fn) as fp2:
-                    lines = fp2.readlines()
-                    for i, line in enumerate(lines):
-                        line = ''.join([v.strip() for v in line.split()])
-                        if line == '11':
-                            break
-                        
-#                fp.write(''.join(lines[i+1:]) + '\n')
+        # iterate over soils and append them together
+        fp = open(_join(runs_dir, 'pw0.sol'), 'w')
+        fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
+                 .format(chn_n=chn_n))
+        i = 0
+        for chn_enum, soil in soil_c:
+            soil_fn = _join(soils_dir, soil.fname)
+
+            with open(soil_fn) as fp2:
+                contents = fp2.read()
+                is_water = 'water' in contents.lower()
+
+            if is_water:  # and chn_enum != outlet_chn_enum:
+                fp.write("""\
+water_7778_2		Water	1 	0.1600 	0.7500 	1.0000 	0.0100 	999.0000 	0.1000
+    210.000000 	1.400000 	100.000000 	10.000000 	0.242 	0.115 	66.800 	7.000 	3.000 	11.300	55.500
+0 0 0
+""")
+
+            else:
                 fp.write("""\
 Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
-400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20
+    400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20
 1 10000 0.0001
 """.format(erodibility=erodibility, critical_shear=critical_shear))
 
-            fp.close()
-            
-        else:
-            # iterate over soils and append them together
-            fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-            fp.write('2006.2\ncomments: soil file\n{chn_n} 1\n'
-                     .format(chn_n=chn_n))
-            for chn_enum, soil in soil_c:
-                soil_fn = _join(soils_dir, soil.fname)
-                lines = open(soil_fn).readlines()
-                lines = [line for line in lines if not line.strip().startswith('#')]
-                        
-                fp.write(''.join(lines[3:6]))
-                    
-            fp.close()
+        fp.close()
         
     def _prep_watershed_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
@@ -853,22 +876,26 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
     def report_loss(self, exclude_yr_indxs=None):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        return Loss(loss_pw0, self.wd, exclude_yr_indxs=exclude_yr_indxs)
+        return Loss(loss_pw0, self.has_phosphorus, self.wd, exclude_yr_indxs=exclude_yr_indxs)
 
     def report_return_periods(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        loss_rpt = Loss(loss_pw0, self.wd)
+        loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = Ebe(ebe_pw0)
 
-        return ReturnPeriods(ebe_rpt, loss_rpt)
+        climate = Climate.getInstance(self.wd)
+        cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
+        cli_df = cli.as_dataframe(calc_peak_intensities=True)
+
+        return ReturnPeriods(ebe_rpt, loss_rpt, cli_df)
 
     def report_frq_flood(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        loss_rpt = Loss(loss_pw0, self.wd)
+        loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = Ebe(ebe_pw0)
@@ -917,7 +944,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = Loss(loss_pw0, self.wd)
+        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
         
         d = {}
         try:
@@ -937,7 +964,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = Loss(loss_pw0, self.wd)
+        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         d = {}
         for row in report.chn_tbl:

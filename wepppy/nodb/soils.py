@@ -41,6 +41,8 @@ class SoilsMode(IntEnum):
     Gridded = 0
     Single = 1
     SingleDb = 2
+    RRED_Unburned = 3
+    RRED_Burned = 4
 
 
 # noinspection PyPep8Naming
@@ -259,6 +261,11 @@ class Soils(NoDbBase):
             self._build_single()
         elif self.mode == SoilsMode.SingleDb:
             self._build_singledb()
+        elif self._mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]:
+            import wepppy
+            rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
+            rred.build_soils(self._mode)
+            return
 
     def _calc_clay_pct(self, surgo_c):
         fp = open(_join(self.soils_dir, 'clay_rpt.log'), 'w')

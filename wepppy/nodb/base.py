@@ -40,6 +40,7 @@ class TriggerEvents(Enum):
 # .nodb are jsonpickle files
 # The .nodb is used to distinguish these from regular json datafiles
 
+
 class NoDbBase(object):
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
@@ -178,6 +179,10 @@ class NoDbBase(object):
         if 'baer' in self.mods:
             baer = wepppy.nodb.mods.Baer.getInstance(self.wd)
             baer.on(evt)
+
+        if 'rred' in self.mods:
+            rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
+            rred.on(evt)
         
     @property
     def mods(self):

@@ -10,12 +10,14 @@
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}> Closest</label>
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 0] }}>
+                Closest</label>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-8">
             <label class="radio-inline">
             <input type="radio" value="1" class="disable-readonly" id="climatestation_mode1"
-            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}> Heuristic Ranking</label>
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}>
+                Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
     </div>    
     <div class="form-group row">

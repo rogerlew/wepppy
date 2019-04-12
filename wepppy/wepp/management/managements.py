@@ -34,6 +34,7 @@ from wepppy.all_your_base import *
 _thisdir = os.path.dirname(__file__)
 _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
+_rred_map_fn = _join(_management_dir, "rred_map.json")
 
 
 def _parse_julian(x):
@@ -1302,6 +1303,7 @@ class ManagementLoop(object):
 class ManagementSummary(object):
     def __init__(self, **kwargs):
         self.key = kwargs["Key"]
+        self._map = kwargs.get("_map", None)
         self.man_fn = kwargs["ManagementFile"]
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
         self.desc = kwargs["Description"]
@@ -1311,7 +1313,7 @@ class ManagementSummary(object):
 
         self.pct_coverage = None
 
-        m = get_management(self.key)
+        m = get_management(self.key, _map=self._map)
         assert len(m.inis) == 1
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
@@ -1328,7 +1330,7 @@ class ManagementSummary(object):
         return _join(self.man_dir, self.man_fn)
 
     def get_management(self):
-        m = get_management(self.key)
+        m = get_management(self.key, _map=self._map)
         assert len(m.inis) == 1
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
@@ -1345,7 +1347,7 @@ class ManagementSummary(object):
         return m
      
     def as_dict(self):
-        return dict(key=self.key, 
+        return dict(key=self.key, _map=self._map,
                     man_fn=self.man_fn, man_dir=self.man_dir, 
                     desc=self.desc, color=self.color, area=self.area, 
                     pct_coverage=self.pct_coverage,
@@ -1698,9 +1700,14 @@ def merge_managements(mans):
     return man0
 
 
-def load_map():
-    with open(_map_fn) as fp:
-        d = json.load(fp)
+def load_map(_map=None):
+
+    if _map is None:
+        with open(_map_fn) as fp:
+            d = json.load(fp)
+    elif 'rred' in _map.lower():
+        with open(_rred_map_fn) as fp:
+            d = json.load(fp)
         
     for k, v in d.items():
         assert int(k) == v['Key']
@@ -1720,12 +1727,15 @@ class InvalidManagementKey(Exception):
         pass
 
         
-def get_management_summary(dom) -> ManagementSummary:
+def get_management_summary(dom, _map=None) -> ManagementSummary:
     """
     Parameters
     ----------
     dom : int
         dominant landcover code
+
+    _map: string or None
+        mapfile to use
     
     Returns
     -------
@@ -1733,15 +1743,15 @@ def get_management_summary(dom) -> ManagementSummary:
         The object is built from the .man file cooresponding to dom in the
         weppy/wepp/management/data/map.json
     """
-    d = load_map()
+    d = load_map(_map=_map)
     k = str(dom)
     if not k in d:
         raise InvalidManagementKey
 
-    return ManagementSummary(**d[k])
+    return ManagementSummary(**d[k], _map=_map)
 
         
-def get_management(dom) -> Management:
+def get_management(dom, _map=None) -> Management:
     """
     Parameters
     ----------
@@ -1754,7 +1764,7 @@ def get_management(dom) -> Management:
         The object is built from the .man file cooresponding to dom in the
         weppy/wepp/management/data/map.json
     """
-    d = load_map()
+    d = load_map(_map=_map)
     k = str(dom)
     if not k in d:
         raise InvalidManagementKey
@@ -1763,24 +1773,24 @@ def get_management(dom) -> Management:
 
 
 if __name__ == "__main__":
-    d = load_map()
+    d = load_map('rred')
 
     print(d.keys())
 
-    man_sum = get_management_summary(81)
+    man_sum = get_management_summary(323, _map='rred')
     print(man_sum.desc)
 
-    m = get_management(81)
+    m = get_management(323, _map='rred')
 
     m2 = m.build_multiple_year_man(5)
     #print(m2)
 
     import csv
 
-    fp = open('weppcloud_managements.csv', 'w')
+    fp = open('tests/weppcloud_managements.csv', 'w')
     wtr = csv.writer(fp)
     for k in d:
-        m = get_management(k)
+        m = get_management(k, _map='rred')
         #Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
 
         assert len(m.inis) == 1
@@ -1791,7 +1801,6 @@ if __name__ == "__main__":
         print('{},{},{},{}'.format(k, m.desc, cancov, inrcov, rilcov))
 
         wtr.writerow([k, m.desc, cancov, inrcov, rilcov])
-
 
     fp.close()
 

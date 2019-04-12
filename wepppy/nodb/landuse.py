@@ -36,6 +36,8 @@ class LanduseMode(IntEnum):
     Undefined = -1
     Gridded = 0
     Single = 1
+    RRED_Unburned = 2
+    RRED_Burned = 3
 
 
 class Landuse(NoDbBase):
@@ -179,6 +181,15 @@ class Landuse(NoDbBase):
         os.mkdir(lc_dir)
     
     def build(self):
+
+        if self._mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]:
+            import wepppy
+            rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
+            rred.build_landuse(self._mode)
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+            self.build_managements()
+            return
+
         self.lock()
 
         # noinspection PyBroadException
@@ -281,6 +292,8 @@ class Landuse(NoDbBase):
     def build_managements(self):
         self.lock()
 
+        _map = (None, 'rred')[self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]]
+
         # noinspection PyBroadException
         try:
             watershed = Watershed.getInstance(self.wd)
@@ -300,7 +313,7 @@ class Landuse(NoDbBase):
                 assert summary is not None, topaz_id
                 
                 if k not in managements:
-                    man = get_management_summary(k)
+                    man = get_management_summary(k, _map)
                     man.area = summary["area"]
                     managements[k] = man
                 else:
