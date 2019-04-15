@@ -1,6 +1,7 @@
 from .loss import *
 from .ebe import *
 from .plot import *
+from .hill_loss import HillLoss
 from .chnwb import Chnwb
 from .chanwb import Chanwb
 from .totalwatsed import TotalWatSed

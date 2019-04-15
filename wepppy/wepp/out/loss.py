@@ -425,6 +425,7 @@ class Loss(object):
                     else:
                         chn_tbl[i]['Total P Density'] = float('nan')
 
+        self.fn = fn
         self.hill_tbl = hill_tbl
         self.chn_tbl = chn_tbl
         self.out_tbl = out_tbl
@@ -438,6 +439,7 @@ class Loss(object):
             self.avg_years = avg_years
 
         self.has_phosphorus = has_phosphorus
+
 
     @property
     def avg_annual_years(self):

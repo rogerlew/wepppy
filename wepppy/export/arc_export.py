@@ -93,9 +93,9 @@ def arc_export(wd):
         f['properties']['BaseF(mm)'] = weppout['Baseflow'][topaz_id]['value']
         f['properties']['DepLos(kg)'] = weppout['DepLoss'][topaz_id]['value']
 
-        f['properties']['SoiLos(kg)'] = weppout['Soil Loss Density'][topaz_id]['value']
-        f['properties']['SedDep(kg)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
-        f['properties']['SedYld(kg)'] = weppout['Sediment Yield Density'][topaz_id]['value']
+        f['properties']['SoLs(kg/ha)'] = weppout['Soil Loss Density'][topaz_id]['value']
+        f['properties']['SdDp(kg/ha)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
+        f['properties']['SdYd(kg/ha)'] = weppout['Sediment Yield Density'][topaz_id]['value']
 
         if weppout['Total P Density'] is not None:
             f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
