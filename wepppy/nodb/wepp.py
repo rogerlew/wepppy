@@ -748,7 +748,7 @@ class Wepp(NoDbBase, LogMixin):
                 contents = fp2.read()
                 is_water = 'water' in contents.lower()
 
-            if is_water:  # and chn_enum != outlet_chn_enum:
+            if is_water and chn_enum != outlet_chn_enum:
                 fp.write("""\
 water_7778_2		Water	1 	0.1600 	0.7500 	1.0000 	0.0100 	999.0000 	0.1000
     210.000000 	1.400000 	100.000000 	10.000000 	0.242 	0.115 	66.800 	7.000 	3.000 	11.300	55.500

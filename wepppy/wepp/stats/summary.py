@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import csv
+from os.path import split as _split
 from os.path import join as _join
 from os.path import exists as _exists
 from glob import glob
@@ -19,9 +20,12 @@ from wepppy.wepp.stats.report_base import ReportBase
 
 
 class HillSummary(ReportBase):
-    def __init__(self, loss: Loss):
+    def __init__(self, loss: Loss, class_fractions=False, fraction_under=None):
+        self.loss_fn = loss.fn
         self.data = loss.hill_tbl
         self.has_phosphorus = loss.has_phosphorus
+        self.class_fractions = class_fractions
+        self.fraction_under = fraction_under
 
         self._hdr = [
             'WeppID',
@@ -37,11 +41,27 @@ class HillSummary(ReportBase):
             'Sediment Deposition Density (kg/ha)',
             'Sediment Yield Density (kg/ha)'
         ]
+
         if self.has_phosphorus:
             self._hdr.extend([
                 'Solub. React. P Density (kg/ha,3)',
                 'Particulate P Density (kg/ha,3)',
                 'Total P Density (kg/ha,3)'
+            ])
+
+        if self.class_fractions:
+            self._hdr.extend([
+                'Particle Class 1 Fraction',
+                'Particle Class 2 Fraction',
+                'Particle Class 3 Fraction',
+                'Particle Class 4 Fraction',
+                'Particle Class 5 Fraction'
+            ])
+
+        if self.fraction_under:
+            self._hdr.extend([
+                'Particle Fraction Under %0.3f mm' % self.fraction_under,
+                'Sediment Yield of Particles Under %0.3f mm (kg/ha)' % self.fraction_under,
             ])
 
     @property
@@ -51,8 +71,36 @@ class HillSummary(ReportBase):
     def __iter__(self):
         data = self.data
         for i in range(len(data)):
-            yield RowData(OrderedDict([(colname.replace(' Density', ''),
-                                        data[i][parse_name(colname)]) for colname in self._hdr]))
+            _data = [(colname.replace(' Density', ''),
+                      data[i][parse_name(colname)]) for colname in self._hdr[:12]]
+
+            if self.has_phosphorus:
+                _data.extend([(colname.replace(' Density', ''),
+                               data[i][parse_name(colname)]) for colname in self._hdr[12:15]])
+
+            if self.class_fractions or self.fraction_under:
+                wepp_id = data[i]['WeppID']
+                hill_loss_fn = _join(_split(self.loss_fn)[0], 'H%i.loss.dat' % int(wepp_id))
+                assert _exists(hill_loss_fn)
+
+                from wepppy.wepp.out import HillLoss
+                hill_loss = HillLoss(hill_loss_fn)
+
+                if self.class_fractions:
+                    _data.append(('Particle Class 1 Fraction', hill_loss.class_data[0]['Fraction In Flow Exiting']))
+                    _data.append(('Particle Class 2 Fraction', hill_loss.class_data[1]['Fraction In Flow Exiting']))
+                    _data.append(('Particle Class 3 Fraction', hill_loss.class_data[2]['Fraction In Flow Exiting']))
+                    _data.append(('Particle Class 4 Fraction', hill_loss.class_data[3]['Fraction In Flow Exiting']))
+                    _data.append(('Particle Class 5 Fraction', hill_loss.class_data[4]['Fraction In Flow Exiting']))
+
+                if self.fraction_under:
+                    frac = hill_loss.fraction_under(self.fraction_under)
+                    sed_yield = data[i]['Sediment Yield Density']
+                    _data.append(('Particle Fraction Under %0.3f mm' % self.fraction_under, frac))
+                    _data.append(('Sediment Yield of Particles Under %0.3f mm (kg/ha)' % self.fraction_under,
+                                  frac * sed_yield))
+
+            yield RowData(OrderedDict(_data))
 
 
 class ChannelSummary(ReportBase):

@@ -502,7 +502,6 @@ class Soils(NoDbBase):
                 return
 
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
-            print(set(domsoil_d.values()))
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -529,8 +528,6 @@ class Soils(NoDbBase):
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
-
-            print(set(domsoil_d.values()))
 
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
