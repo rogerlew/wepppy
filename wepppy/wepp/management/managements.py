@@ -1330,7 +1330,11 @@ class ManagementSummary(object):
         return _join(self.man_dir, self.man_fn)
 
     def get_management(self):
-        m = get_management(self.key, _map=self._map)
+        _map = None
+        if hasattr(self, "_map"):
+            _map = self._map
+
+        m = get_management(self.key, _map=_map)
         assert len(m.inis) == 1
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
@@ -1347,7 +1351,11 @@ class ManagementSummary(object):
         return m
      
     def as_dict(self):
-        return dict(key=self.key, _map=self._map,
+        _map = None
+        if hasattr(self, "_map"):
+            _map = self._map
+
+        return dict(key=self.key, _map=_map,
                     man_fn=self.man_fn, man_dir=self.man_dir, 
                     desc=self.desc, color=self.color, area=self.area, 
                     pct_coverage=self.pct_coverage,

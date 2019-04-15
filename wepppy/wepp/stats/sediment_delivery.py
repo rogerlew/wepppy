@@ -26,12 +26,13 @@ class SedimentDelivery(object):
         # Find class table
         indx0 = []
         for i, L in enumerate(lines):
-            if 'Avg. Ann. sediment discharge from outlet' in L:
-                sed_discharge = try_parse(L.split()[-2])
-            if 'Sediment Particle Information Leaving Channel' in L:
+            if 'Sediment particle information leaving profile' in L:
                 indx0.append(i)
 
-        assert len(indx0) > 0
+        if len(indx0) == 0:
+            self.class_data = None
+            return
+
         indx0 = indx0[-1]
         lines = lines[indx0:]
 
@@ -99,37 +100,42 @@ class SedimentDelivery(object):
 
     def write(self, fp, write_header=True, run_descriptors=None):
 
+        hdr = ['Channel Class 1', 'Channel Class 2', 'Channel Class 3', 'Channel Class 4', 'Channel Class 5',
+               'Channel Clay', 'Channel Silt', 'Channel Sand', 'Channel Organic Matter',
+               'Hillslopes Class 1', 'Hillslopes Class 2', 'Hillslopes Class 3', 'Hillslopes Class 4',
+               'Hillslopes Class 5',
+               'Hillslopes Clay', 'Hillslopes Silt', 'Hillslopes Sand', 'Hillslopes Organic Matter',
+               'Average Annual Sediment Discharge from Outlet (tonnes/yr)',
+               'Average Annual Sediment Delivery from Hillslopes (tonnes/yr)',
+               'Index of specific surface (m**2/g of total sediment)',
+               'Enrichment ratio of specific surface']
+
         wtr = csv.writer(fp)
 
         if write_header:
-            hdr = ['Channel Class 1', 'Channel Class 2', 'Channel Class 3', 'Channel Class 4', 'Channel Class 5',
-                   'Channel Clay', 'Channel Silt', 'Channel Sand', 'Channel Organic Matter',
-                   'Hillslopes Class 1', 'Hillslopes Class 2', 'Hillslopes Class 3', 'Hillslopes Class 4', 'Hillslopes Class 5',
-                   'Hillslopes Clay', 'Hillslopes Silt', 'Hillslopes Sand', 'Hillslopes Organic Matter',
-                   'Average Annual Sediment Discharge from Outlet (tonnes/yr)',
-                   'Average Annual Sediment Delivery from Hillslopes (tonnes/yr)',
-                   'Index of specific surface (m**2/g of total sediment)',
-                   'Enrichment ratio of specific surface']
 
             if run_descriptors is not None:
                 hdr = [cname for cname, desc in run_descriptors] + hdr
 
             wtr.writerow(hdr)
 
-        row = self.class_fractions + \
-              [self.particle_distribution['clay'],
-               self.particle_distribution['silt'],
-               self.particle_distribution['sand'],
-               self.particle_distribution['organic matter']] + \
-              self.hill_class_fractions + \
-              [self.hill_particle_distribution['clay'],
-               self.hill_particle_distribution['silt'],
-               self.hill_particle_distribution['sand'],
-               self.hill_particle_distribution['organic matter']] + \
-              [self.sed_discharge,
-               self.hill_sed_delivery,
-               self.specific_surface_index,
-               self.enrichment_ratio_of_spec_surf]
+        if self.class_data is None:
+            row = [0 for colname in hdr]
+        else:
+            row = self.class_fractions + \
+                  [self.particle_distribution['clay'],
+                   self.particle_distribution['silt'],
+                   self.particle_distribution['sand'],
+                   self.particle_distribution['organic matter']] + \
+                  self.hill_class_fractions + \
+                  [self.hill_particle_distribution['clay'],
+                   self.hill_particle_distribution['silt'],
+                   self.hill_particle_distribution['sand'],
+                   self.hill_particle_distribution['organic matter']] + \
+                  [self.sed_discharge,
+                   self.hill_sed_delivery,
+                   self.specific_surface_index,
+                   self.enrichment_ratio_of_spec_surf]
 
         if run_descriptors is not None:
             row = [desc for cname, desc in run_descriptors] + row

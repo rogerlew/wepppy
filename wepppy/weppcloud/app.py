@@ -413,6 +413,10 @@ def security_processor():
         name = Ron.getInstance(wd).name
         return name
 
+    def run_exists(runid):
+        wd = get_wd(runid)
+        return _exists(_join(wd, 'ron.nodb'))
+
     def get_run_owner(runid):
         run = Run.query.filter(Run.runid == runid).first()
         if run.owner_id is None:
@@ -446,7 +450,8 @@ def security_processor():
         wd = get_wd(runid)
         return Ron.getInstance(wd).w3w
 
-    return dict(get_run_name=get_run_name,
+    return dict(run_exists=run_exists,
+                get_run_name=get_run_name,
                 get_run_owner=get_run_owner,
                 get_last_modified=get_last_modified,
                 get_anonymous_runs=get_anonymous_runs,
@@ -2010,11 +2015,21 @@ def report_wepp_loss(runid):
     except:
         exclude_yr_indxs = None
 
+    class_fractions = request.args.get('class_fractions', False)
+    class_fractions = str(class_fractions).lower() == 'true'
+
+    fraction_under = request.args.get('fraction_under', None)
+    if fraction_under is not None:
+        try:
+            fraction_under = float(fraction_under)
+        except:
+            fraction_under = None
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
     out_rpt = OutletSummary(loss)
-    hill_rpt = HillSummary(loss)
+    hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
     chn_rpt = ChannelSummary(loss)
     avg_annual_years = loss.avg_annual_years
     excluded_years = loss.excluded_years
