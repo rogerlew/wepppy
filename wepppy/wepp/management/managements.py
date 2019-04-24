@@ -1781,24 +1781,29 @@ def get_management(dom, _map=None) -> Management:
 
 
 if __name__ == "__main__":
-    d = load_map('rred')
+    db = None  # rred
+
+    d = load_map(db)
 
     print(d.keys())
 
-    man_sum = get_management_summary(323, _map='rred')
-    print(man_sum.desc)
+#    man_sum = get_management_summary(323, _map=db)
+#    print(man_sum.desc)
 
-    m = get_management(323, _map='rred')
+#    m = get_management(323, _map=db)
 
-    m2 = m.build_multiple_year_man(5)
+#    m2 = m.build_multiple_year_man(5)
     #print(m2)
 
     import csv
 
     fp = open('tests/weppcloud_managements.csv', 'w')
     wtr = csv.writer(fp)
+
+    wtr.writerow(['key', 'desc', 'cancov', 'inrcov', 'rilcov'])
+
     for k in d:
-        m = get_management(k, _map='rred')
+        m = get_management(k, _map=db)
         #Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
 
         assert len(m.inis) == 1

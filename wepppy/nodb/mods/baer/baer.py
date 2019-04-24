@@ -11,6 +11,7 @@ import ast
 import shutil
 from collections import Counter
 import jsonpickle
+from copy import deepcopy
 
 from subprocess import Popen, PIPE
 from os.path import join as _join
@@ -20,7 +21,8 @@ import numpy as np
 from osgeo import gdal
         
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc
-from wepppy.wepp.soilbuilder.webClient import SoilSummary
+from wepppy.ssurgo import SoilSummary
+from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
@@ -39,6 +41,14 @@ _data_dir = _join(_thisdir, 'data')
 
 class BaerNoDbLockedException(Exception):
     pass
+
+
+# Replaceable parameters:
+# Albedo, iniSatLev, interErod, rillErod, critSh, effHC, soilDepth, Sand, Clay, OM, CEC
+sbs_soil_replacements = dict(
+    low=SoilReplacements(interErod='*0.8', rillErod='*0.8', effHC='*0.8'),
+    moderate=SoilReplacements(interErod='*0.6', rillErod='*0.6', effHC='*0.6'),
+    high=SoilReplacements(interErod='*0.4', rillErod='*0.4', effHC='*0.4'))
 
 
 class Baer(NoDbBase):
@@ -411,7 +421,75 @@ class Baer(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-        
+
+    def _build_ssurgo_modified_soils(self):
+
+        soils = Soils.getInstance(self.wd)
+        soils_dir = soils.soils_dir
+
+        if soils.mode != SoilsMode.Gridded:
+            return
+
+        _soils = deepcopy(soils.soils)
+        for sbs, replacements in sbs_soil_replacements.items():
+            for mukey, soil_sum in soils.soils.items():
+                src = soil_sum.path
+                key = '{}-{}'.format(mukey, sbs)
+                fn = '%s.sol' % key
+                dst = _join(soils_dir, fn)
+                soil_specialization(src, dst, replacements)
+
+                _soils[key] = SoilSummary(
+                    Mukey=key,
+                    FileName=fn,
+                    soils_dir=soils_dir,
+                    BuildDate="N/A",
+                    Description=soil_sum.desc + ' - ' + sbs
+                )
+
+        landuse = Landuse.getInstance(self.wd)
+        domlc_d = landuse.domlc_d
+
+        _domsoil_d = {}
+        _sbs_lookup = {'130': '', '131': 'low', '132': 'moderate', '133': 'high'}
+
+        def _sbs_lookup_func(dom, mukey):
+            if dom == '130':
+                return mukey
+
+            sbs = _sbs_lookup[dom]
+            return '{}-{}'.format(mukey, sbs)
+
+        for topaz_id, dom in domlc_d.items():
+            mukey = soils.domsoil_d[topaz_id]
+            _domsoil_d[topaz_id] = _sbs_lookup_func(dom, mukey)
+
+        # need to recalculate the pct_coverages
+        total_area = 0.0
+        for k in _soils:
+            _soils[k].area = 0.0
+
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, k in _domsoil_d.items():
+            summary = watershed.sub_summary(str(topaz_id))
+            if summary is not None:
+                _soils[k].area += summary["area"]
+                total_area += summary["area"]
+
+        for k in _soils:
+            coverage = 100.0 * _soils[k].area / total_area
+            _soils[k].pct_coverage = coverage
+
+        try:
+            soils.lock()
+            soils.soils = _soils
+            soils.domsoil_d = _domsoil_d
+            soils.dump_and_unlock()
+
+        except Exception:
+            soils.unlock('-f')
+            raise
+
     def modify_soils(self):
 
         wd = self.wd
@@ -422,6 +500,10 @@ class Baer(NoDbBase):
 
         soils_dir = self.soils_dir
         baer_soils_dir = self.baer_soils_dir
+
+        if self._config == 'baer-ssurgo.cfg':
+            self._build_ssurgo_modified_soils()
+            return
 
         if self._config == 'baer-exp.cfg':
             soils_dict = {"130": "20-yr forest sandy loam.sol",
@@ -464,24 +546,24 @@ class Baer(NoDbBase):
                 dom = domlc_d[topaz_id]
                 
                 _domsoil_d[topaz_id] = dom
-                    
-            # need to recalculate the pct_coverages
-            total_area = 0.0
-            for k in _soils:
-                _soils[k].area = 0.0
 
-            watershed = Watershed.getInstance(self.wd)
-            for topaz_id, k in _domsoil_d.items():
-                summary = watershed.sub_summary(str(topaz_id))
-                if summary is not None:
-                    _soils[k].area += summary["area"]
-                    total_area += summary["area"]
+                # need to recalculate the pct_coverages
+                total_area = 0.0
+                for k in _soils:
+                    _soils[k].area = 0.0
 
-            for k in _soils:
-                coverage = 100.0 * _soils[k].area / total_area
-                _soils[k].pct_coverage = coverage
-                        
-            soils.soils = _soils            
+                watershed = Watershed.getInstance(self.wd)
+                for topaz_id, k in _domsoil_d.items():
+                    summary = watershed.sub_summary(str(topaz_id))
+                    if summary is not None:
+                        _soils[k].area += summary["area"]
+                        total_area += summary["area"]
+
+                for k in _soils:
+                    coverage = 100.0 * _soils[k].area / total_area
+                    _soils[k].pct_coverage = coverage
+
+            soils.soils = _soils
             soils.domsoil_d = _domsoil_d
             soils.dump_and_unlock()
             
