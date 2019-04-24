@@ -155,7 +155,7 @@ def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verb
 
             fn = observed_data[(varname, year)]
             rdi = RasterDatasetInterpolator(fn)
-            d[varname] = rdi.get_location_info(lng=lng, lat=lat, method='bilinear')
+            d[varname] = rdi.get_location_info(lng=lng, lat=lat, method='cubic')
 
         d['prcp'] = np.array(d['prcp'])
         d['prcp'] /= 25.4

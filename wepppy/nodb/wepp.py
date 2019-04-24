@@ -713,23 +713,23 @@ class Wepp(NoDbBase, LogMixin):
         for topaz_id, soil in soils.chn_iter():
             soil_c.append((translator.chn_enum(top=int(topaz_id)), soil))
         soil_c.sort(key=lambda x: x[0])
-        
-        versions = []
-        for chn_enum, soil in soil_c:
-            soil_fn = _join(soils_dir, soil.fname)
-            lines = open(soil_fn).readlines()
-            version = lines[0].replace('#', '').strip()
-            versions.append(version)
-            
-        versions = set(versions)
-        if len(versions) > 1:
-            raise Exception('Do not know how to merge '
-                            'soils of different versions')
-
-        if len(versions) == 0:
-            raise Exception('Could not find any soils for channels.')
-
-        version = versions.pop()
+        #
+        # versions = []
+        # for chn_enum, soil in soil_c:
+        #     soil_fn = _join(soils_dir, soil.fname)
+        #     lines = open(soil_fn).readlines()
+        #     version = lines[0].replace('#', '').strip()
+        #     versions.append(version)
+        #
+        # versions = set(versions)
+        # if len(versions) > 1:
+        #     raise Exception('Do not know how to merge '
+        #                     'soils of different versions')
+        #
+        # if len(versions) == 0:
+        #     raise Exception('Could not find any soils for channels.')
+        #
+        # version = versions.pop()
 
         if erodibility is None:
             erodibility = 1E-6

@@ -57,7 +57,8 @@ from wepppy.climates.cligen import (
 from wepppy.watershed_abstraction import (
     ChannelRoutingError,
 )
-from wepppy.wepp import management, soilsdb
+from wepppy.wepp import management
+from wepppy.wepp.soils import soilsdb
 
 from wepppy.wepp.out import TotalWatSed
 

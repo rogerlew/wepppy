@@ -27,7 +27,7 @@ from pyproj import Proj, transform
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc, translate_asc_to_tif, read_raster, raster_extent
 from wepppy.landcover import LandcoverMap
 from wepppy.nodb.mods.rred.rred_api import retrieve_rred
-from wepppy.wepp.soilbuilder.webClient import SoilSummary
+from wepppy.ssurgo import SoilSummary
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
