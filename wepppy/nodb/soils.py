@@ -21,10 +21,9 @@ import jsonpickle
 
 # wepppy
 from wepppy.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
-from wepppy.wepp.soilbuilder.webClient import validatemukeys, fetchsoils
 from wepppy.watershed_abstraction import ischannel
 from wepppy.all_your_base import wmesque_retrieve, isfloat
-from wepppy.wepp.soilsdb import load_db, get_soil
+from wepppy.wepp.soils.soilsdb import load_db, get_soil
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -497,7 +496,6 @@ class Soils(NoDbBase):
                 )
             except NoValidSoilsException:
                 self.dump_and_unlock()
-                print('building statsgo')
                 self.build_statsgo()
                 return
 

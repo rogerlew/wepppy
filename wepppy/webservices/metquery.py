@@ -68,9 +68,7 @@ lccProj = pyproj.Proj(lcc_proj4)
 
 wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
 wgsProj = pyproj.Proj(wgs84_proj4)
-
 wgs2lcc = lambda lon, lat: pyproj.transform(wgsProj, lccProj, lon, lat)
-
 yr_parse = lambda fn: _split(fn)[-1].split('_')[3]
 
 
@@ -90,27 +88,22 @@ def crop_nc(nc, bbox, dst):
 
     ll_x, ll_y, ur_x, ur_y = bbox
 
-    easting, northing = wgs2lcc(ll_x, ur_y)
-    px0 = int(round((easting - transform[0]) / transform[1]))
-    py0 = -int(round((transform[3] - northing) / transform[5]))
+    assert ur_x > ll_x
+    assert ur_y > ll_y
 
-    easting, northing = wgs2lcc(ur_x, ll_y)
-    px1 = int(round((easting - transform[0]) / transform[1]))
-    py1 = -int(round((transform[3] - northing) / transform[5]))
+    easting, northing = wgs2lcc(ll_x, ll_y)
+    ll_px = int(round((easting - transform[0]) / transform[1]))
+    ll_py = -int(round((transform[3] - northing) / transform[5]))
 
-    assert px0 >= 0
-    assert px0 < ncols
-    assert px1 >= 0
-    assert px1 < ncols
-    assert py0 >= 0
-    assert py0 < nrows
-    assert py1 >= 0
-    assert py1 < nrows
+    easting, northing = wgs2lcc(ur_x, ur_y)
+    ur_px = int(round((easting - transform[0]) / transform[1]))
+    ur_py = -int(round((transform[3] - northing) / transform[5]))
 
     cmd = ['ncks',
-           '-d', 'y,{},{}'.format(*sorted([py0, py1])),
-           '-d', 'x,{},{}'.format(*sorted([px0, px1])),
+           '-d', 'x,{},{}'.format(*sorted([ll_px, ur_px])),
+           '-d', 'y,{},{}'.format(*sorted([ll_py, ur_py])),
            nc, dst]
+
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     p.wait()
 

@@ -904,9 +904,14 @@ class Climate(NoDbBase, LogMixin):
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             ron = Ron.getInstance(self.wd)
+            # daymet is 1000m resolution. So each pixel is 0.06 degrees
+            # 1 / ((6378.1 * 1000) / 1000 / 360) = 0.056 ~ 0.06
+            # for cubic interpolation we need at least 5 pixels
+            # so we pad 3 pixels in each direction to be on the safe side
+            pad = 0.06 * 3
             bbox = ron.map.extent
-            bbox = [bbox[0] - 0.03, bbox[1] - 0.03,
-                    bbox[2] + 0.03, bbox[3] + 0.03]
+            bbox = [bbox[0] - pad, bbox[1] - pad,
+                    bbox[2] + pad, bbox[3] + pad]
             bbox = ','.join(str(v) for v in bbox)
 
             observed_data = {}

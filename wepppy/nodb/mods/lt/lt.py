@@ -8,97 +8,24 @@
 
 import os
 import json
-import csv
-import shutil
 
 from copy import deepcopy
-from collections import namedtuple
 from os.path import join as _join
 from os.path import exists as _exists
 
 import jsonpickle
 
-from wepppy.all_your_base import RasterDatasetInterpolator
+# from wepppy.all_your_base import RasterDatasetInterpolator
 
 from ...landuse import Landuse
 from ...soils import Soils
 from ...watershed import Watershed
 from ...wepp import Wepp
+from wepppy.wepp.soils.utils import read_lc_file, soil_specialization
 from ...base import NoDbBase, TriggerEvents
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
-
-Landcover = namedtuple('Landcover', 
-                       ['Code', 'LndcvrID', 'WEPP_Type', 'New_WEPPman', 'ManName', 'Albedo',
-                        'iniSatLev', 'interErod', 'rillErod', 'critSh', 'effHC', 'soilDepth',
-                        'Sand', 'Clay', 'OM', 'CEC'], verbose=False)
-         
-                        
-def read_lc_file(fname):
-    """
-    Reads a file containing landcover parameters and returns a dictionary
-    with tuple keys (LndcvrID, WEPP_Type) and namedtuple values with fields:
-        Code, LndcvrID, WEPP_Type, New_WEPPman, ManName, Albedo, iniSatLev,
-        interErod, rillErod, critSh, effHC, soilDepth, Sand, Clay, OM, CEC
-    """
-    d = {}
-    
-    with open(fname) as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            row['Code'] = int(row['Code'])
-            row['LndcvrID'] = int(row['LndcvrID'])
-            d[(str(row['LndcvrID']), row['WEPP_Type'])] = Landcover(**row)
-
-    return d
-
-
-def soil_specialization(src, dst, replacements):
-    """
-    Creates a new soil file based on soil_in_fname and makes replacements
-    from the provided replacements namedtuple
-    """
-    # read the soil_in_fname file
-    with open(src) as f:
-        lines = f.readlines()
-
-    header = [L for L in lines if L.startswith('#')]
-    lines = [L for L in lines if not L.startswith('#')]
-        
-    line4 = lines[3]
-    line4 = line4.split()
-    line4[-5] = replacements.Albedo
-    line4[-4] = replacements.iniSatLev
-    line4[-3] = replacements.interErod
-    line4[-2] = replacements.rillErod
-    line4[-1] = replacements.critSh
-    line4 = ' '.join(line4) + '\n'
-
-    line5 = lines[4]
-    line5 = line5.split()
-    line5[2] = replacements.effHC
-
-    if len(line5) < 5:  # no horizons (e.g. rock)
-        shutil.copyfile(src, dst)
-        return
-
-    if "rock" not in lines[3].lower() and \
-       "water" not in lines[3].lower():
-        line5[6] = replacements.Sand
-        line5[7] = replacements.Clay
-        line5[8] = replacements.OM
-        line5[9] = replacements.CEC
-    line5 = ' '.join(line5) + '\n'
-
-    # Create new soil files
-    with open(dst, 'w') as f:
-        f.writelines(header)
-        f.writelines(lines[:3])
-        f.writelines(line4)
-        f.writelines(line5)
-        if len(lines) > 5:
-            f.writelines(lines[5:])
 
 
 class LakeTahoeNoDbLockedException(Exception):
@@ -247,29 +174,28 @@ class LakeTahoe(NoDbBase):
             raise
             
     def determine_phosphorus(self):
-        watershed = Watershed.getInstance(self.wd)
-        lng, lat = watershed.centroid
+        # watershed = Watershed.getInstance(self.wd)
+        # lng, lat = watershed.centroid
+
         wepp = Wepp.getInstance(self.wd)
 
-        #d = {}
-        #for opt in ['runoff', 'lateral', 'baseflow', 'sediment']:
+        # d = {}
+        # for opt in ['runoff', 'lateral', 'baseflow', 'sediment']:
         #    fn = _join(_data_dir, 'phosphorus', 'p_%s.tif' % opt)
         #    assert _exists(fn), fn
         #    raster = RasterDatasetInterpolator(fn)
         #    d[opt] = raster.get_location_info(lng, lat)
 
-        d = {}
-        d['surf_runoff'] = 0.004
-        d['lateral_flow'] = 0.005
-        d['baseflow'] = 0.006
-        d['sediment'] = 800
+        d = dict(surf_runoff=0.004,
+                 lateral_flow=0.005,
+                 baseflow=0.006,
+                 sediment=800)
 
         # noinspection PyBroadException
         try:
             wepp.lock()
             wepp.phosphorus_opts.parse_inputs(d)
             wepp.dump_and_unlock()
-            print('set phosopts')
         except Exception:
             wepp.unlock('-f')
             raise

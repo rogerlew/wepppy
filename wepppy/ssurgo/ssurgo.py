@@ -396,6 +396,10 @@ class SoilSummary(object):
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage)
 
+    @property
+    def path(self):
+        return _join(self.soils_dir, self.fname)
+
 
 # noinspection PyPep8Naming,PyProtectedMember
 class WeppSoil:
@@ -748,12 +752,6 @@ Any comments:
 'water_7778_2'		'Water'	1 	0.1600 	0.7500 	1.0000 	0.0100 	999.0000 	0.1000
 	210.000000 	1.400000 	100.000000 	10.000000 	0.242 	0.115 	66.800 	7.000 	3.000 	11.300	55.500
 0 0 0'''
-
-        return '''7778\n''' + self.description + '''
-Any comments:                                   
-1  0                                        
-'Water_1'\t'Water'\t0\t0.0\t0.75\t0\t0.00\t0.0\t000.0
-0\t0\t0'''
 
     def _build_water_v2006_2(self):
         return '''2006.2\n''' + self.description + '''

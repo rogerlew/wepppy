@@ -352,6 +352,12 @@ def read_raster(fn, dtype=np.float64):
         return read_tif(fn, dtype)
 
 
+def wkt_2_proj4(wkt):
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(wkt)
+    return srs.ExportToProj4().strip()
+
+
 def read_tif(fn, dtype=np.float64):
     """
     use gdal to read an tif file and return the data and the
