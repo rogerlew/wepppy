@@ -127,7 +127,7 @@ def readSlopeFile(fname):
     upper_top, upper_bottom, lower_top, lower_bottom = \
         calc_disturbed_grads(hillslope_model)
 
-    # How slopes are calculated on WEPP interface
+    # How slopes are calculated on Jim Frankberger's WEPP interface
     total_slope = sum(slopes)
     top = slopes[0]
     bottom = slopes[-1]
@@ -227,6 +227,81 @@ Watershed Name: {name}
 Watershed Centroid Location
    Latitude: {centroid_lat}
    Longitude: {centroid_lng}   
+
+
+
+Column Descriptions
+++++++++++++++++++++
+
+   
+HS_ID
+    Wepp hillslope ID
+    
+TOPAZ_ID
+    TOPAZ hillslope ID
+    
+UNIT_ID
+    - (Don't know)
+    
+SOIL_TYPE
+    - Currently is always "Sandy Loam"
+    
+AREA
+    - Area in hectares
+
+    
+Slope parameters for Disturbed WEPP Batch File
+----------------------------------------------
+
+Slope is divided into four segments each 25% of total slope
+    
+"U" is for Upper, "L" is for Lower
+    
+UTREAT
+    - description of management file
+    
+USLP_LNG
+    - length of the upper slope (50% of total slope)
+
+LTREAT
+    - description of management file
+    
+UGRD_TP
+    - Upper top slope (%)
+    
+UGRD_BTM
+    - Upper bottom slope (%)
+    
+LGRD_TP
+    - Lower top slope (%)
+
+LGRD_BTM
+    - Lower bottom slope (%)
+    
+LSLP_LNG
+    - length of the lower slope (50% of total slope)
+    
+Slope parameters for ERMiT WEPP Batch File
+----------------------------------------------
+
+According to ERMiT documentation the slope is divided into 
+3 segments representing the top 10% middle 80% and bottom 10%.
+
+Interface replicates Jim Frakenberger's code which uses the first 
+slope point as the top and the last slope point as the bottom.
+
+ERM_TSLP
+    - Top slope (%)
+    
+ERM_MSLP
+    - Middle slope (%)
+    
+ERM_BSLP
+    - Bottom slope (%)
+    
+BURNCLASS
+    - Burn class as Unburned, Low, Moderate, High
+
 '''.format(date=datetime.now(),
            name=name,
            num_hills=watershed.sub_n,
