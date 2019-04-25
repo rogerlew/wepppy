@@ -356,6 +356,35 @@ class Horizon:
                isfloat(self.ksat_r) and \
                isfloat(self.dbthirdbar_r)
 
+    @property
+    def simple_texture(self):
+        """
+        Classifies horizon texture into silt loam, loam, sand loam, and clay loam
+
+        Courtesy of Mary Ellen Miller
+        :return:
+        """
+        clay = self.claytotal_r
+        sand = self.sandtotal_r
+
+        cs = clay + sand
+        if (clay <= 27 and cs <= 50) or \
+           (clay > 27 and sand <= 20 and cs <= 50):
+            return "silt loam"
+        elif (clay >= 6 and clay <= 27) and \
+             (cs > 50 and cs <= 72) and \
+             sand <= 52:
+            return "loam"
+        elif (sand > 52 or cs > 50 and clay < 6) and \
+             sand >= 50:
+            return "sand loam"
+        elif (cs > 72 and sand < 50) or \
+             (clay > 27 and (sand > 20 and sand <= 45)) or \
+             (sand <= 20 and cs > 50):
+            return "clay loam"
+
+        return None
+
 
 colors = [
     '#ec891d', '#66cd00', '#f1e8ca', '#ead61c', '#5588ff', '#ffc425', '#00b159', '#9958db',
@@ -631,6 +660,8 @@ POSSIBILITY OF SUCH DAMAGE."""
              'Mukey: %s' % str(self.mukey),
              'Major Component: {0.cokey} (comppct_r = {0.comppct_r})'
              .format(self.majorComponent),
+             'Texture: {}'
+             .format(self.getFirstHorizon().simple_texture),
              '',
              '  Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r',
              '----------------------------------------------------------------------------']
@@ -884,15 +915,23 @@ Any comments:
 
         ksat_last = 0.0
         
-        last_valid_i = [i for i, v in enumerate(self.horizons_mask) if v and not i == self.res_lyr_i][-1]
+        last_valid_i = None
+        for i, m in enumerate(self.horizons_mask):
+            if i == self.res_lyr_i:
+                break
+
+            if m:
+                last_valid_i = i
+
+        assert len(self.horizons) == len(self.horizons_mask)
 
         total_depth = 0.0
         for i, (h, m) in enumerate(zip(self.horizons, self.horizons_mask)):
 
             if i == self.res_lyr_i:
                 break
-                
-            if m == 0:
+
+            if not m:
                 #  depth += h.hzdepb_r
                 continue
             
@@ -903,7 +942,7 @@ Any comments:
                 # make sure the total depth is at least 200 mm
                 if hzdepb_r10 < 210.0:
                     hzdepb_r10 = 210.0
-               
+
             s2 = '{hzdepb_r10:0.03f}\t{0.dbthirdbar_r:0.02f}\t{ksat:0.04f}\t'\
                  '{0.anisotropy:0.01f}\t{0.field_cap:0.04f}\t{0.wilt_pt:0.04f}\t'\
                  '{0.sandtotal_r:0.2f}\t{0.claytotal_r:0.2f}\t{0.om_r:0.2f}\t'\
@@ -949,7 +988,15 @@ Any comments:
 
         ksat_last = 0.0
 
-        last_valid_i = [i for i, v in enumerate(self.horizons_mask) if v and not i == self.res_lyr_i][-1]
+        last_valid_i = None
+        for i, m in enumerate(self.horizons_mask):
+            if i == self.res_lyr_i:
+                break
+
+            if m:
+                last_valid_i = i
+
+        assert len(self.horizons) == len(self.horizons_mask)
 
         total_depth = 0.0
         for i, (h, m) in enumerate(zip(self.horizons, self.horizons_mask)):
@@ -1382,3 +1429,8 @@ class SurgoSoilCollection(object):
         else:
             return res[0][0]
             
+if __name__ == "__main__":
+    ssc = SurgoSoilCollection([2485028])
+    ssc.makeWeppSoils()
+    for mukey, soil in ssc.weppSoils.items():
+        soil.write('tests')
