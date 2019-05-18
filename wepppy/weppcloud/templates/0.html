@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>{{ ron.configname }} </title>
+    <title>{{ ron.configname }}{% if ron.name != '' %} - {{ ron.name }}{% endif %}</title>
     <!-- Style Sheets -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
     integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
@@ -39,14 +39,14 @@
 {% include 'controls/subcatchments.htm'%}
 {% include 'controls/landuse.htm'%}
 {% include 'controls/soil.htm'%}
-{% if 'debris_flow' in ron.mods %}
-{% include 'controls/debris_flow.htm'%}
-{% endif %}
 {% include 'controls/climate.htm'%}
 {% include 'controls/prep.htm'%}
 {% include 'controls/wepp.htm'%}
 <div id="wepp-results"></div>
 {% include 'controls/observed.htm'%}
+{% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
+{% include 'controls/debris_flow.htm'%}
+{% endif %}
 {% include 'controls/export.htm'%}
 {% if user.is_authenticated %}
 {% include 'controls/team.htm'%}

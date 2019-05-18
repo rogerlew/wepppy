@@ -38,6 +38,9 @@ def run_rred_project(proj):
     rred = Rred.getInstance(wd)
     rred.import_project(proj['rred_key'])
 
+    ron = Ron.getInstance(wd)
+    ron.set_map(rred.wgs_extent, rred.wgs_center, 11)
+
     print('building channels')
     topaz = Topaz.getInstance(wd)
     topaz.build_channels(csa=5, mcl=60)

@@ -29,6 +29,7 @@ from ...soils import Soils, SoilsMode
 from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
+from ...mods.rred import Rred
 from ...base import NoDbBase, TriggerEvents
 
 from .sbs_map import SoilBurnSeverityMap
@@ -348,9 +349,27 @@ class Baer(NoDbBase):
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.remap_landuse()
-            
+            if 'rred' in self.mods:
+                baer_cropped = self.baer_cropped
+                sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals)
+
+                baer_4class = baer_cropped.replace('.tif', '.4class.tif')
+                sbs.export_4class_map(baer_4class)
+
+                srid = Topaz.getInstance(self.wd).srid
+
+                rred = Rred.getInstance(self.wd)
+                rred.request_project(baer_4class, srid=srid)
+                rred.build_landuse()
+
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
-            self.modify_soils()
+            if 'rred' in self.mods:
+                rred = Rred.getInstance(self.wd)
+                rred.build_soils()
+            elif self._config == 'baer-ssurgo.cfg':
+                self._build_ssurgo_modified_soils()
+            else:
+                self.modify_soils()
             
         """
         elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
@@ -366,11 +385,10 @@ class Baer(NoDbBase):
             os.remove(baer_cropped)
 
         topaz = Topaz.getInstance(wd)
-        utmproj = topaz.utmproj4
         xmin, ymin, xmax, ymax = [str(v) for v in topaz.utmextent]
         cellsize = str(Ron.getInstance(wd).map.cellsize)
-            
-        cmd = ['gdalwarp', '-t_srs',  utmproj,
+
+        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % topaz.srid,
                '-tr', cellsize, cellsize,
                '-te', xmin, ymin, xmax, ymax, 
                '-r', 'near', baer_path, baer_cropped]
@@ -465,16 +483,15 @@ class Baer(NoDbBase):
             _domsoil_d[topaz_id] = _sbs_lookup_func(dom, mukey)
 
         # need to recalculate the pct_coverages
-        total_area = 0.0
         for k in _soils:
             _soils[k].area = 0.0
 
         watershed = Watershed.getInstance(self.wd)
+        total_area = watershed.totalarea
         for topaz_id, k in _domsoil_d.items():
             summary = watershed.sub_summary(str(topaz_id))
             if summary is not None:
                 _soils[k].area += summary["area"]
-                total_area += summary["area"]
 
         for k in _soils:
             coverage = 100.0 * _soils[k].area / total_area
@@ -500,10 +517,6 @@ class Baer(NoDbBase):
 
         soils_dir = self.soils_dir
         baer_soils_dir = self.baer_soils_dir
-
-        if self._config == 'baer-ssurgo.cfg':
-            self._build_ssurgo_modified_soils()
-            return
 
         if self._config == 'baer-exp.cfg':
             soils_dict = {"130": "20-yr forest sandy loam.sol",
@@ -548,22 +561,23 @@ class Baer(NoDbBase):
                 _domsoil_d[topaz_id] = dom
 
                 # need to recalculate the pct_coverages
-                total_area = 0.0
+                #total_area = 0.0
                 for k in _soils:
                     _soils[k].area = 0.0
 
                 watershed = Watershed.getInstance(self.wd)
+                total_area = watershed.totalarea
                 for topaz_id, k in _domsoil_d.items():
                     summary = watershed.sub_summary(str(topaz_id))
                     if summary is not None:
                         _soils[k].area += summary["area"]
-                        total_area += summary["area"]
+                #        total_area += summary["area"]
 
                 for k in _soils:
                     coverage = 100.0 * _soils[k].area / total_area
                     _soils[k].pct_coverage = coverage
 
-            soils.soils = _soils
+            soils.soils.update(_soils)
             soils.domsoil_d = _domsoil_d
             soils.dump_and_unlock()
             

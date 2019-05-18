@@ -18,7 +18,7 @@ import numpy as np
 import numpy.ma as ma
 
 from wepppy.topaz import TopazRunner
-from wepppy.all_your_base import read_arc
+from wepppy.all_your_base import read_arc, utm_srid
 
 from .base import NoDbBase
 
@@ -129,7 +129,11 @@ class Topaz(NoDbBase):
     def utmzone(self):
         assert 'utm' in self._utmproj4
         return int([tok for tok in self._utmproj4.split() if tok.startswith('+zone=')][0].replace('+zone=', ''))
-        
+
+    @property
+    def srid(self):
+        return utm_srid(self.utmzone)
+
     @property
     def utmextent(self):
         return self._utmextent

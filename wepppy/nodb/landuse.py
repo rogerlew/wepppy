@@ -289,6 +289,21 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
+    @property
+    def landuseoptions(self):
+        from wepppy.wepp import management
+
+        landuseoptions = management.load_map().values()
+        landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
+
+        if 'baer' in self.mods:
+            landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
+
+        if "lt" in self.mods:
+            landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
+
+        return landuseoptions
+
     def build_managements(self):
         self.lock()
 
@@ -305,7 +320,7 @@ class Landuse(NoDbBase):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            total_area = 0.0
+            total_area = watershed.totalarea
             for topaz_id, k in domlc_d.items():
                 summary = watershed.sub_summary(str(topaz_id))
                 if summary is None:
@@ -319,8 +334,6 @@ class Landuse(NoDbBase):
                 else:
                     managements[k].area += summary["area"]
 
-                total_area += summary["area"]
-
             for k in managements:
                 coverage = 100.0 * managements[k].area / total_area
                 managements[k].pct_coverage = coverage
@@ -328,7 +341,9 @@ class Landuse(NoDbBase):
             # store the managements dict
             self.managements = managements
             self.dump_and_unlock()
-            
+
+            self.trigger(TriggerEvents.LANDUSE_BUILD_COMPLETE)
+
         except Exception:
             self.unlock('-f')
             raise

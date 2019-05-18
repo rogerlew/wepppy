@@ -8,6 +8,9 @@
 
 from math import log
 from collections import OrderedDict
+
+from copy import deepcopy
+
 import numpy as np
 
 from wepppy.all_your_base import RowData
@@ -16,7 +19,7 @@ from .report_base import ReportBase
 
 
 class FrqFlood(ReportBase):
-    def __init__(self, ebe: Ebe, loss: Loss, recurence=[2, 5, 10, 20, 25]):
+    def __init__(self, ebe: Ebe, loss: Loss, recurrence=[2, 5, 10, 20, 25]):
 
         df = ebe.df
         header = list(df.keys())
@@ -24,9 +27,10 @@ class FrqFlood(ReportBase):
         header.remove('mo')
         header.remove('year')
 
+        self.has_phosphorus = loss.has_phosphorus
         self.years = years = ebe.years
         self.wsarea = wsarea = loss.wsarea
-        self.recurence = recurence = sorted(recurence)
+        self.recurrence = recurrence = sorted(recurrence)
 
         # Event of return period T is estimated by applying Chow's frequency factor method and Gumbel's distribution
         # with on the annual maxima series following Patra (2000). X_T is the estimated value of the event of return
@@ -52,7 +56,7 @@ class FrqFlood(ReportBase):
                 d[colname].append(np.max(df[colname][i0:iend]))
 
         recs = {}
-        for colname in header + ['Runoff (mm)', 'Recurence']:
+        for colname in header + ['Runoff (mm)', 'Recurrence']:
             recs[colname] = []
 
         means = {}
@@ -63,7 +67,7 @@ class FrqFlood(ReportBase):
         for colname in header:
             stds[colname] = float(np.std(d[colname]))
 
-        for T in [y for y in recurence if y < years]:
+        for T in [y for y in recurrence if y < years]:
 
             # Frequency factor based on Gumble Distribution
             kfactor = -1.0 * (0.45005 + 0.7797 * log(log(T / (T - 1.0))))
@@ -73,29 +77,40 @@ class FrqFlood(ReportBase):
                 recs[colname].append(means[colname] + stds[colname] * kfactor)
 
             recs['Runoff (mm)'].append(round(recs['Runoff Volume (m^3)'][-1] / (wsarea * 10000.0) * 1000.0, 2))
-            recs['Recurence'].append(T)
+            recs['Recurrence'].append(T)
 
-        self.header = ['Recurence'] + header
+        self._header = ['Recurrence'] + header
         self.recs = recs
         self.means = means
         self.stds = stds
         self.num_events = df.shape[0]
         self.units_d = ebe.units_d
 
+    @property
+    def header(self):
+        header = deepcopy(self._header)
+        if not self.has_phosphorus:
+            header.remove('Soluble Reactive P (kg)')
+            header.remove('Particulate P (kg)')
+            header.remove('Total P (kg)')
+
+        return header
+
     def __iter__(self):
         recs = self.recs
         means = self.means
         stds = self.stds
-        recurence, years, header = self.recurence, self.years, self.header
-        header.remove('Recurence')
-        for i, T in enumerate([y for y in recurence if y < years]):
-            yield RowData(OrderedDict([('Recurence', T)] +
+        recurrence, years, header = self.recurrence, self.years, self.header
+        header.remove('Recurrence')
+
+        for i, T in enumerate([y for y in recurrence if y < years]):
+            yield RowData(OrderedDict([('Recurrence', T)] +
                                       [(colname, recs[colname][i]) for colname in header]))
 
-        yield RowData(OrderedDict([('Recurence', 'Mean')] +
+        yield RowData(OrderedDict([('Recurrence', 'Mean')] +
                                   [(colname, means[colname]) for colname in header]))
 
-        yield RowData(OrderedDict([('Recurence', 'StdDev')] +
+        yield RowData(OrderedDict([('Recurrence', 'StdDev')] +
                                   [(colname, stds[colname]) for colname in header]))
 
 

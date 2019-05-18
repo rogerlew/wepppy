@@ -6,24 +6,50 @@
     <input type="hidden" id="map_zoom" name="map_zoom" />
     <input type="hidden" id="map_bounds" name="map_bounds" />
     <input type="hidden" id="map_distance" name="map_distance" />
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_mcl">Minimum Channel Length (m)</label>
+    <div style="height:150px;" class="unitizer-wrapper">
+        <div class="unitizer units-m">
+            <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_mcl">Minimum Channel Length (m)</label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.mcl }}" aria-label="Lon, Lat">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_csa">Critical Source Area (ha)</label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.csa }}" aria-label="Lon, Lat">
+                </div>
+            </div>
+            <div class="form-group hide-readonly">
+                <button id="btn_build_channels" class="col-sm-4 btn btn-outline-success my-2 my-sm-0" type="button">Build Channels</button>
+                <small id="hint_build_channels" class="text-muted"></small>
+            </div>
         </div>
-        <div class="col-sm-3">
-            <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.mcl }}" aria-label="Lon, Lat">
+        <div class="unitizer units-ft">
+            <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_mcl_en">Minimum Channel Length (ft)</label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.mcl * 3.28084 }}" aria-label="Lon, Lat">
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_csa_en">Critical Source Area (acre)</label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.csa * 2.47105 }}" aria-label="Lon, Lat">
+                </div>
+            </div>
+            <div class="form-group hide-readonly">
+                <button id="btn_build_channels_en" class="col-sm-4 btn btn-outline-success my-2 my-sm-0" type="button">Build Channels</button>
+                <small id="hint_build_channels_en" class="text-muted"></small>
+            </div>
         </div>
-    </div>
-    <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_csa">Critical Source Area (ha)</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ topaz.csa }}" aria-label="Lon, Lat">
-        </div>
-    </div>
-    <div class="form-group hide-readonly">
-        <button id="btn_build_channels" class="col-sm-4 btn btn-outline-success my-2 my-sm-0" type="button">Build Channels</button>
-        <small id="hint_build_channels" class="text-muted"></small>
     </div>
 {% endblock %}

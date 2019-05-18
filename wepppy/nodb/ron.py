@@ -143,7 +143,7 @@ class Ron(NoDbBase):
                     sbs_map = None
 
                 if sbs_map is not None:
-                    #sbs_map = _join(_thisdir, sbs_map)
+                    # sbs_map = _join(_thisdir, sbs_map)
                     assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
                     assert not isdir(sbs_map)
                     baer = wepppy.nodb.mods.Baer.getInstance(wd)

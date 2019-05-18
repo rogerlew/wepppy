@@ -1,3 +1,5 @@
+from .yamlizer import YamlSoil
+
 import csv
 import shutil
 
@@ -52,6 +54,32 @@ def _replace_parameter(original, replacement):
 
     else:
         return replacement
+
+
+def simple_texture(clay, sand):
+    """
+    Classifies horizon texture into silt loam, loam, sand loam, and clay loam
+
+    Courtesy of Mary Ellen Miller
+    :return:
+    """
+    cs = clay + sand
+    if (clay <= 27.0 and cs <= 50.0) or \
+            (clay > 27.0 and sand <= 20.0 and cs <= 50.0):
+        return "silt loam"
+    elif (6.0 <= clay <= 27.0) and \
+            (50.0 < cs <= 72.0) and \
+            sand <= 52:
+        return "loam"
+    elif (sand > 52 or cs > 50 and clay < 6) and \
+            sand >= 50:
+        return "sand loam"
+    elif (cs > 72 and sand < 50) or \
+            (clay > 27 and (20 < sand <= 45)) or \
+            (sand <= 20 and cs > 50):
+        return "clay loam"
+
+    return None
 
 
 def soil_specialization(src, dst, replacements: SoilReplacements):

@@ -23,10 +23,19 @@ class SedimentDelivery(object):
         lines = [L.strip() for L in lines]
 
         sed_discharge = None
+        indx0 = []
+        for i, L in enumerate(lines):
+            if 'Avg. Ann. sediment discharge from outlet' in L:
+                indx0.append(i)
+        if len(indx0) > 0:
+
+            sed_discharge = float(lines[indx0[-1]].split('=')[-1].split()[0])
+
+
         # Find class table
         indx0 = []
         for i, L in enumerate(lines):
-            if 'Sediment particle information leaving profile' in L:
+            if 'sediment particle information leaving' in L.lower():
                 indx0.append(i)
 
         if len(indx0) == 0:
@@ -158,7 +167,7 @@ class SedimentClassInfo(object):
 
 
 if __name__ == "__main__":
-    pc = SedimentDelivery('/geodata/weppcloud_runs/1614413a-fb4e-40b8-a934-9cb5fdd9af1c/')
+    pc = SedimentDelivery('/geodata/weppcloud_runs/devvm4c5-6dec-464a-b520-00e668d993f2/')
 
     rpt = pc.class_info_report
     print(rpt.hdr)

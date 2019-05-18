@@ -1,7 +1,7 @@
 {% extends "security/_layout.html"%}
 {% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
 {% block title %}
-Login to WeppCloud
+Login to WEPPcloud
 {% endblock %}
 {% block content %}
   {% include "security/_messages.html" %}
@@ -13,6 +13,6 @@ Login to WeppCloud
     {{ render_field(login_user_form.next) }}
     {{ render_field(login_user_form.submit, class_="btn btn-primary") }}
   </form>
-<a href="/reset">Reset Password</a>
+<a href="/weppcloud/reset">Reset Password</a>
 {% endblock %}
 

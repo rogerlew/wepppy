@@ -25,7 +25,7 @@ from scipy import stats
 import numpy as np
 from scipy.interpolate import KroghInterpolator
 
-from wepppy.nodb import Watershed, Landuse, Ron
+from wepppy.nodb import Watershed, Landuse, Ron, Climate, Soils
 
 
 def polycurve(x, dy):
@@ -163,6 +163,8 @@ def create_ermit_input(wd):
     wat_dir = watershed.wat_dir
     ron = Ron.getInstance(wd)
     name = ron.name.replace(' ', '_')
+    climate = Climate.getInstance(wd)
+    soils = Soils.getInstance(wd)
 
     if name == '':
         name = _split(wd)[-1]
@@ -186,6 +188,8 @@ def create_ermit_input(wd):
         dom = landuse.domlc_d[str(topaz_id)]
         man = landuse.managements[dom]
         burnclass = landml2burnclass.get(int(dom), 'N/A')
+        mukey = soils.ssurgo_domsoil_d[topaz_id]
+        soil_type = soils.soils[mukey].simple_texture
 
         slp_file = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
         v = readSlopeFile(slp_file)
@@ -193,7 +197,7 @@ def create_ermit_input(wd):
         dictWriter.writerow({'HS_ID': wepp_id,
                              'TOPAZ_ID': topaz_id,
                              'UNIT_ID': '',
-                             'SOIL_TYPE': 'Sandy Loam',
+                             'SOIL_TYPE': soil_type,
                              'AREA': sub.area / 10000.0,
                              'UTREAT': man.desc,
                              'USLP_LNG': v['Length'] / 2.0,
@@ -227,8 +231,14 @@ Watershed Name: {name}
 Watershed Centroid Location
    Latitude: {centroid_lat}
    Longitude: {centroid_lng}   
-
-
+   
+Climate Station
+   State: {station.state}
+   Station: {station.desc}
+   PAR: {station.par}
+   Elevation: {station.elevation}
+   Latitude: {station.latitude}
+   Longitude: {station.longitude}
 
 Column Descriptions
 ++++++++++++++++++++
@@ -244,7 +254,7 @@ UNIT_ID
     - (Don't know)
     
 SOIL_TYPE
-    - Currently is always "Sandy Loam"
+    - Soil texture classified from ssurgo/statsgo
     
 AREA
     - Area in hectares
@@ -307,7 +317,9 @@ BURNCLASS
            num_hills=watershed.sub_n,
            num_chns=watershed.chn_n,
            centroid_lat=watershed.centroid[1],
-           centroid_lng=watershed.centroid[0]))
+           centroid_lng=watershed.centroid[0],
+           station=climate.climatestation_meta))
+
     fp2.close()
 
     zipfn = _join(export_dir, 'ERMiT_input_{}.zip'.format(name))

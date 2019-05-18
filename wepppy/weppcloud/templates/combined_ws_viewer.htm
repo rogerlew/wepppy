@@ -134,7 +134,7 @@ $(document).ready(function () {
     function prep_render() {
 
         if (varname === 'runoff' || varname === 'subrunoff' || varname === 'baseflow') {
-            r = 25.0 * Math.pow(tolerance, 2.00);
+            r = tolerance;
             cmap = function (v) {
                 return cmapperRunoff.map(v / r);
             };
@@ -250,7 +250,7 @@ $(document).ready(function () {
                     html += '> Runoff</label></div>';
                 }
                 else if (key === 'subrunoff') {
-                    html += '> Subrunoff</label></div>';
+                    html += '> Lateral Flow</label></div>';
                 }
                 else if (key === 'baseflow') {
                     html += '> Baseflow</label></div>';
@@ -418,7 +418,7 @@ $(document).ready(function () {
                         }
                     });
 
-                    polys[runid].name = runid;
+                    polys[runid].name = response.name;
                     polys[runid].addTo(map);
                     ctrls.addOverlay(polys[runid], runid);
                 },

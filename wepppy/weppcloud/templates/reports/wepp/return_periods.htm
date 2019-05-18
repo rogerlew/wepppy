@@ -1,7 +1,7 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_title %}Return Periods{% endblock %}
 {% block report_content %}
-<h3>WEPP Return Period Analysis</h3>
+<h3>WEPPcloud Return Period Analysis</h3>
 <p>
 <br>The Return period of the events are estimated by applying Weibull formula on annual maxima series:</br>
 <div style="margin-left: 50px">
@@ -25,8 +25,8 @@ where <i>T</i> is the return period, <i>N</i> is the number of simulation years,
 {% endif %}
 <br/>
 <br/>
-{% for key in ['Precipitation Depth', 'Runoff', 'Peak Runoff',
-               '10-min Peak Intensity', '30-min Peak Intensity', 'Sediment Yield'] %}
+{% for key in ['Precipitation Depth', 'Runoff', 'Peak Discharge',
+               '10-min Peak Rainfall Intensity', '30-min Peak Rainfall Intensity', 'Sediment Yield'] %}
     {% if extraneous %}
         {% include("reports/wepp/_return_period_extraneous_table.htm") %}
     {% else %}

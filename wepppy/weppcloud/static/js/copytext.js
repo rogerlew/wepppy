@@ -56,7 +56,8 @@ function setClipboardText(text) {
 function _fmt(s) {
     return s.replace(/\u00a0/g, '')
             .replace('</sup>', '')
-            .replace('<sup>', '^');
+            .replace('<sup>', '^')
+            .replace(/^\s+|\s+$/g, '');
 }
 
 function copytable(tbl_id) {
