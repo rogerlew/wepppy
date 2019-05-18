@@ -33,6 +33,8 @@ from wepppy.all_your_base import (
 
 )
 
+from wepppy.watershed_abstraction import WeppTopTranslator
+
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)
@@ -753,6 +755,21 @@ class TopazRunner:
         gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
                         callback=prog_func)
 
+        ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
+        top_sub_ids = []
+        top_chn_ids = []
+
+        for id in ids:
+            if id[-1] == '0':
+                continue
+            if id[-1] == '4':
+                top_chn_ids.append(int(id))
+            else:
+                top_sub_ids.append(int(id))
+
+        translator = WeppTopTranslator(top_chn_ids=top_chn_ids,
+                                       top_sub_ids=top_sub_ids)
+
         del src_ds
         del dst_ds
 
@@ -767,6 +784,9 @@ class TopazRunner:
 
             if topaz_id[-1] in '04':
                 continue
+
+            wepp_id = translator.wepp(top=topaz_id)
+            f['properties']['WeppID'] = wepp_id
             _features.append(f)
 
         js['features'] = _features
@@ -826,6 +846,26 @@ class TopazRunner:
         raise Exception('Error running cmd: %s\n%s' % (cmd, ''.join(output)))
 
     def _polygonize_channels(self):
+        subwta_fn = _join(self.topaz_wd, "SUBWTA.ARC")
+
+        assert _exists(subwta_fn)
+        src_ds = gdal.Open(subwta_fn)
+        srcband = src_ds.GetRasterBand(1)
+        ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
+        top_sub_ids = []
+        top_chn_ids = []
+
+        for id in ids:
+            if id[-1] == '0':
+                continue
+            if id[-1] == '4':
+                top_chn_ids.append(int(id))
+            else:
+                top_sub_ids.append(int(id))
+
+        translator = WeppTopTranslator(top_chn_ids=top_chn_ids,
+                                       top_sub_ids=top_sub_ids)
+
         dst_fn = _join(self.topaz_wd, 'SUBWTA.JSON')
         assert _exists(dst_fn), "polygonize SUBWTA first"
 
@@ -840,6 +880,9 @@ class TopazRunner:
 
             if topaz_id[-1] == '4':
                 _features.append(f)
+
+            wepp_id = translator.wepp(top=topaz_id)
+            f['properties']['WeppID'] = wepp_id
 
         js['features'] = _features
 

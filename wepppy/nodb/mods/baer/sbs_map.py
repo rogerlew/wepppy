@@ -116,7 +116,6 @@ class SoilBurnSeverityMap:
             return i + 1
 
         _data, transform, proj = read_raster(fname, dtype=np.uint8)
-        print(proj)
         data = np.ones(_data.shape) * 255
         n, m = _data.shape
         for i in range(n):

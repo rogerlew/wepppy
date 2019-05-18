@@ -34,6 +34,7 @@ _config_dir = _join(_thisdir, 'configs')
 class TriggerEvents(Enum):
     ON_INIT_FINISH = 1
     LANDUSE_DOMLC_COMPLETE = 2
+    LANDUSE_BUILD_COMPLETE = 5
     SOILS_BUILD_COMPLETE = 3
     PREPPING_PHOSPHORUS = 4
 

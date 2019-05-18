@@ -66,6 +66,7 @@ var Project = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         $("#input_name").val(name);
+                        document.title = document.title.split(" - ")[0] + ' - ' + name;
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -800,9 +801,15 @@ var ChannelDelineation = function () {
                 if (zoom >= self.zoom_min || ispoweruser) {
                     $("#btn_build_channels").prop("disabled", false);
                     $("#hint_build_channels").text("");
+
+                    $("#btn_build_channels_en").prop("disabled", false);
+                    $("#hint_build_channels_en").text("");
                 } else {
-                    $("#btn_build_channels").prop("disabled", true);
-                    $("#hint_build_channels").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
+                    $("#btn_build_channels_en").prop("disabled", true);
+                    $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
+
+                    $("#btn_build_channels_en").prop("disabled", true);
+                    $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
                 }
             });
         };
@@ -1005,6 +1012,7 @@ var Outlet = function () {
             var self = instance;
             var map = Map.getInstance();
 
+            map.ctrls.removeLayer(self.outletMarker);
             map.removeLayer(self.outletMarker);
         };
 
@@ -1609,6 +1617,7 @@ var SubcatchmentDelineation = function () {
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataRunoff[topId].value);
+
                 var c = self.cmapperRunoff.map(v / r);
 
                 layer.setStyle({
@@ -3053,6 +3062,12 @@ var Wepp = function () {
 
         that.report = function () {
             var self = instance;
+            var project = Project.getInstance();
+            var task_msg = "Fetching Summary";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
 
             $.get({
                 url: "../report/wepp/results/",
@@ -3065,6 +3080,18 @@ var Wepp = function () {
                 }
             });
 
+            $.get({
+                url: "../report/wepp/run_summary/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                    self.status.html(task_msg + "... Success");
+                    project.set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
 
         };
 

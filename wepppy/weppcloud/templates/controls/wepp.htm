@@ -1,29 +1,32 @@
 {% extends "controls/_base.htm" %}
 {% block form_id %}wepp_form{% endblock %}
-{% block form_title %}Wepp{% endblock %}
+{% block form_title %}WEPP{% endblock %}
 {% block inputs %}
-    <h5>Flowpath Processing</h5>
-    <p>Running flowpaths produces a gridded soil deposition/loss map, but runtime is considerably longer.</p>
-    <label class="form-check-label">
-        <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
-               onchange="Wepp.getInstance().set_flowpaths(this.checked);"
-               {% if wepp.run_flowpaths %}checked{% endif %}>
-        Run Flowpaths
-    </label>
-    <br/><br/>
-    {% if user.has_role('PowerUser') %}
-    <h5>Hourly Seepage</h5>
-    <label class="form-check-label">
-        <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
-               onchange="Wepp.getInstance().set_hourly_seepage(this.checked);"
-               {% if wepp.wepp_ui %}checked{% endif %}>
-        Run hourly seepage
-    </label>
-    <br/><br/>
-    {% endif %}
-    <h5>Baseflow Processing</h5>
-    <div><a href="#baseflow_processing_con" data-toggle="collapse">Modify Baseflow Processing Parameters</a>
-        <div id="baseflow_processing_con" class="collapse">
+    <h4></h4>
+    <div><a href="#advanced_opts_con" data-toggle="collapse">Advanced Options</a>
+        <div id="advanced_opts_con" class="collapse">
+
+            <h5>Flowpath Processing</h5>
+            <p>Running flowpaths produces a gridded soil deposition/loss map, but runtime is considerably longer.</p>
+            <label class="form-check-label">
+                <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
+                       onchange="Wepp.getInstance().set_flowpaths(this.checked);"
+                       {% if wepp.run_flowpaths %}checked{% endif %}>
+                Run Flowpaths
+            </label>
+            <br/><br/>
+            {% if user.has_role('PowerUser') %}
+            <h5>Hourly Seepage</h5>
+            <label class="form-check-label">
+                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+                       onchange="Wepp.getInstance().set_hourly_seepage(this.checked);"
+                       {% if wepp.wepp_ui %}checked{% endif %}>
+                Run hourly seepage
+            </label>
+            <br/><br/>
+            {% endif %}
+            <h5>Baseflow Processing</h5>
+
             <div class="form-group row" id="gwstorage_container">
             <div class="col-sm-4">
                 <label for="gwstorage">Initial groundwater storage (mm): </label>
@@ -60,18 +63,16 @@
                     value="{{ wepp.baseflow_opts.bfthreshold }}" aria-label="Watershed groundwater baseflow threshold area">
                 </div>
             </div>
-        </div>
-    </div>
-    <br/>
 
-    {% if "lt" in ron.mods %}
-    <h5>Phosphorus Processing</h5>
-    <p><i>Phosphorus coefficients determined by lt mod</i></p>
-    {% else %}
-    <h5>Pollutant Processing (Optional)</h5>
-    {%- endif -%}
-    <div><a href="#pollutant_processing_con" data-toggle="collapse">Modify Pollutant/Phosphorus Processing Parameters</a>
-        <div id="pollutant_processing_con" class="collapse">
+
+            <br/>
+
+            {% if "lt" in ron.mods %}
+            <h5>Phosphorus Processing</h5>
+            <p><i>Phosphorus coefficients determined by lt mod</i></p>
+            {% else %}
+            <h5>Pollutant Processing (Optional)</h5>
+            {%- endif -%}
             <div class="form-group row" id="surf_runoff_container">
                 <div class="col-sm-4">
                     <label for="surf_runoff">Surface runoff concentration (mg/l): </label>
@@ -118,13 +119,14 @@
             </div>
         </div>
     </div>
+
     <br/>
 
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_run_wepp" 
               class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
-              type="button">Run Wepp</button>
+              type="button">Run WEPP</button>
         </div>
         <div class="col-sm-5">
             <small id="hint_run_wepp"></small>

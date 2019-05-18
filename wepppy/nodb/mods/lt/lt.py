@@ -8,6 +8,7 @@
 
 import os
 import json
+import csv
 
 from copy import deepcopy
 from os.path import join as _join
@@ -30,6 +31,16 @@ _data_dir = _join(_thisdir, 'data')
 
 class LakeTahoeNoDbLockedException(Exception):
     pass
+
+
+def read_cover_defaults(fn):
+    with open(fn) as fp:
+        d = {}
+        rdr = csv.DictReader(fp)
+        for row in rdr:
+            d[row['key']] = row
+
+    return d
 
 
 class LakeTahoe(NoDbBase):
@@ -81,6 +92,8 @@ class LakeTahoe(NoDbBase):
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.remap_landuse()
+        if evt == TriggerEvents.LANDUSE_BUILD_COMPLETE:
+            self.set_cover_defaults()
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
         elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
@@ -103,7 +116,6 @@ class LakeTahoe(NoDbBase):
 
         # noinspection PyBroadException
         try:
-
             for topaz_id, dom in landuse.domlc_d.items():
                 if int(dom) not in lt_doms:
                     landuse.domlc_d[topaz_id] = lc_map[dom]
@@ -113,7 +125,26 @@ class LakeTahoe(NoDbBase):
         except Exception:
             landuse.unlock('-f')
             raise
-        
+
+    def set_cover_defaults(self):
+
+        landuse = Landuse.getInstance(self.wd)
+        landuse.lock()
+
+        # noinspection PyBroadException
+        try:
+            defaults = read_cover_defaults(_join(_data_dir, 'lt_cover_defaults.csv'))
+            for dom in landuse.managements:
+                if dom in defaults:
+                    for cover in ['cancov', 'inrcov', 'rilcov']:
+                        landuse.modify_coverage(dom, cover, defaults[dom][cover])
+
+            landuse.dump_and_unlock()
+
+        except Exception:
+            landuse.unlock('-f')
+            raise
+
     def modify_soils(self, default_wepp_type='Granitic'):
         wd = self.wd
         soils_dir = self.soils_dir

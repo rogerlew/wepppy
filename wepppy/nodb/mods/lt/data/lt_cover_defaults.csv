@@ -1,0 +1,38 @@
+key,desc,cancov,inrcov,rilcov
+11,Open Water,0.01,0.99,0.99
+12,Perennial Ice/Snow,0.01,0.99,0.99
+21,Low Intensity Residential,0.5,0.85,0.85
+22,High Intensity Residential,0.25,0.85,0.85
+23,Commercial/Industrial/Transportation,0.05,0.85,0.85
+24,"Developed, High Intensity",0.01,0.85,0.85
+31,Bare Rock/Sand/Clay,0.01,0.01,0.01
+32,Quarries/Strip Mines/Gravel Pits,0.01,0.01,0.01
+33,Transitional,0.4,0.8,0.8
+51,Shrubland,0.5,0.6,0.6
+61,Orchards/Vineyards/Other,0.6,0.6,0.6
+71,Grasslands/Herbaceous,0.6,0.6,0.6
+72,Sedge/Herbaceous,0.9,0.9,0.9
+81,Pasture/Hay,0.5,0.9,0.9
+82,Row Crops,0.1,0.1,0.1
+83,Small Grains,0.2,0.8,0.8
+85,Urban/Recreational Grasses,0.5,0.8,0.8
+90,Woody Wetlands,0.8,0.9,0.9
+95,Emergent Herbaceous Wetlands,0.5,0.9,0.9
+96,Palustrine Emergent Wetland (Persistent),0.5,0.9,0.9
+97,Estaurine Emergent Wetland,0.5,0.9,0.9
+98,Palustrine Aquatic Bed,0.5,0.99,0.99
+99,Estaurine Aquatic Bed,0.5,0.99,0.99
+105,Tahoe High Severity Fire,0.2,0.3,0.3
+106,Tahoe Low Severity Fire,0.75,0.8,0.8
+119,Tahoe Shrub High Severity Fire,0.05,0.25,0.25
+120,Tahoe Shrub Moderate Severity Fire,0.3,0.5,0.5
+121,Tahoe Shrub Low Severity Fire,0.5,0.7,0.7
+130,No Burn,0.8,0.95,0.95
+131,Low Severity Fire,0.75,0.8,0.8
+132,Moderate Severity Fire,0.6,0.6,0.6
+133,High Severity Fire,0.2,0.3,0.3
+161,Agriculture: Palouse: Barley- Conventional Till,0,0.2,0.2
+167,"Agriculture: Corn, Soybean- Fall Moldboard Plow",0,0.2,0.2
+171,Agriculture: Corn- Fall Moldboard Plow,0,0.2,0.2
+177,Agriculture: Soybean- Fall Moldboard Plow,0,0.2,0.2
+183,Agriculture: Winter Wheat- Mulch Till,0.2,0.4,0.4

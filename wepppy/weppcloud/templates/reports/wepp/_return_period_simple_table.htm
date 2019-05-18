@@ -3,7 +3,7 @@
       <img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/>
   </a>
   </h5>
-  <table class="table" id="{{ key | replace(' ', '') }}_tbl" style="width:60%; min-width: 600px; max-width: 1000px;">
+  <table class="table" id="{{ key | replace(' ', '') }}_tbl" style="min-width: 400px; max-width: 600px;">
     <thead>
       <tr>
         <th style="width: 20%">Recurrence Interval</th>
@@ -13,8 +13,6 @@
         <th style="width: 20%">
             {% if key == 'Precipitation Depth' %}
                 Precipitation
-            {% elif key == 'Peak Runoff' %}
-                Runoff
             {% else %}
                 {{ key }}
             {% endif %}

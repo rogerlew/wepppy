@@ -66,12 +66,12 @@ class HillSummary(ReportBase):
 
     @property
     def header(self):
-        return [colname.replace(' Density', '') for colname in self._hdr]
+        return [colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for colname in self._hdr]
 
     def __iter__(self):
         data = self.data
         for i in range(len(data)):
-            _data = [(colname.replace(' Density', ''),
+            _data = [(colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow'),
                       data[i][parse_name(colname)]) for colname in self._hdr[:12]]
 
             if self.has_phosphorus:
@@ -130,13 +130,39 @@ class ChannelSummary(ReportBase):
 
     @property
     def header(self):
-        return [colname.replace(' Density', '') for colname in self._hdr]
+        return [colname.replace(' Density', '')
+                       .replace('Area', 'Channel Area')
+                       .replace(' Volume', '')
+                       .replace('Subsuface', 'Lateral')
+                       .replace('(m^3)', '(mm)')
+                       .replace('(kg)', '(tonne)')
+                       .replace('Soil Loss', 'Channel Erosion')
+                       for colname in self._hdr]
 
     def __iter__(self):
         data = self.data
         for i in range(len(data)):
-            yield RowData(OrderedDict([(colname.replace(' Density', ''),
-                                        data[i][parse_name(colname)]) for colname in self._hdr]))
+            _data = OrderedDict()
+
+            for colname in self._hdr:
+                cname = colname.replace(' Density', '') \
+                              .replace('Area', 'Channel Area') \
+                              .replace(' Volume', '') \
+                              .replace('Subsuface', 'Subsurface') \
+                              .replace('Soil Loss', 'Channel Erosion')
+
+                if 'Discharge' in colname:
+                    _data['Discharge (mm)'] = data[i]['Discharge Volume'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
+                elif 'Upland Charge' in colname:
+                    _data['Upland Charge (mm)'] = data[i]['Upland Charge'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
+                elif 'Subsuface Flow' in colname:
+                    _data['Lateral Flow (mm)'] = data[i]['Subsuface Flow Volume'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
+                elif 'Soil Loss' in colname:
+                    _data['Soil Loss (tonne)'] = data[i]['Soil Loss'] / 1000.0
+                else:
+                    _data[cname] = data[i][parse_name(colname)]
+
+            yield RowData(_data)
 
 
 class OutletSummary(ReportBase):
@@ -159,12 +185,12 @@ class OutletSummary(ReportBase):
         units_norm = 'mm/yr'
         yield 'Precipitation', v, units, v_norm, units_norm
 
-        key = 'Avg. Ann. irrigation volume in contributing area'
-        v = self.data[key]['v']
-        units = self.data[key]['units']
-        v_norm = 1000.0 * v / (area * 10000.0)
-        units_norm = 'mm/yr'
-        yield 'Irrigation', v, units, v_norm, units_norm
+#        key = 'Avg. Ann. irrigation volume in contributing area'
+#        v = self.data[key]['v']
+#        units = self.data[key]['units']
+#        v_norm = 1000.0 * v / (area * 10000.0)
+#        units_norm = 'mm/yr'
+#        yield 'Irrigation', v, units, v_norm, units_norm
 
         key = 'Avg. Ann. water discharge from outlet'
         v = self.data[key]['v']
@@ -243,22 +269,8 @@ class OutletSummary(ReportBase):
 
 if __name__ == "__main__":
 
-    loss = Loss('/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/wepp/output/loss_pw0.txt',
-                '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/')
-
-    hill_rpt = HillSummary(loss)
-
-    for row in hill_rpt:
-        for k, v in row:
-            print(k, v)
+    loss = Loss('/geodata/weppcloud_runs/devvm359-de61-4a65-96cd-2db812365b9a/wepp/output/loss_pw0.txt',
+                '/geodata/weppcloud_runs/devvm359-de61-4a65-96cd-2db812365b9a/')
 
     chn_rpt = ChannelSummary(loss)
-
-    for row in chn_rpt:
-        for k, v in row:
-            print(k, v)
-
-    out_rpt = OutletSummary(loss)
-
-    for name, value, units, v_normed, units_normed in out_rpt:
-        print(name, value, units, v_normed, units_normed)
+    print(list(chn_rpt.hdr))
