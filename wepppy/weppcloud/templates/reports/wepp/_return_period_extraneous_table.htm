@@ -11,10 +11,10 @@
         <th>Month</th>
         <th>Day</th>
         <th class="{{ 'table-active' if key == 'Precipitation Depth' }}">Precipitation</th>
-        <th class="{{ 'table-active' if key == 'Runoff' }}">Runoff</th>
-        <th class="{{ 'table-active' if key == 'Peak Runoff' }}">Peak</th>
-        <th class="{{ 'table-active' if key == '10-min Peak Intensity' }}">10-min Peak Intensity</th>
-        <th class="{{ 'table-active' if key == '30-min Peak Intensity' }}">30-min Peak Intensity</th>
+        <th class="{{ 'table-active' if key == 'Discharge' }}">Discharge</th>
+        <th class="{{ 'table-active' if key == 'Peak Discharge' }}">Peak Discharge</th>
+        <th class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">10-min Peak Rainfall Intensity</th>
+        <th class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">30-min Peak Rainfall Intensity</th>
         <th class="{{ 'table-active' if key == 'Sediment Yield' }}">Sediment Yield</th>
         {% if report.has_phosphorus %}
         <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
@@ -30,10 +30,10 @@
         <td></td>
         <td></td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer_units(report.units_d['Precipitation Depth']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer_units(report.units_d['Runoff']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Peak Runoff' }}">{{ unitizer_units(report.units_d['Peak Runoff']) | safe }}</td>
-        <td class="{{ 'table-active' if key == '10-min Peak Intensity' }}">{{ unitizer_units(report.units_d['10-min Peak Intensity']) | safe }}</td>
-        <td class="{{ 'table-active' if key == '30-min Peak Intensity' }}">{{ unitizer_units(report.units_d['30-min Peak Intensity']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Discharge' }}">{{ unitizer_units(report.units_d['Discharge']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer_units(report.units_d['Peak Discharge']) | safe }}</td>
+        <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
+        <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer_units(report.units_d['Sediment Yield']) | safe }}</td>
         {% if report.has_phosphorus %}
         <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive P']) | safe }}</td>
@@ -49,14 +49,14 @@
         <td>{{ report.return_periods[key][rec_interval]['da'] | int }}</td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer(report.return_periods[key][rec_interval]['Precipitation Depth'],
                         report.units_d['Precipitation Depth']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer(report.return_periods[key][rec_interval]['Runoff'],
-                        report.units_d['Runoff']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Peak Runoff' }}">{{ unitizer(report.return_periods[key][rec_interval]['Peak Runoff'],
-                        report.units_d['Peak Runoff']) | safe }}</td>
-        <td class="{{ 'table-active' if key == '10-min Peak Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['10-min Peak Intensity'],
-                        report.units_d['10-min Peak Intensity']) | safe }}</td>
-        <td class="{{ 'table-active' if key == '30-min Peak Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['30-min Peak Intensity'],
-                        report.units_d['30-min Peak Intensity']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Discharge' }}">{{ unitizer(report.return_periods[key][rec_interval]['Discharge'],
+                        report.units_d['Discharge']) | safe }}</td>
+        <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer(report.return_periods[key][rec_interval]['Peak Discharge'],
+                        report.units_d['Peak Discharge']) | safe }}</td>
+        <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['10-min Peak Rainfall Intensity'],
+                        report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
+        <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['30-min Peak Rainfall Intensity'],
+                        report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Sediment Yield' }}">{{ unitizer(report.return_periods[key][rec_interval]['Sediment Yield'],
                         report.units_d['Sediment Yield']) | safe }}</td>
         {% if report.has_phosphorus %}

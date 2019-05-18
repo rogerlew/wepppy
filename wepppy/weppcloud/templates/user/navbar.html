@@ -13,4 +13,11 @@
     <a class="nav-link" href="/weppcloud/usermod">Usermod</a>
   </li>
   {% endif %}
+  {% if current_user.has_role('Root') or
+        current_user.has_role('Admin') or
+        current_user.has_role('Dev') %}
+  <li class="nav-item active">
+    <a class="nav-link" href="/weppcloud/runid_query">Runid Query</a>
+  </li>
+  {% endif %}
 </ul>

@@ -26,8 +26,9 @@ from pyproj import Proj, transform
 
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc, translate_asc_to_tif, read_raster, raster_extent
 from wepppy.landcover import LandcoverMap
-from wepppy.nodb.mods.rred.rred_api import retrieve_rred
+from wepppy.nodb.mods.rred import rred_api
 from wepppy.ssurgo import SoilSummary
+from wepppy.wepp.soils.utils import YamlSoil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
@@ -35,7 +36,6 @@ from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
 from ...base import NoDbBase, TriggerEvents
-
 
 gdal.UseExceptions()
 
@@ -59,6 +59,9 @@ class Rred(NoDbBase):
         try:
             os.mkdir(self.rred_dir)
             self.rred_key = None
+            self.wgs_extent = None
+            self.wgs_center = None
+
             self.dump_and_unlock()
 
         except Exception:
@@ -98,13 +101,19 @@ class Rred(NoDbBase):
     def rred_dir(self):
         return _join(self.wd, 'rred')
 
+    def request_project(self, sbs_4class_fn, srid):
+        assert _exists(sbs_4class_fn)
+        rred_proj = rred_api.send_request(sbs_4class_fn, srid)
+        rred_key = rred_proj['key']
+        self.import_project(rred_key)
+
     def import_project(self, rred_key):
 
         self.lock()
 
         # noinspection PyBroadException
         try:
-            retrieve_rred(rred_key, self.rred_dir)
+            rred_api.retrieve_rred(rred_key, self.rred_dir)
             self.rred_key = rred_key
 
             assert _exists(_join(self.rred_dir, 'dem.asc'))
@@ -120,14 +129,8 @@ class Rred(NoDbBase):
 
             wgs_lr = transform(utm_proj, wgs_proj, utm_extent[0], utm_extent[1])
             wgs_ul = transform(utm_proj, wgs_proj, utm_extent[2], utm_extent[3])
-            wgs_extent = [wgs_lr[0], wgs_lr[1], wgs_ul[0], wgs_ul[1]]
-            wgs_center = (wgs_lr[0] + wgs_ul[0]) / 2.0, (wgs_lr[1] + wgs_ul[1]) / 2.0
-
-            ron = Ron.getInstance(self.wd)
-            ron.set_map(wgs_extent, wgs_center, 11)
-
-            print(_transform)
-            print(proj)
+            self.wgs_extent = [wgs_lr[0], wgs_lr[1], wgs_ul[0], wgs_ul[1]]
+            self.wgs_center = (wgs_lr[0] + wgs_ul[0]) / 2.0, (wgs_lr[1] + wgs_ul[1]) / 2.0
 
             self.dump_and_unlock()
 
@@ -135,7 +138,7 @@ class Rred(NoDbBase):
             self.unlock('-f')
             raise
 
-    def build_landuse(self, landuse_mode):
+    def build_landuse(self, landuse_mode=LanduseMode.RRED_Burned):
         assert landuse_mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]
 
         landuse = Landuse.getInstance(self.wd)
@@ -151,6 +154,7 @@ class Rred(NoDbBase):
 
         # noinspection PyBroadException
         try:
+            landuse._mode = landuse_mode
             landuse.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
             landuse.dump_and_unlock()
         except Exception:
@@ -162,7 +166,7 @@ class Rred(NoDbBase):
         for fn in soil_fns:
             shutil.copy(fn, self.soils_dir)
 
-    def build_soils(self, soils_mode):
+    def build_soils(self, soils_mode=SoilsMode.RRED_Burned):
         assert soils_mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]
 
         soils = Soils.getInstance(self.wd)
@@ -189,21 +193,45 @@ class Rred(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            domsoil_d = lc.build_lcgrid(self.subwta_arc, None)
-            soils_summaries = {}
-            for k, v in domsoil_d.items():
+            _domsoil_d = lc.build_lcgrid(self.subwta_arc, None)
+            _soils = {}
+            for k, v in _domsoil_d.items():
                 sol = soilsmap[str(v)]
-                domsoil_d[k] = sol
-                soils_summaries[sol] = SoilSummary(
+                _domsoil_d[k] = sol
+
+                soil_fn = '%s.sol' % sol
+                soil_path = _join(self.soils_dir, soil_fn)
+
+                yaml_soil = YamlSoil(soil_path)
+                desc = '{slid} - {texid}'.format(**yaml_soil.obj['ofes'][0])
+
+                _soils[sol] = SoilSummary(
                     Mukey=sol,
-                    FileName='%s.sol' % sol,
+                    FileName=soil_fn,
                     soils_dir=self.soils_dir,
                     BuildDate=str(datetime.now()),
-                    Description='%s - RRED' % v
+                    Description=desc
                 )
 
-            soils.domsoil_d = domsoil_d
-            soils.soils = soils_summaries
+            # need to recalculate the pct_coverages
+            total_area = 0.0
+            for k in _soils:
+                _soils[k].area = 0.0
+
+            watershed = Watershed.getInstance(self.wd)
+            total_area += watershed.totalarea
+            for topaz_id, k in _domsoil_d.items():
+                summary = watershed.sub_summary(str(topaz_id))
+                if summary is not None:
+                    _soils[k].area += summary["area"]
+
+            for k in _soils:
+                coverage = 100.0 * _soils[k].area / total_area
+                _soils[k].pct_coverage = coverage
+
+            soils._mode = soils_mode
+            soils.domsoil_d = _domsoil_d
+            soils.soils = _soils
             soils.dump_and_unlock()
         except Exception:
             soils.unlock('-f')

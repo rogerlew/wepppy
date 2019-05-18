@@ -1,10 +1,12 @@
 {% extends "security/_layout.html"%}
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% block title %}
-Create a WeppCloud Account
+Create a WEPPcloud Account
 {% endblock %}
 {% block content %}
     {% include "security/_messages.html" %}
+    <p>User registration is currently restricted to individuals located in the United States. By completing this
+    registration you certify you are located within the United States.</p>
     <form action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
       {{ register_user_form.hidden_tag() }}
       {{ render_field_with_errors(register_user_form.first_name, class_="form-control") }}

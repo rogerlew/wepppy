@@ -2,27 +2,33 @@
 <dl class="dl-horizontal">
     <dd>
         <label class="radio">
-        <input type="radio" value="0" name="uni_main_selector" > SI</label>
+        <input type="radio" value="0" name="uni_main_selector"
+                {{ 'checked' if unitizer_nodb.is_english == False }}> SI</label>
     </dd>
     <dd>
         <label class="radio">
-        <input type="radio" value="1" name="uni_main_selector" > English</label>
+        <input type="radio" value="1" name="uni_main_selector"
+               {{ 'checked' if unitizer_nodb.is_english == True }}> English</label>
     </dd>
 </dl>
-<h6>Unit Preferences</h6>
-<div style="height: 300px; border: 1px solid #ccc; overflow: auto; padding: 10px;">
-    <dl class="dl-horizontal">
-        {% for unitclass in precisions %}
-        <dt><label for="unitizer_{{unitclass}}_radio">{{unitclass}}</label></dt>
-        <dd>
-            {% for units in precisions[unitclass] %}
-            <label class="radio">
-            <input type="radio" value="{{ cls_units(units) }}" name="unitizer_{{unitclass}}_radio" 
-            {{ 'checked' if unitizer_nodb.preferences[unitclass] == units }}>&nbsp;{{ str_units(units) | safe }}&nbsp;&nbsp;</label>
-            {% endfor %}
-        </dd>
-        {% endfor %}
-    </dl>
+
+<div><a href="#unit_pref_con" data-toggle="collapse">Unit Preferences</a>
+    <div id="unit_pref_con" class="collapse">
+        <div style="height: 300px; border: 1px solid #ccc; overflow: auto; padding: 10px;">
+            <dl class="dl-horizontal">
+                {% for unitclass in precisions %}
+                <dt><label for="unitizer_{{unitclass}}_radio">{{unitclass}}</label></dt>
+                <dd>
+                    {% for units in precisions[unitclass] %}
+                    <label class="radio">
+                    <input type="radio" value="{{ cls_units(units) }}" name="unitizer_{{unitclass}}_radio"
+                    {{ 'checked' if unitizer_nodb.preferences[unitclass] == units }}>&nbsp;{{ str_units(units) | safe }}&nbsp;&nbsp;</label>
+                    {% endfor %}
+                </dd>
+                {% endfor %}
+            </dl>
+        </div>
+    </div>
 </div>
 <script>
 

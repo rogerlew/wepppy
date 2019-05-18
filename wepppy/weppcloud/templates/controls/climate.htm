@@ -33,11 +33,21 @@
     <h4>Climate Method</h4>
     <div class="form-group row">
         <div class="col-sm-6">
-            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" Cligen</label><br/>
-            <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified</label><br/>
-            <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (Daymet)</label><br/>
-            <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) <i>Experimental</i></label><br/>
-            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm (Cligen)</label><br/>
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
+                <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified
+                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (DAYMET)
+                <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5)
+                <a data-toggle="tooltip" data-placement="top" title="Experimental."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
+                <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
             {% if climate.observed_clis != none %}
             <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
             {%  endif %}
@@ -50,8 +60,12 @@
         <h5>Spatial Mode</h5>
         <div class="form-group row">
             <div class="col-sm-6">
-                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}> Single Climate for Watershed</label><br/>
-                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates (per hillslope)</label><br/>
+                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}> Single Climate
+                    <a data-toggle="tooltip" data-placement="top" title="One per watershed."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates
+                    <a data-toggle="tooltip" data-placement="top" title="One for each hillslope."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
             </div>
         </div>
     </div>

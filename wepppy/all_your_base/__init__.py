@@ -35,6 +35,39 @@ RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
 
 
+def utm_srid(zone, datum='WGS84', hemisphere='N'):
+    if hemisphere != 'N':
+        raise NotImplementedError
+
+    if datum == 'NAD83':
+        return {
+            '10': 26910,
+            '11': 26911,
+            '12': 26912,
+            '13': 26913,
+            '14': 26914,
+            '15': 26915,
+            '16': 26916,
+            '17': 26917,
+            '18': 26918,
+            '19': 26919 }.get(str(zone), None)
+
+    elif datum == 'WGS84':
+        return {
+            '10': 32610,
+            '11': 32611,
+            '12': 32612,
+            '13': 32613,
+            '14': 32614,
+            '15': 32615,
+            '16': 32616,
+            '17': 32617,
+            '18': 32618,
+            '19': 32619 }.get(str(zone), None)
+
+    return None
+
+
 def flatten(l):
     for el in l:
         if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
@@ -213,6 +246,7 @@ def parse_units(colname):
 
 class RowData:
     def __init__(self, row):
+
         self.row = row
 
     def __iter__(self):

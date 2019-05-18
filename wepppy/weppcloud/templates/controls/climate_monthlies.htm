@@ -1,3 +1,24 @@
+ <h5>{{ title }}</h5>
+ <table class="table table-condensed" style="width:360px;">
+    <tbody>
+      <tr>
+        <td>Average Annual Precipitation</td>
+        <td>{{ unitizer(station.sum_ppt, 'in') | safe }}</td>
+        <td>{{ unitizer_units('in') | safe }}</td>
+      </tr>
+      <tr>
+        <td>Average Monthly T Max</td>
+        <td>{{ unitizer(station.ave_monthly_tmax, 'degf') | safe }}</td>
+        <td>{{ unitizer_units('in') | safe }}</td>
+      </tr>
+      <tr>
+        <td>Average Monthly T Min</td>
+        <td>{{ unitizer(station.ave_monthly_tmin, 'degf') | safe }}</td>
+        <td>{{ unitizer_units('degf') | safe }}</td>
+      </tr>
+    </tbody>
+ </table>
+
  <table class="table table-condensed">
     <thead>
       <tr>

@@ -20,6 +20,8 @@ import sqlite3
 
 from wepppy.all_your_base import *
 
+from wepppy.wepp.soils.utils import simple_texture
+
 __version__ = 'v.0.1.0'
 
 _thisdir = os.path.dirname(__file__)
@@ -364,26 +366,8 @@ class Horizon:
         Courtesy of Mary Ellen Miller
         :return:
         """
-        clay = self.claytotal_r
-        sand = self.sandtotal_r
+        return simple_texture(self.claytotal_r, self.sandtotal_r)
 
-        cs = clay + sand
-        if (clay <= 27 and cs <= 50) or \
-           (clay > 27 and sand <= 20 and cs <= 50):
-            return "silt loam"
-        elif (clay >= 6 and clay <= 27) and \
-             (cs > 50 and cs <= 72) and \
-             sand <= 52:
-            return "loam"
-        elif (sand > 52 or cs > 50 and clay < 6) and \
-             sand >= 50:
-            return "sand loam"
-        elif (cs > 72 and sand < 50) or \
-             (clay > 27 and (sand > 20 and sand <= 45)) or \
-             (sand <= 20 and cs > 50):
-            return "clay loam"
-
-        return None
 
 
 colors = [
@@ -418,12 +402,19 @@ class SoilSummary(object):
         self.area = 0.0
         self.pct_coverage = None
 
+        self.clay = None
+        self.sand = None
+        self.ll = None
+        self.simple_texture = None
+
     def as_dict(self):
         return dict(mukey=self.mukey, fname=self.fname,
                     soils_dir=self.soils_dir,
                     build_date=self.build_date, desc=self.desc,
                     color=self.color, area=self.area,
-                    pct_coverage=self.pct_coverage)
+                    pct_coverage=self.pct_coverage,
+                    clay=self.clay, sand=self.sand, ll=self.ll,
+                    simple_texture=self.simple_texture)
 
     @property
     def path(self):

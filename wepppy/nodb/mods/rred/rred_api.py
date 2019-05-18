@@ -24,7 +24,7 @@ def send_request(sbs_fn, srid, class_low=2, class_mod=3, class_high=4):
                 'class_low': str(class_low),
                 'class_mod': str(class_mod),
                 'class_high': str(class_high),
-                'srid': srid,
+                'srid': str(srid),
                }
         )
 
@@ -33,6 +33,7 @@ def send_request(sbs_fn, srid, class_low=2, class_mod=3, class_high=4):
                              headers={'Content-Type': multipart_data.content_type})
 
     assert response.status_code == 200
+    print(response.text)
     return response.json()
 
 

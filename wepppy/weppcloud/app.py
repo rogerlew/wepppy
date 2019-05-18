@@ -44,7 +44,7 @@ import what3words
 
 import wepppy
 
-from wepppy.all_your_base import isfloat, isint
+from wepppy.all_your_base import isfloat, isint, parse_datetime
 
 from wepppy.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
@@ -403,6 +403,17 @@ def units_processor():
 
 
 @app.context_processor
+def commafy_processor():
+    def commafy(v):
+        try:
+            return "{:,}".format(int(v))
+        except:
+            return v
+
+    return dict(commafy=commafy)
+
+
+@app.context_processor
 def isfloat_processor():
     return dict(isfloat=isfloat)
 
@@ -487,7 +498,12 @@ def index():
     if current_user.is_authenticated:
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
-    return render_template('index.htm', user=current_user)
+
+    from wepppy.weppcloud import RunStatistics
+    rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
+    c = rs.counter
+
+    return render_template('index.htm', user=current_user, runs_counter=c)
 
 
 @app.route('/lt')
@@ -528,6 +544,13 @@ def create(config):
         runid = 'mdob' + runid[4:]
     elif request.remote_addr == '127.0.0.1':
         runid = 'devvm' + runid[5:]
+
+    try:
+        from wepppy.weppcloud import RunStatistics
+        rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
+        rs.increment_projects(config)
+    except:
+        pass
 
     wd = get_wd(runid)
     assert not _exists(wd)
@@ -644,6 +667,16 @@ def archive(runid, config):
     return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
 
 
+def log_access(wd, current_user, ip):
+    assert _exists(wd)
+
+    fn, runid = _split(wd)
+    fn = _join(fn, '.{}'.format(runid))
+    with open(fn, 'a') as fp:
+        email = getattr(current_user, 'email', '<anonymous>')
+        fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
+
+
 @app.route('/runs/<runid>/<config>/')
 def runs0(runid, config):
     assert config is not None
@@ -680,17 +713,15 @@ def runs0(runid, config):
     except:
         observed = Observed(wd, "%s.cfg" % config)
 
-    landuseoptions = management.load_map().values()
-    landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
-
-    if "lt" in ron.mods:
-        landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
+    landuseoptions = landuse.landuseoptions
 
     has_sbs = False
     if "baer" in ron.mods:
         has_sbs = Baer.getInstance(wd).has_map
 
     soildboptions = soilsdb.load_db()
+
+    log_access(wd, current_user, request.remote_addr)
     return render_template('0.html',
                            user=current_user,
                            topaz=topaz, soils=soils,
@@ -792,7 +823,17 @@ def resources_subcatchments_geojson(runid):
     try:
         wd = get_wd(runid)
         fn = _join(wd, 'dem', 'topaz', 'SUBCATCHMENTS.WGS.JSON')
-        return send_file(fn, mimetype='application/json')
+
+        js = json.load(open(fn))
+        ron = Ron.getInstance(wd)
+        name = ron.name
+
+        if name.strip() == '':
+            js['name'] = runid
+        else:
+            js['name'] = name
+
+        return jsonify(js)
     except Exception:
         return exception_factory()
 
@@ -803,7 +844,17 @@ def resources_channels_geojson(runid):
     try:
         wd = get_wd(runid)
         fn = _join(wd, 'dem', 'topaz', 'CHANNELS.WGS.JSON')
-        return send_file(fn, mimetype='application/json')
+
+        js = json.load(open(fn))
+        ron = Ron.getInstance(wd)
+        name = ron.name
+
+        if name.strip() == '':
+            js['name'] = runid
+        else:
+            js['name'] = name
+
+        return jsonify(js)
     except Exception:
         return exception_factory()
 
@@ -914,6 +965,7 @@ def browse_response(path, show_up=True):
             try:
                 contents = fp.read()
             except UnicodeDecodeError:
+                return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
                 return error_factory('Cannot return this binary file.')
 
         if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
@@ -942,6 +994,31 @@ def dev_tree(runid):
     """
     wd = get_wd(runid)
     return browse_response(wd, show_up=False)
+
+@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/')
+def wp_dev_tree1(runid, wepp, dir):
+    return dev_tree1(runid, dir)
+
+
+@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/')
+def wp_dev_tree2(runid, wepp, dir, dir2):
+    return dev_tree2(runid, dir, dir2)
+
+
+@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/')
+def wp_dev_tree32(runid, wepp, dir, dir2, dir3):
+    return dev_tree32(runid, dir, dir2, dir3)
+
+
+@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
+def wp_dev_tree432(runid, wepp, dir, dir2, dir3, dir4):
+    return dev_tree32(runid, dir, dir2, dir3, dir4)
+
+
+@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
+def wp_dev_tree5432(runid, wepp, dir, dir2, dir3, dir4, dir5):
+    return dev_tree5432(runid, dir, dir2, dir3, dir4, dir5)
+
 
 @app.route('/runs/<string:runid>/browse/<dir>/')
 def dev_tree1(runid, dir):
@@ -983,6 +1060,27 @@ def dev_tree432(runid, dir, dir2, dir3, dir4):
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
+    assert dir.startswith(wd)
+    return browse_response(dir)
+
+
+@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
+def dev_tree5432(runid, dir, dir2, dir3, dir4, dir5):
+    """
+    recursive list the file strucuture of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5))
+    assert dir.startswith(wd)
+    return browse_response(dir)
+
+@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
+def dev_tree65432(runid, dir, dir2, dir3, dir4, dir5, dir6):
+    """
+    recursive list the file strucuture of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5, dir6))
     assert dir.startswith(wd)
     return browse_response(dir)
 
@@ -1091,6 +1189,7 @@ def export_winwepp(runid):
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/tasks/build_channels/', methods=['POST'])
 def task_build_channels(runid):
+
     error, args = _parse_map_change(request.form)
 
     if error is not None:
@@ -1111,7 +1210,7 @@ def task_build_channels(runid):
         try:
             ron.fetch_dem()
         except Exception:
-            return exception_factory('Fetchining DEM Failed')
+            return exception_factory('Fetching DEM Failed')
 
     # Delineate channels
 
@@ -1240,7 +1339,8 @@ def task_modify_landuse_mapping(runid):
     dom = request.json.get('dom', None)
     newdom = request.json.get('newdom', None)
 
-    Landuse.getInstance(wd).modify_mapping(dom, newdom)
+    landuse = Landuse.getInstance(wd)
+    landuse.modify_mapping(dom, newdom)
 
     return success_factory()
 
@@ -1306,15 +1406,13 @@ def report_landuse(runid):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    landuseoptions = management.load_map().values()
-    landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
-
-    if "lt" in ron.mods:
-        landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
+    landuse = Landuse.getInstance(wd)
+    landuseoptions = landuse.landuseoptions
 
     return render_template('reports/landuse.htm',
                            landuseoptions=landuseoptions,
                            report=Landuse.getInstance(wd).report)
+
 
 @app.route('/runs/<string:runid>/view/channel_def/<chn_key>')
 @app.route('/runs/<string:runid>/view/channel_def/<chn_key>/')
@@ -1626,6 +1724,7 @@ def view_climate_monthlies(runid):
 
     assert isinstance(station_meta, StationMeta)
     return render_template('controls/climate_monthlies.htm',
+                           title='Summary for the selected station',
                            station=station_meta.as_dict(include_monthlies=True))
     
 
@@ -1917,6 +2016,14 @@ def submit_task_run_wepp(runid):
         #
         # Run Watershed
         wepp.run_watershed()
+
+        try:
+            from wepppy.weppcloud import RunStatistics
+            rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
+            rs.increment_hillruns(watershed.config_stem, watershed.sub_n)
+        except:
+            pass
+
     except Exception:
         return exception_factory('Error running wepp')
         
@@ -2001,6 +2108,27 @@ def query_wepp_phos_opts(runid):
     wd = get_wd(runid)
     phos_opts = Wepp.getInstance(wd).phosphorus_opts.asdict()
     return jsonify(phos_opts)
+
+
+@app.route('/runs/<string:runid>/report/wepp/run_summary')
+@app.route('/runs/<string:runid>/report/wepp/run_summary/')
+def report_wepp_run_summary(runid):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    flowpaths_n = len(glob(_join(wd, 'wepp/flowpaths/output/*.plot.dat')))
+    subs_n = len(glob(_join(wd, 'wepp/output/*.loss.dat')))
+
+    with open(_join(wd, 'wepp/runs/status.log')) as fp:
+        lines = fp.readlines()
+        t0 = parse_datetime(lines[0])
+        tend = parse_datetime(lines[-1])
+
+    return render_template('reports/wepp_run_summary.htm',
+                           flowpaths_n=flowpaths_n,
+                           subs_n=subs_n,
+                           run_time=tend-t0,
+                           ron=ron)
 
 
 @app.route('/runs/<string:runid>/report/wepp/summary')
@@ -2170,7 +2298,6 @@ def plot_wepp_streamflow(runid):
 def report_wepp_return_periods(runid):
 
     extraneous = request.args.get('extraneous', None) == 'true'
-    print(extraneous)
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     report = Wepp.getInstance(wd).report_return_periods()
@@ -2601,7 +2728,7 @@ def combined_ws_viewer_url_gen():
     phos_opts = ('', '"phosphorus":1.0,')[has_phos]
 
     _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
-           'ws={ws}&varopts={{"runoff":0.5,"subrunoff":0.5,"baseflow":0.5,{phos_opts}"loss":4000}}&' \
+           'ws={ws}&varopts={{"runoff":10,"subrunoff":10,"baseflow":10,{phos_opts}"loss":4000}}&' \
            'varname=loss&title={title}'
 
     url = None
@@ -2615,6 +2742,31 @@ def combined_ws_viewer_url_gen():
 
     return render_template('combined_ws_viewer_url_gen.htm',
         url=url, user=current_user, title=title, runids=', '.join(runids))
+
+
+@app.route('/dev/usage_statistics')
+def usage_statistics():
+    from wepppy.weppcloud import RunStatistics
+    rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
+    fn = rs._json
+    return send_file(fn, mimetype='application/json')
+
+
+def get_config_stem(wd):
+    ron = Ron.getInstance(wd)
+    return ron.config_stem
+
+
+@app.route('/dev/runid_query/<wc>')
+def runid_query(wc):
+    if current_user.has_role('Root') or \
+       current_user.has_role('Admin') or \
+       current_user.has_role('Dev'):
+
+        wds = glob(_join('/geodata/weppcloud_runs', '{}*'.format(wc)))
+        return jsonify([_join('weppcloud/runs', _split(wd)[-1], get_config_stem(wd)) for wd in wds])
+    else:
+        return error_factory('not authorized')
 
 
 if __name__ == '__main__':

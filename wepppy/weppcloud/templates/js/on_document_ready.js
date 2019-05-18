@@ -194,7 +194,33 @@ $(document).ready(function () {
     //
     // Bindings
     //
+    var input_mcl = $("#input_mcl");
+    var input_mcl_en = $("#input_mcl_en");
+    var input_csa = $("#input_csa");
+    var input_csa_en = $("#input_csa_en");
+
+    input_mcl.on("input", function () {
+        console.log('on input_mcl change.');
+        input_mcl_en.val(parseFloat(input_mcl.val()) * 3.28084 );
+    });
+
+    input_mcl_en.on("input", function () {
+        console.log('on input_mcl_en change.');
+        input_mcl.val(parseFloat(input_mcl_en.val()) / 3.28084 );
+    });
+
+    input_csa.on("input", function () {
+        console.log('on input_csa change.');
+        input_csa_en.val(parseFloat(input_csa.val()) * 2.47105 );
+    });
+
+    input_csa_en.on("input", function () {
+        console.log('on input_csa_en change.');
+        input_csa.val(parseFloat(input_csa_en.val()) / 2.47105 );
+    });
+
     $("#btn_build_channels").click(channel_ctrl.build_router);
+    $("#btn_build_channels_en").click(channel_ctrl.build_router);
 
     //
     // Channel Event Handling

@@ -80,18 +80,10 @@ converters = {
     'volume': {
         ('m^3', 'ft^3'): lambda v: v * 35.3146667,
         ('ft^3', 'm^3'): lambda v: v * 0.0283168,
-        ('m^3', 'yd^3'): lambda v: v * 1.30795,
-        ('ft^3', 'yd^3'): lambda v: v * 0.037037,
-        ('yd^3', 'm^3'): lambda v: v * 0.764555,
-        ('yd^3', 'ft^3'): lambda v: v * 27.0
     },
     'volume-annual': {
         ('m^3/yr', 'ft^3/yr'): lambda v: v * 35.3146667,
         ('ft^3/yr', 'm^3/yr'): lambda v: v * 0.0283168,
-        ('m^3/yr', 'yd^3/yr'): lambda v: v * 1.30795,
-        ('ft^3/yr', 'yd^3/yr'): lambda v: v * 0.037037,
-        ('yd^3/yr', 'm^3/yr'): lambda v: v * 0.764555,
-        ('yd^3/yr', 'ft^3/yr'): lambda v: v * 27.0
     },
     'flow': {
         ('m^3/s', 'ft^3/min'): lambda v: v * 2118.88,
@@ -154,89 +146,87 @@ converters = {
 
 precisions = OrderedDict([
     ('temperature', OrderedDict([
-        ('degc', 1),
-        ('degf', 1)])
+        ('degc', 2),
+        ('degf', 2)])
      ),
     ('distance', OrderedDict([
         ('km', 2),
         ('mi', 2)])
      ),
     ('sm-distance', OrderedDict([
-        ('m', 1),
-        ('ft', 1)])
+        ('m', 2),
+        ('ft', 2)])
      ),
     ('xs-distance', OrderedDict([
-        ('mm', 1),
+        ('mm', 2),
         ('in', 2)])
      ),
     ('xs-distance-rate', OrderedDict([
-        ('mm/hour', 1),
+        ('mm/hour', 2),
         ('in/hour', 2)])
      ),
     ('xs-annual', OrderedDict([
-        ('mm/yr', 1),
+        ('mm/yr', 2),
         ('in/yr', 2)])
      ),
     ('area', OrderedDict([
-        ('ha', 1),
-        ('acre', 1),
-        ('m^2', 0),
-        ('km^2', 3)])
+        ('ha', 2),
+        ('acre', 2),
+        ('m^2', 2),
+        ('km^2', 2)])
      ),
     ('weight', OrderedDict([
-        ('tonne', 3),
-        ('ton', 3)])
+        ('tonne', 2),
+        ('ton', 2)])
      ),
     ('weight-annual', OrderedDict([
-        ('tonne/yr', 3),
-        ('ton/yr', 3)])
+        ('tonne/yr', 2),
+        ('ton/yr', 2)])
      ),
     ('sm-weight', OrderedDict([
-        ('kg', 1),
-        ('lb', 0)])
+        ('kg', 2),
+        ('lb', 2)])
      ),
     ('sm-weight-annual', OrderedDict([
-        ('kg/yr', 3),
-        ('lb/yr', 3)])
+        ('kg/yr', 2),
+        ('lb/yr', 2)])
      ),
     ('volume', OrderedDict([
-        ('m^3', 0),
-        ('yd^3', 0),
-        ('ft^3', 0)])
+        ('m^3', 2),
+        ('ft^3', 2)])
      ),
     ('volume-annual', OrderedDict([
-        ('m^3/yr', 0),
-        ('yd^3/yr', 0),
-        ('ft^3/yr', 0)])
+        ('m^3/yr', 2),
+        ('ft^3/yr', 2)])
      ),
     ('flow', OrderedDict([
         ('m^3/s', 2),
         ('ft^3/s', 2)])
      ),
     ('xs-surface-density', OrderedDict([
-        ('kg/ha,3', 3),
-        ('lb/acre,3', 3)])
+        ('kg/ha,3', 2),
+        ('lb/acre,3', 2)])
      ),
     ('sm-surface-density', OrderedDict([
-        ('kg/ha', 0),
-        ('lb/acre', 0),
-        ('kg/m^2', 1),
-        ('lb/mi^2', 1)])
+        ('kg/ha', 2),
+        ('lb/acre', 2),
+        ('kg/m^2', 2),
+        ('lb/mi^2', 2)])
      ),
     ('xs-surface-density-annual', OrderedDict([
         ('kg/ha/yr,3', 3),
         ('lb/acre/yr,3', 3)])
      ),
     ('sm-surface-density-annual', OrderedDict([
-        ('kg/ha/yr', 0),
-        ('lb/acre/yr', 0),
-        ('kg/m^2/yr', 3),
-        ('lb/mi^2/yr', 3)])
+        ('kg/ha/yr', 2),
+        ('lb/acre/yr', 2),
+        ('kg/m^2/yr', 2),
+        ('lb/mi^2/yr', 2)])
      ),
     ('surface-density', OrderedDict([
-        ('tonne/ha', 1),
-        ('ton/acre', 1),
-        ('ton/mi^2', 1)])
+        ('tonne/ha', 2),
+        ('ton/acre', 2),
+        ('ton/mi^2', 2)])
      ),
     ('surface-density-annual', OrderedDict([
         ('tonne/ha/yr', 2),
@@ -260,16 +250,25 @@ class Unitizer(NoDbBase):
     __name__ = 'Unitizer'
 
     def __init__(self, wd, cfg_fn):
+        global precisions
+
         super(Unitizer, self).__init__(wd, cfg_fn)
 
         self.lock()
+
+        config = self.config
+
+        try:
+            is_english = config.getboolean('unitizer', 'is_english')
+        except:
+            is_english = False
 
         # noinspection PyBroadException
         try:
 
             # make the second in the list the default (English Units)
             self._preferences = \
-                {k: list(v.keys())[1] for k, v in precisions.items()}
+                {k: list(v.keys())[is_english] for k, v in precisions.items()}
 
             self.dump_and_unlock()
 
@@ -281,6 +280,27 @@ class Unitizer(NoDbBase):
     def preferences(self):
         return self._preferences
 
+    @property
+    def is_english(self):
+        global precisions
+
+        selections = []
+        for k, v in precisions.items():
+            opts = list(v.keys())
+
+            selections.append(self._preferences[k] == opts[1])
+
+        sum_select = sum(selections)
+
+        if sum_select == 0:
+            return False
+
+        elif sum_select == len(selections):
+            return True
+
+        return None
+
+
     def set_preferences(self, kwds):
 
         # noinspection PyBroadException
@@ -288,8 +308,9 @@ class Unitizer(NoDbBase):
             self.lock()
 
             for k, v in kwds.items():
-                assert k in precisions
-                assert v in precisions[k]
+                v = v.replace('-/', ',')
+                assert k in precisions, k
+                assert v in precisions[k], v
                 self._preferences[k] = v
 
             self.dump_and_unlock()
@@ -334,12 +355,17 @@ class Unitizer(NoDbBase):
         global converters, precisions
 
         def tostring(v, p):
-            if p == 0:
-                return str(int(v))
+            if p <= 0:
+                p = 3
 
-            fmt = '%.{}f'.format(int(p))
             try:
-                return fmt % float(v)
+                fmt = '%.' + str(int(p)) + 'g'
+                _v = float(fmt % v)
+
+                if _v == float(int(_v)):
+                    return str(int(_v))
+
+                return str(_v)
             except:
                 return str(v)
 
@@ -422,14 +448,13 @@ class Unitizer(NoDbBase):
                         pass
 
                 if isfloat(value):
-                    fmt = '%0.' + str(precision) + 'f'
-                    return fmt % float(value)
+                    return tostring(value, precision)
 
                 return str(value)
 
             if in_units == 'pct' or in_units == '%':
                 try:
-                    return '%0.2f' % float(value)
+                    return '%0.1f' % float(value)
                 except ValueError:
                     return '<i>{}</i>'.format(value)
 
@@ -473,4 +498,6 @@ class Unitizer(NoDbBase):
         return dict(cls_units=cls_units,
                     str_units=str_units,
                     unitizer=unitizer,
+                    sum=sum,
+                    mean=lambda x: sum(x) / len(x),
                     unitizer_units=unitizer_units)

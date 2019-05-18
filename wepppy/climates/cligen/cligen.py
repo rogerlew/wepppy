@@ -290,9 +290,9 @@ class ClimateFile(object):
             d[name] = []
 
         if calc_peak_intensities:
-            d['10-min Peak Intensity (mm/hour)'] = []
-            d['30-min Peak Intensity (mm/hour)'] = []
-            d['60-min Peak Intensity (mm/hour)'] = []
+            d['10-min Peak Rainfall Intensity (mm/hour)'] = []
+            d['30-min Peak Rainfall Intensity (mm/hour)'] = []
+            d['60-min Peak Rainfall Intensity (mm/hour)'] = []
 
         for i, L in enumerate(self.lines[self.data0line:]):
             row = [v.strip() for v in L.split()]
@@ -307,9 +307,9 @@ class ClimateFile(object):
             if calc_peak_intensities:
                 max_time = [10, 30, 60]
                 intensities = cli2pat(prcp=d['prcp'][-1], dur=d['dur'][-1], tp=d['tp'][-1], ip=d['ip'][-1], max_time=max_time)
-                d['10-min Peak Intensity (mm/hour)'].append(intensities[0])
-                d['30-min Peak Intensity (mm/hour)'].append(intensities[1])
-                d['60-min Peak Intensity (mm/hour)'].append(intensities[2])
+                d['10-min Peak Rainfall Intensity (mm/hour)'].append(intensities[0])
+                d['30-min Peak Rainfall Intensity (mm/hour)'].append(intensities[1])
+                d['60-min Peak Rainfall Intensity (mm/hour)'].append(intensities[2])
 
         return pd.DataFrame(data=d)
 
@@ -560,6 +560,9 @@ class StationMeta:
                 "tmaxs": list(station.tmaxs),
                 "tmins": list(station.tmins)
             }
+            d['sum_ppt'] = np.sum(v * d for v, d in zip(station.ppts, station.nwds))
+            d['ave_monthly_tmax'] = np.mean(station.tmaxs)
+            d['ave_monthly_tmin'] = np.mean(station.tmins)
 
         return d
             
