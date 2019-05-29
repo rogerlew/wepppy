@@ -1,0 +1,88 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ tx413668.par                                                                                                                                                                                                                                                    
+ 0500000US48503.prn                                                                                                                                                                                                                                              
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   20.0000000      SDlevel=   50.9148102      Days:          50
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   30.0000000      SDlevel=   52.0583076      Days:          50
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   30.0000000      SDlevel=   53.1907578      Days:          50
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   30.0000000      SDlevel=   53.1909866      Days:          50
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1991  Mlevel=   30.0000000      SDlevel=   53.1781311      Days:          50
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         103
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2001  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2001  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2001  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2001  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2001  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2002  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2002  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2002  N:         104
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US48503.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2002  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2002  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         108
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         114
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         117
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         121
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.

@@ -1,0 +1,5133 @@
+AGLIM1
+----------------
+ 0   No information
+ 1   No limitation to agricultural use
+ 2   Gravelly (over 35% gravel diameter < 7.5 cm)
+ 3   Stony (presence of stones diameter > 7.5 cm,
+     impracticable mechanisation)
+ 4   Lithic (coherent and hard rock within 50 cm)
+ 5   Concretionary (over 35% concretions diameter < 7.5
+     cm near the surface)
+ 6   Petrocalcic (cemented or indurated calcic horizon
+     within 100 cm)
+ 7   Saline (electric conductivity > 4 mS.cm-1 within
+     100 cm)
+ 8   Sodic (Na/T > 6% within 100 cm)
+ 9   Glaciers and snow-caps
+10   Soils disturbed by man (i.e. landfills, paved
+     surfaces, mine spoils)
+11   Fragipans
+12   Excessively drained
+13   Almost always flooded
+14   Eroded phase, erosion
+15   Phreatic phase (shallow water table)
+16   Duripan (silica and iron cemented subsoil horizon)
+17   Petroferric horizon
+18   Permafrost
+---------------------------------------------------------------------------
+AGLIM2
+----------------
+ 0   No information
+ 1   No limitation to agricultural use
+ 2   Gravelly (over 35% gravel diameter < 7.5 cm)
+ 3   Stony (presence of stones diameter > 7.5 cm,
+     impracticable mechanisation)
+ 4   Lithic (coherent and hard rock within 50 cm)
+ 5   Concretionary (over 35% concretions diameter < 7.5
+     cm near the surface)
+ 6   Petrocalcic (cemented or indurated calcic horizon
+     within 100 cm)
+ 7   Saline (electric conductivity > 4 mS.cm-1 within
+     100 cm)
+ 8   Sodic (Na/T > 6% within 100 cm)
+ 9   Glaciers and snow-caps
+10   Soils disturbed by man (i.e. landfills, paved
+     surfaces, mine spoils)
+11   Fragipans
+12   Excessively drained
+13   Almost always flooded
+14   Eroded phase, erosion
+15   Phreatic phase (shallow water table)
+16   Duripan (silica and iron cemented subsoil horizon)
+17   Petroferric horizon
+18   Permafrost
+---------------------------------------------------------------------------
+BORDER_SOIL1M
+----------------
+0   Null arcs (border lines of oceans)
+1   Border lines of countries currently covered by the
+    database
+2   Border lines of countries under progress
+3   Border lines of other countries
+---------------------------------------------------------------------------
+BORDER_TYPE
+----------------
+    Null arcs (border lines of oceans)
+E   Earth
+S   Sea
+---------------------------------------------------------------------------
+CFL
+----------------
+0   No information
+H   High confidence in the STU description
+M   Medium confidence in the STU description
+L   Low confidence in the STU description
+V   Very low confidence in the STU description because
+    some interpretation was made by the co-ordinator
+---------------------------------------------------------------------------
+CL
+----------------
+h   High
+m   Moderate
+l   Low
+v   Very low
+    or unknown confidence level
+o   Data originates from author
+    (no pedo-transfer interpretation)
+    No information
+---------------------------------------------------------------------------
+COUNTRY
+----------------
+     No information
+-3   Not applicable (oceans)
+AD   ANDORRA
+AL   ALBANIA
+AM   ARMENIA
+AT   AUSTRIA
+AZ   AZERBAIJAN
+BA   BOSNIA AND HERZEGOVINA
+BE   BELGIUM
+BG   BULGARIA
+BY   BELARUS
+CH   SWITZERLAND
+CN   CHINA
+CY   CYPRUS
+CZ   CZECH REPUBLIC
+DE   GERMANY
+DK   DENMARK
+DZ   ALGERIA
+EE   ESTONIA
+EG   EGYPT
+EH   WESTERN SAHARA
+ES   SPAIN
+FI   FINLAND
+FO   FAROE ISLANDS
+FR   FRANCE
+GB   UNITED KINGDOM
+GE   GEORGIA
+GI   GIBRALTAR
+GR   GREECE
+HR   CROATIA
+HU   HUNGARY
+IE   IRELAND
+IL   ISRAEL
+IQ   IRAQ
+IR   IRAN, ISLAMIC REPUBLIC OF
+IS   ICELAND
+IT   ITALY
+JO   JORDAN
+JP   JAPAN
+KG   KYRGYZSTAN
+KP   KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF
+KZ   KAZAKSTAN
+LB   LEBANON
+LI   LIECHTENSTEIN
+LT   LITHUANIA
+LU   LUXEMBOURG
+LV   LATVIA
+LY   LIBYAN ARAB JAMAHIRIYA
+MA   MOROCCO
+MC   MONACO
+MD   MOLDOVA, REPUBLIC OF
+MK   MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF
+ML   MALI
+MN   MONGOLIA
+MR   MAURITANIA
+MT   MALTA
+NE   NIGER
+NL   NETHERLANDS
+NO   NORWAY
+PL   POLAND
+PS   PALESTINIAN TERRITORY, OCCUPIED
+PT   PORTUGAL
+RO   ROMANIA
+RU   RUSSIAN FEDERATION
+SA   SAUDI ARABIA
+SD   SUDAN
+SE   SWEDEN
+SI   SLOVENIA
+SK   SLOVAKIA
+SM   SAN MARINO
+SY   SYRIAN ARAB REPUBLIC
+TD   CHAD
+TJ   TAJIKISTAN
+TM   TURKMENISTAN
+TN   TUNISIA
+TR   TURKEY
+UA   UKRAINE
+US   UNITED STATES
+UZ   UZBEKISTAN
+YU   YUGOSLAVIA
+---------------------------------------------------------------------------
+DT
+----------------
+0   No information
+1   Textural change between 20 and 40 cm depth
+2   Textural change between 40 and 60 cm depth
+3   Textural change between 60 and 80 cm depth
+4   Textural change between 80 and 120 cm depth
+5   No textural change between 20 and 120 cm depth
+6   Textural change between 20 and 60 cm depth
+7   Textural change between 60 and 120 cm depth
+---------------------------------------------------------------------------
+FAO85-FULL
+----------------
+       No information
+A      Acrisol
+Af     Ferric Acrisol
+Ag     Gleyic Acrisol
+Ah     Humic Acrisol
+Ao     Orthic Acrisol
+Ap     Plinthic Acrisol
+B      Cambisol
+Ba     Calcaric Cambisol
+Bc     Chromic Cambisol
+Bcc    Calcaro-Chromic Cambisol
+Bch    Humo-Chromic Cambisol
+Bck    Calci-Chromic Cambisol
+Bcr    Rhodo-Chromic Cambisol
+Bd     Dystric Cambisol
+Bda    Ando-Dystric Cambisol
+Bdg    Gleyo-Dystric Cambisol
+Bds    Spodo-Dystric Cambisol
+Be     Eutric Cambisol
+Bea    Ando-Eutric Cambisol
+Bec    Calcaro-Eutric Cambisol
+Bef    Fluvi-Eutric Cambisol
+Beg    Gleyo-Eutric Cambisol
+Bev    Verti-Eutric Cambisol
+Bf     Ferralic Cambisol
+Bg     Gleyic Cambisol
+Bgc    Calcaro-Gleyic Cambisol
+Bge    Eutri-Gleyic Cambisol
+Bgg    Stagno-Gleyic Cambisol
+Bgs    Spodo-Gleyic Cambisol
+Bgv    Verti-Gleyic Cambisol (?)
+Bh     Humic Cambisol
+Bhc    Calcaro-Humic Cambisol
+Bk     Calcic Cambisol
+Bkf    Fluvi-Calcic Cambisol
+Bkh    Humo-Calcic Cambisol
+Bkv    Verti-Calcic Cambisol
+Bm     Mollic Cambisol
+Bv     Vertic Cambisol
+Bvc    Calcaro-Vertic Cambisol
+Bvg    Gleyo-Vertic Cambisol
+Bvk    Calci-Vertic Cambisol
+Bx     Gelic Cambisol
+Bxs    Spodo-Gelic Cambisol
+C      Chernozem
+Cg     Gleyic Chernozem
+Ch     Haplic Chernozem
+Chp    Pachi-Haplic Chernozem
+Chv    Verti-Haplic Chernozem
+Ck     Calcic Chernozem
+Ckb    Vermi-Calcic Chernozem
+Ckc    Calcaro-Calcic Chernozem
+Ckcb   Vermi-Calcaro-Calcic Chernozem
+Ckp    Pachi-Calcic Chernozem
+Cl     Luvic Chernozem
+D      Podzoluvisol
+Dd     Dystric Podzoluvisol
+De     Eutric Podzoluvisol
+Dg     Gleyic Podzoluvisol
+Dgd    Dystric Gleyic Podzoluvisol
+Dge    Eutric Gleyic Podzoluvisol
+Dgs    Stagno-Gleyic Podzoluvisol
+E      Rendzina
+Ec     Cambic Rendzina
+Eh     Histic Rendzina
+Eo     Orthic Rendzina
+F      Ferralsol
+Fo     Orthic Ferralsol
+G      Gleysol
+Gc     Calcaric Gleysol
+Gcf    Fluvi-Calcaric Gleysol
+Gcs    Stagno-Calcaric Gleysol
+Gd     Dystric Gleysol
+Gdf    Fluvi-Dystric Gleysol
+Gds    Stagno-Dystric Gleysol
+Ge     Eutric Gleysol
+Gef    Fluvi-Eutric Gleysol
+Ges    Stagno-Eutric Gleysol
+Gev    Verti-Eutric Gleysol
+Gf     Fluvic Gleysol
+Gfm    Molli-Fluvic Gleysol
+Gh     Humic Gleysol
+Ghf    Fluvi-Humic Gleysol
+Ghh    Histo-Humic Gleysol
+Ght    Thioni-Humic Gleysol
+Gi     Histic Gleysol
+Gih    Humo-Histic Gleysol
+Gl     Luvic Gleysol
+Gls    Stagno-Luvic Gleysol
+Gm     Mollic Gleysol
+Gmc    Calcaro-Mollic Gleysol
+Gmf    Fluvi-Mollic Gleysol
+Gmv    Verti-Mollic Gleysol
+Gs     Stagnic Gleysol
+Gt     Thionic Gleysol
+Gtz    Undefined code
+Gx     Gelic Gleysol
+H      Phaeozem
+Hc     Calcaric Phaeozem
+Hcb    Vermi-Calcaric Phaeozem
+Hcf    Fluvi-Calcaric Phaeozem
+Hcn    Alkalino-Calcaric Phaeozem
+Hcs    Saline-Calcaric Phaeozem
+Hg     Gleyic Phaeozem
+Hgc    Calcaro-Gleyic Phaeozem
+Hgf    Fluvi-Gleyic Phaeozem
+Hgs    Stagno-Gleyic Phaeozem
+Hgv    Verti-Gleyic Phaeozem
+Hh     Haplic Phaeozem
+Hhv    Verti-Haplic Phaeozem
+Hl     Luvic Phaeozem
+Hlv    Verti-Luvic Phaeozem
+Ho     Orthic Phaeozem
+I      Lithosol
+Ic     Calcaric Lithosol
+Ich    Humo-Calcaric Lithosol
+Id     Dystric Lithosol
+Ie     Eutric Lithosol
+J      Fluvisol
+Jc     Calcaric Fluvisol
+Jcf    Fluvi-Calcaric Fluvisol
+Jcg    Gleyo-Calcaric Fluvisol
+Jd     Dystric Fluvisol
+Jdf    Fluvi-Dystric Fluvisol
+Jdg    Gleyo-Dystric Fluvisol
+Je     Eutric Fluvisol
+Jef    Fluvi-Eutric Fluvisol
+Jeg    Gleyo-Eutric Fluvisol
+Jm     Mollic Fluvisol
+Jmg    Gleyo-Mollic Fluvisol
+Jmv    Verti-Mollic Fluvisol
+Jt     Thionic Fluvisol
+K      Kastanozem
+Kh     Haplic Kastanozem
+Khb    Vermi-Haplic Kastanozem
+Kk     Calcic Kastanozem
+Kkb    Vermi-Calcic Kastanozem
+Kkv    Verti-Calcic Kastanozem
+Kl     Luvic Kastanozem
+Ko     Orthic Kastanozem
+L      Luvisol
+La     Albic Luvisol
+Lap    Plano-Albic Luvisol
+Lc     Chromic Luvisol
+Lcp    Plano-Chromic Luvisol
+Lcr    Rhodo-Chromic Luvisol
+Lcv    Verti-Chromic Luvisol
+Ld     Dystric Luvisol
+Ldg    Gleyo-Dystric Luvisol
+Lf     Ferric Luvisol
+Lg     Gleyic Luvisol
+Lga    Albo-Gleyic Luvisol
+Lgp    Plano-Gleyic Luvisol
+Lgs    Stagno-Gleyic Luvisol
+Lh     Humic Luvisol
+Lk     Calcic Luvisol
+Lkc    Chromo-Calcic Luvisol
+Lkcr   Rhodo-Chromo-Calcic Luvisol
+Lkv    Verti-Calcic Luvisol
+Lo     Orthic Luvisol
+Lop    Plano-Orthic Luvisol
+Lp     Plinthic Luvisol
+Ls     Spodic Luvisol
+Lv     Vertic Luvisol
+Lvc    Chromo-Vertic Luvisol
+Lvcr   Rhodo-Chromo-Vertic Luvisol
+Lvk    Calci-Vertic Luvisol
+M      Greyzem
+Mo     Orthic Greyzem
+Nc     Cambic Nitosol
+O      Histosol
+Od     Dystric Histosol
+Odp    Placi-Dystric Histosol
+Oe     Eutric Histosol
+Ox     Gelic Histosol
+P      Podzol
+Pf     Ferric Podzol
+Pg     Gleyic Podzol
+Pgh    Histo-Gleyic Podzol
+Pgs    Stagno-Gleyic Podzol
+Ph     Humic Podzol
+Phf    Ferro-Humic Podzol
+Pl     Leptic Podzol
+Plh    Humo-Leptic Podzol
+Po     Orthic Podzol
+Pof    Ferro-Orthic Podzol
+Poh    Humo-Orthic Podzol
+Pol    Lepto-Orthic Podzol
+Pp     Placic Podzol
+Pph    Humo-Placic Podzol
+Q      Arenosol
+Qa     Albic Arenosol
+Qc     Cambic Arenosol
+Qcc    Calcaro-Cambic Arenosol
+Qcd    Dystri-Cambic Arenosol
+Qcg    Gleyo-Cambic Arenosol
+Qcs    Spodo-Cambic Arenosol
+Qh     Humic Arenosol
+Ql     Luvic Arenosol
+Qld    Dystri-Luvic Arenosol
+Qlg    Gleyo-Luvic Arenosol
+R      Regosol
+Rc     Calcaric Regosol
+Rd     Dystric Regosol
+Rds    Undefined code
+Re     Eutric Regosol
+Rx     Gelic Regosol
+S      Solonetz
+Sg     Gleyic Solonetz
+Sm     Mollic Solonetz
+So     Orthic Solonetz
+Sof    Fluvi-Orthic Solonetz
+T      Andosol
+Th     Humic Andosol
+Tm     Mollic Andosol
+To     Ochric Andosol
+Tv     Vitric Andosol
+U      Ranker
+Ud     Dystric Ranker
+Ul     Luvic Ranker
+V      Vertisol
+Vc     Chromic Vertisol
+Vcc    Calcaro-Chromic Vertisol
+Vg     Gleyic Vertisol
+Vgs    Undefined code
+Vp     Pellic Vertisol
+Vpc    Calcaro-Pellic Vertisol
+Vpg    Gleyo-Pellic Vertisol
+Vpn    Sodi-Pellic Vertisol
+W      Planosol
+Wd     Dystric Planosol
+Wdv    Verti-Dystric Planosol
+We     Eutric Planosol
+Wev    Verti-Eutric Planosol
+Wh     Humic Planosol
+Wm     Mollic Planosol
+Ws     Solodic Planosol
+X      Xerosol
+Xk     Calcic Xerosol
+Xl     Luvic Xerosol
+Xy     Gypsic Xerosol
+Z      Solonchak
+Zg     Gleyic Solonchak
+Zgf    Fluvi-Gleyic Solonchak
+Zo     Orthic Solonchak
+Zt     Takyric Solonchak
+p      Plaggensol
+111    Town
+222    Soil disturbed by man
+333    Water body
+444    Marsh
+555    Glacier
+666    Rock outcrops
+---------------------------------------------------------------------------
+FAO85-LEV1
+----------------
+A   Acrisol
+B   Cambisol
+C   Chernozem
+D   Podzoluvisol
+E   Rendzina
+F   Ferralsol
+G   Gleysol
+H   Phaeozem
+I   Lithosol
+J   Fluvisol
+K   Kastanozem
+L   Luvisol
+M   Greyzem
+N   Nitosol
+O   Histosol
+P   Podzol
+Q   Arenosol
+R   Regosol
+S   Solonetz
+T   Andosol
+U   Ranker
+V   Vertisol
+W   Planosol
+X   Xerosol
+Z   Solonchak
+p   Plaggensol
+1   Town
+2   Soil disturbed by man
+3   Water body
+4   Marsh
+5   Glacier
+6   Rock outcrops
+    No information
+---------------------------------------------------------------------------
+FAO85-LEV2
+----------------
+A    Acrisol
+Af   Ferric Acrisol
+Ag   Gleyic Acrisol
+Ah   Humic Acrisol
+Ao   Orthic Acrisol
+Ap   Plinthic Acrisol
+B    Cambisol
+Ba   Calcaric Cambisol
+Bc   Chromic Cambisol
+Bd   Dystric Cambisol
+Be   Eutric Cambisol
+Bf   Ferralic Cambisol
+Bg   Gleyic Cambisol
+Bh   Humic Cambisol
+Bk   Calcic Cambisol
+Bm   Mollic Cambisol
+Bv   Vertic Cambisol
+Bx   Gelic Cambisol
+C    Chernozem
+Cg   Gleyic Chernozem
+Ch   Haplic Chernozem
+Ck   Calcic Chernozem
+Cl   Luvic Chernozem
+D    Podzoluvisol
+Dd   Dystric Podzoluvisol
+De   Eutric Podzoluvisol
+Dg   Gleyic Podzoluvisol
+E    Rendzina
+Ec   Cambic Rendzina
+Eh   Histic Rendzina
+Eo   Orthic Rendzina
+F    Ferralsol
+Fo   Orthic Ferralsol
+G    Gleysol
+Gc   Calcaric Gleysol
+Gd   Dystric Gleysol
+Ge   Eutric Gleysol
+Gf   Fluvic Gleysol
+Gh   Humic Gleysol
+Gi   Histic Gleysol
+Gl   Luvic Gleysol
+Gm   Mollic Gleysol
+Gs   Stagnic Gleysol
+Gt   Thionic Gleysol
+Gx   Gelic Gleysol
+H    Phaeozem
+Hc   Calcaric Phaeozem
+Hg   Gleyic Phaeozem
+Hh   Haplic Phaeozem
+Hl   Luvic Phaeozem
+Ho   Orthic Phaeozem
+I    Lithosol
+Ic   Calcaric Lithosol
+Id   Dystric Lithosol
+Ie   Eutric Lithosol
+J    Fluvisol
+Jc   Calcaric Fluvisol
+Jd   Dystric Fluvisol
+Je   Eutric Fluvisol
+Jm   Mollic Fluvisol
+Jt   Thionic Fluvisol
+K    Kastanozem
+Kh   Haplic Kastanozem
+Kk   Calcic Kastanozem
+Kl   Luvic Kastanozem
+Ko   Orthic Kastanozem
+L    Luvisol
+La   Albic Luvisol
+Lc   Chromic Luvisol
+Ld   Dystric Luvisol
+Lf   Ferric Luvisol
+Lg   Gleyic Luvisol
+Lh   Humic Luvisol
+Lk   Calcic Luvisol
+Lo   Orthic Luvisol
+Lp   Plinthic Luvisol
+Ls   Spodic Luvisol
+Lv   Vertic Luvisol
+M    Greyzem
+Mo   Orthic Greyzem
+Nc   Cambic Nitosol
+O    Histosol
+Od   Dystric Histosol
+Oe   Eutric Histosol
+Ox   Gelic Histosol
+P    Podzol
+Pf   Ferric Podzol
+Pg   Gleyic Podzol
+Ph   Humic Podzol
+Pl   Leptic Podzol
+Po   Orthic Podzol
+Pp   Placic Podzol
+Q    Arenosol
+Qa   Albic Arenosol
+Qc   Cambic Arenosol
+Qh   Humic Arenosol
+Ql   Luvic Arenosol
+R    Regosol
+Rc   Calcaric Regosol
+Rd   Dystric Regosol
+Re   Eutric Regosol
+Rx   Gelic Regosol
+S    Solonetz
+Sg   Gleyic Solonetz
+Sm   Mollic Solonetz
+So   Orthic Solonetz
+T    Andosol
+Th   Humic Andosol
+Tm   Mollic Andosol
+To   Ochric Andosol
+Tv   Vitric Andosol
+U    Ranker
+Ud   Dystric Ranker
+Ul   Luvic Ranker
+V    Vertisol
+Vc   Chromic Vertisol
+Vg   Gleyic Vertisol
+Vp   Pellic Vertisol
+W    Planosol
+Wd   Dystric Planosol
+We   Eutric Planosol
+Wh   Humic Planosol
+Wm   Mollic Planosol
+Ws   Solodic Planosol
+X    Xerosol
+Xk   Calcic Xerosol
+Xl   Luvic Xerosol
+Xy   Gypsic Xerosol
+Z    Solonchak
+Zg   Gleyic Solonchak
+Zo   Orthic Solonchak
+Zt   Takyric Solonchak
+p    Plaggensol
+11   Town
+22   Soil disturbed by man
+33   Water body
+44   Marsh
+55   Glacier
+66   Rock outcrops
+     No information
+---------------------------------------------------------------------------
+FAO85-LEV3
+----------------
+      No information
+A     Acrisol
+Af    Ferric Acrisol
+Ag    Gleyic Acrisol
+Ah    Humic Acrisol
+Ao    Orthic Acrisol
+Ap    Plinthic Acrisol
+B     Cambisol
+Ba    Calcaric Cambisol
+Bc    Chromic Cambisol
+Bcc   Calcaro-Chromic Cambisol
+Bch   Humo-Chromic Cambisol
+Bck   Calci-Chromic Cambisol
+Bcr   Rhodo-Chromic Cambisol
+Bd    Dystric Cambisol
+Bda   Ando-Dystric Cambisol
+Bdg   Gleyo-Dystric Cambisol
+Bds   Spodo-Dystric Cambisol
+Be    Eutric Cambisol
+Bea   Ando-Eutric Cambisol
+Bec   Calcaro-Eutric Cambisol
+Bef   Fluvi-Eutric Cambisol
+Beg   Gleyo-Eutric Cambisol
+Bev   Verti-Eutric Cambisol
+Bf    Ferralic Cambisol
+Bg    Gleyic Cambisol
+Bgc   Calcaro-Gleyic Cambisol
+Bge   Eutri-Gleyic Cambisol
+Bgg   Stagno-Gleyic Cambisol
+Bgs   Spodo-Gleyic Cambisol
+Bgv   Verti-Gleyic Cambisol (?)
+Bh    Humic Cambisol
+Bhc   Calcaro-Humic Cambisol
+Bk    Calcic Cambisol
+Bkf   Fluvi-Calcic Cambisol
+Bkh   Humo-Calcic Cambisol
+Bkv   Verti-Calcic Cambisol
+Bm    Mollic Cambisol
+Bv    Vertic Cambisol
+Bvc   Calcaro-Vertic Cambisol
+Bvg   Gleyo-Vertic Cambisol
+Bvk   Calci-Vertic Cambisol
+Bx    Gelic Cambisol
+Bxs   Spodo-Gelic Cambisol
+C     Chernozem
+Cg    Gleyic Chernozem
+Ch    Haplic Chernozem
+Chp   Pachi-Haplic Chernozem
+Chv   Verti-Haplic Chernozem
+Ck    Calcic Chernozem
+Ckb   Vermi-Calcic Chernozem
+Ckc   Calcaro-Calcic Chernozem
+Ckp   Pachi-Calcic Chernozem
+Cl    Luvic Chernozem
+D     Podzoluvisol
+Dd    Dystric Podzoluvisol
+De    Eutric Podzoluvisol
+Dg    Gleyic Podzoluvisol
+Dgd   Dystric Gleyic Podzoluvisol
+Dge   Eutric Gleyic Podzoluvisol
+Dgs   Stagno-Gleyic Podzoluvisol
+E     Rendzina
+Ec    Cambic Rendzina
+Eh    Histic Rendzina
+Eo    Orthic Rendzina
+F     Ferralsol
+Fo    Orthic Ferralsol
+G     Gleysol
+Gc    Calcaric Gleysol
+Gcf   Fluvi-Calcaric Gleysol
+Gcs   Stagno-Calcaric Gleysol
+Gd    Dystric Gleysol
+Gdf   Fluvi-Dystric Gleysol
+Gds   Stagno-Dystric Gleysol
+Ge    Eutric Gleysol
+Gef   Fluvi-Eutric Gleysol
+Ges   Stagno-Eutric Gleysol
+Gev   Verti-Eutric Gleysol
+Gf    Fluvic Gleysol
+Gfm   Molli-Fluvic Gleysol
+Gh    Humic Gleysol
+Ghf   Fluvi-Humic Gleysol
+Ghh   Histo-Humic Gleysol
+Ght   Thioni-Humic Gleysol
+Gi    Histic Gleysol
+Gih   Humo-Histic Gleysol
+Gl    Luvic Gleysol
+Gls   Stagno-Luvic Gleysol
+Gm    Mollic Gleysol
+Gmc   Calcaro-Mollic Gleysol
+Gmf   Fluvi-Mollic Gleysol
+Gmv   Verti-Mollic Gleysol
+Gs    Stagnic Gleysol
+Gt    Thionic Gleysol
+Gtz   Undefined code
+Gx    Gelic Gleysol
+H     Phaeozem
+Hc    Calcaric Phaeozem
+Hcb   Vermi-Calcaric Phaeozem
+Hcf   Fluvi-Calcaric Phaeozem
+Hcn   Alkalino-Calcaric Phaeozem
+Hcs   Saline-Calcaric Phaeozem
+Hg    Gleyic Phaeozem
+Hgc   Calcaro-Gleyic Phaeozem
+Hgf   Fluvi-Gleyic Phaeozem
+Hgs   Stagno-Gleyic Phaeozem
+Hgv   Verti-Gleyic Phaeozem
+Hh    Haplic Phaeozem
+Hhv   Verti-Haplic Phaeozem
+Hl    Luvic Phaeozem
+Hlv   Verti-Luvic Phaeozem
+Ho    Orthic Phaeozem
+I     Lithosol
+Ic    Calcaric Lithosol
+Ich   Humo-Calcaric Lithosol
+Id    Dystric Lithosol
+Ie    Eutric Lithosol
+J     Fluvisol
+Jc    Calcaric Fluvisol
+Jcf   Fluvi-Calcaric Fluvisol
+Jcg   Gleyo-Calcaric Fluvisol
+Jd    Dystric Fluvisol
+Jdf   Fluvi-Dystric Fluvisol
+Jdg   Gleyo-Dystric Fluvisol
+Je    Eutric Fluvisol
+Jef   Fluvi-Eutric Fluvisol
+Jeg   Gleyo-Eutric Fluvisol
+Jm    Mollic Fluvisol
+Jmg   Gleyo-Mollic Fluvisol
+Jmv   Verti-Mollic Fluvisol
+Jt    Thionic Fluvisol
+K     Kastanozem
+Kh    Haplic Kastanozem
+Khb   Vermi-Haplic Kastanozem
+Kk    Calcic Kastanozem
+Kkb   Vermi-Calcic Kastanozem
+Kkv   Verti-Calcic Kastanozem
+Kl    Luvic Kastanozem
+Ko    Orthic Kastanozem
+L     Luvisol
+La    Albic Luvisol
+Lap   Plano-Albic Luvisol
+Lc    Chromic Luvisol
+Lcp   Plano-Chromic Luvisol
+Lcr   Rhodo-Chromic Luvisol
+Lcv   Verti-Chromic Luvisol
+Ld    Dystric Luvisol
+Ldg   Gleyo-Dystric Luvisol
+Lf    Ferric Luvisol
+Lg    Gleyic Luvisol
+Lga   Albo-Gleyic Luvisol
+Lgp   Plano-Gleyic Luvisol
+Lgs   Stagno-Gleyic Luvisol
+Lh    Humic Luvisol
+Lk    Calcic Luvisol
+Lkc   Chromo-Calcic Luvisol
+Lkv   Verti-Calcic Luvisol
+Lo    Orthic Luvisol
+Lop   Plano-Orthic Luvisol
+Lp    Plinthic Luvisol
+Ls    Spodic Luvisol
+Lv    Vertic Luvisol
+Lvc   Chromo-Vertic Luvisol
+Lvk   Calci-Vertic Luvisol
+M     Greyzem
+Mo    Orthic Greyzem
+Nc    Cambic Nitosol
+O     Histosol
+Od    Dystric Histosol
+Odp   Placi-Dystric Histosol
+Oe    Eutric Histosol
+Ox    Gelic Histosol
+P     Podzol
+Pf    Ferric Podzol
+Pg    Gleyic Podzol
+Pgh   Histo-Gleyic Podzol
+Pgs   Stagno-Gleyic Podzol
+Ph    Humic Podzol
+Phf   Ferro-Humic Podzol
+Pl    Leptic Podzol
+Plh   Humo-Leptic Podzol
+Po    Orthic Podzol
+Pof   Ferro-Orthic Podzol
+Poh   Humo-Orthic Podzol
+Pol   Lepto-Orthic Podzol
+Pp    Placic Podzol
+Pph   Humo-Placic Podzol
+Q     Arenosol
+Qa    Albic Arenosol
+Qc    Cambic Arenosol
+Qcc   Calcaro-Cambic Arenosol
+Qcd   Dystri-Cambic Arenosol
+Qcg   Gleyo-Cambic Arenosol
+Qcs   Spodo-Cambic Arenosol
+Qh    Humic Arenosol
+Ql    Luvic Arenosol
+Qld   Dystri-Luvic Arenosol
+Qlg   Gleyo-Luvic Arenosol
+R     Regosol
+Rc    Calcaric Regosol
+Rd    Dystric Regosol
+Rds   Undefined code
+Re    Eutric Regosol
+Rx    Gelic Regosol
+S     Solonetz
+Sg    Gleyic Solonetz
+Sm    Mollic Solonetz
+So    Orthic Solonetz
+Sof   Fluvi-Orthic Solonetz
+T     Andosol
+Th    Humic Andosol
+Tm    Mollic Andosol
+To    Ochric Andosol
+Tv    Vitric Andosol
+U     Ranker
+Ud    Dystric Ranker
+Ul    Luvic Ranker
+V     Vertisol
+Vc    Chromic Vertisol
+Vcc   Calcaro-Chromic Vertisol
+Vg    Gleyic Vertisol
+Vgs   Undefined code
+Vp    Pellic Vertisol
+Vpc   Calcaro-Pellic Vertisol
+Vpg   Gleyo-Pellic Vertisol
+Vpn   Sodi-Pellic Vertisol
+W     Planosol
+Wd    Dystric Planosol
+Wdv   Verti-Dystric Planosol
+We    Eutric Planosol
+Wev   Verti-Eutric Planosol
+Wh    Humic Planosol
+Wm    Mollic Planosol
+Ws    Solodic Planosol
+X     Xerosol
+Xk    Calcic Xerosol
+Xl    Luvic Xerosol
+Xy    Gypsic Xerosol
+Z     Solonchak
+Zg    Gleyic Solonchak
+Zgf   Fluvi-Gleyic Solonchak
+Zo    Orthic Solonchak
+Zt    Takyric Solonchak
+p     Plaggensol
+111   Town
+222   Soil disturbed by man
+333   Water body
+444   Marsh
+555   Glacier
+666   Rock outcrops
+---------------------------------------------------------------------------
+FAO90-FULL
+----------------
+AC     Acrisol
+ACf    Ferric Acrisol
+ACg    Gleyic Acrisol
+ACh    Haplic Acrisol
+ACp    Plinthic Acrisol
+ACu    Humic Acrisol
+AL     Alisol
+ALf    Ferric Alisol
+ALg    Gleyic Alisol
+ALh    Haplic Alisol
+ALj    Stagnic Alisol
+ALp    Plinthic Alisol
+ALu    Humic Alisol
+AN     Andosol
+ANg    Gleyic Andosol
+ANh    Haplic Andosol
+ANi    Gelic Andosol
+ANm    Mollic Andosol
+ANu    Umbric Andosol
+AR     Arenosol
+ARa    Albic Arenosol
+ARb    Cambic Arenosol
+ARbs   ?-Cambic Arenosol
+ARc    Calcaric Arenosol
+ARcg   ?-Calcaric Arenosol
+ARg    Gleyic Arenosol
+ARh    Haplic Arenosol
+ARl    Luvic Arenosol
+ARo    Ferralic Arenosol
+AT     Anthrosol
+ATa    Aric Anthrosol
+ATc    Cumulic Anthrosol
+ATf    Fimic Anthrosol
+ATu    Urbic Anthrosol
+CH     Chernozem
+CHb
+CHe
+CHg    Gleyic Chernozem
+CHgs   ?-Gleyic Chernozem
+CHh    Haplic Chernozem
+CHha   ?-Haplic Chernozem
+CHhv   ?-Haplic Chernozem
+CHi
+CHk    Calcic Chernozem
+CHkb   ?-Calcic Chernozem
+CHkc   ?-Calcic Chernozem
+CHkv   ?-Calcic Chernozem
+CHl    Luvic Chernozem
+CHw    Glossic Chernozem
+CL     Calcisol
+CLh    Haplic Calcisol
+CLl    Luvic Calcisol
+CLp    Petric Calcisol
+CM     Cambisol
+CMa
+CMc    Calcaric Cambisol
+CMd    Dystric Cambisol
+CMda   ?-Dystric Cambisol
+CMdh   ?-Dystric Cambisol
+CMds   ?-Dystric Cambisol
+CMe    Eutric Cambisol
+CMea   ?-Eutric Cambisol
+CMec   ?-Eutric Cambisol
+CMef   ?-Eutric Cambisol
+CMep   ?-Eutric Cambisol
+CMet   ?-Eutric Cambisol
+CMev   ?-Eutric Cambisol
+CMg    Gleyic Cambisol
+CMh
+CMi    Gelic Cambisol
+CMj    Stagnic Cambisol
+CMjd   ?-Stagnic Cambisol
+CMjp   ?-Stagnic Cambisol
+CMo    Ferralic Cambisol
+CMu    Humic Cambisol
+CMv    Vertic Cambisol
+CMx    Chromic Cambisol
+FL     Fluvisol
+FLc    Calcaric Fluvisol
+FLcf   ?-Calcaric Fluvisol
+FLcg   ?-Calcaric Fluvisol
+FLd    Dystric Fluvisol
+FLe    Eutric Fluvisol
+FLef   ?-Eutric Fluvisol
+FLeg   ?-Eutric Fluvisol
+FLhi   ?-
+FLm    Mollic Fluvisol
+FLs    Salic Fluvisol
+FLt    Thionic Fluvisol
+FLu    Umbric Fluvisol
+FR     Ferralsol
+FRg    Geric Ferralsol
+FRh    Haplic Ferralsol
+FRp    Plinthic Ferralsol
+FRr    Rhodic Ferralsol
+FRu    Humic Ferralsol
+FRx    Xanthic Ferralsol
+GL     Gleysol
+GLa    Andic Gleysol
+GLd    Dystric Gleysol
+GLdh   ?-Dystric Gleysol
+GLe    Eutric Gleysol
+GLef   ?-Eutric Gleysol
+GLh
+GLi    Gelic Gleysol
+GLk    Calcic Gleysol
+GLm    Mollic Gleysol
+GLme   ?-Mollic Gleysol
+GLmf   ?-Mollic Gleysol
+GLt    Thionic Gleysol
+GLu    Umbric Gleysol
+GMe
+GR     Greyzem
+GRg    Gleyic Greyzem
+GRh    Haplic Greyzem
+GY     Gypsisol
+GYh    Haplic Gypsisol
+GYk    Calcic Gypsisol
+GYl    Luvic Gypsisol
+GYp    Petric Gypsisol
+HS     Histosol
+HSf    Fibric Histosol
+HSfd   ?-Fibric Histosol
+HSi    Gelic Histosol
+HSl    Folic Histosol
+HSs    Terric Histosol
+HSt    Thionic Histosol
+KS     Kastanozem
+KSh    Haplic Kastanozem
+KSk    Calcic Kastanozem
+KSkb   ?-Calcic Kastanozem
+KSl    Luvic Kastanozem
+KSy    Gypsic Kastanozem
+LP     Leptosol
+LPc
+LPd    Dystric Leptosol
+LPe    Eutric Leptosol
+LPi    Gelic Leptosol
+LPk    Rendzic Leptosol
+LPm    Mollic Leptosol
+LPq    Lithic Leptosol
+LPqc   ?-Lithic Leptosol
+LPqd   ?-Lithic Leptosol
+LPqe   ?-Lithic Leptosol
+LPr
+LPu    Umbric Leptosol
+LV     Luvisol
+LVa    Albic Luvisol
+LVaa   ?-Albic Luvisol
+LVal   ?-Albic Luvisol
+LVe
+LVf    Ferric Luvisol
+LVg    Gleyic Luvisol
+LVh    Haplic Luvisol
+LVhp   ?-Haplic Luvisol
+LVj    Stagnic Luvisol
+LVja   ?-Stagnic Luvisol
+LVjp   ?-Stagnic Luvisol
+LVk    Calcic Luvisol
+LVo
+LVv    Vertic Luvisol
+LVx    Chromic Luvisol
+LVxp   ?-Chromic Luvisol
+LVxv   ?-Chromic Luvisol
+LX     Lixisol
+LXa    Albic Lixisol
+LXf    Ferric Lixisol
+LXg    Gleyic Lixisol
+LXh    Haplic Lixisol
+LXj    Stagnic Lixisol
+LXp    Plinthic Lixisol
+MGd
+NT     Nitisol
+NTh    Haplic Nitisol
+NTr    Rhodic Nitisol
+NTu    Humic Nitisol
+PD     Podzoluvisol
+PDd    Dystric Podzoluvisol
+PDe    Eutric Podzoluvisol
+PDg    Gleyic Podzoluvisol
+PDi    Gelic Podzoluvisol
+PDj    Stagnic Podzoluvisol
+PFg
+PH     Phaeozem
+PHc    Calcaric Phaeozem
+PHg    Gleyic Phaeozem
+PHh    Haplic Phaeozem
+PHhv   ?-Haplic Phaeozem
+PHi
+PHj    Stagnic Phaeozem
+PHjv   ?-Stagnic Phaeozem
+PHl    Luvic Phaeozem
+PHlv   ?-Luvic Phaeozem
+PL     Planosol
+PLd    Dystric Planosol
+PLe    Eutric Planosol
+PLev   ?-Eutric Planosol
+PLi    Gelic Planosol
+PLm    Mollic Planosol
+PLu    Umbric Planosol
+PT     Plinthosol
+PTa    Albic Plinthosol
+PTd    Dystric Plinthosol
+PTe    Eutric Plinthosol
+PTu    Humic Plinthosol
+PZ     Podzol
+PZb    Cambic Podzol
+PZc    Carbic Podzol
+PZf    Ferric Podzol
+PZg    Gleyic Podzol
+PZh    Haplic Podzol
+PZha   ?-Haplic Podzol
+PZi    Gelic Podzol
+RG     Regosol
+RGc    Calcaric Regosol
+RGd    Dystric Regosol
+RGe    Eutric Regosol
+RGep   ?-Eutric Regosol
+RGi    Gelic Regosol
+RGu    Umbric Regosol
+RGy    Gypsic Regosol
+Rge
+SC     Solonchak
+SCg    Gleyic Solonchak
+SCh    Haplic Solonchak
+SCi    Gelic Solonchak
+SCk    Calcic Solonchak
+SCm    Mollic Solonchak
+SCn    Sodic Solonchak
+SCy    Gypsic Solonchak
+SN     Solonetz
+SNg    Gleyic Solonetz
+SNh    Haplic Solonetz
+SNj    Stagnic Solonetz
+SNk    Calcic Solonetz
+SNm    Mollic Solonetz
+SNy    Gypsic Solonetz
+VR     Vertisol
+VRd    Dystric Vertisol
+VRe    Eutric Vertisol
+VReg   ?-Eutric Vertisol
+VRej   ?-Eutric Vertisol
+VRen   ?-Eutric Vertisol
+VRk    Calcic Vertisol
+VRy    Gypsic Vertisol
+1 11   Town
+2 22   Soil disturbed by man
+3 33   Water body
+4 44   Marsh
+5 55   Glacier
+6 66   Rock outcrops
+       No information
+---------------------------------------------------------------------------
+FAO90-LEV1
+----------------
+AC   Acrisol
+AL   Alisol
+AN   Andosol
+AR   Arenosol
+AT   Anthrosol
+CH   Chernozem
+CL   Calcisol
+CM   Cambisol
+FL   Fluvisol
+FR   Ferralsol
+GL   Gleysol
+GR   Greyzem
+GY   Gypsisol
+HS   Histosol
+KS   Kastanozem
+LP   Leptosol
+LV   Luvisol
+LX   Lixisol
+NT   Nitisol
+PD   Podzoluvisol
+PH   Phaeozem
+PL   Planosol
+PT   Plinthosol
+PZ   Podzol
+RG   Regosol
+SC   Solonchak
+SN   Solonetz
+VR   Vertisol
+1    Town
+2    Soil disturbed by man
+3    Water body
+4    Marsh
+5    Glacier
+6    Rock outcrops
+     No information
+---------------------------------------------------------------------------
+FAO90-LEV2
+----------------
+AC    Acrisol
+ACf   Ferric Acrisol
+ACg   Gleyic Acrisol
+ACh   Haplic Acrisol
+ACp   Plinthic Acrisol
+ACu   Humic Acrisol
+AL    Alisol
+ALf   Ferric Alisol
+ALg   Gleyic Alisol
+ALh   Haplic Alisol
+ALj   Stagnic Alisol
+ALp   Plinthic Alisol
+ALu   Humic Alisol
+AN    Andosol
+ANg   Gleyic Andosol
+ANh   Haplic Andosol
+ANi   Gelic Andosol
+ANm   Mollic Andosol
+ANu   Umbric Andosol
+AR    Arenosol
+ARa   Albic Arenosol
+ARb   Cambic Arenosol
+ARc   Calcaric Arenosol
+ARg   Gleyic Arenosol
+ARh   Haplic Arenosol
+ARl   Luvic Arenosol
+ARo   Ferralic Arenosol
+AT    Anthrosol
+ATa   Aric Anthrosol
+ATc   Cumulic Anthrosol
+ATf   Fimic Anthrosol
+ATu   Urbic Anthrosol
+CH    Chernozem
+CHg   Gleyic Chernozem
+CHh   Haplic Chernozem
+CHk   Calcic Chernozem
+CHl   Luvic Chernozem
+CHw   Glossic Chernozem
+CL    Calcisol
+CLh   Haplic Calcisol
+CLl   Luvic Calcisol
+CLp   Petric Calcisol
+CM    Cambisol
+CMc   Calcaric Cambisol
+CMd   Dystric Cambisol
+CMe   Eutric Cambisol
+CMg   Gleyic Cambisol
+CMi   Gelic Cambisol
+CMj   Stagnic Cambisol
+CMo   Ferralic Cambisol
+CMu   Humic Cambisol
+CMv   Vertic Cambisol
+CMx   Chromic Cambisol
+FL    Fluvisol
+FLc   Calcaric Fluvisol
+FLd   Dystric Fluvisol
+FLe   Eutric Fluvisol
+FLm   Mollic Fluvisol
+FLs   Salic Fluvisol
+FLt   Thionic Fluvisol
+FLu   Umbric Fluvisol
+FR    Ferralsol
+FRg   Geric Ferralsol
+FRh   Haplic Ferralsol
+FRp   Plinthic Ferralsol
+FRr   Rhodic Ferralsol
+FRu   Humic Ferralsol
+FRx   Xanthic Ferralsol
+GL    Gleysol
+GLa   Andic Gleysol
+GLd   Dystric Gleysol
+GLe   Eutric Gleysol
+GLi   Gelic Gleysol
+GLk   Calcic Gleysol
+GLm   Mollic Gleysol
+GLt   Thionic Gleysol
+GLu   Umbric Gleysol
+GR    Greyzem
+GRg   Gleyic Greyzem
+GRh   Haplic Greyzem
+GY    Gypsisol
+GYh   Haplic Gypsisol
+GYk   Calcic Gypsisol
+GYl   Luvic Gypsisol
+GYp   Petric Gypsisol
+HS    Histosol
+HSf   Fibric Histosol
+HSi   Gelic Histosol
+HSl   Folic Histosol
+HSs   Terric Histosol
+HSt   Thionic Histosol
+KS    Kastanozem
+KSh   Haplic Kastanozem
+KSk   Calcic Kastanozem
+KSl   Luvic Kastanozem
+KSy   Gypsic Kastanozem
+LP    Leptosol
+LPd   Dystric Leptosol
+LPe   Eutric Leptosol
+LPi   Gelic Leptosol
+LPk   Rendzic Leptosol
+LPm   Mollic Leptosol
+LPq   Lithic Leptosol
+LPu   Umbric Leptosol
+LV    Luvisol
+LVa   Albic Luvisol
+LVf   Ferric Luvisol
+LVg   Gleyic Luvisol
+LVh   Haplic Luvisol
+LVj   Stagnic Luvisol
+LVk   Calcic Luvisol
+LVv   Vertic Luvisol
+LVx   Chromic Luvisol
+LX    Lixisol
+LXa   Albic Lixisol
+LXf   Ferric Lixisol
+LXg   Gleyic Lixisol
+LXh   Haplic Lixisol
+LXj   Stagnic Lixisol
+LXp   Plinthic Lixisol
+NT    Nitisol
+NTh   Haplic Nitisol
+NTr   Rhodic Nitisol
+NTu   Humic Nitisol
+PD    Podzoluvisol
+PDd   Dystric Podzoluvisol
+PDe   Eutric Podzoluvisol
+PDg   Gleyic Podzoluvisol
+PDi   Gelic Podzoluvisol
+PDj   Stagnic Podzoluvisol
+PH    Phaeozem
+PHc   Calcaric Phaeozem
+PHg   Gleyic Phaeozem
+PHh   Haplic Phaeozem
+PHj   Stagnic Phaeozem
+PHl   Luvic Phaeozem
+PL    Planosol
+PLd   Dystric Planosol
+PLe   Eutric Planosol
+PLi   Gelic Planosol
+PLm   Mollic Planosol
+PLu   Umbric Planosol
+PT    Plinthosol
+PTa   Albic Plinthosol
+PTd   Dystric Plinthosol
+PTe   Eutric Plinthosol
+PTu   Humic Plinthosol
+PZ    Podzol
+PZb   Cambic Podzol
+PZc   Carbic Podzol
+PZf   Ferric Podzol
+PZg   Gleyic Podzol
+PZh   Haplic Podzol
+PZi   Gelic Podzol
+RG    Regosol
+RGc   Calcaric Regosol
+RGd   Dystric Regosol
+RGe   Eutric Regosol
+RGi   Gelic Regosol
+RGu   Umbric Regosol
+RGy   Gypsic Regosol
+SC    Solonchak
+SCg   Gleyic Solonchak
+SCh   Haplic Solonchak
+SCi   Gelic Solonchak
+SCk   Calcic Solonchak
+SCm   Mollic Solonchak
+SCn   Sodic Solonchak
+SCy   Gypsic Solonchak
+SN    Solonetz
+SNg   Gleyic Solonetz
+SNh   Haplic Solonetz
+SNj   Stagnic Solonetz
+SNk   Calcic Solonetz
+SNm   Mollic Solonetz
+SNy   Gypsic Solonetz
+VR    Vertisol
+VRd   Dystric Vertisol
+VRe   Eutric Vertisol
+VRk   Calcic Vertisol
+VRy   Gypsic Vertisol
+1 1   Town
+2 2   Soil disturbed by man
+3 3   Water body
+4 4   Marsh
+5 5   Glacier
+6 6   Rock outcrops
+      No information
+---------------------------------------------------------------------------
+IL
+----------------
+0   No information
+1   No impermeable layer within 150 cm
+2   Impermeable layer between 80 and 150 cm
+3   Impermeable layer between 40 and 80 cm
+4   Impermeable layer within 40 cm
+---------------------------------------------------------------------------
+MAT1
+----------------
+      No information
+100   Undifferentiated alluvial deposits (or glacial deposits)
+110   River alluvium
+111   Old fluviatile deposit (Tertiary)
+112   Terraces
+113   Lacustrofluvial alluvium
+120   Estuarine/Marine alluvium
+130   Glaciofluvial deposits
+131   Till
+140   Glaciofluvial drift
+150   Colluvium
+200   Calcareous rocks
+209   Residuum from calcareous rocks
+210   Limestone
+211   Primary limestone (Carboniferous)
+212   Secondary limestone
+213   Tertiary limestone
+214   Ferrugineous limestone
+215   Hard limestone
+216   Soft limestone
+217   Marly limestone
+218   Chalky limestone
+219   Detrital limestone
+220   Secondary chalk
+230   Marl
+231   Secondary marl
+232   Tertiary marl
+233   Gypseous marl
+234   Schistose marl
+240   Gypsum
+250   Dolomite
+300   Clayey materials
+310   Old clayey sedimentary deposits
+311   Primary clay and sandstone
+312   Secondary clay
+313   Tertiary clay
+314   Pleistocene clay
+319   Residuum from old clayey sedimentary deposits
+320   Alluvial or glaciofluvial clay
+321   Tertiary alluvial clay
+322   Glacial clay (Tertiary and Quaternary)
+323   Gravelly clay
+324   Boulder clay
+330   Residual clay from calcareous rocks
+331   Clay-with-flints
+332   Siderolith formations
+333   Calcareous decalcification clay
+340   Claystone, mudstone
+350   Calcareous clay
+400   Sandy materials
+410   Old sandy sedimentary deposits
+411   Secondary sands
+412   Tertiary sands
+413   Flint sands
+414   Pleistocene sands
+419   Residuum from old sandy sedimentary deposits
+420   Alluvial or glaciofluvial sands
+421   Glacial sands
+422   Sandy gravelly materials
+429   Residuum from alluvial or glaciofluvial sands
+430   Eolian sands
+431   Locally sandcover
+440   Coastal sands (Dune sands)
+441   Shelly coastal sands
+442   Non calcareous coastal sands
+450   Sandstone
+451   Calcareous sandstone (Macigno)
+452   Ferrugineous sandstone (Old Red sandstone)
+453   Clayey sandstone
+454   Soft quartzy sandstone
+455   Hard quartzy sandstone
+456   Quartzite
+457   Schistose sandstone
+459   Residuum from sandstone
+500   Loamy materials
+510   Residual loam
+511   Old loam (Touyas)
+512   Stony loam
+513   Clay loam
+514   Sandy loam
+520   Eolian loam
+521   Loess
+522   Thin loess cover
+523   Sandy loess
+530   Siltstone
+539   Residuum from siltstone
+600   Detrital formations
+610   Arkose
+620   Breccia and Puddingstone
+630   Flysch and Molasse
+640   Ranas
+700   Crystalline rocks and migmatites
+709   Residuum from crystalline rocks and migmatites
+710   Acid crystalline rocks (and migmatites)
+711   Granite
+712   Diorite, Quartzodiorite
+719   Residuum from acid crystalline rocks
+720   Non acid crystalline rocks (and migmatites)
+721   Syenite
+722   Gabbro
+723   Serpentine
+730   Crystalline metamorphic rocks
+731   Gneiss
+732   Embrechites
+739   Residuum from crystalline metamorphic rocks
+740   Schists
+741   Micaschists
+742   Slates
+743   Shales
+744   Calcschists
+745   Green schists
+749   Residuum from schists
+750   Other metamorphic rocks
+800   Volcanic rocks
+809   Residuum from volcanic rocks
+810   Acid volcanic rocks
+819   Residuum from acid volcanic rocks
+820   Basic volcanic rocks
+821   Phonolites
+822   Basalt
+823   Andesite
+824   Rhyolite
+825   Volcanic tuff
+830   Volcanic slag
+900   Other rocks
+901   Sedimentary rocks
+902   Sedimentary, metamorphic and eruptive rocks
+910   Organic materials
+---------------------------------------------------------------------------
+MAT11
+----------------
+    No information
+1   Undifferentiated alluvial deposits (or glacial deposits)
+2   Calcareous rocks
+3   Clayey materials
+4   Sandy materials
+5   Loamy materials
+6   Detrital formations
+7   Crystalline rocks and migmatites
+8   Volcanic rocks
+9   Other rocks
+---------------------------------------------------------------------------
+MAT12
+----------------
+     No information
+10   Undifferentiated alluvial deposits (or glacial deposits)
+11   River alluvium
+12   Estuarine/Marine alluvium
+13   Glaciofluvial deposits
+14   Glaciofluvial drift
+15   Colluvium
+20   Calcareous rocks
+21   Limestone
+22   Secondary chalk
+23   Marl
+24   Gypsum
+25   Dolomite
+30   Clayey materials
+31   Old clayey sedimentary deposits
+32   Alluvial or glaciofluvial clay
+33   Residual clay from calcareous rocks
+
+34   Claystone, mudstone
+35   Calcareous clay
+40   Sandy materials
+41   Old sandy sedimentary deposits
+42   Alluvial or glaciofluvial sands
+43   Eolian sands
+44   Coastal sands (Dune sands)
+45   Sandstone
+50   Loamy materials
+51   Residual loam
+52   Eolian loam
+53   Siltstone
+60   Detrital formations
+61   Arkose
+62   Breccia and Puddingstone
+63   Flysch and Molasse
+64   Ranas
+70   Crystalline rocks and migmatites
+71   Acid crystalline rocks (and migmatites)
+72   Non acid crystalline rocks (and migmatites)
+73   Crystalline metamorphic rocks
+74   Schists
+75   Other metamorphic rocks
+80   Volcanic rocks
+81   Acid volcanic rocks
+82   Basic volcanic rocks
+83   Volcanic slag
+90   Other rocks
+91   Organic materials
+---------------------------------------------------------------------------
+MAT2
+----------------
+      No information
+100   Undifferentiated alluvial deposits (or glacial deposits)
+110   River alluvium
+111   Old fluviatile deposit (Tertiary)
+112   Terraces
+113   Lacustrofluvial alluvium
+120   Estuarine/Marine alluvium
+130   Glaciofluvial deposits
+131   Till
+140   Glaciofluvial drift
+150   Colluvium
+200   Calcareous rocks
+209   Residuum from calcareous rocks
+210   Limestone
+211   Primary limestone (Carboniferous)
+212   Secondary limestone
+213   Tertiary limestone
+214   Ferrugineous limestone
+215   Hard limestone
+216   Soft limestone
+217   Marly limestone
+218   Chalky limestone
+219   Detrital limestone
+220   Secondary chalk
+230   Marl
+231   Secondary marl
+232   Tertiary marl
+233   Gypseous marl
+234   Schistose marl
+240   Gypsum
+250   Dolomite
+300   Clayey materials
+310   Old clayey sedimentary deposits
+311   Primary clay and sandstone
+312   Secondary clay
+313   Tertiary clay
+314   Pleistocene clay
+319   Residuum from old clayey sedimentary deposits
+320   Alluvial or glaciofluvial clay
+321   Tertiary alluvial clay
+322   Glacial clay (Tertiary and Quaternary)
+323   Gravelly clay
+324   Boulder clay
+330   Residual clay from calcareous rocks
+331   Clay-with-flints
+332   Siderolith formations
+333   Calcareous decalcification clay
+340   Claystone, mudstone
+350   Calcareous clay
+400   Sandy materials
+410   Old sandy sedimentary deposits
+411   Secondary sands
+412   Tertiary sands
+413   Flint sands
+414   Pleistocene sands
+419   Residuum from old sandy sedimentary deposits
+420   Alluvial or glaciofluvial sands
+421   Glacial sands
+422   Sandy gravelly materials
+429   Residuum from alluvial or glaciofluvial sands
+430   Eolian sands
+431   Locally sandcover
+440   Coastal sands (Dune sands)
+441   Shelly coastal sands
+442   Non calcareous coastal sands
+450   Sandstone
+451   Calcareous sandstone (Macigno)
+452   Ferrugineous sandstone (Old Red sandstone)
+453   Clayey sandstone
+454   Soft quartzy sandstone
+455   Hard quartzy sandstone
+456   Quartzite
+457   Schistose sandstone
+459   Residuum from sandstone
+500   Loamy materials
+510   Residual loam
+511   Old loam (Touyas)
+512   Stony loam
+513   Clay loam
+514   Sandy loam
+520   Eolian loam
+521   Loess
+522   Thin loess cover
+523   Sandy loess
+530   Siltstone
+539   Residuum from siltstone
+600   Detrital formations
+610   Arkose
+620   Breccia and Puddingstone
+630   Flysch and Molasse
+640   Ranas
+700   Crystalline rocks and migmatites
+709   Residuum from crystalline rocks and migmatites
+710   Acid crystalline rocks (and migmatites)
+711   Granite
+712   Diorite, Quartzodiorite
+719   Residuum from acid crystalline rocks
+720   Non acid crystalline rocks (and migmatites)
+721   Syenite
+722   Gabbro
+723   Serpentine
+730   Crystalline metamorphic rocks
+731   Gneiss
+732   Embrechites
+739   Residuum from crystalline metamorphic rocks
+740   Schists
+741   Micaschists
+742   Slates
+743   Shales
+744   Calcschists
+745   Green schists
+749   Residuum from schists
+750   Other metamorphic rocks
+800   Volcanic rocks
+809   Residuum from volcanic rocks
+810   Acid volcanic rocks
+819   Residuum from acid volcanic rocks
+820   Basic volcanic rocks
+821   Phonolites
+822   Basalt
+823   Andesite
+824   Rhyolite
+825   Volcanic tuff
+830   Volcanic slag
+900   Other rocks
+901   Sedimentary rocks
+902   Sedimentary, metamorphic and eruptive rocks
+910   Organic materials
+---------------------------------------------------------------------------
+MAT21
+----------------
+    No information
+1   Undifferentiated alluvial deposits (or glacial deposits)
+2   Calcareous rocks
+3   Clayey materials
+4   Sandy materials
+5   Loamy materials
+6   Detrital formations
+7   Crystalline rocks and migmatites
+8   Volcanic rocks
+9   Other rocks
+---------------------------------------------------------------------------
+MAT22
+----------------
+     No information
+10   Undifferentiated alluvial deposits (or glacial deposits)
+11   River alluvium
+12   Estuarine/Marine alluvium
+13   Glaciofluvial deposits
+14   Glaciofluvial drift
+15   Colluvium
+20   Calcareous rocks
+21   Limestone
+22   Secondary chalk
+23   Marl
+24   Gypsum
+25   Dolomite
+30   Clayey materials
+31   Old clayey sedimentary deposits
+32   Alluvial or glaciofluvial clay
+33   Residual clay from calcareous rocks
+34   Claystone, mudstone
+35   Calcareous clay
+40   Sandy materials
+41   Old sandy sedimentary deposits
+42   Alluvial or glaciofluvial sands
+43   Eolian sands
+44   Coastal sands (Dune sands)
+45   Sandstone
+50   Loamy materials
+51   Residual loam
+52   Eolian loam
+53   Siltstone
+60   Detrital formations
+61   Arkose
+62   Breccia and Puddingstone
+63   Flysch and Molasse
+64   Ranas
+70   Crystalline rocks and migmatites
+71   Acid crystalline rocks (and migmatites)
+72   Non acid crystalline rocks (and migmatites)
+73   Crystalline metamorphic rocks
+74   Schists
+75   Other metamorphic rocks
+80   Volcanic rocks
+81   Acid volcanic rocks
+82   Basic volcanic rocks
+83   Volcanic slag
+90   Other rocks
+91   Organic materials
+---------------------------------------------------------------------------
+NON-SOIL
+----------------
+0   SMU is dominantly covered by soil
+1   SMU is dominantly covered by non-soil
+---------------------------------------------------------------------------
+PAR-MAT-DOM
+----------------
+   0   No information
+1000   consolidated-clastic-sedimentary rocks
+1100   psephite or rudite
+1110   conglomerate
+1111   pudding stone
+1120   breccia
+1200   psammite or arenite
+1210   sandstone
+1211   calcareous sandstone
+1212   ferruginous sandstone
+1213   clayey sandstone
+1214   quartzitiic sandstone/orthoquartzite
+1215   micaceous sandstone
+1220   arkose
+1230   graywacke
+1231   feldspathic graywacke
+1300   pelite, lutite or argilite
+1310   claystone/mudstone
+1311   kaolinite
+1312   bentonite
+1320   siltstone
+1400   facies bound rock
+1410   flysch
+1411   sandy flisch
+1412   clayey and silty flysch
+1413   conglomeratic flysch
+1420   molasse
+2000   sedimentary rocks (chemically precipitated,
+       evaporated, or organogenic or biogenic in origin)
+2100   calcareous rocks
+2110   limestone
+2111   hard limestone
+2112   soft limestone
+2113   marly limestone
+2114   chalky limestone
+2115   detrital limestone
+2116   carbonaceous limestone
+2117   lacustrine or freshwater limestone
+2118   travertine/calcareous sinter
+2119   cavernous limestone
+2120   dolomite
+2121   cavernous dolomite
+2122   calcareous dolomite
+2130   marlstone
+2140   marl
+2141   chalk marl
+2142   gypsiferous marl
+2150   chalk
+2200   evaporites
+2210   gypsum
+2220   anhydrite
+2230   halite
+2300   siliceous rocks
+2310   chert, hornstone, flint
+2320   diatomite/radiolarite
+3000   igneous rocks
+3100   acid to intermediate plutonic rocks
+3110   granite
+3120   granodiorite
+3130   diorite
+3131   quartz diorite
+3132   gabbro diorite
+3140   syenite
+3200   basic plutonic rocks
+3210   gabbro
+3300   ultrabasic plutonic rocks
+3310   peridotite
+3320   pyroxenite
+3400   acid to intermediate volcanic rocks
+3410   rhyolite
+3411   obsidian
+3412   quartz porphyrite
+3420   dacite
+3430   andesite
+3431   porphyrite (interm,)
+3440   phonolite
+3441   tephritic phonolite
+3450   trachyte
+3500   basic to ultrabasic volcanic rocks
+3510   basalt
+3520   diabase
+3530   pikrite
+3600   dike rocks
+3610   aplite
+3620   pegmatite
+3630   lamprophyre
+3700   pyroclastic rocks (tephra)
+3710   tuff/tuffstone
+3711   agglomeratic tuff
+3712   block tuff
+3713   lapilli tuff
+3720   tuffite
+3721   sandy tuffite
+3722   silty tuffite
+3723   clayey tuffite
+3730   volcanic scoria/volcanic breccia
+3740   volcanic ash
+3750   ignimbrite
+3760   pumice
+4000   metamorphic rocks
+4100   weakly metamorphic rocks
+4110   (meta-)shale/argilite
+4120   slate
+4121   graphitic slate
+4200   acid regional metamorphic rocks
+4210   (meta-)quartzite
+4211   quartzite schist
+4220   phyllite
+4230   micaschist
+4240   gneiss
+4250   granulite (sensu stricto)
+4260   migmatite
+4300   basic regional metamorphic rocks
+4310   greenschist
+4311   prasinite
+4312   chlorite
+4313   talc schist
+4320   amphibolite
+4330   eclogite
+4400   ultrabasic regional metamorphic rocks
+4410   serpentinite
+4411   greenstone
+4500   calcareous regional metamorphic rocks
+4510   marble
+4520   calcschist, skam
+4600   rocks formed by contact metamorphism
+4610   contact slate
+4611   nodular slate
+4620   hornfels
+4630   calsilicate rocks
+4700   tectogenetic metamorphism rocks or cataclasmic
+       metamorphism
+4710   tectonic breccia
+4720   cataclasite
+4730   mylonite
+5000   unconsolidated deposits (alluvium, weathering
+       residuum and slope deposits)
+5100   marine and estuarine sands
+5110   pre-quaternary sand
+5111   tertiary sand
+5120   quaternary sand
+5121   holocene coastal sand with shells
+5122   delta sand
+5200   marine and estuarine clays and silts
+5210   pre-quaternary clay and silt
+5211   tertiary clay
+5212   tertiary silt
+5220   quaternary clay and silt
+5221   holocene clay
+5222   holocene silt
+5300   fluvial sands and gravels
+5310   river terrace sand or gravel
+5311   river terrace sand
+5312   river terrace gravel
+5320   floodplain sand or gravel
+5321   floodplain sand
+5322   floodplain gravel
+5400   fluvial clays, silts and loams
+5410   river clay and silt
+5411   terrace clay and silt
+5412   floodplain clay and silt
+5420   river loam
+5421   terrace loam
+5430   overbank deposit
+5431   floodplain clay and silt
+5432   floodplain loam
+5500   lake deposits
+5510   lake sand and delta sand
+5520   lake marl, bog lime
+5530   lake silt
+5600   residual and redeposited loams from silicate rocks
+5610   residual loam
+5611   stony loam
+5612   clayey loam
+5620   redeposited loam
+5621   running-ground
+5700   residual and redeposited clays from calcareous
+       rocks
+5710   residual clay
+5711   clay with flints
+5712   ferruginous residual clay
+5713   calcareous clay
+5714   non-calcareous clay
+5715   marly clay
+5720   redeposited clay
+5721   stony clay
+5800   slope deposits
+5810   slope-wash alluvium
+5820   colluvial deposit
+5830   talus scree
+5831   stratified slope deposits
+6000   unconsolidated glacial deposits/glacial drift
+6100   morainic deposits
+6110   glacial till
+6111   boulder clay
+6120   glacial debris
+6200   glaciofluvial deposits
+6210   outwash sand, glacial sand
+6220   outwash gravels glacial gravels
+6300   glaciolacustrine deposits
+6310   varves
+7000   eolian deposits
+7100   loess
+7110   loamy loess
+7120   sandy loess
+7200   eolian sands
+7210   dune sand
+7220   cover sand
+8000   organic materials
+8100   peat (mires)
+8110   rainwater fed moor peat (raised bog)
+8111   folic peat
+8112   fibric peat
+8113   terric peat
+8120   groundwater fed bog peat
+8200   slime and ooze deposits
+8210   gyttja, sapropel
+8300   carbonaceaous rocks (caustobiolite)
+8310   lignite (brown coal)
+8320   hard coal
+8330   anthracite
+9000   anthropogenic deposits
+9100   redeposited natural materials
+9110   sand and gravel fill
+9120   loamy fill
+9200   dump deposits
+9210   rubble/rubbish
+9220   industrial ashes and slag
+9230   industrial sludge
+9240   industrial waste
+9300   anthropogenic organic materials
+---------------------------------------------------------------------------
+PAR-MAT-DOM1
+----------------
+0   No information
+1   consolidated-clastic-sedimentary rocks
+2   sedimentary rocks (chemically precipitated,
+    evaporated, or organogenic or biogenic in origin)
+3   igneous rocks
+4   metamorphic rocks
+5   unconsolidated deposits (alluvium, weathering
+    residuum and slope deposits)
+6   unconsolidated glacial deposits/glacial drift
+7   eolian deposits
+8   organic materials
+9   anthropogenic deposits
+---------------------------------------------------------------------------
+PAR-MAT-DOM2
+----------------
+ 0   No information
+10   consolidated-clastic-sedimentary rocks
+11   psephite or rudite
+12   psammite or arenite
+13   pelite, lutite or argilite
+14   facies bound rock
+20   sedimentary rocks (chemically precipitated,
+     evaporated, or organogenic or biogenic in origin)
+21   calcareous rocks
+22   evaporites
+23   siliceous rocks
+30   igneous rocks
+31   acid to intermediate plutonic rocks
+32   basic plutonic rocks
+33   ultrabasic plutonic rocks
+34   acid to intermediate volcanic rocks
+35   basic to ultrabasic volcanic rocks
+36   dike rocks
+37   pyroclastic rocks (tephra)
+40   metamorphic rocks
+41   weakly metamorphic rocks
+42   acid regional metamorphic rocks
+43   basic regional metamorphic rocks
+44   ultrabasic regional metamorphic rocks
+45   calcareous regional metamorphic rocks
+46   rocks formed by contact metamorphism
+47   tectogenetic metamorphism rocks or cataclasmic
+     metamorphism
+50   unconsolidated deposits (alluvium, weathering
+     residuum and slope deposits)
+51   marine and estuarine sands
+52   marine and estuarine clays and silts
+53   fluvial sands and gravels
+54   fluvial clays, silts and loams
+55   lake deposits
+56   residual and redeposited loams from silicate rocks
+57   residual and redeposited clays from calcareous
+     rocks
+58   slope deposits
+60   unconsolidated glacial deposits/glacial drift
+61   morainic deposits
+62   glaciofluvial deposits
+63   glaciolacustrine deposits
+70   eolian deposits
+71   loess
+72   eolian sands
+80   organic materials
+81   peat (mires)
+82   slime and ooze deposits
+83   carbonaceaous rocks (caustobiolite)
+90   anthropogenic deposits
+91   redeposited natural materials
+92   dump deposits
+93   anthropogenic organic materials
+---------------------------------------------------------------------------
+PAR-MAT-DOM3
+----------------
+  0   No information
+100   consolidated-clastic-sedimentary rocks
+110   psephite or rudite
+111   conglomerate
+112   breccia
+120   psammite or arenite
+121   sandstone
+122   arkose
+123   graywacke
+130   pelite, lutite or argilite
+131   claystone/mudstone
+132   siltstone
+140   facies bound rock
+141   flysch
+142   molasse
+200   sedimentary rocks (chemically precipitated,
+      evaporated, or organogenic or biogenic in origin)
+210   calcareous rocks
+211   limestone
+212   dolomite
+213   marlstone
+214   marl
+215   chalk
+220   evaporites
+221   gypsum
+222   anhydrite
+223   halite
+230   siliceous rocks
+231   chert, hornstone, flint
+232   diatomite/radiolarite
+300   igneous rocks
+310   acid to intermediate plutonic rocks
+311   granite
+312   granodiorite
+313   diorite
+314   syenite
+320   basic plutonic rocks
+321   gabbro
+330   ultrabasic plutonic rocks
+331   peridotite
+332   pyroxenite
+340   acid to intermediate volcanic rocks
+341   rhyolite
+342   dacite
+343   andesite
+344   phonolite
+345   trachyte
+350   basic to ultrabasic volcanic rocks
+351   basalt
+352   diabase
+353   pikrite
+360   dike rocks
+361   aplite
+362   pegmatite
+363   lamprophyre
+370   pyroclastic rocks (tephra)
+371   tuff/tuffstone
+372   tuffite
+373   volcanic scoria/volcanic breccia
+374   volcanic ash
+375   ignimbrite
+376   pumice
+400   metamorphic rocks
+410   weakly metamorphic rocks
+411   (meta-)shale/argilite
+412   slate
+420   acid regional metamorphic rocks
+421   (meta-)quartzite
+422   phyllite
+423   micaschist
+424   gneiss
+425   granulite (sensu stricto)
+426   migmatite
+430   basic regional metamorphic rocks
+431   greenschist
+432   amphibolite
+433   eclogite
+440   ultrabasic regional metamorphic rocks
+441   serpentinite
+450   calcareous regional metamorphic rocks
+451   marble
+452   calcschist, skam
+460   rocks formed by contact metamorphism
+461   contact slate
+462   hornfels
+463   calsilicate rocks
+470   tectogenetic metamorphism rocks or cataclasmic
+      metamorphism
+471   tectonic breccia
+472   cataclasite
+473   mylonite
+500   unconsolidated deposits (alluvium, weathering
+      residuum and slope deposits)
+510   marine and estuarine sands
+511   pre-quaternary sand
+512   quaternary sand
+520   marine and estuarine clays and silts
+521   pre-quaternary clay and silt
+522   quaternary clay and silt
+530   fluvial sands and gravels
+531   river terrace sand or gravel
+532   floodplain sand or gravel
+540   fluvial clays, silts and loams
+541   river clay and silt
+542   river loam
+543   overbank deposit
+550   lake deposits
+551   lake sand and delta sand
+552   lake marl, bog lime
+553   lake silt
+560   residual and redeposited loams from silicate rocks
+561   residual loam
+562   redeposited loam
+570   residual and redeposited clays from calcareous
+      rocks
+571   residual clay
+572   redeposited clay
+580   slope deposits
+581   slope-wash alluvium
+582   colluvial deposit
+583   talus scree
+600   unconsolidated glacial deposits/glacial drift
+610   morainic deposits
+611   glacial till
+612   glacial debris
+620   glaciofluvial deposits
+621   outwash sand, glacial sand
+622   outwash gravels glacial gravels
+630   glaciolacustrine deposits
+631   varves
+700   eolian deposits
+710   loess
+711   loamy loess
+712   sandy loess
+720   eolian sands
+721   dune sand
+722   cover sand
+800   organic materials
+810   peat (mires)
+811   rainwater fed moor peat (raised bog)
+812   groundwater fed bog peat
+820   slime and ooze deposits
+821   gyttja, sapropel
+830   carbonaceaous rocks (caustobiolite)
+831   lignite (brown coal)
+832   hard coal
+833   anthracite
+900   anthropogenic deposits
+910   redeposited natural materials
+911   sand and gravel fill
+912   loamy fill
+920   dump deposits
+921   rubble/rubbish
+922   industrial ashes and slag
+923   industrial sludge
+924   industrial waste
+930   anthropogenic organic materials
+---------------------------------------------------------------------------
+PAR-MAT-SEC
+----------------
+   0   No information
+1000   consolidated-clastic-sedimentary rocks
+1100   psephite or rudite
+1110   conglomerate
+1111   pudding stone
+1120   breccia
+1200   psammite or arenite
+1210   sandstone
+1211   calcareous sandstone
+1212   ferruginous sandstone
+1213   clayey sandstone
+1214   quartzitiic sandstone/orthoquartzite
+1215   micaceous sandstone
+1220   arkose
+1230   graywacke
+1231   feldspathic graywacke
+1300   pelite, lutite or argilite
+1310   claystone/mudstone
+1311   kaolinite
+1312   bentonite
+1320   siltstone
+1400   facies bound rock
+1410   flysch
+1411   sandy flisch
+1412   clayey and silty flysch
+1413   conglomeratic flysch
+1420   molasse
+2000   sedimentary rocks (chemically precipitated,
+       evaporated, or organogenic or biogenic in origin)
+2100   calcareous rocks
+2110   limestone
+2111   hard limestone
+2112   soft limestone
+2113   marly limestone
+2114   chalky limestone
+2115   detrital limestone
+2116   carbonaceous limestone
+2117   lacustrine or freshwater limestone
+2118   travertine/calcareous sinter
+2119   cavernous limestone
+2120   dolomite
+2121   cavernous dolomite
+2122   calcareous dolomite
+2130   marlstone
+2140   marl
+2141   chalk marl
+2142   gypsiferous marl
+2150   chalk
+2200   evaporites
+2210   gypsum
+2220   anhydrite
+2230   halite
+2300   siliceous rocks
+2310   chert, hornstone, flint
+2320   diatomite/radiolarite
+3000   igneous rocks
+3100   acid to intermediate plutonic rocks
+3110   granite
+3120   granodiorite
+3130   diorite
+3131   quartz diorite
+3132   gabbro diorite
+3140   syenite
+3200   basic plutonic rocks
+3210   gabbro
+3300   ultrabasic plutonic rocks
+3310   peridotite
+3320   pyroxenite
+3400   acid to intermediate volcanic rocks
+3410   rhyolite
+3411   obsidian
+3412   quartz porphyrite
+3420   dacite
+3430   andesite
+3431   porphyrite (interm,)
+3440   phonolite
+3441   tephritic phonolite
+3450   trachyte
+3500   basic to ultrabasic volcanic rocks
+3510   basalt
+3520   diabase
+3530   pikrite
+3600   dike rocks
+3610   aplite
+3620   pegmatite
+3630   lamprophyre
+3700   pyroclastic rocks (tephra)
+3710   tuff/tuffstone
+3711   agglomeratic tuff
+3712   block tuff
+3713   lapilli tuff
+3720   tuffite
+3721   sandy tuffite
+3722   silty tuffite
+3723   clayey tuffite
+3730   volcanic scoria/volcanic breccia
+3740   volcanic ash
+3750   ignimbrite
+3760   pumice
+4000   metamorphic rocks
+4100   weakly metamorphic rocks
+4110   (meta-)shale/argilite
+4120   slate
+4121   graphitic slate
+4200   acid regional metamorphic rocks
+4210   (meta-)quartzite
+4211   quartzite schist
+4220   phyllite
+4230   micaschist
+4240   gneiss
+4250   granulite (sensu stricto)
+4260   migmatite
+4300   basic regional metamorphic rocks
+4310   greenschist
+4311   prasinite
+4312   chlorite
+4313   talc schist
+4320   amphibolite
+4330   eclogite
+4400   ultrabasic regional metamorphic rocks
+4410   serpentinite
+4411   greenstone
+4500   calcareous regional metamorphic rocks
+4510   marble
+4520   calcschist, skam
+4600   rocks formed by contact metamorphism
+4610   contact slate
+4611   nodular slate
+4620   hornfels
+4630   calsilicate rocks
+4700   tectogenetic metamorphism rocks or cataclasmic
+       metamorphism
+4710   tectonic breccia
+4720   cataclasite
+4730   mylonite
+5000   unconsolidated deposits (alluvium, weathering
+       residuum and slope deposits)
+5100   marine and estuarine sands
+5110   pre-quaternary sand
+5111   tertiary sand
+5120   quaternary sand
+5121   holocene coastal sand with shells
+5122   delta sand
+5200   marine and estuarine clays and silts
+5210   pre-quaternary clay and silt
+5211   tertiary clay
+5212   tertiary silt
+5220   quaternary clay and silt
+5221   holocene clay
+5222   holocene silt
+5300   fluvial sands and gravels
+5310   river terrace sand or gravel
+5311   river terrace sand
+5312   river terrace gravel
+5320   floodplain sand or gravel
+5321   floodplain sand
+5322   floodplain gravel
+5400   fluvial clays, silts and loams
+5410   river clay and silt
+5411   terrace clay and silt
+5412   floodplain clay and silt
+5420   river loam
+5421   terrace loam
+5430   overbank deposit
+5431   floodplain clay and silt
+5432   floodplain loam
+5500   lake deposits
+5510   lake sand and delta sand
+5520   lake marl, bog lime
+5530   lake silt
+5600   residual and redeposited loams from silicate rocks
+5610   residual loam
+5611   stony loam
+5612   clayey loam
+5620   redeposited loam
+5621   running-ground
+5700   residual and redeposited clays from calcareous
+       rocks
+5710   residual clay
+5711   clay with flints
+5712   ferruginous residual clay
+5713   calcareous clay
+5714   non-calcareous clay
+5715   marly clay
+5720   redeposited clay
+5721   stony clay
+5800   slope deposits
+5810   slope-wash alluvium
+5820   colluvial deposit
+5830   talus scree
+5831   stratified slope deposits
+6000   unconsolidated glacial deposits/glacial drift
+6100   morainic deposits
+6110   glacial till
+6111   boulder clay
+6120   glacial debris
+6200   glaciofluvial deposits
+6210   outwash sand, glacial sand
+6220   outwash gravels glacial gravels
+6300   glaciolacustrine deposits
+6310   varves
+7000   eolian deposits
+7100   loess
+7110   loamy loess
+7120   sandy loess
+7200   eolian sands
+7210   dune sand
+7220   cover sand
+8000   organic materials
+8100   peat (mires)
+8110   rainwater fed moor peat (raised bog)
+8111   folic peat
+8112   fibric peat
+8113   terric peat
+8120   groundwater fed bog peat
+8200   slime and ooze deposits
+8210   gyttja, sapropel
+8300   carbonaceaous rocks (caustobiolite)
+8310   lignite (brown coal)
+8320   hard coal
+8330   anthracite
+9000   anthropogenic deposits
+9100   redeposited natural materials
+9110   sand and gravel fill
+9120   loamy fill
+9200   dump deposits
+9210   rubble/rubbish
+9220   industrial ashes and slag
+9230   industrial sludge
+9240   industrial waste
+9300   anthropogenic organic materials
+---------------------------------------------------------------------------
+PAR-MAT-SEC1
+----------------
+0   No information
+1   consolidated-clastic-sedimentary rocks
+2   sedimentary rocks (chemically precipitated,
+    evaporated, or organogenic or biogenic in origin)
+3   igneous rocks
+4   metamorphic rocks
+5   unconsolidated deposits (alluvium, weathering
+    residuum and slope deposits)
+6   unconsolidated glacial deposits/glacial drift
+7   eolian deposits
+8   organic materials
+9   anthropogenic deposits
+---------------------------------------------------------------------------
+PAR-MAT-SEC2
+----------------
+ 0   No information
+10   consolidated-clastic-sedimentary rocks
+11   psephite or rudite
+12   psammite or arenite
+13   pelite, lutite or argilite
+14   facies bound rock
+20   sedimentary rocks (chemically precipitated,
+     evaporated, or organogenic or biogenic in origin)
+21   calcareous rocks
+22   evaporites
+23   siliceous rocks
+30   igneous rocks
+31   acid to intermediate plutonic rocks
+32   basic plutonic rocks
+33   ultrabasic plutonic rocks
+34   acid to intermediate volcanic rocks
+35   basic to ultrabasic volcanic rocks
+36   dike rocks
+37   pyroclastic rocks (tephra)
+40   metamorphic rocks
+41   weakly metamorphic rocks
+42   acid regional metamorphic rocks
+43   basic regional metamorphic rocks
+44   ultrabasic regional metamorphic rocks
+45   calcareous regional metamorphic rocks
+46   rocks formed by contact metamorphism
+47   tectogenetic metamorphism rocks or cataclasmic
+     metamorphism
+50   unconsolidated deposits (alluvium, weathering
+     residuum and slope deposits)
+51   marine and estuarine sands
+52   marine and estuarine clays and silts
+53   fluvial sands and gravels
+54   fluvial clays, silts and loams
+55   lake deposits
+56   residual and redeposited loams from silicate rocks
+57   residual and redeposited clays from calcareous
+     rocks
+58   slope deposits
+60   unconsolidated glacial deposits/glacial drift
+61   morainic deposits
+62   glaciofluvial deposits
+63   glaciolacustrine deposits
+70   eolian deposits
+71   loess
+72   eolian sands
+80   organic materials
+81   peat (mires)
+82   slime and ooze deposits
+83   carbonaceaous rocks (caustobiolite)
+90   anthropogenic deposits
+91   redeposited natural materials
+92   dump deposits
+93   anthropogenic organic materials
+---------------------------------------------------------------------------
+PAR-MAT-SEC3
+----------------
+  0   No information
+100   consolidated-clastic-sedimentary rocks
+110   psephite or rudite
+111   conglomerate
+112   breccia
+120   psammite or arenite
+121   sandstone
+122   arkose
+123   graywacke
+130   pelite, lutite or argilite
+131   claystone/mudstone
+132   siltstone
+140   facies bound rock
+141   flysch
+142   molasse
+200   sedimentary rocks (chemically precipitated,
+      evaporated, or organogenic or biogenic in origin)
+210   calcareous rocks
+211   limestone
+212   dolomite
+213   marlstone
+214   marl
+215   chalk
+220   evaporites
+221   gypsum
+222   anhydrite
+223   halite
+230   siliceous rocks
+231   chert, hornstone, flint
+232   diatomite/radiolarite
+300   igneous rocks
+310   acid to intermediate plutonic rocks
+311   granite
+312   granodiorite
+313   diorite
+314   syenite
+320   basic plutonic rocks
+321   gabbro
+330   ultrabasic plutonic rocks
+331   peridotite
+332   pyroxenite
+340   acid to intermediate volcanic rocks
+341   rhyolite
+342   dacite
+343   andesite
+344   phonolite
+345   trachyte
+350   basic to ultrabasic volcanic rocks
+351   basalt
+352   diabase
+353   pikrite
+360   dike rocks
+361   aplite
+362   pegmatite
+363   lamprophyre
+370   pyroclastic rocks (tephra)
+371   tuff/tuffstone
+372   tuffite
+373   volcanic scoria/volcanic breccia
+374   volcanic ash
+375   ignimbrite
+376   pumice
+400   metamorphic rocks
+
+410   weakly metamorphic rocks
+411   (meta-)shale/argilite
+412   slate
+420   acid regional metamorphic rocks
+421   (meta-)quartzite
+422   phyllite
+423   micaschist
+424   gneiss
+425   granulite (sensu stricto)
+426   migmatite
+430   basic regional metamorphic rocks
+431   greenschist
+432   amphibolite
+433   eclogite
+440   ultrabasic regional metamorphic rocks
+441   serpentinite
+450   calcareous regional metamorphic rocks
+451   marble
+452   calcschist, skam
+460   rocks formed by contact metamorphism
+461   contact slate
+462   hornfels
+463   calsilicate rocks
+470   tectogenetic metamorphism rocks or cataclasmic
+      metamorphism
+471   tectonic breccia
+472   cataclasite
+473   mylonite
+500   unconsolidated deposits (alluvium, weathering
+      residuum and slope deposits)
+510   marine and estuarine sands
+511   pre-quaternary sand
+512   quaternary sand
+520   marine and estuarine clays and silts
+521   pre-quaternary clay and silt
+522   quaternary clay and silt
+530   fluvial sands and gravels
+531   river terrace sand or gravel
+532   floodplain sand or gravel
+540   fluvial clays, silts and loams
+541   river clay and silt
+542   river loam
+543   overbank deposit
+550   lake deposits
+551   lake sand and delta sand
+552   lake marl, bog lime
+553   lake silt
+560   residual and redeposited loams from silicate rocks
+561   residual loam
+562   redeposited loam
+570   residual and redeposited clays from calcareous
+      rocks
+571   residual clay
+572   redeposited clay
+580   slope deposits
+581   slope-wash alluvium
+582   colluvial deposit
+583   talus scree
+600   unconsolidated glacial deposits/glacial drift
+610   morainic deposits
+611   glacial till
+612   glacial debris
+620   glaciofluvial deposits
+621   outwash sand, glacial sand
+622   outwash gravels glacial gravels
+630   glaciolacustrine deposits
+631   varves
+700   eolian deposits
+710   loess
+711   loamy loess
+712   sandy loess
+720   eolian sands
+721   dune sand
+722   cover sand
+800   organic materials
+810   peat (mires)
+811   rainwater fed moor peat (raised bog)
+812   groundwater fed bog peat
+820   slime and ooze deposits
+821   gyttja, sapropel
+830   carbonaceaous rocks (caustobiolite)
+831   lignite (brown coal)
+832   hard coal
+833   anthracite
+900   anthropogenic deposits
+910   redeposited natural materials
+911   sand and gravel fill
+912   loamy fill
+920   dump deposits
+921   rubble/rubbish
+922   industrial ashes and slag
+923   industrial sludge
+924   industrial waste
+930   anthropogenic organic materials
+---------------------------------------------------------------------------
+PC
+----------------
+ 24   0 - 24 %
+ 49   25 - 49 %
+ 74   50 - 74 %
+ 99   75 - 99 %
+100   100 % (pure)
+---------------------------------------------------------------------------
+PCAREA
+----------------
+  5   STU covers 5 % of the SMU
+ 10   STU covers 10 % of the SMU
+ 95   STU covers 95 % of the SMU
+100   STU covers 100 % of the SMU (SMU is 'pure')
+---------------------------------------------------------------------------
+ROO
+----------------
+0   No information
+1   No obstacle to roots between 0 and 80 cm
+2   Obstacle to roots between 60 and 80 cm depth
+3   Obstacle to roots between 40 and 60 cm depth
+4   Obstacle to roots between 20 and 40 cm depth
+5   Obstacle to roots between 0 and 80 cm depth
+6   Obstacle to roots between 0 and 20 cm depth
+---------------------------------------------------------------------------
+SLOPE-DOM
+----------------
+0   No information
+1   Level (dominant slope ranging from 0 to 8 %)
+2   Sloping (dominant slope ranging from 8 to 15 %)
+3   Moderately steep (dominant slope ranging from 15
+    to 25 %)
+4   Steep (dominant slope over 25 %)
+---------------------------------------------------------------------------
+SLOPE-SEC
+----------------
+0   No information
+1   Level (dominant slope ranging from 0 to 8 %)
+2   Sloping (dominant slope ranging from 8 to 15 %)
+3   Moderately steep (dominant slope ranging from 15
+    to 25 %)
+4   Steep (dominant slope over 25 %)
+---------------------------------------------------------------------------
+SLOPE1
+----------------
+0   No information
+1   Level (dominant slope ranging from 0 to 8 %)
+2   Sloping (dominant slope ranging from 8 to 15 %)
+3   Moderately steep (dominant slope ranging from 15
+    to 25 %)
+4   Steep (dominant slope over 25 %)
+---------------------------------------------------------------------------
+SLOPE2
+----------------
+0   No information
+1   Level (dominant slope ranging from 0 to 8 %)
+2   Sloping (dominant slope ranging from 8 to 15 %)
+3   Moderately steep (dominant slope ranging from 15
+    to 25 %)
+4   Steep (dominant slope over 25 %)
+---------------------------------------------------------------------------
+SMU
+----------------
+     -2   No information
+     -1   Out of surveyed area
+      0   Background polygon (also called 'universe'
+          polygon)
+      1   SMU number 1
+      2   SMU number 2
+   5694   SMU number 5694
+   5695   SMU number 5695
+---------------------------------------------------------------------------
+SOIL
+----------------
+A      Acrisol
+Af     Ferric Acrisol
+Ag     Gleyic Acrisol
+Ah     Humic Acrisol
+Ao     Orthic Acrisol
+Ap     Plinthic Acrisol
+B      Cambisol
+Ba     Calcaric Cambisol
+Bc     Chromic Cambisol
+Bcc    Calcaro-Chromic Cambisol
+Bch    Humo-Chromic Cambisol
+Bck    Calci-Chromic Cambisol
+Bcr    Rhodo-Chromic Cambisol
+Bd     Dystric Cambisol
+Bda    Ando-Dystric Cambisol
+Bdg    Gleyo-Dystric Cambisol
+Bds    Spodo-Dystric Cambisol
+Be     Eutric Cambisol
+Bea    Ando-Eutric Cambisol
+Bec    Calcaro-Eutric Cambisol
+Bef    Fluvi-Eutric Cambisol
+Beg    Gleyo-Eutric Cambisol
+Bev    Verti-Eutric Cambisol
+Bf     Ferralic Cambisol
+Bg     Gleyic Cambisol
+Bgc    Calcaro-Gleyic Cambisol
+Bge    Eutri-Gleyic Cambisol
+Bgg    Stagno-Gleyic Cambisol
+Bgs    Spodo-Gleyic Cambisol
+Bgv    Verti-Gleyic Cambisol (?)
+Bh     Humic Cambisol
+Bhc    Calcaro-Humic Cambisol
+Bk     Calcic Cambisol
+Bkf    Fluvi-Calcic Cambisol
+Bkh    Humo-Calcic Cambisol
+Bkv    Verti-Calcic Cambisol
+Bm     Mollic Cambisol
+Bv     Vertic Cambisol
+Bvc    Calcaro-Vertic Cambisol
+Bvg    Gleyo-Vertic Cambisol
+Bvk    Calci-Vertic Cambisol
+Bx     Gelic Cambisol
+Bxs    Spodo-Gelic Cambisol
+C      Chernozem
+Cg     Gleyic Chernozem
+Ch     Haplic Chernozem
+Chp    Pachi-Haplic Chernozem
+Chv    Verti-Haplic Chernozem
+Ck     Calcic Chernozem
+Ckb    Vermi-Calcic Chernozem
+Ckc    Calcaro-Calcic Chernozem
+Ckcb   Vermi-Calcaro-Calcic Chernozem
+Ckp    Pachi-Calcic Chernozem
+Cl     Luvic Chernozem
+D      Podzoluvisol
+Dd     Dystric Podzoluvisol
+De     Eutric Podzoluvisol
+Dg     Gleyic Podzoluvisol
+Dgd    Dystric Gleyic Podzoluvisol
+Dge    Eutric Gleyic Podzoluvisol
+Dgs    Stagno-Gleyic Podzoluvisol
+E      Rendzina
+Ec     Cambic Rendzina
+Eh     Histic Rendzina
+Eo     Orthic Rendzina
+F      Ferralsol
+Fo     Orthic Ferralsol
+G      Gleysol
+Gc     Calcaric Gleysol
+Gcf    Fluvi-Calcaric Gleysol
+Gcs    Stagno-Calcaric Gleysol
+Gd     Dystric Gleysol
+Gdf    Fluvi-Dystric Gleysol
+Gds    Stagno-Dystric Gleysol
+Ge     Eutric Gleysol
+Gef    Fluvi-Eutric Gleysol
+Ges    Stagno-Eutric Gleysol
+Gev    Verti-Eutric Gleysol
+Gf     Fluvic Gleysol
+Gfm    Molli-Fluvic Gleysol
+Gh     Humic Gleysol
+Ghf    Fluvi-Humic Gleysol
+Ghh    Histo-Humic Gleysol
+Ght    Thioni-Humic Gleysol
+Gi     Histic Gleysol
+Gih    Humo-Histic Gleysol
+Gl     Luvic Gleysol
+Gls    Stagno-Luvic Gleysol
+Gm     Mollic Gleysol
+Gmc    Calcaro-Mollic Gleysol
+Gmf    Fluvi-Mollic Gleysol
+Gmv    Verti-Mollic Gleysol
+Gs     Stagnic Gleysol
+Gt     Thionic Gleysol
+Gtz    Undefined code
+Gx     Gelic Gleysol
+H      Phaeozem
+Hc     Calcaric Phaeozem
+Hcb    Vermi-Calcaric Phaeozem
+Hcf    Fluvi-Calcaric Phaeozem
+Hcn    Alkalino-Calcaric Phaeozem
+Hcs    Saline-Calcaric Phaeozem
+Hg     Gleyic Phaeozem
+Hgc    Calcaro-Gleyic Phaeozem
+Hgf    Fluvi-Gleyic Phaeozem
+Hgs    Stagno-Gleyic Phaeozem
+Hgv    Verti-Gleyic Phaeozem
+Hh     Haplic Phaeozem
+Hhv    Verti-Haplic Phaeozem
+Hl     Luvic Phaeozem
+Hlv    Verti-Luvic Phaeozem
+Ho     Orthic Phaeozem
+I      Lithosol
+Ic     Calcaric Lithosol
+Ich    Humo-Calcaric Lithosol
+Id     Dystric Lithosol
+Ie     Eutric Lithosol
+J      Fluvisol
+Jc     Calcaric Fluvisol
+Jcf    Fluvi-Calcaric Fluvisol
+Jcg    Gleyo-Calcaric Fluvisol
+Jd     Dystric Fluvisol
+Jdf    Fluvi-Dystric Fluvisol
+Jdg    Gleyo-Dystric Fluvisol
+Je     Eutric Fluvisol
+Jef    Fluvi-Eutric Fluvisol
+Jeg    Gleyo-Eutric Fluvisol
+Jm     Mollic Fluvisol
+Jmg    Gleyo-Mollic Fluvisol
+Jmv    Verti-Mollic Fluvisol
+Jt     Thionic Fluvisol
+K      Kastanozem
+Kh     Haplic Kastanozem
+Khb    Vermi-Haplic Kastanozem
+Kk     Calcic Kastanozem
+Kkb    Vermi-Calcic Kastanozem
+Kkv    Verti-Calcic Kastanozem
+Kl     Luvic Kastanozem
+Ko     Orthic Kastanozem
+L      Luvisol
+La     Albic Luvisol
+Lap    Plano-Albic Luvisol
+Lc     Chromic Luvisol
+Lcp    Plano-Chromic Luvisol
+Lcr    Rhodo-Chromic Luvisol
+Lcv    Verti-Chromic Luvisol
+Ld     Dystric Luvisol
+Ldg    Gleyo-Dystric Luvisol
+Lf     Ferric Luvisol
+Lg     Gleyic Luvisol
+Lga    Albo-Gleyic Luvisol
+Lgp    Plano-Gleyic Luvisol
+Lgs    Stagno-Gleyic Luvisol
+Lh     Humic Luvisol
+Lk     Calcic Luvisol
+Lkc    Chromo-Calcic Luvisol
+Lkcr   Rhodo-Chromo-Calcic Luvisol
+Lkv    Verti-Calcic Luvisol
+Lo     Orthic Luvisol
+Lop    Plano-Orthic Luvisol
+Lp     Plinthic Luvisol
+Ls     Spodic Luvisol
+Lv     Vertic Luvisol
+Lvc    Chromo-Vertic Luvisol
+Lvcr   Rhodo-Chromo-Vertic Luvisol
+Lvk    Calci-Vertic Luvisol
+M      Greyzem
+Mo     Orthic Greyzem
+Nc     Cambic Nitosol
+O      Histosol
+Od     Dystric Histosol
+Odp    Placi-Dystric Histosol
+Oe     Eutric Histosol
+Ox     Gelic Histosol
+P      Podzol
+Pf     Ferric Podzol
+Pg     Gleyic Podzol
+Pgh    Histo-Gleyic Podzol
+Pgs    Stagno-Gleyic Podzol
+Ph     Humic Podzol
+Phf    Ferro-Humic Podzol
+Pl     Leptic Podzol
+Plh    Humo-Leptic Podzol
+Po     Orthic Podzol
+Pof    Ferro-Orthic Podzol
+Poh    Humo-Orthic Podzol
+Pol    Lepto-Orthic Podzol
+Pp     Placic Podzol
+Pph    Humo-Placic Podzol
+Q      Arenosol
+Qa     Albic Arenosol
+Qc     Cambic Arenosol
+Qcc    Calcaro-Cambic Arenosol
+Qcd    Dystri-Cambic Arenosol
+Qcg    Gleyo-Cambic Arenosol
+Qcs    Spodo-Cambic Arenosol
+Qh     Humic Arenosol
+Ql     Luvic Arenosol
+Qld    Dystri-Luvic Arenosol
+Qlg    Gleyo-Luvic Arenosol
+R      Regosol
+Rc     Calcaric Regosol
+Rd     Dystric Regosol
+Rds    Undefined code
+Re     Eutric Regosol
+Rx     Gelic Regosol
+S      Solonetz
+Sg     Gleyic Solonetz
+Sm     Mollic Solonetz
+So     Orthic Solonetz
+Sof    Fluvi-Orthic Solonetz
+T      Andosol
+Th     Humic Andosol
+Tm     Mollic Andosol
+To     Ochric Andosol
+Tv     Vitric Andosol
+U      Ranker
+Ud     Dystric Ranker
+Ul     Luvic Ranker
+V      Vertisol
+Vc     Chromic Vertisol
+Vcc    Calcaro-Chromic Vertisol
+Vg     Gleyic Vertisol
+Vgs    Undefined code
+Vp     Pellic Vertisol
+Vpc    Calcaro-Pellic Vertisol
+Vpg    Gleyo-Pellic Vertisol
+Vpn    Sodi-Pellic Vertisol
+W      Planosol
+Wd     Dystric Planosol
+Wdv    Verti-Dystric Planosol
+We     Eutric Planosol
+Wev    Verti-Eutric Planosol
+Wh     Humic Planosol
+Wm     Mollic Planosol
+Ws     Solodic Planosol
+X      Xerosol
+Xk     Calcic Xerosol
+Xl     Luvic Xerosol
+Xy     Gypsic Xerosol
+Z      Solonchak
+Zg     Gleyic Solonchak
+Zgf    Fluvi-Gleyic Solonchak
+Zo     Orthic Solonchak
+Zt     Takyric Solonchak
+p      Plaggensol
+111    Town
+222    Soil disturbed by man
+333    Water body
+444    Marsh
+555    Glacier
+666    Rock outcrops
+       No information
+---------------------------------------------------------------------------
+SOIL1
+----------------
+A   Acrisol
+B   Cambisol
+C   Chernozem
+D   Podzoluvisol
+E   Rendzina
+F   Ferralsol
+G   Gleysol
+H   Phaeozem
+I   Lithosol
+J   Fluvisol
+K   Kastanozem
+L   Luvisol
+M   Greyzem
+N   Nitosol
+O   Histosol
+P   Podzol
+Q   Arenosol
+R   Regosol
+S   Solonetz
+T   Andosol
+U   Ranker
+V   Vertisol
+W   Planosol
+X   Xerosol
+Z   Solonchak
+p   Plaggensol
+1   Town
+2   Soil disturbed by man
+3   Water body
+4   Marsh
+5   Glacier
+6   Rock outcrops
+    No information
+---------------------------------------------------------------------------
+SOIL1M
+----------------
+ 0   Background polygon
+-3   Not applicable (oceans)
+ 1   Countries currently covered by the database
+ 2   Countries under progress
+ 3   Other countries
+---------------------------------------------------------------------------
+SOIL2
+----------------
+A    Acrisol
+Af   Ferric Acrisol
+Ag   Gleyic Acrisol
+Ah   Humic Acrisol
+Ao   Orthic Acrisol
+Ap   Plinthic Acrisol
+B    Cambisol
+Ba   Calcaric Cambisol
+Bc   Chromic Cambisol
+Bd   Dystric Cambisol
+Be   Eutric Cambisol
+Bf   Ferralic Cambisol
+Bg   Gleyic Cambisol
+Bh   Humic Cambisol
+Bk   Calcic Cambisol
+Bm   Mollic Cambisol
+Bv   Vertic Cambisol
+Bx   Gelic Cambisol
+C    Chernozem
+Cg   Gleyic Chernozem
+Ch   Haplic Chernozem
+Ck   Calcic Chernozem
+Cl   Luvic Chernozem
+D    Podzoluvisol
+Dd   Dystric Podzoluvisol
+De   Eutric Podzoluvisol
+Dg   Gleyic Podzoluvisol
+E    Rendzina
+Ec   Cambic Rendzina
+Eh   Histic Rendzina
+Eo   Orthic Rendzina
+F    Ferralsol
+Fo   Orthic Ferralsol
+G    Gleysol
+Gc   Calcaric Gleysol
+Gd   Dystric Gleysol
+Ge   Eutric Gleysol
+Gf   Fluvic Gleysol
+Gh   Humic Gleysol
+Gi   Histic Gleysol
+Gl   Luvic Gleysol
+Gm   Mollic Gleysol
+Gs   Stagnic Gleysol
+Gt   Thionic Gleysol
+Gx   Gelic Gleysol
+H    Phaeozem
+Hc   Calcaric Phaeozem
+Hg   Gleyic Phaeozem
+Hh   Haplic Phaeozem
+Hl   Luvic Phaeozem
+Ho   Orthic Phaeozem
+I    Lithosol
+Ic   Calcaric Lithosol
+Id   Dystric Lithosol
+Ie   Eutric Lithosol
+J    Fluvisol
+Jc   Calcaric Fluvisol
+Jd   Dystric Fluvisol
+Je   Eutric Fluvisol
+Jm   Mollic Fluvisol
+Jt   Thionic Fluvisol
+K    Kastanozem
+Kh   Haplic Kastanozem
+Kk   Calcic Kastanozem
+Kl   Luvic Kastanozem
+Ko   Orthic Kastanozem
+L    Luvisol
+La   Albic Luvisol
+Lc   Chromic Luvisol
+Ld   Dystric Luvisol
+Lf   Ferric Luvisol
+Lg   Gleyic Luvisol
+Lh   Humic Luvisol
+Lk   Calcic Luvisol
+Lo   Orthic Luvisol
+Lp   Plinthic Luvisol
+Ls   Spodic Luvisol
+Lv   Vertic Luvisol
+M    Greyzem
+Mo   Orthic Greyzem
+Nc   Cambic Nitosol
+O    Histosol
+Od   Dystric Histosol
+Oe   Eutric Histosol
+Ox   Gelic Histosol
+P    Podzol
+Pf   Ferric Podzol
+Pg   Gleyic Podzol
+Ph   Humic Podzol
+Pl   Leptic Podzol
+Po   Orthic Podzol
+Pp   Placic Podzol
+Q    Arenosol
+Qa   Albic Arenosol
+Qc   Cambic Arenosol
+Qh   Humic Arenosol
+Ql   Luvic Arenosol
+R    Regosol
+Rc   Calcaric Regosol
+Rd   Dystric Regosol
+Re   Eutric Regosol
+Rx   Gelic Regosol
+S    Solonetz
+Sg   Gleyic Solonetz
+Sm   Mollic Solonetz
+So   Orthic Solonetz
+T    Andosol
+Th   Humic Andosol
+Tm   Mollic Andosol
+To   Ochric Andosol
+Tv   Vitric Andosol
+U    Ranker
+Ud   Dystric Ranker
+Ul   Luvic Ranker
+V    Vertisol
+Vc   Chromic Vertisol
+Vg   Gleyic Vertisol
+Vp   Pellic Vertisol
+W    Planosol
+Wd   Dystric Planosol
+We   Eutric Planosol
+Wh   Humic Planosol
+Wm   Mollic Planosol
+Ws   Solodic Planosol
+X    Xerosol
+Xk   Calcic Xerosol
+Xl   Luvic Xerosol
+Xy   Gypsic Xerosol
+Z    Solonchak
+Zg   Gleyic Solonchak
+Zo   Orthic Solonchak
+Zt   Takyric Solonchak
+p    Plaggensol
+11   Town
+22   Soil disturbed by man
+33   Water body
+44   Marsh
+55   Glacier
+66   Rock outcrops
+     No information
+---------------------------------------------------------------------------
+SOIL3
+----------------
+A     Acrisol
+Af    Ferric Acrisol
+Ag    Gleyic Acrisol
+Ah    Humic Acrisol
+Ao    Orthic Acrisol
+Ap    Plinthic Acrisol
+B     Cambisol
+Ba    Calcaric Cambisol
+Bc    Chromic Cambisol
+Bcc   Calcaro-Chromic Cambisol
+Bch   Humo-Chromic Cambisol
+Bck   Calci-Chromic Cambisol
+Bcr   Rhodo-Chromic Cambisol
+Bd    Dystric Cambisol
+Bda   Ando-Dystric Cambisol
+Bdg   Gleyo-Dystric Cambisol
+Bds   Spodo-Dystric Cambisol
+Be    Eutric Cambisol
+Bea   Ando-Eutric Cambisol
+Bec   Calcaro-Eutric Cambisol
+Bef   Fluvi-Eutric Cambisol
+Beg   Gleyo-Eutric Cambisol
+Bev   Verti-Eutric Cambisol
+Bf    Ferralic Cambisol
+Bg    Gleyic Cambisol
+Bgc   Calcaro-Gleyic Cambisol
+Bge   Eutri-Gleyic Cambisol
+Bgg   Stagno-Gleyic Cambisol
+Bgs   Spodo-Gleyic Cambisol
+Bgv   Verti-Gleyic Cambisol (?)
+Bh    Humic Cambisol
+Bhc   Calcaro-Humic Cambisol
+Bk    Calcic Cambisol
+Bkf   Fluvi-Calcic Cambisol
+Bkh   Humo-Calcic Cambisol
+Bkv   Verti-Calcic Cambisol
+Bm    Mollic Cambisol
+Bv    Vertic Cambisol
+Bvc   Calcaro-Vertic Cambisol
+Bvg   Gleyo-Vertic Cambisol
+Bvk   Calci-Vertic Cambisol
+Bx    Gelic Cambisol
+Bxs   Spodo-Gelic Cambisol
+C     Chernozem
+Cg    Gleyic Chernozem
+Ch    Haplic Chernozem
+Chp   Pachi-Haplic Chernozem
+Chv   Verti-Haplic Chernozem
+Ck    Calcic Chernozem
+Ckb   Vermi-Calcic Chernozem
+Ckc   Calcaro-Calcic Chernozem
+Ckp   Pachi-Calcic Chernozem
+Cl    Luvic Chernozem
+D     Podzoluvisol
+Dd    Dystric Podzoluvisol
+De    Eutric Podzoluvisol
+Dg    Gleyic Podzoluvisol
+Dgd   Dystric Gleyic Podzoluvisol
+Dge   Eutric Gleyic Podzoluvisol
+Dgs   Stagno-Gleyic Podzoluvisol
+E     Rendzina
+Ec    Cambic Rendzina
+Eh    Histic Rendzina
+Eo    Orthic Rendzina
+F     Ferralsol
+Fo    Orthic Ferralsol
+G     Gleysol
+Gc    Calcaric Gleysol
+Gcf   Fluvi-Calcaric Gleysol
+Gcs   Stagno-Calcaric Gleysol
+Gd    Dystric Gleysol
+Gdf   Fluvi-Dystric Gleysol
+Gds   Stagno-Dystric Gleysol
+Ge    Eutric Gleysol
+Gef   Fluvi-Eutric Gleysol
+Ges   Stagno-Eutric Gleysol
+Gev   Verti-Eutric Gleysol
+Gf    Fluvic Gleysol
+Gfm   Molli-Fluvic Gleysol
+Gh    Humic Gleysol
+Ghf   Fluvi-Humic Gleysol
+Ghh   Histo-Humic Gleysol
+Ght   Thioni-Humic Gleysol
+Gi    Histic Gleysol
+Gih   Humo-Histic Gleysol
+Gl    Luvic Gleysol
+Gls   Stagno-Luvic Gleysol
+Gm    Mollic Gleysol
+Gmc   Calcaro-Mollic Gleysol
+Gmf   Fluvi-Mollic Gleysol
+Gmv   Verti-Mollic Gleysol
+Gs    Stagnic Gleysol
+Gt    Thionic Gleysol
+Gtz   Undefined code
+Gx    Gelic Gleysol
+H     Phaeozem
+Hc    Calcaric Phaeozem
+Hcb   Vermi-Calcaric Phaeozem
+Hcf   Fluvi-Calcaric Phaeozem
+Hcn   Alkalino-Calcaric Phaeozem
+Hcs   Saline-Calcaric Phaeozem
+Hg    Gleyic Phaeozem
+Hgc   Calcaro-Gleyic Phaeozem
+Hgf   Fluvi-Gleyic Phaeozem
+Hgs   Stagno-Gleyic Phaeozem
+Hgv   Verti-Gleyic Phaeozem
+Hh    Haplic Phaeozem
+Hhv   Verti-Haplic Phaeozem
+Hl    Luvic Phaeozem
+Hlv   Verti-Luvic Phaeozem
+Ho    Orthic Phaeozem
+I     Lithosol
+Ic    Calcaric Lithosol
+Ich   Humo-Calcaric Lithosol
+Id    Dystric Lithosol
+Ie    Eutric Lithosol
+J     Fluvisol
+Jc    Calcaric Fluvisol
+Jcf   Fluvi-Calcaric Fluvisol
+Jcg   Gleyo-Calcaric Fluvisol
+Jd    Dystric Fluvisol
+Jdf   Fluvi-Dystric Fluvisol
+Jdg   Gleyo-Dystric Fluvisol
+Je    Eutric Fluvisol
+Jef   Fluvi-Eutric Fluvisol
+Jeg   Gleyo-Eutric Fluvisol
+Jm    Mollic Fluvisol
+Jmg   Gleyo-Mollic Fluvisol
+Jmv   Verti-Mollic Fluvisol
+Jt    Thionic Fluvisol
+K     Kastanozem
+Kh    Haplic Kastanozem
+Khb   Vermi-Haplic Kastanozem
+Kk    Calcic Kastanozem
+Kkb   Vermi-Calcic Kastanozem
+Kkv   Verti-Calcic Kastanozem
+Kl    Luvic Kastanozem
+Ko    Orthic Kastanozem
+L     Luvisol
+La    Albic Luvisol
+Lap   Plano-Albic Luvisol
+Lc    Chromic Luvisol
+Lcp   Plano-Chromic Luvisol
+Lcr   Rhodo-Chromic Luvisol
+Lcv   Verti-Chromic Luvisol
+Ld    Dystric Luvisol
+Ldg   Gleyo-Dystric Luvisol
+Lf    Ferric Luvisol
+Lg    Gleyic Luvisol
+Lga   Albo-Gleyic Luvisol
+Lgp   Plano-Gleyic Luvisol
+Lgs   Stagno-Gleyic Luvisol
+Lh    Humic Luvisol
+Lk    Calcic Luvisol
+Lkc   Chromo-Calcic Luvisol
+Lkv   Verti-Calcic Luvisol
+Lo    Orthic Luvisol
+Lop   Plano-Orthic Luvisol
+Lp    Plinthic Luvisol
+Ls    Spodic Luvisol
+Lv    Vertic Luvisol
+Lvc   Chromo-Vertic Luvisol
+Lvk   Calci-Vertic Luvisol
+M     Greyzem
+Mo    Orthic Greyzem
+Nc    Cambic Nitosol
+O     Histosol
+Od    Dystric Histosol
+Odp   Placi-Dystric Histosol
+Oe    Eutric Histosol
+Ox    Gelic Histosol
+P     Podzol
+Pf    Ferric Podzol
+Pg    Gleyic Podzol
+Pgh   Histo-Gleyic Podzol
+Pgs   Stagno-Gleyic Podzol
+Ph    Humic Podzol
+Phf   Ferro-Humic Podzol
+Pl    Leptic Podzol
+Plh   Humo-Leptic Podzol
+Po    Orthic Podzol
+Pof   Ferro-Orthic Podzol
+Poh   Humo-Orthic Podzol
+Pol   Lepto-Orthic Podzol
+Pp    Placic Podzol
+Pph   Humo-Placic Podzol
+Q     Arenosol
+Qa    Albic Arenosol
+Qc    Cambic Arenosol
+Qcc   Calcaro-Cambic Arenosol
+Qcd   Dystri-Cambic Arenosol
+Qcg   Gleyo-Cambic Arenosol
+Qcs   Spodo-Cambic Arenosol
+Qh    Humic Arenosol
+Ql    Luvic Arenosol
+Qld   Dystri-Luvic Arenosol
+Qlg   Gleyo-Luvic Arenosol
+R     Regosol
+Rc    Calcaric Regosol
+Rd    Dystric Regosol
+Rds   Undefined code
+Re    Eutric Regosol
+Rx    Gelic Regosol
+S     Solonetz
+Sg    Gleyic Solonetz
+Sm    Mollic Solonetz
+So    Orthic Solonetz
+Sof   Fluvi-Orthic Solonetz
+T     Andosol
+Th    Humic Andosol
+Tm    Mollic Andosol
+To    Ochric Andosol
+Tv    Vitric Andosol
+U     Ranker
+Ud    Dystric Ranker
+Ul    Luvic Ranker
+V     Vertisol
+Vc    Chromic Vertisol
+Vcc   Calcaro-Chromic Vertisol
+Vg    Gleyic Vertisol
+Vgs   Undefined code
+Vp    Pellic Vertisol
+Vpc   Calcaro-Pellic Vertisol
+Vpg   Gleyo-Pellic Vertisol
+Vpn   Sodi-Pellic Vertisol
+W     Planosol
+Wd    Dystric Planosol
+Wdv   Verti-Dystric Planosol
+We    Eutric Planosol
+Wev   Verti-Eutric Planosol
+Wh    Humic Planosol
+Wm    Mollic Planosol
+Ws    Solodic Planosol
+X     Xerosol
+Xk    Calcic Xerosol
+Xl    Luvic Xerosol
+Xy    Gypsic Xerosol
+Z     Solonchak
+Zg    Gleyic Solonchak
+Zgf   Fluvi-Gleyic Solonchak
+Zo    Orthic Solonchak
+Zt    Takyric Solonchak
+p     Plaggensol
+111   Town
+222   Soil disturbed by man
+333   Water body
+444   Marsh
+555   Glacier
+666   Rock outcrops
+      No information
+---------------------------------------------------------------------------
+SOIL90
+----------------
+AC     Acrisol
+ACf    Ferric Acrisol
+ACg    Gleyic Acrisol
+ACh    Haplic Acrisol
+ACp    Plinthic Acrisol
+ACu    Humic Acrisol
+AL     Alisol
+ALf    Ferric Alisol
+ALg    Gleyic Alisol
+ALh    Haplic Alisol
+ALj    Stagnic Alisol
+ALp    Plinthic Alisol
+ALu    Humic Alisol
+AN     Andosol
+ANg    Gleyic Andosol
+ANh    Haplic Andosol
+ANi    Gelic Andosol
+ANm    Mollic Andosol
+ANu    Umbric Andosol
+AR     Arenosol
+ARa    Albic Arenosol
+ARb    Cambic Arenosol
+ARbs   ?-Cambic Arenosol
+ARc    Calcaric Arenosol
+ARcg   ?-Calcaric Arenosol
+ARg    Gleyic Arenosol
+ARh    Haplic Arenosol
+ARl    Luvic Arenosol
+ARo    Ferralic Arenosol
+AT     Anthrosol
+ATa    Aric Anthrosol
+ATc    Cumulic Anthrosol
+ATf    Fimic Anthrosol
+ATu    Urbic Anthrosol
+CH     Chernozem
+CHb
+CHe
+CHg    Gleyic Chernozem
+CHgs   ?-Gleyic Chernozem
+CHh    Haplic Chernozem
+CHha   ?-Haplic Chernozem
+CHhv   ?-Haplic Chernozem
+CHi
+CHk    Calcic Chernozem
+CHkb   ?-Calcic Chernozem
+CHkc   ?-Calcic Chernozem
+CHkv   ?-Calcic Chernozem
+CHl    Luvic Chernozem
+CHw    Glossic Chernozem
+CL     Calcisol
+CLh    Haplic Calcisol
+CLl    Luvic Calcisol
+CLp    Petric Calcisol
+CM     Cambisol
+CMa
+CMc    Calcaric Cambisol
+CMd    Dystric Cambisol
+CMda   ?-Dystric Cambisol
+CMdh   ?-Dystric Cambisol
+CMds   ?-Dystric Cambisol
+CMe    Eutric Cambisol
+CMea   ?-Eutric Cambisol
+CMec   ?-Eutric Cambisol
+CMef   ?-Eutric Cambisol
+CMep   ?-Eutric Cambisol
+CMet   ?-Eutric Cambisol
+CMev   ?-Eutric Cambisol
+CMg    Gleyic Cambisol
+CMh
+CMi    Gelic Cambisol
+CMj    Stagnic Cambisol
+CMjd   ?-Stagnic Cambisol
+CMjp   ?-Stagnic Cambisol
+CMo    Ferralic Cambisol
+CMu    Humic Cambisol
+CMv    Vertic Cambisol
+CMx    Chromic Cambisol
+FL     Fluvisol
+FLc    Calcaric Fluvisol
+FLcf   ?-Calcaric Fluvisol
+FLcg   ?-Calcaric Fluvisol
+FLd    Dystric Fluvisol
+FLe    Eutric Fluvisol
+FLef   ?-Eutric Fluvisol
+FLeg   ?-Eutric Fluvisol
+FLhi   ?-
+FLm    Mollic Fluvisol
+FLs    Salic Fluvisol
+FLt    Thionic Fluvisol
+FLu    Umbric Fluvisol
+FR     Ferralsol
+FRg    Geric Ferralsol
+FRh    Haplic Ferralsol
+FRp    Plinthic Ferralsol
+FRr    Rhodic Ferralsol
+FRu    Humic Ferralsol
+FRx    Xanthic Ferralsol
+GL     Gleysol
+GLa    Andic Gleysol
+GLd    Dystric Gleysol
+GLdh   ?-Dystric Gleysol
+GLe    Eutric Gleysol
+GLef   ?-Eutric Gleysol
+GLh
+GLi    Gelic Gleysol
+GLk    Calcic Gleysol
+GLm    Mollic Gleysol
+GLme   ?-Mollic Gleysol
+GLmf   ?-Mollic Gleysol
+GLt    Thionic Gleysol
+GLu    Umbric Gleysol
+GMe
+GR     Greyzem
+GRg    Gleyic Greyzem
+GRh    Haplic Greyzem
+GY     Gypsisol
+GYh    Haplic Gypsisol
+GYk    Calcic Gypsisol
+GYl    Luvic Gypsisol
+GYp    Petric Gypsisol
+HS     Histosol
+HSf    Fibric Histosol
+HSfd   ?-Fibric Histosol
+HSi    Gelic Histosol
+HSl    Folic Histosol
+HSs    Terric Histosol
+HSt    Thionic Histosol
+KS     Kastanozem
+KSh    Haplic Kastanozem
+KSk    Calcic Kastanozem
+KSkb   ?-Calcic Kastanozem
+KSl    Luvic Kastanozem
+KSy    Gypsic Kastanozem
+LP     Leptosol
+LPc
+LPd    Dystric Leptosol
+LPe    Eutric Leptosol
+LPi    Gelic Leptosol
+LPk    Rendzic Leptosol
+LPm    Mollic Leptosol
+LPq    Lithic Leptosol
+LPqc   ?-Lithic Leptosol
+LPqd   ?-Lithic Leptosol
+LPqe   ?-Lithic Leptosol
+LPr
+LPu    Umbric Leptosol
+LV     Luvisol
+LVa    Albic Luvisol
+LVaa   ?-Albic Luvisol
+LVal   ?-Albic Luvisol
+LVe
+LVf    Ferric Luvisol
+LVg    Gleyic Luvisol
+LVh    Haplic Luvisol
+LVhp   ?-Haplic Luvisol
+LVj    Stagnic Luvisol
+LVja   ?-Stagnic Luvisol
+LVjp   ?-Stagnic Luvisol
+LVk    Calcic Luvisol
+LVo
+LVv    Vertic Luvisol
+LVx    Chromic Luvisol
+LVxp   ?-Chromic Luvisol
+LVxv   ?-Chromic Luvisol
+LX     Lixisol
+LXa    Albic Lixisol
+LXf    Ferric Lixisol
+LXg    Gleyic Lixisol
+LXh    Haplic Lixisol
+LXj    Stagnic Lixisol
+LXp    Plinthic Lixisol
+MGd
+NT     Nitisol
+NTh    Haplic Nitisol
+NTr    Rhodic Nitisol
+NTu    Humic Nitisol
+PD     Podzoluvisol
+PDd    Dystric Podzoluvisol
+PDe    Eutric Podzoluvisol
+PDg    Gleyic Podzoluvisol
+PDi    Gelic Podzoluvisol
+PDj    Stagnic Podzoluvisol
+PFg
+PH     Phaeozem
+PHc    Calcaric Phaeozem
+PHg    Gleyic Phaeozem
+PHh    Haplic Phaeozem
+PHhv   ?-Haplic Phaeozem
+PHi
+PHj    Stagnic Phaeozem
+PHjv   ?-Stagnic Phaeozem
+PHl    Luvic Phaeozem
+PHlv   ?-Luvic Phaeozem
+PL     Planosol
+PLd    Dystric Planosol
+PLe    Eutric Planosol
+PLev   ?-Eutric Planosol
+PLi    Gelic Planosol
+PLm    Mollic Planosol
+PLu    Umbric Planosol
+PT     Plinthosol
+PTa    Albic Plinthosol
+PTd    Dystric Plinthosol
+PTe    Eutric Plinthosol
+PTu    Humic Plinthosol
+PZ     Podzol
+PZb    Cambic Podzol
+PZc    Carbic Podzol
+PZf    Ferric Podzol
+PZg    Gleyic Podzol
+PZh    Haplic Podzol
+PZha   ?-Haplic Podzol
+PZi    Gelic Podzol
+RG     Regosol
+RGc    Calcaric Regosol
+RGd    Dystric Regosol
+RGe    Eutric Regosol
+RGep   ?-Eutric Regosol
+RGi    Gelic Regosol
+RGu    Umbric Regosol
+RGy    Gypsic Regosol
+Rge
+SC     Solonchak
+SCg    Gleyic Solonchak
+SCh    Haplic Solonchak
+SCi    Gelic Solonchak
+SCk    Calcic Solonchak
+SCm    Mollic Solonchak
+SCn    Sodic Solonchak
+SCy    Gypsic Solonchak
+SN     Solonetz
+SNg    Gleyic Solonetz
+SNh    Haplic Solonetz
+SNj    Stagnic Solonetz
+SNk    Calcic Solonetz
+SNm    Mollic Solonetz
+SNy    Gypsic Solonetz
+VR     Vertisol
+VRd    Dystric Vertisol
+VRe    Eutric Vertisol
+VReg   ?-Eutric Vertisol
+VRej   ?-Eutric Vertisol
+VRen   ?-Eutric Vertisol
+VRk    Calcic Vertisol
+VRy    Gypsic Vertisol
+1 11   Town
+2 22   Soil disturbed by man
+3 33   Water body
+4 44   Marsh
+5 55   Glacier
+6 66   Rock outcrops
+       No information
+---------------------------------------------------------------------------
+SOIL901
+----------------
+AC   Acrisol
+AL   Alisol
+AN   Andosol
+AR   Arenosol
+AT   Anthrosol
+CH   Chernozem
+CL   Calcisol
+CM   Cambisol
+FL   Fluvisol
+FR   Ferralsol
+GL   Gleysol
+GR   Greyzem
+GY   Gypsisol
+HS   Histosol
+KS   Kastanozem
+LP   Leptosol
+LV   Luvisol
+LX   Lixisol
+NT   Nitisol
+PD   Podzoluvisol
+PH   Phaeozem
+PL   Planosol
+PT   Plinthosol
+PZ   Podzol
+RG   Regosol
+SC   Solonchak
+SN   Solonetz
+VR   Vertisol
+1    Town
+2    Soil disturbed by man
+3    Water body
+4    Marsh
+5    Glacier
+6    Rock outcrops
+---------------------------------------------------------------------------
+SOIL902
+----------------
+AC    Acrisol
+ACf   Ferric Acrisol
+ACg   Gleyic Acrisol
+ACh   Haplic Acrisol
+ACp   Plinthic Acrisol
+ACu   Humic Acrisol
+AL    Alisol
+ALf   Ferric Alisol
+ALg   Gleyic Alisol
+ALh   Haplic Alisol
+ALj   Stagnic Alisol
+ALp   Plinthic Alisol
+ALu   Humic Alisol
+AN    Andosol
+ANg   Gleyic Andosol
+ANh   Haplic Andosol
+ANi   Gelic Andosol
+ANm   Mollic Andosol
+ANu   Umbric Andosol
+AR    Arenosol
+ARa   Albic Arenosol
+ARb   Cambic Arenosol
+ARc   Calcaric Arenosol
+ARg   Gleyic Arenosol
+ARh   Haplic Arenosol
+ARl   Luvic Arenosol
+ARo   Ferralic Arenosol
+AT    Anthrosol
+ATa   Aric Anthrosol
+ATc   Cumulic Anthrosol
+ATf   Fimic Anthrosol
+ATu   Urbic Anthrosol
+CH    Chernozem
+CHg   Gleyic Chernozem
+CHh   Haplic Chernozem
+CHk   Calcic Chernozem
+CHl   Luvic Chernozem
+CHw   Glossic Chernozem
+CL    Calcisol
+CLh   Haplic Calcisol
+CLl   Luvic Calcisol
+CLp   Petric Calcisol
+CM    Cambisol
+CMc   Calcaric Cambisol
+CMd   Dystric Cambisol
+CMe   Eutric Cambisol
+CMg   Gleyic Cambisol
+CMi   Gelic Cambisol
+CMj   Stagnic Cambisol
+CMo   Ferralic Cambisol
+CMu   Humic Cambisol
+CMv   Vertic Cambisol
+CMx   Chromic Cambisol
+FL    Fluvisol
+FLc   Calcaric Fluvisol
+FLd   Dystric Fluvisol
+FLe   Eutric Fluvisol
+FLm   Mollic Fluvisol
+FLs   Salic Fluvisol
+FLt   Thionic Fluvisol
+FLu   Umbric Fluvisol
+FR    Ferralsol
+FRg   Geric Ferralsol
+FRh   Haplic Ferralsol
+FRp   Plinthic Ferralsol
+FRr   Rhodic Ferralsol
+FRu   Humic Ferralsol
+FRx   Xanthic Ferralsol
+GL    Gleysol
+GLa   Andic Gleysol
+GLd   Dystric Gleysol
+GLe   Eutric Gleysol
+GLi   Gelic Gleysol
+GLk   Calcic Gleysol
+GLm   Mollic Gleysol
+GLt   Thionic Gleysol
+GLu   Umbric Gleysol
+GR    Greyzem
+GRg   Gleyic Greyzem
+GRh   Haplic Greyzem
+GY    Gypsisol
+GYh   Haplic Gypsisol
+GYk   Calcic Gypsisol
+GYl   Luvic Gypsisol
+GYp   Petric Gypsisol
+HS    Histosol
+HSf   Fibric Histosol
+HSi   Gelic Histosol
+HSl   Folic Histosol
+HSs   Terric Histosol
+HSt   Thionic Histosol
+KS    Kastanozem
+KSh   Haplic Kastanozem
+KSk   Calcic Kastanozem
+KSl   Luvic Kastanozem
+KSy   Gypsic Kastanozem
+LP    Leptosol
+LPd   Dystric Leptosol
+LPe   Eutric Leptosol
+LPi   Gelic Leptosol
+LPk   Rendzic Leptosol
+LPm   Mollic Leptosol
+LPq   Lithic Leptosol
+LPu   Umbric Leptosol
+LV    Luvisol
+LVa   Albic Luvisol
+LVf   Ferric Luvisol
+LVg   Gleyic Luvisol
+LVh   Haplic Luvisol
+LVj   Stagnic Luvisol
+LVk   Calcic Luvisol
+LVv   Vertic Luvisol
+LVx   Chromic Luvisol
+LX    Lixisol
+LXa   Albic Lixisol
+LXf   Ferric Lixisol
+LXg   Gleyic Lixisol
+LXh   Haplic Lixisol
+LXj   Stagnic Lixisol
+LXp   Plinthic Lixisol
+NT    Nitisol
+NTh   Haplic Nitisol
+NTr   Rhodic Nitisol
+NTu   Humic Nitisol
+PD    Podzoluvisol
+PDd   Dystric Podzoluvisol
+PDe   Eutric Podzoluvisol
+PDg   Gleyic Podzoluvisol
+PDi   Gelic Podzoluvisol
+PDj   Stagnic Podzoluvisol
+PH    Phaeozem
+PHc   Calcaric Phaeozem
+PHg   Gleyic Phaeozem
+PHh   Haplic Phaeozem
+PHj   Stagnic Phaeozem
+PHl   Luvic Phaeozem
+PL    Planosol
+PLd   Dystric Planosol
+PLe   Eutric Planosol
+PLi   Gelic Planosol
+PLm   Mollic Planosol
+PLu   Umbric Planosol
+PT    Plinthosol
+PTa   Albic Plinthosol
+PTd   Dystric Plinthosol
+PTe   Eutric Plinthosol
+PTu   Humic Plinthosol
+PZ    Podzol
+PZb   Cambic Podzol
+PZc   Carbic Podzol
+PZf   Ferric Podzol
+PZg   Gleyic Podzol
+PZh   Haplic Podzol
+PZi   Gelic Podzol
+RG    Regosol
+RGc   Calcaric Regosol
+RGd   Dystric Regosol
+RGe   Eutric Regosol
+RGi   Gelic Regosol
+RGu   Umbric Regosol
+RGy   Gypsic Regosol
+SC    Solonchak
+SCg   Gleyic Solonchak
+SCh   Haplic Solonchak
+SCi   Gelic Solonchak
+SCk   Calcic Solonchak
+SCm   Mollic Solonchak
+SCn   Sodic Solonchak
+SCy   Gypsic Solonchak
+SN    Solonetz
+SNg   Gleyic Solonetz
+SNh   Haplic Solonetz
+SNj   Stagnic Solonetz
+SNk   Calcic Solonetz
+SNm   Mollic Solonetz
+SNy   Gypsic Solonetz
+VR    Vertisol
+VRd   Dystric Vertisol
+VRe   Eutric Vertisol
+VRk   Calcic Vertisol
+VRy   Gypsic Vertisol
+1 1   Town
+2 2   Soil disturbed by man
+3 3   Water body
+4 4   Marsh
+5 5   Glacier
+6 6   Rock outcrops
+---------------------------------------------------------------------------
+STU
+----------------
+      1   STU number 1
+      2   STU number 2
+   3876   STU number 3876
+   3877   STU number 3877
+---------------------------------------------------------------------------
+TD1
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TD2
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT-DEP-CHG
+----------------
+0   No information
+1   Textural change between 20 and 40 cm depth
+2   Textural change between 40 and 60 cm depth
+3   Textural change between 60 and 80 cm depth
+4   Textural change between 80 and 120 cm depth
+5   No textural change between 20 and 120 cm depth
+6   Textural change between 20 and 60 cm depth
+7   Textural change between 60 and 120 cm depth
+---------------------------------------------------------------------------
+TEXT-SRF-DOM
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT-SRF-SEC
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT-SUB-DOM
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT-SUB-SEC
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT1
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT2
+----------------
+0   No information
+9   No mineral texture (Peat soils)
+1   Coarse (18% < clay and > 65% sand)
+2   Medium (18% < clay < 35% and >= 15% sand, or 18% <
+    clay and 15% < sand < 65%)
+3   Medium fine (< 35% clay and < 15% sand)
+4   Fine (35% < clay < 60%)
+5   Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+USE-DOM
+----------------
+ 0   No information
+ 1   Pasture, grassland, grazing land
+ 2   Poplars
+ 3   Arable land, cereals
+ 4   Wasteland, shrub
+ 5   Forest, coppice
+ 6   Horticulture
+ 7   Vineyards
+ 8   Garrigue
+ 9   Bush, macchia
+10   Moor
+11   Halophile grassland
+12   Arboriculture, orchard
+13   Industrial crops
+14   Rice
+15   Cotton
+16   Vegetables
+17   Olive trees
+18   Recreation
+19   Extensive pasture, grazing, rough pasture
+20   Dehesa (extensive pastoral system in forest parks
+     in Spain)
+21   Cultivos enarenados (artificial soils for orchards
+     in SE Spain)
+22   Wildlife refuge, land above timberline
+---------------------------------------------------------------------------
+USE-SEC
+----------------
+ 0   No information
+ 1   Pasture, grassland, grazing land
+ 2   Poplars
+ 3   Arable land, cereals
+ 4   Wasteland, shrub
+ 5   Forest, coppice
+ 6   Horticulture
+ 7   Vineyards
+ 8   Garrigue
+ 9   Bush, macchia
+10   Moor
+11   Halophile grassland
+12   Arboriculture, orchard
+13   Industrial crops
+14   Rice
+15   Cotton
+16   Vegetables
+17   Olive trees
+18   Recreation
+19   Extensive pasture, grazing, rough pasture
+20   Dehesa (extensive pastoral system in forest parks
+     in Spain)
+21   Cultivos enarenados (artificial soils for orchards
+     in SE Spain)
+22   Wildlife refuge, land above timberline
+---------------------------------------------------------------------------
+USE1
+----------------
+ 0   No information
+ 1   Pasture, grassland, grazing land
+ 2   Poplars
+ 3   Arable land, cereals
+ 4   Wasteland, shrub
+ 5   Forest, coppice
+ 6   Horticulture
+ 7   Vineyards
+ 8   Garrigue
+ 9   Bush, macchia
+10   Moor
+11   Halophile grassland
+12   Arboriculture, orchard
+13   Industrial crops
+14   Rice
+15   Cotton
+16   Vegetables
+17   Olive trees
+18   Recreation
+19   Extensive pasture, grazing, rough pasture
+20   Dehesa (extensive pastoral system in forest parks
+     in Spain)
+21   Cultivos enarenados (artificial soils for orchards
+     in SE Spain)
+22   Wildlife refuge, land above timberline
+---------------------------------------------------------------------------
+USE2
+----------------
+ 0   No information
+ 1   Pasture, grassland, grazing land
+ 2   Poplars
+ 3   Arable land, cereals
+ 4   Wasteland, shrub
+ 5   Forest, coppice
+ 6   Horticulture
+ 7   Vineyards
+ 8   Garrigue
+ 9   Bush, macchia
+10   Moor
+11   Halophile grassland
+12   Arboriculture, orchard
+13   Industrial crops
+14   Rice
+15   Cotton
+16   Vegetables
+17   Olive trees
+18   Recreation
+19   Extensive pasture, grazing, rough pasture
+20   Dehesa (extensive pastoral system in forest parks
+     in Spain)
+21   Cultivos enarenados (artificial soils for orchards
+     in SE Spain)
+22   Wildlife refuge, land above timberline
+---------------------------------------------------------------------------
+WM1
+----------------
+0   No information
+1   Not applicable (no agriculture)
+2   No water management system
+3   A water management system exists to alleviate
+    waterlogging (drainage)
+4   A water management system exists to alleviate
+    drought stress (irrigation)
+5   A water management system exists to alleviate
+    salinity (drainage)
+6   A water management system exists to alleviate both
+    waterlogging and drought stress
+7   A water management system exists to alleviate both
+    waterlogging and salinity
+---------------------------------------------------------------------------
+WM2
+----------------
+ 0   No information
+ 1   Not applicable (no agriculture)
+ 2   No water management system
+ 3   Pumping
+ 4   Ditches
+ 5   Pipe under drainage (network of drain pipes)
+ 6   Mole drainage
+ 7   Deep loosening (subsoiling)
+ 8   'Bed' system (ridge-funow or steching)
+ 9   Flood irrigation (system of irrigation by
+     controlled flooding as for rice)
+10   Overhead sprinkler (system of irrigation by
+     sprinkling)
+11   Trickle irrigation
+---------------------------------------------------------------------------
+WR
+----------------
+0   No information
+1   Not wet within 80 cm for over 3 months, nor wet
+    within 40 cm for over 1 month
+2   Wet within 80 cm for 3 to 6 months, but not wet
+    within 40 cm for over 1 month
+3   Wet within 80 cm for over 6 months, but not wet
+    within 40 cm for over 11 months
+4   Wet within 40 cm depth for over 11 months
+---------------------------------------------------------------------------
+WRB-ADJ1
+----------------
+II   Lamellic
+Iv   Luvic
+Ix   Lixic
+ab   Albic
+ac   Acric
+ad   Aridic
+ae   Aceric
+ah   Anthropic
+ai   Aric
+al   Alic
+am   Anthric
+an   Andic
+ao   Acroxic
+ap   Abruptic
+aq   Anthraquic
+ar   Arenic
+au   Alumic
+ax   Alcalic
+az   Arzic
+ca   Calcaric
+cb   Carbic
+cc   Calcic
+ch   Chernic
+cl   Chloridic
+cn   Carbonatic
+cr   Chromic
+ct   Cutanic
+cy   Cryic
+dn   Densic
+du   Duric
+dy   Dystric
+es   Eutrisilic
+et   Entic
+eu   Eutric
+fg   Fragic
+fi   Fibric
+fl   Ferralic
+fo   Folic
+fr   Ferric
+fu   Fulvic
+fv   Fluvic
+ga   Garbic
+gc   Glacic
+ge   Gelic
+gi   Gibbsic
+gl   Gleyic
+gm   Grumic
+gp   Gypsiric
+gr   Geric
+gs   Glossic
+gt   Gelistagnic
+gy   Gypsic
+gz   Greyic
+ha   Haplic
+hg   Hydragric
+hi   Histic
+hk   Hyperskeletic
+ht   Hortic
+hu   Humic
+hy   Hydric
+ir   Irragric
+le   Leptic
+li   Lithic
+me   Melanic
+mg   Magnesic
+mo   Mollic
+ms   Mesotrophic
+mz   Mazic
+na   Natric
+ni   Nitic
+oa   Oxyaquic
+oh   Ochric
+om   Ombric
+or   Orthic
+pa   Plaggic
+pc   Petrocalcic
+pd   Petroduric
+pe   Pellic
+pf   Profondic
+pg   Petrogypsic
+ph   Pachic
+pi   Placic
+pl   Plinthic
+pn   Planic
+po   Posic
+pp   Petroplinthic
+pr   Protic
+ps   Petrosalic
+pt   Petric
+rd   Reductic
+rg   Regic
+rh   Rheic
+ro   Rhodic
+rp   Ruptic
+rs   Rustic
+ru   Rubic
+rz   Rendzic
+sa   Sapric
+sd   Spodic
+si   Silic
+sk   Skeletic
+sl   Siltic
+so   Sodic
+sp   Spolic
+st   Stagnic
+su   Sulphatic
+sz   Salic
+tf   Tephric
+ti   Thionic
+tr   Terric
+tu   Turbic
+tx   Toxic
+ty   Takyric
+ub   Urbic
+um   Umbric
+vi   Vitric
+vm   Vermic
+vr   Vertic
+vt   Vetic
+xa   Xanthic
+ye   Yermic
+1    Town
+2    Soil disturbed by man
+3    Water body
+4    Marsh
+5    Glacier
+6    Rock outcrops
+---------------------------------------------------------------------------
+WRB-ADJ2
+----------------
+II   Lamellic
+Iv   Luvic
+Ix   Lixic
+ab   Albic
+ac   Acric
+ad   Aridic
+ae   Aceric
+ah   Anthropic
+ai   Aric
+al   Alic
+am   Anthric
+an   Andic
+ao   Acroxic
+ap   Abruptic
+aq   Anthraquic
+ar   Arenic
+au   Alumic
+ax   Alcalic
+az   Arzic
+ca   Calcaric
+cb   Carbic
+cc   Calcic
+ch   Chernic
+cl   Chloridic
+cn   Carbonatic
+cr   Chromic
+ct   Cutanic
+cy   Cryic
+dn   Densic
+du   Duric
+dy   Dystric
+es   Eutrisilic
+et   Entic
+eu   Eutric
+fg   Fragic
+fi   Fibric
+fl   Ferralic
+fo   Folic
+fr   Ferric
+fu   Fulvic
+fv   Fluvic
+ga   Garbic
+gc   Glacic
+ge   Gelic
+gi   Gibbsic
+gl   Gleyic
+gm   Grumic
+gp   Gypsiric
+gr   Geric
+gs   Glossic
+gt   Gelistagnic
+gy   Gypsic
+gz   Greyic
+ha   Haplic
+hg   Hydragric
+hi   Histic
+hk   Hyperskeletic
+ht   Hortic
+hu   Humic
+hy   Hydric
+ir   Irragric
+le   Leptic
+li   Lithic
+me   Melanic
+mg   Magnesic
+mo   Mollic
+ms   Mesotrophic
+mz   Mazic
+na   Natric
+ni   Nitic
+oa   Oxyaquic
+oh   Ochric
+om   Ombric
+or   Orthic
+pa   Plaggic
+pc   Petrocalcic
+pd   Petroduric
+pe   Pellic
+pf   Profondic
+pg   Petrogypsic
+ph   Pachic
+pi   Placic
+pl   Plinthic
+pn   Planic
+po   Posic
+pp   Petroplinthic
+pr   Protic
+ps   Petrosalic
+pt   Petric
+rd   Reductic
+rg   Regic
+rh   Rheic
+ro   Rhodic
+rp   Ruptic
+rs   Rustic
+ru   Rubic
+rz   Rendzic
+sa   Sapric
+sd   Spodic
+si   Silic
+sk   Skeletic
+sl   Siltic
+so   Sodic
+sp   Spolic
+st   Stagnic
+su   Sulphatic
+sz   Salic
+tf   Tephric
+ti   Thionic
+tr   Terric
+tu   Turbic
+tx   Toxic
+ty   Takyric
+ub   Urbic
+um   Umbric
+vi   Vitric
+vm   Vermic
+vr   Vertic
+vt   Vetic
+xa   Xanthic
+ye   Yermic
+1    Town
+2    Soil disturbed by man
+3    Water body
+4    Marsh
+5    Glacier
+6    Rock outcrops
+---------------------------------------------------------------------------
+WRB-FULL
+----------------
+AB         Albeluvisol
+ABal       Alic Albeluvisol
+ABap       Abruptic Albeluvisol
+ABar       Arenic Albeluvisol
+ABau       Alumic Albeluvisol
+ABeun      Endoeutric Albeluvisol
+ABfg       Fragic Albeluvisol
+ABfr       Ferric Albeluvisol
+ABge       Gelic Albeluvisol
+ABgl       Gleyic Albeluvisol
+ABha       Haplic Albeluvisol
+ABhi       Histic Albeluvisol
+ABsl       Siltic Albeluvisol
+ABst       Stagnic Albeluvisol
+ABum       Umbric Albeluvisol
+AC         Acrisol
+ACab       Albic Acrisol
+ACan       Andic Acrisol
+ACap       Abruptic Acrisol
+ACar       Arenic Acrisol
+ACau       Alumic Acrisol
+ACcr       Chromic Acrisol
+ACdyh      Hyperdystric Acrisol
+ACfr       Ferric Acrisol
+ACgl       Gleyic Acrisol
+ACgr       Geric Acrisol
+ACha       Haplic Acrisol
+AChu       Humic Acrisol
+ACle       Leptic Acrisol
+ACll       Lamellic Acrisol
+ACohh      Hyperochric Acrisol
+ACpf       Profondic Acrisol
+ACpl       Plinthic Acrisol
+ACro       Rhodic Acrisol
+ACsk       Skeletic Acrisol
+ACst       Stagnic Acrisol
+ACum       Umbric Acrisol
+ACvi       Vitric Acrisol
+ACvt       Vetic Acrisol
+AL         Alisol
+ALab       Albic Alisol
+ALan       Andic Alisol
+ALap       Abruptic Alisol
+ALar       Arenic Alisol
+ALcr       Chromic Alisol
+ALdyh      Hyperdystric Alisol
+ALfr       Ferric Alisol
+ALgl       Gleyic Alisol
+ALha       Haplic Alisol
+ALhu       Humic Alisol
+ALll       Lamellic Alisol
+ALni       Nitic Alisol
+ALpf       Profondic Alisol
+ALpl       Plinthic Alisol
+ALro       Rhodic Alisol
+ALsk       Skeletic Alisol
+ALst       Stagnic Alisol
+ALum       Umbric Alisol
+ALvr       Vertic Alisol
+AN         Andosol
+ANao       Acroxic Andosol
+ANar       Arenic Andosol
+ANca       Calcaric Andosol
+ANdu       Duric Andosol
+ANdy       Dystric Andosol
+ANes       Eutrisilic Andosol
+ANeu       Eutric Andosol
+ANfu       Fulvic Andosol
+ANgl       Gleyic Andosol
+ANha       Haplic Andosol
+ANhi       Histic Andosol
+ANhy       Hydric Andosol
+ANle       Leptic Andosol
+ANlv       Luvic Andosol
+ANme       Melanic Andosol
+ANmo       Mollic Andosol
+ANph       Pachic Andosol
+ANpi       Placic Andosol
+ANsi       Silic Andosol
+ANsk       Skeletic Andosol
+ANso       Sodic Andosol
+ANth       Thaptic Andosol
+ANum       Umbric Andosol
+ANvi       Vitric Andosol
+ANvt       Vetic Andosol
+AR         Arenosol
+ARab       Albic Arenosol
+ARad       Aridic Arenosol
+ARca       Calcaric Arenosol
+ARduw      Hypoduric Arenosol
+ARdy       Dystric Arenosol
+AReu       Eutric Arenosol
+ARfg       Fragic Arenosol
+ARfl       Ferralic Arenosol
+ARge       Gelic Arenosol
+ARgl       Gleyic Arenosol
+ARgp       Gypsiric Arenosol
+ARha       Haplic Arenosol
+ARll       Lamellic Arenosol
+ARlvw      Hypoluvic Arenosol
+ARpl       Plinthic Arenosol
+ARpr       Protic Arenosol
+ARru       Rubic Arenosol
+ARszw      Hyposalic Arenosol
+ARtf       Tephric Arenosol
+ARye       Yermic Arenosol
+AT         Anthrosol
+ATar       Arenic Anthrosol
+ATfl       Ferralic Anthrosol
+ATgl       Gleyic Anthrosol
+AThg       Hydragric Anthrosol
+ATht       Hortic Anthrosol
+ATir       Irragric Anthrosol
+ATlv       Luvic Anthrosol
+ATpa       Plaggic Anthrosol
+ATrg       Regic Anthrosol
+ATsd       Spodic Anthrosol
+ATst       Stagnic Anthrosol
+ATtr       Terric Anthrosol
+CH         Chernozem
+CHcc       Calcic Chernozem
+CHch       Chernic Chernozem
+CHgl       Gleyic Chernozem
+CHgs       Glossic Chernozem
+CHha       Haplic Chernozem
+CHlv       Luvic Chernozem
+CHsl       Siltic Chernozem
+CHvm       Vermic Chernozem
+CHvr       Vertic Chernozem
+CL         Calcisol
+CLad       Aridic Calcisol
+CLcch      Hypercalcic Calcisol
+CLccw      Hypocalcic Calcisol
+CLgl       Gleyic Calcisol
+CLha       Haplic Calcisol
+CLle       Leptic Calcisol
+CLlv       Luvic Calcisol
+CLohh      Hyperochric Calcisol
+CLpt       Petric Calcisol
+CLsk       Skeletic Calcisol
+CLso       Sodic Calcisol
+CLszn      Endosalic Calcisol
+CLty       Takyric Calcisol
+CLvr       Vertic Calcisol
+CLye       Yermic Calcisol
+CM         Cambisol
+CMad       Aridic Cambisol
+CMan       Andic Cambisol
+CMca       Calcaric Cambisol
+CMcr       Chromic Cambisol
+CMdy       Dystric Cambisol
+CMeu       Eutric Cambisol
+CMfl       Ferralic Cambisol
+CMfv       Fluvic Cambisol
+CMge       Gelic Cambisol
+CMgl       Gleyic Cambisol
+CMgp       Gypsiric Cambisol
+CMgt       Gelistagnic Cambisol
+CMha       Haplic Cambisol
+CMle       Leptic Cambisol
+CMmo       Mollic Cambisol
+CMohh      Hyperochric Cambisol
+CMpl       Plinthic Cambisol
+CMro       Rhodic Cambisol
+CMsk       Skeletic Cambisol
+CMso       Sodic Cambisol
+CMst       Stagnic Cambisol
+CMszn      Endosalic Cambisol
+CMty       Takyric Cambisol
+CMvi       Vitric Cambisol
+CMvr       Vertic Cambisol
+CMye       Yermic Cambisol
+CR         Cryosol
+CRad       Aridic Cryosol
+CRan       Andic Cryosol
+CRcc       Calcic Cryosol
+CRgc       Glacic Cryosol
+CRgl       Gleyic Cryosol
+CRgy       Gypsic Cryosol
+CRha       Haplic Cryosol
+CRhi       Histic Cryosol
+CRle       Leptic Cryosol
+CRli       Lithic Cryosol
+CRmo       Mollic Cryosol
+CRna       Natric Cryosol
+CRoa       Oxyaquic Cryosol
+CRst       Stagnic Cryosol
+CRsz       Salic Cryosol
+CRti       Thionic Cryosol
+CRtu       Turbic Cryosol
+CRum       Umbric Cryosol
+CRye       Yermic Cryosol
+DU         Durisol
+DUad       Aridic Durisol
+DUar       Arenic Durisol
+DUcc       Calcic Durisol
+DUcr       Chromic Durisol
+DUgy       Gypsic Durisol
+DUha       Haplic Durisol
+DUle       Leptic Durisol
+DUlv       Luvic Durisol
+DUohh      Hyperochric Durisol
+DUpt       Petric Durisol
+DUty       Takyric Durisol
+DUvr       Vertic Durisol
+DUye       Yermic Durisol
+FL         Fluvisol
+FLad       Aridic Fluvisol
+FLar       Arenic Fluvisol
+FLca       Calcaric Fluvisol
+FLdy       Dystric Fluvisol
+FLeu       Eutric Fluvisol
+FLge       Gelic Fluvisol
+FLgl       Gleyic Fluvisol
+FLgp       Gypsiric Fluvisol
+FLha       Haplic Fluvisol
+FLhi       Histic Fluvisol
+FLhu       Humic Fluvisol
+FLmo       Mollic Fluvisol
+FLsk       Skeletic Fluvisol
+FLso       Sodic Fluvisol
+FLst       Stagnic Fluvisol
+FLsz       Salic Fluvisol
+FLtf       Tephric Fluvisol
+FLti       Thionic Fluvisol
+FLty       Takyric Fluvisol
+FLum       Umbric Fluvisol
+FLye       Yermic Fluvisol
+FR         Ferralsol
+FRac       Acric Ferralsol
+FRan       Andic Ferralsol
+FRar       Arenic Ferralsol
+FRau       Alumic Ferralsol
+FRdyh      Hyperdystric Ferralsol
+FReuh      Hypereutric Ferralsol
+FRfr       Ferric Ferralsol
+FRgi       Gibbsic Ferralsol
+FRgl       Gleyic Ferralsol
+FRgr       Geric Ferralsol
+FRha       Haplic Ferralsol
+FRhi       Histic Ferralsol
+FRhu       Humic Ferralsol
+FRlx       Lixic Ferralsol
+FRmo       Mollic Ferralsol
+FRpl       Plinthic Ferralsol
+FRpo       Posic Ferralsol
+FRro       Rhodic Ferralsol
+FRstn      Endostagnic Ferralsol
+FRum       Umbric Ferralsol
+FRvt       Vetic Ferralsol
+FRxa       Xanthic Ferralsol
+GL         Gleysol
+GLan       Andic Gleysol
+GLap       Abruptic Gleysol
+GLaq       Anthraquic Gleysol
+GLar       Arenic Gleysol
+GLau       Alumic Gleysol
+GLax       Alcalic Gleysol
+GLca       Calcaric Gleysol
+GLcc       Calcic Gleysol
+GLdy       Dystric Gleysol
+GLeu       Eutric Gleysol
+GLge       Gelic Gleysol
+GLgy       Gypsic Gleysol
+GLha       Haplic Gleysol
+GLhi       Histic Gleysol
+GLhu       Humic Gleysol
+GLmo       Mollic Gleysol
+GLpl       Plinthic Gleysol
+GLso       Sodic Gleysol
+GLszn      Endosalic Gleysol
+GLtf       Tephric Gleysol
+GLti       Thionic Gleysol
+GLtx       Toxic Gleysol
+GLty       Takyric Gleysol
+GLum       Umbric Gleysol
+GLvi       Vitric Gleysol
+GY         Gypsisol
+GYad       Aridic Gypsisol
+GYaz       Arzic Gypsisol
+GYcc       Calcic Gypsisol
+GYdu       Duric Gypsisol
+GYgyh      Hypergypsic Gypsisol
+GYgyw      Hypogypsic Gypsisol
+GYha       Haplic Gypsisol
+GYle       Leptic Gypsisol
+GYlv       Luvic Gypsisol
+GYohh      Hyperochric Gypsisol
+GYpt       Petric Gypsisol
+GYsk       Skeletic Gypsisol
+GYso       Sodic Gypsisol
+GYszn      Endosalic Gypsisol
+GYty       Takyric Gypsisol
+GYvr       Vertic Gypsisol
+GYye       Yermic Gypsisol
+HS         Histosol
+HSax       Alcalic Histosol
+HScy       Cryic Histosol
+HSdy       Dystric Histosol
+HSeu       Eutric Histosol
+HSfi       Fibric Histosol
+HSfo       Folic Histosol
+HSgc       Glacic Histosol
+HSge       Gelic Histosol
+HSom       Ombric Histosol
+HSrh       Rheic Histosol
+HSsa       Sapric Histosol
+HSsz       Salic Histosol
+HSti       Thionic Histosol
+HStx       Toxic Histosol
+KS         Kastanozem
+KSam       Anthric Kastanozem
+KScc       Calcic Kastanozem
+KScr       Chromic Kastanozem
+KSgy       Gypsic Kastanozem
+KSha       Haplic Kastanozem
+KSlv       Luvic Kastanozem
+KSsl       Siltic Kastanozem
+KSsow      Hyposodic Kastanozem
+KSvr       Vertic Kastanozem
+LP         Leptosol
+LPad       Aridic Leptosol
+LPca       Calcaric Leptosol
+LPdy       Dystric Leptosol
+LPeu       Eutric Leptosol
+LPge       Gelic Leptosol
+LPgl       Gleyic Leptosol
+LPgp       Gypsiric Leptosol
+LPha       Haplic Leptosol
+LPhk       Hyperskeletic Leptosol
+LPhu       Humic Leptosol
+LPli       Lithic Leptosol
+LPmo       Mollic Leptosol
+LPrz       Rendzic Leptosol
+LPum       Umbric Leptosol
+LPvr       Vertic Leptosol
+LPye       Yermic Leptosol
+LV         Luvisol
+LVab       Albic Luvisol
+LVan       Andic Luvisol
+LVar       Arenic Luvisol
+LVcc       Calcic Luvisol
+LVcr       Chromic Luvisol
+LVct       Cutanic Luvisol
+LVdy       Dystric Luvisol
+LVfr       Ferric Luvisol
+LVgl       Gleyic Luvisol
+LVha       Haplic Luvisol
+LVle       Leptic Luvisol
+LVll       Lamellic Luvisol
+LVohh      Hyperochric Luvisol
+LVpf       Profondic Luvisol
+LVro       Rhodic Luvisol
+LVsow      Hyposodic Luvisol
+LVst       Stagnic Luvisol
+LVvi       Vitric Luvisol
+LVvr       Vertic Luvisol
+LX         Lixisol
+LXab       Albic Lixisol
+LXan       Andic Lixisol
+LXap       Abruptic Lixisol
+LXar       Arenic Lixisol
+LXcc       Calcic Lixisol
+LXcr       Chromic Lixisol
+LXfr       Ferric Lixisol
+LXgl       Gleyic Lixisol
+LXgr       Geric Lixisol
+LXha       Haplic Lixisol
+LXhu       Humic Lixisol
+LXle       Leptic Lixisol
+LXll       Lamellic Lixisol
+LXohh      Hyperochric Lixisol
+LXpf       Profondic Lixisol
+LXpl       Plinthic Lixisol
+LXro       Rhodic Lixisol
+LXst       Stagnic Lixisol
+LXvi       Vitric Lixisol
+LXvt       Vetic Lixisol
+NT         Nitisol
+NTal       Alic Nitisol
+NTan       Andic Nitisol
+NTau       Alumic Nitisol
+NTdy       Dystric Nitisol
+NTeu       Eutric Nitisol
+NTfl       Ferralic Nitisol
+NTha       Haplic Nitisol
+NThu       Humic Nitisol
+NTmo       Mollic Nitisol
+NTro       Rhodic Nitisol
+NTum       Umbric Nitisol
+NTvt       Vetic Nitisol
+PH         Phaeozem
+PHab       Albic Phaeozem
+PHan       Andic Phaeozem
+PHap       Abruptic Phaeozem
+PHca       Calcaric Phaeozem
+PHcr       Chromic Phaeozem
+PHgl       Gleyic Phaeozem
+PHgs       Glossic Phaeozem
+PHgz       Greyic Phaeozem
+PHha       Haplic Phaeozem
+PHle       Leptic Phaeozem
+PHlv       Luvic Phaeozem
+PHph       Pachic Phaeozem
+PHsk       Skeletic Phaeozem
+PHsl       Siltic Phaeozem
+PHso       Sodic Phaeozem
+PHst       Stagnic Phaeozem
+PHtf       Tephric Phaeozem
+PHvi       Vitric Phaeozem
+PHvm       Vermic Phaeozem
+PHvr       Vertic Phaeozem
+PL         Planosol
+PLab       Albic Planosol
+PLal       Alic Planosol
+PLar       Arenic Planosol
+PLau       Alumic Planosol
+PLax       Alcalic Planosol
+PLca       Calcaric Planosol
+PLcc       Calcic Planosol
+PLcr       Chromic Planosol
+PLdy       Dystric Planosol
+PLeu       Eutric Planosol
+PLfr       Ferric Planosol
+PLge       Gelic Planosol
+PLgl       Gleyic Planosol
+PLgr       Geric Planosol
+PLgy       Gypsic Planosol
+PLha       Haplic Planosol
+PLhi       Histic Planosol
+PLlv       Luvic Planosol
+PLmo       Mollic Planosol
+PLpf?      Petroferric Planosol
+PLpl       Plinthic Planosol
+PLro       Rhodic Planosol
+PLso       Sodic Planosol
+PLszn      Endosalic Planosol
+PLti       Thionic Planosol
+PLum       Umbric Planosol
+PLvr       Vertic Planosol
+PT         Plinthosol
+PTab       Albic Plinthosol
+PTac       Acric Plinthosol
+PTal       Alic Plinthosol
+PTap       Abruptic Plinthosol
+PTau       Alumic Plinthosol
+PTdun      Endoduric Plinthosol
+PTeun      Endoeutric Plinthosol
+PTfr       Ferric Plinthosol
+PTgr       Geric Plinthosol
+PTgs       Glossic Plinthosol
+PTha       Haplic Plinthosol
+PThu       Humic Plinthosol
+PTph       Pachic Plinthosol
+PTpt       Petric Plinthosol
+PTst       Stagnic Plinthosol
+PTum       Umbric Plinthosol
+PTvt       Vetic Plinthosol
+PZ         Podzol
+PZam       Anthric Podzol
+PZcb       Carbic Podzol
+PZdn       Densic Podzol
+PZet       Entic Podzol
+PZfg       Fragic Podzol
+PZge       Gelic Podzol
+PZgl       Gleyic Podzol
+PZha       Haplic Podzol
+PZhi       Histic Podzol
+PZll       Lamellic Podzol
+PZpi       Placic Podzol
+PZrs       Rustic Podzol
+PZsk       Skeletic Podzol
+PZst       Stagnic Podzol
+PZum       Umbric Podzol
+RG         Regosol
+RGad       Aridic Regosol
+RGah       Anthropic Regosol
+RGai       Aric Regosol
+RGanb      Thaptoandic Regosol
+RGar       Arenic Regosol
+RGca       Calcaric Regosol
+RGdy       Dystric Regosol
+RGeu       Eutric Regosol
+RGga       Garbic Regosol
+RGge       Gelic Regosol
+RGgl       Gleyic Regosol
+RGgp       Gypsiric Regosol
+RGgt       Gelistagnic Regosol
+RGha       Haplic Regosol
+RGhu       Humic Regosol
+RGle       Leptic Regosol
+RGohh      Hyperochric Regosol
+RGrd       Reductic Regosol
+RGsk       Skeletic Regosol
+RGsow      Hyposodic Regosol
+RGsp       Spolic Regosol
+RGst       Stagnic Regosol
+RGszw      Hyposalic Regosol
+RGtf       Tephric Regosol
+RGty       Takyric Regosol
+RGub       Urbic Regosol
+RGvib      Thaptovitric Regosol
+RGvm       Vermic Regosol
+RGye       Yermic Regosol
+SC         Solonchak
+SCad       Aridic Solonchak
+SCae       Aceric Solonchak
+SCcc       Calcic Solonchak
+SCcl       Chloridic Solonchak
+SCcn       Carbonatic Solonchak
+SCdu       Duric Solonchak
+SCge       Gelic Solonchak
+SCgl       Gleyic Solonchak
+SCgy       Gypsic Solonchak
+SCha       Haplic Solonchak
+SChi       Histic Solonchak
+SCmo       Mollic Solonchak
+SCoh       Ochric Solonchak
+SCps       Petrosalic Solonchak
+SCso       Sodic Solonchak
+SCst       Stagnic Solonchak
+SCsu       Sulphatic Solonchak
+SCszh      Hypersalic Solonchak
+SCty       Takyric Solonchak
+SCvr       Vertic Solonchak
+SCye       Yermic Solonchak
+SN         Solonetz
+SNab       Albic Solonetz
+SNad       Aridic Solonetz
+SNcc       Calcic Solonetz
+SNdu       Duric Solonetz
+SNgl       Gleyic Solonetz
+SNgy       Gypsic Solonetz
+SNha       Haplic Solonetz
+SNhu       Humic Solonetz
+SNmg       Magnesic Solonetz
+SNmo       Mollic Solonetz
+SNst       Stagnic Solonetz
+SNsz       Salic Solonetz
+SNty       Takyric Solonetz
+SNvr       Vertic Solonetz
+SNye       Yermic Solonetz
+UM         Umbrisol
+UMab       Albic Umbrisol
+UMam       Anthric Umbrisol
+UMar       Arenic Umbrisol
+UMfl       Ferralic Umbrisol
+UMge       Gelic Umbrisol
+UMgl       Gleyic Umbrisol
+UMha       Haplic Umbrisol
+UMhu       Humic Umbrisol
+UMle       Leptic Umbrisol
+UMsk       Skeletic Umbrisol
+UMst       Stagnic Umbrisol
+VR         Vertisol
+VRal       Alic Vertisol
+VRcc       Calcic Vertisol
+VRcr       Chromic Vertisol
+VRdu       Duric Vertisol
+VReu       Eutric Vertisol
+VRgm       Grumic Vertisol
+VRgp       Gypsiric Vertisol
+VRgy       Gypsic Vertisol
+VRha       Haplic Vertisol
+VRms       Mesotrophic Vertisol
+VRmz       Mazic Vertisol
+VRna       Natric Vertisol
+VRpe       Pellic Vertisol
+VRsow      Hyposodic Vertisol
+VRsz       Salic Vertisol
+VRti       Thionic Vertisol
+           No information
+---------------------------------------------------------------------------
+WRB-LEV1
+----------------
+AB   Albeluvisol
+AC   Acrisol
+AL   Alisol
+AN   Andosol
+AR   Arenosol
+AT   Anthrosol
+CH   Chernozem
+CL   Calcisol
+CM   Cambisol
+CR   Cryosol
+DU   Durisol
+FL   Fluvisol
+FR   Ferralsol
+GL   Gleysol
+GY   Gypsisol
+HS   Histosol
+KS   Kastanozem
+LP   Leptosol
+LV   Luvisol
+LX   Lixisol
+NT   Nitisol
+PH   Phaeozem
+PL   Planosol
+PT   Plinthosol
+PZ   Podzol
+RG   Regosol
+SC   Solonchak
+SN   Solonetz
+UM   Umbrisol
+VR   Vertisol
+1    Town
+2    Soil disturbed by man
+3    Water body
+4    Marsh
+5    Glacier
+6    Rock outcrops
+---------------------------------------------------------------------------
+WRB-SPE1
+----------------
+b   Thapto
+c   Cumuli
+d   Bathi
+h   Hyper
+n   Endo
+o   Orthi
+p   Epi
+r   Para
+t   Proto
+w   Hypo
+    No information
+1   Town
+2   Soil disturbed by man
+3   Water body
+4   Marsh
+5   Glacier
+6   Rock outcrops
+---------------------------------------------------------------------------
+WRB-SPE2
+----------------
+b   Thapto
+c   Cumuli
+d   Bathi
+h   Hyper
+n   Endo
+o   Orthi
+p   Epi
+r   Para
+t   Proto
+w   Hypo
+    No information
+1   Town
+2   Soil disturbed by man
+3   Water body
+4   Marsh
+5   Glacier
+6   Rock outcrops
+---------------------------------------------------------------------------
+ZMAX
+----------------
+-999   No information
+  -2   metres
+  -1   metres
+   0   metres
+   1   metres
+   2   metres
+5000   metres
+---------------------------------------------------------------------------
+ZMIN
+----------------
+-999   No information
+  -2   metres
+  -1   metres
+   0   metres
+   1   metres
+   2   metres
+5000   metres
+---------------------------------------------------------------------------

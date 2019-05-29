@@ -1,0 +1,265 @@
+AGLIM1NNI = Dominant limitation to agricultural use (without no information).
+0 = No information
+1 = No limitation to agricultural use
+2 = Gravelly (over 35% gravels diameter < 7.5 cm)
+3 = Stony (presence of stones diameter > 7.5 cm, impracticable mechanization)
+4 = Lithic (coherent and hard rock within 50 cm)
+5 = Concretionary (over 35% concretions diameter < 7.5 cm near the surface)
+6 = Petrocalcic (cemented or indurated calcic horizon within 100 cm)
+7 = Saline (electric conductivity > 4 mS.cm-1 within 100 cm)
+8 = Sodic (Na/T > 6% within 100 cm)
+9 = Glaciers and snow-caps
+10 = Soils disturbed by man
+20 = Fragic
+21 = Drained
+22 = Quasi permanently flooded
+30 = Eroded phase, erosion
+31 = Phreatic phase
+---------------------------------------------------------------------------
+AGLIM2NNI = Secondary limitation to agricultural use (without no information).
+0 = No information
+1 = No limitation to agricultural use
+2 = Gravelly (over 35% gravels diameter < 7.5 cm)
+3 = Stony (presence of stones diameter > 7.5 cm, impracticable mechanization)
+4 = Lithic (coherent and hard rock within 50 cm)
+5 = Concretionary (over 35% concretions diameter < 7.5 cm near the surface)
+6 = Petrocalcic (cemented or indurated calcic horizon within 100 cm)
+7 = Saline (electric conductivity > 4 mS.cm-1 within 100 cm)
+8 = Sodic (Na/T > 6% within 100 cm)
+9 = Glaciers and snow-caps
+10 = Soils disturbed by man
+20 = Fragic
+21 = Drained
+22 = Quasi permanently flooded
+30 = Eroded phase, erosion
+31 = Phreatic phase
+---------------------------------------------------------------------------
+ALT = ELEVATION
+# = No information
+L = Lowlands & intermediate
+U = Uplands & mountains
+---------------------------------------------------------------------------
+ATC = Regrouped accumulated mean annual temperature class (ATC) (source: JRC-MARS)
+H = High (> 3000°C)
+M = Medium (1800-3000°C)
+L = Low (< 1800°C)
+---------------------------------------------------------------------------
+AWC_SUB = Subsoil available water capacity.
+VL = Very low ( ~ 0 mm/m)
+L = Low ( < 100 mm/m)
+M = Medium (100 - 140 mm/m)
+H = High (140 - 190 mm/m)
+VH = Very high ( > 190 mm/m)
+# = No data or not applicable
+---------------------------------------------------------------------------
+AWC_TOP = Topsoil available water capacity.
+L = Low ( < 100 mm/m)
+M = Medium (100 - 140 mm/m)
+H = High (140 - 190 mm/m)
+VH = Very high ( > 190 mm/m)
+# = No data or not applicable
+---------------------------------------------------------------------------
+BS_SUB = Base saturation of the subsoil.
+H = High ( > 50 %)
+L = Low ( < 50 %)
+---------------------------------------------------------------------------
+BS_TOP = Base saturation of the topsoil.
+H = High ( > 75 %)
+M = Medium (50 - 75 %)
+L = Low ( < 50 %)
+---------------------------------------------------------------------------
+CEC_SUB = Subsoil cation exchange capacity.
+H = High ( > 40 cmol(+)/kg)
+M = Medium (15-40 cmol(+)/kg)
+L = Low ( < 15 cmol(+)/kg)
+---------------------------------------------------------------------------
+CEC_TOP = Topsoil cation exchange capacity.
+H = High ( > 40 cmol(+)/kg)
+M = Medium (15-40 cmol(+)/kg)
+L = Low ( < 15 cmol(+)/kg)
+---------------------------------------------------------------------------
+CRUSTING = Soil crusting class.
+1 = Very weak
+2 = Weak
+3 = Moderate
+4 = Strong
+5 = Very strong
+---------------------------------------------------------------------------
+DGH = Depth to a gleyed horizon.
+S = Shallow ( < 40 cm)
+M = Moderate (40 - 80 cm)
+D = Deep (80 - 120 cm)
+V = Very deep ( > 120 cm)
+---------------------------------------------------------------------------
+DIFF = Soil profile differentiation.
+H = High differentiation
+L = Low differentiation
+O = No differentiation
+---------------------------------------------------------------------------
+DIMP = Depth to an impermeable layer.
+S = Shallow ( < 80 cm)
+D = Deep ( > 80 cm)
+---------------------------------------------------------------------------
+DR = Depth to rock.
+S = Shallow ( < 40 cm)
+M = Moderate (40 - 80 cm)
+D = Deep (80 - 120 cm)
+V = Very deep ( > 120 cm)
+---------------------------------------------------------------------------
+EAWC_SUB = Subsoil easily available water capacity.
+VL = Very low ( ~ 0 mm/m)
+L = Low ( < 100 mm/m)
+M = Medium (100 - 140 mm/m)
+H = High (140 - 190 mm/m)
+VH = Very high ( > 190 mm/m)
+# = No data or not applicable
+---------------------------------------------------------------------------
+EAWC_TOP = Topsoil easily available water capacity.
+L = Low ( < 100 mm/m)
+M = Medium (100 - 140 mm/m)
+H = High (140 - 190 mm/m)
+VH = Very high ( > 190 mm/m)
+# = No data or not applicable
+---------------------------------------------------------------------------
+ERODIBILITY = Soil erodibility class.
+1 = Very weak
+2 = Weak
+3 = Moderate
+4 = Strong
+5 = Very strong
+---------------------------------------------------------------------------
+HG = Hydrogeological class.
+1R = 1R
+1C = 1C
+1S = 1S
+1L = 1L
+1H = 1H
+1M = 1M
+2 = 2
+3 = 3
+4W = 4W
+4D = 4D
+---------------------------------------------------------------------------
+MIN = Profile mineralogy.
+C = Chemical or Geochemical
+M = Mechanical or Physical
+MC = Chemical and Mechanical
+ND = No differentiation
+---------------------------------------------------------------------------
+MIN_SUB = Subsoil mineralogy.
+KQ = 1/1 Minerals + Quartz
+KX = 1/1 Min. + Oxy. & Hydroxy.
+MK = 2/1 & 1/1 Minerals
+M = 2/1 & 2/1/1 non swel. Min.
+MS = Swel. & non swel. 2/1 Min.
+S = Swelling 2/1 Minerals
+TV = Vitric Minerals
+TO = Andic Minerals
+NA = Not applicable
+---------------------------------------------------------------------------
+MIN_TOP = Topsoil mineralogy.
+KQ = 1/1 Minerals + Quartz
+KX = 1/1 Min. + Oxy. & Hydroxy.
+MK = 2/1 & 1/1 Minerals
+M = 2/1 & 2/1/1 non swel. Min.
+MS = Swel. & non swel. 2/1 Min.
+S = Swelling 2/1 Minerals
+TV = Vitric Minerals
+TO = Andic Minerals
+NA = Not applicable
+---------------------------------------------------------------------------
+OC_TOP = Topsoil organic carbon content.
+H = High ( > 6 %)
+M = Medium (2 - 6 %)
+L = Low (1 - 2 %)
+V = Very low ( < 1 %)
+---------------------------------------------------------------------------
+PD_SUB = Subsoil packing density.
+L = Low
+M = Medium
+H = High
+---------------------------------------------------------------------------
+PD_TOP = Topsoil packing density.
+L = Low
+M = Medium
+H = High
+---------------------------------------------------------------------------
+PEAT = Peat.
+N = No
+Y = Yes
+---------------------------------------------------------------------------
+PHYS-CHIM = Physico-chemical factor of soil crusting & erodibility.
+1 = Very favourable
+2 = Favourable
+3 = Medium
+4 = Unfavourable
+5 = Very unfavourable
+---------------------------------------------------------------------------
+PMH = Parent material hydrogeological type.
+R = Porous - Stor. ~ Perm. +
+C = Porous 2 Stor. ~ Perm. +
+S = Porous 1 Stor. + Perm. +
+L = Stor. - Perm. -
+H = Hard. Stor. -- Perm. --
+M = Soft. Stor. -- Perm. --
+# = No information
+---------------------------------------------------------------------------
+STR_SUB = Subsoil structure.
+G = Good
+N = Normal
+P = Poor
+O = Peaty subsoil
+---------------------------------------------------------------------------
+STR_TOP = Topsoil structure.
+G = Good
+N = Normal
+P = Poor
+H = Humic or Peaty topsoil
+---------------------------------------------------------------------------
+TD = Rule infered subsoil texture.
+0 = No information
+9 = No texture (histosols, ...)
+1 = Coarse (clay < 18 % and sand > 65 %)
+2 = Medium (18% < clay < 35% and sand > 15%, or clay < 18% and 15% < sand < 65%)
+3 = Medium fine (clay < 35 % and sand < 15 %)
+4 = Fine (35 % < clay < 60 %)
+5 = Very fine (clay > 60 %)
+---------------------------------------------------------------------------
+TEXT = Dominant surface textural class (infered).
+1 = Coarse (clay < 18 % and sand > 65 %)
+2 = Medium (18% < clay < 35% and sand > 15%,\or clay < 18% and 15% < sand < 65%)
+3 = Medium fine (clay < 35 % and sand < 15 %)
+4 = Fine (35 % < clay < 60 %)
+5 = Very fine (clay > 60 %)
+7 = No texture (because of rock outcrop)
+8 = No texture (because of organic layer)
+6 = No texture (other cases)
+0 = No information
+---------------------------------------------------------------------------
+TEXT-CRUST = Textural factor of soil crusting.
+1 = Very favourable
+2 = Favourable
+3 = Medium
+4 = Unfavourable
+5 = Very unfavourable
+---------------------------------------------------------------------------
+TEXT-EROD = Textural factor of soil erodibility.
+1 = Very favourable
+2 = Favourable
+3 = Medium
+4 = Unfavourable
+5 = Very unfavourable
+---------------------------------------------------------------------------
+USE = Regrouped land use class.
+HG = Halophile Grassland
+MG = Managed Grassland
+SN = Semi-natural
+C = Cultivated
+# = No information
+---------------------------------------------------------------------------
+VS = Volume of stones.
+00 =  0 % stones
+10 = 10 % stones
+15 = 15 % stones
+20 = 20 % stones
+---------------------------------------------------------------------------

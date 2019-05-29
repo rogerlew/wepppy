@@ -200,6 +200,55 @@ def get_prism_monthly_ppt(lng, lat, method='cubic', units=None):
     return vals
 
 
+def get_eobs_monthly_tmin(lng, lat, method='cubic', units='c'):
+    _json = _metquery_retrieve_monthly('eu/e-obs/tn/mean', lng, lat, method)
+
+    vals = _json['MonthlyValues']
+    assert len(vals) == 12
+
+    vals = [(v, float('nan'))[v < -273.15] for v in vals]
+    vals = np.array(vals)
+
+    if units is not None and 'f' in units.lower():
+        vals = c_to_f(vals)
+
+    return vals
+
+
+def get_eobs_monthly_tmax(lng, lat, method='cubic', units='c'):
+    _json = _metquery_retrieve_monthly('eu/e-obs/tx/mean', lng, lat, method)
+
+    vals = _json['MonthlyValues']
+    assert len(vals) == 12
+
+    vals = [(v, float('nan'))[v < -273.15] for v in vals]
+    vals = np.array(vals)
+
+    if units is not None and 'f' in units.lower():
+        vals = c_to_f(vals)
+
+    return vals
+
+
+def get_eobs_monthly_ppt(lng, lat, method='cubic', units=None):
+    _json = _metquery_retrieve_monthly('eu/e-obs/rr/mean', lng, lat, method)
+
+    vals = _json['MonthlyValues']
+    assert len(vals) == 12
+
+    vals = [(v, float('nan'))[v < 0] for v in vals]
+    vals = np.array(vals)
+
+    if units is not None and 'in' in units.lower():
+        vals *= 0.0393701
+
+    if units is not None and 'daily' not in units.lower():
+        vals *= np.array([31.0, 28.25, 31.0, 30.0, 31.0, 30.0,
+                          31.0, 31.0, 30.0, 31.0, 30.0, 31.0])
+
+    return vals
+
+
 def get_daily(dataset, bbox, year, dst):
     global _metquery_url
 

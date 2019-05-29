@@ -1,0 +1,8 @@
+"Landform"|"valleys"|"sides"|||"Yes"|"2982979"|"2399364"
+"Landform"|"mountainsides"||||"Yes"|"2982979"|"2400251"
+"Landform"|"mesas"||||"Yes"|"3002409"|"2400918"
+"Landform"|"valleys"|"bottoms"|||"Yes"|"3041269"|"2401357"
+"Landform"|"alluvial fans"||||"Yes"|"3041269"|"2398698"
+"Landform"|"mesas"|"tops"|||"Yes"|"3047745"|"2399809"
+"Landform"|"ridges"|"tops"|||"Yes"|"3047745"|"2398922"
+"Landform"|"pediments"|"old"|||"Yes"|"3047745"|"2398035"

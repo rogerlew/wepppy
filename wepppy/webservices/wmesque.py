@@ -282,6 +282,9 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
           xmin=ul_x, xmax=lr_x, ymin=lr_y, ymax=ul_y,
           resample=resample, src=src, dst=dst)
 
+    with open(dst + '.cmd', 'w') as fp:
+        fp.write(cmd)
+
     # delete destination file if it exists
     if os.path.exists(dst):
         os.remove(dst)

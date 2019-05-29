@@ -1,0 +1,2 @@
+"alluvium"|"Yes"|"3015359"|"1159939"
+"gravelly alluvium derived from gneiss, limestone, dolomite, quartzite, shale, and acid igneous rocks"|"Yes"|"3054218"|"1158381"

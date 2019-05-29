@@ -1,0 +1,17 @@
+mukey: 325834
+found 1 components
+looping over components
+analyzing cokey 14726523
+found 5 layers
+analyzing chkey 42420738
+analyzing chkey 42420740
+analyzing chkey 42420741
+analyzing chkey 42420742
+analyzing chkey 42420739
+horizons mask: [True, True, True, True, True]
+computing erodibility for h0
+building major component
+identified 5 layers, ksat_min=2.7
+done
+Validity: all checks passed
+Validity: all checks passed

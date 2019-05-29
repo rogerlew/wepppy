@@ -1,0 +1,5 @@
+|||"Alluvium"||"1158955"|"1499289"
+|"Coarse-loamy"|"calcareous"|"Alluvium"||"1159505"|"1498840"
+|"Silty"||"Alluvium"||"1159835"|"1500889"
+|||"Calcareous loess"||"1159735"|"1499568"
+|||"Alluvium"||"1159959"|"1499003"

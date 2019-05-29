@@ -1,0 +1,495 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ tn408522.par                                                                                                                                                                                                                                                    
+ 0500000US47185.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1989  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1989  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1989  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1989  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1989  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:        1989  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1990  N:         106
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1990  N:         106
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1990  N:         106
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1990  N:         106
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1990  N:         106
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           4  Year:        1990  N:         330
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1990  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1990  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1990  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1990  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1990  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:          11  Year:        1990  N:         330
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         115
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1991  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1991  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1991  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1991  N:         107
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1991  N:         107
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1991  Mlevel=   30.0000000      SDlevel=   61.3196793      Days:         360
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         122
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         122
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         122
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         122
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         122
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:        1992  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1992  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1992  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1992  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1992  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1992  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:          11  Year:        1992  N:         360
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1992  Mlevel=   40.0000000      SDlevel=   94.8554688      Days:         390
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         130
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         130
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         130
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         130
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         130
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:        1993  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1993  N:         123
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1993  N:         123
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1993  N:         123
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1993  N:         123
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1993  N:         123
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1993  Mlevel=   20.0000000      SDlevel=   99.7512589      Days:         420
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1994  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1994  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1994  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1994  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1994  N:         146
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1994  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1994  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1994  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1994  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1994  N:         128
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1994  Mlevel=   10.0000000      SDlevel=   99.9733658      Days:         450
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1995  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1995  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1995  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1995  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1995  N:         155
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1995  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1995  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1995  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1995  N:         139
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1995  N:         139
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1995  Mlevel=   10.0000000      SDlevel=   99.9998703      Days:         480
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1996  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1996  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1996  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1996  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1996  N:         163
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1996  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1996  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1996  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1996  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1996  N:         143
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1996  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         510
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1997  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1997  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1997  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1997  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1997  N:         173
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1997  N:         152
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1997  N:         152
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1997  N:         152
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1997  N:         152
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1997  N:         152
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1997  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         540
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1998  N:         180
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1998  N:         180
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1998  N:         180
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1998  N:         180
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1998  N:         180
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1998  N:         160
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1998  N:         160
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1998  N:         160
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1998  N:         160
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1998  N:         160
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1998  Mlevel=   5.00000000      SDlevel=   100.000000      Days:         570
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1999  N:         195
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1999  N:         195
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1999  N:         195
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1999  N:         195
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1999  N:         195
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1999  N:         172
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1999  N:         172
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1999  N:         172
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1999  N:         172
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        1999  N:         172
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        1999  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         600
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2000  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2000  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2000  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2000  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2000  N:         202
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2000  N:         183
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2000  N:         183
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2000  N:         183
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2000  N:         183
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2000  N:         183
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2000  Mlevel=   1.00000000      SDlevel=   100.000000      Days:         630
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2001  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2001  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2001  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2001  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2001  N:         210
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2001  N:         192
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2001  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         660
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2002  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2002  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2002  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2002  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2002  N:         222
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           4  Year:        2002  N:         690
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2002  N:         205
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2002  N:         205
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2002  N:         205
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2002  N:         205
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2002  N:         205
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2002  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         690
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2003  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2003  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2003  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2003  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2003  N:         227
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2003  N:         213
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2003  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         720
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2004  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2004  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2004  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2004  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2004  N:         241
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2004  N:         223
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2004  N:         223
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2004  N:         223
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2004  N:         223
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2004  N:         223
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:          11  Year:        2004  N:         750
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2004  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         750
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2005  N:         253
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2005  N:         253
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2005  N:         253
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2005  N:         253
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2005  N:         253
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           4  Year:        2005  N:         750
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2005  N:         228
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2005  N:         228
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2005  N:         228
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2005  N:         228
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2005  N:         228
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2005  Mlevel=   5.00000000      SDlevel=   100.000000      Days:         780
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2006  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2006  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2006  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2006  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2006  N:         258
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2006  N:         241
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2006  Mlevel=   5.00000000      SDlevel=   100.000000      Days:         810
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         273
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2007  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2007  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2007  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2007  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2007  N:         249
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2007  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         840
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         278
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         278
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         278
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         278
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         278
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2008  N:         255
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2008  N:         255
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2008  N:         255
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2008  N:         255
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2008  N:         255
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2008  Mlevel=   10.0000000      SDlevel=   100.000000      Days:         870
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2009  N:         287
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2009  N:         287
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2009  N:         287
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2009  N:         287
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2009  N:         287
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2009  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2009  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2009  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2009  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2009  N:         256
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:          11  Year:        2009  N:         840
+ FAILED K-S -- Parm:Wind Vel.       Mon:          11  Year:        2009  N:         870
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2009  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         900
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2010  N:         293
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2010  N:         293
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2010  N:         293
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2010  N:         293
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2010  N:         293
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2010  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2010  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2010  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2010  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2010  N:         264
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2010  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         930
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2011  N:         296
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2011  N:         296
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2011  N:         296
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2011  N:         296
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2011  N:         296
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2011  N:         271
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2011  N:         271
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2011  N:         271
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2011  N:         271
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2011  N:         271
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2011  Mlevel=   20.0000000      SDlevel=   100.000000      Days:         960
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2012  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2012  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2012  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2012  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2012  N:         312
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2012  N:         285
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2012  N:         285
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2012  N:         285
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2012  N:         285
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2012  N:         285
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2012  Mlevel=   5.00000000      SDlevel=   100.000000      Days:         990
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2013  N:         322
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2013  N:         322
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2013  N:         322
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2013  N:         322
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2013  N:         322
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2013  N:         292
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2013  N:         292
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2013  N:         292
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2013  N:         292
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2013  N:         292
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2013  Mlevel=   10.0000000      SDlevel=   100.000000      Days:        1020
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2014  N:         332
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2014  N:         332
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2014  N:         332
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2014  N:         332
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2014  N:         332
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2014  N:         299
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2014  Mlevel=   10.0000000      SDlevel=   100.000000      Days:        1050
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2015  N:         341
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2015  N:         341
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2015  N:         341
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2015  N:         341
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2015  N:         341
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2015  N:         308
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2015  N:         308
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2015  N:         308
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2015  N:         308
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2015  N:         308
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:          11  Year:        2015  N:         990
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2015  Mlevel=   20.0000000      SDlevel=   100.000000      Days:        1080
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2016  N:         349
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2016  N:         349
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2016  N:         349
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2016  N:         349
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2016  N:         349
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2016  N:         319
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US47185.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2016  N:         319
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2016  Mlevel=   10.0000000      SDlevel=   100.000000      Days:        1110
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2017  N:         361
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2017  N:         361
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2017  N:         361
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2017  N:         361
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2017  N:         361
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2017  N:         328
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2017  N:         328
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2017  N:         328
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2017  N:         328
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          11  Year:        2017  N:         328
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          11  Year:        2017  Mlevel=   10.0000000      SDlevel=   100.000000      Days:        1140

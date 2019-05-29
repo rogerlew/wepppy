@@ -96,13 +96,14 @@ if __name__ == "__main__":
     from glob import glob
     import csv
 
-    YamlSoil('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/High sev fire-loam.sol')
+    #YamlSoil('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/High sev fire-loam.sol')
 
-    #sol_fns = glob('/home/weppdev/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/*.sol')
-    sol_fns = glob('/home/weppdev/PycharmProjects/wepppy/wepppy/nodb/mods/baer/data/soils/*.sol')
+    sol_fns = glob('/home/roger/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/*.sol')
+    #sol_fns = glob('/home/roger/PycharmProjects/wepppy/wepppy/nodb/mods/baer/data/soils/*.sol')
 
-    fp = open('/home/weppdev/PycharmProjects/wepppy/wepppy/nodb/mods/baer/data/soils/summary.csv', 'w')
-    fp.write('slid,texid,burnclass,ki,kr,shcrit,avke,solthk\n')
+    #fp = open('/home/weppdev/PycharmProjects/wepppy/wepppy/nodb/mods/baer/data/soils/summary.csv', 'w')
+    fp = open('/home/roger/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/summary.csv', 'w')
+    fp.write('slid,texid,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
     for sol_fn in sol_fns:
         print(sol_fn)
         sol = YamlSoil(sol_fn)
@@ -118,7 +119,8 @@ if __name__ == "__main__":
         if 'low' in ofe['slid'].lower():
             burnclass = 'low'
 
-        fp.write('{},{},{},{},{},{},{},{}\n'
-                 .format(ofe['slid'], ofe['texid'], burnclass, ofe['ki'], ofe['kr'], ofe['shcrit'], ofe['avke'], hor['solthk']))
+        fp.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'
+                 .format(ofe['slid'], ofe['texid'], burnclass, ofe['salb'], ofe['sat'], ofe['ki'], ofe['kr'], ofe['shcrit'], ofe['avke'],
+                         hor['sand'], hor['clay'], hor['orgmat'], hor['cec'], hor['rfg'], hor['solthk']))
 
     fp.close()

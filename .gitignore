@@ -1,7 +1,9 @@
-wepppy/ssurgo/data/*
-wepppy/scripts/*
+wepppy/_scripts/*
+wepppy/_scripts
 wepppy/validation/*
 *.pyc
+*.db
+*.zip
 venv/*
 devnotes.txt
 .idea/workspace.xml

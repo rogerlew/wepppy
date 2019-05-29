@@ -1,0 +1,9 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: SHARLAND        Rec. ID: WY0036     Tex.:sandy clay loam     
+1     1
+'SHARLAND'          'SCL'    2   .23   .75  4364871.00  .019921   3.58  10.17
+ 304.8   64.2   21.6     .50    13.9     6.9
+1524.0   93.1    2.5     .17     1.5    63.8

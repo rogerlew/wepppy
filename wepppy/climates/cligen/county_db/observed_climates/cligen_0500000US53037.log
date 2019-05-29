@@ -1,0 +1,53 @@
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US53037.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ wa452505.par                                                                                                                                                                                                                                                    
+ 0500000US53037.prn                                                                                                                                                                                                                                              
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1987  Mlevel=   40.0000000      SDlevel=   58.5919609      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1987  Mlevel=   40.0000000      SDlevel=   58.5983086      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1987  Mlevel=   40.0000000      SDlevel=   58.8738327      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1987  Mlevel=   40.0000000      SDlevel=   58.8738327      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           9  Year:        1987  Mlevel=   40.0000000      SDlevel=   58.8617096      Days:          23
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           8  Year:        1988  Mlevel=   30.0000000      SDlevel=   51.9728432      Days:          26
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           8  Year:        1988  Mlevel=   20.0000000      SDlevel=   55.1242371      Days:          26
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           8  Year:        1988  Mlevel=   10.0000000      SDlevel=   52.1867142      Days:          26
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           8  Year:        1988  Mlevel=   30.0000000      SDlevel=   51.8197136      Days:          26
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           8  Year:        1988  Mlevel=   30.0000000      SDlevel=   52.6198883      Days:          26
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

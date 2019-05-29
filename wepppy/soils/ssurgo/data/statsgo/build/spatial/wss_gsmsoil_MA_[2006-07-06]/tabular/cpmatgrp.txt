@@ -1,0 +1,7 @@
+"loamy basal till derived from limestone and/or loamy basal till derived from mica schist"|"Yes"|"3035169"|"1159001"
+"loamy basal till derived from phyllite and/or loamy basal till derived from schist"|"Yes"|"2996309"|"1159224"
+"coarse-loamy till derived from schist coarse-loamy till derived from gneiss coarse-loamy till derived from granite"|"Yes"|"2989832"|"1159557"
+"coarse-loamy ablation till derived from granite and/or coarse-loamy ablation till derived from gneiss"|"Yes"|"3009262"|"1158556"
+"loamy ablation till derived from schist and/or loamy ablation till derived from granite and/or loamy ablation till derived from gneiss"|"Yes"|"3054598"|"1159335"
+"coarse-loamy ablation till derived from granite"|"Yes"|"3067551"|"1159112"
+"coarse-loamy ablation till derived from gneiss and/or coarse-loamy ablation till derived from granite"|"Yes"|"2970402"|"1158779"

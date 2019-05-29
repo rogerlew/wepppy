@@ -35,6 +35,7 @@ _thisdir = os.path.dirname(__file__)
 _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
+_esdac_map_fn = _join(_management_dir, "esdac_map.json")
 
 
 def _parse_julian(x):
@@ -1716,7 +1717,10 @@ def load_map(_map=None):
     elif 'rred' in _map.lower():
         with open(_rred_map_fn) as fp:
             d = json.load(fp)
-        
+    elif 'esdac' in _map.lower():
+        with open(_esdac_map_fn) as fp:
+            d = json.load(fp)
+
     for k, v in d.items():
         assert int(k) == v['Key']
 
@@ -1752,6 +1756,7 @@ def get_management_summary(dom, _map=None) -> ManagementSummary:
         weppy/wepp/management/data/map.json
     """
     d = load_map(_map=_map)
+    print(d)
     k = str(dom)
     if not k in d:
         raise InvalidManagementKey
@@ -1781,7 +1786,7 @@ def get_management(dom, _map=None) -> Management:
 
 
 if __name__ == "__main__":
-    db = None  # rred
+    db = 'esdac' # None  # 'rred'
 
     d = load_map(db)
 
@@ -1800,7 +1805,7 @@ if __name__ == "__main__":
     fp = open('tests/weppcloud_managements.csv', 'w')
     wtr = csv.writer(fp)
 
-    wtr.writerow(['key', 'desc', 'cancov', 'inrcov', 'rilcov'])
+    wtr.writerow(['key', 'desc', 'man', 'cancov', 'inrcov', 'rilcov'])
 
     for k in d:
         m = get_management(k, _map=db)
@@ -1810,8 +1815,9 @@ if __name__ == "__main__":
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
         cancov, inrcov, rilcov = m.inis[0].data.cancov, m.inis[0].data.inrcov, m.inis[0].data.rilcov
+        man_fn = d[k]['ManagementFile']
 
-        print('{},{},{},{}'.format(k, m.desc, cancov, inrcov, rilcov))
+        print('{},{},{},{},{}'.format(k, m.desc, man_fn, cancov, inrcov, rilcov))
 
         wtr.writerow([k, m.desc, cancov, inrcov, rilcov])
 

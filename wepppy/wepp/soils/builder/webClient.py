@@ -12,7 +12,7 @@ from os.path import exists as _exists
 import requests
 from posixpath import join as urljoin
 
-from wepppy.ssurgo import SoilSummary
+from wepppy.soils.ssurgo import SoilSummary
 
 _soilbuilder_url = "https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/"
 

@@ -1,0 +1,422 @@
+"US"|"United States"|2|07/06/2006 08:49:17|2|07/05/2006 17:23:38|06/28/2006 16:23:00|"fully certified"||"<metadata><idinfo><citation><citeinfo><origin>
+U.S. Department of Agriculture, Natural Resources
+Conservation Service
+</origin><pubdate>20060705</pubdate><title>Digital General Soil Map of U.S.</title><geoform>Tabular digital data and vector digital data</geoform><pubinfo><pubplace>Fort Worth, Texas</pubplace><publish>
+U.S. Department of Agriculture, Natural Resources
+Conservation Service
+</publish></pubinfo><onlink>URL:http://DataGateway.nrcs.usda.gov/</onlink></citeinfo></citation><descript><abstract>
+This data set consists of general soil association units. It was
+develped by the National Cooperative Soil Survey and supersedes
+the State Soil Geographic (STATSGO) data set published in 1994.
+It consists of a broad based inventory of soils and nonsoil areas
+that occur in a repeatable pattern on the landscape and that can
+be cartographically shown at the scale mapped. The data set was
+created by generalizing more detailed soil survey maps. Where more
+detailed soil survey maps were not available, data on geology,
+topography, vegetation, and climate were assembled, together with
+Land Remote Sensing Satellite (LANDSAT) images. Soils of like areas
+were studied, and the probable classification and extent of the soils
+were determined.
+
+Map unit composition was determined by transecting or sampling areas
+on the more detailed maps and expanding the data statistically to
+characterize the whole map unit.
+
+This data set consists of georeferenced vector digital data and
+tabular digital data. The map data were collected in 1-by 2-degree
+topographic quadrangle units and merged into a seamless national
+data set. It is distributed in state/territory and national extents.
+The soil map units are linked to attributes in the National Soil
+Information System data base which gives the proportionate extent of
+the component soils and their properties.
+</abstract><purpose>
+These data provide information about soil features on or near the
+surface of the Earth. Data were collected as part of the National
+Cooperative Soil Survey. These data are intended for geographic
+display and analysis at the state, regional, and national level.
+The data should be displayed and analyzed at scales appropriate for
+1:250,000-scale data.
+</purpose></descript><timeperd><timeinfo><rngdates><begdate>2000</begdate><enddate>20060705</enddate></rngdates></timeinfo><current>publication date</current></timeperd><status><progress>Complete</progress><update>As needed</update></status><spdom><bounding><westbc>-110.0</westbc><eastbc>-102.0</eastbc><northbc>41.0</northbc><southbc>37.0</southbc></bounding></spdom><keywords><theme><themekt>None</themekt><themekey>Soils</themekey><themekey>General Soil Map</themekey><themekey>State Soil Geographic</themekey><themekey>STATSGO</themekey><themekey>United States Department of Agriculture</themekey><themekey>USDA</themekey><themekey>National Soil Information System (NASIS)</themekey></theme><place><placekt>
+U.S. Department of Commerce, 1995, Countries, Dependencies, Areas
+of Special Sovereignty, and Their Principal Administrative Divisions
+(Federal Information Processing Standard 10-4): Washington, DC,
+National Institute of Standards and Technology.
+</placekt><placekey>Colorado</placekey></place><place><placekt>None</placekt><placekey>USA</placekey></place></keywords><accconst>None</accconst><useconst>
+The U.S. Department of Agriculture, Natural Resources Conservation
+Service should be acknowledged as the data source in products
+derived from these data. Hardcopies utilizing these data shall
+clearly indicate their source. User agrees not to misrepresent these
+data, nor to imply that changes made were approved by the Natural
+Resources Conservation Service.
+
+The Digital General Soil Map of U.S. was designed primarily for
+regional, multicounty, river basin, State, and multistate resource
+planning, management, and monitoring. Data are not detailed enough
+to make interpretations at a county level. This soil survey product
+is not designed for use as a primary regulatory tool in permitting
+or citing decisions, but may be used as a reference source. The use
+of these data is not restricted and may be interpreted by organizations,
+agencies, units of government, or others; however, they are responsible
+for its appropriate application. Federal, State, or local regulatory
+bodies are not to reassign to the Natural Resources Conservation
+Service any authority for the decisions that they make. The Natural
+Resources Conservation Service will not perform any evaluations of
+these maps for purposes related solely to state or local regulatory
+programs.
+
+When data from the Digital General Soil Map of U.S. are overlayed
+with other data layers, such as land use data, caution must be
+used in generating statistics on the co-occurence of the land use
+data with the soil data. The composition of the soil map unit can
+be characterized independently for the land use and for the soil
+component, but there are no data on their joint occurrence at a
+more detailed level. Analysis of the overlayed data should be on a
+map polygon basis.
+
+Additional political, watershed, or other boundaries may be
+intersected with the soil data. Although the composition of each
+political and watershed unit may be described in terms of the
+soil map units, information is not available to assign the
+components to the boundary units with full accuracy. As with the
+land use categories, the analysis should be restricted to the
+classified components.
+
+The approximate minimum area delineated is 625 hectares
+(1,544 acres), which is represented on a 1:250,000-scale map by
+an area approximately 1 cm by 1 cm (0.4 inch by 0.4 inch). Linear
+delineations are not less than 0.5 cm (0.2 inch) in width. The
+number of delineations per 1:250,000 quadrangle typically is 100
+to 200, but may range up to 400. Delineations depict the dominant
+soils making up the landscape. Other dissimilar soils, too small
+to be delineated, are present within a delineation.
+
+Digital enlargements of these data to scales greater than at
+which they were originally mapped can cause misinterpretation
+of the data. If enlarged, maps do not show the small areas of
+contrasting soils that could have been shown at a larger scale.
+The depicted soil boundaries, interpretations, and analysis
+derived from them do not eliminate the need for onsite sampling,
+testing, and detailed study of specific sites for intensive uses.
+Thus, these data and their interpretations are intended for
+planning purposes only.
+
+Data values for some data elements may be incomplete or missing.
+Where data are unavailable, a mask should be used to exclude the
+area from analysis.
+
+The spatial and tabular data used to create this product are
+periodically updated. Data are versioned, and users are responsible
+for obtaining the latest version of the product.
+</useconst><ptcontac><cntinfo><cntperp><cntper>Paul R. Finnell</cntper><cntorg>
+U.S. Department of Agriculture, Natural Resources
+Conservation Service
+</cntorg></cntperp><cntpos>Soil Scientist</cntpos><cntaddr><addrtype>mailing and physical address</addrtype><address>USDA-NRCS / Soils</address><address>Fed. Bldg. Rm 3416</address><address>700 W. Capitol Ave.</address><address/><city>Little Rock</city><state>AR</state><postal>72201</postal><country>USA</country></cntaddr><cntvoice>501-301-3116</cntvoice><cnttdd>(202) 720-2600</cnttdd><cntfax>(402) 437-5821</cntfax><cntemail>luis.hernandez@ar.usda.gov</cntemail></cntinfo></ptcontac><crossref><citeinfo><origin>U.S. Department of Agriculture, Soil Conservation Service</origin><pubdate>1994</pubdate><title>State Soil Survey Geographic (STATSGO) data base</title></citeinfo></crossref></idinfo><dataqual><attracc><attraccr>
+Accuracy is tested by manual comparison of the source with hard
+copy plots and/or symbolized display of the map data on an
+interactive computer graphic system. Selected  attributes that
+cannot be visually verified on plots or on screen are interactively
+queried and verified on screen. In addition, the attributes
+are tested against a master set of valid attributes. All attribute
+data conform to the attribute codes in the signed classification
+and correlation document and amendments and are current as of
+the date of digitizing.
+</attraccr></attracc><logic>
+Certain node/geometry and topology (GT)-polygon/chain
+relationships are collected or generated to satisfy topological
+requirements. (The GT-polygon corresponds to the soil delineation).
+Some of these requirements include: chains must begin and end at
+nodes, chains must connect to each other at nodes, chains do not
+extend through nodes, left and right GT-polygons are defined for
+each chain element and are consistent throughout, and the chains
+representing the limits of the file (neatline) are free of gaps.
+The tests of logical consistency are performed using vendor
+software. The neatline is generated by connecting the explicitly
+entered four corners of the digital file. All data outside the
+enclosed region are ignored and all data crossing these
+geographically straight lines are clipped at the neatline. Data
+within a specified tolerance of the neatline are snapped to the
+neatline. Neatline straightening aligns the digitized edges of
+the digital data with the generated neatline (i.e., with the
+longitude/latitude lines in geographic coordinates). All internal
+polygons are tested for closure with vendor software and are
+checked on hard copy plots. All data are checked for common soil
+lines (i.e., adjacent polygons with the same label). Quadrangles
+are edge matched within the state, merged into a statewide data
+sets, and then edge matched to adjacent state data sets. Edge
+locations do not deviate from centerline to centerline by more
+than 0.01 inch.
+</logic><complete>
+A map unit is a collection of areas defined and named the same
+in terms of their soil and/or nonsoil areas. Each map unit differs
+in some respect from all others in a survey area and is uniquely
+identified. Each individual area is a delineation. Each map unit
+in the Digital General Soil Map of U.S. consists of one to more
+than 21 components.
+
+In those few areas where detailed maps did not exist,
+reconnaissance soil surveys were combined with data on geology,
+topography, vegetation, climate, and remote sensing images to
+delineate map units and estimate the percentages of components.
+Map unit components in this product are soil series phases, and
+their percent composition represents the estimated areal proportion
+of each within a map unit. The composition for a map unit is
+generalized to represent the statewide extent of that map unit
+and not the extent of any single map unit delineation. These
+specifications provide a nationally consistent representation of
+the associated attribute data.
+
+The actual composition and interpretive purity of the map unit
+delineations were based on statistical analysis of transect data.
+The composition was largely determined by measuring transects on
+detailed soil survey maps. The number of transects used was
+proportional to the relative size, number, and complexity of the
+delineations. The combined data on the length of the map units
+crossed by the transects were used to determine the percentages
+of the different soil and nonsoil areas in each map unit.
+
+Specific National Cooperative Soil Survey Standards and
+procedures were used in the classification of soils, design and
+name of map units. These standards are outlined in U.S. Department
+of Agriculture. 2nd Ed., 1999. Soil Taxonomy: A basic system of
+soil classification for making and interpreting soil surveys.
+Nat. Res. Conserv. Serv., U.S. Dep. Agric. Handb. 436.; U.S.
+Department of Agriculture. 9th Ed., 2003. Keys to Soil Taxonomy.
+Soil Surv. staff, Nat. Res. Conserv. Serv.; U.S. Department of
+Agriculture. Current Issue. National Soil Survey Handbook, title
+430-VI. Soil Surv. Staff, Nat. Res. Conserv. Serv.; and U.S.
+Department of Agriculture. 1993. Soil Survey Manual. Soil Surv.
+Staff, U.S. Dep. Agric. Handbook 18.
+
+Adherence to National Cooperative Soil Survey standards and
+procedures is based on peer review, quality control, and quality
+assurance. Quality control is outlined in documents that reside
+with the Natural Resources Conservation Service state soil
+scientist.
+</complete><posacc><horizpa><horizpar>
+The accuracy of these digital data is based upon their
+compilation to base maps that meet National Map Accuracy
+Standards. The difference in positional accuracy between
+the map unit boundaries in the field and their digitized
+map locations is unknown. The locational acuracy of soil
+delineations on the ground varies with the transition
+between map units.
+
+For example, in areas where changes in soils, climate,
+topography, and geology occur subtly across a portion of a
+state, the transition between soil map unit boundaries will
+be gradual. Where these features change abruptly, such as
+from an area of foothills to a lake plain, the transition
+will be very narrow. Soil delineation boundaries were
+digitized within 0.01 inches of their locations on the
+digitizing source. The digital map elements are edge matched
+between data sets. The data along each state boundary are
+matched against the data for the adjacent state. Edge
+locations generally do not deviate from centerline to
+centerline by more than 0.01 inch.
+</horizpar></horizpa></posacc><lineage><srcinfo><srccite><citeinfo><origin>
+U.S Department of Agriculture, Natural Resources
+Conservation Service
+</origin><pubdate>Unknown</pubdate><title>multiple soil survey publications</title><geoform>map</geoform><pubinfo><pubplace>Washington, D.C.</pubplace><publish>U.S. Government Printing Office</publish></pubinfo></citeinfo></srccite><typesrc>paper</typesrc><srctime><timeinfo><sngdate><caldate>Unknown</caldate></sngdate></timeinfo><srccurr>publication date</srccurr></srctime><srccitea>SCS1</srccitea><srccontr>
+base information for development of map unit delineations
+and transect data for naming map units
+</srccontr></srcinfo><srcinfo><srccite><citeinfo><origin>
+U.S Department of Agriculture, Natural Resources
+Conservation Service
+</origin><pubdate>Unknown</pubdate><title>
+multiple reconnaissance, county, and State general
+soil maps
+</title><geoform>map</geoform><pubinfo><pubplace>Washington, D.C.</pubplace><publish>U.S. Government Printing Office</publish></pubinfo></citeinfo></srccite><typesrc>paper</typesrc><srctime><timeinfo><sngdate><caldate>Unknown</caldate></sngdate></timeinfo><srccurr>publication date</srccurr></srctime><srccitea>SCS2</srccitea><srccontr>
+reference information for development of map unit
+delineations and transect data for naming map units
+where detailed surveys did not exist
+</srccontr></srcinfo><srcinfo><srccite><citeinfo><origin>U.S. Geological Survey</origin><pubdate>Unknown</pubdate><title>multiple maps</title><geoform>map</geoform><pubinfo><pubplace>Reston, Virginia</pubplace><publish>U.S. Geological Survey</publish></pubinfo></citeinfo></srccite><srcscale>250000</srcscale><typesrc>stable-base material</typesrc><srctime><timeinfo><sngdate><caldate>Unknown</caldate></sngdate></timeinfo><srccurr>publication date</srccurr></srctime><srccitea>USGS1</srccitea><srccontr>
+base materials for compilation of map unit delineation
+linework
+</srccontr></srcinfo><srcinfo><srccite><citeinfo><origin>
+U.S Department of Agriculture, Natural Resources
+Conservation Service
+</origin><pubdate>Unknown</pubdate><title>
+multiple compiled mylar overlays of map unit
+delineations, unpublished
+</title><geoform>annotated overlay</geoform></citeinfo></srccite><typesrc>stable-base material</typesrc><srctime><timeinfo><sngdate><caldate>Unknown</caldate></sngdate></timeinfo><srccurr>unknown</srccurr></srctime><srccitea>SCS3</srccitea><srccontr>digitizing source</srccontr></srcinfo><srcinfo><srccite><citeinfo><origin>
+U.S. Department of Agriculture, Natural Resources
+Conservation Service
+</origin><pubdate>1994</pubdate><title>State Soil Geographic (STATSGO) data base</title><geoform>digital data</geoform></citeinfo></srccite><srcscale>250000</srcscale><typesrc>CD-ROM</typesrc><srctime><timeinfo><sngdate><caldate>1994</caldate></sngdate></timeinfo><srccurr>1994</srccurr></srctime><srccitea>SCS4</srccitea><srccontr>
+source material of soil map unit delineations and
+soil symbols
+</srccontr></srcinfo><srcinfo><srccite><citeinfo><origin>
+U.S. Department of Agriculture,
+Natural Resources Conservation Service
+</origin><pubdate>2005</pubdate><title>National Soil Information System (NASIS) data base</title><geoform>tabular digital data</geoform><pubinfo><pubplace>Fort Collins, Colorado</pubplace><publish>
+U.S. Department of Agriculture,
+Natural Resources Conservation Service
+</publish></pubinfo></citeinfo></srccite><typesrc>database</typesrc><srctime><timeinfo><rngdates><begdate>2005</begdate><enddate>2005</enddate></rngdates></timeinfo><srccurr>publication date</srccurr></srctime><srccitea>NASIS</srccitea><srccontr>attribute (tabular) information</srccontr></srcinfo><procstep><procdesc>
+Map unit composition was determined by transecting or
+sampling areas on the more detailed soil maps and expanding
+the data statistically to characterize the whole map unit.
+</procdesc><srcused>SCS1</srcused><procdate>1994</procdate></procstep><procstep><procdesc>
+Soil map unit lines and symbols were drafted in red pencil
+on a mylar overlay that was punch registered to fit the mylar
+USGS 1:250,000-scale topographic quadrangle. A detailed and
+complete edit was performed on all overlays before digitizing.
+The soil delineation overlays were raster scanned at a
+scanning resolution of at least 0.01 inches and converted to
+a vector format or were manually digitized on a digitizing
+tablet with a resolution of at least 0.001 inches. Four
+control points corresponding to the four corners of the
+quadrangles were used for registration during data collection.
+The control points were either explicitly entered or developed
+by the software. The data sets were edge matched and merged
+into statewide coverages. A detailed and complete edit was
+performed on all digital data.
+</procdesc><srcused>USGS1, SCS3</srcused><procdate>1994</procdate></procstep><procstep><procdesc>
+State coverages were merged into a seamless national coverage.
+This reduced tabular data redundancy and polygon number. A detailed
+and complete edit was performed on all digital data.
+</procdesc><srcused>SCS4</srcused><procdate>2000</procdate></procstep><procstep><procdesc>
+The National Soil Information System data base was developed
+by Natural Resources Conservation Service soil scientists
+according to national standards.
+</procdesc><srcused>SCS4</srcused><procdate>2005</procdate></procstep><procstep><procdesc>
+The Natural Resources Conservation Service State Soil Scientist
+or delegate, upon completion of data quality verification,
+determined that the tabular data should be released for official
+use. A selected set of map units and components in the soil
+survey legend was copied to a staging database, and rating values
+for selected interpretations were generated. The list of selected
+interpretations is stored in the database table named sainterp.
+</procdesc><srcused>NASIS</srcused><procdate>20050715</procdate></procstep><procstep><procdesc>
+The Natural Resources Conservation Service State Soil Scientist
+or delegate verified that the labels on the digitized soil map
+units link to map units in the tabular database, and certified
+the joined data sets for release to the Soil Data Warehouse. A
+system assigned version number and date stamp were added and the
+data were copied to the data warehouse. The tabular data for the
+map units and components were extracted from the data warehouse
+and reformatted into the soil data delivery data model, then
+stored in the Soil Data Mart. The spatial data were copied to the
+Soil Data Mart without change.
+</procdesc><srcused>NASIS</srcused><procdate>20050715</procdate></procstep><procstep><procdesc>
+The tabular data were extracted from the Soil Data Mart without
+change. The spatial data was exported to an ESRI shapefile.
+</procdesc><srcused>NASIS</srcused><procdate>20050718</procdate></procstep><procstep><procdesc>
+The Natural Resources Conservation Service State Soil Scientist or
+delegate, upon completion of data quality verification, determined
+that the tabular data should be released for official use. A
+selected set of map units and components in the soil survey legend was
+copied to a staging database, and rating values for selected
+interpretations were generated. The list of selected interpretations is
+stored in the database table named sainterp.
+</procdesc><srcused>NASIS</srcused><procdate>20060628</procdate></procstep><procstep><procdesc>
+The Natural Resources Conservation Service State Soil Scientist or
+delegate verified that the labels on the digitized soil map units
+link to map units in the tabular database, and certified the joined
+data sets for release to the Soil Data Warehouse. A system assigned
+version number and date stamp were added and the data were copied to
+the data warehouse. The tabular data for the map units and components
+were extracted from the data warehouse and reformatted into the soil
+data delivery data model, then stored in the Soil Data Mart. The spatial
+data were copied to the Soil Data Mart without change.
+</procdesc><srcused>NASIS</srcused><procdate>20060629</procdate></procstep></lineage></dataqual><spdoinfo><direct>Vector</direct></spdoinfo><spref><horizsys><geograph><latres>0.000001</latres><longres>0.0000001</longres><geogunit>decimal degrees</geogunit></geograph><geodetic><horizdn>World Geodetic System 1984</horizdn><ellips>World Geodetic System 1984</ellips><semiaxis>6378137.00000</semiaxis><denflat>298.257222</denflat></geodetic></horizsys></spref><eainfo><detailed><enttyp><enttypl>General Soil Map Unit</enttypl><enttypd>
+A closed polygon that consists of soils and nonsoil areas that
+occur in a repeatable pattern on the landscape and that can be
+cartographically shown at the scale mapped.
+</enttypd><enttypds>NRCS National Cooperative Soil Survey</enttypds></enttyp><attr><attrlabl>AREASYMBOL</attrlabl><attrdef>
+A symbol that uniquely identifies a single occurrence of a
+particular type of area (e.g. Lancaster Co., Nebraska is NE109).
+</attrdef><attrdefs>NASIS</attrdefs><attrdomv><codesetd><codesetn>None</codesetn><codesets>
+National Information Technology Center, NRCS, 2150 Centre Ave.,
+Bldg. A, Fort Collins, CO 80526
+</codesets></codesetd></attrdomv></attr><attr><attrlabl>MUSYM</attrlabl><attrdef>
+The symbol used to uniquely identify the soil map unit in the
+soil survey.
+</attrdef><attrdefs>NASIS</attrdefs><attrdomv><codesetd><codesetn>None</codesetn><codesets>
+National Information Technology Center, NRCS, 2150 Centre Ave.,
+Bldg. A, Fort Collins, CO 80526
+</codesets></codesetd></attrdomv></attr><attr><attrlabl>MUKEY</attrlabl><attrdef>
+A non-connotative string of characters used to uniquely identify
+a record in the Mapunit table.
+</attrdef><attrdefs>NASIS</attrdefs><attrdomv><udom>No predefined set of mukeys.</udom></attrdomv></attr><attr><attrlabl>SPATIALVERSION</attrlabl><attrdef>
+A sequential integer number used to denote the serial version of
+the spatial data for a soil survey area.
+</attrdef><attrdefs>NASIS</attrdefs><attrdomv><rdom><rdommin>1</rdommin><rdommax>1</rdommax></rdom></attrdomv></attr></detailed><overview><eaover>
+Map Unit Delineations are closed polygons that are geographic
+mixtures of groups of soils or soils and nonsoil areas.
+
+The map unit key uniquely identifies each closed map unit
+delineation. Each map unit key is linked to a map unit symbol
+and a map unit name. The map unit key is also the key for linking
+information in the National Soil Information System tables.
+
+Map Unit Delineations are described by the National Soil
+Information System data base. This attribute data base gives the
+proportionate extent of the component soils and the properties
+for each soil. The data base contains both estimated and measured
+data on the physical and chemical soil properties and soil
+interpretations for engineering, water management, recreation,
+agronomic, woodland, range and wildlife uses of the soil.
+
+The National Soil Information System data base contains static
+metadata. It documents the data structure and includes such
+information as what tables, columns, indexes, and relationships
+are defined as well as a variety of attributes of each of these
+data base objects. Attributes include table and column descriptions
+and detailed domain information.
+
+The National Soil Information System data base also contains
+distribution metadata. It records the criteria used in the set
+of distributed data.
+</eaover><eadetcit>
+U.S. Department of Agriculture. 2nd Ed., 1999. Soil Taxonomy: A
+basic system of soil classification for making and interpreting
+soil surveys. Nat. Res. Conserv. Serv., U.S. Dep. Agric. Handb.
+436.
+
+U.S. Department of Agriculture. 9th Ed., 2003. Keys to Soil
+Taxonomy. Soil Surv. Staff, Nat. Res. Conserv. Serv.
+
+U.S. Department of Agriculture. Current Issue. National Soil
+Survey Handbook, title 430-VI. Soil Surv. Staff, Nat. Res.
+Conserv. Serv.
+
+U.S. Department of Agriculture. 1993. Soil Survey Manual.
+Soil Surv. Staff, U.S. Dep. Agric. Handbook 18.
+
+U.S. Department of Agriculture. 1994. State Soil Geographic
+(STATSGO) Data Base: Data use information. Soil Conserv. Serv.
+</eadetcit></overview></eainfo><distinfo><distrib><cntinfo><cntorgp><cntorg>
+U.S. Department of Agriculture, Natural Resources Conservation
+Service, National Cartography and Geospatial Center
+</cntorg></cntorgp><cntaddr><addrtype>mailing and physical address</addrtype><address>501 West Felix Street, Building 23</address><address>P.O. Box 6567</address><city>Fort Worth</city><state>Texas</state><postal>76115</postal></cntaddr><cntvoice>(800) 672-5559</cntvoice><cnttdd>(202) 720-2600</cnttdd><cntfax>(817) 509-3469</cntfax></cntinfo></distrib><resdesc>Digital General Soil Map of U.S.</resdesc><distliab>
+Although data in this product have been processed successfully on a
+computer system at the U.S. Department of Agriculture, no warranty
+expressed or implied is made by the Agency regarding the utility of
+the data on any other system, nor shall the act of distribution
+constitute any such warranty. The U.S. Department of Agriculture will
+warrant the delivery of this product in computer-readable format, and
+will offer appropriate adjustment of credit when the product is
+determined unreadable by correctly adjusted computer input peripherals,
+or when the physical medium is delivered in damaged condition. Request
+for adjustment of credit must be made within 90 days from the date of
+this shipment from the ordering site.
+
+The U.S. Department of Agriculture, nor any of its agencies are
+liable for misuse of the data. It is also not liable for damage,
+transmission of viruses, or computer contamination through the
+distribution of these data sets. The U.S. Department of Agriculture
+prohibits discrimination in its programs on the basis of race, color,
+national origin, sex, religion, age, disability, political beliefs,
+and marital or familial status. (Not all prohibited bases apply to
+all programs.)
+</distliab><stdorder><fees>
+There is currently no direct charge for requesting data or for
+retrieving via FTP.
+</fees><ordering>
+Visit the above mentioned Internet Web Site, select state or
+territory or national extent. Spatial data are available in ESRI shapefile
+format. The National Soil Information System attribute soil data are
+available in variable length, pipe delimited, ASCII file format.
+</ordering><turnarnd>Typically within four hours</turnarnd></stdorder></distinfo><metainfo><metd>20060705</metd><metc><cntinfo><cntorgp><cntorg>
+U.S. Department of Agriculture, Natural Resources Conservation
+Service
+</cntorg><cntper>Paul R. Finnell</cntper></cntorgp><cntpos>Soil Scientist</cntpos><cntaddr><addrtype>mailing and physical address</addrtype><address>USDA-NRCS / Soils</address><address>Fed. Bldg. Rm 3416</address><address>700 W. Capitol Ave.</address><address/><city>Little Rock</city><state>AR</state><postal>72201</postal><country>USA</country></cntaddr><cntvoice>501-301-3116</cntvoice><cnttdd>(202) 720-2600</cnttdd><cntfax>(402) 437-5821</cntfax><cntemail>luis.hernandez@ar.usda.gov</cntemail></cntinfo></metc><metstdn>Content Standards for Digital Geospatial Metadata</metstdn><metstdv>FGDC-STD-001-1998</metstdv><metuc>none</metuc></metainfo></metadata>"|"15970"

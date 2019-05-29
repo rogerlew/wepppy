@@ -53,7 +53,7 @@ class Map(object):
 
         # e.g. (395201.3103811303, 5673135.241182375, 32, 'U')
         self.utm = utm.from_latlon(t, l)
-        assert self.utm[2] in range(10, 20)
+
         self.utmzone = self.utm[2]
 
     @property
@@ -102,6 +102,7 @@ class Ron(NoDbBase):
             self._center0 = config.get('map', 'center0')
             self._zoom0 = config.get('map', 'zoom0')
             self._boundary = config.get('map', 'boundary')
+            self.dem_db = config.get('general', 'dem_db')
 
             self._enable_landuse_change = config.getboolean('landuse', 'enable_landuse_change')
 
@@ -248,8 +249,9 @@ class Ron(NoDbBase):
             w3w_geocoder = what3words.Geocoder(w3w_api_key)
             try:
                 self._w3w = w3w_geocoder.reverse(lat=lat, lng=lng)
-            except requests.exceptions.ConnectionError:
-                pass
+            except:
+                coord = what3words.Coordinates(lat=lat, lng=lng)
+                self._w3w = w3w_geocoder.convert_to_3wa(coord)
 
             self.dump_and_unlock()
 
@@ -296,7 +298,7 @@ class Ron(NoDbBase):
     #
     def fetch_dem(self):
         assert self.map is not None
-        wmesque_retrieve('ned1/2016', self.map.extent,
+        wmesque_retrieve(self.dem_db, self.map.extent,
                          self.dem_fn, self.map.cellsize)
 
         assert _exists(self.dem_fn)

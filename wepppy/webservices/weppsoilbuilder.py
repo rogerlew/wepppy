@@ -7,21 +7,17 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 
-import os
 from os.path import join as _join
 from os.path import exists as _exists
 import sys
 import uuid
 import math
-from datetime import datetime
-from flask import Flask, jsonify, request, send_from_directory, Response
-from pyproj import Proj, transform
+from flask import Flask, jsonify, request, Response
 
 sys.path.append('/home/roger')
-from wepppy.ssurgo import *
+from wepppy.soils.ssurgo import *
 from wepppy.all_your_base import isint
 import array
-import sys
 import os
 from bisect import bisect_left
 from subprocess import Popen, PIPE

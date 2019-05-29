@@ -1,0 +1,4 @@
+50|"PIPO"|"Pinus ponderosa"|"ponderosa pine"|"3015565"|"119662"
+50|"PIPO"|"Pinus ponderosa"|"ponderosa pine"|"3015737"|"119663"
+50|"PIPO"|"Pinus ponderosa"|"ponderosa pine"|"3028691"|"119660"
+50|"PIPO"|"Pinus ponderosa"|"ponderosa pine"|"3061023"|"119661"

@@ -1,0 +1,4 @@
+"interbedded alluvium derived from sandstone and shale"|"Yes"|"2982979"|"1159383"
+"residuum weathered from shale"|"Yes"|"3002409"|"1158829"
+"medium-textured alluvium"|"Yes"|"3041269"|"1159496"
+"fine-textured alluvium derived from shale and/or loess"|"Yes"|"3047745"|"1159161"

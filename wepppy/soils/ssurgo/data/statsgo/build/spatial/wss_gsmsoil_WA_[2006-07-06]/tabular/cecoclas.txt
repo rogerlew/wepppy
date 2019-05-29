@@ -1,0 +1,6 @@
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R009XY013ID"|"SOUTH SLOPE LOAMY 16-22 PSSP6-FEID"|"2976717"|"512992"
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R009XY013ID"|"SOUTH SLOPE LOAMY 16-22 PSSP6-FEID"|"2996147"|"513478"
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R009XY010ID"|"SOUTH SLOPE SCHIST 16-22 PSSP6-POSE"|"3002624"|"513640"
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R009XY002ID"|"NORTH SLOPE LOAMY 16-22 SYAL/FEID-PSSP6"|"3022054"|"514106"
+"Forest Habitat Type - northern Idaho"|"INT-GTR-236 Forest Habitat Types of Northern Idaho: A Second Approximation (Cooper, Neiman & Roberts), revised April 1991."|"CN575"|"western hemlock/wild ginger"|"3060884"|"515634"
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R009XY012ID"|"SOUTH SLOPE LOAMY 12-16 PSSP6-POSE"|"3060913"|"515073"

@@ -1,0 +1,298 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ tn400876.par                                                                                                                                                                                                                                                    
+ 0500000US47069.prn                                                                                                                                                                                                                                              
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1991  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           7  Year:        1991  N:         372
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1991  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1991  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1991  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1991  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1991  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1992  N:         113
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1992  N:         113
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1992  N:         113
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1992  N:         113
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1992  N:         113
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1992  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1992  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1992  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1992  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1992  N:         108
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1993  N:         118
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1993  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1993  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1993  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1993  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1993  N:         114
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1994  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1994  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1994  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1994  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1994  N:         129
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1994  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1994  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1994  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1994  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1994  N:         121
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1995  N:         137
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1995  N:         137
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1995  N:         137
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1995  N:         137
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1995  N:         137
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1995  N:         137
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1995  N:         137
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1995  N:         137
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1995  N:         137
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1995  N:         137
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1996  N:         144
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1996  N:         144
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1996  N:         144
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1996  N:         144
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1996  N:         144
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Vel.       Mon:           7  Year:        1996  N:         496
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1996  N:         149
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1996  N:         149
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1996  N:         149
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1996  N:         149
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1996  N:         149
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1997  N:         158
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           7  Year:        1997  Mlevel=   5.00000000      SDlevel=   50.3339767      Days:         558
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1997  N:         157
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1997  N:         157
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1997  N:         157
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1997  N:         157
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1997  N:         157
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1998  N:         169
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1998  N:         169
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1998  N:         169
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1998  N:         169
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1998  N:         169
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1998  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1998  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1998  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1998  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1998  N:         169
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1999  N:         182
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1999  N:         182
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1999  N:         182
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1999  N:         182
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        1999  N:         182
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:        1999  N:         182
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1999  N:         177
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1999  N:         177
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1999  N:         177
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1999  N:         177
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        1999  N:         177
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2000  N:         189
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2000  N:         189
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2000  N:         189
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2000  N:         189
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2000  N:         189
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        2000  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        2000  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        2000  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        2000  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           8  Year:        2000  N:         186
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2001  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2001  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2001  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2001  N:         199
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2001  N:         199
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:        2001  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2002  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2002  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2002  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2002  N:         207
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2002  N:         207
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           7  Year:        2002  N:         713
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2003  N:         213
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2003  N:         213
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2004  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2004  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2004  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2004  N:         227
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2004  N:         227
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2005  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2005  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2005  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2005  N:         235
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2005  N:         235
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2006  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2006  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2006  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2006  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2006  N:         239
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2007  N:         244
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2007  N:         244
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2007  N:         244
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2007  N:         244
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2007  N:         244
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           7  Year:        2007  N:         221
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2008  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2008  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2008  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2008  N:         258
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2008  N:         258
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2009  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2009  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2009  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2009  N:         273
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2009  N:         273
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           7  Year:        2009  N:         899
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2010  N:         276
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2010  N:         276
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2010  N:         276
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2010  N:         276
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2010  N:         276
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           7  Year:        2010  N:         899
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2011  N:         283
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2011  N:         283
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2011  N:         283
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2011  N:         283
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2011  N:         283
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           7  Year:        2011  N:         899
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2012  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2012  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2012  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2012  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2012  N:         288
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           7  Year:        2012  N:         899
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US47069.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2013  N:         295
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2014  N:         299
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2014  N:         299
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2015  N:         310
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2015  N:         310
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2015  N:         310
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2015  N:         310
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2015  N:         310
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2016  N:         319
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2016  N:         319
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2017  N:         329
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2017  N:         329
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2017  N:         329
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2017  N:         329
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           7  Year:        2017  N:         329
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
