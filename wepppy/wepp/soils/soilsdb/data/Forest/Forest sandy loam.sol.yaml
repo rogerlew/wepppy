@@ -1,0 +1,19 @@
+header: ['Created by WpSlp, Thu Mar 13 02:19:57 PM 2008', 'Author: W. Elliot, March,
+    2008;  With restrictive layer', updated 6-20-2014]
+datver: '2006.2'
+solcom: 'Any comments:'
+ntemp: 1
+ksflag: 1
+ofes:
+- slid: Forest sandy loam
+  texid: sandy loam
+  nsl: 1
+  salb: 0.06
+  sat: 0.5
+  ki: 400000.0
+  kr: 8.0e-05
+  shcrit: 2.0
+  avke: 60.0
+  horizons:
+  - {solthk: 800.0, sand: 65.0, clay: 10.0, orgmat: 5.0, cec: 15.0, rfg: 25.0}
+res_lyr: [1, 25.0, 0.00036]

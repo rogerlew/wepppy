@@ -7,12 +7,9 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
-import ast
 import shutil
-from collections import Counter
 import jsonpickle
 
-from subprocess import Popen, PIPE
 from os.path import join as _join
 from os.path import exists as _exists
 
@@ -24,18 +21,16 @@ from osgeo import gdal
 
 from pyproj import Proj, transform
 
-from wepppy.all_your_base import wgs84_proj4, isint, read_arc, translate_asc_to_tif, read_raster, raster_extent
+from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent
 from wepppy.landcover import LandcoverMap
 from wepppy.nodb.mods.rred import rred_api
-from wepppy.ssurgo import SoilSummary
+from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import YamlSoil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
 from ...watershed import Watershed
-from ...ron import Ron
-from ...topaz import Topaz
-from ...base import NoDbBase, TriggerEvents
+from ...base import NoDbBase
 
 gdal.UseExceptions()
 

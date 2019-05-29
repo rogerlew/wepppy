@@ -1,0 +1,13 @@
+slid,texid,burnclass,ki,kr,shcrit,avke,solthk
+Forest sandy loam,sandy loam,,400000.0,8e-05,2.0,60.0,800.0
+Forest clay loam,clay loam,,400000.0,2e-05,0.5,35.0,800.0
+Low sev fire-sandy loam,sandy loam,low,400000.0,0.00012,2.0,20.0,400.0
+High sev fire-loam,loam,high,1000000.0,0.0001,1.0,15.0,400.0
+High sev fire-clay loam,clay loam,high,1500000.0,6e-05,0.5,14.0,400.0
+Low sev fire-silt loam,silt loam,low,1000000.0,0.0001,1.5,13.0,400.0
+High sev fire-silt loam,silt loam,high,1000000.0,0.00012,1.5,10.0,400.0
+Forest loam,loam,,400000.0,3e-05,1.0,50.0,800.0
+Low sev fire-loam,loam,low,1000000.0,8e-05,1.0,20.0,400.0
+High sev fire-sandy loam,sandy loam,high,400000.0,0.00014,2.0,15.0,400.0
+Low sev fire-clay loam,clay loam,low,1500000.0,5e-05,0.5,18.0,400.0
+Forest silt loam,silt loam,,1000000.0,5e-05,1.5,40.0,800.0

@@ -1,0 +1,26 @@
+header: []
+datver: '2006.2'
+solcom: High sev fire-silt loam
+ntemp: 1
+ksflag: 1
+ofes:
+- slid: High sev fire-silt loam
+  texid: silt loam
+  nsl: 1
+  salb: 0.1
+  sat: 0.75
+  ki: 1000000.0
+  kr: 0.00012
+  shcrit: 1.5
+  avke: 10.0
+  horizons:
+  - solthk: 400.0
+    sand: 25.0
+    clay: 15.0
+    orgmat: 5.0
+    cec: 15.0
+    rfg: 15.0
+res_lyr:
+- 1
+- 25.0
+- 0.00036

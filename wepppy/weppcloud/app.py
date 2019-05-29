@@ -46,7 +46,7 @@ import wepppy
 
 from wepppy.all_your_base import isfloat, isint, parse_datetime
 
-from wepppy.ssurgo import NoValidSoilsException
+from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
     WatershedBoundaryTouchesEdgeError,
     MinimumChannelLengthTooShortError
@@ -84,7 +84,13 @@ from wepppy.nodb import (
 
 from wepppy.nodb.mods import Baer
 
-from wepppy.weppcloud.app_config import config_app
+import socket
+_hostname = socket.gethostname()
+if 'wepp1' in _hostname:
+    from wepppy.weppcloud.app_config import config_app
+else:
+    from wepppy.weppcloud.standalone_config import config_app
+
 
 # noinspection PyBroadException
 
@@ -231,39 +237,11 @@ security = Security(app, user_datastore,
 
 # Create a user to test with
 @app.before_first_request
-def create_user():
-    """
-    db.drop_all()
-    db.create_all()
-    user_datastore.create_role(name='User', description='Regular WeppCloud User')
-    user_datastore.create_role(name='PowerUser', description='WeppCloud PowerUser')
-    user_datastore.create_role(name='Admin', description='WeppCloud Administrator')
-    user_datastore.create_role(name='Dev', description='Developer')
-    user_datastore.create_role(name='Root', description='Root')
+def init_db():
+    if not _exists('/geodata/weppcloud_runs/standalone.db') and _hostname != 'wepp1':
+        import app_config
+        app_config._init(db, user_datastore)
 
-    user_datastore.create_user(email='rogerlew@gmail.com', password='test123',
-                               first_name='Roger', last_name='Lew')
-    user_datastore.add_role_to_user('rogerlew@gmail.com', 'User')
-    user_datastore.add_role_to_user('rogerlew@gmail.com', 'PowerUser')
-    user_datastore.add_role_to_user('rogerlew@gmail.com', 'Admin')
-    user_datastore.add_role_to_user('rogerlew@gmail.com', 'Dev')
-    user_datastore.add_role_to_user('rogerlew@gmail.com', 'Root')
-
-    user_datastore.create_user(email='rogerlew@uidaho.edu', password='test123',
-                               first_name='Raja', last_name='Wu')
-    user_datastore.add_role_to_user('rogerlew@uidaho.edu', 'User')
-
-    user_datastore.create_user(email='mdobre@uidaho.edu', password='test123',
-                               first_name='Mariana', last_name='Dobre')
-    user_datastore.add_role_to_user('mdobre@uidaho.edu', 'User')
-    user_datastore.add_role_to_user('mdobre@uidaho.edu', 'PowerUser')
-    user_datastore.add_role_to_user('mdobre@uidaho.edu', 'Admin')
-    user_datastore.add_role_to_user('mdobre@uidaho.edu', 'Dev')
-    user_datastore.add_role_to_user('mdobre@uidaho.edu', 'Root')
-
-
-    db.session.commit()
-    """
 
 def get_run_owners(runid):
     return User.query.filter(User.runs.any(Run.runid == runid)).all()
@@ -472,27 +450,6 @@ def security_processor():
                 get_all_users=get_all_users)
 
 
-w3w_geocoder = what3words.Geocoder(app.config['W3W_API_KEY'])
-
-
-@app.route('/w3w/forward/<addr>/')
-def w3w_forward(addr):
-    return jsonify(w3w_geocoder.forward(addr=addr))
-
-
-@app.route('/w3w/reverse/<lnglat>/')
-def w3w_reverse(lnglat):
-    # noinspection PyBroadException
-    try:
-        lng, lat = lnglat.split(',')
-        lng = float(lng)
-        lat = float(lat)
-    except Exception:
-        return exception_factory('Error parsing lng, lat')
-
-    return jsonify(w3w_geocoder.reverse(lat=lat, lng=lng))
-
-
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -567,7 +524,7 @@ def create(config):
 
     user_datastore.create_run(runid, config, current_user)
     
-    return redirect('runs/%s/%s/' % (runid, config))
+    return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config))
 
 
 @app.route('/runs/<runid>/<config>/create_fork')
@@ -628,7 +585,8 @@ def create_fork(runid, config):
         os.remove(fn)
 
     # redirect to fork
-    return redirect('runs/%s/%s/' % (new_runid, config))
+    return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config))
+
 
 
 @app.route('/runs/<runid>/tasks/clear_locks')
@@ -1702,6 +1660,30 @@ def view_heuristic_stations(runid):
         options.append('<option value="{id}" {selected}>'
                        '{desc} ({rank_based_on_query_location} | '
                        '{distance_to_query_location:0.1f} km)</option>'
+                       .format(**r))
+
+    return Response('n'.join(options), mimetype='text/html')
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/view/eu_heuristic_stations/')
+def view_eu_heuristic_stations(runid):
+    wd = get_wd(runid)
+    climate = Climate.getInstance(wd)
+
+    try:
+        results = climate.find_eu_heuristic_stations()
+    except Exception:
+        return exception_factory('Error finding heuristic stations')
+
+    if results is None:
+        return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
+
+    options = []
+    for r in results:
+        r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
+        options.append('<option value="{id}" {selected}>'
+                       '{desc} ({rank_based_on_query_location})</option>'
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')

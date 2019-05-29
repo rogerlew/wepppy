@@ -21,7 +21,7 @@ from copy import deepcopy
 import jsonpickle
 
 # wepppy
-from wepppy.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
+from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
 from wepppy.watershed_abstraction import ischannel
 from wepppy.all_your_base import wmesque_retrieve, isfloat
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
@@ -268,9 +268,65 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
+    def _build_esdac(self):
+        soils_dir = self.soils_dir
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+
+            from wepppy.soils.esdac import build_edsac_soils
+
+            watershed = Watershed.getInstance(self.wd)
+
+            orders = []
+            for topaz_id, sub in watershed.sub_iter():
+                orders.append([topaz_id, sub.centroid.lnglat])
+
+            for topaz_id, chn in watershed.chn_iter():
+                orders.append([topaz_id, sub.centroid.lnglat])
+
+            soils, domsoil_d = build_edsac_soils(orders, self.soils_dir)
+            for topaz_id, k in domsoil_d.items():
+                summary = watershed.sub_summary(topaz_id)
+                if summary is not None:  # subcatchment
+                    soils[k].area += summary["area"]
+
+            for k in soils:
+                coverage = 100.0 * soils[k].area / watershed.totalarea
+                soils[k].pct_coverage = coverage
+#                clay = clay_d[k]
+#                sand = sand_d[k]
+
+#                soils[k].sand = sand
+#                soils[k].clay = clay
+#                soils[k].ll = ll_d[k]
+#                soils[k].simple_texture = simple_texture(clay, sand)
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+            self.soils = soils
+
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
     def build(self):
         if self.mode == SoilsMode.Gridded:
-            self._build_gridded()
+            if self.config_stem in ['eu']:
+                self._build_esdac()
+            else:
+                self._build_gridded()
         elif self.mode == SoilsMode.Single:
             self._build_single()
         elif self.mode == SoilsMode.SingleDb:

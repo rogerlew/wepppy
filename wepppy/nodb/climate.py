@@ -31,6 +31,7 @@ import jsonpickle
 from wepppy.climates import cligen_client as cc
 from wepppy.climates.metquery_client import get_daily
 from wepppy.climates.prism import prism_mod, prism_revision
+from wepppy.climates.eobs import eobs_mod
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn
 from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator
 from wepppy.watershed_abstraction import ischannel
@@ -64,6 +65,7 @@ class ClimateStationMode(IntEnum):
     Undefined = -1
     Closest = 0
     Heuristic = 1
+    EUHeuristic = 2
 
 
 class ClimateMode(IntEnum):
@@ -72,9 +74,10 @@ class ClimateMode(IntEnum):
     Observed = 2    # Daymet, single or multiple
     Future = 3      # Single Only
     SingleStorm = 4 # Single Only
-    PRISM = 5       # Single or muliple
+    PRISM = 5       # Single or multiple
     ObservedDb = 6
     FutureDb = 7
+    EOBS = 8       # Single or multiple
 
 
 class ClimateSpatialMode(IntEnum):
@@ -117,9 +120,16 @@ class Climate(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self._input_years = 30
-            self._climatestation_mode = ClimateStationMode.Undefined
+            if 'eu' in cfg_fn:
+                self._climatestation_mode = ClimateStationMode.EUHeuristic
+            else:
+                self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
-            self._climate_mode = ClimateMode.Undefined
+
+            if 'eu' in cfg_fn:
+                self._climate_mode = ClimateMode.EOBS
+            else:
+                self._climate_mode = ClimateMode.Undefined
             self._climate_spatialmode = ClimateSpatialMode.Single
             self._cligen_seed = None
             self._observed_start_year = ''
@@ -294,16 +304,19 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def has_observed(self):
-        cli_fn = self.cli_fn
+        try:
+            cli_fn = self.cli_fn
 
-        if cli_fn is None:
-            return False
+            if cli_fn is None:
+                return False
 
-        cli_path = _join(self.cli_dir, self.cli_fn)
-        cli = ClimateFile(cli_path)
-        years = cli.years
+            cli_path = _join(self.cli_dir, self.cli_fn)
+            cli = ClimateFile(cli_path)
+            years = cli.years
 
-        return all(yr > 1900 for yr in years)
+            return all(yr > 1900 for yr in years)
+        except:
+            return None
 
     #
     # climatestation
@@ -438,6 +451,30 @@ class Climate(NoDbBase, LogMixin):
             station_manager = CligenStationsManager()
             results = station_manager\
                 .get_stations_heuristic_search((lng, lat), num_stations)
+            self._heuristic_stations = results
+
+            self._climatestation = int(results[0].id)
+            self.dump_and_unlock()
+            return self.heuristic_stations
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def find_eu_heuristic_stations(self, num_stations=10):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            watershed = Watershed.getInstance(self.wd)
+            lng, lat = watershed.centroid
+
+            rdi = RasterDatasetInterpolator(watershed.dem_fn)
+            elev = rdi.get_location_info(lng, lat, method='near')
+
+            station_manager = CligenStationsManager()
+            results = station_manager\
+                .get_stations_eu_heuristic_search((lng, lat), elev, num_stations)
             self._heuristic_stations = results
 
             self._climatestation = int(results[0].id)
@@ -729,11 +766,15 @@ class Climate(NoDbBase, LogMixin):
 
         # PRISM
         elif climate_mode == ClimateMode.PRISM:
-            self._build_climate_prism(verbose=verbose)
+            self._build_climate_mod(mod_function=prism_mod, verbose=verbose)
 
         elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
             assert self.orig_cli_fn is not None
             self._build_climate_observed_cli_PRISM(verbose=verbose)
+
+        # EOBS
+        elif climate_mode == ClimateMode.EOBS:
+            self._build_climate_mod(mod_function=eobs_mod, verbose=verbose)
 
     def _build_climate_observed_cli_PRISM(self, verbose):
         self.lock()
@@ -793,7 +834,7 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_prism(self, verbose):
+    def _build_climate_mod(self, mod_function, verbose):
         self.log('  running _build_climate_prism... \n')
 
         self.lock()
@@ -821,10 +862,9 @@ class Climate(NoDbBase, LogMixin):
             self.par_fn = '{}.par'.format(climatestation)
             self.cli_fn = '{}.cli'.format(climatestation)
 
-            monthlies = prism_mod(par=climatestation,
-                                  years=years, lng=lng, lat=lat, wd=cli_dir,
-                                  logger=self, nwds_method=''
-            )
+            monthlies = mod_function(par=climatestation,
+                                     years=years, lng=lng, lat=lat, wd=cli_dir,
+                                     logger=self, nwds_method='')
             self.monthlies = monthlies
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
@@ -838,10 +878,9 @@ class Climate(NoDbBase, LogMixin):
                     lng, lat = ss.centroid.lnglat
                     suffix = '_{}'.format(topaz_id)
 
-                    prism_mod(par=climatestation,
-                              years=years, lng=lng, lat=lat, wd=cli_dir,
-                              suffix=suffix, logger=self, nwds_method=''
-                    )
+                    mod_function(par=climatestation,
+                                 years=years, lng=lng, lat=lat, wd=cli_dir,
+                                 suffix=suffix, logger=self, nwds_method='')
 
                     sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
                     sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)

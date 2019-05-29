@@ -167,8 +167,6 @@ class Landuse(NoDbBase):
         else:
             return self.domlc_d is not None
 
-        return False
-
     #
     # build
     #
@@ -179,7 +177,59 @@ class Landuse(NoDbBase):
         if _exists(lc_dir):
             shutil.rmtree(lc_dir)
         os.mkdir(lc_dir)
-    
+
+    def _build_ESDAC(self):
+        from wepppy.soils.esdac import ESDAC
+        esd = ESDAC()
+        _map = Ron.getInstance(self.wd).map
+
+        domlc_d = {}
+
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, summary in watershed.sub_iter():
+            lng, lat = summary.centroid.lnglat
+            d = esd.query(lng, lat, ['usedo'])
+            assert 'usedom' in d, d
+            dom = d['usedom'][1]
+            domlc_d[topaz_id] = str(dom)
+
+        for topaz_id, _ in watershed.chn_iter():
+            lng, lat = summary.centroid.lnglat
+            d = esd.query(lng, lat, ['usedo'])
+            dom = d['usedom'][1]
+            domlc_d[topaz_id] = str(dom)
+
+        self.domlc_d = domlc_d
+
+    def _build_NLCD(self):
+        _map = Ron.getInstance(self.wd).map
+
+        # Get NLCD 2011 from wmesque webservice
+        lc_fn = self.lc_fn
+        wmesque_retrieve('nlcd/2011', _map.extent, lc_fn, _map.cellsize)
+
+        # create LandcoverMap instance
+        lc = LandcoverMap(lc_fn)
+
+        # build the grid
+        # domlc_fn map is a property of NoDbBase
+        # domlc_d is a dictionary with topaz_id keys
+        self.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+
+    def _build_single_selection(self):
+        assert self.single_selection is not None
+
+        domlc_d = {}
+
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, _ in watershed.sub_iter():
+            domlc_d[topaz_id] = str(self.single_selection)
+
+        for topaz_id, _ in watershed.chn_iter():
+            domlc_d[topaz_id] = str(self.single_selection)
+
+        self.domlc_d = domlc_d
+
     def build(self):
 
         if self._mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]:
@@ -194,36 +244,16 @@ class Landuse(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            _map = Ron.getInstance(self.wd).map
-            
             self.clean()
 
             if self._mode == LanduseMode.Gridded:
-                # Get NLCD 2011 from wmesque webservice
-                lc_fn = self.lc_fn
-                wmesque_retrieve('nlcd/2011', _map.extent, lc_fn, _map.cellsize)
-
-                # create LandcoverMap instance
-                lc = LandcoverMap(lc_fn)
-
-                # build the grid
-                # domlc_fn map is a property of NoDbBase
-                # domlc_d is a dictionary with topaz_id keys
-                self.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+                if self.config_stem in ['eu']:
+                    self._build_ESDAC()
+                else:
+                    self._build_NLCD()
 
             elif self._mode == LanduseMode.Single:
-                assert self.single_selection is not None
-
-                domlc_d = {}
-
-                watershed = Watershed.getInstance(self.wd)
-                for topaz_id, _ in watershed.sub_iter():
-                    domlc_d[topaz_id] = str(self.single_selection)
-
-                for topaz_id, _ in watershed.chn_iter():
-                    domlc_d[topaz_id] = str(self.single_selection)
-
-                self.domlc_d = domlc_d
+                self._build_single_selection()
 
             elif self._mode == LanduseMode.Undefined:
                 raise Exception('LanduseMode is not set')
@@ -235,6 +265,7 @@ class Landuse(NoDbBase):
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
             self.build_managements()
+
         except Exception:
             self.unlock('-f')
             raise
@@ -293,8 +324,16 @@ class Landuse(NoDbBase):
     def landuseoptions(self):
         from wepppy.wepp import management
 
-        landuseoptions = management.load_map().values()
+        if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
+            _map = 'rred'
+        elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
+            _map = 'esdac'
+        else:
+            _map = None
+
+        landuseoptions = management.load_map(_map).values()
         landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
+        landuseoptions = [opt for opt in landuseoptions if 'DisturbedWEPPManagement' not in opt['ManagementFile']]
 
         if 'baer' in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
@@ -307,7 +346,12 @@ class Landuse(NoDbBase):
     def build_managements(self):
         self.lock()
 
-        _map = (None, 'rred')[self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]]
+        if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
+            _map = 'rred'
+        elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
+            _map = 'esdac'
+        else:
+            _map = None
 
         # noinspection PyBroadException
         try:

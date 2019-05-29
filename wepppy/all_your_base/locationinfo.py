@@ -37,7 +37,7 @@ class RDIOutOfBoundsException(Exception):
 
 
 class RasterDatasetInterpolator:
-    def __init__(self, fname):
+    def __init__(self, fname, epsg=None):
 
         # open the image
         self.ds = ds = gdal.Open(fname, GA_ReadOnly)
@@ -47,7 +47,6 @@ class RasterDatasetInterpolator:
         self.nbands = nbands = ds.RasterCount
         self.band = [ds.GetRasterBand(i+1) for i in range(nbands)]
         self.transform = ds.GetGeoTransform()
-
         self.wkt_text = ds.GetProjection()
         self.srs = srs = osr.SpatialReference()
         srs.ImportFromWkt(self.wkt_text)
@@ -161,7 +160,7 @@ class RasterDatasetInterpolator:
         return z
 
 if __name__ == "__main__":
-    rds = RasterDatasetInterpolator('/home/weppdev/PycharmProjects/wepppy/wepppy/all_your_base/tests/8b2cd722b5444271a203229b1597b941.nc4')
-
-    data = rds.get_location_info(lng=-120, lat=39)
+    #rds = RasterDatasetInterpolator('/home/weppdev/PycharmProjects/wepppy/wepppy/all_your_base/tests/8b2cd722b5444271a203229b1597b941.nc4')
+    rds = RasterDatasetInterpolator('/geodata/ESDAC_ESDB_rasters/usedo.tif')
+    data = rds.get_location_info(lng=-7.915447803023927, lat=43.528076324743296, method='near')
     print(data)

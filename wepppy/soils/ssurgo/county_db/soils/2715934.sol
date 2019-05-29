@@ -1,0 +1,59 @@
+2006.2
+# 
+#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+# 
+#   Build Date: 2018-08-28 21:38:37.638402
+#   Source Data: Surgo
+# 
+# Mukey: 2715934
+# Major Component: 15099322 (comppct_r = 35.0)
+# 
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
+# ----------------------------------------------------------------------------
+#  43648129   A              10.0    9.17        0.0         0.0         1.15
+#  43648130   AC             33.0    9.17        0.0         0.0          1.3
+#  43648131   C             200.0    9.17        0.0         0.0         1.45
+# 
+# Restricting Layer:
+#     ksat threshold: 2.00000
+#     type: -
+#     ksat: -
+# 
+# defaults applied to missing chorizon data:
+#     sandtotal_r  ->      66.800
+#     claytotal_r  ->       7.000
+#     om_r         ->       7.000
+#     cec7_r       ->      11.300
+#     sandvf_r     ->      10.000
+#     ksat_r       ->      28.000
+#     dbthirdbar_r ->       1.400
+#     smr          ->      55.500
+#     field_cap    ->       0.242
+#     wilt_pt      ->       0.115
+# 
+# Build Notes:
+#   initial assumed ksat = 0.750
+# THIS FILE AND THE CONTAINED DATA IS PROVIDED BY THE UNIVERSITY OF IDAHO 
+# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF IDAHO 
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
+# 
+# 
+#   If you change the original contexts of this file please 
+#   indicate it by putting an 'X' in the box here -> [ ]
+# 
+# 
+Any comments:
+1 1
+'Patent, frequently flooded-Badland-Cabbart complex, 6 to 50 percent slopes'		'L'	3	0.3000	0.7500	7242350.00	0.0090	2.6720	33.0120
+	  100.000	  36.00	  21.00	   4.50	  17.00	   0.00
+	  330.000	  31.00	  24.00	   3.00	  18.00	   0.00
+	 2000.000	  34.00	  26.00	   1.50	  18.00	   3.00
+1 10000.0 33.01200

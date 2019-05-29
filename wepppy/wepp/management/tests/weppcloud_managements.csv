@@ -1,0 +1,24 @@
+key,desc,man,cancov,inrcov,rilcov
+0,No information,0.05,0.2,0.2
+1,"Pasture, grassland, grazing land",0.6,0.3,0.3
+2,Poplars,0.9,1.0,1.0
+3,"Arable land, cereals",0.2,0.9,0.9
+4,"Wasteland, shrub",0.28,0.28,0.28
+5,"Forest, coppice",0.9,1.0,1.0
+6,Horticulture,0.0,0.9,0.9
+7,Vineyards,0.5,0.5,0.5
+8,Garrigue,0.7,0.8,0.8
+9,"Bush, macchia",0.7,0.8,0.8
+10,Moor,0.6,0.4,0.4
+11,Halophile grassland,0.6,0.4,0.4
+12,"Arboriculture, orchard",0.5,0.5,0.5
+13,Industrial crops,0.5,0.5,0.5
+14,Rice,0.6,0.4,0.4
+15,Cotton,0.0,0.5,0.5
+16,Vegetables,0.0,0.9,0.9
+17,Olive trees,0.5,0.5,0.5
+18,Recreation,0.5,0.5,0.5
+19,"Extensive pasture, grazing, rough pasture",0.6,0.4,0.4
+20,Dehesa (extensive pastoral system in forest parks in Spain),0.7,0.8,0.8
+21,Cultivos enarenados (artificial soils for orchards in SE Spain),0.5,0.5,0.5
+22,"Wildlife refuge, land above timberline",0.9,1.0,1.0

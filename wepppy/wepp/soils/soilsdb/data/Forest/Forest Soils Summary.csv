@@ -1,0 +1,33 @@
+slid,texid,landcover,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk
+High sev fire-sandy loam,sandy loam,high sev,high,0.1,0.75,400000,0.00014,2,15,65,10,5,15,25,400
+Low sev fire-loam,loam,low sev,low,0.15,0.75,1000000,8E-05,1,20,45,20,5,20,20,400
+Skid-clay loam,clay loam,skid,,0.2,0.75,1500000,5E-05,0.5,6,25,30,5,25,15,300
+Tall Grass sandy loam,sandy loam,grass,,0.15,0.75,400000,0.0001,2,30,65,10,5,15,25,400
+Skid sandy loam,sandy loam,skid,,0.2,0.75,400000,0.0001,2,10,65,10,5,15,25,300
+Short Grass loam,loam,grass,,0.15,0.75,1000000,6E-05,1,25,45,20,5,20,20,400
+Low sev fire-sandy loam,sandy loam,low sev,low,0.15,0.75,400000,0.00012,2,20,65,10,5,15,25,400
+Low sev fire-clay loam,clay loam,low sev,low,0.15,0.75,1500000,5E-05,0.5,18,25,30,5,25,15,400
+Young forest sandy loam,sandy loam,forest,,0.06,0.5,400100,9E-05,2,50,65,10,5,15,25,600
+Forest clay loam,clay loam,forest,,0.06,0.5,400000,2E-05,0.5,35,25,30,5,25,15,800
+Short Grass-silt-Loam ,silt loam,grass,,0.15,0.75,1000000,8E-05,1.5,15,25,15,5,15,15,400
+Short Grass sandy loam,sandy loam,grass,,0.15,0.75,400000,0.0001,2,25,65,10,5,15,25,400
+Shrub silt loam,silt loam,shrub,,0.15,0.75,1000000,7E-05,1.5,25,25,15,5,15,15,500
+Tall Grass loam,loam,grass,,0.15,0.75,1000000,6E-05,1,30,45,20,5,20,20,400
+Skid-silt loam,silt loam,skid,,0.2,0.75,1000000,8E-05,1.5,6,25,15,5,15,15,300
+Tall Grass clay loam,clay loam,grass,,0.15,0.75,1500000,4E-05,0.5,24,25,30,5,25,15,400
+High sev fire-clay loam,clay loam,high sev,high,0.1,0.75,1500000,6E-05,0.5,14,25,30,5,25,15,400
+Skid-loam,loam,skid,,0.2,0.75,1000000,6E-05,1,10,45,20,5,20,20,300
+Forest loam,loam,forest,,0.06,0.5,400000,3E-05,1,50,45,20,5,20,20,800
+Tall Grass silt loam,silt loam,grass,,0.15,0.75,1000000,8E-05,1.5,20,25,15,5,15,15,400
+Shrub clay loam,clay loam,shrub,,0.15,0.75,1500000,3E-05,0.5,28,25,30,5,25,15,500
+Young forest clay loam,clay loam,forest,,0.06,0.5,400000,3E-05,0.5,33,25,30,5,25,15,600
+Shrub loam ,loam,shrub,,0.15,0.75,1000000,5E-05,1,35,45,20,5,20,20,500
+Short Grass clay loam,clay loam,grass,,0.15,0.75,1500000,4E-05,0.5,20,25,30,5,25,15,400
+Forest silt loam,silt loam,forest,,0.06,0.5,1000000,5E-05,1.5,40,25,15,5,15,15,800
+Shrub sandy loam,sandy loam,shrub,,0.15,0.75,400000,0.0001,2,40,65,10,5,15,25,500
+Young forest silt loam,silt loam,forest,,0.06,0.5,1000000,6E-05,1.5,30,25,15,5,15,15,600
+High sev fire-loam,loam,high sev,high,0.1,0.75,1000000,0.0001,1,15,45,20,5,20,20,400
+High sev fire-silt loam,silt loam,high sev,high,0.1,0.75,1000000,0.00012,1.5,10,25,15,5,15,15,400
+Young forest loam ,loam,forest,,0.06,0.5,400000,4E-05,1,40,45,20,5,20,20,600
+Forest sandy loam,sandy loam,forest,,0.06,0.5,400000,8E-05,2,60,65,10,5,15,25,800
+Low sev fire-silt loam,silt loam,low sev,low,0.15,0.75,1000000,0.0001,1.5,13,25,15,5,15,15,400

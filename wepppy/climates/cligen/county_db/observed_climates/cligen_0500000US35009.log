@@ -1,0 +1,54 @@
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US35009.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ nm291963.par                                                                                                                                                                                                                                                    
+ 0500000US35009.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:        1997  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:        1997  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:        1997  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:        1997  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           6  Year:        1997  N:         105
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2005  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2005  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2005  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2005  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2005  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2006  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2006  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2006  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2006  N:         103
+ FAILED K-S -- Parm:Time to Peak    Mon:          10  Year:        2006  N:         103
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

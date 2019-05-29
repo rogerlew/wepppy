@@ -1,0 +1,51 @@
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US41049.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ or353827.par                                                                                                                                                                                                                                                    
+ 0500000US41049.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:        2007  Mlevel=   10.0000000      SDlevel=   52.7632484      Days:          95
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:        2007  Mlevel=   20.0000000      SDlevel=   51.7617722      Days:          95
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:        2007  Mlevel=   20.0000000      SDlevel=   52.2182388      Days:          95
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:        2007  Mlevel=   20.0000000      SDlevel=   53.4623985      Days:          95
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           7  Year:        2007  Mlevel=   20.0000000      SDlevel=   53.4267426      Days:          95
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:           7  Year:        2007  N:         868

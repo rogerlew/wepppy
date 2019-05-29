@@ -401,6 +401,7 @@ var Map = function () {
         that.ctrls.addTo(that);
 
         that.onMapChange = function () {
+            console.log('on map change');
             var self = instance;
 
             var center = self.getCenter();
@@ -2632,6 +2633,21 @@ var Climate = function () {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
                 });
+            } else if (mode === 2) {
+                // sync climate with nodb
+                $.get({
+                    url: "../view/eu_heuristic_stations/",
+                    data: { "mode": mode },
+                    cache: false,
+                    success: function success(response) {
+                        self.stationselection.html(response);
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             } else if (mode === -1) {
                 pass();
             } else {
@@ -2801,6 +2817,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").hide();
             } else if (mode === 0) {
                 // single
@@ -2813,6 +2830,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 2) {
                 // observed
@@ -2825,6 +2843,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 3) {
                 // future
@@ -2837,6 +2856,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 4) {
                 // single storm
@@ -2849,6 +2869,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").show();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 5) {
                 // prism
@@ -2861,6 +2882,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 6) {
                 // observed database
@@ -2873,6 +2895,7 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").show();
                 $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 7) {
                 // future database
@@ -2885,6 +2908,20 @@ var Climate = function () {
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").show();
+                $("#climate_mode8_controls").hide();
+                $("#btn_build_climate_container").show();
+            }  else if (mode === 8) {
+                // future database
+                $("#climate_spatialmode_controls").show();
+                $("#input_years_container").show();
+                $("#climate_mode0_controls").hide();
+                $("#climate_mode5_controls").hide();
+                $("#climate_mode2_controls").hide();
+                $("#climate_mode3_controls").hide();
+                $("#climate_mode4_controls").hide();
+                $("#climate_mode6_controls").hide();
+                $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").show();
                 $("#btn_build_climate_container").show();
             } else {
                 throw "ValueError: unknown mode";

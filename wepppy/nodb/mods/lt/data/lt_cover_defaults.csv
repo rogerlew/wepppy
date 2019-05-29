@@ -27,6 +27,7 @@ key,desc,cancov,inrcov,rilcov
 119,Tahoe Shrub High Severity Fire,0.05,0.25,0.25
 120,Tahoe Shrub Moderate Severity Fire,0.3,0.5,0.5
 121,Tahoe Shrub Low Severity Fire,0.5,0.7,0.7
+122,Tahoe Shrub Prescribed Fire,0.75,0.75,0.75
 130,No Burn,0.8,0.95,0.95
 131,Low Severity Fire,0.75,0.8,0.8
 132,Moderate Severity Fire,0.6,0.6,0.6

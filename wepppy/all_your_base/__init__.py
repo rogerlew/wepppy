@@ -262,9 +262,11 @@ wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
 def wmesque_retrieve(dataset, extent, fname, cellsize):
     global wmesque_url
 
+
     assert dataset in ['ned1/2016',
+                       'eu/eu-dem-v1.1',
                        'ssurgo/201703',
-                       'nlcd/2011']
+                       'nlcd/2011'], '"%s"' % dataset
 
     assert isfloat(cellsize)
 
@@ -562,10 +564,11 @@ def get_utm_zone(srs):
 
     projcs = srs.GetAttrValue('projcs')
     # should be something like NAD83 / UTM zone 11N...
-    if '/' not in projcs:
-        return None
 
-    utm_token = projcs.split('/')[1]
+    if '/' in projcs:
+        utm_token = projcs.split('/')[1]
+    else:
+        utm_token = projcs
     if 'UTM' not in utm_token:
         return None
 

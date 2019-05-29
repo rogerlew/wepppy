@@ -1,0 +1,11 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: HEZEL           Rec. ID: WA1673     Tex.:loamy fine sand     
+1     1
+'HEZEL'             'LFS'    4   .23   .75  5815683.00  .022187   1.95  17.13
+ 177.8   87.2    3.2     .50     3.2      .0
+ 838.2   84.2    2.5     .17     1.8      .0
+1143.0   73.3    5.0     .06     3.5      .0
+1524.0   79.2    2.5     .02     1.8    75.7

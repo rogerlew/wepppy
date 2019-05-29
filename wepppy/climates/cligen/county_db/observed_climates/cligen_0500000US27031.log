@@ -1,0 +1,1175 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ mn213282.par                                                                                                                                                                                                                                                    
+ 0500000US27031.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1991  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1992  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1992  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1992  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1992  N:         115
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1992  N:         115
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1993  N:         124
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1993  N:         124
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1993  N:         124
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1993  N:         124
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1993  N:         124
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1994  N:         134
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1994  N:         134
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1994  N:         134
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1994  N:         134
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1994  N:         134
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           9  Year:        1994  Mlevel=   10.0000000      SDlevel=   52.6736374      Days:         450
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1995  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1995  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1995  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1995  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1995  N:         138
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1996  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1996  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1996  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1996  N:         146
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1996  N:         146
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1997  N:         158
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1997  N:         158
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         111
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1998  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1998  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1998  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1998  N:         163
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1998  N:         163
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1999  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1999  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1999  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1999  N:         114
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1999  N:         114
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1999  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1999  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1999  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1999  N:         173
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        1999  N:         173
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         101
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2000  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2000  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2000  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2000  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2000  N:         118
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2000  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2000  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2000  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2000  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2000  N:         186
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2000  N:         186
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2001  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2001  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2001  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2001  N:         122
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2001  N:         122
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2001  N:         192
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2001  N:         192
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         105
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         105
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2002  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2002  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2002  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2002  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2002  N:         129
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2002  N:         203
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2002  N:         203
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2002  N:         203
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2002  N:         203
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2002  N:         203
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         109
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         109
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         109
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         109
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         109
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2003  N:         132
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2003  N:         132
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2003  N:         132
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2003  N:         132
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2003  N:         132
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2003  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2003  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2003  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2003  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2003  N:         210
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         111
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2004  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2004  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2004  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2004  N:         138
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2004  N:         138
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2004  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2004  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2004  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2004  N:         222
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2004  N:         222
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2005  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2005  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2005  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2005  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2005  N:         147
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2005  N:         230
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2005  N:         230
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2005  N:         230
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2005  N:         230
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2005  N:         230
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         121
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         121
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2006  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2006  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2006  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2006  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2006  N:         154
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2006  N:         241
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2006  N:         241
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         125
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         125
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         125
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         125
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         125
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2007  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2007  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2007  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2007  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2007  N:         159
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2007  N:         257
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2007  N:         257
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2007  N:         257
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2007  N:         257
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2007  N:         257
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         130
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2008  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2008  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2008  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2008  N:         169
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2008  N:         169
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2008  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2008  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2008  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2008  N:         264
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2008  N:         264
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2009  N:         173
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2009  N:         173
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2009  N:         173
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2009  N:         173
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2009  N:         173
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2009  N:         274
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2009  N:         274
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2009  N:         274
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2009  N:         274
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2009  N:         274
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2010  N:         180
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2010  N:         180
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2010  N:         180
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2010  N:         180
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2010  N:         180
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2010  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2010  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2010  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2010  N:         288
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2010  N:         288
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2011  N:         191
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2011  N:         191
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2011  N:         191
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2011  N:         191
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2011  N:         191
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2011  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2011  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2011  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2011  N:         295
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2011  N:         295
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2012  N:         195
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2012  N:         195
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2012  N:         195
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2012  N:         195
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2012  N:         195
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2012  N:         304
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2012  N:         304
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2012  N:         304
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2012  N:         304
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2012  N:         304
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2013  N:         204
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2013  N:         204
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2013  N:         204
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2013  N:         204
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2013  N:         204
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2013  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2013  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2013  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2013  N:         312
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2013  N:         312
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2014  N:         207
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2014  N:         207
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2014  N:         207
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2014  N:         207
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2014  N:         207
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2014  N:         326
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2014  N:         326
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2014  N:         326
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2014  N:         326
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2014  N:         326
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2015  N:         215
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2015  N:         215
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2015  N:         215
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2015  N:         215
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2015  N:         215
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2015  N:         334
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2015  N:         334
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US27031.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2015  N:         334
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2015  N:         334
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           9  Year:        2015  N:         334
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2016  N:         221
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2016  N:         221
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2016  N:         221
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2016  N:         221
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2016  N:         221
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2017  N:         224
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2017  N:         224
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2017  N:         224
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2017  N:         224
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2017  N:         224
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
