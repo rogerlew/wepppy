@@ -2,7 +2,6 @@ wepppy/_scripts/*
 wepppy/_scripts
 wepppy/validation/*
 *.pyc
-*.db
 *.zip
 venv/*
 devnotes.txt
