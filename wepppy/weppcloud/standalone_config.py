@@ -26,9 +26,9 @@ def config_app(app):
 def _init(db, user_datastore):
     from wepppy.weppcloud import RunStatistics
     try:
-        rs = RunStatistics('/geodata/weppcloud_runs')
+        RunStatistics('/geodata/weppcloud_runs')
     except:
-        raise
+        pass
 
     db.drop_all()
     db.create_all()
