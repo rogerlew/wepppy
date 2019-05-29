@@ -1,0 +1,2 @@
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R048AY248CO"|"Mountain Clay Loam"|"3002409"|"513564"
+"NRCS Rangeland Site"|"Ecological Site Description Database"|"R048AY222CO"|"Loamy Park"|"3041269"|"514507"

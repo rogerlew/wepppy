@@ -743,7 +743,10 @@ class WatershedAbstraction:
 
     def px_to_lnglat(self, x: int, y: int) -> Tuple[float, float]:
         e, n = self.px_to_utm(x, y)
-        return transform(self.utmProj, self.wgsProj, e, n)
+        lng, lat = transform(self.utmProj, self.wgsProj, e, n)
+        assert not np.isinf(lng), (self.transform, x, y, e, n)
+        assert not np.isinf(lat)
+        return lng, lat
 
     def _read_netw_tab(self):
         translator = self.translator

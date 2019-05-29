@@ -1,0 +1,77 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ va449215.par                                                                                                                                                                                                                                                    
+ 0500000US21133.prn                                                                                                                                                                                                                                              
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1986  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1986  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1986  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1986  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1986  N:         112
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1987  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1987  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1987  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1987  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1987  N:         127
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1988  N:         142
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1988  N:         142
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1988  N:         142
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1988  N:         142
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1988  N:         142
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1989  N:         158
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1989  N:         158
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1989  N:         158
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1989  N:         158
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1989  N:         158
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US21133.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1990  N:         175
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1990  N:         175
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1990  N:         175
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1990  N:         175
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1990  N:         175
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1991  N:         190
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1991  N:         190
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1991  N:         190
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1991  N:         190
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1991  N:         190
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1992  N:         202
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1992  N:         202
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1992  N:         202
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1992  N:         202
+ FAILED K-S -- Parm:Time to Peak    Mon:          12  Year:        1992  N:         202
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.

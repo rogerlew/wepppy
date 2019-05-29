@@ -1,0 +1,10 @@
+95.1
+#  This WEPP soil input file was made using USDA-SCS Soil-5 (1992) data 
+#  base. Assumptions: soil albedo=0.23, initial sat.=0.75. If you have 
+#  any question, please contact Reza Savabi, Ph: (317)-494-5051
+#  Soil Name: SAGEMOOR        Rec. ID: WA1219     Tex.:silt loam           
+1     1
+'SAGEMOOR'          'SIL'    3   .23   .75  5417800.00  .020228   3.50   4.52
+ 228.6   27.4   11.5    1.50    10.7      .0
+ 482.6   44.7    6.0     .50     4.2      .0
+1524.0   44.2    7.5     .17     5.3      .0

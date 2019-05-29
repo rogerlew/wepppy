@@ -49,6 +49,9 @@ monthly_catalog = {
     'prism/ppt'        : {'Description': 'Total precipitation in millimeters per month', 'Units': 'mm/month' },
     'prism/tmean'      : {'Description': 'Mean temperature', 'Units': 'C' },
     'prism/tdmean'     : {'Description': 'Dewpoint temperature', 'Units': 'C' },
+    'eu/e-obs/tn/mean' : {'Description': 'Minimum air temperature', 'Units': 'C' },
+    'eu/e-obs/tx/mean' : {'Description': 'Maximum air temperature', 'Units': 'C' },
+    'eu/e-obs/rr/mean' : {'Description': 'Average daily precipitation', 'Units': 'mm' }
 }
 
 daily_catalog = {
@@ -57,9 +60,7 @@ daily_catalog = {
     'daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'},
     'lt/daymet/prcp': {'Description': 'Precipitation daily values from Daymet', 'Units': 'mm'},
     'lt/daymet/tmin': {'Description': 'Temperature Minimum daily values from Daymet', 'Units': 'C'},
-    'lt/daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'},
-
-
+    'lt/daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'}
 }
 
 lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
@@ -302,6 +303,7 @@ def query_monthly():
                     'Units' : monthly_catalog[dataset]['Units'],
                     'Method': method,
                     'MonthlyValues': data})
+
 
 if __name__ == '__main__':
     app.run()

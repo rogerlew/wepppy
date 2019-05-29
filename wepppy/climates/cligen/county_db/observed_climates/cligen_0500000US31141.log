@@ -1,0 +1,551 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ ne251825.par                                                                                                                                                                                                                                                    
+ 0500000US31141.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1990  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1990  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1990  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1990  N:         112
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1990  N:         112
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1991  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1991  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1991  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1991  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1991  N:         128
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1992  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1992  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1992  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1992  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1992  N:         143
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1992  N:         403
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1993  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1993  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1993  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1993  N:         155
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1993  N:         155
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1993  Mlevel=   40.0000000      SDlevel=   89.4029083      Days:         434
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1994  N:         165
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1994  N:         165
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1994  N:         165
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1994  N:         165
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           5  Year:        1994  N:         165
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1994  Mlevel=   30.0000000      SDlevel=   98.9814224      Days:         465
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1995  Mlevel=   20.0000000      SDlevel=   99.9316330      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1995  Mlevel=   1.00000000      SDlevel=   99.9448013      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1995  Mlevel=   30.0000000      SDlevel=   99.3531342      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1995  Mlevel=   10.0000000      SDlevel=   99.9296417      Days:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1995  Mlevel=   20.0000000      SDlevel=   99.7405930      Days:         496
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1996  Mlevel=   30.0000000      SDlevel=   98.6686707      Days:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1996  Mlevel=   20.0000000      SDlevel=   99.7742310      Days:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1996  Mlevel=   20.0000000      SDlevel=   98.9020844      Days:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1996  Mlevel=   5.00000000      SDlevel=   98.9064789      Days:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1996  Mlevel=   20.0000000      SDlevel=   99.4984894      Days:         527
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1997  Mlevel=   30.0000000      SDlevel=   98.9630051      Days:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1997  Mlevel=   5.00000000      SDlevel=   99.3779907      Days:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1997  Mlevel=   30.0000000      SDlevel=   99.0092163      Days:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1997  Mlevel=   20.0000000      SDlevel=   98.7728119      Days:         558
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1997  N:         465
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1997  Mlevel=   20.0000000      SDlevel=   98.7728119      Days:         558
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1998  N:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1998  Mlevel=   50.0000000      SDlevel=   98.5218353      Days:         589
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1998  N:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1998  Mlevel=   50.0000000      SDlevel=   98.5218353      Days:         589
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1998  N:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1998  Mlevel=   50.0000000      SDlevel=   98.5218353      Days:         589
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1998  N:         496
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1998  Mlevel=   50.0000000      SDlevel=   98.5218353      Days:         589
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1998  Mlevel=   50.0000000      SDlevel=   98.7224731      Days:         589
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         107
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         107
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1999  Mlevel=   10.0000000      SDlevel=   98.4258804      Days:         620
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1999  N:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1999  Mlevel=   10.0000000      SDlevel=   98.4258804      Days:         620
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1999  N:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1999  Mlevel=   10.0000000      SDlevel=   98.4258804      Days:         620
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1999  Mlevel=   50.0000000      SDlevel=   97.0312500      Days:         620
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        1999  N:         527
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        1999  Mlevel=   50.0000000      SDlevel=   97.0312500      Days:         620
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         112
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         112
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2000  N:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2000  Mlevel=   40.0000000      SDlevel=   99.0757370      Days:         651
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2000  N:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2000  Mlevel=   40.0000000      SDlevel=   99.0757370      Days:         651
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2000  N:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2000  Mlevel=   40.0000000      SDlevel=   99.0757370      Days:         651
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2000  N:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2000  Mlevel=   40.0000000      SDlevel=   99.0757370      Days:         651
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2000  N:         558
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2000  Mlevel=   40.0000000      SDlevel=   99.0757370      Days:         651
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2001  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2001  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2001  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2001  N:         100
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2001  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           2  Year:        2001  Mlevel=   10.0000000      SDlevel=   51.5710297      Days:         113
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           2  Year:        2001  Mlevel=   10.0000000      SDlevel=   52.0923729      Days:         113
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           2  Year:        2001  Mlevel=   10.0000000      SDlevel=   52.0211220      Days:         113
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           2  Year:        2001  Mlevel=   20.0000000      SDlevel=   51.4015198      Days:         113
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           2  Year:        2001  Mlevel=   20.0000000      SDlevel=   51.9855042      Days:         113
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         113
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2001  N:         589
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2001  Mlevel=   40.0000000      SDlevel=   97.9558258      Days:         682
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2001  N:         589
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2001  Mlevel=   40.0000000      SDlevel=   97.9558258      Days:         682
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2001  N:         589
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2001  Mlevel=   40.0000000      SDlevel=   97.9558258      Days:         682
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2001  N:         589
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2001  Mlevel=   40.0000000      SDlevel=   97.9558258      Days:         682
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2001  Mlevel=   90.0000000      SDlevel=   94.6106415      Days:         682
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2002  Mlevel=   90.0000000      SDlevel=   96.3728409      Days:         713
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2002  Mlevel=   80.0000000      SDlevel=   94.6884766      Days:         713
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2002  N:         620
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2002  Mlevel=   80.0000000      SDlevel=   94.6884766      Days:         713
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2002  Mlevel=   80.0000000      SDlevel=   94.3524017      Days:         713
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2002  Mlevel=   80.0000000      SDlevel=   96.9128571      Days:         713
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2003  Mlevel=   70.0000000      SDlevel=   97.4896622      Days:         744
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2003  Mlevel=   80.0000000      SDlevel=   96.4569168      Days:         744
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2003  Mlevel=   90.0000000      SDlevel=   96.1599808      Days:         744
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2003  Mlevel=   90.0000000      SDlevel=   96.0424728      Days:         744
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2003  Mlevel=   80.0000000      SDlevel=   93.1258774      Days:         744
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2004  Mlevel=   60.0000000      SDlevel=   90.2683258      Days:         775
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2004  Mlevel=   80.0000000      SDlevel=   85.1068649      Days:         775
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2004  N:         682
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2004  Mlevel=   80.0000000      SDlevel=   85.1068649      Days:         775
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2004  Mlevel=   80.0000000      SDlevel=   92.0162582      Days:         775
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2004  Mlevel=   95.0000000      SDlevel=   57.7950974      Days:         775
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2005  Mlevel=   90.0000000      SDlevel=   51.7533188      Days:         806
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2005  Mlevel=   95.0000000      SDlevel=   73.0507584      Days:         806
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2005  Mlevel=   95.0000000      SDlevel=   57.4049454      Days:         806
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2005  Mlevel=   90.0000000      SDlevel=   59.3750839      Days:         806
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2005  Mlevel=   90.0000000      SDlevel=   60.2378387      Days:         806
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2006  Mlevel=   80.0000000      SDlevel=   65.7744446      Days:         837
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2006  Mlevel=   90.0000000      SDlevel=   74.1229172      Days:         837
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2006  Mlevel=   90.0000000      SDlevel=   70.4887772      Days:         837
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2006  Mlevel=   95.0000000      SDlevel=   49.8142052      Days:         837
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2006  Mlevel=   95.0000000      SDlevel=   67.4007187      Days:         837
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2007  Mlevel=   90.0000000      SDlevel=   78.1637344      Days:         868
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2007  Mlevel=   95.0000000      SDlevel=   68.5057983      Days:         868
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2007  Mlevel=   90.0000000      SDlevel=   73.3051682      Days:         868
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2007  Mlevel=   99.0000000      SDlevel=   33.2148209      Days:         868
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2007  Mlevel=   90.0000000      SDlevel=   54.0855827      Days:         868
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2008  Mlevel=   90.0000000      SDlevel=   61.3106842      Days:         899
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2008  Mlevel=   95.0000000      SDlevel=   58.7151299      Days:         899
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2008  Mlevel=   90.0000000      SDlevel=   53.5608521      Days:         899
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2008  N:         806
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2008  Mlevel=   90.0000000      SDlevel=   53.5608521      Days:         899
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2008  N:         806
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2008  Mlevel=   90.0000000      SDlevel=   53.5608521      Days:         899
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2009  N:         837
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2009  Mlevel=   90.0000000      SDlevel=   64.0894623      Days:         930
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2009  Mlevel=   80.0000000      SDlevel=   36.3784447      Days:         930
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2009  Mlevel=   95.0000000      SDlevel=   4.96897125      Days:         930
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           5  Year:        2009  N:         837
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2009  Mlevel=   95.0000000      SDlevel=   4.96897125      Days:         930
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2009  Mlevel=   90.0000000      SDlevel=   56.9509850      Days:         930
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2010  Mlevel=   90.0000000      SDlevel=   41.1263046      Days:         961
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2010  Mlevel=   90.0000000      SDlevel=   60.3540077      Days:         961
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2010  Mlevel=   90.0000000      SDlevel=   68.2044067      Days:         961
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2010  Mlevel=   80.0000000      SDlevel=   60.7402153      Days:         961
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2010  Mlevel=   90.0000000      SDlevel=   22.2175007      Days:         961
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2011  Mlevel=   90.0000000      SDlevel=   25.8376427      Days:         992
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2011  Mlevel=   90.0000000      SDlevel=   45.3124809      Days:         992
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2011  Mlevel=   90.0000000      SDlevel=   6.36645555      Days:         992
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2011  Mlevel=   90.0000000      SDlevel=   47.3116951      Days:         992
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2011  Mlevel=   90.0000000      SDlevel=   2.47453451      Days:         992
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2012  Mlevel=   90.0000000      SDlevel=   1.70499682      Days:        1023
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2012  Mlevel=   95.0000000      SDlevel=   6.81748390      Days:        1023
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2012  Mlevel=   95.0000000      SDlevel=   36.4853745      Days:        1023
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2012  Mlevel=   95.0000000      SDlevel=   8.67705345      Days:        1023
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2012  Mlevel=   90.0000000      SDlevel=   11.2031822      Days:        1023
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2013  Mlevel=   90.0000000      SDlevel=   21.0760956      Days:        1054
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2013  Mlevel=   90.0000000      SDlevel=   29.3330421      Days:        1054
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2013  Mlevel=   90.0000000      SDlevel=   28.0912170      Days:        1054
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2013  Mlevel=   80.0000000      SDlevel=   18.4076672      Days:        1054
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2013  Mlevel=   90.0000000      SDlevel=   17.1484051      Days:        1054
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2014  Mlevel=   80.0000000      SDlevel=   27.7881794      Days:        1085
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2014  Mlevel=   90.0000000      SDlevel=   14.7073746      Days:        1085
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2014  Mlevel=   90.0000000      SDlevel=   17.9568062      Days:        1085
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2014  Mlevel=   80.0000000      SDlevel=   25.9014130      Days:        1085
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2014  Mlevel=   80.0000000      SDlevel=   18.7526646      Days:        1085
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2015  Mlevel=   80.0000000      SDlevel=   35.0750999      Days:        1116
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2015  Mlevel=   80.0000000      SDlevel=   12.4694405      Days:        1116
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US31141.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2015  Mlevel=   80.0000000      SDlevel=   27.2155228      Days:        1116
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2015  Mlevel=   80.0000000      SDlevel=   28.0637856      Days:        1116
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           5  Year:        2015  Mlevel=   70.0000000      SDlevel=   25.2371006      Days:        1116
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

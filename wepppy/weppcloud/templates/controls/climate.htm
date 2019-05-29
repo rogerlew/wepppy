@@ -7,6 +7,7 @@
         <div class="col-sm-1">
             <h5>Filter</h5>
         </div>
+        {% if 'eu' not in ron.config_stem %}
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
@@ -19,6 +20,20 @@
             name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 1] }}>
                 Multi-Factor Ranking (Considers Distance, Elevation, and Climate)</label>
         </div>
+        {% else %}
+        <div class="col-sm-4">
+            <label class="radio-inline">
+            <input type="radio" value="2" class="disable-readonly" id="climatestation_mode2"
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == 2] }}>
+                Find US Climate Station to Approximate Climate</label>
+        </div>
+        <div class="col-sm-3">
+            <label class="radio-inline">
+            <input type="radio" value="-1" class="disable-readonly" id="climatestation_mode_"
+            name="climatestation_mode" {{ ('', 'checked')[climate.climatestation_mode == -1] }}>
+                Reset Selection</label>
+        </div>
+        {% endif %}
     </div>    
     <div class="form-group row">
         <div class="col-sm-5">
@@ -33,6 +48,7 @@
     <h4>Climate Method</h4>
     <div class="form-group row">
         <div class="col-sm-6">
+            {% if 'eu' not in ron.config_stem %}
             <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
@@ -54,6 +70,11 @@
             {% if climate.future_clis != none %}
             <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
             {%  endif %}
+            {% else %}
+            <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified
+                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            {% endif %}
         </div>
     </div>
     <div id="climate_spatialmode_controls">
@@ -84,6 +105,8 @@
     <div id="climate_mode0_controls">
     </div>
     <div id="climate_mode5_controls">
+    </div>
+    <div id="climate_mode8_controls">
     </div>
     <div id="climate_mode6_controls">
         <h5>Observed Climate Database</h5>

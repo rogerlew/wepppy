@@ -1,0 +1,6 @@
+||"gravelly"|"Alluvium"|"Limestone and dolomite"|"1158381"|"1498435"
+||"gravelly"|"Alluvium"|"Quartzite"|"1158381"|"1499078"
+||"gravelly"|"Alluvium"|"Shale"|"1158381"|"1499721"
+||"gravelly"|"Alluvium"|"Gneiss"|"1158381"|"1500363"
+||"gravelly"|"Alluvium"|"Igneous rock"|"1158381"|"1500364"
+|||"Alluvium"||"1159939"|"1498997"

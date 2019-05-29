@@ -1,0 +1,6 @@
+"Landform"|"depressions"||||"No "|"2989712"|"2398771"
+"Landform"|"rock pediments"||||"Yes"|"3015359"|"2399581"
+"Landscape"|"fan piedmonts"||||"No "|"3015359"|"2400468"
+"Landform"|"lake terraces"||||"No "|"3028572"|"2400101"
+"Landform"|"fans"||||"No "|"3054218"|"2398253"
+"Landform"|"lake terraces"||||"No "|"3054478"|"2400987"

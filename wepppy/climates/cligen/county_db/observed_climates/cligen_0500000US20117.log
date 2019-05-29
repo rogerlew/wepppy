@@ -1,0 +1,240 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ ks145063.par                                                                                                                                                                                                                                                    
+ 0500000US20117.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1994  N:         100
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1994  N:         100
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1995  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1995  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1995  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1995  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1995  N:         109
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1996  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1996  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1996  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1996  N:         116
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1996  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1996  N:         105
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1997  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1997  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1997  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1997  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1997  N:         118
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         100
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1998  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1998  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1998  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1998  N:         129
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1998  N:         129
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1999  N:         133
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        1999  N:         133
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1999  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2000  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2000  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2000  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2000  N:         138
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2000  N:         138
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2000  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2001  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2001  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2001  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2001  N:         143
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2001  N:         143
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           3  Year:        2001  N:         682
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2001  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2002  N:         150
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2002  N:         150
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2002  N:         150
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2002  N:         150
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2002  N:         150
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2002  N:         105
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2003  N:         154
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2003  N:         154
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2003  N:         154
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2003  N:         154
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2003  N:         154
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2003  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2004  N:         162
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2004  N:         162
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2004  N:         162
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2004  N:         162
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2004  N:         162
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2005  N:         174
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2005  N:         174
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2005  N:         174
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2005  N:         174
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2005  N:         174
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:           3  Year:        2005  N:         775
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2005  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2006  N:         181
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2006  N:         181
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2006  N:         181
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2006  N:         181
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2006  N:         181
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2007  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2007  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2007  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2007  N:         186
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2007  N:         186
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2008  N:         196
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2008  N:         196
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2008  N:         196
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2008  N:         196
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2008  N:         196
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        2008  N:         128
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2009  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2009  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2009  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2009  N:         202
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2009  N:         202
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2010  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2010  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2010  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2010  N:         210
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2010  N:         210
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2011  N:         221
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2011  N:         221
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2011  N:         221
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2011  N:         221
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2011  N:         221
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2012  N:         226
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2012  N:         226
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2012  N:         226
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2012  N:         226
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2012  N:         226
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2013  N:         236
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2013  N:         236
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2013  N:         236
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2013  N:         236
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2013  N:         236
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2014  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2014  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2014  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2014  N:         239
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2014  N:         239
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2015  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2015  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2015  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2015  N:         249
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2015  N:         249
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2016  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2016  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2016  N:         256
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US20117.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2016  N:         256
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2016  N:         256
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2017  N:         260
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2017  N:         260
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2017  N:         260
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2017  N:         260
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           3  Year:        2017  N:         260
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.

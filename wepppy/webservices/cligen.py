@@ -31,6 +31,7 @@ from wepppy.climates.cligen import (
     CligenStationsManager,
     ClimateFile,
     _bin_dir,
+    make_clinp,
     df_to_prn
 )
                                     
@@ -186,25 +187,6 @@ def fetchpar(par):
     return r
 
 
-def _make_clinp(wd, cliver, years, cli_fn, par_fn):
-    """
-    makes an input file that is passed as stdin to cligen
-    """
-    clinp = _join(wd, "clinp.txt")
-    fp = open(clinp, "w")
-
-    if cliver in ["5.2", "5.3"]:
-        fp.write("5\n1\n{years}\n{cli_fn}\nn\n\n"
-                 .format(years=years, cli_fn=cli_fn))
-    else:
-        fp.write("\n{par_fn}\nn\n5\n1\n{years}\n{cli_fn}\nn\n\n"
-                 .format(par_fn=par_fn, years=years, cli_fn=cli_fn))
-
-    fp.close()
-
-    assert _exists(clinp)
-
-
 @app.route('/single_year/<par>', methods=['GET', 'POST'])
 @app.route('/single_year/<par>/', methods=['GET', 'POST'])
 def single_year_route(par):
@@ -267,7 +249,7 @@ def _multiple_year(par, _request, singleyearmode=False):
 
     # create cligen input file
     cli_fn = par + '.cli'
-    _make_clinp(wd, cliver, years, cli_fn, par_fn)
+    make_clinp(wd, cliver, years, cli_fn, par_fn)
 
     # build cmd
     if cliver == "4.3":

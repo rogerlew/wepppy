@@ -1,0 +1,66 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ az028619.par                                                                                                                                                                                                                                                    
+ 0500000US04003.prn                                                                                                                                                                                                                                              
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           3  Year:        1985  Mlevel=   20.0000000      SDlevel=   52.0959396      Days:          17
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           3  Year:        1985  Mlevel=   30.0000000      SDlevel=   51.4217148      Days:          17
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           3  Year:        1985  Mlevel=   30.0000000      SDlevel=   51.2307663      Days:          17
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           3  Year:        1985  Mlevel=   20.0000000      SDlevel=   51.0381622      Days:          17
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           3  Year:        1985  Mlevel=   20.0000000      SDlevel=   51.4599304      Days:          17
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1990  Mlevel=   30.0000000      SDlevel=   55.0028915      Days:          16
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1990  Mlevel=   10.0000000      SDlevel=   54.5193367      Days:          16
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1990  Mlevel=   10.0000000      SDlevel=   51.9860344      Days:          16
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1990  Mlevel=   20.0000000      SDlevel=   57.9669952      Days:          16
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1990  Mlevel=   10.0000000      SDlevel=   53.3344688      Days:          16
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:           6  Year:        1990  Mlevel=   10.0000000      SDlevel=   50.7759323      Days:         330
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1997  Mlevel=   30.0000000      SDlevel=   56.0982056      Days:          21
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1997  Mlevel=   20.0000000      SDlevel=   55.0373726      Days:          21
+ Failed SN SD test.
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US04003.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ Parm:Precip. Amt.    Month:           6  Year:        1997  Mlevel=   30.0000000      SDlevel=   56.5080872      Days:          21
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1997  Mlevel=   20.0000000      SDlevel=   55.7743378      Days:          21
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:           6  Year:        1997  Mlevel=   20.0000000      SDlevel=   56.0098038      Days:          21
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.

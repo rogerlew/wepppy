@@ -1,0 +1,5 @@
+|||"Residuum"|"Shale"|"1158829"|"1500530"
+|||"Loess"||"1159161"|"1498720"
+||"fine-textured"|"Alluvium"|"Shale"|"1159161"|"1500648"
+||"interbedded"|"Alluvium"|"Sandstone and shale"|"1159383"|"1500728"
+||"medium-textured"|"Alluvium"||"1159496"|"1500765"

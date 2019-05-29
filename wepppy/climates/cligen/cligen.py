@@ -10,6 +10,12 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
+from subprocess import (
+    Popen, PIPE
+)
+
+import numpy as np
+
 from datetime import datetime, timedelta
 import subprocess
 import shutil
@@ -26,13 +32,57 @@ from wepppy.all_your_base import (
     haversine,
     RasterDatasetInterpolator
 )
-from wepppy.climates.metquery_client import *
+
+from wepppy.climates.metquery_client import (
+    get_prism_monthly_tmin,
+    get_prism_monthly_tmax,
+    get_prism_monthly_ppt,
+    get_eobs_monthly_tmin,
+    get_eobs_monthly_tmax,
+    get_eobs_monthly_ppt,
+    get_daymet_prcp_pwd,
+    get_daymet_prcp_pww,
+    get_daymet_prcp_skew,
+    get_daymet_prcp_std,
+    get_daymet_prcp_mean,
+    get_daymet_srld_mean,
+    get_prism_monthly_tdmean,
+    c_to_f
+
+)
 
 
 _thisdir = os.path.dirname(__file__)
 _db = _join(_thisdir, 'stations.db')
 _stations_dir = _join(_thisdir, 'stations')
 _bin_dir = _join(_thisdir, 'bin')
+
+
+_rowfmt = lambda x: '\t'.join(['%0.2f' % v for v in x])
+
+
+days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+
+
+def _row_formatter(values):
+    """
+    tasks a list of value and formats them as a string for .par files
+    """
+    s = []
+    for v in values:
+        v = float(v)
+        if v < 1.0:
+            s.append('  ' + '{0:.2f}'.format(v)[1:])
+        elif v > 10000.0:
+            s.append('{0}'.format(int(v)))
+        elif v > 1000.0:
+            s.append('{0:.0f}'.format(v))
+        elif v > 100.0:
+            s.append('{0:.1f}'.format(v))
+        else:
+            s.append('{0:.2f}'.format(v))
+
+    return ' '.join(s)
 
 
 def cli2pat(prcp=50, dur=2, tp=0.3, ip=4, max_time=[10, 30, 60]):
@@ -100,6 +150,27 @@ def cli2pat(prcp=50, dur=2, tp=0.3, ip=4, max_time=[10, 30, 60]):
                     im / max(dur_peak[p], max_time[p] / dur)
 
     return I_peak
+
+
+def _make_clinp(wd, cliver, years, cli_fname, par):
+    """
+    makes an input file that is passed as stdin to cligen
+    """
+    clinp = _join(wd, "clinp.txt")
+    fid = open(clinp, "w")
+
+    if cliver in ["5.2", "5.3"]:
+        fid.write("5\n1\n{years}\n{cli_fname}\nn\n\n"
+                  .format(years=years, cli_fname=cli_fname))
+    else:
+        fid.write("\n{par}\nn\n5\n1\n{years}\n{cli_fname}\nn\n\n"
+                  .format(par=par, years=years, cli_fname=cli_fname))
+
+    fid.close()
+
+    assert _exists(clinp)
+
+    return clinp
 
 
 def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
@@ -179,22 +250,6 @@ def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verb
                      .format(date.month, date.day, date.year, int(prcp), int(tmax), int(tmin)))
 
     fp.close()
-
-
-def _row_formatter(values):
-    """
-    tasks a list of value and formats them as a string for .par files
-    """
-    s = []
-    for v in values:
-        if float(v) >= 100.0:
-            s.append('%5.1f' % v)
-        else:
-            s.append('%5.2f' % v)
-    return ' '.join(s).replace('0.', ' .')
-
-
-days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
 
 class ClimateFile(object):
@@ -443,7 +498,6 @@ class Station:
         This could is deprecated and the localization provided by
         wepppy.climates.prism.prism_mod
         """
-
         new = deepcopy(self)
 
         if p_mean == 'prism':
@@ -518,6 +572,7 @@ class StationMeta:
         self.tp5 = tp5
         self.tp6 = tp6
         self.distance = None
+        self.lat_distance = None
         self.rank = None
 
         self.id = ''.join([v for v in par if v in '0123456789'])
@@ -530,6 +585,9 @@ class StationMeta:
 
     def get_station(self):
         return Station(self.parpath)
+
+    def calculate_lat_distance(self, loc_lat):
+        self.lat_distance = abs(self.latitude - loc_lat)
 
     def calculate_distance(self, location):
         self.distance = haversine(location, (self.longitude, self.latitude))
@@ -607,6 +665,20 @@ class CligenStationsManager:
         self.order_by_distance_to_location(location)
         return self.stations[:num_stations]
 
+    def order_by_lat_distance_to_location(self, location):
+        """
+        location in longitude, latitude
+        """
+        for station in self.stations:
+            station.calculate_lat_distance(location[1])
+
+        self.stations = \
+            sorted(self.stations, key=lambda s: s.lat_distance)
+
+    def get_closest_stations_by_lat(self, location, num_stations):
+        self.order_by_lat_distance_to_location(location)
+        return self.stations[:num_stations]
+
     def get_station_fromid(self, _id):
         for station in self.stations:
             if str(_id) in str(station.par):
@@ -657,6 +729,57 @@ class CligenStationsManager:
 
         return _stations
 
+    def get_stations_eu_heuristic_search(self, location, elev, pool=40):
+
+        stations = self.get_closest_stations_by_lat(location, pool)
+
+        lat_ranks = [(i, abs(s.latitude - location[1]))
+                     for i, s in enumerate(stations)]
+        lat_ranks = sorted(lat_ranks, key=lambda x: x[1])
+
+        stations_elevs = np.array([elevationquery(s.longitude, s.latitude)
+                                   for s in stations])
+        stations_elevs -= elev
+        stations_elevs = np.abs(stations_elevs)
+        elev_ranks = [(i, err) for i, err in enumerate(stations_elevs)]
+        elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
+
+        ppts = get_eobs_monthly_ppt(*location, units='inch')
+        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - ppts)**2.0))
+                              for s in stations])
+        ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
+        ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
+
+        txs = get_eobs_monthly_tmax(*location, units='f')
+        tx_ranks = np.array([math.sqrt(np.sum((s.get_station().tmaxs - txs)**2.0))
+                              for s in stations])
+        tx_ranks = [(i, err) for i, err in enumerate(tx_ranks)]
+        tx_ranks = sorted(tx_ranks, key=lambda x: x[1])
+
+        tns = get_eobs_monthly_tmax(*location, units='f')
+        tn_ranks = np.array([math.sqrt(np.sum((s.get_station().tmaxs - tns)**2.0))
+                              for s in stations])
+        tn_ranks = [(i, err) for i, err in enumerate(tn_ranks)]
+        tn_ranks = sorted(tn_ranks, key=lambda x: x[1])
+
+        s_ranks = list(range(pool))
+        weights = [1, 1, 3, 1.5, 1.5]
+        for ranks, w in zip([lat_ranks, elev_ranks, ppt_ranks, tx_ranks, tn_ranks],
+                            weights):
+
+            for score, (i, err) in enumerate(ranks):
+                s_ranks[i] += score * w
+
+        s_ranks = [(i, err) for i, err in enumerate(s_ranks)]
+        s_ranks = sorted(s_ranks, key=lambda x: x[1])
+
+        _stations = []
+        for i, rank in s_ranks:
+            _stations.append(stations[i])
+            _stations[-1].rank = rank
+
+        return _stations
+
 
 class Cligen:
     def __init__(self, station, wd='./', cliver="5.3"):
@@ -673,24 +796,6 @@ class Cligen:
 
         assert _exists(self.cligen52), "Cannot find cligen52 executable"
         assert _exists(self.cligen52), "Cannot find cligen43 executable"
-
-    def _make_clinp(self, years, cli_fname, par):
-        """
-        makes an input file that is passed as stdin to cligen
-        """
-        clinp = _join(self.wd, "clinp.txt")
-        fid = open(clinp, "w")
-
-        if self.cliver == "5.2":
-            fid.write("5\n1\n{years}\n{cli_fname}\nn\n\n"
-                      .format(years=years, cli_fname=cli_fname))
-        else:
-            fid.write("\n{par}\nn\n5\n1\n{years}\n{cli_fname}\nn\n\n"
-                      .format(par=par, years=years, cli_fname=cli_fname))
-
-        fid.close()
-
-        assert _exists(clinp)
 
     def run_multiple_year(self, years, cli_fname='wepp.cli',
                           localization=None, verbose=False):
@@ -725,7 +830,7 @@ class Cligen:
         assert _exists(par_fn)
         _, par = os.path.split(par_fn)
 
-        self._make_clinp(years, cli_fname, par)
+        _make_clinp(self.wd, self.cliver, years, cli_fname, par)
 
         if self.cliver == "5.2":
             cmd = [self.cligen52, "-i%s" % par]
@@ -798,6 +903,203 @@ class Cligen:
         _log.close()
 
         assert _exists(_join(cli_dir, cli_fn))
+
+
+def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_dataset='prism',
+            nwds_method='', randseed=None, cliver=None, suffix='', logger=None):
+    """
+
+    :param par:
+    :param years:
+    :param lng:
+    :param lat:
+    :param wd:
+    :param nwds_method: '' or 'daymet' (daymet is experimental)
+    :param randseed:
+    :param cliver:
+    :param suffix:
+    :param logger:
+    :return:
+    """
+
+    days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+
+    # determine which version of cligen to use
+    if cliver is None:
+        cliver = '5.3'
+
+    # change to the working directory
+    assert _exists(wd)
+
+    try:
+        curdir = os.path.abspath(os.curdir)
+    except FileNotFoundError:
+        curdir = '../'
+
+    os.chdir(wd)
+
+    stationManager = CligenStationsManager()
+    stationMeta = stationManager.get_station_fromid(par)
+
+    if stationMeta is None:
+        raise Exception('Cannot find station')
+
+    station = stationMeta.get_station()
+    par_monthlies = station.ppts * station.nwds
+
+    if logger is not None:
+        logger.log('  prism_mod:fetching climates...')
+
+    if monthly_dataset.lower() == 'prism':
+        prism_ppts = get_prism_monthly_ppt(lng, lat, units='inch')
+        prism_tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
+        prism_tmins = get_prism_monthly_tmin(lng, lat, units='f')
+        #        p_stds = get_daymet_prcp_std(lng, lat, units='inch')
+        #        p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
+    elif monthly_dataset.lower() == 'eobs':
+        prism_ppts = get_eobs_monthly_ppt(lng, lat, units='inch')
+        prism_tmaxs = get_eobs_monthly_tmax(lng, lat, units='f')
+        prism_tmins = get_eobs_monthly_tmin(lng, lat, units='f')
+    else:
+        raise Exception
+
+    # calculate number of wet days
+    if nwds_method.lower() == 'daymet':
+        assert monthly_dataset == 'prism'
+        p_wws = get_daymet_prcp_pww(lng, lat)
+        p_wds = get_daymet_prcp_pwd(lng, lat)
+        nwds = days_in_mo * (p_wds / (1.0 - p_wws + p_wds))
+
+    else:
+        station_nwds = days_in_mo * (station.pwds / (1.0 - station.pwws + station.pwds))
+        delta = prism_ppts / par_monthlies
+        nwds = [float(v)for v in station_nwds]
+
+        # clamp between 50% and 200% of original value
+        # and between 0.1 days and the number of days in the month
+        for i, (d, nwd, days) in enumerate(zip(delta, nwds, days_in_mo)):
+
+            if d > 1.0:
+                nwd *= 1.0 + (d - 1.0) / 2.0
+            else:
+                nwd *= 1.0 - (1.0 - d) / 2.0
+
+            if nwd < station_nwds[i] / 2.0:
+                nwd = station_nwds[i] / 2.0
+            if nwd < 0.1:
+                nwd = 0.1
+            if nwd > station_nwds[i] * 2.0:
+                nwd = station_nwds[i] * 2.0
+            if nwd > days - 0.25:
+                nwd = days - 0.25
+
+            nwds[i] = nwd
+
+        pw = nwds / days_in_mo
+
+        assert np.all(pw >= 0.0)
+        assert np.all(pw <= 1.0), pw
+
+        ratio = station.pwds / station.pwws
+        p_wws = 1.0 / (1.0 - ratio + ratio / pw)
+        p_wds = ((p_wws - 1.0) * pw) / (pw - 1.0)
+
+    if logger is not None:
+        logger.log_done()
+
+    if randseed is None:
+        randseed = 12345
+    randseed = str(randseed)
+
+    daily_ppts = prism_ppts / nwds  # in inches / day
+
+    # build par file
+    par_fn = '{}{}.par'.format(par, suffix)
+
+    if _exists(par_fn):
+        os.remove(par_fn)
+
+    # p_stds = station.pstds * x[3]
+
+    s2 = deepcopy(station)
+    s2.lines[3] = ' MEAN P  ' + _row_formatter(daily_ppts) + '\r\n'
+    #        s2.lines[4] = ' S DEV P ' + _row_formatter(pstds) + '\r\n'
+    s2.lines[6] = ' P(W/W)  ' + _row_formatter(p_wws) + '\r\n'
+    s2.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
+    s2.lines[8] = ' TMAX AV ' + _row_formatter(prism_tmaxs) + '\r\n'
+    s2.lines[9] = ' TMIN AV ' + _row_formatter(prism_tmins) + '\r\n'
+
+    s2.write(par_fn)
+
+    # run cligen
+    cli_fn = '{}{}.cli'.format(par, suffix)
+
+    if _exists(cli_fn):
+        os.remove(cli_fn)
+
+    # create cligen input file
+    clinp_fn = _make_clinp(wd, cliver, years, cli_fn, par_fn)
+
+    # build cmd
+    if cliver == "4.3":
+        cmd = [_join(_bin_dir, 'cligen43')]
+    elif cliver == "5.2":
+        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+    else:
+        cmd = [_join(_bin_dir, 'cligen53'), "-i%s" % par_fn]
+
+    if randseed is not None:
+        cmd.append('-r%s' % randseed)
+
+    # run cligen
+    _clinp = open(clinp_fn)
+
+    process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE,
+                    preexec_fn=os.setsid)
+
+    output = process.stdout.read()
+
+    with open("cligen.log", "wb") as fp:
+        fp.write(output)
+
+    assert _exists(cli_fn)
+
+    cli = ClimateFile(cli_fn)
+
+    sim_ppts = cli.header_ppts() * days_in_mo
+    if np.any(np.isnan(sim_ppts)):
+        raise Exception('Cligen failed to produce precipitation')
+
+    sim_nwds = cli.count_wetdays()
+
+    if logger is not None:
+        logger.log('Note: CLIGEN uses English Units.\n\n')
+
+        logger.log('Station : %s\n' % _rowfmt(par_monthlies))
+        logger.log('%s   : %s\n' % (monthly_dataset, _rowfmt(prism_ppts)))
+        logger.log('Cligen  : %s\n' % _rowfmt(sim_ppts))
+
+        logger.log('Monthly number wet days\n')
+        logger.log('Station : %s\n' % _rowfmt(station.nwds))
+        logger.log('Target  : %s\n' % _rowfmt(nwds))
+        logger.log('Cligen  : %s\n' % _rowfmt(sim_nwds))
+
+        logger.log('p(w|w) and p(w|d)\n')
+        logger.log('Station p(w|w) : %s\n' % _rowfmt(station.pwws))
+        logger.log('Cligen p(w|w)  : %s\n' % _rowfmt(p_wws))
+        logger.log('Station p(w|d) : %s\n' % _rowfmt(station.pwds))
+        logger.log('Cligen p(w|d)  : %s\n' % _rowfmt(p_wds))
+
+        logger.log('Daily P for day precipitation occurs\n')
+        logger.log('Station : %s\n' % _rowfmt(station.ppts))
+        logger.log('Target  : %s\n' % _rowfmt(daily_ppts))
+
+        logger.log('%s TMAX (F): %s\n' % (monthly_dataset, _rowfmt(prism_tmaxs)))
+        logger.log('%s TMIN (F) : %s\n' % (monthly_dataset, _rowfmt(prism_tmins)))
+
+    os.chdir(curdir)
+
+    return cli.calc_monthlies()
 
 
 if __name__ == "__main__":

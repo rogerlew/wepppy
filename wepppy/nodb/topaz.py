@@ -58,6 +58,7 @@ class Topaz(NoDbBase):
             self.csa = config.getfloat('topaz', 'csa')
             self.mcl = config.getfloat('topaz', 'mcl')
             self.zoom_min = config.getint('topaz', 'zoom_min')
+
             self._outlet = None
             
             self._utmproj4 = None

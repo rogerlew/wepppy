@@ -1,0 +1,6 @@
+"Rill erosion"|"Yes"|"3008825"|"40599"
+"Sheet erosion"|"Yes"|"3008825"|"40626"
+"Rill erosion"|"Yes"|"3034732"|"40653"
+"Sheet erosion"|"Yes"|"3054161"|"40648"
+"Rill erosion"|"Yes"|"3067114"|"40634"
+"Gully erosion"|"Yes"|"3067114"|"40661"

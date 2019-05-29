@@ -1,0 +1,59 @@
+2006.2
+# 
+#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+# 
+#   Build Date: 2018-08-28 21:41:34.302109
+#   Source Data: Surgo
+# 
+# Mukey: 571600
+# Major Component: 14786385 (comppct_r = 65.0)
+# 
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
+# ----------------------------------------------------------------------------
+#  42617660   A               5.0  28.222        0.0         0.0         1.45
+#  42617658   E              13.0  28.222        0.0         0.0         1.45
+#  42617659   Bt     R      102.0  0.9174        0.0         0.0         1.48
+#  42617657   Cr            152.0   0.217         -           -          1.93
+# 
+# Restricting Layer:
+#     ksat threshold: 2.00000
+#     type: Paralithic bedrock
+#     ksat: 0.00917
+# 
+# defaults applied to missing chorizon data:
+#     sandtotal_r  ->      66.800
+#     claytotal_r  ->       7.000
+#     om_r         ->       7.000
+#     cec7_r       ->      11.300
+#     sandvf_r     ->      10.000
+#     ksat_r       ->      28.000
+#     dbthirdbar_r ->       1.400
+#     smr          ->      55.500
+#     field_cap    ->       0.242
+#     wilt_pt      ->       0.115
+# 
+# Build Notes:
+#   initial assumed ksat = 0.750
+# THIS FILE AND THE CONTAINED DATA IS PROVIDED BY THE UNIVERSITY OF IDAHO 
+# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF IDAHO 
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
+# 
+# 
+#   If you change the original contexts of this file please 
+#   indicate it by putting an 'X' in the box here -> [ ]
+# 
+# 
+Any comments:
+1 1
+'Homa-Hector complex, 12 to 20 percent slopes'		'FSL'	2	0.2300	0.7500	5840020.00	0.0165	2.6404	101.5992
+	   50.000	  66.10	  14.00	   0.75	   8.50	   1.00
+	  130.000	  66.10	  14.00	   0.75	   8.50	   1.00
+1 10000.0 0.03303

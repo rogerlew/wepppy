@@ -1,0 +1,6 @@
+"PIPO"|"Pinus ponderosa"|"ponderosa pine"|||35|||14||"2991606"|"4817463"
+"UNKNOWN"|"unknown scientific name"|"plains cottonwood"|||80|||72||"3011036"|"4855300"
+"QUAL"|"Quercus alba"|"white oak"|||55|||43||"3028435"|"4824842"
+"UNKNOWN"|"unknown scientific name"|"plains cottonwood"|||80|||72||"3036724"|"4876817"
+"PODE3"|"Populus deltoides"|"eastern cottonwood"|||90|||100||"3047865"|"4797822"
+"PLOC"|"Platanus occidentalis"|"American sycamore"||||||0||"3047865"|"4862642"

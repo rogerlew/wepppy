@@ -1,0 +1,184 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ az023303.par                                                                                                                                                                                                                                                    
+ 0500000US04001.prn                                                                                                                                                                                                                                              
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1986  Mlevel=   20.0000000      SDlevel=   59.0442543      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1986  Mlevel=   20.0000000      SDlevel=   57.0910645      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1986  Mlevel=   20.0000000      SDlevel=   57.1583328      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1986  Mlevel=   20.0000000      SDlevel=   57.7940826      Days:          23
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1986  Mlevel=   10.0000000      SDlevel=   58.6283569      Days:          23
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Wind Dir.       Mon:          12  Year:        1986  N:         217
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1986  Mlevel=   10.0000000      SDlevel=   69.7479019      Days:         217
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1987  Mlevel=   30.0000000      SDlevel=   60.9836349      Days:          24
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1987  Mlevel=   20.0000000      SDlevel=   63.2151489      Days:          24
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1987  Mlevel=   20.0000000      SDlevel=   63.3062363      Days:          24
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1987  Mlevel=   20.0000000      SDlevel=   66.8804474      Days:          24
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          12  Year:        1987  Mlevel=   30.0000000      SDlevel=   59.2233658      Days:          24
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1987  Mlevel=   20.0000000      SDlevel=   99.0192261      Days:         248
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1988  Mlevel=   10.0000000      SDlevel=   99.9384918      Days:         279
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1988  Mlevel=   30.0000000      SDlevel=   99.9728241      Days:         279
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1988  Mlevel=   20.0000000      SDlevel=   99.8522415      Days:         279
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:          12  Year:        1988  N:         217
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1988  Mlevel=   20.0000000      SDlevel=   99.8522415      Days:         279
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1988  Mlevel=   10.0000000      SDlevel=   99.6390305      Days:         279
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1989  Mlevel=   50.0000000      SDlevel=   99.5097427      Days:         310
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1989  Mlevel=   20.0000000      SDlevel=   99.3046799      Days:         310
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1989  Mlevel=   30.0000000      SDlevel=   98.9710312      Days:         310
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1989  Mlevel=   20.0000000      SDlevel=   99.1955872      Days:         310
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1989  Mlevel=   20.0000000      SDlevel=   99.8431549      Days:         310
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1990  Mlevel=   30.0000000      SDlevel=   99.9197617      Days:         341
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1990  Mlevel=   20.0000000      SDlevel=   99.9116364      Days:         341
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1990  Mlevel=   50.0000000      SDlevel=   99.8510971      Days:         341
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1990  Mlevel=   20.0000000      SDlevel=   99.6193085      Days:         341
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1990  Mlevel=   10.0000000      SDlevel=   99.8898468      Days:         341
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1991  Mlevel=   30.0000000      SDlevel=   99.8092957      Days:         372
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1991  Mlevel=   10.0000000      SDlevel=   96.1650925      Days:         372
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1991  Mlevel=   20.0000000      SDlevel=   99.8932800      Days:         372
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1991  Mlevel=   30.0000000      SDlevel=   99.9380264      Days:         372
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1991  Mlevel=   40.0000000      SDlevel=   99.8557510      Days:         372
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1992  Mlevel=   30.0000000      SDlevel=   99.9232788      Days:         403
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1992  Mlevel=   50.0000000      SDlevel=   99.9396362      Days:         403
+ FAILED K-S -- Parm:Temp. Dew Pt.   Mon:          12  Year:        1992  N:         341
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1992  Mlevel=   50.0000000      SDlevel=   99.9396362      Days:         403
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1992  Mlevel=   60.0000000      SDlevel=   99.8463669      Days:         403
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1992  Mlevel=   30.0000000      SDlevel=   99.8281631      Days:         403
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1993  Mlevel=   40.0000000      SDlevel=   99.9141617      Days:         434
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1993  Mlevel=   10.0000000      SDlevel=   99.7950439      Days:         434
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1993  Mlevel=   20.0000000      SDlevel=   99.6690063      Days:         434
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1993  Mlevel=   10.0000000      SDlevel=   98.9260330      Days:         434
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1993  Mlevel=   40.0000000      SDlevel=   99.7321930      Days:         434
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1994  Mlevel=   10.0000000      SDlevel=   98.5608139      Days:         465
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1994  Mlevel=   50.0000000      SDlevel=   99.9011459      Days:         465
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1994  Mlevel=   50.0000000      SDlevel=   99.5888901      Days:         465
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1994  Mlevel=   60.0000000      SDlevel=   99.8688507      Days:         465
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        1994  Mlevel=   30.0000000      SDlevel=   99.6961441      Days:         465
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2000  Mlevel=   30.0000000      SDlevel=   53.3744507      Days:          45
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2000  Mlevel=   30.0000000      SDlevel=   53.3655052      Days:          45
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2000  Mlevel=   30.0000000      SDlevel=   53.5448418      Days:          45
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2000  Mlevel=   30.0000000      SDlevel=   53.5072556      Days:          45
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2000  Mlevel=   30.0000000      SDlevel=   53.5656815      Days:          45
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2001  Mlevel=   30.0000000      SDlevel=   59.3672752      Days:          46
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2001  Mlevel=   40.0000000      SDlevel=   55.2766342      Days:          46
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2001  Mlevel=   30.0000000      SDlevel=   59.9193459      Days:          46
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2001  Mlevel=   20.0000000      SDlevel=   56.0421181      Days:          46
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          10  Year:        2001  Mlevel=   40.0000000      SDlevel=   55.9783707      Days:          46
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         103
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US04001.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2014  N:         103
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           2  Year:        2015  N:         109
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.

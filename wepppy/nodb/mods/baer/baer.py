@@ -21,7 +21,7 @@ import numpy as np
 from osgeo import gdal
         
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc
-from wepppy.ssurgo import SoilSummary
+from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization
 
 from ...landuse import Landuse, LanduseMode

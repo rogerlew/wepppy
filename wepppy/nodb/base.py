@@ -145,7 +145,8 @@ class NoDbBase(object):
         cfg = _join(_config_dir, self._config)
         
         parser = RawConfigParser(
-            dict(boundary=None),
+            dict(boundary=None,
+                 dem_db='ned1/2016'),
             allow_no_value=True
         )
         with open(_join(_config_dir, '0.cfg')) as fp:

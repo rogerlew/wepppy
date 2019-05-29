@@ -1,0 +1,284 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ ut423611.par                                                                                                                                                                                                                                                    
+ 0500000US49055.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2003  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2004  N:         108
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2005  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2005  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2005  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2005  N:         102
+ FAILED K-S -- Parm:Time to Peak    Mon:           1  Year:        2005  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         111
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2005  N:         111
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2006  N:         115
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2007  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2007  N:         123
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2007  N:         123
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2007  N:         123
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2007  N:         123
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2007  N:         123
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2007  N:         101
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2007  N:         101
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        2008  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2008  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2008  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2008  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2008  N:         127
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2008  N:         127
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2008  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2008  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2008  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2008  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2008  N:         105
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2008  Mlevel=   40.0000000      SDlevel=   54.4282990      Days:         899
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2009  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2009  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2009  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2009  N:         129
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2009  N:         129
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2009  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2009  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2009  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2009  N:         105
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2009  N:         105
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2009  Mlevel=   40.0000000      SDlevel=   76.0256653      Days:         930
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2010  N:         139
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2010  N:         139
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2010  N:         139
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2010  N:         139
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2010  N:         139
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2010  N:         108
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2010  N:         108
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2010  N:         108
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2010  N:         108
+ FAILED K-S -- Parm:Precip. Amt.    Mon:          12  Year:        2010  N:         108
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2010  Mlevel=   20.0000000      SDlevel=   91.2209167      Days:         961
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2011  N:         141
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2011  N:         141
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2011  N:         141
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2011  N:         141
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2011  N:         141
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2011  Mlevel=   30.0000000      SDlevel=   97.3614120      Days:         992
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2011  Mlevel=   30.0000000      SDlevel=   99.2278137      Days:         992
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2011  Mlevel=   50.0000000      SDlevel=   98.9981537      Days:         992
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2011  Mlevel=   30.0000000      SDlevel=   99.5545959      Days:         992
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2011  Mlevel=   40.0000000      SDlevel=   99.4935989      Days:         992
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2012  N:         148
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2012  N:         148
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2012  N:         148
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2012  N:         148
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2012  N:         148
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2012  Mlevel=   70.0000000      SDlevel=   98.3115158      Days:        1023
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2012  Mlevel=   30.0000000      SDlevel=   99.0010681      Days:        1023
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2012  Mlevel=   40.0000000      SDlevel=   99.4709930      Days:        1023
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2012  Mlevel=   40.0000000      SDlevel=   99.6597672      Days:        1023
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2012  Mlevel=   50.0000000      SDlevel=   99.2004852      Days:        1023
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2013  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2013  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2013  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2013  N:         154
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2013  N:         154
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2013  Mlevel=   40.0000000      SDlevel=   99.2383270      Days:        1054
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2013  Mlevel=   60.0000000      SDlevel=   99.3096619      Days:        1054
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2013  Mlevel=   40.0000000      SDlevel=   99.4838791      Days:        1054
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2013  Mlevel=   40.0000000      SDlevel=   99.5850525      Days:        1054
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2013  Mlevel=   40.0000000      SDlevel=   98.3992233      Days:        1054
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2014  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2014  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2014  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2014  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2014  N:         159
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2014  Mlevel=   40.0000000      SDlevel=   99.1116028      Days:        1085
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2014  Mlevel=   50.0000000      SDlevel=   99.0444031      Days:        1085
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2014  Mlevel=   60.0000000      SDlevel=   98.0232849      Days:        1085
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2014  Mlevel=   50.0000000      SDlevel=   96.3352127      Days:        1085
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2014  Mlevel=   40.0000000      SDlevel=   97.8713303      Days:        1085
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2015  N:         161
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2015  N:         161
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2015  N:         161
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2015  N:         161
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2015  N:         161
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2015  Mlevel=   30.0000000      SDlevel=   96.4085999      Days:        1116
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2015  Mlevel=   40.0000000      SDlevel=   99.0291824      Days:        1116
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2015  Mlevel=   40.0000000      SDlevel=   97.3040314      Days:        1116
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2015  Mlevel=   30.0000000      SDlevel=   97.8323898      Days:        1116
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2015  Mlevel=   40.0000000      SDlevel=   96.8562164      Days:        1116
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2016  N:         165
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2016  N:         165
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2016  N:         165
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2016  N:         165
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2016  N:         165
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2016  Mlevel=   10.0000000      SDlevel=   95.0898972      Days:        1147
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2016  Mlevel=   40.0000000      SDlevel=   96.1971893      Days:        1147
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2016  Mlevel=   40.0000000      SDlevel=   97.3894348      Days:        1147
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2016  Mlevel=   20.0000000      SDlevel=   97.2345734      Days:        1147
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2016  Mlevel=   50.0000000      SDlevel=   95.1353378      Days:        1147
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2017  N:         167
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2017  N:         167
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2017  N:         167
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2017  N:         167
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        2017  N:         167
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2017  Mlevel=   40.0000000      SDlevel=   96.5534439      Days:        1178
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2017  Mlevel=   30.0000000      SDlevel=   96.0104218      Days:        1178
+ Failed SN Mean test.
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2017  Mlevel=   60.0000000      SDlevel=   96.7142181      Days:        1178
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US49055.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2017  Mlevel=   40.0000000      SDlevel=   97.1922302      Days:        1178
+ Failed SN SD test.
+ Parm:Temp. Dew Pt.   Month:          12  Year:        2017  Mlevel=   50.0000000      SDlevel=   97.2845154      Days:        1178
+*** ERROR *** Could not produce desired level of quality in
+                    << Temp. Dew Pt.   >> random deviates.

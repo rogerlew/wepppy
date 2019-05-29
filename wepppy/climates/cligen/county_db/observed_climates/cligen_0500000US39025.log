@@ -1,0 +1,283 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ oh331576.par                                                                                                                                                                                                                                                    
+ 0500000US39025.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           5  Year:        1988  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           5  Year:        1988  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           5  Year:        1988  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           5  Year:        1988  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           5  Year:        1988  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1989  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1989  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1989  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1989  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1989  N:         108
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1990  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1990  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1990  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1990  N:         118
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1990  N:         118
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1991  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1991  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1991  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1991  N:         130
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1991  N:         130
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1992  N:         136
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1992  N:         136
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1992  N:         136
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1992  N:         136
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1992  N:         136
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1993  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1993  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1993  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1993  N:         147
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1993  N:         147
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1993  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1993  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1993  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1993  N:         104
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1993  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1994  N:         152
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1994  N:         152
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1994  N:         152
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1994  N:         152
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1994  N:         152
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1994  N:         113
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1994  N:         113
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1994  N:         113
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1994  N:         113
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1994  N:         113
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1995  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1995  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1995  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1995  N:         159
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1995  N:         159
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1995  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1995  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1995  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1995  N:         116
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1995  N:         116
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1996  N:         172
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1996  N:         172
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1996  N:         172
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1996  N:         172
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1996  N:         172
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1996  N:         124
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1996  N:         124
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1996  N:         124
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1996  N:         124
+ FAILED K-S -- Parm:Time to Peak    Mon:           9  Year:        1996  N:         124
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         186
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1997  N:         186
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         197
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         197
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         197
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         197
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1998  N:         197
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         205
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         205
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         205
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         205
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        1999  N:         205
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         214
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         214
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         214
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         214
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2000  N:         214
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         223
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         223
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         223
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         223
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2001  N:         223
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         232
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         232
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         232
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         232
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2002  N:         232
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         238
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         238
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         238
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         238
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2003  N:         238
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         244
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         244
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         244
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         244
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2004  N:         244
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         256
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         256
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         256
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         256
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2005  N:         256
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         268
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         268
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         268
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         268
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2006  N:         268
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         277
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         277
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         277
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         277
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2007  N:         277
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         287
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         287
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         287
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         287
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2008  N:         287
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2009  N:         300
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2009  N:         300
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2009  N:         300
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2009  N:         300
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2009  N:         300
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2010  N:         304
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2010  N:         304
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2010  N:         304
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2010  N:         304
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2010  N:         304
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2011  N:         314
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2011  N:         314
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2011  N:         314
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2011  N:         314
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2011  N:         314
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2012  N:         322
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2012  N:         322
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2012  N:         322
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2012  N:         322
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2012  N:         322
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2013  N:         329
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2013  N:         329
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2013  N:         329
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2013  N:         329
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2013  N:         329
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2014  N:         339
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2014  N:         339
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2014  N:         339
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2014  N:         339
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2014  N:         339
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2015  N:         351
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2015  N:         351
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2015  N:         351
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2015  N:         351
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2015  N:         351
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2016  N:         356
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2016  N:         356
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2016  N:         356
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2016  N:         356
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2016  N:         356
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US39025.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2017  N:         367
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2017  N:         367
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2017  N:         367
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2017  N:         367
+ FAILED K-S -- Parm:Time to Peak    Mon:           2  Year:        2017  N:         367
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.

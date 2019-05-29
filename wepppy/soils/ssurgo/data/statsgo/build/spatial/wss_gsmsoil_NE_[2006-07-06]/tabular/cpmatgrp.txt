@@ -1,0 +1,5 @@
+"alluvium"|"No "|"2983099"|"1158955"
+"calcareous loess"|"No "|"3002529"|"1159735"
+"silty alluvium"|"Yes"|"3008905"|"1159835"
+"alluvium"|"No "|"3041389"|"1159959"
+"calcareous coarse-loamy alluvium"|"Yes"|"3067194"|"1159505"

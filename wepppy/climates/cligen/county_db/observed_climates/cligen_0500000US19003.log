@@ -1,0 +1,154 @@
+
+
+  ********************************************************************
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                 WEPP CLIMATE INPUT DATA GENERATOR                *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                    with Command Line Options,                    *
+  *                        and Corrections to                        *
+  *                  Rainfall Intensity Calculations                 *
+  *                   and Random Number Generation.                  *
+  *                                                                  *
+  *                          VERSION 5.30000                         *
+  *                     Revised from VERSION 4.2                     *
+  *                           October 2004                           *
+  *                                                                  *
+  *           (Use -h or /h to list command line options.)           *
+  *                                                                  *
+  ********************************************************************
+
+
+ ia131833.par                                                                                                                                                                                                                                                    
+ 0500000US19003.prn                                                                                                                                                                                                                                              
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1991  N:         102
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:        1991  N:         102
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1991  N:         104
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           8  Year:        1991  N:         104
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Failed SN Mean test.
+ Parm:Temp. Dew Pt.   Month:           8  Year:        1991  Mlevel=   60.0000000      SDlevel=   13.6123543      Days:         372
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         109
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1992  N:         109
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:        1992  N:         103
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         118
+ FAILED K-S -- Parm:Precip. Amt.    Mon:           4  Year:        1993  N:         118
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           4  Year:        1993  N:         105
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1995  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1995  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1995  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1995  N:         108
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1995  N:         108
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1996  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1996  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1996  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1996  N:         115
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1996  N:         115
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          11  Year:        1996  Mlevel=   5.00000000      SDlevel=   53.4852028      Days:          87
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          11  Year:        1996  Mlevel=   5.00000000      SDlevel=   52.7992706      Days:          87
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          11  Year:        1996  Mlevel=   10.0000000      SDlevel=   54.1837082      Days:          87
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          11  Year:        1996  Mlevel=   5.00000000      SDlevel=   52.0924339      Days:          87
+ Failed SN SD test.
+ Parm:Precip. Amt.    Month:          11  Year:        1996  Mlevel=   5.00000000      SDlevel=   52.7747040      Days:          87
+*** ERROR *** Could not produce desired level of quality in
+                    << Precip. Amt.    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         117
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1997  N:         117
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         128
+At line 3013 of file cligen53.f (unit = 9, file = '0500000US19003.prn')
+Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         128
+ FAILED K-S -- Parm:Time to Peak    Mon:           3  Year:        1998  N:         128
+*** ERROR *** Could not produce desired level of quality in
+                    << Time to Peak    >> random deviates.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.
+ Tdew -10 rangecheck executed.

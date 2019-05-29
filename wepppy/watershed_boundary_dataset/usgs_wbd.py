@@ -78,8 +78,6 @@ def build_mask(points, georef_fn):
 class WatershedBoundaryDataset:
     def __init__(self, shp):
         sf = shapefile.Reader(shp)
-        print(sf.shapeType)
-        print(sf.fields)
         header = [field[0] for field in sf.fields][1:]
 
         """
