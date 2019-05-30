@@ -101,7 +101,13 @@ class Ron(NoDbBase):
             self._cellsize = float(config.get('general', 'cellsize'))
             self._center0 = config.get('map', 'center0')
             self._zoom0 = config.get('map', 'zoom0')
-            self._boundary = config.get('map', 'boundary')
+
+            _boundary = config.get('map', 'boundary')
+            if _boundary is not None:
+                _boundary = _boundary.replace('MODS_DIR', wepppy.nodb.mods.MODS_DIR)
+                print('_boundary', _boundary)
+
+            self._boundary = _boundary
             self.dem_db = config.get('general', 'dem_db')
 
             self._enable_landuse_change = config.getboolean('landuse', 'enable_landuse_change')
@@ -144,6 +150,9 @@ class Ron(NoDbBase):
                     sbs_map = None
 
                 if sbs_map is not None:
+                    from wepppy.nodb.mods import MODS_DIR
+                    sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
+
                     # sbs_map = _join(_thisdir, sbs_map)
                     assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
                     assert not isdir(sbs_map)
