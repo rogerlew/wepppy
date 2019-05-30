@@ -156,14 +156,21 @@ class Climate(NoDbBase, LogMixin):
             if not _exists(cli_dir):
                 os.mkdir(cli_dir)
 
+            from wepppy.nodb.mods import MODS_DIR
             config = self.config
             _observed_clis_wc = config.get('climate', 'observed_clis_wc')
+            if _observed_clis_wc is not None:
+                _observed_clis_wc = _observed_clis_wc.replace('MODS_DIR', MODS_DIR)
+
             if _observed_clis_wc == 'None':
                 _observed_clis_wc = None
             else:
                 assert _exists(_observed_clis_wc), _observed_clis_wc
                 
             _future_clis_wc = config.get('climate', 'future_clis_wc')
+            if _future_clis_wc is not None:
+                _future_clis_wc = _future_clis_wc.replace('MODS_DIR', MODS_DIR)
+
             if _future_clis_wc == 'None':
                 _future_clis_wc = None
             else:
