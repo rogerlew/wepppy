@@ -33,16 +33,6 @@ class LakeTahoeNoDbLockedException(Exception):
     pass
 
 
-def read_cover_defaults(fn):
-    with open(fn) as fp:
-        d = {}
-        rdr = csv.DictReader(fp)
-        for row in rdr:
-            d[row['key']] = row
-
-    return d
-
-
 class LakeTahoe(NoDbBase):
     __name__ = 'LakeTahoe'
 
@@ -126,24 +116,6 @@ class LakeTahoe(NoDbBase):
             landuse.unlock('-f')
             raise
 
-    def set_cover_defaults(self):
-
-        landuse = Landuse.getInstance(self.wd)
-        landuse.lock()
-
-        # noinspection PyBroadException
-        try:
-            defaults = read_cover_defaults(_join(_data_dir, 'lt_cover_defaults.csv'))
-            for dom in landuse.managements:
-                if dom in defaults:
-                    for cover in ['cancov', 'inrcov', 'rilcov']:
-                        landuse.modify_coverage(dom, cover, defaults[dom][cover])
-
-            landuse.dump_and_unlock()
-
-        except Exception:
-            landuse.unlock('-f')
-            raise
 
     def modify_soils(self, default_wepp_type='Granitic'):
         wd = self.wd
