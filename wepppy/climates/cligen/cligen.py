@@ -430,7 +430,6 @@ class ClimateFile(object):
 
     def calc_intensity(self):
         ppts = sorted(self.as_dataframe().prcp)
-        print(np.where(np.array(ppts) > 0.0))
         n = len(ppts)
         return {
             "99": float(ppts[int(round(0.99 * n))]),

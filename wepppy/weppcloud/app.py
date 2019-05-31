@@ -670,6 +670,7 @@ def runs0(runid, config):
     climate = Climate.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     unitizer = Unitizer.getInstance(wd)
+    site_prefix = app.config['SITE_PREFIX']
 
     try:
         observed = Observed.getInstance(wd)
@@ -687,6 +688,7 @@ def runs0(runid, config):
     log_access(wd, current_user, request.remote_addr)
     return render_template('0.html',
                            user=current_user,
+                           site_prefix=site_prefix,
                            topaz=topaz, soils=soils,
                            ron=ron, landuse=landuse, climate=climate,
                            wepp=wepp,
