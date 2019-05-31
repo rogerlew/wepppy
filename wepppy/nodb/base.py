@@ -146,6 +146,7 @@ class NoDbBase(object):
         
         parser = RawConfigParser(
             dict(boundary=None,
+                 cover_defaults=None,
                  dem_db='ned1/2016'),
             allow_no_value=True
         )

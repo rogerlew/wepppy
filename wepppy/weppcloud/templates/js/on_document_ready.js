@@ -137,7 +137,7 @@ $(document).ready(function () {
     if ({{ (ron.boundary != None) | tojson }}) {
         var boundary = null;
         $.get({
-            url: "{{ ron.boundary }}",
+            url: "{{ site_prefix }}/{{ ron.boundary }}",
             cache: false,
             success: function success(response) {
                 boundary = L.geoJSON(response, {
