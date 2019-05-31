@@ -14,7 +14,6 @@ class YamlSoil(object):
             self._load_yaml(fn)
 
     def _parse_sol(self, fn):
-        print(fn)
         with open(fn) as fp:
             lines = fp.readlines()
 
@@ -80,7 +79,6 @@ class YamlSoil(object):
         yaml_txt = yaml.dump(soil)
 
         self.obj = yaml.safe_load(yaml_txt)
-        print(self.obj)
 
     def _load_yaml(self, fn):
         with open(fn) as fp:

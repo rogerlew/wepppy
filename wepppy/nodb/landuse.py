@@ -76,6 +76,8 @@ class Landuse(NoDbBase):
             cover_defaults_fn = config.get('landuse', 'cover_defaults')
 
             if cover_defaults_fn is not None and cover_defaults_fn != '':
+                from wepppy.nodb.mods import MODS_DIR
+                cover_defaults_fn = cover_defaults_fn.replace('MODS_DIR', MODS_DIR)
                 self.cover_defaults_d = read_cover_defaults(cover_defaults_fn)
             else:
                 self.cover_defaults_d = None
@@ -276,12 +278,13 @@ class Landuse(NoDbBase):
                 raise Exception('LanduseMode is not set')
 
             self.dump_and_unlock()
-            
+
             self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
             self.build_managements()
+            self.set_cover_defaults()
 
         except Exception:
             self.unlock('-f')

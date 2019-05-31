@@ -1756,7 +1756,6 @@ def get_management_summary(dom, _map=None) -> ManagementSummary:
         weppy/wepp/management/data/map.json
     """
     d = load_map(_map=_map)
-    print(d)
     k = str(dom)
     if not k in d:
         raise InvalidManagementKey
