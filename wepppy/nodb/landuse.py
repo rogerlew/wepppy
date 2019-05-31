@@ -7,6 +7,8 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 # standard library
+import csv
+
 import os
 from os.path import join as _join
 from os.path import exists as _exists
@@ -40,6 +42,16 @@ class LanduseMode(IntEnum):
     RRED_Burned = 3
 
 
+def read_cover_defaults(fn):
+    with open(fn) as fp:
+        d = {}
+        rdr = csv.DictReader(fp)
+        for row in rdr:
+            d[row['key']] = row
+
+    return d
+
+
 class Landuse(NoDbBase):
     """
     Manager that keeps track of project details
@@ -61,8 +73,13 @@ class Landuse(NoDbBase):
             self._single_man = None
             self.domlc_d = None  # topaz_id keys, ManagementSummary values
             self.managements = None
+            cover_defaults_fn = config.get('landuse', 'cover_defaults')
 
-            #self._sbs_map = config.get('landuse', 'sbs_map')
+            if cover_defaults_fn is not None and cover_defaults_fn != '':
+                self.cover_defaults_d = read_cover_defaults(cover_defaults_fn)
+            else:
+                self.cover_defaults_d = None
+
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
@@ -265,6 +282,28 @@ class Landuse(NoDbBase):
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
             self.build_managements()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_cover_defaults(self):
+
+        defaults = self.cover_defaults_d
+
+        if defaults is None:
+            return
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            for dom in self.managements:
+                if dom in defaults:
+                    for cover in ['cancov', 'inrcov', 'rilcov']:
+                        self.modify_coverage(dom, cover, defaults[dom][cover])
+
+            self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
