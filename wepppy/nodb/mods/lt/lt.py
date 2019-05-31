@@ -83,7 +83,7 @@ class LakeTahoe(NoDbBase):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.remap_landuse()
         if evt == TriggerEvents.LANDUSE_BUILD_COMPLETE:
-            self.set_cover_defaults()
+            pass
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
         elif evt == TriggerEvents.PREPPING_PHOSPHORUS:

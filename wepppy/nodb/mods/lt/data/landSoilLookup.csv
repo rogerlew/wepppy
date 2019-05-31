@@ -1,4 +1,4 @@
-Code,LndcvrID,WEPP_Type,New_WEPPman,ManName,Albedo,iniSatLev,interErod,rillErod,critSh,effHC,soilDepth,Sand,Clay,OM,CEC,Edit Comment
+Code,LndcvrID,WEPP_Type,New_WEPPman,ManName,Albedo,iniSatLev,interErod,rillErod,critSh,effHC,soilDepth,Sand,Clay,OM,CEC,Comment
 3100,100,Alluvial,Tahoe_Bare_Slope.rot,Bare,0.2,0.75,600000,0.0006,1,15,400,60,10,3,10,
 3103,103,Alluvial,Tahoe_Bunch_Grass.rot,BnchG,0.15,0.75,800000,5.00E-05,1,20,500,60,10,6,12,
 3115,115,Alluvial,Cable_Thinning_93_Cover.man,Cable_Thinning,0.1,0.5,600000,2.00E-05,1,30,700,60,10,6,13,

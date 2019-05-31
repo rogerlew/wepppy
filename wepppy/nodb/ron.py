@@ -104,8 +104,7 @@ class Ron(NoDbBase):
 
             _boundary = config.get('map', 'boundary')
             if _boundary is not None:
-                _boundary = _boundary.replace('MODS_DIR', wepppy.nodb.mods.MODS_DIR)
-                print('_boundary', _boundary)
+                _boundary = _boundary
 
             self._boundary = _boundary
             self.dem_db = config.get('general', 'dem_db')

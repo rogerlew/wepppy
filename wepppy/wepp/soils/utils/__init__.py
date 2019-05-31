@@ -7,7 +7,7 @@ import shutil
 class SoilReplacements(object):
     def __init__(self, Code=None, LndcvrID=None, WEPP_Type=None, New_WEPPman=None, ManName=None, Albedo=None,
                  iniSatLev=None, interErod=None, rillErod=None, critSh=None, effHC=None, soilDepth=None,
-                 Sand=None, Clay=None, OM=None, CEC=None):
+                 Sand=None, Clay=None, OM=None, CEC=None, Comment=None):
         self.Code = Code
         self.LndcvrID = LndcvrID
         self.WEPP_Type = WEPP_Type
@@ -127,3 +127,7 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
         f.writelines(line5)
         if len(lines) > 5:
             f.writelines(lines[5:])
+
+
+if __name__ == "__main__":
+    read_lc_file('/home/roger/wepppy/wepppy/nodb/mods/lt/data/landSoilLookup.csv')
