@@ -36,7 +36,7 @@ _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
-
+_lu10v5ua_map_fn =  _join(_management_dir, "lu10v5ua_map.json")
 
 def _parse_julian(x):
     foo = int(x)
@@ -1720,9 +1720,12 @@ def load_map(_map=None):
     elif 'esdac' in _map.lower():
         with open(_esdac_map_fn) as fp:
             d = json.load(fp)
+    elif 'lu10v5ua' in _map.lower():
+        with open(_lu10v5ua_map_fn) as fp:
+            d = json.load(fp)
 
     for k, v in d.items():
-        assert int(k) == v['Key']
+        assert k == str(v['Key'])
 
     return d
 
@@ -1785,7 +1788,7 @@ def get_management(dom, _map=None) -> Management:
 
 
 if __name__ == "__main__":
-    db = 'esdac' # None  # 'rred'
+    db = 'lu10v5ua' #None #'esdac' # None  # 'rred'
 
     d = load_map(db)
 
