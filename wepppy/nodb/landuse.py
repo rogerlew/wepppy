@@ -14,6 +14,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 import shutil
 from enum import IntEnum
+import time
 
 # non-standard
 import jsonpickle
@@ -198,7 +199,7 @@ class Landuse(NoDbBase):
         os.mkdir(lc_dir)
 
     def _build_ESDAC(self):
-        from wepppy.soils.esdac import ESDAC
+        from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
         _map = Ron.getInstance(self.wd).map
 
@@ -217,6 +218,26 @@ class Landuse(NoDbBase):
             d = esd.query(lng, lat, ['usedo'])
             dom = d['usedom'][1]
             domlc_d[topaz_id] = str(dom)
+
+        self.domlc_d = domlc_d
+
+    def _build_lu10v5ua(self):
+        from wepppy.au.landuse_201011 import Lu10v5ua
+        lu = Lu10v5ua()
+        _map = Ron.getInstance(self.wd).map
+
+        domlc_d = {}
+
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, summary in watershed.sub_iter():
+            lng, lat = summary.centroid.lnglat
+            dom = lu.query_dom(lng, lat)
+            domlc_d[topaz_id] = dom
+
+        for topaz_id, _ in watershed.chn_iter():
+            lng, lat = summary.centroid.lnglat
+            dom = lu.query_dom(lng, lat)
+            domlc_d[topaz_id] = dom
 
         self.domlc_d = domlc_d
 
@@ -268,6 +289,8 @@ class Landuse(NoDbBase):
             if self._mode == LanduseMode.Gridded:
                 if self.config_stem in ['eu']:
                     self._build_ESDAC()
+                elif self.config_stem in ['au']:
+                    self._build_lu10v5ua()
                 else:
                     self._build_NLCD()
 
@@ -297,6 +320,7 @@ class Landuse(NoDbBase):
         if defaults is None:
             return
 
+        time.sleep(0.5)
         self.lock()
 
         # noinspection PyBroadException
@@ -304,7 +328,7 @@ class Landuse(NoDbBase):
             for dom in self.managements:
                 if dom in defaults:
                     for cover in ['cancov', 'inrcov', 'rilcov']:
-                        self.modify_coverage(dom, cover, defaults[dom][cover])
+                        self._modify_coverage(dom, cover, defaults[dom][cover])
 
             self.dump_and_unlock()
 
@@ -312,27 +336,29 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
+    def _modify_coverage(self, dom, cover, value):
+        dom = str(dom)
+        assert dom in self.managements
+
+        assert cover in ['cancov', 'inrcov', 'rilcov']
+
+        value = float(value)
+        assert value >= 0.0
+        assert value <= 1.0
+
+        if cover in 'cancov':
+            self.managements[dom].cancov_override = value
+        elif cover in 'inrcov':
+            self.managements[dom].inrcov_override = value
+        elif cover in 'rilcov':
+            self.managements[dom].rilcov_override = value
+
     def modify_coverage(self, dom, cover, value):
         self.lock()
 
         # noinspection PyBroadException
         try:
-            dom = str(dom)
-            assert dom in self.managements
-
-            assert cover in ['cancov', 'inrcov', 'rilcov']
-
-            value = float(value)
-            assert value >= 0.0
-            assert value <= 1.0
-
-            if cover in 'cancov':
-                self.managements[dom].cancov_override = value
-            elif cover in 'inrcov':
-                self.managements[dom].inrcov_override = value
-            elif cover in 'rilcov':
-                self.managements[dom].rilcov_override = value
-
+            self._modify_coverage(dom, cover, value)
             self.dump_and_unlock()
 
         except Exception:
@@ -370,6 +396,8 @@ class Landuse(NoDbBase):
             _map = 'rred'
         elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
             _map = 'esdac'
+        elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
+            _map = 'lu10v5ua'
         else:
             _map = None
 
@@ -392,6 +420,8 @@ class Landuse(NoDbBase):
             _map = 'rred'
         elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
             _map = 'esdac'
+        elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
+            _map = 'lu10v5ua'
         else:
             _map = None
 

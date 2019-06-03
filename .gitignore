@@ -7,3 +7,4 @@ venv/*
 devnotes.txt
 .idea/workspace.xml
 wepppy/weppcloud/app_config.py
+wepppy/au/asris_2001/cache/*
