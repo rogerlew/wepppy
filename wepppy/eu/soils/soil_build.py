@@ -11,89 +11,8 @@ from copy import deepcopy
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.all_your_base import RasterDatasetInterpolator
 
-from ..eusoilhydrogrids import SoilHydroGrids
-
-_esdac_esdb_raster_dir = '/geodata/eu/ESDAC_ESDB_rasters/'
-
-
-def _attr_fmt(attr):
-    _attr = ''.join(c for c in attr.lower() if
-                   c in string.ascii_lowercase or c in string.digits)
-
-    if 'lv' in _attr:
-        _attr = _attr.replace('lv', 'lev')
-
-    _replacements = {'txsrfdo': 'textsrfdom',
-                     'txsrfse': 'textsrfsec',
-                     'txsubdo': 'textsubdom',
-                     'txsubse': 'textsubsec',
-                     'txdepchg': 'textdepchg',
-                     'usedo': 'usedom',
-                     'erodi': 'erodibility'
-                     }
-
-    if _attr in _replacements:
-        _attr = _replacements[_attr]
-
-    return _attr
-
-
-class ESDAC:
-    def __init__(self):
-        # { attr, raster_file_path}
-        catalog = glob(_join(_esdac_esdb_raster_dir, '*.tif'))
-        self.catalog = {_attr_fmt(_split(fn)[-1][:-4]): fn for fn in catalog}
-
-        # { attr, raster_attribute table}
-        rats = {}
-        for fn in catalog:
-            rats[_attr_fmt(_split(fn)[-1][:-4])] = self._rat_extract(fn[:-4] + '.json')
-        self.rats = rats
-
-    @staticmethod
-    def _rat_extract(fn):
-        with open(fn.replace('.tif', '.json')) as fp:
-            info = json.load(fp)
-
-        rows = info['rat']['row']
-
-        d = {}
-        for r in rows:
-            r = r['f']
-
-            if len(r) == 3:
-                d[str(r[0])] = str(r[2])
-            elif len(r) == 2:
-                d[str(r[0])] = str(r[0])
-            else:
-                raise Exception
-
-        return d
-
-    def query(self, lng, lat, attrs):
-        from .legends import get_legend
-
-        catalog = self.catalog
-        rats = self.rats
-        d = {}
-
-        for attr in attrs:
-            attr = _attr_fmt(attr)
-            assert attr in catalog, attr
-            rdi = RasterDatasetInterpolator(catalog[attr])
-            x = rdi.get_location_info(lng, lat, method='near')
-            px_val = str(int(x))
-            short = rats[attr][px_val]
-            legend = get_legend(attr)
-            try:
-                long = legend['table'][short]
-            except KeyError:
-                long = 'None'
-
-            d[attr] = px_val, short, long
-
-        return d
-
+from wepppy.eu.soils.esdac import ESDAC, _attr_fmt
+from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 
 _texture_defaults = {'clay loam': {'shcrit': 0.5, 'sand': 25.0, 'clay': 30.0, 'orgmat': 5.0, 'cec': 25.0, 'rfg': 15.0},
                      'silt loam': {'shcrit': 1.5, 'sand': 25.0, 'clay': 15.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 15.0},
@@ -153,7 +72,7 @@ _disclaimer = """\
 # """
 
 
-def build_edsac_soils(orders, soil_dir):
+def build_esdac_soils(orders, soil_dir):
     """
     0   No information  -->  None
     9   No mineral texture (Peat soils)  --> ?
@@ -172,18 +91,23 @@ def build_edsac_soils(orders, soil_dir):
 
     soils = {}
     domsoil_d = {}
+    clay_d = {}
+    sand_d = {}
 
     for topaz_id, (lng, lat) in orders:
         res = esd.query(lng, lat, vars)
         _vars = [_attr_fmt(v) for v in vars]
+
+        key = '_'.join(['{}'.format(res[v][1]) for v in _vars])
+        desc = ', '.join(['{}:{}'.format(v, res[v][1]) for v in _vars])
 
         s = ['2006.2',
              '#',
              '#            WEPPcloud (c) University of Idaho',
              '#',
              '#  Build Date: ' + str(datetime.now()),
-             '#  Source Data: Default Soil Type',
-             '#']
+             '#  Source Data: ESDAC ESDB, EU Soil Hydro Grids v1.0',
+             '#', '#']
 
         s.extend(_disclaimer.split('\n'))
 
@@ -309,15 +233,13 @@ def build_edsac_soils(orders, soil_dir):
 
         s.append('1 \t25.0 \t0.00036')
 
-        key = '_'.join(['{}'.format(res[v][1]) for v in _vars])
-        desc = ', '.join(['{}:{}'.format(v, res[v][1]) for v in _vars])
-
-        fname = key + ".sol"
-        fn = _join(soil_dir, fname)
-        with open(fn, 'w') as fp:
-            fp.write('\n'.join(s))
-
         if key not in soils:
+
+            fname = key + ".sol"
+            fn = _join(soil_dir, fname)
+            with open(fn, 'w') as fp:
+                fp.write('\n'.join(s))
+
             soils[key] = SoilSummary(
                 Mukey=key,
                 FileName=fname,
@@ -326,8 +248,7 @@ def build_edsac_soils(orders, soil_dir):
                 Description=desc)
 
         domsoil_d[topaz_id] = key
+        clay_d[key] = horizon0['clay']
+        sand_d[key] = horizon0['sand']
 
-    return soils, domsoil_d
-
-
-
+    return soils, domsoil_d, clay_d, sand_d

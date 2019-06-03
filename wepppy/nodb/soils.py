@@ -268,17 +268,15 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_esdac(self):
+    def _build_by_identify(self, build_func):
         soils_dir = self.soils_dir
-
+        wd = self.wd
         self.lock()
 
         # noinspection PyBroadException
         try:
 
-            from wepppy.soils.esdac import build_edsac_soils
-
-            watershed = Watershed.getInstance(self.wd)
+            watershed = Watershed.getInstance(wd)
 
             orders = []
             for topaz_id, sub in watershed.sub_iter():
@@ -287,7 +285,7 @@ class Soils(NoDbBase):
             for topaz_id, chn in watershed.chn_iter():
                 orders.append([topaz_id, sub.centroid.lnglat])
 
-            soils, domsoil_d = build_edsac_soils(orders, self.soils_dir)
+            soils, domsoil_d, clay_d, sand_d = build_func(orders, soils_dir)
             for topaz_id, k in domsoil_d.items():
                 summary = watershed.sub_summary(topaz_id)
                 if summary is not None:  # subcatchment
@@ -296,13 +294,13 @@ class Soils(NoDbBase):
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.totalarea
                 soils[k].pct_coverage = coverage
-#                clay = clay_d[k]
-#                sand = sand_d[k]
+                clay = clay_d[k]
+                sand = sand_d[k]
 
-#                soils[k].sand = sand
-#                soils[k].clay = clay
-#                soils[k].ll = ll_d[k]
-#                soils[k].simple_texture = simple_texture(clay, sand)
+                soils[k].sand = sand
+                soils[k].clay = clay
+                # soils[k].ll = ll_d[k]
+                soils[k].simple_texture = simple_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -320,11 +318,14 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-
     def build(self):
         if self.mode == SoilsMode.Gridded:
             if self.config_stem in ['eu']:
-                self._build_esdac()
+                from wepppy.eu.soils import build_esdac_soils
+                self._build_by_identify(build_esdac_soils)
+            elif self.config_stem in ['au']:
+                from wepppy.au.soils import build_asris_soils
+                self._build_by_identify(build_asris_soils)
             else:
                 self._build_gridded()
         elif self.mode == SoilsMode.Single:

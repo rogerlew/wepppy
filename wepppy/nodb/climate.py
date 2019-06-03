@@ -15,10 +15,8 @@ from os.path import split as _split
 import json
 from enum import IntEnum
 import random
-import datetime
 from glob import glob
 
-import pandas as pd
 import shutil
 
 from shutil import copyfile
@@ -31,7 +29,7 @@ import jsonpickle
 from wepppy.climates import cligen_client as cc
 from wepppy.climates.metquery_client import get_daily
 from wepppy.climates.prism import prism_mod, prism_revision
-from wepppy.climates.eobs import eobs_mod
+from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn
 from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator
 from wepppy.watershed_abstraction import ischannel
@@ -954,7 +952,7 @@ class Climate(NoDbBase, LogMixin):
             # 1 / ((6378.1 * 1000) / 1000 / 360) = 0.056 ~ 0.06
             # for cubic interpolation we need at least 5 pixels
             # so we pad 3 pixels in each direction to be on the safe side
-            pad = 0.06 * 3
+            pad = 0.06 * 4
             bbox = ron.map.extent
             bbox = [bbox[0] - pad, bbox[1] - pad,
                     bbox[2] + pad, bbox[3] + pad]

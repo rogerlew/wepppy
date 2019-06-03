@@ -265,6 +265,7 @@ def wmesque_retrieve(dataset, extent, fname, cellsize):
 
     assert dataset in ['ned1/2016',
                        'eu/eu-dem-v1.1',
+                       'au/srtm-1s-dem-h',
                        'ssurgo/201703',
                        'nlcd/2011'], '"%s"' % dataset
 

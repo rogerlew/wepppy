@@ -21,6 +21,9 @@ from glob import glob
 
 import numpy as np
 
+
+import markdown
+
 from werkzeug.utils import secure_filename
 
 from flask import (
@@ -594,6 +597,7 @@ def create_fork(runid, config):
 
 
 
+
 @app.route('/runs/<runid>/tasks/clear_locks')
 @app.route('/runs/<runid>/tasks/clear_locks/')
 def clear_locks(runid):
@@ -949,6 +953,18 @@ def browse_response(path, show_up=True):
         r = Response(response=contents, status=200, mimetype="text/plain")
         r.headers["Content-Type"] = "text/plain; charset=utf-8"
         return r
+
+@app.route('/docs')
+@app.route('/docs//')
+def docs_index():
+    """
+    recursive list the file strucuture of the working directory
+    """
+    with open(_join(_thisdir, 'docs', 'index.md')) as fp:
+        md = fp.read()
+
+    html = markdown.markdown(md)
+    return Response(html, mimetype='text/html')
 
 
 @app.route('/runs/<string:runid>/browse')
@@ -2759,4 +2775,4 @@ def runid_query(wc):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
+    app.run(debug=True, port=5003)#, host='0.0.0.0', port=80)

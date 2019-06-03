@@ -83,7 +83,8 @@ def crop_nc(nc, bbox, dst):
     y = [ds.variables['y'][0],
          ds.variables['y'][1],
          ds.variables['y'][-1]]
-    transform = [x[0], x[1] - x[0], 0.0, y[0], 0.0, y[1] - y[0]]
+    res = x[1] - x[0]
+    transform = [x[0], res, 0.0, y[0], 0.0, -res]
     ncols = len(ds.variables['x'])
     nrows = len(ds.variables['y'])
 
@@ -92,13 +93,13 @@ def crop_nc(nc, bbox, dst):
     assert ur_x > ll_x
     assert ur_y > ll_y
 
-    easting, northing = wgs2lcc(ll_x, ll_y)
-    ll_px = int(round((easting - transform[0]) / transform[1]))
-    ll_py = -int(round((transform[3] - northing) / transform[5]))
+    ll_px, ll_py = wgs2lcc(ll_x, ll_y)
+    #ll_px = int(round((easting - transform[0]) / transform[1]))
+    #ll_py = -int(round((transform[3] - northing) / transform[5]))
 
-    easting, northing = wgs2lcc(ur_x, ur_y)
-    ur_px = int(round((easting - transform[0]) / transform[1]))
-    ur_py = -int(round((transform[3] - northing) / transform[5]))
+    ur_px, ur_py = wgs2lcc(ur_x, ur_y)
+    #ur_px = int(round((easting - transform[0]) / transform[1]))
+    #ur_py = -int(round((transform[3] - northing) / transform[5]))
 
     cmd = ['ncks',
            '-d', 'x,{},{}'.format(*sorted([ll_px, ur_px])),
