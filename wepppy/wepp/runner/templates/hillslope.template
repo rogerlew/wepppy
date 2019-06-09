@@ -17,7 +17,8 @@ Yes                             # distance and sediment loss
 No                              # large graphics output
 Yes                             # event by event output
 ../output/H{wepp_id}.ebe.dat    #
-No                              # element output
+Yes                             # element output
+../output/H{wepp_id}.element.dat    #
 No                              # final summary output
 No                              # daily winter output
 No                              # plant yield output

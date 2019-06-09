@@ -170,6 +170,9 @@ class Ron(NoDbBase):
             if "debris_flow" in self.mods:
                 wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)
 
+            if "ash" in self.mods:
+                wepppy.nodb.mods.Ash(wd, cfg_fn)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.ON_INIT_FINISH)
