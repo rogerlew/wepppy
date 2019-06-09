@@ -213,6 +213,10 @@ class Climate(NoDbBase, LogMixin):
         return _join(self.wd, 'climate.nodb.lock')
 
     @property
+    def cli_path(self):
+        return _join(self.cli_dir, self.cli_fn)
+
+    @property
     def status_log(self):
         return os.path.abspath(_join(self.cli_dir, 'status.log'))
 

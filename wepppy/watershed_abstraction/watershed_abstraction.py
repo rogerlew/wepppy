@@ -44,7 +44,7 @@ def garbrecht_length(distances: List[List[float]]) -> float:
     by the flowpaths length relative to its area.
 
     distances should be an array of distances between cells along the
-    flowpath (not cummulative distance)
+    flowpath (not cumulative distance)
 
     eq. 3.4 in Thomas Cochrane's Dissertation
     # """
@@ -55,7 +55,7 @@ def garbrecht_length(distances: List[List[float]]) -> float:
 
 def cummnorm_distance(distance: List[float]) -> np.array:
     """
-    builds and returns cummulative normalized distance array from an array
+    builds and returns cumulative normalized distance array from an array
     of cell-to-cell distances
     """
     assert len(distance) > 0
@@ -234,12 +234,12 @@ def _weighted_slope_average(flowpaths, slopes, distances, max_points=19):
 
     # for each flowpath determine the distance from channel
     # this requires reversing the elements in the distance
-    # array and calculating the cummulative sum
-    rev_cumm_distances = [np.cumsum(d[::-1]) for d in distances]
+    # array and calculating the cumulative sum
+    rev_cum_distances = [np.cumsum(d[::-1]) for d in distances]
 
     # if we did this right, then the distance should equally the longest
     # length
-    assert round(longest, 5) == round(rev_cumm_distances[i][-1], 5)
+    assert round(longest, 5) == round(rev_cum_distances[i][-1], 5)
 
     # determine weights for each flowpath
     areas = [f.shape[0] for f in flowpaths]
@@ -256,7 +256,7 @@ def _weighted_slope_average(flowpaths, slopes, distances, max_points=19):
         num = 0  # to hold numerator value
         kpsum = 0  # to hold k_p sum
 
-        for slp, rcd, kp in zip(slopes, rev_cumm_distances, kps):
+        for slp, rcd, kp in zip(slopes, rev_cum_distances, kps):
             # reverse slopes
             slp = slp[::-1]
 
