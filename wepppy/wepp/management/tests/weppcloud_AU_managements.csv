@@ -1,0 +1,44 @@
+key,desc,man,cancov,inrcov,rilcov
+a0,Unallocated agricultural land,0.5,0.5,0.5
+a1,Grazing - native or naturalised pasture or native-exotic pasture mosaic,0.6,0.3,0.3
+a10,Winter oilseeds,0.2,0.9,0.9
+a11,Summer oilseeds,0.5,0.5,0.5
+a12,Sugar cane,0.5,0.5,0.5
+a13,Pastures and crops for hay and silage,0.5,0.55,0.55
+a14,Cotton,0.4,0.85,0.85
+a16,Vegetables,0.5,0.5,0.5
+a17,Citrus,0.5,0.5,0.5
+a18,Apples,0.5,0.5,0.5
+a19,Pears and other pome fruit,0.5,0.5,0.5
+a20,Stone fruit excluding tropical,0.5,0.5,0.5
+a21,Tropical stone fruit,0.5,0.5,0.5
+a22,Nuts,0.5,0.5,0.5
+a24,Plantation fruit,0.5,0.5,0.5
+a25,Grapes,0.5,0.5,0.5
+a3,Grazing sown pastures,0.6,0.3,0.3
+a30,Other non-cereal crops - mainly cropping,0.2,0.9,0.9
+a32,Other non-cereal crops - mainly coriander or hops,0.2,0.9,0.9
+a4,Agroforestry - newly planted,0.5,0.2,0.2
+a46,"Other non-cereal crops - mainly nurseries, flowers or lavender",0.5,0.5,0.5
+a5,Winter cereals,0.2,0.9,0.9
+a55,Other non-cereal crops - mainly irrigated turf farming,0.5,0.5,0.5
+a6,Summer cereals excluding rice,0.5,0.5,0.5
+a7,Rice,0.0,0.9,0.9
+a8,Winter legumes,0.2,0.9,0.9
+a9,Summer legumes,0.0,0.9,0.9
+c0,No data,0.5,0.5,0.5
+c1,Nature conservation (1.1),0.9,1.0,1.0
+c13,"Intensive animal and plant production (5.1, 5.2)",0.6,0.4,0.4
+c14,"Rural residential and farm infrastructure (5.4.2, 5.4.3, 5.4.4, 5.4.5)",0.6,0.4,0.4
+c15,"Urban intensive uses (5.3, 5.4, 5.4.1, 5.5, 5.6, 5.7)",0.5,0.5,0.5
+c16,"Mining and waste (5.8, 5.9)",0.5,0.5,0.5
+c17,Water (6.0),0.5,0.5,0.5
+c2,Other protected areas including indigenous uses (1.2),0.5,0.5,0.5
+c3,Other minimal use (1.3),0.5,0.5,0.5
+c5,Production forestry (2.2),0.9,1.0,1.0
+c6,"Plantation forestry (3.1, 4.1)",0.9,1.0,1.0
+f2,Native woodland,0.9,1.0,1.0
+f3,Native open forest,0.9,1.0,1.0
+f4,Native closed forest,0.9,1.0,1.0
+f5,Plantation forest - irrigation status unknown,0.9,1.0,1.0
+f6,Plantation forest - irrigated,0.9,1.0,1.0
