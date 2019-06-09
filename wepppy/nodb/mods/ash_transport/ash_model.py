@@ -293,6 +293,8 @@ class AshModel(object):
             # increment the days from fire variable
             dff += 1
 
+        # calculate cumulative wind and water transport
+
         # store in the dataframe
         df['fire_year (yr)'] = pd.Series(fire_years, index=df.index)
         df['w_vl_ifgt (m/s)'] = pd.Series(w_vl_ifgt, index=df.index)
@@ -302,6 +304,7 @@ class AshModel(object):
         df['_proportion_ash_transport (fraction)'] = pd.Series(proportion_ash_transport, index=df.index)
         df['_cum_proportion_ash_transport (fraction)'] = pd.Series(cum_proportion_ash_transport, index=df.index)
         df['wind_transport (tonne/ha)'] = pd.Series(wind_transport, index=df.index)
+        df['cum_wind_transport (tonne/ha)'] = pd.Series(np.cumsum(wind_transport), index=df.index)
         df['peak_ro (mm/hr)'] = pd.Series(peak_ro, index=df.index)
         df['eff_dur (hr)'] = pd.Series(eff_dur, index=df.index)
         df['water_excess (mm)'] = pd.Series(water_excess, index=df.index)
@@ -309,6 +312,7 @@ class AshModel(object):
         df['effective_runoff (mm)'] = pd.Series(effective_runoff, index=df.index)
         df['cum_runoff (mm)'] = pd.Series(cum_runoff, index=df.index)
         df['water_transport (tonne/ha)'] = pd.Series(water_transport, index=df.index)
+        df['cum_water_transport (tonne/ha)'] = pd.Series(np.cumsum(water_transport), index=df.index)
 
         df.drop(columns=['dur', 'tp', 'ip', 'tmax', 'tmin', 'rad', 'w-dir', 'tdew'], inplace=True)
         df.drop(index=range(breaks[0]), inplace=True)
