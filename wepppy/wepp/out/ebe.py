@@ -13,27 +13,50 @@ import pandas as pd
 from wepppy.wepp.out import Loss
 
 
+def _get_lines(fn):
+    # read the loss report
+    with open(fn) as fp:
+        lines = fp.readlines()
+
+    # strip trailing and leading white space
+    lines = [L.strip() for L in lines]
+
+    lines = [L for L in lines if L != '']
+
+    i0 = 0
+    for i0, L in enumerate(lines):
+        if L.startswith('---'):
+            break
+
+    return lines[i0 + 1:]
+
+
+class HillslopeEbe(object):
+    def __init__(self, fn):
+        lines = _get_lines(fn)
+
+        header = ['da', 'mo', 'year',
+                  'Precp', 'Runoff',
+                  'IR-det', 'Av-det', 'Mx-det',
+                  'Point0', 'Av-dep', 'Max-dep',
+                  'Point1', 'Sed.Del', 'ER']
+
+        units = [int, int, int, float, float, float, float, float, float, float, float, float, float, float]
+
+        data = [[u(v) for v, u in zip(L.split(), units)] for L in lines]
+
+        d = {}
+
+        for row in data:
+            da, mo, year = row[0], row[1], row[2]
+            d[(year, mo, da)] = dict(zip(header, row))
+
+        self.d = d
+
+
 class Ebe(object):
     def __init__(self, fn):
-
-        # read the loss report
-        with open(fn) as fp:
-            lines = fp.readlines()
-
-        # strip trailing and leading white space
-        lines = [L.strip() for L in lines]
-
-        lines = [L for L in lines if L != '']
-
-        # find the average annual
-        i0 = 0
-        for i0, L in enumerate(lines):
-            if '---------' in L:
-                break
-
-        # restrict lines to just the average annual
-        # values
-        lines = lines[i0+1:]
+        lines = _get_lines(fn)
 
         header = ['da', 'mo', 'year',
                   'Precipitation Depth (mm)',

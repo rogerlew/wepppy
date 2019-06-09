@@ -273,7 +273,7 @@ class ClimateFile(object):
         colnames = [v.strip() for v in lines[i].split()]
 
         assert ' '.join(colnames) == \
-               'da mo year prcp dur tp ip tmax tmin rad w-vl w-dir tdew'
+               'da mo year prcp dur tp ip tmax tmin rad w-vl w-dir tdew', colnames
 
         self.dtypes = [int, int, int, float, float, float, float,
                        float, float, float, float, float, float]
