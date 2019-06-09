@@ -652,6 +652,34 @@ def _md_to_julian(month, day):
     return _cummdays[month-1] + day - _days[month-1]
 
 
+class YearlessDate(object):
+    def __init__(self, month, day):
+        month = int(month)
+        day = int(day)
+        assert month in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        self.month = month
+
+        assert day > 0
+        assert day <= _days[month-1]
+        self.day = day
+
+    @staticmethod
+    def from_string(s):
+        for delimiter in '/ -.':
+            _s = s.split(delimiter)
+            if len(_s) == 2:
+                month, day = _s
+                return YearlessDate(month, day)
+
+        raise Exception
+
+    def __str__(self):
+        return 'YearlessDate({0.month}, {0.day})'.format(self)
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class Julian(object):
     def __init__(self, *args, **kwargs):
 

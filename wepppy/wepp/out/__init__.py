@@ -5,6 +5,7 @@ from .hill_loss import HillLoss
 from .chnwb import Chnwb
 from .chanwb import Chanwb
 from .totalwatsed import TotalWatSed
+from .element import *
 
 import os
 
