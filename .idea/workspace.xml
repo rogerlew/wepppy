@@ -1,28 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="refactoring project organization, AU soils and landuse">
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/configs/us-ash.cfg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/data/wind_transport_thresholds.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/ash_tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/out/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wepppy/wepp/out/element.py" afterDir="false" />
+    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="ash model">
+      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/data/climateRAW.cli" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/data/peakroRAW.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/out/black_cli_ash.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/out/white_cli_ash.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/climate.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/climate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/ron.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/ron.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/watershed_abstraction/watershed_abstraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/watershed_abstraction/watershed_abstraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/management/tests/weppcloud_managements.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/out/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/out/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/out/ebe.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/out/ebe.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/out/totalwatsed.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/out/totalwatsed.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/wepp/runner/templates/hillslope.template" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/wepp/runner/templates/hillslope.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -144,8 +130,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="72" column="52" selection-start-line="72" selection-start-column="52" selection-end-line="72" selection-end-column="52" />
+            <state relative-caret-position="210">
+              <caret line="296" selection-start-line="296" selection-end-line="296" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -154,9 +140,18 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="9" column="32" selection-start-line="9" selection-start-column="32" selection-end-line="9" selection-end-column="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="147">
+            <state relative-caret-position="486">
               <caret line="49" column="18" selection-start-line="49" selection-start-column="18" selection-end-line="49" selection-end-column="18" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
@@ -173,15 +168,6 @@
           <provider selected="true" editor-type-id="csv-text-editor">
             <state>
               <caret column="72" selection-start-column="72" selection-end-column="72" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wepppy/climates/cligen/cligen.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="424">
-              <caret line="275" column="16" selection-start-line="275" selection-start-column="16" selection-end-line="275" selection-end-column="72" />
             </state>
           </provider>
         </entry>
@@ -321,7 +307,6 @@
         <option value="$PROJECT_DIR$/wepppy/wepp/management/managements.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/landuse.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/configs/au.cfg" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/wepppy/au/landuse_201011/__init__.py" />
         <option value="$PROJECT_DIR$/wepppy/au/asris_2001/asris_client.py" />
         <option value="$PROJECT_DIR$/wepppy/au/asris_2001/soil_build.py" />
@@ -357,8 +342,9 @@
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/data/wind_transport_thresholds.csv" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/__init__.py" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -444,7 +430,7 @@
               <item name="mods" type="462c0819:PsiDirectoryNode" />
               <item name="ash_transport" type="462c0819:PsiDirectoryNode" />
               <item name="tests" type="462c0819:PsiDirectoryNode" />
-              <item name="out" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
@@ -766,14 +752,7 @@
       <workItem from="1559585891763" duration="4348000" />
       <workItem from="1559624220779" duration="742000" />
       <workItem from="1559846053660" duration="36000" />
-      <workItem from="1559922025956" duration="41976000" />
-    </task>
-    <task id="LOCAL-00056" summary="fix #84">
-      <created>1533773151127</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1533773151128</updated>
+      <workItem from="1559922025956" duration="42366000" />
     </task>
     <task id="LOCAL-00057" summary="baer-exp for Robin">
       <created>1533850561241</created>
@@ -1111,7 +1090,14 @@
       <option name="project" value="LOCAL" />
       <updated>1559594051245</updated>
     </task>
-    <option name="localTasksCounter" value="105" />
+    <task id="LOCAL-00105" summary="ash model">
+      <created>1560109287987</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1560109287988</updated>
+    </task>
+    <option name="localTasksCounter" value="106" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1147,7 +1133,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="453288000" />
+    <option name="totallyTimeSpent" value="453678000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1161,7 +1147,7 @@
   <component name="ToolWindowManager">
     <frame x="42" y="27" width="1878" height="1053" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2124183" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2124183" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -1177,7 +1163,7 @@
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32403433" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.2725322" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="13" visible="true" weight="0.63733906" />
+      <window_info anchor="bottom" id="Version Control" order="13" visible="true" weight="0.23390558" />
       <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
       <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
@@ -1232,8 +1218,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Holden WRF for Debris Flow, Land Managment reassignment, &#10;SBS map bug fix, Combined Watershed Viewer URL Generator" />
-    <MESSAGE value="Agriculture managements added" />
     <MESSAGE value="_scripts organization" />
     <MESSAGE value="open-iconic v1.1 installed" />
     <MESSAGE value="new p maps" />
@@ -1257,7 +1241,9 @@
     <MESSAGE value="nodb config reference fix" />
     <MESSAGE value="lt prescribed fire, generalize setting management cover defaults" />
     <MESSAGE value="refactoring project organization, AU soils and landuse" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactoring project organization, AU soils and landuse" />
+    <MESSAGE value="ash model" />
+    <MESSAGE value="ash model test files" />
+    <option name="LAST_COMMIT_MESSAGE" value="ash model test files" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1305,7 +1291,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/wepppy$gdal_test.coverage" NAME="gdal_test Coverage Results" MODIFIED="1553814902241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/_scripts" />
     <SUITE FILE_PATH="coverage/wepppy$rred_api_test.coverage" NAME="rred_api_test Coverage Results" MODIFIED="1554145262095" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/mods/rred" />
-    <SUITE FILE_PATH="coverage/wepppy$ash_tests.coverage" NAME="ash_tests Coverage Results" MODIFIED="1560106729321" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests" />
+    <SUITE FILE_PATH="coverage/wepppy$ash_tests.coverage" NAME="ash_tests Coverage Results" MODIFIED="1560109464448" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests" />
     <SUITE FILE_PATH="coverage/wepppy$__init____2_.coverage" NAME="__init__ (2) Coverage Results" MODIFIED="1559524161027" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/au/asris_2001" />
     <SUITE FILE_PATH="coverage/wepppy$cli2pat.coverage" NAME="cli2pat Coverage Results" MODIFIED="1553812667482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
     <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1560020433005" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
@@ -1335,23 +1321,6 @@
     <SUITE FILE_PATH="coverage/wepppy$sediment_delivery.coverage" NAME="sediment_delivery Coverage Results" MODIFIED="1556252273525" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/wepppy/eu/soils/esdac/esdac.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="58" selection-start-line="7" selection-start-column="58" selection-end-line="7" selection-end-column="58" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/au/soils/ceea8d96d69f8e225092b521951162ab94293ae4bae29380eebb6c43.sol">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-165">
-          <caret line="28" column="48" lean-forward="true" selection-start-line="28" selection-start-column="48" selection-end-line="28" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/au/soils/soil_build.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2850">
@@ -1661,6 +1630,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="49" column="18" selection-start-line="49" selection-start-column="18" selection-end-line="49" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests/out/black_cli_ash.csv">
       <provider selected="true" editor-type-id="csv-text-editor">
         <state>
@@ -1670,21 +1649,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="72" column="52" selection-start-line="72" selection-start-column="52" selection-end-line="72" selection-end-column="52" />
+        <state relative-caret-position="210">
+          <caret line="296" selection-start-line="296" selection-end-line="296" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/wind_transport_thresholds.py">
+    <entry file="file://$PROJECT_DIR$/wepppy/au/landuse_201011/rat.csv">
+      <provider editor-type-id="csv-table-editor">
+        <state showInfoPanel="true" fixedHeaders="false" rowLines="3" />
+      </provider>
+      <provider selected="true" editor-type-id="csv-text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="49" column="18" selection-start-line="49" selection-start-column="18" selection-end-line="49" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="135">
+          <caret line="9" column="32" selection-start-line="9" selection-start-column="32" selection-end-line="9" selection-end-column="32" />
         </state>
       </provider>
     </entry>
