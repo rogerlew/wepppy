@@ -5,7 +5,7 @@
 #
 
 1 # number of OFE's
-50 # (total) years in simulation
+1 # (total) years in simulation
 
 #######################
 # Plant Section       #
