@@ -2689,6 +2689,7 @@ def report_ron_chn_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return render_template('reports/hill.htm',
+                           ron=ron,
                            d=ron.chn_summary(topaz_id))
 
 
@@ -2709,6 +2710,7 @@ def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return render_template('reports/hill.htm',
+                           ron=ron,
                            d=ron.sub_summary(topaz_id))
 
 
