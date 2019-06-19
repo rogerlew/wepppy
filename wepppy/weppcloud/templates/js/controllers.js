@@ -793,7 +793,7 @@ var ChannelDelineation = function () {
             var ispoweruser = false;
 
             $.get({
-                url: "/ispoweruser/",
+                url: site_prefix + "/ispoweruser/",
                 success: function success(response) {
                     ispoweruser = response;
                 }

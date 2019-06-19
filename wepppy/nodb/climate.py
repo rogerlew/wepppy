@@ -706,6 +706,23 @@ class Climate(NoDbBase, LogMixin):
             ss_time_to_peak_intensity_pct = \
                 kwds['ss_time_to_peak_intensity_pct']
 
+            # Some sort of versioning annoyance. On VM these are strings
+            # on wepp1 they are lists
+            if isinstance(ss_storm_date, list):
+                ss_storm_date = ss_storm_date[0]
+
+            if isinstance(ss_design_storm_amount_inches, list):
+                ss_design_storm_amount_inches = ss_design_storm_amount_inches[0]
+
+            if isinstance(ss_duration_of_storm_in_hours, list):
+                ss_duration_of_storm_in_hours = ss_duration_of_storm_in_hours[0]
+
+            if isinstance(ss_max_intensity_inches_per_hour, list):
+                ss_max_intensity_inches_per_hour = ss_max_intensity_inches_per_hour[0]
+
+            if isinstance(ss_time_to_peak_intensity_pct, list):
+                ss_time_to_peak_intensity_pct = ss_time_to_peak_intensity_pct[0]
+
             try:
                 ss_design_storm_amount_inches = \
                     float(ss_design_storm_amount_inches)
@@ -724,13 +741,13 @@ class Climate(NoDbBase, LogMixin):
                 assert all([isint(token) for token in ss_storm_date])
                 ss_storm_date = ' '.join(ss_storm_date)
 
-                assert isfloat(ss_design_storm_amount_inches)
+                assert isfloat(ss_design_storm_amount_inches), ss_design_storm_amount_inches
                 assert ss_design_storm_amount_inches > 0
 
-                assert isfloat(ss_duration_of_storm_in_hours)
+                assert isfloat(ss_duration_of_storm_in_hours), ss_duration_of_storm_in_hours
                 assert ss_duration_of_storm_in_hours > 0
 
-                assert isfloat(ss_max_intensity_inches_per_hour)
+                assert isfloat(ss_max_intensity_inches_per_hour), ss_max_intensity_inches_per_hour
                 assert ss_max_intensity_inches_per_hour > 0
 
                 assert isfloat(ss_time_to_peak_intensity_pct)
