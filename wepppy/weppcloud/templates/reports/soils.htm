@@ -10,7 +10,7 @@
       {% for row in report %}
       {% if row.pct_coverage > 0.0 %}
       <tr>
-        <td><a href="../browse/soils/{{ row.fname }}"  target="_blank">{{ row.mukey }}</a></td>
+        <td><a href="browse/soils/{{ row.fname }}"  target="_blank">{{ row.mukey }}</a></td>
         <td>{{ row.desc }}</td>
         <td class="text-right">{{ '%0.1f' % row.pct_coverage }}</td>
       </tr>

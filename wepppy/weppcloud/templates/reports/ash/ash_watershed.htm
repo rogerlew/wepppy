@@ -1,0 +1,103 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_title %}Ash Transport Model{% endblock %}
+{% block report_content %}
+<h2>Ash Transport Model</h2>
+<form name="ash_parameters">
+<h3>Model Parameters</h3>
+<table class="table table-nonfluid">
+<thead>
+<tr>
+    <th>Parameter</th>
+    <th>Value</th>
+    <th>Units</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Fire Date</td>
+    <td>{{ fire_date.month }} / {{ fire_date.day }}</td>
+    <td>month/day</td>
+  </tr>
+  <tr>
+    <td>Initial Black Ash Depth</td>
+    <td>{{ unitizer(ini_black_ash_depth_mm, 'mm')  | safe}}</td>
+    <td>{{ unitizer_units('mm')  | safe}}</td>
+  </tr>
+  <tr>
+    <td>Initial White Ash Depth</td>
+    <td>{{ unitizer(ini_white_ash_depth_mm, 'mm')  | safe}}</td>
+    <td>{{ unitizer_units('mm')  | safe}}</td>
+  </tr>
+</tbody>
+</table>
+<h3>Burn Class Summary</h3>
+<table class="table table-nonfluid">
+<thead>
+<tr>
+    <th>Burn Class</th>
+    <th>Area</th>
+    <th>{{ unitizer_units('ha') | safe }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+    <th>Ash Type</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Unburned</td>
+    <td>{{ unitizer(burnclass_summary[1], 'ha') | safe }}&nbsp;</td>
+    <td>{{ unitizer_units('ha') | safe }}&nbsp;</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>Low Severity</td>
+    <td>{{ unitizer(burnclass_summary[2], 'ha') | safe }}&nbsp;</td>
+    <td>{{ unitizer_units('ha') | safe }}&nbsp;</td>
+    <td>Black Ash</td>
+  </tr>
+  <tr>
+    <td>Moderate Severity</td>
+    <td>{{ unitizer(burnclass_summary[3], 'ha') | safe }}&nbsp;</td>
+    <td>{{ unitizer_units('ha') | safe }}&nbsp;</td>
+    <td>Black Ash</td>
+  </tr>
+  <tr>
+    <td>HighSeverity</td>
+    <td>{{ unitizer(burnclass_summary[4], 'ha') | safe }}&nbsp;</td>
+    <td>{{ unitizer_units('ha') | safe }}&nbsp;</td>
+    <td>White Ash</td>
+  </tr>
+</tbody>
+</table>
+<div class="alert alert-info"><strong>Note:</strong>
+    Probability estimates are for the event occurring within 1 year of the fire.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;p(N) = 1 – (1 – p)^N,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;where p = 1 / recurence interval, N is the period of interest
+</div>
+<h3>Return Period Results</h3>
+{% set measure = "ash_delivery (tonne)" %}
+{% set measure_name = "Ash Transport" %}
+{% set units = "tonne" %}
+{% include("reports/ash/_ash_event_table.htm") %}
+
+{% set measure = "ash_by_wind_delivery (tonne)" %}
+{% set measure_name = "Wind Transport" %}
+{% include("reports/ash/_ash_event_table.htm") %}
+
+{% set measure = "ash_by_water_delivery (tonne)" %}
+{% set measure_name = "Water Transport" %}
+{% include("reports/ash/_ash_event_table.htm") %}
+
+
+<h3>Cumulative Annual Results</h3>
+{% set measure = "cum_ash_delivery (tonne)" %}
+{% set measure_name = "Ash Transport (Wind, Water, Decay)" %}
+{% include("reports/ash/_ash_annual_table.htm") %}
+
+{% set measure = "cum_ash_by_wind_delivery (tonne)" %}
+{% set measure_name = "Wind Transport" %}
+{% include("reports/ash/_ash_annual_table.htm") %}
+
+{% set measure = "cum_ash_by_water_delivery (tonne)" %}
+{% set measure_name = "Water Transport" %}
+{% include("reports/ash/_ash_annual_table.htm") %}
+
+{% endblock %}
