@@ -3375,7 +3375,7 @@ var Ash = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='report/ash/' target='_blank'>View Ash Transport Model Results</a>");
+            self.info.html("<p><a href='report/ash/' target='_blank'>View Ash Transport Model Results</a></p>");
         };
 
         return that;

@@ -27,6 +27,7 @@ $(document).ready(function () {
     var wepp = Wepp.getInstance();
     var observed = Observed.getInstance();
     var debris_flow = DebrisFlow.getInstance();
+    var ash = Ash.getInstance();
 
     team.hideStacktrace();
     channel_ctrl.hideStacktrace();
@@ -183,7 +184,7 @@ $(document).ready(function () {
         setTimeout(baer.load_modify_class, 4000);
     });
 
-    if ({{ has_sbs | tojson}})
+    if ({{ ron.has_sbs | tojson}})
     {
         baer.show_sbs();
         baer.load_modify_class();
@@ -586,6 +587,11 @@ $(document).ready(function () {
     // show report if wepp has run
     if ( {{ observed.has_results | tojson }} ) {
         observed.report();
+    }
+
+    // show report if ash model has run
+    if ( {{ ron.has_ash_results | tojson }} ) {
+        ash.report();
     }
 
     /*
