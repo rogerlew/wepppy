@@ -31,7 +31,6 @@ class SedimentDelivery(object):
 
             sed_discharge = float(lines[indx0[-1]].split('=')[-1].split()[0])
 
-
         # Find class table
         indx0 = []
         for i, L in enumerate(lines):

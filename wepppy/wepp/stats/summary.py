@@ -166,11 +166,12 @@ class ChannelSummary(ReportBase):
 
 
 class OutletSummary(ReportBase):
-    def __init__(self, loss: Loss):
+    def __init__(self, loss: Loss, fraction_under=None):
         data = loss.out_tbl
         data = dict([(d['key'], d) for d in data])
         self.data = data
         self.has_phosphorus = loss.has_phosphorus
+        self.fraction_under = fraction_under
 
     def __iter__(self):
         key = 'Total contributing area to outlet'
@@ -214,7 +215,7 @@ class OutletSummary(ReportBase):
         yield 'Total channel soil loss', v, units, v_norm, units_norm
 
         key = 'Avg. Ann. sediment discharge from outlet'
-        v = self.data[key]['v']
+        sed_del = v = self.data[key]['v']
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
@@ -231,6 +232,19 @@ class OutletSummary(ReportBase):
             v_norm = v / area
             units_norm = 'kg/ha/yr'
             yield 'Phosphorus discharge', v, units, v_norm, units_norm
+
+        if self.fraction_under:
+            key = 'Particle Fraction Under %0.3f mm' % self.fraction_under
+            v = loss.outlet_fraction_under(self.fraction_under)
+            yield key, v, None, None, None
+
+            key = 'Sediment Yield of Particles Under %0.3f mm' % self.fraction_under
+            units = 'kg'
+            v *= sed_del
+            v_norm = 1000.0 * v / area
+            units_norm = 'kg/ha/yr'
+            yield key, v, units, v_norm, units_norm
+
 
     def write(self, fp, write_header=True, run_descriptors=None):
 

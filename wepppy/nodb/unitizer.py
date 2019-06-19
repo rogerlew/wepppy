@@ -300,7 +300,6 @@ class Unitizer(NoDbBase):
 
         return None
 
-
     def set_preferences(self, kwds):
 
         # noinspection PyBroadException
@@ -453,10 +452,13 @@ class Unitizer(NoDbBase):
                 return str(value)
 
             if in_units == 'pct' or in_units == '%':
-                try:
-                    return '%0.1f' % float(value)
-                except ValueError:
-                    return '<i>{}</i>'.format(value)
+                if isfloat(value):
+                    if value < 0.1:
+                        return '%0.E' % float(value)
+                    else:
+                        return '%0.1f' % float(value)
+
+                return '<i>{}</i>'.format(value)
 
             unitclass = determine_unitclass(in_units)
             if unitclass is None:

@@ -9,9 +9,7 @@ body {
   margin-bottom: 30px;
 }
 
-.table-nonfluid {
-   width: auto !important;
-}
+.table-nonfluid {width: auto !important;}
 
 .container-full {
   width: auto;

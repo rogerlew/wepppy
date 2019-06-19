@@ -15,10 +15,16 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
 
+    "use strict";
+
+    var site_prefix = "{{ site_prefix }}";
+    var runid = "{{ ron.runid }}";
+    var config = "{{ ron.config_stem }}";
+
+
     {% include 'js/controllers.js'%}
 
     $(document).ready(function () {
-
         "use strict";
 
         var project = Project.getInstance();

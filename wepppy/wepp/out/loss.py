@@ -244,6 +244,32 @@ class Loss(object):
         chn_tbl = _parse_tbl(lines[chn0:], chn_avg_hdr)
         out_tbl = _parse_out(lines[out0:])
 
+
+        # Find class table
+        indx0 = []
+        for i, L in enumerate(lines):
+            if 'sediment particle information leaving' in L.lower():
+                indx0.append(i)
+
+        if len(indx0) == 0:
+            self.class_data = None
+            return
+
+        indx0 = indx0[-1]
+        lines = lines[indx0:]
+
+        assert lines[7].startswith('1')
+        assert lines[8].startswith('2')
+        assert lines[9].startswith('3')
+        assert lines[10].startswith('4')
+        assert lines[11].startswith('5')
+
+        class_data = _parse_tbl(lines[7:12],
+                                ['Class', 'Diameter', 'Specific Gravity',
+                                 'Pct Sand', 'Pct Silt', 'Pct Clay', 'Pct OM',
+                                 'Fraction In Flow Exiting'])
+
+
         # remove the years from average
         assert exclude_yr_indxs is None
 
@@ -429,6 +455,7 @@ class Loss(object):
         self.hill_tbl = hill_tbl
         self.chn_tbl = chn_tbl
         self.out_tbl = out_tbl
+        self.class_data = class_data
         self.wsarea = [d['v'] for d in out_tbl if d['key'] == 'Total contributing area to outlet'][0]
         self.yearlies = yearlies
         self.years = years
@@ -440,6 +467,41 @@ class Loss(object):
 
         self.has_phosphorus = has_phosphorus
 
+    def outlet_fraction_under(self, particle_size=0.016):
+        """
+
+        :param particle_size: in mm
+        :return: fraction (0-1) of flow exiting hillslope less than particle size.
+        """
+        if self.class_data is None:
+            return 0.0
+
+        class_data = [(c['Diameter'], c['Fraction In Flow Exiting']) for c in self.class_data]
+
+        class_data.sort(key=lambda x: x[0])
+
+        if particle_size >= class_data[-1][0]:
+            return 1.0
+
+        i = 0
+        for diam, frac in class_data:
+            if particle_size <= diam:
+                break
+            i += 1
+
+        if i == 0:
+            x0 = 0.0
+        else:
+            x0 = class_data[i-1][0]
+        xend, frac = class_data[i]
+
+        partial_frac = (particle_size-x0)/(xend-x0) * frac
+
+        if i > 0:
+            for j in range(i):
+                partial_frac += class_data[j][1]
+
+        return partial_frac
 
     @property
     def avg_annual_years(self):

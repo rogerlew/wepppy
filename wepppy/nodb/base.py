@@ -11,6 +11,7 @@ import ast
 import os
 
 from os.path import join as _join
+from os.path import split as _split
 from os.path import exists as _exists
 
 import sys
@@ -100,6 +101,10 @@ class NoDbBase(object):
     @property
     def readonly(self):
         return _exists(_join(self.wd, 'READONLY'))
+
+    @property
+    def runid(self):
+        return _split(self.wd)[-1].replace('/', '')
 
     @readonly.setter
     def readonly(self, value):

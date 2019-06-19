@@ -38,6 +38,7 @@ _rred_map_fn = _join(_management_dir, "rred_map.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn =  _join(_management_dir, "lu10v5ua_map.json")
 
+
 def _parse_julian(x):
     foo = int(x)
     if foo == 0:
@@ -1788,11 +1789,19 @@ def get_management(dom, _map=None) -> Management:
 
 
 if __name__ == "__main__":
-    db = 'lu10v5ua' #None #'esdac' # None  # 'rred'
+    db = None  # 'lu10v5ua' #'esdac' # 'rred'
 
     d = load_map(db)
 
     print(d.keys())
+
+    for k in d:
+        man = get_management(k, _map=db)
+
+        print(k, man.desc)
+        man.build_multiple_year_man(30)
+        man.make_multiple_ofe(10)
+
 
 #    man_sum = get_management_summary(323, _map=db)
 #    print(man_sum.desc)
