@@ -1,5 +1,5 @@
 {% extends "reports/_page_container.htm" %}
-{% block report_title %}Ash Transport Model{% endblock %}
+{% block report_title %}Ash Transport Model (Experimental){% endblock %}
 {% block report_content %}
 <script>
 function rerun_ash() {
@@ -11,7 +11,7 @@ function rerun_ash() {
 }
 
 </script>
-<h2>Ash Transport Model</h2>
+<h2>Ash Transport Model (Experimental)</h2>
 <form name="ash_parameters">
 <h3>Model Parameters</h3>
 <table class="table table-nonfluid">
@@ -87,5 +87,8 @@ function rerun_ash() {
 {% set measure = "cum_water_transport (tonne/ha)" %}
 {% set measure_name = "Water transport" %}
 {% include("reports/ash/_ash_annual_table.htm") %}
+
+<h3>Download Output Files</h3>
+<p><a href='../../../browse/_ash/' target='_blank'>Browse Hillslope Ash Transport Output Directory</a></p>
 
 {% endblock %}
