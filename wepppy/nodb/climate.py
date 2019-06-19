@@ -44,7 +44,7 @@ NCPU = math.floor(multiprocessing.cpu_count() * 0.3)
 if NCPU < 1:
     NCPU = 1
 
-CLIMATE_MAX_YEARS = 100
+CLIMATE_MAX_YEARS = 1000
 
 
 class ClimateSummary(object):

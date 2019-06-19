@@ -36,13 +36,13 @@
     <dt>Dominant Landuse</dt>
     <dd>{% if d.landuse is not none %}
         {{ d.landuse.desc }} 
-        (<a href="../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)
+        (<a href="view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)
         {% endif %}
     </dd>
     <dt>Dominant Soil</dt>
     <dd>{% if d.soil is not none %}
         {{ d.soil.desc }} 
-        (<a href="../browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)
+        (<a href="browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)
         {% endif %}
     </dd>
     {% if d.meta.hill_type == "Channel"%}
@@ -50,6 +50,6 @@
     <dd>{{ d.watershed.order }}</dd>
     <dt>Channel Type</dt>
     <dd>
-        <a href="../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></dd>
+        <a href="view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></dd>
     {% endif %}
 </dl>

@@ -61,7 +61,7 @@ var Project = function () {
         that.setName = function (name) {
             var self = instance;
             $.post({
-                url: "../tasks/setname/",
+                url: "tasks/setname/",
                 data: $("#setname_form").serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
@@ -80,7 +80,7 @@ var Project = function () {
         that.clear_locks = function() {
 
             $.get({
-                url: "../tasks/clear_locks/",
+                url: "tasks/clear_locks/",
                 cache: false,
                 success: function success(response) {
                     if (response.Success == true) {
@@ -98,7 +98,7 @@ var Project = function () {
 
         that.set_public = function (state) {
             $.post({
-                url: "../tasks/set_public/",
+                url: "tasks/set_public/",
                 data: JSON.stringify({ public: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -113,7 +113,7 @@ var Project = function () {
             var self = instance;
 
             $.post({
-                url: "../tasks/set_readonly/",
+                url: "tasks/set_readonly/",
                 data: JSON.stringify({ readonly: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -171,7 +171,7 @@ var Project = function () {
             }
 
             $.post({
-                url: "../tasks/set_unit_preferences/",
+                url: site_prefix + "/runs/" + runid + "/" + config + "/tasks/set_unit_preferences/",
                 data: unit_preferences,
                 success: function success(response) {
                     if (response.Success === true) {} else {}
@@ -233,7 +233,7 @@ var Team = function () {
         that.adduser = function () {
             var self = instance;
             $.post({
-                url: "../tasks/adduser/",
+                url: "tasks/adduser/",
                 data: $("#team_form").serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
@@ -251,7 +251,7 @@ var Team = function () {
         that.removeuser = function (user_id) {
             var self = instance;
             $.post({
-                url: "../tasks/removeuser/",
+                url: "tasks/removeuser/",
                 data: JSON.stringify({ user_id: user_id }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -272,7 +272,7 @@ var Team = function () {
             var self = instance;
 
             $.get({
-                url: "../report/users/",
+                url: "report/users/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -401,7 +401,6 @@ var Map = function () {
         that.ctrls.addTo(that);
 
         that.onMapChange = function () {
-            console.log('on map change');
             var self = instance;
 
             var center = self.getCenter();
@@ -429,13 +428,13 @@ var Map = function () {
 
         that.chnQuery = function (topazID) {
             var self = instance;
-            var query_url = "../report/chn_summary/" + topazID + "/";
+            var query_url = "report/chn_summary/" + topazID + "/";
             self.hillQuery(query_url);
         };
 
         that.subQuery = function (topazID) {
             var self = instance;
-            var query_url = "../report/sub_summary/" + topazID + "/";
+            var query_url = "report/sub_summary/" + topazID + "/";
             self.hillQuery(query_url);
         };
 
@@ -483,7 +482,7 @@ var Baer = function () {
             var formData = new FormData($('#sbs_upload_form')[0]);
 
             $.post({
-                url: "../tasks/upload_sbs/",
+                url: "tasks/upload_sbs/",
                 data: formData,
                 contentType: false,
                 cache: false,
@@ -517,7 +516,7 @@ var Baer = function () {
             var self = instance;
 
             $.get({
-                url: "../view/modify_burn_class/",
+                url: "view/modify_burn_class/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -545,7 +544,7 @@ var Baer = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/modify_burn_class/",
+                url: "tasks/modify_burn_class/",
                 data: JSON.stringify({ classes: data , nodata_vals: nodata_vals}),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -577,7 +576,7 @@ var Baer = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "../query/baer_wgs_map/",
+                url: "query/baer_wgs_map/",
                 cache: false,
                 success: function success(response) {
                     if (response.Success === true) {
@@ -591,7 +590,7 @@ var Baer = function () {
                         map.ctrls.addOverlay(self.baer_map, "Burn Severity Map");
 
                         $.get({
-                            url: "../query/has_dem/",
+                            url: "query/has_dem/",
                             cache: false,
                             success: function doFlyTo(response) {
                                 if (response === false) {
@@ -613,7 +612,7 @@ var Baer = function () {
                 var self = instance;
 
                 $.get({
-                    url: "../resources/legends/sbs/",
+                    url: "resources/legends/sbs/",
                     cache: false,
                     success: function (response) {
                         var map = Map.getInstance();
@@ -694,7 +693,7 @@ var ChannelDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "../query/has_dem/",
+                url: "query/has_dem/",
                 cache: false,
                 success: onSuccessCallback,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -731,7 +730,7 @@ var ChannelDelineation = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/fetch_dem/",
+                url: "tasks/fetch_dem/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
@@ -758,7 +757,7 @@ var ChannelDelineation = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/build_channels/",
+                url: "tasks/build_channels/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
@@ -794,7 +793,7 @@ var ChannelDelineation = function () {
             var ispoweruser = false;
 
             $.get({
-                url: "../../../ispoweruser/",
+                url: "/ispoweruser/",
                 success: function success(response) {
                     ispoweruser = response;
                 }
@@ -829,7 +828,7 @@ var ChannelDelineation = function () {
             // eliminated we can just show the channels in the watershed. The
             // underlying vector will contain feature.properties.TopazID attributes
             $.get({
-                url: "../query/topaz_pass/",
+                url: "query/topaz_pass/",
                 cache: false,
                 success: function success(response) {
                     response = parseInt(response, 10);
@@ -869,7 +868,7 @@ var ChannelDelineation = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "../resources/netful.json",
+                url: "resources/netful.json",
                 cache: false,
                 success: function success(response) {
                     var map = Map.getInstance();
@@ -904,7 +903,7 @@ var ChannelDelineation = function () {
             var self = instance;
             self.data = null;
             $.get({
-                url: "../resources/channels.json",
+                url: "resources/channels.json",
                 cache: false,
                 success: self.on2Success,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -964,7 +963,7 @@ var ChannelDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "../report/channel/",
+                url: "report/channel/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -1029,7 +1028,7 @@ var Outlet = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "../query/outlet/",
+                url: "query/outlet/",
                 cache: false,
                 success: function success(response) {
                     var map = Map.getInstance();
@@ -1044,7 +1043,7 @@ var Outlet = function () {
             });
 
             $.get({
-                url: "../report/outlet/",
+                url: "report/outlet/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -1082,7 +1081,7 @@ var Outlet = function () {
             var lng = ev.latlng.lng;
 
             $.post({
-                url: "../tasks/setoutlet/",
+                url: "tasks/setoutlet/",
                 data: { latitude: lat, longitude: lng },
                 success: function success(response) {
                     if (response.Success === true) {
@@ -1217,7 +1216,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
             self.data = null;
             $.get({
-                url: "../resources/subcatchments.json",
+                url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1351,7 +1350,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "../query/watershed/subcatchments/",
+                url: "query/watershed/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1361,7 +1360,7 @@ var SubcatchmentDelineation = function () {
                 var self = instance;
 
                 $.get({
-                    url: "../resources/legends/slope_aspect/",
+                    url: "resources/legends/slope_aspect/",
                     cache: false,
                     success: function (response) {
                         var map = Map.getInstance();
@@ -1378,7 +1377,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "../query/landuse/subcatchments/",
+                url: "query/landuse/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1388,7 +1387,7 @@ var SubcatchmentDelineation = function () {
                 var self = instance;
 
                 $.get({
-                    url: "../resources/legends/landuse/",
+                    url: "resources/legends/landuse/",
                     cache: false,
                     success: function (response) {
                         var map = Map.getInstance();
@@ -1405,7 +1404,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
 
             $.get({
-                url: "../query/soils/subcatchments/",
+                url: "query/soils/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -1415,7 +1414,7 @@ var SubcatchmentDelineation = function () {
                 var self = instance;
 
                 $.get({
-                    url: "../resources/legends/soil/",
+                    url: "resources/legends/soil/",
                     cache: false,
                     success: function (response) {
                         var map = Map.getInstance();
@@ -1441,7 +1440,7 @@ var SubcatchmentDelineation = function () {
         that.cmapPhosphorus = function () {
             var self = instance;
             $.get({
-                url: "../query/wepp/phosphorus/subcatchments/",
+                url: "query/wepp/phosphorus/subcatchments/",
                 cache: false,
                 success: function success(data) {
                     if (data === null) {
@@ -1468,7 +1467,7 @@ var SubcatchmentDelineation = function () {
 
 
             $.get({
-                url: "../unitizer/",
+                url: "unitizer/",
                 data: {value: r, in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
@@ -1481,7 +1480,7 @@ var SubcatchmentDelineation = function () {
             });
 
             $.get({
-                url: "../unitizer_units/",
+                url: "unitizer_units/",
                 data: {in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
@@ -1526,7 +1525,7 @@ var SubcatchmentDelineation = function () {
         that.cmapRunoff = function () {
             var self = instance;
             $.get({
-                url: "../query/wepp/runoff/subcatchments/",
+                url: "query/wepp/runoff/subcatchments/",
                 cache: false,
                 success: function success(data) {
                     if (data === null) {
@@ -1544,7 +1543,7 @@ var SubcatchmentDelineation = function () {
         that.cmapSubrunoff = function () {
             var self = instance;
             $.get({
-                url: "../query/wepp/subrunoff/subcatchments/",
+                url: "query/wepp/subrunoff/subcatchments/",
                 cache: false,
                 success: function success(data) {
                     if (data === null) {
@@ -1562,7 +1561,7 @@ var SubcatchmentDelineation = function () {
         that.cmapBaseflow = function () {
             var self = instance;
             $.get({
-                url: "../query/wepp/baseflow/subcatchments/",
+                url: "query/wepp/baseflow/subcatchments/",
                 cache: false,
                 success: function success(data) {
                     if (data === null) {
@@ -1585,7 +1584,7 @@ var SubcatchmentDelineation = function () {
 
 
             $.get({
-                url: "../unitizer/",
+                url: "unitizer/",
                 data: {value: r, in_units: 'mm'},
                 cache: false,
                 success: function success(response) {
@@ -1598,7 +1597,7 @@ var SubcatchmentDelineation = function () {
             });
 
             $.get({
-                url: "../unitizer_units/",
+                url: "unitizer_units/",
                 data: {in_units: 'mm'},
                 cache: false,
                 success: function success(response) {
@@ -1645,7 +1644,7 @@ var SubcatchmentDelineation = function () {
         that.cmapLoss = function () {
             var self = instance;
             $.get({
-                url: "../query/wepp/loss/subcatchments/",
+                url: "query/wepp/loss/subcatchments/",
                 cache: false,
                 success: function success(data) {
                     if (data === null) {
@@ -1666,7 +1665,7 @@ var SubcatchmentDelineation = function () {
             var r = parseFloat(self.rangeLoss.val());
 
             $.get({
-                url: "../unitizer/",
+                url: "unitizer/",
                 data: {value: -1.0 * r, in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
@@ -1679,7 +1678,7 @@ var SubcatchmentDelineation = function () {
             });
 
             $.get({
-                url: "../unitizer/",
+                url: "unitizer/",
                 data: {value: r, in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
@@ -1692,7 +1691,7 @@ var SubcatchmentDelineation = function () {
             });
 
             $.get({
-                url: "../unitizer_units/",
+                url: "unitizer_units/",
                 data: {in_units: 'kg/ha'},
                 cache: false,
                 success: function success(response) {
@@ -1752,7 +1751,7 @@ var SubcatchmentDelineation = function () {
             self.removeGrid();
 
             self.grid = L.leafletGeotiff(
-                '../resources/wepp_loss.tif',
+                'resources/wepp_loss.tif',
                 {
                     band: 0,
                     displayMin: 0,
@@ -1778,7 +1777,7 @@ var SubcatchmentDelineation = function () {
             }
 
             $.get({
-                url: "../unitizer/",
+                url: "unitizer/",
                 data: {value: v, in_units: 'kg/m^2'},
                 cache: false,
                 success: function success(response) {
@@ -1791,7 +1790,7 @@ var SubcatchmentDelineation = function () {
             });
 
             $.get({
-                url: "../unitizer/",
+                url: "unitizer/",
                 data: {value: -1.0 * v, in_units: 'kg/m^2'},
                 cache: false,
                 success: function success(response) {
@@ -1804,7 +1803,7 @@ var SubcatchmentDelineation = function () {
             });
 
             $.get({
-                url: "../unitizer_units/",
+                url: "unitizer_units/",
                 data: {in_units: 'kg/m^2'},
                 cache: false,
                 success: function success(response) {
@@ -1863,7 +1862,7 @@ var SubcatchmentDelineation = function () {
             }
 
             $.post({
-                url: "../tasks/build_subcatchments/",
+                url: "tasks/build_subcatchments/",
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("BUILD_SUBCATCHMENTS_TASK_COMPLETED");
@@ -1887,7 +1886,7 @@ var SubcatchmentDelineation = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/abstract_watershed/",
+                url: "tasks/abstract_watershed/",
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("WATERSHED_ABSTRACTION_TASK_COMPLETED");
@@ -1912,7 +1911,7 @@ var SubcatchmentDelineation = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "../report/watershed/",
+                url: "report/watershed/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -1965,7 +1964,7 @@ var Landuse = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/build_landuse/",
+                url: "tasks/build_landuse/",
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
@@ -1988,7 +1987,7 @@ var Landuse = function () {
             };
 
             $.post({
-                url: "../tasks/modify_landuse_coverage/",
+                url: "tasks/modify_landuse_coverage/",
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -2009,7 +2008,7 @@ var Landuse = function () {
             };
 
             $.post({
-                url: "../tasks/modify_landuse_mapping/",
+                url: "tasks/modify_landuse_mapping/",
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -2025,7 +2024,7 @@ var Landuse = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "../report/landuse/",
+                url: "report/landuse/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -2062,7 +2061,7 @@ var Landuse = function () {
 
             // sync landuse with nodb
             $.post({
-                url: "../tasks/set_landuse_mode/",
+                url: "tasks/set_landuse_mode/",
                 data: { "mode": mode, "landuse_single_selection": landuse_single_selection },
                 success: function success(response) {
                     if (response.Success === true) {
@@ -2211,7 +2210,7 @@ var LanduseModify = function () {
             var extent = [sw.lng, sw.lat, ne.lng, ne.lat];
 
             $.post({
-                url: "../tasks/sub_intersection/",
+                url: "tasks/sub_intersection/",
                 data: JSON.stringify({ extent: extent }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -2279,7 +2278,7 @@ var LanduseModify = function () {
 
             self.data = null;
             $.get({
-                url: "../resources/subcatchments.json",
+                url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
                 fail: function fail(jqXHR, textStatus, errorThrown) {
@@ -2360,7 +2359,7 @@ var LanduseModify = function () {
             self.hideStacktrace();
 
             $.post({
-                url: "../tasks/modify_landuse/",
+                url: "tasks/modify_landuse/",
                 data: { topaz_ids: self.textarea.val(),
                         landuse: self.selection.val() },
                 success: function success(response) {
@@ -2421,7 +2420,7 @@ var Soil = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/build_soil/",
+                url: "tasks/build_soil/",
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("SOIL_BUILD_TASK_COMPLETED");
@@ -2439,7 +2438,7 @@ var Soil = function () {
         that.report = function () {
             var self = instance;
             $.get({
-                url: "../report/soils/",
+                url: "report/soils/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -2476,7 +2475,7 @@ var Soil = function () {
 
             // sync soil with nodb
             $.post({
-                url: "../tasks/set_soil_mode/",
+                url: "tasks/set_soil_mode/",
                 data: {
                     "mode": mode,
                     "soil_single_selection": soil_single_selection,
@@ -2572,7 +2571,7 @@ var Climate = function () {
 
             // sync climate with nodb
             $.post({
-                url: "../tasks/set_climatestation_mode/",
+                url: "tasks/set_climatestation_mode/",
                 data: { "mode": mode },
                 success: function success(response) {
                     if (response.Success === true) {
@@ -2606,7 +2605,7 @@ var Climate = function () {
             if (mode === 0) {
                 // sync climate with nodb
                 $.get({
-                    url: "../view/closest_stations/",
+                    url: "view/closest_stations/",
                     cache: false,
                     data: { "mode": mode },
                     success: function success(response) {
@@ -2621,7 +2620,7 @@ var Climate = function () {
             } else if (mode === 1) {
                 // sync climate with nodb
                 $.get({
-                    url: "../view/heuristic_stations/",
+                    url: "view/heuristic_stations/",
                     data: { "mode": mode },
                     cache: false,
                     success: function success(response) {
@@ -2636,7 +2635,7 @@ var Climate = function () {
             } else if (mode === 2) {
                 // sync climate with nodb
                 $.get({
-                    url: "../view/eu_heuristic_stations/",
+                    url: "view/eu_heuristic_stations/",
                     data: { "mode": mode },
                     cache: false,
                     success: function success(response) {
@@ -2667,7 +2666,7 @@ var Climate = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/set_climatestation/",
+                url: "tasks/set_climatestation/",
                 data: { "station": station },
                 success: function success(response) {
                     if (response.Success === true) {
@@ -2687,7 +2686,7 @@ var Climate = function () {
             var self = instance;
             var project = Project.getInstance();
             $.get({
-                url: "../view/climate_monthlies/",
+                url: "view/climate_monthlies/",
                 cache: false,
                 success: function success(response) {
                     $("#climate_monthlies").html(response);
@@ -2711,7 +2710,7 @@ var Climate = function () {
             setTimeout(self.status_loop, 5000);
 
             $.post({
-                url: "../tasks/build_climate/",
+                url: "tasks/build_climate/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
@@ -2734,7 +2733,7 @@ var Climate = function () {
             var self = instance;
             var project = Project.getInstance();
             $.get({
-                url: "../report/climate/",
+                url: "report/climate/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -2750,7 +2749,7 @@ var Climate = function () {
             var self = instance;
 
             $.post({
-                url: '../query/status/climate/',
+                url: 'query/status/climate/',
                 success: function success(response) {
 
                     if (response.Success === true && self.attempts < 14400) {
@@ -2786,7 +2785,7 @@ var Climate = function () {
 
             // sync climate with nodb
             $.post({
-                url: "../tasks/set_climate_mode/",
+                url: "tasks/set_climate_mode/",
                 data: { "mode": mode,
                         "climate_single_selection": climate_single_selection },
                 success: function success(response) {
@@ -2943,7 +2942,7 @@ var Climate = function () {
 
             // sync climate with nodb
             $.post({
-                url: "../tasks/set_climate_spatialmode/",
+                url: "tasks/set_climate_spatialmode/",
                 data: { "spatialmode": mode},
                 success: function success(response) {
                     if (response.Success === true) {
@@ -3001,7 +3000,7 @@ var Wepp = function () {
             var self = instance;
 
             $.get({
-                url: "../query/wepp/phosphorus_opts/",
+                url: "query/wepp/phosphorus_opts/",
                 cache: false,
                 success: function success(response) {
                     self.surf_runoff.val(response.surf_runoff.toFixed(4));
@@ -3023,7 +3022,7 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/set_hourly_seepage/",
+                url: "tasks/set_hourly_seepage/",
                 data: JSON.stringify({ hourly_seepage: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -3049,7 +3048,7 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/set_run_flowpaths/",
+                url: "tasks/set_run_flowpaths/",
                 data: JSON.stringify({ run_flowpaths: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -3079,7 +3078,7 @@ var Wepp = function () {
             setTimeout(self.status_loop, 5000);
 
             $.post({
-                url: "../tasks/run_wepp/",
+                url: "tasks/run_wepp/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
@@ -3107,7 +3106,7 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             $.get({
-                url: "../report/wepp/results/",
+                url: "report/wepp/results/",
                 cache: false,
                 success: function success(response) {
                     $('#wepp-results').html(response);
@@ -3118,7 +3117,7 @@ var Wepp = function () {
             });
 
             $.get({
-                url: "../report/wepp/run_summary/",
+                url: "report/wepp/run_summary/",
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
@@ -3136,7 +3135,7 @@ var Wepp = function () {
             var self = instance;
 
             $.post({
-                url: '../query/status/wepp/',
+                url: 'query/status/wepp/',
                 success: function success(response) {
 
                     if (response.Success === true && self.attempts < 14400) {
@@ -3201,7 +3200,7 @@ var Observed = function () {
             var self = instance;
 
             $.get({
-                url: "../query/climate_has_observed/",
+                url: "query/climate_has_observed/",
                 success: function success(response) {
                     if (response === true) {
                         self.showControl();
@@ -3227,7 +3226,7 @@ var Observed = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/run_model_fit/",
+                url: "tasks/run_model_fit/",
                 data: JSON.stringify({ data: textdata }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -3247,7 +3246,7 @@ var Observed = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='../report/observed/' target='_blank'>View Model Fit Results</a>");
+            self.info.html("<a href='report/observed/' target='_blank'>View Model Fit Results</a>");
         };
 
         return that;
@@ -3293,7 +3292,7 @@ var DebrisFlow = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "../tasks/run_debris_flow/",
+                url: "tasks/run_debris_flow/",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -3312,7 +3311,71 @@ var DebrisFlow = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<a href='../report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
+            self.info.html("<a href='report/debris_flow/' target='_blank'>View Debris Flow Model Results</a>");
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+
+
+
+/* ----------------------------------------------------------------------------
+ * Ash
+ * ----------------------------------------------------------------------------
+ */
+var Ash = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#ash_form");
+        that.info = $("#ash_form #info");
+        that.status = $("#ash_form  #status");
+        that.stacktrace = $("#ash_form #stacktrace");
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.run_model = function() {
+            var self = instance;
+
+            var task_msg = "Running ash model";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/run_ash/",
+                data: self.form.serialize(),
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... done.");
+                        self.report();
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            self.info.html("<a href='report/ash/' target='_blank'>View Ash Transport Model Results</a>");
         };
 
         return that;

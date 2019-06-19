@@ -64,6 +64,7 @@ class ChanWatbal2(ReportBase):
             yield RowData(OrderedDict([(colname, np.sum(data[colname][i])) for colname in self.header]))
 """
 
+
 class ChannelWatbal(ReportBase):
     def __init__(self, wd):
         self.wd = wd
@@ -92,9 +93,14 @@ class ChannelWatbal(ReportBase):
             OFE, J, Y, P, RM, Q, Ep, Es, Er, Dp, UpStrmQ, \
             SubRIn, latqcc, TSW, frozwt, SnowWater, QOFE, Tile, Irr, Surf, Base, Area = wl.split()
 
-            OFE, J, Y, P, Q, Ep, Es, Er, Dp, latqcc, TSW, Base, Area = \
-                int(OFE), int(J), int(Y), float(P), float(Q), float(Ep), float(Es), float(Er), float(Dp), \
+            OFE, J, Y, P, Ep, Es, Er, Dp, latqcc, TSW, Base, Area = \
+                int(OFE), int(J), int(Y), float(P), float(Ep), float(Es), float(Er), float(Dp), \
                 float(latqcc), float(TSW), float(Base), float(Area)
+
+            try:
+                Q = float(Q)
+            except ValueError:
+                Q = 0.0
 
             topaz_id = translator.top(chn_enum=OFE)
 

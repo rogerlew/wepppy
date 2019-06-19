@@ -12,45 +12,45 @@
           <div class="col-md-6">
             <h5>NoDbs</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/ron.nodb">nodb.ron</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/topaz.nodb">nodb.topaz</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/watershed.nodb">nodb.watershed</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/landuse.nodb">nodb.landuse</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/soils.nodb">nodb.soils</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/climate.nodb">nodb.climate</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/wepp.nodb">nodb.wepp</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/wepppost.nodb">nodb.wepppost</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/observed.nodb">nodb.observed</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/unitizer.nodb">nodb.unitizer</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ron.nodb">nodb.ron</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/topaz.nodb">nodb.topaz</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed.nodb">nodb.watershed</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse.nodb">nodb.landuse</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils.nodb">nodb.soils</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/climate.nodb">nodb.climate</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp.nodb">nodb.wepp</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepppost.nodb">nodb.wepppost</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/observed.nodb">nodb.observed</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/unitizer.nodb">nodb.unitizer</a>
               {% if 'baer' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/baer.nodb">nodb.baer</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/baer.nodb">nodb.baer</a>
               {% endif %}
               {% if 'rred' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/rred.nodb">nodb.rred</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred.nodb">nodb.rred</a>
               {% endif %}
               {% if 'lt' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/lt.nodb">nodb.lt</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/lt.nodb">nodb.lt</a>
               {% endif %}
               {% if 'debris_flow' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/debris_flow.nodb">nodb.debris_flow</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
               {% endif %}
             </div>
           </div>
           <div class="col-md-6">
             <h5>Directory Views</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse">/</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/">/</a>
               {% if 'rred' in ron.mods %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/rred">rred</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred">rred</a>
               {% endif %}
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/wepp/runs">wepp/runs</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../browse/wepp/output">wepp/output</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/runs">wepp/runs</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/output">wepp/output</a>
             </div>
             <br/>
             <h5>Data Queries</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="../query/subcatchments_summary/">subcatchments</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="../query/channels_summary/">channels</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/query/subcatchments_summary/">subcatchments</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/query/channels_summary/">channels</a>
             </div>
             <br/>
             <h5>Commands</h5>
