@@ -172,6 +172,7 @@ class OutletSummary(ReportBase):
         self.data = data
         self.has_phosphorus = loss.has_phosphorus
         self.fraction_under = fraction_under
+        self.loss = loss
 
     def __iter__(self):
         key = 'Total contributing area to outlet'
@@ -235,7 +236,7 @@ class OutletSummary(ReportBase):
 
         if self.fraction_under:
             key = 'Particle Fraction Under %0.3f mm' % self.fraction_under
-            v = loss.outlet_fraction_under(self.fraction_under)
+            v = self.loss.outlet_fraction_under(self.fraction_under)
             yield key, v, None, None, None
 
             key = 'Sediment Yield of Particles Under %0.3f mm' % self.fraction_under
@@ -290,3 +291,5 @@ if __name__ == "__main__":
     out_rpt = OutletSummary(loss, fraction_under=0.16)
     for row in out_rpt:
         print(row)
+    with open('/home/roger/out_summary.csv', 'w') as fp:
+        out_rpt.write(fp, write_header=True)
