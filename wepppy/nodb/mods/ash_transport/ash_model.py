@@ -6,8 +6,11 @@ from os.path import join as _join
 from copy import deepcopy
 import pandas as pd
 
-from wepppy.all_your_base import YearlessDate
-
+from wepppy.all_your_base import (
+    YearlessDate,
+    weibull_series,
+    probability_of_occurrence
+)
 
 from .wind_transport_thresholds import *
 
@@ -74,7 +77,8 @@ class AshModel(object):
         elif self.ash_type == AshType.WHITE:
             return lookup_wind_threshold_white_ash_proportion(w)
 
-    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, out_dir, prefix):
+    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, out_dir, prefix,
+                  recurrence=[100, 50, 20, 10, 5, 2.5, 1], area_ha=None):
         """
         Runs the ash model for a hillslope
         
@@ -89,8 +93,10 @@ class AshModel(object):
             the directory save the model output 
         :param prefix: 
             prefix for the model output file
+        :param recurrence:
+            list of recurrence intervals
         :return: 
-            returns the output file name
+            returns the output file name, return period results dictionary
         """
         # copy the DataFrame 
         df = deepcopy(cli_df)
@@ -119,6 +125,7 @@ class AshModel(object):
         proportion_ash_transport = np.zeros((s_len,))
         cum_proportion_ash_transport = np.zeros((s_len,))
         wind_transport = np.zeros((s_len,))
+        cum_wind_transport = np.zeros((s_len,))
 
         # peak runoff from the element (PeakRunoffRAW) WEPP output
         peak_ro = np.zeros((s_len,))
@@ -132,6 +139,7 @@ class AshModel(object):
         effective_runoff = np.zeros((s_len,))
         cum_runoff = np.zeros((s_len,))
         water_transport = np.zeros((s_len,))
+        cum_water_transport = np.zeros((s_len,))
 
         #
         # Loop through each day in the climate file
@@ -290,10 +298,19 @@ class AshModel(object):
             if available_ash[i] < 0.0:
                 available_ash[i] = 0.0
 
+            cum_wind_transport[i] = wind_transport[i]
+            cum_water_transport[i] = water_transport[i]
+
+            if dff > 0:
+                cum_wind_transport[i] += cum_wind_transport[i-1]
+                cum_water_transport[i] += cum_water_transport[i-1]
+
             # increment the days from fire variable
             dff += 1
 
         # calculate cumulative wind and water transport
+        ash_transport = water_transport + wind_transport
+        cum_ash_transport = cum_water_transport + cum_wind_transport
 
         # store in the dataframe
         df['fire_year (yr)'] = pd.Series(fire_years, index=df.index)
@@ -304,7 +321,7 @@ class AshModel(object):
         df['_proportion_ash_transport (fraction)'] = pd.Series(proportion_ash_transport, index=df.index)
         df['_cum_proportion_ash_transport (fraction)'] = pd.Series(cum_proportion_ash_transport, index=df.index)
         df['wind_transport (tonne/ha)'] = pd.Series(wind_transport, index=df.index)
-        df['cum_wind_transport (tonne/ha)'] = pd.Series(np.cumsum(wind_transport), index=df.index)
+        df['cum_wind_transport (tonne/ha)'] = pd.Series(cum_wind_transport, index=df.index)
         df['peak_ro (mm/hr)'] = pd.Series(peak_ro, index=df.index)
         df['eff_dur (hr)'] = pd.Series(eff_dur, index=df.index)
         df['water_excess (mm)'] = pd.Series(water_excess, index=df.index)
@@ -312,21 +329,107 @@ class AshModel(object):
         df['effective_runoff (mm)'] = pd.Series(effective_runoff, index=df.index)
         df['cum_runoff (mm)'] = pd.Series(cum_runoff, index=df.index)
         df['water_transport (tonne/ha)'] = pd.Series(water_transport, index=df.index)
-        df['cum_water_transport (tonne/ha)'] = pd.Series(np.cumsum(water_transport), index=df.index)
+        df['cum_water_transport (tonne/ha)'] = pd.Series(cum_water_transport, index=df.index)
+        df['ash_transport (tonne/ha)'] = pd.Series(ash_transport, index=df.index)
+        df['cum_ash_transport (tonne/ha)'] = pd.Series(cum_ash_transport, index=df.index)
+
+        if area_ha is not None:
+            df['ash_delivery (tonne)'] = pd.Series(ash_transport * area_ha, index=df.index)
+            df['ash_by_wind_delivery (tonne)'] = pd.Series(wind_transport * area_ha, index=df.index)
+            df['ash_by_water_delivery (tonne)'] = pd.Series(water_transport * area_ha, index=df.index)
+            df['cum_ash_delivery (tonne)'] = pd.Series(cum_ash_transport * area_ha, index=df.index)
+            df['cum_ash_by_wind_delivery (tonne)'] = pd.Series(cum_wind_transport * area_ha, index=df.index)
+            df['cum_ash_by_water_delivery (tonne)'] = pd.Series(cum_water_transport * area_ha, index=df.index)
 
         df.drop(columns=['dur', 'tp', 'ip', 'tmax', 'tmin', 'rad', 'w-dir', 'tdew'], inplace=True)
+
+        yr_df = df.loc[[brk-1 for brk in breaks[1:]],
+                       ['year',
+                        'cum_wind_transport (tonne/ha)',
+                        'cum_water_transport (tonne/ha)',
+                        'cum_ash_transport (tonne/ha)']]
+
         df.drop(index=range(breaks[0]), inplace=True)
         df.drop(index=range(breaks[-1], s_len), inplace=True)
 
-        out_fn = _join(out_dir, '%s_cli_ash.csv' % prefix)
+        out_fn = _join(out_dir, '%s_ash.csv' % prefix)
         df.to_csv(out_fn, index=False)
-        return out_fn
+
+        num_fire_years = len(breaks) - 1
+
+        annuals = {}
+        for measure in ['cum_wind_transport (tonne/ha)',
+                        'cum_water_transport (tonne/ha)',
+                        'cum_ash_transport (tonne/ha)']:
+
+            annuals[measure] = []
+            yr_df.sort_values(by=measure, ascending=False, inplace=True)
+
+            data = []
+            colnames =['year', measure, 'probability', 'rank', 'return_interval']
+            for j, (i, _row) in enumerate(yr_df.iterrows()):
+                val = _row[measure]
+
+                if val == 0.0:
+                    break
+
+                rank = j + 1
+                ri = (num_fire_years + 1) / rank
+                prob = probability_of_occurrence(ri, 1.0)
+                data.append([int(_row.year), val, prob, int(rank), ri])
+                annuals[measure].append(dict(zip(colnames, data[-1])))
+
+            _df = pd.DataFrame(data, columns=colnames)
+            _df.to_csv(_join(out_dir, '%s_ash_stats_per_year_%s.csv' % (prefix, measure.split('_')[1])), index=False)
+
+        num_days = len(df.da)
+        return_periods = {}
+        for measure in ['wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)']:
+            return_periods[measure] = {}
+            df.sort_values(by=measure, ascending=False, inplace=True)
+
+            data = []
+            for j, (i, _row) in enumerate(df.iterrows()):
+                val = _row[measure]
+
+                if val == 0.0:
+                    break
+
+                dff = _row['days_from_fire (days)']
+                rank = j + 1
+                ri = (num_days + 1) / rank
+                ri /= 365.25
+                prob = probability_of_occurrence(ri, 1.0)
+                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
+
+            _df = pd.DataFrame(data, columns=
+            ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
+            _df.to_csv(_join(out_dir, '%s_ash_stats_per_event_%s.csv' % (prefix, measure.split('_')[0])), index=False)
+
+            rec = weibull_series(recurrence, num_fire_years)
+
+            num_events = len(_df.da)
+            for retperiod in recurrence:
+                if retperiod not in rec:
+                    return_periods[measure][retperiod] = None
+                else:
+                    indx = rec[retperiod]
+                    if indx >= num_events:
+                        return_periods[measure][retperiod] = None
+                    else:
+                        _row = dict(_df.loc[indx, :])
+                        for _m in ['year', 'mo', 'da', 'days_from_fire', 'rank']:
+                            _row[_m] = int(_row[_m])
+
+                        return_periods[measure][retperiod] = _row
+
+        return out_fn, return_periods, annuals
 
 
 class WhiteAshModel(AshModel):
     __name__ = 'WhiteAshModel'
 
-    def __init__(self):
+    def __init__(self, ini_ash_depth=None):
         super(WhiteAshModel, self).__init__(
             ash_type=AshType.WHITE,
             proportion=1.0,
@@ -340,11 +443,14 @@ class WhiteAshModel(AshModel):
             water_transport_rate_k=-0.126,
             wind_threshold=6)
 
+        if ini_ash_depth is not None:
+            self.ini_ash_depth_mm  = ini_ash_depth
+
 
 class BlackAshModel(AshModel):
     __name__ = 'BlackAshModel'
 
-    def __init__(self):
+    def __init__(self, ini_ash_depth=None):
         super(BlackAshModel, self).__init__(
             ash_type=AshType.BLACK,
             proportion=1.0,
@@ -357,3 +463,6 @@ class BlackAshModel(AshModel):
             water_transport_rate=9.85,
             water_transport_rate_k=None,
             wind_threshold=6)
+
+        if ini_ash_depth is not None:
+            self.ini_ash_depth_mm  = ini_ash_depth

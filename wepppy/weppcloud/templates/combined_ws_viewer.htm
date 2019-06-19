@@ -20,6 +20,8 @@
             integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
             crossorigin=""></script>
 <script type="text/javascript">
+var site_prefix = "{{ site_prefix }}";
+
 function getURLParameter(sParam) {
     var sPageURL = window.location.search.substring(1);
     var sURLVariables = sPageURL.split('&');
@@ -331,7 +333,7 @@ $(document).ready(function () {
                 data = {};
 
                 $.get({
-                    url: "../runs/" + runid + "/query/wepp/" + varname + "/subcatchments/",
+                    url: site_prefix + "/runs/" + runid + "/cfg/query/wepp/" + varname + "/subcatchments/",
                     success: function success(_data) {
                         if (_data === null) {
                             throw "query returned null";
@@ -382,7 +384,7 @@ $(document).ready(function () {
             polys[runid] = {};
 
             $.get({
-                url: "../runs/" + runid + "/resources/subcatchments.json",
+                url: site_prefix + "/runs/" + runid + "/cfg/resources/subcatchments.json",
                 async: false,
                 success: function (response) {
                     polys[runid] = L.geoJSON(response.features, {
@@ -391,7 +393,7 @@ $(document).ready(function () {
                             layer.on({
                                 click: function click(ev) {
                                     var topaz_id = ev.target.feature.properties.TopazID;
-                                    var query_url = "../runs/" + runid + "/report/sub_summary/" + topaz_id + "/";
+                                    var query_url = site_prefix + "/runs/" + runid + "/cfg/report/sub_summary/" + topaz_id + "/";
                                     $.get({
                                         url: query_url,
                                         success: function success(response) {
@@ -401,7 +403,7 @@ $(document).ready(function () {
                                             const content =
                                                 '<h5>' + runid + '</h5>' +
                                                 response +
-                                                '<a href="../runs/' + runid + '/' + cfg + '/">View Watershed Run</a>';
+                                                '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/">View Watershed Run</a>';
 
                                             popup = L.popup()
                                                 .setLatLng(ev.latlng)

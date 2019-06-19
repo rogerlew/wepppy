@@ -1,0 +1,41 @@
+<h5>{{ measure_name }} recurrence intervals</h5>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Recurrence Interval</th>
+        <th>Year</th>
+        <th>Month</th>
+        <th>Day</th>
+        <th>Days From Fire</th>
+        <th>{{ measure_name }}</th>
+        <th>Probability</th>
+        <th>Event Rank</th>
+    </tr>
+    <tr>
+        <th>years</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>&nbsp;</th>
+        <th>days</th>
+        <th>{{ unitizer_units(units) | safe }}&nbsp;</th>
+        <th>{{ unitizer_units('%') | safe }}&nbsp;</th>
+        <th>&nbsp;</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for rec_interval in recurrence_intervals %}
+        {% if results[measure][rec_interval] is not none %}
+        <tr>
+        <td>{{ rec_interval }}</td>
+        <td>{{ results[measure][rec_interval]['year'] }}</td>
+        <td>{{ results[measure][rec_interval]['mo'] }}</td>
+        <td>{{ results[measure][rec_interval]['da'] }}</td>
+        <td>{{ results[measure][rec_interval]['days_from_fire'] }}</td>
+        <td>{{ unitizer(results[measure][rec_interval][measure], units) | safe }}</td>
+        <td>{{ unitizer(results[measure][rec_interval]['probability'], '%') | safe  }}</td>
+        <td>{{ results[measure][rec_interval]['rank'] }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </tbody>
+</table>

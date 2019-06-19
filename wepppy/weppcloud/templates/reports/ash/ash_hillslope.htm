@@ -1,0 +1,91 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_title %}Ash Transport Model{% endblock %}
+{% block report_content %}
+<script>
+function rerun_ash() {
+    console.log('run ash transport');
+    var fire_date = $('#fire_date').val();
+    var ini_ash_depth= $('#ini_ash_depth').val();
+    var ash_type = $('#ash_type_selection').val();
+    window.location = '?fire_date=' + fire_date + '&ini_ash_depth=' + ini_ash_depth+ '&ash_type=' + ash_type;
+}
+
+</script>
+<h2>Ash Transport Model</h2>
+<form name="ash_parameters">
+<h3>Model Parameters</h3>
+<table class="table table-nonfluid">
+<thead>
+<tr>
+    <th>Parameter</th>
+    <th>Value</th>
+    <th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>Hillslope Area</td>
+    <td>{{unitizer(sub.area, 'm^2') | safe }}</td>
+    <td>{{ unitizer_units('m^2') | safe }}</td>
+</tr>
+    <td>Fire Date</td>
+    <td><input type="text" id="fire_date" value="{{ fire_date }}"></td>
+    <td>month/day</td>
+</tr>
+<tr>
+    <td>Initial Ash Depth</td>
+    <td><input type="text" id="ini_ash_depth" value="{{ ini_ash_depth | round(2) }}"></td>
+    <td>mm</td>
+</tr>
+<tr>
+    <td>Ash Type</td>
+    <td>
+        <select class="form-control disable-readonly" id="ash_type_selection">
+           <option value="black" {% if ash_type == "black" %}selected{% endif %}>Black ash / Low or moderate burn severity</option>
+           <option value="white" {% if ash_type == "white" %}selected{% endif %}>White ash / High burn severity</option>
+        </select>
+    </td>
+</tr>
+</tbody>
+</table>
+<div class="form-group">
+    <div class="col-sm-4">
+        <button id="run_ash"
+                class="btn btn-outline my-2 my-sm-0 col-sm-12"
+                type="button"
+                onclick="rerun_ash()">Rerun Ash Transport Model</button>
+    </div>
+    <div class="col-sm-5">
+        <small></small>
+    </div>
+</div>
+</form>
+<h3>Return Period Results</h3>
+{% set measure = "ash_transport (tonne/ha)" %}
+{% set measure_name = "Ash transport (Wind, Water, Decay)" %}
+{% set units = "tonne/ha" %}
+{% include("reports/ash/_ash_event_table.htm") %}
+
+{% set measure = "wind_transport (tonne/ha)" %}
+{% set measure_name = "Wind transport" %}
+{% include("reports/ash/_ash_event_table.htm") %}
+
+{% set measure = "water_transport (tonne/ha)" %}
+{% set measure_name = "Water transport" %}
+{% include("reports/ash/_ash_event_table.htm") %}
+
+
+<h3>Cumulative Annual Results</h3>
+{% set measure = "cum_ash_transport (tonne/ha)" %}
+{% set measure_name = "Ash transport (Wind, Water, Decay)" %}
+{% include("reports/ash/_ash_annual_table.htm") %}
+
+{% set measure = "cum_wind_transport (tonne/ha)" %}
+{% set measure_name = "Wind transport" %}
+{% include("reports/ash/_ash_annual_table.htm") %}
+
+{% set measure = "cum_water_transport (tonne/ha)" %}
+{% set measure_name = "Water transport" %}
+{% include("reports/ash/_ash_annual_table.htm") %}
+
+{% endblock %}
