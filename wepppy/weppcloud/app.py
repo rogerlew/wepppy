@@ -696,10 +696,6 @@ def runs0(runid, config):
 
     landuseoptions = landuse.landuseoptions
 
-    has_sbs = False
-    if "baer" in ron.mods:
-        has_sbs = Baer.getInstance(wd).has_map
-
     soildboptions = soilsdb.load_db()
 
     log_access(wd, current_user, request.remote_addr)
@@ -713,8 +709,7 @@ def runs0(runid, config):
                            observed=observed,
                            landuseoptions=landuseoptions,
                            soildboptions=soildboptions,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           has_sbs=has_sbs)
+                           precisions=wepppy.nodb.unitizer.precisions)
 
 
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
@@ -2159,9 +2154,12 @@ def get_wepp_run_status(runid, config, nodb):
 @app.route('/runs/<string:runid>/<config>/report/wepp/results')
 @app.route('/runs/<string:runid>/<config>/report/wepp/results/')
 def report_wepp_results(runid, config):
+    wd = get_wd(runid)
+    climate = Climate.getInstance(wd)
 
     try:
-        return render_template('controls/wepp_reports.htm')
+        return render_template('controls/wepp_reports.htm',
+                               climate=climate)
     except:
         return exception_factory('Error building reports template')
 
