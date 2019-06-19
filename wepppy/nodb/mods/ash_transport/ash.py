@@ -138,6 +138,10 @@ class Ash(NoDbBase, LogMixin):
         return os.path.abspath(_join(self.ash_dir, 'status.log'))
 
     @property
+    def has_ash_results(self):
+        return _exists(self.status_log) and len(glob(_join(self.ash_dir, '*.csv'))) > 0
+
+    @property
     def ash_dir(self):
         return _join(self.wd, 'ash')
 

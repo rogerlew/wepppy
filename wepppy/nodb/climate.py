@@ -387,6 +387,10 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    @property
+    def is_single_storm(self):
+        return self._climate_mode == ClimateMode.SingleStorm
+
     #
     # climate_spatial mode
     #
@@ -692,15 +696,15 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
-            ss_storm_date = kwds['ss_storm_date'][0]
+            ss_storm_date = kwds['ss_storm_date']
             ss_design_storm_amount_inches = \
-                kwds['ss_design_storm_amount_inches'][0]
+                kwds['ss_design_storm_amount_inches']
             ss_duration_of_storm_in_hours = \
-                kwds['ss_duration_of_storm_in_hours'][0]
+                kwds['ss_duration_of_storm_in_hours']
             ss_max_intensity_inches_per_hour = \
-                kwds['ss_max_intensity_inches_per_hour'][0]
+                kwds['ss_max_intensity_inches_per_hour']
             ss_time_to_peak_intensity_pct = \
-                kwds['ss_time_to_peak_intensity_pct'][0]
+                kwds['ss_time_to_peak_intensity_pct']
 
             try:
                 ss_design_storm_amount_inches = \
@@ -714,9 +718,9 @@ class Climate(NoDbBase, LogMixin):
             except (TypeError, ValueError) as e:
                 pass
 
-            if self.climate_mode == ClimateMode.SingleStorm:
+            if self.is_single_storm:
                 ss_storm_date = ss_storm_date.split()
-                assert len(ss_storm_date) == 3
+                assert len(ss_storm_date) == 3, ss_storm_date
                 assert all([isint(token) for token in ss_storm_date])
                 ss_storm_date = ' '.join(ss_storm_date)
 

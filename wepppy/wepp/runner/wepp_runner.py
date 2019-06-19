@@ -34,6 +34,10 @@ def _template_loader(fn):
     return _template
 
 
+def ss_hill_template_loader():
+    return _template_loader("ss_hillslope.template")
+
+
 def hill_template_loader():
     return _template_loader("hillslope.template")
 
@@ -44,8 +48,12 @@ def flowpath_template_loader():
 
 def watershed_template_loader():
     return _template_loader("watershed.template")
-    
-    
+
+
+def ss_watershed_template_loader():
+    return _template_loader("ss_watershed.template")
+
+
 def hillstub_template_loader():
     return """
 M
@@ -70,6 +78,16 @@ def make_hillslope_run(wepp_id, sim_years, runs_dir):
     s = _hill_template.format(wepp_id=wepp_id, 
                               sim_years=sim_years)
             
+    fn = _join(runs_dir, 'p%s.run' % wepp_id)
+    with open(fn, 'w') as fp:
+        fp.write(s)
+
+
+def make_ss_hillslope_run(wepp_id, runs_dir):
+    _hill_template = ss_hill_template_loader()
+
+    s = _hill_template.format(wepp_id=wepp_id)
+
     fn = _join(runs_dir, 'p%s.run' % wepp_id)
     with open(fn, 'w') as fp:
         fp.write(s)
@@ -149,8 +167,23 @@ def make_watershed_run(sim_years, wepp_ids, runs_dir):
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:
         fp.write(s)
-        
-    
+
+
+def make_ss_watershed_run(wepp_ids, runs_dir):
+    block = []
+    for wepp_id in wepp_ids:
+        block.append(hillstub_template_loader().format(wepp_id=wepp_id))
+    block = ''.join(block)
+
+    _watershed_template = ss_watershed_template_loader()
+
+    s = _watershed_template.format(sub_n=len(wepp_ids),
+                                   hillslopes_block=block)
+
+    fn = _join(runs_dir, 'pw0.run')
+    with open(fn, 'w') as fp:
+        fp.write(s)
+
 def run_watershed(runs_dir):
     t0 = time()
 
@@ -175,13 +208,17 @@ def run_watershed(runs_dir):
     
     log_fn = _join(runs_dir, 'pw0.err')
 
-    if _exists(_join(runs_dir, '../output/pass_pw0.txt')) and \
-       _exists(_join(runs_dir, '../output/loss_pw0.txt')) and \
-       _exists(_join(runs_dir, '../output/chnwb.txt')) and \
-       _exists(_join(runs_dir, '../output/soil_pw0.txt')) and \
-       _exists(_join(runs_dir, '../output/plot_pw0.txt')) and \
-       _exists(_join(runs_dir, '../output/ebe_pw0.txt')) and \
-       _exists(_join(runs_dir, '../output/pass_pw0.txt')):
-        return True, time() - t0
+#    if _exists(_join(runs_dir, '../output/pass_pw0.txt')) and \
+#       _exists(_join(runs_dir, '../output/loss_pw0.txt')):
+#       _exists(_join(runs_dir, '../output/chnwb.txt')) and \
+#       _exists(_join(runs_dir, '../output/soil_pw0.txt')) and \
+#       _exists(_join(runs_dir, '../output/plot_pw0.txt')) and \
+#       _exists(_join(runs_dir, '../output/ebe_pw0.txt')) and \
+#       _exists(_join(runs_dir, '../output/pass_pw0.txt')):
+
+    with open(_join(runs_dir, 'pw0.err')) as fp:
+        stdout = fp.read()
+        if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in stdout:
+            return True, time() - t0
 
     raise Exception('Error running wepp for watershed \nSee <a href="browse/wepp/runs/pw0.err">%s</a>' % log_fn)

@@ -303,7 +303,25 @@ class Ron(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-            
+
+    @property
+    def has_ash_results(self):
+        if 'ash' not in self.mods:
+            return False
+
+        from wepppy.nodb.mods import Ash
+        ash = Ash.getInstance(self.wd)
+        return ash.has_ash_results
+
+    @property
+    def has_sbs(self):
+        if "baer" not in self.mods:
+            return False
+
+        from wepppy.nodb.mods import Baer
+        baer = Baer.getInstance(self.wd)
+        return baer.has_map
+
     #
     # dem
     #

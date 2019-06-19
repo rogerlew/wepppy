@@ -1,6 +1,12 @@
 <div class="form-group row">
     <h3>Run Reports</h3>
 </div>
+{% if climate.is_single_storm %}
+<div>
+    <h4>WEPP Results</h4>
+    <p><a href="browse/wepp/output/" target="_blank">View WEPP Outputs Directory</a></p>
+</div>
+{% else %}
 <div>
     <h4>WEPP Results</h4>
     <p><a href="report/wepp/summary/" target="_blank">Watershed Loss Summary</a></p>
@@ -15,4 +21,5 @@
     <p><a href="report/wepp/yearly_watbal/" target="_blank">Yearly Report</a></p>
     <p><a href="plot/wepp/streamflow/" target="_blank">Daily Runoff/Lateral Flow/Baseflow Graph</a></p>
 </div>
+{% endif %}
 <hr/>

@@ -43,10 +43,12 @@ import wepppy
 from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.runner import (
     make_hillslope_run,
+    make_ss_hillslope_run,
     run_hillslope,
     make_flowpath_run,
     run_flowpath,
     make_watershed_run,
+    make_ss_watershed_run,
     run_watershed
 )
 from wepppy.wepp.management import (
@@ -486,16 +488,27 @@ class Wepp(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
-        years = Climate.getInstance(self.wd).input_years
+        climate = Climate.getInstance(self.wd)
+        years = climate.input_years
 
-        for topaz_id, _ in watershed.sub_iter():
-            wepp_id = translator.wepp(top=int(topaz_id))
-            
-            make_hillslope_run(wepp_id, years, runs_dir)
+        if climate.is_single_storm:
+            for topaz_id, _ in watershed.sub_iter():
+                wepp_id = translator.wepp(top=int(topaz_id))
 
-            if getattr(self, 'run_flowpaths', False):
-                for fp in watershed.fps_summary(topaz_id):
-                    make_flowpath_run(fp, years, fp_runs_dir)
+                make_ss_hillslope_run(wepp_id, runs_dir)
+
+                if getattr(self, 'run_flowpaths', False):
+                    for fp in watershed.fps_summary(topaz_id):
+                        make_ss_hillslope_run(fp, fp_runs_dir)
+        else:
+            for topaz_id, _ in watershed.sub_iter():
+                wepp_id = translator.wepp(top=int(topaz_id))
+
+                make_hillslope_run(wepp_id, years, runs_dir)
+
+                if getattr(self, 'run_flowpaths', False):
+                    for fp in watershed.fps_summary(topaz_id):
+                        make_flowpath_run(fp, years, fp_runs_dir)
 
     def run_hillslopes(self):
         self.log('Running Hillslopes\n')
@@ -820,8 +833,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         runs_dir = self.runs_dir
         wepp_ids = list(translator.iter_wepp_sub_ids())
         wepp_ids.sort()
-        years = Climate.getInstance(self.wd).input_years
-        make_watershed_run(years, wepp_ids, runs_dir)
+
+        climate = Climate.getInstance(self.wd)
+        years = climate.input_years
+
+        if climate.is_single_storm:
+            make_ss_watershed_run(wepp_ids, runs_dir)
+        else:
+            make_watershed_run(years, wepp_ids, runs_dir)
         
     def run_watershed(self):
         wd  = self.wd
@@ -839,22 +858,25 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 
         self.log_done()
 
-        self.log('Building totalsedwat.txt... ')
-        self._build_totalsedwat()
-        self.log_done()
+        climate = Climate.getInstance(wd)
 
-        self.log('Running WeppPost... ')
-        wepppost = WeppPost.getInstance(wd)
-        wepppost.run_post()
-        self.log_done()
+        if climate.climate_mode != ClimateMode.SingleStorm:
+            self.log('Building totalsedwat.txt... ')
+            self._build_totalsedwat()
+            self.log_done()
 
-        self.log('Calculating hill streamflow measures... ')
-        wepppost.calc_hill_streamflow()
-        self.log_done()
+            self.log('Running WeppPost... ')
+            wepppost = WeppPost.getInstance(wd)
+            wepppost.run_post()
+            self.log_done()
 
-        self.log('Calculating channel streamflow measures... ')
-        wepppost.calc_channel_streamflow()
-        self.log_done()
+            self.log('Calculating hill streamflow measures... ')
+            wepppost.calc_hill_streamflow()
+            self.log_done()
+
+            self.log('Calculating channel streamflow measures... ')
+            wepppost.calc_channel_streamflow()
+            self.log_done()
 
     def _build_totalsedwat(self):
         output_dir = self.output_dir
