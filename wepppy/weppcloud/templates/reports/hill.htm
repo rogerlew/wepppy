@@ -54,6 +54,8 @@
     {% endif %}
     {% if 'ash' in ron.mods %}
     <dt>Ash Transport Model (Experimental)</dt>
-    <dd><a href="hillslope/{{ d.meta.topaz_id }}/ash/" target="_blank">Run Ash Transport for Hillslope</a></dd>
+    <dd>
+        <i>Must First Run WEPP for Watershed.</i><br>
+        <a href="hillslope/{{ d.meta.topaz_id }}/ash/" target="_blank">Run Ash Transport for Hillslope</a></dd>
     {% endif %}
 </dl>

@@ -3097,3 +3097,6 @@ def runid_query(wc):
 
 if __name__ == '__main__':
     app.run(debug=True, port=5003)#, host='0.0.0.0', port=80)
+
+#rsync -av --progress --exclude=_scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
+#
