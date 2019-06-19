@@ -1,5 +1,9 @@
 "use strict";
 
+var site_prefix = "{{ site_prefix }}";
+var runid = "{{ ron.runid }}";
+var config = "{{ ron.config_stem }}";
+
 $(document).ready(function () {
 
     "use strict";

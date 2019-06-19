@@ -1,0 +1,42 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}ash_form{% endblock %}
+{% block form_title %}Ash Transport Analysis{% endblock %}
+{% block inputs %}
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="fire_date">Fire Date (month/year)</label>
+        </div>
+        <div class="col-sm-3">
+            <input input id="fire_date" name="fire_date"
+                   class="form-control mr-sm-3 disable-readonly" type="text" value="8/4"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="ini_black_depth">Black Ash Initial Depth (mm)<br>for Low or Moderate Severity</label>
+        </div>
+        <div class="col-sm-3">
+            <input input id="ini_black_depth" name="ini_black_depth"
+                   class="form-control mr-sm-3 disable-readonly" type="text" value="5"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="ini_white_depth">White Ash Initial Depth (mm)<br>for High Severity</label>
+        </div>
+        <div class="col-sm-3">
+            <input input id="ini_white_depth" name="ini_white_depth"
+                   class="form-control mr-sm-3 disable-readonly" type="text" value="5"/>
+        </div>
+    </div>
+    <div class="form-group row hide-readonly">
+      <div class="col-sm-4">
+        <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+                type="button"
+                onclick="Ash.getInstance().run_model();">Run Model</button>
+      </div>
+      <div class="col-sm-5">
+        <small id="hint_run_wepp"></small>
+      </div>
+    </div>
+{% endblock %}

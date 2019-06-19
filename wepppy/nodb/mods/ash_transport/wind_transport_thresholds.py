@@ -30,11 +30,9 @@ def lookup_wind_threshold_white_ash_proportion(w):
     """
     global _wind_speeds, _white_w_pct
 
-    for i, _w in enumerate(_wind_speeds):
+    for i, _w in enumerate(_wind_speeds[1:]):
         if _w > w:
-            return _white_w_pct[i-1]
-
-    #return _white_w_pct[np.abs(w - _wind_speeds).argmin()]
+            return _white_w_pct[i]
 
 
 def lookup_wind_threshold_black_ash_proportion(w):
@@ -46,10 +44,6 @@ def lookup_wind_threshold_black_ash_proportion(w):
     """
     global _wind_speeds, _black_w_pct
 
-    for i, _w in enumerate(_wind_speeds):
+    for i, _w in enumerate(_wind_speeds[1:]):
         if _w > w:
-            return _black_w_pct[i-1]
-
-    #return _black_w_pct[np.abs(w - _wind_speeds).argmin()]
-
-
+            return _black_w_pct[i]

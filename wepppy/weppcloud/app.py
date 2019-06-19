@@ -7,22 +7,26 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
+import csv
 from datetime import datetime
 
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+from io import BytesIO
 import uuid
 import json
 import shutil
 import traceback
 from glob import glob
-
+from subprocess import check_output
 import numpy as np
-
+import pandas as pd
+import matplotlib.pyplot as plt
 
 import markdown
+
 
 from werkzeug.utils import secure_filename
 
@@ -47,7 +51,13 @@ import what3words
 
 import wepppy
 
-from wepppy.all_your_base import isfloat, isint, parse_datetime
+from wepppy.all_your_base import (
+    isfloat,
+    isint,
+    parse_datetime,
+    YearlessDate,
+    read_raster
+)
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
@@ -63,7 +73,7 @@ from wepppy.watershed_abstraction import (
 from wepppy.wepp import management
 from wepppy.wepp.soils import soilsdb
 
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed, Element
 
 from wepppy.wepp.stats import (
     OutletSummary,
@@ -82,10 +92,12 @@ from wepppy.nodb import (
     Wepp, WeppPost,
     Unitizer,
     Observed,
-    DebrisFlow
+    Baer,
+    DebrisFlow,
+    Ash
 )
 
-from wepppy.nodb.mods import Baer
+from wepppy.nodb.mods.ash_transport import BlackAshModel, WhiteAshModel, AshType
 
 import socket
 _hostname = socket.gethostname()
@@ -93,7 +105,6 @@ if 'wepp1' in _hostname:
     from wepppy.weppcloud.app_config import config_app
 else:
     from wepppy.weppcloud.standalone_config import config_app
-
 
 # noinspection PyBroadException
 
@@ -106,6 +117,10 @@ mail = Mail(app)
 # Setup Flask-Security
 # Create database connection object
 db = SQLAlchemy(app)
+
+@app.context_processor
+def inject_site_prefix():
+    return dict(site_prefix=app.config['SITE_PREFIX'])
 
 # Define models
 roles_users = db.Table(
@@ -308,7 +323,7 @@ _thisdir = os.path.dirname(__file__)
 
 
 def htmltree(_dir='.', padding='', print_files=True, recurse=False):
-    def _tree(__dir, _padding, _print_files, recurse=False):
+    def _gdalinfo(__dir, _padding, _print_files, recurse=False):
         # Original from Written by Doug Dahms
         # http://code.activestate.com/recipes/217212/
         #
@@ -342,7 +357,7 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
         s.extend(f)
         return s
         
-    return ''.join(_tree(_dir, padding, print_files))
+    return ''.join(_gdalinfo(_dir, padding, print_files))
 
 
 def get_wd(runid):
@@ -411,7 +426,7 @@ def security_processor():
         name = Ron.getInstance(wd).name
         return name
 
-    def run_exists(runid):
+    def run_exists(runid, config):
         wd = get_wd(runid)
         return _exists(_join(wd, 'ron.nodb'))
 
@@ -535,8 +550,8 @@ def create(config):
     return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config))
 
 
-@app.route('/runs/<runid>/<config>/create_fork')
-@app.route('/runs/<runid>/<config>/create_fork/')
+@app.route('/runs/<string:runid>/<config>/create_fork')
+@app.route('/runs/<string:runid>/<config>/create_fork/')
 def create_fork(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
@@ -596,11 +611,9 @@ def create_fork(runid, config):
     return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config))
 
 
-
-
-@app.route('/runs/<runid>/tasks/clear_locks')
-@app.route('/runs/<runid>/tasks/clear_locks/')
-def clear_locks(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/clear_locks')
+@app.route('/runs/<string:runid>/<config>/tasks/clear_locks/')
+def clear_locks(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
 
@@ -618,8 +631,8 @@ def clear_locks(runid):
         return exception_factory('Error Clearing Locks')
 
 
-@app.route('/runs/<runid>/<config>/archive')
-@app.route('/runs/<runid>/<config>/archive/')
+@app.route('/runs/<string:runid>/<config>/archive')
+@app.route('/runs/<string:runid>/<config>/archive/')
 def archive(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
@@ -644,7 +657,7 @@ def log_access(wd, current_user, ip):
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
 
 
-@app.route('/runs/<runid>/<config>/')
+@app.route('/runs/<string:runid>/<config>/')
 def runs0(runid, config):
     assert config is not None
 
@@ -704,10 +717,101 @@ def runs0(runid, config):
                            has_sbs=has_sbs)
 
 
+@app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
+@app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
+def hillslope0(runid, config, topaz_id):
+    assert config is not None
+
+    from wepppy.climates.cligen import ClimateFile
+    from wepppy.wepp.out import Element
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    ron = Ron.getInstance(wd)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    fire_date = request.args.get('fire_date', None)
+    if fire_date is None:
+        fire_date = '8/4'
+    _fire_date = YearlessDate.from_string(fire_date)
+
+    ini_ash_depth = request.args.get('ini_ash_depth', None)
+    if ini_ash_depth is None:
+        ini_ash_depth = 5.0
+
+    ash_type = request.args.get('ash_type', None)
+    if ash_type is None:
+        ash_type = 'black'
+
+    _ash_type = None
+    if 'black' in ash_type.lower():
+        _ash_type = AshType.BLACK
+    elif 'white' in ash_type.lower():
+        _ash_type = AshType.WHITE
+
+    ash_dir = _join(wd, '_ash')
+    if not _exists(ash_dir):
+        os.mkdir(ash_dir)
+
+    unitizer = Unitizer.getInstance(wd)
+
+    watershed = Watershed.getInstance(wd)
+    translator = watershed.translator_factory()
+    wepp_id = translator.wepp(top=topaz_id)
+    sub = watershed.sub_summary(topaz_id)
+    climate = Climate.getInstance(wd)
+    wepp = Wepp.getInstance(wd)
+
+    cli_path = climate.cli_path
+    cli_df = ClimateFile(cli_path).as_dataframe()
+
+    element_fn = _join(wepp.output_dir, 'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
+    element = Element(element_fn)
+
+    prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
+    recurrence = [100, 50, 20, 10, 2.5, 1]
+    if _ash_type == AshType.BLACK:
+        _, results, annuals, = BlackAshModel().run_model(_fire_date, element.d, cli_df,
+                                               ash_dir, prefix=prefix, recurrence=recurrence)
+    elif _ash_type == AshType.WHITE:
+        _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df,
+                                               ash_dir, prefix=prefix, recurrence=recurrence)
+    else:
+        raise ValueError
+
+    return render_template('reports/ash/ash_hillslope.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           sub=sub,
+                           ash_type=ash_type,
+                           ini_ash_depth=5.0,
+                           fire_date=fire_date,
+                           recurrence_intervals=recurrence,
+                           results=results,
+                           annuals=annuals,
+                           ron=ron,
+                           user=current_user)
+
+
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/adduser/', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])
 @login_required
-def task_adduser(runid):
+def task_adduser(runid, config):
     owners = get_run_owners(runid)
 
     should_abort = True
@@ -737,9 +841,9 @@ def task_adduser(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/removeuser/', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/removeuser/', methods=['POST'])
 @login_required
-def task_removeuser(runid):
+def task_removeuser(runid, config):
 
     owners = get_run_owners(runid)
 
@@ -767,17 +871,17 @@ def task_removeuser(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/report/users/')
+@app.route('/runs/<string:runid>/<config>/report/users/')
 @login_required
-def report_users(runid):
+def report_users(runid, config):
     owners = get_run_owners(runid)
 
     return render_template('reports/users.htm', owners=owners)
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/resources/netful.json')
-def resources_netful_geojson(runid):
+@app.route('/runs/<string:runid>/<config>/resources/netful.json')
+def resources_netful_geojson(runid, config):
     try:
         wd = get_wd(runid)
         fn = _join(wd, 'dem', 'topaz', 'NETFUL.WGS.JSON')
@@ -787,8 +891,8 @@ def resources_netful_geojson(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/resources/subcatchments.json')
-def resources_subcatchments_geojson(runid):
+@app.route('/runs/<string:runid>/<config>/resources/subcatchments.json')
+def resources_subcatchments_geojson(runid, config):
     try:
         wd = get_wd(runid)
         fn = _join(wd, 'dem', 'topaz', 'SUBCATCHMENTS.WGS.JSON')
@@ -808,8 +912,8 @@ def resources_subcatchments_geojson(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/resources/channels.json')
-def resources_channels_geojson(runid):
+@app.route('/runs/<string:runid>/<config>/resources/channels.json')
+def resources_channels_geojson(runid, config):
     try:
         wd = get_wd(runid)
         fn = _join(wd, 'dem', 'topaz', 'CHANNELS.WGS.JSON')
@@ -828,50 +932,50 @@ def resources_channels_geojson(runid):
         return exception_factory()
 
 
-@app.route('/runs/<string:runid>/tasks/setname/', methods=['POST'])
-def task_setname(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/setname/', methods=['POST'])
+def task_setname(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     ron.name = request.form.get('name', 'Untitled')
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/report/tasks/set_unit_preferences/', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/set_unit_preferences/', methods=['POST'])
-def task_set_unit_preferences(runid):
+@app.route('/runs/<string:runid>/<config>/report/tasks/set_unit_preferences/', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])
+def task_set_unit_preferences(runid, config):
     wd = get_wd(runid)
     unitizer = Unitizer.getInstance(wd)
     res = unitizer.set_preferences(request.form)
     return success_factory(res)
 
  
-@app.route('/runs/<string:runid>/query/topaz_pass')
-@app.route('/runs/<string:runid>/query/topaz_pass/')
-def query_topaz_pass(runid):
+@app.route('/runs/<string:runid>/<config>/query/topaz_pass')
+@app.route('/runs/<string:runid>/<config>/query/topaz_pass/')
+def query_topaz_pass(runid, config):
     wd = get_wd(runid)
     return jsonify(Topaz.getInstance(wd).topaz_pass)
 
 
-@app.route('/runs/<string:runid>/query/extent')
-@app.route('/runs/<string:runid>/query/extent/')
-def query_extent(runid):
+@app.route('/runs/<string:runid>/<config>/query/extent')
+@app.route('/runs/<string:runid>/<config>/query/extent/')
+def query_extent(runid, config):
     wd = get_wd(runid)
     
     return jsonify(Ron.getInstance(wd).extent)
     
     
-@app.route('/runs/<string:runid>/report/channel')
-@app.route('/runs/<string:runid>/report/channel/')
-def report_channel(runid):
+@app.route('/runs/<string:runid>/<config>/report/channel')
+@app.route('/runs/<string:runid>/<config>/report/channel/')
+def report_channel(runid, config):
     wd = get_wd(runid)
     
     return render_template('reports/channel.htm',
                            map=Ron.getInstance(wd).map)
 
     
-@app.route('/runs/<string:runid>/query/outlet')
-@app.route('/runs/<string:runid>/query/outlet/')
-def query_outlet(runid):
+@app.route('/runs/<string:runid>/<config>/query/outlet')
+@app.route('/runs/<string:runid>/<config>/query/outlet/')
+def query_outlet(runid, config):
     wd = get_wd(runid)
     
     return jsonify(Topaz.getInstance(wd)
@@ -879,9 +983,9 @@ def query_outlet(runid):
                         .as_dict())
 
 
-@app.route('/runs/<string:runid>/report/outlet')
-@app.route('/runs/<string:runid>/report/outlet/')
-def report_outlet(runid):
+@app.route('/runs/<string:runid>/<config>/report/outlet')
+@app.route('/runs/<string:runid>/<config>/report/outlet/')
+def report_outlet(runid, config):
     wd = get_wd(runid)
     
     return render_template('reports/outlet.htm',
@@ -890,8 +994,8 @@ def report_outlet(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/setoutlet/', methods=['POST'])
-def task_setoutlet(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/setoutlet/', methods=['POST'])
+def task_setoutlet(runid, config):
     try:
         lat = float(request.form.get('latitude', None))
         lng = float(request.form.get('longitude', None))
@@ -909,7 +1013,41 @@ def task_setoutlet(runid):
     return success_factory()
 
 
-def browse_response(path, show_up=True):
+def matplotlib_vis(path):
+
+    data, transform, proj = read_raster(path)
+
+    plt.imshow(data)
+    img_bytes = BytesIO()
+    plt.savefig(img_bytes)
+    img_bytes.seek(0)
+    return send_file(img_bytes, mimetype='image/png')
+
+
+def csv_to_html(path):
+    with open(path) as fp:
+        reader = csv.reader(fp)
+
+        s = ['<table class="table table-nonfluid">']
+        for line in reader:
+            s.append('<tr>')
+            for c in line:
+                if isfloat(c):
+                    v = float(c)
+                    iv = int(v)
+                    if iv == v:
+                        s.append('<td class="text-right">%i</td>' % iv)
+                    else:
+                        s.append('<td class="text-right">%0.3f</td>' % v)
+                else:
+                    s.append('<td>%s</td>' % c)
+            s.append('</tr>')
+        s.append('</table>')
+
+    return '\n'.join(s)
+
+
+def browse_response(path, args=None, show_up=True):
     if not _exists(path):
         return error_factory('path does not exist')
 
@@ -925,17 +1063,25 @@ def browse_response(path, show_up=True):
 
         return Response(c, mimetype='text/html')
 
-    elif path_lower.endswith('.tif') or path_lower.endswith('.png'):
-        basename = path.split()[-1]
-        return send_file(path, attachment_filename=basename)
+#    elif path_lower.endswith('.tif') or path_lower.endswith('.png'):
+#        basename = path.split()[-1]
+#        return send_file(path, attachment_filename=basename)
 
     else:
         with open(path) as fp:
             try:
                 contents = fp.read()
             except UnicodeDecodeError:
-                return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
-                return error_factory('Cannot return this binary file.')
+                if 'raw' in args:
+                    return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
+                    # return matplotlib_vis(path)
+                else:
+                    return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
+
+        if 'raw' in args:
+            r = Response(response=contents, status=200, mimetype="text/plain")
+            r.headers["Content-Type"] = "text/plain; charset=utf-8"
+            return r
 
         if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
             jsobj = json.loads(contents)
@@ -950,6 +1096,23 @@ def browse_response(path, show_up=True):
             c = '<pre style="font-size:xx-small;">\n{}</pre>'.format(contents)
             return Response(c, mimetype='text/html')
 
+        if path_lower.endswith('.csv'):
+            html = csv_to_html(path)
+            c = ['<html>',
+                 '<head>',
+                 '<link rel="stylesheet" '
+                 'href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"'
+                 'integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"'
+                 'crossorigin="anonymous">',
+                 '<style>.table-nonfluid {width: auto !important;}</style>'
+                 '</head>'
+                 '<body>',
+                 '<a href="?raw">View Raw</a><hr>' + html,
+                 '</body>',
+                 '</html>']
+
+            return Response('\n'.join(c), mimetype='text/html')
+
         r = Response(response=contents, status=200, mimetype="text/plain")
         r.headers["Content-Type"] = "text/plain; charset=utf-8"
         return r
@@ -958,7 +1121,7 @@ def browse_response(path, show_up=True):
 @app.route('/docs//')
 def docs_index():
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     with open(_join(_thisdir, 'docs', 'index.md')) as fp:
         md = fp.read()
@@ -967,107 +1130,211 @@ def docs_index():
     return Response(html, mimetype='text/html')
 
 
-@app.route('/runs/<string:runid>/browse')
-@app.route('/runs/<string:runid>/browse/')
-def dev_tree(runid):
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/')
+def wp_dev_tree1(runid, config, wepp, dir):
+    return dev_tree1(runid, config, dir)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/')
+def wp_dev_tree2(runid, config, wepp, dir, dir2):
+    return dev_tree2(runid, config, dir, dir2)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/')
+def wp_dev_tree32(runid, config, wepp, dir, dir2, dir3):
+    return dev_tree32(runid, config, dir, dir2, dir3)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
+def wp_dev_tree432(runid, config, wepp, dir, dir2, dir3, dir4):
+    return dev_tree32(runid, config, dir, dir2, dir3, dir4)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
+def wp_dev_tree5432(runid, config, wepp, dir, dir2, dir3, dir4, dir5):
+    return dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5)
+
+
+@app.route('/runs/<string:runid>/<config>/browse')
+@app.route('/runs/<string:runid>/<config>/browse/')
+def dev_tree(runid, config):
     """
     recursive list the file strucuture of the working directory
     """
     wd = get_wd(runid)
     return browse_response(wd, show_up=False)
 
-@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/')
-def wp_dev_tree1(runid, wepp, dir):
-    return dev_tree1(runid, dir)
 
-
-@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/')
-def wp_dev_tree2(runid, wepp, dir, dir2):
-    return dev_tree2(runid, dir, dir2)
-
-
-@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/')
-def wp_dev_tree32(runid, wepp, dir, dir2, dir3):
-    return dev_tree32(runid, dir, dir2, dir3)
-
-
-@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
-def wp_dev_tree432(runid, wepp, dir, dir2, dir3, dir4):
-    return dev_tree32(runid, dir, dir2, dir3, dir4)
-
-
-@app.route('/runs/<string:runid>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
-def wp_dev_tree5432(runid, wepp, dir, dir2, dir3, dir4, dir5):
-    return dev_tree5432(runid, dir, dir2, dir3, dir4, dir5)
-
-
-@app.route('/runs/<string:runid>/browse/<dir>/')
-def dev_tree1(runid, dir):
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/')
+def dev_tree1(runid, config, dir):
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir))
     assert dir.startswith(wd)
-    return browse_response(dir)
+    return browse_response(dir, args=request.args)
 
 
-@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/')
-def dev_tree2(runid, dir, dir2):
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/')
+def dev_tree2(runid, config, dir, dir2):
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2))
     assert dir.startswith(wd)
-    return browse_response(dir)
+    return browse_response(dir, args=request.args)
 
 
-@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/')
-def dev_tree32(runid, dir, dir2, dir3):
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/')
+def dev_tree32(runid, config, dir, dir2, dir3):
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3))
     assert dir.startswith(wd)
-    return browse_response(dir)
+    return browse_response(dir, args=request.args)
 
 
-@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
-def dev_tree432(runid, dir, dir2, dir3, dir4):
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
+def dev_tree432(runid, config, dir, dir2, dir3, dir4):
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
     assert dir.startswith(wd)
-    return browse_response(dir)
+    return browse_response(dir, args=request.args)
 
 
-@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
-def dev_tree5432(runid, dir, dir2, dir3, dir4, dir5):
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
+def dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5):
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5))
     assert dir.startswith(wd)
-    return browse_response(dir)
+    return browse_response(dir, args=request.args)
 
-@app.route('/runs/<string:runid>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
-def dev_tree65432(runid, dir, dir2, dir3, dir4, dir5, dir6):
+
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
+def dev_tree65432(runid, config, dir, dir2, dir3, dir4, dir5, dir6):
     """
-    recursive list the file strucuture of the working directory
+    recursive list the file structure of the working directory
     """
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5, dir6))
     assert dir.startswith(wd)
-    return browse_response(dir)
+    return browse_response(dir, args=request.args)
 
-@app.route('/runs/<string:runid>/query/has_dem')
-@app.route('/runs/<string:runid>/query/has_dem/')
-def query_has_dem(runid):
+
+def gdalinfo_response(path):
+    if not _exists(path):
+        return error_factory('path does not exist')
+
+    contents = check_output('gdalinfo -json ' + path, shell=True)
+    jsobj = json.loads(contents)
+    return jsonify(jsobj)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/')
+def wp_dev_gdalinfo1(runid, config, wepp, dir):
+    return dev_gdalinfo1(runid, config, dir)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/')
+def wp_dev_gdalinfo2(runid, config, wepp, dir, dir2):
+    return dev_gdalinfo2(runid, config, dir, dir2)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/<dir3>/')
+def wp_dev_gdalinfo32(runid, config, wepp, dir, dir2, dir3):
+    return dev_gdalinfo32(runid, config, dir, dir2, dir3)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/')
+def wp_dev_gdalinfo432(runid, config, wepp, dir, dir2, dir3, dir4):
+    return dev_gdalinfo32(runid, config, dir, dir2, dir3, dir4)
+
+
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
+def wp_dev_gdalinfo5432(runid, config, wepp, dir, dir2, dir3, dir4, dir5):
+    return dev_gdalinfo5432(runid, config, dir, dir2, dir3, dir4, dir5)
+
+
+@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/')
+def dev_gdalinfo1(runid, config, dir):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir))
+    assert dir.startswith(wd)
+    return gdalinfo_response(dir)
+
+
+@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/')
+def dev_gdalinfo2(runid, config, dir, dir2):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2))
+    assert dir.startswith(wd)
+    return gdalinfo_response(dir)
+
+
+@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/')
+def dev_gdalinfo32(runid, config, dir, dir2, dir3):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3))
+    assert dir.startswith(wd)
+    return gdalinfo_response(dir)
+
+
+@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/')
+def dev_gdalinfo432(runid, config, dir, dir2, dir3, dir4):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
+    assert dir.startswith(wd)
+    return gdalinfo_response(dir)
+
+
+@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
+def dev_gdalinfo5432(runid, config, dir, dir2, dir3, dir4, dir5):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5))
+    assert dir.startswith(wd)
+    return gdalinfo_response(dir)
+
+
+@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
+def dev_gdalinfo65432(runid, config, dir, dir2, dir3, dir4, dir5, dir6):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5, dir6))
+    assert dir.startswith(wd)
+    return gdalinfo_response(dir)
+
+
+
+@app.route('/runs/<string:runid>/<config>/query/has_dem')
+@app.route('/runs/<string:runid>/<config>/query/has_dem/')
+def query_has_dem(runid, config):
     wd = get_wd(runid)
     return jsonify(Ron.getInstance(wd).has_dem)
 
@@ -1112,8 +1379,8 @@ def _parse_map_change(form):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/fetch_dem/', methods=['POST'])
-def task_fetch_dem(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/fetch_dem/', methods=['POST'])
+def task_fetch_dem(runid, config):
     error, args = _parse_map_change(request.form)
 
     if error is not None:
@@ -1135,8 +1402,8 @@ def task_fetch_dem(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/export/ermit/')
-def export_ermit(runid):
+@app.route('/runs/<string:runid>/<config>/export/ermit/')
+def export_ermit(runid, config):
     from wepppy.export import create_ermit_input
     wd = get_wd(runid)
     fn = create_ermit_input(wd)
@@ -1144,9 +1411,9 @@ def export_ermit(runid):
     return send_file(fn, as_attachment=True, attachment_filename=name)
 
 
-@app.route('/runs/<runid>/export/arcmap')
-@app.route('/runs/<runid>/export/arcmap/')
-def export_arcmap(runid):
+@app.route('/runs/<string:runid>/<config>/export/arcmap')
+@app.route('/runs/<string:runid>/<config>/export/arcmap/')
+def export_arcmap(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -1159,8 +1426,8 @@ def export_arcmap(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/export/winwepp/')
-def export_winwepp(runid):
+@app.route('/runs/<string:runid>/<config>/export/winwepp/')
+def export_winwepp(runid, config):
     from wepppy.export import export_winwepp
     wd = get_wd(runid)
     export_winwepp_path = export_winwepp(wd)
@@ -1168,8 +1435,8 @@ def export_winwepp(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/build_channels/', methods=['POST'])
-def task_build_channels(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/build_channels/', methods=['POST'])
+def task_build_channels(runid, config):
 
     error, args = _parse_map_change(request.form)
 
@@ -1207,8 +1474,8 @@ def task_build_channels(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/tasks/build_subcatchments/', methods=['POST'])
-def task_build_subcatchments(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/build_subcatchments/', methods=['POST'])
+def task_build_subcatchments(runid, config):
     wd = get_wd(runid)
     topaz = Topaz.getInstance(wd)
 
@@ -1223,31 +1490,31 @@ def task_build_subcatchments(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/query/watershed/subcatchments')
-@app.route('/runs/<string:runid>/query/watershed/subcatchments/')
-def query_watershed_summary_subcatchments(runid):
+@app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments/')
+def query_watershed_summary_subcatchments(runid, config):
     wd = get_wd(runid)
     return jsonify(Watershed.getInstance(wd).subs_summary)
 
 
-@app.route('/runs/<string:runid>/query/watershed/channels')
-@app.route('/runs/<string:runid>/query/watershed/channels/')
-def query_watershed_summary_channels(runid):
+@app.route('/runs/<string:runid>/<config>/query/watershed/channels')
+@app.route('/runs/<string:runid>/<config>/query/watershed/channels/')
+def query_watershed_summary_channels(runid, config):
     wd = get_wd(runid)
     return jsonify(Watershed.getInstance(wd).chns_summary)
 
 
-@app.route('/runs/<string:runid>/report/watershed')
-@app.route('/runs/<string:runid>/report/watershed/')
-def query_watershed_summary(runid):
+@app.route('/runs/<string:runid>/<config>/report/watershed')
+@app.route('/runs/<string:runid>/<config>/report/watershed/')
+def query_watershed_summary(runid, config):
     wd = get_wd(runid)
     
     return render_template('reports/subcatchments.htm',
                            watershed=Watershed.getInstance(wd))
                            
 
-@app.route('/runs/<string:runid>/tasks/abstract_watershed/', methods=['GET', 'POST'])
-def task_abstract_watershed(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
+def task_abstract_watershed(runid, config):
     wd = get_wd(runid)
     watershed = Watershed.getInstance(wd)
 
@@ -1263,8 +1530,8 @@ def task_abstract_watershed(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/sub_intersection/', methods=['POST'])
-def sub_intersection(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])
+def sub_intersection(runid, config):
     wd = get_wd(runid)
 
     extent = request.json.get('extent', None)
@@ -1274,8 +1541,8 @@ def sub_intersection(runid):
     return jsonify(topaz_ids)
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_landuse_mode/', methods=['POST'])
-def set_landuse_mode(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_landuse_mode/', methods=['POST'])
+def set_landuse_mode(runid, config):
 
     mode = None
     single_selection = None
@@ -1298,9 +1565,9 @@ def set_landuse_mode(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/tasks/modify_landuse_coverage', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/modify_landuse_coverage/', methods=['POST'])
-def modify_landuse_coverage(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/modify_landuse_coverage', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/modify_landuse_coverage/', methods=['POST'])
+def modify_landuse_coverage(runid, config):
     wd = get_wd(runid)
 
     dom = request.json.get('dom', None)
@@ -1313,8 +1580,8 @@ def modify_landuse_coverage(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/modify_landuse_mapping/', methods=['POST'])
-def task_modify_landuse_mapping(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/modify_landuse_mapping/', methods=['POST'])
+def task_modify_landuse_mapping(runid, config):
     wd = get_wd(runid)
 
     dom = request.json.get('dom', None)
@@ -1326,64 +1593,64 @@ def task_modify_landuse_mapping(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/query/landuse')
-@app.route('/runs/<string:runid>/query/landuse/')
-def query_landuse(runid):
+@app.route('/runs/<string:runid>/<config>/query/landuse')
+@app.route('/runs/<string:runid>/<config>/query/landuse/')
+def query_landuse(runid, config):
     wd = get_wd(runid)
     return jsonify(Landuse.getInstance(wd).domlc_d)
 
 
-@app.route('/runs/<string:runid>/resources/legends/slope_aspect')
-@app.route('/runs/<string:runid>/resources/legends/slope_aspect/')
-def resources_slope_aspect_legend(runid):
+@app.route('/runs/<string:runid>/<config>/resources/legends/slope_aspect')
+@app.route('/runs/<string:runid>/<config>/resources/legends/slope_aspect/')
+def resources_slope_aspect_legend(runid, config):
     wd = get_wd(runid)
 
     return render_template('legends/slope_aspect.htm')
 
 
-@app.route('/runs/<string:runid>/resources/legends/landuse')
-@app.route('/runs/<string:runid>/resources/legends/landuse/')
-def resources_landuse_legend(runid):
+@app.route('/runs/<string:runid>/<config>/resources/legends/landuse')
+@app.route('/runs/<string:runid>/<config>/resources/legends/landuse/')
+def resources_landuse_legend(runid, config):
     wd = get_wd(runid)
 
     return render_template('legends/landuse.htm',
                            legend=Landuse.getInstance(wd).legend)
 
 
-@app.route('/runs/<string:runid>/resources/legends/soil')
-@app.route('/runs/<string:runid>/resources/legends/soil/')
-def resources_soil_legend(runid):
+@app.route('/runs/<string:runid>/<config>/resources/legends/soil')
+@app.route('/runs/<string:runid>/<config>/resources/legends/soil/')
+def resources_soil_legend(runid, config):
     wd = get_wd(runid)
 
     return render_template('legends/soil.htm',
                            legend=Soils.getInstance(wd).legend)
 
 
-@app.route('/runs/<string:runid>/resources/legends/sbs')
-@app.route('/runs/<string:runid>/resources/legends/sbs/')
-def resources_sbs_legend(runid):
+@app.route('/runs/<string:runid>/<config>/resources/legends/sbs')
+@app.route('/runs/<string:runid>/<config>/resources/legends/sbs/')
+def resources_sbs_legend(runid, config):
     wd = get_wd(runid)
 
     return render_template('legends/landuse.htm',
                            legend=Baer.getInstance(wd).legend)
 
-@app.route('/runs/<string:runid>/query/landuse/subcatchments')
-@app.route('/runs/<string:runid>/query/landuse/subcatchments/')
-def query_landuse_subcatchments(runid):
+@app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments/')
+def query_landuse_subcatchments(runid, config):
     wd = get_wd(runid)
     return jsonify(Landuse.getInstance(wd).subs_summary)
 
 
-@app.route('/runs/<string:runid>/query/landuse/channels')
-@app.route('/runs/<string:runid>/query/landuse/channels/')
-def query_landuse_channels(runid):
+@app.route('/runs/<string:runid>/<config>/query/landuse/channels')
+@app.route('/runs/<string:runid>/<config>/query/landuse/channels/')
+def query_landuse_channels(runid, config):
     wd = get_wd(runid)
     return jsonify(Landuse.getInstance(wd).chns_summary)
 
 
-@app.route('/runs/<string:runid>/report/landuse')
-@app.route('/runs/<string:runid>/report/landuse/')
-def report_landuse(runid):
+@app.route('/runs/<string:runid>/<config>/report/landuse')
+@app.route('/runs/<string:runid>/<config>/report/landuse/')
+def report_landuse(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
@@ -1395,9 +1662,9 @@ def report_landuse(runid):
                            report=Landuse.getInstance(wd).report)
 
 
-@app.route('/runs/<string:runid>/view/channel_def/<chn_key>')
-@app.route('/runs/<string:runid>/view/channel_def/<chn_key>/')
-def view_channel_def(runid, chn_key):
+@app.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
+@app.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>/')
+def view_channel_def(runid, config, chn_key):
     wd = get_wd(runid)
     assert wd is not None
 
@@ -1409,8 +1676,8 @@ def view_channel_def(runid, chn_key):
     return jsonify(chn_d)
 
 
-@app.route('/runs/<string:runid>/tasks/build_landuse/', methods=['POST'])
-def task_build_landuse(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/build_landuse/', methods=['POST'])
+def task_build_landuse(runid, config):
     wd = get_wd(runid)
     landuse = Landuse.getInstance(wd)
 
@@ -1422,9 +1689,9 @@ def task_build_landuse(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/view/management/<key>')
-@app.route('/runs/<string:runid>/view/management/<key>/')
-def view_management(runid, key):
+@app.route('/runs/<string:runid>/<config>/view/management/<key>')
+@app.route('/runs/<string:runid>/<config>/view/management/<key>/')
+def view_management(runid, config, key):
     wd = get_wd(runid)
     assert wd is not None
 
@@ -1438,8 +1705,8 @@ def view_management(runid, key):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/modify_landuse/', methods=['POST'])
-def task_modify_landuse(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/modify_landuse/', methods=['POST'])
+def task_modify_landuse(runid, config):
     wd = get_wd(runid)
     landuse = Landuse.getInstance(wd)
 
@@ -1461,8 +1728,8 @@ def task_modify_landuse(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_soil_mode/', methods=['POST'])
-def set_soil_mode(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_soil_mode/', methods=['POST'])
+def set_soil_mode(runid, config):
 
     mode = None
     single_selection = None
@@ -1492,37 +1759,37 @@ def set_soil_mode(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/query/soils')
-@app.route('/runs/<string:runid>/query/soils/')
-def query_soils(runid):
+@app.route('/runs/<string:runid>/<config>/query/soils')
+@app.route('/runs/<string:runid>/<config>/query/soils/')
+def query_soils(runid, config):
     wd = get_wd(runid)
     return jsonify(Soils.getInstance(wd).domsoil_d)
 
 
-@app.route('/runs/<string:runid>/query/soils/subcatchments')
-@app.route('/runs/<string:runid>/query/soils/subcatchments/')
-def query_soils_subcatchments(runid):
+@app.route('/runs/<string:runid>/<config>/query/soils/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/soils/subcatchments/')
+def query_soils_subcatchments(runid, config):
     wd = get_wd(runid)
     return jsonify(Soils.getInstance(wd).subs_summary)
 
 
-@app.route('/runs/<string:runid>/query/soils/channels')
-@app.route('/runs/<string:runid>/query/soils/channels/')
-def query_soils_channels(runid):
+@app.route('/runs/<string:runid>/<config>/query/soils/channels')
+@app.route('/runs/<string:runid>/<config>/query/soils/channels/')
+def query_soils_channels(runid, config):
     wd = get_wd(runid)
     return jsonify(Soils.getInstance(wd).chns_summary)
 
 
-@app.route('/runs/<string:runid>/report/soils')
-@app.route('/runs/<string:runid>/report/soils/')
-def report_soils(runid):
+@app.route('/runs/<string:runid>/<config>/report/soils')
+@app.route('/runs/<string:runid>/<config>/report/soils/')
+def report_soils(runid, config):
     wd = get_wd(runid)
     return render_template('reports/soils.htm',
                            report=Soils.getInstance(wd).report)
 
                            
-@app.route('/runs/<string:runid>/tasks/build_soil/', methods=['POST'])
-def task_build_soil(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/build_soil/', methods=['POST'])
+def task_build_soil(runid, config):
     wd = get_wd(runid)
     soils = Soils.getInstance(wd)
 
@@ -1538,8 +1805,8 @@ def task_build_soil(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_climatestation_mode/', methods=['POST'])
-def set_climatestation_mode(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_climatestation_mode/', methods=['POST'])
+def set_climatestation_mode(runid, config):
 
     try:
         mode = int(request.form.get('mode', None))
@@ -1558,8 +1825,8 @@ def set_climatestation_mode(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_climatestation/', methods=['POST'])
-def set_climatestation(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_climatestation/', methods=['POST'])
+def set_climatestation(runid, config):
 
     try:
         station = int(request.form.get('station', None))
@@ -1577,22 +1844,22 @@ def set_climatestation(runid):
     return success_factory()
 
 
-@app.route('/runs/<string:runid>/query/climatestation')
-@app.route('/runs/<string:runid>/query/climatestation/')
-def query_climatestation(runid):
+@app.route('/runs/<string:runid>/<config>/query/climatestation')
+@app.route('/runs/<string:runid>/<config>/query/climatestation/')
+def query_climatestation(runid, config):
     wd = get_wd(runid)
     return jsonify(Climate.getInstance(wd).climatestation)
 
 
-@app.route('/runs/<string:runid>/query/climate_has_observed')
-@app.route('/runs/<string:runid>/query/climate_has_observed/')
-def query_climate_has_observed(runid):
+@app.route('/runs/<string:runid>/<config>/query/climate_has_observed')
+@app.route('/runs/<string:runid>/<config>/query/climate_has_observed/')
+def query_climate_has_observed(runid, config):
     wd = get_wd(runid)
     return jsonify(Climate.getInstance(wd).has_observed)
 
 
-@app.route('/runs/<string:runid>/report/climate/')
-def report_climate(runid):
+@app.route('/runs/<string:runid>/<config>/report/climate/')
+def report_climate(runid, config):
     wd = get_wd(runid)
     
     climate = Climate.getInstance(wd)
@@ -1602,8 +1869,8 @@ def report_climate(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_climate_mode/', methods=['POST'])
-def set_climate_mode(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_climate_mode/', methods=['POST'])
+def set_climate_mode(runid, config):
     try:
         mode = int(request.form.get('mode', None))
     except Exception:
@@ -1621,8 +1888,8 @@ def set_climate_mode(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_climate_spatialmode/', methods=['POST'])
-def set_climate_spatialmode(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_climate_spatialmode/', methods=['POST'])
+def set_climate_spatialmode(runid, config):
     try:
         spatialmode = int(request.form.get('spatialmode', None))
     except Exception:
@@ -1640,8 +1907,8 @@ def set_climate_spatialmode(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/view/closest_stations/')
-def view_closest_stations(runid):
+@app.route('/runs/<string:runid>/<config>/view/closest_stations/')
+def view_closest_stations(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
@@ -1664,8 +1931,8 @@ def view_closest_stations(runid):
     
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/view/heuristic_stations/')
-def view_heuristic_stations(runid):
+@app.route('/runs/<string:runid>/<config>/view/heuristic_stations/')
+def view_heuristic_stations(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
@@ -1689,8 +1956,8 @@ def view_heuristic_stations(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/view/eu_heuristic_stations/')
-def view_eu_heuristic_stations(runid):
+@app.route('/runs/<string:runid>/<config>/view/eu_heuristic_stations/')
+def view_eu_heuristic_stations(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
@@ -1713,9 +1980,9 @@ def view_eu_heuristic_stations(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/view/climate_monthlies')
-@app.route('/runs/<string:runid>/view/climate_monthlies/')
-def view_climate_monthlies(runid):
+@app.route('/runs/<string:runid>/<config>/view/climate_monthlies')
+@app.route('/runs/<string:runid>/<config>/view/climate_monthlies/')
+def view_climate_monthlies(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
     
@@ -1734,9 +2001,9 @@ def view_climate_monthlies(runid):
     
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/build_climate', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/build_climate/', methods=['POST'])
-def task_build_climate(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/build_climate', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/build_climate/', methods=['POST'])
+def task_build_climate(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
@@ -1754,9 +2021,9 @@ def task_build_climate(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_hourly_seepage', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/set_hourly_seepage/', methods=['POST'])
-def task_set_hourly_seepage(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_hourly_seepage', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_hourly_seepage/', methods=['POST'])
+def task_set_hourly_seepage(runid, config):
 
     try:
         state = request.json.get('hourly_seepage', None)
@@ -1776,9 +2043,9 @@ def task_set_hourly_seepage(runid):
     return success_factory()
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_run_flowpaths', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/set_run_flowpaths/', methods=['POST'])
-def task_set_run_flowpaths(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths/', methods=['POST'])
+def task_set_run_flowpaths(runid, config):
 
     try:
         state = request.json.get('run_flowpaths', None)
@@ -1798,9 +2065,9 @@ def task_set_run_flowpaths(runid):
     return success_factory()
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_public', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/set_public/', methods=['POST'])
-def task_set_public(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_public', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_public/', methods=['POST'])
+def task_set_public(runid, config):
     owners = get_run_owners(runid)
 
     should_abort = True
@@ -1832,9 +2099,9 @@ def task_set_public(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/set_readonly', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/set_readonly/', methods=['POST'])
-def task_set_readonly(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/set_readonly', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_readonly/', methods=['POST'])
+def task_set_readonly(runid, config):
     owners = get_run_owners(runid)
 
     should_abort = True
@@ -1866,9 +2133,9 @@ def task_set_readonly(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/status/<nodb>', methods=['GET', 'POST'])
-@app.route('/runs/<string:runid>/query/status/<nodb>/', methods=['GET', 'POST'])
-def get_wepp_run_status(runid, nodb):
+@app.route('/runs/<string:runid>/<config>/query/status/<nodb>', methods=['GET', 'POST'])
+@app.route('/runs/<string:runid>/<config>/query/status/<nodb>/', methods=['GET', 'POST'])
+def get_wepp_run_status(runid, config, nodb):
     wd = get_wd(runid)
 
     if nodb == 'wepp':
@@ -1889,9 +2156,9 @@ def get_wepp_run_status(runid, nodb):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/report/wepp/results')
-@app.route('/runs/<string:runid>/report/wepp/results/')
-def report_wepp_results(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/results')
+@app.route('/runs/<string:runid>/<config>/report/wepp/results/')
+def report_wepp_results(runid, config):
 
     try:
         return render_template('controls/wepp_reports.htm')
@@ -1900,9 +2167,9 @@ def report_wepp_results(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/report/<nodb>/log')
-@app.route('/runs/<string:runid>/report/<nodb>/log/')
-def get_wepp_run_status_full(runid, nodb):
+@app.route('/runs/<string:runid>/<config>/report/<nodb>/log')
+@app.route('/runs/<string:runid>/<config>/report/<nodb>/log/')
+def get_wepp_run_status_full(runid, config, nodb):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
@@ -1927,9 +2194,9 @@ def get_wepp_run_status_full(runid, nodb):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/subcatchments_summary')
-@app.route('/runs/<string:runid>/query/subcatchments_summary/')
-def query_subcatchments_summary(runid):
+@app.route('/runs/<string:runid>/<config>/query/subcatchments_summary')
+@app.route('/runs/<string:runid>/<config>/query/subcatchments_summary/')
+def query_subcatchments_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
@@ -1942,9 +2209,9 @@ def query_subcatchments_summary(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/channels_summary')
-@app.route('/runs/<string:runid>/query/channels_summary/')
-def query_channels_summary(runid):
+@app.route('/runs/<string:runid>/<config>/query/channels_summary')
+@app.route('/runs/<string:runid>/<config>/query/channels_summary/')
+def query_channels_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
@@ -1957,9 +2224,9 @@ def query_channels_summary(runid):
     
     
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/report/wepp/prep_details')
-@app.route('/runs/<string:runid>/report/wepp/prep_details/')
-def get_wepp_prep_details(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/prep_details')
+@app.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')
+def get_wepp_prep_details(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
@@ -1980,9 +2247,9 @@ def get_wepp_prep_details(runid):
         return exception_factory('Error building summary')
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/run_wepp', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/run_wepp/', methods=['POST'])
-def submit_task_run_wepp(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
+def submit_task_run_wepp(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
@@ -2036,9 +2303,9 @@ def submit_task_run_wepp(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/run_model_fit', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/run_model_fit/', methods=['POST'])
-def submit_task_run_model_fit(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/run_model_fit', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/run_model_fit/', methods=['POST'])
+def submit_task_run_model_fit(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
 
@@ -2057,9 +2324,9 @@ def submit_task_run_model_fit(runid):
     return success_factory()
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/report/observed')
-@app.route('/runs/<string:runid>/report/observed/')
-def report_observed(runid):
+@app.route('/runs/<string:runid>/<config>/report/observed')
+@app.route('/runs/<string:runid>/<config>/report/observed/')
+def report_observed(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
     ron = Ron.getInstance(wd)
@@ -2069,9 +2336,9 @@ def report_observed(runid):
                            ron=ron,
                            user=current_user)
 
-@app.route('/runs/<string:runid>/plot/observed/<selected>/')
-@app.route('/runs/<string:runid>/plot/observed/<selected>/')
-def plot_observed(runid, selected):
+@app.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
+@app.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
+def plot_observed(runid, config, selected):
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -2096,8 +2363,8 @@ def plot_observed(runid, selected):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/resources/observed/<file>')
-def resources_observed_data(runid, file):
+@app.route('/runs/<string:runid>/<config>/resources/observed/<file>')
+def resources_observed_data(runid, config, file):
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
@@ -2107,17 +2374,17 @@ def resources_observed_data(runid, file):
     return send_file(fn, mimetype='text/csv', attachment_filename=file)
 
 
-@app.route('/runs/<string:runid>/query/wepp/phosphorus_opts')
-@app.route('/runs/<string:runid>/query/wepp/phosphorus_opts/')
-def query_wepp_phos_opts(runid):
+@app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts')
+@app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts/')
+def query_wepp_phos_opts(runid, config):
     wd = get_wd(runid)
     phos_opts = Wepp.getInstance(wd).phosphorus_opts.asdict()
     return jsonify(phos_opts)
 
 
-@app.route('/runs/<string:runid>/report/wepp/run_summary')
-@app.route('/runs/<string:runid>/report/wepp/run_summary/')
-def report_wepp_run_summary(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/run_summary')
+@app.route('/runs/<string:runid>/<config>/report/wepp/run_summary/')
+def report_wepp_run_summary(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
@@ -2136,9 +2403,9 @@ def report_wepp_run_summary(runid):
                            ron=ron)
 
 
-@app.route('/runs/<string:runid>/report/wepp/summary')
-@app.route('/runs/<string:runid>/report/wepp/summary/')
-def report_wepp_loss(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/summary')
+@app.route('/runs/<string:runid>/<config>/report/wepp/summary/')
+def report_wepp_loss(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -2183,9 +2450,9 @@ def report_wepp_loss(runid):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/report/wepp/yearly_watbal')
-@app.route('/runs/<string:runid>/report/wepp/yearly_watbal/')
-def report_wepp_yearly_watbal(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')
+@app.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal/')
+def report_wepp_yearly_watbal(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -2215,9 +2482,9 @@ def report_wepp_yearly_watbal(runid):
                            ron=ron,
                            user=current_user)
 
-@app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal')
-@app.route('/runs/<string:runid>/report/wepp/avg_annual_watbal/')
-def report_wepp_avg_annual_watbal(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
+@app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
+def report_wepp_avg_annual_watbal(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
@@ -2235,8 +2502,8 @@ def report_wepp_avg_annual_watbal(runid):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/resources/wepp/daily_streamflow.csv')
-def resources_wepp_streamflow(runid):
+@app.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
+def resources_wepp_streamflow(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -2258,8 +2525,8 @@ def resources_wepp_streamflow(runid):
     return send_file(fn, mimetype='text/csv', attachment_filename='daily_streamflow.csv')
 
 
-@app.route('/runs/<string:runid>/resources/wepp/totalwatsed.csv')
-def resources_wepp_totalwatsed(runid):
+@app.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed.csv')
+def resources_wepp_totalwatsed(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
@@ -2273,9 +2540,9 @@ def resources_wepp_totalwatsed(runid):
     return send_file(fn, mimetype='text/csv', attachment_filename='totalwatsed.csv')
 
 
-@app.route('/runs/<string:runid>/plot/wepp/streamflow')
-@app.route('/runs/<string:runid>/plot/wepp/streamflow/')
-def plot_wepp_streamflow(runid):
+@app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')
+@app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
+def plot_wepp_streamflow(runid, config):
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -2298,9 +2565,10 @@ def plot_wepp_streamflow(runid):
                            ron=ron,
                            user=current_user)
 
-@app.route('/runs/<string:runid>/report/wepp/return_periods')
-@app.route('/runs/<string:runid>/report/wepp/return_periods/')
-def report_wepp_return_periods(runid):
+
+@app.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
+@app.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
+def report_wepp_return_periods(runid, config):
 
     extraneous = request.args.get('extraneous', None) == 'true'
     wd = get_wd(runid)
@@ -2320,9 +2588,9 @@ def report_wepp_return_periods(runid):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/report/wepp/frq_flood')
-@app.route('/runs/<string:runid>/report/wepp/frq_flood/')
-def report_wepp_frq_flood(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')
+@app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood/')
+def report_wepp_frq_flood(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     report = Wepp.getInstance(wd).report_frq_flood()
@@ -2339,9 +2607,9 @@ def report_wepp_frq_flood(runid):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/report/wepp/sediment_delivery')
-@app.route('/runs/<string:runid>/report/wepp/sediment_delivery/')
-def report_wepp_sediment_delivery(runid):
+@app.route('/runs/<string:runid>/<config>/report/wepp/sediment_delivery')
+@app.route('/runs/<string:runid>/<config>/report/wepp/sediment_delivery/')
+def report_wepp_sediment_delivery(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     sed_del = Wepp.getInstance(wd).report_sediment_delivery()
@@ -2358,86 +2626,88 @@ def report_wepp_sediment_delivery(runid):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/query/wepp/runoff/subcatchments')
-@app.route('/runs/<string:runid>/query/wepp/runoff/subcatchments/')
-def query_wepp_sub_runoff(runid):
+@app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments/')
+def query_wepp_sub_runoff(runid, config):
     # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Runoff'))
 
 
-@app.route('/runs/<string:runid>/query/wepp/subrunoff/subcatchments')
-@app.route('/runs/<string:runid>/query/wepp/subrunoff/subcatchments/')
-def query_wepp_sub_subrunoff(runid):
+@app.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments/')
+def query_wepp_sub_subrunoff(runid, config):
     # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Subrunoff'))
 
 
-@app.route('/runs/<string:runid>/query/wepp/baseflow/subcatchments')
-@app.route('/runs/<string:runid>/query/wepp/baseflow/subcatchments/')
-def query_wepp_sub_baseflow(runid):
+@app.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments/')
+def query_wepp_sub_baseflow(runid, config):
     # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Baseflow'))
     
     
-@app.route('/runs/<string:runid>/query/wepp/loss/subcatchments')
-@app.route('/runs/<string:runid>/query/wepp/loss/subcatchments/')
-def query_wepp_sub_loss(runid):
+@app.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments/')
+def query_wepp_sub_loss(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('DepLoss'))
     
     
-@app.route('/runs/<string:runid>/query/wepp/phosphorus/subcatchments')
-@app.route('/runs/<string:runid>/query/wepp/phosphorus/subcatchments/')
-def query_wepp_sub_phosphorus(runid):
+@app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments/')
+def query_wepp_sub_phosphorus(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Total P Density'))
     
     
-@app.route('/runs/<string:runid>/query/chn_summary/<topaz_id>')
-@app.route('/runs/<string:runid>/query/chn_summary/<topaz_id>/')
-def query_ron_chn_summary(runid, topaz_id):
+@app.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>')
+@app.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>/')
+def query_ron_chn_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return jsonify(ron.chn_summary(topaz_id))
     
     
-@app.route('/runs/<string:runid>/query/sub_summary/<topaz_id>')
-@app.route('/runs/<string:runid>/query/sub_summary/<topaz_id>/')
-def query_ron_sub_summary(runid, topaz_id):
+@app.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>')
+@app.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>/')
+def query_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return jsonify(ron.sub_summary(topaz_id))
     
     
-@app.route('/runs/<string:runid>/report/chn_summary/<topaz_id>')
-@app.route('/runs/<string:runid>/report/chn_summary/<topaz_id>/')
-def report_ron_chn_summary(runid, topaz_id):
+@app.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>')
+@app.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>/')
+def report_ron_chn_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return render_template('reports/hill.htm',
                            d=ron.chn_summary(topaz_id))
 
-@app.route('/runs/<string:runid>/query/topaz_wepp_map')
-@app.route('/runs/<string:runid>/query/topaz_wepp_map/')
-def query_topaz_wepp_map(runid):
+
+@app.route('/runs/<string:runid>/<config>/query/topaz_wepp_map')
+@app.route('/runs/<string:runid>/<config>/query/topaz_wepp_map/')
+def query_topaz_wepp_map(runid, config):
     wd = get_wd(runid)
     translator = Watershed.getInstance(wd).translator_factory()
 
     d = dict([(wepp, translator.top(wepp=wepp)) for wepp in translator.iter_wepp_sub_ids()])
 
     return jsonify(d)
-    
-@app.route('/runs/<string:runid>/report/sub_summary/<topaz_id>')
-@app.route('/runs/<string:runid>/report/sub_summary/<topaz_id>/')
-def report_ron_sub_summary(runid, topaz_id):
+
+
+@app.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>')
+@app.route('/runs/<string:runid>/<config>/report/sub_summary/<topaz_id>/')
+def report_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return render_template('reports/hill.htm',
@@ -2445,8 +2715,8 @@ def report_ron_sub_summary(runid, topaz_id):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/resources/wepp_loss.tif')
-def resources_wepp_loss(runid):
+@app.route('/runs/<string:runid>/<config>/resources/wepp_loss.tif')
+def resources_wepp_loss(runid, config):
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
@@ -2461,9 +2731,9 @@ def resources_wepp_loss(runid):
         return exception_factory()
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/bound_coords')
-@app.route('/runs/<string:runid>/query/bound_coords/')
-def query_bound_coords(runid):
+@app.route('/runs/<string:runid>/<config>/query/bound_coords')
+@app.route('/runs/<string:runid>/<config>/query/bound_coords/')
+def query_bound_coords(runid, config):
     try:
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
@@ -2486,9 +2756,10 @@ def query_bound_coords(runid):
 # Unitizer
 #
 
-@app.route('/runs/<string:runid>/unitizer')
-@app.route('/runs/<string:runid>/unitizer/')
-def unitizer_route(runid):
+
+@app.route('/runs/<string:runid>/<config>/unitizer')
+@app.route('/runs/<string:runid>/<config>/unitizer/')
+def unitizer_route(runid, config):
 
     try:
         wd = get_wd(runid)
@@ -2506,9 +2777,9 @@ def unitizer_route(runid):
     except Exception:
         return exception_factory()
 
-@app.route('/runs/<string:runid>/unitizer_units')
-@app.route('/runs/<string:runid>/unitizer_units/')
-def unitizer_units_route(runid):
+@app.route('/runs/<string:runid>/<config>/unitizer_units')
+@app.route('/runs/<string:runid>/<config>/unitizer_units/')
+def unitizer_units_route(runid, config):
 
     try:
         wd = get_wd(runid)
@@ -2532,9 +2803,9 @@ def unitizer_units_route(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/query/baer_wgs_map')
-@app.route('/runs/<string:runid>/query/baer_wgs_map/')
-def query_baer_wgs_bounds(runid):
+@app.route('/runs/<string:runid>/<config>/query/baer_wgs_map')
+@app.route('/runs/<string:runid>/<config>/query/baer_wgs_map/')
+def query_baer_wgs_bounds(runid, config):
     try:
         wd = get_wd(runid)
         baer = Baer.getInstance(wd)
@@ -2543,15 +2814,15 @@ def query_baer_wgs_bounds(runid):
             
         return success_factory(dict(bounds=baer.bounds,
                                classes=baer.classes,
-                               imgurl='../resources/baer.png'))
+                               imgurl='resources/baer.png'))
     except Exception:
         return exception_factory()
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/view/modify_burn_class')
-@app.route('/runs/<string:runid>/view/modify_burn_class/')
-def query_baer_class_map(runid):
+@app.route('/runs/<string:runid>/<config>/view/modify_burn_class')
+@app.route('/runs/<string:runid>/<config>/view/modify_burn_class/')
+def query_baer_class_map(runid, config):
     try:
         wd = get_wd(runid)
         baer = Baer.getInstance(wd)
@@ -2564,9 +2835,9 @@ def query_baer_class_map(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/modify_burn_class', methods=['POST'])
-@app.route('/runs/<string:runid>/tasks/modify_burn_class/', methods=['POST'])
-def task_baer_class_map(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/modify_burn_class', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/modify_burn_class/', methods=['POST'])
+def task_baer_class_map(runid, config):
     try:
         wd = get_wd(runid)
         baer = Baer.getInstance(wd)
@@ -2583,8 +2854,8 @@ def task_baer_class_map(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/resources/baer.png')
-def resources_baer_sbs(runid):
+@app.route('/runs/<string:runid>/<config>/resources/baer.png')
+def resources_baer_sbs(runid, config):
     try:
         wd = get_wd(runid)
         baer = Baer.getInstance(wd)
@@ -2598,8 +2869,8 @@ def resources_baer_sbs(runid):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/tasks/upload_sbs/', methods=['POST'])
-def task_upload_sbs(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
+def task_upload_sbs(runid, config):
     wd = get_wd(runid)
     baer = Baer.getInstance(wd)
     
@@ -2629,9 +2900,9 @@ def task_upload_sbs(runid):
     return success_factory(res)
 
 
-@app.route('/runs/<runid>/tasks/run_debris_flow', methods=['POST'])
-@app.route('/runs/<runid>/tasks/run_debris_flow/', methods=['POST'])
-def run_debris_flow(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow/', methods=['POST'])
+def run_debris_flow(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
 
@@ -2644,9 +2915,30 @@ def run_debris_flow(runid):
         return exception_factory('Error Running Debris Flow')
 
 
-@app.route('/runs/<string:runid>/report/debris_flow')
-@app.route('/runs/<string:runid>/report/debris_flow/')
-def report_debris_flow(runid):
+@app.route('/runs/<string:runid>/<config>/tasks/run_ash', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/run_ash/', methods=['POST'])
+def run_ash(runid, config):
+    # get working dir of original directory
+    wd = get_wd(runid)
+
+    fire_date = request.form.get('fire_date', None)
+    ini_black_ash_depth_mm = request.form.get('ini_black_depth', None)
+    ini_white_ash_depth_mm = request.form.get('ini_white_depth', None)
+
+    try:
+        assert isfloat(ini_black_ash_depth_mm), ini_black_ash_depth_mm
+        assert isfloat(ini_white_ash_depth_mm), ini_white_ash_depth_mm
+        ash = Ash.getInstance(wd)
+        ash.run_ash(fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm))
+        return success_factory()
+
+    except:
+        return exception_factory('Error Running Ash Transport')
+
+
+@app.route('/runs/<string:runid>/<config>/report/debris_flow')
+@app.route('/runs/<string:runid>/<config>/report/debris_flow/')
+def report_debris_flow(runid, config):
     wd = get_wd(runid)
 
     ron = Ron.getInstance(wd)
@@ -2664,6 +2956,35 @@ def report_debris_flow(runid):
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            debris_flow=debris_flow,
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/<config>/report/ash')
+@app.route('/runs/<string:runid>/<config>/report/ash/')
+def report_ash(runid, config):
+    wd = get_wd(runid)
+
+    ron = Ron.getInstance(wd)
+    ash = Ash.getInstance(wd)
+    fire_date = ash.fire_date
+    ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
+    ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
+    unitizer = Unitizer.getInstance(wd)
+
+    burnclass_summary = ash.burnclass_summary()
+    recurrence_intervals, results, annuals = ash.report()
+
+    return render_template('reports/ash/ash_watershed.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           fire_date=fire_date,
+                           burnclass_summary=burnclass_summary,
+                           ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                           ini_white_ash_depth_mm=ini_white_ash_depth_mm,
+                           recurrence_intervals=recurrence_intervals,
+                           results=results,
+                           annuals=annuals,
                            ron=ron,
                            user=current_user)
 

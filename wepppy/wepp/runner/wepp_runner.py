@@ -184,4 +184,4 @@ def run_watershed(runs_dir):
        _exists(_join(runs_dir, '../output/pass_pw0.txt')):
         return True, time() - t0
 
-    raise Exception('Error running wepp for watershed \nSee <a href="../browse/wepp/runs/pw0.err">%s</a>' % log_fn)
+    raise Exception('Error running wepp for watershed \nSee <a href="browse/wepp/runs/pw0.err">%s</a>' % log_fn)

@@ -9,7 +9,7 @@
 from collections import OrderedDict
 import  numpy as np
 from pandas import DataFrame, Series
-from wepppy.all_your_base import parse_units, RowData, parse_name
+from wepppy.all_your_base import parse_units, RowData, parse_name, weibull_series
 
 from wepppy.wepp.out import Loss, Ebe
 
@@ -54,41 +54,16 @@ class ReturnPeriods:
         self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
 
-        recurrence = sorted(recurrence)
+        weibull_series
 
-        # Note that return period of the events are estimated by applying
-        # Weibull formula on annual maxima series.
-        #    T = (N + 1)/m
-        #
-        # where T is the return period, N is the number of simulation years,
-        # and m is the rank of the annual maxima event.
-
-        rec = {}
-        i = 0
-        rankind = ebe.years
-        orgind = years + 1
-        reccount = 0
-
-        while i < len(recurrence) and rankind >= 2.5:
-            retperiod = recurrence[i]
-            rankind = float(years + 1) / retperiod
-            intind = int(rankind) - 1
-
-            if intind < orgind:
-                rec[retperiod] = intind
-                orgind = intind
-                reccount += 1
-
-            i += 1
+        rec = weibull_series(recurrence, years)
 
         results = {}
-
         for colname in header:
 
             df2 = df.sort_values(by=colname, ascending=False)
 
             colname = parse_name(colname)
-            print('"%s"' % colname)
             if colname == 'Runoff Volume':
                 colname = 'Runoff'
             elif colname == 'Peak Runoff':
@@ -108,11 +83,9 @@ class ReturnPeriods:
 
                     row[cname] = v
 
-                print(row.keys())
                 row['Runoff'] = round(row['Runoff Volume'] / (wsarea * 10000.0) * 1000.0, 2)
                 results[colname][retperiod] = row
 
-        print(results)
         self.return_periods = results
         self.num_events = df.shape[0]
         self.intervals = sorted(rec.keys())
