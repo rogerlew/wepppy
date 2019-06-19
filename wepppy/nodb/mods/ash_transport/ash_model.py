@@ -116,6 +116,7 @@ class AshModel(object):
         
         # fraction of ash lost from decay for a day
         daily_relative_ash_decay = np.zeros((s_len,))
+        cum_relative_ash_decay = np.zeros((s_len,))
         
         # daily total available ash in tonne/ha
         available_ash = np.zeros((s_len,))
@@ -180,7 +181,10 @@ class AshModel(object):
             # this was determine as the derivative of 1 * exp(decomposition_rate * time_from_fire(days))
             else:
                 daily_relative_ash_decay[i] = self.decomposition_rate * math.exp(-self.decomposition_rate * dff)
-                available_ash[i] = available_ash[i - 1] * (1.0 - daily_relative_ash_decay[i])
+                if i > 0:
+                    cum_relative_ash_decay[i] = cum_relative_ash_decay[i-1] + daily_relative_ash_decay[i]
+
+                available_ash[i] = available_ash[i-1] * (1.0 - daily_relative_ash_decay[i])
                 
             #
             # model wind transport
@@ -198,7 +202,7 @@ class AshModel(object):
 
             # if not the day of the fire adjust by the cumulative proportion of ash transport
             if dff > 0:
-                proportion_ash_transport[i] -= cum_proportion_ash_transport[i - 1]
+                proportion_ash_transport[i] -= cum_proportion_ash_transport[i-1]
 
                 # clamp to 0
                 if proportion_ash_transport[i] < 0.0:
@@ -210,16 +214,13 @@ class AshModel(object):
                 cum_proportion_ash_transport[i] = proportion_ash_transport[i]
             else:
                 # on subsequent days sum up the values
-                cum_proportion_ash_transport[i] = cum_proportion_ash_transport[i - 1] + proportion_ash_transport[i]
+                cum_proportion_ash_transport[i] = cum_proportion_ash_transport[i-1] + proportion_ash_transport[i]
 
             # lookup yesterdays water transport
-            if i == 0:
-                _yesterday_wat_transport = 0.0
-            else:
-                _yesterday_wat_transport = water_transport[i - 1]
+            relative_ash_decay = 1.0 - cum_relative_ash_decay[i]
 
             # calculate wind transport
-            wind_transport[i] = (self.ini_material_available_tonneperha - _yesterday_wat_transport) * \
+            wind_transport[i] = (self.ini_material_available_tonneperha - relative_ash_decay) * \
                                 (1.0 - daily_relative_ash_decay[i]) * proportion_ash_transport[i]
 
             if wind_transport[i] < 0.0:
@@ -265,7 +266,7 @@ class AshModel(object):
 
             # calculate cumulative runoff
             if dff > 0:
-                cum_runoff[i] = cum_runoff[i - 1] + effective_runoff[i]
+                cum_runoff[i] = cum_runoff[i-1] + effective_runoff[i]
 
             # water transport is empirically modeled
             # black and white ash have their own models
