@@ -521,8 +521,8 @@ class Loss(object):
 if __name__ == "__main__":
 
 
-    loss = Loss('/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/wepp/output/loss_pw0.txt',
-                '/geodata/weppcloud_runs/88d80fb4-41b5-4fb7-a9aa-5e2de0892c4f/')
+    loss = Loss('/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/wepp/output/loss_pw0.txt',
+                '/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/')
 
     #print(loss.excluded_years)
 

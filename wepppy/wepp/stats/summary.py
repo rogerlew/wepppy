@@ -239,12 +239,11 @@ class OutletSummary(ReportBase):
             yield key, v, None, None, None
 
             key = 'Sediment Yield of Particles Under %0.3f mm' % self.fraction_under
-            units = 'kg'
+            units = 'tonne/yr'
             v *= sed_del
             v_norm = 1000.0 * v / area
             units_norm = 'kg/ha/yr'
             yield key, v, units, v_norm, units_norm
-
 
     def write(self, fp, write_header=True, run_descriptors=None):
 
@@ -283,8 +282,11 @@ class OutletSummary(ReportBase):
 
 if __name__ == "__main__":
 
-    loss = Loss('/geodata/weppcloud_runs/devvm359-de61-4a65-96cd-2db812365b9a/wepp/output/loss_pw0.txt',
-                '/geodata/weppcloud_runs/devvm359-de61-4a65-96cd-2db812365b9a/')
+    loss = Loss('/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/wepp/output/loss_pw0.txt',
+                '/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/')
 
     chn_rpt = ChannelSummary(loss)
-    print(list(chn_rpt.hdr))
+
+    out_rpt = OutletSummary(loss, fraction_under=0.16)
+    for row in out_rpt:
+        print(row)
