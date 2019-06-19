@@ -52,4 +52,8 @@
     <dd>
         <a href="view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></dd>
     {% endif %}
+    {% if 'ash' in ron.mods %}
+    <dt>Ash Transport Model (Experimental)</dt>
+    <dd><a href="hillslope/{{ d.meta.topaz_id }}/ash/" target="_blank">Run Ash Transport for Hillslope</a></dd>
+    {% endif %}
 </dl>
