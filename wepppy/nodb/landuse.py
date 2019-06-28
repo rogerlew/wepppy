@@ -287,7 +287,7 @@ class Landuse(NoDbBase):
             self.clean()
 
             if self._mode == LanduseMode.Gridded:
-                if self.config_stem in ['eu']:
+                if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
                     self._build_ESDAC()
                 elif self.config_stem in ['au']:
                     self._build_lu10v5ua()
@@ -438,17 +438,14 @@ class Landuse(NoDbBase):
             # for the landcover types in the watershed
             total_area = watershed.totalarea
             for topaz_id, k in domlc_d.items():
-                summary = watershed.sub_summary(str(topaz_id))
-                if summary is None:
-                    summary = watershed.chn_summary(str(topaz_id))
-                assert summary is not None, topaz_id
+                area = watershed.area_of(topaz_id)
                 
                 if k not in managements:
                     man = get_management_summary(k, _map)
-                    man.area = summary["area"]
+                    man.area = area
                     managements[k] = man
                 else:
-                    managements[k].area += summary["area"]
+                    managements[k].area += area
 
             for k in managements:
                 coverage = 100.0 * managements[k].area / total_area
@@ -470,7 +467,8 @@ class Landuse(NoDbBase):
         returns a list of managements sorted by coverage in
         descending order
         """
-        report = list(self.managements.values())
+        used_mans = set(self.domlc_d.values())
+        report = [s for s in list(self.managements.values()) if str(s.key) in used_mans]
         report.sort(key=lambda x: x.pct_coverage, reverse=True)
         return [man.as_dict() for man in report]
 
@@ -516,7 +514,6 @@ class Landuse(NoDbBase):
         colors = [man.color for man in mans]
 
         return list(zip(doms, descs, colors))
-
 
     def sub_summary(self, topaz_id):
         return self._x_summary(topaz_id)

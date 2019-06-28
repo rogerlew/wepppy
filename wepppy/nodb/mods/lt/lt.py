@@ -158,9 +158,7 @@ class LakeTahoe(NoDbBase):
             # need to recalculate the pct_coverages
             watershed = Watershed.getInstance(self.wd)
             for topaz_id, k in domsoil_d.items():
-                summary = watershed.sub_summary(str(topaz_id))
-                if summary is not None:
-                    _soils[k].area += summary["area"]
+                _soils[k].area += watershed.area_of(topaz_id)
 
             for k in _soils:
                 coverage = 100.0 * _soils[k].area / watershed.totalarea
