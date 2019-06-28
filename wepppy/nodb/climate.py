@@ -118,10 +118,7 @@ class Climate(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self._input_years = 30
-            if 'eu' in cfg_fn:
-                self._climatestation_mode = ClimateStationMode.EUHeuristic
-            else:
-                self._climatestation_mode = ClimateStationMode.Undefined
+            self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
 
             if 'eu' in cfg_fn:
