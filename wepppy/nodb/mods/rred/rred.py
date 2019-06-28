@@ -216,9 +216,7 @@ class Rred(NoDbBase):
             watershed = Watershed.getInstance(self.wd)
             total_area += watershed.totalarea
             for topaz_id, k in _domsoil_d.items():
-                summary = watershed.sub_summary(str(topaz_id))
-                if summary is not None:
-                    _soils[k].area += summary["area"]
+                _soils[k].area += watershed.area_of(topaz_id)
 
             for k in _soils:
                 coverage = 100.0 * _soils[k].area / total_area

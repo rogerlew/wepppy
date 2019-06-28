@@ -36,7 +36,6 @@ class RunStatistics(object):
         except:
             self.unlock()
 
-
     def increment_hillruns(self, cfg, num_hills):
         num_hills = int(num_hills)
         assert int(num_hills) == int(float(num_hills))

@@ -236,9 +236,7 @@ class Soils(NoDbBase):
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
-                summary = watershed.sub_summary(topaz_id)
-                if summary is not None:  # subcatchment
-                    soils[k].area += summary["area"]
+                soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.totalarea
@@ -287,9 +285,7 @@ class Soils(NoDbBase):
 
             soils, domsoil_d, clay_d, sand_d = build_func(orders, soils_dir)
             for topaz_id, k in domsoil_d.items():
-                summary = watershed.sub_summary(topaz_id)
-                if summary is not None:  # subcatchment
-                    soils[k].area += summary["area"]
+                soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.totalarea
@@ -320,10 +316,10 @@ class Soils(NoDbBase):
 
     def build(self):
         if self.mode == SoilsMode.Gridded:
-            if self.config_stem in ['eu']:
+            if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
-            elif self.config_stem in ['au']:
+            elif self.config_stem in ['au', 'au-fire']:
                 from wepppy.au.soils import build_asris_soils
                 self._build_by_identify(build_asris_soils)
             else:
@@ -470,9 +466,7 @@ class Soils(NoDbBase):
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
-                summary = watershed.sub_summary(topaz_id)
-                if summary is not None:  # subcatchment
-                    soils[k].area += summary["area"]
+                soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
                 clay = clay_d[k]
@@ -543,9 +537,7 @@ class Soils(NoDbBase):
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
-                summary = watershed.sub_summary(topaz_id)
-                if summary is not None:  # subcatchment
-                    soils[k].area += summary["area"]
+                soils[k].area += watershed.area_of(topaz_id)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -616,9 +608,7 @@ class Soils(NoDbBase):
 
             total_area = watershed.totalarea
             for topaz_id, k in domsoil_d.items():
-                summary = watershed.sub_summary(topaz_id)
-                if summary is not None:  # subcatchment
-                    soils[k].area += summary["area"]
+                soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / total_area
@@ -655,7 +645,7 @@ class Soils(NoDbBase):
         returns a list of managements sorted by coverage in
         descending order
         """
-        used_soils = self.domsoil_d.values()
+        used_soils = set(self.domsoil_d.values())
         report = [s for s in list(self.soils.values()) if str(s.mukey) in used_soils]
         report.sort(key=lambda x: x.pct_coverage, reverse=True)
         return [soil.as_dict() for soil in report]
