@@ -89,6 +89,33 @@
         </div>
       </div>
       <div style="height: 2em;"></div>
+      <div style="height: 2em;"></div>
+      <div class="jumbotron row">
+        <div class="col-lg-3">
+            <img src="{{  url_for('static', filename='images/interfaces/europe.png') }}" height="200" width="200" style="width: 200px; height: 200px;" />
+        </div>
+        <div id="pep" class="col-lg-8">
+          <h1>WEPPcloud-EU</h1>
+          <p>The WEPPcloud for Europe.</p>
+          <p>Managements are assigned based on ESDAC landuses. Soils are built from ESDAC and EU-SoilHydroGrids data.
+              U.S. climate stations are selected based on E-OBS monthly precip and temperatures.
+          </p>
+          <p>The PeP interfaces provide post fire erosion modeling and ash transport modeling. Method 1 assigns landuse
+              and soils based on burn severity. Method 2 parameterizes soils based on burn severity and soil texture
+              using Disturbed WEPP soil files.
+          </p>
+          <p>
+            <a class="btn btn-primary btn-lg" href="create/eu" role="button">Start EU WEPPcloud Run (Experimental)</a><br><br>
+            <a class="btn btn-primary" href="create/eu-fire" role="button">PeP Method 1 (Experimental)</a><br><br>
+            <a class="btn btn-primary" href="create/eu-fire2" role="button">PeP Method 2 (Experimental)</a>
+            <p>{{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} EU hillslopes ran since January 1, 2019</p>
+            <p>{{ runs_counter['eu-fire_projects'] }} PeP Method 1 projects and {{ commafy(runs_counter['eu_hillruns']) }} PeP Method 1 hillslopes ran since January 1, 2019</p>
+            <p>{{ runs_counter['eu-fire2_projects'] }} PeP Method 2 projects and {{ commafy(runs_counter['eu_hillruns']) }} PeP Method 2 hillslopes ran since January 1, 2019</p>
+            <!--a class="btn btn-primary" href="create/baer-ssurgo" role="button">SURGO Modified Soils (Experimental)</a-->
+          </p>
+        </div>
+      </div>
+      <div style="height: 2em;"></div>
       <h1>Site Specific Resources</h1>
       <div class="jumbotron row" style="padding: 2rem 2rem;">
         <div class="col-lg-3">

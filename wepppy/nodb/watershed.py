@@ -246,3 +246,10 @@ class Watershed(NoDbBase):
     def get_ws(self):
         with open(self.wat_js) as fp:
             return json.load(fp)
+
+    def area_of(self, topaz_id):
+        topaz_id = str(topaz_id)
+        if topaz_id.endswith('4'):
+            return self._chns_summary[topaz_id].area
+        else:
+            return self._subs_summary[topaz_id].area
