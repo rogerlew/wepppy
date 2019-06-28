@@ -366,6 +366,8 @@ class Baer(NoDbBase):
             if 'rred' in self.mods:
                 rred = Rred.getInstance(self.wd)
                 rred.build_soils()
+            elif self._config == 'eu-fire2.cfg':
+                self._assign_eu_soils()
             elif self._config == 'baer-ssurgo.cfg':
                 self._build_ssurgo_modified_soils()
             else:
@@ -489,9 +491,7 @@ class Baer(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
         total_area = watershed.totalarea
         for topaz_id, k in _domsoil_d.items():
-            summary = watershed.sub_summary(str(topaz_id))
-            if summary is not None:
-                _soils[k].area += summary["area"]
+            _soils[k].area += watershed.area_of(topaz_id)
 
         for k in _soils:
             coverage = 100.0 * _soils[k].area / total_area
@@ -499,6 +499,53 @@ class Baer(NoDbBase):
 
         try:
             soils.lock()
+            soils.soils = _soils
+            soils.domsoil_d = _domsoil_d
+            soils.dump_and_unlock()
+
+        except Exception:
+            soils.unlock('-f')
+            raise
+
+    def _assign_eu_soils(self):
+
+        wd = self.wd
+
+        ron = Ron.getInstance(wd)
+        soils = Soils.getInstance(wd)
+        landuse = Landuse.getInstance(wd)
+
+        # noinspection PyBroadExpection
+        try:
+            soils.lock()
+
+            _domsoil_d = deepcopy(soils.domsoil_d)
+            _soils = deepcopy(soils.soils)
+
+            domlc_d = landuse.domlc_d
+
+            for topaz_id, mukey in soils.domsoil_d.items():
+                dom = domlc_d[topaz_id]
+
+                if dom in ['131', '132']:
+                    _domsoil_d[topaz_id] = '{}_lowmod_sev'.format(_domsoil_d[topaz_id])
+                elif dom in ['133']:
+                    _domsoil_d[topaz_id] = '{}_high_sev'.format(_domsoil_d[topaz_id])
+
+                # need to recalculate the pct_coverages
+                # total_area = 0.0
+                for k in _soils:
+                    _soils[k].area = 0.0
+
+                watershed = Watershed.getInstance(self.wd)
+                total_area = watershed.totalarea
+                for topaz_id, k in _domsoil_d.items():
+                    _soils[k].area += watershed.area_of(topaz_id)
+
+                for k in _soils:
+                    coverage = 100.0 * _soils[k].area / total_area
+                    _soils[k].pct_coverage = coverage
+
             soils.soils = _soils
             soils.domsoil_d = _domsoil_d
             soils.dump_and_unlock()
@@ -568,10 +615,7 @@ class Baer(NoDbBase):
                 watershed = Watershed.getInstance(self.wd)
                 total_area = watershed.totalarea
                 for topaz_id, k in _domsoil_d.items():
-                    summary = watershed.sub_summary(str(topaz_id))
-                    if summary is not None:
-                        _soils[k].area += summary["area"]
-                #        total_area += summary["area"]
+                    _soils[k].area += watershed.area_of(topaz_id)
 
                 for k in _soils:
                     coverage = 100.0 * _soils[k].area / total_area

@@ -9,6 +9,7 @@ from os.path import exists as _exists
 
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture
+from wepppy.wepp.soils.soilsdb import read_disturbed_wepp_soil_fire_pars
 from wepppy.au.landuse_201011 import Lu10v5ua
 
 from wepppy.au.soils.asris_2001.asris_client import query_asris
@@ -169,6 +170,7 @@ def build_asris_soils(orders, soil_dir):
         kr = erod_d['rill']
         shcrit = erod_d['shear']
 
+        ofe_indx = len(s)
         s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
             slid=soil_type, texid=tex_top,
             nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=shcrit, avke=ks_top))
@@ -200,9 +202,51 @@ def build_asris_soils(orders, soil_dir):
                 BuildDate=str(datetime.now),
                 Description=soil_type)
 
+            # create low severity soil file
+            lowmod_key = '{}_lowmod_sev'.format(key)
+            soil_pars = read_disturbed_wepp_soil_fire_pars(tex_top, 'low')
+            s[ofe_indx] = "'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
+                slid=soil_type, texid=tex_top, nsl=1, salb=soil_pars['salb'], sat=soil_pars['sat'],
+                ki=soil_pars['ki'], kr=soil_pars['kr'], shcrit=soil_pars['shcrit'], avke=soil_pars['avke'])
+
+            fname = lowmod_key + '.sol'
+            fn = _join(soil_dir, fname)
+            with open(fn, 'w') as fp:
+                fp.write('\n'.join(s))
+
+            soils[lowmod_key] = SoilSummary(
+                Mukey=lowmod_key,
+                FileName=fname,
+                soils_dir=soil_dir,
+                BuildDate=str(datetime.now),
+                Description=soil_type)
+
+            # create high severity soil file
+            high_key = '{}_high_sev'.format(key)
+            soil_pars = read_disturbed_wepp_soil_fire_pars(tex_top, 'high')
+            s[ofe_indx] = "'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
+                slid=soil_type, texid=tex_top, nsl=1, salb=soil_pars['salb'], sat=soil_pars['sat'],
+                ki=soil_pars['ki'], kr=soil_pars['kr'], shcrit=soil_pars['shcrit'], avke=soil_pars['avke'])
+
+            fname = high_key + '.sol'
+            fn = _join(soil_dir, fname)
+            with open(fn, 'w') as fp:
+                fp.write('\n'.join(s))
+
+            soils[high_key] = SoilSummary(
+                Mukey=high_key,
+                FileName=fname,
+                soils_dir=soil_dir,
+                BuildDate=str(datetime.now),
+                Description=soil_type)
+
         domsoil_d[topaz_id] = key
         clay_d[key] = clay_top
+        clay_d[lowmod_key] = clay_top
+        clay_d[high_key] = clay_top
         sand_d[key] = sand_top
+        sand_d[lowmod_key] = sand_top
+        sand_d[high_key] = sand_top
 
     return soils, domsoil_d, clay_d, sand_d
 

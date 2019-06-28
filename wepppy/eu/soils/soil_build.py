@@ -3,6 +3,7 @@ import json
 import string
 from os.path import split as _split
 from os.path import join as _join
+from os.path import exists as _exists
 
 from glob import glob
 from datetime import datetime
@@ -14,11 +15,14 @@ from wepppy.all_your_base import RasterDatasetInterpolator
 from wepppy.eu.soils.esdac import ESDAC, _attr_fmt
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 
+from wepppy.wepp.soils.soilsdb import read_disturbed_wepp_soil_fire_pars
+
 _texture_defaults = {'clay loam': {'shcrit': 0.5, 'sand': 25.0, 'clay': 30.0, 'orgmat': 5.0, 'cec': 25.0, 'rfg': 15.0},
                      'silt loam': {'shcrit': 1.5, 'sand': 25.0, 'clay': 15.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 15.0},
                      'loam': {'shcrit': 1.0, 'sand': 45.0, 'clay': 20.0, 'orgmat': 5.0, 'cec': 20.0, 'rfg': 20.0},
                      'sand loam': {'shcrit': 2.0, 'sand': 65.0, 'clay': 10.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 25.0},
                      None: None}
+
 
 _tex_short_to_simple_texture = {
     '0': None,
@@ -30,6 +34,7 @@ _tex_short_to_simple_texture = {
     '5': 'clay loam',
 }
 
+
 _il_short_to_depth_mm = {
     '0':   None,
     '1':   1500,
@@ -37,6 +42,7 @@ _il_short_to_depth_mm = {
     '3':   600,
     '4':   400
 }
+
 
 _texdepchg_short_to_depth_mm = {
     '0': None,
@@ -57,7 +63,8 @@ _octop_short_to_pct = {
     '': 5.0
 }
 
-_disclaimer = """\
+
+_disclaimer = '''\
 # THIS FILE AND THE CONTAINED DATA IS PROVIDED BY THE UNIVERSITY OF IDAHO 
 # 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
@@ -69,11 +76,11 @@ _disclaimer = """\
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
-# """
+# '''
 
 
 def build_esdac_soils(orders, soil_dir):
-    """
+    '''
     0   No information  -->  None
     9   No mineral texture (Peat soils)  --> ?
     1   Coarse (18% < clay and > 65% sand)  -->  sand loam
@@ -82,7 +89,7 @@ def build_esdac_soils(orders, soil_dir):
     3   Medium fine (< 35% clay and < 15% sand)  -->  silt loam
     4   Fine (35% < clay < 60%)  -->  clay loam
     5   Very fine (clay > 60 %)  -->  clay loam
-    """
+    '''
     esd = ESDAC()
     vars = ['txsrfdo', 'txsubdo', 'txdepchg',
             'fao90lv1', 'cec_top', 'cec_sub', 'il',
@@ -188,6 +195,7 @@ def build_esdac_soils(orders, soil_dir):
 
         avke = ks['sl1'][1] * 0.004166667
 
+        ofe_indx = len(s)
         s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
             slid=fao90lev1, texid=srf_simple_texture,
             nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=srf_defaults['shcrit'], avke=avke))
@@ -235,7 +243,7 @@ def build_esdac_soils(orders, soil_dir):
 
         if key not in soils:
 
-            fname = key + ".sol"
+            fname = key + '.sol'
             fn = _join(soil_dir, fname)
             with open(fn, 'w') as fp:
                 fp.write('\n'.join(s))
@@ -247,8 +255,50 @@ def build_esdac_soils(orders, soil_dir):
                 BuildDate=str(datetime.now),
                 Description=desc)
 
+            # create low severity soil file
+            lowmod_key = '{}_lowmod_sev'.format(key)
+            soil_pars = read_disturbed_wepp_soil_fire_pars(srf_simple_texture, 'low')
+            s[ofe_indx] = "'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
+                slid=fao90lev1, texid=srf_simple_texture, nsl=1, salb=soil_pars['salb'], sat=soil_pars['sat'],
+                ki=soil_pars['ki'], kr=soil_pars['kr'], shcrit=soil_pars['shcrit'], avke=soil_pars['avke'])
+
+            fname = lowmod_key + '.sol'
+            fn = _join(soil_dir, fname)
+            with open(fn, 'w') as fp:
+                fp.write('\n'.join(s))
+
+            soils[lowmod_key] = SoilSummary(
+                Mukey=lowmod_key,
+                FileName=fname,
+                soils_dir=soil_dir,
+                BuildDate=str(datetime.now),
+                Description=desc)
+
+            # create high severity soil file
+            high_key = '{}_high_sev'.format(key)
+            soil_pars = read_disturbed_wepp_soil_fire_pars(srf_simple_texture, 'high')
+            s[ofe_indx] = "'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
+                slid=fao90lev1, texid=srf_simple_texture, nsl=1, salb=soil_pars['salb'], sat=soil_pars['sat'],
+                ki=soil_pars['ki'], kr=soil_pars['kr'], shcrit=soil_pars['shcrit'], avke=soil_pars['avke'])
+
+            fname = high_key + '.sol'
+            fn = _join(soil_dir, fname)
+            with open(fn, 'w') as fp:
+                fp.write('\n'.join(s))
+
+            soils[high_key] = SoilSummary(
+                Mukey=high_key,
+                FileName=fname,
+                soils_dir=soil_dir,
+                BuildDate=str(datetime.now),
+                Description=desc)
+
         domsoil_d[topaz_id] = key
         clay_d[key] = horizon0['clay']
+        clay_d[lowmod_key] = horizon0['clay']
+        clay_d[high_key] = horizon0['clay']
         sand_d[key] = horizon0['sand']
+        sand_d[lowmod_key] = horizon0['sand']
+        sand_d[high_key] = horizon0['sand']
 
     return soils, domsoil_d, clay_d, sand_d
