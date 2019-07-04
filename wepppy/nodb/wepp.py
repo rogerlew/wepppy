@@ -98,31 +98,31 @@ class BaseflowOpts(object):
         Stores the coeffs that go into gwcoeff.txt
         """
         # Initial groundwater storage (mm)
-        self.gwstorage = 200 
-        
+        self.gwstorage = 200
+
         # Baseflow coefficient (per day)
         self.bfcoeff = 0.04
 
-        # Deep seepage coefficient (per day)        
-        self.dscoeff = 0 
-        
+        # Deep seepage coefficient (per day)
+        self.dscoeff = 0
+
         # Watershed groundwater baseflow threshold area (ha)
-        self.bfthreshold = 1 
+        self.bfthreshold = 1
 
     def parse_inputs(self, kwds):
         self.gwstorage = float(kwds['gwstorage'])
         self.bfcoeff = float(kwds['bfcoeff'])
         self.dscoeff = float(kwds['dscoeff'])
         self.bfthreshold = float(kwds['bfthreshold'])
-        
+
     @property
     def contents(self):
-        return ( 
+        return (
             '{0.gwstorage}\tInitial groundwater storage (mm)\n'
             '{0.bfcoeff}\tBaseflow coefficient (per day)\n'
             '{0.dscoeff}\tDeep seepage coefficient (per day)\n'
             '{0.bfthreshold}\tWatershed groundwater baseflow threshold area (ha)\n\n'
-            .format(self) 
+            .format(self)
         )
 
 
@@ -133,14 +133,14 @@ def validate_phosphorus_txt(fn):
     lines = [L for L in lines if not L.strip() == '']
     if 'Phosphorus concentration' != lines[0].strip():
         return False
-     
+
     opts = [isfloat(L.split()[0]) for L in lines[1:]]
     if len(opts) != 4:
         return False
-        
+
     if not all(opts):
         return False
-        
+
     return True
 
 
@@ -148,13 +148,13 @@ class PhosphorusOpts(object):
     def __init__(self, surf_runoff=None, lateral_flow=None, baseflow=None, sediment=None):
         # Surface runoff concentration (mg/l)
         self.surf_runoff = surf_runoff
-        
+
         # Subsurface lateral flow concentration (mg/l)
         self.lateral_flow = lateral_flow
-        
+
         # Baseflow concentration (mg/l)
         self.baseflow = baseflow
-        
+
         # Sediment concentration (mg/kg)
         self.sediment = sediment
 
@@ -167,23 +167,23 @@ class PhosphorusOpts(object):
             self.sediment = float(kwds['sediment'])
         except Exception:
             pass
-    
+
     @property
     def isvalid(self):
         return isfloat(self.surf_runoff) and \
                isfloat(self.lateral_flow) and \
                isfloat(self.baseflow) and \
                isfloat(self.sediment)
-        
+
     @property
     def contents(self):
-        return ( 
+        return (
             'Phosphorus concentration\n'
             '{0.surf_runoff}\tSurface runoff concentration (mg/l)\n'
             '{0.lateral_flow}\tSubsurface lateral flow concentration (mg/l)\n'
             '{0.baseflow}\tBaseflow concentration (mg/l)\n'
             '{0.sediment}\tSediment concentration (mg/kg)\n\n'
-            .format(self) 
+            .format(self)
         )
 
     def asdict(self):
@@ -287,13 +287,13 @@ class Wepp(NoDbBase, LogMixin):
         try:
             self.baseflow_opts.parse_inputs(kwds)
             self.phosphorus_opts.parse_inputs(kwds)
-            
+
             self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
             raise
-            
+
     @property
     def has_run(self):
         output_dir = self.output_dir
@@ -309,9 +309,9 @@ class Wepp(NoDbBase, LogMixin):
     #
     def prep_hillslopes(self):
         self.log('Prepping Hillslopes... ')
-    
+
         translator = Watershed.getInstance(self.wd).translator_factory()
-        
+
         # get translator
         self._prep_slopes(translator)
         self._prep_managements(translator)
@@ -350,33 +350,30 @@ class Wepp(NoDbBase, LogMixin):
 
         # noinspection PyMethodFirstArgAssignment
         self = self.getInstance(self.wd)
-        
+
         fn = _join(self.runs_dir, 'phosphorus.txt')
         if self.phosphorus_opts.isvalid:
             with open(fn, 'w') as fp:
                 fp.write(self.phosphorus_opts.contents)
-        
+
         if _exists(fn):
             if not validate_phosphorus_txt(fn):
                 os.remove(fn)
-                
+
     def _prep_baseflow(self):
         fn = _join(self.runs_dir, 'gwcoeff.txt')
         with open(fn, 'w') as fp:
             fp.write(self.baseflow_opts.contents)
-            
+
     def clean(self):
-        try:
-            if _exists(self.status_log):
-                os.remove(self.status_log)
-        except:
-            self.status_log = _join(self.runs_dir, 'status.log')
+        if _exists(self.status_log):
+            os.remove(self.status_log)
 
         runs_dir = self.runs_dir
         if _exists(runs_dir):
             shutil.rmtree(runs_dir)
         os.mkdir(runs_dir)
-            
+
         output_dir = self.output_dir
         if _exists(output_dir):
             shutil.rmtree(output_dir)
@@ -386,7 +383,7 @@ class Wepp(NoDbBase, LogMixin):
         if _exists(plot_dir):
             shutil.rmtree(plot_dir)
         os.mkdir(plot_dir)
-            
+
         stats_dir = self.stats_dir
         if _exists(stats_dir):
             shutil.rmtree(stats_dir)
@@ -401,16 +398,16 @@ class Wepp(NoDbBase, LogMixin):
         if _exists(fp_output_dir):
             shutil.rmtree(fp_output_dir)
         os.mkdir(fp_output_dir)
-            
+
     def _prep_slopes(self, translator):
         watershed = Watershed.getInstance(self.wd)
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
-        
+
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
-            
+
             src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
             shutil.copyfile(src_fn, dst_fn)
@@ -422,7 +419,7 @@ class Wepp(NoDbBase, LogMixin):
                     src_fn = _join(wat_dir, fn)
                     dst_fn = _join(fp_runs_dir, fn)
                     shutil.copyfile(src_fn, dst_fn)
-            
+
     def _prep_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
         years = Climate.getInstance(self.wd).input_years
@@ -476,14 +473,16 @@ class Wepp(NoDbBase, LogMixin):
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
-            cli_path = _join(cli_dir, climate.cli_fn)
+
+            cli_summary = climate.sub_summary(topaz_id)
+            cli_path = _join(cli_dir, cli_summary['cli_fn'])
             shutil.copyfile(cli_path, dst_fn)
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
                     shutil.copyfile(cli_path, dst_fn)
-                
+
     def _make_hillslope_runs(self, translator):
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
@@ -621,7 +620,7 @@ class Wepp(NoDbBase, LogMixin):
 
     #
     # watershed
-    #    
+    #
     def prep_watershed(self, erodibility=None, critical_shear=None):
         self.log('Prepping Watershed... ')
 
@@ -645,35 +644,35 @@ class Wepp(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         structure = watershed.structure
         runs_dir = self.runs_dir
-        
+
         s = ['99.1']
         for L in structure:
             s2 = "2    {} {} {}   "\
                  .format(*[translator.wepp(top=v) for v in L[1:4]])
-                
+
             s2 += "{} {} {}   {} {} {}"\
                   .format(*[translator.wepp(top=v) for v in L[4:]])
 #                .format(*[translator.chn_enum(top=v) for v in L[4:]])
-                
+
             s.append(s2)
-            
+
         with open(_join(runs_dir, 'pw0.str'), 'w') as fp:
             fp.write('\n'.join(s) + '\n')
-            
+
     def _prep_channel_slopes(self):
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
-        
+
         shutil.copyfile(_join(wat_dir, 'channels.slp'),
                         _join(runs_dir, 'pw0.slp'))
-                        
+
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
                           channel_routing_method=ChannelRoutingMethod.MuskingumCunge):
         assert translator is not None
 
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
-        
+
         chn_n = watershed.chn_n
 
         fp = open(_join(runs_dir, 'pw0.chn'), 'w')
@@ -693,7 +692,7 @@ class Wepp(NoDbBase, LogMixin):
             fp.write(contents)
             fp.write('\n')
         fp.close()
-        
+
     def _prep_impoundment(self):
         runs_dir = self.runs_dir
         with open(_join(runs_dir, 'pw0.imp'), 'w') as fp:
@@ -776,11 +775,11 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 """.format(erodibility=erodibility, critical_shear=critical_shear))
 
         fp.close()
-        
+
     def _prep_watershed_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
         runs_dir = self.runs_dir
-    
+
         years = Climate.getInstance(self.wd).input_years
 
         """
@@ -828,7 +827,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         dst_fn = _join(runs_dir, 'pw0.cli')
         cli_path = _join(self.cli_dir, climate.cli_fn)
         shutil.copyfile(cli_path, dst_fn)
-    
+
     def _make_watershed_run(self, translator):
         runs_dir = self.runs_dir
         wepp_ids = list(translator.iter_wepp_sub_ids())
@@ -841,7 +840,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
             make_ss_watershed_run(wepp_ids, runs_dir)
         else:
             make_watershed_run(years, wepp_ids, runs_dir)
-        
+
     def run_watershed(self):
         wd  = self.wd
         self.log('Running Watershed... ')
@@ -960,14 +959,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         except Exception:
             self.unlock('-f')
             raise
-        
+
     def query_sub_val(self, measure):
         wd = self.wd
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         report = Loss(loss_pw0, self.has_phosphorus, self.wd)
-        
+
         d = {}
         try:
             for row in report.hill_tbl:

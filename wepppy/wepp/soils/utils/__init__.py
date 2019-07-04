@@ -82,6 +82,48 @@ def simple_texture(clay, sand):
     return None
 
 
+def _soil_texture(sand, clay):
+    assert sand + clay <= 100
+    silt = 100.0 - sand - clay
+
+    if clay >= 40:
+        if silt >= 40:
+            return 'silty clay'
+        elif sand <= 45:
+            return 'clay'
+
+    if clay >= 35 and sand > 45:
+        return 'sandy clay'
+
+    if clay >= 27:
+        if sand <= 20:
+            return 'silty clay loam'
+        elif sand <= 45:
+            return 'clay loam'
+    else:
+        if silt >= 50:
+            if clay < 12.0 and silt >= 80:
+                return 'silt'
+            return 'silt loam'
+        elif silt >= 28 and clay >= 7 and sand <= 52:
+            return 'loam'
+
+    if clay >= 20 and sand > 45 and silt <= 28:
+        return 'sandy clay loam'
+    else:
+        if silt + 1.5 * clay < 15:
+            return 'sand'
+        elif silt + 2 * clay < 30:
+            return 'loamy sand'
+        return 'sandy loam'
+
+
+def soil_texture(sand, clay):
+    res = _soil_texture(sand, clay)
+    assert res is not None
+    return res
+
+
 def soil_specialization(src, dst, replacements: SoilReplacements):
     """
     Creates a new soil file based on soil_in_fname and makes replacements

@@ -6,20 +6,23 @@
     <p>
     <a href="archive/">Download Zip Archive of the Project</a>
     </p>
+    {% if 'rhem' not in ron.mods %}
     <h4>Daily Waterbalance Report</h4>
     <p>
     <a href="resources/wepp/totalwatsed.csv">Download totalwatsed.csv</a>
     </p>
+    {% endif %}
     <h4>Arcmap Resources</h4>
     <p>
     <a href="export/arcmap/">Download Zip Archive with gtiffs and shapefiles</a>
     </p>
+    {% if 'rhem' not in ron.mods %}
     <h4>ERMiT</h4>
     <p>
     <a href="export/ermit/">Download Hillslope Input CSV for ERMiT and Disturbed WEPP</a>
-
     </p>
     <p>
     <a href="https://forest.moscowfsl.wsu.edu/fswepp/batch/">Download the ERMiT and Disturbed WEPP batch processing spreadsheets</a>
     </p>
+    {% endif %}
 </div>
