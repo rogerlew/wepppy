@@ -1,0 +1,67 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_title %}Average Annuals by Hillslope{% endblock %}
+{% block report_content %}
+<h2>RHEM Results Summary</h2>
+<h5>Average Annual Summary for Hillslopes
+    <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+</h5>
+<table class="table table-condensed" id="hill_tbl">
+  <thead>
+    <tr>
+      <th>Topaz ID</th>
+      <th colspan="2">Runoff</th>
+      <th colspan="2">Sediment Yield</th>
+      <th colspan="2">Soil Loss</th>
+      <th colspan="2">Rain</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>over hill</th>
+      <th>per unit</th>
+      <th>over hill</th>
+      <th>per unit</th>
+      <th>over hill</th>
+      <th>per unit</th>
+      <th>over hill</th>
+      <th>per unit</th>
+    </tr>
+    <tr>
+      <th>&nbsp;</th>
+      <th>{{ unitizer_units('m^3/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('mm/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('tonne/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('tonne/ha/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('tonne/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('tonne/ha/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('m^3/yr') | safe }}&nbsp;</th>
+      <th>{{ unitizer_units('mm/yr') | safe }}&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for topaz_id in rhempost.hill_summaries %}
+    <tr>
+      <td>{{  topaz_id }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg-Runoff (m^3/yr)'], 'm^3/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg-Runoff (mm/yr)'], 'mm/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg-SY (tonne/yr)'], 'tonne/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg-SY (tonne/ha/yr)'], 'tonne/ha/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg-Soil-Loss (tonne/yr)'], 'tonne/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg-Soil-Loss (tonne/ha/yr)'], 'tonne/ha/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg. Precipitation (m^3/yr)'], 'm^3/yr') | safe }}</td>
+      <td>{{ unitizer(rhempost.hill_summaries[topaz_id].annuals['Avg. Precipitation (mm/yr)'], 'mm/yr') | safe }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <th>Watershed</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg-Runoff (m^3/yr)'], 'm^3/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg-Runoff (mm/yr)'], 'mm/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg-SY (tonne/yr)'], 'tonne/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg-SY (tonne/ha/yr)'], 'tonne/ha/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg-Soil-Loss (tonne/yr)'], 'tonne/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg-Soil-Loss (tonne/ha/yr)'], 'tonne/ha/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg. Precipitation (m^3/yr)'], 'm^3/yr') | safe }}</th>
+      <th>{{ unitizer(rhempost.watershed_annuals['Avg. Precipitation (mm/yr)'], 'mm/yr') | safe }}</th>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

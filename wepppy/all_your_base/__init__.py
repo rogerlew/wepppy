@@ -308,11 +308,11 @@ def wmesque_retrieve(dataset, extent, fname, cellsize):
     global wmesque_url
 
 
-    assert dataset in ['ned1/2016',
-                       'eu/eu-dem-v1.1',
-                       'au/srtm-1s-dem-h',
-                       'ssurgo/201703',
-                       'nlcd/2011'], '"%s"' % dataset
+    #assert dataset in ['ned1/2016',
+    #                   'eu/eu-dem-v1.1',
+    #                   'au/srtm-1s-dem-h',
+    #                   'ssurgo/201703',
+    #                   'nlcd/2011'], '"%s"' % dataset
 
     assert isfloat(cellsize)
 

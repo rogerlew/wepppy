@@ -1,0 +1,49 @@
+<h5>Run Summary</h5>
+ <dl class="dl-horizontal">
+    <dt>Hillslopes Ran:</dt>
+    <dd>{{subs_n}}</dd>
+    <dt>Elapsed Run Time:</dt>
+    <dd>{{run_time}}</dd>
+</dl>
+ <h5>Watershed Annual Averages</h5>
+ <table class="table table-condensed" >
+    <thead>
+      <tr>
+        <th>Measure</th>
+        <th>over watershed</th>
+        <th>units</th>
+        <th>per unit area of watershed</th>
+        <th>units</th>
+      </tr>
+    </thead>
+     <tbody>
+      <tr>
+        <td>Average Runoff &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg-Runoff (m^3/yr)'], 'm^3/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('m^3/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg-Runoff (mm/yr)'], 'mm/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('mm/yr') | safe }} &nbsp;</td>
+      </tr>
+      <tr>
+        <td>Average Sediment Yield &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg-SY (tonne/yr)'], 'tonne/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('tonne/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg-SY (tonne/ha/yr)'], 'tonne/ha/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('tonne/ha/yr') | safe }} &nbsp;</td>
+      </tr>
+      <tr>
+        <td>Average Soil Loss &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg-Soil-Loss (tonne/yr)'], 'tonne/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('tonne/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg-Soil-Loss (tonne/ha/yr)'], 'tonne/ha/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('tonne/ha/yr') | safe }} &nbsp;</td>
+      </tr>
+      <tr>
+        <td>Average Rain &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg. Precipitation (m^3/yr)'], 'm^3/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('m^3/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer(rhempost.watershed_annuals['Avg. Precipitation (mm/yr)'], 'mm/yr') | safe }} &nbsp;</td>
+        <td>{{ unitizer_units('mm/yr') | safe }} &nbsp;</td>
+      </tr>
+    </tbody>
+ </table>

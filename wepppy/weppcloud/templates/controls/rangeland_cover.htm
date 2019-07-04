@@ -1,0 +1,115 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}rangeland_cover_form{% endblock %}
+{% block form_title %}Rangeland Cover Options{% endblock %}
+{% block inputs %}
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <label class="radio-inline">
+                <input type="radio" class="disable-readonly" value="0" id="rangeland_cover_mode0" name="rangeland_cover_mode"
+                {% if rangeland_cover.mode == 0 %}checked{% endif %}> Determine Per Hillslope</label>
+        </div>
+        <div class="col-sm-6">
+            <label class="radio-inline">
+                <input type="radio" class="disable-readonly" value="1" id="rangeland_cover_mode1" name="rangeland_cover_mode"
+                {% if rangeland_cover.mode == 1 %}checked{% endif %}> Single Cover for Watershed</label>
+        </div>
+    </div>
+    <h5>Foliar Cover (%)</h5>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_bunchgrass_cover">Bunch Grass</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_bunchgrass_cover"
+                   name="bunchgrass_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.bunchgrass_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_forbs_cover">Forbs/Annuals</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_forbs_cover"
+                   name="forbs_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.forbs_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_sodgrass_cover">Sod Grass</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_sodgrass_cover"
+                   name="sodgrass_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.sodgrass_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_shrub_cover">Shrub</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_shrub_cover"
+                   name="shrub_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.shrub_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <h5>Ground Cover (%)</h5>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_basal_cover">Basal Plant Cover</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_basal_cover"
+                   name="basal_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.basal_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_rock_cover">Rock</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_rock_cover"
+                   name="rock_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.rock_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_litter_cover">Litter</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_litter_cover"
+                   name="litter_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.litter_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_cryptogams_cover">Biological Crusts Cover</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_cryptogams_cover"
+                   name="cryptogams_cover"
+                   class="form-control mr-sm-3 disable-readonly"
+                   type="text" value="{{ rangeland_cover.cryptogams_cover_default}}" aria-label="Lon, Lat">
+        </div>
+    </div>
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button id="btn_build_rangeland_cover" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Build Rangeland Cover</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_build_rangeland_cover"></small>
+        </div>
+    </div>
+{% endblock %}

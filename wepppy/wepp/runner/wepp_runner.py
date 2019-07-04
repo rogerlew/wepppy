@@ -21,16 +21,16 @@ _wepp = _join(_thisdir, "../", "bin", "wepp")
 
 def _template_loader(fn):
     global _template_dir
-    
+
     with open(_join(_template_dir, fn)) as fp:
         _template = fp.readlines()
-        
+
         # the watershedslope.template contains comments.
         # here we strip those out
         _template = [L[:L.find('#')] for L in _template]
         _template = [L.strip() for L in _template]
         _template = '\n'.join(_template)
-        
+
     return _template
 
 
@@ -74,10 +74,10 @@ def make_flowpath_run(fp, sim_years, runs_dir):
 
 def make_hillslope_run(wepp_id, sim_years, runs_dir):
     _hill_template = hill_template_loader()
-    
-    s = _hill_template.format(wepp_id=wepp_id, 
+
+    s = _hill_template.format(wepp_id=wepp_id,
                               sim_years=sim_years)
-            
+
     fn = _join(runs_dir, 'p%s.run' % wepp_id)
     with open(fn, 'w') as fp:
         fp.write(s)
@@ -117,7 +117,7 @@ def run_hillslope(wepp_id, runs_dir):
         for L in lines:
             if 'WEPP COMPLETED HILLSLOPE SIMULATION SUCCESSFULLY' in L:
                 return True, wepp_id, time() - t0
-                    
+
     raise Exception('Error running wepp for wepp_id %i\nSee %s'
                     % (wepp_id, log_fn))
 
@@ -152,18 +152,18 @@ def run_flowpath(flowpath, runs_dir):
 
 
 def make_watershed_run(sim_years, wepp_ids, runs_dir):
-    
+
     block = []
     for wepp_id in wepp_ids:
         block.append(hillstub_template_loader().format(wepp_id=wepp_id))
     block = ''.join(block)
-    
+
     _watershed_template = watershed_template_loader()
-    
-    s = _watershed_template.format(sub_n=len(wepp_ids), 
+
+    s = _watershed_template.format(sub_n=len(wepp_ids),
                                    hillslopes_block=block,
                                    sim_years=sim_years)
-            
+
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:
         fp.write(s)
@@ -183,6 +183,7 @@ def make_ss_watershed_run(wepp_ids, runs_dir):
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:
         fp.write(s)
+
 
 def run_watershed(runs_dir):
     t0 = time()
@@ -205,7 +206,7 @@ def run_watershed(runs_dir):
     p.wait()
     _run.close()
     _log.close()
-    
+
     log_fn = _join(runs_dir, 'pw0.err')
 
 #    if _exists(_join(runs_dir, '../output/pass_pw0.txt')) and \

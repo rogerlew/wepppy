@@ -1,0 +1,57 @@
+<h5>NLCD 2016 Shrubland Statistics</h5>
+ <table class="table">
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Num pixels</th>
+        <th>Coverage (%)</th>
+        <th>Mean</th>
+        <th>Std. Dev.</th>
+        <th>Units</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for ds in report %}
+      <tr>
+        <td>{{ ds }}</td>
+        <td>{{ report[ds].num_pixels }}</td>
+        <td>{{ unitizer(100.0 * report[ds].valid_pixels / report[ds].num_pixels, '%') | safe }}</td>
+        <td>{{ unitizer(report[ds].mean, report[ds].units) | safe }}</td>
+        <td>{{ unitizer(report[ds].std, report[ds].units) | safe }}</td>
+        <td>{{ unitizer_units(report[ds].units) | safe }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+ </table>
+
+<h5>Rangeland Covers by Hillslope</h5>
+ <table class="table">
+    <thead>
+      <tr>
+        <th>Topaz ID</th>
+        <th>Bunchgrass</th>
+        <th>Forbs</th>
+        <th>Sodgrass</th>
+        <th>Shrub</th>
+        <th>Basal</th>
+        <th>Rock</th>
+        <th>Litter</th>
+        <th>Cryptogams</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for topaz_id in covers %}
+      <tr>
+        <td>{{ topaz_id }}</td>
+        <td>{{ unitizer(covers[topaz_id].bunchgrass, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].forbs, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].sodgrass, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].shrub, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].basal, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].rock, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].litter, '%') | safe }}</td>
+        <td>{{ unitizer(covers[topaz_id].cryptogams, '%') | safe }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+ </table>

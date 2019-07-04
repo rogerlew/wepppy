@@ -37,13 +37,24 @@
 {% include 'controls/channel_delineation.htm'%}
 {% include 'controls/set_outlet.htm'%}
 {% include 'controls/subcatchments.htm'%}
+{% if 'rangeland_cover' in ron.mods %}
+{% include 'controls/rangeland_cover.htm'%}
+{% else %}
 {% include 'controls/landuse.htm'%}
+{% endif %}
 {% include 'controls/soil.htm'%}
 {% include 'controls/climate.htm'%}
+
+{% if 'rhem' not in ron.mods %}
 {% include 'controls/prep.htm'%}
 {% include 'controls/wepp.htm'%}
 <div id="wepp-results"></div>
-{% if climate.has_observed %}
+{% else %}
+{% include 'controls/rhem.htm'%}
+<div id="rhem-results"></div>
+{% endif %}
+
+{% if climate.has_observed and 'rhem' not in ron.mods %}
 {% include 'controls/observed.htm'%}
 {% endif %}
 
@@ -51,11 +62,11 @@
 {% include 'controls/debris_flow.htm'%}
 {% endif %}
 
-    {% if 'ash' in ron.mods %}
+{% if 'ash' in ron.mods %}
 {% include 'controls/ash.htm'%}
 {% endif %}
 
-    {% include 'controls/export.htm'%}
+{% include 'controls/export.htm'%}
 {% if user.is_authenticated %}
 {% include 'controls/team.htm'%}
 {% endif %}
