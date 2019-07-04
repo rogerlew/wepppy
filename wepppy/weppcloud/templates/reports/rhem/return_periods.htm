@@ -1,0 +1,88 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_title %}Return Periods{% endblock %}
+{% block report_content %}
+<h2>RHEM Results Summary</h2>
+<h5>Return Periods
+    <!-- (excluding years {{ excluded_years }}) -->
+    <a onclick="javascript:copytable('ret_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+</h5>
+<table class="table table-condensed" id="ret_tbl">
+  <thead>
+    <tr>
+      <th>Measure</th>
+      <th colspan="{{ rhempost.ret_freq_periods | length }}">Return Period</th>
+      <th>Units</th>
+    </tr>
+    <tr>
+      <th>&nbsp;</th>
+      {% for ret_period in rhempost.ret_freq_periods %}
+        <th>{{ ret_period }}</th>
+      {% endfor %}
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rain</td>
+      {% for value in rhempost.watershed_ret_freqs['Rain (m^3)'] %}
+        <td>{{ unitizer(value, 'm^3') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('m^3') | safe }}</td>
+    </tr>
+    <tr>
+      <td>&nbsp</td>
+      {% for value in rhempost.watershed_ret_freqs['Rain (mm)'] %}
+        <td>{{ unitizer(value, 'mm') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('mm') | safe }}</td>
+    </tr>
+
+    <tr>
+      <td>Sediment Yield</td>
+      {% for value in rhempost.watershed_ret_freqs['Sediment-Yield (tonne)'] %}
+        <td>{{ unitizer(value, 'tonne') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('tonne') | safe }}</td>
+    </tr>
+    <tr>
+      <td>&nbsp</td>
+      {% for value in rhempost.watershed_ret_freqs['Sediment-Yield (tonne/ha)'] %}
+        <td>{{ unitizer(value, 'tonne/ha') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('tonne/ha') | safe }}</td>
+    </tr>
+
+    <tr>
+      <td>Soil Loss</td>
+      {% for value in rhempost.watershed_ret_freqs['Soil-Loss (tonne)'] %}
+        <td>{{ unitizer(value, 'tonne') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('tonne') | safe }}</td>
+    </tr>
+    <tr>
+      <td>&nbsp</td>
+      {% for value in rhempost.watershed_ret_freqs['Soil-Loss (tonne/ha)'] %}
+        <td>{{ unitizer(value, 'tonne/ha') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('tonne/ha') | safe }}</td>
+    </tr>
+
+    <tr>
+      <td>Runoff</td>
+      {% for value in rhempost.watershed_ret_freqs['Runoff (m^3)'] %}
+        <td>{{ unitizer(value, 'm^3') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('m^3') | safe }}</td>
+    </tr>
+    <tr>
+      <td>&nbsp</td>
+      {% for value in rhempost.watershed_ret_freqs['Runoff (mm)'] %}
+        <td>{{ unitizer(value, 'mm') | safe }}</td>
+      {% endfor %}
+      <td>{{ unitizer_units('mm') | safe }}</td>
+    </tr>
+
+
+  </tbody>
+</table>
+{% endblock %}
