@@ -1,0 +1,40 @@
+! Parameter file for scenario: {scn_name}
+! Date built: {now} (Version {model_version})
+! Parameter units: DIAMS(mm), DENSITY(g/cc),TEMP(deg C)
+BEGIN GLOBAL
+		CLEN	=	{slope_length}
+		UNITS	=	metric
+		DIAMS	=	{soil[clay_diameter]}	{soil[silt_diameter]}	{soil[small_aggregates_diameter]}	{soil[large_aggregates_diameter]}	{soil[sand_diameter]}
+		DENSITY	=	{soil[clay_specific_gravity]}	{soil[silt_specific_gravity]}	{soil[small_aggregates_specific_gravity]}	{soil[large_aggregates_specific_gravity]}	{soil[sand_specific_gravity]}
+		TEMP	=	40
+		NELE	=	1
+END GLOBAL
+BEGIN PLANE
+		ID	=	1                                  # identifier for the current plane
+		LEN	=	{slope_length}                     # The plane slope length in meters or feet
+		WIDTH	=	{width}                        # The plane bottom width in meters or feet
+		CHEZY	=	{chezy}                        # Overland flow Chezy Coeff. (m^(1/2)/s) (square root meter per second)
+		RCHEZY	=	{rchezy}                       # Concentrated flow Chezy Coeff. (m^(1/2)/s) (square root meter per second)
+		SL	=	{sl}                               # slopes delimeter should be  ,
+		SX	=	{sx}                               # normalized distances
+		CV	=	1.0000                             # This is the coefficient of variation for Ke
+		SAT	=	{moisture_content}                 # Initial degree of soil saturation, expressed as a fraction of the pore space filled
+		PR	=	1                                  # Print flag
+		KSS	=	{kss_final}                        # Splash and sheet erodibility coefficient
+		KOMEGA	=	0.000007747                    # Undisturbed concentrated erodibility coeff. (s2/m2) value suggested by Nearing 02Jul2014
+		KCM	=	0.000299364300                     # Maximum concentrated erodibility coefficient (s2/m2)
+		CA	=	1.000                              # Cover fraction of surface covered by intercepting cover — rainfall intensity is reduced by this fraction until the specified interception depth has accumulated
+		IN	=	0.0000                             # Interception depth in mm or inches
+		KE	=	{weighted_ke}                      # Effective hydraulic conductivity (mm/h)
+		G	=	{soil[mean_matric_potential]}      # Mean capillary drive, mm or inches — a zero value sets the infiltration at a constant value of Ke
+		DIST	=	{soil[pore_size_distribution]} # Pore size distribution index. This parameter is used for redistribution of soil moisture during unponded intervals
+		POR	=	{soil[mean_porosity]}              # Porosity
+		ROCK	=	0.0000                         # Volumetric rock fraction, if any. If KE is estimated based on textural class it should be multiplied by (1 - Rock) to reflect this rock volume
+		SMAX	=	1.0000                         # Upper limit to SAT
+		ADF	=	0.00                               # Beta decay factor in the detachement equation in Al-Hamdan et al 2012 (Non-FIRE)
+		ALF	=	0.8000                             # allow variable alfa in the infiltration Smith-Parlange Equation, alf <= 0.05, Green and Ampt
+		BARE	=	0.23                           # Fraction of bare soil to total area. 1 - ground cover ( this will be used if ADF is not 0)
+		RSP	=	1.000                              # Rill spacing in meters or feet
+		SPACING	=	1.000                          # Average micro topographic spacing in meters or feet
+		FRACT	=	{soil[clay_fraction]}	{soil[silt_fraction]}	{soil[small_aggregates_fraction]}	{soil[large_aggregates_fraction]}	{soil[sand_fraction]}
+END PLANE

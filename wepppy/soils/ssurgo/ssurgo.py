@@ -406,6 +406,7 @@ class SoilSummary(object):
         self.sand = None
         self.ll = None
         self.simple_texture = None
+        self.texture = None
 
     def as_dict(self):
         return dict(mukey=self.mukey, fname=self.fname,

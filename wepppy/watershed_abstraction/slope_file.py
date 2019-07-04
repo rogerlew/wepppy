@@ -59,6 +59,20 @@ class SlopeFile(object):
         self.distances = distances
         self.slopes = slopes
 
+    @property
+    def slope_scalar(self):
+        x = np.array(self.distances)
+        dy = np.array(self.slopes)
+        dy_ = np.array([np.mean(dy[i:i + 2]) for i in range(len(dy) - 1)])
+
+        # calculate the positions, assume top of hillslope is 0 y
+        y = [0]
+        for i in range(len(dy) - 1):
+            step = x[i + 1] - x[i]
+            y.append(y[-1] - step * dy_[i])
+
+        return -y[-1]
+
     def _determine_segments(self, d0, dend):
         i = 0
         for d in self.distances:
@@ -96,7 +110,5 @@ class SlopeFile(object):
         dend = 1.0
         nSegments = self._determine_segments(d0, dend)
         ofes.append(self._find_points(d0, dend, nSegments))
-
-        print(ofes)
 
 

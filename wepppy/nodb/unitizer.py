@@ -453,7 +453,7 @@ class Unitizer(NoDbBase):
 
             if in_units == 'pct' or in_units == '%':
                 if isfloat(value):
-                    if value < 0.1:
+                    if value < 0.1 and value != 0.0:
                         return '%0.E' % float(value)
                     else:
                         return '%0.1f' % float(value)

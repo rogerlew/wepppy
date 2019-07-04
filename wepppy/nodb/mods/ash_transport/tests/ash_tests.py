@@ -21,10 +21,6 @@ _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
 
-print(200, lookup_wind_threshold_white_ash_proportion(200))
-
-print(weibull_series([100, 50, 20, 10, 5, 2.5, 1], 143))
-
 cli = ClimateFile(_join('data/climateRAW.cli'))
 cli_df = cli.as_dataframe()
 

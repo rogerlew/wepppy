@@ -39,13 +39,13 @@ W. Elliot 03/17
 Reset Random Roughness each year, no residue buried
 1  #landuse
 0.0000 0.0000 0
-4 # pcode - other 
-0.0000 0.0000 0.0000 0.0000 0.0600 1.0000 0.0010 
+4 # pcode - other
+0.0000 0.0000 0.0000 0.0000 0.0600 1.0000 0.0010
 
 
 
 ###############################
-# Initial Conditions Section  #
+# Initial Conditions Section  #ru
 ###############################
 
 1  # Number of initial scenarios
@@ -54,7 +54,7 @@ Reset Random Roughness each year, no residue buried
 Skidder_Thinning
 Assume 85  Cover
 W. Elliot March, 2017
-Use Shrub Soil
+Use Shurrub Soil
 1  #landuse
 1.10000 0.40000 200 92 0.00000 0.85000
 1 # iresd  <No__0664>
@@ -83,7 +83,7 @@ March, 2017
 
 1  # landuse  - cropland
 1 # ntill - number of operations
-  2  # mdate  --- 1 / 2 
+  2  # mdate  --- 1 / 2
   1  # op --- Reset_Roughness
       0.050  # depth
       2  # type
@@ -111,7 +111,7 @@ March, 2017
 #
 # Yearly scenario 1 of 1
 #
-Year 1 
+Year 1
 
 
 

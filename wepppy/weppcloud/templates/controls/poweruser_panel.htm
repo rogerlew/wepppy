@@ -15,12 +15,25 @@
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ron.nodb">nodb.ron</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/topaz.nodb">nodb.topaz</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed.nodb">nodb.watershed</a>
+              {% if 'rhem' not in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse.nodb">nodb.landuse</a>
+              {% endif %}
+              {% if 'shrubland' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/shrubland.nodb">nodb.shrubland</a>
+              {% endif %}
+              {% if 'rangeland_cover' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rangeland_cover.nodb">nodb.rangeland_cover</a>
+              {% endif %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils.nodb">nodb.soils</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/climate.nodb">nodb.climate</a>
+              {% if 'rhem' not in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp.nodb">nodb.wepp</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepppost.nodb">nodb.wepppost</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/observed.nodb">nodb.observed</a>
+              {% else %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem.nodb">nodb.rhem</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhempost.nodb">nodb.rhempost</a>
+              {% endif %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/unitizer.nodb">nodb.unitizer</a>
               {% if 'baer' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/baer.nodb">nodb.baer</a>
@@ -43,8 +56,13 @@
               {% if 'rred' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred">rred</a>
               {% endif %}
+              {%  if 'rhem' not in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/runs">wepp/runs</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/wepp/output">wepp/output</a>
+              {% else %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/runs">rhem/runs</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/output">rhem/output</a>
+              {% endif %}
             </div>
             <br/>
             <h5>Data Queries</h5>

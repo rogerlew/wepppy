@@ -98,7 +98,7 @@ class Watershed(NoDbBase):
     @property
     def impoundment_n(self) -> int:
         return self._impoundment_n
-        
+
     @property
     def chn_n(self) -> int:
         if self._chns_summary is None:
@@ -113,19 +113,19 @@ class Watershed(NoDbBase):
     @property
     def structure(self):
         return self._structure
-        
+
     @property
     def outlet_top_id(self):
         return self._outlet_top_id
-        
+
     def translator_factory(self):
         if self._chns_summary is None:
             raise Exception('No chn_ids available for translator')
-            
+
         if self._subs_summary is None:
             raise Exception('No sub_ids available for translator')
-    
-        return WeppTopTranslator(map(int, self._subs_summary.keys()), 
+
+        return WeppTopTranslator(map(int, self._subs_summary.keys()),
                                  map(int, self._chns_summary.keys()))
 
     #
@@ -145,7 +145,7 @@ class Watershed(NoDbBase):
             _abs = WatershedAbstraction(topaz_wd, wat_dir)
             _abs.abstract()
             _abs.write_slps(cell_width=cell_width)
-            
+
             chns_summary = {}
             for k, v in _abs.watershed['channels'].items():
                 topaz_id = int(k.replace('chn_', ''))
@@ -157,7 +157,7 @@ class Watershed(NoDbBase):
                 topaz_id = int(k.replace('hill_', ''))
                 subs_summary[topaz_id] = v
                 fps_summary[topaz_id] = _abs.watershed['flowpaths'][k]
-                
+
             self._subs_summary = subs_summary
             self._chns_summary = chns_summary
             self._fps_summary = fps_summary
@@ -165,7 +165,7 @@ class Watershed(NoDbBase):
             self._centroid = _abs.centroid.lnglat
             self._outlet_top_id = str(_abs.outlet_top_id)
             self._structure = _abs.structure
-            
+
             del _abs
 
             self.dump_and_unlock()
@@ -174,6 +174,8 @@ class Watershed(NoDbBase):
             if any(['lt' in ron.mods]):
                 wepp = wepppy.nodb.Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
+
+            self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
 
         except Exception:
             self.unlock('-f')
@@ -188,11 +190,11 @@ class Watershed(NoDbBase):
     @property
     def centroid(self) -> Tuple[float, float]:
         return self._centroid
-        
+
     def sub_summary(self, topaz_id) -> Dict:
         if self._subs_summary is None:
             return None
-            
+
         if str(topaz_id) in self._subs_summary:
             return self._subs_summary[str(topaz_id)].as_dict()
         else:
@@ -211,14 +213,14 @@ class Watershed(NoDbBase):
     def _(self, wepp_id) -> Union[HillSummary, ChannelSummary]:
         translator = self.translator_factory()
         topaz_id = str(translator.top(wepp=int(wepp_id)))
-        
+
         if topaz_id in self._subs_summary:
             return self._subs_summary[topaz_id]
         elif topaz_id in self._chns_summary:
             return self._chns_summary[topaz_id]
-            
+
         raise IndexError
-        
+
     @property
     def subs_summary(self) -> Dict[str, Dict]:
         return {k: v.as_dict() for k, v in self._subs_summary.items()}
@@ -227,7 +229,7 @@ class Watershed(NoDbBase):
         if self.sub_n > 0:
             for topaz_id, v in self._subs_summary.items():
                 yield topaz_id, v
-                
+
     def chn_summary(self, topaz_id) -> Generator[ChannelSummary, None, None]:
         if str(topaz_id) in self._chns_summary:
             return self._chns_summary[str(topaz_id)].as_dict()
@@ -237,12 +239,12 @@ class Watershed(NoDbBase):
     @property
     def chns_summary(self) -> Dict[str, Dict]:
         return {k: v.as_dict() for k, v in self._chns_summary.items()}
-            
+
     def chn_iter(self) -> Generator[ChannelSummary, None, None]:
         if self.chn_n > 0:
             for topaz_id, v in self._chns_summary.items():
                 yield topaz_id, v
-            
+
     def get_ws(self):
         with open(self.wat_js) as fp:
             return json.load(fp)

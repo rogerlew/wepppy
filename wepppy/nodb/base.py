@@ -38,6 +38,7 @@ class TriggerEvents(Enum):
     LANDUSE_BUILD_COMPLETE = 5
     SOILS_BUILD_COMPLETE = 3
     PREPPING_PHOSPHORUS = 4
+    WATERSHED_ABSTRACTION_COMPLETE = 5
 
 # .nodb are jsonpickle files
 # The .nodb is used to distinguish these from regular json datafiles
@@ -57,7 +58,7 @@ class NoDbBase(object):
     def dump_and_unlock(self, validate=True):
         self.dump()
         self.unlock()
-        
+
         if validate:
             nodb = type(self)
 
@@ -72,8 +73,8 @@ class NoDbBase(object):
         # noinspection PyUnresolvedReferences
         with open(self._nodb, 'w') as fp:
             fp.write(js)
-            
-        # validate 
+
+        # validate
 
     def lock(self):
         if self.islocked():
@@ -148,7 +149,7 @@ class NoDbBase(object):
     @property
     def config(self):
         cfg = _join(_config_dir, self._config)
-        
+
         parser = RawConfigParser(
             dict(boundary=None,
                  cover_defaults=None,
@@ -170,20 +171,20 @@ class NoDbBase(object):
     def _load_mods(self):
         cfg = self.config
         mods = cfg.get('nodb', 'mods')
-        
+
         if mods is not None:
             mods = ast.literal_eval(mods)
-            
+
         self._mods = mods
-        
+
     def trigger(self, evt):
         assert isinstance(evt, TriggerEvents)
         import wepppy.nodb.mods
-        
+
         if 'lt' in self.mods:
             lt = wepppy.nodb.mods.LakeTahoe.getInstance(self.wd)
             lt.on(evt)
-        
+
         if 'baer' in self.mods:
             baer = wepppy.nodb.mods.Baer.getInstance(self.wd)
             baer.on(evt)
@@ -191,11 +192,15 @@ class NoDbBase(object):
         if 'rred' in self.mods:
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
             rred.on(evt)
-        
+
+        if 'shrubland' in self.mods:
+            shrubland = wepppy.nodb.mods.Shrubland.getInstance(self.wd)
+            shrubland.on(evt)
+
     @property
     def mods(self):
         return self._mods
-    
+
     @property
     def dem_dir(self):
         return _join(self.wd, 'dem')
@@ -267,11 +272,11 @@ class NoDbBase(object):
     @property
     def wepp_dir(self):
         return _join(self.wd, 'wepp')
-        
+
     @property
     def runs_dir(self):
         return _join(self.wd, 'wepp', 'runs')
-        
+
     @property
     def output_dir(self):
         return _join(self.wd, 'wepp', 'output')
@@ -295,7 +300,7 @@ class NoDbBase(object):
     @property
     def export_dir(self):
         return _join(self.wd, 'export')
-        
+
     @property
     def export_winwepp_dir(self):
         return _join(self.wd, 'export', 'winwepp')
