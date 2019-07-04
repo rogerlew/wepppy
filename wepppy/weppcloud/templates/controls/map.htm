@@ -99,92 +99,25 @@
           </div>
           {% endif %}
           <div class="tab-pane" id="results" role="tabpanel">
-            <h6>WEPP Results</h6>
-            <p><b><i>Hillslope Visualizations</i></b></p>
-            <div class="radio radio-primary">
-                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_runoff" value="sub_runoff" >
-                <label for="wepp_sub_cmap_radio_runoff">
-                    Runoff
-                </label>&nbsp;&nbsp;
-                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_subrunoff" value="sub_subrunoff" >
-                <label for="wepp_sub_cmap_radio_subrunoff">
-                    Lateral Flow
-                </label>&nbsp;&nbsp;
-                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_baseflow" value="sub_baseflow" >
-                <label for="wepp_sub_cmap_radio_baseflow">
-                    Baseflow
-                </label>
-                <br/>
-                <input type="range" id="wepp_sub_cmap_range_runoff" min="0.0001" max="10" value="5" step="0.1">
-                <span id="wepp_sub_cmap_canvas_runoff_units"></span><br/>
-                <div style='width:240px;height:40px'>
-                    <canvas id="wepp_sub_cmap_canvas_runoff" width=200 height=20
-                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-                    <div class="row">
-                        <div class="col-md-4"><span id="wepp_sub_cmap_canvas_runoff_min"></span></div>
-                        <div class="col-md-4" style="text-align: center;"></div>
-                        <div class="col-md-4" style="text-align: right;"><span id="wepp_sub_cmap_canvas_runoff_max"></span></div>
-                    </div>
-                </div>
-            </div>
-            <div class="radio radio-primary">
-                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_loss" value="sub_loss">
-                <label for="wepp_sub_cmap_radio_loss">
-                    Soil Deposition/Loss
-                </label>
-                <br/>
-                <input type="range" id="wepp_sub_cmap_range_loss" min="0.0001" max="100000" value="50000" step="100">
-                <span id="wepp_sub_cmap_canvas_loss_units"></span><br/>
-                <div style='width:240px;height:40px'>
-                    <canvas id="wepp_sub_cmap_canvas_loss" width=200 height=20
-                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-                    <div class="row">
-                        <div class="col-md-4"><span id="wepp_sub_cmap_canvas_loss_min"></span></div>
-                        <div class="col-md-4" style="text-align: center;">0</div>
-                        <div class="col-md-4" style="text-align: right;"><span id="wepp_sub_cmap_canvas_loss_max"></span></div>
-                    </div>
-                </div>
-            </div>
-            {% if 'baer' not in ron.mods %}
-            <div class="radio radio-primary">
-                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_phosphorus" value="sub_phosphorus" >
-                <label for="wepp_sub_cmap_radio_phosphorus">
-                    Total Phosphorus
-                </label>
-                <br/>
-                <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="5" step="0.1">
-                <span id="wepp_sub_cmap_canvas_phosphorus_units"></span><br/>
-                <div style='width:240px;height:40px'>
-                    <canvas id="wepp_sub_cmap_canvas_phosphorus" width=200 height=20
-                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-                    <div class="row">
-                        <div class="col-md-4"><span id="wepp_sub_cmap_canvas_phosphorus_min"></span></div>
-                        <div class="col-md-4" style="text-align: center;"></div>
-                        <div class="col-md-4" style="text-align: right;"><span id="wepp_sub_cmap_canvas_phosphorus_max"></span></div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            <p style="padding-top: 1em;"><b><i>Gridded Visualizations</i></b></p>
-            <div class="radio radio-primary">
-                <input type="radio" name="wepp_sub_cmap_radio" id="wepp_grd_cmap_radio_loss" value="grd_loss" >
-                <label for="wepp_grd_cmap_radio_loss">
-                    Soil Deposition/Loss
-                </label>
-                <br/>
-                <input type="range" id="wepp_grd_cmap_range_loss" min="0.0001" max="40" value="20" step="0.1">
-                <span id="wepp_grd_cmap_range_loss_units"></span><br/>
-                <div style='width:240px;height:40px'>
-                    <canvas id="wepp_grd_cmap_canvas_loss" width=200 height=20
-                            style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-                    <div class="row">
-                        <div class="col-md-4"><span id="wepp_grd_cmap_range_loss_min"></span></div>
-                        <div class="col-md-4" style="text-align: center;">0</div>
-                        <div class="col-md-4" style="text-align: right;"><span id="wepp_grd_cmap_range_loss_max"></span></div>
-                    </div>
-                </div>
-            </div>
+              {% if 'rhem' not in ron.mods %}
+                  {% include("controls/map/wepp_hillslope_visualizations.htm") %}
+              {% else %}
+                  {% include("controls/map/rhem_hillslope_visualizations.htm") %}
+              {% endif %}
+
+
+
+
+
+
+
           </div>
+
+
+
+
+
+
         </div>
       </div>
     </div>

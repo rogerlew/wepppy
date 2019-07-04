@@ -31,7 +31,7 @@ import markdown
 from werkzeug.utils import secure_filename
 
 from flask import (
-    Flask, jsonify, request, render_template, 
+    Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort
 )
 from flask_sqlalchemy import SQLAlchemy
@@ -86,12 +86,15 @@ from wepppy.nodb import (
     Ron,
     Topaz,
     Watershed,
-    Landuse, LanduseMode, 
-    Soils, SoilsMode, 
+    Landuse, LanduseMode,
+    Soils, SoilsMode,
     Climate, ClimateStationMode,
     Wepp, WeppPost,
     Unitizer,
     Observed,
+    Shrubland,
+    RangelandCover, RangelandCoverMode,
+    Rhem, RhemPost,
     Baer,
     DebrisFlow,
     Ash
@@ -239,7 +242,7 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
             self.commit()
         return True
 
-        
+
 user_datastore = WeppCloudUserDatastore(db, User, Role, Run)
 
 
@@ -328,10 +331,10 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
         # http://code.activestate.com/recipes/217212/
         #
         # Adapted to return string instead of printing to stdout
-        
+
         from os import listdir, sep
         from os.path import abspath, basename, isdir
-        
+
         s = [_padding[:-1] + '+-' + basename(abspath(__dir)) + '\n']
         f = []
         _padding += ' '
@@ -356,7 +359,7 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
 
         s.extend(f)
         return s
-        
+
     return ''.join(_gdalinfo(_dir, padding, print_files))
 
 
@@ -389,14 +392,14 @@ def success_factory(kwds=None):
     else:
         return jsonify({'Success': True,
                         'Content': kwds})
-    
+
 
 @app.context_processor
 def utility_processor():
     def format_mode(mode):
         return str(int(mode))
     return dict(format_mode=format_mode)
-    
+
 
 @app.context_processor
 def units_processor():
@@ -514,6 +517,7 @@ def seattle_index():
 
 
 @app.route('/create/<config>')
+@app.route('/create/<config>/')
 def create(config):
     runid = str(uuid.uuid4())
 
@@ -537,7 +541,7 @@ def create(config):
     os.mkdir(wd)
 
     Ron(wd, "%s.cfg" % config)
-    
+
     # for development convenience create a symlink
     # to the this working directory
     last = get_last()
@@ -546,7 +550,7 @@ def create(config):
     os.symlink(wd, last)
 
     user_datastore.create_run(runid, config, current_user)
-    
+
     return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config))
 
 
@@ -580,21 +584,21 @@ def create_fork(runid, config):
     new_runid = str(uuid.uuid4())
     new_wd = get_wd(new_runid)
     assert not _exists(new_wd)
-    
+
     # copy the contents over
     shutil.copytree(wd, new_wd)
-    
+
     # replace the runid in the nodb files
     nodbs = glob(_join(new_wd, '*.nodb'))
     for fn in nodbs:
         with open(fn) as fp:
             s = fp.read()
-            
+
         s = s.replace(runid, new_runid)
         with open(fn, 'w') as fp:
             fp.write(s)
-    
-    # delete any active locks    
+
+    # delete any active locks
     locks = glob(_join(new_wd, '*.lock'))
     for fn in locks:
         os.remove(fn)
@@ -694,6 +698,16 @@ def runs0(runid, config):
     except:
         observed = Observed(wd, "%s.cfg" % config)
 
+    try:
+        rangeland_cover = RangelandCover.getInstance(wd)
+    except:
+        rangeland_cover = None
+
+    try:
+        rhem = Rhem.getInstance(wd)
+    except:
+        rhem = None
+
     landuseoptions = landuse.landuseoptions
 
     soildboptions = soilsdb.load_db()
@@ -705,8 +719,10 @@ def runs0(runid, config):
                            topaz=topaz, soils=soils,
                            ron=ron, landuse=landuse, climate=climate,
                            wepp=wepp,
+                           rhem=rhem,
                            unitizer_nodb=unitizer,
                            observed=observed,
+                           rangeland_cover=rangeland_cover,
                            landuseoptions=landuseoptions,
                            soildboptions=soildboptions,
                            precisions=wepppy.nodb.unitizer.precisions)
@@ -943,7 +959,7 @@ def task_set_unit_preferences(runid, config):
     res = unitizer.set_preferences(request.form)
     return success_factory(res)
 
- 
+
 @app.route('/runs/<string:runid>/<config>/query/topaz_pass')
 @app.route('/runs/<string:runid>/<config>/query/topaz_pass/')
 def query_topaz_pass(runid, config):
@@ -955,24 +971,24 @@ def query_topaz_pass(runid, config):
 @app.route('/runs/<string:runid>/<config>/query/extent/')
 def query_extent(runid, config):
     wd = get_wd(runid)
-    
+
     return jsonify(Ron.getInstance(wd).extent)
-    
-    
+
+
 @app.route('/runs/<string:runid>/<config>/report/channel')
 @app.route('/runs/<string:runid>/<config>/report/channel/')
 def report_channel(runid, config):
     wd = get_wd(runid)
-    
+
     return render_template('reports/channel.htm',
                            map=Ron.getInstance(wd).map)
 
-    
+
 @app.route('/runs/<string:runid>/<config>/query/outlet')
 @app.route('/runs/<string:runid>/<config>/query/outlet/')
 def query_outlet(runid, config):
     wd = get_wd(runid)
-    
+
     return jsonify(Topaz.getInstance(wd)
                         .outlet
                         .as_dict())
@@ -982,7 +998,7 @@ def query_outlet(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/outlet/')
 def report_outlet(runid, config):
     wd = get_wd(runid)
-    
+
     return render_template('reports/outlet.htm',
                            outlet=Topaz.getInstance(wd).outlet,
                            ron=Ron.getInstance(wd))
@@ -1503,10 +1519,10 @@ def query_watershed_summary_channels(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/watershed/')
 def query_watershed_summary(runid, config):
     wd = get_wd(runid)
-    
+
     return render_template('reports/subcatchments.htm',
                            watershed=Watershed.getInstance(wd))
-                           
+
 
 @app.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
 def task_abstract_watershed(runid, config):
@@ -1535,6 +1551,32 @@ def sub_intersection(runid, config):
     topaz_ids = top.sub_intersection(extent)
     return jsonify(topaz_ids)
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode/', methods=['POST'])
+def set_rangeland_cover_mode(runid, config):
+
+    mode = None
+    single_selection = None
+    try:
+        mode = int(request.form.get('mode', None))
+        single_selection = \
+            int(request.form.get('rangeland_cover_single_selection', None))
+    except Exception:
+        exception_factory('mode and rangeland_cover_single_selection must be provided')
+
+    wd = get_wd(runid)
+    rangeland_cover = RangelandCover.getInstance(wd)
+
+    try:
+        rangeland_cover.mode = RangelandCoverMode(mode)
+        rangeland_cover.single_selection = single_selection
+    except Exception:
+        exception_factory('error setting rangeland_cover mode')
+
+    return success_factory()
+
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_landuse_mode/', methods=['POST'])
 def set_landuse_mode(runid, config):
@@ -1550,7 +1592,7 @@ def set_landuse_mode(runid, config):
 
     wd = get_wd(runid)
     landuse = Landuse.getInstance(wd)
-    
+
     try:
         landuse.mode = LanduseMode(mode)
         landuse.single_selection = single_selection
@@ -1654,7 +1696,21 @@ def report_landuse(runid, config):
 
     return render_template('reports/landuse.htm',
                            landuseoptions=landuseoptions,
-                           report=Landuse.getInstance(wd).report)
+                           report=landuse.report)
+
+
+@app.route('/runs/<string:runid>/<config>/report/rangeland_cover')
+@app.route('/runs/<string:runid>/<config>/report/rangeland_cover/')
+def report_rangeland_cover(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    shrubland = Shrubland.getInstance(wd)
+    rangeland_cover = RangelandCover.getInstance(wd)
+
+    return render_template('reports/rangeland_cover.htm',
+                           report=shrubland.report,
+                           covers=rangeland_cover.covers)
 
 
 @app.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
@@ -1680,6 +1736,20 @@ def task_build_landuse(runid, config):
         landuse.build()
     except Exception:
         return exception_factory('Building Landuse Failed')
+
+    return success_factory()
+
+
+@app.route('/runs/<string:runid>/<config>/tasks/build_rangeland_cover/', methods=['POST'])
+def task_build_rangeland_cover(runid, config):
+    wd = get_wd(runid)
+    rangeland_cover = RangelandCover.getInstance(wd)
+
+    try:
+        from pprint import pprint
+        rangeland_cover.build()
+    except Exception:
+        return exception_factory('Building RangelandCover Failed')
 
     return success_factory()
 
@@ -1741,7 +1811,7 @@ def set_soil_mode(runid, config):
         exception_factory('mode and soil_single_selection must be provided')
 
     wd = get_wd(runid)
-    
+
     try:
         soils = Soils.getInstance(wd)
         soils.mode = SoilsMode(mode)
@@ -1782,7 +1852,7 @@ def report_soils(runid, config):
     return render_template('reports/soils.htm',
                            report=Soils.getInstance(wd).report)
 
-                           
+
 @app.route('/runs/<string:runid>/<config>/tasks/build_soil/', methods=['POST'])
 def task_build_soil(runid, config):
     wd = get_wd(runid)
@@ -1856,7 +1926,7 @@ def query_climate_has_observed(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/climate/')
 def report_climate(runid, config):
     wd = get_wd(runid)
-    
+
     climate = Climate.getInstance(wd)
     return render_template('reports/climate.htm',
                            station_meta=climate.climatestation_meta,
@@ -1911,10 +1981,10 @@ def view_closest_stations(runid, config):
         results = climate.find_closest_stations()
     except Exception:
         return exception_factory('Error finding closest stations')
-        
+
     if results is None:
         return Response('<!-- closest_stations is None -->', mimetype='text/html')
-        
+
     options = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
@@ -1923,7 +1993,7 @@ def view_closest_stations(runid, config):
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')
-    
+
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/view/heuristic_stations/')
@@ -1938,7 +2008,7 @@ def view_heuristic_stations(runid, config):
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
-        
+
     options = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
@@ -1980,7 +2050,7 @@ def view_eu_heuristic_stations(runid, config):
 def view_climate_monthlies(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
-    
+
     try:
         station_meta = climate.climatestation_meta
     except Exception:
@@ -1993,7 +2063,7 @@ def view_climate_monthlies(runid, config):
     return render_template('controls/climate_monthlies.htm',
                            title='Summary for the selected station',
                            station=station_meta.as_dict(include_monthlies=True))
-    
+
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/build_climate', methods=['POST'])
@@ -2140,6 +2210,13 @@ def get_wepp_run_status(runid, config, nodb):
         except:
             return exception_factory('Could not determine status')
 
+    elif nodb == 'rhem':
+        rhem = Rhem.getInstance(wd)
+        try:
+            return success_factory(rhem.get_log_last())
+        except:
+            return exception_factory('Could not determine status')
+
     elif nodb == 'climate':
         climate = Climate.getInstance(wd)
         try:
@@ -2148,6 +2225,17 @@ def get_wepp_run_status(runid, config, nodb):
             return exception_factory('Could not determine status')
 
     return error_factory('Unknown nodb')
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/report/rhem/results')
+@app.route('/runs/<string:runid>/<config>/report/rhem/results/')
+def report_rhem_results(runid, config):
+    wd = get_wd(runid)
+
+    try:
+        return render_template('controls/rhem_reports.htm')
+    except:
+        return exception_factory('Error building reports template')
 
 
 # noinspection PyBroadException
@@ -2219,8 +2307,8 @@ def query_channels_summary(runid, config):
         return jsonify(channels_summary)
     except:
         return exception_factory('Error building summary')
-    
-    
+
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/report/wepp/prep_details')
 @app.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')
@@ -2260,7 +2348,7 @@ def submit_task_run_wepp(runid, config):
         wepp.clean()
     except Exception:
         return exception_factory('Error cleaning wepp directories')
-    
+
     try:
 
         watershed = Watershed.getInstance(wd)
@@ -2270,7 +2358,7 @@ def submit_task_run_wepp(runid, config):
         #
         # Prep Hillslopes
         wepp.prep_hillslopes()
-        
+
         #
         # Run Hillslopes
 #        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
@@ -2278,11 +2366,11 @@ def submit_task_run_wepp(runid, config):
 #            assert run_hillslope(wepp_id, runs_dir)
 
         wepp.run_hillslopes()
-        
+
         #
         # Prep Watershed
         wepp.prep_watershed()
-        
+
         #
         # Run Watershed
         wepp.run_watershed()
@@ -2296,7 +2384,7 @@ def submit_task_run_wepp(runid, config):
 
     except Exception:
         return exception_factory('Error running wepp')
-        
+
     return success_factory()
 
 
@@ -2389,16 +2477,64 @@ def report_wepp_run_summary(runid, config):
     flowpaths_n = len(glob(_join(wd, 'wepp/flowpaths/output/*.plot.dat')))
     subs_n = len(glob(_join(wd, 'wepp/output/*.loss.dat')))
 
+    t0, tend = None, None
     with open(_join(wd, 'wepp/runs/status.log')) as fp:
         lines = fp.readlines()
-        t0 = parse_datetime(lines[0])
-        tend = parse_datetime(lines[-1])
+        for line in lines:
+            try:
+                if t0 is None:
+                    t0 = parse_datetime(line)
+                tend = parse_datetime(line)
+            except Exception:
+                pass
 
     return render_template('reports/wepp_run_summary.htm',
                            flowpaths_n=flowpaths_n,
                            subs_n=subs_n,
                            run_time=tend-t0,
                            ron=ron)
+
+
+@app.route('/runs/<string:runid>/<config>/report/rhem/run_summary')
+@app.route('/runs/<string:runid>/<config>/report/rhem/run_summary/')
+def report_rhem_run_summary(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    rhempost = RhemPost.getInstance(wd)
+    subs_n = len(glob(_join(wd, 'rhem/output/*.sum')))
+
+    t0, tend = None, None
+    with open(_join(wd, 'rhem/runs/status.log')) as fp:
+        lines = fp.readlines()
+        for line in lines:
+            try:
+                if t0 is None:
+                    t0 = parse_datetime(line)
+                tend = parse_datetime(line)
+            except Exception:
+                pass
+
+    return render_template('reports/rhem_run_summary.htm',
+                           subs_n=subs_n,
+                           run_time=tend-t0,
+                           rhempost=rhempost,
+                           ron=ron)
+
+
+@app.route('/runs/<string:runid>/<config>/report/rhem/summary')
+@app.route('/runs/<string:runid>/<config>/report/rhem/summary/')
+def report_rhem_avg_annuals(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    rhempost = RhemPost.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
+
+    return render_template('reports/rhem/avg_annual_summary.htm',
+                           rhempost=rhempost,
+                           ron=ron,
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           user=current_user)
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/summary')
@@ -2553,13 +2689,32 @@ def plot_wepp_streamflow(runid, config):
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    
+
     unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/wepp/daily_streamflow_graph.htm',
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
+@app.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')
+def report_rhem_return_periods(runid, config):
+
+    extraneous = request.args.get('extraneous', None) == 'true'
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    rhempost = RhemPost.getInstance(wd)
+
+    unitizer = Unitizer.getInstance(wd)
+
+    return render_template('reports/rhem/return_periods.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           rhempost=rhempost,
                            ron=ron,
                            user=current_user)
 
@@ -2624,6 +2779,30 @@ def report_wepp_sediment_delivery(runid, config):
                            user=current_user)
 
 
+@app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments/')
+def query_rhem_sub_runoff(runid, config):
+    wd = get_wd(runid)
+    rhempost = RhemPost.getInstance(wd)
+    return jsonify(rhempost.query_sub_val('runoff'))
+
+
+@app.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/rhem/sed_yield/subcatchments/')
+def query_rhem_sub_sed_yield(runid, config):
+    wd = get_wd(runid)
+    rhempost = RhemPost.getInstance(wd)
+    return jsonify(rhempost.query_sub_val('sed_yield'))
+
+
+@app.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/rhem/soil_loss/subcatchments/')
+def query_rhem_sub_soil_loss(runid, config):
+    wd = get_wd(runid)
+    rhempost = RhemPost.getInstance(wd)
+    return jsonify(rhempost.query_sub_val('soil_loss'))
+
+
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments/')
 def query_wepp_sub_runoff(runid, config):
@@ -2649,40 +2828,40 @@ def query_wepp_sub_baseflow(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Baseflow'))
-    
-    
+
+
 @app.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/loss/subcatchments/')
 def query_wepp_sub_loss(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('DepLoss'))
-    
-    
+
+
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments/')
 def query_wepp_sub_phosphorus(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Total P Density'))
-    
-    
+
+
 @app.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>')
 @app.route('/runs/<string:runid>/<config>/query/chn_summary/<topaz_id>/')
 def query_ron_chn_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return jsonify(ron.chn_summary(topaz_id))
-    
-    
+
+
 @app.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>')
 @app.route('/runs/<string:runid>/<config>/query/sub_summary/<topaz_id>/')
 def query_ron_sub_summary(runid, config, topaz_id):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     return jsonify(ron.sub_summary(topaz_id))
-    
-    
+
+
 @app.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>')
 @app.route('/runs/<string:runid>/<config>/report/chn_summary/<topaz_id>/')
 def report_ron_chn_summary(runid, config, topaz_id):
@@ -2799,7 +2978,7 @@ def unitizer_units_route(runid, config):
 
 #
 # BAER
-#                           
+#
 
 
 # noinspection PyBroadException
@@ -2811,7 +2990,7 @@ def query_baer_wgs_bounds(runid, config):
         baer = Baer.getInstance(wd)
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
-            
+
         return success_factory(dict(bounds=baer.bounds,
                                classes=baer.classes,
                                imgurl='resources/baer.png'))
@@ -2828,7 +3007,7 @@ def query_baer_class_map(runid, config):
         baer = Baer.getInstance(wd)
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
-            
+
         return render_template('mods/baer/classify.htm', baer=baer)
     except Exception:
         return exception_factory()
@@ -2843,10 +3022,10 @@ def task_baer_class_map(runid, config):
         baer = Baer.getInstance(wd)
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
-            
+
         classes = request.json.get('classes', None)
         nodata_vals = request.json.get('nodata_vals', None)
-        
+
         baer.modify_burn_class(classes, nodata_vals)
         return success_factory()
     except Exception:
@@ -2861,7 +3040,7 @@ def resources_baer_sbs(runid, config):
         baer = Baer.getInstance(wd)
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
-        
+
         fn = _join(baer.baer_dir, 'baer.wgs.rgba.png')
         return send_file(fn, mimetype='image/png')
     except Exception:
@@ -2873,20 +3052,20 @@ def resources_baer_sbs(runid, config):
 def task_upload_sbs(runid, config):
     wd = get_wd(runid)
     baer = Baer.getInstance(wd)
-    
+
     try:
         file = request.files['input_upload_sbs']
     except Exception:
         return exception_factory('Could not find file')
-        
+
     try:
         if file.filename == '':
             return error_factory('no filename specified')
-            
+
         filename = secure_filename(file.filename)
     except Exception:
         return exception_factory('Could not obtain filename')
-        
+
     try:
         file.save(_join(baer.baer_dir, filename))
     except Exception:
@@ -3093,6 +3272,53 @@ def runid_query(wc):
         return jsonify([_join('weppcloud/runs', _split(wd)[-1], get_config_stem(wd)) for wd in wds])
     else:
         return error_factory('not authorized')
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/run_rhem', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/run_rhem/', methods=['POST'])
+def submit_task_run_rhem(runid, config):
+    wd = get_wd(runid)
+    rhem = Rhem.getInstance(wd)
+
+#    try:
+#        rhem.parse_inputs(request.form)
+#    except Exception:
+#        return exception_factory('Error parsing climate inputs')
+
+    try:
+        rhem.clean()
+    except Exception:
+        return exception_factory('Error cleaning rhem directories')
+
+    try:
+
+        watershed = Watershed.getInstance(wd)
+        translator = Watershed.getInstance(wd).translator_factory()
+        runs_dir = os.path.abspath(rhem.runs_dir)
+
+        #
+        # Prep Hillslopes
+        rhem.prep_hillslopes()
+
+        #
+        # Run Hillslopes
+#        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+#            rhem_id = translator.rhem(top=int(topaz_id))
+#            assert run_hillslope(rhem_id, runs_dir)
+
+        rhem.run_hillslopes()
+
+        try:
+            from wepppy.weppcloud import RunStatistics
+            rs = RunStatistics.getInstance('/geodata/rhemcloud_runs')
+            rs.increment_hillruns(watershed.config_stem, watershed.sub_n)
+        except:
+            pass
+
+    except Exception:
+        return exception_factory('Error running rhem')
+
+    return success_factory()
 
 
 if __name__ == '__main__':

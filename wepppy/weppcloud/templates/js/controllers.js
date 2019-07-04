@@ -1320,6 +1320,12 @@ var SubcatchmentDelineation = function () {
                 self.cmapLoss();
             } else if (cmap_name === "sub_phosphorus") {
                 self.cmapPhosphorus();
+            } else if (cmap_name === "sub_rhem_runoff") {
+                self.cmapRhemRunoff();
+            } else if (cmap_name === "sub_rhem_sed_yield") {
+                self.cmapRhemSedYield();
+            } else if (cmap_name === "sub_rhem_soil_loss") {
+                self.cmapRhemSoilLoss();
             }
 
             if (cmap_name === "grd_loss") {
@@ -1840,6 +1846,271 @@ var SubcatchmentDelineation = function () {
             });
         };
 
+        // Rhem Visualizations
+
+        //
+        // RhemRunoff
+        //
+        that.dataRhemRunoff = null;
+        that.rangeRhemRunoff = $('#rhem_sub_cmap_range_runoff');
+        that.labelRhemRunoffMin = $('#rhem_sub_cmap_canvas_runoff_min');
+        that.labelRhemRunoffMax = $('#rhem_sub_cmap_canvas_runoff_max');
+        that.labelRhemRunoffUnits = $('#rhem_sub_cmap_canvas_runoff_units');
+        that.cmapperRhemRunoff = createColormap({ colormap: 'winter', nshades: 64 });
+
+        that.cmapRhemRunoff = function () {
+            var self = instance;
+            $.get({
+                url: "query/rhem/runoff/subcatchments/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataRhemRunoff = data;
+                    self.renderRhemRunoff();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.renderRhemRunoff = function () {
+            var self = instance;
+
+            var r = parseFloat(self.rangeRhemRunoff.val()); // 25.0 * Math.pow(parseFloat(self.rangeRhemRunoff.val()), 2.00);
+            self.labelRhemRunoffMin.html("0.000");
+
+            $.get({
+                url: "unitizer/",
+                data: {value: r, in_units: 'mm'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemRunoffMax.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer_units/",
+                data: {in_units: 'mm'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemRunoffUnits.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+
+            if (self.polys == null) {
+                return;
+            }
+
+            self.polys.eachLayer(function (layer) {
+                var topId = layer.feature.properties.TopazID;
+                var v = parseFloat(self.dataRhemRunoff[topId].value);
+
+                var c = self.cmapperRhemRunoff.map(v / r);
+
+                layer.setStyle({
+                    color: c,
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: c,
+                    fillOpacity: 0.9
+                });
+            });
+        };
+        // end RhemRunoff
+
+        //
+        // RhemSedYield
+        //
+        that.dataRhemSedYield = null;
+        that.rangeRhemSedYield = $('#rhem_sub_cmap_range_sed_yield');
+        that.labelRhemSedYieldMin = $('#rhem_sub_cmap_canvas_sed_yield_min');
+        that.labelRhemSedYieldMax = $('#rhem_sub_cmap_canvas_sed_yield_max');
+        that.labelRhemSedYieldUnits = $('#rhem_sub_cmap_canvas_sed_yield_units');
+        that.cmapperRhemSedYield = createColormap({ colormap: 'viridis', nshades: 64 });
+
+        that.cmapRhemSedYield = function () {
+            var self = instance;
+            $.get({
+                url: "query/rhem/sed_yield/subcatchments/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataRhemSedYield = data;
+                    self.renderRhemSedYield();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.renderRhemSedYield = function () {
+            var self = instance;
+
+            var r = parseFloat(self.rangeRhemSedYield.val());
+            if (r < 1) {
+                r = Math.pow(r, 2.0);
+            }
+
+            self.labelRhemSedYieldMin.html("0.000");
+
+
+            $.get({
+                url: "unitizer/",
+                data: {value: r, in_units: 'kg/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemSedYieldMax.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer_units/",
+                data: {in_units: 'kg/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemSedYieldUnits.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            if (self.polys == null) {
+                return;
+            }
+
+            self.polys.eachLayer(function (layer) {
+                var topId = layer.feature.properties.TopazID;
+                var v = parseFloat(self.dataRhemSedYield[topId].value);
+                var c = self.cmapperRhemSedYield.map(v / r);
+
+                layer.setStyle({
+                    color: c,
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: c,
+                    fillOpacity: 0.9
+                });
+            });
+        };
+        // end RhemSedYield
+
+
+        //
+        // RhemSoilLoss
+        //
+        that.dataRhemSoilLoss = null;
+        that.rangeRhemSoilLoss = $('#rhem_sub_cmap_range_soil_loss');
+        that.labelRhemSoilLossMin = $('#rhem_sub_cmap_canvas_soil_loss_min');
+        that.labelRhemSoilLossMax = $('#rhem_sub_cmap_canvas_soil_loss_max');
+        that.labelRhemSoilLossUnits = $('#rhem_sub_cmap_canvas_soil_loss_units');
+        that.cmapperRhemSoilLoss = createColormap({ colormap: "electric", nshades: 64 });
+
+        that.cmapRhemSoilLoss = function () {
+            var self = instance;
+            $.get({
+                url: "query/rhem/soil_loss/subcatchments/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataRhemSoilLoss = data;
+                    self.renderRhemSoilLoss();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.renderRhemSoilLoss = function () {
+            var self = instance;
+
+            var r = parseFloat(self.rangeRhemSoilLoss.val());
+
+            $.get({
+                url: "unitizer/",
+                data: {value: -1.0 * r, in_units: 'kg/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemSoilLossMin.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer/",
+                data: {value: r, in_units: 'kg/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemSoilLossMax.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer_units/",
+                data: {in_units: 'kg/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelRhemSoilLossUnits.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+
+            if (self.polys == null) {
+                return;
+            }
+
+            self.polys.eachLayer(function (layer) {
+                var topId = layer.feature.properties.TopazID;
+                var v = parseFloat(self.dataRhemSoilLoss[topId].value);
+                var c = self.cmapperRhemSoilLoss.map(v / (2.0 * r) + 0.5);
+
+                layer.setStyle({
+                    color: c,
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: c,
+                    fillOpacity: 0.9
+                });
+            });
+        };
+        // end RhemSoilLoss
+
+
+
         //
         // Controller Methods
         //
@@ -1936,6 +2207,112 @@ var SubcatchmentDelineation = function () {
         }
     };
 }();
+
+/* ----------------------------------------------------------------------------
+ * Rangeland Cover
+ * ----------------------------------------------------------------------------
+ */
+
+var RangelandCover = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#rangeland_cover_form");
+        that.info = $("#rangeland_cover_form #info");
+        that.status = $("#rangeland_cover_form  #status");
+        that.stacktrace = $("#rangeland_cover_form #stacktrace");
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.build = function () {
+            var self = instance;
+            var task_msg = "Building rangeland_cover";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/build_rangeland_cover/",
+                data: self.form.serialize(),
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.form.trigger("RANGELAND_COVER_BUILD_TASK_COMPLETED");
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            $.get({
+                url: "report/rangeland_cover/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.setMode = function (mode) {
+            var self = instance;
+            // mode is an optional parameter
+            // if it isn't provided then we get the checked value
+            if (mode === undefined) {
+                mode = $("input[name='rangeland_cover_mode']:checked").val();
+            }
+            mode = parseInt(mode, 10);
+            var rangeland_cover_single_selection = $("#rangeland_cover_single_selection").val();
+
+            var task_msg = "Setting Mode to " + mode + " (" + rangeland_cover_single_selection + ")";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            // sync rangeland_cover with nodb
+            $.post({
+                url: "tasks/set_rangeland_cover_mode/",
+                data: { "mode": mode, "rangeland_cover_single_selection": rangeland_cover_single_selection },
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+            self.showHideControls(mode);
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+
 
 /* ----------------------------------------------------------------------------
  * Landuse
@@ -2957,7 +3334,7 @@ var Climate = function () {
             });
         };
 
-        
+
         return that;
     }
 
@@ -3039,7 +3416,7 @@ var Wepp = function () {
             });
 
         };
-        
+
         that.set_flowpaths = function (state) {
             var self = instance;
             var task_msg = "Setting run_flowpaths (" + state + ")";
@@ -3390,5 +3767,127 @@ var Ash = function () {
         }
     };
 }();
+
+
+/* ----------------------------------------------------------------------------
+ * Rhem
+ * ----------------------------------------------------------------------------
+ */
+var Rhem = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#rhem_form");
+        that.info = $("#rhem_form #info");
+        that.status = $("#rhem_form  #status");
+        that.stacktrace = $("#rhem_form #stacktrace");
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.attempts = 0;
+
+        that.run = function () {
+            var self = instance;
+            var task_msg = "Submitting rhem run";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            self.attempts = 0;
+            setTimeout(self.status_loop, 5000);
+
+            $.post({
+                url: "tasks/run_rhem/",
+                data: self.form.serialize(),
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("RHEM_RUN_TASK_COMPLETED");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            }).always(function () {
+                    self.attempts = 9999999;
+            });
+        };
+
+        that.report = function () {
+            var self = instance;
+            var project = Project.getInstance();
+            var task_msg = "Fetching Summary";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.get({
+                url: "report/rhem/results/",
+                cache: false,
+                success: function success(response) {
+                    $('#rhem-results').html(response);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "report/rhem/run_summary/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                    self.status.html(task_msg + "... Success");
+                    project.set_preferred_units();
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+        };
+
+        that.status_loop = function () {
+            var self = instance;
+
+            $.post({
+                url: 'query/status/rhem/',
+                success: function success(response) {
+
+                    if (response.Success === true && self.attempts < 14400) {
+                        self.status.html(response.Content);
+                        self.attempts += 1;
+                    } else {
+                        self.attempts += 1000;
+                    }
+                }
+            }).done(function () {
+                if (self.attempts < 32000) {
+                    setTimeout(self.status_loop, 1000);
+                }
+
+            });
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+
 
 // end-of-file controller.js -----------------------------------------

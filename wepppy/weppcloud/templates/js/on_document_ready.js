@@ -29,6 +29,7 @@ $(document).ready(function () {
     var debris_flow = DebrisFlow.getInstance();
     var ash = Ash.getInstance();
 
+
     team.hideStacktrace();
     channel_ctrl.hideStacktrace();
     outlet.hideStacktrace();
@@ -310,12 +311,19 @@ $(document).ready(function () {
         sub_ctrl.setColorMap($("input[name='sub_cmap_radio']:checked").val());
     });
 
+    {% if 'rhem' not in ron.mods %}
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
     $("[name='wepp_sub_cmap_radio']").change(function () {
         sub_ctrl.setColorMap($("input[name='wepp_sub_cmap_radio']:checked").val());
     });
-
+    {% else %}
+    // Bind radio to change subcatchment appearance
+    // radios live in the map.htm template
+    $("[name='rhem_sub_cmap_radio']").change(function () {
+        sub_ctrl.setColorMap($("input[name='rhem_sub_cmap_radio']:checked").val());
+    });
+    {% endif %}
 
     //
     // Subcatchment Event Bindings
@@ -333,40 +341,63 @@ $(document).ready(function () {
     });
 
     //
-    // Hillslopes
-
-    // Phosphorus
-    render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
-    sub_ctrl.renderPhosphorus();
-    $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
+    // Hillslopes Visualizations
+    {% if 'rhem' not in ron.mods %}
+        // Phosphorus
+        render_legend("viridis", "wepp_sub_cmap_canvas_phosphorus");
         sub_ctrl.renderPhosphorus();
-    });
+        $('#wepp_sub_cmap_range_phosphorus').on('input', function () {
+            sub_ctrl.renderPhosphorus();
+        });
 
-    // Runoff
-    render_legend("winter", "wepp_sub_cmap_canvas_runoff");
-    sub_ctrl.renderRunoff();
-    $('#wepp_sub_cmap_range_runoff').on('input', function () {
+        // Runoff
+        render_legend("winter", "wepp_sub_cmap_canvas_runoff");
         sub_ctrl.renderRunoff();
-    });
+        $('#wepp_sub_cmap_range_runoff').on('input', function () {
+            sub_ctrl.renderRunoff();
+        });
 
-    // Loss
-    render_legend("electric", "wepp_sub_cmap_canvas_loss");
-    sub_ctrl.renderLoss();
-    $('#wepp_sub_cmap_range_loss').on('input', function () {
+        // Loss
+        render_legend("electric", "wepp_sub_cmap_canvas_loss");
         sub_ctrl.renderLoss();
-    });
+        $('#wepp_sub_cmap_range_loss').on('input', function () {
+            sub_ctrl.renderLoss();
+        });
 
 
-    //
-    // Gridded
+        //
+        // Gridded
 
-    // Soil Deposition / Loss
-    render_legend("electric", "wepp_grd_cmap_canvas_loss");
-    sub_ctrl.updateGriddedLoss();
-
-    $('#wepp_grd_cmap_range_loss').on('input', function () {
+        // Soil Deposition / Loss
+        render_legend("electric", "wepp_grd_cmap_canvas_loss");
         sub_ctrl.updateGriddedLoss();
-    });
+
+        $('#wepp_grd_cmap_range_loss').on('input', function () {
+            sub_ctrl.updateGriddedLoss();
+        });
+    {% else %}
+
+        // Runoff
+        render_legend("winter", "rhem_sub_cmap_canvas_runoff");
+        sub_ctrl.renderRunoff();
+        $('#rhem_sub_cmap_range_runoff').on('input', function () {
+            sub_ctrl.renderRhemRunoff();
+        });
+
+        // Yield
+        render_legend("viridis", "rhem_sub_cmap_canvas_sed_yield");
+        sub_ctrl.renderPhosphorus();
+        $('#rhem_sub_cmap_range_yield').on('input', function () {
+            sub_ctrl.renderRhemSedYield();
+        });
+
+        // Loss
+        render_legend("electric", "rhem_sub_cmap_canvas_soil_loss");
+        sub_ctrl.renderLoss();
+        $('#rhem_sub_cmap_range_loss').on('input', function () {
+            sub_ctrl.renderRhemSoilLoss();
+        });
+    {% endif %}
 
     // load subcatchments
     if ({{ topaz.has_subcatchments | tojson }}) {
@@ -375,6 +406,36 @@ $(document).ready(function () {
         channel_ctrl.show();
         sub_ctrl.enableColorMap("slp_asp");
     }
+
+    {% if 'rangeland_cover' in ron.mods %}
+    /*
+     * Rangeland Cover Initialization
+     * ===============================
+     */
+
+    var rangeland_cover = RangelandCover.getInstance();
+    rangeland_cover.hideStacktrace();
+
+    //
+    // Bindings
+    //
+    $("[name='rangeland_cover_mode']").change(function () {
+        rangeland_cover.setMode();
+    });
+
+    $("#rangeland_cover_single_selection").on("change", function () {
+        rangeland_cover.setMode();
+    });
+
+    $("#btn_build_rangeland_cover").click(rangeland_cover.build);
+
+    //
+    // Rangeland Cover Event Bindings
+    //
+    rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
+        rangeland_cover.report();
+    });
+    {% endif %}
 
     /*
      * Landuse Initialization
@@ -575,6 +636,29 @@ $(document).ready(function () {
         wepp.report();
         observed.onWeppRunCompleted();
     });
+
+    {% if 'rhem' in ron.mods %}
+    /*
+    * Rhem Initialization
+    * ======================
+    */
+
+    var rhem = Rhem.getInstance();
+    rhem.hideStacktrace();
+
+    //
+    // Bindings
+    //
+
+    rhem.form.on("RHEM_RUN_TASK_COMPLETED", function () {
+        rhem.report();
+    });
+
+    if ( {{ rhem.has_run | tojson }} ) {
+        rhem.report();
+    }
+
+    {% endif %}
 
     //
     // Initial Configuration

@@ -122,10 +122,10 @@ class Ron(NoDbBase):
             export_dir = self.export_dir
             if not _exists(export_dir):
                 os.mkdir(export_dir)
-                
+
             # initialize the other controllers here
             # this will create the other .nodb files
-            
+
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
             wepppy.nodb.Topaz(wd, cfg_fn)
@@ -137,10 +137,10 @@ class Ron(NoDbBase):
             wepppy.nodb.Unitizer(wd, cfg_fn)
             wepppy.nodb.WeppPost(wd, cfg_fn)
             wepppy.nodb.Observed(wd, cfg_fn)
-            
+
             if "lt" in self.mods:
                 wepppy.nodb.mods.LakeTahoe(wd, cfg_fn)
-                    
+
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
                 sbs_map = config.get('landuse', 'sbs_map')
@@ -164,19 +164,29 @@ class Ron(NoDbBase):
 
                     baer.modify_burn_class([0, 1, 2, 3], None)
 
-            if "rred" in self.mods:
+            if 'rred' in self.mods:
                 wepppy.nodb.mods.Rred(wd, cfg_fn)
 
-            if "debris_flow" in self.mods:
+            if 'debris_flow' in self.mods:
                 wepppy.nodb.mods.DebrisFlow(wd, cfg_fn)
 
-            if "ash" in self.mods:
+            if 'ash' in self.mods:
                 wepppy.nodb.mods.Ash(wd, cfg_fn)
+
+            if 'shrubland' in self.mods:
+                wepppy.nodb.mods.Shrubland(wd, cfg_fn)
+
+            if 'rangeland_cover' in self.mods:
+                wepppy.nodb.mods.RangelandCover(wd, cfg_fn)
+
+            if 'rhem' in self.mods:
+                wepppy.nodb.mods.Rhem(wd, cfg_fn)
+                wepppy.nodb.mods.RhemPost(wd, cfg_fn)
 
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.ON_INIT_FINISH)
-            
+
         except Exception:
             self.unlock('-f')
             raise
@@ -241,7 +251,7 @@ class Ron(NoDbBase):
     @property
     def boundary(self):
         return self._boundary
-            
+
     @property
     def map(self):
         return self._map
@@ -335,7 +345,7 @@ class Ron(NoDbBase):
     @property
     def has_dem(self):
         return _exists(self.dem_fn)
-     
+
     #
     # summary
     #
@@ -369,7 +379,7 @@ class Ron(NoDbBase):
         soils = wepppy.nodb.Soils.getInstance(wd)
         climate = wepppy.nodb.Climate.getInstance(wd)
         landuse = wepppy.nodb.Landuse.getInstance(wd)
-        
+
         if topaz_id is None:
             topaz_id = translator.top(wepp=wepp_id)
 

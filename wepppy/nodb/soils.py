@@ -25,7 +25,7 @@ from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, N
 from wepppy.watershed_abstraction import ischannel
 from wepppy.all_your_base import wmesque_retrieve, isfloat
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
-from wepppy.wepp.soils.utils import simple_texture
+from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -248,6 +248,7 @@ class Soils(NoDbBase):
                 soils[k].clay = clay
                 soils[k].ll = ll_d[k]
                 soils[k].simple_texture = simple_texture(clay, sand)
+                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -297,6 +298,7 @@ class Soils(NoDbBase):
                 soils[k].clay = clay
                 # soils[k].ll = ll_d[k]
                 soils[k].simple_texture = simple_texture(clay, sand)
+                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -476,6 +478,7 @@ class Soils(NoDbBase):
                 soils[k].sand = sand
                 soils[k].ll = ll_d[k]
                 soils[k].simple_texture = simple_texture(clay, sand)
+                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -620,6 +623,7 @@ class Soils(NoDbBase):
                 soils[k].sand = sand
                 soils[k].ll = ll_d[k]
                 soils[k].simple_texture = simple_texture(clay, sand)
+                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}

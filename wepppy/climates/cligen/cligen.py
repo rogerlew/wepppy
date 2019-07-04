@@ -337,6 +337,26 @@ class ClimateFile(object):
         years = [int(v) for v in sorted(set(df['year']))]
         return years
 
+    def make_storm_file(self, dst_fn):
+        header_template = """\
+{num_rain_events} # The number of rain events
+0 # Breakpoint data? (0 for no, 1 for yes)
+#  id     day  month  year  Rain   Dur    Tp     Ip
+#                           (mm)   (h)
+"""
+        storms = []
+        df = self.as_dataframe()
+        for i, row in df.iterrows():
+            if row.prcp > 0:
+                storms.append([int(row.da), int(row.mo), int(row.year), row.prcp, row.dur, row.tp, row.ip])
+
+        with open(dst_fn, 'w') as fp:
+            fp.write(header_template.format(num_rain_events=len(storms)))
+
+            for i, (da, mo, year, prcp, dur, tp, ip) in enumerate(storms):
+                fp.write('{0:<8}{1:<6}{2:<6}{3:<6}{4:<7}{5:<7}{6:<7}{7:<7}\n'
+                         .format(i+1, da, mo, year, prcp, dur, tp, ip))
+
     def as_dataframe(self, calc_peak_intensities=False):
         colnames = self.colnames
         dtypes = self.dtypes
@@ -441,7 +461,7 @@ class ClimateFile(object):
     def write(self, fn):
         with open(fn, 'w') as fp:
             fp.write(''.join(self.lines))
-            
+
     @property
     def contents(self):
         return ''.join(self.lines)
@@ -592,7 +612,7 @@ class StationMeta:
         self.distance = haversine(location, (self.longitude, self.latitude))
 
     def as_dict(self, include_monthlies=False):
-    
+
         d = {
             "state": self.state,
             "desc": self.desc,
@@ -608,10 +628,10 @@ class StationMeta:
             "rank_based_on_query_location": self.rank,
             "id": int(self.id)
         }
-        
+
         if include_monthlies:
             station = self.get_station()
-            d["monthlies"] = { 
+            d["monthlies"] = {
                 "ppts": list(station.ppts),
                 "nwds": list(station.nwds),
                 "tmaxs": list(station.tmaxs),
@@ -622,7 +642,7 @@ class StationMeta:
             d['ave_monthly_tmin'] = np.mean(station.tmins)
 
         return d
-            
+
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.__dict__)
 
