@@ -82,7 +82,7 @@ from .topaz import Topaz
 from .wepppost import WeppPost
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.6)
+NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
 if NCPU < 1:
     NCPU = 1
 

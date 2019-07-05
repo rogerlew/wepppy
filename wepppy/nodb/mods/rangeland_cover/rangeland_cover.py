@@ -26,7 +26,7 @@ from pyproj import Proj, transform
 from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent, wmesque_retrieve
 from wepppy.landcover import LandcoverMap
 
-from ...ron import Ron
+from ...watershed import Watershed
 from ...base import NoDbBase, TriggerEvents
 
 gdal.UseExceptions()
@@ -302,6 +302,37 @@ class RangelandCover(NoDbBase):
             raise
 
     def build(self):
+        if self.mode == RangelandCoverMode.Gridded:
+            self._build_gridded()
+        else:
+            self._build_single()
+
+    def _build_single(self):
+        wd = self.wd
+
+        self.lock()
+        try:
+            watershed = Watershed.getInstance(wd)
+            covers = {}
+            for topaz_id, summary in watershed.sub_iter():
+                cover = dict(bunchgrass=self._bunchgrass_cover_default,
+                             forbs=self._forbs_cover_default,
+                             sodgrass=self._sodgrass_cover_default,
+                             shrub=self._shrub_cover_default,
+                             basal=self._basal_cover_default,
+                             rock=self._rock_cover_default,
+                             litter=self._litter_cover_default,
+                             cryptogams=self._cryptogams_cover_default)
+                covers[topaz_id] = cover
+
+            self.covers = covers
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_gridded(self):
         wd = self.wd
         from wepppy.nodb.mods import Shrubland, nlcd_shrubland_layers
 
@@ -325,7 +356,6 @@ class RangelandCover(NoDbBase):
                                  litter=self._litter_cover_default,
                                  cryptogams=self._cryptogams_cover_default)
                 else:
-                    print(topaz_id, shrubland_data)
                     herbaceous_normalized = shrubland_data.herbaceous_normalized
                     sagebrush_normalized = shrubland_data.sagebrush_normalized
                     shrub_normalized = shrubland_data.shrub_normalized
@@ -374,3 +404,7 @@ class RangelandCover(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+    @property
+    def has_covers(self):
+        return self.covers is not None

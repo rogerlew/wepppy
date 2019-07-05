@@ -40,7 +40,7 @@ from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.3)
+NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
 if NCPU < 1:
     NCPU = 1
 
@@ -112,7 +112,7 @@ def build_observed(kwds):
 class Climate(NoDbBase, LogMixin):
     def __init__(self, wd, cfg_fn):
         super(Climate, self).__init__(wd, cfg_fn)
-        
+
         self.lock()
 
         # noinspection PyBroadException
@@ -161,7 +161,7 @@ class Climate(NoDbBase, LogMixin):
                 _observed_clis_wc = None
             else:
                 assert _exists(_observed_clis_wc), _observed_clis_wc
-                
+
             _future_clis_wc = config.get('climate', 'future_clis_wc')
             if _future_clis_wc is not None:
                 _future_clis_wc = _future_clis_wc.replace('MODS_DIR', MODS_DIR)
@@ -170,7 +170,7 @@ class Climate(NoDbBase, LogMixin):
                 _future_clis_wc = None
             else:
                 assert _exists(_future_clis_wc)
-                
+
             self._observed_clis_wc = _observed_clis_wc
             self._future_clis_wc = _future_clis_wc
 
@@ -222,7 +222,7 @@ class Climate(NoDbBase, LogMixin):
         wc = getattr(self, '_observed_clis_wc', None)
         if wc is None:
             return None
-        
+
         return glob(_join(wc, '*.cli'))
 
     @property
@@ -232,7 +232,7 @@ class Climate(NoDbBase, LogMixin):
             return None
 
         return glob(_join(wc, '*.cli'))
-    
+
     @property
     def observed_start_year(self):
         return self._observed_start_year
@@ -346,16 +346,16 @@ class Climate(NoDbBase, LogMixin):
     @property
     def climatestation_meta(self):
         climatestation = self.climatestation
-    
+
         if climatestation is None:
             return None
-    
+
         station_manager = CligenStationsManager()
         station_meta = station_manager.get_station_fromid(climatestation)
         assert station_meta is not None
-        
+
         return station_meta
-        
+
     #
     # climate_mode
     #
@@ -760,7 +760,7 @@ class Climate(NoDbBase, LogMixin):
                 ss_max_intensity_inches_per_hour
             self._ss_time_to_peak_intensity_pct = \
                 ss_time_to_peak_intensity_pct
-                
+
             self.dump_and_unlock()
 
         except Exception:
@@ -1120,7 +1120,7 @@ class Climate(NoDbBase, LogMixin):
     def sub_summary(self, topaz_id):
         if not self.has_climate:
             return None
-        
+
         if self._climate_spatialmode == ClimateSpatialMode.Multiple:
             return dict(cli_fn=self.sub_cli_fns[str(topaz_id)],
                         par_fn=self.sub_par_fns[str(topaz_id)])
@@ -1133,9 +1133,9 @@ class Climate(NoDbBase, LogMixin):
 
         if not self.has_climate:
             return None
-            
+
         return dict(cli_fn=self.cli_fn, par_fn=self.par_fn)
-    
+
     # gotcha: using __getitem__ breaks jinja's attribute lookup, so...
     def _(self, wepp_id):
         if not self.has_climate:
@@ -1144,14 +1144,14 @@ class Climate(NoDbBase, LogMixin):
         if self._climate_spatialmode == ClimateSpatialMode.Multiple:
             translator = Watershed.getInstance(self.wd).translator_factory()
             topaz_id = str(translator.top(wepp=int(wepp_id)))
-            
+
             if topaz_id in self.sub_cli_fns:
                 cli_fn = self.sub_cli_fns[topaz_id]
                 par_fn = self.sub_par_fns[topaz_id]
                 return dict(cli_fn=cli_fn, par_fn=par_fn)
-        
+
         else:
-            return dict(cli_fn=self.cli_fn, 
+            return dict(cli_fn=self.cli_fn,
                         par_fn=self.par_fn)
-        
+
         raise IndexError
