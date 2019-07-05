@@ -387,14 +387,14 @@ $(document).ready(function () {
         // Yield
         render_legend("viridis", "rhem_sub_cmap_canvas_sed_yield");
         sub_ctrl.renderPhosphorus();
-        $('#rhem_sub_cmap_range_yield').on('input', function () {
+        $('#rhem_sub_cmap_range_sed_yield').on('input', function () {
             sub_ctrl.renderRhemSedYield();
         });
 
         // Loss
         render_legend("electric", "rhem_sub_cmap_canvas_soil_loss");
         sub_ctrl.renderLoss();
-        $('#rhem_sub_cmap_range_loss').on('input', function () {
+        $('#rhem_sub_cmap_range_soil_loss').on('input', function () {
             sub_ctrl.renderRhemSoilLoss();
         });
     {% endif %}
@@ -435,6 +435,11 @@ $(document).ready(function () {
     rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
         rangeland_cover.report();
     });
+
+
+    if ({{ rangeland_cover.has_covers | tojson }}) {
+        rangeland_cover.report();
+    }
     {% endif %}
 
     /*

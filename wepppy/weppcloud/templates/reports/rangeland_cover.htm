@@ -1,3 +1,4 @@
+{% if report is not none %}
 <h5>NLCD 2016 Shrubland Statistics</h5>
  <table class="table">
     <thead>
@@ -23,35 +24,40 @@
     {% endfor %}
     </tbody>
  </table>
+{% endif %}
 
 <h5>Rangeland Covers by Hillslope</h5>
- <table class="table">
-    <thead>
-      <tr>
-        <th>Topaz ID</th>
-        <th>Bunchgrass</th>
-        <th>Forbs</th>
-        <th>Sodgrass</th>
-        <th>Shrub</th>
-        <th>Basal</th>
-        <th>Rock</th>
-        <th>Litter</th>
-        <th>Cryptogams</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for topaz_id in covers %}
-      <tr>
-        <td>{{ topaz_id }}</td>
-        <td>{{ unitizer(covers[topaz_id].bunchgrass, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].forbs, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].sodgrass, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].shrub, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].basal, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].rock, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].litter, '%') | safe }}</td>
-        <td>{{ unitizer(covers[topaz_id].cryptogams, '%') | safe }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
- </table>
+<div><a href="#rangeland_covers_hillslopes" data-toggle="collapse">View Covers by Hillslope.</a>
+    <div id="rangeland_covers_hillslopes" class="collapse">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Topaz ID</th>
+                    <th>Bunchgrass</th>
+                    <th>Forbs</th>
+                    <th>Sodgrass</th>
+                    <th>Shrub</th>
+                    <th>Basal</th>
+                    <th>Rock</th>
+                    <th>Litter</th>
+                    <th>Cryptogams</th>
+                </tr>
+            </thead>
+        <tbody>
+            {% for topaz_id in covers %}
+                <tr>
+                    <td>{{ topaz_id }}</td>
+                    <td>{{ unitizer(covers[topaz_id].bunchgrass, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].forbs, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].sodgrass, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].shrub, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].basal, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].rock, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].litter, '%') | safe }}</td>
+                    <td>{{ unitizer(covers[topaz_id].cryptogams, '%') | safe }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

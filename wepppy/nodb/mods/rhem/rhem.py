@@ -90,8 +90,7 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 
 from .rhempost import RhemPost
 
-#NCPU = math.floor(multiprocessing.cpu_count() * 0.6)
-NCPU = multiprocessing.cpu_count() - 1
+NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
 if NCPU < 1:
     NCPU = 1
 
@@ -266,6 +265,14 @@ class Rhem(NoDbBase, LogMixin):
         self.log('Running RhemPost... ')
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
+
+        try:
+            from wepppy.weppcloud import RunStatistics
+            rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
+            rs.increment_hillruns(watershed.config_stem, watershed.sub_n)
+        except Exception:
+            pass
+
         self.log_done()
 
     def report_loss(self):
