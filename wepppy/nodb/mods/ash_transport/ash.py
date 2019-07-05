@@ -41,7 +41,7 @@ from wepppy.nodb.wepp import Wepp
 from .wind_transport_thresholds import *
 from .ash_model import *
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.6)
+NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
 if NCPU < 1:
     NCPU = 1
 

@@ -1,3 +1,4 @@
+import io
 import os
 import csv
 from os.path import join as _join
@@ -12,10 +13,11 @@ _data_dir = _join(_thisdir, 'data')
 _template_dir = _join(_thisdir, 'templates')
 _rhem = _join(_thisdir, "bin", "rhem_v23")
 
+
 def _template_loader(fn):
     global _template_dir
 
-    with open(_join(_template_dir, fn)) as fp:
+    with io.open(_join(_template_dir, fn), "r", encoding="utf-8") as fp:
         _template = fp.readlines()
 
         # strip comments
