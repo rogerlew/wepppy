@@ -221,6 +221,9 @@ class Shrubland(NoDbBase):
 
     @property
     def report(self):
+        if self.data is None:
+            return None
+        
         wd = self.wd
         assert _exists(self.bound_arc)
 
