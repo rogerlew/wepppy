@@ -1552,6 +1552,16 @@ def sub_intersection(runid, config):
     return jsonify(topaz_ids)
 
 
+@app.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])
+def query_rangeland_cover_current(runid, config):
+    wd = get_wd(runid)
+
+    topaz_ids = request.json.get('topaz_ids', None)
+    topaz_ids = [x for x in topaz_ids if x != '']
+
+    return jsonify(RangelandCover.getInstance(wd).current_cover_summary(topaz_ids))
+
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_rangeland_cover_mode/', methods=['POST'])
 def set_rangeland_cover_mode(runid, config):
@@ -1630,6 +1640,28 @@ def task_modify_landuse_mapping(runid, config):
     return success_factory()
 
 
+@app.route('/runs/<string:runid>/<config>/tasks/modify_rangeland_cover/', methods=['POST'])
+def task_modify_rangeland_cover(runid, config):
+    wd = get_wd(runid)
+
+    topaz_ids = request.json.get('topaz_ids', None)
+    covers = request.json.get('covers', None)
+
+    assert topaz_ids is not None
+    assert covers is not None
+
+    for measure, value in covers.items():
+        value = float(value)
+        covers[measure] = float(value)
+        if value < 0.0 or value > 100.0:
+            return Exception('covers must be between 0 and 100')
+
+    rangeland_cover = RangelandCover.getInstance(wd)
+    rangeland_cover.modify_covers(topaz_ids, covers)
+
+    return success_factory()
+
+
 @app.route('/runs/<string:runid>/<config>/query/landuse')
 @app.route('/runs/<string:runid>/<config>/query/landuse/')
 def query_landuse(runid, config):
@@ -1671,6 +1703,7 @@ def resources_sbs_legend(runid, config):
     return render_template('legends/landuse.htm',
                            legend=Baer.getInstance(wd).legend)
 
+
 @app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments/')
 def query_landuse_subcatchments(runid, config):
@@ -1697,6 +1730,13 @@ def report_landuse(runid, config):
     return render_template('reports/landuse.htm',
                            landuseoptions=landuseoptions,
                            report=landuse.report)
+
+
+@app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')
+def query_rangeland_cover_subcatchments(runid, config):
+    wd = get_wd(runid)
+    return jsonify(RangelandCover.getInstance(wd).subs_summary)
 
 
 @app.route('/runs/<string:runid>/<config>/report/rangeland_cover')
