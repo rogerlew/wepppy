@@ -438,6 +438,7 @@ $(document).ready(function () {
         // Rangeland Cover Event Bindings
         //
         rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
+            sub_ctrl.enableColorMap("rangeland_cover");
             rangeland_cover.report();
         });
 
@@ -461,12 +462,12 @@ $(document).ready(function () {
         });
 
 
-        lc_modify.form.on("RANGELAND_COVER_MODIFY_TASK_COMPLETED", function () {
+        rangeland_cover_modify.form.on("RANGELAND_COVER_MODIFY_TASK_COMPLETED", function () {
             if (sub_ctrl.getCmapMode() === "rangeland_cover") {
                 sub_ctrl.setColorMap("rangeland_cover");
             }
-            sub_ctrl.enableColorMap("rangeland_cover");
             rangeland_cover.report();
+            sub_ctrl.cmapRangelandCover();
         });
 
 
