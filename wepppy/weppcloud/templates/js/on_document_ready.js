@@ -340,6 +340,7 @@ $(document).ready(function () {
         wepp.updatePhosphorus();
     });
 
+
     //
     // Hillslopes Visualizations
     {% if 'rhem' not in ron.mods %}
@@ -408,38 +409,67 @@ $(document).ready(function () {
     }
 
     {% if 'rangeland_cover' in ron.mods %}
-    /*
-     * Rangeland Cover Initialization
-     * ===============================
-     */
+        /*
+         * Rangeland Cover Initialization
+         * ===============================
+         */
 
-    var rangeland_cover = RangelandCover.getInstance();
-    rangeland_cover.hideStacktrace();
-
-    //
-    // Bindings
-    //
-    $("[name='rangeland_cover_mode']").change(function () {
-        rangeland_cover.setMode();
-    });
-
-    $("#rangeland_cover_single_selection").on("change", function () {
-        rangeland_cover.setMode();
-    });
-
-    $("#btn_build_rangeland_cover").click(rangeland_cover.build);
-
-    //
-    // Rangeland Cover Event Bindings
-    //
-    rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
-        rangeland_cover.report();
-    });
+        var rangeland_cover = RangelandCover.getInstance();
+        rangeland_cover.hideStacktrace();
 
 
-    if ({{ rangeland_cover.has_covers | tojson }}) {
-        rangeland_cover.report();
-    }
+        var rangeland_cover_modify = RangelandCoverModify.getInstance();
+        rangeland_cover_modify.hideStacktrace();
+
+        //
+        // Bindings
+        //
+        $("[name='rangeland_cover_mode']").change(function () {
+            rangeland_cover.setMode();
+        });
+
+        $("#rangeland_cover_single_selection").on("change", function () {
+            rangeland_cover.setMode();
+        });
+
+        $("#btn_build_rangeland_cover").click(rangeland_cover.build);
+
+        //
+        // Rangeland Cover Event Bindings
+        //
+        rangeland_cover.form.on("RANGELAND_COVER_BUILD_TASK_COMPLETED", function () {
+            rangeland_cover.report();
+        });
+
+
+        if ({{ rangeland_cover.has_covers | tojson }}) {
+            rangeland_cover.report();
+            sub_ctrl.enableColorMap("rangeland_cover");
+        }
+
+
+        /*
+         * Modify RangelandCover Initialization
+         * ======================
+         */
+
+        //
+        // Bindings
+        //
+        $("#checkbox_modify_rangeland_cover").on("change", function () {
+            rangeland_cover_modify.toggle();
+        });
+
+
+        lc_modify.form.on("RANGELAND_COVER_MODIFY_TASK_COMPLETED", function () {
+            if (sub_ctrl.getCmapMode() === "rangeland_cover") {
+                sub_ctrl.setColorMap("rangeland_cover");
+            }
+            sub_ctrl.enableColorMap("rangeland_cover");
+            rangeland_cover.report();
+        });
+
+
     {% endif %}
 
     /*
@@ -492,7 +522,6 @@ $(document).ready(function () {
         lc_modify.toggle();
     });
 
-    $("#btn_modify_landuse").click(lc_modify.modify);
 
     lc_modify.form.on("LANDCOVER_MODIFY_TASK_COMPLETED", function () {
         if (sub_ctrl.getCmapMode() === "dom_lc") {

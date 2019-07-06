@@ -35,6 +35,15 @@ RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
 
 
+def cmyk_to_rgb(c, m, y, k):
+    """
+    """
+    r = (1.0 - c) * (1.0 - k)
+    g = (1.0 - m) * (1.0 - k)
+    b = (1.0 - y) * (1.0 - k)
+    return r, g, b
+
+
 def utm_srid(zone, datum='WGS84', hemisphere='N'):
     if hemisphere != 'N':
         raise NotImplementedError

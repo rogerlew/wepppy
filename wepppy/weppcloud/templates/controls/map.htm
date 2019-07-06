@@ -43,6 +43,13 @@
             </a>
           </li>
           {% endif %}
+          {% if 'rangeland_cover' in ron.mods %}
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#modify_rangeland_cover" role="tab">
+              <img src="{{ url_for('static', filename='open-iconic/png/wrench-2x.png') }}"/>
+            </a>
+          </li>
+          {% endif %}
           {% if false %}
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
@@ -79,6 +86,14 @@
                     Dominant Landcover
                 </label>
             </div>
+            {% if 'rangeland_cover' in ron.mods %}
+            <div class="radio radio-primary">
+                <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_rangeland_cover" value="rangeland_cover" disabled>
+                <label for="sub_cmap_radio2">
+                    Rangeland Cover
+                </label>
+            </div>
+            {% endif %}
             <div class="radio radio-primary">
                 <input type="radio" name="sub_cmap_radio" id="sub_cmap_radio_dom_soil" value="dom_soil" disabled>
                 <label for="sub_cmap_radio3">
@@ -98,26 +113,18 @@
               {% include 'controls/modify_landuse.htm' %}
           </div>
           {% endif %}
+          {% if 'rangeland_cover' in ron.mods %}
+          <div class="tab-pane" id="modify_rangeland_cover" role="tabpanel">
+              {% include 'controls/modify_rangeland_cover.htm' %}
+          </div>
+          {% endif %}
           <div class="tab-pane" id="results" role="tabpanel">
               {% if 'rhem' not in ron.mods %}
                   {% include("controls/map/wepp_hillslope_visualizations.htm") %}
               {% else %}
                   {% include("controls/map/rhem_hillslope_visualizations.htm") %}
               {% endif %}
-
-
-
-
-
-
-
           </div>
-
-
-
-
-
-
         </div>
       </div>
     </div>
