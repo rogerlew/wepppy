@@ -6,8 +6,6 @@ from wepppy.all_your_base import isfloat
 from bs4 import BeautifulSoup
 from seleniumrequests import PhantomJS
 
-
-
 def run_ermit(top_slope, avg_slope, toe_slope, length_ft,
               cli_fn, severity, soil_type,
               vegetation, pct_grass=None, pct_shrub=None):
