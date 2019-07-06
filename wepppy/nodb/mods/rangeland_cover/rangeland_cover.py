@@ -13,6 +13,8 @@ import jsonpickle
 from os.path import join as _join
 from os.path import exists as _exists
 
+from copy import deepcopy
+
 from enum import IntEnum
 
 from glob import glob
@@ -23,7 +25,7 @@ from osgeo import gdal
 
 from pyproj import Proj, transform
 
-from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent, wmesque_retrieve
+from wepppy.all_your_base import cmyk_to_rgb, RGBA
 from wepppy.landcover import LandcoverMap
 
 from ...watershed import Watershed
@@ -33,6 +35,34 @@ gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
+
+
+def gen_cover_color(cover):
+    rock = cover['rock']
+    litter = cover['litter']
+    forbs = cover['forbs']
+    bunchgrass = cover['bunchgrass']
+    sodgrass = cover['sodgrass']
+
+    annual_perennial_tot = forbs + bunchgrass + sodgrass
+    if annual_perennial_tot == 0.0:
+        m = 1.0
+        c = 1.0
+    else:
+        m = (cover['bunchgrass'] + cover['sodgrass']) / annual_perennial_tot
+        c = cover['forbs'] / annual_perennial_tot
+
+    y = (100.0 - cover['shrub']) / 100.0
+
+    if litter > rock:
+        k = 0.2 - litter / 100 * 0.2
+    else:
+        k = 0.2 + rock / 100 * 0.2
+
+    r, g, b = cmyk_to_rgb(c, m, y, k)
+
+
+    return RGBA(*[int(v * 255) for v in [r, g, b, 1.0]]).tohex()
 
 
 class RangelandCoverNoDbLockedException(Exception):
@@ -408,3 +438,70 @@ class RangelandCover(NoDbBase):
     @property
     def has_covers(self):
         return self.covers is not None
+
+    def current_cover_summary(self, topaz_ids):
+        covers = self.covers
+        if covers is None or len(topaz_ids) == 0:
+            return dict(bunchgrass='',
+                        forbs='',
+                        sodgrass='',
+                        shrub='',
+                        basal='',
+                        rock='',
+                        litter='',
+                        cryptogams='')
+
+        sub_covers = dict(bunchgrass=set(),
+                          forbs=set(),
+                          sodgrass=set(),
+                          shrub=set(),
+                          basal=set(),
+                          rock=set(),
+                          litter=set(),
+                          cryptogams=set())
+
+        for topaz_id in topaz_ids:
+            assert topaz_id in covers, topaz_id
+            cover = covers[topaz_id]
+            for measure in sub_covers:
+                sub_covers[measure].add(round(cover[measure]))
+
+        for measure in sub_covers:
+            if len(sub_covers[measure]) > 1:
+                sub_covers[measure] = '-'
+            else:
+                sub_covers[measure] = str(sub_covers[measure].pop())
+
+        return sub_covers
+
+    def modify_covers(self, topaz_ids, new_cover):
+        for topaz_id in topaz_ids:
+            assert topaz_id in self.covers, (topaz_id, self.covers)
+
+        self.lock()
+        try:
+            covers = self.covers
+
+            for topaz_id in topaz_ids:
+                for measure, value in new_cover.items():
+                    covers[topaz_id][measure] = value
+
+            self.covers = covers
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def subs_summary(self):
+        """
+        returns a dictionary of topaz_id keys and
+        management summaries as dicts
+        """
+        covers = deepcopy(self.covers)
+
+        for topaz_id, cover in covers.items():
+            covers[topaz_id]['color'] = gen_cover_color(cover)
+
+        return covers
