@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="rhem integration">
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/climate.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/climate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/configs/rhem.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/configs/rhem.cfg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/ash.py" afterDir="false" />
+    <list default="true" id="7a652da5-516d-4e84-8848-cb638e42e9a0" name="Default" comment="rhem bug fixes">
+      <change afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_rangeland_cover.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/roger.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/roger.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/rangeland_cover.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/rangeland_cover.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/nodb/wepp.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/nodb/wepp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/rhem/rhem.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/rhem/rhem.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/rhem/templates/par.template" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/rhem/templates/par.template" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rangeland_cover.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rangeland_cover.htm" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/combined_ws_viewer.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/combined_ws_viewer.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_landuse.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_landuse.htm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rangeland_cover.htm" beforeDir="false" afterPath="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rangeland_cover.htm" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -108,34 +107,13 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.83926034">
+    <splitter split-orientation="horizontal" split-proportion="0.45783132">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/rhem/rhem.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-2527">
-                  <caret line="1" selection-start-line="1" selection-end-line="1" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="477">
-                  <caret line="225" column="8" selection-start-line="225" selection-start-column="8" selection-end-line="225" selection-end-column="8" />
-                  <folding>
-                    <element signature="e#254#263#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="501">
+                <state relative-caret-position="2655">
                   <caret line="267" selection-start-line="267" selection-end-line="267" />
                   <folding>
                     <element signature="e#0#11#0" expanded="true" />
@@ -147,8 +125,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rangeland_cover.htm">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="504">
-                  <caret line="37" column="37" lean-forward="true" selection-start-line="37" selection-start-column="37" selection-end-line="37" selection-end-column="37" />
+                <state relative-caret-position="555">
+                  <caret line="37" column="37" selection-start-line="37" selection-start-column="37" selection-end-line="37" selection-end-column="37" />
                 </state>
               </provider>
             </entry>
@@ -156,8 +134,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/rangeland_cover.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="731">
-                  <caret line="410" selection-start-line="410" selection-end-line="410" />
+                <state relative-caret-position="240">
+                  <caret line="49" column="15" selection-start-line="49" selection-start-column="15" selection-end-line="49" selection-end-column="15" />
                   <folding>
                     <element signature="e#254#263#0" expanded="true" />
                   </folding>
@@ -166,49 +144,40 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
+            <entry file="file://$PROJECT_DIR$/wepppy/all_your_base/__init__.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="264">
-                  <caret line="440" column="33" selection-start-line="440" selection-start-column="33" selection-end-line="440" selection-end-column="33" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="533">
-                  <caret line="130" column="45" selection-start-line="130" selection-start-column="45" selection-end-line="130" selection-end-column="45" />
+                <state relative-caret-position="308">
+                  <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
                   <folding>
-                    <element signature="n#style#0;n#div#5;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                    <element signature="n#style#0;n#div#7;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                    <element signature="n#style#0;n#div#0;n#div#0;n#div#8;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                    <element signature="n#style#0;n#img#0;n#div#0;n#div#8;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                    <element signature="n#style#0;n#div#8;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                    <element signature="e#254#297#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/run_statistics.py">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_landuse.htm">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="420">
-                  <caret line="38" column="26" selection-start-line="38" selection-start-column="8" selection-end-line="38" selection-end-column="26" />
+                <state relative-caret-position="75">
+                  <caret line="5" column="46" selection-start-line="5" selection-start-column="23" selection-end-line="5" selection-end-column="46" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/baer_upload.htm">
-              <provider selected="true" editor-type-id="text-editor" />
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="150">
+                  <caret line="445" column="37" selection-start-line="445" selection-start-column="37" selection-end-line="445" selection-end-column="37" />
+                </state>
+              </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/mods/baer/classify.htm">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_rangeland_cover.htm">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="67">
-                  <caret line="57" selection-start-line="57" selection-end-line="58" selection-end-column="47" />
+                <state relative-caret-position="300">
+                  <caret line="20" column="30" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
                 </state>
               </provider>
             </entry>
@@ -217,29 +186,23 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm">
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="360">
-                  <caret line="24" column="5" lean-forward="true" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
+                <state relative-caret-position="263">
+                  <caret line="1736" column="25" selection-start-line="1736" selection-start-column="25" selection-end-line="1736" selection-end-column="25" />
+                  <folding>
+                    <element signature="e#254#263#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp.htm">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/legends/slope_aspect.htm">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1980">
-                  <caret line="132" column="14" selection-end-line="134" selection-end-column="14" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rhem.htm">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="180">
-                  <caret line="12" column="14" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
+                <state>
+                  <caret column="4" selection-start-column="4" selection-end-column="4" />
                 </state>
               </provider>
             </entry>
@@ -247,7 +210,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="210">
+                <state relative-caret-position="16320">
                   <caret line="1119" column="19" selection-start-line="1119" selection-start-column="8" selection-end-line="1119" selection-end-column="19" />
                   <folding>
                     <element signature="e#273#282#0" expanded="true" />
@@ -259,20 +222,11 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/wepppy/nodb/landuse.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="663">
-                  <caret line="251" column="20" selection-start-line="251" selection-start-column="20" selection-end-line="251" selection-end-column="20" />
+                <state relative-caret-position="513">
+                  <caret line="397" column="22" lean-forward="true" selection-start-line="397" selection-start-column="22" selection-end-line="397" selection-end-column="22" />
                   <folding>
                     <element signature="e#273#283#0" expanded="true" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/landcover/landcover_map.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="975">
-                  <caret line="73" column="45" selection-start-line="73" selection-start-column="45" selection-end-line="73" selection-end-column="45" />
                 </state>
               </provider>
             </entry>
@@ -289,7 +243,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhempost.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="378">
+                <state relative-caret-position="2445">
                   <caret line="180" column="36" selection-start-line="180" selection-start-column="36" selection-end-line="180" selection-end-column="36" />
                   <folding>
                     <element signature="e#254#263#0" expanded="true" />
@@ -299,36 +253,33 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/avg_annual_summary.htm">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="60">
-                  <caret line="4" column="41" selection-start-line="4" selection-start-column="41" selection-end-line="4" selection-end-column="41" />
+                <state relative-caret-position="266">
+                  <caret line="1428" column="59" selection-start-line="1428" selection-start-column="59" selection-end-line="1428" selection-end-column="59" />
                   <folding>
-                    <element signature="e#904#910#1#HTML" expanded="true" />
-                    <element signature="e#963#969#0#HTML" expanded="true" />
-                    <element signature="e#1021#1027#0#HTML" expanded="true" />
-                    <element signature="e#1082#1088#0#HTML" expanded="true" />
-                    <element signature="e#1146#1152#0#HTML" expanded="true" />
-                    <element signature="e#1207#1213#0#HTML" expanded="true" />
-                    <element signature="e#1271#1277#0#HTML" expanded="true" />
-                    <element signature="e#1330#1336#0#HTML" expanded="true" />
-                    <element signature="e#1388#1394#0#HTML" expanded="true" />
+                    <element signature="n#!!doc" expanded="true" />
+                    <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+                    <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="102">
-                  <caret line="1881" column="63" selection-start-line="1881" selection-start-column="63" selection-end-line="1881" selection-end-column="63" />
-                  <folding>
-                    <element signature="n#!!doc" expanded="true" />
-                    <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-                    <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-                    <element signature="e#56941#59183#0" />
-                  </folding>
+                <state relative-caret-position="390">
+                  <caret line="83" column="83" selection-start-line="83" selection-start-column="62" selection-end-line="83" selection-end-column="83" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rangeland_cover.htm">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="1575">
+                  <caret line="105" column="10" selection-start-line="16" selection-start-column="4" selection-end-line="105" selection-end-column="10" />
                 </state>
               </provider>
             </entry>
@@ -349,53 +300,46 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>0.htm</find>
-      <find>Sediment-Yield</find>
-      <find>Hillslope Visualizations</find>
-      <find>tonne/yr</find>
-      <find>include</find>
-      <find>has_pho</find>
-      <find>map</find>
-      <find>wepp</find>
-      <find>td&gt;</find>
-      <find>cmapperRuno</find>
-      <find>quer</find>
-      <find>query/we</find>
-      <find>wepp_sub_cmap_radio</find>
-      <find>phosphorus</find>
-      <find>dataRhemRunoff</find>
-      <find>rhem_sub_cmap_canvas_runoff</find>
-      <find>NCPU =</find>
-      <find>loss</find>
-      <find>Foliar Cover (%)</find>
-      <find>_template_loader(&quot;par.template&quot;)</find>
-      <find>rangeland_cover.htm</find>
-      <find>runoff</find>
-      <find>{% for topa</find>
-      <find>baer_px_classes</find>
-      <find>rhem_sub_cmap_range_runoff</find>
-      <find>print</find>
-      <find>has_covers</find>
-      <find>report</find>
-      <find>RunStatistics</find>
-      <find>increment_hillruns</find>
+      <find>selection_modify_rangeland_cover</find>
+      <find>input_litter_cover</find>
+      <find>cvr_</find>
+      <find>tasks/sub</find>
+      <find>rangebunchgrassland_cover</find>
+      <find>aria-label=&quot;Lon, Lat&quot;&gt;</find>
+      <find>current_cover_summary</find>
+      <find>request.</find>
+      <find>tasks/su</find>
+      <find>textarea</find>
+      <find>leaflet</find>
+      <find>print(</find>
+      <find>modify</find>
+      <find>modify_l</find>
+      <find>Slope/Aspect</find>
+      <find>current_co</find>
+      <find>Slope/Aspect</find>
+      <find>enableColorMap</find>
+      <find>RANGELAND</find>
+      <find>enab</find>
+      <find>that.modify</find>
+      <find>query/landuse/su</find>
+      <find>ManagementSummary(</find>
+      <find>enableCo</find>
+      <find>self.colo</find>
+      <find>RGBA(</find>
+      <find>query/ran</find>
+      <find>enable</find>
+      <find>set()</find>
+      <find>RGB</find>
     </findStrings>
     <replaceStrings>
-      <replace>slope_shape</replace>
-      <replace>scn_name</replace>
-      <replace>model_version</replace>
-      <replace>'</replace>
-      <replace>grass_cover</replace>
       <replace>WATERSHED_ABSTRACTION_COMPLETE</replace>
       <replace>Shrubland</replace>
-      <replace>rangeland_cover</replace>
       <replace>cryptogams</replace>
       <replace>+</replace>
       <replace>RangelandCover</replace>
       <replace>grid</replace>
       <replace>td</replace>
       <replace>\t</replace>
-      <replace />
       <replace>topaz_id</replace>
       <replace>RHEM</replace>
       <replace>/yr</replace>
@@ -407,10 +351,17 @@
       <replace>th&gt;</replace>
       <replace>rhem</replace>
       <replace>yield</replace>
-      <replace>RhemRunoff</replace>
       <replace>soil_loss</replace>
       <replace>sed_yield</replace>
+      <replace>RhemRunoff</replace>
       <replace>rangeland_covers_hillslopes</replace>
+      <replace>input</replace>
+      <replace>rangeland_cover</replace>
+      <replace>leaflet-src.js</replace>
+      <replace />
+      <replace>&gt;</replace>
+      <replace>input_</replace>
+      <replace>''</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/</dir>
@@ -432,9 +383,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/wepppy/nodb/watershed.py" />
-        <option value="$PROJECT_DIR$/wepppy/wepp/management/data/Tahoe/Skidder_Thinning_85_Cover.man" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/base.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rangeland_cover.html" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/__init__.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/shrubland/__init__.py" />
@@ -445,7 +393,6 @@
         <option value="$PROJECT_DIR$/wepppy/watershed_abstraction/slope_file.py" />
         <option value="$PROJECT_DIR$/wepppy/rhem/__init__.py" />
         <option value="$PROJECT_DIR$/wepppy/wepp/runner/wepp_runner.py" />
-        <option value="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" />
         <option value="$PROJECT_DIR$/wepppy/climates/cligen/cligen.py" />
         <option value="$PROJECT_DIR$/wepppy/_scripts/rap_client.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem_post.py" />
@@ -460,15 +407,11 @@
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/annual_summary.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem_run_summary.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rhem_results.htm" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rhem_reports.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/avg_annual_summary.htm" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/return_periods.htm" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/app.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map/wepp_hillslope_visualizations.htm" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhempost.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map/rhem_hillslope_visualizations.htm" />
         <option value="$PROJECT_DIR$/wepppy/nodb/climate.py" />
         <option value="$PROJECT_DIR$/wepppy/nodb/wepp.py" />
@@ -479,10 +422,18 @@
         <option value="$PROJECT_DIR$/wepppy/rhem/templates/par.template" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland.py" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rangeland_cover.htm" />
-        <option value="$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/rangeland_cover.py" />
-        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" />
         <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm" />
         <option value="$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_landuse.htm" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/combined_ws_viewer.htm" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/0.html" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_rangeland_cover.htm" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/app.py" />
+        <option value="$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js" />
+        <option value="$PROJECT_DIR$/wepppy/all_your_base/__init__.py" />
+        <option value="$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/rangeland_cover.py" />
       </list>
     </option>
   </component>
@@ -533,54 +484,28 @@
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="nodb" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="nodb" type="462c0819:PsiDirectoryNode" />
-              <item name="mods" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="nodb" type="462c0819:PsiDirectoryNode" />
-              <item name="mods" type="462c0819:PsiDirectoryNode" />
-              <item name="rhem" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="rhem" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="rhem" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="soils" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
-              <item name="soils" type="462c0819:PsiDirectoryNode" />
-              <item name="ssurgo" type="462c0819:PsiDirectoryNode" />
+              <item name="all_your_base" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="wepppy" type="462c0819:PsiDirectoryNode" />
               <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+              <item name="static" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+              <item name="static" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
@@ -596,6 +521,14 @@
               <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
               <item name="controls" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="wepppy" type="462c0819:PsiDirectoryNode" />
+              <item name="weppcloud" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wepppy" type="b2602c69:ProjectViewProjectNode" />
@@ -923,14 +856,8 @@
       <workItem from="1561656675264" duration="19523000" />
       <workItem from="1561998259052" duration="36627000" />
       <workItem from="1562170789405" duration="22504000" />
-      <workItem from="1562258036326" duration="16369000" />
-    </task>
-    <task id="LOCAL-00071" summary="county soils db">
-      <created>1536103292340</created>
-      <option name="number" value="00071" />
-      <option name="presentableId" value="LOCAL-00071" />
-      <option name="project" value="LOCAL" />
-      <updated>1536103292340</updated>
+      <workItem from="1562258036326" duration="19719000" />
+      <workItem from="1562357866182" duration="10166000" />
     </task>
     <task id="LOCAL-00072" summary="lt updates and fixes">
       <created>1541792551176</created>
@@ -1268,7 +1195,14 @@
       <option name="project" value="LOCAL" />
       <updated>1562277130482</updated>
     </task>
-    <option name="localTasksCounter" value="120" />
+    <task id="LOCAL-00120" summary="rhem bug fixes">
+      <created>1562347708618</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1562347708618</updated>
+    </task>
+    <option name="localTasksCounter" value="121" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1304,7 +1238,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="620401000" />
+    <option name="totallyTimeSpent" value="633917000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1317,14 +1251,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="42" y="27" width="1878" height="1053" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2342048" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23148148" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.14484979" />
-      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.5374113" visible="true" weight="0.18347639" />
+      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.5374113" weight="0.16738197" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.46459228" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -1335,7 +1268,7 @@
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.43669528" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.2725322" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="13" weight="0.115879826" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="13" visible="true" weight="0.5" />
       <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
       <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
@@ -1347,12 +1280,12 @@
       <window_info anchor="right" id="SciView" order="7" weight="0.66193336" />
     </layout>
     <layout-to-restore>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13453159" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2342048" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.14484979" />
-      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.5374113" visible="true" weight="0.37553647" />
+      <window_info anchor="bottom" x="328" y="73" width="1360" height="833" id="Run" order="2" sideWeight="0.5374113" weight="0.18347639" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.46459228" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -1363,7 +1296,7 @@
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.43669528" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.2725322" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="13" weight="0.3251073" />
+      <window_info anchor="bottom" id="Version Control" order="13" visible="true" weight="0.08690987" />
       <window_info anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32934132" />
       <window_info anchor="right" x="0" y="0" width="413" height="878" id="Documentation" order="0" weight="0.32982844" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
@@ -1390,7 +1323,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="rred" />
     <MESSAGE value="rred integration" />
     <MESSAGE value="lt fixes" />
     <MESSAGE value="baer-ssurgo" />
@@ -1415,7 +1347,8 @@
     <MESSAGE value="website change log updated" />
     <MESSAGE value="eu-fire" />
     <MESSAGE value="rhem integration" />
-    <option name="LAST_COMMIT_MESSAGE" value="rhem integration" />
+    <MESSAGE value="rhem bug fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="rhem bug fixes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1452,7 +1385,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/wepppy/weppcloud/app.py</url>
-          <line>3172</line>
+          <line>3212</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1476,7 +1409,7 @@
     <SUITE FILE_PATH="coverage/wepppy$ash_tests.coverage" NAME="ash_tests Coverage Results" MODIFIED="1560209934556" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/nodb/mods/ash_transport/tests" />
     <SUITE FILE_PATH="coverage/wepppy$__init____2_.coverage" NAME="__init__ (2) Coverage Results" MODIFIED="1559524161027" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/au/asris_2001" />
     <SUITE FILE_PATH="coverage/wepppy$cli2pat.coverage" NAME="cli2pat Coverage Results" MODIFIED="1553812667482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/out" />
-    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1562345672638" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
+    <SUITE FILE_PATH="coverage/wepppy$app.coverage" NAME="app Coverage Results" MODIFIED="1562370782690" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
     <SUITE FILE_PATH="coverage/wepppy$__init____1_.coverage" NAME="__init__ (1) Coverage Results" MODIFIED="1559423830911" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/au/landuse_201011" />
     <SUITE FILE_PATH="coverage/wepppy$run_statistics.coverage" NAME="run_statistics Coverage Results" MODIFIED="1556915622909" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/weppcloud" />
     <SUITE FILE_PATH="coverage/wepppy$make_gdalinfo_jsons.coverage" NAME="make_gdalinfo_jsons Coverage Results" MODIFIED="1559525619759" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/au/soils/asris_soil_grids/scripts" />
@@ -1506,41 +1439,6 @@
     <SUITE FILE_PATH="coverage/wepppy$sediment_delivery.coverage" NAME="sediment_delivery Coverage Results" MODIFIED="1560833707617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/wepppy/wepp/stats" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/wepppy/watershed_abstraction/slope_file.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="59" column="28" selection-start-line="59" selection-start-column="28" selection-end-line="59" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/rhem/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="19" selection-start-column="19" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/0.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="780">
-          <caret line="52" column="25" selection-start-line="52" selection-start-column="25" selection-end-line="52" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/wepp/runner/wepp_runner.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="554">
-          <caret line="209" column="10" selection-start-line="209" selection-start-column="4" selection-end-line="209" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/rhem/templates/run.template">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="67" lean-forward="true" selection-start-column="67" selection-end-column="81" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/wepp/out/loss.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-2610" />
@@ -1588,16 +1486,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
           <caret line="34" column="183" lean-forward="true" selection-start-line="34" selection-start-column="183" selection-end-line="34" selection-end-column="183" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/all_your_base/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="346" column="7" selection-start-line="346" selection-start-column="7" selection-end-line="346" selection-end-column="7" />
-          <folding>
-            <element signature="e#254#297#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1660,13 +1548,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland_map.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="26" column="44" selection-start-line="26" selection-start-column="44" selection-end-line="26" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/wepp/summary.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="555">
@@ -1698,31 +1579,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="5" lean-forward="true" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/avg_annual_summary.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="41" selection-start-line="4" selection-start-column="41" selection-end-line="4" selection-end-column="41" />
-          <folding>
-            <element signature="e#904#910#1#HTML" expanded="true" />
-            <element signature="e#963#969#0#HTML" expanded="true" />
-            <element signature="e#1021#1027#0#HTML" expanded="true" />
-            <element signature="e#1082#1088#0#HTML" expanded="true" />
-            <element signature="e#1146#1152#0#HTML" expanded="true" />
-            <element signature="e#1207#1213#0#HTML" expanded="true" />
-            <element signature="e#1271#1277#0#HTML" expanded="true" />
-            <element signature="e#1330#1336#0#HTML" expanded="true" />
-            <element signature="e#1388#1394#0#HTML" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/return_periods.htm">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="152">
@@ -1734,37 +1590,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="104" column="47" selection-start-line="104" selection-start-column="47" selection-end-line="104" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/landuse.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="251" column="20" selection-start-line="251" selection-start-column="20" selection-end-line="251" selection-end-column="20" />
-          <folding>
-            <element signature="e#273#283#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/wepp.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="448">
           <caret line="976" column="17" lean-forward="true" selection-start-line="972" selection-start-column="65" selection-end-line="976" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="1119" column="19" selection-start-line="1119" selection-start-column="8" selection-end-line="1119" selection-end-column="19" />
-          <folding>
-            <element signature="e#273#282#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1790,29 +1619,6 @@
             <element signature="n#style#0;n#canvas#0;n#div#0;n#div#3;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#1;n#div#0;n#div#0;n#div#3;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#2;n#div#0;n#div#0;n#div#3;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhempost.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="180" column="36" selection-start-line="180" selection-start-column="36" selection-end-line="180" selection-end-column="36" />
-          <folding>
-            <element signature="e#254#263#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="1881" column="63" selection-start-line="1881" selection-start-column="63" selection-end-line="1881" selection-end-column="63" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
-            <element signature="e#56941#59183#0" />
           </folding>
         </state>
       </provider>
@@ -1859,16 +1665,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="1711" column="45" selection-start-line="1711" selection-start-column="45" selection-end-line="1711" selection-end-column="45" />
-          <folding>
-            <element signature="e#254#263#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="477">
@@ -1882,38 +1678,89 @@
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/baer_upload.htm">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/mods/baer/classify.htm">
+    <entry file="file://$PROJECT_DIR$/wepppy/rhem/rhem.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="67">
-          <caret line="57" selection-start-line="57" selection-end-line="58" selection-end-column="47" />
+        <state relative-caret-position="15">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2655">
+          <caret line="267" selection-start-line="267" selection-end-line="267" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rangeland_cover.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="37" column="37" lean-forward="true" selection-start-line="37" selection-start-column="37" selection-end-line="37" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="440" column="33" selection-start-line="440" selection-start-column="33" selection-end-line="440" selection-end-column="33" />
+        <state relative-caret-position="555">
+          <caret line="37" column="37" selection-start-line="37" selection-start-column="37" selection-end-line="37" selection-end-column="37" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/index.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="533">
+        <state relative-caret-position="1950">
           <caret line="130" column="45" selection-start-line="130" selection-start-column="45" selection-end-line="130" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/climate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16320">
+          <caret line="1119" column="19" selection-start-line="1119" selection-start-column="8" selection-end-line="1119" selection-end-column="19" />
           <folding>
-            <element signature="n#style#0;n#div#5;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#7;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#0;n#div#8;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#img#0;n#div#0;n#div#8;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#8;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="e#273#282#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/shrubland/shrubland_map.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="26" column="44" selection-start-line="26" selection-start-column="44" selection-end-line="26" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhempost.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2445">
+          <caret line="180" column="36" selection-start-line="180" selection-start-column="36" selection-end-line="180" selection-end-column="36" />
+          <folding>
+            <element signature="e#254#263#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/reports/rhem/avg_annual_summary.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="41" selection-start-line="4" selection-start-column="41" selection-end-line="4" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/rangeland_cover.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1575">
+          <caret line="105" column="10" selection-start-line="16" selection-start-column="4" selection-end-line="105" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/combined_ws_viewer.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="156">
+          <caret line="33" lean-forward="true" selection-start-line="33" selection-end-line="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/mods/baer/classify.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="57" selection-start-line="57" selection-end-line="58" selection-end-column="47" />
         </state>
       </provider>
     </entry>
@@ -1924,27 +1771,94 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/rhem/rhem.py">
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/wepp_reports.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2527">
-          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        <state relative-caret-position="360">
+          <caret line="24" column="5" selection-start-line="24" selection-start-column="5" selection-end-line="24" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rhem/rhem.py">
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_rangeland_cover.htm">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="501">
-          <caret line="267" selection-start-line="267" selection-end-line="267" />
+        <state relative-caret-position="300">
+          <caret line="20" column="30" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/legends/slope_aspect.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="4" selection-start-column="4" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/map.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="83" column="83" selection-start-line="83" selection-start-column="62" selection-end-line="83" selection-end-column="83" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/controllers.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="1428" column="59" selection-start-line="1428" selection-start-column="59" selection-end-line="1428" selection-end-column="59" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/controls/modify_landuse.htm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="46" selection-start-line="5" selection-start-column="23" selection-end-line="5" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/nodb/landuse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="397" column="22" lean-forward="true" selection-start-line="397" selection-start-column="22" selection-end-line="397" selection-end-column="22" />
+          <folding>
+            <element signature="e#273#283#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="263">
+          <caret line="1736" column="25" selection-start-line="1736" selection-start-column="25" selection-end-line="1736" selection-end-column="25" />
+          <folding>
+            <element signature="e#254#263#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/weppcloud/templates/js/on_document_ready.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="445" column="37" selection-start-line="445" selection-start-column="37" selection-end-line="445" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wepppy/all_your_base/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+          <folding>
+            <element signature="e#254#297#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wepppy/nodb/mods/rangeland_cover/rangeland_cover.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="410" selection-start-line="410" selection-end-line="410" />
+        <state relative-caret-position="240">
+          <caret line="49" column="15" selection-start-line="49" selection-start-column="15" selection-end-line="49" selection-end-column="15" />
           <folding>
             <element signature="e#254#263#0" expanded="true" />
           </folding>
