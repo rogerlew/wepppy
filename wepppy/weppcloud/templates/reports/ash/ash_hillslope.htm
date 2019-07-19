@@ -62,30 +62,30 @@ function rerun_ash() {
 </form>
 <h3>Return Period Results</h3>
 {% set measure = "ash_transport (tonne/ha)" %}
-{% set measure_name = "Ash transport (Wind, Water, Decay)" %}
+{% set measure_name = "Ash Delivery by Wind/Water" %}
 {% set units = "tonne/ha" %}
 {% include("reports/ash/_ash_event_table.htm") %}
 
 {% set measure = "wind_transport (tonne/ha)" %}
-{% set measure_name = "Wind transport" %}
+{% set measure_name = "Ash Delivery by Wind" %}
 {% include("reports/ash/_ash_event_table.htm") %}
 
 {% set measure = "water_transport (tonne/ha)" %}
-{% set measure_name = "Water transport" %}
+{% set measure_name = "Ash Delivery by Water" %}
 {% include("reports/ash/_ash_event_table.htm") %}
 
 
 <h3>Cumulative Annual Results</h3>
 {% set measure = "cum_ash_transport (tonne/ha)" %}
-{% set measure_name = "Ash transport (Wind, Water, Decay)" %}
+{% set measure_name = "Ash Delivery by Wind/Water" %}
 {% include("reports/ash/_ash_annual_table.htm") %}
 
 {% set measure = "cum_wind_transport (tonne/ha)" %}
-{% set measure_name = "Wind transport" %}
+{% set measure_name = "Ash Delivery by Wind" %}
 {% include("reports/ash/_ash_annual_table.htm") %}
 
 {% set measure = "cum_water_transport (tonne/ha)" %}
-{% set measure_name = "Water transport" %}
+{% set measure_name = "Ash Delivery by Water" %}
 {% include("reports/ash/_ash_annual_table.htm") %}
 
 <h3>Download Output Files</h3>

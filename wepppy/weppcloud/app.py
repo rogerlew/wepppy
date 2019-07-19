@@ -429,7 +429,7 @@ def security_processor():
         name = Ron.getInstance(wd).name
         return name
 
-    def run_exists(runid, config):
+    def run_exists(runid):
         wd = get_wd(runid)
         return _exists(_join(wd, 'ron.nodb'))
 
