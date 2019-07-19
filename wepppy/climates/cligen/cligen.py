@@ -53,8 +53,8 @@ from wepppy.climates.metquery_client import (
 
 
 _thisdir = os.path.dirname(__file__)
-_db = _join(_thisdir, 'stations.db')
-_stations_dir = _join(_thisdir, 'stations')
+_db = _join(_thisdir, '2015_stations.db')
+_stations_dir = _join(_thisdir, '2015_par_files')
 _bin_dir = _join(_thisdir, 'bin')
 
 
