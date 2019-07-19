@@ -29,7 +29,7 @@ class AshNoDbLockedException(Exception):
 
 class AshModel(object):
     """
-    Base class for the hillslope ash models. This class is inherited by 
+    Base class for the hillslope ash models. This class is inherited by
     the WhiteAshModel and BlackAshModel classes
     """
     def __init__(self,
@@ -81,43 +81,43 @@ class AshModel(object):
                   recurrence=[100, 50, 20, 10, 5, 2.5, 1], area_ha=None):
         """
         Runs the ash model for a hillslope
-        
-        :param fire_date: 
+
+        :param fire_date:
             month, day of fire as a YearlessDate instance
-        :param element_d: 
+        :param element_d:
             dictionary runoff events from the element WEPP output. The keys are (year, mo, da) and the values contain
             the row data as dictionaries with header keys
-        :param cli_df: 
+        :param cli_df:
             the climate file produced by CLIGEN as a pandas.Dataframe
         :param out_dir:
-            the directory save the model output 
-        :param prefix: 
+            the directory save the model output
+        :param prefix:
             prefix for the model output file
         :param recurrence:
             list of recurrence intervals
-        :return: 
+        :return:
             returns the output file name, return period results dictionary
         """
-        # copy the DataFrame 
+        # copy the DataFrame
         df = deepcopy(cli_df)
 
         # number of days in the file
         s_len = len(df.da)
-        
+
         #
         # Initialize np.arrays to store model values
         #
 
         # current fire year starting at 1
         fire_years = np.zeros((s_len,), dtype=np.int32)
-        
+
         # days from fire for wach fire year
         days_from_fire = np.zeros((s_len,), dtype=np.int32)
-        
+
         # fraction of ash lost from decay for a day
         daily_relative_ash_decay = np.zeros((s_len,))
         cum_relative_ash_decay = np.zeros((s_len,))
-        
+
         # daily total available ash in tonne/ha
         available_ash = np.zeros((s_len,))
 
@@ -130,10 +130,10 @@ class AshModel(object):
 
         # peak runoff from the element (PeakRunoffRAW) WEPP output
         peak_ro = np.zeros((s_len,))
-        
+
         # effective duration from the element (PeakRunoffRAW) WEPP output
         eff_dur = np.zeros((s_len,))
-        
+
         # water transport modeling variables
         water_excess = np.zeros((s_len,))
         real_runoff = np.zeros((s_len,))
@@ -145,7 +145,7 @@ class AshModel(object):
         #
         # Loop through each day in the climate file
         #
-        
+
         breaks = []    # list of indices of new fire years
         fire_year = 0  # current fire year
         w_vl_if = 0.0  # maximum wind speed event for current fire year
@@ -163,7 +163,7 @@ class AshModel(object):
             # store the fire year and days from fire
             fire_years[i] = fire_year
             days_from_fire[i] = dff
-            
+
             # if we are in the first year of the climate file and haven't encountered the fire date
             # we can just continue to the next day
             if dff == -1:
@@ -174,7 +174,7 @@ class AshModel(object):
             #
             if dff == 0:
                 available_ash[i] = self.ini_material_available_tonneperha
-                
+
             #
             # model ash decay
             #
@@ -185,7 +185,7 @@ class AshModel(object):
                     cum_relative_ash_decay[i] = cum_relative_ash_decay[i-1] + daily_relative_ash_decay[i]
 
                 available_ash[i] = available_ash[i-1] * (1.0 - daily_relative_ash_decay[i])
-                
+
             #
             # model wind transport
             #
@@ -229,10 +229,10 @@ class AshModel(object):
             #
             # model runoff
             #
-            
+
             # the element file contains event data we need to look up if the current day has data
             # from the element_d dictionary
-            
+
             # unpack the key
             yr_mo_da = _row.year, _row.mo, _row.da
             if yr_mo_da in element_d:
@@ -259,7 +259,7 @@ class AshModel(object):
 
             # calculate runoff over the runoff_threshold specifed by the model parameters
             effective_runoff[i] = real_runoff[i] - self.runoff_threshold
-            
+
             # clamp to 0
             if effective_runoff[i] < 0.0:
                 effective_runoff[i] = 0.0
@@ -336,11 +336,11 @@ class AshModel(object):
 
         if area_ha is not None:
             df['ash_delivery (tonne)'] = pd.Series(ash_transport * area_ha, index=df.index)
-            df['ash_by_wind_delivery (tonne)'] = pd.Series(wind_transport * area_ha, index=df.index)
-            df['ash_by_water_delivery (tonne)'] = pd.Series(water_transport * area_ha, index=df.index)
+            df['ash_delivery_by_wind (tonne)'] = pd.Series(wind_transport * area_ha, index=df.index)
+            df['ash_delivery_by_water (tonne)'] = pd.Series(water_transport * area_ha, index=df.index)
             df['cum_ash_delivery (tonne)'] = pd.Series(cum_ash_transport * area_ha, index=df.index)
-            df['cum_ash_by_wind_delivery (tonne)'] = pd.Series(cum_wind_transport * area_ha, index=df.index)
-            df['cum_ash_by_water_delivery (tonne)'] = pd.Series(cum_water_transport * area_ha, index=df.index)
+            df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(cum_wind_transport * area_ha, index=df.index)
+            df['cum_ash_delivery_by_water (tonne)'] = pd.Series(cum_water_transport * area_ha, index=df.index)
 
         df.drop(columns=['dur', 'tp', 'ip', 'tmax', 'tmin', 'rad', 'w-dir', 'tdew'], inplace=True)
 

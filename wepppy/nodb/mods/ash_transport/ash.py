@@ -272,11 +272,11 @@ class Ash(NoDbBase, LogMixin):
             # unburned landuses won't have ash outputs
             if _exists(ash_fn):
                 df = pd.read_csv(ash_fn)
-                water.append(df['ash_by_water_delivery (tonne)'].to_numpy())
-                wind.append(df['ash_by_wind_delivery (tonne)'].to_numpy())
+                water.append(df['ash_delivery_by_water (tonne)'].to_numpy())
+                wind.append(df['ash_delivery_by_wind (tonne)'].to_numpy())
                 ash.append(df['ash_delivery (tonne)'].to_numpy())
-                cum_water.append(df['cum_ash_by_water_delivery (tonne)'].to_numpy())
-                cum_wind.append(df['cum_ash_by_wind_delivery (tonne)'].to_numpy())
+                cum_water.append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
+                cum_wind.append(df['cum_ash_delivery_by_wind (tonne)'].to_numpy())
                 cum_ash.append(df['cum_ash_delivery (tonne)'].to_numpy())
 
         water = np.array(water)
@@ -294,12 +294,12 @@ class Ash(NoDbBase, LogMixin):
         cum_ash = np.sum(cum_ash, axis=0)
 
         df = deepcopy(df)
-        df['ash_by_water_delivery (tonne)'] = pd.Series(water, index=df.index)
-        df['ash_by_wind_delivery (tonne)'] = pd.Series(wind, index=df.index)
+        df['ash_delivery_by_water (tonne)'] = pd.Series(water, index=df.index)
+        df['ash_delivery_by_wind (tonne)'] = pd.Series(wind, index=df.index)
         df['ash_delivery (tonne)'] = pd.Series(ash, index=df.index)
 
-        df['cum_ash_by_water_delivery (tonne)'] = pd.Series(cum_water, index=df.index)
-        df['cum_ash_by_wind_delivery (tonne)'] = pd.Series(cum_wind, index=df.index)
+        df['cum_ash_delivery_by_water (tonne)'] = pd.Series(cum_water, index=df.index)
+        df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(cum_wind, index=df.index)
         df['cum_ash_delivery (tonne)'] = pd.Series(cum_ash, index=df.index)
 
         breaks = []    # list of indices of new fire years
@@ -310,15 +310,15 @@ class Ash(NoDbBase, LogMixin):
 
         yr_df = df.loc[[brk for brk in breaks],
                        ['year',
-                        'cum_ash_by_water_delivery (tonne)',
-                        'cum_ash_by_wind_delivery (tonne)',
+                        'cum_ash_delivery_by_water (tonne)',
+                        'cum_ash_delivery_by_wind (tonne)',
                         'cum_ash_delivery (tonne)']]
 
         num_fire_years = len(breaks)
 
         annuals = {}
-        for measure in ['cum_ash_by_water_delivery (tonne)',
-                        'cum_ash_by_wind_delivery (tonne)',
+        for measure in ['cum_ash_delivery_by_water (tonne)',
+                        'cum_ash_delivery_by_wind (tonne)',
                         'cum_ash_delivery (tonne)']:
 
             annuals[measure] = []
@@ -344,7 +344,7 @@ class Ash(NoDbBase, LogMixin):
 
         num_days = len(df.da)
         return_periods = {}
-        for measure in ['ash_by_wind_delivery (tonne)', 'ash_by_water_delivery (tonne)', 'ash_delivery (tonne)']:
+        for measure in ['ash_delivery_by_wind (tonne)', 'ash_delivery_by_water (tonne)', 'ash_delivery (tonne)']:
             return_periods[measure] = {}
             df.sort_values(by=measure, ascending=False, inplace=True)
 

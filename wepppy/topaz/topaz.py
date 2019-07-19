@@ -29,8 +29,8 @@ import numpy as np
 from wepppy.all_your_base import (
     read_arc,
     get_utm_zone,
-    isfloat
-
+    isfloat,
+    wgs84_wkt
 )
 
 from wepppy.watershed_abstraction import WeppTopTranslator
@@ -613,13 +613,13 @@ class TopazRunner:
 
     def _run_dednm(self, _pass=1, verbose=False):
         topaz_wd = self.topaz_wd
-        
+
         if _pass == 2:
             if _exists(_join(topaz_wd, 'CATWIN.TAB')):
                 os.remove(_join(topaz_wd, 'CATWIN.TAB'))
             if _exists(_join(topaz_wd, 'BOUND.OUT')):
                 os.remove(_join(topaz_wd, 'BOUND.OUT'))
-            
+
         output = self._run_subprocess('./dednm', (None, '1')[_pass == 2], verbose)
 
         with open(_join(topaz_wd, 'dednm.log'), 'w') as fp:
@@ -828,22 +828,31 @@ class TopazRunner:
 
         self._json_to_wgs(dst_fn)
 
-    def _json_to_wgs(self, src_fn, verbose=False):
-        # create a version in WGS 1984 (long/lat)
-        prj_fn = _join(self.topaz_wd, 'NETFUL.PRJ')
+    def _json_to_wgs(self, src_fn, verbose=True):
+        utm_proj = Proj(self.srs_proj4)
+
+        with open(src_fn) as fp:
+            js = json.load(fp)
+
+        _features = []
+        for f in js['features']:
+            coords = f['geometry']['coordinates']
+            coords = np.array(coords)
+
+            wgs_lngs, wgs_lats = utm_proj(coords[0, :, 0],
+                                  coords[0, :, 1], inverse=True)
+            coords[0, :, 0] = wgs_lngs
+            coords[0, :, 1] = wgs_lats
+            f['geometry']['coordinates'] = coords.tolist()
+            _features.append(f)
+
+        js['features'] = _features
+
         dst_wgs_fn = src_fn.replace('.JSON', '.WGS.JSON')
+        with open(dst_wgs_fn, 'w') as fp:
+            json.dump(js, fp)
 
-        cmd = ['ogr2ogr',
-               '-s_srs', prj_fn,
-               '-t_srs', 'EPSG:4326',
-               '-f', 'GeoJSON',
-               dst_wgs_fn, src_fn]
-
-        output = self._run_subprocess(cmd, None, verbose)
-        if len(output) == 0:
-            return output
-
-        raise Exception('Error running cmd: %s\n%s' % (cmd, ''.join(output)))
+        return
 
     def _polygonize_channels(self):
         subwta_fn = _join(self.topaz_wd, "SUBWTA.ARC")
