@@ -69,6 +69,7 @@ class HillSummary(ReportBase):
         return [colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for colname in self._hdr]
 
     def __iter__(self):
+
         data = self.data
         for i in range(len(data)):
             _data = [(colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow'),
@@ -283,13 +284,8 @@ class OutletSummary(ReportBase):
 
 if __name__ == "__main__":
 
-    loss = Loss('/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/wepp/output/loss_pw0.txt',
-                '/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/')
+    loss = Loss('/geodata/weppcloud_runs/2aa3e70e-769b-4e1b-959c-54c8c7c4f2e6/wepp/output/loss_pw0.txt',
+                has_phosphorus=False,
+                wd='/geodata/weppcloud_runs/2aa3e70e-769b-4e1b-959c-54c8c7c4f2e6/')
 
-    chn_rpt = ChannelSummary(loss)
-
-    out_rpt = OutletSummary(loss, fraction_under=0.16)
-    for row in out_rpt:
-        print(row)
-    with open('/home/roger/out_summary.csv', 'w') as fp:
-        out_rpt.write(fp, write_header=True)
+    hill_rpt = HillSummary(loss)

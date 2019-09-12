@@ -43,7 +43,7 @@ class LogMixin(object):
         if s is None:
             return ''
         if s.strip().endswith('...'):
-            return '{} ({}s | {}s)'.format(s, t_elapsed.total_seconds(), r_elapsed.total_seconds())
+            return '{} ({:.2f}s | {:.2f}s)'.format(s, t_elapsed.total_seconds(), r_elapsed.total_seconds())
         else:
             return s
 
@@ -62,4 +62,4 @@ class LogMixin(object):
             warnings.warn('FileNotFoundError')
             return
 
-        self._write('done. ({}s | {}s)\n'.format(t_elapsed.total_seconds(), r_elapsed.total_seconds()))
+        self._write('done. ({:.2f}s | {:.2f}s)\n'.format(t_elapsed.total_seconds(), r_elapsed.total_seconds()))
