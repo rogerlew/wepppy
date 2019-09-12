@@ -18,6 +18,8 @@ import numpy as np
 import pandas as pd
 import multiprocessing
 
+from collections import namedtuple
+
 # wepppy
 from wepppy.landcover import LandcoverMap
 
@@ -47,6 +49,12 @@ if NCPU < 1:
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
+
+
+
+ContaminantConcentrations = namedtuple('ContaminantConcentrations',
+                                    ['PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
+                                     'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg'])
 
 
 def run_ash_model(kwds):
@@ -98,6 +106,63 @@ class Ash(NoDbBase, LogMixin):
             self.ini_white_ash_depth_mm = None
             self.meta = None
             self.fire_years = None
+            self._reservoir_capacity_m3 = 1000000
+            self._reservoir_storage = 0.8
+
+            self.high_contaminant_concentrations = ContaminantConcentrations(
+                PO4=3950,  # mg*Kg-1
+                Al=7500,
+                Si=880,
+                Ca=20300,
+                Pb=25.0,
+                Na=553,
+                Mg=980,
+                P=1289,
+                Mn=42.0,
+                Fe=5600,
+                Ni=13.0,
+                Cu=11.0,
+                Zn=35.0,
+                As=2441,  # µg*Kg-1
+                Cd=413,
+                Hg=7.71)
+
+            self.moderate_contaminant_concentrations = ContaminantConcentrations(
+                PO4=9270,
+                Al=1936,
+                Si=2090,
+                Ca=18100,
+                Pb=70.0,
+                Na=1213,
+                Mg=4100,
+                P=3025,
+                Mn=910,
+                Fe=2890,
+                Ni=26.0,
+                Cu=59.0,
+                Zn=150,
+                As=713,
+                Cd=802,
+                Hg=42.9)
+
+            self.low_contaminant_concentrations = ContaminantConcentrations(
+                PO4=9270,
+                Al=1936,
+                Si=2090,
+                Ca=18100,
+                Pb=70.0,
+                Na=1213,
+                Mg=4100,
+                P=3025,
+                Mn=910,
+                Fe=2890,
+                Ni=26.0,
+                Cu=59.0,
+                Zn=150,
+                As=713,
+                Cd=802,
+                Hg=42.9)
+
             self.dump_and_unlock()
 
         except Exception:
@@ -144,6 +209,50 @@ class Ash(NoDbBase, LogMixin):
     @property
     def ash_dir(self):
         return _join(self.wd, 'ash')
+
+    @property
+    def reservoir_storage(self):
+        if not getattr(self, '_reservoir_storage'):
+            self.reservoir_storage = 1000000
+
+        return self._reservoir_storage
+
+    @reservoir_storage.setter
+    def reservoir_storage(self, value):
+        assert isfloat(value), value
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._reservoir_storage = float(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def reservoir_capacity_m3(self):
+        if not getattr(self, '_reservoir_capacity_m3'):
+            self.reservoir_capacity_m3 = 1000000
+
+        return self._reservoir_capacity_m3
+
+    @reservoir_capacity_m3.setter
+    def reservoir_capacity_m3(self, value):
+        assert isfloat(value), value
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._reservoir_capacity_m3 = float(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
 
@@ -195,10 +304,10 @@ class Ash(NoDbBase, LogMixin):
                 meta[topaz_id]['area_ha'] = area_ha
 
                 if burn_class in [2, 3]:
-                    ash_type = AshType.WHITE
+                    ash_type = AshType.BLACK
 
                 elif burn_class in [4]:
-                    ash_type = AshType.BLACK
+                    ash_type = AshType.WHITE
                 else:
                     continue
 
@@ -235,6 +344,74 @@ class Ash(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def get_ash_type(self, topaz_id):
+        ash_type = self.meta[str(topaz_id)]['ash_type']
+        if ash_type == AshType.BLACK:
+            return 'black'
+        elif ash_type == AshType.WHITE:
+            return 'white'
+
+    def get_ini_ash_depth(self, topaz_id):
+        ash_type = self.meta[str(topaz_id)]['ash_type']
+        if ash_type == AshType.BLACK:
+            return self.ini_black_ash_depth_mm
+        elif ash_type == AshType.WHITE:
+            return self.ini_white_ash_depth_mm
+
+    def get_annual_watershed_water_transport_by_burnclass(self, burnclass):
+        fn = _join(self.ash_dir,  'pw0_burn_class={},ash_stats_per_year_cum_ash_delivery_by_water.csv'.format(burnclass))
+        with open(fn) as fp:
+            df = pd.read_csv(fp)
+            series = df['cum_ash_delivery_by_water (tonne)']
+            return float(np.mean(series))
+
+    def get_annual_water_transport(self, topaz_id):
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        wepp_id = translator.wepp(top=topaz_id)
+        fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_water.csv'.format(wepp_id))
+        with open(fn) as fp:
+            df = pd.read_csv(fp)
+            series = df['cum_water_transport (tonne/ha)']
+            return 1000 * float(np.mean(series))
+
+    def get_annual_wind_transport(self, topaz_id):
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        wepp_id = translator.wepp(top=topaz_id)
+        fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_wind.csv'.format(wepp_id))
+        with open(fn) as fp:
+            df = pd.read_csv(fp)
+            series = df['cum_wind_transport (tonne/ha)']
+            return 1000 * float(np.mean(series))
+
+    def get_annual_ash_transport(self, topaz_id):
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        wepp_id = translator.wepp(top=topaz_id)
+        fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_ash.csv'.format(wepp_id))
+        with open(fn) as fp:
+            df = pd.read_csv(fp)
+            series = df['cum_ash_transport (tonne/ha)']
+            return 1000 * float(np.mean(series))
+
+    def contaminants_iter(self):
+        high_contaminant_concentrations = self.high_contaminant_concentrations
+        moderate_contaminant_concentrations = self.moderate_contaminant_concentrations
+        low_contaminant_concentrations = self.low_contaminant_concentrations
+
+        for contaminant in high_contaminant_concentrations._fields:
+            high = getattr(high_contaminant_concentrations, contaminant)
+            mod = getattr(moderate_contaminant_concentrations, contaminant)
+            low = getattr(low_contaminant_concentrations, contaminant)
+
+            if contaminant in ['As', 'Cd', 'Hg']:
+                units = 'μg/kg'
+            else:
+                units = 'mg/kg'
+
+            yield contaminant, high, mod, low, units
+
     def burnclass_summary(self):
         assert self.meta is not None
 
@@ -257,6 +434,7 @@ class Ash(NoDbBase, LogMixin):
         fire_date = self.fire_date
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
+        meta = self.meta
 
         water = []
         wind = []
@@ -383,4 +561,199 @@ class Ash(NoDbBase, LogMixin):
 
                         return_periods[measure][retperiod] = _row
 
-        return recurrence, return_periods, annuals
+        sev_water = {burn_class: [] for burn_class in range(1, 5)}
+        sev_wind = {burn_class: [] for burn_class in range(1, 5)}
+        sev_ash = {burn_class: [] for burn_class in range(1, 5)}
+        sev_cum_water = {burn_class: [] for burn_class in range(1, 5)}
+        sev_cum_wind = {burn_class: [] for burn_class in range(1, 5)}
+        sev_cum_ash = {burn_class: [] for burn_class in range(1, 5)}
+
+        for topaz_id, sub in watershed.sub_iter():
+            wepp_id = translator.wepp(top=topaz_id)
+            ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
+            burn_class = meta[topaz_id]['burn_class']
+
+            # unburned landuses won't have ash outputs
+            if _exists(ash_fn):
+                df = pd.read_csv(ash_fn)
+                sev_water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
+                sev_wind[burn_class].append(df['ash_delivery_by_wind (tonne)'].to_numpy())
+                sev_ash[burn_class].append(df['ash_delivery (tonne)'].to_numpy())
+                sev_cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
+                sev_cum_wind[burn_class].append(df['cum_ash_delivery_by_wind (tonne)'].to_numpy())
+                sev_cum_ash[burn_class].append(df['cum_ash_delivery (tonne)'].to_numpy())
+
+        # burn_class report
+        sev_annuals = {burn_class: {} for burn_class in range(1, 5)}
+        for burn_class in range(1, 5):
+            sev_water[burn_class] = np.array(sev_water[burn_class])
+            sev_water[burn_class] = np.sum(sev_water[burn_class], axis=0)
+            sev_wind[burn_class] = np.array(sev_wind[burn_class])
+            sev_wind[burn_class] = np.sum(sev_wind[burn_class], axis=0)
+            sev_ash[burn_class] = np.array(sev_ash[burn_class])
+            sev_ash[burn_class] = np.sum(sev_ash[burn_class], axis=0)
+
+            sev_cum_water[burn_class] = np.array(sev_cum_water[burn_class])
+            sev_cum_water[burn_class] = np.sum(sev_cum_water[burn_class], axis=0)
+            sev_cum_wind[burn_class] = np.array(sev_cum_wind[burn_class])
+            sev_cum_wind[burn_class] = np.sum(sev_cum_wind[burn_class], axis=0)
+            sev_cum_ash[burn_class] = np.array(sev_cum_ash[burn_class])
+            sev_cum_ash[burn_class] = np.sum(sev_cum_ash[burn_class], axis=0)
+
+            df = deepcopy(df)
+            df['ash_delivery_by_water (tonne)'] = pd.Series(sev_water[burn_class], index=df.index)
+            df['ash_delivery_by_wind (tonne)'] = pd.Series(sev_wind[burn_class], index=df.index)
+            df['ash_delivery (tonne)'] = pd.Series(sev_ash[burn_class], index=df.index)
+
+            df['cum_ash_delivery_by_water (tonne)'] = pd.Series(sev_cum_water[burn_class], index=df.index)
+            df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(sev_cum_wind[burn_class], index=df.index)
+            df['cum_ash_delivery (tonne)'] = pd.Series(sev_cum_ash[burn_class], index=df.index)
+
+            breaks = []  # list of indices of new fire years
+            last_day = fire_date.yesterday
+            for i, _row in df.iterrows():
+                if _row.mo == last_day.month and _row.da == last_day.day:
+                    breaks.append(i)  # record the index for the new year
+
+            yr_df = df.loc[[brk for brk in breaks],
+                           ['year',
+                            'cum_ash_delivery_by_water (tonne)',
+                            'cum_ash_delivery_by_wind (tonne)',
+                            'cum_ash_delivery (tonne)']]
+
+            num_fire_years = len(breaks)
+
+            for measure in ['cum_ash_delivery_by_water (tonne)',
+                            'cum_ash_delivery_by_wind (tonne)',
+                            'cum_ash_delivery (tonne)']:
+
+                sev_annuals[burn_class][measure] = []
+                yr_df.sort_values(by=measure, ascending=False, inplace=True)
+
+                data = []
+                colnames =['year', measure, 'probability', 'rank', 'return_interval']
+                for j, (i, _row) in enumerate(yr_df.iterrows()):
+                    val = _row[measure]
+
+                    if val == 0.0:
+                        break
+
+                    rank = j + 1
+                    ri = (num_fire_years + 1) / rank
+                    prob = probability_of_occurrence(ri, 1.0)
+                    data.append([int(_row.year), val, prob, int(rank), ri])
+                    sev_annuals[burn_class][measure].append(dict(zip(colnames, data[-1])))
+
+                _df = pd.DataFrame(data, columns=colnames)
+                _df.to_csv(_join(ash_dir, '%s_burn_class=%i,ash_stats_per_year_%s.csv' %
+                                 ('pw0', burn_class, measure.replace(' (tonne)', ''))),
+                           index=False)
+
+        return recurrence, return_periods, annuals, sev_annuals
+
+    def reservoir_report(self, recurrence=[100, 50, 20, 10, 5, 2.5, 1]):
+        """
+        builds recurrence interval and annuals report for the watershed
+
+        :param recurrence:
+        :return:
+        """
+        wd = self.wd
+        ash_dir = self.ash_dir
+        fire_date = self.fire_date
+        watershed = Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        meta = self.meta
+
+        water = {2: [], 3: [], 4: []}
+        cum_water = {2: [], 3: [], 4: []}
+
+        for topaz_id, sub in watershed.sub_iter():
+            wepp_id = translator.wepp(top=topaz_id)
+            ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
+
+            # unburned landuses won't have ash outputs
+            if _exists(ash_fn):
+                burn_class = meta[topaz_id]['burn_class']
+                df = pd.read_csv(ash_fn)
+                water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
+                cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
+
+        df = deepcopy(df)
+
+        for burn_class in [2, 3, 4]:
+            water[burn_class] = np.array(water[burn_class])
+            water[burn_class] = np.sum(water[burn_class], axis=0)
+
+            cum_water[burn_class] = np.array(cum_water[burn_class])
+            cum_water[burn_class] = np.sum(cum_water[burn_class], axis=0)
+
+            df['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)] = \
+                pd.Series(water[burn_class], index=df.index)
+            df['burn_class={},cum_ash_delivery_by_water (tonne)'.format(burn_class)] = \
+                pd.Series(cum_water[burn_class], index=df.index)
+
+        breaks = []    # list of indices of new fire years
+        last_day = fire_date.yesterday
+        for i, _row in df.iterrows():
+            if _row.mo == last_day.month and _row.da == last_day.day:
+                breaks.append(i)  # record the index for the new year
+
+        num_fire_years = len(breaks)
+        num_days = len(df.da)
+
+        return_periods = {2: {}, 3: {}, 4: {}}
+        for burn_class in [2, 3, 4]:
+            measure = 'burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)
+            df.sort_values(by=measure, ascending=False, inplace=True)
+
+            data = []
+            for j, (i, _row) in enumerate(df.iterrows()):
+                val = _row[measure]
+
+                if val == 0.0:
+                    break
+
+                dff = _row['days_from_fire (days)']
+                rank = j + 1
+                ri = (num_days + 1) / rank
+                ri /= 365.25
+                prob = probability_of_occurrence(ri, 1.0)
+                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
+
+            _df = pd.DataFrame(data, columns=
+            ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
+            _df.to_csv(_join(ash_dir, '%s_burnclass=%i,ash_stats_per_event_%s.csv' % ('pw0', burn_class, measure.replace(' (tonne)', ''))), index=False)
+
+            rec = weibull_series(recurrence, num_fire_years)
+
+            num_events = len(_df.da)
+            for retperiod in recurrence:
+                if retperiod not in rec:
+                    return_periods[measure][retperiod] = None
+                else:
+                    indx = rec[retperiod]
+                    if indx >= num_events:
+                        return_periods[measure][retperiod] = None
+                    else:
+                        _row = dict(_df.loc[indx, :])
+                        for _m in ['year', 'mo', 'da', 'days_from_fire', 'rank']:
+                            _row[_m] = int(_row[_m])
+
+                        return_periods[burn_class][retperiod] = _row
+
+            sev_water = {burn_class: [] for burn_class in range(1, 5)}
+            sev_cum_water = {burn_class: [] for burn_class in range(1, 5)}
+
+            for topaz_id, sub in watershed.sub_iter():
+                wepp_id = translator.wepp(top=topaz_id)
+                ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
+                burn_class = meta[topaz_id]['burn_class']
+
+                # unburned landuses won't have ash outputs
+                if _exists(ash_fn):
+                    df = pd.read_csv(ash_fn)
+                    sev_water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
+                    sev_cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
+
+        return recurrence, return_periods

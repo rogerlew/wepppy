@@ -303,6 +303,13 @@ class RowData:
 
         self.row = row
 
+    def __getitem__(self, item):
+        for colname in self.row:
+            if colname.startswith(item):
+                return self.row[colname]
+
+        raise KeyError
+
     def __iter__(self):
         for colname in self.row:
             value = self.row[colname]
@@ -720,6 +727,9 @@ class YearlessDate(object):
 
     @staticmethod
     def from_string(s):
+        if s.startswith('YearlessDate('):
+            s = s[13:-1].replace(',', '-').replace(' ', '')
+
         for delimiter in '/ -.':
             _s = s.split(delimiter)
             if len(_s) == 2:

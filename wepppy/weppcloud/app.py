@@ -483,6 +483,9 @@ def index():
             user_datastore.add_role_to_user(current_user.email, 'User')
 
     from wepppy.weppcloud import RunStatistics
+    if not _exists('/geodata/weppcloud_runs/run_statistics.nodb'):
+        RunStatistics('/geodata/weppcloud_runs')
+
     rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
     c = rs.counter
 
@@ -730,7 +733,7 @@ def runs0(runid, config):
 
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
-def hillslope0(runid, config, topaz_id):
+def hillslope0_ash(runid, config, topaz_id):
     assert config is not None
 
     from wepppy.climates.cligen import ClimateFile
@@ -872,9 +875,9 @@ def task_removeuser(runid, config):
     user = User.query.filter(User.id == user_id).first()
     run = Run.query.filter(Run.runid == runid).first()
 
-    assert user is not None
-    assert user in owners
-    assert run is not None
+    assert user is not None, user
+    assert user in owners, user
+    assert run is not None, run
 
     user_datastore.remove_run_to_user(user, run)
 
@@ -1425,12 +1428,13 @@ def export_ermit(runid, config):
 @app.route('/runs/<string:runid>/<config>/export/arcmap')
 @app.route('/runs/<string:runid>/<config>/export/arcmap/')
 def export_arcmap(runid, config):
+    from wepppy.export import arc_export, archive_project
+
     # get working dir of original directory
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     ron.export_arc_dir
 
-    from wepppy.export import arc_export, archive_project
     arc_export(wd)
     archive_path = archive_project(ron.export_arc_dir)
     return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
@@ -2611,6 +2615,7 @@ def report_wepp_loss(runid, config):
     translator = Watershed.getInstance(wd).translator_factory()
     unitizer = Unitizer.getInstance(wd)
 
+
     return render_template('reports/wepp/summary.htm',
                            out_rpt=out_rpt,
                            hill_rpt=hill_rpt,
@@ -3192,7 +3197,7 @@ def report_ash(runid, config):
     unitizer = Unitizer.getInstance(wd)
 
     burnclass_summary = ash.burnclass_summary()
-    recurrence_intervals, results, annuals = ash.report()
+    recurrence_intervals, results, annuals, sev_annuals = ash.report()
 
     return render_template('reports/ash/ash_watershed.htm',
                            unitizer_nodb=unitizer,
@@ -3204,6 +3209,90 @@ def report_ash(runid, config):
                            recurrence_intervals=recurrence_intervals,
                            results=results,
                            annuals=annuals,
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
+@app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope/')
+def report_ash_by_hillslope(runid, config):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = None
+
+    class_fractions = request.args.get('class_fractions', False)
+    class_fractions = str(class_fractions).lower() == 'true'
+
+    fraction_under = request.args.get('fraction_under', None)
+    if fraction_under is not None:
+        try:
+            fraction_under = float(fraction_under)
+        except:
+            fraction_under = None
+
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+    ash = Ash.getInstance(wd)
+
+    out_rpt = OutletSummary(loss)
+    hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+    chn_rpt = ChannelSummary(loss)
+    avg_annual_years = loss.avg_annual_years
+    excluded_years = loss.excluded_years
+    translator = Watershed.getInstance(wd).translator_factory()
+    unitizer = Unitizer.getInstance(wd)
+
+    fire_date = ash.fire_date
+    ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
+    ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
+
+    burnclass_summary = ash.burnclass_summary()
+    recurrence_intervals, results, annuals, sev_annuals = ash.report()
+
+    return render_template('reports/ash/ash_watershed_by_hillslope.htm',
+                           out_rpt=out_rpt,
+                           hill_rpt=hill_rpt,
+                           chn_rpt=chn_rpt,
+                           avg_annual_years=avg_annual_years,
+                           excluded_years=excluded_years,
+                           translator=translator,
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           fire_date=fire_date,
+                           burnclass_summary=burnclass_summary,
+                           ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                           ini_white_ash_depth_mm=ini_white_ash_depth_mm,
+                           recurrence_intervals=recurrence_intervals,
+                           results=results,
+                           annuals=annuals,
+                           ash=ash,
+                           ron=ron,
+                           user=current_user)
+
+
+@app.route('/runs/<string:runid>/<config>/report/ash_contaminant')
+@app.route('/runs/<string:runid>/<config>/report/ash_contaminant/')
+def report_contaminant(runid, config):
+    wd = get_wd(runid)
+
+    ron = Ron.getInstance(wd)
+    ash = Ash.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
+
+#    burnclass_summary = ash.burnclass_summary()
+#    recurrence_intervals, results, annuals, sev_annuals = ash.report()
+
+    return render_template('reports/ash/ash_contaminant.htm',
+                           unitizer_nodb=unitizer,
+                           precisions=wepppy.nodb.unitizer.precisions,
+                           ash=ash,
                            ron=ron,
                            user=current_user)
 
@@ -3222,7 +3311,7 @@ def combined_ws_viewer_url_gen():
             user_datastore.add_role_to_user(current_user.email, 'User')
 
     title = request.form.get('title', '')
-    runids = request.form.get('runids', '')  # devvmfac-3e27-459a-96d4-f1a731fe7502, devvm647-3e1d-4c81-b23f-9700145612c0
+    runids = request.form.get('runids', '')
     runids = runids.replace(',', ' ').split()
 
     ws = []
@@ -3313,6 +3402,7 @@ def runid_query(wc):
     else:
         return error_factory('not authorized')
 
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_rhem', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_rhem/', methods=['POST'])
@@ -3362,7 +3452,9 @@ def submit_task_run_rhem(runid, config):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5003)#, host='0.0.0.0', port=80)
+    app.run(debug=True, host='0.0.0.0', port=80)
+
+    # sudo docker run -i -p 5003:80 -v /Users/roger/geodata:/geodata -v /Users/roger/wepppy/wepppy:/workdir/wepppy/wepppy  -t wepppydocker-base
 
 #rsync -av --progress --exclude=_scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
-#
+

@@ -26,7 +26,7 @@ from wepppy.watershed_abstraction import ischannel
 from wepppy.all_your_base import wmesque_retrieve
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents
+from .base import NoDbBase, TriggerEvents, DEFAULT_NLCD_DB
 from .ron import Ron
 from .watershed import Watershed
 
@@ -83,6 +83,7 @@ class Landuse(NoDbBase):
             else:
                 self.cover_defaults_d = None
 
+            self._nlcd_db = config.get('landuse', 'nlcd_db')
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
@@ -241,12 +242,32 @@ class Landuse(NoDbBase):
 
         self.domlc_d = domlc_d
 
+    @property
+    def nlcd_db(self):
+        if not hasattr(self, "_nlcd_db"):
+            return DEFAULT_NLCD_DB
+
+        return self._nlcd_db
+
+    @nlcd_db.setter
+    def nlcd_db(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._nlcd_db = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def _build_NLCD(self):
         _map = Ron.getInstance(self.wd).map
 
         # Get NLCD 2011 from wmesque webservice
         lc_fn = self.lc_fn
-        wmesque_retrieve('nlcd/2011', _map.extent, lc_fn, _map.cellsize)
+        wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
 
         # create LandcoverMap instance
         lc = LandcoverMap(lc_fn)

@@ -31,7 +31,7 @@ from wepppy.all_your_base import (
 )
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents
+from .base import NoDbBase, TriggerEvents, DEFAULT_DEM_DB
 
 
 _thisdir = os.path.dirname(__file__)
@@ -107,7 +107,7 @@ class Ron(NoDbBase):
                 _boundary = _boundary
 
             self._boundary = _boundary
-            self.dem_db = config.get('general', 'dem_db')
+            self._dem_db = config.get('general', 'dem_db')
 
             self._enable_landuse_change = config.getboolean('landuse', 'enable_landuse_change')
 
@@ -331,6 +331,27 @@ class Ron(NoDbBase):
         from wepppy.nodb.mods import Baer
         baer = Baer.getInstance(self.wd)
         return baer.has_map
+
+
+    @property
+    def dem_db(self):
+        if not hasattr(self, "_dem_db"):
+            return DEFAULT_DEM_DB
+
+        return self._dem_db
+
+    @dem_db.setter
+    def dem_db(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._dem_db = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     #
     # dem

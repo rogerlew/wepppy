@@ -28,7 +28,7 @@ from wepppy.wepp.soils.soilsdb import load_db, get_soil
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents
+from .base import NoDbBase, TriggerEvents, DEFAULT_SSURGO_DB
 from .ron import Ron
 from .watershed import Watershed
 
@@ -59,11 +59,15 @@ class Soils(NoDbBase):
 
         self.lock()
 
+        config = self.config
+
         # noinspection PyBroadException
         try:
             self._mode = SoilsMode.Gridded
             self._single_selection = 0
             self._single_dbselection = None
+
+            self._ssurgo_db = config.get('soils', 'ssurgo_db')
 
             self.domsoil_d = None  # topaz_id keys
             self.ssurgo_domsoil_d = None
@@ -200,6 +204,26 @@ class Soils(NoDbBase):
         if _exists(soils_dir):
             shutil.rmtree(soils_dir)
         os.mkdir(soils_dir)
+
+    @property
+    def ssurgo_db(self):
+        if not hasattr(self, "_ssurgo_db"):
+            return DEFAULT_SSURGO_DB
+
+        return self._ssurgo_db
+
+    @ssurgo_db.setter
+    def ssurgo_db(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ssurgo_db = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     def build_statsgo(self):
         soils_dir = self.soils_dir
@@ -573,7 +597,7 @@ class Soils(NoDbBase):
             subwta_arc = self.subwta_arc
             ssurgo_fn = self.ssurgo_fn
 
-            wmesque_retrieve('ssurgo/201703', _map.extent,
+            wmesque_retrieve(self.ssurgo_db, _map.extent,
                              ssurgo_fn, _map.cellsize)
 
             # Make SSURGO Soils
