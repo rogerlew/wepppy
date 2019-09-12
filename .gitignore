@@ -8,3 +8,4 @@ devnotes.txt
 .idea/workspace.xml
 wepppy/weppcloud/app_config.py
 wepppy/au/soils/asris_2001/cache/*
+.DS_Store

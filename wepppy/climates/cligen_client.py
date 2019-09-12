@@ -97,6 +97,7 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
         returnjson == 1 or returnjson == 0
 
     data["returnjson"] = returnjson
+    data["version"] = 2015
 
     r = requests.post(url, params=data)
 
@@ -152,7 +153,7 @@ def selected_single_storm(par,
                 duration_of_storm_in_hours=duration_of_storm_in_hours,
                 time_to_peak_intensity_pct=time_to_peak_intensity_pct,
                 max_intensity_inches_per_hour=max_intensity_inches_per_hour,
-                cliver=cliver, returnjson=returnjson)
+                cliver=cliver, returnjson=returnjson, version=2015)
 
     r = requests.post(url, params=data)
 
@@ -191,7 +192,8 @@ def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=Tr
         returnjson == 1 or returnjson == 0
 
     data = dict(start_year=start_year, end_year=end_year,
-                lng=lng, lat=lat, returnjson=returnjson)
+                lng=lng, lat=lat, returnjson=returnjson,
+                version=2015)
 
     r = requests.post(url, params=data)
 
@@ -227,7 +229,8 @@ def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True)
         returnjson == 1 or returnjson == 0
 
     data = dict(start_year=start_year, end_year=end_year,
-                lng=lng, lat=lat, returnjson=returnjson)
+                lng=lng, lat=lat, returnjson=returnjson,
+                version=2015)
 
     r = requests.post(url, params=data)
 
