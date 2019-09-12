@@ -113,17 +113,18 @@ def _fetch_par_contents(par, _request):
     """
     returns the contents of a par file
     """
-
-    stationManager = CligenStationsManager()
-    stationMeta = stationManager.get_station_fromid(par)
-   
-    if stationMeta is None:
-        return jsonify({'Error': 'cannot find par'})
-
     if _request.method == 'GET':
         d = _request.args
     else:  # POST
         d = _request.get_json()
+
+    version = d.get('version', None)
+
+    stationManager = CligenStationsManager(version)
+    stationMeta = stationManager.get_station_fromid(par)
+   
+    if stationMeta is None:
+        return jsonify({'Error': 'cannot find par'})
 
     lat = d.get('lat', None)
     lng = d.get('lng', None)

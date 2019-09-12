@@ -1,0 +1,125 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_title %}Ash Contaminant Analysis{% endblock %}
+{% block report_content %}
+<script>
+</script>
+<h2>Ash Contaminant Analysis Results</h2>
+<form name="ash_contaminant_parameters">
+<h3>Contaminant Concentrations</h3>
+<table class="table table-nonfluid">
+<tbody>
+<tr>
+    <th>Contaminant</th>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+    {% endfor %}
+</tr>
+
+<tr>
+    <th>Units</th>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td>{{ units }}</td>
+    {% endfor %}
+</tr>
+<tr>
+    <th>High</th>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td><input style="width:100px;" type="text" id="high_{{ contaminant }}" value="{{ high }}"></td>
+    {% endfor %}
+</tr>
+<tr>
+    <th>Moderate</th>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td><input style="width:100px;" type="text" id="mod_{{ contaminant }}" value="{{ mod }}"></td>
+    {% endfor %}
+</tr>
+<tr>
+    <th>Low</th>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td><input style="width:100px;" type="text" id="low_{{ contaminant }}" value="{{ low }}"></td>
+    {% endfor %}
+</tr>
+</tbody>
+</table>
+
+
+<h3>Burn Severity</h3>
+<table class="table table-nonfluid">
+<tbody>
+<tr>
+    <th>Severity</th>
+    <th>Area</th>
+    <th>Ash Delivery by Water</th>
+{% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+    <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+{% endfor %}
+</tr>
+
+
+<tr>
+    <td> &nbsp;</td>
+    <td>{{ unitizer_units('ha') | safe }} </td>
+    <td>{{ unitizer_units('tonne') | safe }} </td>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td style="width:100px; text-align: right;" >{{ unitizer_units('kg') | safe }} </td>
+    {% endfor %}
+</tr>
+
+{% set burnclass_summary = ash.burnclass_summary() %}
+{% set high_ash = ash.get_annual_watershed_water_transport_by_burnclass(4) %}
+{% set mod_ash = ash.get_annual_watershed_water_transport_by_burnclass(3) %}
+{% set low_ash = ash.get_annual_watershed_water_transport_by_burnclass(2) %}
+
+<tr>
+    <td>High</td>
+    <td>{{ unitizer(burnclass_summary[4], 'ha') | safe }}</td>
+    <td>{{ unitizer(high_ash, 'tonne') | safe }}</td>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td style="width:100px; text-align: right;" >{{ unitizer(1000 * high_ash * high / 1000000, 'kg') | safe }}</td>
+    {% endfor %}
+</tr>
+
+<tr>
+    <td>Moderate</td>
+    <td>{{ unitizer(burnclass_summary[3], 'ha') | safe }}</td>
+    <td>{{ unitizer(mod_ash, 'tonne') | safe }}</td>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td style="width:100px; text-align: right;" >{{ unitizer(1000 * mod_ash * mod / 1000000, 'kg') | safe }}</td>
+    {% endfor %}
+</tr>
+
+<tr>
+    <td>Low</td>
+    <td>{{ unitizer(burnclass_summary[2], 'ha') | safe }}</td>
+    <td>{{ unitizer(low_ash, 'tonne') | safe }}</td>
+    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        <td style="width:100px; text-align: right;"  >{{ unitizer(1000 * low_ash * low / 1000000, 'kg') | safe }}</td>
+    {% endfor %}
+</tr>
+</tbody>
+</table>
+
+<h2>Reservoir/Lake Loading Analysis</h2>
+    {% set reservoir_current_volume = ash.reservoir_capacity_m3 * ash.reservoir_storage * 0.01 %}
+<table>
+<tbody>
+<tr>
+    <td>Capacity</td>
+    <td><input type="text" id="reservoir_capacity" value="{{ ash.reservoir_capacity_m3 | round(2) }}"></td>
+    <td>{{ unitizer_units('m^3') | safe }}</td>
+</tr>
+<tr>
+    <td>Current Storage</td>
+    <td><input type="text" id="reservoir_storage" value="{{ ash.reservoir_storage | round(2) }}"></td>
+    <td>{{ unitizer_units('%') | safe }}</td>
+</tr>
+<tr>
+    <td>Current Volume</td>
+    <td>{{ unitizer(reservoir_current_volume, 'm^3') | safe }}</td>
+    <td>{{ unitizer_units('m^3') | safe }}</td>
+</tr>
+</tbody>
+</table>
+
+
+{% endblock %}
