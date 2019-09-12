@@ -31,6 +31,9 @@ else:
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
 
+DEFAULT_DEM_DB = 'ned1/2016'
+DEFAULT_NLCD_DB = 'nlcd/2016'
+DEFAULT_SSURGO_DB = 'ssurgo/201703'
 
 class TriggerEvents(Enum):
     ON_INIT_FINISH = 1
@@ -153,7 +156,9 @@ class NoDbBase(object):
         parser = RawConfigParser(
             dict(boundary=None,
                  cover_defaults=None,
-                 dem_db='ned1/2016'),
+                 dem_db=DEFAULT_DEM_DB,
+                 nlcd_db=DEFAULT_NLCD_DB,
+                 ssurgo_db=DEFAULT_SSURGO_DB),
             allow_no_value=True
         )
         with open(_join(_config_dir, '0.cfg')) as fp:

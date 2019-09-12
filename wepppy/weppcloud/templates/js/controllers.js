@@ -4135,7 +4135,9 @@ var Ash = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<p><a href='report/ash/' target='_blank'>View Ash Transport Model Results</a></p>");
+            self.info.html("<p><a href='report/ash/' target='_blank'>View Watershed Ash Transport Model Results</a></p>\n" +
+                           "<p><a href='report/ash_by_hillslope/' target='_blank'>View Ash Transport Model Results by Hillslope</a></p>\n" +
+                           "<p><a href='report/ash_contaminant/' target='_blank'>Contaminant and Reservoir Loading Analysis</a></p>");
         };
 
         return that;

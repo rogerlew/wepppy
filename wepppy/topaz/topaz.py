@@ -838,6 +838,8 @@ class TopazRunner:
         for f in js['features']:
             coords = f['geometry']['coordinates']
             coords = np.array(coords)
+            if len(coords.shape) < 3:
+                continue
 
             wgs_lngs, wgs_lats = utm_proj(coords[0, :, 0],
                                   coords[0, :, 1], inverse=True)
