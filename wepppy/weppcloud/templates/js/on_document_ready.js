@@ -4,8 +4,14 @@ var site_prefix = "{{ site_prefix }}";
 var runid = "{{ ron.runid }}";
 var config = "{{ ron.config_stem }}";
 
-$(document).ready(function () {
+var error = null;
 
+jQuery.readyException = function( e ) {
+  console.error( e );
+  error = e;
+};
+
+function onReady() {
     "use strict";
     // globals for JSLint: $, L, polylabel, setTimeout, console
 
@@ -769,4 +775,6 @@ $(document).ready(function () {
         window.scrollTo(0, 0);
     });
 
-});
+}
+
+$(document).ready(onReady);

@@ -3577,6 +3577,7 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").hide();
             } else if (mode === 0) {
                 // single
@@ -3590,8 +3591,9 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
-            } else if (mode === 2) {
+            } else if ((mode === 2) || (mode === 11)) {
                 // observed
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
@@ -3603,6 +3605,7 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 3) {
                 // future
@@ -3616,6 +3619,7 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 4) {
                 // single storm
@@ -3629,6 +3633,7 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 5) {
                 // prism
@@ -3642,6 +3647,7 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 6) {
                 // observed database
@@ -3655,6 +3661,7 @@ var Climate = function () {
                 $("#climate_mode6_controls").show();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 7) {
                 // future database
@@ -3668,9 +3675,10 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").show();
                 $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
                 $("#btn_build_climate_container").show();
             }  else if (mode === 8) {
-                // future database
+                // EOBS (EU)
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
@@ -3681,6 +3689,35 @@ var Climate = function () {
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").show();
+                $("#climate_mode10_controls").hide();
+                $("#btn_build_climate_container").show();
+            } else if (mode === 9) {
+                // observed PRISM
+                $("#climate_spatialmode_controls").show();
+                $("#input_years_container").hide();
+                $("#climate_mode0_controls").hide();
+                $("#climate_mode5_controls").hide();
+                $("#climate_mode2_controls").show();
+                $("#climate_mode3_controls").hide();
+                $("#climate_mode4_controls").hide();
+                $("#climate_mode6_controls").hide();
+                $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
+                $("#btn_build_climate_container").show();
+            } else if (mode === 10) {
+                // AGDC (AU)
+                $("#climate_spatialmode_controls").show();
+                $("#input_years_container").show();
+                $("#climate_mode0_controls").hide();
+                $("#climate_mode5_controls").hide();
+                $("#climate_mode2_controls").hide();
+                $("#climate_mode3_controls").hide();
+                $("#climate_mode4_controls").hide();
+                $("#climate_mode6_controls").hide();
+                $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").show();
                 $("#btn_build_climate_container").show();
             } else {
                 throw "ValueError: unknown mode";
@@ -3763,10 +3800,17 @@ var Wepp = function () {
                 url: "query/wepp/phosphorus_opts/",
                 cache: false,
                 success: function success(response) {
-                    self.surf_runoff.val(response.surf_runoff.toFixed(4));
-                    self.lateral_flow.val(response.lateral_flow.toFixed(4));
-                    self.baseflow.val(response.baseflow.toFixed(4));
-                    self.sediment.val(response.sediment.toFixed(0));
+                    if (response.surf_runoff !== null)
+                        self.surf_runoff.val(response.surf_runoff.toFixed(4));
+
+                    if (response.lateral_flow !== null)
+                        self.lateral_flow.val(response.lateral_flow.toFixed(4));
+
+                    if (response.baseflow !== null)
+                        self.baseflow.val(response.baseflow.toFixed(4));
+
+                    if (response.sediment !== null)
+                        self.sediment.val(response.sediment.toFixed(0));
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
