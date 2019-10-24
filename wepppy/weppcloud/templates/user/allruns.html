@@ -1,0 +1,46 @@
+{% extends "security/_layout.html"%}
+{% from "security/_macros.html" import render_field_with_errors, render_checkbox_with_errors, render_field %}
+{% block title %}
+Runs
+{% endblock %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js">
+</script>
+<h3>All Runs</h3>
+<table class="table" id="allruns">
+  <thead>
+    <tr>
+      <th>Owner</th>
+      <th>Project Name</th>
+      <th>Location (What3Words)</th>
+      <th>Link</th>
+      <th>Creation Date</th>
+      <th>Last Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for run in get_all_runs() %}
+        {% if run_exists(run.runid) %}
+        <tr>
+          <td>{{ get_run_owner(run.runid) }}</td>
+          <td>{{ get_run_name(run.runid) }}</td>
+          <td>{{ w3w_center(run.runid) }}</td>
+          <td>
+              <a href="/weppcloud/runs/{{ run.runid }}/{{ run.config }}/">
+              /runs/{{ run.runid }}/{{ run.config }}/
+              </a>
+          </td>
+          <td>{{ run.date_created }}</td>
+          <td>{{ get_last_modified(run.runid) }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+<script type="text/javascript" >
+$(document).ready(function() {
+	$("#allruns").DataTable();
+} );
+</script>
+{% endblock %}

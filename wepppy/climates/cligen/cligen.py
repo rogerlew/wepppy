@@ -40,6 +40,9 @@ from wepppy.climates.metquery_client import (
     get_eobs_monthly_tmin,
     get_eobs_monthly_tmax,
     get_eobs_monthly_ppt,
+    get_agdc_monthly_tmin,
+    get_agdc_monthly_tmax,
+    get_agdc_monthly_ppt,
     get_daymet_prcp_pwd,
     get_daymet_prcp_pww,
     get_daymet_prcp_skew,
@@ -214,6 +217,38 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     fp.close()
 
 
+def build_gridmet_prn(gridmet_dir, start_year, end_year, prn_fn, verbose=False):
+
+    fp = open(prn_fn, 'w')
+    for year in range(start_year, end_year + 1):
+        d = {}
+        for var in ['pr', 'tmmn', 'tmmx']:
+            fn = _join(gridmet_dir, '%s_%s.npy' % (var, str(year)))
+            assert _exists(fn)
+            d[var] = [float(x) for x in list(np.load(fn))]
+
+        d['dates'] = [datetime(year, 1, 1) + timedelta(i) for i, _ in enumerate(d['pr'])]
+
+        d['pr'] = np.array(d['pr'])
+        d['pr'] /= 25.4
+        d['pr'] *= 100.0
+        d['pr'] = np.round(d['pr'])
+
+        d['tmmx'] = np.array(d['tmmx'])
+        d['tmmx'] = np.round(c_to_f(d['tmmx']))
+        d['tmmx'] = np.round(d['tmmx'])
+
+        d['tmmn'] = np.array(d['tmmn'])
+        d['tmmn'] = np.round(c_to_f(d['tmmn']))
+        d['tmmn'] = np.round(d['tmmn'])
+
+        for i, (pr, tmmn, tmmx, _date) in enumerate(zip(d['pr'], d['tmmn'], d['tmmx'], d['dates'])):
+            #print(pr, tmmn, tmmx, _date)
+            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                     .format(_date.month, _date.day, _date.year, int(pr), int(tmmx), int(tmmn)))
+    fp.close()
+    
+
 def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verbose=False):
 
     fp = open(prn_fn, 'w')
@@ -240,14 +275,14 @@ def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verb
         d['tmin'] = np.round(c_to_f(d['tmin']))
 
         for i, (prcp, tmin, tmax) in enumerate(zip(d['prcp'], d['tmin'], d['tmax'])):
-            date = datetime(year, 1, 1) + timedelta(i)
+            _date = datetime(year, 1, 1) + timedelta(i)
 
             fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
-                     .format(date.month, date.day, date.year, int(prcp), int(tmax), int(tmin)))
+                     .format(_date.month, _date.day, _date.year, int(prcp), int(tmax), int(tmin)))
 
         if year % 4 == 0:
             fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
-                     .format(date.month, date.day, date.year, int(prcp), int(tmax), int(tmin)))
+                     .format(_date.month, _date.day, _date.year, int(prcp), int(tmax), int(tmin)))
 
     fp.close()
 
@@ -775,8 +810,63 @@ class CligenStationsManager:
         tx_ranks = [(i, err) for i, err in enumerate(tx_ranks)]
         tx_ranks = sorted(tx_ranks, key=lambda x: x[1])
 
-        tns = get_eobs_monthly_tmax(*location, units='f')
-        tn_ranks = np.array([math.sqrt(np.sum((s.get_station().tmaxs - tns)**2.0))
+        tns = get_eobs_monthly_tmin(*location, units='f')
+        tn_ranks = np.array([math.sqrt(np.sum((s.get_station().tmins - tns)**2.0))
+                              for s in stations])
+        tn_ranks = [(i, err) for i, err in enumerate(tn_ranks)]
+        tn_ranks = sorted(tn_ranks, key=lambda x: x[1])
+
+        s_ranks = list(range(pool))
+        weights = [1, 1, 3, 1.5, 1.5]
+        for ranks, w in zip([lat_ranks, elev_ranks, ppt_ranks, tx_ranks, tn_ranks],
+                            weights):
+
+            for score, (i, err) in enumerate(ranks):
+                s_ranks[i] += score * w
+
+        s_ranks = [(i, err) for i, err in enumerate(s_ranks)]
+        s_ranks = sorted(s_ranks, key=lambda x: x[1])
+
+        _stations = []
+        for i, rank in s_ranks:
+            _stations.append(stations[i])
+            _stations[-1].rank = rank
+
+        return _stations
+
+    def get_stations_au_heuristic_search(self, location, elev, pool=40):
+
+        stations = self.get_closest_stations_by_lat(location, pool)
+        norm_lat = abs(location[1])
+
+        lat_ranks = [(i, abs(s.latitude - norm_lat))
+                     for i, s in enumerate(stations)]
+        lat_ranks = sorted(lat_ranks, key=lambda x: x[1])
+
+        stations_elevs = np.array([elevationquery(s.longitude, s.latitude)
+                                   for s in stations])
+        stations_elevs -= elev
+        stations_elevs = np.abs(stations_elevs)
+        elev_ranks = [(i, err) for i, err in enumerate(stations_elevs)]
+        elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
+
+        ppts = get_agdc_monthly_ppt(*location, units='inch')
+        _ppts = ppts[6:] + ppts[:6]
+        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - _ppts)**2.0))
+                              for s in stations])
+        ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
+        ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
+
+        txs = get_agdc_monthly_tmax(*location, units='f')
+        _txs = txs[6:] + txs[:6]
+        tx_ranks = np.array([math.sqrt(np.sum((s.get_station().tmaxs - txs)**2.0))
+                              for s in stations])
+        tx_ranks = [(i, err) for i, err in enumerate(tx_ranks)]
+        tx_ranks = sorted(tx_ranks, key=lambda x: x[1])
+
+        tns = get_agdc_monthly_tmin(*location, units='f')
+        _tns = tns[6:] + tns[:6]
+        tn_ranks = np.array([math.sqrt(np.sum((s.get_station().tmins - tns)**2.0))
                               for s in stations])
         tn_ranks = [(i, err) for i, err in enumerate(tn_ranks)]
         tn_ranks = sorted(tn_ranks, key=lambda x: x[1])
@@ -873,7 +963,7 @@ class Cligen:
         assert _exists(cli_fname)
 
     def run_observed(self, prn_fn, cli_fn='wepp.cli',
-                     verbose=False):
+                     verbose=True):
 
         if verbose:
             print("running observed")
@@ -914,6 +1004,9 @@ class Cligen:
                "-O%s" % prn_fn,
                "-o%s" % cli_fn,
                "-t6", "-I2"]
+
+        if verbose:
+            print(cmd)
 
         # run cligen
         _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fn[:-4])), "w")
@@ -979,6 +1072,10 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         prism_ppts = get_eobs_monthly_ppt(lng, lat, units='inch')
         prism_tmaxs = get_eobs_monthly_tmax(lng, lat, units='f')
         prism_tmins = get_eobs_monthly_tmin(lng, lat, units='f')
+    elif monthly_dataset.lower() == 'agdc':
+        prism_ppts = get_agdc_monthly_ppt(lng, lat, units='inch')
+        prism_tmaxs = get_agdc_monthly_tmax(lng, lat, units='f')
+        prism_tmins = get_agdc_monthly_tmin(lng, lat, units='f')
     else:
         raise Exception
 

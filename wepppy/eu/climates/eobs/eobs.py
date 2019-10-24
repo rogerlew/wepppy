@@ -3,9 +3,6 @@
 #
 # Roger Lew (rogerlew@gmail.com)
 #
-# The project described was supported by NSF award number IIA-1301792
-# from the NSF Idaho EPSCoR Program and by the National Science Foundation.
-
 
 from wepppy.climates.cligen import par_mod
 
