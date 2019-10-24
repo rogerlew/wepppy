@@ -51,7 +51,10 @@ monthly_catalog = {
     'prism/tdmean'     : {'Description': 'Dewpoint temperature', 'Units': 'C' },
     'eu/e-obs/tn/mean' : {'Description': 'Minimum air temperature', 'Units': 'C' },
     'eu/e-obs/tx/mean' : {'Description': 'Maximum air temperature', 'Units': 'C' },
-    'eu/e-obs/rr/mean' : {'Description': 'Average daily precipitation', 'Units': 'mm' }
+    'eu/e-obs/rr/mean' : {'Description': 'Average daily precipitation', 'Units': 'mm' },
+    'au/agdc/monthlies/tmin' : {'Description': 'Minimum air temperature', 'Units': 'C' },
+    'au/agdc/monthlies/tmax' : {'Description': 'Maximum air temperature', 'Units': 'C' },
+    'au/agdc/monthlies/rain' : {'Description': 'Average daily precipitation', 'Units': 'mm' }
 }
 
 daily_catalog = {

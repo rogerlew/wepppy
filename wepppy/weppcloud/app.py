@@ -287,6 +287,13 @@ def runs():
     return render_template('user/runs.html', user=current_user)
 
 
+@app.route('/allruns')
+@app.route('/allruns/')
+@roles_required('Admin')
+def allruns():
+    return render_template('user/allruns.html', user=current_user)
+
+
 @app.route('/usermod')
 @app.route('/usermod/')
 @roles_required('Root')
@@ -298,6 +305,7 @@ def usermod():
 @app.route('/ispoweruser/')
 def ispoweruser():
     return jsonify(current_user.has_role('PowerUser'))
+
 
 @app.route('/tasks/usermod/', methods=['POST'])
 @roles_required('Root')
@@ -425,21 +433,34 @@ def isfloat_processor():
 @app.context_processor
 def security_processor():
     def get_run_name(runid):
-        wd = get_wd(runid)
-        name = Ron.getInstance(wd).name
-        return name
+        try:
+            wd = get_wd(runid)
+            name = Ron.getInstance(wd).name
+            return name
+        except:
+            return '-'
 
     def run_exists(runid):
         wd = get_wd(runid)
-        return _exists(_join(wd, 'ron.nodb'))
+        if not _exists(_join(wd, 'ron.nodb')):
+            return False
+
+        try:
+            ron = Ron.getInstance(wd)
+            return True
+        except:
+            return False
 
     def get_run_owner(runid):
-        run = Run.query.filter(Run.runid == runid).first()
-        if run.owner_id is None:
-            return 'anonymous'
+        try:
+            run = Run.query.filter(Run.runid == runid).first()
+            if run.owner_id is None:
+                return 'anonymous'
 
-        owner = User.query.filter(User.id == run.owner_id).first()
-        return owner.email
+            owner = User.query.filter(User.id == run.owner_id).first()
+            return owner.email
+        except:
+            return '-'
 
     def get_last_modified(runid):
         wd = get_wd(runid)
@@ -2519,7 +2540,7 @@ def report_wepp_run_summary(runid, config):
     ron = Ron.getInstance(wd)
 
     flowpaths_n = len(glob(_join(wd, 'wepp/flowpaths/output/*.plot.dat')))
-    subs_n = len(glob(_join(wd, 'wepp/output/*.loss.dat')))
+    subs_n = len(glob(_join(wd, 'wepp/output/*.pass.dat')))
 
     t0, tend = None, None
     with open(_join(wd, 'wepp/runs/status.log')) as fp:

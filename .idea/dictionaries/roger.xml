@@ -9,10 +9,12 @@
       <w>foliar</w>
       <w>forbs</w>
       <w>fract</w>
+      <w>geodata</w>
       <w>hillslope</w>
       <w>komega</w>
       <w>landuseoptions</w>
       <w>matric</w>
+      <w>ramdisk</w>
       <w>rangeland</w>
       <w>rchezy</w>
       <w>retval</w>
@@ -20,6 +22,7 @@
       <w>shrubland</w>
       <w>smax</w>
       <w>sodgrass</w>
+      <w>workdir</w>
     </words>
   </dictionary>
 </component>

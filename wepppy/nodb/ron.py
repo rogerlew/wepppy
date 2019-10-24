@@ -342,6 +342,8 @@ class Ron(NoDbBase):
 
     @dem_db.setter
     def dem_db(self, value):
+        return
+
         self.lock()
 
         # noinspection PyBroadException

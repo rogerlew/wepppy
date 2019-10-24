@@ -35,29 +35,45 @@ class RDIOutOfBoundsException(Exception):
     def __init__(self):
         pass
 
-
 class RasterDatasetInterpolator:
-    def __init__(self, fname, epsg=None):
+    def __init__(self, fname, proj=None):
+        self.lon_lat = False
+        if fname.endswith('.nc'):
+            import netCDF4
+            nc = netCDF4.Dataset(fname)
+            name = list(nc.variables.keys())[0]
+            var = nc.variables[name]
+
+            if not ('lat' in var.dimensions[-2].lower() and 'lon' in var.dimensions[-1]):
+                self.lon_lat = True
 
         # open the image
         self.ds = ds = gdal.Open(fname, GA_ReadOnly)
-        assert ds is not None
-        
+        assert ds is not None, fname
+
         self.fname = fname
         self.nbands = nbands = ds.RasterCount
-        self.band = [ds.GetRasterBand(i+1) for i in range(nbands)]
+        self.band = [ds.GetRasterBand(i + 1) for i in range(nbands)]
         self.transform = ds.GetGeoTransform()
+
         self.wkt_text = ds.GetProjection()
         self.srs = srs = osr.SpatialReference()
         srs.ImportFromWkt(self.wkt_text)
         self.proj4 = srs.ExportToProj4()
 
-        self.proj = Proj(self.proj4)
+        if proj is None:
+            self.proj = Proj(self.proj4)
+        else:
+            self.proj = Proj(init=proj)
         self.wgs84 = Proj(init='EPSG:4326')
-        
-        self.left, self.upper = self.get_geo_coord(0, 0)
-        self.right, self.lower = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
-        
+
+        if self.lon_lat:
+            self.upper, self.left = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
+            self.lower, self.right = self.get_geo_coord(0, 0)
+        else:
+            self.left, self.upper = self.get_geo_coord(0, 0)
+            self.right, self.lower = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
+
         lng0, lat0 = transform(self.proj, self.wgs84, self.left, self.upper)
         _, _, self.utm_n, self.utm_h = utm.from_latlon(lat0, lng0)
         

@@ -35,6 +35,15 @@ RGBA = namedtuple('RGBA', list('RGBA'))
 RGBA.tohex = lambda this: '#' + ''.join('{:02X}'.format(a) for a in this)
 
 
+SCRATCH = '/media/ramdisk'
+
+if not _exists(SCRATCH):
+    SCRATCH = '/Users/roger/Downloads'
+
+if not _exists(SCRATCH):
+    SCRATCH = '/workdir'
+
+
 def cmyk_to_rgb(c, m, y, k):
     """
     """

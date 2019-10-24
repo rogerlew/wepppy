@@ -4,6 +4,10 @@
 {% if climate.is_single_storm %}
 <div>
     <h4>WEPP Results</h4>
+    <div class="alert alert-info"><strong>Note:</strong>
+    The aggregated loss summary, flood frequency, and sediment delivery reports are not available for single-storm events.
+    Please directly interpret the WEPP outputs in the the wepp/output directory.
+    </div>
     <p><a href="browse/wepp/output/" target="_blank">View WEPP Outputs Directory</a></p>
 </div>
 {% else %}
