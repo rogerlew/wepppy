@@ -185,7 +185,6 @@ if __name__ == '__main__':
         wat.abstract_watershed(cell_width=proj['chn_cell_width'])
         translator = wat.translator_factory()
         topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
-        print('topaz_ids:', topaz_ids)
 
         landuse = Landuse.getInstance(wd)
         landuse.mode = LanduseMode.Gridded

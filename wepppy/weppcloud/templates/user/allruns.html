@@ -4,9 +4,14 @@
 Runs
 {% endblock %}
 {% block content %}
-<table class="table">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js">
+</script>
+<h3>All Runs</h3>
+<table class="table" id="allruns">
   <thead>
     <tr>
+      <th>Owner</th>
       <th>Project Name</th>
       <th>Location (What3Words)</th>
       <th>Link</th>
@@ -15,13 +20,14 @@ Runs
     </tr>
   </thead>
   <tbody>
-    {% for run in user.runs %}
+    {% for run in get_all_runs() %}
         {% if run_exists(run.runid) %}
         <tr>
+          <td>{{ get_run_owner(run.runid) }}</td>
           <td>{{ get_run_name(run.runid) }}</td>
           <td>{{ w3w_center(run.runid) }}</td>
           <td>
-              <a href="{{ site_prefix }}/runs/{{ run.runid }}/{{ run.config }}/">
+              <a href="/weppcloud/runs/{{ run.runid }}/{{ run.config }}/">
               /runs/{{ run.runid }}/{{ run.config }}/
               </a>
           </td>
@@ -32,4 +38,9 @@ Runs
     {% endfor %}
   </tbody>
 </table>
+<script type="text/javascript" >
+$(document).ready(function() {
+	$("#allruns").DataTable();
+} );
+</script>
 {% endblock %}
