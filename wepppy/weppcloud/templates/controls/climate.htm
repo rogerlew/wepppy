@@ -7,7 +7,7 @@
         <div class="col-sm-1">
             <h5>Filter</h5>
         </div>
-        {% if 'eu' not in ron.config_stem %}
+        {% if 'eu' not in ron.config_stem or 'au' not in ron.config_stem %}
         <div class="col-sm-2">
             <label class="radio-inline">
             <input type="radio" value="0" class="disable-readonly" id="climatestation_mode0"
@@ -48,7 +48,7 @@
     <h4>Climate Method</h4>
     <div class="form-group row">
         <div class="col-sm-6">
-            {% if 'eu' not in ron.config_stem %}
+            {% if 'eu' not in ron.config_stem or 'au' not in ron.config_stem %}
             <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
@@ -56,6 +56,12 @@
                 <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (DAYMET)
+                <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed (DAYMET) with PRISM Revision
+                <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed (GRIDMET) with PRISM Revision
                 <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5)
@@ -70,8 +76,13 @@
             {% if climate.future_clis != none %}
             <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
             {%  endif %}
-            {% else %}
-            <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified
+
+            {% elif 'eu' in ron.config_stem %}
+            <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified (Europe)
+                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+
+            {% elif 'au' in ron.config_stem %}
+            <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode10" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 10] }}> AGDC Modified (Australia)
                 <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             {% endif %}
@@ -108,6 +119,8 @@
     </div>
     <div id="climate_mode8_controls">
     </div>
+    <div id="climate_mode10_controls">
+    </div>
     <div id="climate_mode6_controls">
         <h5>Observed Climate Database</h5>
         <select class="form-control disable-readonly" id="climate_observed_selection" name="climate_observed_selection">
@@ -119,7 +132,7 @@
         </select>
     </div>
     <div id="climate_mode7_controls">
-        <h5>Observed Climate Database</h5>
+        <h5>Future Climate Database</h5>
         <select class="form-control disable-readonly" id="climate_future_selection" name="climate_future_selection">
             {% if climate.future_clis != none %}
             {% for fn in climate.future_clis %}
@@ -129,7 +142,7 @@
         </select>
     </div>
     <div id="climate_mode2_controls">
-        <h5>Observed (Daymet)</h5>
+        <h5>Observed</h5>
         <div class="form-group row">
             <div class="col-sm-4">
                 <label for="observed_start_year">Start Year [1980-2016]: </label>
