@@ -842,7 +842,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
             make_watershed_run(years, wepp_ids, runs_dir)
 
     def run_watershed(self):
-        wd  = self.wd
+        wd = self.wd
         self.log('Running Watershed... ')
 
         runs_dir = self.runs_dir
