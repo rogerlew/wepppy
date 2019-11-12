@@ -73,7 +73,7 @@ from wepppy.watershed_abstraction import (
 from wepppy.wepp import management
 from wepppy.wepp.soils import soilsdb
 
-from wepppy.wepp.out import TotalWatSed, Element
+from wepppy.wepp.out import TotalWatSed, Element, HillWat
 
 from wepppy.wepp.stats import (
     OutletSummary,
@@ -758,7 +758,6 @@ def hillslope0_ash(runid, config, topaz_id):
     assert config is not None
 
     from wepppy.climates.cligen import ClimateFile
-    from wepppy.wepp.out import Element
 
     wd = get_wd(runid)
     owners = get_run_owners(runid)
@@ -818,13 +817,16 @@ def hillslope0_ash(runid, config, topaz_id):
     element_fn = _join(wepp.output_dir, 'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
     element = Element(element_fn)
 
+    hill_wat_fn = _join(wepp.output_dir, 'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
+    hill_wat = HillWat(hill_wat_fn)
+
     prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
     recurrence = [100, 50, 20, 10, 2.5, 1]
     if _ash_type == AshType.BLACK:
-        _, results, annuals, = BlackAshModel().run_model(_fire_date, element.d, cli_df,
+        _, results, annuals, = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
                                                ash_dir, prefix=prefix, recurrence=recurrence)
     elif _ash_type == AshType.WHITE:
-        _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df,
+        _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
                                                ash_dir, prefix=prefix, recurrence=recurrence)
     else:
         raise ValueError

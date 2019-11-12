@@ -317,12 +317,17 @@ class Ash(NoDbBase, LogMixin):
                                    'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
                 element = Element(element_fn)
 
+                hill_wat_fn = _join(wepp.output_dir,
+                                   'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
+                hill_wat = HillWat(element_fn)
+
                 kwds = dict(ash_type=ash_type,
                             ini_white_ash_depth_mm=ini_white_ash_depth_mm,
                             ini_black_ash_depth_mm=ini_black_ash_depth_mm,
                             fire_date=fire_date,
                             element_d=element.d,
                             cli_df=cli_df,
+                            hill_wat=hill_wat,
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha)

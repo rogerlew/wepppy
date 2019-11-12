@@ -116,7 +116,6 @@ class LakeTahoe(NoDbBase):
             landuse.unlock('-f')
             raise
 
-
     def modify_soils(self, default_wepp_type='Granitic'):
         wd = self.wd
         soils_dir = self.soils_dir
