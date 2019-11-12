@@ -13,6 +13,8 @@ from wepppy.all_your_base import (
     probability_of_occurrence
 )
 
+from wepppy.wepp.out import HillWat
+
 from .wind_transport_thresholds import *
 
 _thisdir = os.path.dirname(__file__)
@@ -78,7 +80,7 @@ class AshModel(object):
         elif self.ash_type == AshType.WHITE:
             return lookup_wind_threshold_white_ash_proportion(w)
 
-    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, out_dir, prefix,
+    def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
                   recurrence=[100, 50, 20, 10, 5, 2.5, 1], area_ha=None):
         """
         Runs the ash model for a hillslope
@@ -101,6 +103,8 @@ class AshModel(object):
         """
         # copy the DataFrame
         df = deepcopy(cli_df)
+
+        hill_wat_d = hill_wat.as_dict()
 
         # number of days in the file
         s_len = len(df.da)
@@ -140,6 +144,8 @@ class AshModel(object):
         real_runoff = np.zeros((s_len,))
         effective_runoff = np.zeros((s_len,))
         cum_runoff = np.zeros((s_len,))
+        soil_evap = np.zeros((s_len,))
+        ash_wat_cap = np.zeros((s_len,))
         water_transport = np.zeros((s_len,))
         cum_water_transport = np.zeros((s_len,))
 
@@ -243,6 +249,11 @@ class AshModel(object):
                 peak_ro[i] = 0.0
                 eff_dur[i] = 0.0
 
+            if yr_mo_da in hill_wat_d:
+                soil_evap[i] = hill_wat_d[yr_mo_da]['Es (mm)']
+            else:
+                soil_evap[i] = 0.0
+
             assert not math.isnan(peak_ro[i])
             assert not math.isnan(eff_dur[i])
 
@@ -258,12 +269,19 @@ class AshModel(object):
 
             assert not math.isnan(real_runoff[i]), (i, available_ash[i], self.bulk_density)
 
-            # calculate runoff over the runoff_threshold specifed by the model parameters
+            # calculate runoff over the runoff_threshold specified by the model parameters
             effective_runoff[i] = real_runoff[i] - self.runoff_threshold
 
             # clamp to 0
             if effective_runoff[i] < 0.0:
                 effective_runoff[i] = 0.0
+
+            if dff == 0:
+                ash_wat_cap[i] = effective_runoff[i] - soil_evap[i]
+            else:
+                ash_wat_cap[i] = ash_wat_cap[i - 1] + effective_runoff[i] - soil_evap[i]
+                if ash_wat_cap[i] < 0.0:
+                    ash_wat_cap[i] = 0.0
 
             # calculate cumulative runoff
             if dff > 0:
@@ -405,7 +423,7 @@ class AshModel(object):
                 data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
 
             _df = pd.DataFrame(data, columns=
-            ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
+                ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
             _df.to_csv(_join(out_dir, '%s_ash_stats_per_event_%s.csv' % (prefix, measure.split('_')[0])), index=False)
 
             rec = weibull_series(recurrence, num_fire_years)

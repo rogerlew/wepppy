@@ -97,7 +97,7 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
     ll_x, ll_y = min(lons), min(lats)
     ur_x, ur_y = max(lons), max(lats)
 
-    if len(locations) ==  1:
+    if len(locations) == 1:
         ll_x -= 0.04
         ll_y -= 0.04
         ur_x += 0.04
@@ -123,8 +123,8 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
                 variable = ds.variables[variable_name]
                 desc = variable.description
                 units = variable.units
-                scale_factor = variable.scale_factor
-                add_offset = variable.add_offset
+                scale_factor = getattr(variable, 'scale_factor', 1.0)
+                add_offset = getattr(variable, 'add_offset', 0.0)
 
                 if _d is not None:
                     for key, ts in _d.items():
