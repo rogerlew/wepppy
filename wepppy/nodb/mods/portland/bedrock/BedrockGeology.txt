@@ -1,0 +1,11 @@
+Aschoff Buttes Vent	42	mm/h
+Andesite of Zigzag Mountain and Lolo Pass
+Andesite of Hiyu Mountain	42	mm/h
+Boring Lava	417	mm/h
+Basalt of Bull Run	0.04	mm/h
+Wanapum Basalt	0.04	mm/h
+Pliocene Lava Flows, Undivided	417	mm/h
+Troutdale Formation	4	mm/h
+Grande Ronde Basalt	0.04	mm/h
+Rhododendron Formation	0	mm/h
+Andesite and Basalt of Ashchoff Butte	0.004	mm/h
