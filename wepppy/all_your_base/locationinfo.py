@@ -35,6 +35,7 @@ class RDIOutOfBoundsException(Exception):
     def __init__(self):
         pass
 
+
 class RasterDatasetInterpolator:
     def __init__(self, fname, proj=None):
         self.lon_lat = False
@@ -100,6 +101,12 @@ class RasterDatasetInterpolator:
         y = (n - yorigin) / ypxsize
 
         return x, y
+
+    @property
+    def extent(self):
+        ll_left, ll_lower = transform(self.proj, self.wgs84, self.left, self.lower)
+        ll_right, ll_upper = transform(self.proj, self.wgs84, self.left, self.lower)
+        return ll_left, ll_lower, ll_right, ll_upper
 
     def __contains__(self, en):
         e, n = en
@@ -174,6 +181,7 @@ class RasterDatasetInterpolator:
         if nbands == 1:
             return z[0]
         return z
+
 
 if __name__ == "__main__":
     #rds = RasterDatasetInterpolator('/home/weppdev/PycharmProjects/wepppy/wepppy/all_your_base/tests/8b2cd722b5444271a203229b1597b941.nc4')
