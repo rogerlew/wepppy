@@ -4,7 +4,7 @@ from os.path import join as _join
 import warnings
 from osgeo import ogr
 
-from wepppy.all_your_base import RasterDatasetInterpolator
+from wepppy.all_your_base import RasterDatasetInterpolator, RDIOutOfBoundsException
 
 _thisdir = os.path.dirname(__file__)
 
@@ -29,15 +29,18 @@ class BullRunBedrock(object):
 
     def get_bedrock(self, lng, lat):
         try:
+            print(os.path.abspath(_join(_thisdir, 'Bedrock.tif')))
             rdi = RasterDatasetInterpolator(_join(_thisdir, 'Bedrock.tif'))
             object_id = rdi.get_location_info(lng, lat, method='nearest')
-
             return self._d[object_id]
-        except:
-            warnings.warn('failed finding bedrock {}, {}'.format(lng, lat))
-            return self._d[5]
+        except RDIOutOfBoundsException:
+            print(lng, lat, rdi.extent)
+            return self._d[0]
 
 
 if __name__ == "__main__":
     bullrun_bedrock = BullRunBedrock()
-    print(bullrun_bedrock.get_bedrock(-122.0, 45.5))
+    print(bullrun_bedrock.get_bedrock(-121.88436270034585, 45.45078330129854))
+
+# +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +datum=NAD83 +units=ft +no_defs
+# +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +datum=NAD83 +units=ft +no_defs
