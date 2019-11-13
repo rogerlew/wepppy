@@ -5,6 +5,10 @@ def modify_ksat(src_fn, dst_fn, ksat):
     while len(lines[-1].strip()) == 0:
         del lines[-1]
 
+    for i, line in enumerate(lines):
+        if line.startswith('Any comments:'):
+            lines[i] = '{} ksat modified to {}\n'.format(lines[i].strip(), ksat)
+
     lastline = lines[-1].split()
     lastline[-1] = '{}'.format(ksat)
     lines[-1] = ' '.join(lastline)

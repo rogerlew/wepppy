@@ -53,7 +53,7 @@
 #   indicate it by putting an 'X' in the box here -> [ ]
 # 
 # 
-Any comments:
+Any comments: ksat modified to 0.04
 1 1
 'Duckcreek-Cloud Peak-Spanpeak families, complex, 15 to 50 percent slopes'		'SPM'	2	0.0900	0.7500	4649000.00	0.0050	2.5450	0.0000
 	   40.000	    0.20	1260.0000	 10.0	   0.2420	   0.1145	  66.80	   7.00	  75.00	  11.30	  55.50
