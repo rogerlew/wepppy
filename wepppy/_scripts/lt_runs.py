@@ -1,4 +1,3 @@
-
 import os
 import sys
 
@@ -9,6 +8,7 @@ from os.path import exists as _exists
 from pprint import pprint
 from time import time
 from time import sleep
+from datetime import datetime
 
 import wepppy
 from wepppy.nodb import *
@@ -105,9 +105,13 @@ def not_outcrop_selector(landuse, soils):
 
     return topaz_ids
 
+wd = None
+def log_print(msg):
+    now = datetime.now()
+    print('[{now}] {wd}: {msg}'.format(now=now, wd=wd, msg=msg))
 
 if __name__ == '__main__':
-    
+
     watersheds = [
         dict(wd='Watershed_1',
              extent=[-120.25497436523439, 39.072244930479926, -120.0146484375, 39.25857565711887],
@@ -253,46 +257,52 @@ if __name__ == '__main__':
     ]
 
     scenarios = [
-                dict(wd='SimFire4.2.2',
+                dict(wd='SimFire4.2.2b.1',
                      landuse=None,
                      cfg='lt-fire'),
-                dict(wd='SimFire4.2fA2p.2.obs_cli',
+                dict(wd='SimFire4.2fA2p.2b.1.obs_cli',
                      landuse=None,
                      cfg='lt-fire-future'),
-                dict(wd='SimFire4.2fA2p.2.fut_cli',
+                dict(wd='SimFire4.2fA2p.2b.1.fut_cli',
                      landuse=None,
                      cfg='lt-fire-future',
                      climate='future'),
-                dict(wd='CurCond4.1.2',
+                dict(wd='CurCond4.1.3b.1',
                      landuse=None),
-                dict(wd='LowSev4.2.2',
+                dict(wd='PrescFire.2.2b.1',
+                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)]),
+                dict(wd='LowSev4.2.2b.1',
                      landuse=[(not_shrub_selector, 106), (shrub_selector, 121)]),
-                dict(wd='ModSev4.2.2',
+                dict(wd='ModSev4.2.2b.1',
                      landuse=[(not_shrub_selector, 118), (shrub_selector, 120)]),
-                dict(wd='HighSev4.2.2',
+                dict(wd='HighSev4.2.2b.1',
                      landuse=[(not_shrub_selector, 105), (shrub_selector, 119)]),
-                dict(wd='Thinn4.3.2',
+                dict(wd='Thinn4.3.2b.1',
                      landuse=[(not_shrub_selector, 107)]),
-                dict(wd='LowSev4.3.2',
+                dict(wd='Thinn4.16.2b.1',
+                     landuse=[(not_shrub_selector, 116)]),
+                dict(wd='Thinn4.17.2b.1',
+                     landuse=[(not_shrub_selector, 117)]),
+                dict(wd='LowSev4.3.2b.1',
                      landuse=[(not_shrub_selector, 106)]),
-                dict(wd='LowSev4.4.2',
+                dict(wd='LowSev4.4.2b.1',
                      landuse=[(not_shrub_and_not_outcrop_selector, 106),
                               (shrub_and_not_outcrop_selector, 121)]),
-                dict(wd='LowSev4.5.2',
+                dict(wd='LowSev4.5.2b.1',
                      landuse=[(not_shrub_and_not_outcrop_selector, 106)]),
-                dict(wd='ModSev4.3.2',
+                dict(wd='ModSev4.3.2b.1',
                      landuse=[(not_shrub_selector, 118)]),
-                dict(wd='ModSev4.4.2',
+                dict(wd='ModSev4.4.2b.1',
                      landuse=[(not_shrub_and_not_outcrop_selector, 118),
                               (shrub_and_not_outcrop_selector, 120)]),
-                dict(wd='ModSev4.5.2',
+                dict(wd='ModSev4.5.2b.1',
                      landuse=[(not_shrub_and_not_outcrop_selector, 118)]),
-                dict(wd='HighSev4.3.2',
+                dict(wd='HighSev4.3.2b.1',
                      landuse=[(not_shrub_selector, 105)]),
-                dict(wd='HighSev4.4.2',
+                dict(wd='HighSev4.4.2b.1',
                      landuse=[(not_shrub_and_not_outcrop_selector, 105),
                               (shrub_and_not_outcrop_selector, 119)]),
-                dict(wd='HighSev4.5.2',
+                dict(wd='HighSev4.5.2b.1',
                      landuse=[(not_shrub_and_not_outcrop_selector, 105)]),
                 ]
 
@@ -326,42 +336,42 @@ if __name__ == '__main__':
                 if not wc in wd:
                     continue
 
-            print('cleaning dir')
+            log_print('cleaning dir')
             if _exists(wd):
                 print()
                 shutil.rmtree(wd)
             os.mkdir(wd)
 
-            print('initializing project')
+            log_print('initializing project')
             ron = Ron(wd, "%s.cfg" % cfg)
             ron.name = wd
             ron.set_map(extent, map_center, zoom=map_zoom)
 
-            print('fetching dem')
+            log_print('fetching dem')
             ron.fetch_dem()
 
-            print('building channels')
+            log_print('building channels')
             topaz = Topaz.getInstance(wd)
             topaz.build_channels(csa=5, mcl=60)
             topaz.set_outlet(*outlet)
             sleep(0.5)
 
-            print('building subcatchments')
+            log_print('building subcatchments')
             topaz.build_subcatchments()
 
-            print('abstracting watershed')
+            log_print('abstracting watershed')
             wat = Watershed.getInstance(wd)
             wat.abstract_watershed(cell_width=None)
             translator = wat.translator_factory()
             topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
 
-            print('building landuse')
+            log_print('building landuse')
             landuse = Landuse.getInstance(wd)
             landuse.mode = LanduseMode.Gridded
             landuse.build()
             landuse = Landuse.getInstance(wd)
 
-            print('building soils')
+            log_print('building soils')
             soils = Soils.getInstance(wd)
             soils.mode = SoilsMode.Gridded
             soils.build()
@@ -369,7 +379,7 @@ if __name__ == '__main__':
             # 105 - Tahoe High severity fire
             # topaz_ids is a list of string ids e.g. ['22', '23']
             if default_landuse is not None:
-                print('setting default landuse')
+                log_print('setting default landuse')
 
                 tops = []
 
@@ -406,7 +416,7 @@ if __name__ == '__main__':
                 #     assert '1222' not in tops
                 #     assert '2203' not in tops
 
-            print('building climate')
+            log_print('building climate')
 
             if climate_mode == 'observed':
                 climate = Climate.getInstance(wd)
@@ -432,24 +442,24 @@ if __name__ == '__main__':
 
             climate.build(verbose=1)
 
-            print('prepping wepp')
+            log_print('prepping wepp')
             wepp = Wepp.getInstance(wd)
             wepp.prep_hillslopes()
 
-            print('running hillslopes')
+            log_print('running hillslopes')
             wepp.run_hillslopes()
 
-            print('prepping watershed')
+            log_print('prepping watershed')
             wepp = Wepp.getInstance(wd)
             wepp.prep_watershed(erodibility=proj['erod'], critical_shear=proj['cs'])
 
-            print('running watershed')
+            log_print('running watershed')
             wepp.run_watershed()
 
-            print('generating loss report')
+            log_print('generating loss report')
             loss_report = wepp.report_loss()
 
-            print('generating totalwatsed report')
+            log_print('generating totalwatsed report')
             fn = _join(ron.export_dir, 'totalwatsed.csv')
 
             totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
@@ -457,9 +467,10 @@ if __name__ == '__main__':
             totwatsed.export(fn)
             assert _exists(fn)
 
-            print('exporting arcmap resources')
+            log_print('exporting arcmap resources')
             arc_export(wd)
         except:
             failed.write('%s\n' % wd)
             raise
+
 
