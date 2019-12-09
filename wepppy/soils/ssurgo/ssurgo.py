@@ -400,7 +400,7 @@ class SoilSummary(object):
         self.desc = kwargs["Description"]
 
         self.area = 0.0
-        self.pct_coverage = None
+        self.pct_coverage = kwargs.get('pct_coverage', None)
 
         self.clay = None
         self.sand = None
