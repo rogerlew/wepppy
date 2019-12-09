@@ -29,13 +29,37 @@ class BullRunBedrock(object):
 
     def get_bedrock(self, lng, lat):
         try:
-            print(os.path.abspath(_join(_thisdir, 'Bedrock.tif')))
             rdi = RasterDatasetInterpolator(_join(_thisdir, 'Bedrock.tif'))
             object_id = rdi.get_location_info(lng, lat, method='nearest')
             return self._d[object_id]
         except RDIOutOfBoundsException:
             print(lng, lat, rdi.extent)
             return self._d[0]
+
+
+class ShallowLandSlideSusceptibility(object):
+    def __init__(self):
+        with open(_join(_thisdir, 'Bedrock_attrs.csv')) as fp:
+            csv_rdr = csv.DictReader(fp)
+            d = {}
+            for row in csv_rdr:
+                row['ksat'] = float(row['ksat'])
+                row['Shape_Leng'] = float(row['Shape_Leng'])
+                row['Shape_Area'] = float(row['Shape_Area'])
+                row['OBJECTID'] = int(row['OBJECTID'])
+                d[row['OBJECTID']] = row
+
+            self._d = d
+
+    def get_bedrock(self, lng, lat):
+        try:
+            rdi = RasterDatasetInterpolator(_join(_thisdir, 'Shallow_Landslide_Susceptibility.tif'))
+            object_id = rdi.get_location_info(lng, lat, method='nearest')
+            return self._d[object_id]
+        except RDIOutOfBoundsException:
+            print(lng, lat, rdi.extent)
+            return self._d[0]
+
 
 
 if __name__ == "__main__":
