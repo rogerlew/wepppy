@@ -341,7 +341,9 @@ class Soils(NoDbBase):
             raise
 
     def build(self):
-        if self.mode == SoilsMode.Gridded:
+        if self.config_stem.startswith('ak'):
+            self._build_ak()
+        elif self.mode == SoilsMode.Gridded:
             if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
@@ -457,6 +459,50 @@ class Soils(NoDbBase):
         ll_pct = wsum / totalarea
 
         return ll_pct
+
+    def _build_ak(self):
+        wd = self.wd
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+
+            watershed = Watershed.getInstance(wd)
+            mukey = -9999
+
+            domsoil_d = {}
+            soils = {str(mukey): SoilSummary(
+                        Mukey=mukey,
+                        FileName=None,
+                        soils_dir=None,
+                        BuildDate="N/A",
+                        Description=None,
+                        pct_coverage=100.0
+                    )}
+
+            for topaz_id, sub in watershed.sub_iter():
+                domsoil_d[str(topaz_id)] = str(mukey)
+
+            for topaz_id, chn in watershed.chn_iter():
+                domsoil_d[str(topaz_id)] = str(mukey)
+
+            soils[str(mukey)].pct_coverage = 100.0
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+            self.soils = soils
+
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     def _build_single(self):
 
@@ -586,7 +632,6 @@ class Soils(NoDbBase):
 
     def _build_gridded(self):
         soils_dir = self.soils_dir
-
         self.lock()
 
         # noinspection PyBroadException
