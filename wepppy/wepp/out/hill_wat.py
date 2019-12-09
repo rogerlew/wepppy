@@ -40,6 +40,8 @@ class HillWat:
             lines = f.readlines()
         lines = [L.strip() for L in lines]
 
+        assert len(lines) > 19, fname
+
         # Read header
         i0, iend = self._find_headerlines(lines)
         header = [L.split() for L in lines[i0:iend]]

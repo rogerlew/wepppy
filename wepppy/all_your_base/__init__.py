@@ -54,11 +54,18 @@ def cmyk_to_rgb(c, m, y, k):
 
 
 def utm_srid(zone, datum='WGS84', hemisphere='N'):
+    print('utm_srid', zone, datum, hemisphere)
     if hemisphere != 'N':
         raise NotImplementedError
 
     if datum == 'NAD83':
         return {
+            '4': 26904,
+            '5': 26905,
+            '6': 26906,
+            '7': 26907,
+            '8': 26908,
+            '9': 26909,
             '10': 26910,
             '11': 26911,
             '12': 26912,
@@ -76,6 +83,12 @@ def utm_srid(zone, datum='WGS84', hemisphere='N'):
 
     elif datum == 'WGS84':
         return {
+            '4': 32604,
+            '5': 32605,
+            '6': 32606,
+            '7': 32607,
+            '8': 32608,
+            '9': 32609,
             '10': 32610,
             '11': 32611,
             '12': 32612,
