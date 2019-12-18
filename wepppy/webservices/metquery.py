@@ -247,6 +247,7 @@ def query_monthly():
     """
     https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
     https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
+    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=au/agdc/monthlies/rain&lng=146.80738449096683&lat=-37.69733638487025
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})

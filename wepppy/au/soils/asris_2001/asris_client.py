@@ -21,11 +21,14 @@ _url = 'http://www.asris.csiro.au/arcgis/rest/services/ASRIS/ASRIS_2001/MapServe
 def query_asris(lng, lat):
     global _url
 
+    lng = round(lng, 2)
+    lat = round(lat, 2)
+
     if not _exists(_cache_dir):
         os.mkdir(_cache_dir)
 
     d = None
-    fn = _join(_cache_dir, '{lng:0.8},{lat:0.8}.json'.format(lng=lng, lat=lat))
+    fn = _join(_cache_dir, '{lng:0.2f},{lat:0.2f}.json'.format(lng=lng, lat=lat))
     if _exists(fn):
         with open(fn) as fp:
             d = json.load(fp)
