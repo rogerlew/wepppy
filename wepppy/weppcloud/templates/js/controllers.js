@@ -3407,6 +3407,21 @@ var Climate = function () {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
                 });
+            }  else if (mode === 3) {
+                // sync climate with nodb
+                $.get({
+                    url: "view/au_heuristic_stations/",
+                    data: { "mode": mode },
+                    cache: false,
+                    success: function success(response) {
+                        self.stationselection.html(response);
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                    }
+                });
             } else if (mode === -1) {
                 pass();
             } else {

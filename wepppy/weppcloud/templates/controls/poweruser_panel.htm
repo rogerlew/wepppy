@@ -44,6 +44,9 @@
               {% if 'lt' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/lt.nodb">nodb.lt</a>
               {% endif %}
+              {% if 'ash' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash.nodb">nodb.ash</a>
+              {% endif %}
               {% if 'debris_flow' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
               {% endif %}
@@ -62,6 +65,9 @@
               {% else %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/runs">rhem/runs</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rhem/output">rhem/output</a>
+              {% endif %}
+              {% if 'ash' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash">ash</a>
               {% endif %}
             </div>
             <br/>

@@ -17,6 +17,7 @@ from subprocess import Popen, PIPE, STDOUT
 import time
 from glob import glob
 import shutil
+import warnings
 
 from imageio import imread
 
@@ -428,7 +429,11 @@ class TopazRunner:
         Uses gdal to extract elevation values from dem and puts them in a
         single column ascii file named DEDNM.INP for topaz
         """
-        data = imread(self.dem)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            data = imread(self.dem)
+
         data = data.flatten()
         data = np.clip(data, 1.0, 9999.0)
 

@@ -8,7 +8,7 @@ from urllib.request import urlopen
 
 
 if __name__ == "__main__":
-    measures = ['tmin', 'rad']
+    measures = ['tmin', 'tmax', 'rain', 'rad']
     for measure in measures:
         print(measure)
         url = 'http://rs-data1-mel.csiro.au/thredds/catalog/bawap/{}/month/catalog.html'.format(measure)

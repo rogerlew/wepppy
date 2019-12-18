@@ -76,6 +76,8 @@ def _row_formatter(values):
         v = float(v)
         if v < 1.0:
             s.append('  ' + '{0:.2f}'.format(v)[1:])
+        elif v < 10.0:
+            s.append(' {0:.2f}'.format(v))
         elif v > 10000.0:
             s.append('{0}'.format(int(v)))
         elif v > 1000.0:
@@ -851,21 +853,21 @@ class CligenStationsManager:
         elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
 
         ppts = get_agdc_monthly_ppt(*location, units='inch')
-        _ppts = ppts[6:] + ppts[:6]
+        _ppts = np.concatenate((ppts[6:], ppts[:6]))
         ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - _ppts)**2.0))
                               for s in stations])
         ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
         ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
 
         txs = get_agdc_monthly_tmax(*location, units='f')
-        _txs = txs[6:] + txs[:6]
+        _txs = np.concatenate((txs[6:], txs[:6]))
         tx_ranks = np.array([math.sqrt(np.sum((s.get_station().tmaxs - txs)**2.0))
                               for s in stations])
         tx_ranks = [(i, err) for i, err in enumerate(tx_ranks)]
         tx_ranks = sorted(tx_ranks, key=lambda x: x[1])
 
         tns = get_agdc_monthly_tmin(*location, units='f')
-        _tns = tns[6:] + tns[:6]
+        _tns = np.concatenate((tns[6:], tns[:6]))
         tn_ranks = np.array([math.sqrt(np.sum((s.get_station().tmins - tns)**2.0))
                               for s in stations])
         tn_ranks = [(i, err) for i, err in enumerate(tn_ranks)]
@@ -963,7 +965,7 @@ class Cligen:
         assert _exists(cli_fname)
 
     def run_observed(self, prn_fn, cli_fn='wepp.cli',
-                     verbose=True):
+                     verbose=False):
 
         if verbose:
             print("running observed")
@@ -1033,7 +1035,6 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     :param logger:
     :return:
     """
-
     days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
     # determine which version of cligen to use
@@ -1049,6 +1050,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         curdir = '../'
 
     os.chdir(wd)
+    fp_log = open("cligen.log", "w")
 
     stationManager = CligenStationsManager()
     stationMeta = stationManager.get_station_fromid(par)
@@ -1078,6 +1080,11 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         prism_tmins = get_agdc_monthly_tmin(lng, lat, units='f')
     else:
         raise Exception
+
+    fp_log.write('monthly_dataset = {}\n'.format(monthly_dataset))
+    fp_log.write('prism_ppts (in) = {}\n'.format(prism_ppts))
+    fp_log.write('prism_tmaxs (F) = {}\n'.format(prism_tmaxs))
+    fp_log.write('prism_tmins (F) = {}\n'.format(prism_tmins))
 
     # calculate number of wet days
     if nwds_method.lower() == 'daymet':
@@ -1129,6 +1136,9 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
 
     daily_ppts = prism_ppts / nwds  # in inches / day
 
+    fp_log.write('daily_ppts (in) = {}\n'.format(daily_ppts))
+    fp_log.write('nwds = {}\n'.format(nwds))
+
     # build par file
     par_fn = '{}{}.par'.format(par, suffix)
 
@@ -1174,11 +1184,11 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
                     preexec_fn=os.setsid)
 
     output = process.stdout.read()
+    output += process.stderr.read()
 
-    with open("cligen.log", "wb") as fp:
-        fp.write(output)
+    fp_log.write(str(output))
 
-    assert _exists(cli_fn)
+    assert _exists(cli_fn), (cli_fn, cmd)
 
     cli = ClimateFile(cli_fn)
 
