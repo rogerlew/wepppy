@@ -52,5 +52,5 @@ for i in range(len(linux)):
 
     if not compare_row(L, W):
         fp.write('{} {}\n'.format(year, i+1))
-        fp.write(L + '\n')
-        fp.write(W + '\n\n')
+        fp.write('Linux:   ' + L + '\n')
+        fp.write('Windows: ' + W + '\n\n')
