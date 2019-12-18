@@ -27,6 +27,8 @@ import matplotlib.pyplot as plt
 
 import markdown
 
+import awesome_codename
+
 
 from werkzeug.utils import secure_filename
 
@@ -543,15 +545,26 @@ def seattle_index():
 @app.route('/create/<config>')
 @app.route('/create/<config>/')
 def create(config):
-    runid = str(uuid.uuid4())
 
-    email = getattr(current_user, 'email', '')
-    if email.startswith('rogerlew@'):
-        runid = 'rlew' + runid[4:]
-    elif email.startswith('mdobre@'):
-        runid = 'mdob' + runid[4:]
-    elif request.remote_addr == '127.0.0.1':
-        runid = 'devvm' + runid[5:]
+    wd = None
+    dir_created = False
+    while not dir_created:
+        runid = awesome_codename.generate_codename().replace(' ', '-')
+
+        email = getattr(current_user, 'email', '')
+        if email.startswith('rogerlew@'):
+            runid = 'rlew-' + runid
+        elif email.startswith('mdobre@'):
+            runid = 'mdobre-' + runid
+        elif request.remote_addr == '127.0.0.1':
+            runid = 'devvm-' + runid
+
+        wd = get_wd(runid)
+        if _exists(wd):
+            continue
+
+        os.mkdir(wd)
+        dir_created = True
 
     try:
         from wepppy.weppcloud import RunStatistics
@@ -560,9 +573,6 @@ def create(config):
     except:
         pass
 
-    wd = get_wd(runid)
-    assert not _exists(wd)
-    os.mkdir(wd)
 
     Ron(wd, "%s.cfg" % config)
 
@@ -2110,6 +2120,28 @@ def view_eu_heuristic_stations(runid, config):
 
     return Response('n'.join(options), mimetype='text/html')
 
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/view/au_heuristic_stations/')
+def view_au_heuristic_stations(runid, config):
+    wd = get_wd(runid)
+    climate = Climate.getInstance(wd)
+
+    try:
+        results = climate.find_au_heuristic_stations()
+    except Exception:
+        return exception_factory('Error finding heuristic stations')
+
+    if results is None:
+        return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
+
+    options = []
+    for r in results:
+        r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
+        options.append('<option value="{id}" {selected}>'
+                       '{desc} ({rank_based_on_query_location})</option>'
+                       .format(**r))
+
+    return Response('n'.join(options), mimetype='text/html')
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/view/climate_monthlies')
@@ -3480,4 +3512,5 @@ if __name__ == '__main__':
     # sudo docker run -i -p 5003:80 -v /Users/roger/geodata:/geodata -v /Users/roger/wepppy/wepppy:/workdir/wepppy/wepppy  -t wepppydocker-base
 
 #rsync -av --progress --exclude=_scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
+#rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=_scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
 
