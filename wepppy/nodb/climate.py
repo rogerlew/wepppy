@@ -66,6 +66,7 @@ class ClimateStationMode(IntEnum):
     Closest = 0
     Heuristic = 1
     EUHeuristic = 2
+    AUHeuristic = 3
 
 
 class ClimateMode(IntEnum):

@@ -250,7 +250,7 @@ def get_eobs_monthly_ppt(lng, lat, method='cubic', units=None):
 
 
 def get_agdc_monthly_tmin(lng, lat, method='cubic', units='c'):
-    _json = _metquery_retrieve_monthly('au/agdc/monthlies/tmin/mean', lng, lat, method)
+    _json = _metquery_retrieve_monthly('au/agdc/monthlies/tmin', lng, lat, method)
 
     vals = _json['MonthlyValues']
     assert len(vals) == 12
@@ -265,7 +265,7 @@ def get_agdc_monthly_tmin(lng, lat, method='cubic', units='c'):
 
 
 def get_agdc_monthly_tmax(lng, lat, method='cubic', units='c'):
-    _json = _metquery_retrieve_monthly('au/agdc/monthlies/tmax/mean', lng, lat, method)
+    _json = _metquery_retrieve_monthly('au/agdc/monthlies/tmax', lng, lat, method)
 
     vals = _json['MonthlyValues']
     assert len(vals) == 12
@@ -280,8 +280,7 @@ def get_agdc_monthly_tmax(lng, lat, method='cubic', units='c'):
 
 
 def get_agdc_monthly_ppt(lng, lat, method='cubic', units=None):
-    _json = _metquery_retrieve_monthly('au/agdc/monthlies/rain/mean', lng, lat, method)
-
+    _json = _metquery_retrieve_monthly('au/agdc/monthlies/rain', lng, lat, method)
     vals = _json['MonthlyValues']
     assert len(vals) == 12
 
@@ -290,10 +289,6 @@ def get_agdc_monthly_ppt(lng, lat, method='cubic', units=None):
 
     if units is not None and 'in' in units.lower():
         vals *= 0.0393701
-
-    if units is not None and 'daily' not in units.lower():
-        vals *= np.array([31.0, 28.25, 31.0, 30.0, 31.0, 30.0,
-                          31.0, 31.0, 30.0, 31.0, 30.0, 31.0])
 
     return vals
 
@@ -320,10 +315,12 @@ if __name__ == "__main__":
     import sys
     from pprint import pprint
 
+    get_agdc_monthly_ppt(145.708065032959, -37.772953636729326)
+    sys.exit()
+
     get_daily('daymet/prcp', '-117,39,-116.9,39.1', 1980, 'tests/daymet_prcp_1980_ws.nc4')
 
-    sys.exit()
-    
+
     _lng = -115.67
     _lat = 45.27
     pprint(get_prism_monthly_ppt(_lng, _lat, units='dailyin'))

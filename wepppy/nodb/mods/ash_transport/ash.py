@@ -370,10 +370,21 @@ class Ash(NoDbBase, LogMixin):
             series = df['cum_ash_delivery_by_water (tonne)']
             return float(np.mean(series))
 
+    def hillslope_is_burned(self, topaz_id):
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        burnclass = self.meta[str(topaz_id)]['burn_class']
+        return burnclass in [2, 3, 4]
+
     def get_annual_water_transport(self, topaz_id):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         wepp_id = translator.wepp(top=topaz_id)
+        burnclass = self.meta[str(topaz_id)]['burn_class']
+
+        if burnclass not in [2, 3, 4]:
+            return '-'
+
         fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_water.csv'.format(wepp_id))
         with open(fn) as fp:
             df = pd.read_csv(fp)
@@ -384,6 +395,11 @@ class Ash(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         wepp_id = translator.wepp(top=topaz_id)
+        burnclass = self.meta[str(topaz_id)]['burn_class']
+
+        if burnclass not in [2, 3, 4]:
+            return '-'
+
         fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_wind.csv'.format(wepp_id))
         with open(fn) as fp:
             df = pd.read_csv(fp)
@@ -394,6 +410,11 @@ class Ash(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
         wepp_id = translator.wepp(top=topaz_id)
+        burnclass = self.meta[str(topaz_id)]['burn_class']
+
+        if burnclass not in [2, 3, 4]:
+            return '-'
+
         fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_ash.csv'.format(wepp_id))
         with open(fn) as fp:
             df = pd.read_csv(fp)
@@ -423,7 +444,11 @@ class Ash(NoDbBase, LogMixin):
         burnclass_sum = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
 
         for topaz_id, d in self.meta.items():
-            burnclass_sum[d['burn_class']] += d['area_ha']
+            burnclass = d['burn_class']
+            if burnclass == 255:
+                burnclass = 1
+            assert burnclass in burnclass_sum, burnclass
+            burnclass_sum[burnclass] += d['area_ha']
 
         return {k: burnclass_sum[k] for k in sorted(burnclass_sum)}
 
