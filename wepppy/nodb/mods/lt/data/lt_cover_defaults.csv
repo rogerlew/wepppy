@@ -22,12 +22,29 @@ key,desc,cancov,inrcov,rilcov
 97,Estaurine Emergent Wetland,0.5,0.9,0.9
 98,Palustrine Aquatic Bed,0.5,0.99,0.99
 99,Estaurine Aquatic Bed,0.5,0.99,0.99
-105,Tahoe High Severity Fire,0.2,0.3,0.3
-106,Tahoe Low Severity Fire,0.75,0.8,0.8
-119,Tahoe Shrub High Severity Fire,0.05,0.25,0.25
-120,Tahoe Shrub Moderate Severity Fire,0.3,0.5,0.5
-121,Tahoe Shrub Low Severity Fire,0.5,0.7,0.7
-122,Tahoe Shrub Prescribed Fire,0.75,0.75,0.75
+100,Bare,0.05,0.2,0.2
+101,Sod_G,0.4,0.6,0.6
+102,OForst,0.9,1,1
+103,BnchG,0.6,0.8,0.8
+104,Shrub,0.7,0.9,0.9
+105,HighF,0.2,0.3,0.3
+106,LowF,0.75,0.8,0.8
+107,YForst,0.8,1,1
+110,PrescrF,0.85,0.85,0.85
+111,Skid,0.05,0.4,0.4
+112,Yr1_Recov_Fire,0.8,0.92,0.92
+113,Yr1_Recov_Thinn,0.8,0.92,0.92
+114,Yr2_Recov_Fire,0.85,0.95,0.95
+115,Thinning_93_Cover,0.4,0.93,0.93
+116,Thinning_90_Cover,0.4,0.9,0.9
+117,Thinning_85_Cover,0.4,0.85,0.85
+118,ModF,0.4,0.75,0.75
+119,HighFShrub,0.05,0.25,0.25
+120,ModFShrub,0.3,0.5,0.5
+121,LowFShrub,0.5,0.7,0.7
+122,PrescrShrub,0.7,0.75,0.75
+123,Thinning_96_Cover,0.4,0.96,0.96
+124,Thinning_75_Cover,0.4,0.75,0.75
 130,No Burn,0.8,0.95,0.95
 131,Low Severity Fire,0.75,0.8,0.8
 132,Moderate Severity Fire,0.6,0.6,0.6

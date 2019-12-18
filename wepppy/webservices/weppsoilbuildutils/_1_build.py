@@ -3,8 +3,11 @@ import sys
 import shutil
 
 from multiprocessing import Pool
+from os.path import join as _join
+from os.path import exists as _exists
+from os.path import split as _split
 
-from ssurgo import SurgoMap, SurgoSoilCollection
+from soils.ssurgo import SurgoMap, SurgoSoilCollection
 
 from datetime import datetime
 from glob import glob
@@ -26,7 +29,7 @@ def build(args):
         if (int(i) + int(j)) % ncpu != 0:
             continue
         
-        print i,
+        print(i,)
         _mukeys = mukeys[i0:iend]
         
         ssurgo_c = SurgoSoilCollection([int(m) for m in _mukeys])
