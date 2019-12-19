@@ -6,7 +6,10 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 _thisdir = os.path.dirname(__file__)
-_cache_dir = _join(_thisdir, 'cache')
+_cache_dir = '/geodata/au/asris_2001/cache'
+
+if not _exists(_cache_dir):
+    _join(_thisdir, 'cache')
 
 _url = 'http://www.asris.csiro.au/arcgis/rest/services/ASRIS/ASRIS_2001/MapServer/' \
        'identify?geometry={{x:{lng},y:{lat}}}&geometryType=esriGeometryPoint&' \

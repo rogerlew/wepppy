@@ -4,6 +4,7 @@ import string
 import os
 from os.path import split as _split
 from os.path import join as _join
+from os.path import exists as _exists
 
 from glob import glob
 from datetime import datetime
@@ -27,6 +28,9 @@ class ASRISgrid:
         rats = {}
         for var, path in catalog.items():
             fn = _join(path + '.json')
+
+            if not _exists(fn):
+                continue
 
             with open(fn) as fp:
                 info = json.load(fp)
