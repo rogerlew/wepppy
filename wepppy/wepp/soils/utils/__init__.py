@@ -63,26 +63,40 @@ def simple_texture(clay, sand):
     Courtesy of Mary Ellen Miller
     :return:
     """
+    # clay = 21
+    # sand = 52
+    # cs = 73
+
     cs = clay + sand
     if (clay <= 27.0 and cs <= 50.0) or \
-            (clay > 27.0 and sand <= 20.0 and cs <= 50.0):
-        return "silt loam"
+       (clay > 27.0 and sand <= 20.0 and cs <= 50.0):
+        return 'silt loam'
     elif (6.0 <= clay <= 27.0) and \
             (50.0 < cs <= 72.0) and \
             sand <= 52:
-        return "loam"
+        return 'loam'
     elif (sand > 52 or cs > 50 and clay < 6) and \
             sand >= 50:
-        return "sand loam"
+        return 'sand loam'
     elif (cs > 72 and sand < 50) or \
             (clay > 27 and (20 < sand <= 45)) or \
             (sand <= 20 and cs > 50):
-        return "clay loam"
+        return 'clay loam'
 
+    tex = soil_texture(clay, sand)
+    if tex.startswith('sand'):
+        return 'sand loam'
+    elif tex.startswith('silt'):
+        return 'silt loam'
+    elif tex.startswith('clay'):
+        return 'clay loam'
+    elif tex.startswith('loam'):
+        return 'loam'
+    
     return None
 
 
-def _soil_texture(sand, clay):
+def _soil_texture(clay, sand):
     assert sand + clay <= 100
     silt = 100.0 - sand - clay
 
@@ -118,8 +132,8 @@ def _soil_texture(sand, clay):
         return 'sandy loam'
 
 
-def soil_texture(sand, clay):
-    res = _soil_texture(sand, clay)
+def soil_texture(clay, sand):
+    res = _soil_texture(clay, sand)
     assert res is not None
     return res
 

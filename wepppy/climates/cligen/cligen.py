@@ -631,8 +631,8 @@ class StationMeta:
         self.lat_distance = None
         self.rank = None
 
-        self.id = ''.join([v for v in par if v in '0123456789'])
-        assert len(self.id) == 6
+        self.id = par.replace('.par', '')
+        #assert len(self.id) == 6
 
         self.desc = desc.split(str(self.id))[0].strip()
 
@@ -663,7 +663,7 @@ class StationMeta:
             "tp6": self.tp6,
             "distance_to_query_location": self.distance,
             "rank_based_on_query_location": self.rank,
-            "id": int(self.id)
+            "id": self.id
         }
 
         if include_monthlies:

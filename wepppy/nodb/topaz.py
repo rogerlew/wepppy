@@ -132,8 +132,23 @@ class Topaz(NoDbBase):
         return int([tok for tok in self._utmproj4.split() if tok.startswith('+zone=')][0].replace('+zone=', ''))
 
     @property
+    def hemisphere(self):
+        if '+south' in self._utmproj4:
+            return 'S'
+        else:
+            return 'N'
+
+    @property
+    def datum(self):
+        for tok in self._utmproj4.split():
+            if tok.startswith('+datum'):
+                return tok.split('=')[-1]
+
+        return None
+
+    @property
     def srid(self):
-        return utm_srid(self.utmzone)
+        return utm_srid(self.utmzone, datum=self.datum, hemisphere=self.hemisphere)
 
     @property
     def utmextent(self):

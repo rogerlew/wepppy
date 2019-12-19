@@ -3,7 +3,7 @@
 # Copyright (c) 2016, University of Idaho
 # All rights reserved.
 #
-# Roger Lew (rogerlew@gmail.com)
+# Roger Lew (rogerlew.gmail.com)
 #
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
@@ -53,7 +53,6 @@ gdaldem_modes = tuple(gdaldem_modes)
 _this_dir = os.path.dirname(__file__)
 _catalog = os.path.join(_this_dir, 'catalog')
 
-
 def raster_stats(src):
     cmd = 'gdalinfo %s -stats' % src
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -77,7 +76,6 @@ def raster_stats(src):
     print(d)
     return d
 
-
 def format_convert(src, _format):
     dst = src[:-4] + ext_d[_format]
     if _format == 'ENVI':
@@ -87,6 +85,7 @@ def format_convert(src, _format):
     else:
         cmd = 'gdal_translate -of %s %s %s' % (_format, src, dst)
 
+    print(cmd)
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     output = p.stdout \
               .read() \
@@ -98,7 +97,6 @@ def format_convert(src, _format):
 
     return None
 
-
 def determine_band_type(vrt):
     ds = gdal.Open(vrt)
     if ds == None:
@@ -107,7 +105,6 @@ def determine_band_type(vrt):
     band = ds.GetRasterBand(1)
     return gdal.GetDataTypeName(band.DataType)
 
-
 def build_catalog(geodata):
     """
     recursively searches for .vrt files from the
@@ -115,12 +112,20 @@ def build_catalog(geodata):
     """
     fp = open(_catalog, 'w')
 
-    for root, dirnames, filenames in os.walk(geodata):
-        for filename in fnmatch.filter(filenames, '.vrt'):
-            path = os.path.join(root, filename)
-            fp.write(path + '\n')
-    fp.close()
 
+    dirs = [os.path.join(geodata, o) for o in os.listdir(geodata)
+            if os.path.isdir(os.path.join(geodata, o))]
+
+    dirs = [d for d in dirs if 'weppcloud_runs' not in d]
+
+    for _dir in dirs:
+        for root, dirnames, filenames in os.walk(_dir):
+            print(root, dirnames)
+
+            for filename in fnmatch.filter(filenames, '.vrt'):
+                path = os.path.join(root, filename)
+                fp.write(path + '\n')
+    fp.close()
 
 def find_maps(geodata):
     """
@@ -132,7 +137,6 @@ def find_maps(geodata):
 
     return maps
 
-
 def safe_float_parse(x):
     """
     Tries to parse {x} as a float. Returns None if it fails.
@@ -141,7 +145,6 @@ def safe_float_parse(x):
         return float(x)
     except:
         return None
-
 
 def parse_bbox(bbox):
     """
@@ -155,15 +158,13 @@ def parse_bbox(bbox):
 
     n = len(coords)
     if n < 4:
-        coords.extend([None for i in range(4-n)])
+        coords.extend([None for i in xrange(4-n)])
     if n > 4:
         coords = coords[:4]
 
     return tuple(map(safe_float_parse, coords))
 
-
 app = Flask(__name__)
-
 
 @app.route('/')
 def api_root():
@@ -175,7 +176,6 @@ def api_root():
         path = os.path.split(map)[0].replace(geodata_dir, '')
         d.append(path)
     return jsonify(d)
-
 
 @app.route('/<dataset>')
 @app.route('/<dataset>/')
@@ -190,12 +190,15 @@ def api_dataset(dataset):
     else:
         return 'error: cannot find dataset: %s' % dataset
 
-
 @app.route('/<dataset>/<year>')
 @app.route('/<dataset>/<year>/')
 @app.route('/<dataset>/<year>/<layer>')
 @app.route('/<dataset>/<year>/<layer>/')
-def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
+@app.route('/<dataset>/<year>/<layer>/<foo>')
+@app.route('/<dataset>/<year>/<layer>/<foo>/')
+@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>')
+@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/')
+def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'POST']):
     """
     Process and serve the map
     """
@@ -203,7 +206,13 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
     if layer == '':
         src = os.path.join(geodata_dir, dataset, year,'.vrt')
     else:
-        src = os.path.join(geodata_dir, dataset, year, layer, '.vrt')
+        if foo == '':
+            src = os.path.join(geodata_dir, dataset, year, layer, '.vrt')
+        else:
+            if bar == '':
+                src = os.path.join(geodata_dir, dataset, year, layer, foo, '.vrt')
+            else:
+                src = os.path.join(geodata_dir, dataset, year, layer, foo, bar, '.vrt')
 
     fn_uuid = str(uuid4().hex) + '.tif'
     dst = os.path.join('/var/www/WMesque/FlaskApp/static', fn_uuid)
@@ -245,7 +254,7 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
     ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
 
     # bottom right
-    lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2],
+    lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], 
                                        force_zone_number=utm_number)
 
     # check size
@@ -255,8 +264,8 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
 #    if (height_px > 2048 or width_px > 2048):
 #        return jsonify({'Error:': 'output size cannot exceed 2048 x 2048'})
 
-    proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=NAD83 +ellps=GRS80" \
-            .format(zone=utm_number, hemisphere=('south', 'north')[ul_y > 0])
+    proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84" \
+            .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
 
     # determine resample method
     if 'resample' not in request.args:
@@ -282,12 +291,12 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
           xmin=ul_x, xmax=lr_x, ymin=lr_y, ymax=ul_y,
           resample=resample, src=src, dst=dst)
 
-    with open(dst + '.cmd', 'w') as fp:
-        fp.write(cmd)
-
     # delete destination file if it exists
     if os.path.exists(dst):
         os.remove(dst)
+
+    with open(dst + '.cmd', 'w') as fp:
+        fp.write(cmd)
 
     # run command, check_output returns standard output
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -367,7 +376,6 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
                                 'url': request.url,
                                 'stdout': output}
 
-
     if gdaldem != None:
         response.headers['Meta-gdaldem'] = {'mode': gdaldem,
                                             'cmd': cmd2,
@@ -376,7 +384,6 @@ def api_dataset_year(dataset, year, layer='', methods=['GET', 'POST']):
 
     # return response
     return response
-
 
 if __name__ == '__main__':
     import sys
