@@ -7,8 +7,9 @@ from datetime import datetime
 from os.path import join as _join
 from os.path import exists as _exists
 
+from wepppy.all_your_base import isfloat
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import simple_texture
+from wepppy.wepp.soils.utils import simple_texture, soil_texture
 from wepppy.wepp.soils.soilsdb import read_disturbed_wepp_soil_fire_pars
 from wepppy.au.landuse_201011 import Lu10v5ua
 
@@ -148,6 +149,8 @@ def build_asris_soils(orders, soil_dir):
         sand_top = d['Sand Content Topsoil']['Value']
         om_top = d['Organic Carbon Topsoil %']['Value']
         tex_top = simple_texture(clay_top, sand_top)
+        assert tex_top is not None, (clay_top, sand_top, isfloat(clay_top), isfloat(sand_top), soil_texture(clay_top, sand_top))
+
         thickness_top = d['Topsoil Thickness m']['Value'] * 1000
         ks_top = d['Saturated Hydraulic Topsoil mm/hr']['Value']
         cec_top = _texture_defaults[tex_top]['cec']

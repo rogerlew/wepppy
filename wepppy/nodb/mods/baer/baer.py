@@ -370,6 +370,8 @@ class Baer(NoDbBase):
                 rred.build_soils()
             elif self._config == 'eu-fire2.cfg':
                 self._assign_eu_soils()
+            elif self._config == 'au-fire.cfg':
+                self._assign_au_soils()
             elif self._config == 'baer-ssurgo.cfg':
                 self._build_ssurgo_modified_soils()
             else:
@@ -396,6 +398,8 @@ class Baer(NoDbBase):
                '-tr', cellsize, cellsize,
                '-te', xmin, ymin, xmax, ymax,
                '-r', 'near', baer_path, baer_cropped]
+
+        print(cmd)
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
 
@@ -510,6 +514,53 @@ class Baer(NoDbBase):
             raise
 
     def _assign_eu_soils(self):
+
+        wd = self.wd
+
+        ron = Ron.getInstance(wd)
+        soils = Soils.getInstance(wd)
+        landuse = Landuse.getInstance(wd)
+
+        # noinspection PyBroadExpection
+        try:
+            soils.lock()
+
+            _domsoil_d = deepcopy(soils.domsoil_d)
+            _soils = deepcopy(soils.soils)
+
+            domlc_d = landuse.domlc_d
+
+            for topaz_id, mukey in soils.domsoil_d.items():
+                dom = domlc_d[topaz_id]
+
+                if dom in ['131', '132']:
+                    _domsoil_d[topaz_id] = '{}_lowmod_sev'.format(_domsoil_d[topaz_id])
+                elif dom in ['133']:
+                    _domsoil_d[topaz_id] = '{}_high_sev'.format(_domsoil_d[topaz_id])
+
+                # need to recalculate the pct_coverages
+                # total_area = 0.0
+                for k in _soils:
+                    _soils[k].area = 0.0
+
+                watershed = Watershed.getInstance(self.wd)
+                total_area = watershed.totalarea
+                for topaz_id, k in _domsoil_d.items():
+                    _soils[k].area += watershed.area_of(topaz_id)
+
+                for k in _soils:
+                    coverage = 100.0 * _soils[k].area / total_area
+                    _soils[k].pct_coverage = coverage
+
+            soils.soils = _soils
+            soils.domsoil_d = _domsoil_d
+            soils.dump_and_unlock()
+
+        except Exception:
+            soils.unlock('-f')
+            raise
+
+    def _assign_au_soils(self):
 
         wd = self.wd
 
