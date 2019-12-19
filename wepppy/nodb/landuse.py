@@ -310,7 +310,7 @@ class Landuse(NoDbBase):
             if self._mode == LanduseMode.Gridded:
                 if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
                     self._build_ESDAC()
-                elif self.config_stem in ['au']:
+                elif self.config_stem in ['au', 'au-fire']:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD()

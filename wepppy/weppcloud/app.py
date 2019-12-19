@@ -614,9 +614,22 @@ def create_fork(runid, config):
     if should_abort:
         abort(404)
 
-    # build new runid for fork
-    new_runid = str(uuid.uuid4())
-    new_wd = get_wd(new_runid)
+    dir_created = False
+    while not dir_created:
+        new_runid = awesome_codename.generate_codename().replace(' ', '-')
+
+        email = getattr(current_user, 'email', '')
+        if email.startswith('rogerlew@'):
+            new_runid = 'rlew-' + new_runid
+        elif email.startswith('mdobre@'):
+            new_runid = 'mdobre-' + new_runid
+        elif request.remote_addr == '127.0.0.1':
+            new_runid = 'devvm-' + new_runid
+
+        new_wd = get_wd(new_runid)
+        if _exists(new_wd):
+            continue
+
     assert not _exists(new_wd)
 
     # copy the contents over

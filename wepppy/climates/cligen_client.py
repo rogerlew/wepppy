@@ -29,7 +29,6 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
 
     """
 
-    assert isint(par), par
     url = urljoin(_cligen_url, "multiple_year", str(par))
 
     assert isint(years)
@@ -118,7 +117,6 @@ def selected_single_storm(par,
                           max_intensity_inches_per_hour,
                           cliver=5.3, returnjson=True):
 
-    assert isint(par)
     url = urljoin(_cligen_url, "selected_single_storm", str(par))
 
     if "-" in storm_date:
@@ -170,7 +168,6 @@ def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=Tr
     """
     https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?start_year=1980&end_year=2010&lng=-116&lat=47&returnjson=true
     """
-    assert isint(par)
     url = urljoin(_cligen_url, "observed_daymet", str(par))
 
     assert isint(start_year)
@@ -207,7 +204,6 @@ def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=Tr
 
 
 def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True):
-    assert isint(par)
     url = urljoin(_cligen_url, "future_rcp85", str(par))
 
     assert isint(start_year)

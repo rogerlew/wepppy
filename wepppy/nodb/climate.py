@@ -440,7 +440,7 @@ class Climate(NoDbBase, LogMixin):
                 .get_closest_stations((lng, lat), num_stations)
             self._closest_stations = results
 
-            self._climatestation = int(results[0].id)
+            self._climatestation = results[0].id
             self.dump_and_unlock()
             return self.closest_stations
 
@@ -471,7 +471,7 @@ class Climate(NoDbBase, LogMixin):
                 .get_stations_heuristic_search((lng, lat), num_stations)
             self._heuristic_stations = results
 
-            self._climatestation = int(results[0].id)
+            self._climatestation = results[0].id
             self.dump_and_unlock()
             return self.heuristic_stations
 
@@ -495,7 +495,7 @@ class Climate(NoDbBase, LogMixin):
                 .get_stations_eu_heuristic_search((lng, lat), elev, num_stations)
             self._heuristic_stations = results
 
-            self._climatestation = int(results[0].id)
+            self._climatestation = results[0].id
             self.dump_and_unlock()
             return self.heuristic_stations
 
@@ -519,7 +519,7 @@ class Climate(NoDbBase, LogMixin):
                 .get_stations_au_heuristic_search((lng, lat), elev, num_stations)
             self._heuristic_stations = results
 
-            self._climatestation = int(results[0].id)
+            self._climatestation = results[0].id
             self.dump_and_unlock()
             return self.heuristic_stations
 
@@ -802,8 +802,13 @@ class Climate(NoDbBase, LogMixin):
     def build(self, verbose=False):
         cli_dir = self.cli_dir
         if _exists(cli_dir):
-            shutil.rmtree(cli_dir)
-        os.mkdir(cli_dir)
+            try:
+                shutil.rmtree(cli_dir)
+            except:
+                pass
+
+        if not _exists(cli_dir):
+            os.mkdir(cli_dir)
 
         climate_mode = self.climate_mode
 
