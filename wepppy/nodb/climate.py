@@ -345,7 +345,7 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
-            self._climatestation = int(value)
+            self._climatestation = value
             self.dump_and_unlock()
         except Exception:
             self.unlock('-f')
