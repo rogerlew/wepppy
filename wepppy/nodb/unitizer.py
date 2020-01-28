@@ -69,9 +69,25 @@ converters = {
         ('tonne/yr', 'ton/yr'): lambda v: v * 1.10231,
         ('ton/yr', 'tonne/yr'): lambda v: v * 25.4
     },
+    'concentration': {
+        ('g/L', 'ppm'): lambda v: v * 1000.0,
+        ('ppm', 'g/L'): lambda v: v * 0.001
+    },
+    'sm-concentration': {
+        ('mg/L', 'ppm'): lambda v: v * 1.0,
+        ('ppm', 'mg/L'): lambda v: v * 1.0
+    },
+    'xs-concentration': {
+        ('µg/L', 'ppm'): lambda v: v * 0.001,
+        ('ppm', 'µg/L'): lambda v: v * 1000
+    },
     'sm-weight': {
         ('kg', 'lb'): lambda v: v * 2.20462,
         ('lb', 'kg'): lambda v: v * 0.453592
+    },
+    'xs-weight': {
+        ('g', 'lb'): lambda v: v * 0.002204623,
+        ('lb', 'g'): lambda v: v * 453.5924
     },
     'sm-weight-annual': {
         ('kg/yr', 'lb/yr'): lambda v: v * 2.20462,
@@ -183,9 +199,25 @@ precisions = OrderedDict([
         ('tonne/yr', 2),
         ('ton/yr', 2)])
      ),
+    ('concentration', OrderedDict([
+        ('g/L', 2),
+        ('ppm', 0)])
+     ),
+    ('sm-concentration', OrderedDict([
+        ('mg/L', 2),
+        ('ppm', 2)])
+     ),
+    ('xs-concentration', OrderedDict([
+        ('µg/L', 2),
+        ('ppm', 5)])
+     ),
     ('sm-weight', OrderedDict([
         ('kg', 2),
         ('lb', 2)])
+     ),
+    ('xs-weight', OrderedDict([
+        ('g', 1),
+        ('lb', 3)])
      ),
     ('sm-weight-annual', OrderedDict([
         ('kg/yr', 2),
@@ -234,6 +266,7 @@ precisions = OrderedDict([
         ('ton/mi^2/yr', 2)])
      )
 ])
+
 
 for _k in converters:
     assert _k in precisions
@@ -288,7 +321,8 @@ class Unitizer(NoDbBase):
         for k, v in precisions.items():
             opts = list(v.keys())
 
-            selections.append(self._preferences[k] == opts[1])
+            if k in self._preferences:
+                selections.append(self._preferences[k] == opts[1])
 
         sum_select = sum(selections)
 

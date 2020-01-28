@@ -326,7 +326,8 @@ class Landuse(NoDbBase):
             self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
+            self = Landuse.getInstance(self.wd)
+
             self.build_managements()
             self.set_cover_defaults()
 
@@ -347,8 +348,11 @@ class Landuse(NoDbBase):
         # noinspection PyBroadException
         try:
             for dom in self.managements:
+                print('dom', dom)
+                dom = str(dom)
                 if dom in defaults:
                     for cover in ['cancov', 'inrcov', 'rilcov']:
+                        print(dom, cover, defaults[dom][cover])
                         self._modify_coverage(dom, cover, defaults[dom][cover])
 
             self.dump_and_unlock()
@@ -367,11 +371,11 @@ class Landuse(NoDbBase):
         assert value >= 0.0
         assert value <= 1.0
 
-        if cover in 'cancov':
+        if cover == 'cancov':
             self.managements[dom].cancov_override = value
-        elif cover in 'inrcov':
+        elif cover == 'inrcov':
             self.managements[dom].inrcov_override = value
-        elif cover in 'rilcov':
+        elif cover == 'rilcov':
             self.managements[dom].rilcov_override = value
 
     def modify_coverage(self, dom, cover, value):
@@ -510,6 +514,7 @@ class Landuse(NoDbBase):
                 
             self.dump_and_unlock()
             self.build_managements()
+            self.set_cover_defaults()
             
         except Exception:
             self.unlock('-f')

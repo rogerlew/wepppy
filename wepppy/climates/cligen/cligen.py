@@ -690,9 +690,13 @@ class CligenStationsManager:
         # connect to sqlite3 db
         global _db, _stations_dir
 
-        if str(version) == '2015':
+        if '2015' in str(version):
             _db = _join(_thisdir, '2015_stations.db')
             _stations_dir = _join(_thisdir, '2015_par_files')
+
+        if 'au' in str(version):
+            _db = _join(_thisdir, 'au_stations.db')
+            _stations_dir = _join(_thisdir, 'au_par_files')
 
         conn = sqlite3.connect(_db)
         c = conn.cursor()
@@ -836,9 +840,10 @@ class CligenStationsManager:
 
         return _stations
 
-    def get_stations_au_heuristic_search(self, location, elev, pool=40):
+    def get_stations_au_heuristic_search(self, location, elev, pool=None):
+        stations = self.stations
+        pool = len(stations)
 
-        stations = self.get_closest_stations_by_lat(location, pool)
         norm_lat = abs(location[1])
 
         lat_ranks = [(i, abs(s.latitude - norm_lat))
@@ -853,21 +858,18 @@ class CligenStationsManager:
         elev_ranks = sorted(elev_ranks, key=lambda x: x[1])
 
         ppts = get_agdc_monthly_ppt(*location, units='inch')
-        _ppts = np.concatenate((ppts[6:], ppts[:6]))
-        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - _ppts)**2.0))
+        ppt_ranks = np.array([math.sqrt(np.sum((s.get_station().monthly_ppts - ppts)**2.0))
                               for s in stations])
         ppt_ranks = [(i, err) for i, err in enumerate(ppt_ranks)]
         ppt_ranks = sorted(ppt_ranks, key=lambda x: x[1])
 
         txs = get_agdc_monthly_tmax(*location, units='f')
-        _txs = np.concatenate((txs[6:], txs[:6]))
         tx_ranks = np.array([math.sqrt(np.sum((s.get_station().tmaxs - txs)**2.0))
                               for s in stations])
         tx_ranks = [(i, err) for i, err in enumerate(tx_ranks)]
         tx_ranks = sorted(tx_ranks, key=lambda x: x[1])
 
         tns = get_agdc_monthly_tmin(*location, units='f')
-        _tns = np.concatenate((tns[6:], tns[:6]))
         tn_ranks = np.array([math.sqrt(np.sum((s.get_station().tmins - tns)**2.0))
                               for s in stations])
         tn_ranks = [(i, err) for i, err in enumerate(tn_ranks)]
@@ -888,7 +890,8 @@ class CligenStationsManager:
         for i, rank in s_ranks:
             _stations.append(stations[i])
             _stations[-1].rank = rank
-
+            _stations[-1].calculate_distance(location)
+            _stations[-1].calculate_lat_distance(location[1])
         return _stations
 
 
@@ -1020,7 +1023,7 @@ class Cligen:
 
 
 def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_dataset='prism',
-            nwds_method='', randseed=None, cliver=None, suffix='', logger=None):
+            nwds_method='', randseed=None, cliver=None, suffix='', logger=None, version='2015'):
     """
 
     :param par:
@@ -1052,7 +1055,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     os.chdir(wd)
     fp_log = open("cligen.log", "w")
 
-    stationManager = CligenStationsManager()
+    stationManager = CligenStationsManager(version=version)
     stationMeta = stationManager.get_station_fromid(par)
 
     if stationMeta is None:

@@ -53,6 +53,9 @@ function onReady() {
         debris_flow.hideStacktrace();
     } catch (e) { }
 
+    try {
+        ash.hideStacktrace();
+    } catch (e) { }
 
     /*
      * Project Initialization
@@ -714,10 +717,19 @@ function onReady() {
         observed.report();
     }
 
-    // show report if ash model has run
-    if ( {{ ron.has_ash_results | tojson }} ) {
-        ash.report();
-    }
+    {% if 'ash' in ron.mods %}
+        $("[name='ash_depth_mode']").change(function () {
+            ash.setAshDepthMode();
+        });
+
+        // show report if ash model has run
+        if ( {{ ron.has_ash_results | tojson }} ) {
+            ash.report();
+        }
+
+        ash.setAshDepthMode({{ ash.ash_depth_mode }});
+
+    {% endif %}
 
     /*
      * Team Initialization

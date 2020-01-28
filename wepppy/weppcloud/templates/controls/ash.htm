@@ -12,24 +12,86 @@
         </div>
     </div>
     <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="ini_black_depth">Initial Ash Depth for high severity</label>
+        <div class="col-sm-3">
+            <label class="radio-inline">
+            <input type="radio" value="1" class="disable-readonly" id="climatestation_mode3"
+            name="ash_depth_mode" {{ ('', 'checked')[ash.ash_depth_mode == 1] }}>
+                Specify Depth</label>
         </div>
         <div class="col-sm-3">
-            <input input id="ini_black_depth" name="ini_black_depth"
-                   class="form-control mr-sm-3 disable-readonly" type="text" value="5"/>
+            <label class="radio-inline">
+            <input type="radio" value="0" class="disable-readonly" id="climatestation_mode3"
+            name="ash_depth_mode" {{ ('', 'checked')[ash.ash_depth_mode == 0] }}>
+                Specify Load</label>
         </div>
-        <div class="col-sm-1">mm</div>
+    </div>
+
+    <div  id="ash_depth_mode1_controls">
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="ini_black_depth">Initial Ash Depth for high severity</label>
+            </div>
+            <div class="col-sm-3">
+                <input input id="ini_black_depth" name="ini_black_depth"
+                       class="form-control mr-sm-3 disable-readonly" type="text" value="{{ ash.ini_black_ash_depth_mm }}"/>
+            </div>
+            <div class="col-sm-1">mm</div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="ini_white_depth">Initial Ash Depth for moderate and low severity</label>
+            </div>
+            <div class="col-sm-3">
+                <input input id="ini_white_depth" name="ini_white_depth"
+                       class="form-control mr-sm-3 disable-readonly" type="text" value="{{ ash.ini_white_ash_depth_mm }}"/>
+            </div>
+            <div class="col-sm-1">mm</div>
+        </div>
+    </div>
+
+    <div  id="ash_depth_mode0_controls">
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="ini_black_load">Initial Ash Load for high severity</label>
+            </div>
+            <div class="col-sm-3">
+                <input input id="ini_black_load" name="ini_black_load"
+                       class="form-control mr-sm-3 disable-readonly" type="text" value="{{ ash.ini_black_ash_load }}"/>
+            </div>
+            <div class="col-sm-1">kg/m<sup>2</sup></div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="ini_white_load">Initial Ash Load for moderate and low severity</label>
+            </div>
+            <div class="col-sm-3">
+                <input input id="ini_white_load" name="ini_white_load"
+                       class="form-control mr-sm-3 disable-readonly" type="text" value="{{ ash.ini_white_ash_load }}"/>
+            </div>
+            <div class="col-sm-1">kg/m<sup>2</sup></div>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="ini_black_bulkdensity">Initial Ash Bulk Density for high severity</label>
+        </div>
+        <div class="col-sm-3">
+            <input input id="ini_black_bulkdensity" name="ini_black_bulkdensity"
+                   class="form-control mr-sm-3" type="text" value="{{ ash.ini_black_ash_bulkdensity }}" readonly/>
+        </div>
+        <div class="col-sm-1">g/cm<sup>3</sup></div>
     </div>
     <div class="form-group row">
         <div class="col-sm-5">
-            <label for="ini_white_depth">Initial Ash Depth for moderate and low severity</label>
+            <label for="ini_white_bulkdensity">Initial Ash Bulk Density for moderate and low severity</label>
         </div>
         <div class="col-sm-3">
-            <input input id="ini_white_depth" name="ini_white_depth"
-                   class="form-control mr-sm-3 disable-readonly" type="text" value="5"/>
+            <input input id="ini_white_bulkdensity" name="ini_white_bulkdensity"
+                   class="form-control mr-sm-3" type="text" value="{{ ash.ini_white_ash_bulkdensity }}" readonly/>
         </div>
-        <div class="col-sm-1">mm</div>
+        <div class="col-sm-1">g/cm<sup>3</sup></div>
     </div>
     <div class="form-group row hide-readonly">
       <div class="col-sm-4">
@@ -37,6 +99,7 @@
                 type="button"
                 onclick="Ash.getInstance().run_model();">Run Model</button>
       </div>
+
       <div class="col-sm-5">
         <small id="hint_run_wepp"></small>
       </div>
