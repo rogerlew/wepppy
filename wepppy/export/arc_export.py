@@ -88,14 +88,26 @@ def arc_export(wd):
         except KeyError:
             pass
 
-        f['properties']['Runoff(mm)'] = weppout['Runoff'][topaz_id]['value']
-        f['properties']['Subrun(mm)'] = weppout['Subrunoff'][topaz_id]['value']
-        f['properties']['BaseF(mm)'] = weppout['Baseflow'][topaz_id]['value']
-        f['properties']['DepLos(kg)'] = weppout['DepLoss'][topaz_id]['value']
+        if weppout['Runoff'] is not None:
+            f['properties']['Runoff(mm)'] = weppout['Runoff'][topaz_id]['value']
 
-        f['properties']['SoLs(kg/ha)'] = weppout['Soil Loss Density'][topaz_id]['value']
-        f['properties']['SdDp(kg/ha)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
-        f['properties']['SdYd(kg/ha)'] = weppout['Sediment Yield Density'][topaz_id]['value']
+        if weppout['Subrunoff'] is not None:
+            f['properties']['Subrun(mm)'] = weppout['Subrunoff'][topaz_id]['value']
+
+        if weppout['Baseflow'] is not None:
+            f['properties']['BaseF(mm)'] = weppout['Baseflow'][topaz_id]['value']
+
+        if weppout['DepLoss'] is not None:
+            f['properties']['DepLos(kg)'] = weppout['DepLoss'][topaz_id]['value']
+
+        if weppout['Soil Loss Density'] is not None:
+            f['properties']['SoLs(kg/ha)'] = weppout['Soil Loss Density'][topaz_id]['value']
+
+        if weppout['Sediment Deposition Density'] is not None:
+            f['properties']['SdDp(kg/ha)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
+
+        if weppout['Sediment Yield Density'] is not None:
+            f['properties']['SdYd(kg/ha)'] = weppout['Sediment Yield Density'][topaz_id]['value']
 
         if weppout['Total P Density'] is not None:
             f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
@@ -159,6 +171,7 @@ def arc_export(wd):
         topaz_id = str(f['properties']['TopazID'])
         ss = chns_summary[topaz_id]
         chn_id = translator.chn_enum(top=topaz_id)
+        _area = ss['watershed']['area'] * 0.0001
 
         f['properties']['watershed'] = name
         f['properties']['topaz_id'] = topaz_id
@@ -166,7 +179,6 @@ def arc_export(wd):
         f['properties']['wepp_id'] = ss['meta']['wepp_id']
         f['properties']['width(m)'] = ss['watershed']['width']
         f['properties']['length(m)'] = ss['watershed']['length']
-        _area = ss['watershed']['area'] * 0.0001
         f['properties']['area(ha)'] = _area
         f['properties']['cntrb(ha)'] = weppout['Contributing Area'][topaz_id]['value']
         f['properties']['slope'] = ss['watershed']['slope_scalar']
@@ -223,8 +235,6 @@ def arc_export(wd):
               stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
     p.wait()
     stdout, stderr = p.communicate()
-    print(stdout)
-    print(stderr)
 
     assert _exists(_join(export_dir, 'channels.shp'))
 

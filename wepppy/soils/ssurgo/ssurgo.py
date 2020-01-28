@@ -602,7 +602,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
             if isfloat(h.ksat_r) and h.ksat_r < res_lyr_ksat_threshold:
                 self.res_lyr_i = i
-                self.res_lyr_ksat = ksat_min * 0.01
+                self.res_lyr_ksat = ksat_min# * 0.01
                 break
 
         # determine number of layers
@@ -655,8 +655,8 @@ POSSIBILITY OF SUCH DAMAGE."""
              'Texture: {}'
              .format(self.getFirstHorizon().simple_texture),
              '',
-             '  Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r',
-             '----------------------------------------------------------------------------']
+             '  Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om',
+             '------------------------------------------------------------------------------------------------------------']
              
         for i, h in enumerate(self.horizons):
             desc = ''
@@ -668,9 +668,10 @@ POSSIBILITY OF SUCH DAMAGE."""
             ksat = h.ksat_r   
             
             foo = [h.chkey, h.hzname, desc, h.hzdepb_r, ksat, 
-                   h.fraggt10_r, h.frag3to10_r, h.dbthirdbar_r]
+                   h.fraggt10_r, h.frag3to10_r, h.dbthirdbar_r,
+                   h.claytotal_r, h.sandtotal_r, h.sandvf_r, h.om_r]
             foo = [[v, ' - '][v is None] for v in foo]
-            s.append(' {0:<11}{1:<5}{2:>3}{3:>11}{4:>8}{5:>11}{6:>12}{7:>13}'
+            s.append(' {0:<11}{1:<5}{2:>3}{3:>11}{4:>8}{5:>11}{6:>12}{7:>13}{8:>8}{9:>8}{10:>8}{11:>8}'
                      .format(*foo))
             
         s.extend(['',

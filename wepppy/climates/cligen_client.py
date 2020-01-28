@@ -23,85 +23,87 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
                         p_wd=None, p_ww=None,
                         tmax=None, tmin=None,
                         dewpoint=None, solrad=None,
-                        returnjson=True, randseed=None):
+                        returnjson=True, randseed=None,
+                        version='2015'):
     """
     https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=5&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
 
     """
 
-    url = urljoin(_cligen_url, "multiple_year", str(par))
+    url = urljoin(_cligen_url, 'multiple_year', str(par))
 
     assert isint(years)
 
-    data = {"years": int(years)}
+    data = {'years': int(years),
+            'version': '2015'}
 
     if lng is not None:
         lng = float(lng)
-        data["lng"] = lng
+        data['lng'] = lng
 
     if lat is not None:
         lat = float(lat)
-        data["lat"] = lat
+        data['lat'] = lat
 
     if p_mean is not None:
         p_mean = p_mean.lower()
-        assert p_mean in ["prism", "daymet"]
-        data["p_mean"] = p_mean
+        assert p_mean in ['prism', 'daymet']
+        data['p_mean'] = p_mean
 
     if p_std is not None:
         p_std = p_std.lower()
-        assert p_std in ["daymet"]
-        data["p_std"] = p_std
+        assert p_std in ['daymet']
+        data['p_std'] = p_std
 
     if p_skew is not None:
         p_skew = p_skew.lower()
-        assert p_skew in ["daymet"]
-        data["p_skew"] = p_skew
+        assert p_skew in ['daymet']
+        data['p_skew'] = p_skew
 
     if p_ww is not None:
         p_ww = p_ww.lower()
-        assert p_ww in ["daymet"]
-        data["p_ww"] = p_ww
+        assert p_ww in ['daymet']
+        data['p_ww'] = p_ww
 
     if p_wd is not None:
         p_wd = p_wd.lower()
-        assert p_wd in ["daymet"]
-        data["p_wd"] = p_wd
+        assert p_wd in ['daymet']
+        data['p_wd'] = p_wd
 
     if tmax is not None:
         tmax = tmax.lower()
-        assert tmax in ["prism"]
-        data["tmax"] = tmax
+        assert tmax in ['prism']
+        data['tmax'] = tmax
 
     if tmin is not None:
         tmin = tmin.lower()
-        assert tmin in ["prism"]
-        data["tmin"] = tmin
+        assert tmin in ['prism']
+        data['tmin'] = tmin
 
     if dewpoint is not None:
         dewpoint = dewpoint.lower()
-        assert dewpoint in ["daymet"]
-        data["dewpoint"] = dewpoint
+        assert dewpoint in ['daymet']
+        data['dewpoint'] = dewpoint
 
     if solrad is not None:
         solrad = solrad.lower()
-        assert solrad in ["daymet"]
-        data["solrad"] = solrad
+        assert solrad in ['daymet']
+        data['solrad'] = solrad
 
     if randseed is not None:
         assert int(randseed) >= 0
-        data["randseed"] = randseed
+        data['randseed'] = randseed
         
     assert returnjson is True or returnjson is False or \
         returnjson == 1 or returnjson == 0
 
-    data["returnjson"] = returnjson
-    data["version"] = 2015
+    data['returnjson'] = returnjson
+    data['version'] = 2015
 
     r = requests.post(url, params=data)
 
     if r.status_code != 200:
-        raise Exception("Encountered error retrieving from cligen")
+        raise Exception('Encountered error retrieving from cligen')
 
     if returnjson:
         return json.loads(r.text)
@@ -115,18 +117,18 @@ def selected_single_storm(par,
                           duration_of_storm_in_hours,
                           time_to_peak_intensity_pct,
                           max_intensity_inches_per_hour,
-                          cliver=5.3, returnjson=True):
+                          cliver=5.3, returnjson=True, version='2015'):
 
-    url = urljoin(_cligen_url, "selected_single_storm", str(par))
+    url = urljoin(_cligen_url, 'selected_single_storm', str(par))
 
-    if "-" in storm_date:
-        storm_date = storm_date.split("-")
-    elif "/" in storm_date:
-        storm_date = storm_date.split("/")
-    elif "." in storm_date:
-        storm_date = storm_date.split(".")
+    if '-' in storm_date:
+        storm_date = storm_date.split('-')
+    elif '/' in storm_date:
+        storm_date = storm_date.split('/')
+    elif '.' in storm_date:
+        storm_date = storm_date.split('.')
     else:
-        storm_date = storm_date.split(" ")
+        storm_date = storm_date.split(' ')
 
     assert len(storm_date) == 3
     storm_date = [int(v) for v in storm_date]
@@ -146,17 +148,17 @@ def selected_single_storm(par,
     assert returnjson is True or returnjson is False or \
         returnjson == 1 or returnjson == 0
 
-    data = dict(storm_date="{}-{}-{}".format(mo, da, yr),
+    data = dict(storm_date='{}-{}-{}'.format(mo, da, yr),
                 design_storm_amount_inches=design_storm_amount_inches,
                 duration_of_storm_in_hours=duration_of_storm_in_hours,
                 time_to_peak_intensity_pct=time_to_peak_intensity_pct,
                 max_intensity_inches_per_hour=max_intensity_inches_per_hour,
-                cliver=cliver, returnjson=returnjson, version=2015)
+                cliver=cliver, returnjson=returnjson, version=version)
 
     r = requests.post(url, params=data)
 
     if r.status_code != 200:
-        raise Exception("Encountered error retrieving from cligen")
+        raise Exception('Encountered error retrieving from cligen')
 
     if returnjson:
         return json.loads(r.text)
@@ -164,7 +166,7 @@ def selected_single_storm(par,
     return r.text
 
 
-def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=True):
+def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=True, version='2015'):
     """
     https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?start_year=1980&end_year=2010&lng=-116&lat=47&returnjson=true
     """
@@ -190,7 +192,7 @@ def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=Tr
 
     data = dict(start_year=start_year, end_year=end_year,
                 lng=lng, lat=lat, returnjson=returnjson,
-                version=2015)
+                version=version)
 
     r = requests.post(url, params=data)
 
@@ -203,7 +205,7 @@ def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=Tr
     return r.text
 
 
-def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True):
+def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True, version='2015'):
     url = urljoin(_cligen_url, "future_rcp85", str(par))
 
     assert isint(start_year)
@@ -226,7 +228,7 @@ def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True)
 
     data = dict(start_year=start_year, end_year=end_year,
                 lng=lng, lat=lat, returnjson=returnjson,
-                version=2015)
+                version=version)
 
     r = requests.post(url, params=data)
 

@@ -142,14 +142,15 @@ class LakeTahoe(NoDbBase):
                 wepp_type = soil_type_map.get(mukey, default_wepp_type)
                 
                 replacements = lc_dict[(dom, wepp_type)]
-                k = '%s-%s' % (mukey, wepp_type)
+                k = '%s-%s-%s' % (mukey, wepp_type, dom)
                 src_fn = _join(soils_dir, '%s.sol' % mukey)
                 dst_fn = _join(soils_dir, '%s.sol' % k)
-                
+
                 if k not in _soils:
                     soil_specialization(src_fn, dst_fn, replacements)
                     _soils[k] = deepcopy(soils.soils[mukey])
                     _soils[k].mukey = k
+                    _soils[k].fname = '%s.sol' % k
                     _soils[k].area = 0.0
                     
                 domsoil_d[topaz_id] = k

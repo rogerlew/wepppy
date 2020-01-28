@@ -475,6 +475,7 @@ class ChannelSummary(SummaryBase):
         self.head = kwds['head']
         self.tail = kwds['tail']
         self.chn_enum = int(kwds['chn_enum'])
+        self._chn_type = kwds['chn_type']
 
     @property
     def head_coord(self):
@@ -498,8 +499,14 @@ class ChannelSummary(SummaryBase):
         
     @property
     def channel_type(self) -> str:
-        return 'OnRock 2'
-        return ('OnRock 2', 'OnGravel 1', 'OnEarth 1')[int([None, 0, 0, 0, 1, 1, 1, 2][self.order])]
+        return getattr(self, '_chn_type', 'Default')
+
+        # return 'Default'
+        # return ('OnEarth 1', 'OnGravel 1', 'OnRock 2')[int([None, 0, 0, 1, 1, 1, 2, 2][self.order])]
+
+    @channel_type.setter
+    def channel_type(self, value):
+        self._chn_type = value
 
     @property
     def cell_width(self) -> int:
@@ -657,8 +664,8 @@ class WatershedAbstraction:
     def centroid(self) -> CentroidSummary:
         return self._centroid
 
-    def abstract(self, verbose=False):
-        self.abstract_channels(verbose=verbose)
+    def abstract(self, wepp_chn_type='Default', verbose=False):
+        self.abstract_channels(wepp_chn_type=wepp_chn_type, verbose=verbose)
         self.abstract_subcatchments(verbose=verbose)
         self.abstract_structure(verbose=verbose)
 
@@ -844,7 +851,7 @@ class WatershedAbstraction:
         rads = np.array(taspec[(indx, indy)]) * pi / 180.0
         return float(circmean(rads) * 180.0 / pi)
 
-    def abstract_channels(self, verbose=False):
+    def abstract_channels(self, wepp_chn_type='Default', verbose=False):
         subwta = self.subwta
 
         # extract the subcatchment and channel ids from the subwta map
@@ -861,7 +868,7 @@ class WatershedAbstraction:
         for i, chn_id in enumerate(chn_ids):
             if verbose:
                 print('abstracting channel %s (%i of %i)...' % (chn_id, i+1, n))
-            self.abstract_channel(chn_id)
+            self.abstract_channel(chn_id, wepp_chn_type=wepp_chn_type)
 
         self.channel_n = len(chn_ids)
 
@@ -915,7 +922,7 @@ class WatershedAbstraction:
         # return to _abstract_channel
         return flowpath, slope, distance, indx, indy
 
-    def abstract_channel(self, chn_id: int):
+    def abstract_channel(self, chn_id: int, wepp_chn_type='Default'):
         """
         define channel abstraction for the purposes of running WEPP
         """
@@ -952,7 +959,8 @@ class WatershedAbstraction:
         chn_summary = ChannelSummary(
             topaz_id=chn_id,
             wepp_id=translator.wepp(top=chn_id),
-            chn_enum=translator.chn_enum(top=chn_id), 
+            chn_enum=translator.chn_enum(top=chn_id),
+            chn_type=wepp_chn_type,
             isoutlet=isoutlet,
             length=length,
             width=width,
