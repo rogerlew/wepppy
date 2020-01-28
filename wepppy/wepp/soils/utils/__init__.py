@@ -24,6 +24,60 @@ class SoilReplacements(object):
         self.Clay = Clay
         self.OM = OM
         self.CEC = CEC
+        self.Comment = Comment
+
+    def __repr__(self):
+        s = []
+
+        if self.Code is not None:
+            s.append('Code={}'.format(self.Code))
+
+        if self.LndcvrID is not None:
+            s.append('LndcvrID={}'.format(self.LndcvrID))
+
+        if self.WEPP_Type is not None:
+            s.append('WEPP_Type={}'.format(self.WEPP_Type))
+
+        if self.New_WEPPman is not None:
+            s.append('New_WEPPman={}'.format(self.New_WEPPman))
+
+        if self.ManName is not None:
+            s.append('ManName={}'.format(self.ManName))
+
+        if self.Albedo is not None:
+            s.append('Albedo={}'.format(self.Albedo))
+
+        if self.iniSatLev is not None:
+            s.append('iniSatLev={}'.format(self.iniSatLev))
+
+        if self.interErod is not None:
+            s.append('interErod={}'.format(self.interErod))
+
+        if self.rillErod is not None:
+            s.append('rillErod={}'.format(self.rillErod))
+
+        if self.critSh is not None:
+            s.append('critSh={}'.format(self.critSh))
+
+        if self.effHC is not None:
+            s.append('effHC={}'.format(self.effHC))
+
+        if self.soilDepth is not None:
+            s.append('soilDepth={}'.format(self.soilDepth))
+
+        if self.Sand is not None:
+            s.append('Sand={}'.format(self.Sand))
+
+        if self.Clay is not None:
+            s.append('Clay={}'.format(self.Clay))
+
+        if self.OM is not None:
+            s.append('OM={}'.format(self.OM))
+
+        if self.CEC is not None:
+            s.append('CEC={}'.format(self.CEC))
+
+        return 'SoilReplacements(' + ' '.join(s) + ')'
 
 
 def read_lc_file(fname):
@@ -40,6 +94,13 @@ def read_lc_file(fname):
         for row in reader:
             row['Code'] = int(row['Code'])
             row['LndcvrID'] = int(row['LndcvrID'])
+
+            for k in row:
+                v = row[k]
+                if isinstance(v, str):
+                    if v.lower().startswith('none'):
+                        row[k] = None
+
             d[(str(row['LndcvrID']), row['WEPP_Type'])] = SoilReplacements(**row)
 
     return d
@@ -148,15 +209,17 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
         lines = f.readlines()
 
     header = [L for L in lines if L.startswith('#')]
+    header.append('# {}\n'.format(repr(replacements)))
+
     lines = [L for L in lines if not L.startswith('#')]
 
     line4 = lines[3]
     line4 = line4.split()
-    line4[-5] = _replace_parameter(line4[-5], replacements.Albedo)
-    line4[-4] = _replace_parameter(line4[-4], replacements.iniSatLev)
-    line4[-3] = _replace_parameter(line4[-3], replacements.interErod)
-    line4[-2] = _replace_parameter(line4[-2], replacements.rillErod)
-    line4[-1] = _replace_parameter(line4[-1], replacements.critSh)
+    line4[-6] = _replace_parameter(line4[-6], replacements.Albedo)
+    line4[-5] = _replace_parameter(line4[-5], replacements.iniSatLev)
+    line4[-4] = _replace_parameter(line4[-4], replacements.interErod)
+    line4[-3] = _replace_parameter(line4[-3], replacements.rillErod)
+    line4[-2] = _replace_parameter(line4[-2], replacements.critSh)
     line4 = ' '.join(line4) + '\n'
 
     line5 = lines[4]

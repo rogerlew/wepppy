@@ -34,6 +34,9 @@ _config_dir = _join(_thisdir, 'configs')
 DEFAULT_DEM_DB = 'ned1/2016'
 DEFAULT_NLCD_DB = 'nlcd/2016'
 DEFAULT_SSURGO_DB = 'ssurgo/201703'
+DEFAULT_WEPP_CHN_TYPE = 'Default'
+DEFAULT_CLIGEN_DB = '2015_stations.db'
+
 
 class TriggerEvents(Enum):
     ON_INIT_FINISH = 1
@@ -158,7 +161,9 @@ class NoDbBase(object):
                  cover_defaults=None,
                  dem_db=DEFAULT_DEM_DB,
                  nlcd_db=DEFAULT_NLCD_DB,
-                 ssurgo_db=DEFAULT_SSURGO_DB),
+                 ssurgo_db=DEFAULT_SSURGO_DB,
+                 wepp_chn_type=DEFAULT_WEPP_CHN_TYPE,
+                 cligen_db=DEFAULT_CLIGEN_DB),
             allow_no_value=True
         )
         with open(_join(_config_dir, '0.cfg')) as fp:

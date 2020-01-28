@@ -58,7 +58,7 @@ def readpar(par):
     
     return '"%s"' % state, '"%s"' % desc, '"%s"' % _split(par)[-1], latitude, longitude, years, type, elevation, tp5, tp6
         
-_db_fn = '2015_stations.db'
+_db_fn = 'au_stations.db'
         
 if _exists(_db_fn):
     os.remove(_db_fn)
@@ -68,8 +68,8 @@ c = conn.cursor()
 c.execute('''CREATE TABLE stations
              (state text, desc text, par text, latitude real, longitude real, years real, type integer, elevation real, tp5 real, tp6 real)''')
         
-pars = glob.glob("../2015_par_files/*.PAR")
-pars.extend(glob.glob("../2015_par_files/*.par"))
+pars = glob.glob("../au_par_files/*.PAR")
+pars.extend(glob.glob("../au_par_files/*.par"))
 for par in pars:
     print(par)
     line = ','.join(readpar(par))

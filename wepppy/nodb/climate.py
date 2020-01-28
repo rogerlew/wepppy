@@ -37,7 +37,7 @@ from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator, have
 from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules
-from .base import NoDbBase
+from .base import NoDbBase, DEFAULT_CLIGEN_DB
 from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
@@ -100,13 +100,14 @@ def build_observed(kwds):
     cli_dir = kwds['cli_dir']
     cli_fn = kwds['cli_fn']
     climatestation = kwds['climatestation']
+    version = kwds.get('version', '2015')
 
     build_daymet_prn(lng=lng, lat=lat,
                      observed_data=observed_data,
                      start_year=start_year, end_year=end_year,
                      prn_fn=_join(cli_dir, prn_fn))
 
-    stationManager = CligenStationsManager()
+    stationManager = CligenStationsManager(version=version)
     stationMeta = stationManager.get_station_fromid(climatestation)
     cligen = Cligen(stationMeta, wd=cli_dir)
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
@@ -161,6 +162,8 @@ class Climate(NoDbBase, LogMixin):
 
             from wepppy.nodb.mods import MODS_DIR
             config = self.config
+            self._cligen_db = config.get('climate', 'cligen_db')
+
             _observed_clis_wc = config.get('climate', 'observed_clis_wc')
             if _observed_clis_wc is not None:
                 _observed_clis_wc = _observed_clis_wc.replace('MODS_DIR', MODS_DIR)
@@ -216,6 +219,10 @@ class Climate(NoDbBase, LogMixin):
     @property
     def _lock(self):
         return _join(self.wd, 'climate.nodb.lock')
+
+    @property
+    def cligen_db(self):
+        return getattr(self, '_cligen_db', DEFAULT_CLIGEN_DB)
 
     @property
     def cli_path(self):
@@ -358,7 +365,7 @@ class Climate(NoDbBase, LogMixin):
         if climatestation is None:
             return None
 
-        station_manager = CligenStationsManager()
+        station_manager = CligenStationsManager(version=self.cligen_db)
         station_meta = station_manager.get_station_fromid(climatestation)
         assert station_meta is not None
 
@@ -435,7 +442,7 @@ class Climate(NoDbBase, LogMixin):
         try:
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
-            station_manager = CligenStationsManager()
+            station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager\
                 .get_closest_stations((lng, lat), num_stations)
             self._closest_stations = results
@@ -466,7 +473,7 @@ class Climate(NoDbBase, LogMixin):
             watershed = Watershed.getInstance(self.wd)
             lng, lat = watershed.centroid
 
-            station_manager = CligenStationsManager()
+            station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager\
                 .get_stations_heuristic_search((lng, lat), num_stations)
             self._heuristic_stations = results
@@ -490,7 +497,7 @@ class Climate(NoDbBase, LogMixin):
             rdi = RasterDatasetInterpolator(watershed.dem_fn)
             elev = rdi.get_location_info(lng, lat, method='near')
 
-            station_manager = CligenStationsManager()
+            station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager\
                 .get_stations_eu_heuristic_search((lng, lat), elev, num_stations)
             self._heuristic_stations = results
@@ -503,7 +510,7 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def find_au_heuristic_stations(self, num_stations=10):
+    def find_au_heuristic_stations(self, num_stations=None):
         self.lock()
 
         # noinspection PyBroadInspection
@@ -514,7 +521,7 @@ class Climate(NoDbBase, LogMixin):
             rdi = RasterDatasetInterpolator(watershed.dem_fn)
             elev = rdi.get_location_info(lng, lat, method='near')
 
-            station_manager = CligenStationsManager()
+            station_manager = CligenStationsManager(version=self.cligen_db)
             results = station_manager\
                 .get_stations_au_heuristic_search((lng, lat), elev, num_stations)
             self._heuristic_stations = results
@@ -1019,7 +1026,7 @@ class Climate(NoDbBase, LogMixin):
             start_year, end_year = self._observed_start_year, self._observed_end_year
             self._input_years = end_year - start_year
 
-            stationManager = CligenStationsManager()
+            stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
             stationMeta = stationManager.get_station_fromid(climatestation)
 
@@ -1082,7 +1089,8 @@ class Climate(NoDbBase, LogMixin):
                                 start_year=start_year, end_year=end_year,
                                 prn_fn=prn_fn, cli_dir=cli_dir,
                                 cli_fn=cli_fn,
-                                climatestation=climatestation)
+                                climatestation=climatestation,
+                                version=self.cligen_db)
 
                     args.append(kwds)
                     sub_par_fns[topaz_id] = par_fn
@@ -1116,7 +1124,7 @@ class Climate(NoDbBase, LogMixin):
             start_year, end_year = self._observed_start_year, self._observed_end_year
             self._input_years = end_year - start_year
 
-            stationManager = CligenStationsManager()
+            stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
             stationMeta = stationManager.get_station_fromid(climatestation)
 
@@ -1224,7 +1232,7 @@ class Climate(NoDbBase, LogMixin):
             start_year, end_year = self._observed_start_year, self._observed_end_year
             self._input_years = end_year - start_year
 
-            stationManager = CligenStationsManager()
+            stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
             stationMeta = stationManager.get_station_fromid(climatestation)
 
