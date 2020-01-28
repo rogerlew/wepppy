@@ -75,11 +75,13 @@ def findstation():
         lat = request.args.get('lat', None)
         lng = request.args.get('lng', None)
         method = request.args.get('method', None)
+        version = request.args.get('version', None)
     else:  # POST
         d = request.get_json()
         lat = d.get('lat', None)
         lng = d.get('lng', None)
         method = d.get('method', None)
+        version = d.get('version', None)
 
     if lat is None or lng is None:
         return jsonify({'Error': 'lat, lng, must be supplied'})
@@ -96,7 +98,7 @@ def findstation():
     if method is None:
         method = 'closest'
 
-    stationManager = CligenStationsManager()
+    stationManager = CligenStationsManager(version=version)
     if method == 'heuristic_search':
         stationMeta = stationManager.get_station_heuristic_search([lng, lat])
         return jsonify(stationMeta.as_dict())
@@ -159,8 +161,15 @@ def fetchstationmeta(par):
     """
     https://wepp1.nkn.uidaho.edu/webservices/cligen/fetchstationmeta/106152
     """
+    if request.method not in ['GET', 'POST']:
+        return jsonify({'Error': 'Expecting GET or POST'})
 
-    stationManager = CligenStationsManager()
+    if request.method == 'GET':
+        version = request.args.get('version', None)
+    else:  # POST
+        version = d.get('version', None)
+
+    stationManager = CligenStationsManager(version)
     stationMeta = stationManager.get_station_fromid(par)
    
     if stationMeta is None:
@@ -219,7 +228,7 @@ def _multiple_year(par, _request, singleyearmode=False):
         d = _request.args
     else:  # POST
         d = _request.get_json()
-    
+
     years = d.get('years', None)
     cliver = d.get('cliver', None)
     returnjson = d.get('returnjson', False)

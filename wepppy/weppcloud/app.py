@@ -10,6 +10,7 @@ import os
 import csv
 from datetime import datetime
 
+from ast import literal_eval
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -524,6 +525,15 @@ def lt_index():
     return render_template('lt/index.htm', user=current_user)
 
 
+@app.route('/ltf')
+@app.route('/ltf/')
+def ltf_index():
+    if current_user.is_authenticated:
+        if not current_user.roles:
+            user_datastore.add_role_to_user(current_user.email, 'User')
+    return render_template('ltf/index.htm', user=current_user)
+
+
 @app.route('/portland-municipal')
 @app.route('/portland-municipal/')
 def portland_index():
@@ -755,8 +765,12 @@ def runs0(runid, config):
     except:
         rhem = None
 
-    landuseoptions = landuse.landuseoptions
+    try:
+        ash = Ash.getInstance(wd)
+    except:
+        ash = None
 
+    landuseoptions = landuse.landuseoptions
     soildboptions = soilsdb.load_db()
 
     log_access(wd, current_user, request.remote_addr)
@@ -767,6 +781,7 @@ def runs0(runid, config):
                            ron=ron, landuse=landuse, climate=climate,
                            wepp=wepp,
                            rhem=rhem,
+                           ash=ash,
                            unitizer_nodb=unitizer,
                            observed=observed,
                            rangeland_cover=rangeland_cover,
@@ -1479,11 +1494,13 @@ def export_arcmap(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    ron.export_arc_dir
 
-    arc_export(wd)
-    archive_path = archive_project(ron.export_arc_dir)
-    return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+    try:
+        arc_export(wd)
+        archive_path = archive_project(ron.export_arc_dir)
+        return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+    except Exception:
+        return exception_factory('Error running arc_export')
 
 
 # noinspection PyBroadException
@@ -2273,6 +2290,14 @@ def task_set_public(runid, config):
         return exception_factory('Error setting state')
 
     return success_factory()
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/hasowners', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/hasowners/', methods=['POST'])
+def get_owners(runid, config):
+    owners = get_run_owners(runid)
+    return jsonify(len(owners) > 0)
 
 
 # noinspection PyBroadException
@@ -3214,13 +3239,32 @@ def run_ash(runid, config):
     wd = get_wd(runid)
 
     fire_date = request.form.get('fire_date', None)
+    ash_depth_mode = request.form.get('ash_depth_mode', None)
     ini_black_ash_depth_mm = request.form.get('ini_black_depth', None)
     ini_white_ash_depth_mm = request.form.get('ini_white_depth', None)
+    ini_black_ash_load_kgm2 = request.form.get('ini_black_load', None)
+    ini_white_ash_load_kgm2 = request.form.get('ini_white_load', None)
+    ini_black_ash_bulkdensity = request.form.get('ini_black_bulkdensity', None)
+    ini_white_ash_bulkdensity = request.form.get('ini_white_bulkdensity', None)
 
     try:
-        assert isfloat(ini_black_ash_depth_mm), ini_black_ash_depth_mm
-        assert isfloat(ini_white_ash_depth_mm), ini_white_ash_depth_mm
+        assert isint(ash_depth_mode), ash_depth_mode
+
+        if int(ash_depth_mode) == 1:
+            assert isfloat(ini_black_ash_depth_mm), ini_black_ash_depth_mm
+            assert isfloat(ini_white_ash_depth_mm), ini_white_ash_depth_mm
+        else:
+            assert isfloat(ini_black_ash_load_kgm2), ini_black_ash_load_kgm2
+            assert isfloat(ini_white_ash_load_kgm2), ini_white_ash_load_kgm2
+            assert isfloat(ini_black_ash_bulkdensity), ini_black_ash_bulkdensity
+            assert isfloat(ini_white_ash_bulkdensity), ini_white_ash_bulkdensity
+
+            ini_black_ash_depth_mm = float(ini_black_ash_load_kgm2) / float(ini_black_ash_bulkdensity)
+            ini_white_ash_depth_mm = float(ini_white_ash_load_kgm2) / float(ini_white_ash_bulkdensity)
+
         ash = Ash.getInstance(wd)
+        ash.ash_depth_mode = ash_depth_mode
+
         ash.run_ash(fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm))
         return success_factory()
 
@@ -3345,19 +3389,36 @@ def report_ash_by_hillslope(runid, config):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/<config>/report/ash_contaminant')
-@app.route('/runs/<string:runid>/<config>/report/ash_contaminant/')
+@app.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
+@app.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
 def report_contaminant(runid, config):
+    rec_intervals = request.args.get('rec_intervals', None)
+
+    if rec_intervals is None:
+        rec_intervals = [100, 20, 10, 5]
+    else:
+        rec_intervals = literal_eval(rec_intervals)
+        assert all([isint(x) for x in rec_intervals])
+
     wd = get_wd(runid)
 
     ron = Ron.getInstance(wd)
     ash = Ash.getInstance(wd)
+
+    if request.method == 'POST':
+        ash.parse_inputs(dict(request.form))
+        ash = Ash.getInstance(wd)
+
     unitizer = Unitizer.getInstance(wd)
 
-#    burnclass_summary = ash.burnclass_summary()
-#    recurrence_intervals, results, annuals, sev_annuals = ash.report()
+    if not ash.has_watershed_summaries:
+        ash.report()
+
+    recurrence_intervals, results = ash.reservoir_report(recurrence=rec_intervals)
 
     return render_template('reports/ash/ash_contaminant.htm',
+                           rec_intervals=rec_intervals,
+                           rec_results=results,
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            ash=ash,
@@ -3489,7 +3550,6 @@ def submit_task_run_rhem(runid, config):
         return exception_factory('Error cleaning rhem directories')
 
     try:
-
         watershed = Watershed.getInstance(wd)
         translator = Watershed.getInstance(wd).translator_factory()
         runs_dir = os.path.abspath(rhem.runs_dir)
