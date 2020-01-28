@@ -208,6 +208,8 @@ class Loss(object):
         with open(fn) as fp:
             lines = fp.readlines()
 
+        lines = [L.replace('*** total soil loss < 1 kg ***', '') for L in lines]
+
         # strip trailing and leading white space
         lines = [L.strip() for L in lines]
 
@@ -244,7 +246,6 @@ class Loss(object):
         chn_tbl = _parse_tbl(lines[chn0:], chn_avg_hdr)
         out_tbl = _parse_out(lines[out0:])
 
-
         # Find class table
         indx0 = []
         for i, L in enumerate(lines):
@@ -252,23 +253,21 @@ class Loss(object):
                 indx0.append(i)
 
         if len(indx0) == 0:
-            self.class_data = None
-            return
+            class_data = None
+        else:
+            indx0 = indx0[-1]
+            lines = lines[indx0:]
 
-        indx0 = indx0[-1]
-        lines = lines[indx0:]
+            assert lines[7].startswith('1')
+            assert lines[8].startswith('2')
+            assert lines[9].startswith('3')
+            assert lines[10].startswith('4')
+            assert lines[11].startswith('5')
 
-        assert lines[7].startswith('1')
-        assert lines[8].startswith('2')
-        assert lines[9].startswith('3')
-        assert lines[10].startswith('4')
-        assert lines[11].startswith('5')
-
-        class_data = _parse_tbl(lines[7:12],
-                                ['Class', 'Diameter', 'Specific Gravity',
-                                 'Pct Sand', 'Pct Silt', 'Pct Clay', 'Pct OM',
-                                 'Fraction In Flow Exiting'])
-
+            class_data = _parse_tbl(lines[7:12],
+                                    ['Class', 'Diameter', 'Specific Gravity',
+                                     'Pct Sand', 'Pct Silt', 'Pct Clay', 'Pct OM',
+                                     'Fraction In Flow Exiting'])
 
         # remove the years from average
         assert exclude_yr_indxs is None

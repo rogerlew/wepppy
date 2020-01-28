@@ -53,8 +53,8 @@ _data_dir = _join(_thisdir, 'data')
 
 
 ContaminantConcentrations = namedtuple('ContaminantConcentrations',
-                                    ['PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
-                                     'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg'])
+                                       ['PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
+                                        'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg'])
 
 
 def run_ash_model(kwds):
@@ -102,12 +102,13 @@ class Ash(NoDbBase, LogMixin):
         try:
             # config = self.config
             self.fire_date = None
-            self.ini_black_ash_depth_mm = None
-            self.ini_white_ash_depth_mm = None
+            self.ini_black_ash_depth_mm = 5
+            self.ini_white_ash_depth_mm = 5
             self.meta = None
             self.fire_years = None
             self._reservoir_capacity_m3 = 1000000
             self._reservoir_storage = 0.8
+            self._ash_depth_mode = 1
 
             self.high_contaminant_concentrations = ContaminantConcentrations(
                 PO4=3950,  # mg*Kg-1
@@ -162,6 +163,84 @@ class Ash(NoDbBase, LogMixin):
                 As=713,
                 Cd=802,
                 Hg=42.9)
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def parse_inputs(self, kwds):
+
+        for k in kwds:
+            try:
+                kwds[k] = float(kwds[k])
+            except TypeError:
+                try:
+                    kwds[k] = float(kwds[k][0])
+                except:
+                    assert 0, (k, kwds[k])
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.high_contaminant_concentrations = ContaminantConcentrations(
+                PO4=kwds.get('high_PO4'),
+                Al=kwds.get('high_Al'),
+                Si=kwds.get('high_Si'),
+                Ca=kwds.get('high_Ca'),
+                Pb=kwds.get('high_Pb'),
+                Na=kwds.get('high_Na'),
+                Mg=kwds.get('high_Mg'),
+                P=kwds.get('high_P'),
+                Mn=kwds.get('high_Mn'),
+                Fe=kwds.get('high_Fe'),
+                Ni=kwds.get('high_Ni'),
+                Cu=kwds.get('high_Cu'),
+                Zn=kwds.get('high_Zn'),
+                As=kwds.get('high_As'),
+                Cd=kwds.get('high_Cd'),
+                Hg=kwds.get('high_Hg'))
+
+            self.moderate_contaminant_concentrations = ContaminantConcentrations(
+                PO4=kwds.get('mod_PO4'),
+                Al=kwds.get('mod_Al'),
+                Si=kwds.get('mod_Si'),
+                Ca=kwds.get('mod_Ca'),
+                Pb=kwds.get('mod_Pb'),
+                Na=kwds.get('mod_Na'),
+                Mg=kwds.get('mod_Mg'),
+                P=kwds.get('mod_P'),
+                Mn=kwds.get('mod_Mn'),
+                Fe=kwds.get('mod_Fe'),
+                Ni=kwds.get('mod_Ni'),
+                Cu=kwds.get('mod_Cu'),
+                Zn=kwds.get('mod_Zn'),
+                As=kwds.get('mod_As'),
+                Cd=kwds.get('mod_Cd'),
+                Hg=kwds.get('mod_Hg'))
+            
+            self.low_contaminant_concentrations = ContaminantConcentrations(
+                PO4=kwds.get('low_PO4'),
+                Al=kwds.get('low_Al'),
+                Si=kwds.get('low_Si'),
+                Ca=kwds.get('low_Ca'),
+                Pb=kwds.get('low_Pb'),
+                Na=kwds.get('low_Na'),
+                Mg=kwds.get('low_Mg'),
+                P=kwds.get('low_P'),
+                Mn=kwds.get('low_Mn'),
+                Fe=kwds.get('low_Fe'),
+                Ni=kwds.get('low_Ni'),
+                Cu=kwds.get('low_Cu'),
+                Zn=kwds.get('low_Zn'),
+                As=kwds.get('low_As'),
+                Cd=kwds.get('low_Cd'),
+                Hg=kwds.get('low_Hg'))
+
+            self._reservoir_capacity_m3 = kwds.get('reservoir_capacity')
+            self._reservoir_storage = kwds.get('reservoir_storage')
 
             self.dump_and_unlock()
 
@@ -226,6 +305,28 @@ class Ash(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self._reservoir_storage = float(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def ash_depth_mode(self):
+        if not getattr(self, '_ash_depth_mode'):
+            self.ash_depth_mode = 1
+
+        return self._ash_depth_mode
+
+    @ash_depth_mode.setter
+    def ash_depth_mode(self, value):
+        assert isfloat(value), value
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ash_depth_mode = int(value)
             self.dump_and_unlock()
 
         except Exception:
@@ -363,8 +464,32 @@ class Ash(NoDbBase, LogMixin):
         elif ash_type == AshType.WHITE:
             return self.ini_white_ash_depth_mm
 
+    @property
+    def ini_black_ash_bulkdensity(self):
+        return BlackAshModel(self.ini_black_ash_depth_mm).bulk_density
+
+    @property
+    def ini_white_ash_bulkdensity(self):
+        return WhiteAshModel(self.ini_white_ash_depth_mm).bulk_density
+
+    @property
+    def ini_black_ash_load(self):
+        return BlackAshModel(self.ini_black_ash_depth_mm).ini_material_available_tonneperha * 0.1  # to kg/m^2
+
+    @property
+    def ini_white_ash_load(self):
+        return WhiteAshModel(self.ini_white_ash_depth_mm).ini_material_available_tonneperha * 0.1  # to kg/m^2
+
+    @property
+    def has_watershed_summaries(self):
+        return len(glob(_join(self.ash_dir, 'pw0_burn_class=*,ash_stats_per_year_cum_ash_delivery_by_water.csv'))) > 0
+
     def get_annual_watershed_water_transport_by_burnclass(self, burnclass):
-        fn = _join(self.ash_dir,  'pw0_burn_class={},ash_stats_per_year_cum_ash_delivery_by_water.csv'.format(burnclass))
+        fn = _join(self.ash_dir, 'pw0_burn_class={},ash_stats_per_year_cum_ash_delivery_by_water.csv'.format(burnclass))
+
+        if not _exists(fn):
+            return 0.0
+
         with open(fn) as fp:
             df = pd.read_csv(fp)
             series = df['cum_ash_delivery_by_water (tonne)']
@@ -570,9 +695,11 @@ class Ash(NoDbBase, LogMixin):
                 prob = probability_of_occurrence(ri, 1.0)
                 data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
 
-            _df = pd.DataFrame(data, columns=
-            ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
-            _df.to_csv(_join(ash_dir, '%s_ash_stats_per_event_%s.csv' % ('pw0', measure.replace(' (tonne)', ''))), index=False)
+            _df = pd.DataFrame(data,
+                               columns=['year', 'mo', 'da', 'days_from_fire',
+                                        measure, 'probability', 'rank', 'return_interval'])
+            _df.to_csv(_join(ash_dir, '%s_ash_stats_per_event_%s.csv' % ('pw0', measure.replace(' (tonne)', ''))),
+                       index=False)
 
             rec = weibull_series(recurrence, num_fire_years)
 
@@ -751,39 +878,43 @@ class Ash(NoDbBase, LogMixin):
                 prob = probability_of_occurrence(ri, 1.0)
                 data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
 
-            _df = pd.DataFrame(data, columns=
-            ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
-            _df.to_csv(_join(ash_dir, '%s_burnclass=%i,ash_stats_per_event_%s.csv' % ('pw0', burn_class, measure.replace(' (tonne)', ''))), index=False)
+            _df = pd.DataFrame(data,
+                               columns=['year', 'mo', 'da', 'days_from_fire',
+                                        measure, 'probability', 'rank', 'return_interval'])
+            _df.to_csv(_join(ash_dir, '%s_burnclass=%i,ash_stats_per_event_%s.csv' %
+                             ('pw0', burn_class, measure.replace(' (tonne)', ''))), index=False)
 
             rec = weibull_series(recurrence, num_fire_years)
 
             num_events = len(_df.da)
             for retperiod in recurrence:
                 if retperiod not in rec:
-                    return_periods[measure][retperiod] = None
+                    return_periods[burn_class][retperiod] = {'value': 0.0}
                 else:
                     indx = rec[retperiod]
                     if indx >= num_events:
-                        return_periods[measure][retperiod] = None
+                        return_periods[burn_class][retperiod] = {'value': 0.0}
                     else:
                         _row = dict(_df.loc[indx, :])
                         for _m in ['year', 'mo', 'da', 'days_from_fire', 'rank']:
                             _row[_m] = int(_row[_m])
 
+                        _row['value'] = _row['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)]
+
                         return_periods[burn_class][retperiod] = _row
 
-            sev_water = {burn_class: [] for burn_class in range(1, 5)}
-            sev_cum_water = {burn_class: [] for burn_class in range(1, 5)}
-
-            for topaz_id, sub in watershed.sub_iter():
-                wepp_id = translator.wepp(top=topaz_id)
-                ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
-                burn_class = meta[topaz_id]['burn_class']
-
-                # unburned landuses won't have ash outputs
-                if _exists(ash_fn):
-                    df = pd.read_csv(ash_fn)
-                    sev_water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
-                    sev_cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
+            # sev_water = {burn_class: [] for burn_class in range(1, 5)}
+            # sev_cum_water = {burn_class: [] for burn_class in range(1, 5)}
+            #
+            # for topaz_id, sub in watershed.sub_iter():
+            #     wepp_id = translator.wepp(top=topaz_id)
+            #     ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
+            #     burn_class = meta[topaz_id]['burn_class']
+            #
+            #     # unburned landuses won't have ash outputs
+            #     if _exists(ash_fn):
+            #         df = pd.read_csv(ash_fn)
+            #         sev_water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
+            #         sev_cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
 
         return recurrence, return_periods

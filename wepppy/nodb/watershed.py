@@ -24,7 +24,7 @@ from wepppy.watershed_abstraction import (
     WeppTopTranslator
 )
 
-from .base import NoDbBase, TriggerEvents
+from .base import NoDbBase, TriggerEvents, DEFAULT_WEPP_CHN_TYPE
 
 
 class WatershedNoDbLockedException(Exception):
@@ -49,6 +49,9 @@ class Watershed(NoDbBase):
             self._impoundment_n = 0
             self._centroid = None
             self._outlet_top_id = None
+
+            config = self.config
+            self._wepp_chn_type = config.get('soils', 'wepp_chn_type')
 
             wat_dir = self.wat_dir
             if not _exists(wat_dir):
@@ -87,6 +90,11 @@ class Watershed(NoDbBase):
     @property
     def _lock(self):
         return _join(self.wd, 'watershed.nodb.lock')
+
+
+    @property
+    def wepp_chn_type(self):
+        return getattr(self, '_wepp_chn_type', DEFAULT_WEPP_CHN_TYPE)
 
     @property
     def sub_n(self) -> int:
@@ -143,7 +151,7 @@ class Watershed(NoDbBase):
             assert _exists(topaz_wd)
 
             _abs = WatershedAbstraction(topaz_wd, wat_dir)
-            _abs.abstract()
+            _abs.abstract(wepp_chn_type=self.wepp_chn_type)
             _abs.write_slps(cell_width=cell_width)
 
             chns_summary = {}

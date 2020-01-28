@@ -464,7 +464,7 @@ class WhiteAshModel(AshModel):
             wind_threshold=6)
 
         if ini_ash_depth is not None:
-            self.ini_ash_depth_mm  = ini_ash_depth
+            self.ini_ash_depth_mm = ini_ash_depth
 
 
 class BlackAshModel(AshModel):
@@ -485,4 +485,4 @@ class BlackAshModel(AshModel):
             wind_threshold=6)
 
         if ini_ash_depth is not None:
-            self.ini_ash_depth_mm  = ini_ash_depth
+            self.ini_ash_depth_mm = ini_ash_depth

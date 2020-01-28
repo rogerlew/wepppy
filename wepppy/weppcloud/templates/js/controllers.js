@@ -4174,6 +4174,7 @@ var Ash = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ash_depth_mode = 1;
 
             $.post({
                 url: "tasks/run_ash/",
@@ -4191,6 +4192,30 @@ var Ash = function () {
                 }
             });
         };
+
+        that.setAshDepthMode = function (mode) {
+            var self = instance;
+
+            if (mode === undefined) {
+                mode = $("input[name='ash_depth_mode']:checked").val();
+            }
+
+            self.ash_depth_mode = parseInt(mode, 10);
+            self.showHideControls();
+        }
+
+        that.showHideControls = function () {
+            var self = instance;
+
+            if (self.ash_depth_mode === 1) {
+                $("#ash_depth_mode0_controls").hide();
+                $("#ash_depth_mode1_controls").show();
+
+            } else {
+                $("#ash_depth_mode0_controls").show();
+                $("#ash_depth_mode1_controls").hide();
+            }
+        }
 
         that.report = function () {
             var self = instance;
