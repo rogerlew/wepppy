@@ -22,7 +22,7 @@ University of Idaho 2015-Present
 ### Acknowledgements
 
 This publication was made possible by the NSF Idaho EPSCoR Program and by the National Science Foundation under award 
-pinumber IIA-1301792.
+number IIA-1301792.
 
 ### License
 
