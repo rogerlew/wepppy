@@ -15,7 +15,7 @@ from wepppy.wepp.out import Loss, Ebe
 
 
 class ReturnPeriods:
-    def __init__(self, ebe: Ebe, loss: Loss, cli_df: DataFrame, recurrence=[2, 5, 10, 20, 25]):
+    def __init__(self, ebe: Ebe, loss: Loss, cli_df: DataFrame, recurrence=(2, 5, 10, 20, 25)):
         self.has_phosphorus = loss.has_phosphorus
 
         df = ebe.df

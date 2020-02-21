@@ -139,6 +139,9 @@ class AshModel(object):
         # effective duration from the element (PeakRunoffRAW) WEPP output
         eff_dur = np.zeros((s_len,))
 
+        # effective duration from the element (Precip) WEPP output
+        precip = np.zeros((s_len,))
+
         # water transport modeling variables
         water_excess = np.zeros((s_len,))
         real_runoff = np.zeros((s_len,))
@@ -245,9 +248,11 @@ class AshModel(object):
             if yr_mo_da in element_d:
                 peak_ro[i] = element_d[yr_mo_da]['PeakRO']
                 eff_dur[i] = element_d[yr_mo_da]['EffDur']
+                precip[i] = element_d[yr_mo_da]['Precip']
             else:
                 peak_ro[i] = 0.0
                 eff_dur[i] = 0.0
+                precip[i] = 0.0
 
             if yr_mo_da in hill_wat_d:
                 soil_evap[i] = hill_wat_d[yr_mo_da]['Es (mm)']
@@ -344,6 +349,7 @@ class AshModel(object):
         df['cum_wind_transport (tonne/ha)'] = pd.Series(cum_wind_transport, index=df.index)
         df['peak_ro (mm/hr)'] = pd.Series(peak_ro, index=df.index)
         df['eff_dur (hr)'] = pd.Series(eff_dur, index=df.index)
+        df['precip (mm)'] = pd.Series(precip, index=df.index)
         df['water_excess (mm)'] = pd.Series(water_excess, index=df.index)
         df['real_runoff (mm)'] = pd.Series(real_runoff, index=df.index)
         df['effective_runoff (mm)'] = pd.Series(effective_runoff, index=df.index)
@@ -420,10 +426,10 @@ class AshModel(object):
                 ri = (num_days + 1) / rank
                 ri /= 365.25
                 prob = probability_of_occurrence(ri, 1.0)
-                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
+                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri, _row['precip (mm)']])
 
             _df = pd.DataFrame(data, columns=
-                ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval'])
+                ['year', 'mo', 'da', 'days_from_fire', measure, 'probability', 'rank', 'return_interval' , 'precip'])
             _df.to_csv(_join(out_dir, '%s_ash_stats_per_event_%s.csv' % (prefix, measure.split('_')[0])), index=False)
 
             rec = weibull_series(recurrence, num_fire_years)
