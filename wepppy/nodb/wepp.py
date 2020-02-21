@@ -899,7 +899,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd, exclude_yr_indxs=exclude_yr_indxs)
 
-    def report_return_periods(self):
+    def report_return_periods(self, rec_intervals=(25, 20, 10, 5, 2)):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
@@ -911,7 +911,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
         cli_df = cli.as_dataframe(calc_peak_intensities=True)
 
-        return ReturnPeriods(ebe_rpt, loss_rpt, cli_df)
+        return ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals)
 
     def report_frq_flood(self):
         output_dir = self.output_dir
