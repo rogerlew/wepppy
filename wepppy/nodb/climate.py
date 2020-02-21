@@ -249,6 +249,10 @@ class Climate(NoDbBase, LogMixin):
         return glob(_join(wc, '*.cli'))
 
     @property
+    def years(self):
+        return self._input_years
+
+    @property
     def observed_start_year(self):
         return self._observed_start_year
 
@@ -1218,8 +1222,6 @@ class Climate(NoDbBase, LogMixin):
 
     def _build_climate_observed_gridmet_prism_revised(self, verbose=False):
 
-        assert self.climate_spatialmode == ClimateSpatialMode.Multiple
-
         self.lock()
 
         # noinspection PyBroadInspection
@@ -1261,7 +1263,6 @@ class Climate(NoDbBase, LogMixin):
 
             cli_path = _join(cli_dir, cli_fn)
             climate = ClimateFile(cli_path)
-            self.monthlies = climate.calc_monthlies()
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
@@ -1277,30 +1278,35 @@ class Climate(NoDbBase, LogMixin):
             sub_par_fns = {}
             sub_cli_fns = {}
             for topaz_id, ss in watershed._subs_summary.items():
-                self.log('    Using prism to spatialize {}...'.format(topaz_id))
+                if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                    self.log('    Using prism to spatialize {}...'.format(topaz_id))
 
-                hill_lng, hill_lat = ss.centroid.lnglat
-                suffix = '_{}'.format(topaz_id)
-                new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
+                    hill_lng, hill_lat = ss.centroid.lnglat
+                    suffix = '_{}'.format(topaz_id)
+                    new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
 
-                prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
+                    prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
 
-                sub_par_fns[topaz_id] = '.par'
-                sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
+                    sub_par_fns[topaz_id] = '.par'
+                    sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
 
-                _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
-                if _d < distance:
-                    closest_hill = topaz_id
-                    distance = _d
+                    _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
+                    if _d < distance:
+                        closest_hill = topaz_id
+                        distance = _d
 
-                self.log_done()
+                    self.log_done()
+
+                    # set the watershed climate file to be the one closest to the centroid
+                    assert closest_hill is not None
+                    self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
+
+                else:
+                    sub_par_fns[topaz_id] = '.par'
+                    sub_cli_fns[topaz_id] = cli_fn
 
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
-
-            # set the watershed climate file to be the one closest to the centroid
-            assert closest_hill is not None
-            self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
 
             self.log('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))
@@ -1367,7 +1373,8 @@ class Climate(NoDbBase, LogMixin):
                 self._ss_design_storm_amount_inches,
                 self._ss_duration_of_storm_in_hours,
                 self._ss_time_to_peak_intensity_pct,
-                self._ss_max_intensity_inches_per_hour
+                self._ss_max_intensity_inches_per_hour,
+                version=self.cligen_db
             )
 
             par_fn, cli_fn, monthlies = cc.unpack_json_result(
