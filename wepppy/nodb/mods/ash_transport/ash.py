@@ -501,6 +501,38 @@ class Ash(NoDbBase, LogMixin):
         burnclass = self.meta[str(topaz_id)]['burn_class']
         return burnclass in [2, 3, 4]
 
+    def get_ash_out(self):
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+
+        ash_out = {}
+        for topaz_id, ss in watershed._subs_summary.items():
+            wepp_id = translator.wepp(top=topaz_id)
+            burnclass = self.meta[str(topaz_id)]['burn_class']
+
+            ash_out[topaz_id] = {}
+            ash_out[topaz_id]['burnclass'] = burnclass
+
+            fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_water.csv'.format(wepp_id))
+            with open(fn) as fp:
+                df = pd.read_csv(fp)
+                series = df['cum_water_transport (tonne/ha)']
+                ash_out[topaz_id]['water_transport (kg/ha)'] = 1000 * float(np.mean(series))
+
+            fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_wind.csv'.format(wepp_id))
+            with open(fn) as fp:
+                df = pd.read_csv(fp)
+                series = df['cum_wind_transport (tonne/ha)']
+                ash_out[topaz_id]['wind_transport (kg/ha)'] = 1000 * float(np.mean(series))
+
+            fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_ash.csv'.format(wepp_id))
+            with open(fn) as fp:
+                df = pd.read_csv(fp)
+                series = df['cum_ash_transport (tonne/ha)']
+                ash_out[topaz_id]['ash_transport (kg/ha)'] = 1000 * float(np.mean(series))
+
+        return ash_out
+
     def get_annual_water_transport(self, topaz_id):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -577,7 +609,7 @@ class Ash(NoDbBase, LogMixin):
 
         return {k: burnclass_sum[k] for k in sorted(burnclass_sum)}
 
-    def report(self, recurrence=[100, 50, 20, 10, 5, 2.5, 1]):
+    def report(self, recurrence=(100, 50, 20, 10, 5, 2.5, 1)):
         """
         builds recurrence interval and annuals report for the watershed
 
@@ -597,6 +629,7 @@ class Ash(NoDbBase, LogMixin):
         cum_water = []
         cum_wind = []
         cum_ash = []
+        precip = []
 
         for topaz_id, sub in watershed.sub_iter():
             wepp_id = translator.wepp(top=topaz_id)
@@ -611,6 +644,7 @@ class Ash(NoDbBase, LogMixin):
                 cum_water.append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
                 cum_wind.append(df['cum_ash_delivery_by_wind (tonne)'].to_numpy())
                 cum_ash.append(df['cum_ash_delivery (tonne)'].to_numpy())
+                precip.append(df['precip (mm)'].to_numpy())
 
         water = np.array(water)
         water = np.sum(water, axis=0)
@@ -618,6 +652,8 @@ class Ash(NoDbBase, LogMixin):
         wind = np.sum(wind, axis=0)
         ash = np.array(ash)
         ash = np.sum(ash, axis=0)
+        precip = np.array(ash)
+        precip = np.sum(ash, axis=0)
 
         cum_water = np.array(cum_water)
         cum_water = np.sum(cum_water, axis=0)
@@ -630,6 +666,7 @@ class Ash(NoDbBase, LogMixin):
         df['ash_delivery_by_water (tonne)'] = pd.Series(water, index=df.index)
         df['ash_delivery_by_wind (tonne)'] = pd.Series(wind, index=df.index)
         df['ash_delivery (tonne)'] = pd.Series(ash, index=df.index)
+        df['precip (mm)'] = pd.Series(precip, index=df.index)
 
         df['cum_ash_delivery_by_water (tonne)'] = pd.Series(cum_water, index=df.index)
         df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(cum_wind, index=df.index)
@@ -693,11 +730,11 @@ class Ash(NoDbBase, LogMixin):
                 ri = (num_days + 1) / rank
                 ri /= 365.25
                 prob = probability_of_occurrence(ri, 1.0)
-                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
+                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri, _row['precip (mm)']])
 
             _df = pd.DataFrame(data,
                                columns=['year', 'mo', 'da', 'days_from_fire',
-                                        measure, 'probability', 'rank', 'return_interval'])
+                                        measure, 'probability', 'rank', 'return_interval', 'precip'])
             _df.to_csv(_join(ash_dir, '%s_ash_stats_per_event_%s.csv' % ('pw0', measure.replace(' (tonne)', ''))),
                        index=False)
 
@@ -808,7 +845,7 @@ class Ash(NoDbBase, LogMixin):
 
         return recurrence, return_periods, annuals, sev_annuals
 
-    def reservoir_report(self, recurrence=[100, 50, 20, 10, 5, 2.5, 1]):
+    def reservoir_report(self, recurrence=(100, 50, 20, 10, 5, 2.5, 1)):
         """
         builds recurrence interval and annuals report for the watershed
 
@@ -887,6 +924,7 @@ class Ash(NoDbBase, LogMixin):
             rec = weibull_series(recurrence, num_fire_years)
 
             num_events = len(_df.da)
+            actual_reccurence = []
             for retperiod in recurrence:
                 if retperiod not in rec:
                     return_periods[burn_class][retperiod] = {'value': 0.0}
@@ -894,7 +932,7 @@ class Ash(NoDbBase, LogMixin):
                     indx = rec[retperiod]
                     if indx >= num_events:
                         return_periods[burn_class][retperiod] = {'value': 0.0}
-                    else:
+                    elif indx != -1:
                         _row = dict(_df.loc[indx, :])
                         for _m in ['year', 'mo', 'da', 'days_from_fire', 'rank']:
                             _row[_m] = int(_row[_m])
@@ -902,6 +940,8 @@ class Ash(NoDbBase, LogMixin):
                         _row['value'] = _row['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)]
 
                         return_periods[burn_class][retperiod] = _row
+
+                actual_reccurence.append(retperiod)
 
             # sev_water = {burn_class: [] for burn_class in range(1, 5)}
             # sev_cum_water = {burn_class: [] for burn_class in range(1, 5)}
@@ -917,4 +957,4 @@ class Ash(NoDbBase, LogMixin):
             #         sev_water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
             #         sev_cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
 
-        return recurrence, return_periods
+        return actual_reccurence, return_periods
