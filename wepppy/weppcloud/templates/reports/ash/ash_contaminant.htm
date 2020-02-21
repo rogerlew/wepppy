@@ -199,24 +199,23 @@
     {% set _delivery_mod = rec_results[3][rec]['value'] %}
     {% set _delivery_high = rec_results[4][rec]['value'] %}
     {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
-<tr>
-    <td>{{ rec }}</td>
-    <td style="width:100px; text-align: right;" >{{ unitizer(_delivery / reservoir_current_volume, 'tonne') | safe }} </td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-        <td style="width:100px; text-align: right;" >
-            {% set concentration = _delivery_low * low * 0.001 +
-                                   _delivery_mod + mod * 0.001 +
-                                   _delivery_high * high * 0.001 %}
-            {% set concentration = concentration / reservoir_current_volume %}
-            {% if units == 'mg/kg' %}
-                {{ unitizer(concentration, 'mg/L') | safe }}
-            {% else %}
-                {{ unitizer(concentration, 'µg/L') | safe }}
-            {% endif %}
-
-        </td>
-    {% endfor %}
-</tr>
+    <tr>
+        <td>{{ rec }}</td>
+        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery / reservoir_current_volume, 'tonne') | safe }} </td>
+        {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+            <td style="width:100px; text-align: right;" >
+                {% set concentration = _delivery_low * low * 0.001 +
+                                       _delivery_mod + mod * 0.001 +
+                                       _delivery_high * high * 0.001 %}
+                {% set concentration = concentration / reservoir_current_volume %}
+                {% if units == 'mg/kg' %}
+                    {{ unitizer(concentration, 'mg/L') | safe }}
+                {% else %}
+                    {{ unitizer(concentration, 'µg/L') | safe }}
+                {% endif %}
+            </td>
+        {% endfor %}
+    </tr>
 {% endfor %}
 </tbody>
 </table>
