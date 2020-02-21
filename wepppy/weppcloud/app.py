@@ -583,19 +583,21 @@ def create(config):
     except:
         pass
 
+    try:
+        Ron(wd, "%s.cfg" % config)
 
-    Ron(wd, "%s.cfg" % config)
+        # for development convenience create a symlink
+        # to the this working directory
+        last = get_last()
+        if _exists(last):
+            os.unlink(last)
+        os.symlink(wd, last)
 
-    # for development convenience create a symlink
-    # to the this working directory
-    last = get_last()
-    if _exists(last):
-        os.unlink(last)
-    os.symlink(wd, last)
+        user_datastore.create_run(runid, config, current_user)
 
-    user_datastore.create_run(runid, config, current_user)
-
-    return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config))
+        return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config))
+    except Exception:
+        return exception_factory()
 
 
 @app.route('/runs/<string:runid>/<config>/create_fork')
@@ -2861,10 +2863,14 @@ def report_rhem_return_periods(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
 def report_wepp_return_periods(runid, config):
 
-    extraneous = request.args.get('extraneous', None) == 'true'
     wd = get_wd(runid)
+    extraneous = request.args.get('extraneous', None) == 'true'
+
+    climate = Climate.getInstance(wd)
+    rec_intervals = _parse_rec_intervals(request, climate.years)
+
     ron = Ron.getInstance(wd)
-    report = Wepp.getInstance(wd).report_return_periods()
+    report = Wepp.getInstance(wd).report_return_periods(rec_intervals=rec_intervals)
     translator = Watershed.getInstance(wd).translator_factory()
 
     unitizer = Unitizer.getInstance(wd)
@@ -3046,6 +3052,7 @@ def resources_wepp_loss(runid, config):
 
     except Exception:
         return exception_factory()
+
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/query/bound_coords')
@@ -3296,10 +3303,35 @@ def report_debris_flow(runid, config):
                            user=current_user)
 
 
+def _parse_rec_intervals(request, years):
+    rec_intervals = request.args.get('rec_intervals', None)
+    if rec_intervals is None:
+        rec_intervals = [2, 5, 10, 20, 25]
+        if years >= 50:
+            rec_intervals.append(50)
+        if years >= 100:
+            rec_intervals.append(100)
+        if years >= 200:
+            rec_intervals.append(200)
+        if years >= 500:
+            rec_intervals.append(500)
+        if years >= 1000:
+            rec_intervals.append(1000)
+        rec_intervals = rec_intervals[::-1]
+    else:
+        rec_intervals = literal_eval(rec_intervals)
+        assert all([isint(x) for x in rec_intervals])
+
+    return rec_intervals
+
+
 @app.route('/runs/<string:runid>/<config>/report/ash')
 @app.route('/runs/<string:runid>/<config>/report/ash/')
 def report_ash(runid, config):
     wd = get_wd(runid)
+
+    climate = Climate.getInstance(wd)
+    rec_intervals = _parse_rec_intervals(request, climate.years)
 
     ron = Ron.getInstance(wd)
     ash = Ash.getInstance(wd)
@@ -3309,7 +3341,7 @@ def report_ash(runid, config):
     unitizer = Unitizer.getInstance(wd)
 
     burnclass_summary = ash.burnclass_summary()
-    recurrence_intervals, results, annuals, sev_annuals = ash.report()
+    recurrence_intervals, results, annuals, sev_annuals = ash.report(recurrence=rec_intervals)
 
     return render_template('reports/ash/ash_watershed.htm',
                            unitizer_nodb=unitizer,
@@ -3392,38 +3424,40 @@ def report_ash_by_hillslope(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
 def report_contaminant(runid, config):
-    rec_intervals = request.args.get('rec_intervals', None)
 
-    if rec_intervals is None:
-        rec_intervals = [100, 20, 10, 5]
-    else:
-        rec_intervals = literal_eval(rec_intervals)
-        assert all([isint(x) for x in rec_intervals])
+    try:
+        wd = get_wd(runid)
 
-    wd = get_wd(runid)
+        climate = Climate.getInstance(wd)
+        rec_intervals = _parse_rec_intervals(request, climate.years)
 
-    ron = Ron.getInstance(wd)
-    ash = Ash.getInstance(wd)
-
-    if request.method == 'POST':
-        ash.parse_inputs(dict(request.form))
+        ron = Ron.getInstance(wd)
         ash = Ash.getInstance(wd)
 
-    unitizer = Unitizer.getInstance(wd)
+        if request.method == 'POST':
+            ash.parse_inputs(dict(request.form))
+            ash = Ash.getInstance(wd)
 
-    if not ash.has_watershed_summaries:
-        ash.report()
+        unitizer = Unitizer.getInstance(wd)
 
-    recurrence_intervals, results = ash.reservoir_report(recurrence=rec_intervals)
+        if not ash.has_watershed_summaries:
+            ash.report()
 
-    return render_template('reports/ash/ash_contaminant.htm',
-                           rec_intervals=rec_intervals,
-                           rec_results=results,
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           ash=ash,
-                           ron=ron,
-                           user=current_user)
+        actual_reccurence, results = ash.reservoir_report(recurrence=rec_intervals)
+
+        # return jsonify(dict(rec_intervals=[str(v) for v in actual_reccurence],
+        #                     rec_results=results))
+        return render_template('reports/ash/ash_contaminant.htm',
+                               rec_intervals=actual_reccurence,
+                               rec_results=results,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               ash=ash,
+                               ron=ron,
+                               user=current_user)
+
+    except Exception:
+        return exception_factory('Error')
 
 
 @app.route('/combined_ws_viewer')
