@@ -433,9 +433,12 @@ def wmesque_retrieve(dataset, extent, fname, cellsize):
           .format(wmesque_url=wmesque_url, dataset=dataset,
                   extent=extent, cellsize=cellsize, format=fmt)
 
-    output = urlopen(url)
-    with open(fname, 'wb') as fp:
-        fp.write(output.read())
+    try:
+        output = urlopen(url, timeout=10)
+        with open(fname, 'wb') as fp:
+            fp.write(output.read())
+    except Exception:
+        raise Exception("Error retrieving: %s" % url)
 
     return 1
 
