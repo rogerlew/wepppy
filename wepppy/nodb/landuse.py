@@ -348,11 +348,9 @@ class Landuse(NoDbBase):
         # noinspection PyBroadException
         try:
             for dom in self.managements:
-                print('dom', dom)
                 dom = str(dom)
                 if dom in defaults:
                     for cover in ['cancov', 'inrcov', 'rilcov']:
-                        print(dom, cover, defaults[dom][cover])
                         self._modify_coverage(dom, cover, defaults[dom][cover])
 
             self.dump_and_unlock()
