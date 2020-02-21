@@ -8,7 +8,7 @@ import sys
 from subprocess import Popen, PIPE
 from glob import glob
 
-from wepppy.nodb import Ron, Wepp, Topaz, Watershed
+from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash
 
 
 def arc_export(wd):
@@ -17,6 +17,16 @@ def arc_export(wd):
     topaz = Topaz.getInstance(wd)
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
+    try:
+        ash = Ash.getInstance(wd)
+    except FileNotFoundError:
+        ash = ash_out = None
+
+    if ash is not None:
+        try:
+            ash_out = ash.get_ash_out()
+        except:
+            ash_out = None
 
     name = ron.name
     export_dir = ron.export_arc_dir
@@ -117,6 +127,13 @@ def arc_export(wd):
 
         if weppout['Particulate P Density'] is not None:
             f['properties']['PP(kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
+
+        if ash is not None:
+            if ash_out is not None:
+                f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
+                f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
+                f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
+                f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
 
         js['features'][i] = f
 
