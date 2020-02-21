@@ -93,11 +93,17 @@
 
             {% elif 'eu' in ron.config_stem %}
             <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified (Europe)
-                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a><br/>
+            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
+                <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
 
             {% elif 'au' in ron.config_stem %}
             <label class="radio"><input type="radio" value="10" class="disable-readonly" id="climate_mode10" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 10] }}> AGDC Modified (Australia)
-                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a><br/>
+            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
+                <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
             </label><br/>
             {% endif %}
         </div>
