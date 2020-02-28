@@ -434,7 +434,7 @@ def wmesque_retrieve(dataset, extent, fname, cellsize):
                   extent=extent, cellsize=cellsize, format=fmt)
 
     try:
-        output = urlopen(url, timeout=10)
+        output = urlopen(url, timeout=60)
         with open(fname, 'wb') as fp:
             fp.write(output.read())
     except Exception:
@@ -557,8 +557,6 @@ def read_tif(fn, dtype=np.float64):
     srs.ImportFromWkt(wkt_text)
     proj = srs.ExportToProj4().strip()
 
-    print('wkt', wkt_text)
-    print('proj', proj)
     del ds
 
     data = np.array(data, dtype=dtype)
