@@ -53,6 +53,7 @@ gdaldem_modes = tuple(gdaldem_modes)
 _this_dir = os.path.dirname(__file__)
 _catalog = os.path.join(_this_dir, 'catalog')
 
+
 def raster_stats(src):
     cmd = 'gdalinfo %s -stats' % src
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -73,8 +74,8 @@ def raster_stats(src):
         value = float(stat.text)
         d[key] = value
 
-    print(d)
     return d
+
 
 def format_convert(src, _format):
     dst = src[:-4] + ext_d[_format]
@@ -85,7 +86,6 @@ def format_convert(src, _format):
     else:
         cmd = 'gdal_translate -of %s %s %s' % (_format, src, dst)
 
-    print(cmd)
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     output = p.stdout \
               .read() \
@@ -97,6 +97,7 @@ def format_convert(src, _format):
 
     return None
 
+
 def determine_band_type(vrt):
     ds = gdal.Open(vrt)
     if ds == None:
@@ -104,6 +105,7 @@ def determine_band_type(vrt):
 
     band = ds.GetRasterBand(1)
     return gdal.GetDataTypeName(band.DataType)
+
 
 def build_catalog(geodata):
     """
@@ -127,6 +129,7 @@ def build_catalog(geodata):
                 fp.write(path + '\n')
     fp.close()
 
+
 def find_maps(geodata):
     """
     recursively searches for .vrt files from the
@@ -137,6 +140,7 @@ def find_maps(geodata):
 
     return maps
 
+
 def safe_float_parse(x):
     """
     Tries to parse {x} as a float. Returns None if it fails.
@@ -145,6 +149,7 @@ def safe_float_parse(x):
         return float(x)
     except:
         return None
+
 
 def parse_bbox(bbox):
     """
@@ -164,7 +169,9 @@ def parse_bbox(bbox):
 
     return tuple(map(safe_float_parse, coords))
 
+
 app = Flask(__name__)
+
 
 @app.route('/')
 def api_root():
@@ -176,6 +183,7 @@ def api_root():
         path = os.path.split(map)[0].replace(geodata_dir, '')
         d.append(path)
     return jsonify(d)
+
 
 @app.route('/<dataset>')
 @app.route('/<dataset>/')
@@ -189,6 +197,7 @@ def api_dataset(dataset):
         return jsonify(find_maps(path))
     else:
         return 'error: cannot find dataset: %s' % dataset
+
 
 @app.route('/<dataset>/<year>')
 @app.route('/<dataset>/<year>/')
@@ -384,6 +393,7 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
 
     # return response
     return response
+
 
 if __name__ == '__main__':
     import sys
