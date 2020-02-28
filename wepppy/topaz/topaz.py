@@ -78,6 +78,15 @@ def _cp_chmod(src, dst, mode):
     os.chmod(dst, mode)
 
 
+class TopazUnexpectedTermination(Exception):
+    """
+    DEDNM TERMINATED UNEXPECTEDLY, THIS GENERALLY OCCURS IF THE
+    WATERSHED IS TOO BIG OR COMPLEX. TRY DELINEATING A SMALLER
+    AREA OR ADJUSTING THE CSA AND MCL PARAMETERS
+    """
+
+    __name__ = 'Topaz Unexpected Termination'
+
 class WatershedBoundaryTouchesEdgeError(Exception):
     """
     THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM.
@@ -588,8 +597,17 @@ class TopazRunner:
 
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
-                p.stdin.write(b'1')
-                p.stdin.close()
+                try:
+                    p.stdin.write(b'1')
+                    p.stdin.close()
+                except:
+                    try:
+                        p.kill()
+                    except:
+                        pass
+
+                    lines.append('UNEXPECTED TERMINATION')
+                    return [line for line in lines if line != '']
 
             # This comes up if the outlet isn't a channel and we are trying to build
             # subcatchments. The build_subcatchments method preprocesses the outlet
@@ -633,6 +651,8 @@ class TopazRunner:
         for i in range(len(output)-1):
             line = output[i]
 
+            if 'UNEXPECTED TERMINATION' in line:
+                raise TopazUnexpectedTermination()
             if 'THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM' in line:
                 raise WatershedBoundaryTouchesEdgeError()
             if 'THE VALUE FOR THE MINIMUM CHANNEL LENGTH FOR A CHANNEL TO BE' in line and \
