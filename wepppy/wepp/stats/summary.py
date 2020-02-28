@@ -13,41 +13,56 @@ from os.path import exists as _exists
 from glob import glob
 from collections import OrderedDict
 
+from copy import deepcopy
+
 from wepppy.all_your_base import parse_units, parse_name, RowData, flatten
 
 from wepppy.wepp.out import Loss
 from wepppy.wepp.stats.report_base import ReportBase
 
+_hill_default_hdr = [
+    'WeppID',
+    'TopazID',
+    'Landuse',
+    'Soil',
+    'Length (m)',
+    'Hillslope Area (ha)',
+    'Runoff (mm)',
+    'Subrunoff (mm)',
+    'Baseflow (mm)',
+    'Soil Loss Density (kg/ha)',
+    'Sediment Deposition Density (kg/ha)',
+    'Sediment Yield Density (kg/ha)'
+]
+
+_hill_phos_hdr = [
+    'Solub. React. P Density (kg/ha,3)',
+    'Particulate P Density (kg/ha,3)',
+    'Total P Density (kg/ha,3)'
+]
+
 
 class HillSummary(ReportBase):
-    def __init__(self, loss: Loss, class_fractions=False, fraction_under=None):
+    def __init__(self, loss: Loss, class_fractions=False, fraction_under=None, subs_summary=None):
         self.loss_fn = loss.fn
         self.data = loss.hill_tbl
         self.has_phosphorus = loss.has_phosphorus
         self.class_fractions = class_fractions
         self.fraction_under = fraction_under
+        self.subs_summary = subs_summary
 
-        self._hdr = [
-            'WeppID',
-            'TopazID',
-            'Landuse',
-            'Soil',
-            'Length (m)',
-            'Hillslope Area (ha)',
-            'Runoff (mm)',
-            'Subrunoff (mm)',
-            'Baseflow (mm)',
-            'Soil Loss Density (kg/ha)',
-            'Sediment Deposition Density (kg/ha)',
-            'Sediment Yield Density (kg/ha)'
-        ]
+        self._hdr = deepcopy(_hill_default_hdr)
+
+        if self.subs_summary:
+            self._hdr.extend([
+                'Width (m)',
+                'Slope',
+                'LanduseDesc',
+                'SoilDesc'
+            ])
 
         if self.has_phosphorus:
-            self._hdr.extend([
-                'Solub. React. P Density (kg/ha,3)',
-                'Particulate P Density (kg/ha,3)',
-                'Total P Density (kg/ha,3)'
-            ])
+            self._hdr.extend(_hill_phos_hdr)
 
         if self.class_fractions:
             self._hdr.extend([
@@ -69,15 +84,25 @@ class HillSummary(ReportBase):
         return [colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for colname in self._hdr]
 
     def __iter__(self):
+        subs_summary = self.subs_summary
 
         data = self.data
         for i in range(len(data)):
             _data = [(colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow'),
-                      data[i][parse_name(colname)]) for colname in self._hdr[:12]]
+                      data[i][parse_name(colname)]) for colname in _hill_default_hdr]
+
+            topaz_id = data[i]['TopazID']
+
+            if subs_summary:
+                sub_summary = subs_summary[topaz_id]
+                _data.append(('Width (m)', sub_summary['watershed']['width']))
+                _data.append(('Slope', sub_summary['watershed']['slope_scalar']))
+                _data.append(('LanduseDesc', sub_summary['landuse']['desc']))
+                _data.append(('SoilDesc', sub_summary['soil']['desc']))
 
             if self.has_phosphorus:
                 _data.extend([(colname.replace(' Density', ''),
-                               data[i][parse_name(colname)]) for colname in self._hdr[12:15]])
+                               data[i][parse_name(colname)]) for colname in _hill_phos_hdr])
 
             if self.class_fractions or self.fraction_under:
                 wepp_id = data[i]['WeppID']
@@ -104,30 +129,53 @@ class HillSummary(ReportBase):
             yield RowData(OrderedDict(_data))
 
 
+_chn_default_hdr = [
+    'WeppID',
+    'WeppChnID',
+    'TopazID',
+    'Length (m)',
+    'Area (ha)',
+    'Contributing Area (ha)',
+    'Discharge Volume (m^3)',
+    'Sediment Yield (tonne)',
+    'Soil Loss (kg)',
+    'Upland Charge (m^3)',
+    'Subsuface Flow Volume (m^3)'
+]
+
+
+_chn_summary_hdr = [
+    'CellWidth',
+    'Order',
+    'Slope',
+    'Landuse',
+    'LanduseDesc',
+    'Soil',
+    'SoilDesc',
+    'ChannelType'
+]
+
+
+_chn_phos_hdr = [
+    'Solub. React. P Density (kg/ha)',
+    'Particulate P Density (kg/ha)',
+    'Total P Density (kg/ha)'
+]
+
+
 class ChannelSummary(ReportBase):
-    def __init__(self, loss: Loss):
+    def __init__(self, loss: Loss, chns_summary=None):
         self.data = loss.chn_tbl
+        self.chns_summary = chns_summary
         self.has_phosphorus = loss.has_phosphorus
 
-        self._hdr = [
-            'WeppID',
-            'WeppChnID',
-            'TopazID',
-            'Length (m)',
-            'Area (ha)',
-            'Contributing Area (ha)',
-            'Discharge Volume (m^3)',
-            'Sediment Yield (tonne)',
-            'Soil Loss (kg)',
-            'Upland Charge (m^3)',
-            'Subsuface Flow Volume (m^3)']
+        self._hdr = deepcopy(_chn_default_hdr)
+
+        if self.chns_summary:
+            self._hdr.extend(_chn_summary_hdr)
 
         if self.has_phosphorus:
-            self._hdr.extend([
-                'Solub. React. P Density (kg/ha)',
-                'Particulate P Density (kg/ha)',
-                'Total P Density (kg/ha)'
-            ])
+            self._hdr.extend(_chn_phos_hdr)
 
     @property
     def header(self):
@@ -142,15 +190,19 @@ class ChannelSummary(ReportBase):
 
     def __iter__(self):
         data = self.data
+        chns_summary = self.chns_summary
+
         for i in range(len(data)):
             _data = OrderedDict()
 
-            for colname in self._hdr:
+            topaz_id = data[i]['TopazID']
+
+            for colname in _chn_default_hdr:
                 cname = colname.replace(' Density', '') \
-                              .replace('Area', 'Channel Area') \
-                              .replace(' Volume', '') \
-                              .replace('Subsuface', 'Subsurface') \
-                              .replace('Soil Loss', 'Channel Erosion')
+                               .replace('Area', 'Channel Area') \
+                               .replace(' Volume', '') \
+                               .replace('Subsuface', 'Subsurface') \
+                               .replace('Soil Loss', 'Channel Erosion')
 
                 if 'Discharge' in colname:
                     _data['Discharge (mm)'] = data[i]['Discharge Volume'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
@@ -161,6 +213,27 @@ class ChannelSummary(ReportBase):
                 elif 'Soil Loss' in colname:
                     _data['Soil Loss (tonne)'] = data[i]['Soil Loss'] / 1000.0
                 else:
+                    _data[cname] = data[i][parse_name(colname)]
+
+            if chns_summary:
+                chn_summary = chns_summary[topaz_id]
+                _data['CellWidth'] = chn_summary['watershed']['cell_width']
+                _data['Order'] = chn_summary['watershed']['order']
+                _data['Slope'] = chn_summary['watershed']['slope_scalar']
+                _data['Landuse'] = chn_summary['landuse']['key']
+                _data['LanduseDesc'] = chn_summary['landuse']['desc']
+                _data['Soil'] = chn_summary['soil']['mukey']
+                _data['SoilDesc'] = chn_summary['soil']['desc']
+                _data['ChannelType'] = chn_summary['soil']['desc']
+
+            if self.has_phosphorus:
+                for colname in _chn_phos_hdr:
+                    cname = colname.replace(' Density', '') \
+                                   .replace('Area', 'Channel Area') \
+                                   .replace(' Volume', '') \
+                                   .replace('Subsuface', 'Subsurface') \
+                                   .replace('Soil Loss', 'Channel Erosion')
+
                     _data[cname] = data[i][parse_name(colname)]
 
             yield RowData(_data)
