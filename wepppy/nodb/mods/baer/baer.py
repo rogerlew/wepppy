@@ -370,7 +370,7 @@ class Baer(NoDbBase):
                 rred.build_soils()
             elif self._config == 'eu-fire2.cfg':
                 self._assign_eu_soils()
-            elif self._config == 'au-fire.cfg':
+            elif self._config == 'au-fire.cfg' or self._config == 'au-fire60.cfg':
                 self._assign_au_soils()
             elif self._config == 'baer-ssurgo.cfg':
                 self._build_ssurgo_modified_soils()
@@ -399,7 +399,6 @@ class Baer(NoDbBase):
                '-te', xmin, ymin, xmax, ymax,
                '-r', 'near', baer_path, baer_cropped]
 
-        print(cmd)
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
 
