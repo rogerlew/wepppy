@@ -347,7 +347,7 @@ class Soils(NoDbBase):
             if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
-            elif self.config_stem in ['au', 'au-fire']:
+            elif self.config_stem in ['au', 'au-fire', 'au-fire60']:
                 from wepppy.au.soils import build_asris_soils
                 self._build_by_identify(build_asris_soils)
             else:
