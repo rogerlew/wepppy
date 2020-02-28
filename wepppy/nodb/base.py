@@ -224,6 +224,10 @@ class NoDbBase(object):
         return _join(self.wd, 'dem', 'topaz')
 
     @property
+    def chnjnt_arc(self):
+        return _join(self.topaz_wd, 'CHNJNT.ARC')
+
+    @property
     def netful_arc(self):
         return _join(self.topaz_wd, 'NETFUL.ARC')
 
