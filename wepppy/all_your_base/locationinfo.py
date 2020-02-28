@@ -90,6 +90,11 @@ class RasterDatasetInterpolator:
 
         return e, n
 
+    def get_px_coord_from_lnglat(self, lng, lat):
+        e, n = transform(self.wgs84, self.proj,  lng, lat)
+        px, py = self.get_px_coord(e, n)
+        return int(px), int(py)
+
     def get_px_coord(self, e, n):
         assert self.transform is not None
         
