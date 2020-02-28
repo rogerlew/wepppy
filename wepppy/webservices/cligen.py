@@ -267,7 +267,7 @@ def _multiple_year(par, _request, singleyearmode=False):
     elif cliver == "5.2":
         cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
-        cmd = [_join(_bin_dir, 'cligen53'), "-i%s" % par_fn]
+        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
         
     if randseed is not None:
         cmd.append('-r%s' % randseed)
@@ -414,7 +414,7 @@ def single_storm(par):
 
     # build cmd
     if cliver == "5.3":
-        cmd = [_join(_bin_dir, 'cligen53'), "-i%s" % par_fn]
+        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
     elif cliver == "5.2":
         cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
@@ -523,7 +523,7 @@ def observed_daymet(par):
     
     # build cmd
     cli_fn = "observed.cli"
-    cmd = [_join(_bin_dir, 'cligen53'),
+    cmd = [_join(_bin_dir, 'cligen532'),
            "-i%s.par" % par,
            "-Oinput.prn", 
            "-o%s" % cli_fn,
@@ -646,7 +646,7 @@ def future_rcp85(par):
     
     # build cmd
     cli_fn = "future.cli"
-    cmd = [_join(_bin_dir, 'cligen53'),
+    cmd = [_join(_bin_dir, 'cligen532'),
            "-i%s.par" % par,
            "-Oinput.prn", 
            "-o%s" % cli_fn,
