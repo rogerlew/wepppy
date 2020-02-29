@@ -664,9 +664,9 @@ class WatershedAbstraction:
     def centroid(self) -> CentroidSummary:
         return self._centroid
 
-    def abstract(self, wepp_chn_type='Default', verbose=False):
+    def abstract(self, wepp_chn_type='Default', verbose=False, warn=warn):
         self.abstract_channels(wepp_chn_type=wepp_chn_type, verbose=verbose)
-        self.abstract_subcatchments(verbose=verbose)
+        self.abstract_subcatchments(verbose=verbose, warn=warn)
         self.abstract_structure(verbose=verbose)
 
     def write_slps(self, channels=1, subcatchments=1, flowpaths=1, cell_width=None):
@@ -983,7 +983,7 @@ class WatershedAbstraction:
         # save channel abstraction to instance
         watershed['channels']['chn_%i' % chn_id] = chn_summary
         
-    def abstract_subcatchments(self, verbose=False):
+    def abstract_subcatchments(self, verbose=False, warn=False):
         subwta = self.subwta
 
         # extract the subcatchment and channel ids from the subwta map
@@ -1001,11 +1001,11 @@ class WatershedAbstraction:
         for i, sub_id in enumerate(sub_ids):
             if verbose:
                 print('abstracting subtatchment %s (%i of %i)' % (sub_id, i+1, n))
-            self.abstract_subcatchment(sub_id, verbose=verbose)
+            self.abstract_subcatchment(sub_id, verbose=verbose, warn=warn)
 
         self.hillslope_n = len(sub_ids)
         
-    def _walk_flowpath(self, sub_id: int, c: int, r: int) -> Tuple[np.array, np.array, np.array]:
+    def _walk_flowpath(self, sub_id: int, c: int, r: int, warn=False) -> Tuple[np.array, np.array, np.array]:
         """
         walk down the gradient until we reach a channel
         to find the flowpath in pixel coords, the slope
@@ -1041,7 +1041,8 @@ class WatershedAbstraction:
 
             # make sure we aren't in a loop
             if (c, r) in flowpath:
-                warnings.warn('Flowpath c=%i, r=%i for %i went in a circle' % (c, r, sub_id))
+                if warn:
+                    warnings.warn('Flowpath c=%i, r=%i for %i went in a circle' % (c, r, sub_id))
                 break
 
             # store the new values
@@ -1057,7 +1058,8 @@ class WatershedAbstraction:
             i += 1
 
             if i > n + m:
-                warnings.warn('Flowpath c=%i, r=%i for %i is too long (>N)' % (c, r, sub_id))
+                if warn:
+                    warnings.warn('Flowpath c=%i, r=%i for %i is too long (>N)' % (c, r, sub_id))
                 break
 
         # cast flowpath and distance as ndarrays
@@ -1074,7 +1076,7 @@ class WatershedAbstraction:
         # return to _walk_flowpaths
         return flowpath, slope, distance
 
-    def _walk_flowpaths(self, sub_id: int, verbose=False) -> \
+    def _walk_flowpaths(self, sub_id: int, verbose=False, warn=False) -> \
             Tuple[List[np.array], List[np.array], List[np.array], np.array, np.array]:
         """
         considers each cell of the subcatchment as a starting
@@ -1094,7 +1096,7 @@ class WatershedAbstraction:
             if verbose:
                 print('walking flowpath %i of %i (%s)' % (i+1, n, sub_id))
 
-            flowpath, slope, distance = self._walk_flowpath(sub_id, c, r)
+            flowpath, slope, distance = self._walk_flowpath(sub_id, c, r, warn=warn)
             flowpaths.append(flowpath)
             slopes.append(slope)
             distances.append(distance)
@@ -1175,7 +1177,7 @@ class WatershedAbstraction:
 
         return fp_d, subflows
 
-    def abstract_subcatchment(self, sub_id, verbose=False):
+    def abstract_subcatchment(self, sub_id, verbose=False, warn=False):
         """
         define subcatchment abstraction for the purposes of running WEPP
         """
@@ -1187,7 +1189,7 @@ class WatershedAbstraction:
         # determine flowpaths
         # Tuple[List[np.array], List[np.array], List[np.array], np.array, np.array]
         flowpaths, slopes, distances, indx, indy = \
-            self._walk_flowpaths(sub_id, verbose=verbose)
+            self._walk_flowpaths(sub_id, verbose=verbose, warn=warn)
 
         # determine area, width, and length
         area = float(len(indx)) * cellsize2
