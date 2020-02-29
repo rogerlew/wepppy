@@ -9,5 +9,5 @@ OBJECTID,Unit_Name,Shape_Leng,Shape_Area,ksat,ksat_units
 7,"Pliocene Lava Flows, Undivided",127567.9098,48145504.69,417,mm/h
 8,Troutdale Formation,207840.7373,124634394.6,4,mm/h
 9,Grande Ronde Basalt,237358.3341,129594890.9,0.04,mm/h
-10,Rhododendron Formation,849579.3075,407144800.8,0,mm/h
+10,Rhododendron Formation,849579.3075,407144800.8,0.0001,mm/h
 11,Andesite and Basalt of Ashchoff Butte,94896.97931,348573204.3,0.004,mm/h
