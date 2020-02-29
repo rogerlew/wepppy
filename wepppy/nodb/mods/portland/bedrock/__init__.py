@@ -39,14 +39,15 @@ class BullRunBedrock(object):
 
 class ShallowLandSlideSusceptibility(object):
     def __init__(self):
-        with open(_join(_thisdir, 'Bedrock_attrs.csv')) as fp:
+        with open(_join(_thisdir, 'shallow_landslided_attrs.csv')) as fp:
             csv_rdr = csv.DictReader(fp)
             d = {}
             for row in csv_rdr:
                 row['ksat'] = float(row['ksat'])
-                row['Shape_Leng'] = float(row['Shape_Leng'])
-                row['Shape_Area'] = float(row['Shape_Area'])
-                row['OBJECTID'] = int(row['OBJECTID'])
+                try:
+                    row['OBJECTID'] = int(row['OBJECTID'])
+                except:
+                    row['OBJECTID'] = None
                 d[row['OBJECTID']] = row
 
             self._d = d
@@ -66,5 +67,6 @@ if __name__ == "__main__":
     bullrun_bedrock = BullRunBedrock()
     print(bullrun_bedrock.get_bedrock(-121.88436270034585, 45.45078330129854))
 
+# +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +datum=NAD83 +units=ft +no_defs
 # +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +datum=NAD83 +units=ft +no_defs
 # +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +datum=NAD83 +units=ft +no_defs
