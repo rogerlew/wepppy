@@ -24,28 +24,33 @@ def config_app(app):
 
 
 def _init(db, user_datastore):
-    # from wepppy.weppcloud import RunStatistics
-    # try:
-    #     RunStatistics('/geodata/weppcloud_runs')
-    # except:
-    #     pass
-    #
-    # db.drop_all()
-    # db.create_all()
-    # user_datastore.create_role(name='User', description='Regular WeppCloud User')
-    # user_datastore.create_role(name='PowerUser', description='WeppCloud PowerUser')
-    # user_datastore.create_role(name='Admin', description='WeppCloud Administrator')
-    # user_datastore.create_role(name='Dev', description='Developer')
-    # user_datastore.create_role(name='Root', description='Root')
-    #
-    # user_datastore.create_user(email='root@weppcloud.com', password='test123',
-    #                            first_name='Super', last_name='User')
-    # user_datastore.add_role_to_user('root@weppcloud.com', 'User')
-    # user_datastore.add_role_to_user('root@weppcloud.com', 'PowerUser')
-    # user_datastore.add_role_to_user('root@weppcloud.com', 'Admin')
-    # user_datastore.add_role_to_user('root@weppcloud.com', 'Dev')
-    # user_datastore.add_role_to_user('root@weppcloud.com', 'Root')
-    #
-    # db.session.commit()
+    from os.path import exists
+
+    if exists('/geodata/weppcloud_runs/standalone.db'):
+        return
+
+    from wepppy.weppcloud import RunStatistics
+    try:
+        RunStatistics('/geodata/weppcloud_runs')
+    except:
+        pass
+
+    db.drop_all()
+    db.create_all()
+    user_datastore.create_role(name='User', description='Regular WeppCloud User')
+    user_datastore.create_role(name='PowerUser', description='WeppCloud PowerUser')
+    user_datastore.create_role(name='Admin', description='WeppCloud Administrator')
+    user_datastore.create_role(name='Dev', description='Developer')
+    user_datastore.create_role(name='Root', description='Root')
+
+    user_datastore.create_user(email='root@weppcloud.com', password='test123',
+                               first_name='Super', last_name='User')
+    user_datastore.add_role_to_user('root@weppcloud.com', 'User')
+    user_datastore.add_role_to_user('root@weppcloud.com', 'PowerUser')
+    user_datastore.add_role_to_user('root@weppcloud.com', 'Admin')
+    user_datastore.add_role_to_user('root@weppcloud.com', 'Dev')
+    user_datastore.add_role_to_user('root@weppcloud.com', 'Root')
+
+    db.session.commit()
 
     assert 1
