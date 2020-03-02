@@ -33,7 +33,6 @@ class BullRunBedrock(object):
             object_id = rdi.get_location_info(lng, lat, method='nearest')
             return self._d[object_id]
         except RDIOutOfBoundsException:
-            print(lng, lat, rdi.extent)
             return self._d[0]
 
 
@@ -58,7 +57,6 @@ class ShallowLandSlideSusceptibility(object):
             object_id = rdi.get_location_info(lng, lat, method='nearest')
             return self._d[object_id]
         except RDIOutOfBoundsException:
-            print(lng, lat, rdi.extent)
             return self._d[0]
 
 
