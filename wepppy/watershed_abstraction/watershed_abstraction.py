@@ -664,7 +664,7 @@ class WatershedAbstraction:
     def centroid(self) -> CentroidSummary:
         return self._centroid
 
-    def abstract(self, wepp_chn_type='Default', verbose=False, warn=warn):
+    def abstract(self, wepp_chn_type='Default', verbose=False, warn=False):
         self.abstract_channels(wepp_chn_type=wepp_chn_type, verbose=verbose)
         self.abstract_subcatchments(verbose=verbose, warn=warn)
         self.abstract_structure(verbose=verbose)
