@@ -262,14 +262,12 @@ security = Security(app, user_datastore,
 # Create a user to test with
 @app.before_first_request
 def init_db():
-    if not _exists('/geodata/weppcloud_runs/standalone.db') and _hostname != 'wepp1':
+    if 'wepp1' in _hostname:
+        from wepppy.weppcloud.app_config import _init
+    else:
+        from wepppy.weppcloud.standalone_config import _init
 
-        if 'wepp1' in _hostname:
-            from wepppy.weppcloud.app_config import _init
-        else:
-            from wepppy.weppcloud.standalone_config import _init
-
-        _init(db, user_datastore)
+    _init(db, user_datastore)
 
 
 def get_run_owners(runid):
