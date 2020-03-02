@@ -1,5 +1,3 @@
-At line 3013 of file cligen53.f (unit = 9, file = 'data_45.53125_-122.03125.prn')
-Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, possibly use REWIND or BACKSPACE
 
 
   ********************************************************************
@@ -14,14 +12,19 @@ Fortran runtime error: Sequential READ or WRITE not allowed after EOF marker, po
   *                  Rainfall Intensity Calculations                 *
   *                   and Random Number Generation.                  *
   *                                                                  *
-  *                          VERSION 5.30000                         *
+  *                          VERSION 5.32000                         *
   *                     Revised from VERSION 4.2                     *
-  *                           October 2004                           *
-  *                                                                  *
   *           (Use -h or /h to list command line options.)           *
   *                                                                  *
   ********************************************************************
 
 
- or353770.par                                                                                                                                                                                                                                                    
- data_45.53125_-122.03125.prn                                                                                                                                                                                                                                    
+ or353770.par                                                                   
+                                                                                
+                                                                                
+                    
+ data_45.53125_-122.03125.prn                                                   
+                                                                                
+                                                                                
+                    
+Normal program termination

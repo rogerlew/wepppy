@@ -1,6 +1,7 @@
 import os
 from os.path import exists as _exists
 from os.path import join as _join
+from os.path import split as _split
 
 import shutil
 from glob import glob
@@ -8,7 +9,8 @@ from datetime import date, datetime, timedelta
 import numpy as np
 
 from wepppy.all_your_base import c_to_f
-from wepppy.climates.cligen import CligenStationsManager, Cligen
+from wepppy.climates.cligen import CligenStationsManager, Cligen, ClimateFile
+
 
 def read_livneh_datafn(fn, start_date='1-1-1915'):
 
@@ -72,8 +74,10 @@ if __name__ == "__main__":
     station_meta = station_manager.get_station_fromid(climatestation)
     print(station_meta.desc)
 
-    data_fns = glob('data*')
+    os.chdir('../')
 
+    data_fns = glob('data_1911-2015/data*')
+    print(data_fns)
     build_dir = 'build'
 
     if _exists(build_dir):
@@ -82,19 +86,26 @@ if __name__ == "__main__":
     os.mkdir(build_dir)
 
     for fn in data_fns:
-        lat, lng = fn.split('_')[1:]
+        print(fn)
+        _fn = _split(fn)[-1]
+        lat, lng = _fn.split('_')[1:]
         lat = float(lat)
         lng = float(lng)
         print(fn, lat, lng)
 
         prcp, tmax, tmin, ws, dates = read_livneh_datafn(fn)
 
-        prn_fn = _join(build_dir, fn + '.prn')
+        prn_fn = _fn + '.prn'
+        cli_fn = _fn + '.cli'
 
-        build_prn(prcp=prcp, tmin=tmin, tmax=tmax, dates=dates, prn_fn=prn_fn, start_year=1990)
+        build_prn(prcp=prcp, tmin=tmin, tmax=tmax, dates=dates, prn_fn=_join(build_dir, prn_fn), start_year=1990)
 
         cligen = Cligen(station_meta, wd=build_dir)
-        cligen.run_observed(prn_fn=fn + '.prn', cli_fn=fn + '.cli')
+        cligen.run_observed(prn_fn=prn_fn, cli_fn=cli_fn)
+
+        cli = ClimateFile(_join(build_dir, cli_fn))
+        cli.discontinuous_temperature_adjustment(date(2005, 11, 2))
+        cli.write(_join(build_dir, cli_fn))
 
         #results = station_manager \
         #    .get_stations_heuristic_search((lng, lat), 10)
