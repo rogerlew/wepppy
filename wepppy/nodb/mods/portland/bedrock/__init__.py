@@ -9,7 +9,9 @@ from wepppy.all_your_base import RasterDatasetInterpolator, RDIOutOfBoundsExcept
 _thisdir = os.path.dirname(__file__)
 
 """
-roger@wepp1:/usr/lib/python3/dist-packages/wepppy/nodb/mods/portland/bedrock⟫ gdal_rasterize -l Bedrock -a OBJECTID -tr 30.0 30.0 -a_nodata 0.0 -te 862644.9015748054 1331481.7965879291 977244.4967191529 1395676.03969816 -ot Byte -of GTiff -at Bedrock.shp Bedrock.tif
+> gdal_rasterize -l Bedrock -a OBJECTID -tr 30.0 30.0 -a_nodata 0.0 -te 862644.9015748054 1331481.7965879291 977244.4967191529 1395676.03969816 -ot Byte -of GTiff -at Bedrock.shp Bedrock.tif
+> gdalwarp  -t_srs EPSG:26910 -r near -of vrt Bedrock.tif Bedrock_utm.vrt
+> gdal_translate -co compress=LZW Bedrock_utm.vrt Bedrock_utm.tif
 """
 
 
@@ -29,7 +31,7 @@ class BullRunBedrock(object):
 
     def get_bedrock(self, lng, lat):
         try:
-            rdi = RasterDatasetInterpolator(_join(_thisdir, 'Bedrock.tif'))
+            rdi = RasterDatasetInterpolator(_join(_thisdir, 'Bedrock_utm.tif'))
             object_id = rdi.get_location_info(lng, lat, method='nearest')
             return self._d[object_id]
         except RDIOutOfBoundsException:
@@ -53,7 +55,7 @@ class ShallowLandSlideSusceptibility(object):
 
     def get_bedrock(self, lng, lat):
         try:
-            rdi = RasterDatasetInterpolator(_join(_thisdir, 'Shallow_Landslide_Susceptibility.tif'))
+            rdi = RasterDatasetInterpolator(_join(_thisdir, 'Shallow_Landslide_Susceptibility_utm.tif'))
             object_id = rdi.get_location_info(lng, lat, method='nearest')
             return self._d[object_id]
         except RDIOutOfBoundsException:
