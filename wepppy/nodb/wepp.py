@@ -307,7 +307,7 @@ class Wepp(NoDbBase, LogMixin):
     #
     # hillslopes
     #
-    def prep_hillslopes(self):
+    def prep_hillslopes(self, frost=False, baseflow=True):
         self.log('Prepping Hillslopes... ')
 
         translator = Watershed.getInstance(self.wd).translator_factory()
@@ -318,9 +318,15 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_soils(translator)
         self._prep_climates(translator)
         self._make_hillslope_runs(translator)
-        #self._prep_frost()
+
+        if frost:
+            self._prep_frost()
+
         self._prep_phosphorus()
-        self._prep_baseflow()
+
+        if baseflow:
+            self._prep_baseflow()
+
         self._prep_wepp_ui()
 
         self.log_done()
@@ -345,6 +351,17 @@ class Wepp(NoDbBase, LogMixin):
         fn = _join(self.runs_dir, 'tcr.txt')
         with open(fn, 'w') as fp:
             fp.write('\n')
+
+    def _prep_pmet(self):
+        fn = _join(self.runs_dir, 'pmetpara.txt')
+        with open(fn, 'w') as fp:
+            fp.write("""5
+mic_0547,0.95,0.70,1,undistub/thin
+Shr_8709,0.95,0.70,2,Mica_clearcut
+For_8425,0.95,0.70,3,undistub/thin
+For_5352,1.2,1.2,4,forest
+For_5688,1.2,1.2,5,forest
+""")
 
     def _prep_phosphorus(self):
 
@@ -621,7 +638,8 @@ class Wepp(NoDbBase, LogMixin):
     #
     # watershed
     #
-    def prep_watershed(self, erodibility=None, critical_shear=None):
+    def prep_watershed(self, erodibility=None, critical_shear=None,
+                       tcr=False, pmet=False):
         self.log('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -634,7 +652,13 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_channel_soils(translator, erodibility, critical_shear)
         self._prep_channel_climate(translator)
         self._prep_channel_input()
-        #self._prep_tcr()
+
+        if tcr:
+            self._prep_tcr()
+
+        if pmet:
+            self._prep_pmet()
+
         self._prep_watershed_managements(translator)
         self._make_watershed_run(translator)
 
