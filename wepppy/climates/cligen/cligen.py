@@ -9,6 +9,7 @@
 import os
 from os.path import join as _join
 from os.path import exists as _exists
+from os.path import split as _split
 
 from subprocess import (
     Popen, PIPE
@@ -16,7 +17,7 @@ from subprocess import (
 
 import numpy as np
 
-from datetime import datetime, timedelta
+import datetime
 import subprocess
 import shutil
 import math
@@ -200,7 +201,7 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     p, tmax, tmin = '', '', ''
     for index, row in df.iterrows():
 
-        mo, da, yr = int(index.month), int(index.day), int(index.year)
+        mo, da, yr = int(row.month), int(row.day), int(row.year)
         p, tmax, tmin = row[p_key], row[tmax_key], row[tmin_key]
 
         if math.isnan(p) or math.isnan(tmax) or math.isnan(tmin):
@@ -229,7 +230,8 @@ def build_gridmet_prn(gridmet_dir, start_year, end_year, prn_fn, verbose=False):
             assert _exists(fn)
             d[var] = [float(x) for x in list(np.load(fn))]
 
-        d['dates'] = [datetime(year, 1, 1) + timedelta(i) for i, _ in enumerate(d['pr'])]
+        d['dates'] = [datetime.datetime(year, 1, 1) +
+                      datetime.timedelta(i) for i, _ in enumerate(d['pr'])]
 
         d['pr'] = np.array(d['pr'])
         d['pr'] /= 25.4
@@ -251,7 +253,8 @@ def build_gridmet_prn(gridmet_dir, start_year, end_year, prn_fn, verbose=False):
     fp.close()
     
 
-def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verbose=False):
+def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verbose=False,
+                     discontinuous_temperature_adjustment_pars=None):
 
     fp = open(prn_fn, 'w')
     for year in range(start_year, end_year + 1):
@@ -277,7 +280,7 @@ def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verb
         d['tmin'] = np.round(c_to_f(d['tmin']))
 
         for i, (prcp, tmin, tmax) in enumerate(zip(d['prcp'], d['tmin'], d['tmax'])):
-            _date = datetime(year, 1, 1) + timedelta(i)
+            _date = datetime.datetime(year, 1, 1) + datetime.timedelta(i)
 
             fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                      .format(_date.month, _date.day, _date.year, int(prcp), int(tmax), int(tmin)))
@@ -319,6 +322,66 @@ class ClimateFile(object):
         self.header = header
         self.colnames = colnames
 
+    def discontinuous_temperature_adjustment(self, target_date: datetime.date):
+        """
+        adjusts tmax, tmin, and tdew with discontinuous observed climate datasets. e.g. climate station moved at
+        a date or recalibrated.
+
+        Data before the target date are adjusted as follows:
+        tmax = tmax - tmax_diff
+        tmin = tmin - tmin_diff
+
+        if tdew > tmin:
+            tdew = tmin
+        where:
+            tmax_diff = average tmax after date - average tmax before date
+            tmin_diff = average tmin after date - average tmin before date
+
+        :param target_date:
+        :return:
+        """
+
+        assert isinstance(target_date, datetime.date)
+
+        yr, mo, da = target_date.year, target_date.month, target_date.day
+        df = self.as_dataframe()
+        _dates = {(int(row.year), int(row.mo), int(row.da)): i for i, row in df.iterrows()}
+        assert (yr, mo, da) in _dates
+        indx = _dates[(yr, mo, da)]
+
+        tmaxs = df.tmax.to_numpy()
+        tmax_diff = np.mean(tmaxs[:indx]) - np.mean(tmaxs[indx:])
+        tmaxs[:indx] -= tmax_diff
+
+        tmins = df.tmin.to_numpy()
+        tmin_diff = np.mean(tmins[:indx]) - np.mean(tmins[indx:])
+        tmins[:indx] -= tmin_diff
+
+        tdews = df.tdew.to_numpy()
+        tdew_indx = np.where(tdews < tmins)
+        tdews[tdew_indx] = tmins[tdew_indx]
+
+        _dates = list(_dates.keys())
+        self.replace_var('tmax', _dates, tmaxs)
+        self.replace_var('tmin', _dates, tmins)
+        self.replace_var('tdew', _dates, tdews)
+
+    def transform_precip(self, offset: float, scale: float):
+        """
+        linearly transforms precipitation by:
+        new_precip = offset + precip * scale
+
+        :param offset:
+        :param scale:
+        :return:
+        """
+        df = self.as_dataframe()
+        _dates = [(int(row.year), int(row.mo), int(row.da)) for i, row in df.iterrows()]
+
+        prcp = df.prcp.to_numpy()
+        prcp = offset + prcp * scale
+        self.replace_var('prcp', _dates, prcp)
+
     def replace_var(self, colname, dates, values):
         """
         supports the post processing of wepp files generated from
@@ -332,7 +395,7 @@ class ClimateFile(object):
 
         d = dict(zip(dates, values))
 
-        is_datetime = isinstance(dates[0], datetime)
+        is_datetime = isinstance(dates[0], datetime.datetime)
 
         for i, L in enumerate(self.lines[self.data0line:]):
             row = [v.strip() for v in L.split()]
@@ -344,7 +407,7 @@ class ClimateFile(object):
             day, month, year = [int(v) for v in row[:3]]
 
             if is_datetime:
-                date = datetime(year, month, day)
+                date = datetime.datetime(year, month, day)
             else:
                 date = int(year), int(month), int(day)
 
@@ -1014,7 +1077,7 @@ class Cligen:
             print(cmd)
 
         # run cligen
-        _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fn[:-4])), "w")
+        _log = open(_join(cli_dir, "cligen_{}.log".format(_split(cli_fn)[-1][:-4])), "w")
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait()
         _log.close()
