@@ -385,13 +385,37 @@ class Loss(object):
                 hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
                 hill_tbl[i]['Soil'] = soils.domsoil_d[str(topaz_id)]
                 hill_tbl[i]['Length'] = sub_summary['length']
-                hill_tbl[i]['Runoff'] = 100 * row['Runoff Volume'] / (area * 1000.0)
-                hill_tbl[i]['Subrunoff'] = 100 * row['Subrunoff Volume'] / (area * 1000.0)
-                hill_tbl[i]['Baseflow'] = 100 * row['Baseflow Volume'] / (area * 1000.0)
 
-                _loss = row['Soil Loss'] / area
-                _dep = row['Sediment Deposition'] / area
-                _yield = row['Sediment Yield'] / area
+                if isfloat(row['Runoff Volume']):
+                    hill_tbl[i]['Runoff'] = 100 * row['Runoff Volume'] / (area * 1000.0)
+                else:
+                    hill_tbl[i]['Runoff'] = float('nan')
+
+                if isfloat(row[i]['Subrunoff Volume']):
+                    hill_tbl[i]['Subrunoff'] = 100 * row['Subrunoff Volume'] / (area * 1000.0)
+                else:
+                    hill_tbl[i]['Subrunoff'] = float('nan')
+
+                if isfloat(row['Baseflow Volume']):
+                    hill_tbl[i]['Baseflow'] = 100 * row['Baseflow Volume'] / (area * 1000.0)
+                else:
+                    hill_tbl[i]['Baseflow'] = float('nan')
+
+                if isfloat(row['Soil Loss']):
+                    _loss = row['Soil Loss'] / area
+                else:
+                    _loss = float('nan')
+
+                if isfloat(row['Sediment Deposition']):
+                    _dep = row['Sediment Deposition'] / area
+                else:
+                    _dep = float('nan')
+
+                if isfloat(row['Sediment Yield']):
+                    _yield = row['Sediment Yield'] / area
+                else:
+                    _yield = float('nan')
+
                 hill_tbl[i]['Soil Loss Density'] = _loss
                 hill_tbl[i]['Sediment Deposition Density'] = _dep
                 hill_tbl[i]['Sediment Yield Density'] = _yield
