@@ -391,7 +391,7 @@ class Loss(object):
                 else:
                     hill_tbl[i]['Runoff'] = float('nan')
 
-                if isfloat(row[i]['Subrunoff Volume']):
+                if isfloat(row['Subrunoff Volume']):
                     hill_tbl[i]['Subrunoff'] = 100 * row['Subrunoff Volume'] / (area * 1000.0)
                 else:
                     hill_tbl[i]['Subrunoff'] = float('nan')
