@@ -55,7 +55,6 @@ def cmyk_to_rgb(c, m, y, k):
 
 def utm_srid(zone, datum='WGS84', hemisphere='N'):
     zone = str(zone)
-    print('utm_srid', zone, datum, datum=='WGS84', hemisphere, hemisphere=='N')
     if hemisphere == 'N':
         if datum == 'NAD83':
             return {
