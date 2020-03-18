@@ -100,11 +100,13 @@ from wepppy.nodb import (
     Rhem, RhemPost,
     Baer,
     DebrisFlow,
-    Ash
+    Ash, AshPost
 )
 
 from wepppy.nodb.mods.ash_transport import BlackAshModel, WhiteAshModel, AshType
 
+
+# load app configuration based on deployment
 import socket
 _hostname = socket.gethostname()
 if 'wepp1' in _hostname:
@@ -123,6 +125,7 @@ mail = Mail(app)
 # Setup Flask-Security
 # Create database connection object
 db = SQLAlchemy(app)
+
 
 @app.context_processor
 def inject_site_prefix():
@@ -841,7 +844,6 @@ def hillslope0_ash(runid, config, topaz_id):
         os.mkdir(ash_dir)
 
     unitizer = Unitizer.getInstance(wd)
-
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
     wepp_id = translator.wepp(top=topaz_id)
@@ -861,11 +863,13 @@ def hillslope0_ash(runid, config, topaz_id):
     prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
     recurrence = [100, 50, 20, 10, 2.5, 1]
     if _ash_type == AshType.BLACK:
-        _, results, annuals, = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
-                                               ash_dir, prefix=prefix, recurrence=recurrence)
+        _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+                                                        ash_dir, prefix=prefix, recurrence=recurrence,
+                                                        ini_ash_depth=ini_ash_depth)
     elif _ash_type == AshType.WHITE:
         _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
-                                               ash_dir, prefix=prefix, recurrence=recurrence)
+                                                        ash_dir, prefix=prefix, recurrence=recurrence,
+                                                        ini_ash_depth=ini_ash_depth)
     else:
         raise ValueError
 
@@ -3333,13 +3337,18 @@ def report_ash(runid, config):
 
     ron = Ron.getInstance(wd)
     ash = Ash.getInstance(wd)
+    ashpost = AshPost.getInstance(wd)
+
     fire_date = ash.fire_date
     ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
     ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
     unitizer = Unitizer.getInstance(wd)
 
     burnclass_summary = ash.burnclass_summary()
-    recurrence_intervals, results, annuals, sev_annuals = ash.report(recurrence=rec_intervals)
+    summary_stats = ashpost.summary_stats
+    recurrence_intervals = [str(v) for v in summary_stats['recurrence']]
+    results = summary_stats['return_periods']
+    annuals = summary_stats['annuals']
 
     return render_template('reports/ash/ash_watershed.htm',
                            unitizer_nodb=unitizer,
@@ -3382,6 +3391,7 @@ def report_ash_by_hillslope(runid, config):
     ron = Ron.getInstance(wd)
     loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
     ash = Ash.getInstance(wd)
+    ashpost = AshPost.getInstance(wd)
 
     out_rpt = OutletSummary(loss)
     hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
@@ -3396,7 +3406,7 @@ def report_ash_by_hillslope(runid, config):
     ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
 
     burnclass_summary = ash.burnclass_summary()
-    recurrence_intervals, results, annuals, sev_annuals = ash.report()
+    ash_out = ashpost.ash_out
 
     return render_template('reports/ash/ash_watershed_by_hillslope.htm',
                            out_rpt=out_rpt,
@@ -3411,9 +3421,7 @@ def report_ash_by_hillslope(runid, config):
                            burnclass_summary=burnclass_summary,
                            ini_black_ash_depth_mm=ini_black_ash_depth_mm,
                            ini_white_ash_depth_mm=ini_white_ash_depth_mm,
-                           recurrence_intervals=recurrence_intervals,
-                           results=results,
-                           annuals=annuals,
+                           ash_out=ash_out,
                            ash=ash,
                            ron=ron,
                            user=current_user)
@@ -3431,6 +3439,7 @@ def report_contaminant(runid, config):
 
         ron = Ron.getInstance(wd)
         ash = Ash.getInstance(wd)
+        ashpost = AshPost.getInstance(wd)
 
         if request.method == 'POST':
             ash.parse_inputs(dict(request.form))
@@ -3438,18 +3447,22 @@ def report_contaminant(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        if not ash.has_watershed_summaries:
-            ash.report()
+        # if not ash.has_watershed_summaries:
+        #     ash.report()
 
-        actual_reccurence, results = ash.reservoir_report(recurrence=rec_intervals)
+        reservoir_stats = ashpost.reservoir_stats
+        recurrence_intervals = reservoir_stats['reccurence']
+        results = reservoir_stats['return_periods']
+        pw0_stats = ashpost.pw0_stats
 
         # return jsonify(dict(rec_intervals=[str(v) for v in actual_reccurence],
         #                     rec_results=results))
         return render_template('reports/ash/ash_contaminant.htm',
-                               rec_intervals=actual_reccurence,
+                               rec_intervals=recurrence_intervals,
                                rec_results=results,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
+                               pw0_stats=pw0_stats,
                                ash=ash,
                                ron=ron,
                                user=current_user)
@@ -3616,6 +3629,6 @@ if __name__ == '__main__':
 
     # sudo docker run -i -p 5003:80 -v /Users/roger/geodata:/geodata -v /Users/roger/wepppy/wepppy:/workdir/wepppy/wepppy  -t wepppydocker-base
 
-#rsync -av --progress --exclude=_scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
-#rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=_scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
+#rsync -av --progress --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
+#rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
 
