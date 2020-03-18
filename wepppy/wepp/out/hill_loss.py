@@ -73,7 +73,7 @@ class HillLoss(object):
 
 if __name__ == "__main__":
     from pprint import pprint
-    hill_loss = HillLoss('/home/weppdev/PycharmProjects/wepppy/wepppy/_scripts/RRED_RattleSnake_Burned/wepp/output/H1.loss.dat')
+    hill_loss = HillLoss('/home/weppdev/PycharmProjects/wepppy/wepppy/scripts/RRED_RattleSnake_Burned/wepp/output/H1.loss.dat')
     print(hill_loss.fraction_under(particle_size=0.016))
     print(hill_loss.fraction_under(particle_size=0.0))
     print(hill_loss.fraction_under(particle_size=1.0))
