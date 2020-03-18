@@ -30,7 +30,7 @@ def parse_float(x):
 
 class HillWat:
     def __init__(self, fname):
-        assert _exists(fname)
+        assert _exists(fname), fname
 
         self.fname = fname
 
@@ -151,9 +151,10 @@ if __name__ == "__main__":
     from glob import glob
     from os.path import join as _join
 
-    test_wd = '/Volumes/Space/geodata/weppcloud_runs/3ddb4fe8-ad90-4c5b-8ac9-19aa46a0d5c9/wepp/output/'
+    test_wd = '/Users/roger/wepppy/wepppy/tests/feverish-lamp/wepp/output'
     fns = glob(_join(test_wd, '*.wat.dat'))
     for fn in fns:
         print(fn)
         wat = HillWat(fn)
-        pprint(wat.as_dict())
+        pprint(wat.data.keys())
+        input()
