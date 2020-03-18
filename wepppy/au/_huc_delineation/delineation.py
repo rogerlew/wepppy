@@ -14,10 +14,18 @@ import matplotlib.pyplot as plt
 from osgeo import gdal, osr, ogr
 import pyproj
 
-from wepppy.all_your_base import wgs84_proj4, read_raster, haversine, RasterDatasetInterpolator
+from wepppy.all_your_base import wgs84_proj4, read_raster, haversine, RasterDatasetInterpolator, RDIOutOfBoundsException
 from wepppy.all_your_base import shapefile
 from wepppy.nodb import (
-    Ron, Topaz, Watershed, Landuse, LanduseMode, Soils, SoilsMode, Baer, Climate, ClimateSpatialMode, Wepp, Ash
+    Ron,
+    Topaz,
+    Watershed,
+    Landuse, LanduseMode,
+    Soils, SoilsMode,
+    Baer,
+    Climate, ClimateSpatialMode,
+    Wepp,
+    Ash, AshPost
 )
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
@@ -281,12 +289,18 @@ class WatershedBoundaryDataset:
 
                 _centroid_lng, _centroid_lat = _wat['centroid']
 
-                _sbs2 = gwc2.get_location_info(_centroid_lng, _centroid_lat, method='near')
-                if _sbs2 < 0:
+                try:
+                    _sbs2 = gwc2.get_location_info(_centroid_lng, _centroid_lat, method='near')
+                    if _sbs2 < 0:
+                        _sbs2 = None
+                except RDIOutOfBoundsException:
                     _sbs2 = None
 
-                _sbs6 = gwc6.get_location_info(_centroid_lng, _centroid_lat, method='near')
-                if _sbs6 < 0:
+                try:
+                    _sbs6 = gwc6.get_location_info(_centroid_lng, _centroid_lat, method='near')
+                    if _sbs6 < 0:
+                        _sbs6 = None
+                except RDIOutOfBoundsException:
                     _sbs6 = None
 
                 if _sbs2 is None and _sbs6 is None:
@@ -369,8 +383,16 @@ class WatershedBoundaryDataset:
 
             ash = Ash.getInstance(wd)
             ash.run_ash(fire_date='8/4', ini_white_ash_depth_mm=5.0, ini_black_ash_depth_mm=5.0)
-            _recurrence, _return_periods, _annuals, _sev_annuals = ash.report()
-            ash.reservoir_report()
+
+            ashpost = AshPost.getInstance(wd)
+
+            ash_summary = ashpost.summary_stats
+
+            _recurrence = ash_summary['recurrence']
+            _return_periods = ash_summary['return_periods']
+            _annuals = ash_summary['annuals']
+            _sev_annuals = ash_summary['sev_annuals']
+            ash_out = ashpost.ash_out
 
             for topaz_id, hill_summary in wat.sub_iter():
                 print(topaz_id)
@@ -386,9 +408,9 @@ class WatershedBoundaryDataset:
                           centroid_lat=_centroid_lat,
                           landuse=_landuse['key'],
                           soil_texture=_soils['simple_texture'],
-                          ash_wind_transport=ash.get_annual_wind_transport(topaz_id),
-                          ash_water_transport=ash.get_annual_water_transport(topaz_id),
-                          ash_transport=ash.get_annual_ash_transport(topaz_id))
+                          ash_wind_transport=ash_out[topaz_id]['wind_transport (kg/ha)'],
+                          ash_water_transport=ash_out[topaz_id]['water_transport (kg/ha)'],
+                          ash_transport=ash_out[topaz_id]['ash_transport (kg/ha)'])
                 csv_wtr.writerow(_d)
 
             print('exporting arcmap resources')
