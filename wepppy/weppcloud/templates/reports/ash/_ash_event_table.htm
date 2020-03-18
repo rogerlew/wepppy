@@ -25,15 +25,16 @@
     <tbody>
     {% for rec_interval in recurrence_intervals %}
         {% if results[measure][rec_interval] is not none %}
+        {%  set _rec_interval = rec_interval | string %}
         <tr>
-        <td>{{ unitizer(results[measure][rec_interval][measure], units) | safe }}</td>
-        <td>{{ unitizer(results[measure][rec_interval]['probability'], '%') | safe  }}</td>
+        <td>{{ unitizer(results[measure][_rec_interval][measure], units) | safe }}</td>
+        <td>{{ unitizer(results[measure][_rec_interval]['probability'], '%') | safe  }}</td>
         <td>{{ rec_interval }}</td>
-        <td>{{ results[measure][rec_interval]['year'] }}</td>
-        <td>{{ results[measure][rec_interval]['mo'] }}</td>
-        <td>{{ results[measure][rec_interval]['da'] }}</td>
-        <td>{{ results[measure][rec_interval]['days_from_fire'] }}</td>
-        <td>{{ results[measure][rec_interval]['rank'] }}</td>
+        <td>{{ results[measure][_rec_interval]['year'] }}</td>
+        <td>{{ results[measure][_rec_interval]['mo'] }}</td>
+        <td>{{ results[measure][_rec_interval]['da'] }}</td>
+        <td>{{ results[measure][_rec_interval]['days_from_fire'] }}</td>
+        <td>{{ results[measure][_rec_interval]['rank'] }}</td>
         </tr>
         {% endif %}
     {% endfor %}
