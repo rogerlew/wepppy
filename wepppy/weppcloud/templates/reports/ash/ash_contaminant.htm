@@ -68,9 +68,9 @@
 </tr>
 
 {% set burnclass_summary = ash.burnclass_summary() %}
-{% set high_ash = ash.get_annual_watershed_water_transport_by_burnclass(4) %}
-{% set mod_ash = ash.get_annual_watershed_water_transport_by_burnclass(3) %}
-{% set low_ash = ash.get_annual_watershed_water_transport_by_burnclass(2) %}
+{% set high_ash = pw0_stats['water']['4'] %}
+{% set mod_ash = pw0_stats['water']['3'] %}
+{% set low_ash = pw0_stats['water']['2'] %}
 
 <tr>
     <td>High</td>
@@ -125,9 +125,10 @@
     {% endfor %}
 </tr>
 {% for rec in rec_intervals %}
-    {% set _delivery_low = rec_results[2][rec]['value'] %}
-    {% set _delivery_mod = rec_results[3][rec]['value'] %}
-    {% set _delivery_high = rec_results[4][rec]['value'] %}
+    {% set _rec = rec | string %}
+    {% set _delivery_low = rec_results['2'][_rec]['value'] %}
+    {% set _delivery_mod = rec_results['3'][_rec]['value'] %}
+    {% set _delivery_high = rec_results['4'][_rec]['value'] %}
     {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
 <tr>
     <td>{{ rec }}</td>
@@ -195,9 +196,10 @@
     {% endfor %}
 </tr>
 {% for rec in rec_intervals %}
-    {% set _delivery_low = rec_results[2][rec]['value'] %}
-    {% set _delivery_mod = rec_results[3][rec]['value'] %}
-    {% set _delivery_high = rec_results[4][rec]['value'] %}
+    {% set _rec = rec | string %}
+    {% set _delivery_low = rec_results['2'][_rec]['value'] %}
+    {% set _delivery_mod = rec_results['3'][_rec]['value'] %}
+    {% set _delivery_high = rec_results['4'][_rec]['value'] %}
     {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
     <tr>
         <td>{{ rec }}</td>
