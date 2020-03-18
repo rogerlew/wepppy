@@ -15,7 +15,7 @@ from collections import OrderedDict
 
 from copy import deepcopy
 
-from wepppy.all_your_base import parse_units, parse_name, RowData, flatten
+from wepppy.all_your_base import parse_units, parse_name, RowData, flatten, isfloat
 
 from wepppy.wepp.out import Loss
 from wepppy.wepp.stats.report_base import ReportBase
@@ -41,15 +41,22 @@ _hill_phos_hdr = [
     'Total P Density (kg/ha,3)'
 ]
 
+_hill_ash_hdr = [
+    'Wind Transport (kg/ha)',
+    'Water Transport (kg/ha)',
+    'Burnclass'
+]
 
 class HillSummary(ReportBase):
-    def __init__(self, loss: Loss, class_fractions=False, fraction_under=None, subs_summary=None):
+    def __init__(self, loss: Loss, class_fractions=False, fraction_under=None, subs_summary=None,
+                 ash_out=None):
         self.loss_fn = loss.fn
         self.data = loss.hill_tbl
         self.has_phosphorus = loss.has_phosphorus
         self.class_fractions = class_fractions
         self.fraction_under = fraction_under
         self.subs_summary = subs_summary
+        self.ash_out = ash_out
 
         self._hdr = deepcopy(_hill_default_hdr)
 
@@ -79,12 +86,16 @@ class HillSummary(ReportBase):
                 'Sediment Yield of Particles Under %0.3f mm (kg/ha)' % self.fraction_under,
             ])
 
+        if ash_out:
+            self._hdr.extend(_hill_ash_hdr)
+
     @property
     def header(self):
         return [colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for colname in self._hdr]
 
     def __iter__(self):
         subs_summary = self.subs_summary
+        ash_out = self.ash_out
 
         data = self.data
         for i in range(len(data)):
@@ -125,6 +136,11 @@ class HillSummary(ReportBase):
                     _data.append(('Particle Fraction Under %0.3f mm' % self.fraction_under, frac))
                     _data.append(('Sediment Yield of Particles Under %0.3f mm (kg/ha)' % self.fraction_under,
                                   frac * sed_yield))
+
+            if ash_out:
+                _data.append(('Wind Transport (kg/ha)', ash_out[topaz_id]['wind_transport (kg/ha)']))
+                _data.append(('Water Transport (kg/ha)', ash_out[topaz_id]['water_transport (kg/ha)']))
+                _data.append(('Burnclass', ash_out[topaz_id]['burnclass']))
 
             yield RowData(OrderedDict(_data))
 
@@ -205,13 +221,28 @@ class ChannelSummary(ReportBase):
                                .replace('Soil Loss', 'Channel Erosion')
 
                 if 'Discharge' in colname:
-                    _data['Discharge (mm)'] = data[i]['Discharge Volume'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
+                    if isfloat(data[i]['Discharge Volume']):
+                        _data['Discharge (mm)'] = data[i]['Discharge Volume'] /\
+                                                  data[i]['Contributing Area'] / 10000.0 * 1000.0
+                    else:
+                        _data['Discharge (mm)'] = float('nan')
                 elif 'Upland Charge' in colname:
-                    _data['Upland Charge (mm)'] = data[i]['Upland Charge'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
+                    if isfloat(data[i]['Upland Charge']):
+                        _data['Upland Charge (mm)'] = data[i]['Upland Charge'] /\
+                                                      data[i]['Contributing Area'] / 10000.0 * 1000.0
+                    else:
+                        _data['Upland Charge (mm)'] = float('nan')
                 elif 'Subsuface Flow' in colname:
-                    _data['Lateral Flow (mm)'] = data[i]['Subsuface Flow Volume'] / data[i]['Contributing Area'] / 10000.0 * 1000.0
+                    if isfloat(data[i]['Subsuface Flow Volume']):
+                        _data['Lateral Flow (mm)'] = data[i]['Subsuface Flow Volume'] /\
+                                                     data[i]['Contributing Area'] / 10000.0 * 1000.0
+                    else:
+                        _data['Lateral Flow (mm)'] = float('nan')
                 elif 'Soil Loss' in colname:
-                    _data['Soil Loss (tonne)'] = data[i]['Soil Loss'] / 1000.0
+                    if isfloat(data[i]['Soil Loss']):
+                        _data['Soil Loss (tonne)'] = data[i]['Soil Loss'] / 1000.0
+                    else:
+                        _data['Soil Loss (tonne)'] = float('nan')
                 else:
                     _data[cname] = data[i][parse_name(colname)]
 
