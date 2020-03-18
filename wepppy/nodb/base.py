@@ -330,3 +330,7 @@ class NoDbBase(object):
     @property
     def observed_fn(self):
         return _join(self.observed_dir, 'observed.csv')
+
+    @property
+    def ash_dir(self):
+        return _join(self.wd, 'ash')
