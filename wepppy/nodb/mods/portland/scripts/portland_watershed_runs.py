@@ -137,10 +137,10 @@ if __name__ == '__main__':
                       csa=10, mcl=100)
                ]
 
-    scenarios = ['daymet_groundwater_pmetpara',
-                 'daymet_landslides_pmetpara',
-                 'gridmet_groundwater_pmetpara',
-                 'gridmet_landslides_pmetpara'
+    scenarios = [#'daymet_groundwater_pmetpara',
+                 #'daymet_landslides_pmetpara',
+                 'gridmet_groundwater.2_pmetpara',
+                 #'gridmet_landslides_pmetpara'
                  ]
 
     config = 'portland.cfg'
@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
                         climate.climate_mode = ClimateMode.Observed
                         climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                        climate.set_observed_pars(start_year=1980, end_year=2017)
+                        climate.set_observed_pars(start_year=1990, end_year=2017)
 
                         climate.build(verbose=1)
 
@@ -312,7 +312,7 @@ if __name__ == '__main__':
 
                         climate.climate_mode = ClimateMode.GridMetPRISM
                         climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                        climate.set_observed_pars(start_year=1980, end_year=2017)
+                        climate.set_observed_pars(start_year=1990, end_year=2017)
 
                         climate.build(verbose=1)
 
