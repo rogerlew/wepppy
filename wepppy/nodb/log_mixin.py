@@ -6,6 +6,8 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from os.path import exists as _exists
+
 import warnings
 from datetime import datetime
 
@@ -34,8 +36,15 @@ class LogMixin(object):
             return None, None, None
 
     def _write(self, msg):
-        with open(self.status_log, 'a') as fp:
-            fp.write(msg)
+        if _exists(self.status_log):
+            with open(self.status_log, 'a') as fp:
+                fp.write(msg)
+        else:
+            try:
+                with open(self.status_log, 'w') as fp:
+                    fp.write(msg)
+            except FileNotFoundError:
+                warnings.warn('FileNotFoundError')
 
     def get_log_last(self):
         r_elapsed, t_elapsed, s = self._calc_log_elapsed()
