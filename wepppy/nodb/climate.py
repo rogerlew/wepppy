@@ -124,7 +124,7 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
-            self._input_years = 30
+            self._input_years = 100
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
 
