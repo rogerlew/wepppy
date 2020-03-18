@@ -81,7 +81,7 @@ class AshModel(object):
             return lookup_wind_threshold_white_ash_proportion(w)
 
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 20, 10, 5, 2.5, 1], area_ha=None):
+                  recurrence=[100, 50, 20, 10, 5, 2.5, 1], area_ha=None, ini_ash_depth=None):
         """
         Runs the ash model for a hillslope
 
@@ -101,6 +101,10 @@ class AshModel(object):
         :return:
             returns the output file name, return period results dictionary
         """
+
+        if ini_ash_depth is not None:
+            self.ini_ash_depth_mm = float(ini_ash_depth)
+
         # copy the DataFrame
         df = deepcopy(cli_df)
 
