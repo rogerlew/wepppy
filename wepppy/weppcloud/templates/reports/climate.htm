@@ -28,18 +28,18 @@
     <tbody>
       <tr>
         <td>Average Annual Precipitation</td>
-        <td>{{ unitizer(sum(climate.monthlies.ppts), 'in') | safe }}</td>
-        <td>{{ unitizer_units('in') | safe }}</td>
+        <td style="width:4em;">  {{ unitizer(sum(climate.monthlies.ppts), 'in') | safe }}  </td>
+        <td>  {{ unitizer_units('in') | safe }}  </td>
       </tr>
       <tr>
         <td>Average Monthly T Max</td>
-        <td>{{ unitizer(mean(climate.monthlies.tmaxs), 'degf') | safe }}</td>
-        <td>{{ unitizer_units('degf') | safe }}</td>
+        <td style="width:4em;">  {{ unitizer(mean(climate.monthlies.tmaxs), 'degf') | safe }}  </td>
+        <td>  {{ unitizer_units('degf') | safe }}  </td>
       </tr>
       <tr>
         <td>Average Monthly T Min</td>
-        <td>{{ unitizer(mean(climate.monthlies.tmins), 'degf') | safe }}</td>
-        <td>{{ unitizer_units('degf') | safe }}</td>
+        <td style="width:4em;">  {{ unitizer(mean(climate.monthlies.tmins), 'degf') | safe }}  </td>
+        <td>  {{ unitizer_units('degf') | safe }}  </td>
       </tr>
     </tbody>
  </table>
