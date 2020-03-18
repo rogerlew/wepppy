@@ -17,6 +17,8 @@ def arc_export(wd):
     topaz = Topaz.getInstance(wd)
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
+
+    ash_out = None
     try:
         ash = Ash.getInstance(wd)
     except FileNotFoundError:
@@ -130,8 +132,8 @@ def arc_export(wd):
 
         if ash is not None:
             if ash_out is not None:
-                f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
-                f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
+                f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
+                f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
                 f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
                 f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
 
