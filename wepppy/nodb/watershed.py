@@ -91,7 +91,6 @@ class Watershed(NoDbBase):
     def _lock(self):
         return _join(self.wd, 'watershed.nodb.lock')
 
-
     @property
     def wepp_chn_type(self):
         return getattr(self, '_wepp_chn_type', DEFAULT_WEPP_CHN_TYPE)
@@ -199,7 +198,7 @@ class Watershed(NoDbBase):
     def centroid(self) -> Tuple[float, float]:
         return self._centroid
 
-    def sub_summary(self, topaz_id) -> Dict:
+    def sub_summary(self, topaz_id) -> Union[Dict, None]:
         if self._subs_summary is None:
             return None
 
@@ -238,7 +237,7 @@ class Watershed(NoDbBase):
             for topaz_id, v in self._subs_summary.items():
                 yield topaz_id, v
 
-    def chn_summary(self, topaz_id) -> Generator[ChannelSummary, None, None]:
+    def chn_summary(self, topaz_id) -> Union[Generator[ChannelSummary, None, None], None]:
         if str(topaz_id) in self._chns_summary:
             return self._chns_summary[str(topaz_id)].as_dict()
         else:
