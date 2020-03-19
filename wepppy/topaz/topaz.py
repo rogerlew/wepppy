@@ -393,7 +393,6 @@ class TopazRunner:
         if self.junction_mask is None:
             self._load_channel_masks()
 
-
         # The orientation of the map is a wonky in this algorithm.
         # we transpose the mask for the algorithm
         mask = self.junction_mask.T
