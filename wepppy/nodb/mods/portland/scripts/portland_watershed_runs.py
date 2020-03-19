@@ -219,6 +219,7 @@ if __name__ == '__main__':
                     else:
                         ron = Ron.getInstance(wd)
                         topaz = Topaz.getInstance(wd)
+                        watershed = Watershed.getInstance(wd)
 
                     landuse = Landuse.getInstance(wd)
                     if build_landuse:
@@ -233,7 +234,6 @@ if __name__ == '__main__':
                             landuse.modify(topaz_ids, default_landuse)
 
                     soils = Soils.getInstance(wd)
-                    watershed = Watershed.getInstance(wd)
                     if build_soils:
                         print('building soils')
                         soils.mode = SoilsMode.Gridded
