@@ -421,5 +421,5 @@ class WatershedBoundaryDataset:
 
 if __name__ == "__main__":
 
-    wbd = WatershedBoundaryDataset("gwc_watersheds_sm")
+    wbd = WatershedBoundaryDataset("gwc_subcatchments")
 
