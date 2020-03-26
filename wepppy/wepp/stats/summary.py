@@ -138,9 +138,9 @@ class HillSummary(ReportBase):
                                   frac * sed_yield))
 
             if ash_out:
-                _data.append(('Wind Transport (kg/ha)', ash_out[topaz_id]['wind_transport (kg/ha)']))
-                _data.append(('Water Transport (kg/ha)', ash_out[topaz_id]['water_transport (kg/ha)']))
-                _data.append(('Burnclass', ash_out[topaz_id]['burnclass']))
+                _data.append(('Wind Transport (kg/ha)', ash_out[str(topaz_id)]['wind_transport (kg/ha)']))
+                _data.append(('Water Transport (kg/ha)', ash_out[str(topaz_id)]['water_transport (kg/ha)']))
+                _data.append(('Burnclass', ash_out[str(topaz_id)]['burnclass']))
 
             yield RowData(OrderedDict(_data))
 

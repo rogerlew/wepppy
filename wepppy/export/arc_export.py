@@ -8,7 +8,7 @@ import sys
 from subprocess import Popen, PIPE
 from glob import glob
 
-from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash
+from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash, AshPost
 
 
 def arc_export(wd):
@@ -21,12 +21,13 @@ def arc_export(wd):
     ash_out = None
     try:
         ash = Ash.getInstance(wd)
+        ash_post = AshPost.getInstance(wd)
     except FileNotFoundError:
-        ash = ash_out = None
+        ash = ash_post = ash_out = None
 
-    if ash is not None:
+    if ash_post is not None:
         try:
-            ash_out = ash.get_ash_out()
+            ash_out = ash_post.ash_out
         except:
             ash_out = None
 
