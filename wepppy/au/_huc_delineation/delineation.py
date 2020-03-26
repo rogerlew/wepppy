@@ -391,7 +391,7 @@ class WatershedBoundaryDataset:
             assert _exists(fn)
 
             ash = Ash.getInstance(wd)
-            ash.run_ash(fire_date='8/4', ini_white_ash_depth_mm=5.0, ini_black_ash_depth_mm=5.0)
+            ash.run_ash(fire_date='8/4', ini_white_ash_depth_mm=16.5625, ini_black_ash_depth_mm=17.166666666666668)
 
             ashpost = AshPost.getInstance(wd)
 
