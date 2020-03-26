@@ -70,7 +70,7 @@ class AshPost(NoDbBase):
     # noinspection PyPep8Naming
     @staticmethod
     def getInstance(wd):
-        with open(_join(wd, 'AshPost.nodb')) as fp:
+        with open(_join(wd, 'ashpost.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, AshPost), db
 
@@ -86,11 +86,11 @@ class AshPost(NoDbBase):
 
     @property
     def _nodb(self):
-        return _join(self.wd, 'AshPost.nodb')
+        return _join(self.wd, 'ashpost.nodb')
 
     @property
     def _lock(self):
-        return _join(self.wd, 'AshPost.nodb.lock')
+        return _join(self.wd, 'ashpost.nodb.lock')
 
     @property
     def ash_out(self):
