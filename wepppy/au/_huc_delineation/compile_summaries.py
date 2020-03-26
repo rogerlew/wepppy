@@ -7,13 +7,13 @@ from os.path import split as _split
 import sys
 import shutil
 from glob import glob
-from wepppy.nodb import Ron, Wepp, Ash
+from wepppy.nodb import Ron, Wepp, Ash, AshPost
 from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, SedimentDelivery
 
 
 if __name__ == "__main__":
-    prefix = 'au_2020_gwc'
-    outdir = '/home/roger/%s_csvs' % prefix
+    prefix = 'au_2020_gwc2'
+    outdir = '/geodata/au/%s_csvs' % prefix
 
     if _exists(outdir):
         res = input('Outdir exists, Delete outdir?')
@@ -32,11 +32,15 @@ if __name__ == "__main__":
     fp_out = open(_join(outdir, '%s_out_summary.csv' % prefix), 'w')
     fp_sd = open(_join(outdir, '%s_sed_del_summary.csv' % prefix), 'w')
 
+    write_header = True
     for i, wd in enumerate(wds):
         if not os.path.isdir(wd):
             continue
+
         print(wd)
-        write_header = i == 0
+
+        if not _exists(_join(wd, 'wepp/output/loss_pw0.txt')):
+            continue
 
         ron = Ron.getInstance(wd)
         subcatchments_summary = {_d['meta']['topaz_id']: _d for _d in ron.subs_summary()}
@@ -45,14 +49,16 @@ if __name__ == "__main__":
         ash_out = None
         try:
             ash = Ash.getInstance(wd)
+            ash_post = AshPost.getInstance(wd)
         except FileNotFoundError:
-            ash = ash_out = None
+            ash = ash_post = ash_out = None
 
-        if ash is not None:
+        if ash_post is not None:
             try:
-                ash_out = ash.get_ash_out()
+                ash_out = ash_post.ash_out
             except:
                 ash_out = None
+                raise
 
         name = ron.name
 
@@ -79,6 +85,9 @@ if __name__ == "__main__":
         chn_rpt.write(fp_chn, write_header=write_header, run_descriptors=run_descriptors)
         out_rpt.write(fp_out, write_header=write_header, run_descriptors=run_descriptors)
         sed_del.write(fp_sd, write_header=write_header, run_descriptors=run_descriptors)
+
+        if write_header:
+            write_header = False
 
     fp_hill.close()
     fp_chn.close()
