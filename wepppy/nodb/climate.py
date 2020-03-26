@@ -42,9 +42,12 @@ from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-if NCPU < 1:
-    NCPU = 1
+try:
+    NCPU = int(os.environ['WEPPPY_NCPU'])
+except KeyError:
+    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
+    if NCPU < 1:
+        NCPU = 1
 
 CLIMATE_MAX_YEARS = 1000
 

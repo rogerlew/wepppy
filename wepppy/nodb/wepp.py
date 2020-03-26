@@ -82,9 +82,12 @@ from .topaz import Topaz
 from .wepppost import WeppPost
 from .log_mixin import LogMixin
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-if NCPU < 1:
-    NCPU = 1
+try:
+    NCPU = int(os.environ['WEPPPY_NCPU'])
+except KeyError:
+    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
+    if NCPU < 1:
+        NCPU = 1
 
 
 class ChannelRoutingMethod(IntEnum):

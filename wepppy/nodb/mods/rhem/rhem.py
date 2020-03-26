@@ -90,9 +90,12 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 
 from .rhempost import RhemPost
 
-NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-if NCPU < 1:
-    NCPU = 1
+try:
+    NCPU = int(os.environ['WEPPPY_NCPU'])
+except KeyError:
+    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
+    if NCPU < 1:
+        NCPU = 1
 
 
 class RhemNoDbLockedException(Exception):
