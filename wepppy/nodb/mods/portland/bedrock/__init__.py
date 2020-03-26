@@ -21,7 +21,10 @@ class BullRunBedrock(object):
             csv_rdr = csv.DictReader(fp)
             d = {}
             for row in csv_rdr:
-                row['ksat'] = float(row['ksat'])
+                try:
+                    row['ksat'] = float(row['ksat'])
+                except:
+                    row['ksat'] = None
                 row['Shape_Leng'] = float(row['Shape_Leng'])
                 row['Shape_Area'] = float(row['Shape_Area'])
                 row['OBJECTID'] = int(row['OBJECTID'])
@@ -44,7 +47,11 @@ class ShallowLandSlideSusceptibility(object):
             csv_rdr = csv.DictReader(fp)
             d = {}
             for row in csv_rdr:
-                row['ksat'] = float(row['ksat'])
+                try:
+                    row['ksat'] = float(row['ksat'])
+                except:
+                    row['ksat'] = None
+
                 try:
                     row['OBJECTID'] = int(row['OBJECTID'])
                 except:
@@ -60,7 +67,6 @@ class ShallowLandSlideSusceptibility(object):
             return self._d[object_id]
         except RDIOutOfBoundsException:
             return self._d[0]
-
 
 
 if __name__ == "__main__":
