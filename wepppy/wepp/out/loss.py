@@ -387,32 +387,32 @@ class Loss(object):
                 hill_tbl[i]['Length'] = sub_summary['length']
 
                 if isfloat(row['Runoff Volume']):
-                    hill_tbl[i]['Runoff'] = 100 * row['Runoff Volume'] / (area * 1000.0)
+                    hill_tbl[i]['Runoff'] = 100 * float(row['Runoff Volume']) / (area * 1000.0)
                 else:
                     hill_tbl[i]['Runoff'] = float('nan')
 
                 if isfloat(row['Subrunoff Volume']):
-                    hill_tbl[i]['Subrunoff'] = 100 * row['Subrunoff Volume'] / (area * 1000.0)
+                    hill_tbl[i]['Subrunoff'] = 100 * float(row['Subrunoff Volume']) / (area * 1000.0)
                 else:
                     hill_tbl[i]['Subrunoff'] = float('nan')
 
                 if isfloat(row['Baseflow Volume']):
-                    hill_tbl[i]['Baseflow'] = 100 * row['Baseflow Volume'] / (area * 1000.0)
+                    hill_tbl[i]['Baseflow'] = 100 * float(row['Baseflow Volume']) / (area * 1000.0)
                 else:
                     hill_tbl[i]['Baseflow'] = float('nan')
 
                 if isfloat(row['Soil Loss']):
-                    _loss = row['Soil Loss'] / area
+                    _loss = float(row['Soil Loss']) / area
                 else:
                     _loss = float('nan')
 
                 if isfloat(row['Sediment Deposition']):
-                    _dep = row['Sediment Deposition'] / area
+                    _dep = float(row['Sediment Deposition']) / area
                 else:
                     _dep = float('nan')
 
                 if isfloat(row['Sediment Yield']):
-                    _yield = row['Sediment Yield'] / area
+                    _yield = float(row['Sediment Yield']) / area
                 else:
                     _yield = float('nan')
 
@@ -422,13 +422,22 @@ class Loss(object):
                 hill_tbl[i]['DepLoss'] = _yield - _dep
 
                 if 'Solub. React. Phosphorus' in row:
-                    hill_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
+                    if isfloat(row['Solub. React. Phosphorus']):
+                        hill_tbl[i]['Solub. React. P Density'] = float(row['Solub. React. Phosphorus']) / area
+                    else:
+                        hill_tbl[i]['Solub. React. P Density'] = float('nan')
 
                 if 'Particulate Phosphorus' in row:
-                    hill_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
+                    if isfloat(row['Particulate Phosphorus']):
+                        hill_tbl[i]['Particulate P Density'] = float(row['Particulate Phosphorus']) / area
+                    else:
+                        hill_tbl[i]['Particulate P Density'] = float('nan')
 
                 if 'Total Phosphorus' in row:
-                    hill_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
+                    if isfloat(row['Total Phosphorus']):
+                        hill_tbl[i]['Total P Density'] = float(row['Total Phosphorus']) / area
+                    else:
+                        hill_tbl[i]['Total P Density'] = float('nan')
 
             for i in range(len(chn_tbl)):
                 row = chn_tbl[i]
@@ -447,30 +456,30 @@ class Loss(object):
                 chn_tbl[i]['Length'] = chn_summary['length']
 
                 if isfloat(row['Sediment Yield']):
-                    chn_tbl[i]['Sediment Yield Density'] = row['Sediment Yield'] / area
+                    chn_tbl[i]['Sediment Yield Density'] = float(row['Sediment Yield']) / area
                 else:
                     chn_tbl[i]['Sediment Yield Density'] = float('nan')
 
                 if isfloat(row['Soil Loss']):
-                    chn_tbl[i]['Soil Loss Density'] = row['Soil Loss'] / area
+                    chn_tbl[i]['Soil Loss Density'] = float(row['Soil Loss']) / area
                 else:
                     chn_tbl[i]['Soil Loss Density'] = float('nan')
 
                 if 'Solub. React. Phosphorus' in row:
                     if isfloat(row['Solub. React. Phosphorus']):
-                        chn_tbl[i]['Solub. React. P Density'] = row['Solub. React. Phosphorus'] / area
+                        chn_tbl[i]['Solub. React. P Density'] = float(row['Solub. React. Phosphorus']) / area
                     else:
                         chn_tbl[i]['Solub. React. P Density'] = float('nan')
 
                 if 'Particulate Phosphorus' in row:
                     if isfloat(row['Particulate Phosphorus']):
-                        chn_tbl[i]['Particulate P Density'] = row['Particulate Phosphorus'] / area
+                        chn_tbl[i]['Particulate P Density'] = float(row['Particulate Phosphorus']) / area
                     else:
                         chn_tbl[i]['Particulate P Density'] = float('nan')
 
                 if 'Total Phosphorus' in row:
                     if isfloat(row['Total Phosphorus']):
-                        chn_tbl[i]['Total P Density'] = row['Total Phosphorus'] / area
+                        chn_tbl[i]['Total P Density'] = float(row['Total Phosphorus']) / area
                     else:
                         chn_tbl[i]['Total P Density'] = float('nan')
 
