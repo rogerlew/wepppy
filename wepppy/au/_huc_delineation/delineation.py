@@ -1,5 +1,8 @@
 
 import sys
+
+sys.path.append('/workdir/wepppy/')
+
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -14,7 +17,13 @@ import matplotlib.pyplot as plt
 from osgeo import gdal, osr, ogr
 import pyproj
 
-from wepppy.all_your_base import wgs84_proj4, read_raster, haversine, RasterDatasetInterpolator, RDIOutOfBoundsException
+from wepppy.all_your_base import (
+    wgs84_proj4,
+    read_raster,
+    haversine,
+    RasterDatasetInterpolator,
+    RDIOutOfBoundsException
+)
 from wepppy.all_your_base import shapefile
 from wepppy.nodb import (
     Ron,
