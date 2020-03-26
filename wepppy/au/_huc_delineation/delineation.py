@@ -417,9 +417,9 @@ class WatershedBoundaryDataset:
                           centroid_lat=_centroid_lat,
                           landuse=_landuse['key'],
                           soil_texture=_soils['simple_texture'],
-                          ash_wind_transport=ash_out[topaz_id]['wind_transport (kg/ha)'],
-                          ash_water_transport=ash_out[topaz_id]['water_transport (kg/ha)'],
-                          ash_transport=ash_out[topaz_id]['ash_transport (kg/ha)'])
+                          ash_wind_transport=ash_out[str(topaz_id)]['wind_transport (kg/ha)'],
+                          ash_water_transport=ash_out[str(topaz_id)]['water_transport (kg/ha)'],
+                          ash_transport=ash_out[str(topaz_id)]['ash_transport (kg/ha)'])
                 csv_wtr.writerow(_d)
 
             print('exporting arcmap resources')
