@@ -70,6 +70,10 @@ blacklist = [
     '259',  # a large bounding box around the subcatchments
 ]
 
+chn_routing_err_topaz_pars = {
+    '198': dict(csa=10.1, mcl=200.2)
+}
+
 
 def build_mask(points, georef_fn):
 
@@ -224,7 +228,8 @@ class WatershedBoundaryDataset:
             topaz = Topaz.getInstance(wd)
 
             print('building channels')
-            topaz.build_channels(csa=10, mcl=200)
+            topaz_pars = chn_routing_err_topaz_pars.get(huc12, dict(csa=10, mcl=200))
+            topaz.build_channels(**topaz_pars)
 
             print('find raster indices')
             # print('"', topaz.utmproj4, '"')
