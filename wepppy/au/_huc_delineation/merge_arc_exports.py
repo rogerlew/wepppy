@@ -40,7 +40,7 @@ if __name__ == "__main__":
         from wepppy.export import archive_project, arc_export
 
         try:
-        #   arc_export(wd)
+           arc_export(wd)
            _wds.append(wd)
            print(wd)
         except:
