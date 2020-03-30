@@ -1,10 +1,13 @@
+import sys
+
+sys.path.append('/workdir/wepppy/')
+
 import os
 
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 
-import sys
 import shutil
 from glob import glob
 from wepppy.nodb import Ron, Wepp, Ash, AshPost

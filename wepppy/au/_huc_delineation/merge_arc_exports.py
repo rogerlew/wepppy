@@ -1,5 +1,8 @@
-import shutil
 import sys
+
+sys.path.append('/workdir/wepppy/')
+
+import shutil
 import os
 from os.path import join as _join
 from os.path import exists as _exists
