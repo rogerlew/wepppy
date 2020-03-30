@@ -33,14 +33,13 @@ if __name__ == "__main__":
         if not os.path.isdir(wd):
             continue
 
-
         if not _exists(_join(wd, 'wepp/output/loss_pw0.txt')):
             continue
 
         from wepppy.export import archive_project, arc_export
 
         try:
-           arc_export(wd)
+#           arc_export(wd)
            _wds.append(wd)
            print(wd)
         except:
