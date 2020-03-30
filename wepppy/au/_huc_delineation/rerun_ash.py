@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append('/workdir/wepppy/')
+
 import os
 from glob import glob
 
