@@ -219,7 +219,7 @@ class WatershedBoundaryDataset:
             ron.name = wd
 
             print('setting map')
-            pad = max(abs(bbox[0] - bbox[2]), abs(bbox[1] - bbox[3])) * 0.2
+            pad = max(abs(bbox[0] - bbox[2]), abs(bbox[1] - bbox[3])) * 0.4
             map_center = (bbox[0] + bbox[2]) / 2.0,  (bbox[1] + bbox[3]) / 2.0
             l, b, r, t = bbox
             bbox = [l - pad, b - pad, r + pad, t + pad]
