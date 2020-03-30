@@ -52,10 +52,12 @@ outlet_locs = {
     '123': (150.203247, -34.003217),
     '137': (150.400806, -34.059555),
     '138': (150.155435, -34.040962),
-    '175': (150.3904197, -34.1589295),
+    '175': (150.3900, -34.1589),
     '177': (150.454035, -34.135170),
+    '199': (150.3474, -34.2182),
     '201': (150.23246, -34.22814),
     '206': (150.320811, -34.184367),
+    '218': (150.3476, -34.2643),
     '222': (150.21148, -34.27796),
     '225': (150.344941, -34.276337),
     '232': (150.38096, -34.20016),
@@ -70,7 +72,7 @@ blacklist = [
     '33',   # might be too flat channel map has drainage from over ridge
     '178',  # in gwc_sbs6 map, area needs to be delineated from interface
     '259',  # a large bounding box around the subcatchments
-    '262',  # too large
+    '262',  # not actually a subcatchment
 ]
 
 chn_routing_err_topaz_pars = {
