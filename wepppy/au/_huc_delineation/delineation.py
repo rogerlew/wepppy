@@ -68,6 +68,7 @@ blacklist = [
     '33',   # might be too flat channel map has drainage from over ridge
     '178',  # in gwc_sbs6 map, area needs to be delineated from interface
     '259',  # a large bounding box around the subcatchments
+    '262',  # too large
 ]
 
 chn_routing_err_topaz_pars = {
