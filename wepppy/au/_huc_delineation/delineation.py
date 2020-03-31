@@ -165,8 +165,9 @@ class WatershedBoundaryDataset:
 #        records = sf.records()
 #        print(len(records))
 
-        gwc2 = RasterDatasetInterpolator('gwc_sbs2.tif')
-        gwc6 = RasterDatasetInterpolator('gwc_sbs6.tif')
+        gwc = RasterDatasetInterpolator('/geodata/weppcloud_runs/au/gwc_dnbr_barc4_utm.tif')
+        # gwc2 = RasterDatasetInterpolator('gwc_sbs2.tif')
+        # gwc6 = RasterDatasetInterpolator('gwc_sbs6.tif')
 
         fp_hill = open('%s_hill_summary.csv' % prefix, 'w')
         csv_wtr = csv.DictWriter(fp_hill, fieldnames=('huc', 'topaz_id', 'wepp_id',
@@ -309,30 +310,30 @@ class WatershedBoundaryDataset:
 
                 _centroid_lng, _centroid_lat = _wat['centroid']
 
-                try:
-                    _sbs2 = gwc2.get_location_info(_centroid_lng, _centroid_lat, method='near')
-                    if _sbs2 < 0:
-                        _sbs2 = None
-                except RDIOutOfBoundsException:
-                    _sbs2 = None
-
-                try:
-                    _sbs6 = gwc6.get_location_info(_centroid_lng, _centroid_lat, method='near')
-                    if _sbs6 < 0:
-                        _sbs6 = None
-                except RDIOutOfBoundsException:
-                    _sbs6 = None
-
-                if _sbs2 is None and _sbs6 is None:
-                    _sbs = 0
-
-                elif _sbs2 is not None:
-                    _sbs = _sbs2
-                    is_gwc2 = True
-
-                else:
-                    _sbs = _sbs6
-                    is_gwc6 = True
+                # try:
+                #     _sbs2 = gwc2.get_location_info(_centroid_lng, _centroid_lat, method='near')
+                #     if _sbs2 < 0:
+                #         _sbs2 = None
+                # except RDIOutOfBoundsException:
+                #     _sbs2 = None
+                #
+                # try:
+                #     _sbs6 = gwc6.get_location_info(_centroid_lng, _centroid_lat, method='near')
+                #     if _sbs6 < 0:
+                #         _sbs6 = None
+                # except RDIOutOfBoundsException:
+                #     _sbs6 = None
+                #
+                # if _sbs2 is None and _sbs6 is None:
+                #     _sbs = 0
+                #
+                # elif _sbs2 is not None:
+                #     _sbs = _sbs2
+                #     is_gwc2 = True
+                #
+                # else:
+                #     _sbs = _sbs6
+                #     is_gwc6 = True
 
                 # _d = dict(huc=huc12, topaz_id=int(topaz_id), wepp_id=_wat['wepp_id'],
                 #           length=_wat['length'], width=_wat['width'], area=_wat['area'],
@@ -344,16 +345,20 @@ class WatershedBoundaryDataset:
                 #           sbs=_sbs)
                 # csv_wtr.writerow(_d)
 
-            if not is_gwc2 and not is_gwc6:
-                continue
+            # if not is_gwc2 and not is_gwc6:
+            #     continue
 
             baer = Baer.getInstance(wd)
-            if is_gwc2:
-                shutil.copyfile('gwc_sbs2.tif', _join(baer.baer_dir, 'gwc_sbs2.tif'))
-                baer.validate('gwc_sbs2.tif')
-            if is_gwc6:
-                shutil.copyfile('gwc_sbs6.tif', _join(baer.baer_dir, 'gwc_sbs6.tif'))
-                baer.validate('gwc_sbs6.tif')
+            # if is_gwc2:
+            #     shutil.copyfile('gwc_sbs2.tif', _join(baer.baer_dir, 'gwc_sbs2.tif'))
+            #     baer.validate('gwc_sbs2.tif')
+            # if is_gwc6:
+            #     shutil.copyfile('gwc_sbs6.tif', _join(baer.baer_dir, 'gwc_sbs6.tif'))
+            #     baer.validate('gwc_sbs6.tif')
+
+            os.symlink('/geodata/weppcloud_runs/au/gwc_dnbr_barc4_utm.tif',
+                       _join(baer.baer_dir, 'gwc_dnbr_barc4_utm.tif'))
+            baer.validate('gwc_dnbr_barc4_utm.tif')
 
             print('building landuse')
             landuse = Landuse.getInstance(wd)
