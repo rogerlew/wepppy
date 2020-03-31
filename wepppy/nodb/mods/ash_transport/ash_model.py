@@ -400,9 +400,6 @@ class AshModel(object):
             for j, (i, _row) in enumerate(yr_df.iterrows()):
                 val = _row[measure]
 
-                if val == 0.0:
-                    break
-
                 rank = j + 1
                 ri = (num_fire_years + 1) / rank
                 prob = probability_of_occurrence(ri, 1.0)
@@ -423,7 +420,7 @@ class AshModel(object):
                 val = _row[measure]
 
                 if val == 0.0:
-                    break
+                    continue
 
                 dff = _row['days_from_fire (days)']
                 rank = j + 1
