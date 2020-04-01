@@ -42,6 +42,7 @@ from wepppy.export import arc_export
 
 outlet_locs = {
     '17': (150.3171, -33.8460),
+    '20': (150.1857, -33.8344),
     '25': (150.26653, -33.85829),
     '36': (150.3402, -33.8555),
     '61': (150.1706178, -33.8001780),
@@ -300,7 +301,7 @@ class WatershedBoundaryDataset:
             translator = wat.translator_factory()
             topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
 
-            is_gwc2 = is_gwc6 = False
+            # is_gwc2 = is_gwc6 = False
 
             for topaz_id, hill_summary in wat.sub_iter():
                 print(topaz_id)
@@ -356,7 +357,7 @@ class WatershedBoundaryDataset:
             #     shutil.copyfile('gwc_sbs6.tif', _join(baer.baer_dir, 'gwc_sbs6.tif'))
             #     baer.validate('gwc_sbs6.tif')
 
-            os.symlink('/geodata/weppcloud_runs/au/gwc_dnbr_barc4_utm.tif',
+            shutil.copyfile('/geodata/weppcloud_runs/au/gwc_dnbr_barc4_utm.tif',
                        _join(baer.baer_dir, 'gwc_dnbr_barc4_utm.tif'))
             baer.validate('gwc_dnbr_barc4_utm.tif')
 
