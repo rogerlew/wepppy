@@ -413,31 +413,31 @@ class WatershedBoundaryDataset:
             ashpost = AshPost.getInstance(wd)
 
             ash_summary = ashpost.summary_stats
+            if ash_summary is not None:
+                _recurrence = ash_summary['recurrence']
+                _return_periods = ash_summary['return_periods']
+                _annuals = ash_summary['annuals']
+                _sev_annuals = ash_summary['sev_annuals']
+                ash_out = ashpost.ash_out
 
-            _recurrence = ash_summary['recurrence']
-            _return_periods = ash_summary['return_periods']
-            _annuals = ash_summary['annuals']
-            _sev_annuals = ash_summary['sev_annuals']
-            ash_out = ashpost.ash_out
+                for topaz_id, hill_summary in wat.sub_iter():
+                    print(topaz_id)
+                    _wat = hill_summary.as_dict()
+                    _landuse = landuse_summaries[str(topaz_id)]
+                    _soils = soils_summaries[str(topaz_id)]
+                    _centroid_lng, _centroid_lat = _wat['centroid']
 
-            for topaz_id, hill_summary in wat.sub_iter():
-                print(topaz_id)
-                _wat = hill_summary.as_dict()
-                _landuse = landuse_summaries[str(topaz_id)]
-                _soils = soils_summaries[str(topaz_id)]
-                _centroid_lng, _centroid_lat = _wat['centroid']
-
-                _d = dict(huc=huc12, topaz_id=int(topaz_id), wepp_id=_wat['wepp_id'],
-                          length=_wat['length'], width=_wat['width'], area=_wat['area'],
-                          slope=_wat['slope_scalar'],
-                          centroid_lng=_centroid_lng,
-                          centroid_lat=_centroid_lat,
-                          landuse=_landuse['key'],
-                          soil_texture=_soils['simple_texture'],
-                          ash_wind_transport=ash_out[str(topaz_id)]['wind_transport (kg/ha)'],
-                          ash_water_transport=ash_out[str(topaz_id)]['water_transport (kg/ha)'],
-                          ash_transport=ash_out[str(topaz_id)]['ash_transport (kg/ha)'])
-                csv_wtr.writerow(_d)
+                    _d = dict(huc=huc12, topaz_id=int(topaz_id), wepp_id=_wat['wepp_id'],
+                              length=_wat['length'], width=_wat['width'], area=_wat['area'],
+                              slope=_wat['slope_scalar'],
+                              centroid_lng=_centroid_lng,
+                              centroid_lat=_centroid_lat,
+                              landuse=_landuse['key'],
+                              soil_texture=_soils['simple_texture'],
+                              ash_wind_transport=ash_out[str(topaz_id)]['wind_transport (kg/ha)'],
+                              ash_water_transport=ash_out[str(topaz_id)]['water_transport (kg/ha)'],
+                              ash_transport=ash_out[str(topaz_id)]['ash_transport (kg/ha)'])
+                    csv_wtr.writerow(_d)
 
             print('exporting arcmap resources')
             arc_export(wd)
