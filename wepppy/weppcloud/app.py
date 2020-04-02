@@ -604,6 +604,7 @@ def create(config):
 @app.route('/runs/<string:runid>/<config>/create_fork')
 @app.route('/runs/<string:runid>/<config>/create_fork/')
 def create_fork(runid, config):
+
     # get working dir of original directory
     wd = get_wd(runid)
     owners = get_run_owners(runid)
@@ -642,6 +643,8 @@ def create_fork(runid, config):
         new_wd = get_wd(new_runid)
         if _exists(new_wd):
             continue
+
+        dir_created = True
 
     assert not _exists(new_wd)
 
