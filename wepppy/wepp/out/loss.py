@@ -61,6 +61,16 @@ def _parse_tbl(lines, hdr):
                 row.append(float(tok0))
                 row.append(float(tok1))
 
+            elif v.count('.') == 3:
+                # e.g. 0.010152.20288323.9
+                tok0 = v[:3]
+                tok1 = v[3:11]
+                tok2 = v[11:]
+
+                row.append(float(tok0))
+                row.append(float(tok1))
+                row.append(float(tok2))
+
             elif '.' in v:
 
                 if '*' in v:
@@ -197,7 +207,7 @@ class Loss(object):
         None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'ha', 'kg', 'kg', 'kg'
     )
 
-    def __init__(self, fn, has_phosphorus, wd=None, exclude_yr_indxs=None):
+    def __init__(self, fn, has_phosphorus=False, wd=None, exclude_yr_indxs=None):
         hill_hdr = self.hill_hdr
         hill_avg_hdr = self.hill_avg_hdr
         chn_hdr = self.chn_hdr
@@ -552,6 +562,10 @@ class Loss(object):
 
 if __name__ == "__main__":
 
+    loss = Loss('test/loss_pw0.txt')
+
+    import sys
+    sys.exit()
 
     loss = Loss('/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/wepp/output/loss_pw0.txt',
                 '/geodata/weppcloud_runs/devvm4b6-394f-4546-bdf9-cab068a50115/')
