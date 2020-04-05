@@ -83,7 +83,7 @@ blacklist = [
 ]
 
 chn_routing_err_topaz_pars = {
-    '198': dict(csa=10.1, mcl=200.2),
+    '198': dict(csa=30, mcl=200.0),
     '173': dict(csa=30, mcl=200.0),
     '175': dict(csa=30, mcl=200.0)
 }
