@@ -49,7 +49,8 @@ from wepppy.wepp.runner import (
     run_flowpath,
     make_watershed_run,
     make_ss_watershed_run,
-    run_watershed
+    run_watershed,
+    get_pmetpara_contents
 )
 from wepppy.wepp.management import (
     get_channel,
@@ -199,6 +200,11 @@ class PhosphorusOpts(object):
 class WeppNoDbLockedException(Exception):
     pass
 
+_RUN_WEPP_UI_DEFAULT = True
+_RUN_PMET_DEFAULT = True
+_RUN_FROST_DEFAULT = True
+_RUN_TCR_DEFAULT = True
+_RUN_BASEFLOW_DEFAULT = True
 
 class Wepp(NoDbBase, LogMixin):
     __name__ = 'Wepp'
@@ -232,11 +238,41 @@ class Wepp(NoDbBase, LogMixin):
                 sediment = config.getfloat('phosphorus_opts', 'sediment')
             except:
                 sediment = None
+
+            try:
+                _wepp_ui = config.getboolean('wepp', 'wepp_ui')
+            except:
+                _wepp_ui = _RUN_WEPP_UI_DEFAULT
+            try:
+                _pmet = config.getboolean('wepp', 'pmet')
+            except:
+                _pmet = _RUN_PMET_DEFAULT
+            try:
+                _frost = config.getboolean('wepp', 'frost')
+            except:
+                _frost = _RUN_FROST_DEFAULT
+            try:
+                _tcr = config.getboolean('wepp', 'tcr')
+            except:
+                _tcr = _RUN_TCR_DEFAULT
+            try:
+                _baseflow = config.getboolean('wepp', 'baseflow')
+            except:
+                _baseflow = _RUN_BASEFLOW_DEFAULT
+
+
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
                 lateral_flow=lateral_flow,
                 baseflow=baseflow,
                 sediment=sediment)
+
+            self._run_wepp_ui = _wepp_ui
+            self._run_pmet = _pmet
+            self._run_frost = _frost
+            self._run_tcr = _tcr
+            self._run_baseflow = _baseflow
+
 
             self.baseflow_opts = BaseflowOpts()
             self.run_flowpaths = False
@@ -283,6 +319,48 @@ class Wepp(NoDbBase, LogMixin):
     def status_log(self):
         return os.path.abspath(_join(self.runs_dir, 'status.log'))
 
+    @property
+    def run_tcr(self):
+        if not hasattr(self, "_run_tcr"):
+            return _RUN_TCR_DEFAULT
+
+        return self._run_tcr
+
+    @property
+    def run_wepp_ui(self):
+        if not hasattr(self, "_run_wepp_ui"):
+            return _RUN_WEPP_UI_DEFAULT
+
+        return self._run_wepp_ui
+
+    @property
+    def run_pmet(self):
+        if not hasattr(self, "_run_pmet"):
+            return _RUN_PMET_DEFAULT
+
+        return self._run_pmet
+
+    @property
+    def run_frost(self):
+        if not hasattr(self, "_run_frost"):
+            return _RUN_FROST_DEFAULT
+
+        return self._run_frost
+
+    @property
+    def run_tcr(self):
+        if not hasattr(self, "_run_tcr"):
+            return _RUN_TCR_DEFAULT
+
+        return self._run_tcr
+
+    @property
+    def run_baseflow(self):
+        if not hasattr(self, "_run_baseflow"):
+            return _RUN_BASEFLOW_DEFAULT
+
+        return self._run_baseflow
+
     def parse_inputs(self, kwds):
         self.lock()
 
@@ -305,12 +383,14 @@ class Wepp(NoDbBase, LogMixin):
 
     @property
     def has_phosphorus(self):
-        return self.has_run and self.phosphorus_opts.isvalid and _exists(_join(self.runs_dir, 'phosphorus.txt'))
+        return self.has_run and \
+               self.phosphorus_opts.isvalid and \
+               _exists(_join(self.runs_dir, 'phosphorus.txt'))
 
     #
     # hillslopes
     #
-    def prep_hillslopes(self, frost=False, baseflow=True):
+    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None):
         self.log('Prepping Hillslopes... ')
 
         translator = Watershed.getInstance(self.wd).translator_factory()
@@ -322,27 +402,23 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_climates(translator)
         self._make_hillslope_runs(translator)
 
-        if frost:
+        if (frost is None and self.run_frost) or frost:
             self._prep_frost()
 
         self._prep_phosphorus()
 
-        if baseflow:
+        if (baseflow is None and self.run_baseflow) or baseflow:
             self._prep_baseflow()
 
-        self._prep_wepp_ui()
+        if (wepp_ui is None and self.run_wepp_ui) or wepp_ui:
+            self._prep_wepp_ui()
 
         self.log_done()
 
     def _prep_wepp_ui(self):
         fn = _join(self.runs_dir, 'wepp_ui.txt')
-
-        if getattr(self, 'wepp_ui', False):
-            with open(fn, 'w') as fp:
-                fp.write('')
-        else:
-            if _exists(fn):
-                os.remove(fn)
+        with open(fn, 'w') as fp:
+            fp.write('')
 
     def _prep_frost(self):
         fn = _join(self.runs_dir, 'frost.txt')
@@ -358,13 +434,7 @@ class Wepp(NoDbBase, LogMixin):
     def _prep_pmet(self):
         fn = _join(self.runs_dir, 'pmetpara.txt')
         with open(fn, 'w') as fp:
-            fp.write("""5
-mic_0547,0.95,0.70,1,undistub/thin
-Shr_8709,0.95,0.70,2,Mica_clearcut
-For_8425,0.95,0.70,3,undistub/thin
-For_5352,1.2,1.2,4,forest
-For_5688,1.2,1.2,5,forest
-""")
+            fp.write(get_pmetpara_contents())
 
     def _prep_phosphorus(self):
 
@@ -642,7 +712,7 @@ For_5688,1.2,1.2,5,forest
     # watershed
     #
     def prep_watershed(self, erodibility=None, critical_shear=None,
-                       tcr=False, pmet=False):
+                       tcr=None, pmet=None):
         self.log('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -656,10 +726,10 @@ For_5688,1.2,1.2,5,forest
         self._prep_channel_climate(translator)
         self._prep_channel_input()
 
-        if tcr:
+        if (tcr is None and self.run_tcr) or tcr:
             self._prep_tcr()
 
-        if pmet:
+        if (pmet is None and self.run_pmet) or pmet:
             self._prep_pmet()
 
         self._prep_watershed_managements(translator)
