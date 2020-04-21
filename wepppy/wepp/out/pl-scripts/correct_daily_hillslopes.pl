@@ -104,7 +104,7 @@ while (<LIST>) {
 				$precip_total = $precip;
 				$rain_melt_total = $rain_melt;
 				$transpiration_total = $transpiration;
-				$evap_total = $evap;
+				$evap_total = $evap_soil + $evap_residue; #CD
 				$perc_total = $perc;
 				$runoff_out_last = $qofe;
 				$lateral_last = $lateral;
