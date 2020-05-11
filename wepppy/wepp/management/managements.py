@@ -20,9 +20,10 @@ entries can cause ambiguity. The rotations break if the condition cannot be foun
 in the db.
 """
 
-
+from glob import glob
 from os.path import join as _join
 from os.path import exists as _exists
+from os.path import split as _split
 
 import json
 from copy import deepcopy
@@ -36,7 +37,7 @@ _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
-_lu10v5ua_map_fn =  _join(_management_dir, "lu10v5ua_map.json")
+_lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 
 
 def _parse_julian(x):
@@ -1786,6 +1787,26 @@ def get_management(dom, _map=None) -> Management:
         raise InvalidManagementKey
         
     return Management(**d[k])
+
+
+def get_plant_loop_names(runs_dir):
+    plant_loops = set()
+    man_fns = glob(_join(runs_dir, '*.man'))
+
+    for man_fn in man_fns:
+        _fn = _split(man_fn)[-1]
+        if 'pw0' in _fn:
+            continue
+
+        man = Management(Key=None,
+                         ManagementFile=_fn,
+                         ManagementDir=runs_dir,
+                         Description='-',
+                         Color=(0, 0, 0, 0))
+
+        plant_loops.add(man.plants[0].name)
+
+    return list(plant_loops)
 
 
 if __name__ == "__main__":
