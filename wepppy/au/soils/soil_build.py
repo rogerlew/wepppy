@@ -93,7 +93,7 @@ def build_asris_soils(orders, soil_dir):
     for topaz_id, (lng, lat) in orders:
         d = query_asris(lng, lat)
 
-        key = hashlib.sha224(json.dumps(d).encode('utf-8')).hexdigest()
+        key = hashlib.sha224(json.dumps(d, allow_nan=False).encode('utf-8')).hexdigest()
 
         s = ['2006.2',
              '#',

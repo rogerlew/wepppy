@@ -327,8 +327,7 @@ class Climate(NoDbBase, LogMixin):
     # noinspection PyPep8Naming
     @property
     def onLoad_refreshStationSelection(self):
-        return json.dumps(self.climatestation_mode is not
-                          ClimateStationMode.Undefined)
+        return json.dumps(self.climatestation_mode is not ClimateStationMode.Undefined)
 
     @property
     def has_observed(self):

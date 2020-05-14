@@ -817,7 +817,7 @@ class TopazRunner:
 
         dst_fn2 = _join(self.topaz_wd, 'SUBCATCHMENTS.JSON')
         with open(dst_fn2, 'w') as fp:
-            json.dump(js, fp)
+            json.dump(js, fp, allow_nan=False)
 
         self._json_to_wgs(dst_fn2)
 
@@ -876,7 +876,7 @@ class TopazRunner:
 
         dst_wgs_fn = src_fn.replace('.JSON', '.WGS.JSON')
         with open(dst_wgs_fn, 'w') as fp:
-            json.dump(js, fp)
+            json.dump(js, fp, allow_nan=False)
 
         return
 
@@ -923,7 +923,7 @@ class TopazRunner:
 
         dst_fn2 = _join(self.topaz_wd, 'CHANNELS.JSON')
         with open(dst_fn2, 'w') as fp:
-            json.dump(js, fp)
+            json.dump(js, fp, allow_nan=False)
 
         # create a version in WGS 1984 (long/lat)
         self._json_to_wgs(dst_fn2)
@@ -972,7 +972,7 @@ class TopazRunner:
         js['features'] = _features
 
         with open(dst_fn, 'w') as fp:
-            json.dump(js, fp)
+            json.dump(js, fp, allow_nan=False)
 
         # create a version in WGS 1984 (long/lat)
         self._json_to_wgs(dst_fn)

@@ -138,7 +138,8 @@ class SurgoSpatializer(object):
 
         with open(dst_fname + '.meta', 'w') as fid:
             fid.write(json.dumps(meta, sort_keys=True,
-                                 indent=4, separators=(',', ': ')))
+                                 indent=4, separators=(',', ': '),
+                                 allow_nan=False))
 
         # create raster
         driver = gdal.GetDriverByName(drivername)
