@@ -19,4 +19,4 @@ for ds, path in catalog.items():
     js = check_output('gdalinfo -json ' + _join(path, ds), shell=True)
     info = json.loads(js.decode())
     with open(_join(_asris_grid_raster_dir, ds + '.json'), 'w') as fp:
-        json.dump(info, fp, indent=4, sort_keys=True)
+        json.dump(info, fp, indent=4, sort_keys=True, allow_nan=False)

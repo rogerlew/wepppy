@@ -3833,7 +3833,7 @@ var Wepp = function () {
             });
         };
 
-        that.set_hourly_seepage = function (state) {
+        that.set_run_wepp_routine = function (routine, state) {
             var self = instance;
             var task_msg = "Setting hourly_seepage (" + state + ")";
 
@@ -3841,8 +3841,8 @@ var Wepp = function () {
             self.stacktrace.text("");
 
             $.post({
-                url: "tasks/set_hourly_seepage/",
-                data: JSON.stringify({ hourly_seepage: state }),
+                url: "tasks/set_run_wepp_routine/",
+                data: JSON.stringify({routine: routine, state: state }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
@@ -3856,7 +3856,6 @@ var Wepp = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
-
         };
 
         that.set_flowpaths = function (state) {

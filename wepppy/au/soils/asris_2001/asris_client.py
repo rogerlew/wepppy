@@ -73,7 +73,7 @@ def query_asris(lng, lat):
         d = d['results']
 
         with open(fn, 'w') as fp:
-            json.dump(d, fp)
+            json.dump(d, fp, allow_nan=False)
 
     _d = {row['layerName'].replace(' (value/1000)', ''): row for row in d}
     for name in _d:

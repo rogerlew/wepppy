@@ -121,6 +121,9 @@ def cli2pat(prcp=50, dur=2, tp=0.3, ip=4, max_time=[10, 30, 60]):
         last_b = b
         b = the_b(b, tp, ip)
 
+    if tp == 1:
+        tp = 0.999
+
     d = b*tp/(1-tp)
     starts = [None for i in max_time]
     ends = [None for i in max_time]
