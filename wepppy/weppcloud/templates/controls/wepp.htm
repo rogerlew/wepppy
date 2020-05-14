@@ -17,11 +17,31 @@
             <br/><br/>
             {% if user.has_role('PowerUser') %}
             <h5>Hourly Seepage</h5>
+            <p>Computes hourly instead of daily seepage calculations.</p>
             <label class="form-check-label">
                 <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_hourly_seepage(this.checked);"
-                       {% if wepp.wepp_ui %}checked{% endif %}>
-                Run hourly seepage
+                       onchange="Wepp.getInstance().set_run_wepp_routine('wepp_ui', this.checked);"
+                       {% if wepp.run_wepp_ui %}checked{% endif %}>
+                Run hourly seepage (wepp_ui.txt)
+            </label>
+            <br/><br/>
+            <h5>PMET</h5>
+                <p>Computes evaporation and transpiration (ET) based on Penman-Monteith’s equation. The default is
+                    Penman’s equation.</p>
+            <label class="form-check-label">
+                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+                       onchange="Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"
+                       {% if wepp.run_pmet %}checked{% endif %}>
+                Run PMET (pmetpara.txt)
+            </label>
+            <br/><br/>
+            <h5>Frost</h5>
+                <p>Multiple frozen soil hydraulic conductivity factors for different land use types.</p>
+            <label class="form-check-label">
+                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+                       onchange="Wepp.getInstance().set_run_wepp_routine('frost', this.checked);"
+                       {% if wepp.run_frost %}checked{% endif %}>
+                Run Frost (frost.txt)
             </label>
             <br/><br/>
             {% endif %}

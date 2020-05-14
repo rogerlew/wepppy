@@ -28,7 +28,7 @@ for wd in wds:
     js = check_output('gdalinfo -json ' + _split(wd)[0], shell=True)
     info = json.loads(js.decode())
     with open(ds + '.json', 'w') as fp:
-        json.dump(info, fp, indent=4, sort_keys=True)
+        json.dump(info, fp, indent=4, sort_keys=True, allow_nan=False)
 
 
 

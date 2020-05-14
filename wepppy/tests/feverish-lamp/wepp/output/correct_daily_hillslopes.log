@@ -1,0 +1,7 @@
+rm: cannot remove 'water_file_list': No such file or directory
+rm: cannot remove '*.sed': No such file or directory
+rm: cannot remove '*.wat': No such file or directory
+Creating water output files (*.out) for each hillslope
+rm: cannot remove 'pass_file_list': No such file or directory
+rm: cannot remove '*.sum': No such file or directory
+Creating sediment output files (*.sed) for each hillslope
