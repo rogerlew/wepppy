@@ -2222,12 +2222,23 @@ def task_build_climate(runid, config):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/tasks/set_hourly_seepage', methods=['POST'])
-@app.route('/runs/<string:runid>/<config>/tasks/set_hourly_seepage/', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
 def task_set_hourly_seepage(runid, config):
 
     try:
-        state = request.json.get('hourly_seepage', None)
+        routine = request.json.get('routine', None)
+    except Exception:
+        return exception_factory('Error parsing routine')
+
+    if routine is None:
+        return error_factory('routine is None')
+
+    if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr']:
+        return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr']")
+
+    try:
+        state = request.json.get('state', None)
     except Exception:
         return exception_factory('Error parsing state')
 
@@ -2237,7 +2248,16 @@ def task_set_hourly_seepage(runid, config):
     try:
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
-        wepp.set_hourly_seepage(state)
+
+        if routine == 'wepp_ui':
+            wepp.set_run_wepp_ui(state)
+        elif routine == 'pmet':
+            wepp.set_run_pmet(state)
+        elif routine == 'frost':
+            wepp.set_run_frost(state)
+        elif routine == 'tcr':
+            wepp.set_run_tcr(state)
+
     except Exception:
         return exception_factory('Error setting state')
 
@@ -2874,6 +2894,8 @@ def report_wepp_return_periods(runid, config):
     climate = Climate.getInstance(wd)
     rec_intervals = _parse_rec_intervals(request, climate.years)
 
+    print('return_periods', runid, config, rec_intervals)
+
     ron = Ron.getInstance(wd)
     report = Wepp.getInstance(wd).report_return_periods(rec_intervals=rec_intervals)
     translator = Watershed.getInstance(wd).translator_factory()
@@ -2912,20 +2934,25 @@ def report_wepp_frq_flood(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/wepp/sediment_delivery')
 @app.route('/runs/<string:runid>/<config>/report/wepp/sediment_delivery/')
 def report_wepp_sediment_delivery(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    sed_del = Wepp.getInstance(wd).report_sediment_delivery()
-    translator = Watershed.getInstance(wd).translator_factory()
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        sed_del = Wepp.getInstance(wd).report_sediment_delivery()
+        translator = Watershed.getInstance(wd).translator_factory()
 
-    unitizer = Unitizer.getInstance(wd)
+        unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/wepp/sediment_delivery.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           sed_del=sed_del,
-                           translator=translator,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/wepp/sediment_delivery.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               sed_del=sed_del,
+                               translator=translator,
+                               ron=ron,
+                               user=current_user)
+
+    except Exception:
+        return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss. "
+                                 "Check that the loss_pw0.txt contains a class fractions table.")
 
 
 @app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments')
@@ -3101,8 +3128,6 @@ def unitizer_route(runid, config):
         contents = ctx_processer['unitizer'](float(value), in_units)
         return success_factory(contents)
 
-        return error_factory('loss_grid_wgs does not exist')
-
     except Exception:
         return exception_factory()
 
@@ -3119,8 +3144,6 @@ def unitizer_units_route(runid, config):
 
         contents = ctx_processer['unitizer_units'](in_units)
         return success_factory(contents)
-
-        return error_factory('loss_grid_wgs does not exist')
 
     except Exception:
         return exception_factory()
@@ -3548,7 +3571,7 @@ def combined_ws_viewer_url_gen():
        zoom is not None and \
        len(ws) > 0:
         url = _url.format(center_lat=center_lat, center_lng=center_lng,
-                          zoom=zoom, ws=json.dumps(ws), title=title,
+                          zoom=zoom, ws=json.dumps(ws, allow_nan=False), title=title,
                           phos_opts=phos_opts)
 
     return render_template('combined_ws_viewer_url_gen.htm',

@@ -18,7 +18,6 @@ from subprocess import Popen, PIPE
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_EXCEPTION
 
-
 from datetime import datetime
 import time
 
@@ -49,18 +48,21 @@ from wepppy.wepp.runner import (
     run_flowpath,
     make_watershed_run,
     make_ss_watershed_run,
-    run_watershed,
-    get_pmetpara_contents
+    run_watershed
 )
 from wepppy.wepp.management import (
     get_channel,
     merge_managements,
+    pmetpara_prep
 )
+
 
 from wepppy.all_your_base import (
     isfloat,
     read_arc,
-    wgs84_proj4
+    wgs84_proj4,
+    isnan,
+    isinf
 )
 
 from wepppy.wepp.out import (
@@ -91,27 +93,46 @@ except KeyError:
         NCPU = 1
 
 
+_RUN_WEPP_UI_DEFAULT = True
+_RUN_PMET_DEFAULT = True
+_RUN_FROST_DEFAULT = False
+_RUN_TCR_DEFAULT = False
+_RUN_BASEFLOW_DEFAULT = True
+
+
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
     MuskingumCunge = 4
 
 
 class BaseflowOpts(object):
-    def __init__(self):
+    def __init__(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
         """
         Stores the coeffs that go into gwcoeff.txt
         """
         # Initial groundwater storage (mm)
-        self.gwstorage = 200
+        if gwstorage is None:
+            self.gwstorage = 200
+        else:
+            self.gwstorage = gwstorage
 
         # Baseflow coefficient (per day)
-        self.bfcoeff = 0.04
+        if bfcoeff is None:
+            self.bfcoeff = 0.04
+        else:
+            self.bfcoeff = bfcoeff
 
         # Deep seepage coefficient (per day)
-        self.dscoeff = 0
+        if dscoeff is None:
+            self.dscoeff = 0
+        else:
+            self.dscoeff = dscoeff
 
         # Watershed groundwater baseflow threshold area (ha)
-        self.bfthreshold = 1
+        if bfthreshold is None:
+            self.bfthreshold = 1
+        else:
+            self.bfthreshold = bfthreshold
 
     def parse_inputs(self, kwds):
         self.gwstorage = float(kwds['gwstorage'])
@@ -200,11 +221,6 @@ class PhosphorusOpts(object):
 class WeppNoDbLockedException(Exception):
     pass
 
-_RUN_WEPP_UI_DEFAULT = True
-_RUN_PMET_DEFAULT = True
-_RUN_FROST_DEFAULT = True
-_RUN_TCR_DEFAULT = True
-_RUN_BASEFLOW_DEFAULT = True
 
 class Wepp(NoDbBase, LogMixin):
     __name__ = 'Wepp'
@@ -273,10 +289,8 @@ class Wepp(NoDbBase, LogMixin):
             self._run_tcr = _tcr
             self._run_baseflow = _baseflow
 
-
             self.baseflow_opts = BaseflowOpts()
             self.run_flowpaths = False
-            self.wepp_ui = False
             self.loss_grid_d_path = None
 
             self.clean()
@@ -431,10 +445,12 @@ class Wepp(NoDbBase, LogMixin):
         with open(fn, 'w') as fp:
             fp.write('\n')
 
-    def _prep_pmet(self):
-        fn = _join(self.runs_dir, 'pmetpara.txt')
-        with open(fn, 'w') as fp:
-            fp.write(get_pmetpara_contents())
+    def _prep_pmet(self, mid_season_crop_coeff=0.95, p_coeff=0.80):
+        pmetpara_prep(self.runs_dir,
+                      mid_season_crop_coeff=mid_season_crop_coeff,
+                      p_coeff=p_coeff)
+
+        assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
 
     def _prep_phosphorus(self):
 
@@ -1001,12 +1017,23 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
+        print(1)
+
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = Ebe(ebe_pw0)
 
+        print(2)
+
         climate = Climate.getInstance(self.wd)
+        print(3)
+
         cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
+
+        print(4, _join(climate.cli_dir, climate.cli_fn))
+
         cli_df = cli.as_dataframe(calc_peak_intensities=True)
+
+        print(3)
 
         return ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals)
 
@@ -1043,14 +1070,70 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
             self.unlock('-f')
             raise
 
-    def set_hourly_seepage(self, state):
+    def set_run_wepp_ui(self, state):
         assert state in [True, False]
 
         self.lock()
 
         # noinspection PyBroadException
         try:
-            self.wepp_ui = state
+            self._run_wepp_ui = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_run_pmet(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._run_pmet = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_run_frost(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._run_frost = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_run_tcr(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._run_tcr = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_run_baseflow(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._run_baseflow = state
             self.dump_and_unlock()
 
         except Exception:
@@ -1068,9 +1151,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         try:
             for row in report.hill_tbl:
                 topaz_id = translator.top(wepp=row['Hillslopes'])
+
+                v = row[measure]
+                if isnan(v) or isinf(v):
+                    v = None
+
                 d[str(topaz_id)] = dict(
                     topaz_id=topaz_id,
-                    value=row[measure]
+                    value=v
                 )
         except:
             return None
@@ -1087,9 +1175,14 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         d = {}
         for row in report.chn_tbl:
             topaz_id = translator.top(chn_enum=row['Channels and Impoundments'])
+
+            v = row[measure]
+            if isnan(v) or isinf(v):
+                v = None
+
             d[str(topaz_id)] = dict(
                 topaz_id=topaz_id,
-                value=row[measure]
+                value=v
             )
 
         return d

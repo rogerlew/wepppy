@@ -22,6 +22,8 @@ from urllib.request import urlopen
 import requests
 from subprocess import Popen, PIPE
 from collections import namedtuple
+import math
+
 from math import radians, sin, cos, asin, sqrt
 
 import numpy as np
@@ -331,6 +333,18 @@ def isfloat(f):
         return True
     except Exception:
         return False
+
+
+def isnan(f):
+    if not isfloat(f):
+        return False
+    return math.isnan(float(f))
+
+
+def isinf(f):
+    if not isfloat(f):
+        return False
+    return math.isinf(float(f))
 
 
 def try_parse(f):
