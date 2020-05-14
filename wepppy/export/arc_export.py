@@ -7,8 +7,27 @@ import json
 import sys
 from subprocess import Popen, PIPE
 from glob import glob
+import math
 
+from wepppy.all_your_base import isnan, isinf
 from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash, AshPost
+
+
+def has_arc_export(wd):
+    ron = Ron.getInstance(wd)
+    name = ron.name
+    export_dir = ron.export_arc_dir
+    topaz_wd = ron.topaz_wd
+
+    sub_json = _join(topaz_wd, 'SUBCATCHMENTS.JSON')
+    try:
+        assert _exists(sub_json)
+        assert _exists(_join(export_dir, 'subcatchments.shp'))
+        assert _exists(_join(export_dir, 'channels.shp'))
+    except:
+        return False
+
+    return True
 
 
 def arc_export(wd):
@@ -63,7 +82,7 @@ def arc_export(wd):
     with open(sub_json) as fp:
         js = json.load(fp)
 
-    subs_summary = {str(ss['meta']['topaz_id']):ss for ss in ron.subs_summary()}
+    subs_summary = {str(ss['meta']['topaz_id']): ss for ss in ron.subs_summary()}
 
     weppout= {}
     weppout['Runoff'] = wepp.query_sub_val('Runoff')
@@ -138,25 +157,29 @@ def arc_export(wd):
                 f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
                 f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
 
+        for k, v in f['properties'].items():
+            if isnan(v) or isinf(v):
+                f['properties'][k] = None
+
         js['features'][i] = f
 
     geojson_fn = _join(export_dir, 'subcatchments.json')
     with open(geojson_fn, 'w') as fp:
-        json.dump(js, fp)
+        json.dump(js, fp, allow_nan=False)
 
-    p = Popen(['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
-               'subcatchments.shp', 'subcatchments.json'],
-              stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
+    cmd = ['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+           'subcatchments.shp', 'subcatchments.json']
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
     p.wait()
 
-    assert _exists(_join(export_dir, 'subcatchments.shp'))
+    assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
 
-    p = Popen(['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
-               'subcatchments.kml', 'subcatchments.json'],
-              stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+           'subcatchments.kml', 'subcatchments.json']
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
     p.wait()
 
-    assert _exists(_join(export_dir, 'subcatchments.kml'))
+    assert _exists(_join(export_dir, 'subcatchments.kml')), cmd
 
 #    os.remove(geojson_fn)
 
@@ -241,29 +264,33 @@ def arc_export(wd):
         except KeyError:
             pass
 
+        for k, v in f['properties'].items():
+            if isnan(v) or isinf(v):
+                f['properties'][k] = None
+
         js['features'][i] = f
 
     geojson_fn = _join(export_dir, 'channels.json')
-    json_txt = json.dumps(js)
+    json_txt = json.dumps(js, allow_nan=False)
     json_txt = json_txt.replace('NaN', 'null')
 
     with open(geojson_fn, 'w') as fp:
         fp.write(json_txt)
 
-    p = Popen(['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
-               'channels.shp', 'channels.json'],
-              stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
+    cmd = ['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+           'channels.shp', 'channels.json']
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
     p.wait()
     stdout, stderr = p.communicate()
 
-    assert _exists(_join(export_dir, 'channels.shp'))
+    assert _exists(_join(export_dir, 'channels.shp')), cmd
 
-    p = Popen(['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
-               'channels.kml', 'channels.json'],
-              stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+           'channels.kml', 'channels.json']
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
     p.wait()
 
-    assert _exists(_join(export_dir, 'channels.kml'))
+    assert _exists(_join(export_dir, 'channels.kml')), cmd
 
 #    os.remove(geojson_fn)
 

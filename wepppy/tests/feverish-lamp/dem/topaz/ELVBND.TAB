@@ -1,0 +1,52 @@
+ TOPAZ SOFTWARE: TOPOGRAPHIC PARAMETERIZATION SOFTWARE SYSTEM                  
+ PROGRAM RASPRO: RASTER PROCESSING PROGRAM                                     
+                 VERSION 3.10, APRIL 1999                                      
+
+ J. GARBRECHT, USDA-ARS, EL RENO, OKLAHOMA, USA.                               
+ L. MARTZ, UNIVERSITY OF SASKATCHEWAN, SASKATOON, CANADA.                      
+
+
+ TITLE OF CURRENT TOPAZ APPLICATION:
+
+  DATE: 23 AUGUST 1999     WEPP WEB INTERFACE   DEDNM VERSION 3.1              
+  APPLICATION FOR TESTING AND VERIFICATION WEPP WEB GIS; INPUT FILE            
+  TESTING AND CALIBRATION.                                                     
+
+
+
+ TABLE OF ELEVATION CLASS CHARACTERISTICS AS COMPUTED BY PROGRAM RASPRO
+
+
+        CLASS       BEGINNING VALUE   MEAN VALUE
+        NUMBER          OF CLASS       OF CLASS
+          1               841.4           852.7
+          2               864.0           875.3
+          3               886.6           897.9
+          4               909.2           920.5
+          5               931.8           943.1
+          6               954.4           965.7
+          7               977.0           988.3
+          8               999.6          1010.9
+          9              1022.1          1033.4
+         10              1044.7          1056.0
+         11              1067.3          1078.6
+         12              1089.9          1101.2
+         13              1112.5          1123.8
+         14              1135.1          1146.4
+         15              1157.7          1169.0
+         16              1180.3          1191.6
+         17              1202.9          1214.2
+         18              1225.5          1236.8
+         19              1248.1          1259.4
+         20              1270.7          1282.0
+         21              1293.3          1304.6
+         22              1315.9          1327.2
+         23              1338.5          1349.8
+         24              1361.1          1372.3
+         25              1383.6          1394.9
+         26              1406.2          1417.5
+         27              1428.8          1440.1
+         28              1451.4          1462.7
+         29              1474.0          1485.3
+         30              1496.6          1507.9
+                         1519.2

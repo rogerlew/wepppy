@@ -8,6 +8,8 @@
 
 # standard library
 import os
+import math
+import multiprocessing
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -31,6 +33,14 @@ from wepppy.wepp.soils.utils import simple_texture, soil_texture
 from .base import NoDbBase, TriggerEvents, DEFAULT_SSURGO_DB
 from .ron import Ron
 from .watershed import Watershed
+
+
+try:
+    NCPU = int(os.environ['WEPPPY_NCPU'])
+except KeyError:
+    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
+    if NCPU < 1:
+        NCPU = 1
 
 
 class SoilsNoDbLockedException(Exception):
@@ -298,7 +308,6 @@ class Soils(NoDbBase):
 
         # noinspection PyBroadException
         try:
-
             watershed = Watershed.getInstance(wd)
 
             orders = []

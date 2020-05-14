@@ -1,0 +1,294 @@
+98.4
+1 # number of ofes or channels
+100 # sim_years
+
+#############################
+#   Plant Growth Section    #
+#############################
+1 # ncrop
+For_5352
+use with WSU senescence modification in WEPP code
+(null)
+W. Elliot 01/07
+1 # landuse
+WeppWillSet
+14.00000 3.00000 15.00000 2.00000 5.00000 5.00000 0.00000 20.00000 0.50000 0.25000
+0.50000 0.80000 0.90000 0.99000 17.00000 0.00000 0.42000 6.00000
+2
+0.00600 0.00600 20.00000 0.10000 2.00000 2.00000 0.33000 0.50000 90 40.00000
+-40.00000 6.00000 0.00000
+
+#############################
+#     Operation Section     #
+#############################
+0 # nop
+
+#############################
+# Initial Condition Section
+#############################
+1 # nini
+For_5688
+Initial conditions for forest
+With WSU WEPP Senescence change
+W. Elliot  01/07
+1 # landuse
+1.10000 0.90000 1000 1000 0.00000 1.00000 
+1 
+2 
+999.99799 0.10000 1.00000 0.10000 0.00000 
+1 
+0.00000 0.00000 0.10000 0.20000 0.00000 
+0.50003 0.50003
+
+#############################
+#  Surface Effects Section  #
+#############################
+0 # nseq
+
+#############################
+#      Contour Section      #
+#############################
+0 # ncnt
+
+#############################
+#      Drainage Section     #
+#############################
+0 # ndrain
+
+#############################
+#       Yearly Section      #
+#############################
+1 # nscen
+Year 1
+(null)
+(null)
+(null)
+1 # landuse
+1
+0
+0
+0
+2
+   250 # jdharv
+   0 # jdplt
+   0 # jdstop
+   0.00000 # rw
+   3 # mgtopt
+   
+   
+
+
+#############################
+#     Management Section    #
+#############################
+Manage
+description 1
+description 2
+description 3
+1 # number of ofes in the rotation
+# Initial Condition Scenario indices used for each OFE
+  1
+1 # number of times the rotation is repeated
+100 # number of years in a single rotation
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+   1 # number of crops per year
+      1 # yearly index
+
+
