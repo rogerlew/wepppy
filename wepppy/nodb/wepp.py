@@ -69,7 +69,8 @@ from wepppy.wepp.out import (
     Loss,
     Ebe,
     PlotFile,
-    correct_daily_hillslopes_pl_path
+    correct_daily_hillslopes_pl_path,
+    NumYearsIsZeroException
 )
 
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
@@ -1142,10 +1143,20 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 
     def query_sub_val(self, measure):
         wd = self.wd
+
+        climate = Climate.getInstance(wd)
+
+        if climate.climate_mode == ClimateMode.SingleStorm:
+            return None
+
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+
+        try:
+            report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+        except NumYearsIsZeroException:
+            pass
 
         d = {}
         try:
@@ -1167,10 +1178,20 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 
     def query_chn_val(self, measure):
         wd = self.wd
+
+        climate = Climate.getInstance(wd)
+
+        if climate.climate_mode == ClimateMode.SingleStorm:
+            return None
+
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+
+        try:
+            report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+        except NumYearsIsZeroException:
+            pass
 
         d = {}
         for row in report.chn_tbl:

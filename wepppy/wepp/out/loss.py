@@ -134,6 +134,10 @@ def _parse_out(lines):
     return data
 
 
+class NumYearsIsZeroException(Exception):
+    pass
+
+
 class Loss(object):
     hill_hdr = (
         'Type',
@@ -237,7 +241,9 @@ class Loss(object):
 
         num_years = len(yr_indxs)
         assert avg_indx is not None
-        assert num_years > 0
+
+        #if num_years == 0:
+        #    raise NumYearsIsZeroException
 
         years = [yr for i, yr in yr_indxs]
 

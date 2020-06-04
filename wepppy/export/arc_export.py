@@ -223,7 +223,10 @@ def arc_export(wd):
         f['properties']['width(m)'] = ss['watershed']['width']
         f['properties']['length(m)'] = ss['watershed']['length']
         f['properties']['area(ha)'] = _area
-        f['properties']['cntrb(ha)'] = weppout['Contributing Area'][topaz_id]['value']
+
+        if weppout['Contributing Area'] is not None:
+            f['properties']['cntrb(ha)'] = weppout['Contributing Area'][topaz_id]['value']
+
         f['properties']['slope'] = ss['watershed']['slope_scalar']
         f['properties']['aspect'] = ss['watershed']['aspect']
 
