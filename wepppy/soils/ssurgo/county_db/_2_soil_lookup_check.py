@@ -23,9 +23,9 @@ for row in rdr:
         bad_mukeys.add(int(mukey))
 
         fp2.write('{AFFGEOID},None,None,None,None\n'
-                  .dict(AFFGEOID=key))
+                  .format(AFFGEOID=key))
     else:
         fp2.write('{AFFGEOID},{mukey},{source},{lng},{lat}\n'
-                  .dict(AFFGEOID=key, mukey=mukey, source=source, lng=lng, lat=lat))
+                  .format(AFFGEOID=key, mukey=mukey, source=source, lng=lng, lat=lat))
 
 print(bad_mukeys)
