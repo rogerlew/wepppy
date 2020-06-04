@@ -142,7 +142,7 @@ class AshPost(NoDbBase):
 
             ash_out[topaz_id] = {}
             ash_out[topaz_id]['burnclass'] = burnclass
-            if burnclass <= 1:
+            if burnclass <= 1 or burnclass == 255:
                 ash_out[topaz_id]['water_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['wind_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['ash_transport (kg/ha)'] = 0.0
