@@ -395,7 +395,7 @@ def exception_factory(msg='Error Handling Request',
 
     return jsonify({'Success': False,
                     'Error': msg,
-                    'StackTrace': stacktrace})
+                    'StackTrace': stacktrace.split('\n')})
 
 
 def success_factory(kwds=None):
@@ -705,10 +705,11 @@ def archive(runid, config):
     wd = get_wd(runid)
 
     from wepppy.export import archive_project, arc_export
+
     try:
         arc_export(wd)
-    except:
-        pass
+    except Exception:
+        return exception_factory()
 
     archive_path = archive_project(wd)
     return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
