@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:00.862587
+#   Build Date: 2020-06-05 11:16:32.780538
 #   Source Data: Surgo
 # 
 # Mukey: 81938
 # Major Component: 14544596 (comppct_r = 40.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41887497   A               8.0    2.82        2.0        26.0          1.4
-#  41887496   Bss    R       76.0    0.21        0.0         5.0          1.4
-#  41887495   Bqm           109.0   0.215         -           -           1.4
-#  41887494   R             134.0    28.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41887497   A               8.0    2.82        2.0        26.0          1.4    31.5    20.0    12.2     1.5
+#  41887496   Bss    R       76.0    0.21        0.0         5.0          1.4    50.0     5.3     2.5    1.25
+#  41887495   Bqm           109.0   0.215         -           -           1.4     7.0    66.8    10.0     7.0
+#  41887494   R             134.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Tschamman-Hobby-Bray complex, 2 to 8 percent slopes'		'CBV-SICL'	1	0.2300	0.7500	4317405.00	0.0071	3.5000	10.1520
-	   80.000	  20.00	  31.50	   1.50	  25.00	  53.92
-1 10000.0 0.00756
+	  210.000	  20.00	  31.50	   1.50	  25.00	  53.92
+1 10000.0 0.75600

@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.793013
+#   Build Date: 2020-06-05 11:16:33.037124
 #   Source Data: Surgo
 # 
 # Mukey: 565351
 # Major Component: 15103558 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43662028   A              10.0     9.0        0.0         0.0          1.5
-#  43662029   Eg             48.0     9.0        0.0         0.0          1.5
-#  43662030   Btg/E  R       63.0     1.0        0.0         0.0         1.53
-#  43662031   Btg           185.0     1.0        0.0         0.0         1.53
-#  43662027   Cg            203.0     1.0        0.0         0.0         1.53
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43662028   A              10.0     9.0        0.0         0.0          1.5    17.0    13.0     8.0    2.25
+#  43662029   Eg             48.0     9.0        0.0         0.0          1.5    17.0    13.0     8.0     1.0
+#  43662030   Btg/E  R       63.0     1.0        0.0         0.0         1.53    28.0     7.0     3.0    0.75
+#  43662031   Btg           185.0     1.0        0.0         0.0         1.53    28.0     7.0     3.0    0.75
+#  43662027   Cg            203.0     1.0        0.0         0.0         1.53    26.0     7.0     4.0    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Guyton silt loam, 0 to 1 percent slopes, frequently flooded'		'SIL'	2	0.2300	0.7500	5116790.00	0.0114	3.5000	32.4000
 	  100.000	  13.00	  17.00	   2.25	  11.30	   0.00
 	  480.000	  13.00	  17.00	   1.00	  11.30	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

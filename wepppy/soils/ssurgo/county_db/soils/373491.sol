@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.932770
+#   Build Date: 2020-06-05 11:16:31.430387
 #   Source Data: Surgo
 # 
 # Mukey: 373491
 # Major Component: 15762808 (comppct_r = 85.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45642859   H1             41.0     2.7        0.0         0.0         1.33
-#  45642860   H2     R      117.0     1.0        0.0         0.0         1.35
-#  45642861   H3            152.0     1.0        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45642859   H1             41.0     2.7        0.0         0.0         1.33    37.0    30.5     8.4     2.0
+#  45642860   H2     R      117.0     1.0        0.0         0.0         1.35    42.5    27.8     7.9    0.75
+#  45642861   H3            152.0     1.0        0.0         0.0         1.35    40.0    29.0     8.0     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Raymondville clay loam'		'CL'	1	0.2300	0.7500	4341640.00	0.0055	4.5878	9.7200
 	  410.000	  30.50	  37.00	   2.00	  32.50	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

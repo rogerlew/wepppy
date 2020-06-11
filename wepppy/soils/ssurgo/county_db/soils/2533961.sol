@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:37.796223
+#   Build Date: 2020-06-05 11:16:32.208159
 #   Source Data: Surgo
 # 
 # Mukey: 2533961
 # Major Component: 14849142 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42819901   Ap             20.0     9.0        0.0         0.0          1.4
-#  42819902   Bt             51.0     9.0        0.0         0.0          1.4
-#  42819903   2Btx   R       86.0     0.2        0.0         0.0         1.75
-#  42819904   3Bt           203.0     1.0        0.0         5.0          1.3
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42819901   Ap             20.0     9.0        0.0         0.0          1.4    14.0    12.0     1.5     2.8
+#  42819902   Bt             51.0     9.0        0.0         0.0          1.4    30.0     9.0     0.8     0.3
+#  42819903   2Btx   R       86.0     0.2        0.0         0.0         1.75    20.0    18.0     4.8    0.25
+#  42819904   3Bt           203.0     1.0        0.0         5.0          1.3    55.0    11.0     1.1    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Tonti silt loam, 3 to 8 percent slopes'		'SIL'	2	0.2300	0.7500	5282180.00	0.0150	3.5000	32.4000
 	  200.000	  12.00	  14.00	   2.80	  12.00	  10.00
 	  510.000	   9.00	  30.00	   0.30	  17.00	  30.00
-1 10000.0 0.00720
+1 10000.0 0.72000

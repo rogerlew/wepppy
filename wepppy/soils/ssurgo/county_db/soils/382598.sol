@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.729474
+#   Build Date: 2020-06-05 11:16:33.024806
 #   Source Data: Surgo
 # 
 # Mukey: 382598
 # Major Component: 14994450 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43299592   A              18.0     9.0        0.0         0.0         1.36
-#  43299595   Bt1    R       30.0   0.215        0.0         0.0          1.4
-#  43299594   Bt2           165.0   0.215        0.0         0.0         1.41
-#  43299593   C             185.0   0.215        0.0         0.0         1.44
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43299592   A              18.0     9.0        0.0         0.0         1.36    20.2    25.2    13.6     1.0
+#  43299595   Bt1    R       30.0   0.215        0.0         0.0          1.4    39.0    14.3     8.3    0.75
+#  43299594   Bt2           165.0   0.215        0.0         0.0         1.41    43.6    14.5     8.2    0.75
+#  43299593   C             185.0   0.215        0.0         0.0         1.44    42.1    10.1     4.4     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00215
+#     ksat: 0.21500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Renfrow silt loam, 3 to 5 percent slopes, eroded'		'SIL'	1	0.1600	0.7500	4940374.00	0.0093	3.5000	32.4000
-	  180.000	  25.20	  20.20	   1.00	  17.20	   0.00
-1 10000.0 0.00774
+	  210.000	  25.20	  20.20	   1.00	  17.20	   0.00
+1 10000.0 0.77400

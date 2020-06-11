@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.774459
+#   Build Date: 2020-06-05 11:16:33.034312
 #   Source Data: Surgo
 # 
 # Mukey: 296202
 # Major Component: 15789810 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45746995   Ap             20.0    10.0        0.0         0.0          1.3
-#  45746996   Bw             52.0    10.0        0.0         0.0         1.55
-#  45746997   Btx    R      121.0     0.1        0.0         0.0          1.7
-#  45746998   C             183.0     0.1        0.0         0.0          1.7
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45746995   Ap             20.0    10.0        0.0         0.0          1.3    17.0    23.0     7.7     4.2
+#  45746996   Bw             52.0    10.0        0.0         0.0         1.55    23.0    26.0     8.8    0.57
+#  45746997   Btx    R      121.0     0.1        0.0         0.0          1.7    22.0    31.0     8.0    0.24
+#  45746998   C             183.0     0.1        0.0         0.0          1.7    17.0    35.0    10.7    0.26
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00100
+#     ksat: 0.10000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Venango silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	5116790.00	0.0114	3.5000	36.0000
 	  200.000	  23.00	  17.00	   4.20	  11.30	  10.00
 	  520.000	  26.00	  23.00	   0.57	  11.30	  11.00
-1 10000.0 0.00360
+1 10000.0 0.36000

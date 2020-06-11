@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.492501
+#   Build Date: 2020-06-05 11:16:33.164679
 #   Source Data: Surgo
 # 
 # Mukey: 2534639
 # Major Component: 14710078 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42365834   Ap             18.0    14.0        0.0         5.0         1.49
-#  42365832   Bt             53.0    10.0        0.0         7.0         1.48
-#  42365833   2Btx   R       86.0     0.2        0.0         6.0         1.56
-#  42365835   3Bt           200.0     8.0        0.0        15.0         1.34
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42365834   Ap             18.0    14.0        0.0         5.0         1.49    11.0    22.0     3.0     2.0
+#  42365832   Bt             53.0    10.0        0.0         7.0         1.48    16.0    18.0     2.0     0.5
+#  42365833   2Btx   R       86.0     0.2        0.0         6.0         1.56    26.0    15.0     2.0     0.2
+#  42365835   3Bt           200.0     8.0        0.0        15.0         1.34    54.0    14.0     3.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Scholten-Poynor complex, 8 to 15 percent slopes'		'GRV-SIL'	2	0.2300	0.7500	5447570.00	0.0217	3.5000	50.4000
 	  180.000	  22.00	  11.00	   2.00	  11.30	  55.35
 	  530.000	  18.00	  16.00	   0.50	  11.30	  64.66
-1 10000.0 0.00720
+1 10000.0 0.72000

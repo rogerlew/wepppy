@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.193276
+#   Build Date: 2020-06-05 11:16:32.047274
 #   Source Data: Surgo
 # 
 # Mukey: 537202
 # Major Component: 14630215 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42129879   H1             15.0    9.17        0.0         0.0          1.3
-#  42129880   H2     R      130.0    0.92        0.0         0.0         1.45
-#  42129881   H3            157.0    0.92        0.0         0.0         1.45
-#  42129882   H4            165.0   0.705         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42129879   H1             15.0    9.17        0.0         0.0          1.3    21.0    26.3     8.6     2.5
+#  42129880   H2     R      130.0    0.92        0.0         0.0         1.45    47.5     5.5     2.7    0.25
+#  42129881   H3            157.0    0.92        0.0         0.0         1.45    36.0    19.0     6.6    0.25
+#  42129882   H4            165.0   0.705         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Upshur-Gilpin complex, 25 to 50 percent slopes'		'SIL'	1	0.3700	0.7500	4896270.00	0.0089	3.5000	33.0120
-	  150.000	  26.30	  21.00	   2.50	  17.50	   2.50
-1 10000.0 0.03312
+	  210.000	  26.30	  21.00	   2.50	  17.50	   2.50
+1 10000.0 3.31200

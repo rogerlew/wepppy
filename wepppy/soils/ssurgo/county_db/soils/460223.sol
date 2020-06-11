@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.365271
+#   Build Date: 2020-06-05 11:16:33.477804
 #   Source Data: Surgo
 # 
 # Mukey: 460223
 # Major Component: 14615159 (comppct_r = 55.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42083380   A              30.0     9.0        0.0         3.0         1.25
-#  42083381   Bt            127.0     9.0        0.0         3.0          1.3
-#  42083382   Cr     R      152.0    0.28         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42083380   A              30.0     9.0        0.0         3.0         1.25    21.0    41.0    14.2     3.5
+#  42083381   Bt            127.0     9.0        0.0         3.0          1.3    31.0    35.0    11.0    1.25
+#  42083382   Cr     R      152.0    0.28         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00280
+#     ksat: 0.28000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Josephine-Mariposa complex, 15 to 50 percent slopes, eroded'		'GR-L'	2	0.1600	0.7500	5455820.00	0.0063	3.2114	32.4000
 	  300.000	  41.00	  21.00	   3.50	  17.50	  39.38
 	 1270.000	  35.00	  31.00	   1.25	  17.50	  39.38
-1 10000.0 0.01008
+1 10000.0 1.00800

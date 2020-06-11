@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.718319
+#   Build Date: 2020-06-05 11:16:30.401689
 #   Source Data: Surgo
 # 
 # Mukey: 625743
 # Major Component: 14964565 (comppct_r = 55.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43193880   H1             36.0   28.23        0.0         5.0         1.45
-#  43193881   H2             86.0   28.23        3.0         8.0         1.45
-#  43193879   Cr     R      111.0    0.71         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43193880   H1             36.0   28.23        0.0         5.0         1.45    18.5    27.1     8.9     1.0
+#  43193881   H2             86.0   28.23        3.0         8.0         1.45    23.5    19.9     8.0    0.25
+#  43193879   Cr     R      111.0    0.71         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Hawthorne-Bodine complex, 20 to 60 percent slopes'		'GR-SIL'	2	0.3600	0.7500	5034095.00	0.0102	3.5000	101.6280
 	  360.000	  27.10	  18.50	   1.00	  11.30	  38.25
 	  860.000	  19.90	  23.50	   0.25	  11.30	  48.83
-1 10000.0 0.02556
+1 10000.0 2.55600

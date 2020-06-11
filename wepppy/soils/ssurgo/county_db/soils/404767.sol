@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:37.630866
+#   Build Date: 2020-06-05 11:16:32.153686
 #   Source Data: Surgo
 # 
 # Mukey: 404767
 # Major Component: 14488245 (comppct_r = 94.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41715123   Ap             15.0     3.0        0.0         0.0         1.53
-#  41715124   Bt1    R       79.0     0.9        0.0         3.0         1.46
-#  41715125   Bt2           102.0     3.0        0.0         0.0         1.53
-#  41715122   C             200.0     2.7        0.0         3.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41715123   Ap             15.0     3.0        0.0         0.0         1.53    31.0    35.0    10.3     1.5
+#  41715124   Bt1    R       79.0     0.9        0.0         3.0         1.46    33.0    34.0     7.7     0.5
+#  41715125   Bt2           102.0     3.0        0.0         0.0         1.53    33.0    34.0     8.1    0.81
+#  41715122   C             200.0     2.7        0.0         3.0         1.45    32.0    34.0     7.6    0.17
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Gara clay loam, 14 to 18 percent slopes, moderately eroded'		'CL'	1	0.2300	0.7500	4706630.00	0.0075	4.0876	10.8000
-	  150.000	  35.00	  31.00	   1.50	  25.00	  13.00
-1 10000.0 0.03240
+	  210.000	  35.00	  31.00	   1.50	  25.00	  13.00
+1 10000.0 3.24000

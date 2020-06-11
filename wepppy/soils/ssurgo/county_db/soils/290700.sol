@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.190055
+#   Build Date: 2020-06-05 11:16:32.045217
 #   Source Data: Surgo
 # 
 # Mukey: 290700
 # Major Component: 14849766 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42820892   H1             13.0     9.0        0.0        13.0         1.25
-#  42820893   H2             41.0     9.0        0.0        18.0         1.35
-#  42820894   H3     R       51.0   0.217        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42820892   H1             13.0     9.0        0.0        13.0         1.25    12.0    36.5    11.1     4.0
+#  42820893   H2             41.0     9.0        0.0        18.0         1.35    12.0    32.1     9.9     1.0
+#  42820894   H3     R       51.0   0.217        0.0         0.0          1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00217
+#     ksat: 0.21700
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Nassau-Cardigan complex, hilly, very rocky'		'CN-SIL'	2	0.3000	0.7500	4860310.00	0.0053	2.8062	32.4000
 	  130.000	  36.50	  12.00	   4.00	  11.30	  45.62
 	  410.000	  32.10	  12.00	   1.00	  11.30	  67.20
-1 10000.0 0.00781
+1 10000.0 0.78120

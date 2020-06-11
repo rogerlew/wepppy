@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.823176
+#   Build Date: 2020-06-05 11:16:29.681314
 #   Source Data: Surgo
 # 
 # Mukey: 355426
 # Major Component: 15390428 (comppct_r = 50.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44574791   H1             10.0    28.0        0.0         0.0         1.48
-#  44574788   H2     R       23.0     1.0        0.0         0.0         1.65
-#  44574789   H3             56.0     7.0        0.0         0.0          1.5
-#  44574790   Cr            152.0     2.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44574791   H1             10.0    28.0        0.0         0.0         1.48     7.5    65.2    17.6     1.5
+#  44574788   H2     R       23.0     1.0        0.0         0.0         1.65    26.5    55.8    11.3     0.5
+#  44574789   H3             56.0     7.0        0.0         0.0          1.5    15.0    63.1    10.1    0.25
+#  44574790   Cr            152.0     2.0         -           -           1.4     7.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Bullock-Parchin fine sandy loams, 0 to 4 percent slopes'		'FSL'	1	0.2300	0.7500	6108960.00	0.0097	2.1367	100.8000
-	  100.000	  65.20	   7.50	   1.50	   7.50	   0.00
-1 10000.0 0.03600
+	  210.000	  65.20	   7.50	   1.50	   7.50	   0.00
+1 10000.0 3.60000

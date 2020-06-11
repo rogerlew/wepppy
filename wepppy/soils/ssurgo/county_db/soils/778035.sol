@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.424428
+#   Build Date: 2020-06-05 11:16:32.356232
 #   Source Data: Surgo
 # 
 # Mukey: 778035
 # Major Component: 15402155 (comppct_r = 80.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44613361   H1             15.0     9.0        0.0         0.0          1.3
-#  44613362   H2     R       74.0     0.9        0.0         0.0         1.38
-#  44613363   H3             99.0     0.4         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44613361   H1             15.0     9.0        0.0         0.0          1.3    35.0    17.3     3.3     1.5
+#  44613362   H2     R       74.0     0.9        0.0         0.0         1.38    70.0     8.9     2.8    0.25
+#  44613363   H3             99.0     0.4         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Carbo-Rock outcrop complex, 25 to 65 percent slopes, eroded'		'SICL'	1	0.3600	0.7500	4124450.00	0.0070	3.5000	32.4000
-	  150.000	  17.30	  35.00	   1.50	  16.00	   0.00
-1 10000.0 0.03240
+	  210.000	  17.30	  35.00	   1.50	  16.00	   0.00
+1 10000.0 3.24000

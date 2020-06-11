@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:37.751649
+#   Build Date: 2020-06-05 11:16:32.196894
 #   Source Data: Surgo
 # 
 # Mukey: 571335
 # Major Component: 14828387 (comppct_r = 72.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42757323   A              18.0  9.1735       28.0         5.0         1.45
-#  42757324   Bt     R      107.0  0.9174        0.0         5.0         1.48
-#  42757322   Cr            132.0   0.711         -           -          1.93
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42757323   A              18.0  9.1735       28.0         5.0         1.45    20.5    42.0    12.1    1.25
+#  42757324   Bt     R      107.0  0.9174        0.0         5.0         1.48    52.5    18.2     5.6    0.25
+#  42757322   Cr            132.0   0.711         -           -          1.93     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00917
+#     ksat: 0.91740
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Carnasaw-Clebit association, 8 to 25 percent slopes'		'ST-L'	1	0.2300	0.7500	5052410.00	0.0095	3.3007	33.0246
-	  180.000	  42.00	  20.50	   1.25	  12.50	  39.70
-1 10000.0 0.03303
+	  210.000	  42.00	  20.50	   1.25	  12.50	  39.70
+1 10000.0 3.30264

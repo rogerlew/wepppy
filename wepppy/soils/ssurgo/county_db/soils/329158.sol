@@ -1,27 +1,28 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.911837
+#   Build Date: 2020-06-05 11:16:29.721081
 #   Source Data: Surgo
 # 
 # Mukey: 329158
 # Major Component: 15004817 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43336220   Ap             18.0     9.0        0.0         0.0         1.51
-#  43336214   Bw             58.0     9.0        0.0         0.0         1.44
-#  43336217   E/Btx  R       66.0     0.9        0.0         0.0         1.68
-#  43336219   E/Btx          83.0     0.9        0.0         0.0         1.66
-#  43336218   Btx           122.0     0.9        0.0         0.0          1.7
-#  43336215   Bt            145.0     9.0        0.0         0.0         1.58
-#  43336216   R             203.0     0.1         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43336220   Ap             18.0     9.0        0.0         0.0         1.51    11.0    63.0     9.0    1.25
+#  43336214   Bw             58.0     9.0        0.0         0.0         1.44    18.0    46.0    11.6    0.75
+#  43336217   E/Btx  R       66.0     0.9        0.0         0.0         1.68    12.0    61.0    12.7    0.25
+#  43336219   E/Btx          83.0     0.9        0.0         0.0         1.66    17.0    52.0    12.6    0.25
+#  43336218   Btx           122.0     0.9        0.0         0.0          1.7    25.0    50.0    10.9     0.1
+#  43336215   Bt            145.0     9.0        0.0         0.0         1.58    26.0    58.0    10.3     0.1
+#  43336216   R             203.0     0.1         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -59,4 +60,4 @@ Any comments:
 'Hartsells (Wynnville) fine sandy loam, 2 to 6 percent slopes, eroded'		'FSL'	2	0.3000	0.7500	4456900.00	0.0085	2.8630	32.4000
 	  180.000	  63.00	  11.00	   1.25	  11.30	  10.00
 	  580.000	  46.00	  18.00	   0.75	  11.30	  14.00
-1 10000.0 0.03240
+1 10000.0 3.24000

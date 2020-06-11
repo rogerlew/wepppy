@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:53.603375
+#   Build Date: 2020-06-05 11:16:33.607030
 #   Source Data: Surgo
 # 
 # Mukey: 344709
 # Major Component: 14411458 (comppct_r = 40.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41501614   Ap             18.0     3.0        0.0         0.0         1.39
-#  41501615   Btkn   R       46.0    0.21        0.0         0.0          1.4
-#  41501616   Bknyz1          63.0    0.21        0.0         0.0          1.4
-#  41501617   Bknyz2         152.0    0.21        0.0         0.0         1.44
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41501614   Ap             18.0     3.0        0.0         0.0         1.39    33.5    34.2    10.3     2.0
+#  41501615   Btkn   R       46.0    0.21        0.0         0.0          1.4    45.0    26.1     7.8    0.75
+#  41501616   Bknyz1          63.0    0.21        0.0         0.0          1.4    40.0    30.0     8.3    0.25
+#  41501617   Bknyz2         152.0    0.21        0.0         0.0         1.44    38.0    31.1     8.6    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Natric
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Gerdrum-Vanda-Creed complex, 0 to 8 percent slopes'		'CL'	1	0.3000	0.7500	4706630.00	0.0060	4.2501	10.8000
-	  180.000	  34.20	  33.50	   2.00	  26.40	  22.00
-1 10000.0 0.00756
+	  210.000	  34.20	  33.50	   2.00	  26.40	  22.00
+1 10000.0 0.75600

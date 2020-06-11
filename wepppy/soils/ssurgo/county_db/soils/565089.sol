@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.251656
+#   Build Date: 2020-06-05 11:16:29.812489
 #   Source Data: Surgo
 # 
 # Mukey: 565089
 # Major Component: 15064760 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43522883   A              64.0     9.0        0.0         0.0         1.48
-#  43522881   Btx1   R      127.0     1.0        0.0         0.0         1.45
-#  43522882   Btx2          183.0     1.0        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43522883   A              64.0     9.0        0.0         0.0         1.48    18.5    11.7     6.7    1.25
+#  43522881   Btx1   R      127.0     1.0        0.0         0.0         1.45    21.0    11.3     6.6    0.55
+#  43522882   Btx2          183.0     1.0        0.0         0.0          1.5    24.0     7.0     4.9     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Calloway silt loam, 1 to 3 percent slopes'		'SIL'	1	0.2300	0.7500	5034095.00	0.0102	3.5000	32.4000
 	  640.000	  11.70	  18.50	   1.25	  10.00	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

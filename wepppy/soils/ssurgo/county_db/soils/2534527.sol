@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:37.693170
+#   Build Date: 2020-06-05 11:16:32.175462
 #   Source Data: Surgo
 # 
 # Mukey: 2534527
 # Major Component: 14779379 (comppct_r = 60.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42592830   A               8.0     9.0        0.0         0.0         1.25
-#  42592827   E              36.0     9.0        0.0         0.0         1.48
-#  42592828   2Bt    R      132.0    0.21        0.0         0.0          1.2
-#  42592829   2R            203.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42592830   A               8.0     9.0        0.0         0.0         1.25    11.0    17.1     1.3     2.2
+#  42592827   E              36.0     9.0        0.0         0.0         1.48    14.2    14.2     1.3    0.85
+#  42592828   2Bt    R      132.0    0.21        0.0         0.0          1.2    72.0     5.0     0.3    0.75
+#  42592829   2R            203.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Niangua-Bardley complex, 15 to 50 percent slopes, extremely stony'		'GRV-SIL'	2	0.1600	0.7500	5447570.00	0.0217	3.5000	32.4000
 	   80.000	  17.10	  11.00	   2.20	   8.20	  55.00
 	  360.000	  14.20	  14.20	   0.85	   6.80	  70.00
-1 10000.0 0.00756
+1 10000.0 0.75600

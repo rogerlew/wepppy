@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.973931
+#   Build Date: 2020-06-05 11:16:30.108894
 #   Source Data: Surgo
 # 
 # Mukey: 348380
 # Major Component: 14521833 (comppct_r = 50.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41820258   Ap             16.0     3.0        0.0         3.0          1.3
-#  41820259   Bt     R       38.0     1.0        0.0         3.0         1.35
-#  41820260   Bk1            74.0     3.0        0.0         3.0          1.4
-#  41820261   Bk2           109.0     3.0        0.0         3.0         1.45
-#  41820262   BCyz          155.0     1.0        0.0         3.0          1.5
-#  41820263   Cz            200.0     1.0        0.0         3.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41820258   Ap             16.0     3.0        0.0         3.0          1.3    29.0    34.0    11.7     2.0
+#  41820259   Bt     R       38.0     1.0        0.0         3.0         1.35    41.0    29.0     9.6     1.5
+#  41820260   Bk1            74.0     3.0        0.0         3.0          1.4    37.0    32.0    11.1     1.0
+#  41820261   Bk2           109.0     3.0        0.0         3.0         1.45    37.0    32.0    11.1    0.75
+#  41820262   BCyz          155.0     1.0        0.0         3.0          1.5    36.0    33.0    11.4     0.5
+#  41820263   Cz            200.0     1.0        0.0         3.0          1.5    36.0    33.0    11.4     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,5 +57,5 @@
 Any comments:
 1 1
 'Scobey-Kevin clay loams, 0 to 4 percent slopes'		'CL'	1	0.2300	0.7500	4975570.00	0.0065	3.8764	10.8000
-	  160.000	  34.00	  29.00	   2.00	  23.30	  14.64
-1 10000.0 0.03600
+	  210.000	  34.00	  29.00	   2.00	  23.30	  14.64
+1 10000.0 3.60000

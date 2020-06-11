@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.168684
+#   Build Date: 2020-06-05 11:16:31.568083
 #   Source Data: Surgo
 # 
 # Mukey: 375386
 # Major Component: 15736825 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45600445   A              13.0    28.0        0.0         0.0          1.4
-#  45600443   Bt     R       76.0    0.91        0.0         0.0         1.46
-#  45600446   BCt           102.0     9.0        0.0         5.0         1.55
-#  45600444   C/B           191.0     9.0        0.0         0.0         1.63
-#  45600447   C             203.0     9.0        0.0         0.0         1.63
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45600445   A              13.0    28.0        0.0         0.0          1.4     8.5    69.7    18.8    0.75
+#  45600443   Bt     R       76.0    0.91        0.0         0.0         1.46    47.5    23.3     5.6    0.75
+#  45600446   BCt           102.0     9.0        0.0         5.0         1.55    25.0    57.0    25.8     0.5
+#  45600444   C/B           191.0     9.0        0.0         0.0         1.63    20.0    30.0     8.6     0.3
+#  45600447   C             203.0     9.0        0.0         0.0         1.63    20.0    30.0     9.9     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Edge fine sandy loam, 5 to 12 percent slopes'		'FSL'	1	0.2900	0.7500	6339480.00	0.0173	2.1321	100.8000
-	  130.000	  69.70	   8.50	   0.75	   6.00	   4.00
-1 10000.0 0.03276
+	  210.000	  69.70	   8.50	   0.75	   6.00	   4.00
+1 10000.0 3.27600

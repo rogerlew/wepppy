@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.936680
+#   Build Date: 2020-06-05 11:16:29.725467
 #   Source Data: Surgo
 # 
 # Mukey: 331469
 # Major Component: 15497072 (comppct_r = 50.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44914807   A              12.0    55.0        0.0         0.0         1.48
-#  44914809   Bw            132.0     5.5        0.0         0.0         1.44
-#  44914808   C      R      165.0    0.55        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44914807   A              12.0    55.0        0.0         0.0         1.48    17.5    67.2     9.9     2.0
+#  44914809   Bw            132.0     5.5        0.0         0.0         1.44    25.0    53.0    14.0    0.75
+#  44914808   C      R      165.0    0.55        0.0         0.0          1.5    22.0    41.1    11.8     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00550
+#     ksat: 0.55000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Alamuchee-Mooreville complex, 0 to 2 percent slopes, frequently flooded'		'SL'	2	0.2900	0.7500	4629790.00	0.0059	3.2333	198.0000
 	  120.000	  67.20	  17.50	   2.00	  11.30	   5.00
 	 1320.000	  53.00	  25.00	   0.75	  11.30	   5.00
-1 10000.0 0.01980
+1 10000.0 1.98000

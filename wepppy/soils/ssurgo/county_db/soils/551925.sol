@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.234762
+#   Build Date: 2020-06-05 11:16:31.152806
 #   Source Data: Surgo
 # 
 # Mukey: 551925
 # Major Component: 15033602 (comppct_r = 70.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43426789   Ap             20.0    9.11        0.0         0.0          1.3
-#  43426790   Bt            104.0    2.32        0.0         0.0         1.45
-#  43426791   BC     R      135.0    0.92        1.0         3.0         1.55
-#  43426788   R             160.0    0.42         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43426789   Ap             20.0    9.11        0.0         0.0          1.3    13.0    16.6     1.6    1.75
+#  43426790   Bt            104.0    2.32        0.0         0.0         1.45    50.8     6.8     1.5    0.25
+#  43426791   BC     R      135.0    0.92        1.0         3.0         1.55    50.9     4.1     1.9    0.25
+#  43426788   R             160.0    0.42         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Lowell-Faywood silt loams, 6 to 12 percent slopes'		'SIL'	2	0.3000	0.7500	5337310.00	0.0169	3.5000	32.7960
 	  200.000	  16.60	  13.00	   1.75	   7.10	   0.00
 	 1040.000	   6.80	  50.80	   0.25	  26.40	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

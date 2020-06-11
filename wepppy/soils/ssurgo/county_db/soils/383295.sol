@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.940413
+#   Build Date: 2020-06-05 11:16:31.434397
 #   Source Data: Surgo
 # 
 # Mukey: 383295
 # Major Component: 14787599 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42621980   A              36.0  9.1735       13.0        35.0         1.58
-#  42621979   R      R       41.0   0.217         -           -           2.1
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42621980   A              36.0  9.1735       13.0        35.0         1.58    23.5    24.5    10.0     2.0
+#  42621979   R      R       41.0   0.217         -           -           2.1     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00217
+#     ksat: 0.21700
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Kiti-Rock outcrop complex, 1 to 25 percent slopes'		'FLV-SIL'	1	0.0900	0.7500	4758445.00	0.0081	3.5000	33.0246
 	  360.000	  24.50	  23.50	   2.00	  14.50	  54.50
-1 10000.0 0.00781
+1 10000.0 0.78120

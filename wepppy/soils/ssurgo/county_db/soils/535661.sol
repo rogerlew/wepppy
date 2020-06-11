@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.861200
+#   Build Date: 2020-06-05 11:16:30.991429
 #   Source Data: Surgo
 # 
 # Mukey: 535661
 # Major Component: 14636543 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42147613   Ap             15.0    9.17        0.0         0.0         1.43
-#  42147612   Bt             58.0    9.17        0.0         0.0         1.53
-#  42147611   Btx    R      110.0    0.41        0.0         0.0         1.67
-#  42147610   2Bt           165.0    0.74        0.0         3.0          1.5
-#  42147609   3BCt          205.0    0.74        0.0         2.0         1.55
-#  42147608   3Cr           230.0     1.3         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42147613   Ap             15.0    9.17        0.0         0.0         1.43    18.0     5.0     2.0     2.0
+#  42147612   Bt             58.0    9.17        0.0         0.0         1.53    24.0     4.0     2.0    0.25
+#  42147611   Btx    R      110.0    0.41        0.0         0.0         1.67    23.0    17.0    10.0    0.25
+#  42147610   2Bt           165.0    0.74        0.0         3.0          1.5    47.0    24.0    17.0    0.25
+#  42147609   3BCt          205.0    0.74        0.0         2.0         1.55    24.0    37.0    21.0    0.25
+#  42147608   3Cr           230.0     1.3         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00410
+#     ksat: 0.41000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 'Apalona-Zanesville silt loams, 6 to 12 percent slopes, eroded'		'SIL'	2	0.3000	0.7500	5061660.00	0.0106	3.5000	33.0120
 	  150.000	   5.00	  18.00	   2.00	   9.80	   0.00
 	  580.000	   4.00	  24.00	   0.25	  11.30	   0.00
-1 10000.0 0.01476
+1 10000.0 1.47600

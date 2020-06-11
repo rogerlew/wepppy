@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.748824
+#   Build Date: 2020-06-05 11:16:30.415984
 #   Source Data: Surgo
 # 
 # Mukey: 129360
 # Major Component: 15767314 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45654288   Ap             23.0     9.0        0.0         0.0          1.5
-#  45654289   Btg    R       74.0     1.4        0.0         0.0         1.59
-#  45654291   2BCg           86.0    28.0        0.0         0.0         1.64
-#  45654290   2Cg           203.0    92.0        0.0         0.0         1.64
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45654288   Ap             23.0     9.0        0.0         0.0          1.5    15.0    14.0     3.0    2.22
+#  45654289   Btg    R       74.0     1.4        0.0         0.0         1.59    24.0    14.0     1.0    0.44
+#  45654291   2BCg           86.0    28.0        0.0         0.0         1.64    11.0    70.0    10.0     0.2
+#  45654290   2Cg           203.0    92.0        0.0         0.0         1.64     7.0    84.0     2.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01400
+#     ksat: 1.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Othello silt loams, 0 to 2 percent slopes, Northern Tidewater Area'		'SIL'	1	0.1500	0.7500	5227050.00	0.0136	3.5000	32.4000
 	  230.000	  14.00	  15.00	   2.22	   8.20	   0.00
-1 10000.0 0.05040
+1 10000.0 5.04000

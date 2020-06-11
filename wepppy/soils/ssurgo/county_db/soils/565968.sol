@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.260408
+#   Build Date: 2020-06-05 11:16:29.816486
 #   Source Data: Surgo
 # 
 # Mukey: 565968
 # Major Component: 15368302 (comppct_r = 35.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44497686   Ap             13.0     9.0        0.0         0.0         1.43
-#  44497688   Eg             38.0     2.7        0.0         0.0         1.38
-#  44497689   B/E    R      102.0    0.21        0.0         0.0         1.38
-#  44497687   Btng          183.0     0.7        0.0         0.0         1.38
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44497686   Ap             13.0     9.0        0.0         0.0         1.43    15.0    14.0     8.5    1.25
+#  44497688   Eg             38.0     2.7        0.0         0.0         1.38    12.5    14.3     8.7    0.75
+#  44497689   B/E    R      102.0    0.21        0.0         0.0         1.38    30.0     6.9     3.6    0.75
+#  44497687   Btng          183.0     0.7        0.0         0.0         1.38    20.0    11.4     6.6    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Natric
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Foley-Calhoun-Bonn complex'		'SIL'	2	0.2300	0.7500	5227050.00	0.0136	3.5000	32.4000
 	  130.000	  14.00	  15.00	   1.25	  10.00	   0.00
 	  380.000	  14.30	  12.50	   0.75	  17.50	   0.00
-1 10000.0 0.00756
+1 10000.0 0.75600

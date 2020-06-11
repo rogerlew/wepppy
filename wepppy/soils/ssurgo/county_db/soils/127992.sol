@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.171697
+#   Build Date: 2020-06-05 11:16:33.748133
 #   Source Data: Surgo
 # 
 # Mukey: 127992
 # Major Component: 14881315 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42908990   Ap             13.0    5.64        0.0         0.0         1.47
-#  42908989   E              28.0    4.23        0.0         0.0         1.51
-#  42908988   Bt     R       86.0     1.4        0.0         0.0          1.6
-#  42908987   2BC            97.0    21.2        0.0         0.0         1.75
-#  42908991   2C            203.0    84.7        0.0         0.0         1.75
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42908990   Ap             13.0    5.64        0.0         0.0         1.47    13.0    20.0     2.0    1.22
+#  42908989   E              28.0    4.23        0.0         0.0         1.51    13.0    20.0     2.0    0.25
+#  42908988   Bt     R       86.0     1.4        0.0         0.0          1.6    25.0    10.0     1.0    0.31
+#  42908987   2BC            97.0    21.2        0.0         0.0         1.75    11.0    70.0     7.0     0.2
+#  42908991   2C            203.0    84.7        0.0         0.0         1.75     7.0    84.0     2.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01400
+#     ksat: 1.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Matapeake silt loam, 2 to 5 percent slopes'		'L'	2	0.0900	0.7500	5337310.00	0.0169	3.5000	20.3040
 	  130.000	  20.00	  13.00	   1.22	   7.20	   0.00
 	  280.000	  20.00	  13.00	   0.25	   6.00	   0.00
-1 10000.0 0.05040
+1 10000.0 5.04000

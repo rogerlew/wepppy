@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.456559
+#   Build Date: 2020-06-05 11:16:33.501243
 #   Source Data: Surgo
 # 
 # Mukey: 579207
 # Major Component: 15403966 (comppct_r = 45.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44620105   A              13.0     9.0        0.0         0.0          1.4
-#  44620107   E              30.0     9.0        0.0         0.0          1.5
-#  44620103   Bt1, Bt2  R       79.0     1.0        0.0         0.0         1.33
-#  44620106   Bt3, Btg         127.0     2.7        0.0         0.0         1.38
-#  44620104   BCg, Cg         203.0     2.7        0.0         0.0         1.38
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44620105   A              13.0     9.0        0.0         0.0          1.4    12.5    70.9    17.4     2.0
+#  44620107   E              30.0     9.0        0.0         0.0          1.5    13.5    63.1    15.5    0.75
+#  44620103   Bt1, Bt2  R       79.0     1.0        0.0         0.0         1.33    47.5    23.3     5.6    0.55
+#  44620106   Bt3, Btg         127.0     2.7        0.0         0.0         1.38    33.5    31.7     9.5    0.25
+#  44620104   BCg, Cg         203.0     2.7        0.0         0.0         1.38    28.0    34.0    10.2    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Sacul-Sawyer complex, 1 to 8 percent slopes'		'FSL'	2	0.2300	0.7500	6070540.00	0.0082	2.4733	32.4000
 	  130.000	  70.90	  12.50	   2.00	  11.30	  12.50
 	  300.000	  63.10	  13.50	   0.75	  11.30	  12.50
-1 10000.0 0.03600
+1 10000.0 3.60000

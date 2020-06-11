@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.303413
+#   Build Date: 2020-06-05 11:16:30.246751
 #   Source Data: Surgo
 # 
 # Mukey: 463243
 # Major Component: 14603463 (comppct_r = 65.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42058965   A               8.0     9.0        0.0         0.0          1.5
-#  42058966   B              41.0     9.0        0.0         0.0          1.5
-#  42058967   R      R       51.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42058965   A               8.0     9.0        0.0         0.0          1.5    17.5    43.0    12.1    1.25
+#  42058966   B              41.0     9.0        0.0         0.0          1.5    21.0    42.0    12.1     0.5
+#  42058967   R      R       51.0   0.005         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00005
+#     ksat: 0.00500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Auburn very rocky loam, 15 to 30 percent slopes'		'L'	2	0.2300	0.7500	5052410.00	0.0095	3.1057	32.4000
 	   80.000	  43.00	  17.50	   1.25	  12.50	   5.00
 	  410.000	  42.00	  21.00	   0.50	  12.50	   5.00
-1 10000.0 0.00018
+1 10000.0 0.01800

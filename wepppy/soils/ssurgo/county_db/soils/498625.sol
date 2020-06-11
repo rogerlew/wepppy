@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.496780
+#   Build Date: 2020-06-05 11:16:30.854953
 #   Source Data: Surgo
 # 
 # Mukey: 498625
 # Major Component: 15689528 (comppct_r = 85.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45475955   H1             41.0    9.17       48.0        38.0         1.43
-#  45475956   H2     R       51.0    0.92         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45475955   H1             41.0    9.17       48.0        38.0         1.43    17.5    43.0    12.1    0.75
+#  45475956   H2     R       51.0    0.92         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Travelers very stony loam, 3 to 25 percent slopes'		'STV-L'	1	0.2300	0.7500	5052410.00	0.0153	3.1057	33.0120
 	  410.000	  43.00	  17.50	   0.75	  10.00	  91.25
-1 10000.0 0.03312
+1 10000.0 3.31200

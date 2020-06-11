@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.270014
+#   Build Date: 2020-06-05 11:16:29.819238
 #   Source Data: Surgo
 # 
 # Mukey: 1707524
 # Major Component: 15381728 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44546054   A              10.0     9.0        0.0         0.0         1.48
-#  44546053   E              20.0     9.0        0.0         0.0          1.5
-#  44546051   Bt     R       76.0     1.0        0.0         0.0         1.43
-#  44546052   BC            132.0     1.0        0.0         0.0         1.55
-#  44546050   Cr            183.0     2.7         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44546054   A              10.0     9.0        0.0         0.0         1.48    12.8    54.6    31.0    1.25
+#  44546053   E              20.0     9.0        0.0         0.0          1.5    17.8    60.6    29.6    0.75
+#  44546051   Bt     R       76.0     1.0        0.0         0.0         1.43    58.2    31.9    18.6    0.55
+#  44546052   BC            132.0     1.0        0.0         0.0         1.55    35.0    33.3    10.0    0.55
+#  44546050   Cr            183.0     2.7         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,5 +57,5 @@ Any comments:
 1 1
 'Sacul very fine sandy loam, 8 to 15 percent slopes'		'VFSL'	2	0.2300	0.7500	8683100.00	0.0151	1.7040	32.4000
 	  100.000	  54.60	  12.80	   1.25	  11.30	  12.00
-	  200.000	  60.60	  17.80	   0.75	  11.30	  12.00
-1 10000.0 0.03600
+	  210.000	  60.60	  17.80	   0.75	  11.30	  12.00
+1 10000.0 3.60000

@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.651374
+#   Build Date: 2020-06-05 11:16:33.329579
 #   Source Data: Surgo
 # 
 # Mukey: 551614
 # Major Component: 15048860 (comppct_r = 75.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43470937   H1             13.0     2.2        0.0        22.0         1.55
-#  43470938   H2     R       58.0     0.9        0.0        28.0         1.55
-#  43470939   Cr            170.0    28.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43470937   H1             13.0     2.2        0.0        22.0         1.55    43.5     7.5     3.7    1.75
+#  43470938   H2     R       58.0     0.9        0.0        28.0         1.55    50.0     5.3     2.5    0.25
+#  43470939   Cr            170.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Eden flaggy silty clay, 15 to 35 percent slopes'		'FL-SIC'	1	0.3000	0.7500	3655845.00	0.0069	3.5000	7.9200
-	  130.000	   7.50	  43.50	   1.75	  23.30	  26.68
-1 10000.0 0.03240
+	  210.000	   7.50	  43.50	   1.75	  23.30	  26.68
+1 10000.0 3.24000

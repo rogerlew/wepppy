@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:19.069693
+#   Build Date: 2020-06-05 11:16:32.902559
 #   Source Data: Surgo
 # 
 # Mukey: 2536129
 # Major Component: 14845225 (comppct_r = 60.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42807645   A              20.0     9.0        7.0        31.0         1.43
-#  42807646   Bw             43.0     3.0        3.0        50.0         1.58
-#  42807647   2R     R      203.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42807645   A              20.0     9.0        7.0        31.0         1.43    37.5    30.2    10.2     3.0
+#  42807646   Bw             43.0     3.0        3.0        50.0         1.58    38.0    29.9    10.1    0.75
+#  42807647   2R     R      203.0   0.005         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00005
+#     ksat: 0.00500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Gasconade-Gatewood-Rock outcrop complex, 15 to 50 percent slopes'		'FLV-CL'	2	0.0900	0.7500	4687420.00	0.0052	4.5159	32.4000
 	  200.000	  30.20	  37.50	   3.00	  22.00	  69.62
 	  430.000	  29.90	  38.00	   0.75	  22.50	  86.37
-1 10000.0 0.00018
+1 10000.0 0.01800

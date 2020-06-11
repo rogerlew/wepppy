@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.736742
+#   Build Date: 2020-06-05 11:16:33.027083
 #   Source Data: Surgo
 # 
 # Mukey: 2536112
 # Major Component: 14744308 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42476435   A              15.0     9.0        0.0         0.0         1.35
-#  42476436   E              51.0     9.0        0.0         5.0         1.38
-#  42476437   2Bt    R      135.0    0.28        0.0         3.0          1.4
-#  42476434   3R            203.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42476435   A              15.0     9.0        0.0         0.0         1.35     9.5    29.2     2.0     1.2
+#  42476436   E              51.0     9.0        0.0         5.0         1.38     8.8    50.9     2.3    0.68
+#  42476437   2Bt    R      135.0    0.28        0.0         3.0          1.4    68.6     7.7     1.0     0.5
+#  42476434   3R            203.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00280
+#     ksat: 0.28000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Beemont gravelly silt loam, 15 to 35 percent slopes'		'GR-SIL'	2	0.3000	0.7500	5502700.00	0.0250	3.5000	32.4000
 	  150.000	  29.20	   9.50	   1.20	   4.00	  30.00
 	  510.000	  50.90	   8.80	   0.68	   2.80	  66.75
-1 10000.0 0.01008
+1 10000.0 1.00800

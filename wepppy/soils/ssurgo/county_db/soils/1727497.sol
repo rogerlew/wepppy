@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.315739
+#   Build Date: 2020-06-05 11:16:29.837440
 #   Source Data: Surgo
 # 
 # Mukey: 1727497
 # Major Component: 15238945 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44069423   H1              8.0    9.11        5.0        16.0          1.3
-#  44069424   H2     R       46.0    0.55       10.0        30.0         1.48
-#  44069425   R              71.0    28.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44069423   H1              8.0    9.11        5.0        16.0          1.3    34.0    10.0     6.1     2.5
+#  44069424   H2     R       46.0    0.55       10.0        30.0         1.48    62.0    11.4     3.6    0.25
+#  44069425   R              71.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00550
+#     ksat: 0.55000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Cynthiana-Faywood complex, rocky, 20 to 40 percent slopes, eroded'		'FL-SICL'	1	0.3000	0.7500	4179580.00	0.0070	3.5000	32.7960
-	   80.000	  10.00	  34.00	   2.50	  18.40	  32.85
-1 10000.0 0.01980
+	  210.000	  10.00	  34.00	   2.50	  18.40	  32.85
+1 10000.0 1.98000

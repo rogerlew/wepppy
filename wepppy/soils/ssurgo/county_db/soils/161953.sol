@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.245174
+#   Build Date: 2020-06-05 11:16:29.429584
 #   Source Data: Surgo
 # 
 # Mukey: 161953
 # Major Component: 15249159 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44096812   Ap             25.0    9.17        1.0         1.0         1.45
-#  44096811   Bt     R       83.0    0.92        0.0         1.0         1.55
-#  44096813   BC             99.0    0.92        1.0         1.0          1.8
-#  44096810   Cd            200.0    0.74        1.0         2.0          1.9
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44096812   Ap             25.0    9.17        1.0         1.0         1.45    22.0    22.0     6.0     2.5
+#  44096811   Bt     R       83.0    0.92        0.0         1.0         1.55    42.0    16.0     5.0     0.5
+#  44096813   BC             99.0    0.92        1.0         1.0          1.8    35.0    25.0     7.0    0.25
+#  44096810   Cd            200.0    0.74        1.0         2.0          1.9    33.0    22.0     6.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Blount silt loam, ground moraine, 0 to 2 percent slopes'		'SIL'	1	0.2900	0.7500	4841140.00	0.0085	3.5000	33.0120
 	  250.000	  22.00	  22.00	   2.50	  18.00	   6.90
-1 10000.0 0.03312
+1 10000.0 3.31200

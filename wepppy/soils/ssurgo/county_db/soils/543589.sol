@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.216220
+#   Build Date: 2020-06-05 11:16:30.698253
 #   Source Data: Surgo
 # 
 # Mukey: 543589
 # Major Component: 14884158 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42920665   Ap             25.0    9.17        1.0         6.0         1.42
-#  42920666   Bt             51.0    9.17        0.0         6.0         1.54
-#  42920667   Bx     R       99.0    0.92        1.0        10.0         1.52
-#  42920668   BCg           122.0    2.33        2.0        15.0         1.56
-#  42920664   R             147.0    2.33         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42920665   Ap             25.0    9.17        1.0         6.0         1.42    17.5    29.1     9.4     2.5
+#  42920666   Bt             51.0    9.17        0.0         6.0         1.54    24.5    20.9     8.7    0.25
+#  42920667   Bx     R       99.0    0.92        1.0        10.0         1.52    21.3     9.4     2.0    0.25
+#  42920668   BCg           122.0    2.33        2.0        15.0         1.56    24.5    20.9     8.7     0.0
+#  42920664   R             147.0    2.33         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Abbottstown silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	5089225.00	0.0109	3.5000	33.0120
 	  250.000	  29.10	  17.50	   2.50	   9.50	  18.16
 	  510.000	  20.90	  24.50	   0.25	  11.30	  16.34
-1 10000.0 0.03312
+1 10000.0 3.31200

@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.261441
+#   Build Date: 2020-06-05 11:16:33.779725
 #   Source Data: Surgo
 # 
 # Mukey: 371971
 # Major Component: 15757230 (comppct_r = 100.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45634393   H1             18.0     2.7       50.0        48.0         1.45
-#  45634394   H2     R       46.0     1.0       50.0        48.0          1.5
-#  45634392   H3             61.0     7.2         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45634393   H1             18.0     2.7       50.0        48.0         1.45    35.0    33.3    10.1     2.0
+#  45634394   H2     R       46.0     1.0       50.0        48.0          1.5    50.0    22.1     5.3    0.75
+#  45634392   H3             61.0     7.2         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Roughcreek very stony clay loam, gently rolling'		'STV-CL'	1	0.1600	0.7500	4668210.00	0.0060	4.3592	9.7200
-	  180.000	  33.30	  35.00	   2.00	  32.50	  98.22
-1 10000.0 0.03600
+	  210.000	  33.30	  35.00	   2.00	  32.50	  98.22
+1 10000.0 3.60000
