@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.179356
+#   Build Date: 2020-06-05 11:16:32.039410
 #   Source Data: Surgo
 # 
 # Mukey: 290264
 # Major Component: 14844781 (comppct_r = 75.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42807176   H1              8.0     9.0        0.0        13.0         1.25
-#  42807177   H2             43.0     9.0        0.0        18.0         1.35
-#  42807178   H3     R       68.0     0.4        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42807176   H1              8.0     9.0        0.0        13.0         1.25    12.0    36.5    11.1     4.0
+#  42807177   H2             43.0     9.0        0.0        18.0         1.35    12.0    32.1     9.9     1.0
+#  42807178   H3     R       68.0     0.4        0.0         0.0          1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00400
+#     ksat: 0.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Nassau channery silt loam, hilly, very rocky'		'CN-SIL'	2	0.3000	0.7500	4860310.00	0.0053	2.8062	32.4000
 	   80.000	  36.50	  12.00	   4.00	  11.30	  45.62
 	  430.000	  32.10	  12.00	   1.00	  11.30	  67.20
-1 10000.0 0.01440
+1 10000.0 1.44000

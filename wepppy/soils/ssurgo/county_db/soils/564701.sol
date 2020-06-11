@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.809257
+#   Build Date: 2020-06-05 11:16:33.044344
 #   Source Data: Surgo
 # 
 # Mukey: 564701
 # Major Component: 15407369 (comppct_r = 35.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44631144   A              10.0     9.0        0.0         5.0         1.45
-#  44631145   Bt1            38.0     2.7        0.0         5.0         1.58
-#  44631146   Bt2    R      130.0     1.0        0.0         5.0         1.48
-#  44631143   Cr            135.0     1.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44631144   A              10.0     9.0        0.0         5.0         1.45    20.5    26.4     8.7    1.25
+#  44631145   Bt1            38.0     2.7        0.0         5.0         1.58    40.0     8.0     3.9    0.25
+#  44631146   Bt2    R      130.0     1.0        0.0         5.0         1.48    52.5     3.1     2.4    0.25
+#  44631143   Cr            135.0     1.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Carnasaw-Bismarck-Zafra complex, 8 to 20 percent slopes'		'GR-SIL'	2	0.2300	0.7500	4923835.00	0.0091	3.5000	32.4000
 	  100.000	  26.40	  20.50	   1.25	  11.30	  28.75
 	  380.000	   8.00	  40.00	   0.25	  11.30	  14.50
-1 10000.0 0.03600
+1 10000.0 3.60000

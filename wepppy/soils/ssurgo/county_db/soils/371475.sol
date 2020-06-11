@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.387161
+#   Build Date: 2020-06-05 11:16:30.283613
 #   Source Data: Surgo
 # 
 # Mukey: 371475
 # Major Component: 15755215 (comppct_r = 75.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45631688   H1             28.0     2.7        0.0         0.0         1.38
-#  45631689   H2     R      130.0    0.21        0.0         0.0         1.33
-#  45631690   H3            218.0    0.21        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45631688   H1             28.0     2.7        0.0         0.0         1.38    17.5    29.1     9.4    1.75
+#  45631689   H2     R      130.0    0.21        0.0         0.0         1.33    45.0    26.1     7.8    0.75
+#  45631690   H3            218.0    0.21        0.0         0.0         1.35    32.5    17.7    10.8    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Wrightsville-Rodessa complex'		'SIL'	1	0.0900	0.7500	5089225.00	0.0109	3.5000	9.7200
 	  280.000	  29.10	  17.50	   1.75	  11.30	   2.50
-1 10000.0 0.00756
+1 10000.0 0.75600

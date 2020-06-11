@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.198828
+#   Build Date: 2020-06-05 11:16:32.050004
 #   Source Data: Surgo
 # 
 # Mukey: 159968
 # Major Component: 14633683 (comppct_r = 100.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42139171   Ap              5.0    9.17        0.0         1.0         1.53
-#  42139168   A/C    R       13.0    0.25        0.0         2.0         1.68
-#  42139169   Cd             28.0    0.25        1.0         3.0         1.73
-#  42139170   2C            203.0    0.74        3.0         6.0         1.63
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42139171   Ap              5.0    9.17        0.0         1.0         1.53    21.0    17.0     4.0    1.25
+#  42139168   A/C    R       13.0    0.25        0.0         2.0         1.68    25.0    25.0     5.0    1.25
+#  42139169   Cd             28.0    0.25        1.0         3.0         1.73    25.0    26.0     6.0     0.5
+#  42139170   2C            203.0    0.74        3.0         6.0         1.63    24.0    20.0     4.0     2.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00250
+#     ksat: 0.25000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Orthents, 8 to 25 percent slopes'		'SIL'	1	0.3000	0.7500	4896270.00	0.0089	3.5000	33.0120
-	   50.000	  17.00	  21.00	   1.25	  14.00	   5.95
-1 10000.0 0.00900
+	  210.000	  17.00	  21.00	   1.25	  14.00	   5.95
+1 10000.0 0.90000

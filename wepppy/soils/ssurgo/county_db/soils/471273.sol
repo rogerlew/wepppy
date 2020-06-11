@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.185296
+#   Build Date: 2020-06-05 11:16:30.679634
 #   Source Data: Surgo
 # 
 # Mukey: 471273
 # Major Component: 14591275 (comppct_r = 40.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42030330   H1             23.0     9.0        0.0        10.0          1.5
-#  42030329   H2             69.0     2.7        0.0        40.0         1.45
-#  42030328   H3     R       94.0     0.7         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42030330   H1             23.0     9.0        0.0        10.0          1.5    15.0    65.9    10.4     3.0
+#  42030329   H2             69.0     2.7        0.0        40.0         1.45    30.0    35.9    10.7     0.4
+#  42030328   H3     R       94.0     0.7         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Skalan-Deadwood-Kistirn families complex, 50 to 70 percent slopes.'		'GRX-SL'	2	0.3700	0.7500	4725840.00	0.0052	3.0418	32.4000
 	  230.000	  65.90	  15.00	   3.00	  10.00	  64.00
 	  690.000	  35.90	  30.00	   0.40	  15.00	  74.20
-1 10000.0 0.02520
+1 10000.0 2.52000

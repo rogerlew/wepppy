@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.746072
+#   Build Date: 2020-06-05 11:16:30.414609
 #   Source Data: Surgo
 # 
 # Mukey: 1605284
 # Major Component: 15168483 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43861767   Ap             10.0    9.17        0.0         0.0          1.5
-#  43861768   Bt             64.0    9.17        0.0         0.0          1.5
-#  43861765   2Btx1  R      122.0    0.92        0.0         0.0         1.65
-#  43861766   2Btx2         165.0    0.21        0.0         0.0          1.6
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43861767   Ap             10.0    9.17        0.0         0.0          1.5     7.0    21.9    14.0    2.25
+#  43861768   Bt             64.0    9.17        0.0         0.0          1.5    24.0     7.0     4.9    0.25
+#  43861765   2Btx1  R      122.0    0.92        0.0         0.0         1.65    27.5    27.3    17.4    0.25
+#  43861766   2Btx2         165.0    0.21        0.0         0.0          1.6    45.0    26.1     7.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Tangi silt loam, 3 to 8 percent slopes'		'SIL'	2	0.2900	0.7500	5502700.00	0.0250	3.5000	33.0120
 	  100.000	  21.90	   7.00	   2.25	  11.30	   0.00
 	  640.000	   7.00	  24.00	   0.25	  11.30	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

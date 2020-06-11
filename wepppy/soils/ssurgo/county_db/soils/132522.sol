@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.820677
+#   Build Date: 2020-06-05 11:16:29.679516
 #   Source Data: Surgo
 # 
 # Mukey: 132522
 # Major Component: 15395639 (comppct_r = 50.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44593290   A              13.0    28.0        0.0         0.0          1.5
-#  44593291   Btg    R      162.0     1.0        0.0         0.0          1.4
-#  44593292   BCg           193.0     2.0        0.0         0.0         1.35
-#  44593293   Cg            203.0    23.0        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44593290   A              13.0    28.0        0.0         0.0          1.5    12.5    67.3    16.5     2.0
+#  44593291   Btg    R      162.0     1.0        0.0         0.0          1.4    47.5    23.3     5.6    0.25
+#  44593292   BCg           193.0     2.0        0.0         0.0         1.35    30.0    55.5    10.2    0.25
+#  44593293   Cg            203.0    23.0        0.0         0.0         1.45    10.0    66.6    11.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Argent-Okeetee association'		'FSL'	1	0.0600	0.7500	5897650.00	0.0079	2.5255	100.8000
-	  130.000	  67.30	  12.50	   2.00	  11.30	   2.00
-1 10000.0 0.03600
+	  210.000	  67.30	  12.50	   2.00	  11.30	   2.00
+1 10000.0 3.60000

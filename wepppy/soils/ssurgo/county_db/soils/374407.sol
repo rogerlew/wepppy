@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.789052
+#   Build Date: 2020-06-05 11:16:30.434077
 #   Source Data: Surgo
 # 
 # Mukey: 374407
 # Major Component: 15754713 (comppct_r = 85.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45630532   A              18.0     9.0        0.0         1.0         1.43
-#  45630533   Btss   R       66.0    0.21        0.0         0.0          1.4
-#  45630534   BC            137.0     1.0        0.0         0.0         1.45
-#  45630535   C             183.0     1.0        0.0         0.0         1.51
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45630532   A              18.0     9.0        0.0         1.0         1.43    12.5    45.7    12.9     1.5
+#  45630533   Btss   R       66.0    0.21        0.0         0.0          1.4    50.0    22.0     5.3    0.75
+#  45630534   BC            137.0     1.0        0.0         0.0         1.45    38.0    32.0     9.0    0.25
+#  45630535   C             183.0     1.0        0.0         0.0         1.51    32.0    43.0    13.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Woodtell loam, 5 to 12 percent slopes'		'L'	1	0.0900	0.7500	5206090.00	0.0083	2.7343	32.4000
-	  180.000	  45.70	  12.50	   1.50	  11.30	  10.90
-1 10000.0 0.00756
+	  210.000	  45.70	  12.50	   1.50	  11.30	  10.90
+1 10000.0 0.75600

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.360916
+#   Build Date: 2020-06-05 11:16:29.854190
 #   Source Data: Surgo
 # 
 # Mukey: 1414669
 # Major Component: 15314704 (comppct_r = 55.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44326424   Ap             18.0    2.82        0.0         0.0         1.36
-#  44326422   Eg     R       43.0     0.4        0.0         0.0         1.44
-#  44326423   Btg1          102.0    0.21        0.0         0.0         1.39
-#  44326421   Btg2          203.0     0.3        0.0         0.0         1.48
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44326424   Ap             18.0    2.82        0.0         0.0         1.36    18.6    22.3    15.1    1.66
+#  44326422   Eg     R       43.0     0.4        0.0         0.0         1.44    26.2    21.0     7.4    0.62
+#  44326423   Btg1          102.0    0.21        0.0         0.0         1.39    48.8    10.6     7.9    0.75
+#  44326421   Btg2          203.0     0.3        0.0         0.0         1.48    31.0    23.3    18.7    0.03
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00400
+#     ksat: 0.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Crowley-Vidrine complex, 0 to 1 percent slopes'		'SIL'	1	0.2300	0.7500	5028582.00	0.0101	3.5000	10.1520
-	  180.000	  22.30	  18.60	   1.66	  11.30	   0.00
-1 10000.0 0.01440
+	  210.000	  22.30	  18.60	   1.66	  11.30	   0.00
+1 10000.0 1.44000

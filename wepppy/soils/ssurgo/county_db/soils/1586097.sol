@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.305422
+#   Build Date: 2020-06-05 11:16:31.171998
 #   Source Data: Surgo
 # 
 # Mukey: 1586097
 # Major Component: 15044665 (comppct_r = 60.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43459889   A              13.0    9.17        0.0         0.0         1.45
-#  43459891   Eg     R       74.0     0.3        0.0         0.0         1.45
-#  43459890   Btg/E         130.0     0.3        0.0         0.0         1.45
-#  43459892   Btg           203.0     0.3        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43459889   A              13.0    9.17        0.0         0.0         1.45     5.3    31.5    24.2     1.6
+#  43459891   Eg     R       74.0     0.3        0.0         0.0         1.45     6.9    29.1    22.7     0.6
+#  43459890   Btg/E         130.0     0.3        0.0         0.0         1.45    22.4    22.9    18.7     0.2
+#  43459892   Btg           203.0     0.3        0.0         0.0         1.45    22.4    22.9    18.7     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00300
+#     ksat: 0.30000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Caddo-Messer complex, 0 to 1 percent slopes'		'SIL'	1	0.3000	0.7500	7376820.00	0.0113	1.6109	33.0120
-	  130.000	  31.50	   5.30	   1.60	  11.30	   0.00
-1 10000.0 0.01080
+	  210.000	  31.50	   5.30	   1.60	  11.30	   0.00
+1 10000.0 1.08000

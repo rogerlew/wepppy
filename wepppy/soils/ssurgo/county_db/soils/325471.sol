@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.586104
+#   Build Date: 2020-06-05 11:16:31.762779
 #   Source Data: Surgo
 # 
 # Mukey: 325471
 # Major Component: 14712696 (comppct_r = 95.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42375399   Ap             10.0     9.0        0.0         0.0         1.42
-#  42375398   BEg    R       23.0     0.9        0.0         0.0         1.54
-#  42375397   Btg1          157.0     0.9        0.0         0.0         1.36
-#  42375396   Btg2          173.0     0.9        0.0         0.0         1.54
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42375399   Ap             10.0     9.0        0.0         0.0         1.42    23.2    32.5     8.1     2.5
+#  42375398   BEg    R       23.0     0.9        0.0         0.0         1.54    31.7    57.9    11.3    0.25
+#  42375397   Btg1          157.0     0.9        0.0         0.0         1.36    55.0    17.1     5.3    0.25
+#  42375396   Btg2          173.0     0.9        0.0         0.0         1.54    50.0    47.7     7.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Grady loam, 0 to 2 percent slopes, frequently ponded'		'L'	1	0.2900	0.7500	4284010.00	0.0048	3.7082	32.4000
-	  100.000	  32.50	  23.20	   2.50	  11.30	   0.00
-1 10000.0 0.03240
+	  210.000	  32.50	  23.20	   2.50	  11.30	   0.00
+1 10000.0 3.24000

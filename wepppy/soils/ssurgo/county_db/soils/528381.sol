@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.339046
+#   Build Date: 2020-06-05 11:16:30.269551
 #   Source Data: Surgo
 # 
 # Mukey: 528381
 # Major Component: 14964719 (comppct_r = 100.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43194368   H1              8.0   28.23        0.0         4.0          1.4
-#  43194369   H2             69.0   28.23        0.0        13.0         1.45
-#  43194367   R      R       94.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43194368   H1              8.0   28.23        0.0         4.0          1.4    18.0    27.3     9.0     2.5
+#  43194369   H2             69.0   28.23        0.0        13.0         1.45    25.0    20.5     8.6    0.25
+#  43194367   R      R       94.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Sulphura channery silt loam, 25 to 65 percent slopes'		'CN-SIL'	2	0.3600	0.7500	5061660.00	0.0106	3.5000	101.6280
 	   80.000	  27.30	  18.00	   2.50	  13.30	  28.00
 	  690.000	  20.50	  25.00	   0.25	  12.60	  58.67
-1 10000.0 0.00756
+1 10000.0 0.75600

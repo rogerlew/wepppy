@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.287706
+#   Build Date: 2020-06-05 11:16:30.726806
 #   Source Data: Surgo
 # 
 # Mukey: 1423172
 # Major Component: 14944650 (comppct_r = 33.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43124946   A               8.0 23.2815       40.0         5.0         1.35
-#  43124947   E              25.0 23.2815       40.0         5.0         1.35
-#  43124948   2Bt    R       46.0  0.9174        0.0         0.0          1.4
-#  43124949   2BCt           71.0  0.9174        0.0         0.0          1.4
-#  43124950   2Cd           100.0  0.9174        0.0         0.0          1.9
-#  43124945   2Cr           125.0  2.8222         -           -           2.0
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43124946   A               8.0 23.2815       40.0         5.0         1.35    11.0    64.0    17.3     1.0
+#  43124947   E              25.0 23.2815       40.0         5.0         1.35    11.0    64.0    17.3     0.5
+#  43124948   2Bt    R       46.0  0.9174        0.0         0.0          1.4    45.0     7.2     3.5    0.25
+#  43124949   2BCt           71.0  0.9174        0.0         0.0          1.4    45.0     7.2     3.5    0.25
+#  43124950   2Cd           100.0  0.9174        0.0         0.0          1.9    45.0     7.2     3.5    0.25
+#  43124945   2Cr           125.0  2.8222         -           -           2.0     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00917
+#     ksat: 0.91740
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 'Niotaze-Bigheart-Rock outcrop complex, 3 to 15 percent slopes, extremely stony'		'STV-FSL'	2	0.2300	0.7500	6051330.00	0.0133	2.3816	83.8134
 	   80.000	  64.00	  11.00	   1.00	  11.00	  47.75
 	  250.000	  64.00	  11.00	   0.50	  11.00	  47.75
-1 10000.0 0.03303
+1 10000.0 3.30264

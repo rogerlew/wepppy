@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:41.311024
+#   Build Date: 2020-06-05 11:16:32.586435
 #   Source Data: Surgo
 # 
 # Mukey: 58463
 # Major Component: 15743992 (comppct_r = 60.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45612945   A              18.0     9.0       13.0        18.0         1.38
-#  45612944   R      R      200.0     1.4         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45612945   A              18.0     9.0       13.0        18.0         1.38    28.0    38.0    11.3     2.5
+#  45612944   R      R      200.0     1.4         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.01400
+#     ksat: 1.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Brewster association, hilly'		'GR-CL'	1	0.2300	0.7500	4898730.00	0.0057	3.8346	32.4000
 	  210.000	  38.00	  28.00	   2.50	  15.00	  70.67
-1 10000.0 0.05040
+1 10000.0 5.04000

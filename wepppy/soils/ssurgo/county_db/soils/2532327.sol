@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.416253
+#   Build Date: 2020-06-05 11:16:32.351896
 #   Source Data: Surgo
 # 
 # Mukey: 2532327
 # Major Component: 14746426 (comppct_r = 97.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42484056   A              28.0     9.0        0.0         0.0          1.3
-#  42484058   2Bt    R       69.0     0.9        0.0         0.0          1.4
-#  42484059   3Bt           117.0     0.9        0.0        10.0         1.55
-#  42484057   4Bt           203.0    0.21        7.0        23.0         1.33
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42484056   A              28.0     9.0        0.0         0.0          1.3    14.0    14.0     3.2     2.5
+#  42484058   2Bt    R       69.0     0.9        0.0         0.0          1.4    45.0     7.0     1.9     1.3
+#  42484059   3Bt           117.0     0.9        0.0        10.0         1.55    38.0    10.0     2.4     0.3
+#  42484057   4Bt           203.0    0.21        7.0        23.0         1.33    67.0    11.0     1.6     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Maplegrove silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	5282180.00	0.0150	3.5000	32.4000
 	  280.000	  14.00	  14.00	   2.50	  13.70	   1.00
-1 10000.0 0.03240
+1 10000.0 3.24000

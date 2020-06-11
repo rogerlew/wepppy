@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.528900
+#   Build Date: 2020-06-05 11:16:29.543875
 #   Source Data: Surgo
 # 
 # Mukey: 187445
 # Major Component: 15565771 (comppct_r = 87.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45144081   Ap             23.0     4.0        0.0         0.0          1.5
-#  45144078   Bg     R       74.0     0.7        0.0         0.0         1.63
-#  45144079   C             145.0    0.55        0.0         0.0         1.67
-#  45144080   2Cd           203.0   0.005        0.0         0.0         1.88
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45144081   Ap             23.0     4.0        0.0         0.0          1.5    23.0    48.0     8.9     4.4
+#  45144078   Bg     R       74.0     0.7        0.0         0.0         1.63    28.0    43.0     9.2     0.7
+#  45144079   C             145.0    0.55        0.0         0.0         1.67    24.0    38.0    11.8     0.5
+#  45144080   2Cd           203.0   0.005        0.0         0.0         1.88    23.0    36.0     9.9     0.4
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Parkhill loam, 0 to 1 percent slopes'		'L'	1	0.2300	0.7500	4437690.00	0.0047	3.6488	14.4000
 	  230.000	  48.00	  23.00	   4.40	  18.90	   3.00
-1 10000.0 0.02520
+1 10000.0 2.52000

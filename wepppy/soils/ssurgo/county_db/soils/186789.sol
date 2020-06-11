@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.409835
+#   Build Date: 2020-06-05 11:16:29.868491
 #   Source Data: Surgo
 # 
 # Mukey: 186789
 # Major Component: 15520480 (comppct_r = 88.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44976075   Ap             23.0     5.5        0.0         0.0         1.65
-#  44976073   Bt     R       43.0    0.55        0.0         0.0         1.73
-#  44976074   C              66.0     0.1        0.0         1.0         1.75
-#  44976076   2Cd           203.0   0.005        0.0         1.0         1.97
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44976075   Ap             23.0     5.5        0.0         0.0         1.65    14.0    42.0     9.5    2.35
+#  44976073   Bt     R       43.0    0.55        0.0         0.0         1.73    29.0    37.0     9.0    0.91
+#  44976074   C              66.0     0.1        0.0         1.0         1.75    19.0    38.0    11.7    0.31
+#  44976076   2Cd           203.0   0.005        0.0         1.0         1.97    16.0    48.0     6.1     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00550
+#     ksat: 0.55000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Shebeon loam, 0 to 2 percent slopes'		'L'	1	0.3000	0.7500	4552950.00	0.0053	3.0290	19.8000
 	  230.000	  42.00	  14.00	   2.35	  15.90	   5.00
-1 10000.0 0.01980
+1 10000.0 1.98000

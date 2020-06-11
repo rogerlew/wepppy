@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.360511
+#   Build Date: 2020-06-05 11:16:30.277308
 #   Source Data: Surgo
 # 
 # Mukey: 374386
 # Major Component: 15754684 (comppct_r = 85.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45630492   A              20.0     9.0        0.0         0.0         1.55
-#  45630493   Btss   R       63.0    0.21        0.0         0.0          1.5
-#  45630494   Btkss         114.0    0.21        0.0         0.0         1.48
-#  45630495   BCk           135.0    0.21        0.0         0.0          1.4
-#  45630496   Cdk           184.0    0.21        0.0         0.0          1.7
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45630492   A              20.0     9.0        0.0         0.0         1.55    14.0    40.0    16.4    1.25
+#  45630493   Btss   R       63.0    0.21        0.0         0.0          1.5    46.0    39.0    17.4     0.5
+#  45630494   Btkss         114.0    0.21        0.0         0.0         1.48    44.0    35.0    15.8    0.35
+#  45630495   BCk           135.0    0.21        0.0         0.0          1.4    41.0    35.0    15.8     0.3
+#  45630496   Cdk           184.0    0.21        0.0         0.0          1.7    34.0    31.0    13.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Crockett loam, 1 to 3 percent slopes'		'L'	1	0.2900	0.7500	5878440.00	0.0108	2.6288	32.4000
-	  200.000	  40.00	  14.00	   1.25	  14.00	   3.00
-1 10000.0 0.00756
+	  210.000	  40.00	  14.00	   1.25	  14.00	   3.00
+1 10000.0 0.75600

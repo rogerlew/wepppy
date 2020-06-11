@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.707800
+#   Build Date: 2020-06-05 11:16:30.396167
 #   Source Data: Surgo
 # 
 # Mukey: 404124
 # Major Component: 14475892 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41669850   Ap             20.0     3.0        0.0         0.0         1.42
-#  41669851   Btg    R      125.0     0.7        0.0         0.0          1.4
-#  41669852   Cg            200.0     3.0        0.0         0.0         1.38
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41669850   Ap             20.0     3.0        0.0         0.0         1.42    33.0     4.0     1.1     3.0
+#  41669851   Btg    R      125.0     0.7        0.0         0.0          1.4    39.0     3.0     1.1    0.75
+#  41669852   Cg            200.0     3.0        0.0         0.0         1.38    30.0     3.0     1.8    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Arispe silty clay loam, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.0900	0.7500	4234710.00	0.0071	3.5000	10.8000
-	  200.000	   4.00	  33.00	   3.00	  26.40	   0.00
-1 10000.0 0.02520
+	  210.000	   4.00	  33.00	   3.00	  26.40	   0.00
+1 10000.0 2.52000

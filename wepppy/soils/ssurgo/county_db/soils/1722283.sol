@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.252754
+#   Build Date: 2020-06-05 11:16:30.709593
 #   Source Data: Surgo
 # 
 # Mukey: 1722283
 # Major Component: 15187583 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43920780   Ap             10.0     9.0        0.0         0.0         1.35
-#  43920781   E              23.0     9.0        0.0         0.0         1.35
-#  43920782   Btg    R      104.0     1.0        0.0         0.0          1.5
-#  43920783   2Cg           203.0    71.0        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43920780   Ap             10.0     9.0        0.0         0.0         1.35    18.0    27.3     9.0    1.25
+#  43920781   E              23.0     9.0        0.0         0.0         1.35    18.0    27.3     9.0    0.25
+#  43920782   Btg    R      104.0     1.0        0.0         0.0          1.5    45.0     7.2     3.5    0.25
+#  43920783   2Cg           203.0    71.0        0.0         0.0         1.35     8.0    83.0    12.1    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Gertie silt loam, 0 to 2 percent slopes'		'L'	2	0.1600	0.7500	5061660.00	0.0106	3.5000	32.4000
 	  100.000	  27.30	  18.00	   1.25	   7.40	   4.00
 	  230.000	  27.30	  18.00	   0.25	   7.40	   4.00
-1 10000.0 0.03600
+1 10000.0 3.60000

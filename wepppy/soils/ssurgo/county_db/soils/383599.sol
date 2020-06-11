@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:00.811858
+#   Build Date: 2020-06-05 11:16:32.758983
 #   Source Data: Surgo
 # 
 # Mukey: 383599
 # Major Component: 14994741 (comppct_r = 61.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43300230   Ap             33.0     9.0        0.0         0.0         1.44
-#  43300231   Bt             94.0     9.0        0.0         0.0         1.52
-#  43300232   Cr     R      119.0    0.91         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43300230   Ap             33.0     9.0        0.0         0.0         1.44    20.5    42.0    12.1     1.0
+#  43300231   Bt             94.0     9.0        0.0         0.0         1.52    27.5    34.7    10.3    0.75
+#  43300232   Cr     R      119.0    0.91         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Coyle-Ironmound complex, 3 to 5 percent slopes, eroded'		'L'	2	0.1600	0.7500	5052410.00	0.0117	3.3007	32.4000
 	  330.000	  42.00	  20.50	   1.00	  11.00	   0.00
 	  940.000	  34.70	  27.50	   0.75	  14.60	  13.00
-1 10000.0 0.03276
+1 10000.0 3.27600

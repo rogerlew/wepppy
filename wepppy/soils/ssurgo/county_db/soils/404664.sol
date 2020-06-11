@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.710330
+#   Build Date: 2020-06-05 11:16:33.345995
 #   Source Data: Surgo
 # 
 # Mukey: 404664
 # Major Component: 14753180 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42508769   Ap             23.0     9.0        0.0         0.0         1.36
-#  42508770   E              46.0     9.0        0.0         0.0         1.46
-#  42508768   Btg    R      137.0    0.09        0.0         0.0          1.3
-#  42508771   Cg            200.0     3.0        0.0         0.0         1.42
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42508769   Ap             23.0     9.0        0.0         0.0         1.36    21.0     5.0     1.7     2.5
+#  42508770   E              46.0     9.0        0.0         0.0         1.46    20.0     5.0     2.0    0.75
+#  42508768   Btg    R      137.0    0.09        0.0         0.0          1.3    52.0     3.0     2.4    0.25
+#  42508771   Cg            200.0     3.0        0.0         0.0         1.42    35.0     3.0     1.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00090
+#     ksat: 0.09000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Edina silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	32.4000
 	  230.000	   5.00	  21.00	   2.50	  17.80	   0.00
 	  460.000	   5.00	  20.00	   0.75	  17.10	   0.00
-1 10000.0 0.00324
+1 10000.0 0.32400

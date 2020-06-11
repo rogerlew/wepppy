@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.861621
+#   Build Date: 2020-06-05 11:16:29.700570
 #   Source Data: Surgo
 # 
 # Mukey: 575980
 # Major Component: 15761943 (comppct_r = 54.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45642066   H1             66.0    92.0        0.0         0.0          1.4
-#  45642064   H2     R      165.0     1.0        0.0         0.0         1.58
-#  45642065   H3            203.0     2.7        0.0         0.0         1.58
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45642066   H1             66.0    92.0        0.0         0.0          1.4     7.5    83.1    23.0    0.55
+#  45642064   H2     R      165.0     1.0        0.0         0.0         1.58    28.5    54.4    11.0     0.3
+#  45642065   H3            203.0     2.7        0.0         0.0         1.58    27.5    55.1    11.1     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Depcor-Huntsburg association, gently undulating'		'LFS'	1	0.3000	0.7500	7146300.00	0.0229	1.8235	331.2000
 	  660.000	  83.10	   7.50	   0.55	   3.50	   5.00
-1 10000.0 0.03600
+1 10000.0 3.60000

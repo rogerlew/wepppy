@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.627269
+#   Build Date: 2020-06-05 11:16:29.578598
 #   Source Data: Surgo
 # 
 # Mukey: 547860
 # Major Component: 15223518 (comppct_r = 40.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44019578   A              23.0    28.0        0.0         0.0          1.5
-#  44019579   Bw            137.0    28.0        0.0         4.0          1.5
-#  44019580   R      R      203.0   0.035         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44019578   A              23.0    28.0        0.0         0.0          1.5    16.0    43.8    12.3    10.0
+#  44019579   Bw            137.0    28.0        0.0         4.0          1.5    16.0    43.8    12.3     0.5
+#  44019580   R      R      203.0   0.035         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00035
+#     ksat: 0.03500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Porters-Unaka complex, 50 to 95 percent slopes, rocky'		'L'	2	0.2300	0.7500	5090830.00	0.0057	2.9966	100.8000
 	  230.000	  43.80	  16.00	  10.00	  25.90	  18.00
 	 1370.000	  43.80	  16.00	   0.50	   9.00	  31.84
-1 10000.0 0.00126
+1 10000.0 0.12600

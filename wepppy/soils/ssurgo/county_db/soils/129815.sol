@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.054525
+#   Build Date: 2020-06-05 11:16:30.131297
 #   Source Data: Surgo
 # 
 # Mukey: 129815
 # Major Component: 15382824 (comppct_r = 96.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44549668   A              13.0    28.0        0.0         0.0          1.4
-#  44549664   Eg             20.0    28.0        0.0         0.0          1.4
-#  44549665   Btg    R      155.0     1.0        0.0         0.0          1.4
-#  44549666   BCg           173.0     3.0        0.0         0.0          1.4
-#  44549667   Cg            203.0    28.0        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44549668   A              13.0    28.0        0.0         0.0          1.4    16.0    70.0    17.1    2.25
+#  44549664   Eg             20.0    28.0        0.0         0.0          1.4    16.0    70.0    17.1     0.2
+#  44549665   Btg    R      155.0     1.0        0.0         0.0          1.4    26.5    55.8    11.3     0.2
+#  44549666   BCg           173.0     3.0        0.0         0.0          1.4    18.0    62.3     9.1     0.2
+#  44549667   Cg            203.0    28.0        0.0         0.0         1.45    13.0    70.0    11.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,5 +57,5 @@ Any comments:
 1 1
 'Mouzon fine sandy loam, occasionally flooded'		'FSL'	2	0.0600	0.7500	6012910.00	0.0077	2.7182	100.8000
 	  130.000	  70.00	  16.00	   2.25	   5.90	   6.00
-	  200.000	  70.00	  16.00	   0.20	   5.60	   6.00
-1 10000.0 0.03600
+	  210.000	  70.00	  16.00	   0.20	   5.60	   6.00
+1 10000.0 3.60000

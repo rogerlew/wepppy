@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:19.215995
+#   Build Date: 2020-06-05 11:16:32.482117
 #   Source Data: Surgo
 # 
 # Mukey: 364426
 # Major Component: 15732706 (comppct_r = 90.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45592834   A              23.0     9.0        0.0         0.0          1.4
-#  45592835   Bkm    R       38.0   0.215         -           -           1.4
-#  45592833   Bkk           203.0     9.0        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45592834   A              23.0     9.0        0.0         0.0          1.4    25.0    37.0     2.9     1.5
+#  45592835   Bkm    R       38.0   0.215         -           -           1.4     7.0    66.8    10.0     7.0
+#  45592833   Bkk           203.0     9.0        0.0         0.0          1.5    25.0    38.0     2.9    0.55
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Petrocalcic
-#     ksat: 0.00215
+#     ksat: 0.21500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Cho gravelly loam, dry, 1 to 8 percent slopes'		'GR-L'	1	0.2300	0.7500	3285090.00	0.0053	4.1268	32.4000
 	  230.000	  37.00	  25.00	   1.50	  15.20	  26.00
-1 10000.0 0.00774
+1 10000.0 0.77400

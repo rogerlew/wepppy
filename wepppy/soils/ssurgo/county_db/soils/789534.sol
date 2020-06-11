@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:19.142514
+#   Build Date: 2020-06-05 11:16:32.927562
 #   Source Data: Surgo
 # 
 # Mukey: 789534
 # Major Component: 15165788 (comppct_r = 80.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43853274   A              18.0     9.0        1.0         1.0         1.38
-#  43853273   Bg             71.0     9.0        1.0         2.0         1.58
-#  43853276   BC     R      102.0     1.0        1.0         2.0         1.75
-#  43853275   BCd           203.0     0.1        1.0         2.0          1.9
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43853274   A              18.0     9.0        1.0         1.0         1.38    19.5    42.4    12.2     5.5
+#  43853273   Bg             71.0     9.0        1.0         2.0         1.58    11.5    62.5    16.3     2.5
+#  43853276   BC     R      102.0     1.0        1.0         2.0         1.75     8.0    63.0    16.9     0.0
+#  43853275   BCd           203.0     0.1        1.0         2.0          1.9     8.0    63.0    16.9     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Parent loam, 0 to 2 percent slopes, stony'		'L'	2	0.0900	0.7500	5071620.00	0.0056	3.2299	32.4000
 	  180.000	  42.40	  19.50	   5.50	  21.50	  16.70
 	  710.000	  62.50	  11.50	   2.50	  11.50	  17.55
-1 10000.0 0.03600
+1 10000.0 3.60000

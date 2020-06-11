@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.276800
+#   Build Date: 2020-06-05 11:16:32.301932
 #   Source Data: Surgo
 # 
 # Mukey: 383333
 # Major Component: 14941242 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43115340   Ap             20.0     9.0        0.0         0.0          1.4
-#  43115339   Bt     R       48.0    0.91        0.0         0.0         1.36
-#  43115336   Btss           71.0   0.215        0.0         0.0         1.36
-#  43115337   Btkss         130.0   0.215        0.0         0.0         1.42
-#  43115338   Btk           208.0    0.91        0.0         0.0         1.44
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43115340   Ap             20.0     9.0        0.0         0.0          1.4    19.0    21.0    16.6     2.0
+#  43115339   Bt     R       48.0    0.91        0.0         0.0         1.36    42.0    13.0    10.7     1.5
+#  43115336   Btss           71.0   0.215        0.0         0.0         1.36    47.0    12.0     9.9     1.5
+#  43115337   Btkss         130.0   0.215        0.0         0.0         1.42    48.0    12.0     9.9    0.75
+#  43115338   Btk           208.0    0.91        0.0         0.0         1.44    44.0     8.0     6.6    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Kirkland silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	5006530.00	0.0099	3.5000	32.4000
-	  200.000	  21.00	  19.00	   2.00	  16.30	   0.00
-1 10000.0 0.03276
+	  210.000	  21.00	  19.00	   2.00	  16.30	   0.00
+1 10000.0 3.27600

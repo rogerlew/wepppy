@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.279965
+#   Build Date: 2020-06-05 11:16:30.721771
 #   Source Data: Surgo
 # 
 # Mukey: 2521420
 # Major Component: 14746248 (comppct_r = 70.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42483576   Ap              8.0     3.0        0.0         0.0         1.35
-#  42483577   Bw     R       61.0     1.0        0.0         0.0          1.3
-#  42483578   Cr            203.0     1.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42483576   Ap              8.0     3.0        0.0         0.0         1.35    33.5    18.7     3.3     3.0
+#  42483577   Bw     R       61.0     1.0        0.0         0.0          1.3    50.0     5.3     2.5    0.75
+#  42483578   Cr            203.0     1.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Snead-Rock outcrop complex, 14 to 30 percent slopes'		'SICL'	1	0.1600	0.7500	4207145.00	0.0071	3.5000	10.8000
-	   80.000	  18.70	  33.50	   3.00	  27.60	   5.00
-1 10000.0 0.03600
+	  210.000	  18.70	  33.50	   3.00	  27.60	   5.00
+1 10000.0 3.60000

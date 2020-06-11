@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.329621
+#   Build Date: 2020-06-05 11:16:30.264086
 #   Source Data: Surgo
 # 
 # Mukey: 525079
 # Major Component: 15125331 (comppct_r = 100.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43735196   H1             25.0    9.17        0.0        10.0         1.45
-#  43735195   Cr     R       36.0    0.71         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43735196   H1             25.0    9.17        0.0        10.0         1.45    26.5    12.7     5.6    1.25
+#  43735195   Cr     R       36.0    0.71         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Dandridge shaly silt loam, eroded steep phase'		'CN-SIL'	1	0.3600	0.7500	4593055.00	0.0076	3.5000	33.0120
 	  250.000	  12.70	  26.50	   1.25	  16.40	  48.25
-1 10000.0 0.02556
+1 10000.0 2.55600

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.302109
+#   Build Date: 2020-06-05 11:16:33.460404
 #   Source Data: Surgo
 # 
 # Mukey: 571600
 # Major Component: 14786385 (comppct_r = 65.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42617660   A               5.0  28.222        0.0         0.0         1.45
-#  42617658   E              13.0  28.222        0.0         0.0         1.45
-#  42617659   Bt     R      102.0  0.9174        0.0         0.0         1.48
-#  42617657   Cr            152.0   0.217         -           -          1.93
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42617660   A               5.0  28.222        0.0         0.0         1.45    14.0    66.1    16.2    0.75
+#  42617658   E              13.0  28.222        0.0         0.0         1.45    14.0    66.1    16.2    0.75
+#  42617659   Bt     R      102.0  0.9174        0.0         0.0         1.48    47.5    23.3     5.6    0.25
+#  42617657   Cr            152.0   0.217         -           -          1.93     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00917
+#     ksat: 0.91740
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@ Any comments:
 1 1
 'Homa-Hector complex, 12 to 20 percent slopes'		'FSL'	2	0.2300	0.7500	5840020.00	0.0165	2.6404	101.5992
 	   50.000	  66.10	  14.00	   0.75	   8.50	   1.00
-	  130.000	  66.10	  14.00	   0.75	   8.50	   1.00
-1 10000.0 0.03303
+	  210.000	  66.10	  14.00	   0.75	   8.50	   1.00
+1 10000.0 3.30264

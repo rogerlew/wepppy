@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.757236
+#   Build Date: 2020-06-05 11:16:30.419784
 #   Source Data: Surgo
 # 
 # Mukey: 2533138
 # Major Component: 14728434 (comppct_r = 60.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42426177   A               8.0     9.0        0.0         0.0          1.2
-#  42426178   E              46.0     9.0        0.0         0.0          1.5
-#  42426179   2Bt    R      203.0     1.0        0.0        25.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42426177   A               8.0     9.0        0.0         0.0          1.2     9.8    20.5     1.9     2.0
+#  42426178   E              46.0     9.0        0.0         0.0          1.5     9.2    16.2     2.0    0.96
+#  42426179   2Bt    R      203.0     1.0        0.0        25.0          1.5    50.7    35.4     1.9    0.32
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Goss-Gasconade-Rock outcrop complex, 5 to 35 percent slopes'		'GR-SIL'	2	0.3000	0.7500	5502700.00	0.0250	3.5000	32.4000
 	   80.000	  20.50	   9.80	   2.00	  15.40	  40.00
 	  460.000	  16.20	   9.20	   0.96	   5.40	  55.00
-1 10000.0 0.03600
+1 10000.0 3.60000

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.634378
+#   Build Date: 2020-06-05 11:16:29.985736
 #   Source Data: Surgo
 # 
 # Mukey: 546865
 # Major Component: 14842217 (comppct_r = 90.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42799800   A              13.0    9.18        0.0         0.0         1.48
-#  42799801   Bt     R       96.0    0.92        0.0         3.0         1.28
-#  42799802   BC            122.0    2.83        0.0         3.0         1.35
-#  42799803   C             203.0   28.23        0.0         9.0         1.55
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42799800   A              13.0    9.18        0.0         0.0         1.48    17.5    43.0    12.1     2.0
+#  42799801   Bt     R       96.0    0.92        0.0         3.0         1.28    40.0    30.0     8.3    0.75
+#  42799802   BC            122.0    2.83        0.0         3.0         1.35    30.0    55.5    10.2    0.25
+#  42799803   C             203.0   28.23        0.0         9.0         1.55    15.0    68.8    16.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Hayesville loam, 7 to 15 percent slopes'		'L'	1	0.3000	0.7500	5052410.00	0.0066	3.1057	33.0480
-	  130.000	  43.00	  17.50	   2.00	  11.30	  13.00
-1 10000.0 0.03312
+	  210.000	  43.00	  17.50	   2.00	  11.30	  13.00
+1 10000.0 3.31200

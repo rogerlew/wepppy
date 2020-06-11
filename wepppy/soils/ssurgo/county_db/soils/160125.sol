@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.947837
+#   Build Date: 2020-06-05 11:16:30.531711
 #   Source Data: Surgo
 # 
 # Mukey: 160125
 # Major Component: 14634793 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42142614   Ap             18.0    9.17        0.0         0.0         1.45
-#  42142615   Bt             74.0    9.17        0.0         0.0         1.55
-#  42142612   Btx    R      165.0    0.41        0.0         0.0         1.65
-#  42142613   2Bt           200.0    2.82        0.0         0.0          1.6
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42142614   Ap             18.0    9.17        0.0         0.0         1.45    15.0     4.0     2.0     1.5
+#  42142615   Bt             74.0    9.17        0.0         0.0         1.55    24.0     7.0     3.0     0.5
+#  42142612   Btx    R      165.0    0.41        0.0         0.0         1.65    24.0     8.0     3.0    0.25
+#  42142613   2Bt           200.0    2.82        0.0         0.0          1.6    14.0    15.0     5.0    0.15
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00410
+#     ksat: 0.41000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Hosmer silt loam, 2 to 5 percent slopes, eroded'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	33.0120
 	  180.000	   4.00	  15.00	   1.50	   8.10	   0.00
 	  740.000	   7.00	  24.00	   0.50	  11.30	   0.00
-1 10000.0 0.01476
+1 10000.0 1.47600

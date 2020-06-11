@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.329057
+#   Build Date: 2020-06-05 11:16:29.842993
 #   Source Data: Surgo
 # 
 # Mukey: 549705
 # Major Component: 14725013 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42415281   Ap             18.0    9.17        0.0         0.0         1.38
-#  42415282   Bt             79.0    9.17        0.0         0.0          1.4
-#  42415283   Btx    R       99.0    0.92        0.0         0.0         1.63
-#  42415284   2C            173.0    9.17        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42415281   Ap             18.0    9.17        0.0         0.0         1.38    18.0     8.0     4.0     1.5
+#  42415282   Bt             79.0    9.17        0.0         0.0          1.4    25.0     8.0     4.0     0.3
+#  42415283   Btx    R       99.0    0.92        0.0         0.0         1.63    28.0    10.0     4.0     0.2
+#  42415284   2C            173.0    9.17        0.0         0.0          1.4    28.0    15.0     5.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Zanesville silt loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	5061660.00	0.0106	3.5000	33.0120
 	  180.000	   8.00	  18.00	   1.50	  11.30	   0.00
 	  790.000	   8.00	  25.00	   0.30	  11.30	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

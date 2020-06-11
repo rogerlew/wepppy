@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.223127
+#   Build Date: 2020-06-05 11:16:33.764819
 #   Source Data: Surgo
 # 
 # Mukey: 329700
 # Major Component: 14950065 (comppct_r = 35.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43143494   H1             25.0     9.0        0.0         0.0          1.4
-#  43143496   H2            112.0     9.0        0.0         0.0          1.5
-#  43143495   H3     R      183.0     0.9        0.0         0.0         1.33
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43143494   H1             25.0     9.0        0.0         0.0          1.4    12.5    67.9    10.7     2.0
+#  43143496   H2            112.0     9.0        0.0         0.0          1.5    36.0    23.0     8.0    1.25
+#  43143495   H3     R      183.0     0.9        0.0         0.0         1.33    47.5    23.3     5.6    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Shubuta-Magnolia-Falaya association, hilly'		'SL'	2	0.3000	0.7500	4783470.00	0.0062	2.8619	32.4000
 	  250.000	  67.90	  12.50	   2.00	  11.30	  12.50
 	 1120.000	  23.00	  36.00	   1.25	  11.30	  22.00
-1 10000.0 0.03240
+1 10000.0 3.24000

@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.180475
+#   Build Date: 2020-06-05 11:16:32.039932
 #   Source Data: Surgo
 # 
 # Mukey: 286794
 # Major Component: 14619656 (comppct_r = 95.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42095639   H1             23.0    9.17        0.0         0.0          1.4
-#  42095640   H2            137.0    2.82        0.0         0.0         1.55
-#  42095641   H3     R      152.0    0.92        0.0         1.0          1.7
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42095639   H1             23.0    9.17        0.0         0.0          1.4    20.0    11.4     6.6     2.0
+#  42095640   H2            137.0    2.82        0.0         0.0         1.55    27.5     7.1     2.9    0.75
+#  42095641   H3     R      152.0    0.92        0.0         1.0          1.7    27.5     7.1     2.9     0.4
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Conneaut silt loam, 0 to 1 percent slopes'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
 	  230.000	  11.40	  20.00	   2.00	  15.00	   2.50
 	 1370.000	   7.10	  27.50	   0.75	  15.80	   2.50
-1 10000.0 0.03312
+1 10000.0 3.31200

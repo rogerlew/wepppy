@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:19.181119
+#   Build Date: 2020-06-05 11:16:32.466233
 #   Source Data: Surgo
 # 
 # Mukey: 575282
 # Major Component: 15729445 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45587397   H1             15.0     9.0        0.0         0.0         1.48
-#  45587398   H2             66.0     2.7        0.0         0.0         1.45
-#  45587399   H3     R      203.0     1.0        0.0         0.0         1.33
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45587397   H1             15.0     9.0        0.0         0.0         1.48    20.0    11.4     6.6     2.0
+#  45587398   H2             66.0     2.7        0.0         0.0         1.45    30.0     6.8     2.9    1.25
+#  45587399   H3     R      203.0     1.0        0.0         0.0         1.33    45.0    26.1     7.8    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Sawyer silt loam, 0 to 3 percent slopes'		'SIL'	2	0.2300	0.7500	4951400.00	0.0094	3.5000	32.4000
 	  150.000	  11.40	  20.00	   2.00	  11.30	   2.50
 	  660.000	   6.80	  30.00	   1.25	  11.30	   2.50
-1 10000.0 0.03600
+1 10000.0 3.60000

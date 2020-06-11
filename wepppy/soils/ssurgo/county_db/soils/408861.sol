@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.914887
+#   Build Date: 2020-06-05 11:16:31.014972
 #   Source Data: Surgo
 # 
 # Mukey: 408861
 # Major Component: 14479245 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41682856   Ap             20.0     3.0        0.0         0.0         1.28
-#  41682855   A1     R       51.0     0.7        0.0         0.0         1.25
-#  41682852   A2             97.0    0.09        0.0         0.0         1.27
-#  41682853   Bg            132.0     0.7        0.0         0.0         1.28
-#  41682851   BCg           155.0     0.7        0.0         0.0         1.32
-#  41682854   Cg            200.0    0.55        0.0         0.0         1.42
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41682856   Ap             20.0     3.0        0.0         0.0         1.28    34.0     7.0     4.4     6.0
+#  41682855   A1     R       51.0     0.7        0.0         0.0         1.25    36.0     7.0     2.6     6.0
+#  41682852   A2             97.0    0.09        0.0         0.0         1.27    41.0     7.0     3.1     3.0
+#  41682853   Bg            132.0     0.7        0.0         0.0         1.28    38.0     8.0     2.6     3.0
+#  41682851   BCg           155.0     0.7        0.0         0.0         1.32    34.0     9.0     3.3     3.0
+#  41682854   Cg            200.0    0.55        0.0         0.0         1.42    32.0     9.0     4.5     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,5 +57,5 @@
 Any comments:
 1 1
 'Zook-Olmitz-Vesser complex, 0 to 5 percent slopes'		'SICL'	1	0.0900	0.7500	4179580.00	0.0070	3.5000	10.8000
-	  200.000	   7.00	  34.00	   6.00	  27.80	   0.00
-1 10000.0 0.02520
+	  210.000	   7.00	  34.00	   6.00	  27.80	   0.00
+1 10000.0 2.52000

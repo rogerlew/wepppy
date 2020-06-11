@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.777603
+#   Build Date: 2020-06-05 11:16:33.354781
 #   Source Data: Surgo
 # 
 # Mukey: 293151
 # Major Component: 15333133 (comppct_r = 75.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44386692   H1              5.0     9.0        3.0         0.0         0.85
-#  44386693   H2             56.0     9.0        2.0         3.0          1.0
-#  44386694   H3     R      152.0    0.91        0.0         3.0          1.7
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44386692   H1              5.0     9.0        3.0         0.0         0.85    12.0    45.0    12.6     3.5
+#  44386693   H2             56.0     9.0        2.0         3.0          1.0    12.0    45.0    12.6     1.0
+#  44386694   H3     R      152.0    0.91        0.0         3.0          1.7    12.0    45.0    12.6     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Buckland very stony loam, sloping'		'L'	2	0.3400	0.7500	5148460.00	0.0058	2.7192	32.4000
 	   50.000	  45.00	  12.00	   3.50	   4.50	  17.55
 	  560.000	  45.00	  12.00	   1.00	   4.40	  38.25
-1 10000.0 0.03276
+1 10000.0 3.27600

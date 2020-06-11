@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.490740
+#   Build Date: 2020-06-05 11:16:33.511733
 #   Source Data: Surgo
 # 
 # Mukey: 458043
 # Major Component: 14580778 (comppct_r = 65.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42009943   H1             18.0    28.0        0.0         0.0         1.55
-#  42009942   H2     R      150.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42009943   H1             18.0    28.0        0.0         0.0         1.55    12.5    67.9    10.7    0.75
+#  42009942   H2     R      150.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Cieneba sandy loam, 30 to 75 percent slopes, eroded'		'SL'	1	0.3000	0.7500	4783470.00	0.0149	2.8619	100.8000
 	  210.000	  67.90	  12.50	   0.75	   9.20	  16.00
-1 10000.0 0.00756
+1 10000.0 0.75600

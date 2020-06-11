@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.834587
+#   Build Date: 2020-06-05 11:16:29.687120
 #   Source Data: Surgo
 # 
 # Mukey: 529806
 # Major Component: 15028583 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43418878   Ap             13.0    9.14        0.0         0.0         1.39
-#  43418880   BA     R       23.0    0.92        0.0         0.0         1.36
-#  43418881   Bt             91.0    0.71        0.0         0.0         1.39
-#  43418879   R             116.0     0.8         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43418878   Ap             13.0    9.14        0.0         0.0         1.39    32.2     8.5     2.1     3.5
+#  43418880   BA     R       23.0    0.92        0.0         0.0         1.36    42.8     8.5     2.2     1.5
+#  43418881   Bt             91.0    0.71        0.0         0.0         1.39    56.8     8.7     2.6    0.25
+#  43418879   R             116.0     0.8         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Ashwood-Mimosa-Rock outcrop complex, 15 to 45 percent slopes'		'SICL'	1	0.1600	0.7500	4278814.00	0.0071	3.5000	32.9040
-	  130.000	   8.50	  32.20	   3.50	  38.00	   0.00
-1 10000.0 0.03312
+	  210.000	   8.50	  32.20	   3.50	  38.00	   0.00
+1 10000.0 3.31200

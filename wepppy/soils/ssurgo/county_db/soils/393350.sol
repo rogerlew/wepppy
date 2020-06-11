@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.992588
+#   Build Date: 2020-06-05 11:16:30.554246
 #   Source Data: Surgo
 # 
 # Mukey: 393350
 # Major Component: 15743729 (comppct_r = 63.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45612382   H1             41.0    28.0        0.0         0.0         1.46
-#  45612383   H2             84.0     2.7        0.0         0.0         1.45
-#  45612384   H3     R      112.0     1.0        0.0         0.0         1.45
-#  45612385   H4            203.0     1.0        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45612382   H1             41.0    28.0        0.0         0.0         1.46    10.0    63.5    17.1    1.25
+#  45612383   H2             84.0     2.7        0.0         0.0         1.45    27.0    37.2    11.0    0.55
+#  45612384   H3     R      112.0     1.0        0.0         0.0         1.45    40.0    29.0     8.2    0.55
+#  45612385   H4            203.0     1.0        0.0         0.0         1.45    47.5    23.3     5.6    0.55
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Freestone-Hicota complex, 0 to 3 percent slopes'		'FSL'	2	0.3000	0.7500	6012910.00	0.0110	2.3282	100.8000
 	  410.000	  63.50	  10.00	   1.25	  10.00	   2.50
 	  840.000	  37.20	  27.00	   0.55	  22.50	   2.50
-1 10000.0 0.03600
+1 10000.0 3.60000

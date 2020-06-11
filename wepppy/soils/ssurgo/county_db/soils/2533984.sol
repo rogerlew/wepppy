@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.880438
+#   Build Date: 2020-06-05 11:16:33.076480
 #   Source Data: Surgo
 # 
 # Mukey: 2533984
 # Major Component: 14740807 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42462480   A              15.0     9.0        0.0         0.0          1.2
-#  42462481   E              48.0     9.0        0.0        10.0          1.4
-#  42462482   2Bt1   R      152.0     1.0        0.0        15.0          1.4
-#  42462483   2Bt2          203.0    0.21        0.0        15.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42462480   A              15.0     9.0        0.0         0.0          1.2    15.6    13.9     3.7     2.0
+#  42462481   E              48.0     9.0        0.0        10.0          1.4    16.1    17.5     4.4     0.3
+#  42462482   2Bt1   R      152.0     1.0        0.0        15.0          1.4    38.0    18.0     3.7     0.2
+#  42462483   2Bt2          203.0    0.21        0.0        15.0          1.5    70.0    10.0     2.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Goss very gravelly silt loam, 15 to 35 percent slopes, very stony'		'GRV-SIL'	2	0.3000	0.7500	5193972.00	0.0128	3.5000	32.4000
 	  150.000	  13.90	  15.60	   2.00	  13.10	  55.00
 	  480.000	  17.50	  16.10	   0.30	   8.30	  77.50
-1 10000.0 0.03600
+1 10000.0 3.60000

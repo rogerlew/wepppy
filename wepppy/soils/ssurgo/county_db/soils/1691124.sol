@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.366378
+#   Build Date: 2020-06-05 11:16:32.329884
 #   Source Data: Surgo
 # 
 # Mukey: 1691124
 # Major Component: 15401526 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44611122   Ap             15.0     2.7        0.0         0.0          1.3
-#  44611123   BA             25.0     2.7        0.0         0.0         1.35
-#  44611127   Bt1    R       35.0    0.22        0.0         0.0          1.4
-#  44611124   Bt2           105.0    0.91        0.0         0.0          1.4
-#  44611125   BC            135.0     2.7        0.0         0.0         1.35
-#  44611126   C             200.0     2.7        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44611122   Ap             15.0     2.7        0.0         0.0          1.3    35.0     4.0     2.9     3.0
+#  44611123   BA             25.0     2.7        0.0         0.0         1.35    38.0     3.0     2.4     2.5
+#  44611127   Bt1    R       35.0    0.22        0.0         0.0          1.4    46.0     2.0     1.4     1.2
+#  44611124   Bt2           105.0    0.91        0.0         0.0          1.4    39.0     2.0     1.5     0.5
+#  44611125   BC            135.0     2.7        0.0         0.0         1.35    36.0     2.0     1.5    0.25
+#  44611126   C             200.0     2.7        0.0         0.0         1.35    33.0     2.0     1.5    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00220
+#     ksat: 0.22000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 'Wymore silty clay loam, 2 to 6 percent slopes'		'SICL'	2	0.1600	0.7500	4124450.00	0.0070	3.5000	9.7200
 	  150.000	   4.00	  35.00	   3.00	  27.80	   0.00
 	  250.000	   3.00	  38.00	   2.50	  29.70	   0.00
-1 10000.0 0.00792
+1 10000.0 0.79200

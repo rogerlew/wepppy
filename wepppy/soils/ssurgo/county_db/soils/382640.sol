@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.715285
+#   Build Date: 2020-06-05 11:16:33.346968
 #   Source Data: Surgo
 # 
 # Mukey: 382640
 # Major Component: 14938431 (comppct_r = 60.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43107423   A              18.0  28.222        0.0         8.0         1.43
-#  43107424   Bw             46.0  28.222        0.0        10.0         1.43
-#  43107425   Cr     R       71.0   0.217         -           -          1.93
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43107423   A              18.0  28.222        0.0         8.0         1.43    20.0    26.5     8.8     2.0
+#  43107424   Bw             46.0  28.222        0.0        10.0         1.43    17.5    29.1     9.4    1.25
+#  43107425   Cr     R       71.0   0.217         -           -          1.93     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00217
+#     ksat: 0.21700
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Lucien-Nash complex, 5 to 12 percent slopes'		'SIL'	2	0.0900	0.7500	4951400.00	0.0094	3.5000	101.5992
 	  180.000	  26.50	  20.00	   2.00	  12.00	  14.90
 	  460.000	  29.10	  17.50	   1.25	  10.50	  16.75
-1 10000.0 0.00781
+1 10000.0 0.78120

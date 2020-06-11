@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.887457
+#   Build Date: 2020-06-05 11:16:31.407059
 #   Source Data: Surgo
 # 
 # Mukey: 301193
 # Major Component: 15857445 (comppct_r = 60.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45966311   Ap             20.0     9.0        0.0         0.0          1.1
-#  45966312   Bt/E           25.0     2.0        0.0         0.0         1.38
-#  45966315   Bt1    R       38.0     1.0        0.0         0.0         1.24
-#  45966314   Bt2            64.0     1.0        0.0         0.0         1.24
-#  45966313   C             200.0     0.1        0.0         0.0         1.27
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45966311   Ap             20.0     9.0        0.0         0.0          1.1    20.0    15.0     7.0     6.0
+#  45966312   Bt/E           25.0     2.0        0.0         0.0         1.38    38.0    11.0     5.0     1.0
+#  45966315   Bt1    R       38.0     1.0        0.0         0.0         1.24    48.0     6.0     2.0     1.0
+#  45966314   Bt2            64.0     1.0        0.0         0.0         1.24    48.0     6.0     2.0     1.0
+#  45966313   C             200.0     0.1        0.0         0.0         1.27    48.0     6.0     2.0     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Odessa and Schoharie soils, 0 to 5 percent slopes'		'SICL'	2	0.2900	0.7500	4951400.00	0.0094	3.5000	32.4000
 	  200.000	  15.00	  20.00	   6.00	  25.00	   0.00
 	  250.000	  11.00	  38.00	   1.00	  25.00	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

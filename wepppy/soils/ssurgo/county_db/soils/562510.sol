@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.826995
+#   Build Date: 2020-06-05 11:16:29.683569
 #   Source Data: Surgo
 # 
 # Mukey: 562510
 # Major Component: 15590810 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45223760   A               8.0     9.0        0.0        11.0         1.56
-#  45223759   Bt             25.0    2.82        0.0        20.0          1.6
-#  45223761   Cr     R       50.0    0.71         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45223760   A               8.0     9.0        0.0        11.0         1.56    25.0    20.0     8.5     1.3
+#  45223759   Bt             25.0    2.82        0.0        20.0          1.6    48.0    23.0     5.5    0.25
+#  45223761   Cr     R       50.0    0.71         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Nonaburg channery silt loam, 25 to 60 percent slopes, severely eroded, rocky'		'CN-SIL'	2	0.3000	0.7500	4675750.00	0.0078	3.5000	32.4000
 	   80.000	  20.00	  25.00	   1.30	  13.40	  22.57
 	  250.000	  23.00	  48.00	   0.25	  24.90	  40.80
-1 10000.0 0.02556
+1 10000.0 2.55600

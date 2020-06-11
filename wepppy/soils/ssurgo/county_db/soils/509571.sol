@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.194852
+#   Build Date: 2020-06-05 11:16:29.407008
 #   Source Data: Surgo
 # 
 # Mukey: 509571
 # Major Component: 15215063 (comppct_r = 50.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43996791   H1             25.0    2.32        0.0         0.0         1.33
-#  43996792   H2     R       86.0    0.92        0.0         8.0         1.28
-#  43996793   H3            152.0    2.32        0.0         8.0         1.28
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43996791   H1             25.0    2.32        0.0         0.0         1.33    33.5    34.2    10.3     4.0
+#  43996792   H2     R       86.0    0.92        0.0         8.0         1.28    45.0    26.1     7.9     1.5
+#  43996793   H3            152.0    2.32        0.0         8.0         1.28    40.0    29.0     9.8    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 1 1
 'Wetopa-Wesdy complex, 5 to 65 percent slopes'		'CL'	1	0.1211	0.7500	4706630.00	0.0051	4.2501	8.3520
 	  250.000	  34.20	  33.50	   4.00	  25.00	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

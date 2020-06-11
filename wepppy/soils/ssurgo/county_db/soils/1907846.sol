@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.157867
+#   Build Date: 2020-06-05 11:16:31.559610
 #   Source Data: Surgo
 # 
 # Mukey: 1907846
 # Major Component: 15556184 (comppct_r = 45.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45112924   H1             23.0     2.7        0.0         0.0         1.67
-#  45112925   H2     R      152.0     1.2        0.0         0.0          1.6
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45112924   H1             23.0     2.7        0.0         0.0         1.67    17.0    48.0    15.0    0.88
+#  45112925   H2     R      152.0     1.2        0.0         0.0          1.6    14.0    50.0    19.0    0.44
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01200
+#     ksat: 1.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Wheaton-Glenelg complex, 2 to 7 percent slopes'		'FSL'	1	0.3600	0.7500	5609500.00	0.0141	2.9050	9.7200
 	  230.000	  48.00	  17.00	   0.88	   5.60	   5.00
-1 10000.0 0.04320
+1 10000.0 4.32000

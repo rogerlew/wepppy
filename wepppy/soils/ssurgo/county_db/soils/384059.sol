@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.942638
+#   Build Date: 2020-06-05 11:16:31.435813
 #   Source Data: Surgo
 # 
 # Mukey: 384059
 # Major Component: 14995613 (comppct_r = 55.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43302840   A              18.0     9.0        0.0         0.0         1.43
-#  43302843   BA             25.0     2.7        0.0         0.0         1.44
-#  43302842   Btk    R       81.0    0.91        0.0         0.0         1.47
-#  43302841   BCk            97.0   0.215        0.0         0.0         1.44
-#  43302844   Cr            122.0   0.215         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43302840   A              18.0     9.0        0.0         0.0         1.43    33.0    25.0     8.0    0.75
+#  43302843   BA             25.0     2.7        0.0         0.0         1.44    36.0    17.0    10.0    0.75
+#  43302842   Btk    R       81.0    0.91        0.0         0.0         1.47    45.0     8.0     3.2    0.25
+#  43302841   BCk            97.0   0.215        0.0         0.0         1.44    48.0     7.0     3.0    0.25
+#  43302844   Cr            122.0   0.215         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Grainola-Lucien complex, 5 to 12 percent slopes'		'CL'	2	0.1600	0.7500	4234710.00	0.0071	3.5000	32.4000
 	  180.000	  25.00	  33.00	   0.75	  17.50	   0.00
 	  250.000	  17.00	  36.00	   0.75	  19.10	   5.00
-1 10000.0 0.03276
+1 10000.0 3.27600

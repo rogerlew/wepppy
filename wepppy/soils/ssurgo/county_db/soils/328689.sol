@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.298120
+#   Build Date: 2020-06-05 11:16:33.788401
 #   Source Data: Surgo
 # 
 # Mukey: 328689
 # Major Component: 14830102 (comppct_r = 44.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42762042   A              13.0     9.0        0.0         0.0         1.44
-#  42762043   Bt     R       33.0    0.21        0.0         0.0         1.29
-#  42762044   BC             81.0    0.21        0.0         0.0         1.25
-#  42762045   C             140.0    0.21        0.0         1.0          1.3
-#  42762046   Cr            203.0     0.5         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42762042   A              13.0     9.0        0.0         0.0         1.44    18.0    45.0     8.6     2.0
+#  42762043   Bt     R       33.0    0.21        0.0         0.0         1.29    60.0    10.0     3.1    0.75
+#  42762044   BC             81.0    0.21        0.0         0.0         1.25    67.0    10.0     3.1    0.25
+#  42762045   C             140.0    0.21        0.0         1.0          1.3    55.0    17.0     5.3    0.25
+#  42762046   Cr            203.0     0.5         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Chisca-Nella-Nectar complex, 10 to 45 percent slopes'		'L'	1	0.3000	0.7500	4380060.00	0.0055	3.3412	32.4000
-	  130.000	  45.00	  18.00	   2.00	  11.30	   5.00
-1 10000.0 0.00756
+	  210.000	  45.00	  18.00	   2.00	  11.30	   5.00
+1 10000.0 0.75600

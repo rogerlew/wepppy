@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.057759
+#   Build Date: 2020-06-05 11:16:30.576196
 #   Source Data: Surgo
 # 
 # Mukey: 542153
 # Major Component: 15829987 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45889468   Ap             28.0   4.657        0.0         4.0         1.33
-#  45889469   Bt1    R       53.0   0.878        0.0         6.0         1.44
-#  45889470   Bt2            79.0   0.878        0.0         9.0         1.48
-#  45889471   Bt3           117.0   0.878        0.0        13.0          1.5
-#  45889472   Bt4           157.0   0.878        0.0        21.0          1.5
-#  45889473   BC            191.0    4.23        0.0        18.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45889468   Ap             28.0   4.657        0.0         4.0         1.33    22.0    13.0     3.0     2.6
+#  45889469   Bt1    R       53.0   0.878        0.0         6.0         1.44    26.0    11.0     3.0     0.5
+#  45889470   Bt2            79.0   0.878        0.0         9.0         1.48    28.0    14.0     3.0     0.3
+#  45889471   Bt3           117.0   0.878        0.0        13.0          1.5    33.0    10.0     3.0     0.3
+#  45889472   Bt4           157.0   0.878        0.0        21.0          1.5    33.0    10.0     3.0     0.2
+#  45889473   BC            191.0    4.23        0.0        18.0         1.45    38.0    10.0     2.5     0.1
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00878
+#     ksat: 0.87800
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 1 1
 'Dormont-Culleoka complex, 25 to 50 percent slopes'		'SIL'	1	0.3000	0.7500	4841140.00	0.0085	3.5000	16.7652
 	  280.000	  13.00	  22.00	   2.60	  18.80	   8.80
-1 10000.0 0.03161
+1 10000.0 3.16080

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.874625
+#   Build Date: 2020-06-05 11:16:30.994398
 #   Source Data: Surgo
 # 
 # Mukey: 210634
 # Major Component: 15800545 (comppct_r = 75.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45778580   Ap             23.0    9.17        1.0         2.0         1.45
-#  45778581   Bt             61.0    2.82        1.0         2.0          1.5
-#  45778582   BCt    R       86.0    0.92        1.0         2.0          1.6
-#  45778583   Cd            152.0    0.25        1.0         2.0          1.8
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45778580   Ap             23.0    9.17        1.0         2.0         1.45    21.0    19.0     5.0     2.5
+#  45778581   Bt             61.0    2.82        1.0         2.0          1.5    42.0    15.0     3.0    0.75
+#  45778582   BCt    R       86.0    0.92        1.0         2.0          1.6    35.0    20.0     6.0    0.75
+#  45778583   Cd            152.0    0.25        1.0         2.0          1.8    31.0    20.0     6.0    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Blount-Glynwood, thin solum complex, 0 to 3 percent slopes'		'SIL'	2	0.3700	0.7500	4896270.00	0.0089	3.5000	33.0120
 	  230.000	  19.00	  21.00	   2.50	  15.00	   7.85
 	  610.000	  15.00	  42.00	   0.75	  24.00	   5.42
-1 10000.0 0.03312
+1 10000.0 3.31200

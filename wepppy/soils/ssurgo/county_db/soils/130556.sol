@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.229011
+#   Build Date: 2020-06-05 11:16:33.766941
 #   Source Data: Surgo
 # 
 # Mukey: 130556
 # Major Component: 15401861 (comppct_r = 100.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44612353   A              18.0     9.0        0.0         0.0         1.35
-#  44612352   Btg    R      190.0     1.0        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44612353   A              18.0     9.0        0.0         0.0         1.35    15.0    44.3    12.5     3.0
+#  44612352   Btg    R      190.0     1.0        0.0         0.0          1.4    47.5    23.3     5.6    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Cantey loam'		'L'	1	0.2500	0.7500	5129250.00	0.0059	2.9200	32.4000
 	  210.000	  44.30	  15.00	   3.00	  11.30	   4.00
-1 10000.0 0.03600
+1 10000.0 3.60000

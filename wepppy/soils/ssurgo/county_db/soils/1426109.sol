@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.494172
+#   Build Date: 2020-06-05 11:16:30.853703
 #   Source Data: Surgo
 # 
 # Mukey: 1426109
 # Major Component: 14401270 (comppct_r = 35.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41469109   A              20.0     9.0        0.0        33.0         1.33
-#  41469110   R      R      152.0   0.035         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41469109   A              20.0     9.0        0.0        33.0         1.33    20.0    42.1    12.2     1.5
+#  41469110   R      R      152.0   0.035         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00035
+#     ksat: 0.03500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Lampshire-Graham-Rock outcrop association, steep'		'CBV-L'	1	0.2300	0.7500	5071620.00	0.0081	3.2624	32.4000
 	  210.000	  42.10	  20.00	   1.50	  14.00	  61.48
-1 10000.0 0.00126
+1 10000.0 0.12600
