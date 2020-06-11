@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.240672
+#   Build Date: 2020-06-05 11:16:31.608980
 #   Source Data: Surgo
 # 
 # Mukey: 2605803
 # Major Component: 15262496 (comppct_r = 55.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44141899   A              18.0     2.7        0.0         0.0          1.2
-#  44141900   BA             33.0     2.7        0.0         0.0         1.25
-#  44141901   Bt     R       74.0    0.91        0.0         0.0         1.25
-#  44141902   C              91.0    0.91        0.0         6.0         1.25
-#  44141898   R             116.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44141899   A              18.0     2.7        0.0         0.0          1.2    35.0     4.0     3.0     3.0
+#  44141900   BA             33.0     2.7        0.0         0.0         1.25    38.0     5.0     1.7     2.0
+#  44141901   Bt     R       74.0    0.91        0.0         0.0         1.25    54.0     1.0     1.0     0.7
+#  44141902   C              91.0    0.91        0.0         6.0         1.25    55.0     1.0     1.0     0.6
+#  44141898   R             116.0   0.005         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Labette-Dwight complex, 0 to 3 percent slopes'		'SICL'	2	0.0900	0.7500	4124450.00	0.0070	3.5000	9.7200
 	  180.000	   4.00	  35.00	   3.00	  28.70	   0.00
 	  330.000	   5.00	  38.00	   2.00	  30.40	   0.00
-1 10000.0 0.03276
+1 10000.0 3.27600

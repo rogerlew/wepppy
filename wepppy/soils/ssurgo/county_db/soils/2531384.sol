@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.756265
+#   Build Date: 2020-06-05 11:16:30.419245
 #   Source Data: Surgo
 # 
 # Mukey: 2531384
 # Major Component: 14723471 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42409583   Ap             20.0     3.0        0.0         0.0         1.35
-#  42409584   BA             33.0     3.0        0.0         0.0         1.55
-#  42409585   2Bt    R       94.0    0.04        0.0         0.0         1.37
-#  42409586   2Btg          122.0     3.0        0.0         0.0         1.65
-#  42409582   2C            200.0     3.0        0.0         0.0         1.65
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42409583   Ap             20.0     3.0        0.0         0.0         1.35    33.0    15.0     9.2     2.5
+#  42409584   BA             33.0     3.0        0.0         0.0         1.55    34.0    30.0     9.0     1.5
+#  42409585   2Bt    R       94.0    0.04        0.0         0.0         1.37    47.0    15.0     3.5    0.25
+#  42409586   2Btg          122.0     3.0        0.0         0.0         1.65    34.0    30.0     9.0    0.25
+#  42409582   2C            200.0     3.0        0.0         0.0         1.65    34.0    30.0     9.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00040
+#     ksat: 0.04000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Lamoni silty clay loam, 5 to 9 percent slopes, moderately eroded'		'CL'	2	0.1600	0.7500	4234710.00	0.0071	3.5000	10.8000
 	  200.000	  15.00	  33.00	   2.50	  26.30	   8.00
 	  330.000	  30.00	  34.00	   1.50	  26.50	   7.00
-1 10000.0 0.00144
+1 10000.0 0.14400

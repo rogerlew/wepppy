@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:41.352731
+#   Build Date: 2020-06-05 11:16:32.612917
 #   Source Data: Surgo
 # 
 # Mukey: 2528563
 # Major Component: 14747829 (comppct_r = 96.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42488958   Ap             13.0     3.0        0.0         0.0         1.53
-#  42488959   2Bt1   R       28.0     0.9        0.0         3.0          1.4
-#  42488960   2Bt2           79.0    0.04        0.0         3.0         1.46
-#  42488961   2Btg          200.0     0.9        0.0         3.0         1.48
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42488958   Ap             13.0     3.0        0.0         0.0         1.53    31.0    35.0    10.3     1.5
+#  42488959   2Bt1   R       28.0     0.9        0.0         3.0          1.4    37.0    22.0     6.9     1.2
+#  42488960   2Bt2           79.0    0.04        0.0         3.0         1.46    44.0    17.0     5.3    0.51
+#  42488961   2Btg          200.0     0.9        0.0         3.0         1.48    37.0    25.0     8.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Armstrong clay loam, 5 to 9 percent slopes, moderately eroded'		'CL'	1	0.2300	0.7500	4706630.00	0.0075	4.0876	10.8000
-	  130.000	  35.00	  31.00	   1.50	  25.00	  13.00
-1 10000.0 0.03240
+	  210.000	  35.00	  31.00	   1.50	  25.00	  13.00
+1 10000.0 3.24000

@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:41.370120
+#   Build Date: 2020-06-05 11:16:32.623406
 #   Source Data: Surgo
 # 
 # Mukey: 531124
 # Major Component: 15121821 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43723528   H1             15.0   28.23        0.0         5.0          1.3
-#  43723529   H2             74.0   28.23        0.0         8.0         1.35
-#  43723527   R      R       99.0   0.211         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43723528   H1             15.0   28.23        0.0         5.0          1.3    17.0    29.6     9.4    1.75
+#  43723529   H2             74.0   28.23        0.0         8.0         1.35    26.0    21.0     9.2    0.22
+#  43723527   R      R       99.0   0.211         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00211
+#     ksat: 0.21100
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Garmon-Newbern complex, 40 to 80 percent slopes, rocky'		'CN-SIL'	2	0.3600	0.7500	5116790.00	0.0114	3.5000	101.6280
 	  150.000	  29.60	  17.00	   1.75	   6.30	  40.62
 	  740.000	  21.00	  26.00	   0.22	   9.10	  37.90
-1 10000.0 0.00760
+1 10000.0 0.75960

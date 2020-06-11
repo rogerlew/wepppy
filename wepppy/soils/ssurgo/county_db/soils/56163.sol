@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.996385
+#   Build Date: 2020-06-05 11:16:30.118626
 #   Source Data: Surgo
 # 
 # Mukey: 56163
 # Major Component: 14437673 (comppct_r = 45.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41594024   A               3.0    30.0        0.0         5.0         1.52
-#  41594023   C              38.0    30.0        0.0         4.0          1.6
-#  41594022   R      R       48.0     0.4         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41594024   A               3.0    30.0        0.0         5.0         1.52    15.0    65.9    10.4    0.75
+#  41594023   C              38.0    30.0        0.0         4.0          1.6    13.0    67.0    10.7    0.25
+#  41594022   R      R       48.0     0.4         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00400
+#     ksat: 0.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Vessilla-Menefee-Orlie complex, 1 to 30 percent slopes'		'SL'	2	0.2300	0.7500	4725840.00	0.0148	3.0418	108.0000
 	   30.000	  65.90	  15.00	   0.75	   7.80	   5.00
 	  380.000	  67.00	  13.00	   0.25	   6.90	  16.48
-1 10000.0 0.01440
+1 10000.0 1.44000

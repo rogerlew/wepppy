@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.722207
+#   Build Date: 2020-06-05 11:16:30.403384
 #   Source Data: Surgo
 # 
 # Mukey: 328376
 # Major Component: 14794257 (comppct_r = 70.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42644225   A              15.0    28.0        0.0         0.0         1.48
-#  42644226   Bw             38.0    28.0        0.0         1.0         1.54
-#  42644224   R      R      203.0     0.2        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42644225   A              15.0    28.0        0.0         0.0         1.48    12.5    67.3    16.5    1.25
+#  42644226   Bw             38.0    28.0        0.0         1.0         1.54    17.5    63.1     9.3    0.25
+#  42644224   R      R      203.0     0.2        0.0         0.0          1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Hector-Rock outcrop complex, 10 to 45 percent slopes'		'FSL'	2	0.3000	0.7500	5897650.00	0.0108	2.5255	100.8000
 	  150.000	  67.30	  12.50	   1.25	   2.50	  17.00
 	  380.000	  63.10	  17.50	   0.25	  11.30	  18.82
-1 10000.0 0.00720
+1 10000.0 0.72000

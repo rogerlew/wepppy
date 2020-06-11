@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.850325
+#   Build Date: 2020-06-05 11:16:33.062595
 #   Source Data: Surgo
 # 
 # Mukey: 368398
 # Major Component: 15745831 (comppct_r = 85.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45615746   Ap             15.0     2.7        0.0         0.0          1.2
-#  45615744   Bt     R       64.0    0.91        0.0         0.0          1.3
-#  45615743   Btk           102.0    0.91        0.0         0.0          1.3
-#  45615745   Bk            203.0    0.91        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45615746   Ap             15.0     2.7        0.0         0.0          1.2    36.0    31.0     9.4     2.0
+#  45615744   Bt     R       64.0    0.91        0.0         0.0          1.3    48.0    23.0     7.9     1.5
+#  45615743   Btk           102.0    0.91        0.0         0.0          1.3    48.0    23.0     7.9     1.0
+#  45615745   Bk            203.0    0.91        0.0         0.0         1.45    48.0    23.0     7.9     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Coy clay loam, 1 to 3 percent slopes'		'CL'	1	0.1600	0.7500	4533740.00	0.0058	4.4648	9.7200
-	  150.000	  31.00	  36.00	   2.00	  28.10	   0.00
-1 10000.0 0.03276
+	  210.000	  31.00	  36.00	   2.00	  28.10	   0.00
+1 10000.0 3.27600

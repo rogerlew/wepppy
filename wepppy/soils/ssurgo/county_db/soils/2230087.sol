@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.865749
+#   Build Date: 2020-06-05 11:16:29.702898
 #   Source Data: Surgo
 # 
 # Mukey: 2230087
 # Major Component: 14489622 (comppct_r = 35.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41719524   A               3.0   423.0        0.0         0.0         1.55
-#  41719525   C              28.0   423.0        0.0         0.0         1.55
-#  41719526   R      R       53.0     0.7         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41719524   A               3.0   423.0        0.0         0.0         1.55     6.0    90.0     8.0     0.5
+#  41719525   C              28.0   423.0        0.0         0.0         1.55     6.0    90.0     8.0     0.2
+#  41719526   R      R       53.0     0.7         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Rock outcrop-Needle complex, 2 to 30 percent slopes'		'S'	2	0.2300	0.7500	4264800.00	0.0198	2.5960	1522.8000
 	   30.000	  90.00	   6.00	   0.50	   5.00	   0.00
 	  280.000	  90.00	   6.00	   0.20	   4.00	   0.00
-1 10000.0 0.02520
+1 10000.0 2.52000

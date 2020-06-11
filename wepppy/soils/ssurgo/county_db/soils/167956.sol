@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.697130
+#   Build Date: 2020-06-05 11:16:31.306516
 #   Source Data: Surgo
 # 
 # Mukey: 167956
 # Major Component: 15464025 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44812404   Ap             25.0    9.17        0.0         0.0          1.4
-#  44812405   Bt     R       74.0    0.92        0.0         0.0         1.55
-#  44812406   BCt           107.0    0.92        0.0         2.0         1.55
-#  44812407   C             200.0    0.92        0.0         2.0          1.7
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44812404   Ap             25.0    9.17        0.0         0.0          1.4    20.0    20.0     6.0    2.75
+#  44812405   Bt     R       74.0    0.92        0.0         0.0         1.55    38.0    15.0     6.0     1.0
+#  44812406   BCt           107.0    0.92        0.0         2.0         1.55    35.0    18.0     7.0    0.75
+#  44812407   C             200.0    0.92        0.0         2.0          1.7    28.0    22.0     8.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Bennington silt loam, 0 to 2 percent slopes'		'SIL'	1	0.2900	0.7500	4951400.00	0.0094	3.5000	33.0120
 	  250.000	  20.00	  20.00	   2.75	  18.00	   8.00
-1 10000.0 0.03312
+1 10000.0 3.31200

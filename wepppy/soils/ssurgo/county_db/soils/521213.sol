@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.971553
+#   Build Date: 2020-06-05 11:16:31.449395
 #   Source Data: Surgo
 # 
 # Mukey: 521213
 # Major Component: 15395427 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44592503   H1             23.0     9.0        0.0         2.0         1.35
-#  44592499   H2             56.0     9.0        0.0         3.0          1.4
-#  44592500   H3             71.0     9.0        2.0        10.0         1.35
-#  44592501   H4     R      122.0     0.9         -           -           1.4
-#  44592502   H5            147.0     0.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44592503   H1             23.0     9.0        0.0         2.0         1.35    21.0    26.3     8.7    1.25
+#  44592499   H2             56.0     9.0        0.0         3.0          1.4    26.5    23.5     7.8    0.25
+#  44592500   H3             71.0     9.0        2.0        10.0         1.35    21.0    26.3     8.7    0.25
+#  44592501   H4     R      122.0     0.9         -           -           1.4     7.0    66.8    10.0     7.0
+#  44592502   H5            147.0     0.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 	  230.000	  26.30	  21.00	   1.25	  10.20	  11.80
 	  560.000	  23.50	  26.50	   0.25	   9.80	  32.10
 	  710.000	  26.30	  21.00	   0.25	   7.90	  60.40
-1 10000.0 0.03240
+1 10000.0 3.24000

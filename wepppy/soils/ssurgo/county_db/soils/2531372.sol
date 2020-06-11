@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.641757
+#   Build Date: 2020-06-05 11:16:31.295319
 #   Source Data: Surgo
 # 
 # Mukey: 2531372
 # Major Component: 14743102 (comppct_r = 95.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42472071   Ap             20.0     3.0        0.0         0.0         1.27
-#  42472070   2Bt    R      152.0     1.0        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42472071   Ap             20.0     3.0        0.0         0.0         1.27    21.8    36.6     8.6     3.9
+#  42472070   2Bt    R      152.0     1.0        0.0         0.0         1.45    50.3    23.2     4.8    1.37
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: None
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Lamoni loam, 5 to 9 percent slopes'		'L'	1	0.2300	0.7500	4380060.00	0.0046	3.5882	10.8000
 	  210.000	  36.60	  21.80	   3.90	  19.90	   8.00
-1 10000.0 0.03600
+1 10000.0 3.60000

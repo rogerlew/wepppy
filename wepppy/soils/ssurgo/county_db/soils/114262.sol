@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.044375
+#   Build Date: 2020-06-05 11:16:30.572844
 #   Source Data: Surgo
 # 
 # Mukey: 114262
 # Major Component: 15199566 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43952168   A               5.0     9.0        0.0         0.0         1.35
-#  43952170   E              30.0     9.0        0.0         0.0         1.35
-#  43952171   Bt     R       99.0     0.2        0.0         3.0          1.4
-#  43952169   C             142.0     3.0        0.0         5.0          1.4
-#  43952172   Cr            203.0     7.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43952168   A               5.0     9.0        0.0         0.0         1.35    17.5    29.1     9.4     1.5
+#  43952170   E              30.0     9.0        0.0         0.0         1.35    17.5    29.1     9.4     1.0
+#  43952171   Bt     R       99.0     0.2        0.0         3.0          1.4    45.0     7.2     3.5    0.25
+#  43952169   C             142.0     3.0        0.0         5.0          1.4    25.0    20.5     8.7    0.25
+#  43952172   Cr            203.0     7.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Lignum loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	5089225.00	0.0109	3.5000	32.4000
 	   50.000	  29.10	  17.50	   1.50	   7.80	  15.00
 	  300.000	  29.10	  17.50	   1.00	   7.20	  15.00
-1 10000.0 0.00720
+1 10000.0 0.72000

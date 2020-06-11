@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.310584
+#   Build Date: 2020-06-05 11:16:31.174161
 #   Source Data: Surgo
 # 
 # Mukey: 333733
 # Major Component: 15517516 (comppct_r = 40.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44965547   H1             15.0    9.17        0.0         0.0          1.4
-#  44965548   H2             79.0    9.17        0.0         0.0         1.45
-#  44965549   H3     R      152.0    0.92        0.0         0.0         1.48
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44965547   H1             15.0    9.17        0.0         0.0          1.4    12.5    14.3     8.7    1.25
+#  44965548   H2             79.0    9.17        0.0         0.0         1.45    27.5     7.1     2.9     0.3
+#  44965549   H3     R      152.0    0.92        0.0         0.0         1.48    42.5     7.7     3.7     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Tippah-Providence-Wilcox association, hilly'		'SIL'	2	0.3000	0.7500	5364875.00	0.0179	3.5000	33.0120
 	  150.000	  14.30	  12.50	   1.25	  11.30	   0.00
 	  790.000	   7.10	  27.50	   0.30	  11.30	   2.00
-1 10000.0 0.03312
+1 10000.0 3.31200

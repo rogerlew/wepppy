@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.895603
+#   Build Date: 2020-06-05 11:16:31.408907
 #   Source Data: Surgo
 # 
 # Mukey: 198271
 # Major Component: 15252698 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44106314   Ap             23.0    2.82        0.0         0.0          1.4
-#  44106315   2Bt            97.0    2.82        0.0         0.0         1.53
-#  44106316   2Cd    R      200.0    0.24        0.0         0.0          1.8
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44106314   Ap             23.0    2.82        0.0         0.0          1.4    20.0    26.0     9.0     2.0
+#  44106315   2Bt            97.0    2.82        0.0         0.0         1.53    36.0    22.0     6.0    0.75
+#  44106316   2Cd    R      200.0    0.24        0.0         0.0          1.8    22.0    41.0    12.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00240
+#     ksat: 0.24000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Celina silt loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	4951400.00	0.0094	3.5000	10.1520
 	  230.000	  26.00	  20.00	   2.00	  10.80	   0.00
 	  970.000	  22.00	  36.00	   0.75	  19.10	   3.00
-1 10000.0 0.00864
+1 10000.0 0.86400

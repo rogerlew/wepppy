@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.610566
+#   Build Date: 2020-06-05 11:16:29.570772
 #   Source Data: Surgo
 # 
 # Mukey: 295964
 # Major Component: 15026107 (comppct_r = 60.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43414476   H1             10.0    23.0        0.0         0.0         1.25
-#  43414477   H2             48.0    23.0        0.0         1.0         1.43
-#  43414478   H3     R       58.0   0.005        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43414476   H1             10.0    23.0        0.0         0.0         1.25    17.0    43.3    12.2     3.5
+#  43414477   H2             48.0    23.0        0.0         1.0         1.43    10.0    68.5    18.5     1.0
+#  43414478   H3     R       58.0   0.005        0.0         0.0          1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00005
+#     ksat: 0.00500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Hollis-Charlton association, moderately steep and steep'		'L'	2	0.3400	0.7500	5071620.00	0.0057	3.0674	82.8000
 	  100.000	  43.30	  17.00	   3.50	  11.30	  10.00
 	  480.000	  68.50	  10.00	   1.00	  11.30	  16.84
-1 10000.0 0.00018
+1 10000.0 0.01800

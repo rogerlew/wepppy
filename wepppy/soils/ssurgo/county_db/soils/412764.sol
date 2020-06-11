@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.593388
+#   Build Date: 2020-06-05 11:16:29.977277
 #   Source Data: Surgo
 # 
 # Mukey: 412764
 # Major Component: 14625611 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42114013   Ap             20.0     3.0        0.0         0.0         1.42
-#  42114009   BE             33.0     3.0        0.0         0.0         1.42
-#  42114010   Bt     R       43.0     0.2        0.0         0.0         1.46
-#  42114012   2Bt           119.0     0.2        0.0         0.0         1.47
-#  42114011   2C            191.0     0.2        0.0         0.0         1.36
-#  42114008   2Cr           200.0     0.2         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42114013   Ap             20.0     3.0        0.0         0.0         1.42    24.0    15.0     6.4     2.0
+#  42114009   BE             33.0     3.0        0.0         0.0         1.42    30.0    20.0    12.2     1.0
+#  42114010   Bt     R       43.0     0.2        0.0         0.0         1.46    39.0    15.0     5.2    0.25
+#  42114012   2Bt           119.0     0.2        0.0         0.0         1.47    49.0    11.0     4.7    0.25
+#  42114011   2C            191.0     0.2        0.0         0.0         1.36    50.0     9.0     4.4    0.25
+#  42114008   2Cr           200.0     0.2         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 'Munterville silt loam, 14 to 18 percent slopes, moderately eroded'		'SIL'	2	0.2300	0.7500	4730880.00	0.0080	3.5000	10.8000
 	  200.000	  15.00	  24.00	   2.00	  13.00	   0.00
 	  330.000	  20.00	  30.00	   1.00	  16.00	   0.00
-1 10000.0 0.00720
+1 10000.0 0.72000

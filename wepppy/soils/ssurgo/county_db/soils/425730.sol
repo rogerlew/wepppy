@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.426507
+#   Build Date: 2020-06-05 11:16:32.357152
 #   Source Data: Surgo
 # 
 # Mukey: 425730
 # Major Component: 15329720 (comppct_r = 90.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44377242   Ap             18.0    9.17        0.0         3.0         1.44
-#  44377241   Bt             41.0    9.17        0.0         4.0          1.5
-#  44377243   Cd     R      200.0    0.92        4.0         6.0         1.79
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44377242   Ap             18.0    9.17        0.0         3.0         1.44    15.0    45.0     8.0     3.0
+#  44377241   Bt             41.0    9.17        0.0         4.0          1.5    35.0    32.0     7.8    0.75
+#  44377243   Cd     R      200.0    0.92        4.0         6.0         1.79     8.0    61.0    15.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Hochheim loam, 6 to 12 percent slopes, eroded'		'SIL'	2	0.2300	0.7500	4264800.00	0.0045	3.1810	33.0120
 	  180.000	  45.00	  15.00	   3.00	   8.20	   7.85
 	  410.000	  32.00	  35.00	   0.75	  18.60	  17.44
-1 10000.0 0.03312
+1 10000.0 3.31200

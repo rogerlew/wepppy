@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.967119
+#   Build Date: 2020-06-05 11:16:30.106395
 #   Source Data: Surgo
 # 
 # Mukey: 147340
 # Major Component: 14415222 (comppct_r = 65.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41513547   A              10.0     9.0        0.0         3.0         1.25
-#  41513548   Bt     R       36.0    0.91        0.0         3.0          1.4
-#  41513545   Bk             99.0    0.91        0.0         3.0          1.4
-#  41513546   2C            152.0     2.7        0.0         8.0         1.55
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41513547   A              10.0     9.0        0.0         3.0         1.25    31.0    35.4    10.6     3.0
+#  41513548   Bt     R       36.0    0.91        0.0         3.0          1.4    38.0    31.1     8.6     1.5
+#  41513545   Bk             99.0    0.91        0.0         3.0          1.4    38.0    31.1     8.6    0.75
+#  41513546   2C            152.0     2.7        0.0         8.0         1.55    18.0    66.8     9.8    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Danvers-Judith clay loams, 0 to 2 percent slopes'		'CL'	1	0.2300	0.7500	4764260.00	0.0053	4.0702	32.4000
-	  100.000	  35.40	  31.00	   3.00	  22.50	   7.85
-1 10000.0 0.03276
+	  210.000	  35.40	  31.00	   3.00	  22.50	   7.85
+1 10000.0 3.27600

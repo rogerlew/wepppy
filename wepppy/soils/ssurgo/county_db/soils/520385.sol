@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:19.190592
+#   Build Date: 2020-06-05 11:16:32.470123
 #   Source Data: Surgo
 # 
 # Mukey: 520385
 # Major Component: 15398215 (comppct_r = 35.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44598902   H1              5.0     9.0        1.0         9.0          1.3
-#  44598903   H2             30.0     9.0        1.0        10.0          1.4
-#  44598904   H3     R       55.0     0.9         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44598902   H1              5.0     9.0        1.0         9.0          1.3    18.5    27.1     8.9    1.25
+#  44598903   H2             30.0     9.0        1.0        10.0          1.4    22.5    22.4     8.9    0.25
+#  44598904   H3     R       55.0     0.9         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Chiswell-Litz-Urban land complex, 2 to 15 percent slopes'		'CN-SIL'	2	0.3000	0.7500	5034095.00	0.0102	3.5000	32.4000
 	   50.000	  27.10	  18.50	   1.25	   9.30	  32.50
 	  300.000	  22.40	  22.50	   0.25	   8.40	  68.85
-1 10000.0 0.03240
+1 10000.0 3.24000

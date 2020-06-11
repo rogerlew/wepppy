@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.632839
+#   Build Date: 2020-06-05 11:16:33.206935
 #   Source Data: Surgo
 # 
 # Mukey: 1691498
 # Major Component: 15374240 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44519197   Ap             18.0     2.7        0.0         0.0         1.45
-#  44519195   Bt1    R       33.0    0.91        0.0         0.0         1.42
-#  44519196   Bt2            81.0     2.7        0.0         0.0         1.34
-#  44519193   BC            109.0     2.7        0.0         0.0         1.35
-#  44519194   C             200.0     2.7        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44519197   Ap             18.0     2.7        0.0         0.0         1.45    36.0     7.0     5.6     2.3
+#  44519195   Bt1    R       33.0    0.91        0.0         0.0         1.42    34.0     9.0     6.3     0.9
+#  44519196   Bt2            81.0     2.7        0.0         0.0         1.34    34.0     8.0     5.5     0.5
+#  44519193   BC            109.0     2.7        0.0         0.0         1.35    21.0    15.0    14.4     0.1
+#  44519194   C             200.0     2.7        0.0         0.0         1.35    21.0    20.0    18.9     0.1
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Yutan silty clay loam, 6 to 11 percent slopes, eroded'		'SICL'	1	0.2300	0.7500	4069320.00	0.0070	3.5000	9.7200
-	  180.000	   7.00	  36.00	   2.30	  29.20	   0.00
-1 10000.0 0.03276
+	  210.000	   7.00	  36.00	   2.30	  29.20	   0.00
+1 10000.0 3.27600

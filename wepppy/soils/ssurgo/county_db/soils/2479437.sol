@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.793543
+#   Build Date: 2020-06-05 11:16:30.436482
 #   Source Data: Surgo
 # 
 # Mukey: 2479437
 # Major Component: 15244345 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44085224   H1             18.0     9.0        0.0         1.0         1.33
-#  44085225   H2             71.0     9.0        0.0         1.0          1.4
-#  44085226   H3     R      152.0     1.5         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44085224   H1             18.0     9.0        0.0         1.0         1.33    18.5    27.1     8.9    0.25
+#  44085225   H2             71.0     9.0        0.0         1.0          1.4    45.0    20.0     6.0    0.25
+#  44085226   H3     R      152.0     1.5         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01500
+#     ksat: 1.50000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Spears Mountain silt loam,  7 to 15 percent slopes'		'SIL'	2	0.5429	0.7500	5034095.00	0.0102	3.5000	32.4000
 	  180.000	  27.10	  18.50	   0.25	   9.10	   7.93
 	  710.000	  20.00	  45.00	   0.25	   9.80	   7.93
-1 10000.0 0.05400
+1 10000.0 5.40000

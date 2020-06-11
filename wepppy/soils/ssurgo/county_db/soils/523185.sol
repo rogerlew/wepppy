@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.455357
+#   Build Date: 2020-06-05 11:16:33.500517
 #   Source Data: Surgo
 # 
 # Mukey: 523185
 # Major Component: 15476875 (comppct_r = 80.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44858868   H1             15.0     2.7        3.0         5.0          1.4
-#  44858866   H2             46.0     2.7        3.0         8.0          1.4
-#  44858867   H3     R       71.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44858868   H1             15.0     2.7        3.0         5.0          1.4    45.0     6.6     3.2     3.0
+#  44858866   H2             46.0     2.7        3.0         8.0          1.4    45.0    26.1     7.8     2.0
+#  44858867   H3     R       71.0   0.005         -           -           1.4     7.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00005
+#     ksat: 0.00500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Rockland, limestone, steep'		'SICL'	2	0.3000	0.7500	3573150.00	0.0069	3.5000	9.7200
 	  150.000	   6.60	  45.00	   3.00	  34.10	  17.20
 	  460.000	  26.10	  45.00	   2.00	  32.60	  19.90
-1 10000.0 0.00018
+1 10000.0 0.01800

@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.342720
+#   Build Date: 2020-06-05 11:16:32.321060
 #   Source Data: Surgo
 # 
 # Mukey: 106645
 # Major Component: 14809152 (comppct_r = 92.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42693380   Ap             20.0     9.0        0.0         0.0          1.4
-#  42693375   E              51.0     9.0        0.0         0.0          1.4
-#  42693376   2Btg1  R       60.0     0.2        0.0         0.0         1.55
-#  42693377   2Btg2         100.0     0.2        0.0         0.0         1.55
-#  42693378   2BC           150.0   0.705        0.0         0.0         1.53
-#  42693379   2C            200.0   0.705        0.0         0.0         1.53
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42693380   Ap             20.0     9.0        0.0         0.0          1.4    20.0    13.0     3.7     2.0
+#  42693375   E              51.0     9.0        0.0         0.0          1.4    23.0    14.0     3.4    0.75
+#  42693376   2Btg1  R       60.0     0.2        0.0         0.0         1.55    52.0     6.0     1.7     0.6
+#  42693377   2Btg2         100.0     0.2        0.0         0.0         1.55    45.0    15.0     4.9    0.55
+#  42693378   2BC           150.0   0.705        0.0         0.0         1.53    38.0    15.0     4.9     0.5
+#  42693379   2C            200.0   0.705        0.0         0.0         1.53    36.0    16.0     4.9     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Abrupt textural change
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 'Taloka silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2300	0.7500	4951400.00	0.0094	3.5000	32.4000
 	  200.000	  13.00	  20.00	   2.00	  10.80	   2.00
 	  510.000	  14.00	  23.00	   0.75	  12.30	   2.00
-1 10000.0 0.00720
+1 10000.0 0.72000

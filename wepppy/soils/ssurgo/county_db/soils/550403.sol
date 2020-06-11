@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.466372
+#   Build Date: 2020-06-05 11:16:31.725250
 #   Source Data: Surgo
 # 
 # Mukey: 550403
 # Major Component: 15246277 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44089697   H1             28.0     9.0        0.0         0.0          1.4
-#  44089698   H2     R       97.0     0.9        0.0         5.0         1.55
-#  44089699   Cr            122.0    28.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44089697   H1             28.0     9.0        0.0         0.0          1.4    23.5    24.5    10.0     2.0
+#  44089698   H2     R       97.0     0.9        0.0         5.0         1.55    45.0     7.2     3.5    0.25
+#  44089699   Cr            122.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Latham-Shelocta silt loams, 30 to 50 percent slopes'		'SIL'	1	0.3700	0.7500	4758445.00	0.0081	3.5000	32.4000
 	  280.000	  24.50	  23.50	   2.00	  11.30	   0.00
-1 10000.0 0.03240
+1 10000.0 3.24000

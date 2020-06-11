@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.672371
+#   Build Date: 2020-06-05 11:16:33.338967
 #   Source Data: Surgo
 # 
 # Mukey: 198977
 # Major Component: 14768015 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42556461   H1             38.0    2.82        0.0         0.0          1.3
-#  42556462   H2     R      188.0   0.917        0.0         0.0         1.33
-#  42556463   H3            203.0    2.82        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42556461   H1             38.0    2.82        0.0         0.0          1.3    24.0     4.0     1.5     4.5
+#  42556462   H2     R      188.0   0.917        0.0         0.0         1.33    34.0     4.0     1.5     1.0
+#  42556463   H3            203.0    2.82        0.0         0.0          1.4    26.0     4.0     1.5     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00917
+#     ksat: 0.91700
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Virden-Fosterburg silt loams, 0 to 2 percent slopes'		'SIL'	1	0.0900	0.7500	4730880.00	0.0080	3.5000	10.1520
 	  380.000	   4.00	  24.00	   4.50	  25.50	   0.00
-1 10000.0 0.03301
+1 10000.0 3.30120

@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.799805
+#   Build Date: 2020-06-05 11:16:33.040269
 #   Source Data: Surgo
 # 
 # Mukey: 577475
 # Major Component: 15368409 (comppct_r = 65.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44497986   A              13.0    9.17        3.0        25.0         1.45
-#  44497982   Bt1            53.0    9.17        0.0         3.0          1.4
-#  44497984   Bt2    R       74.0    0.92        0.0         3.0         1.38
-#  44497983   Bt3           109.0    0.92        0.0         3.0         1.38
-#  44497985   Cr            127.0    2.82         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44497986   A              13.0    9.17        3.0        25.0         1.45    15.0    30.1     9.7    1.25
+#  44497982   Bt1            53.0    9.17        0.0         3.0          1.4    45.0     7.2     3.5    0.75
+#  44497984   Bt2    R       74.0    0.92        0.0         3.0         1.38    50.0    22.0     5.2     0.2
+#  44497983   Bt3           109.0    0.92        0.0         3.0         1.38    50.0    20.0     5.3     0.2
+#  44497985   Cr            127.0    2.82         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Littlefir-Bismarck complex, 15 to 35 percent slopes'		'CB-SIL'	2	0.2300	0.7500	4591370.00	0.0088	3.0824	33.0120
 	  130.000	  30.10	  15.00	   1.25	  11.30	  42.40
 	  530.000	   7.20	  45.00	   0.75	  11.30	  17.55
-1 10000.0 0.03312
+1 10000.0 3.31200

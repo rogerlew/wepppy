@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.052548
+#   Build Date: 2020-06-05 11:16:30.574707
 #   Source Data: Surgo
 # 
 # Mukey: 384976
 # Major Component: 14946085 (comppct_r = 55.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43129327   A              20.0  2.8222        0.0         0.0         1.38
-#  43129323   BA     R       28.0  0.9174        0.0         0.0         1.55
-#  43129324   Bt1            94.0  0.9174        0.0         0.0         1.55
-#  43129325   Bt2           157.0  0.9174        0.0         3.0         1.58
-#  43129326   C             183.0  0.9174        0.0         3.0         1.68
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43129327   A              20.0  2.8222        0.0         0.0         1.38    31.0    20.0    12.2     2.0
+#  43129323   BA     R       28.0  0.9174        0.0         0.0         1.55    38.0     7.5     2.6     1.5
+#  43129324   Bt1            94.0  0.9174        0.0         0.0         1.55    42.5    28.1     8.1     0.3
+#  43129325   Bt2           157.0  0.9174        0.0         3.0         1.58    42.5    28.1     8.1     0.3
+#  43129326   C             183.0  0.9174        0.0         3.0         1.68    40.0    30.0     8.3     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00917
+#     ksat: 0.91740
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Tillman and Foard soils, 1 to 3 percent slopes'		'SICL'	1	0.0900	0.7500	4344970.00	0.0072	3.5000	10.1599
-	  200.000	  20.00	  31.00	   2.00	  15.00	   0.00
-1 10000.0 0.03303
+	  210.000	  20.00	  31.00	   2.00	  15.00	   0.00
+1 10000.0 3.30264

@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.791253
+#   Build Date: 2020-06-05 11:16:30.435235
 #   Source Data: Surgo
 # 
 # Mukey: 503696
 # Major Component: 14457397 (comppct_r = 40.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41639111   A1              5.0   28.23       58.0        40.0         1.33
-#  41639113   C1, C2          30.0   28.23        0.0         3.0         1.42
-#  41639112   R      R       41.0    0.92         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41639111   A1              5.0   28.23       58.0        40.0         1.33    16.5    43.5    12.3     1.5
+#  41639113   C1, C2          30.0   28.23        0.0         3.0         1.42    13.0    63.5    36.6    0.25
+#  41639112   R      R       41.0    0.92         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Travessilla-Rock outcrop-Gerst complex'		'BYX-L'	2	0.3000	0.7500	5090830.00	0.0081	3.0291	101.6280
 	   50.000	  43.50	  16.50	   1.50	  10.00	  99.10
 	  300.000	  63.50	  13.00	   0.25	   6.00	  12.70
-1 10000.0 0.03312
+1 10000.0 3.31200

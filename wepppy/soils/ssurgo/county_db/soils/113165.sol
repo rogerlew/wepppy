@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:53.670613
+#   Build Date: 2020-06-05 11:16:33.633756
 #   Source Data: Surgo
 # 
 # Mukey: 113165
 # Major Component: 14850220 (comppct_r = 80.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42821997   A              18.0     9.0        0.0         0.0          1.4
-#  42821998   Btg    R      170.0     0.2        0.0         0.0         1.55
-#  42821999   Cg            203.0     0.2        0.0         0.0         1.55
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42821997   A              18.0     9.0        0.0         0.0          1.4    16.0    43.8    12.3     2.0
+#  42821998   Btg    R      170.0     0.2        0.0         0.0         1.55    47.5    23.3     5.6    0.25
+#  42821999   Cg            203.0     0.2        0.0         0.0         1.55    35.0    33.3    10.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Leaf loam'		'FSL'	1	0.2300	0.7500	5090830.00	0.0066	2.9966	32.4000
-	  180.000	  43.80	  16.00	   2.00	   9.10	   4.00
-1 10000.0 0.00720
+	  210.000	  43.80	  16.00	   2.00	   9.10	   4.00
+1 10000.0 0.72000

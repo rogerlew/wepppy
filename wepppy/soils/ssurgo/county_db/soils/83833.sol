@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.782578
+#   Build Date: 2020-06-05 11:16:30.960752
 #   Source Data: Surgo
 # 
 # Mukey: 83833
 # Major Component: 15716316 (comppct_r = 80.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45557121   Ap             15.0    2.82        0.0         0.0         1.48
-#  45557120   C1     R       79.0    0.92        0.0         0.0         1.45
-#  45557119   C2            130.0    2.82        0.0         0.0         1.43
-#  45557118   C3            152.0    0.92        0.0         0.0         1.48
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45557121   Ap             15.0    2.82        0.0         0.0         1.48    34.0    18.1    11.1    0.75
+#  45557120   C1     R       79.0    0.92        0.0         0.0         1.45    47.5    23.3     5.6    0.25
+#  45557119   C2            130.0    2.82        0.0         0.0         1.43    34.0    18.1    11.1    0.25
+#  45557118   C3            152.0    0.92        0.0         0.0         1.48    47.5    23.3     5.6    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Terreton silty clay loam'		'SICL'	1	0.3000	0.7500	4179580.00	0.0070	3.5000	10.1520
-	  150.000	  18.10	  34.00	   0.75	  27.50	   0.00
-1 10000.0 0.03312
+	  210.000	  18.10	  34.00	   0.75	  27.50	   0.00
+1 10000.0 3.31200

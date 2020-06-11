@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.533509
+#   Build Date: 2020-06-05 11:16:33.179816
 #   Source Data: Surgo
 # 
 # Mukey: 1384199
 # Major Component: 15254744 (comppct_r = 45.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44113367   Oi              3.0    92.0        0.0         0.0          0.1
-#  44113364   A               8.0     2.7        0.0         0.0         1.35
-#  44113365   Bt     R       58.0     0.9        0.0         0.0         1.45
-#  44113366   C              71.0     2.2        0.0         0.0         1.45
-#  44113363   Cr             96.0     0.7         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44113367   Oi              3.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
+#  44113364   A               8.0     2.7        0.0         0.0         1.35    23.0    21.0     8.5     1.9
+#  44113365   Bt     R       58.0     0.9        0.0         0.0         1.45    48.0     5.0     2.0     0.6
+#  44113366   C              71.0     2.2        0.0         0.0         1.45    50.0     7.0     3.0    0.25
+#  44113363   Cr             96.0     0.7         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,5 +57,5 @@ Any comments:
 1 1
 'Peabody-Gilpin silt loams, 35 to 70 percent slopes'		'SPM'	2	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
 	   30.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	   80.000	  21.00	  23.00	   1.90	  11.30	   0.00
-1 10000.0 0.03240
+	  210.000	  21.00	  23.00	   1.90	  11.30	   0.00
+1 10000.0 3.24000

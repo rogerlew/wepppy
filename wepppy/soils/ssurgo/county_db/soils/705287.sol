@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:19.149444
+#   Build Date: 2020-06-05 11:16:32.450221
 #   Source Data: Surgo
 # 
 # Mukey: 705287
 # Major Component: 15447965 (comppct_r = 95.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44763135   H1             23.0     9.0        0.0         0.0         1.35
-#  44763136   H2     R      127.0     1.0        0.0         0.0          1.5
-#  44763137   H3            183.0     9.0        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44763135   H1             23.0     9.0        0.0         0.0         1.35    18.5    43.0    12.4    1.25
+#  44763136   H2     R      127.0     1.0        0.0         0.0          1.5    45.0    21.0     6.3    0.25
+#  44763137   H3            183.0     9.0        0.0         0.0         1.35    35.0    39.9    11.9     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Roanoke loam, 0 to 2 percent slopes, occasionally flooded'		'L'	1	0.2500	0.7500	5110040.00	0.0096	3.1533	32.4000
 	  230.000	  43.00	  18.50	   1.25	   7.40	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

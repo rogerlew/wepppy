@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.191279
+#   Build Date: 2020-06-05 11:16:29.405606
 #   Source Data: Surgo
 # 
 # Mukey: 460521
 # Major Component: 14657544 (comppct_r = 80.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42197799   H1             41.0     9.0        0.0         0.0         1.55
-#  42197800   H2     R       64.0   0.215        0.0         0.0         1.58
-#  42197801   H4             90.0    28.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42197799   H1             41.0     9.0        0.0         0.0         1.55    20.0    42.1    12.2    0.75
+#  42197800   H2     R       64.0   0.215        0.0         0.0         1.58    42.5    28.1     8.1    0.25
+#  42197801   H4             90.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Duripan
-#     ksat: 0.00215
+#     ksat: 0.21500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'San Joaquin loam, 0 to 1 percent slopes'		'L'	1	0.3000	0.7500	5071620.00	0.0153	3.2624	32.4000
 	  410.000	  42.10	  20.00	   0.75	  15.00	   2.50
-1 10000.0 0.00774
+1 10000.0 0.77400

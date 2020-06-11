@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.132227
+#   Build Date: 2020-06-05 11:16:32.010674
 #   Source Data: Surgo
 # 
 # Mukey: 185238
 # Major Component: 14777972 (comppct_r = 37.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42587920   Ap             18.0    9.17        0.0         0.0         1.43
-#  42587917   Bt1            45.0    9.17        0.0         0.0          1.5
-#  42587918   2Bt2   R      160.0    1.41        0.0         3.0         1.45
-#  42587919   2Bt3          203.0    1.41        0.0         3.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42587920   Ap             18.0    9.17        0.0         0.0         1.43    20.0     5.0     2.0     1.7
+#  42587917   Bt1            45.0    9.17        0.0         0.0          1.5    34.0     4.0     2.0     0.5
+#  42587918   2Bt2   R      160.0    1.41        0.0         3.0         1.45    65.0     3.0     2.0    0.25
+#  42587919   2Bt3          203.0    1.41        0.0         3.0         1.45    56.0    10.0     4.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.01410
+#     ksat: 1.41000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Knobcreek-Navilleton silt loams, 6 to 12 percent slopes, eroded'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
 	  180.000	   5.00	  20.00	   1.70	  14.00	   2.00
 	  450.000	   4.00	  34.00	   0.50	  16.00	   2.00
-1 10000.0 0.05076
+1 10000.0 5.07600

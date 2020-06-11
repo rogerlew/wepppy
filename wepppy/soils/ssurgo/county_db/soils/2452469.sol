@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:37.704025
+#   Build Date: 2020-06-05 11:16:32.177999
 #   Source Data: Surgo
 # 
 # Mukey: 2452469
 # Major Component: 15359464 (comppct_r = 40.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44470324   H1             10.0     9.0        0.0         8.0         1.25
-#  44470325   H2             38.0     2.7        0.0        23.0          1.4
-#  44470323   R      R       63.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44470324   H1             10.0     9.0        0.0         8.0         1.25    14.0    42.1    11.9     1.5
+#  44470325   H2             38.0     2.7        0.0        23.0          1.4    31.0    35.4    10.6    0.25
+#  44470323   R      R       63.0   0.005         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00005
+#     ksat: 0.00500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Doorkiss-Ister-Ceejay association'		'GRV-L'	2	0.3400	0.7500	5013990.00	0.0080	2.8898	32.4000
 	  100.000	  42.10	  14.00	   1.50	  12.20	  63.20
 	  380.000	  35.40	  31.00	   0.25	  23.30	  71.12
-1 10000.0 0.00018
+1 10000.0 0.01800

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:41.301288
+#   Build Date: 2020-06-05 11:16:32.582016
 #   Source Data: Surgo
 # 
 # Mukey: 426193
 # Major Component: 14845557 (comppct_r = 94.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42808231   Ap             25.0    9.17        0.0         0.0         1.52
-#  42808232   Bt     R       33.0    1.41        0.0         1.0         1.42
-#  42808234   2Bt            74.0     1.1        0.0         3.0         1.37
-#  42808233   2Cd           200.0    0.92        0.0         2.0         1.95
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42808231   Ap             25.0    9.17        0.0         0.0         1.52    20.0    26.0    10.5     2.0
+#  42808232   Bt     R       33.0    1.41        0.0         1.0         1.42    37.0    13.0     4.6    0.75
+#  42808234   2Bt            74.0     1.1        0.0         3.0         1.37    48.0    23.0     7.0    0.75
+#  42808233   2Cd           200.0    0.92        0.0         2.0         1.95    35.0    17.8     6.2    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.01410
+#     ksat: 1.41000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Kewaunee silt loam, 2 to 6 percent slopes'		'SIL'	1	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
 	  250.000	  26.00	  20.00	   2.00	   8.70	   0.00
-1 10000.0 0.05076
+1 10000.0 5.07600

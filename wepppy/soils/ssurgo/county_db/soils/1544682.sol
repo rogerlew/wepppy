@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.707521
+#   Build Date: 2020-06-05 11:16:33.345400
 #   Source Data: Surgo
 # 
 # Mukey: 1544682
 # Major Component: 14426638 (comppct_r = 35.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41554909   Ap             18.0     3.0        0.0         0.0         1.33
-#  41554910   Bt1,Bt3  R       79.0     0.7        0.0         0.0         1.38
-#  41554911   Bt4,BCg2         178.0     3.0        0.0         0.0         1.38
-#  41554912   Cg            203.0     9.0        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41554909   Ap             18.0     3.0        0.0         0.0         1.33    31.5     3.0     1.8     3.2
+#  41554910   Bt1,Bt3  R       79.0     0.7        0.0         0.0         1.38    39.0     3.0     1.1     0.5
+#  41554911   Bt4,BCg2         178.0     3.0        0.0         0.0         1.38    31.5     3.0     1.8     0.5
+#  41554912   Cg            203.0     9.0        0.0         0.0          1.5    26.0     3.0     1.2     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Sharpsburg-Nira complex, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.2300	0.7500	4317405.00	0.0071	3.5000	10.8000
-	  180.000	   3.00	  31.50	   3.20	  25.50	   0.00
-1 10000.0 0.02520
+	  210.000	   3.00	  31.50	   3.20	  25.50	   0.00
+1 10000.0 2.52000

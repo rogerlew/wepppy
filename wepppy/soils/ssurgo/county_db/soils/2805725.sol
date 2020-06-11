@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.683749
+#   Build Date: 2020-06-05 11:16:30.384846
 #   Source Data: Surgo
 # 
 # Mukey: 2805725
 # Major Component: 15620563 (comppct_r = 55.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45327403   A/E            25.0    9.17        0.0         0.0          1.5
-#  45327401   B/Et          117.0    2.82        0.0         0.0          1.5
-#  45327402   2Btg   R      203.0    0.22        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45327403   A/E            25.0    9.17        0.0         0.0          1.5    14.5    14.1     8.5    1.25
+#  45327401   B/Et          117.0    2.82        0.0         0.0          1.5    30.0    10.0     4.2    0.25
+#  45327402   2Btg   R      203.0    0.22        0.0         0.0          1.4    31.0    30.0    19.3    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00220
+#     ksat: 0.22000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Metcalf-Timpson complex, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5254615.00	0.0143	3.5000	33.0120
 	  250.000	  14.10	  14.50	   1.25	  11.30	   0.00
 	 1170.000	  10.00	  30.00	   0.25	  11.30	   0.00
-1 10000.0 0.00792
+1 10000.0 0.79200

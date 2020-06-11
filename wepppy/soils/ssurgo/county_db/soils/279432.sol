@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.263095
+#   Build Date: 2020-06-05 11:16:33.780329
 #   Source Data: Surgo
 # 
 # Mukey: 279432
 # Major Component: 14963349 (comppct_r = 45.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43191030   H1             18.0  9.1722        3.0         3.0          1.0
-#  43191031   H2             74.0  9.1722        1.0         5.0         1.35
-#  43191029   R      R       99.0   0.215         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43191030   H1             18.0  9.1722        3.0         3.0          1.0     7.0    67.8    19.1     5.0
+#  43191031   H2             74.0  9.1722        1.0         5.0         1.35     5.0    64.3    17.1     2.5
+#  43191029   R      R       99.0   0.215         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00215
+#     ksat: 0.21500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Tunbridge-Woodstock very rocky fine sandy loams, 8 to 25 percent slopes'		'FSL'	2	0.1600	0.7500	6397110.00	0.0077	2.0172	33.0199
 	  180.000	  67.80	   7.00	   5.00	  11.30	  17.75
 	  740.000	  64.30	   5.00	   2.50	   3.80	  20.10
-1 10000.0 0.00774
+1 10000.0 0.77400

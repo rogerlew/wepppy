@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.550584
+#   Build Date: 2020-06-05 11:16:31.267330
 #   Source Data: Surgo
 # 
 # Mukey: 568475
 # Major Component: 15519401 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44972064   H1             15.0    2.82        0.0         0.0         1.53
-#  44972063   H2     R       66.0    0.21        0.0         0.0         1.55
-#  44972062   H3            152.0    2.82        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44972064   H1             15.0    2.82        0.0         0.0         1.53    20.0    11.4     3.7    0.75
+#  44972063   H2     R       66.0    0.21        0.0         0.0         1.55    47.5     5.5     2.7     0.5
+#  44972062   H3            152.0    2.82        0.0         0.0          1.5    22.5    19.9     7.9     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Forestdale silt loam, 0.5 to 3 percent slopes'		'SIL'	1	0.3000	0.7500	4951400.00	0.0094	3.5000	10.1520
-	  150.000	  11.40	  20.00	   0.75	  11.30	   0.00
-1 10000.0 0.00756
+	  210.000	  11.40	  20.00	   0.75	  11.30	   0.00
+1 10000.0 0.75600

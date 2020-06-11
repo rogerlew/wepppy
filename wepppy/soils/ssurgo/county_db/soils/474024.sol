@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.660546
+#   Build Date: 2020-06-05 11:16:33.219960
 #   Source Data: Surgo
 # 
 # Mukey: 474024
 # Major Component: 15324748 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44360289   A               5.0    28.0        0.0         0.0         1.48
-#  44360290   Bt             28.0     2.7        0.0         1.0          1.4
-#  44360291   R      R       53.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44360289   A               5.0    28.0        0.0         0.0         1.48    15.0    66.0    10.5    0.25
+#  44360290   Bt             28.0     2.7        0.0         1.0          1.4    29.0    34.0    10.2    0.25
+#  44360291   R      R       53.0   0.005         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00005
+#     ksat: 0.00500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Theon very gravelly sandy loam, 8 to 30 percent slopes'		'GRV-SL'	2	0.3000	0.7500	4745050.00	0.0254	3.0360	100.8000
 	   50.000	  66.00	  15.00	   0.25	  12.10	  54.00
 	  280.000	  34.00	  29.00	   0.25	  22.70	  70.30
-1 10000.0 0.00018
+1 10000.0 0.01800

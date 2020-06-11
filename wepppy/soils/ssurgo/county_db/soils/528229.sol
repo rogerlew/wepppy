@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.833552
+#   Build Date: 2020-06-05 11:16:29.686513
 #   Source Data: Surgo
 # 
 # Mukey: 528229
 # Major Component: 14964684 (comppct_r = 60.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43194243   A              20.0    9.17       19.0        29.0         1.28
-#  43194245   C              25.0    7.27       18.0        31.0         1.34
-#  43194244   R      R       50.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43194243   A              20.0    9.17       19.0        29.0         1.28    36.0    10.0     7.0     4.0
+#  43194245   C              25.0    7.27       18.0        31.0         1.34    55.0    10.0     7.0     1.0
+#  43194244   R      R       50.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Gladeville-Rock outcrop complex, 2 to 15 percent slopes, extremely stony'		'FLV-SICL'	2	0.1700	0.7500	4069320.00	0.0070	3.5000	33.0120
 	  200.000	  10.00	  36.00	   4.00	  19.60	  62.04
 	  250.000	  10.00	  55.00	   1.00	  29.10	  65.83
-1 10000.0 0.00756
+1 10000.0 0.75600
