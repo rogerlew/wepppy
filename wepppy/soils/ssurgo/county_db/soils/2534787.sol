@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.594270
+#   Build Date: 2020-06-05 11:16:31.280309
 #   Source Data: Surgo
 # 
 # Mukey: 2534787
 # Major Component: 14724500 (comppct_r = 88.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42414456   Ap             20.0    28.0        0.0         0.0          1.3
-#  42414457   Bt             48.0     9.0        0.0        15.0         1.35
-#  42414458   2Btx   R       86.0     0.2        0.0        17.0         1.75
-#  42414459   3Bt           203.0     9.0        0.0        14.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42414456   Ap             20.0    28.0        0.0         0.0          1.3    15.4    29.8     9.6     2.1
+#  42414457   Bt             48.0     9.0        0.0        15.0         1.35    26.0     7.3     1.8     0.5
+#  42414458   2Btx   R       86.0     0.2        0.0        17.0         1.75    24.9     8.7     2.5     0.1
+#  42414459   3Bt           203.0     9.0        0.0        14.0         1.45    64.8     5.8     1.4     0.1
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Scholten gravelly silt loam, 3 to 8 percent slopes'		'GR-SIL'	2	0.1600	0.7500	5204998.00	0.0131	3.5000	100.8000
 	  200.000	  29.80	  15.40	   2.10	   9.30	  40.00
 	  480.000	   7.30	  26.00	   0.50	  12.50	  62.60
-1 10000.0 0.00720
+1 10000.0 0.72000

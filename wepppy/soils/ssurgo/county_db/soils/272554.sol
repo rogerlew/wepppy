@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.835575
+#   Build Date: 2020-06-05 11:16:33.054721
 #   Source Data: Surgo
 # 
 # Mukey: 272554
 # Major Component: 15251122 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44101839   Ap             18.0    2.82        0.0         0.0          1.5
-#  44101840   Bt     R       64.0    0.92        0.0         0.0         1.58
-#  44101841   BC             74.0    0.92        0.0         0.0          1.7
-#  44101842   Cd            200.0    0.74        1.0         1.0         1.85
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44101839   Ap             18.0    2.82        0.0         0.0          1.5    26.0    22.0     6.0    1.75
+#  44101840   Bt     R       64.0    0.92        0.0         0.0         1.58    42.0    22.0     7.0     1.0
+#  44101841   BC             74.0    0.92        0.0         0.0          1.7    36.0    24.0     7.0     0.5
+#  44101842   Cd            200.0    0.74        1.0         1.0         1.85    36.0    25.0     7.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Glynwood silt loam, 2 to 6 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	4620620.00	0.0076	3.5000	10.1520
-	  180.000	  22.00	  26.00	   1.75	  18.00	   7.00
-1 10000.0 0.03312
+	  210.000	  22.00	  26.00	   1.75	  18.00	   7.00
+1 10000.0 3.31200

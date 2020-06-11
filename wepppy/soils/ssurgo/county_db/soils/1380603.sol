@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.226016
+#   Build Date: 2020-06-05 11:16:31.600446
 #   Source Data: Surgo
 # 
 # Mukey: 1380603
 # Major Component: 15417406 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44665718   Ap             18.0     2.7        0.0         0.0          1.4
-#  44665717   Bt1    R       35.0    0.91        0.0         0.0         1.35
-#  44665720   Bt2            52.0    0.91        0.0         0.0         1.45
-#  44665719   Bk             78.0     2.7        0.0         0.0         1.37
-#  44665716   C             200.0     2.7        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44665718   Ap             18.0     2.7        0.0         0.0          1.4    32.0     9.0     7.3     2.0
+#  44665717   Bt1    R       35.0    0.91        0.0         0.0         1.35    46.0     6.0     5.3     1.0
+#  44665720   Bt2            52.0    0.91        0.0         0.0         1.45    42.0     5.0     4.0     0.8
+#  44665719   Bk             78.0     2.7        0.0         0.0         1.37    32.0     6.0     4.9     0.5
+#  44665716   C             200.0     2.7        0.0         0.0          1.4    26.0     6.0     4.9     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Spearville silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.2300	0.7500	4289840.00	0.0071	3.5000	9.7200
-	  180.000	   9.00	  32.00	   2.00	  25.40	   0.00
-1 10000.0 0.03276
+	  210.000	   9.00	  32.00	   2.00	  25.40	   0.00
+1 10000.0 3.27600

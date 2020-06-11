@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.663831
+#   Build Date: 2020-06-05 11:16:29.999506
 #   Source Data: Surgo
 # 
 # Mukey: 975516
 # Major Component: 14939511 (comppct_r = 83.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43110264   Ap             23.0  2.8222        0.0         0.0         1.45
-#  43110265   Bt     R       41.0  0.2169        0.0         0.0         1.45
-#  43110262   Btk           119.0  0.2169        0.0         0.0         1.45
-#  43110263   2BCk          142.0  0.2169        0.0         0.0          1.5
-#  43110261   2C            173.0  0.2116        0.0         0.0          1.6
-#  43110260   2Cd           203.0   0.217        0.0         1.0         1.98
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43110264   Ap             23.0  2.8222        0.0         0.0         1.45    33.0    34.4    10.3     2.0
+#  43110265   Bt     R       41.0  0.2169        0.0         0.0         1.45    42.5    28.1     8.1     1.5
+#  43110262   Btk           119.0  0.2169        0.0         0.0         1.45    42.5    28.1     8.1     0.3
+#  43110263   2BCk          142.0  0.2169        0.0         0.0          1.5    40.0    30.0     8.3     0.3
+#  43110261   2C            173.0  0.2116        0.0         0.0          1.6    42.5     7.7     3.7    0.15
+#  43110260   2Cd           203.0   0.217        0.0         1.0         1.98    50.0     5.3     2.5    0.15
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic bedrock
-#     ksat: 0.00217
+#     ksat: 0.21690
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 1 1
 'Westill clay loam, 1 to 3 percent slopes'		'CL'	1	0.0900	0.7500	4706630.00	0.0060	4.2176	10.1599
 	  230.000	  34.40	  33.00	   2.00	  19.50	   1.00
-1 10000.0 0.00781
+1 10000.0 0.78084

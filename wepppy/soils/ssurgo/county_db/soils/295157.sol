@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.611176
+#   Build Date: 2020-06-05 11:16:29.979931
 #   Source Data: Surgo
 # 
 # Mukey: 295157
 # Major Component: 15194770 (comppct_r = 40.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43940877   H1             18.0     9.0        5.0         5.0          1.3
-#  43940878   H2             58.0     9.0        0.0         2.0          1.4
-#  43940879   H3     R      152.0    0.91        1.0         5.0          1.8
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43940877   H1             18.0     9.0        5.0         5.0          1.3    12.0    45.0    12.6     2.0
+#  43940878   H2             58.0     9.0        0.0         2.0          1.4    12.0    45.0    12.6     1.5
+#  43940879   H3     R      152.0    0.91        1.0         5.0          1.8    12.0    45.0    12.6     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Wellsboro and Wurtsboro soils, strongly sloping, extremely stony'		'GR-L'	2	0.3400	0.7500	5148460.00	0.0067	2.7192	32.4000
 	  180.000	  45.00	  12.00	   2.00	  11.30	  41.50
 	  580.000	  45.00	  12.00	   1.50	  11.30	  26.50
-1 10000.0 0.03276
+1 10000.0 3.27600

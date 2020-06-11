@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.953393
+#   Build Date: 2020-06-05 11:16:30.102360
 #   Source Data: Surgo
 # 
 # Mukey: 2532590
 # Major Component: 14747807 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42488894   Ap             18.0     9.0        0.0         0.0         1.46
-#  42488895   2Bt    R       51.0     1.0        0.0         0.0         1.41
-#  42488896   2Btg          200.0     1.0        0.0         0.0         1.46
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42488894   Ap             18.0     9.0        0.0         0.0         1.46    23.0    25.0     5.1     2.4
+#  42488895   2Bt    R       51.0     1.0        0.0         0.0         1.41    44.0    25.0     5.4     1.0
+#  42488896   2Btg          200.0     1.0        0.0         0.0         1.46    39.0    23.0     6.2     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Keswick silt loam, 5 to 9 percent slopes, eroded'		'SIL'	1	0.1700	0.7500	4786010.00	0.0082	3.5000	32.4000
-	  180.000	  25.00	  23.00	   2.40	  19.60	   0.00
-1 10000.0 0.03600
+	  210.000	  25.00	  23.00	   2.40	  19.60	   0.00
+1 10000.0 3.60000

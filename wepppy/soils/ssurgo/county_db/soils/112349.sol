@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.609817
+#   Build Date: 2020-06-05 11:16:33.197608
 #   Source Data: Surgo
 # 
 # Mukey: 112349
 # Major Component: 14787832 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42622717   H1             15.0     9.0        0.0         1.0         1.48
-#  42622718   H2     R       89.0     0.2        0.0         1.0         1.25
-#  42622719   H3            135.0     1.0        0.0         1.0         1.25
-#  42622716   Cr            203.0     0.7         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42622717   H1             15.0     9.0        0.0         1.0         1.48    12.5    67.9    10.7    1.25
+#  42622718   H2     R       89.0     0.2        0.0         1.0         1.25    57.5    16.2     5.0    0.25
+#  42622719   H3            135.0     1.0        0.0         1.0         1.25    30.0    33.5    10.0    0.25
+#  42622716   Cr            203.0     0.7         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'White Store sandy loam, 6 to 10 percent slopes'		'SL'	1	0.3700	0.7500	4783470.00	0.0091	2.8619	32.4000
-	  150.000	  67.90	  12.50	   1.25	  10.00	   7.93
-1 10000.0 0.00720
+	  210.000	  67.90	  12.50	   1.25	  10.00	   7.93
+1 10000.0 0.72000

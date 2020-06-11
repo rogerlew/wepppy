@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.252546
+#   Build Date: 2020-06-05 11:16:29.433339
 #   Source Data: Surgo
 # 
 # Mukey: 408426
 # Major Component: 14478971 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41681720   Ap             18.0     9.0        0.0         0.0          1.4
-#  41681722   BE             46.0     3.0        0.0         0.0         1.52
-#  41681721   Bt1    R       64.0     0.9        0.0         0.0         1.46
-#  41681723   Bt2           170.0     3.0        0.0         0.0         1.47
-#  41681724   BC            200.0     3.0        0.0         0.0         1.52
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41681720   Ap             18.0     9.0        0.0         0.0          1.4    20.0     4.0     1.0     2.0
+#  41681722   BE             46.0     3.0        0.0         0.0         1.52    27.0     4.0     2.0    0.25
+#  41681721   Bt1    R       64.0     0.9        0.0         0.0         1.46    42.0     4.0     2.0    0.25
+#  41681723   Bt2           170.0     3.0        0.0         0.0         1.47    30.0     4.0     2.0    0.25
+#  41681724   BC            200.0     3.0        0.0         0.0         1.52    30.0     4.0     2.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Weller silt loam, 5 to 9 percent slopes, moderately eroded'		'SIL'	2	0.3700	0.7500	4951400.00	0.0094	3.5000	32.4000
 	  180.000	   4.00	  20.00	   2.00	  14.10	   0.00
 	  460.000	   4.00	  27.00	   0.25	  23.70	   0.00
-1 10000.0 0.03240
+1 10000.0 3.24000

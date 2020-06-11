@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.742361
+#   Build Date: 2020-06-05 11:16:30.413357
 #   Source Data: Surgo
 # 
 # Mukey: 1014622
 # Major Component: 14864538 (comppct_r = 85.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42866328   Oa             25.0    28.2        0.0         0.0         0.31
-#  42866329   Ag     R       53.0     0.2        0.0         0.0         0.73
-#  42866330   Cg            203.0     0.2        0.0         0.0         0.96
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42866328   Oa             25.0    28.2        0.0         0.0         0.31    76.4     1.0    10.0    50.0
+#  42866329   Ag     R       53.0     0.2        0.0         0.0         0.73    77.5     1.8     0.6    13.5
+#  42866330   Cg            203.0     0.2        0.0         0.0         0.96    77.5     1.8     0.6    13.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Barbary muck, 0 to 1 percent slopes, frequently flooded'		'MK-MUCK'	1	0.0900	0.7500	1842068.00	0.0069	3.5000	101.5200
 	  250.000	   1.00	  76.40	  50.00	 107.90	  55.50
-1 10000.0 0.00720
+1 10000.0 0.72000

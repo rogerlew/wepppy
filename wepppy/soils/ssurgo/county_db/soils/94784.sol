@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.854427
+#   Build Date: 2020-06-05 11:16:33.064708
 #   Source Data: Surgo
 # 
 # Mukey: 94784
 # Major Component: 14859772 (comppct_r = 60.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42850182   H1             23.0     9.0        0.0         0.0         1.35
-#  42850183   H2     R       66.0     1.0        0.0         0.0         1.35
-#  42850184   H3            152.0     1.0        0.0         0.0         1.38
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42850182   H1             23.0     9.0        0.0         0.0         1.35    22.5    39.8    11.9     2.0
+#  42850183   H2     R       66.0     1.0        0.0         0.0         1.35    38.5     6.8     2.3     1.5
+#  42850184   H3            152.0     1.0        0.0         0.0         1.38    38.5     6.8     2.3    1.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Rago and Kuma loams'		'L'	1	0.2300	0.7500	5013990.00	0.0065	3.4423	32.4000
 	  230.000	  39.80	  22.50	   2.00	  15.00	   2.50
-1 10000.0 0.03600
+1 10000.0 3.60000

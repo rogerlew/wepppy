@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.190856
+#   Build Date: 2020-06-05 11:16:32.045775
 #   Source Data: Surgo
 # 
 # Mukey: 291739
 # Major Component: 14874231 (comppct_r = 48.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42890027   H1              5.0     9.0        0.0         6.0         1.25
-#  42890028   H2             71.0     9.0        1.0        16.0         1.35
-#  42890026   H3     R       81.0    0.01        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42890027   H1              5.0     9.0        0.0         6.0         1.25    14.0    30.4     9.8     4.5
+#  42890028   H2             71.0     9.0        1.0        16.0         1.35    17.0    43.3    12.2     1.0
+#  42890026   H3     R       81.0    0.01        0.0         0.0          1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00010
+#     ksat: 0.01000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Vly-Halcott complex, very steep, very rocky'		'CN-SIL'	2	0.3000	0.7500	4610580.00	0.0049	3.0116	32.4000
 	   50.000	  30.40	  14.00	   4.50	  11.30	  35.14
 	  710.000	  43.30	  17.00	   1.00	  11.30	  67.63
-1 10000.0 0.00036
+1 10000.0 0.03600

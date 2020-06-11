@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.196706
+#   Build Date: 2020-06-05 11:16:29.407723
 #   Source Data: Surgo
 # 
 # Mukey: 505161
 # Major Component: 15301623 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44283907   A              10.0    9.17       45.0        50.0         1.28
-#  44283906   C              30.0    9.17       20.0        58.0         1.33
-#  44283905   R      R       55.0    0.92         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44283907   A              10.0    9.17       45.0        50.0         1.28    22.5    24.8     8.3    0.25
+#  44283906   C              30.0    9.17       20.0        58.0         1.33    22.5    39.8    11.8    0.25
+#  44283905   R      R       55.0    0.92         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Cryorthents-Rock outcrop complex, 50 to 120 percent slopes, extremely stony'		'STX-SIL'	2	0.3000	0.7500	4813575.00	0.0084	3.5000	33.0120
 	  100.000	  24.80	  22.50	   0.25	  14.20	  97.75
 	  300.000	  39.80	  22.50	   0.25	  14.20	  90.10
-1 10000.0 0.03312
+1 10000.0 3.31200

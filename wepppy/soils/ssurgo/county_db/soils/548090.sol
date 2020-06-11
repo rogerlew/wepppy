@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.612962
+#   Build Date: 2020-06-05 11:16:33.313887
 #   Source Data: Surgo
 # 
 # Mukey: 548090
 # Major Component: 14687594 (comppct_r = 90.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42299742   A              23.0    28.0        0.0         3.0          1.5
-#  42299743   Bw            137.0    28.0        0.0         5.0          1.5
-#  42299744   R      R      203.0   0.035         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42299742   A              23.0    28.0        0.0         3.0          1.5    16.0    43.8    12.3    10.0
+#  42299743   Bw            137.0    28.0        0.0         5.0          1.5    16.0    43.8    12.3     0.5
+#  42299744   R      R      203.0   0.035         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00035
+#     ksat: 0.03500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Porters gravelly loam, 30 to 50 percent slopes, stony'		'GR-L'	2	0.2300	0.7500	5090830.00	0.0057	2.9966	100.8000
 	  230.000	  43.80	  16.00	  10.00	  26.50	  30.16
 	 1370.000	  43.80	  16.00	   0.50	   5.10	  14.50
-1 10000.0 0.00126
+1 10000.0 0.12600

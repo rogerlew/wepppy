@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.413516
+#   Build Date: 2020-06-05 11:16:32.350456
 #   Source Data: Surgo
 # 
 # Mukey: 992983
 # Major Component: 14745082 (comppct_r = 96.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42479247   A              25.0     9.0        0.0         0.0         1.35
-#  42479248   E              38.0     9.0        0.0         0.0         1.35
-#  42479244   Bt1    R       71.0     1.0        0.0         0.0         1.35
-#  42479245   Bt2           107.0     1.0        0.0         0.0         1.35
-#  42479246   C             203.0     9.0        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42479247   A              25.0     9.0        0.0         0.0         1.35    21.0    26.3     8.7     3.0
+#  42479248   E              38.0     9.0        0.0         0.0         1.35    23.5    24.5     8.2     1.5
+#  42479244   Bt1    R       71.0     1.0        0.0         0.0         1.35    47.5    23.3     5.6    0.75
+#  42479245   Bt2           107.0     1.0        0.0         0.0         1.35    35.0    17.3     3.3    0.25
+#  42479246   C             203.0     9.0        0.0         0.0         1.35    22.5    24.8     8.3    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Abrupt textural change
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Hartwell silt loam, 1 to 3 percent slopes'		'SIL'	2	0.1600	0.7500	4896270.00	0.0089	3.5000	32.4000
 	  250.000	  26.30	  21.00	   3.00	  11.40	   0.00
 	  380.000	  24.50	  23.50	   1.50	  12.70	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

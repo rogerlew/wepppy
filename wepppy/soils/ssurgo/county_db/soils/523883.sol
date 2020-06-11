@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.326477
+#   Build Date: 2020-06-05 11:16:30.262272
 #   Source Data: Surgo
 # 
 # Mukey: 523883
 # Major Component: 15123083 (comppct_r = 85.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43728328   A               8.0   28.23        0.0         0.0         1.42
-#  43728329   BE             23.0   28.23        0.0         0.0         1.46
-#  43728330   Bt             76.0    28.0        0.0         0.0         1.51
-#  43728331   R      R      101.0     0.4         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43728328   A               8.0   28.23        0.0         0.0         1.42    17.0    43.0     6.9    2.25
+#  43728329   BE             23.0   28.23        0.0         0.0         1.46    20.0    41.0     6.5     1.5
+#  43728330   Bt             76.0    28.0        0.0         0.0         1.51    29.0    44.0    13.2    0.25
+#  43728331   R      R      101.0     0.4         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00400
+#     ksat: 0.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 	   80.000	  43.00	  17.00	   2.25	  11.30	   0.00
 	  230.000	  41.00	  20.00	   1.50	  11.30	  15.00
 	  760.000	  44.00	  29.00	   0.25	  11.30	  14.00
-1 10000.0 0.01440
+1 10000.0 1.44000

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.204205
+#   Build Date: 2020-06-05 11:16:32.052274
 #   Source Data: Surgo
 # 
 # Mukey: 309551
 # Major Component: 15864538 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45979527   H1             23.0     9.0        0.0         2.0         1.35
-#  45979528   H2             41.0     9.0        0.0         2.0         1.35
-#  45979529   H3     R      112.0    0.91        2.0         8.0         1.73
-#  45979530   H4            152.0    0.91        2.0         8.0         1.73
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45979527   H1             23.0     9.0        0.0         2.0         1.35    22.0    18.0     6.0     4.5
+#  45979528   H2             41.0     9.0        0.0         2.0         1.35    22.0    26.0     8.6     1.5
+#  45979529   H3     R      112.0    0.91        2.0         8.0         1.73    32.0    17.9    10.9     0.5
+#  45979530   H4            152.0    0.91        2.0         8.0         1.73    32.0    17.9    10.9     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Burdett-Scriba channery silt loams, 3 to 8 percent slopes'		'CN-SIL'	2	0.3000	0.7500	4841140.00	0.0085	3.5000	32.4000
 	  230.000	  18.00	  22.00	   4.50	  12.10	  31.40
 	  410.000	  26.00	  22.00	   1.50	  11.90	  31.40
-1 10000.0 0.03276
+1 10000.0 3.27600

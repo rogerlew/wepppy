@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.152557
+#   Build Date: 2020-06-05 11:16:29.395843
 #   Source Data: Surgo
 # 
 # Mukey: 52279
 # Major Component: 14396538 (comppct_r = 40.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41453953   H1              5.0     9.0        0.0         5.0          1.4
-#  41453952   H2             25.0     9.0        0.0         5.0          1.4
-#  41453951   H3     R       51.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41453953   H1              5.0     9.0        0.0         5.0          1.4    15.0    44.3    12.5    0.75
+#  41453952   H2             25.0     9.0        0.0         5.0          1.4    15.0    44.3    12.5    0.75
+#  41453951   H3     R       51.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Mellenthin-Rock outcrop-Torriorthents complex , 10 to 70 percent slopes'		'GRV-L'	2	0.1600	0.7500	5129250.00	0.0154	2.9200	32.4000
 	   50.000	  44.30	  15.00	   0.75	   7.50	  62.00
 	  250.000	  44.30	  15.00	   0.75	   7.50	  62.00
-1 10000.0 0.00756
+1 10000.0 0.75600

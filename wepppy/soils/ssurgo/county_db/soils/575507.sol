@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.846183
+#   Build Date: 2020-06-05 11:16:29.693579
 #   Source Data: Surgo
 # 
 # Mukey: 575507
 # Major Component: 15744784 (comppct_r = 90.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45614287   A              18.0     9.0        0.0         0.0         1.46
-#  45614288   Eg             69.0     9.0        0.0         0.0         1.58
-#  45614289   Btng/E  R      114.0    0.21        0.0         0.0         1.48
-#  45614290   2Cyz          203.0    0.21        0.0         0.0         1.64
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45614287   A              18.0     9.0        0.0         0.0         1.46     9.0    64.2    17.3     2.0
+#  45614288   Eg             69.0     9.0        0.0         0.0         1.58     9.0    69.3    18.7    1.25
+#  45614289   Btng/E  R      114.0    0.21        0.0         0.0         1.48    26.5    37.9    11.2    0.55
+#  45614290   2Cyz          203.0    0.21        0.0         0.0         1.64    35.0    33.3    10.1    0.55
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Fuller fine sandy loam, 1 to 3 percent slopes'		'FSL'	2	0.3000	0.7500	6051330.00	0.0081	2.2516	32.4000
 	  180.000	  64.20	   9.00	   2.00	  11.30	   4.00
 	  690.000	  69.30	   9.00	   1.25	  11.30	   4.00
-1 10000.0 0.00756
+1 10000.0 0.75600

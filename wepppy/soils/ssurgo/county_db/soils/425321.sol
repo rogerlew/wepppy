@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:41.345607
+#   Build Date: 2020-06-05 11:16:32.608182
 #   Source Data: Surgo
 # 
 # Mukey: 425321
 # Major Component: 15188473 (comppct_r = 97.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43923543   Ap             18.0     9.0        0.0         0.0          1.4
-#  43923545   Bt1            51.0     8.0        0.0         0.0         1.42
-#  43923544   2Bt2   R       86.0     1.0        0.0         5.0         1.25
-#  43923542   3R            111.0    2.33         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43923543   Ap             18.0     9.0        0.0         0.0          1.4    19.5    11.6     6.7     2.0
+#  43923545   Bt1            51.0     8.0        0.0         0.0         1.42    27.5     7.1     2.9    0.25
+#  43923544   2Bt2   R       86.0     1.0        0.0         5.0         1.25    60.0    12.1     3.8    0.25
+#  43923542   3R            111.0    2.33         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Newglarus silt loam, moderately deep, 12 to 20 percent slopes, moderately eroded'		'SIL'	2	0.2900	0.7500	4978965.00	0.0096	3.5000	32.4000
 	  180.000	  11.60	  19.50	   2.00	  16.70	   0.00
 	  510.000	   7.10	  27.50	   0.25	  20.90	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.210976
+#   Build Date: 2020-06-05 11:16:31.143888
 #   Source Data: Surgo
 # 
 # Mukey: 111641
 # Major Component: 14691606 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42313556   Ap             18.0    28.0        0.0         1.0         1.55
-#  42313557   BA             25.0     9.0        0.0         1.0         1.45
-#  42313558   Bt     R       68.0     1.0        0.0         1.0          1.3
-#  42313555   BC             84.0     1.0        0.0         1.0          1.3
-#  42313559   C             203.0     8.0        0.0         1.0         1.55
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42313556   Ap             18.0    28.0        0.0         1.0         1.55    12.5    70.9    17.4    1.25
+#  42313557   BA             25.0     9.0        0.0         1.0         1.45    28.0    54.7    11.1     0.5
+#  42313558   Bt     R       68.0     1.0        0.0         1.0          1.3    50.0    22.1     5.3    0.25
+#  42313555   BC             84.0     1.0        0.0         1.0          1.3    35.0    33.3    10.0    0.25
+#  42313559   C             203.0     8.0        0.0         1.0         1.55    21.5    41.4    11.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Enon sandy loam, 2 to 8 percent slopes'		'L'	2	0.3000	0.7500	6070540.00	0.0111	2.4733	100.8000
 	  180.000	  70.90	  12.50	   1.25	   9.10	  13.87
 	  250.000	  54.70	  28.00	   0.50	  15.10	  14.86
-1 10000.0 0.03600
+1 10000.0 3.60000

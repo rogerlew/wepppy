@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:00.836220
+#   Build Date: 2020-06-05 11:16:32.769042
 #   Source Data: Surgo
 # 
 # Mukey: 3057230
 # Major Component: 14779146 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42592024   Ap             20.0     9.0        0.0         0.0         1.38
-#  42592022   2Btg1  R       66.0     1.0        0.0         0.0         1.36
-#  42592023   2Btg2         200.0     1.0        0.0         0.0         1.52
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42592024   Ap             20.0     9.0        0.0         0.0         1.38    25.0     5.0     1.4     2.7
+#  42592022   2Btg1  R       66.0     1.0        0.0         0.0         1.36    46.0     3.0     1.0     1.5
+#  42592023   2Btg2         200.0     1.0        0.0         0.0         1.52    37.0    15.0     5.1    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Leonard silt loam, 1 to 6 percent slopes, eroded'		'SIL'	1	0.2300	0.7500	4675750.00	0.0078	3.5000	32.4000
-	  200.000	   5.00	  25.00	   2.70	  20.70	   0.00
-1 10000.0 0.03600
+	  210.000	   5.00	  25.00	   2.70	  20.70	   0.00
+1 10000.0 3.60000

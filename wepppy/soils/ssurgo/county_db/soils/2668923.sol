@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.932881
+#   Build Date: 2020-06-05 11:16:31.023617
 #   Source Data: Surgo
 # 
 # Mukey: 2668923
 # Major Component: 15271769 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44171008   Ap             15.0     2.7        0.0         0.0          1.4
-#  44171009   Bt1    R       38.0    0.91        0.0         0.0         1.33
-#  44171010   Bt2            60.0    0.91        0.0         0.0         1.38
-#  44171011   Bk             75.0     2.7        0.0         0.0         1.34
-#  44171007   C             200.0     9.0        0.0         0.0         1.33
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44171008   Ap             15.0     2.7        0.0         0.0          1.4    30.0     7.0     6.3     2.5
+#  44171009   Bt1    R       38.0    0.91        0.0         0.0         1.33    47.0     4.0     3.8     1.5
+#  44171010   Bt2            60.0    0.91        0.0         0.0         1.38    42.0     4.0     3.8     0.8
+#  44171011   Bk             75.0     2.7        0.0         0.0         1.34    32.0     5.0     4.4     0.5
+#  44171007   C             200.0     9.0        0.0         0.0         1.33    27.0     6.0     5.4     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Crete silty clay loam, 3 to 7 percent slopes, eroded, loess plains and breaks'		'SICL'	1	0.0900	0.7500	4400100.00	0.0072	3.5000	9.7200
-	  150.000	   7.00	  30.00	   2.50	  20.00	   0.00
-1 10000.0 0.03276
+	  210.000	   7.00	  30.00	   2.50	  20.00	   0.00
+1 10000.0 3.27600

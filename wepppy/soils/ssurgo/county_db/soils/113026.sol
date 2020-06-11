@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.398973
+#   Build Date: 2020-06-05 11:16:33.491449
 #   Source Data: Surgo
 # 
 # Mukey: 113026
 # Major Component: 14841929 (comppct_r = 50.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42798583   A              13.0     9.0        0.0         0.0          1.4
-#  42798584   Bg     R      132.0     1.0        0.0         0.0          1.4
-#  42798582   2Cg           203.0    40.0        0.0         0.0          1.6
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42798583   A              13.0     9.0        0.0         0.0          1.4    30.0    33.5    10.0     3.5
+#  42798584   Bg     R      132.0     1.0        0.0         0.0          1.4    50.0     5.3     2.5     2.0
+#  42798582   2Cg           203.0    40.0        0.0         0.0          1.6     5.0    93.6     6.9     2.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Chastain and Bibb soils, 0 to 1 percent slopes, frequently flooded'		'CL'	1	0.3000	0.7500	4649000.00	0.0050	4.0400	32.4000
-	  130.000	  33.50	  30.00	   3.50	  11.50	   4.00
-1 10000.0 0.03600
+	  210.000	  33.50	  30.00	   3.50	  11.50	   4.00
+1 10000.0 3.60000

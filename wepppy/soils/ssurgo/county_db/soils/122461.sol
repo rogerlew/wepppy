@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.496532
+#   Build Date: 2020-06-05 11:16:33.167343
 #   Source Data: Surgo
 # 
 # Mukey: 122461
 # Major Component: 15688977 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45474568   H1             13.0     9.0        0.0         0.0         1.25
-#  45474569   H2     R      162.0     0.2        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45474568   H1             13.0     9.0        0.0         0.0         1.25    17.5    30.0     9.7    1.25
+#  45474569   H2     R      162.0     0.2        0.0         0.0          1.4    47.5    20.0     4.8    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Chickahominy-Urban land complex, 0 to 2 percent slopes'		'VFSL'	1	0.3600	0.7500	4591370.00	0.0088	3.2449	32.4000
 	  210.000	  30.00	  17.50	   1.25	   8.90	   0.00
-1 10000.0 0.00720
+1 10000.0 0.72000

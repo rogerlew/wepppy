@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:53.698084
+#   Build Date: 2020-06-05 11:16:33.640650
 #   Source Data: Surgo
 # 
 # Mukey: 120798
 # Major Component: 15688892 (comppct_r = 35.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45474378   H1             23.0     8.0        0.0         0.0         1.38
-#  45474379   H2     R      135.0     1.0        0.0         0.0         1.38
-#  45474380   H3            203.0    22.0        0.0         0.0         1.48
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45474378   H1             23.0     8.0        0.0         0.0         1.38    17.0    68.5    17.0    1.25
+#  45474379   H2     R      135.0     1.0        0.0         0.0         1.38    47.5    23.3     5.6     0.0
+#  45474380   H3            203.0    22.0        0.0         0.0         1.48    25.0    57.0    11.5     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Craven-Uchee complex, 6 to 10 percent slopes'		'FSL'	1	0.3600	0.7500	5993700.00	0.0109	2.7890	28.8000
 	  230.000	  68.50	  17.00	   1.25	   7.10	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.288955
+#   Build Date: 2020-06-05 11:16:33.786500
 #   Source Data: Surgo
 # 
 # Mukey: 346067
 # Major Component: 14641781 (comppct_r = 60.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42160923   A               5.0     3.0        0.0         0.0          1.2
-#  42160924   C      R       28.0     1.0        0.0         0.0          1.3
-#  42160925   Cr            152.0    28.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42160923   A               5.0     3.0        0.0         0.0          1.2    33.5    17.5    10.7    0.75
+#  42160924   C      R       28.0     1.0        0.0         0.0          1.3    42.5    28.1     8.1    0.25
+#  42160925   Cr            152.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Midway-Thedalund complex, hilly'		'SICL'	1	0.3000	0.7500	4207145.00	0.0071	3.5000	10.8000
-	   50.000	  17.50	  33.50	   0.75	  22.50	   0.00
-1 10000.0 0.03600
+	  210.000	  17.50	  33.50	   0.75	  22.50	   0.00
+1 10000.0 3.60000

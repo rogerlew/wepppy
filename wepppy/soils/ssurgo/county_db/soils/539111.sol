@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.372477
+#   Build Date: 2020-06-05 11:16:32.333280
 #   Source Data: Surgo
 # 
 # Mukey: 539111
 # Major Component: 15374397 (comppct_r = 60.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44519861   A              18.0    9.17        5.0        15.0         1.25
-#  44519859   Bw             76.0    9.17        1.0        18.0         1.35
-#  44519860   R      R      107.0   1.411         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44519861   A              18.0    9.17        5.0        15.0         1.25    17.0    43.3    12.2     2.5
+#  44519859   Bw             76.0    9.17        1.0        18.0         1.35    17.0    43.3    12.2     0.5
+#  44519860   R      R      107.0   1.411         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.01411
+#     ksat: 1.41100
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Oquaga and Lordstown very stony loams, 25 to 70 percent slopes'		'CN-L'	2	0.3000	0.7500	5071620.00	0.0060	3.0674	33.0120
 	  180.000	  43.30	  17.00	   2.50	  11.30	  56.00
 	  760.000	  43.30	  17.00	   0.50	  11.30	  67.60
-1 10000.0 0.05080
+1 10000.0 5.07960

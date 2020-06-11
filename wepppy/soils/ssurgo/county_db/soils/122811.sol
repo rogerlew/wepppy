@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.477794
+#   Build Date: 2020-06-05 11:16:30.841635
 #   Source Data: Surgo
 # 
 # Mukey: 122811
 # Major Component: 14826458 (comppct_r = 30.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42750566   H1             15.0     9.0        0.0         3.0         1.25
-#  42750564   H2            107.0     9.0        0.0         3.0          1.5
-#  42750565   H3     R      132.0     0.2        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42750566   H1             15.0     9.0        0.0         3.0         1.25    19.5    42.4    20.2    1.25
+#  42750564   H2            107.0     9.0        0.0         3.0          1.5    35.0    15.0     9.2     0.1
+#  42750565   H3     R      132.0     0.2        0.0         0.0          1.4     0.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Tatum-Tallapoosa-Fruithurst association, steep'		'L'	2	0.3000	0.7500	6608420.00	0.0119	2.7659	32.4000
 	  150.000	  42.40	  19.50	   1.25	  11.30	  12.70
 	 1070.000	  15.00	  35.00	   0.10	  11.30	  17.55
-1 10000.0 0.00720
+1 10000.0 0.72000

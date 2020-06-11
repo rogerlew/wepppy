@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.380468
+#   Build Date: 2020-06-05 11:16:32.336698
 #   Source Data: Surgo
 # 
 # Mukey: 2535976
 # Major Component: 14740519 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42461438   A               8.0     9.0        0.0         0.0         1.25
-#  42461437   E              23.0     9.0        0.0         5.0          1.2
-#  42461435   2Bt    R       61.0     0.9        0.0         0.0          1.5
-#  42461436   3R            203.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42461438   A               8.0     9.0        0.0         0.0         1.25    15.6    32.7     2.4     3.8
+#  42461437   E              23.0     9.0        0.0         5.0          1.2    16.1    30.8     2.6     2.0
+#  42461435   2Bt    R       61.0     0.9        0.0         0.0          1.5    74.0     5.0     1.5     2.0
+#  42461436   3R            203.0    0.21         -           -           1.4     7.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Gatewood-Moko complex, 8 to 20 percent slopes, very stony'		'GR-SIL'	2	0.2300	0.7500	3189040.00	0.0027	3.5448	32.4000
 	   80.000	  32.70	  15.60	   3.80	  20.10	  40.00
 	  230.000	  30.80	  16.10	   2.00	  10.50	  66.75
-1 10000.0 0.03240
+1 10000.0 3.24000

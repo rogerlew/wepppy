@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.946283
+#   Build Date: 2020-06-05 11:16:31.900772
 #   Source Data: Surgo
 # 
 # Mukey: 2231394
 # Major Component: 14775702 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42580244   Ap             30.0    9.17        0.0         0.0          1.4
-#  42580245   Eng            59.0    2.82        0.0         0.0         1.45
-#  42580246   2E/Bng  R      163.0   0.917        0.0         0.0         1.45
-#  42580243   3Btng         200.0   0.917        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42580244   Ap             30.0    9.17        0.0         0.0          1.4    20.0     9.0     4.0     1.5
+#  42580245   Eng            59.0    2.82        0.0         0.0         1.45    19.0    12.0     5.0     0.5
+#  42580246   2E/Bng  R      163.0   0.917        0.0         0.0         1.45    24.0    12.0     6.0     0.3
+#  42580243   3Btng         200.0   0.917        0.0         0.0          1.5    31.0    12.0     4.0     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00917
+#     ksat: 0.91700
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Bonnie silt loam, sodic, 0 to 2 percent slopes, frequently flooded'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
 	  300.000	   9.00	  20.00	   1.50	  10.80	   0.00
 	  590.000	  12.00	  19.00	   0.50	  10.10	   0.00
-1 10000.0 0.03301
+1 10000.0 3.30120

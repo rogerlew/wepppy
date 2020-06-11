@@ -1,22 +1,23 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:19.041752
+#   Build Date: 2020-06-05 11:16:32.892779
 #   Source Data: Surgo
 # 
 # Mukey: 2521323
 # Major Component: 14746740 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42485124   Ap             18.0     3.0        0.0         0.0          1.4
-#  42485125   Bt     R      203.0     1.0        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42485124   Ap             18.0     3.0        0.0         0.0          1.4    31.0     8.7     2.8     3.5
+#  42485125   Bt     R      203.0     1.0        0.0         0.0          1.5    47.5     5.5     2.7    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,4 +54,4 @@ Any comments:
 1 1
 'Sampsel silty clay loam, 5 to 9 percent slopes, severely eroded'		'SICL'	1	0.2300	0.7500	4344970.00	0.0072	3.5000	10.8000
 	  210.000	   8.70	  31.00	   3.50	  31.10	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

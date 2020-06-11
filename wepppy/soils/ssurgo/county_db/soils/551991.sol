@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.188495
+#   Build Date: 2020-06-05 11:16:31.137314
 #   Source Data: Surgo
 # 
 # Mukey: 551991
 # Major Component: 15161257 (comppct_r = 60.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43842823   A              28.0     2.2       21.0        23.0         1.19
-#  43842824   Bw             43.0     2.2       19.0        21.0          1.4
-#  43842825   R      R       68.0   0.001         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43842823   A              28.0     2.2       21.0        23.0         1.19    45.0    10.0     1.5     5.0
+#  43842824   Bw             43.0     2.2       19.0        21.0          1.4    48.0    23.0     2.0     0.5
+#  43842825   R      R       68.0   0.001         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00001
+#     ksat: 0.00100
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Fairmount-Rock outcrop complex, 30 to 60 percent slopes'		'FL-SIC'	2	0.2300	0.7500	3573150.00	0.0069	3.5000	7.9200
 	  280.000	  10.00	  45.00	   5.00	  24.50	  48.48
 	  430.000	  23.00	  48.00	   0.50	  25.20	  44.20
-1 10000.0 0.00004
+1 10000.0 0.00360

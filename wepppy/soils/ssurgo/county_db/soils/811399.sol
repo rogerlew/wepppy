@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.878399
+#   Build Date: 2020-06-05 11:16:31.876775
 #   Source Data: Surgo
 # 
 # Mukey: 811399
 # Major Component: 14699714 (comppct_r = 80.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42335475   Ap             20.0     9.0        0.0         0.0         1.35
-#  42335472   BEg    R       33.0     1.0        0.0         0.0         1.35
-#  42335473   Btg           147.0     1.0        0.0         0.0          1.5
-#  42335474   Cg            203.0    71.0        0.0         0.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42335475   Ap             20.0     9.0        0.0         0.0         1.35    18.5    27.1     8.9    1.25
+#  42335472   BEg    R       33.0     1.0        0.0         0.0         1.35    27.5    34.7    10.4    0.25
+#  42335473   Btg           147.0     1.0        0.0         0.0          1.5    47.5    23.3     5.6    0.25
+#  42335474   Cg            203.0    71.0        0.0         0.0         1.35    15.0    68.8    16.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Roanoke silt loam'		'SIL'	1	0.3000	0.7500	5034095.00	0.0102	3.5000	32.4000
-	  200.000	  27.10	  18.50	   1.25	   7.40	   2.00
-1 10000.0 0.03600
+	  210.000	  27.10	  18.50	   1.25	   7.40	   2.00
+1 10000.0 3.60000

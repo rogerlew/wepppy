@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.459860
+#   Build Date: 2020-06-05 11:16:31.723592
 #   Source Data: Surgo
 # 
 # Mukey: 497593
 # Major Component: 14877261 (comppct_r = 85.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42898848   Ap             23.0    2.82        0.0         0.0         1.41
-#  42898849   Bt     R       34.0   0.915        0.0         0.0         1.37
-#  42898850   Btk            64.0   0.915        0.0         0.0         1.46
-#  42898851   Bk1            97.0    2.82        0.0         0.0         1.49
-#  42898852   Bk2           203.0    2.82        0.0         0.0          1.5
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42898848   Ap             23.0    2.82        0.0         0.0         1.41    31.0    43.0    19.0     1.5
+#  42898849   Bt     R       34.0   0.915        0.0         0.0         1.37    38.0    32.0    14.0     1.5
+#  42898850   Btk            64.0   0.915        0.0         0.0         1.46    38.0    32.0    14.0    0.75
+#  42898851   Bk1            97.0    2.82        0.0         0.0         1.49    29.0    41.0    18.1    0.25
+#  42898852   Bk2           203.0    2.82        0.0         0.0          1.5    30.0    41.0    18.1    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00915
+#     ksat: 0.91500
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 1 1
 'Nunn clay loam, 1 to 3 percent slopes'		'CL'	1	0.2300	0.7500	6377900.00	0.0101	3.5830	10.1520
 	  230.000	  43.00	  31.00	   1.50	  24.50	   0.00
-1 10000.0 0.03294
+1 10000.0 3.29400
