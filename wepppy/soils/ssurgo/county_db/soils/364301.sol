@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.784342
+#   Build Date: 2020-06-05 11:16:30.431642
 #   Source Data: Surgo
 # 
 # Mukey: 364301
 # Major Component: 15732123 (comppct_r = 70.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45592348   A              19.0     9.0        0.0         0.0         1.68
-#  45592349   Bt1    R       68.0     0.4        0.0         0.0         1.58
-#  45592350   Bt2           133.0     0.4        0.0         0.0         1.83
-#  45592351   Bt3           203.0     0.4        0.0         0.0         1.77
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45592348   A              19.0     9.0        0.0         0.0         1.68     7.7    74.1    17.1    0.93
+#  45592349   Bt1    R       68.0     0.4        0.0         0.0         1.58    22.5    62.4    14.3    0.83
+#  45592350   Bt2           133.0     0.4        0.0         0.0         1.83    26.6    61.0    14.9    0.09
+#  45592351   Bt3           203.0     0.4        0.0         0.0         1.77    25.5    61.4    12.7    0.09
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00400
+#     ksat: 0.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Nada-Cieno frequently ponded complex, 0 to 1 percent slopes'		'FSL'	1	0.2300	0.7500	6012910.00	0.0141	2.1787	32.4000
-	  190.000	  74.10	   7.70	   0.93	  11.30	   0.00
-1 10000.0 0.01440
+	  210.000	  74.10	   7.70	   0.93	  11.30	   0.00
+1 10000.0 1.44000

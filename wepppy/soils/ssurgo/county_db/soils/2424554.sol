@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.614962
+#   Build Date: 2020-06-05 11:16:29.573478
 #   Source Data: Surgo
 # 
 # Mukey: 2424554
 # Major Component: 14787410 (comppct_r = 85.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42621334   A              23.0    28.0        0.0         1.0         1.55
-#  42621335   Bt     R       58.0     1.0        0.0         0.0          1.3
-#  42621333   BC             91.0     1.0        0.0         3.0          1.3
-#  42621336   C             203.0     8.0        0.0         1.0         1.55
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42621334   A              23.0    28.0        0.0         1.0         1.55    12.5    70.9    17.4    1.25
+#  42621335   Bt     R       58.0     1.0        0.0         0.0          1.3    50.0    22.1     5.3    0.25
+#  42621333   BC             91.0     1.0        0.0         3.0          1.3    35.0    33.3    10.0    0.25
+#  42621336   C             203.0     8.0        0.0         1.0         1.55    18.0    67.7    16.8    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Rasalo fine sandy loam, 2 to 8 percent slopes'		'SL'	1	0.3000	0.7500	6070540.00	0.0111	2.4733	100.8000
 	  230.000	  70.90	  12.50	   1.25	   9.10	  15.85
-1 10000.0 0.03600
+1 10000.0 3.60000

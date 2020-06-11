@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.000648
+#   Build Date: 2020-06-05 11:16:31.461482
 #   Source Data: Surgo
 # 
 # Mukey: 363776
 # Major Component: 15730499 (comppct_r = 90.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45588818   Ap             13.0     2.7        0.0         0.0         1.11
-#  45588819   Bt     R       84.0     0.9        0.0         0.0         1.36
-#  45588820   Btk1          132.0     0.9        0.0         0.0          1.4
-#  45588817   Btk2          203.0     2.7        0.0         0.0         1.23
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45588818   Ap             13.0     2.7        0.0         0.0         1.11    32.2    23.6    18.2     2.5
+#  45588819   Bt     R       84.0     0.9        0.0         0.0         1.36    38.9    15.0    11.8     1.8
+#  45588820   Btk1          132.0     0.9        0.0         0.0          1.4    39.1    22.0    16.2    0.26
+#  45588817   Btk2          203.0     2.7        0.0         0.0         1.23    40.2    20.3    15.2    0.31
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00900
+#     ksat: 0.90000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Pullman clay loam, 0 to 1 percent slopes'		'CL'	1	0.0900	0.7500	4278814.00	0.0071	3.5000	9.7200
-	  130.000	  23.60	  32.20	   2.50	  26.40	   0.00
-1 10000.0 0.03240
+	  210.000	  23.60	  32.20	   2.50	  26.40	   0.00
+1 10000.0 3.24000

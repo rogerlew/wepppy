@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.086183
+#   Build Date: 2020-06-05 11:16:31.999117
 #   Source Data: Surgo
 # 
 # Mukey: 116202
 # Major Component: 15219377 (comppct_r = 85.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44009371   Ap             25.0    23.0        0.0         0.0         1.04
-#  44009372   Btg    R      114.0     1.0        0.0         0.0         1.47
-#  44009373   2Cg           203.0    65.0        0.0         0.0         1.53
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44009371   Ap             25.0    23.0        0.0         0.0         1.04    10.0    46.0    13.0    10.0
+#  44009372   Btg    R      114.0     1.0        0.0         0.0         1.47    47.0    26.0     9.0     1.8
+#  44009373   2Cg           203.0    65.0        0.0         0.0         1.53     8.0    84.0     6.0     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Cape Fear loam, 0 to 2 percent slopes, rarely flooded'		'SL'	1	0.0400	0.7500	5225300.00	0.0059	2.5660	82.8000
 	  250.000	  46.00	  10.00	  10.00	  12.00	   0.00
-1 10000.0 0.03600
+1 10000.0 3.60000

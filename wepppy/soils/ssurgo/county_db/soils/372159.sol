@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.391692
+#   Build Date: 2020-06-05 11:16:30.284356
 #   Source Data: Surgo
 # 
 # Mukey: 372159
 # Major Component: 15758231 (comppct_r = 85.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45635892   A              13.0     9.0        2.0         2.0         1.56
-#  45635893   Bt     R       69.0    0.91        0.0         2.0         1.48
-#  45635891   Cr            203.0     8.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45635892   A              13.0     9.0        2.0         2.0         1.56    20.0    46.0    30.6    1.23
+#  45635893   Bt     R       69.0    0.91        0.0         2.0         1.48    53.0    25.0    14.0     1.4
+#  45635891   Cr            203.0     8.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00910
+#     ksat: 0.91000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Bluegrove loam, 1 to 3 percent slopes'		'L'	1	0.1600	0.7500	8606260.00	0.0152	2.1952	32.4000
-	  130.000	  46.00	  20.00	   1.23	  10.80	   4.00
-1 10000.0 0.03276
+	  210.000	  46.00	  20.00	   1.23	  10.80	   4.00
+1 10000.0 3.27600

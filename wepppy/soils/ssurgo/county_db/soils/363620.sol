@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:37.760796
+#   Build Date: 2020-06-05 11:16:33.032681
 #   Source Data: Surgo
 # 
 # Mukey: 363620
 # Major Component: 15729973 (comppct_r = 60.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45588189   H1             15.0     2.7       10.0        13.0          1.4
-#  45588190   H2     R       76.0     1.0        3.0         3.0         1.55
-#  45588191   H3            107.0     1.0        0.0         0.0         1.55
-#  45588192   H4            152.0     1.0        0.0         0.0         1.73
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45588189   H1             15.0     2.7       10.0        13.0          1.4    35.0    33.3    10.1    1.25
+#  45588190   H2     R       76.0     1.0        3.0         3.0         1.55    47.5    23.3     5.6    0.65
+#  45588191   H3            107.0     1.0        0.0         0.0         1.55    50.0    22.1     5.3    0.35
+#  45588192   H4            152.0     1.0        0.0         0.0         1.73    42.5    28.1     8.1     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Throck-Speck association, undulating'		'ST-CL'	1	0.1600	0.7500	4668210.00	0.0089	4.3592	9.7200
-	  150.000	  33.30	  35.00	   1.25	  25.00	  38.40
-1 10000.0 0.03600
+	  210.000	  33.30	  35.00	   1.25	  25.00	  38.40
+1 10000.0 3.60000

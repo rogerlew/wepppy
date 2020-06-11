@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.336908
+#   Build Date: 2020-06-05 11:16:30.268687
 #   Source Data: Surgo
 # 
 # Mukey: 529682
 # Major Component: 15591187 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45224571   H1              5.0   28.23        1.0         9.0         1.35
-#  45224572   H2             30.0   77.63        1.0        18.0         1.38
-#  45224569   R      R      102.0    0.74         -           -           1.4
-#  45224570   R             112.0    0.74         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45224571   H1              5.0   28.23        1.0         9.0         1.35    16.0    29.7     9.5     2.0
+#  45224572   H2             30.0   77.63        1.0        18.0         1.38    16.0    29.7     9.5    0.25
+#  45224569   R      R      102.0    0.74         -           -           1.4     7.0    66.8    10.0     7.0
+#  45224570   R             112.0    0.74         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00740
+#     ksat: 0.74000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Cataska-Sylco complex, 25 to 80 percent slopes'		'CN-SIL'	2	0.3600	0.7500	5171920.00	0.0124	3.5000	101.6280
 	   50.000	  29.70	  16.00	   2.00	  11.30	  41.50
 	  300.000	  29.70	  16.00	   0.25	  11.30	  75.70
-1 10000.0 0.02664
+1 10000.0 2.66400

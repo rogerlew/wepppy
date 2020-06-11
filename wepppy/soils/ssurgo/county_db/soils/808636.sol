@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:53.665958
+#   Build Date: 2020-06-05 11:16:33.631113
 #   Source Data: Surgo
 # 
 # Mukey: 808636
 # Major Component: 15315398 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44328015   Ap             10.0    2.82        0.0         0.0         1.44
-#  44328016   Eg             51.0    2.82        0.0         0.0          1.5
-#  44328017   Btg/E  R      158.0    0.92        0.0         0.0         1.44
-#  44328018   BC            224.0    0.92        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44328015   Ap             10.0    2.82        0.0         0.0         1.44    15.0    14.0    11.3    2.25
+#  44328016   Eg             51.0    2.82        0.0         0.0          1.5    15.0    14.0    11.3    0.75
+#  44328017   Btg/E  R      158.0    0.92        0.0         0.0         1.44    34.0     6.0     2.8    0.75
+#  44328018   BC            224.0    0.92        0.0         0.0          1.4    26.0    14.0    11.3    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Frost silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	10.1520
 	  100.000	  14.00	  15.00	   2.25	   8.20	   0.00
 	  510.000	  14.00	  15.00	   0.75	   8.00	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

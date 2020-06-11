@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.003991
+#   Build Date: 2020-06-05 11:16:30.559817
 #   Source Data: Surgo
 # 
 # Mukey: 463318
 # Major Component: 14602350 (comppct_r = 35.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42057928   H1             20.0    28.0        0.0         0.0         1.53
-#  42057929   H2            122.0    28.0        0.0         0.0         1.55
-#  42057927   Cr     R      152.0    0.21         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42057928   H1             20.0    28.0        0.0         0.0         1.53    12.5    68.3     7.1     1.5
+#  42057929   H2            122.0    28.0        0.0         0.0         1.55    16.0    65.1    10.3    0.75
+#  42057927   Cr     R      152.0    0.21         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Ahwahnee and Vista rocky coarse sandy loams, 8 to 30 percent slopes'		'COSL'	2	0.2500	0.7500	4091910.00	0.0065	3.0707	100.8000
 	  200.000	  68.30	  12.50	   1.50	  10.00	  10.00
 	 1220.000	  65.10	  16.00	   0.75	   7.50	  10.00
-1 10000.0 0.00756
+1 10000.0 0.75600

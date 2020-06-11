@@ -1,26 +1,27 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.726055
+#   Build Date: 2020-06-05 11:16:30.405514
 #   Source Data: Surgo
 # 
 # Mukey: 564961
 # Major Component: 15407819 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44632012   A               8.0     2.7        0.0         0.0         1.38
-#  44632013   Eg             28.0     2.7        0.0         0.0         1.46
-#  44632014   Btg/E  R      114.0    0.21        0.0         0.0         1.42
-#  44632011   Btg           150.0    0.21        0.0         0.0          1.4
-#  44632015   BCg           178.0    0.21        0.0         0.0         1.35
-#  44632016   2C            229.0    0.21        0.0         0.0         1.36
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44632012   A               8.0     2.7        0.0         0.0         1.38    17.5    29.1     9.4    1.75
+#  44632013   Eg             28.0     2.7        0.0         0.0         1.46    17.5    29.1     9.4    1.75
+#  44632014   Btg/E  R      114.0    0.21        0.0         0.0         1.42    45.0     9.0     7.1    0.55
+#  44632011   Btg           150.0    0.21        0.0         0.0          1.4    45.0     9.0     7.1     0.5
+#  44632015   BCg           178.0    0.21        0.0         0.0         1.35    54.0     8.0     5.0     0.5
+#  44632016   2C            229.0    0.21        0.0         0.0         1.36    54.0     8.0     5.0     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -58,4 +59,4 @@ Any comments:
 'Wrightsville silt loam, 0 to 1 percent slopes'		'SIL'	2	0.3000	0.7500	5089225.00	0.0109	3.5000	9.7200
 	   80.000	  29.10	  17.50	   1.75	  11.30	   0.00
 	  280.000	  29.10	  17.50	   1.75	  11.30	   0.00
-1 10000.0 0.00756
+1 10000.0 0.75600

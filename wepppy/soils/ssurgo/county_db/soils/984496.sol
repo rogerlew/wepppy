@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.019699
+#   Build Date: 2020-06-05 11:16:30.122225
 #   Source Data: Surgo
 # 
 # Mukey: 984496
 # Major Component: 15790455 (comppct_r = 95.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45739737   A               8.0    2.33        0.0         3.0         1.23
-#  45739736   C      R      102.0    0.92        0.0         3.0         1.45
-#  45739735   2C            152.0    0.92        0.0         3.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45739737   A               8.0    2.33        0.0         3.0         1.23    20.0    26.5     8.8     1.5
+#  45739736   C      R      102.0    0.92        0.0         3.0         1.45    26.0    19.7     8.6     1.5
+#  45739735   2C            152.0    0.92        0.0         3.0         1.45    26.0    19.7     8.6     1.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Made land, schist and gneiss materials'		'SIL'	1	0.3700	0.7500	4951400.00	0.0094	3.5000	8.3880
-	   80.000	  26.50	  20.00	   1.50	  14.70	  12.70
-1 10000.0 0.03312
+	  210.000	  26.50	  20.00	   1.50	  14.70	  12.70
+1 10000.0 3.31200

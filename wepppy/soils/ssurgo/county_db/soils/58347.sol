@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.729347
+#   Build Date: 2020-06-05 11:16:30.406990
 #   Source Data: Surgo
 # 
 # Mukey: 58347
 # Major Component: 15223495 (comppct_r = 50.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44019535   H1             10.0    2.82        3.0         5.0         1.33
-#  44019536   H2     R       25.0    0.92        0.0         5.0         1.35
-#  44019537   H3             36.0    0.92         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44019535   H1             10.0    2.82        3.0         5.0         1.33    37.5    30.2     8.2     1.5
+#  44019536   H2     R       25.0    0.92        0.0         5.0         1.35    40.0    29.0     8.2    0.25
+#  44019537   H3             36.0    0.92         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Zyme-Rock outcrop complex, 12 to 65 percent slopes'		'CL'	1	0.2300	0.7500	4303220.00	0.0069	4.6319	10.1520
-	  100.000	  30.20	  37.50	   1.50	  25.50	  17.20
-1 10000.0 0.03312
+	  210.000	  30.20	  37.50	   1.50	  25.50	  17.20
+1 10000.0 3.31200

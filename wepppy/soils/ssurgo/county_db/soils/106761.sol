@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.655145
+#   Build Date: 2020-06-05 11:16:29.586433
 #   Source Data: Surgo
 # 
 # Mukey: 106761
 # Major Component: 14809235 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42693715   A              28.0  9.1735        0.0         0.0          1.4
-#  42693716   BA             43.0     3.0        0.0         0.0         1.48
-#  42693717   Bt1    R       56.0     1.1        0.0         0.0          1.3
-#  42693718   Bt2           173.0     1.1        0.0         0.0          1.3
-#  42693714   C             200.0     1.1        0.0         0.0         1.47
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42693715   A              28.0  9.1735        0.0         0.0          1.4    19.0    23.0    12.0     2.0
+#  42693716   BA             43.0     3.0        0.0         0.0         1.48    31.0    19.0    11.0     1.2
+#  42693717   Bt1    R       56.0     1.1        0.0         0.0          1.3    44.0    15.0     6.5     0.7
+#  42693718   Bt2           173.0     1.1        0.0         0.0          1.3    44.0    15.0     6.5     0.5
+#  42693714   C             200.0     1.1        0.0         0.0         1.47    36.0    18.0    10.0     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01100
+#     ksat: 1.10000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Dennis-Radley complex, 0 to 15 percent slopes'		'SIL'	2	0.2300	0.7500	5006530.00	0.0099	3.5000	33.0246
 	  280.000	  23.00	  19.00	   2.00	  10.30	   4.00
 	  430.000	  19.00	  31.00	   1.20	  16.60	   4.00
-1 10000.0 0.03960
+1 10000.0 3.96000

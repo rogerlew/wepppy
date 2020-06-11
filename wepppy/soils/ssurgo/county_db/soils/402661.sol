@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.848430
+#   Build Date: 2020-06-05 11:16:30.989091
 #   Source Data: Surgo
 # 
 # Mukey: 402661
 # Major Component: 14751781 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42503578   Ap             20.0     3.0        0.0         0.0         1.39
-#  42503575   2Bt    R       41.0    0.04        0.0         0.0         1.38
-#  42503576   2Btg          170.0    0.04        0.0         0.0         1.32
-#  42503577   2BC           200.0    0.04        0.0         0.0         1.46
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42503578   Ap             20.0     3.0        0.0         0.0         1.39    33.0     5.0     3.2     2.5
+#  42503575   2Bt    R       41.0    0.04        0.0         0.0         1.38    47.0     8.0     3.8    0.25
+#  42503576   2Btg          170.0    0.04        0.0         0.0         1.32    53.0     7.0     3.4    0.25
+#  42503577   2BC           200.0    0.04        0.0         0.0         1.46    45.0     8.0     3.4     0.1
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00040
+#     ksat: 0.04000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,5 +55,5 @@
 Any comments:
 1 1
 'Clarinda silty clay loam, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.1600	0.7500	4234710.00	0.0071	3.5000	10.8000
-	  200.000	   5.00	  33.00	   2.50	  26.30	   4.00
-1 10000.0 0.00144
+	  210.000	   5.00	  33.00	   2.50	  26.30	   4.00
+1 10000.0 0.14400

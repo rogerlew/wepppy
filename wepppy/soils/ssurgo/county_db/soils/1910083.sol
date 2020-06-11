@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:19.182615
+#   Build Date: 2020-06-05 11:16:32.466780
 #   Source Data: Surgo
 # 
 # Mukey: 1910083
 # Major Component: 15740854 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45607535   A              10.0     9.0        0.0        13.0         1.27
-#  45607533   Ak             25.0     9.0        1.0        49.0         1.33
-#  45607534   R      R      200.0     1.4         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45607535   A              10.0     9.0        0.0        13.0         1.27    13.7    32.8    10.8     6.4
+#  45607533   Ak             25.0     9.0        1.0        49.0         1.33    22.4    26.2     9.6     5.0
+#  45607534   R      R      200.0     1.4         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.01400
+#     ksat: 1.40000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Blackgap-Rock outcrop complex, 10 to 30 percent slopes'		'GRV-SIL'	2	0.3000	0.7500	4802680.00	0.0052	2.9341	32.4000
 	  100.000	  32.80	  13.70	   6.40	  22.30	  71.29
 	  250.000	  26.20	  22.40	   5.00	  19.20	  89.50
-1 10000.0 0.05040
+1 10000.0 5.04000

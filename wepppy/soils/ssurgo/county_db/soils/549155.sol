@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.500616
+#   Build Date: 2020-06-05 11:16:30.301525
 #   Source Data: Surgo
 # 
 # Mukey: 549155
 # Major Component: 14719101 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42397856   Ap             10.0    9.17        0.0         0.0         1.38
-#  42397852   Bt             59.0    9.17        0.0         0.0          1.4
-#  42397855   Btx            87.0    2.33        0.0         0.0         1.63
-#  42397854   2C            142.0    7.76        0.0         0.0          1.6
-#  42397853   R      R      167.0    0.42         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42397856   Ap             10.0    9.17        0.0         0.0         1.38    19.0     6.0     3.0    1.25
+#  42397852   Bt             59.0    9.17        0.0         0.0          1.4    25.0     7.0     3.0    0.25
+#  42397855   Btx            87.0    2.33        0.0         0.0         1.63    30.0    10.0     6.0    0.25
+#  42397854   2C            142.0    7.76        0.0         0.0          1.6    30.0    27.0    11.0     0.1
+#  42397853   R      R      167.0    0.42         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00420
+#     ksat: 0.42000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -59,4 +60,4 @@ Any comments:
 	  590.000	   7.00	  25.00	   0.25	  11.30	   0.00
 	  870.000	  10.00	  30.00	   0.25	  11.30	   0.00
 	 1420.000	  27.00	  30.00	   0.10	  11.30	   3.00
-1 10000.0 0.01512
+1 10000.0 1.51200

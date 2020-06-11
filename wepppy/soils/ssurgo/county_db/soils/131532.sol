@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:19.232123
+#   Build Date: 2020-06-05 11:16:32.491577
 #   Source Data: Surgo
 # 
 # Mukey: 131532
 # Major Component: 15439790 (comppct_r = 60.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44745954   A              20.0    92.0        0.0         0.0          1.5
-#  44745955   Eg             28.0    92.0        0.0         0.0          1.5
-#  44745956   Btg    R       79.0     1.0        0.0         0.0          1.4
-#  44745957   BCg           117.0     3.0        0.0         0.0          1.4
-#  44745958   Cg            183.0    28.0        0.0         0.0         1.45
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44745954   A              20.0    92.0        0.0         0.0          1.5    11.5    65.3    11.6    2.25
+#  44745955   Eg             28.0    92.0        0.0         0.0          1.5    11.5    65.3    11.6    2.25
+#  44745956   Btg    R       79.0     1.0        0.0         0.0          1.4    26.5    55.8    11.3    0.25
+#  44745957   BCg           117.0     3.0        0.0         0.0          1.4    18.0    62.3     9.1     0.1
+#  44745958   Cg            183.0    28.0        0.0         0.0         1.45    10.0    81.1    11.8     0.1
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Mouzon and Hobcaw soils, frequently flooded'		'SL'	2	0.0600	0.7500	4956360.00	0.0061	2.7447	331.2000
 	  200.000	  65.30	  11.50	   2.25	   4.30	   5.00
 	  280.000	  65.30	  11.50	   2.25	   4.30	   5.00
-1 10000.0 0.03600
+1 10000.0 3.60000

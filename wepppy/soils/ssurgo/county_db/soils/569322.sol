@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:19.110348
+#   Build Date: 2020-06-05 11:16:32.912091
 #   Source Data: Surgo
 # 
 # Mukey: 569322
 # Major Component: 15130408 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43748622   H1             58.0    9.17        0.0         0.0          1.5
-#  43748623   H2     R      104.0    0.92        0.0         0.0         1.53
-#  43748624   H3            165.0    0.92        0.0         0.0         1.53
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43748622   H1             58.0    9.17        0.0         0.0          1.5    16.0    13.9     8.4    2.25
+#  43748623   H2     R      104.0    0.92        0.0         0.0         1.53    27.5     7.1     2.9    0.75
+#  43748624   H3            165.0    0.92        0.0         0.0         1.53    27.5     7.1     2.9    0.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Guyton-Ouachita silt loams, frequently flooded'		'SIL'	1	0.2300	0.7500	5171920.00	0.0124	3.5000	33.0120
 	  580.000	  13.90	  16.00	   2.25	  11.30	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

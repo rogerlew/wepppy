@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.479868
+#   Build Date: 2020-06-05 11:16:30.296085
 #   Source Data: Surgo
 # 
 # Mukey: 375859
 # Major Component: 14846647 (comppct_r = 40.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42811662   A               8.0    9.17        0.0         0.0         1.45
-#  42811661   B              61.0    9.17        0.0         0.0         1.45
-#  42811660   R      R       86.0     0.7         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42811662   A               8.0    9.17        0.0         0.0         1.45    20.0    42.1    12.1     1.5
+#  42811661   B              61.0    9.17        0.0         0.0         1.45    25.0    57.0    11.5     0.5
+#  42811660   R      R       86.0     0.7         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00700
+#     ksat: 0.70000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'San Jon-Lacoca-Rock outcrop complex, 1 to 10 percent slopes'		'L'	2	0.2300	0.7500	5052410.00	0.0080	3.2682	33.0120
 	   80.000	  42.10	  20.00	   1.50	  14.00	   5.00
 	  610.000	  57.00	  25.00	   0.50	  15.00	   5.00
-1 10000.0 0.02520
+1 10000.0 2.52000

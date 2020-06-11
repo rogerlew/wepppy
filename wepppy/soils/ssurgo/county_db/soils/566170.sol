@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.268239
+#   Build Date: 2020-06-05 11:16:33.782376
 #   Source Data: Surgo
 # 
 # Mukey: 566170
 # Major Component: 15379590 (comppct_r = 65.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44538514   A               5.0     9.0        0.0         5.0         1.45
-#  44538516   E              15.0     9.0        0.0         5.0         1.45
-#  44538512   Bt1    R       97.0     1.0        0.0         5.0         1.48
-#  44538515   Bt2           124.0     1.0        0.0         5.0         1.48
-#  44538513   Cr            132.0     2.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44538514   A               5.0     9.0        0.0         5.0         1.45    20.5    26.4     8.7    1.25
+#  44538516   E              15.0     9.0        0.0         5.0         1.45    20.5    26.4     8.7    1.25
+#  44538512   Bt1    R       97.0     1.0        0.0         5.0         1.48    52.5     2.6     1.3     0.3
+#  44538515   Bt2           124.0     1.0        0.0         5.0         1.48    39.0     7.4     3.4     0.3
+#  44538513   Cr            132.0     2.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,5 +57,5 @@ Any comments:
 1 1
 'Carnasaw-Mountainburg association, steep'		'GR-SIL'	2	0.2300	0.7500	4923835.00	0.0091	3.5000	32.4000
 	   50.000	  26.40	  20.50	   1.25	  11.30	  28.75
-	  150.000	  26.40	  20.50	   1.25	  11.30	  28.75
-1 10000.0 0.03600
+	  210.000	  26.40	  20.50	   1.25	  11.30	  28.75
+1 10000.0 3.60000

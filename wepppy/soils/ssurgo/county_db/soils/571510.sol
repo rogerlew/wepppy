@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:00.717014
+#   Build Date: 2020-06-05 11:16:32.730228
 #   Source Data: Surgo
 # 
 # Mukey: 571510
 # Major Component: 15076255 (comppct_r = 70.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43566985   A              10.0  9.1735        5.0        15.0         1.45
-#  43566986   BE             33.0  9.1735        0.0         5.0         1.45
-#  43566987   Bt1    R       94.0  0.9174        0.0         5.0         1.48
-#  43566988   Bt2           117.0  0.9174        0.0         3.0         1.48
-#  43566984   Cr            140.0   0.711         -           -          1.93
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43566985   A              10.0  9.1735        5.0        15.0         1.45    15.0    65.4    16.1    1.25
+#  43566986   BE             33.0  9.1735        0.0         5.0         1.45    20.5    42.0    12.1    1.25
+#  43566987   Bt1    R       94.0  0.9174        0.0         5.0         1.48    52.5    18.2     5.6    0.25
+#  43566988   Bt2           117.0  0.9174        0.0         3.0         1.48    52.5    23.1     7.0    0.25
+#  43566984   Cr            140.0   0.711         -           -          1.93     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00917
+#     ksat: 0.91740
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -57,4 +58,4 @@ Any comments:
 'Carnasaw-Clebit association, 8 to 30 percent slopes'		'ST-FSL'	2	0.2300	0.7500	5820810.00	0.0107	2.7112	33.0246
 	  100.000	  65.40	  15.00	   1.25	   9.50	  28.00
 	  330.000	  42.00	  20.50	   1.25	  15.00	  14.50
-1 10000.0 0.03303
+1 10000.0 3.30264

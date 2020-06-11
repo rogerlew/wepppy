@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:42:12.184121
+#   Build Date: 2020-06-05 11:16:33.751615
 #   Source Data: Surgo
 # 
 # Mukey: 2549951
 # Major Component: 14686801 (comppct_r = 50.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42296620   Oe              8.0    41.0        0.0         0.0         0.13
-#  42296623   H1             18.0    9.17        2.0        37.0         0.27
-#  42296622   H2     R       46.0    0.71        6.0        11.0         1.72
-#  42296621   H3            165.0    0.05        8.0         9.0         1.82
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42296620   Oe              8.0    41.0        0.0         0.0         0.13    20.0    26.0     8.0    60.0
+#  42296623   H1             18.0    9.17        2.0        37.0         0.27    23.2    25.1     6.0     2.1
+#  42296622   H2     R       46.0    0.71        6.0        11.0         1.72    22.3    41.8    10.1    0.22
+#  42296621   H3            165.0    0.05        8.0         9.0         1.82    23.9    37.6     8.5    0.15
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@ Any comments:
 1 1
 'Aurelie-Burnham association, 0 to 8 percent slopes, very stony'		'MPM'	2	0.1600	0.7500	4951400.00	0.0094	3.5000	147.6000
 	   80.000	  26.00	  20.00	  60.00	  85.90	  55.50
-	  180.000	  25.10	  23.20	   2.10	  43.60	  73.16
-1 10000.0 0.02556
+	  210.000	  25.10	  23.20	   2.10	  43.60	  73.16
+1 10000.0 2.55600

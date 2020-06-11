@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.602363
+#   Build Date: 2020-06-05 11:16:29.565898
 #   Source Data: Surgo
 # 
 # Mukey: 507746
 # Major Component: 14846064 (comppct_r = 35.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42809731   H1             38.0    9.17        0.0        28.0         1.35
-#  42809732   H2     R       79.0    0.92        0.0        18.0         1.35
-#  42809733   H3            147.0    0.92       15.0        43.0         1.35
-#  42809734   H4            152.0    0.92       30.0        43.0         1.35
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42809731   H1             38.0    9.17        0.0        28.0         1.35    21.5    41.4    11.9     1.5
+#  42809732   H2     R       79.0    0.92        0.0        18.0         1.35    52.5    18.2     5.6     0.3
+#  42809733   H3            147.0    0.92       15.0        43.0         1.35    52.5    18.2     5.6     0.2
+#  42809734   H4            152.0    0.92       30.0        43.0         1.35    47.5    23.3     5.6     0.2
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Fuera-Dargol-Vamer association, steep'		'CB-L'	1	0.1600	0.7500	5013990.00	0.0080	3.3773	33.0120
 	  380.000	  41.40	  21.50	   1.50	  17.50	  38.80
-1 10000.0 0.03312
+1 10000.0 3.31200

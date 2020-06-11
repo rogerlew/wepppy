@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.972362
+#   Build Date: 2020-06-05 11:16:31.449930
 #   Source Data: Surgo
 # 
 # Mukey: 122543
 # Major Component: 15448419 (comppct_r = 35.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44764577   H1             10.0    28.0        0.0         0.0         1.42
-#  44764578   H2     R      127.0     1.0        0.0         0.0          1.4
-#  44764579   H3            188.0     9.0        0.0         0.0          1.6
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44764577   H1             10.0    28.0        0.0         0.0         1.42    13.0    45.4    12.8    1.25
+#  44764578   H2     R      127.0     1.0        0.0         0.0          1.4    38.0    26.5     7.3    0.25
+#  44764579   H3            188.0     9.0        0.0         0.0          1.6    18.0    59.3    15.4    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Nevarc-Remlik complex, 6 to 10 percent slopes'		'VFSL'	1	0.2500	0.7500	5186880.00	0.0097	2.7726	100.8000
-	  100.000	  45.40	  13.00	   1.25	   6.10	   0.00
-1 10000.0 0.03600
+	  210.000	  45.40	  13.00	   1.25	   6.10	   0.00
+1 10000.0 3.60000

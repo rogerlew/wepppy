@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.263032
+#   Build Date: 2020-06-05 11:16:31.158579
 #   Source Data: Surgo
 # 
 # Mukey: 115342
 # Major Component: 15213455 (comppct_r = 85.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43991240   Ap             23.0     9.0        0.0         4.0         1.48
-#  43991241   Bt     R       56.0     1.0        0.0         3.0          1.4
-#  43991242   BC             69.0     1.0        0.0         4.0          1.4
-#  43991238   Cr             81.0     7.0         -           -           1.4
-#  43991239   R             203.0     7.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43991240   Ap             23.0     9.0        0.0         4.0         1.48    17.5    29.1     9.4    1.25
+#  43991241   Bt     R       56.0     1.0        0.0         3.0          1.4    38.0    18.4     6.4    0.25
+#  43991242   BC             69.0     1.0        0.0         4.0          1.4    47.5     5.5     2.7    0.25
+#  43991238   Cr             81.0     7.0         -           -           1.4     7.0    66.8    10.0     7.0
+#  43991239   R             203.0     7.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 1 1
 'Cid channery silt loam, 1 to 5 percent slopes'		'CN-SIL'	1	0.3700	0.7500	5089225.00	0.0109	3.5000	32.4000
 	  230.000	  29.10	  17.50	   1.25	   7.20	  38.56
-1 10000.0 0.03600
+1 10000.0 3.60000

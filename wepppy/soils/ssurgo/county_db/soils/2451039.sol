@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:19.168578
+#   Build Date: 2020-06-05 11:16:32.032872
 #   Source Data: Surgo
 # 
 # Mukey: 2451039
 # Major Component: 14578543 (comppct_r = 45.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42006262   A              20.0    9.17        0.0         3.0          1.4
-#  42006260   Bt     R       86.0    0.92        0.0         5.0         1.55
-#  42006261   Cr             97.0    0.92         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42006262   A              20.0    9.17        0.0         3.0          1.4    23.5    21.7     8.8     2.0
+#  42006260   Bt     R       86.0    0.92        0.0         5.0         1.55    45.0     7.2     3.5     0.6
+#  42006261   Cr             97.0    0.92         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Latham-Wharton silt loams, 15 to 25 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	4758445.00	0.0081	3.5000	33.0120
-	  200.000	  21.70	  23.50	   2.00	  11.30	  15.12
-1 10000.0 0.03312
+	  210.000	  21.70	  23.50	   2.00	  11.30	  15.12
+1 10000.0 3.31200

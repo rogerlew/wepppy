@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:13.830991
+#   Build Date: 2020-06-05 11:16:29.685270
 #   Source Data: Surgo
 # 
 # Mukey: 528541
 # Major Component: 15592040 (comppct_r = 100.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45226789   H1             15.0    9.17        0.0        10.0         1.45
-#  45226790   H2             41.0    2.82        2.0        18.0         1.48
-#  45226788   Cr     R       51.0    0.71         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45226789   H1             15.0    9.17        0.0        10.0         1.45    35.0    16.9    10.4    1.25
+#  45226790   H2             41.0    2.82        2.0        18.0         1.48    42.5     7.7     3.7    0.25
+#  45226788   Cr     R       51.0    0.71         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Dandridge shaly silty clay loam, 35 to 60 percent slopes'		'CN-SICL'	2	0.3600	0.7500	4124450.00	0.0070	3.5000	33.0120
 	  150.000	  16.90	  35.00	   1.25	  20.50	  48.25
 	  410.000	   7.70	  42.50	   0.25	  19.30	  70.00
-1 10000.0 0.02556
+1 10000.0 2.55600

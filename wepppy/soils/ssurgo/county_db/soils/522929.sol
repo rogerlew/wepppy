@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.223635
+#   Build Date: 2020-06-05 11:16:30.702462
 #   Source Data: Surgo
 # 
 # Mukey: 522929
 # Major Component: 15472725 (comppct_r = 85.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44844524   H1             15.0     2.7        0.0        18.0         1.56
-#  44844525   H2             46.0     2.7        0.0        18.0          1.6
-#  44844526   H3     R      203.0     0.1        0.0         0.0          1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44844524   H1             15.0     2.7        0.0        18.0         1.56    45.0     9.0     4.4    1.75
+#  44844525   H2             46.0     2.7        0.0        18.0          1.6    47.5     6.2     2.9     1.0
+#  44844526   H3     R      203.0     0.1        0.0         0.0          1.4     7.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00100
+#     ksat: 0.10000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Limestone rockland rough'		'ST-SIC'	2	0.3000	0.7500	3573150.00	0.0069	3.5000	9.7200
 	  150.000	   9.00	  45.00	   1.75	  32.10	  26.20
 	  460.000	   6.20	  47.50	   1.00	  31.40	  36.45
-1 10000.0 0.00360
+1 10000.0 0.36000

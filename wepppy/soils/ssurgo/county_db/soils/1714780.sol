@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:14.364216
+#   Build Date: 2020-06-05 11:16:29.855431
 #   Source Data: Surgo
 # 
 # Mukey: 1714780
 # Major Component: 15216913 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44002509   H1             41.0    9.17        0.0         0.0          1.5
-#  44002507   H2     R      112.0    0.21        0.0         0.0          1.5
-#  44002508   H3            178.0    0.21        0.0         0.0         1.53
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44002509   H1             41.0    9.17        0.0         0.0          1.5    16.5    13.8     8.3    2.25
+#  44002507   H2     R      112.0    0.21        0.0         0.0          1.5    26.5     6.8     4.7    0.75
+#  44002508   H3            178.0    0.21        0.0         0.0         1.53    26.5     6.8     4.7    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -54,4 +55,4 @@ Any comments:
 1 1
 'Gilbert silt loam'		'SIL'	1	0.1600	0.7500	5144355.00	0.0118	3.5000	33.0120
 	  410.000	  13.80	  16.50	   2.25	  11.30	   0.00
-1 10000.0 0.00756
+1 10000.0 0.75600

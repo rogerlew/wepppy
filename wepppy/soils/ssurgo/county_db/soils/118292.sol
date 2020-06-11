@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.969621
+#   Build Date: 2020-06-05 11:16:31.448159
 #   Source Data: Surgo
 # 
 # Mukey: 118292
 # Major Component: 15235493 (comppct_r = 90.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44058580   H1             25.0     9.0        0.0         0.0         1.25
-#  44058581   H2            104.0     9.0        0.0         0.0          1.5
-#  44058582   H3     R      114.0     0.2         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44058580   H1             25.0     9.0        0.0         0.0         1.25    20.0    26.5     8.8    1.25
+#  44058581   H2            104.0     9.0        0.0         0.0          1.5    50.0    22.1     5.3    0.25
+#  44058582   H3     R      114.0     0.2         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.00200
+#     ksat: 0.20000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Tatum silt loam, 2 to 7 percent slopes'		'SIL'	2	0.4900	0.7500	4951400.00	0.0094	3.5000	32.4000
 	  250.000	  26.50	  20.00	   1.25	   7.80	  19.00
 	 1040.000	  22.10	  50.00	   0.25	  13.10	  12.00
-1 10000.0 0.00720
+1 10000.0 0.72000

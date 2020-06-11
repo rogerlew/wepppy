@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:16.654887
+#   Build Date: 2020-06-05 11:16:33.330825
 #   Source Data: Surgo
 # 
 # Mukey: 2399822
 # Major Component: 14799917 (comppct_r = 90.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42662022   Ap             20.0    7.76        0.0         0.0         1.32
-#  42662023   Btg            89.0    2.82        0.0         1.0         1.55
-#  42662024   BC     R      145.0    0.92        1.0         1.0         1.58
-#  42662025   Cd            203.0   0.005        1.0         1.0          1.8
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42662022   Ap             20.0    7.76        0.0         0.0         1.32    36.0    25.0     8.5    4.75
+#  42662023   Btg            89.0    2.82        0.0         1.0         1.55    46.0    18.0     5.7     1.0
+#  42662024   BC     R      145.0    0.92        1.0         1.0         1.58    38.0    23.0     7.9    0.75
+#  42662025   Cd            203.0   0.005        1.0         1.0          1.8    37.0    25.0     7.9    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Densic material
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Hoytville clay loam, 0 to 1 percent slopes'		'CL'	2	0.2300	0.7500	4069320.00	0.0070	3.5000	27.9360
 	  200.000	  25.00	  36.00	   4.75	  26.50	   6.00
 	  890.000	  18.00	  46.00	   1.00	  26.00	   7.93
-1 10000.0 0.03312
+1 10000.0 3.31200

@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.369673
+#   Build Date: 2020-06-05 11:16:30.280605
 #   Source Data: Surgo
 # 
 # Mukey: 575575
 # Major Component: 15751142 (comppct_r = 100.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45624381   H1             64.0    28.0        0.0         0.0          1.4
-#  45624382   H2     R       79.0     1.0        0.0         0.0         1.58
-#  45624383   H3            198.0     1.0        0.0         0.0         1.65
-#  45624384   H4            203.0     1.0        0.0         0.0         1.68
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45624381   H1             64.0    28.0        0.0         0.0          1.4     6.0    77.9    24.7     1.5
+#  45624382   H2     R       79.0     1.0        0.0         0.0         1.58    35.0    51.5     9.4    0.75
+#  45624383   H3            198.0     1.0        0.0         0.0         1.65    42.5    28.1     8.1    0.75
+#  45624384   H4            203.0     1.0        0.0         0.0         1.68    37.5    50.8     8.8     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Conroe loamy fine sand, 0 to 5 percent slopes'		'LFS'	1	0.3700	0.7500	7472870.00	0.0118	1.6274	100.8000
 	  640.000	  77.90	   6.00	   1.50	   3.00	  11.00
-1 10000.0 0.03600
+1 10000.0 3.60000

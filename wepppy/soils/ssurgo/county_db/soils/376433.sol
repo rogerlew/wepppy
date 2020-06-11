@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:55.565028
+#   Build Date: 2020-06-05 11:16:33.185571
 #   Source Data: Surgo
 # 
 # Mukey: 376433
 # Major Component: 14552834 (comppct_r = 45.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41924801   A               8.0     9.0        0.0         0.0         1.38
-#  41924802   Bw             25.0     9.0        0.0         0.0         1.32
-#  41924803   Bkkm1  R       40.0    0.06         -           -           1.4
-#  41924804   Bkkm2         203.0    0.06         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41924801   A               8.0     9.0        0.0         0.0         1.38    18.6    44.2    27.0     2.9
+#  41924802   Bw             25.0     9.0        0.0         0.0         1.32    22.4    48.1    14.1     2.3
+#  41924803   Bkkm1  R       40.0    0.06         -           -           1.4     7.0    66.8    10.0     7.0
+#  41924804   Bkkm2         203.0    0.06         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Petrocalcic
-#     ksat: 0.00060
+#     ksat: 0.06000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Kimbrough-Lea complex, dry, 0 to 3 percent slopes'		'GR-L'	2	0.1600	0.7500	7914700.00	0.0103	2.3130	32.4000
 	   80.000	  44.20	  18.60	   2.90	  13.30	  25.00
 	  250.000	  48.10	  22.40	   2.30	  19.00	   2.00
-1 10000.0 0.00216
+1 10000.0 0.21600

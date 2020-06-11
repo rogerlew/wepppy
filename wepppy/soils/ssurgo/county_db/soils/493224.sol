@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:41:34.363918
+#   Build Date: 2020-06-05 11:16:33.477247
 #   Source Data: Surgo
 # 
 # Mukey: 493224
 # Major Component: 14573140 (comppct_r = 45.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  41989577   H1             18.0    92.0       38.0        10.0         1.55
-#  41989578   H2             38.0    92.0        3.0         5.0         1.55
-#  41989576   H3     R      152.0     1.0         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  41989577   H1             18.0    92.0       38.0        10.0         1.55     3.0    79.0     9.1     1.5
+#  41989578   H2             38.0    92.0        3.0         5.0         1.55     3.0    79.0     9.1    0.25
+#  41989576   H3     R      152.0     1.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Paralithic bedrock
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Toiyabe-Corbett-Rock outcrop complex, 30 to 50 percent slopes'		'BYV-LCOS'	2	0.1600	0.7500	4476110.00	0.0071	2.3372	331.2000
 	  180.000	  79.00	   3.00	   1.50	   6.00	  67.50
 	  380.000	  79.00	   3.00	   0.25	   3.00	  33.30
-1 10000.0 0.03600
+1 10000.0 3.60000

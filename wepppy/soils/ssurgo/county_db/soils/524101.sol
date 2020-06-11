@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:15.334480
+#   Build Date: 2020-06-05 11:16:30.266895
 #   Source Data: Surgo
 # 
 # Mukey: 524101
 # Major Component: 14935285 (comppct_r = 65.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  43095528   H1             18.0    9.17        0.0         0.0         1.43
-#  43095529   H2     R       81.0    0.71        0.0         0.0          1.4
-#  43095527   R             106.0   0.005         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  43095528   H1             18.0    9.17        0.0         0.0         1.43    25.0    24.0    10.2    1.25
+#  43095529   H2     R       81.0    0.71        0.0         0.0          1.4    55.0    22.1     6.9    0.25
+#  43095527   R             106.0   0.005         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -53,5 +54,5 @@
 Any comments:
 1 1
 'Talbott-Rock outcrop complex, 2 to 15 percent slopes'		'SIL'	1	0.3600	0.7500	4675750.00	0.0078	3.5000	33.0120
-	  180.000	  24.00	  25.00	   1.25	   9.00	   5.00
-1 10000.0 0.02556
+	  210.000	  24.00	  25.00	   1.25	   9.00	   5.00
+1 10000.0 2.55600

@@ -1,18 +1,19 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:39:01.423473
+#   Build Date: 2020-06-05 11:16:32.355654
 #   Source Data: Surgo
 # 
 # Mukey: 537858
 # Major Component: 14639285 (comppct_r = 40.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42154112   H1             25.0   23.29        0.0        10.0         1.35
-#  42154113   H2             56.0   28.23        0.0        20.0          1.4
-#  42154114   H3             61.0    7.46         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42154112   H1             25.0   23.29        0.0        10.0         1.35    14.0    30.0     9.7    1.75
+#  42154113   H2             56.0   28.23        0.0        20.0          1.4    12.0    30.0     9.3    0.25
+#  42154114   H3             61.0    7.46         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000

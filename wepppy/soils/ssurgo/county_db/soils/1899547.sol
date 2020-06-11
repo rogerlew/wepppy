@@ -1,23 +1,24 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:16.291168
+#   Build Date: 2020-06-05 11:16:30.729217
 #   Source Data: Surgo
 # 
 # Mukey: 1899547
 # Major Component: 15614442 (comppct_r = 100.0)
+# Texture: sand loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  45309925   H1             18.0   91.74        0.0        10.0         1.38
-#  45309926   H2             46.0   91.74        0.0        10.0          1.3
-#  45309924   R      R       51.0    0.71         -           -           1.4
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45309925   H1             18.0   91.74        0.0        10.0         1.38    16.5    67.7    16.5     2.0
+#  45309926   H2             46.0   91.74        0.0        10.0          1.3    16.5    64.8    10.2     0.5
+#  45309924   R      R       51.0    0.71         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Lithic bedrock
-#     ksat: 0.00710
+#     ksat: 0.71000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 'Ramsey stony fine sandy loam, very steep phase'		'ST-FSL'	2	0.3600	0.7500	5897650.00	0.0079	2.7855	330.2640
 	  180.000	  67.70	  16.50	   2.00	  11.30	  32.50
 	  460.000	  64.80	  16.50	   0.50	  11.30	  32.50
-1 10000.0 0.02556
+1 10000.0 2.55600

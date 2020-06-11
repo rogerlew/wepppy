@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:17.293354
+#   Build Date: 2020-06-05 11:16:31.166692
 #   Source Data: Surgo
 # 
 # Mukey: 568141
 # Major Component: 15515400 (comppct_r = 95.0)
+# Texture: silt loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44962269   H1             43.0    9.17        0.0         0.0          1.5
-#  44962268   H2     R       69.0    0.92        0.0         0.0         1.53
-#  44962267   H3            140.0    0.92        0.0         0.0         1.53
-#  44962266   H4            160.0    9.17        0.0         0.0         1.53
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44962269   H1             43.0    9.17        0.0         0.0          1.5    18.5    11.7     6.7    1.25
+#  44962268   H2     R       69.0    0.92        0.0         0.0         1.53    21.0    11.3     6.6     0.3
+#  44962267   H3            140.0    0.92        0.0         0.0         1.53    29.0     9.3     3.8     0.2
+#  44962266   H4            160.0    9.17        0.0         0.0         1.53    28.5     7.4     3.1     0.1
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: Fragipan
-#     ksat: 0.00920
+#     ksat: 0.92000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,4 +56,4 @@ Any comments:
 1 1
 'Bude silt loam, 2 to 5 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	5034095.00	0.0102	3.5000	33.0120
 	  430.000	  11.70	  18.50	   1.25	  11.30	   0.00
-1 10000.0 0.03312
+1 10000.0 3.31200

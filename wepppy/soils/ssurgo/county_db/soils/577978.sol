@@ -1,25 +1,26 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:38:18.816444
+#   Build Date: 2020-06-05 11:16:31.858025
 #   Source Data: Surgo
 # 
 # Mukey: 577978
 # Major Component: 15349578 (comppct_r = 80.0)
+# Texture: clay loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  44440779   Ap             15.0     2.7        0.0         0.0         1.33
-#  44440777   Bg     R       43.0    0.21        0.0         0.0         1.23
-#  44440778   Bssg1          66.0    0.21        0.0         0.0         1.28
-#  44440775   Bssg2          84.0    0.21        0.0         0.0         1.28
-#  44440776   BCg           183.0     1.0        0.0         0.0         1.33
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  44440779   Ap             15.0     2.7        0.0         0.0         1.33    33.5    17.5    10.6     2.0
+#  44440777   Bg     R       43.0    0.21        0.0         0.0         1.23    70.0     1.8     1.2    0.75
+#  44440778   Bssg1          66.0    0.21        0.0         0.0         1.28    50.0    22.1     5.3     0.3
+#  44440775   Bssg2          84.0    0.21        0.0         0.0         1.28    50.0    22.1     5.3     0.3
+#  44440776   BCg           183.0     1.0        0.0         0.0         1.33    38.5    18.2     6.3     0.3
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.00210
+#     ksat: 0.21000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -55,5 +56,5 @@
 Any comments:
 1 1
 'Jackport silty clay loam, 0 to 2 percent slopes'		'SICL'	1	0.2300	0.7500	4207145.00	0.0071	3.5000	9.7200
-	  150.000	  17.50	  33.50	   2.00	  22.50	   0.00
-1 10000.0 0.00756
+	  210.000	  17.50	  33.50	   2.00	  22.50	   0.00
+1 10000.0 0.75600

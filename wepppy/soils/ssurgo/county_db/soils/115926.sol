@@ -1,24 +1,25 @@
 2006.2
 # 
-#             Hydro TBD Utils v.0.1.0 (c) University of Idaho
+#             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2018-08-28 21:40:19.136002
+#   Build Date: 2020-06-05 11:16:32.924584
 #   Source Data: Surgo
 # 
 # Mukey: 115926
 # Major Component: 14796660 (comppct_r = 80.0)
+# Texture: loam
 # 
-#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r
-# ----------------------------------------------------------------------------
-#  42654730   A              18.0     9.0        0.0         0.0         1.35
-#  42654727   E              36.0     9.0        0.0         0.0         1.35
-#  42654728   Btg    R      163.0     1.0        0.0         0.0         1.65
-#  42654729   BCg           229.0     1.0        0.0         0.0         1.65
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  42654730   A              18.0     9.0        0.0         0.0         1.35    21.0    41.6    12.0     4.0
+#  42654727   E              36.0     9.0        0.0         0.0         1.35    21.0    41.6    12.0     2.0
+#  42654728   Btg    R      163.0     1.0        0.0         0.0         1.65    45.0    26.1     7.9    0.25
+#  42654729   BCg           229.0     1.0        0.0         0.0         1.65    52.5    18.2     5.6    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
 #     type: N/A
-#     ksat: 0.01000
+#     ksat: 1.00000
 # 
 # defaults applied to missing chorizon data:
 #     sandtotal_r  ->      66.800
@@ -56,4 +57,4 @@ Any comments:
 'Bladen loam, 0 to 2 percent slopes'		'L'	2	0.1600	0.7500	5033200.00	0.0056	3.3390	32.4000
 	  180.000	  41.60	  21.00	   4.00	  16.40	   2.00
 	  360.000	  41.60	  21.00	   2.00	  11.80	   2.00
-1 10000.0 0.03600
+1 10000.0 3.60000
