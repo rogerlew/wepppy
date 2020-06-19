@@ -233,9 +233,9 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
     if "rock" not in lines[3].lower() and \
             "water" not in lines[3].lower():
         line5[6] = _replace_parameter(line5[6], replacements.Sand)
-        line5[7] = _replace_parameter(line5[6], replacements.Clay)
-        line5[8] = _replace_parameter(line5[6], replacements.OM)
-        line5[9] = _replace_parameter(line5[6], replacements.CEC)
+        line5[7] = _replace_parameter(line5[7], replacements.Clay)
+        line5[8] = _replace_parameter(line5[8], replacements.OM)
+        line5[9] = _replace_parameter(line5[9], replacements.CEC)
     line5 = ' '.join(line5) + '\n'
 
     # Create new soil files
