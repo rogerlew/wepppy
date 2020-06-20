@@ -10,13 +10,19 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
+IS_WINDOWS = os.name == 'nt'
+
 from time import time
 
 import subprocess
 
 _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
-_wepp = _join(_thisdir, "../", "bin", "wepp")
+
+if IS_WINDOWS:
+    _wepp = _join(_thisdir, "../", "bin", "wepp2014.exe")
+else:
+    _wepp = _join(_thisdir, "../", "bin", "wepp")
 
 
 def _template_loader(fn):

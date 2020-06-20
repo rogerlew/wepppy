@@ -10,6 +10,7 @@ from typing import Tuple, List, Dict, Union
 
 from .locationinfo import RasterDatasetInterpolator, RDIOutOfBoundsException
 
+import sys
 import collections
 import os
 from os.path import exists as _exists
@@ -28,6 +29,11 @@ from math import radians, sin, cos, asin, sqrt
 
 import numpy as np
 
+try:
+    import win32com.shell.shell as shell
+except ModuleNotFoundError:
+    pass
+
 from osgeo import gdal, osr, ogr
 gdal.UseExceptions()
 
@@ -44,6 +50,18 @@ if not _exists(SCRATCH):
 
 if not _exists(SCRATCH):
     SCRATCH = '/workdir'
+
+IS_WINDOWS = os.name == 'nt'
+
+
+def make_symlink(src, dst):
+    if IS_WINDOWS:
+        if _exists(dst):
+            os.remove(dst)
+        params = ' '.join(['mklink', dst, src])
+        shell.ShellExecuteEx(lpVerb='runas', lpFile=sys.executable, lpParameters=params)
+    else:
+        os.symlink(src, dst)
 
 
 def cmyk_to_rgb(c, m, y, k):
