@@ -59,7 +59,8 @@ from wepppy.all_your_base import (
     isint,
     parse_datetime,
     YearlessDate,
-    read_raster
+    read_raster,
+    make_symlink
 )
 
 from wepppy.soils.ssurgo import NoValidSoilsException
@@ -592,7 +593,7 @@ def create(config):
         last = get_last()
         if _exists(last):
             os.unlink(last)
-        os.symlink(wd, last)
+        make_symlink(wd, last)
 
         user_datastore.create_run(runid, config, current_user)
 

@@ -31,7 +31,8 @@ from wepppy.all_your_base import (
     clamp,
     elevationquery,
     haversine,
-    RasterDatasetInterpolator
+    RasterDatasetInterpolator,
+    IS_WINDOWS
 )
 
 from wepppy.climates.metquery_client import (
@@ -1043,9 +1044,15 @@ class Cligen:
             raise NotImplementedError('Cligen version must be greater than 5')
 
         if self.cliver == '5.2':
-            cligen_bin = _join(_bin_dir, 'cligen52')
+            if IS_WINDOWS:
+                raise NotImplementedError('Cligen52.exe is not available on Windows')
+            else:
+                cligen_bin = _join(_bin_dir, 'cligen52')
         else:
-            cligen_bin = _join(_bin_dir, 'cligen532')
+            if IS_WINDOWS:
+                cligen_bin = _join(_bin_dir, 'cligen532.exe')
+            else:
+                cligen_bin = _join(_bin_dir, 'cligen532')
 
         assert _exists(cligen_bin)
 
@@ -1237,11 +1244,20 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
 
     # build cmd
     if cliver == "4.3":
-        cmd = [_join(_bin_dir, 'cligen43')]
+        if IS_WINDOWS:
+            raise NotImplementedError('Cligen43.exe is not available on Windows')
+        else:
+            cmd = [_join(_bin_dir, 'cligen43')]
     elif cliver == "5.2":
-        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+        if IS_WINDOWS:
+            raise NotImplementedError('Cligen52.exe is not available on Windows')
+        else:
+            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
-        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+        if IS_WINDOWS:
+            cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
+        else:
+            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
 
     if randseed is not None:
         cmd.append('-r%s' % randseed)
