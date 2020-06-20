@@ -24,7 +24,7 @@ import warnings
 from copy import deepcopy
 from flask import Flask, jsonify, request, Response
 
-from wepppy.all_your_base import isint
+from wepppy.all_your_base import isint, IS_WINDOWS
 
 # noinspection PyProtectedMember
 from wepppy.climates.cligen import (
@@ -230,7 +230,7 @@ def _multiple_year(par, _request, singleyearmode=False):
         d = _request.get_json()
 
     years = d.get('years', None)
-    cliver = d.get('cliver', None)
+    cliver = d.get('cliver', '5.3')
     returnjson = d.get('returnjson', False)
     randseed = d.get('randseed', None)
     returnjson = bool(returnjson)
@@ -240,9 +240,6 @@ def _multiple_year(par, _request, singleyearmode=False):
 
     if not isint(years):
         return jsonify({'Error': 'years as an integer is required "%s"' % years})
-
-    if cliver is None:
-        cliver = '5.3'
 
     # create working directory to build climate
     _uuid = str(uuid.uuid4())
@@ -263,11 +260,20 @@ def _multiple_year(par, _request, singleyearmode=False):
 
     # build cmd
     if cliver == "4.3":
-        cmd = [_join(_bin_dir, 'cligen43')]
+        if IS_WINDOWS:
+            raise NotImplementedError('Cligen43.exe is not available on Windows')
+        else:
+            cmd = [_join(_bin_dir, 'cligen43')]
     elif cliver == "5.2":
-        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+        if IS_WINDOWS:
+            raise NotImplementedError('Cligen52.exe is not available on Windows')
+        else:
+            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
-        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+        if IS_WINDOWS:
+            cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
+        else:
+            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
         
     if randseed is not None:
         cmd.append('-r%s' % randseed)
@@ -413,12 +419,21 @@ def single_storm(par):
         jsonify({'Error': 'Could not build cligen input file. Check input parameters'})
 
     # build cmd
-    if cliver == "5.3":
-        cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
+    if cliver == "4.3":
+        if IS_WINDOWS:
+            raise NotImplementedError('Cligen43.exe is not available on Windows')
+        else:
+            cmd = [_join(_bin_dir, 'cligen43')]
     elif cliver == "5.2":
-        cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
+        if IS_WINDOWS:
+            raise NotImplementedError('Cligen52.exe is not available on Windows')
+        else:
+            cmd = [_join(_bin_dir, 'cligen52'), "-i%s" % par_fn]
     else:
-        cmd = [_join(_bin_dir, 'cligen43')]
+        if IS_WINDOWS:
+            cmd = [_join(_bin_dir, 'cligen532.exe'), "-i%s" % par_fn]
+        else:
+            cmd = [_join(_bin_dir, 'cligen532'), "-i%s" % par_fn]
 
     # run cligen
     _clinp = open("clinp.txt")
@@ -646,9 +661,9 @@ def future_rcp85(par):
     
     # build cmd
     cli_fn = "future.cli"
-    cmd = [_join(_bin_dir, 'cligen532'),
+    cmd = [_join(_bin_dir, ('cligen532', 'cligen532.exe')[IS_WINDOWS]),
            "-i%s.par" % par,
-           "-Oinput.prn", 
+           "-Oinput.prn",
            "-o%s" % cli_fn,
            "-t6", "-I2"]
     

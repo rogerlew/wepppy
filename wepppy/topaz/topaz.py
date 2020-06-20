@@ -31,7 +31,8 @@ from wepppy.all_your_base import (
     read_arc,
     get_utm_zone,
     isfloat,
-    wgs84_wkt
+    wgs84_wkt,
+    IS_WINDOWS
 )
 
 from wepppy.watershed_abstraction import WeppTopTranslator
@@ -199,11 +200,13 @@ class TopazRunner:
         wd = self.topaz_wd
 
         for ext in ['.OUT', '.ARC', '.INP', '.RPT', '.UNF', '.TAB', '.PRJ']:
-            for fn in glob(_join(wd, '*' + ext)) + \
-                      glob(_join(wd, '*' + ext.lower())):
+            for fn in glob(_join(wd, '*' + ext)):
                 size = os.path.getsize(fn)
                 if not empty_only or size == 0:
-                    os.remove(fn)
+                    try:
+                        os.remove(fn)
+                    except FileNotFoundError:
+                        pass
 
     def _prep_dir(self):
         """
@@ -211,10 +214,16 @@ class TopazRunner:
         """
         wd = self.topaz_wd
 
-        _cp_chmod(_join(topaz_bin, 'dednm'), _join(wd, 'dednm'), 0o755)
-        _cp_chmod(_join(topaz_bin, 'rasbin'), _join(wd, 'rasbin'), 0o755)
-        _cp_chmod(_join(topaz_bin, 'raspro'), _join(wd, 'raspro'), 0o755)
-        _cp_chmod(_join(topaz_bin, 'rasfor'), _join(wd, 'rasfor'), 0o755)
+        if IS_WINDOWS:
+            _cp_chmod(_join(topaz_bin, 'dednm.exe'), _join(wd, 'dednm.exe'), 0o755)
+            # _cp_chmod(_join(topaz_bin, 'rasbin'), _join(wd, 'rasbin'), 0o755)
+            _cp_chmod(_join(topaz_bin, 'raspro.exe'), _join(wd, 'raspro.exe'), 0o755)
+            _cp_chmod(_join(topaz_bin, 'rasfor.exe'), _join(wd, 'rasfor.exe'), 0o755)
+        else:
+            _cp_chmod(_join(topaz_bin, 'dednm'), _join(wd, 'dednm'), 0o755)
+            # _cp_chmod(_join(topaz_bin, 'rasbin'), _join(wd, 'rasbin'), 0o755)
+            _cp_chmod(_join(topaz_bin, 'raspro'), _join(wd, 'raspro'), 0o755)
+            _cp_chmod(_join(topaz_bin, 'rasfor'), _join(wd, 'rasfor'), 0o755)
 
         shutil.copyfile(_join(topaz_templates, 'RASFOR.INP'), _join(wd, 'RASFOR.INP'))
         shutil.copyfile(_join(topaz_templates, 'RASPRO.INP'), _join(wd, 'RASPRO.INP'))
@@ -566,6 +575,7 @@ class TopazRunner:
         Provides some topaz specific abort conditions to avoid falling into
         deep loops that take a long time to complete
         """
+        verbose = True
 
         if verbose:
             print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
@@ -574,17 +584,19 @@ class TopazRunner:
         # working directory back
         lines = []
 
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd)
+        print('topaz._run_subprocess', self.topaz_wd)
+
+        p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd, universal_newlines=True)
 
         # on pass 2 we need to write '1' to standard input
         if stdin is not None:
-            p.stdin.write(stdin.encode("utf-8"))
-            p.stdin.close()
+            p.stdin.write(stdin)
+            p.stdin.flush()
 
         abort_count = 0
 
         while p.poll() is None:
-            output = p.stdout.readline().decode("utf-8")
+            output = p.stdout.readline()
             output = output.strip()
 
             if output != '':
@@ -597,8 +609,10 @@ class TopazRunner:
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
                 try:
-                    p.stdin.write(b'1')
-                    p.stdin.close()
+                    outs, errs = p.communicate(input=('0\n', '0\r\n')[IS_WINDOWS], timeout=15)
+
+                    if verbose:
+                        print(outs, errs)
                 except:
                     try:
                         p.kill()
@@ -615,12 +629,26 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+
+                if verbose:
+                    print(outs, errs)
                 abort_count += 1
+
+            if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+
+                if verbose:
+                    print(outs, errs)
 
             # This occurs if the watershed extends beyond the dem. There isn't a way
             # of checking that, and novice users have a hard time recognizing this
             # condition from the channel map
             if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+
+                if verbose:
+                    print(outs, errs)
                 abort_count += 1
 
             # if the abort count is greater than 2, then abort
@@ -642,7 +670,10 @@ class TopazRunner:
             if _exists(_join(topaz_wd, 'BOUND.OUT')):
                 os.remove(_join(topaz_wd, 'BOUND.OUT'))
 
-        output = self._run_subprocess('./dednm', (None, '1')[_pass == 2], verbose)
+        if IS_WINDOWS:
+            output = self._run_subprocess(_join(topaz_wd, 'dednm.exe'), (None, '1')[_pass == 2], verbose)
+        else:
+            output = self._run_subprocess('./dednm', (None, '1')[_pass == 2], verbose)
 
         with open(_join(topaz_wd, 'dednm.log'), 'w') as fp:
             fp.write('\n'.join(output))
@@ -674,6 +705,7 @@ class TopazRunner:
         raise DednmCrashedException(output)
 
     def _run_rasfor(self, _pass=1, verbose=False):
+        topaz_wd = self.topaz_wd
 
         if _pass == 1:
             if _exists(_join(self.topaz_wd, 'FLOPAT.ARC')):
@@ -690,7 +722,10 @@ class TopazRunner:
             if _exists(_join(self.topaz_wd, 'SUBWTA.ARC')):
                 os.remove(_join(self.topaz_wd, 'SUBWTA.ARC'))
 
-        output = self._run_subprocess('./rasfor', None, verbose)
+        if IS_WINDOWS:
+            output = self._run_subprocess(_join(topaz_wd, 'rasfor.exe'), None, verbose)
+        else:
+            output = self._run_subprocess('./rasfor', None, verbose)
 
         with open(_join(self.topaz_wd, 'rasfor.log'), 'w') as fp:
             fp.write('\n'.join(output))
@@ -711,7 +746,11 @@ class TopazRunner:
         raise RasforCrashedException(output)
 
     def _run_rasbin(self, verbose=False):
-        output = self._run_subprocess('./rasbin', None, verbose)
+        topaz_wd = self.topaz_wd
+        if IS_WINDOWS:
+            output = self._run_subprocess(_join(topaz_wd, 'rasbin.exe'), None, verbose)
+        else:
+            output = self._run_subprocess('./rasbin', None, verbose)
 
         with open(_join(self.topaz_wd, 'rasbin.log'), 'w') as fp:
             fp.write('\n'.join(output))
@@ -728,7 +767,10 @@ class TopazRunner:
             os.remove(_join(topaz_wd, 'RASPRO.RPT'))
 
         topaz_wd = self.topaz_wd
-        output = self._run_subprocess('./raspro', None, verbose)
+        if IS_WINDOWS:
+            output = self._run_subprocess(_join(topaz_wd, 'raspro.exe'), None, verbose)
+        else:
+            output = self._run_subprocess('./raspro', None, verbose)
 
         with open(_join(self.topaz_wd, 'raspro.log'), 'w') as fp:
             fp.write('\n'.join(output))

@@ -24,6 +24,9 @@ def config_app(app):
 
 
 def _init(db, user_datastore):
+
+    print(db)
+    
     from os.path import exists
 
     if exists('/geodata/weppcloud_runs/standalone.db'):
@@ -35,7 +38,11 @@ def _init(db, user_datastore):
     except:
         pass
 
-    db.drop_all()
+    try:
+        db.drop_all()
+    except:
+        pass
+
     db.create_all()
     user_datastore.create_role(name='User', description='Regular WeppCloud User')
     user_datastore.create_role(name='PowerUser', description='WeppCloud PowerUser')
