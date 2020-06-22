@@ -7,7 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/wepppy/ssurgo/data" />
       <excludeFolder url="file://$MODULE_DIR$/wepppy/validation" />
     </content>
-    <orderEntry type="jdk" jdkName="Remote Python 3.6.9 (sftp://roger@192.168.1.200:22/usr/bin/python3.6m)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (wepppy)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="R User Library" level="project" />
     <orderEntry type="library" name="R Skeletons" level="application" />
