@@ -38,6 +38,7 @@ e.g. "C:\Users\roger\.conda\envs\wepppy\Lib\site-packages\wepppy.pth" contains
 C:\Users\roger\Documents\GitHub\wepppy\
 ```
 
+copy rm.bat and ls.bat to C:\Windows
 
 ### Copyright
 
