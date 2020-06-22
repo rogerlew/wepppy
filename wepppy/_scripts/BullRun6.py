@@ -20,27 +20,29 @@ from wepppy.nodb.mods.portland.bedrock import BullRunBedrock
 from osgeo import gdal, osr
 gdal.UseExceptions()
 
+from .utils import *
+
 if __name__ == '__main__':
 
     lvdm = LivnehDataManager()
 
     projects = [
-#                dict(wd='SouthFork',
-#                     extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
-#                     map_center=[-121.98875427246095, 45.43700828867391],
-#                     map_zoom=11,
-#                     outlet=[-122.1083333, 45.444722],
-#                     landuse=None,
-#                     cs=50, erod=0.000001,
-#                     csa=5, mcl=65),
-#                dict(wd='CedarCreek',
-#                     extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
-#                     map_center=[-121.98875427246095, 45.43700828867391],
-#                     map_zoom=11,
-#                     outlet=[-122.03486546021158, 45.45789702345389],
-#                     landuse=None,
-#                     cs=50, erod=0.000001,
-#                     csa=5, mcl=65),
+               dict(wd='SouthFork',
+                    extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
+                    map_center=[-121.98875427246095, 45.43700828867391],
+                    map_zoom=11,
+                    outlet=[-122.1083333, 45.444722],
+                    landuse=None,
+                    cs=50, erod=0.000001,
+                    csa=5, mcl=65),
+               dict(wd='CedarCreek',
+                    extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
+                    map_center=[-121.98875427246095, 45.43700828867391],
+                    map_zoom=11,
+                    outlet=[-122.03486546021158, 45.45789702345389],
+                    landuse=None,
+                    cs=50, erod=0.000001,
+                    csa=5, mcl=65),
                 dict(wd='BlazedAlder',
                      extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
                      map_center=[-121.98875427246095, 45.43700828867391],
@@ -49,22 +51,22 @@ if __name__ == '__main__':
                      landuse=None,
                      cs=50, erod=0.000001,
                      csa=5, mcl=65),
-                # dict(wd='FirCreek',
-                #      extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
-                #      map_center=[-121.98875427246095, 45.43700828867391],
-                #      map_zoom=11,
-                #      outlet=[-122.02581486422827, 45.47989113970676],
-                #      landuse=None,
-                #      cs=50, erod=0.000001,
-                #      csa=5, mcl=65),
-                # dict(wd='BRnearMultnoma',
-                #      extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
-                #      map_center=[-121.98875427246095, 45.43700828867391],
-                #      map_zoom=11,
-                #      outlet=[-122.01099283401598, 45.498468197226025],
-                #      landuse=None,
-                #      cs=50, erod=0.000001,
-                #      csa=10, mcl=100),
+                dict(wd='FirCreek',
+                     extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
+                     map_center=[-121.98875427246095, 45.43700828867391],
+                     map_zoom=11,
+                     outlet=[-122.02581486422827, 45.47989113970676],
+                     landuse=None,
+                     cs=50, erod=0.000001,
+                     csa=5, mcl=65),
+                dict(wd='BRnearMultnoma',
+                     extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
+                     map_center=[-121.98875427246095, 45.43700828867391],
+                     map_zoom=11,
+                     outlet=[-122.01099283401598, 45.498468197226025],
+                     landuse=None,
+                     cs=50, erod=0.000001,
+                     csa=10, mcl=100),
                dict(wd='NorthFork',
                      extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
                      map_center=[-121.98875427246095, 45.43700828867391],
@@ -73,16 +75,29 @@ if __name__ == '__main__':
                      landuse=None,
                      cs=50, erod=0.000001,
                      csa=10, mcl=100),
-                # dict(wd='LittleSandy',
-                #      extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
-                #      map_center=[-121.98875427246095, 45.43700828867391],
-                #      map_zoom=11,
-                #      outlet=[-122.17147271631961, 45.415421615033246],
-                #      landuse=None,
-                #      cs=50, erod=0.000001,
-                #      csa=10, mcl=100)
+                dict(wd='LittleSandy',
+                     extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
+                     map_center=[-121.98875427246095, 45.43700828867391],
+                     map_zoom=11,
+                     outlet=[-122.17147271631961, 45.415421615033246],
+                     landuse=None,
+                     cs=50, erod=0.000001,
+                     csa=10, mcl=100)
                ]
 
+
+    scenarios = [
+               dict(wd='CurCond.2020.cl532.chn_cs{cs}',
+                    landuse=None),
+               dict(wd='PrescFireS.2020.chn_cs{cs}',
+                    landuse=[(not_shrub_selector, 110), (shrub_selector, 122)]),
+               dict(wd='LowSevS.2020.chn_cs{cs}',
+                    landuse=[(not_shrub_selector, 106), (shrub_selector, 121)]),
+               dict(wd='ModSevS.2020.chn_cs{cs}',
+                    landuse=[(not_shrub_selector, 118), (shrub_selector, 120)]),
+               dict(wd='HighSevS.2020.chn_cs{cs}',
+                    landuse=[(not_shrub_selector, 105), (shrub_selector, 119)]),
+                ]
     v = 'linveh_closest'
     config = 'portland.cfg'
     top_pars=((10,100),)
@@ -166,19 +181,19 @@ if __name__ == '__main__':
                 soils.dump_and_unlock()
                 soils = Soils.getInstance(wd)
 
-                climate = Climate.getInstance(wd)#
+                climate = Climate.getInstance(wd)
                 climate.climate_mode = ClimateMode.ObservedDb
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
                 climate.input_years = 21
 
-                #stations = climate.find_closest_stations()
-                #climate.input_years = 27
-                #climate.climatestation = stations[0]['id']
-                #
-                #climate.climate_mode = ClimateMode.ObservedDb
-                #climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                #
-                #climate.build(verbose=1)
+                stations = climate.find_closest_stations()
+                climate.input_years = 100
+                climate.climatestation = stations[0]['id']
+
+                climate.climate_mode = ClimateMode.ObservedDb
+                climate.climate_spatialmode = ClimateSpatialMode.Multiple
+
+                climate.build(verbose=1)
                 # build a climate for the channels.
 
                 climate.lock()
