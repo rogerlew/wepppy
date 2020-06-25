@@ -576,6 +576,7 @@ class TopazRunner:
         Provides some topaz specific abort conditions to avoid falling into
         deep loops that take a long time to complete
         """
+        verbose = True
 
         if verbose:
             print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
@@ -583,7 +584,6 @@ class TopazRunner:
         # need to use try catch to make sure we have a chance to switch the
         # working directory back
         lines = []
-
 
         p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd, universal_newlines=True)
 
@@ -597,6 +597,7 @@ class TopazRunner:
         while p.poll() is None:
             output = p.stdout.readline()
             output = output.strip()
+            p.stdout.flush()
 
             if output != '':
                 lines.append(output)
