@@ -6,7 +6,7 @@ import shutil
 
 from collections import Counter
 
-import pyproj
+from pyproj import CRS, Transformer
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from wepppy.all_your_base import shapefile, wmesque_retrieve, wgs84_proj4, read_raster, build_mask
 
 from wepppy.climates.cligen import CligenStationsManager
-
 
 def px_to_utm(transform, x: int, y: int):
     e = transform[0] + transform[1] * x
@@ -24,7 +23,8 @@ def px_to_utm(transform, x: int, y: int):
 
 def px_to_lnglat(transform, x: int, y: int, utm_proj, wgs_proj):
     e, n = px_to_utm(transform, x, y)
-    return pyproj.transform(utm_proj, wgs_proj, e, n)
+    utm2wgs_transformer = Transformer.from_crs(utm_proj, wgs_proj, always_xy=True)
+    return utm2wgs_transformer.transform(e, n)
 
 
 def centroid_px(indx, indy):
@@ -80,9 +80,10 @@ if __name__ == "__main__":
             mukey_map, transform, utmproj4 = read_raster(ssurgo_fn)
 
             # transform coordinates in shape file to utm
-            utm_proj = pyproj.Proj(utmproj4)
-            wgs_proj = pyproj.Proj(wgs84_proj4)
-            points = [pyproj.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]
+            utm_proj = CRS.from_proj4(utmproj4)
+            wgs_proj = CRS.from_proj4(wgs84_proj4)
+            wgs2utm_transformer = Transformer.from_crs(utm_proj, wgs_proj, always_xy=True)
+            points = [wgs2utm_transformer.transform(lng, lat) for lng, lat in shape.points]
             assert len(points) > 0
 
             # build a mask for the polygon of the county

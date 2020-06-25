@@ -9,7 +9,7 @@
 import math
 
 from os.path import join as _join
-from pyproj import Proj, transform
+from pyproj import CRS, Transformer
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request
 from osgeo import ogr
@@ -28,7 +28,6 @@ def safe_float_parse(x):
 
 
 app = Flask(__name__)
-
 
 @app.route('/', methods=['GET', 'POST'])
 def query_ecoregion():
@@ -59,23 +58,26 @@ def query_ecoregion():
     if lng is None:
         return jsonify({'Error': 'could not parse lng'})
 
-    wgs_proj = Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+    wgs_proj = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     if srs is not None:
 
         try:
-            p1 = Proj(init=srs)
+            p1 = CRS.from_epsg(srs)
         except:
             return jsonify({'Error': 'could not initialize projection'})
 
-        lng, lat = transform(p1, wgs_proj, lng, lat)
+        proj2wgs_transformer = Transformer.from_crs(p1, wgs_proj, always_xy=True)
+        lng, lat = proj2wgs_transformer.transform(lng, lat)
 
     shapefile = _join(geodata_dir, "ecoregions/us_eco_l3/us_eco_l3.shp")
     driver = ogr.GetDriverByName("ESRI Shapefile")
     dataSource = driver.Open(shapefile, 0)
     layer = dataSource.GetLayer()
 
-    sf_proj = Proj(layer.GetSpatialRef().ExportToProj4())
-    e, n = transform(wgs_proj, sf_proj, lng, lat)
+    sf_proj = CRS.from_proj4(layer.GetSpatialRef().ExportToProj4())
+
+    wgs2sf_transformer = Transformer.from_crs(wgs_proj, sf_proj, always_xy=True)
+    e, n = wgs2sf_transformer.transform(lng, lat)
 
     point = ogr.Geometry(ogr.wkbPoint)
     point.AddPoint_2D(e, n)
