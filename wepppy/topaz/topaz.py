@@ -591,7 +591,7 @@ class TopazRunner:
 
         # on pass 2 we need to write '1' to standard input
         if stdin is not None:
-            p.stdin.write(stdin)
+            p.stdin.write(stdin.encode('utf-8'))
             p.stdin.flush()
 
         abort_count = 0
