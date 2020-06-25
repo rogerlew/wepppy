@@ -638,11 +638,11 @@ class TopazRunner:
                     print(outs, errs)
                 abort_count += 1
 
-            if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
-                outs, errs = p.communicate(input='1\r\n\r\n', timeout=_TIMEOUT)
-
-                if verbose:
-                    print(outs, errs)
+#            if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
+#                outs, errs = p.communicate(input='1\r\n\r\n', timeout=_TIMEOUT)
+#
+#                if verbose:
+#                    print(outs, errs)
 
             # This occurs if the watershed extends beyond the dem. There isn't a way
             # of checking that, and novice users have a hard time recognizing this
