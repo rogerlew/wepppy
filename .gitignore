@@ -1,5 +1,3 @@
-wepppy/_scripts/*
-wepppy/_scripts
 wepppy/validation/*
 *.pyc
 *.zip
