@@ -1265,8 +1265,10 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     # run cligen
     _clinp = open(clinp_fn)
 
-    process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE,
-                    preexec_fn=os.setsid)
+    if IS_WINDOWS:
+        process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
+    else:
+        process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
 
     output = process.stdout.read()
     output += process.stderr.read()

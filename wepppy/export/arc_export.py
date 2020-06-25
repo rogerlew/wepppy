@@ -5,9 +5,11 @@ from os.path import split as _split
 import shutil
 import json
 import sys
-from subprocess import Popen, PIPE
+import subprocess
+from subprocess import PIPE
 from glob import glob
 import math
+from time import sleep
 
 from wepppy.all_your_base import isnan, isinf
 from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash, AshPost
@@ -30,7 +32,9 @@ def has_arc_export(wd):
     return True
 
 
-def arc_export(wd):
+def arc_export(wd, verbose=False):
+    verbose = True
+
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     topaz = Topaz.getInstance(wd)
@@ -67,15 +71,17 @@ def arc_export(wd):
     arcs = glob(_join(topaz_wd, '*.ARC'))
     for arc in arcs:
         _, basename = _split(arc)
-
-        p = Popen(['gdal_translate', '-of', 'GTiff', arc, _join(gtiff_dir, basename.replace('ARC', 'TIF'))],
-                  stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
-
+        cmd = ['gdal_translate', '-of', 'GTiff', arc, _join(gtiff_dir, basename.replace('ARC', 'TIF'))]
+        if verbose:
+            print(cmd)
+        subprocess.check_call(cmd)
+        sleep(1)
 
     #
     # subcatchments
     #
+    if verbose:
+        print('build subcatchments...', end='')
 
     sub_json = _join(topaz_wd, 'SUBCATCHMENTS.JSON')
     assert _exists(sub_json)
@@ -167,17 +173,22 @@ def arc_export(wd):
     with open(geojson_fn, 'w') as fp:
         json.dump(js, fp, allow_nan=False)
 
+    if verbose:
+        print('done.')
+
     cmd = ['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
            'subcatchments.shp', 'subcatchments.json']
-    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
-    p.wait()
+    if verbose:
+        print(cmd)
+    subprocess.check_call(cmd, cwd=export_dir)
 
     assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
 
     cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
            'subcatchments.kml', 'subcatchments.json']
-    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
-    p.wait()
+    if verbose:
+        print(cmd)
+    subprocess.check_call(cmd, cwd=export_dir)
 
     assert _exists(_join(export_dir, 'subcatchments.kml')), cmd
 
@@ -186,6 +197,8 @@ def arc_export(wd):
     #
     # channels
     #
+    if verbose:
+        print('build channels...', end='')
 
     sub_json = _join(topaz_wd, 'CHANNELS.JSON')
     assert _exists(sub_json)
@@ -273,6 +286,9 @@ def arc_export(wd):
 
         js['features'][i] = f
 
+    if verbose:
+        print('done.')
+
     geojson_fn = _join(export_dir, 'channels.json')
     json_txt = json.dumps(js, allow_nan=False)
     json_txt = json_txt.replace('NaN', 'null')
@@ -282,16 +298,17 @@ def arc_export(wd):
 
     cmd = ['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
            'channels.shp', 'channels.json']
-    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
-    p.wait()
-    stdout, stderr = p.communicate()
+    if verbose:
+        print(cmd)
+    subprocess.check_call(cmd, cwd=export_dir)
 
     assert _exists(_join(export_dir, 'channels.shp')), cmd
 
     cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
            'channels.kml', 'channels.json']
-    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, cwd=export_dir)
-    p.wait()
+    if verbose:
+        print(cmd)
+    subprocess.check_call(cmd, cwd=export_dir)
 
     assert _exists(_join(export_dir, 'channels.kml')), cmd
 
