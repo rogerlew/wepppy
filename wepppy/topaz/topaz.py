@@ -634,7 +634,7 @@ class TopazRunner:
                 abort_count += 1
 
             if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
-                outs, errs = p.communicate(input='1\r\n', timeout=15)
+                outs, errs = p.communicate(input='1\r\n\r\n', timeout=15)
 
                 if verbose:
                     print(outs, errs)
