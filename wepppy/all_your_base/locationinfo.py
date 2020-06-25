@@ -22,7 +22,7 @@ from osgeo import osr
 from osgeo.gdalconst import GA_ReadOnly
 
 import utm
-from pyproj import Proj, transform
+from pyproj import CRS, Transformer
 
 
 class RDIOutOfBoundsException(Exception):
@@ -63,10 +63,10 @@ class RasterDatasetInterpolator:
         self.proj4 = srs.ExportToProj4()
 
         if proj is None:
-            self.proj = Proj(self.proj4)
+            self.proj = CRS.from_proj4(self.proj4)
         else:
-            self.proj = Proj(init=proj)
-        self.wgs84 = Proj(init='EPSG:4326')
+            self.proj = CRS.from_proj4(proj)
+        self.wgs84 = CRS.from_string('EPSG:4326')
 
         if self.lon_lat:
             self.upper, self.left = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
@@ -75,7 +75,10 @@ class RasterDatasetInterpolator:
             self.left, self.upper = self.get_geo_coord(0, 0)
             self.right, self.lower = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
 
-        lng0, lat0 = transform(self.proj, self.wgs84, self.left, self.upper)
+        self.proj2wgs_transformer = proj2wgs_transformer = Transformer.from_crs(self.proj, self.wgs84, always_xy=True)
+        self.wgs2proj_transformer = Transformer.from_crs(self.wgs84, self.proj, always_xy=True)
+
+        lng0, lat0 = proj2wgs_transformer.transform(self.left, self.upper)
         _, _, self.utm_n, self.utm_h = utm.from_latlon(lat0, lng0)
         
     def get_geo_coord(self, x, y):
@@ -91,7 +94,9 @@ class RasterDatasetInterpolator:
         return e, n
 
     def get_px_coord_from_lnglat(self, lng, lat):
-        e, n = transform(self.wgs84, self.proj,  lng, lat)
+        wgs2proj_transformer = self.wgs2proj_transformer
+
+        e, n = wgs2proj_transformer.transform(lng, lat)
         px, py = self.get_px_coord(e, n)
         return int(px), int(py)
 
@@ -109,8 +114,9 @@ class RasterDatasetInterpolator:
 
     @property
     def extent(self):
-        ll_left, ll_lower = transform(self.proj, self.wgs84, self.left, self.lower)
-        ll_right, ll_upper = transform(self.proj, self.wgs84, self.left, self.lower)
+        proj2wgs_transformer = self.proj2wgs_transformer
+        ll_left, ll_lower = proj2wgs_transformer.transform(self.left, self.lower)
+        ll_right, ll_upper = proj2wgs_transformer.transform(self.left, self.lower)
         return ll_left, ll_lower, ll_right, ll_upper
 
     def __contains__(self, en):
@@ -118,7 +124,8 @@ class RasterDatasetInterpolator:
         return self.left < e < self.right and self.lower < n < self.upper
 
     def get_location_info(self, lng, lat, method='cubic'):
-        e, n = transform(self.wgs84, self.proj,  lng, lat)
+        wgs2proj_transformer = self.wgs2proj_transformer
+        e, n = wgs2proj_transformer.transform(lng, lat)
 
         if not (e, n) in self:
             raise RDIOutOfBoundsException

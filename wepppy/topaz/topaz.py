@@ -22,7 +22,7 @@ import warnings
 from imageio import imread
 
 from osgeo import gdal, ogr, osr
-from pyproj import Proj, transform
+from pyproj import CRS, Transformer
 import utm
 
 import numpy as np
@@ -192,6 +192,11 @@ class TopazRunner:
 
         # if the channel dataseet is found, load the channel and junction masks
         self.junction_mask = None
+
+        p1 = CRS.from_proj4(self.srs_proj4)
+        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+
+        self.proj2wgs_transformer = Transformer.from_crs(p1, p2, always_xy=True)
 
     def _clean_dir(self, empty_only=False):
         """
@@ -379,13 +384,8 @@ class TopazRunner:
         """
         return the long/lat (WGS84) coords from pixel coords
         """
-
         easting, northing = self.pixel_to_utm(x, y)
-
-        p1 = Proj(self.srs_proj4)
-        p2 = Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-
-        return transform(p1, p2, easting, northing)
+        return self.proj2wgs_transformer.transform(easting, northing)
 
     def find_closest_channel(self, long, lat, pixelcoords=False):
         """
@@ -575,7 +575,6 @@ class TopazRunner:
         Provides some topaz specific abort conditions to avoid falling into
         deep loops that take a long time to complete
         """
-        verbose = True
 
         if verbose:
             print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
@@ -584,7 +583,6 @@ class TopazRunner:
         # working directory back
         lines = []
 
-        print('topaz._run_subprocess', self.topaz_wd)
 
         p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd, universal_newlines=True)
 
@@ -895,7 +893,7 @@ class TopazRunner:
         self._json_to_wgs(dst_fn)
 
     def _json_to_wgs(self, src_fn, verbose=True):
-        utm_proj = Proj(self.srs_proj4)
+        proj2wgs_transformer = self.proj2wgs_transformer
 
         with open(src_fn) as fp:
             js = json.load(fp)
@@ -907,8 +905,8 @@ class TopazRunner:
             if len(coords.shape) < 3:
                 continue
 
-            wgs_lngs, wgs_lats = utm_proj(coords[0, :, 0],
-                                  coords[0, :, 1], inverse=True)
+            wgs_lngs, wgs_lats = proj2wgs_transformer.transform(coords[0, :, 0],
+                                                                coords[0, :, 1])
             coords[0, :, 0] = wgs_lngs
             coords[0, :, 1] = wgs_lats
             f['geometry']['coordinates'] = coords.tolist()

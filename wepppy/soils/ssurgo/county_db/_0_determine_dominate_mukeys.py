@@ -6,7 +6,7 @@ import shutil
 
 from collections import Counter
 
-import pyproj
+from pyproj import CRS, Transformer
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -76,9 +76,11 @@ if __name__ == "__main__":
             mukey_map, transform, utmproj4 = read_raster(ssurgo_fn)
 
             # transform coordinates in shape file to utm
-            utm_proj = pyproj.Proj(utmproj4)
-            wgs_proj = pyproj.Proj(wgs84_proj4)
-            points = [pyproj.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]
+            utm_proj = CRS.from_proj4(utmproj4)
+            wgs_proj = CRS.from_proj4(wgs84_proj4)
+            wgs2utm_transformer = Transformer.from_crs(wgs_proj, utm_proj, always_xy=True)
+            points = [wgs2utm_transformer.transform(lng, lat) for lng, lat in shape.points]
+
             assert len(points) > 0
 
             # build a mask for the polygon of the county

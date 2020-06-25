@@ -16,7 +16,7 @@ from collections import Counter
 from math import pi, atan2
 import warnings
 
-from pyproj import Proj, transform
+from pyproj import CRS, Transformer
 
 import numpy as np
 from scipy.stats import circmean
@@ -630,8 +630,9 @@ class WatershedAbstraction:
         self.watershed['srs'] = dict(transform=_transform,
                                      projection=_proj)
 
-        self.utmProj = Proj(_proj)
-        self.wgsProj = Proj(wgs84_proj4)
+        self.utmProj = CRS.from_proj4(_proj)
+        self.wgsProj = CRS.from_proj4(wgs84_proj4)
+        self.proj2wgs_transformer = Transformer.from_crs(self.utmProj, self.wgsProj, always_xy=True)
 
         # find the centroid_px for the watershed
         indx, indy = np.where(bound == 1)
@@ -749,8 +750,10 @@ class WatershedAbstraction:
         return e, n
 
     def px_to_lnglat(self, x: int, y: int) -> Tuple[float, float]:
+        proj2wgs_transformer = self.proj2wgs_transformer
+
         e, n = self.px_to_utm(x, y)
-        lng, lat = transform(self.utmProj, self.wgsProj, e, n)
+        lng, lat = proj2wgs_transformer.transform(e, n)
         assert not np.isinf(lng), (self.transform, x, y, e, n)
         assert not np.isinf(lat)
         return lng, lat
@@ -1270,7 +1273,6 @@ class WatershedAbstraction:
         self._read_netw_tab()
         network = self.network
         translator = self.translator
-
 
         # now we are going to define the lines of the structure file
         # this doesn't handle impoundments
