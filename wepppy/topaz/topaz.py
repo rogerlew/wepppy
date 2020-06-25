@@ -564,21 +564,17 @@ class TopazRunner:
         return True
 
     def _run_subprocess(self, cmd, stdin=None, verbose=False):
-        """
-        method to run subprocess cmd.
-
-        stdin defines text input that is sent through p.stdin after the
-        subprocess is created.
-
-        verbose specifies whether p.stdout written as the subprocess runs
-
-        returns output as a list of lines. Line returns and empty lines are
-        stripped from the lines list.
-
-        Provides some topaz specific abort conditions to avoid falling into
-        deep loops that take a long time to complete
-        """
         verbose = True
+
+        if IS_WINDOWS:
+            self._run_subprocess_win(cmd=cmd, stdin=stdin, verbose=verbose)
+        else:
+            self._run_subprocess_nix(cmd=cmd, stdin=stdin, verbose=verbose)
+
+    def _run_subprocess_win(self, cmd, stdin=None, verbose=False):
+        """
+        run on windows
+        """
 
         if verbose:
             print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
@@ -587,22 +583,18 @@ class TopazRunner:
         # working directory back
         lines = []
 
-        p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd)
+        p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd, universal_newlines=True)
 
         # on pass 2 we need to write '1' to standard input
         if stdin is not None:
-            p.stdin.write(stdin.encode('utf-8'))
+            p.stdin.write(stdin)
             p.stdin.flush()
 
         abort_count = 0
 
-        while 1:
+        while p.poll() is None:
             output = p.stdout.readline()
-            if not output:
-                break
-
-            output = output.decode('utf-8').strip()
-            p.stdout.flush()
+            output = output.strip()
 
             if output != '':
                 lines.append(output)
@@ -614,13 +606,10 @@ class TopazRunner:
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
                 try:
+                    outs, errs = p.communicate(input=('0\n', '0\r\n')[IS_WINDOWS], timeout=15)
 
-                    p.stdin.write(b'0')
-
-                    # outs, errs = p.communicate(input=b'0', timeout=_TIMEOUT)
-                    #
-                    # if verbose:
-                    #     print(outs, errs)
+                    if verbose:
+                        print(outs, errs)
                 except:
                     try:
                         p.kill()
@@ -637,28 +626,97 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                p.stdin.write(b'1')
-                # outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
-                #
-                # if verbose:
-                #     print(outs, errs)
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+
+                if verbose:
+                    print(outs, errs)
                 abort_count += 1
 
-#            if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
-#                outs, errs = p.communicate(input='1\r\n\r\n', timeout=_TIMEOUT)
-#
-#                if verbose:
-#                    print(outs, errs)
+            if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+
+                if verbose:
+                    print(outs, errs)
 
             # This occurs if the watershed extends beyond the dem. There isn't a way
             # of checking that, and novice users have a hard time recognizing this
             # condition from the channel map
             if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
-                p.stdin.write(b'1')
-                # outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
-                #
-                # if verbose:
-                #     print(outs, errs)
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+
+                if verbose:
+                    print(outs, errs)
+                abort_count += 1
+
+            # if the abort count is greater than 2, then abort
+            if abort_count > 2:
+                p.kill()
+
+        p.stdin.close()
+        p.stdout.close()
+
+        # return output as list of strings
+        return [line for line in lines if line != '']
+
+    def _run_subprocess_nix(self, cmd, stdin=None, verbose=False):
+        """
+        run on linux
+        """
+
+        if verbose:
+            print('cmd: %s\ncwd: %s\n' % (cmd, self.topaz_wd))
+
+        # need to use try catch to make sure we have a chance to switch the
+        # working directory back
+        lines = []
+
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd)
+
+        # on pass 2 we need to write '1' to standard input
+        if stdin is not None:
+            p.stdin.write(stdin.encode("utf-8"))
+            p.stdin.close()
+
+        abort_count = 0
+
+        while p.poll() is None:
+            output = p.stdout.readline().decode("utf-8")
+            output = output.strip()
+
+            if output != '':
+                lines.append(output)
+
+            if verbose:
+                sys.stdout.write(output + '\n')
+                sys.stdout.flush()
+
+            # If the input dem is large it give a warning and prompts whether or not it should continue
+            if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
+                try:
+                    p.stdin.write(b'1')
+                    p.stdin.close()
+                except:
+                    try:
+                        p.kill()
+                    except:
+                        pass
+
+                    lines.append('UNEXPECTED TERMINATION')
+                    return [line for line in lines if line != '']
+
+            # This comes up if the outlet isn't a channel and we are trying to build
+            # subcatchments. The build_subcatchments method preprocesses the outlet
+            # to find a channel, so this shouldn't happen (unless something else breaks)
+            #
+            # It comes up once even if the outlet is a hillslope that is why we write '1'
+            # to the stdin if we are on pass 2.
+            if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
+                abort_count += 1
+
+            # This occurs if the watershed extends beyond the dem. There isn't a way
+            # of checking that, and novice users have a hard time recognizing this
+            # condition from the channel map
+            if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
                 abort_count += 1
 
             # if the abort count is greater than 2, then abort
