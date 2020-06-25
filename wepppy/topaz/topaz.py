@@ -601,7 +601,7 @@ class TopazRunner:
             if not output:
                 break
 
-            output = output.strip()
+            output = output.decode('utf-8').strip()
             p.stdout.flush()
 
             if output != '':
@@ -614,10 +614,13 @@ class TopazRunner:
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
                 try:
-                    outs, errs = p.communicate(input=b'0', timeout=_TIMEOUT)
 
-                    if verbose:
-                        print(outs, errs)
+                    p.stdin.write(b'0')
+
+                    # outs, errs = p.communicate(input=b'0', timeout=_TIMEOUT)
+                    #
+                    # if verbose:
+                    #     print(outs, errs)
                 except:
                     try:
                         p.kill()
@@ -634,10 +637,11 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
-
-                if verbose:
-                    print(outs, errs)
+                p.stdin.write(b'1')
+                # outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
+                #
+                # if verbose:
+                #     print(outs, errs)
                 abort_count += 1
 
 #            if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
@@ -650,10 +654,11 @@ class TopazRunner:
             # of checking that, and novice users have a hard time recognizing this
             # condition from the channel map
             if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
-                outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
-
-                if verbose:
-                    print(outs, errs)
+                p.stdin.write(b'1')
+                # outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
+                #
+                # if verbose:
+                #     print(outs, errs)
                 abort_count += 1
 
             # if the abort count is greater than 2, then abort
