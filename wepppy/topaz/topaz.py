@@ -594,8 +594,11 @@ class TopazRunner:
 
         abort_count = 0
 
-        while p.poll() is None:
+        while 1:
             output = p.stdout.readline()
+            if not output:
+                break
+
             output = output.strip()
             p.stdout.flush()
 
