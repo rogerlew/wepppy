@@ -59,14 +59,15 @@ def query_elevation():
         return jsonify({'Error': 'could not parse lng'})
 
     if srs is not None:
-        from pyproj import Proj, transform
+        from pyproj import CRS, Transformer
         try:
-            p1 = Proj(init=srs)
+            p1 = CRS.from_epsg(srs)
         except:
             return jsonify({'Error': 'could not initialize projection'})
 
-        p2 = Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        lng, lat = transform(p1, p2, lng, lat)
+        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        p1p2_transformer = Transformer.from_crs(p1, p2, always_xy=True)
+        lng, lat = p1p2_transformer.transform(lng, lat)
 
     img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
     src = _join(geodata_dir, 'ned1', '2016', img, 'img' + img + '_1.img')

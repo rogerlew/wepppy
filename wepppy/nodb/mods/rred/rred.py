@@ -19,7 +19,7 @@ from datetime import datetime
 import numpy as np
 from osgeo import gdal
 
-from pyproj import Proj, transform
+from pyproj import CRS, Transformer
 
 from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent
 from wepppy.landcover import LandcoverMap
@@ -119,11 +119,12 @@ class Rred(NoDbBase):
             utm_extent = raster_extent(self.dem_fn)
 
             assert 'utm' in proj
-            utm_proj = Proj(proj)
-            wgs_proj = Proj(wgs84_proj4)
+            utm_proj = CRS.from_proj4(proj)
+            wgs_proj = CRS.from_proj4(wgs84_proj4)
 
-            wgs_lr = transform(utm_proj, wgs_proj, utm_extent[0], utm_extent[1])
-            wgs_ul = transform(utm_proj, wgs_proj, utm_extent[2], utm_extent[3])
+            utm2wgs_transformer = Transformer.from_crs(utm_proj, wgs_proj, always_xy=True)
+            wgs_lr = utm2wgs_transformer.transform(utm_extent[0], utm_extent[1])
+            wgs_ul = utm2wgs_transformer.transform(utm_extent[2], utm_extent[3])
             self.wgs_extent = [wgs_lr[0], wgs_lr[1], wgs_ul[0], wgs_ul[1]]
             self.wgs_center = (wgs_lr[0] + wgs_ul[0]) / 2.0, (wgs_lr[1] + wgs_ul[1]) / 2.0
 
