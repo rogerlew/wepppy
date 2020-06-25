@@ -607,7 +607,7 @@ class TopazRunner:
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
                 try:
-                    outs, errs = p.communicate(input=('0\n', '0\r\n')[IS_WINDOWS], timeout=15)
+                    outs, errs = p.communicate(input='0\r\n', timeout=15)
 
                     if verbose:
                         print(outs, errs)
@@ -627,14 +627,14 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+                outs, errs = p.communicate(input='1\r\n', timeout=15)
 
                 if verbose:
                     print(outs, errs)
                 abort_count += 1
 
             if 'ENTER 0 IF YOU WANT TO CHANGE THESE VALUES' in output:
-                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+                outs, errs = p.communicate(input='1\r\n', timeout=15)
 
                 if verbose:
                     print(outs, errs)
@@ -643,7 +643,7 @@ class TopazRunner:
             # of checking that, and novice users have a hard time recognizing this
             # condition from the channel map
             if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
-                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=15)
+                outs, errs = p.communicate(input='1\r\n', timeout=15)
 
                 if verbose:
                     print(outs, errs)
