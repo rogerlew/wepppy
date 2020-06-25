@@ -37,6 +37,8 @@ from wepppy.all_your_base import (
 
 from wepppy.watershed_abstraction import WeppTopTranslator
 
+os.environ["PYTHONUNBUFFERED"] = "1"
+
 gdal.UseExceptions()
 
 _thisdir = os.path.dirname(__file__)
@@ -585,7 +587,7 @@ class TopazRunner:
         # working directory back
         lines = []
 
-        p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd, universal_newlines=True)
+        p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=self.topaz_wd)
 
         # on pass 2 we need to write '1' to standard input
         if stdin is not None:
@@ -612,7 +614,7 @@ class TopazRunner:
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
                 try:
-                    outs, errs = p.communicate(input='0\r\n', timeout=_TIMEOUT)
+                    outs, errs = p.communicate(input=b'0', timeout=_TIMEOUT)
 
                     if verbose:
                         print(outs, errs)
@@ -632,7 +634,7 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=_TIMEOUT)
+                outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
 
                 if verbose:
                     print(outs, errs)
@@ -648,7 +650,7 @@ class TopazRunner:
             # of checking that, and novice users have a hard time recognizing this
             # condition from the channel map
             if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
-                outs, errs = p.communicate(input='1\r\n', timeout=_TIMEOUT)
+                outs, errs = p.communicate(input=b'1', timeout=_TIMEOUT)
 
                 if verbose:
                     print(outs, errs)
