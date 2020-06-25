@@ -632,7 +632,7 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                outs, errs = p.communicate(input='1\r\n', timeout=_TIMEOUT)
+                outs, errs = p.communicate(input=('1\n', '1\r\n')[IS_WINDOWS], timeout=_TIMEOUT)
 
                 if verbose:
                     print(outs, errs)
