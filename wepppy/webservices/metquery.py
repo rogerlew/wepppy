@@ -21,7 +21,7 @@ import traceback
 import netCDF4
 
 from osgeo import osr
-import pyproj
+from pyproj import CRS, Transformer
 
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request, make_response, send_file
@@ -68,11 +68,11 @@ daily_catalog = {
 
 lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
             '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
-lccProj = pyproj.Proj(lcc_proj4)
+lccProj = CRS.from_proj4(lcc_proj4)
 
 wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-wgsProj = pyproj.Proj(wgs84_proj4)
-wgs2lcc = lambda lon, lat: pyproj.transform(wgsProj, lccProj, lon, lat)
+wgsProj = CRS.from_proj4(wgs84_proj4)
+wgs2lcc = Transformer.from_crs(wgsProj, lccProj, always_xy=True)
 yr_parse = lambda fn: _split(fn)[-1].split('_')[3]
 
 

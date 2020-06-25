@@ -11,7 +11,7 @@ import numpy.ma as ma
 import matplotlib.pyplot as plt
 
 from osgeo import gdal, osr, ogr
-import pyproj
+from pyproj import CRS, Transformer
 
 from wepppy.all_your_base import wgs84_proj4, read_raster
 from wepppy.all_your_base import shapefile
@@ -126,9 +126,10 @@ class WatershedBoundaryDataset:
 
             print('find raster indices')
             print('"', topaz.utmproj4, '"')
-            utm_proj = pyproj.Proj(topaz.utmproj4)
-            wgs_proj = pyproj.Proj(wgs84_proj4)
-            points = [pyproj.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]
+            utm_proj = CRS.from_proj4(topaz.utmproj4)
+            wgs_proj = CRS.from_proj4(wgs84_proj4)
+            wgs2utm_transformer = Transformer.from_crs(wgs_proj, utm_proj, always_xy=True)
+            points = [wgs2utm_transformer.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]
             mask = build_mask(points, ron.dem_fn)
             plt.figure()
             plt.imshow(mask)

@@ -44,7 +44,7 @@ class LogMixin(object):
                 with open(self.status_log, 'w') as fp:
                     fp.write(msg)
             except FileNotFoundError:
-                warnings.warn('FileNotFoundError')
+                warnings.warn('FileNotFoundError: "%s"' % self.status_log)
 
     def get_log_last(self):
         r_elapsed, t_elapsed, s = self._calc_log_elapsed()

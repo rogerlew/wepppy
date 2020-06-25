@@ -175,14 +175,15 @@ def identifymukey():
         return jsonify({'Error': 'Both lat and lng must be supplied for point location'})
 
     if srs is not None:
-        from pyproj import Proj, transform
+        from pyproj import CRS, Transformer
         try:
-            p1 = Proj(init=srs)
+            p1 = CRS.from_epsg(srs)
         except:
             return jsonify({'Error': 'could not initialize projection'})
 
-        p2 = Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        lng, lat = transform(p1, p2, lng, lat)
+        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        p1p2_transformer = Transformer.from_crs(p1, p2, always_xy=True)
+        lng, lat = p1p2_transformer.transform(lng, lat)
 
     # done validating
     img = '201703_n%0.1f_w%0.1f_.tif' % (round_pt5(lat), round_pt5(abs(lng)))
@@ -237,15 +238,17 @@ def identifymukeys():
 
     # proces srs
     if srs is not None:
-        from pyproj import Proj, transform
+        from pyproj import CRS, Transformer
         try:
-            p1 = Proj(init=srs)
+            p1 = CRS.from_epsg(srs)
         except:
             return jsonify({'Error': 'could not initialize projection'})
 
-        p2 = Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        L, b = transform(p1, p2, L, b)
-        r, t = transform(p1, p2, r, t)
+        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        p1p2_transformer = Transformer.from_crs(p1, p2, always_xy=True)
+
+        L, b = p1p2_transformer.transform(L, b)
+        r, t = p1p2_transformer.transform(r, t)
 
     # extract data from map
     src = _join(geodata_dir, 'ssurgo', '201703', '.vrt')
