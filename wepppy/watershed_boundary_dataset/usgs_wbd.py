@@ -11,7 +11,6 @@ import numpy.ma as ma
 import matplotlib.pyplot as plt
 
 from osgeo import gdal, osr, ogr
-from pyproj import CRS, Transformer
 
 from wepppy.all_your_base import wgs84_proj4, read_raster
 from wepppy.all_your_base import shapefile
@@ -77,6 +76,8 @@ def build_mask(points, georef_fn):
 
 class WatershedBoundaryDataset:
     def __init__(self, shp):
+        from pyproj import CRS, Transformer
+
         sf = shapefile.Reader(shp)
         header = [field[0] for field in sf.fields][1:]
 
