@@ -22,7 +22,6 @@ import warnings
 from imageio import imread
 
 from osgeo import gdal, ogr, osr
-from pyproj import CRS, Transformer
 import utm
 
 import numpy as np
@@ -196,6 +195,7 @@ class TopazRunner:
         # if the channel dataseet is found, load the channel and junction masks
         self.junction_mask = None
 
+        from pyproj import CRS, Transformer
         p1 = CRS.from_proj4(self.srs_proj4)
         p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
 

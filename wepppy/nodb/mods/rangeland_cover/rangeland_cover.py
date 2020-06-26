@@ -23,8 +23,6 @@ from datetime import datetime
 import numpy as np
 from osgeo import gdal
 
-from pyproj import Proj, transform
-
 from wepppy.all_your_base import cmyk_to_rgb, RGBA
 from wepppy.landcover import LandcoverMap
 
@@ -60,7 +58,6 @@ def gen_cover_color(cover):
         k = 0.2 + rock / 100 * 0.2
 
     r, g, b = cmyk_to_rgb(c, m, y, k)
-
 
     return RGBA(*[int(v * 255) for v in [r, g, b, 1.0]]).tohex()
 
