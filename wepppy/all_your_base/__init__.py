@@ -31,7 +31,7 @@ import numpy as np
 
 try:
     import win32com.shell.shell as shell
-except ImportError:
+except:
     pass
 
 from osgeo import gdal, osr, ogr
