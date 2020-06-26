@@ -22,7 +22,6 @@ from osgeo import osr
 from osgeo.gdalconst import GA_ReadOnly
 
 import utm
-from pyproj import CRS, Transformer
 
 
 class RDIOutOfBoundsException(Exception):
@@ -62,6 +61,7 @@ class RasterDatasetInterpolator:
         srs.ImportFromWkt(self.wkt_text)
         self.proj4 = srs.ExportToProj4()
 
+        from pyproj import CRS, Transformer
         if proj is None:
             self.proj = CRS.from_proj4(self.proj4)
         else:
