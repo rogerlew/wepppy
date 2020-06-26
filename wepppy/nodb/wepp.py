@@ -1144,10 +1144,10 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
     def query_sub_val(self, measure):
         wd = self.wd
 
-        climate = Climate.getInstance(wd)
+        #climate = Climate.getInstance(wd)
 
-        if climate.climate_mode == ClimateMode.SingleStorm:
-            return None
+        #if climate.climate_mode == ClimateMode.SingleStorm:
+        #    return None
 
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
@@ -1173,10 +1173,10 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
     def query_chn_val(self, measure):
         wd = self.wd
 
-        climate = Climate.getInstance(wd)
+        #climate = Climate.getInstance(wd)
 
-        if climate.climate_mode == ClimateMode.SingleStorm:
-            return None
+        #if climate.climate_mode == ClimateMode.SingleStorm:
+        #    return None
 
         translator = Watershed.getInstance(wd).translator_factory()
         output_dir = self.output_dir
