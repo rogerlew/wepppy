@@ -19,8 +19,6 @@ from datetime import datetime
 import numpy as np
 from osgeo import gdal
 
-from pyproj import CRS, Transformer
-
 from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent
 from wepppy.landcover import LandcoverMap
 from wepppy.nodb.mods.rred import rred_api
@@ -118,6 +116,7 @@ class Rred(NoDbBase):
             data, _transform, proj = read_raster(self.dem_fn, dtype=np.uint8)
             utm_extent = raster_extent(self.dem_fn)
 
+            from pyproj import CRS, Transformer
             assert 'utm' in proj
             utm_proj = CRS.from_proj4(proj)
             wgs_proj = CRS.from_proj4(wgs84_proj4)
