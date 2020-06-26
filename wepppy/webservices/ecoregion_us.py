@@ -9,7 +9,6 @@
 import math
 
 from os.path import join as _join
-from pyproj import CRS, Transformer
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request
 from osgeo import ogr
@@ -31,6 +30,8 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def query_ecoregion():
+    from pyproj import CRS, Transformer
+
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
 

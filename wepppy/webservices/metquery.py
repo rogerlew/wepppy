@@ -21,7 +21,6 @@ import traceback
 import netCDF4
 
 from osgeo import osr
-from pyproj import CRS, Transformer
 
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request, make_response, send_file
@@ -66,17 +65,18 @@ daily_catalog = {
     'lt/daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'}
 }
 
-lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
-            '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
-lccProj = CRS.from_proj4(lcc_proj4)
-
-wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-wgsProj = CRS.from_proj4(wgs84_proj4)
-wgs2lcc = Transformer.from_crs(wgsProj, lccProj, always_xy=True)
-yr_parse = lambda fn: _split(fn)[-1].split('_')[3]
-
-
 def crop_nc(nc, bbox, dst):
+    from pyproj import CRS, Transformer
+    lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
+                '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
+    lccProj = CRS.from_proj4(lcc_proj4)
+
+    wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+    wgsProj = CRS.from_proj4(wgs84_proj4)
+    wgs2lcc = Transformer.from_crs(wgsProj, lccProj, always_xy=True)
+
+    yr_parse = lambda fn: _split(fn)[-1].split('_')[3]
+
     ds = netCDF4.Dataset(nc)
 
     # determine transform

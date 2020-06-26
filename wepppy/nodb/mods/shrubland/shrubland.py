@@ -20,8 +20,6 @@ from datetime import datetime
 import numpy as np
 from osgeo import gdal
 
-from pyproj import Proj, transform
-
 from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent, wmesque_retrieve
 from wepppy.landcover import LandcoverMap
 
