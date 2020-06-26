@@ -96,11 +96,11 @@ def crop_nc(nc, bbox, dst):
     assert ur_x > ll_x
     assert ur_y > ll_y
 
-    ll_px, ll_py = wgs2lcc(ll_x, ll_y)
+    ll_px, ll_py = wgs2lcc.transform(ll_x, ll_y)
     #ll_px = int(round((easting - transform[0]) / transform[1]))
     #ll_py = -int(round((transform[3] - northing) / transform[5]))
 
-    ur_px, ur_py = wgs2lcc(ur_x, ur_y)
+    ur_px, ur_py = wgs2lcc.transform(ur_x, ur_y)
     #ur_px = int(round((easting - transform[0]) / transform[1]))
     #ur_py = -int(round((transform[3] - northing) / transform[5]))
 
