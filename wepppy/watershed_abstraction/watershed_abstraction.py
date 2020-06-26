@@ -16,8 +16,6 @@ from collections import Counter
 from math import pi, atan2
 import warnings
 
-from pyproj import CRS, Transformer
-
 import numpy as np
 from scipy.stats import circmean
 
@@ -629,6 +627,8 @@ class WatershedAbstraction:
         self.outlet_top_id = outlet_top_id
         self.watershed['srs'] = dict(transform=_transform,
                                      projection=_proj)
+
+        from pyproj import CRS, Transformer
 
         self.utmProj = CRS.from_proj4(_proj)
         self.wgsProj = CRS.from_proj4(wgs84_proj4)
