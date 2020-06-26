@@ -1153,26 +1153,20 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
 
-        try:
-            report = Loss(loss_pw0, self.has_phosphorus, self.wd)
-        except NumYearsIsZeroException:
-            pass
+        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         d = {}
-        try:
-            for row in report.hill_tbl:
-                topaz_id = translator.top(wepp=row['Hillslopes'])
+        for row in report.hill_tbl:
+            topaz_id = translator.top(wepp=row['Hillslopes'])
 
-                v = row[measure]
-                if isnan(v) or isinf(v):
-                    v = None
+            v = row[measure]
+            if isnan(v) or isinf(v):
+                v = None
 
-                d[str(topaz_id)] = dict(
-                    topaz_id=topaz_id,
-                    value=v
-                )
-        except:
-            return None
+            d[str(topaz_id)] = dict(
+                topaz_id=topaz_id,
+                value=v
+            )
 
         return d
 
@@ -1188,10 +1182,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
 
-        try:
-            report = Loss(loss_pw0, self.has_phosphorus, self.wd)
-        except NumYearsIsZeroException:
-            pass
+        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         d = {}
         for row in report.chn_tbl:
