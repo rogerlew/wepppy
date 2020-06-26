@@ -593,7 +593,7 @@ def create(config):
         last = get_last()
         if _exists(last):
             os.unlink(last)
-        make_symlink(wd, last)
+        # make_symlink(wd, last)
 
         user_datastore.create_run(runid, config, current_user)
 
