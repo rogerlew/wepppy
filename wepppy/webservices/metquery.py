@@ -28,7 +28,26 @@ from wepppy.all_your_base import RasterDatasetInterpolator, isint
 
 from glob import glob
 
-from osgeo import ogr, osr
+from osgeo import ogr, osr, gdal
+gdal.UseExceptions()
+
+# example GDAL error handler function
+def gdal_error_handler(err_class, err_num, err_msg):
+    errtype = {
+            gdal.CE_None:'None',
+            gdal.CE_Debug:'Debug',
+            gdal.CE_Warning:'Warning',
+            gdal.CE_Failure:'Failure',
+            gdal.CE_Fatal:'Fatal'
+    }
+    err_msg = err_msg.replace('\n',' ')
+    err_class = errtype.get(err_class, 'None')
+    print('Error Number: %s' % (err_num))
+    print('Error Type: %s' % (err_class))
+    print('Error Message: %s' % (err_msg))
+
+# install error handler
+gdal.PushErrorHandler(gdal_error_handler)
 
 geodata_dir = '/geodata/'
 static_dir = None
