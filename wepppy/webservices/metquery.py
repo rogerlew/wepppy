@@ -28,6 +28,8 @@ from wepppy.all_your_base import RasterDatasetInterpolator, isint
 
 from glob import glob
 
+from osgeo import ogr, osr
+
 geodata_dir = '/geodata/'
 static_dir = None
 
@@ -65,15 +67,33 @@ daily_catalog = {
     'lt/daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'}
 }
 
-def crop_nc(nc, bbox, dst):
-    from pyproj import CRS, Transformer
-    lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
-                '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
-    lccProj = CRS.from_proj4(lcc_proj4)
+class Wgs_2_lcc(object):
+    def __init__(self):
 
-    wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-    wgsProj = CRS.from_proj4(wgs84_proj4)
-    wgs2lcc = Transformer.from_crs(wgsProj, lccProj, always_xy=True)
+        lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
+                    '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
+        lccProj = osr.SpatialReference()
+        lccProj.ImportFromProj4(lcc_proj4)
+
+        wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+        wgsProj = osr.SpatialReference()
+
+        self.wgs2lcc = osr.CoordinateTransformation(wgsProj, lccProj)
+
+    def transform(self, lng, lat):
+        # create a geometry from coordinates
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint(lng, lat)
+
+        point.Transform(self.wgs2lcc)
+
+        # print point in EPSG 4326
+        return point.GetX(), point.GetY()
+
+
+def crop_nc(nc, bbox, dst):
+
+    _wgs_2_lcc = Wgs_2_lcc()
 
     yr_parse = lambda fn: _split(fn)[-1].split('_')[3]
 
@@ -96,11 +116,11 @@ def crop_nc(nc, bbox, dst):
     assert ur_x > ll_x
     assert ur_y > ll_y
 
-    ll_px, ll_py = wgs2lcc.transform(ll_x, ll_y)
+    ll_px, ll_py = _wgs_2_lcc.transform(ll_x, ll_y)
     #ll_px = int(round((easting - transform[0]) / transform[1]))
     #ll_py = -int(round((transform[3] - northing) / transform[5]))
 
-    ur_px, ur_py = wgs2lcc.transform(ur_x, ur_y)
+    ur_px, ur_py = _wgs_2_lcc.transform(ur_x, ur_y)
     #ur_px = int(round((easting - transform[0]) / transform[1]))
     #ur_py = -int(round((transform[3] - northing) / transform[5]))
 
