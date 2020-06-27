@@ -78,13 +78,14 @@ class Wgs_2_lcc(object):
         wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
         wgsProj = osr.SpatialReference()
 
+        self.wgsProj = wgsProj
         self.wgs2lcc = osr.CoordinateTransformation(wgsProj, lccProj)
 
     def transform(self, lng, lat):
         # create a geometry from coordinates
         point = ogr.Geometry(ogr.wkbPoint)
         point.AddPoint(lng, lat)
-
+        point.AssignSpatialReference(self.wgsProj)
         point.Transform(self.wgs2lcc)
 
         # print point in EPSG 4326
