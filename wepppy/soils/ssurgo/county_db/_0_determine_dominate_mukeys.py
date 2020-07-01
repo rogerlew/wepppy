@@ -6,31 +6,19 @@ import shutil
 
 from collections import Counter
 
-from pyproj import CRS, Transformer
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from wepppy.all_your_base import shapefile, wmesque_retrieve, wgs84_proj4, read_raster, build_mask
-
-
-def px_to_utm(transform, x: int, y: int):
-    e = transform[0] + transform[1] * x
-    n = transform[3] + transform[5] * y
-    return e, n
-
-
-def px_to_lnglat(transform, x: int, y: int, utm_proj, wgs_proj):
-    e, n = px_to_utm(transform, x, y)
-    return pyproj.transform(utm_proj, wgs_proj, e, n)
-
-
-def centroid_px(indx, indy):
-    """
-    given a sets of x and y indices calulates a central [x,y] index
-    """
-    return (int(round(float(np.mean(indx)))),
-            int(round(float(np.mean(indy)))))
+from wepppy.all_your_base import (
+    shapefile,
+    wmesque_retrieve,
+    wgs84_proj4,
+    read_raster,
+    build_mask,
+    px_to_utm,
+    px_to_lnglat,
+    centroid_px
+)
 
 
 if __name__ == "__main__":
@@ -76,9 +64,7 @@ if __name__ == "__main__":
             mukey_map, transform, utmproj4 = read_raster(ssurgo_fn)
 
             # transform coordinates in shape file to utm
-            utm_proj = CRS.from_proj4(utmproj4)
-            wgs_proj = CRS.from_proj4(wgs84_proj4)
-            wgs2utm_transformer = Transformer.from_crs(wgs_proj, utm_proj, always_xy=True)
+            wgs2utm_transformer = GeoTransformer(src_proj4=wgs84_proj4, dst_proj4=utmproj4)
             points = [wgs2utm_transformer.transform(lng, lat) for lng, lat in shape.points]
 
             assert len(points) > 0
@@ -99,7 +85,7 @@ if __name__ == "__main__":
 
             # find the centroid of the county in case we need to use statsgo later on
             c_px, c_py = centroid_px(indx, indy)
-            c_lng, c_lat = px_to_lnglat(transform, c_px, c_py, utm_proj, wgs_proj)
+            c_lng, c_lat = px_to_lnglat(transform, c_px, c_py, utmproj4, wgs84_proj4)
             assert c_lng > l
             assert c_lng < r
             assert c_lat > b

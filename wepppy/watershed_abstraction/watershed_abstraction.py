@@ -23,7 +23,8 @@ from wepppy.all_your_base import (
     isfloat,
     read_arc,
     wgs84_proj4,
-    centroid_px
+    centroid_px,
+    GeoTransformer
 )
 from .wepp_top_translator import WeppTopTranslator
 
@@ -628,11 +629,8 @@ class WatershedAbstraction:
         self.watershed['srs'] = dict(transform=_transform,
                                      projection=_proj)
 
-        from pyproj import CRS, Transformer
-
-        self.utmProj = CRS.from_proj4(_proj)
-        self.wgsProj = CRS.from_proj4(wgs84_proj4)
-        self.proj2wgs_transformer = Transformer.from_crs(self.utmProj, self.wgsProj, always_xy=True)
+        self.utmProj = _proj
+        self.proj2wgs_transformer = GeoTransformer(self.utmProj, wgs84_proj4)
 
         # find the centroid_px for the watershed
         indx, indy = np.where(bound == 1)

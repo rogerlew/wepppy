@@ -6,33 +6,20 @@ import shutil
 
 from collections import Counter
 
-from pyproj import CRS, Transformer
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from wepppy.all_your_base import shapefile, wmesque_retrieve, wgs84_proj4, read_raster, build_mask
+from wepppy.all_your_base import (
+    shapefile,
+    wmesque_retrieve,
+    wgs84_proj4,
+    read_raster,
+    build_mask,
+    px_to_lnglat,
+    px_to_utm,
+    centroid_px)
 
 from wepppy.climates.cligen import CligenStationsManager
-
-def px_to_utm(transform, x: int, y: int):
-    e = transform[0] + transform[1] * x
-    n = transform[3] + transform[5] * y
-    return e, n
-
-
-def px_to_lnglat(transform, x: int, y: int, utm_proj, wgs_proj):
-    e, n = px_to_utm(transform, x, y)
-    utm2wgs_transformer = Transformer.from_crs(utm_proj, wgs_proj, always_xy=True)
-    return utm2wgs_transformer.transform(e, n)
-
-
-def centroid_px(indx, indy):
-    """
-    given a sets of x and y indices calulates a central [x,y] index
-    """
-    return (int(round(float(np.mean(indx)))),
-            int(round(float(np.mean(indy)))))
 
 
 if __name__ == "__main__":

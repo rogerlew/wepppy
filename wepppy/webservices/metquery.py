@@ -24,7 +24,7 @@ from osgeo import osr
 
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request, make_response, send_file
-from wepppy.all_your_base import RasterDatasetInterpolator, isint, GeoTransformer
+from wepppy.all_your_base import RasterDatasetInterpolator, isint, GeoTransformer, wgs84_proj4
 
 from glob import glob
 
@@ -89,7 +89,7 @@ daily_catalog = {
 
 def crop_nc(nc, bbox, dst):
 
-    _wgs_2_lcc = GeoTransformer(src_proj4='+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs',
+    _wgs_2_lcc = GeoTransformer(src_proj4=wgs84_proj4,
                                 dst_proj4='+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 '
                                           '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs')
 
