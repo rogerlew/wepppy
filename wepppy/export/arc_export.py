@@ -33,7 +33,6 @@ def has_arc_export(wd):
 
 
 def arc_export(wd, verbose=False):
-    verbose = True
 
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)

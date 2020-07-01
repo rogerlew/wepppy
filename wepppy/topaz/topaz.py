@@ -561,7 +561,6 @@ class TopazRunner:
         return True
 
     def _run_subprocess(self, cmd, stdin=None, verbose=False):
-        verbose = True
 
         if IS_WINDOWS:
             return self._run_subprocess_win(cmd=cmd, stdin=stdin, verbose=verbose)
