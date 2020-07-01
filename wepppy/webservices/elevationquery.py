@@ -13,6 +13,8 @@ from os.path import join as _join
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request
 
+from wepppy.all_your_base import GeoTransformer
+
 geodata_dir = '/geodata/'
 
 
@@ -59,15 +61,12 @@ def query_elevation():
         return jsonify({'Error': 'could not parse lng'})
 
     if srs is not None:
-        from pyproj import CRS, Transformer
         try:
-            p1 = CRS.from_epsg(srs)
+            geo_transformer = GeoTransformer(src_proj4=srs,
+                                             dst_proj4=wgs84_proj4)
+            lng, lat = geo_transformer.transform(lng, lat)
         except:
-            return jsonify({'Error': 'could not initialize projection'})
-
-        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        p1p2_transformer = Transformer.from_crs(p1, p2, always_xy=True)
-        lng, lat = p1p2_transformer.transform(lng, lat)
+            return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
     img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
     src = _join(geodata_dir, 'ned1', '2016', img, 'img' + img + '_1.img')
