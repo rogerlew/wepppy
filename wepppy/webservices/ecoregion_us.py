@@ -13,6 +13,8 @@ from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request
 from osgeo import ogr
 
+from wepppy.all_your_base import GeoTransformer, wgs84_proj4
+
 geodata_dir = '/geodata/'
 
 
@@ -30,7 +32,6 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def query_ecoregion():
-    from pyproj import CRS, Transformer
 
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -59,25 +60,22 @@ def query_ecoregion():
     if lng is None:
         return jsonify({'Error': 'could not parse lng'})
 
-    wgs_proj = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     if srs is not None:
-
         try:
-            p1 = CRS.from_epsg(srs)
+            geo_transformer = GeoTransformer(src_proj4=srs,
+                                             dst_proj4=wgs84_proj4)
+            lng, lat = geo_transformer.transform(lng, lat)
         except:
-            return jsonify({'Error': 'could not initialize projection'})
-
-        proj2wgs_transformer = Transformer.from_crs(p1, wgs_proj, always_xy=True)
-        lng, lat = proj2wgs_transformer.transform(lng, lat)
+            return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
     shapefile = _join(geodata_dir, "ecoregions/us_eco_l3/us_eco_l3.shp")
     driver = ogr.GetDriverByName("ESRI Shapefile")
     dataSource = driver.Open(shapefile, 0)
     layer = dataSource.GetLayer()
 
-    sf_proj = CRS.from_proj4(layer.GetSpatialRef().ExportToProj4())
+    sf_proj = layer.GetSpatialRef().ExportToProj4()
 
-    wgs2sf_transformer = Transformer.from_crs(wgs_proj, sf_proj, always_xy=True)
+    wgs2sf_transformer = GeoTransformer(src_proj4=wgs84_proj4, dst_proj4=sf_proj)
     e, n = wgs2sf_transformer.transform(lng, lat)
 
     point = ogr.Geometry(ogr.wkbPoint)

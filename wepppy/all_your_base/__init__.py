@@ -506,6 +506,26 @@ def warp2match(src_filename, match_filename, dst_filename):
     del dst  # Flush
 
 
+def px_to_utm(transform, x: int, y: int):
+    e = transform[0] + transform[1] * x
+    n = transform[3] + transform[5] * y
+    return e, n
+
+
+def px_to_lnglat(transform, x: int, y: int, utm_proj, wgs_proj):
+    e, n = px_to_utm(transform, x, y)
+
+    geo_transformer = GeoTransformer(src_proj4=utm_proj, dst_proj4=wgs_proj)
+    return geo_transformer.transform(e, n)
+
+
+def centroid_px(indx, indy):
+    """
+    given a sets of x and y indices calulates a central [x,y] index
+    """
+    return (int(round(float(np.mean(indx)))),
+            int(round(float(np.mean(indy)))))
+
 def translate_tif_to_asc(fn, fn2=None):
     assert fn.endswith(".tif")
     assert _exists(fn)

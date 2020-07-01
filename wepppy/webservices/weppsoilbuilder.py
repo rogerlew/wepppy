@@ -16,7 +16,7 @@ from flask import Flask, jsonify, request, Response
 
 sys.path.append('/home/roger')
 from wepppy.soils.ssurgo import *
-from wepppy.all_your_base import isint
+from wepppy.all_your_base import isint, GeoTransformer, wgs84_proj4
 import array
 import os
 from bisect import bisect_left
@@ -175,15 +175,11 @@ def identifymukey():
         return jsonify({'Error': 'Both lat and lng must be supplied for point location'})
 
     if srs is not None:
-        from pyproj import CRS, Transformer
         try:
-            p1 = CRS.from_epsg(srs)
+            geo_transformer = GeoTransformer(src_proj4=srs, dst_proj4=wgs84_proj4)
+            lng, lat = geo_transformer.transform(lng, lat)
         except:
-            return jsonify({'Error': 'could not initialize projection'})
-
-        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        p1p2_transformer = Transformer.from_crs(p1, p2, always_xy=True)
-        lng, lat = p1p2_transformer.transform(lng, lat)
+            return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
     # done validating
     img = '201703_n%0.1f_w%0.1f_.tif' % (round_pt5(lat), round_pt5(abs(lng)))
@@ -204,6 +200,7 @@ def identifymukey():
                     'Longitude': lng,
                     'SRS': srs,
                     'Mukey': int(mukey)})
+
 
 @app.route('/identifymukeys', methods=['GET', 'POST'])
 @app.route('/identifymukeys/', methods=['GET', 'POST'])
@@ -238,17 +235,13 @@ def identifymukeys():
 
     # proces srs
     if srs is not None:
-        from pyproj import CRS, Transformer
         try:
-            p1 = CRS.from_epsg(srs)
+            geo_transformer = GeoTransformer(src_proj4=srs, dst_proj4=wgs84_proj4)
+            L, b = geo_transformer.transform(L, b)
+            r, t = geo_transformer.transform(r, t)
         except:
-            return jsonify({'Error': 'could not initialize projection'})
+            return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
-        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        p1p2_transformer = Transformer.from_crs(p1, p2, always_xy=True)
-
-        L, b = p1p2_transformer.transform(L, b)
-        r, t = p1p2_transformer.transform(r, t)
 
     # extract data from map
     src = _join(geodata_dir, 'ssurgo', '201703', '.vrt')
