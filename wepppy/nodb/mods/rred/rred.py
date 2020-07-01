@@ -119,7 +119,7 @@ class Rred(NoDbBase):
             assert 'utm' in proj
             self.utm_proj = proj
 
-            utm2wgs_transformer = GeoTransformer(proj, dst_proj4=wgs84_proj4)
+            utm2wgs_transformer = GeoTransformer(src_proj4=proj, dst_proj4=wgs84_proj4)
             wgs_lr = utm2wgs_transformer.transform(utm_extent[0], utm_extent[1])
             wgs_ul = utm2wgs_transformer.transform(utm_extent[2], utm_extent[3])
             self.wgs_extent = [wgs_lr[0], wgs_lr[1], wgs_ul[0], wgs_ul[1]]
