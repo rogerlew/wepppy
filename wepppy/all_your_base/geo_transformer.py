@@ -18,12 +18,5 @@ class GeoTransformer(object):
         else:
             self.dstProj = Proj(init=dst_epsg)
 
-    def transform(self, x, y,
-                  z: Any=None,
-                  tt: Any=None,
-                  radians: bool=False,
-                  errcheck: bool=False,
-                  skip_equivalent: bool=False,
-                  always_xy: bool=False):
-        return transform(self.srcProj, self.dstProj, x, y, z=z, tt=tt, radians=radians, errcheck=errcheck,
-                         skip_equivalent=skip_equivalent, always_xy=always_xy)
+    def transform(self, x, y):
+        return transform(self.srcProj, self.dstProj, x, y)
