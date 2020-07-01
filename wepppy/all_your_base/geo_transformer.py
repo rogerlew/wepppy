@@ -11,12 +11,12 @@ class GeoTransformer(object):
         if src_proj4:
             self.srcProj = Proj(src_proj4)
         else:
-            self.srcProj = Proj(init=src_epsg)
+            self.srcProj = Proj('EPSG:%i' % src_epsg)
 
         if dst_proj4:
             self.dstProj = Proj(dst_proj4)
         else:
-            self.dstProj = Proj(init=dst_epsg)
+            self.dstProj = Proj('EPSG:%i' % dst_epsg)
 
     def transform(self, x, y):
         return transform(self.srcProj, self.dstProj, x, y)

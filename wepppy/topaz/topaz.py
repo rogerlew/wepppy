@@ -30,7 +30,8 @@ from wepppy.all_your_base import (
     read_arc,
     get_utm_zone,
     isfloat,
-    wgs84_wkt,
+    GeoTransformer,
+    wgs84_proj4,
     IS_WINDOWS
 )
 
@@ -195,11 +196,7 @@ class TopazRunner:
         # if the channel dataseet is found, load the channel and junction masks
         self.junction_mask = None
 
-        from pyproj import CRS, Transformer
-        p1 = CRS.from_proj4(self.srs_proj4)
-        p2 = CRS.from_proj4('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-
-        self.proj2wgs_transformer = Transformer.from_crs(p1, p2, always_xy=True)
+        self.proj2wgs_transformer = GeoTransformer(self.srs_proj4, wgs84_proj4)
 
     def _clean_dir(self, empty_only=False):
         """

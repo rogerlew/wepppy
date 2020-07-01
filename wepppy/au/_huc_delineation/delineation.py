@@ -15,14 +15,14 @@ import numpy.ma as ma
 import matplotlib.pyplot as plt
 
 from osgeo import gdal, osr, ogr
-from pyproj import CRS, Transformer
 
 from wepppy.all_your_base import (
     wgs84_proj4,
     read_raster,
     haversine,
     RasterDatasetInterpolator,
-    RDIOutOfBoundsException
+    RDIOutOfBoundsException,
+    GeoTransformer
 )
 from wepppy.all_your_base import shapefile
 from wepppy.nodb import (
@@ -260,10 +260,7 @@ class WatershedBoundaryDataset:
             topaz.build_channels(**topaz_pars)
 
             print('find raster indices')
-            # print('"', topaz.utmproj4, '"')
-            utm_proj = CRS.from_proj4(topaz.utmproj4)
-            wgs_proj = CRS.from_proj4(wgs84_proj4)
-            utm2wgs_transformer = Transformer.from_crs(wgs_proj, utm_proj, always_xy=True)
+            utm2wgs_transformer = GeoTransformer(src_proj4=wgs84_proj4, dst_proj4=topaz.utmproj4)
             points = [utm2wgs_transformer.transform(lng, lat) for lng, lat in shape.points]
             mask = build_mask(points, ron.dem_fn)
             # plt.figure()
