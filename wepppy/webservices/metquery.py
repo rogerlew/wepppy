@@ -24,7 +24,7 @@ from osgeo import osr
 
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request, make_response, send_file
-from wepppy.all_your_base import RasterDatasetInterpolator, isint
+from wepppy.all_your_base import RasterDatasetInterpolator, isint, GeoTransformer
 
 from glob import glob
 
@@ -86,34 +86,12 @@ daily_catalog = {
     'lt/daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'}
 }
 
-class Wgs_2_lcc(object):
-    def __init__(self):
-
-        lcc_proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 ' \
-                    '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
-        lccProj = osr.SpatialReference()
-        lccProj.ImportFromProj4(lcc_proj4)
-
-        wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-        wgsProj = osr.SpatialReference()
-
-        self.wgsProj = wgsProj
-        self.wgs2lcc = osr.CoordinateTransformation(wgsProj, lccProj)
-
-    def transform(self, lng, lat):
-        # create a geometry from coordinates
-        point = ogr.Geometry(ogr.wkbPoint)
-        point.AddPoint(lng, lat)
-        point.AssignSpatialReference(self.wgsProj)
-        point.Transform(self.wgs2lcc)
-
-        # print point in EPSG 4326
-        return point.GetX(), point.GetY()
-
 
 def crop_nc(nc, bbox, dst):
 
-    _wgs_2_lcc = Wgs_2_lcc()
+    _wgs_2_lcc = GeoTransformer(src_proj4='+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs',
+                                dst_proj4='+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 '
+                                          '+x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs')
 
     yr_parse = lambda fn: _split(fn)[-1].split('_')[3]
 

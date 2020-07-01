@@ -9,7 +9,7 @@
 from typing import Tuple, List, Dict, Union
 
 from .locationinfo import RasterDatasetInterpolator, RDIOutOfBoundsException
-
+from .geo_transformer import GeoTransformer
 import sys
 import collections
 import os
