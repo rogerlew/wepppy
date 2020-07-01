@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 
 from osgeo import gdal, osr, ogr
 
-from wepppy.all_your_base import wgs84_proj4, read_raster
-from wepppy.all_your_base import shapefile
+from wepppy.all_your_base import wgs84_proj4, read_raster, shapefile, GeoTransformer
 from wepppy.nodb import Ron, Topaz
+
 
 def build_mask(points, georef_fn):
 
@@ -76,7 +76,6 @@ def build_mask(points, georef_fn):
 
 class WatershedBoundaryDataset:
     def __init__(self, shp):
-        from pyproj import CRS, Transformer
 
         sf = shapefile.Reader(shp)
         header = [field[0] for field in sf.fields][1:]
@@ -127,10 +126,8 @@ class WatershedBoundaryDataset:
 
             print('find raster indices')
             print('"', topaz.utmproj4, '"')
-            utm_proj = CRS.from_proj4(topaz.utmproj4)
-            wgs_proj = CRS.from_proj4(wgs84_proj4)
-            wgs2utm_transformer = Transformer.from_crs(wgs_proj, utm_proj, always_xy=True)
-            points = [wgs2utm_transformer.transform(wgs_proj, utm_proj, lng, lat) for lng, lat in shape.points]
+            wgs2utm_transformer = GeoTransformer.from_crs(wgs84_proj4, topaz.utmproj4)
+            points = [wgs2utm_transformer.transform(lng, lat) for lng, lat in shape.points]
             mask = build_mask(points, ron.dem_fn)
             plt.figure()
             plt.imshow(mask)

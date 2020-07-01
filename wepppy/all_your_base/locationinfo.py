@@ -23,6 +23,7 @@ from osgeo.gdalconst import GA_ReadOnly
 
 import utm
 
+from .geo_transformer import GeoTransformer
 
 class RDIOutOfBoundsException(Exception):
     """
@@ -61,12 +62,8 @@ class RasterDatasetInterpolator:
         srs.ImportFromWkt(self.wkt_text)
         self.proj4 = srs.ExportToProj4()
 
-        from pyproj import CRS, Transformer
-        if proj is None:
-            self.proj = CRS.from_proj4(self.proj4)
-        else:
-            self.proj = CRS.from_proj4(proj)
-        self.wgs84 = CRS.from_string('EPSG:4326')
+        if proj is not None:
+            self.proj = proj
 
         if self.lon_lat:
             self.upper, self.left = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
@@ -75,8 +72,8 @@ class RasterDatasetInterpolator:
             self.left, self.upper = self.get_geo_coord(0, 0)
             self.right, self.lower = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
 
-        self.proj2wgs_transformer = proj2wgs_transformer = Transformer.from_crs(self.proj, self.wgs84, always_xy=True)
-        self.wgs2proj_transformer = Transformer.from_crs(self.wgs84, self.proj, always_xy=True)
+        self.proj2wgs_transformer = proj2wgs_transformer = GeoTransformer(src_proj4=self.proj, dst_epsg=4326)
+        self.wgs2proj_transformer = GeoTransformer(src_epsg=4326, dst_proj4=self.proj)
 
         lng0, lat0 = proj2wgs_transformer.transform(self.left, self.upper)
         _, _, self.utm_n, self.utm_h = utm.from_latlon(lat0, lng0)
