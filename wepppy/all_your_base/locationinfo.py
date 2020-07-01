@@ -63,7 +63,7 @@ class RasterDatasetInterpolator:
         self.proj4 = srs.ExportToProj4()
 
         if proj is not None:
-            self.proj = proj
+            self.proj4 = proj
 
         if self.lon_lat:
             self.upper, self.left = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
@@ -72,8 +72,8 @@ class RasterDatasetInterpolator:
             self.left, self.upper = self.get_geo_coord(0, 0)
             self.right, self.lower = self.get_geo_coord(ds.RasterXSize, ds.RasterYSize)
 
-        self.proj2wgs_transformer = proj2wgs_transformer = GeoTransformer(src_proj4=self.proj, dst_epsg=4326)
-        self.wgs2proj_transformer = GeoTransformer(src_epsg=4326, dst_proj4=self.proj)
+        self.proj2wgs_transformer = proj2wgs_transformer = GeoTransformer(src_proj4=self.proj4, dst_epsg=4326)
+        self.wgs2proj_transformer = GeoTransformer(src_epsg=4326, dst_proj4=self.proj4)
 
         lng0, lat0 = proj2wgs_transformer.transform(self.left, self.upper)
         _, _, self.utm_n, self.utm_h = utm.from_latlon(lat0, lng0)
