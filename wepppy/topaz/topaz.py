@@ -196,7 +196,7 @@ class TopazRunner:
         # if the channel dataseet is found, load the channel and junction masks
         self.junction_mask = None
 
-        self.proj2wgs_transformer = GeoTransformer(self.srs_proj4, wgs84_proj4)
+        self.proj2wgs_transformer = GeoTransformer(src_proj4=self.srs_proj4, dst_proj4=wgs84_proj4)
 
     def _clean_dir(self, empty_only=False):
         """
