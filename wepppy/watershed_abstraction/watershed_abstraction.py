@@ -630,7 +630,7 @@ class WatershedAbstraction:
                                      projection=_proj)
 
         self.utmProj = _proj
-        self.proj2wgs_transformer = GeoTransformer(self.utmProj, wgs84_proj4)
+        self.proj2wgs_transformer = GeoTransformer(src_proj4=self.utmProj, dst_proj4=wgs84_proj4)
 
         # find the centroid_px for the watershed
         indx, indy = np.where(bound == 1)
