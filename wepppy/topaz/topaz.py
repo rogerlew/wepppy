@@ -24,14 +24,13 @@ from imageio import imread
 from osgeo import gdal, ogr, osr
 import utm
 
-from pyproj import CRS, Transformer
-
 import numpy as np
 
 from wepppy.all_your_base import (
     read_arc,
     get_utm_zone,
     isfloat,
+    GeoTransformer,
     wgs84_proj4,
     IS_WINDOWS
 )
@@ -197,7 +196,6 @@ class TopazRunner:
         # if the channel dataseet is found, load the channel and junction masks
         self.junction_mask = None
 
-        self.proj2wgs_transformer = Transformer.from_crs(self.srs_proj4, wgs84_proj4, always_xy=True)
 
     def _clean_dir(self, empty_only=False):
         """
@@ -386,7 +384,8 @@ class TopazRunner:
         return the long/lat (WGS84) coords from pixel coords
         """
         easting, northing = self.pixel_to_utm(x, y)
-        return self.proj2wgs_transformer.transform(easting, northing)
+        proj2wgs_transformer = GeoTransformer(src_proj4=self.srs_proj4, src_proj4=wgs84_proj4)
+        return proj2wgs_transformer.transform(easting, northing)
 
     def find_closest_channel(self, long, lat, pixelcoords=False):
         """
@@ -960,7 +959,9 @@ class TopazRunner:
         self._json_to_wgs(dst_fn)
 
     def _json_to_wgs(self, src_fn, verbose=True):
-        proj2wgs_transformer = self.proj2wgs_transformer
+
+        from pyproj import CRS, Transformer
+        proj2wgs_transformer = Transformer.from_crs(self.srs_proj4, wgs84_proj4, always_xy=True)
 
         with open(src_fn) as fp:
             js = json.load(fp)
