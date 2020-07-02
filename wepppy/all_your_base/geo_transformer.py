@@ -1,6 +1,6 @@
 from typing import Any
 import os
-from numpy as np
+import numpy as np
 
 IS_WINDOWS = os.name == 'nt'
 
