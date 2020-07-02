@@ -1,6 +1,7 @@
 from typing import Any
+import os
 
-from . import IS_WINDOWS
+IS_WINDOWS = os.name == 'nt'
 
 class GeoTransformer(object):
     def __init__(self, src_proj4=None, src_epsg=None, dst_proj4=None, dst_epsg=None):
