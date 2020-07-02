@@ -384,7 +384,7 @@ class TopazRunner:
         return the long/lat (WGS84) coords from pixel coords
         """
         easting, northing = self.pixel_to_utm(x, y)
-        proj2wgs_transformer = GeoTransformer(src_proj4=self.srs_proj4, src_proj4=wgs84_proj4)
+        proj2wgs_transformer = GeoTransformer(src_proj4=self.srs_proj4, dst_proj4=wgs84_proj4)
         return proj2wgs_transformer.transform(easting, northing)
 
     def find_closest_channel(self, long, lat, pixelcoords=False):
