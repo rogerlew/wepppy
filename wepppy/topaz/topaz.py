@@ -971,8 +971,8 @@ class TopazRunner:
             if len(coords.shape) < 3:
                 continue
 
-            wgs_lngs, wgs_lats = proj2wgs_transformer.transform(coords[0, :, 0],
-                                                                coords[0, :, 1])
+            wgs_lngs, wgs_lats = proj2wgs_transformer.transform(np.flatten(coords[0, :, 0]),
+                                                                np.flatten(coords[0, :, 1]))
             coords[0, :, 0] = wgs_lngs
             coords[0, :, 1] = wgs_lats
             f['geometry']['coordinates'] = coords.tolist()
