@@ -24,13 +24,14 @@ from imageio import imread
 from osgeo import gdal, ogr, osr
 import utm
 
+from pyproj import CRS, Transformer
+
 import numpy as np
 
 from wepppy.all_your_base import (
     read_arc,
     get_utm_zone,
     isfloat,
-    GeoTransformer,
     wgs84_proj4,
     IS_WINDOWS
 )
@@ -196,7 +197,7 @@ class TopazRunner:
         # if the channel dataseet is found, load the channel and junction masks
         self.junction_mask = None
 
-        self.proj2wgs_transformer = GeoTransformer(src_proj4=self.srs_proj4, dst_proj4=wgs84_proj4)
+        self.proj2wgs_transformer = Transformer.from_crs(self.srs_proj4, wgs84_proj4, always_xy=True)
 
     def _clean_dir(self, empty_only=False):
         """
@@ -971,8 +972,8 @@ class TopazRunner:
             if len(coords.shape) < 3:
                 continue
 
-            wgs_lngs, wgs_lats = proj2wgs_transformer.transform(np.flatten(coords[0, :, 0]),
-                                                                np.flatten(coords[0, :, 1]))
+            wgs_lngs, wgs_lats = proj2wgs_transformer.transform(coords[0, :, 0],
+                                                                coords[0, :, 1])
             coords[0, :, 0] = wgs_lngs
             coords[0, :, 1] = wgs_lats
             f['geometry']['coordinates'] = coords.tolist()
