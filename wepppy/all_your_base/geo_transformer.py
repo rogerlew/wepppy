@@ -47,7 +47,7 @@ class GeoTransformer(object):
             cmd = ['gdaltransform', '-s_srs', s_srs, '-t_srs', t_srs, '-output_xy']
             p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
             ret = p.communicate('{x} {y}'.format(x=x, y=y))
-            return map(float, ret[0].split().strip())
+            return map(float, ret[0].strip().split())
 
 
 if __name__ == "__main__":
