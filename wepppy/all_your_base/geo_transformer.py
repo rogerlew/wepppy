@@ -1,5 +1,6 @@
 from typing import Any
 import os
+from numpy as np
 
 IS_WINDOWS = os.name == 'nt'
 
@@ -45,10 +46,18 @@ class GeoTransformer(object):
 
             from subprocess import Popen, PIPE, STDOUT
             cmd = ['gdaltransform', '-s_srs', s_srs, '-t_srs', t_srs, '-output_xy']
-            p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
-            ret = p.communicate('{x} {y}'.format(x=x, y=y))
-            return map(float, ret[0].strip().split())
+            if np.isscalar(x):
 
+                p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
+                ret = p.communicate('{x} {y}'.format(x=x, y=y))
+                return tuple(float(v) for v in ret[0].strip().split())
+            else:
+                _ret = []
+                for _x, _y in zip(x, y):
+                    p = Popen(cmd, bufsize=0, stdin=PIPE, stdout=PIPE, stderr=STDOUT, universal_newlines=True)
+                    ret = p.communicate('{x} {y}'.format(x=_x, y=_y))
+                    _ret.append(tuple(float(v) for v in ret[0].strip().split()))
+                return _ret
 
 if __name__ == "__main__":
 
