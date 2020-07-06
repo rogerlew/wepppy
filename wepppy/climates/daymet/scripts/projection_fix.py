@@ -9,5 +9,5 @@ for var in ['dayl', 'prcp', 'srad']:
     for stat in ['mean', 'std', 'skew', 'pwd', 'pww']:
         for fn in glob('%s/%s/*.tif' % (var, stat)):
             cmd = ['gdalcopyproj.py', src, fn]
-            print cmd
+            print(cmd)
             call(cmd)
