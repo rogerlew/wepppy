@@ -420,7 +420,7 @@ if __name__ == '__main__':
                 print('climate_station:', climate.climatestation)
 
                 climate.climate_mode = ClimateMode.PRISM
-                climate.climate_spatialmode = ClimateSpatialMode.Single
+                climate.climate_spatialmode = ClimateSpatialMode.Multiple
                 climate.input_years = 100
 
                 climate.build(verbose=1)
