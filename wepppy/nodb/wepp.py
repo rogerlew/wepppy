@@ -376,6 +376,38 @@ class Wepp(NoDbBase, LogMixin):
 
         return self._run_baseflow
 
+    def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.baseflow_opts = BaseflowOpts(
+                gwstorage=gwstorage,
+                bfcoeff=bfcoeff,
+                dscoeff=dscoeff,
+                bfthreshold=bfthreshold)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_phosphorus_opts(self, surf_runoff=None, lateral_flow=None, baseflow=None, sediment=None):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.phosphorus_opts = PhosphorusOpts(
+                surf_runoff=surf_runoff,
+                lateral_flow=lateral_flow,
+                baseflow=baseflow,
+                sediment=sediment)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def parse_inputs(self, kwds):
         self.lock()
 
