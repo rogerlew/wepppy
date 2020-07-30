@@ -360,7 +360,7 @@ if __name__ == '__main__':
             projects[-1]['cfg'] = scenario.get('cfg', 'lt')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['climate'] = scenario.get('climate', 'observed')
-            projects[-1]['wd'] = 'lt_%s_%s' % (watershed['wd'], scenario['wd']).format(cs=watershed['cs'])
+            projects[-1]['wd'] = ('lt_%s_%s' % (watershed['wd'], scenario['wd'])).format(cs=watershed['cs'])
 
     failed = open('failed', 'w')
     for proj in projects:
