@@ -320,17 +320,17 @@ if __name__ == '__main__':
     ]
 
     scenarios = [
-               dict(wd='SimFire.2020.kikrcs.chn_cs{cs}_fccsFuels_obs_cli',
+               dict(wd='SimFire.202007.kikrcs.chn_cs{cs}_fccsFuels_obs_cli',
                     landuse=None,
                     cfg='lt-fire'),
-               dict(wd='SimFire.2020.kikrcs.chn_cs{cs}_landisFuels_obs_cli',
+               dict(wd='SimFire.202007.kikrcs.chn_cs{cs}_landisFuels_obs_cli',
                     landuse=None,
                    cfg='lt-fire-future'),
-               dict(wd='SimFire.2020.kikrcs.chn_cs{cs}_landisFuels_fut_cli_A2',
+               dict(wd='SimFire.202007.kikrcs.chn_cs{cs}_landisFuels_fut_cli_A2',
                     landuse=None,
                     cfg='lt-fire-future',
                     climate='future'),
-               dict(wd='CurCond.2020.cl532.ki5krcs.chn_cs{cs}',
+               dict(wd='CurCond.202007.cl532.ki5krcs.chn_cs{cs}',
                     landuse=None),
                dict(wd='PrescFireS.202007.kikrcs.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)]),
