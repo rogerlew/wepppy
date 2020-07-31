@@ -30,6 +30,12 @@ from wepppy._scripts.utils import *
 
 os.chdir('/geodata/weppcloud_runs/')
 
+wd = None
+
+def log_print(msg):
+    now = datetime.now()
+    print('[{now}] {wd}: {msg}'.format(now=now, wd=wd, msg=msg))
+
 
 if __name__ == '__main__':
 
@@ -96,7 +102,7 @@ if __name__ == '__main__':
             outlet=[-122.1083333, 45.444722],
             landuse=None,
             cs=50, erod=0.000001,
-            csa=5, mcl=65),
+            csa=10, mcl=100),
         dict(watershed='CedarCreek',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
@@ -104,7 +110,7 @@ if __name__ == '__main__':
             outlet=[-122.03486546021158, 45.45789702345389],
             landuse=None,
             cs=50, erod=0.000001,
-            csa=5, mcl=65),
+            csa=10, mcl=100),
         dict(watershed='BlazedAlder',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
@@ -112,7 +118,7 @@ if __name__ == '__main__':
             outlet=[-121.89124077457025, 45.45220046527376],
             landuse=None,
             cs=50, erod=0.000001,
-            csa=5, mcl=65),
+            csa=10, mcl=100),
         dict(watershed='FirCreek',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
@@ -120,7 +126,7 @@ if __name__ == '__main__':
             outlet=[-122.02581486422827, 45.47989113970676],
             landuse=None,
             cs=50, erod=0.000001,
-            csa=5, mcl=65),
+            csa=10, mcl=100),
         dict(watershed='BRnearMultnoma',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
@@ -151,18 +157,26 @@ if __name__ == '__main__':
                dict(wd='CurCond.2020.cl532.chn_cs{cs}',
                     landuse=None,
                     cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+               dict(wd='SimFire_Eagle.2020.cl532.chn_cs{cs}',
+                    landuse=None,
+                    cfg='portland-simfire-eagle',
+                    climate='vanilla'),
+               dict(wd='SimFire_Norse.2020.cl532.chn_cs{cs}',
+                    landuse=None,
+                    cfg='portland-simfire-norse',
+                    climate='vanilla'),
                dict(wd='PrescFireS.2020.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
                dict(wd='LowSevS.2020.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
                dict(wd='ModSevS.2020.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
                dict(wd='HighSevS.2020.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
                 ]
 
     wc = sys.argv[-1]
@@ -190,7 +204,7 @@ if __name__ == '__main__':
         watershed = proj['watershed']
         wd = proj['wd']
 
-        print(wd)
+        log_print(wd)
         if wc is not None:
             if not wc in wd:
                 continue
@@ -222,16 +236,16 @@ if __name__ == '__main__':
             ron.set_map(extent, map_center, zoom=map_zoom)
             ron.fetch_dem()
 
-            print('building channels')
+            log_print('building channels')
             topaz = Topaz.getInstance(wd)
             topaz.build_channels(csa=csa, mcl=mcl)
             topaz.set_outlet(*outlet)
             sleep(0.5)
 
-            print('building subcatchments')
+            log_print('building subcatchments')
             topaz.build_subcatchments()
 
-            print('abstracting watershed')
+            log_print('abstracting watershed')
             watershed = Watershed.getInstance(wd)
             watershed.abstract_watershed()
             translator = watershed.translator_factory()
@@ -248,7 +262,7 @@ if __name__ == '__main__':
             landuse.build()
             landuse = Landuse.getInstance(wd)
 
-            print('setting default landuses')
+            log_print('setting default landuses')
 
             if default_landuse is not None:
                 log_print('setting default landuse')
@@ -261,11 +275,11 @@ if __name__ == '__main__':
 
         soils = Soils.getInstance(wd)
         if build_soils:
-            print('building soils')
+            log_print('building soils')
             soils.mode = SoilsMode.Gridded
             soils.build()
 
-            print('adjusting restrictive layer ksat')
+            log_print('adjusting restrictive layer ksat')
             ksat_mod = None
 
             _landslide = ShallowLandSlideSusceptibility()
@@ -314,7 +328,7 @@ if __name__ == '__main__':
                     _soil_fn = '{dom}.sol'.format(dom=_dom)
                     src_soil_fn = _join(_soil.soils_dir, _soil.fname)
                     dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
-                    print(src_soil_fn, dst_soil_fn, ksat, _dom)
+                    log_print(src_soil_fn, dst_soil_fn, ksat, _dom)
                     modify_ksat(src_soil_fn, dst_soil_fn, ksat)
 
                     _soil.fname = _soil_fn
@@ -330,7 +344,7 @@ if __name__ == '__main__':
 
         climate = Climate.getInstance(wd)
         if build_climates:
-            print('building climate')
+            log_print('building climate')
             
             if cli_mode == 'observed':
                 if 'linveh' in scenario:
@@ -354,7 +368,7 @@ if __name__ == '__main__':
                     sub_par_fns = {}
                     sub_cli_fns = {}
                     for topaz_id, ss in watershed._subs_summary.items():
-                        print(topaz_id)
+                        log_print(topaz_id)
                         lng, lat = ss.centroid.lnglat
     
                         cli_path = lvdm.closest_cli(lng, lat)
@@ -417,7 +431,7 @@ if __name__ == '__main__':
                 stations = climate.find_closest_stations()
                 climate.climatestation = stations[0]['id']
 
-                print('climate_station:', climate.climatestation)
+                log_print('climate_station:', climate.climatestation)
 
                 climate.climate_mode = ClimateMode.PRISM
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
@@ -425,7 +439,19 @@ if __name__ == '__main__':
 
                 climate.build(verbose=1)
 
-        print('running wepp')
+            elif cli_mode == 'vanilla':
+                stations = climate.find_closest_stations()
+                climate.climatestation = stations[0]['id']
+
+                log_print('climate_station:', climate.climatestation)
+
+                climate.climate_mode = ClimateMode.Vanilla
+                climate.climate_spatialmode = ClimateSpatialMode.Single
+                climate.input_years = 100
+
+                climate.build(verbose=1)
+
+        log_print('running wepp')
         wepp = Wepp.getInstance(wd)
         wepp.prep_hillslopes()
         wepp.run_hillslopes()
@@ -435,7 +461,7 @@ if __name__ == '__main__':
         wepp.run_watershed()
         loss_report = wepp.report_loss()
 
-        print('running wepppost')
+        log_print('running wepppost')
         fn = _join(ron.export_dir, 'totalwatsed.csv')
 
         totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
