@@ -32,9 +32,10 @@ os.chdir('/geodata/weppcloud_runs/')
 
 wd = None
 
-def log_print(msg):
+
+def log_print(*msg):
     now = datetime.now()
-    print('[{now}] {wd}: {msg}'.format(now=now, wd=wd, msg=msg))
+    print('[{now}] {wd}: {msg}'.format(now=now, wd=wd, msg=', '.join(str(v) for v in msg)))
 
 
 if __name__ == '__main__':
