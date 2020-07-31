@@ -1,71 +1,56 @@
-Code,LndcvrID,WEPP_Type,New_WEPPman,ManName,Albedo,iniSatLev,interErod,rillErod,critSh,effHC,soilDepth,Sand,Clay,OM,CEC,Comment
-1100,100,Granitic,Tahoe_Bare_Slope.rot,Bare,None,None,300000,0.001,4,None,None,None,None,None,None,
-1101,101,Granitic,Tahoe_Sod_Grass.rot,Sod_G,None,None,750000,0.0001,4,None,None,None,None,None,None,
-1101,101,Granitic,Tahoe_Sod_Grass.rot,Sod_G,None,None,750000,0.0001,4,None,None,None,None,None,None,
-1102,102,Granitic,Tahoe_Old_Forest.rot,OForst,None,None,250000,3.00E-05,4,None,None,None,None,None,None,
-1103,103,Granitic,Tahoe_Bunch_Grass.rot,BnchG,None,None,600000,8.00E-05,4,None,None,None,None,None,None,
-1104,104,Granitic,Tahoe_Shrub.rot,Shrub,None,None,300000,6.00E-05,4,None,None,None,None,None,None,
-1105,105,Granitic,Tahoe_High_Severity_Fire.rot,HighF,None,None,1800000,0.0005,4,None,None,None,None,None,None,
-1106,106,Granitic,Tahoe_Low_Severity_Fire.rot,LowF,None,None,1000000,0.0003,4,None,None,None,None,None,None,
-1107,107,Granitic,Tahoe_Young_Forest.rot,YForst,None,None,400000,4.00E-05,4,None,None,None,None,None,None,
-1110,110,Granitic,Tahoe_Low_Severity_Fire.rot,PrescrF,None,None,1000000,0.0003,4,None,None,None,None,None,None,
-1111,111,Granitic,Tahoe_Skid_Trail.rot,Skid,None,None,2700000,0.001,4,None,None,None,None,None,None,
-1112,112,Granitic,Tahoe_Young_Forest.rot,Yr1_Recov_Fire,None,None,400000,4.00E-05,4,None,None,None,None,None,None,
-1113,113,Granitic,Tahoe_Young_Forest.rot,Yr1_Recov_Thinn,None,None,400000,4.00E-05,4,None,None,None,None,None,None,
-1114,114,Granitic,Tahoe_Young_Forest.rot,Yr2_Recov_Fire,None,None,400000,4.00E-05,4,None,None,None,None,None,None,
-1115,115,Granitic,Cable_Thinning_93_Cover.man,Cable_Thinning,None,None,400000,4.00E-05,4,None,None,None,None,None,None,
-1116,116,Granitic,Forward_Thinning_90_Cover.man,Forward_Thinning,None,None,400000,0.00004,4,None,None,None,None,None,None,
-1117,117,Granitic,Skidder_Thinning_85_Cover.man,Skidder_Thinning,None,None,400000,0.00004,4,None,None,None,None,None,None,
-1118,118,Granitic,Tahoe_Moderate_Severity_Fire.rot,ModF,None,None,1000000,0.0003,4,None,None,None,None,None,None,
-1119,119,Granitic,Tahoe_Shrub_High_Severity_Fire.rot,HighFShrub,None,None,450000,7.00E-05,4,None,None,None,None,None,None,
-1120,120,Granitic,Tahoe_Shrub_Moderate_Severity_Fire.rot,ModFShrub,None,None,400000,6.00E-05,4,None,None,None,None,None,None,
-1121,121,Granitic,Tahoe_Shrub_Low_Severity_Fire.rot,LowFShrub,None,None,400000,6.00E-05,4,None,None,None,None,None,None,
-1122,122,Granitic,Tahoe_Shrub_Low_Severity_Fire.rot,PrescrShrub,None,None,350000,6.00E-05,4,None,None,None,None,None,None,
-1123,123,Granitic,Tahoe_Thinning_96_Cover.rot,Thinning_96_Cover,None,None,400000,0.00004,4,None,None,None,None,None,None,
-1124,124,Granitic,Tahoe_Thinning_75_Cover.rot,Thinning_75_Cover,None,None,400000,0.00004,4,None,None,None,None,None,None,
-2100,100,Volcanic,Tahoe_Bare_Slope.rot,Bare,None,None,750000,0.0008,1.5,None,None,None,None,None,None,
-2101,101,Volcanic,Tahoe_Sod_Grass.rot,Sod_G,None,None,1000000,8.00E-05,1.5,None,None,None,None,None,None,
-2102,102,Volcanic,Tahoe_Old_Forest.rot,OForst,None,None,300000,2.00E-05,1.5,None,None,None,None,None,None,
-2103,103,Volcanic,Tahoe_Bunch_Grass.rot,BnchG,None,None,900000,6.00E-05,1.5,None,None,None,None,None,None,
-2104,104,Volcanic,Tahoe_Shrub.rot,Shrub,None,None,600000,4.00E-05,1.5,None,None,None,None,None,None,
-2105,105,Volcanic,Tahoe_High_Severity_Fire.rot,HighF,None,None,2000000,0.0004,1.5,None,None,None,None,None,None,
-2106,106,Volcanic,Tahoe_Low_Severity_Fire.rot,LowF,None,None,1500000,0.0002,1.5,None,None,None,None,None,None,
-2107,107,Volcanic,Tahoe_Young_Forest.rot,YForst,None,None,500000,3.00E-05,1.5,None,None,None,None,None,None,
-2110,110,Volcanic,Tahoe_Low_Severity_Fire.rot,PrescrF,None,None,1500000,0.0002,1.5,None,None,None,None,None,None,
-2111,111,Volcanic,Tahoe_Skid_Trail.rot,Skid,None,None,600000,0.0008,1.5,None,None,None,None,None,None,
-2112,112,Volcanic,Tahoe_Young_Forest.rot,Yr1_Recov_Fire,None,None,700000,3.00E-05,1.5,None,None,None,None,None,None,
-2113,113,Volcanic,Tahoe_Young_Forest.rot,Yr1_Recov_Thinn,None,None,700000,3.00E-05,1.5,None,None,None,None,None,None,
-2114,114,Volcanic,Tahoe_Young_Forest.rot,Yr2_Recov_Fire,None,None,700000,3.00E-05,1.5,None,None,None,None,None,None,
-2115,115,Volcanic,Cable_Thinning_93_Cover.man,Cable_Thinning,None,None,500000,3.00E-05,1.5,None,None,None,None,None,None,
-2116,116,Volcanic,Forward_Thinning_90_Cover.man,Forward_Thinning,None,None,500000,0.00003,1.5,None,None,None,None,None,None,
-2117,117,Volcanic,Skidder_Thinning_85_Cover.man,Skidder_Thinning,None,None,500000,0.00003,1.5,None,None,None,None,None,None,
-2118,118,Volcanic,Tahoe_Moderate_Severity_Fire.rot,ModF,None,None,1500000,0.0002,1.5,None,None,None,None,None,None,
-2119,119,Volcanic,Tahoe_Shrub_High_Severity_Fire.rot,HighFShrub,None,None,800000,5.00E-05,1.5,None,None,None,None,None,None,
-2120,120,Volcanic,Tahoe_Shrub_Moderate_Severity_Fire.rot,ModFShrub,None,None,700000,4.00E-05,1.5,None,None,None,None,None,None,
-2121,121,Volcanic,Tahoe_Shrub_Low_Severity_Fire.rot,LowFShrub,None,None,700000,4.00E-05,1.5,None,None,None,None,None,None,
-2122,122,Volcanic,Tahoe_Shrub_Low_Severity_Fire.rot,PrescrFShrub,None,None,700000,4.00E-05,1.5,None,None,None,None,None,None,
-2123,123,Volcanic,Tahoe_Thin_96_cover.rot,Thinning_96_Cover,None,None,500000,0.00003,1.5,None,None,None,None,None,None,
-2124,124,Volcanic,Tahoe_Thinning_75_Cover.rot,Thinning_75_Cover,None,None,500000,0.00003,1.5,None,None,None,None,None,None,
-3100,100,Alluvial,Tahoe_Bare_Slope.rot,Bare,None,None,600000,0.0006,1,None,None,None,None,None,None,
-3101,101,Alluvial,Tahoe_Sod_Grass.rot,Sod_G,None,None,600000,6.00E-05,1,None,None,None,None,None,None,
-3102,102,Alluvial,Tahoe_Old_Forest.rot,OForst,None,None,300000,1.00E-05,1,None,None,None,None,None,None,
-3103,103,Alluvial,Tahoe_Bunch_Grass.rot,BnchG,None,None,500000,5.00E-05,1,None,None,None,None,None,None,
-3104,104,Alluvial,Tahoe_Shrub.rot,Shrub,None,None,350000,3.00E-05,1,None,None,None,None,None,None,
-3105,105,Alluvial,Tahoe_High_Severity_Fire.rot,HighF,None,None,1500000,0.0003,1,None,None,None,None,None,None,
-3106,106,Alluvial,Tahoe_Low_Severity_Fire.rot,LowF,None,None,1000000,0.0002,1,None,None,None,None,None,None,
-3107,107,Alluvial,Tahoe_Young_Forest.rot,YForst,None,None,600000,2.00E-05,1,None,None,None,None,None,None,
-3110,110,Alluvial,Tahoe_Low_Severity_Fire.rot,PrescrF,None,None,1000000,0.0002,1,None,None,None,None,None,None,
-3111,111,Alluvial,Tahoe_Skid_Trail.rot,Skid,None,None,2500000,0.0006,1,None,None,None,None,None,None,
-3112,112,Alluvial,Tahoe_Young_Forest.rot,Yr1_Recov_Fire,None,None,600000,2.00E-05,1,None,None,None,None,None,None,
-3113,113,Alluvial,Tahoe_Young_Forest.rot,Yr1_Recov_Thinn,None,None,600000,2.00E-05,1,None,None,None,None,None,None,
-3114,114,Alluvial,Tahoe_Young_Forest.rot,Yr2_Recov_Fire,None,None,600000,2.00E-05,1,None,None,None,None,None,None,
-3115,115,Alluvial,Cable_Thinning_93_Cover.man,Cable_Thinning,None,None,600000,2.00E-05,1,None,None,None,None,None,None,
-3116,116,Alluvial,Forward_Thinning_90_Cover.man,Forward_Thinning,None,None,600000,0.00002,1,None,None,None,None,None,None,
-3117,117,Alluvial,Skidder_Thinning_85_Cover.man,Skidder_Thinning,None,None,600000,0.00002,1,None,None,None,None,None,None,
-3118,118,Alluvial,Tahoe_Moderate_Severity_Fire.rot,ModF,None,None,1000000,0.0002,1,None,None,None,None,None,None,
-3119,119,Alluvial,Tahoe_Shrub_High_Severity_Fire.rot,HighFShrub,None,None,450000,3.50E-05,1,None,None,None,None,None,None,
-3120,120,Alluvial,Tahoe_Shrub_Moderate_Severity_Fire.rot,ModFShrub,None,None,450000,3.00E-05,1,None,None,None,None,None,None,
-3121,121,Alluvial,Tahoe_Shrub_Low_Severity_Fire.rot,LowFShrub,None,None,450000,3.00E-05,1,None,None,None,None,None,None,
-3122,122,Alluvial,Tahoe_Shrub_Low_Severity_Fire.rot,PrescrShrub,None,None,400000,3.00E-05,1,None,None,None,None,None,None,
-3123,123,Alluvial,Tahoe_Thin_96_cover.rot,Thinning_96_Cover,None,None,600000,0.00002,1,None,None,None,None,None,None,
-3124,124,Alluvial,Tahoe_Thinning_75_Cover.rot,Thinning_75_Cover,None,None,600000,0.00002,1,None,None,None,None,None,None,
+key,desc,cancov,inrcov,rilcov
+11,Open Water,0.01,0.99,0.99
+12,Perennial Ice/Snow,0.01,0.99,0.99
+21,Low Intensity Residential,0.5,0.85,0.85
+22,High Intensity Residential,0.25,0.85,0.85
+23,Commercial/Industrial/Transportation,0.05,0.85,0.85
+24,"Developed, High Intensity",0.01,0.85,0.85
+31,Bare Rock/Sand/Clay,0.01,0.01,0.01
+32,Quarries/Strip Mines/Gravel Pits,0.01,0.01,0.01
+33,Transitional,0.4,0.8,0.8
+51,Shrubland,0.5,0.6,0.6
+61,Orchards/Vineyards/Other,0.6,0.6,0.6
+71,Grasslands/Herbaceous,0.6,0.6,0.6
+72,Sedge/Herbaceous,0.9,0.9,0.9
+81,Pasture/Hay,0.5,0.9,0.9
+82,Row Crops,0.1,0.1,0.1
+83,Small Grains,0.2,0.8,0.8
+85,Urban/Recreational Grasses,0.5,0.8,0.8
+90,Woody Wetlands,0.8,0.9,0.9
+95,Emergent Herbaceous Wetlands,0.5,0.9,0.9
+96,Palustrine Emergent Wetland (Persistent),0.5,0.9,0.9
+97,Estaurine Emergent Wetland,0.5,0.9,0.9
+98,Palustrine Aquatic Bed,0.5,0.99,0.99
+99,Estaurine Aquatic Bed,0.5,0.99,0.99
+100,Bare,0.05,0.2,0.2
+101,Sod_G,0.4,0.6,0.6
+102,OForst,0.9,1,1
+103,BnchG,0.6,0.8,0.8
+104,Shrub,0.7,0.9,0.9
+105,HighF,0.2,0.3,0.3
+106,LowF,0.75,0.8,0.8
+107,YForst,0.8,1,1
+110,PrescrF,0.85,0.85,0.85
+111,Skid,0.05,0.4,0.4
+112,Yr1_Recov_Fire,0.8,0.8,0.8
+113,Yr1_Recov_Thinn,0.8,0.92,0.92
+114,Yr2_Recov_Fire,0.85,0.9,0.9
+115,Thinning_93_Cover,0.4,0.93,0.93
+116,Thinning_90_Cover,0.4,0.9,0.9
+117,Thinning_85_Cover,0.4,0.85,0.85
+118,ModF,0.4,0.5,0.5
+119,HighFShrub,0.05,0.3,0.3
+120,ModFShrub,0.3,0.5,0.5
+121,LowFShrub,0.5,0.7,0.7
+122,PrescrShrub,0.7,0.75,0.75
+123,Thinning_96_Cover,0.4,0.96,0.96
+124,Thinning_75_Cover,0.4,0.75,0.75
+130,No Burn,0.8,0.95,0.95
+131,Low Severity Fire,0.75,0.8,0.8
+132,Moderate Severity Fire,0.6,0.6,0.6
+133,High Severity Fire,0.2,0.3,0.3
+161,Agriculture: Palouse: Barley- Conventional Till,0,0.2,0.2
+167,"Agriculture: Corn, Soybean- Fall Moldboard Plow",0,0.2,0.2
+171,Agriculture: Corn- Fall Moldboard Plow,0,0.2,0.2
+177,Agriculture: Soybean- Fall Moldboard Plow,0,0.2,0.2
+183,Agriculture: Winter Wheat- Mulch Till,0.2,0.4,0.4
