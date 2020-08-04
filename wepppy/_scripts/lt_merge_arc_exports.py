@@ -6,7 +6,7 @@ from os.path import exists as _exists
 
 from glob import glob
 
-from ogrmerge import process
+from wepppy.all_your_base import ogrmerge
 
 os.chdir('/geodata/weppcloud_runs/')
 
@@ -64,11 +64,11 @@ if __name__ == "__main__":
 
         argv = ['-o', '%s/%s_channels.shp' % (outdir, prefix), '-single'] + channels
         print(argv)
-        process(argv)
+        ogrmerge.process(argv)
 
         argv = ['-o', '%s/%s_subcatchments.shp' % (outdir, prefix), '-single'] + subcatchments
         print(argv)
-        process(argv)
+        ogrmerge.process(argv)
 
 
         print('merged shps are in', outdir)
