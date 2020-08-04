@@ -1280,7 +1280,7 @@ class SurgoSoilCollection(object):
                 .format(table=table, nqs=nqs)
         try:
             cur.executemany(query, data)
-        except sqlite3.IntegrityError:
+        except:
             warnings.warn('Error syncing {} ({})'.format(keyname, keys))
 
         conn.commit()
