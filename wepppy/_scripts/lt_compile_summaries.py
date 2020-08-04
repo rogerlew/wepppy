@@ -10,6 +10,8 @@ from glob import glob
 from wepppy.nodb import Ron, Wepp
 from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, SedimentDelivery
 
+os.chdir('/geodata/weppcloud_runs/')
+
 if __name__ == "__main__":
     prefix = 'lt2020_7'
     outdir = '/home/roger/%s_csvs' % prefix
@@ -24,17 +26,17 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 'SimFire.2020.ki5krcs.chn_cs*_fccsFuels_obs_cli',
-                 'SimFire.2020.ki5krcs.chn_cs*_landisFuels_obs_cli',
-                 'SimFire.2020.ki5krcs.chn_cs*_landisFuels_fut_cli_A2',
-                 'CurCond.2020.cl532.ki5krcs.chn_cs*',
-                 'PrescFireS.2020.ki5krcs.chn_cs*',
-                 'LowSevS.2020.ki5krcs.chn_cs*',
-                 'ModSevS.2020.ki5krcs.chn_cs*',
-                 'HighSevS.2020.ki5krcs.chn_cs*',
-                 'Thinn96.2020.ki5krcs.chn_cs*',
-                 'Thinn93.2020.ki5krcs.chn_cs*',
-                 'Thinn85.2020.ki5krcs.chn_cs*'
+                 'SimFire.202007.kikrcs.chn_cs*_fccsFuels_obs_cli',
+                 'SimFire.202007.kikrcs.chn_cs*_landisFuels_obs_cli',
+                 'SimFire.202007.kikrcs.chn_cs*_landisFuels_fut_cli_A2',
+                 'CurCond.202007.cl532.ki5krcs.chn_cs*',
+                 'PrescFireS.202007.kikrcs.chn_cs*',
+                 'LowSevS.202007.kikrcs.chn_cs*',
+                 'ModSevS.202007.kikrcs.chn_cs*',
+                 'HighSevS.202007.kikrcs.chn_cs*',
+                 'Thinn96.202007.kikrcs.chn_cs*',
+                 'Thinn93.202007.kikrcs.chn_cs*',
+                 'Thinn85.202007.kikrcs.chn_cs*'
                 ]
 
     wds = []
