@@ -62,11 +62,11 @@ if __name__ == "__main__":
         print(channels)
         print(sub)
 
-        argv = ['-o', '%s/%s_channels.shp' % (outdir, prefix), '-single'] + channels
+        argv = ['-o', '%s/%s_channels.shp' % (outdir, prefix.replace('*','--')), '-single'] + channels
         print(argv)
         ogrmerge.process(argv)
 
-        argv = ['-o', '%s/%s_subcatchments.shp' % (outdir, prefix), '-single'] + subcatchments
+        argv = ['-o', '%s/%s_subcatchments.shp' % (outdir, prefix.replace('*','--')), '-single'] + subcatchments
         print(argv)
         ogrmerge.process(argv)
 
