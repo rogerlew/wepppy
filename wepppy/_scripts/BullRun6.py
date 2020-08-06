@@ -414,9 +414,7 @@ if __name__ == '__main__':
                     log_print('building gridmet')
                     stations = climate.find_closest_stations()
                     climate.climatestation = stations[0]['id']
-                    
-                    log_print('setting climate station', climate.climatesation)
-    
+                        
                     climate.climate_mode = ClimateMode.GridMetPRISM
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
                     climate.set_observed_pars(start_year=1990, end_year=2019)
