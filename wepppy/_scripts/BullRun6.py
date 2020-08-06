@@ -351,7 +351,8 @@ if __name__ == '__main__':
             log_print('building climate')
             
             if cli_mode == 'observed':
-                if 'linveh' in scenario:
+                log_print('building observed')
+                if 'linveh' in wd:
                     climate.climate_mode = ClimateMode.ObservedDb
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
                     climate.input_years = 21
@@ -387,7 +388,7 @@ if __name__ == '__main__':
                     climate.sub_cli_fns = sub_cli_fns
                     climate.dump_and_unlock()
     
-                elif 'daymet' in scenario:
+                elif 'daymet' in wd:
                     stations = climate.find_closest_stations()
                     climate.climatestation = stations[0]['id']
     
@@ -409,9 +410,12 @@ if __name__ == '__main__':
     
                     climate.dump_and_unlock()
     
-                elif 'gridmet' in scenario:
+                elif 'gridmet' in wd:
+                    log_print('building gridmet')
                     stations = climate.find_closest_stations()
                     climate.climatestation = stations[0]['id']
+                    
+                    log_print('setting climate station', climate.climatesation)
     
                     climate.climate_mode = ClimateMode.GridMetPRISM
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
