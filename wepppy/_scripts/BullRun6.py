@@ -205,7 +205,7 @@ if __name__ == '__main__':
     config = 'portland.cfg'
     for proj in projects:
 
-        watershed = proj['watershed']
+        watershed_name = proj['watershed']
         wd = proj['wd']
 
         log_print(wd)
@@ -401,11 +401,11 @@ if __name__ == '__main__':
                     climate.lock()
     
                     cli_dir = climate.cli_dir
-                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed)
+                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
                     climate.cli_fn = adj_cli_fn
     
                     for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed)
+                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
                         climate.sub_cli_fns[topaz_id] = adj_cli_fn
     
                     climate.dump_and_unlock()
@@ -424,11 +424,11 @@ if __name__ == '__main__':
                     climate.lock()
     
                     cli_dir = climate.cli_dir
-                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed)
+                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
                     climate.cli_fn = adj_cli_fn
     
                     for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed)
+                        adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
                         climate.sub_cli_fns[topaz_id] = adj_cli_fn
     
                     climate.dump_and_unlock()
