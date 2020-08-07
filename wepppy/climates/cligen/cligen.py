@@ -382,7 +382,11 @@ class ClimateFile(object):
         df = self.as_dataframe()
         _dates = [(int(row.year), int(row.mo), int(row.da)) for i, row in df.iterrows()]
 
-        prcp = df.prcp.to_numpy()
+        try:
+            prcp = df.prcp.to_numpy()
+        except:
+            prcp = df.prcp.values
+
         prcp = offset + prcp * scale
         self.replace_var('prcp', _dates, prcp)
 
