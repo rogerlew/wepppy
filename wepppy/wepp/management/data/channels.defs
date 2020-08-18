@@ -86,10 +86,10 @@ Default
 Default Channel
 Waterway channel with default base
 **Make sure erodibility and shear stress match soil file
-Mariana/Anurag 1.5 m channel depth, 1E-4 side channel
+Mariana/Anurag 900 m channel depth, 1E-4 side channel
 2 1 1 0
 19.990000 0.040000
-0.3 1.000E-6 12 1.5 0.0001
+0.3 1.000E-6 12 900 0.0001
 0.020000 4.000000 0.040000
 0.000000 0.000000 0.000000
 "fallow.rot"
