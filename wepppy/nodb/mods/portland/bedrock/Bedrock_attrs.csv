@@ -1,13 +1,13 @@
 OBJECTID,Unit_Name,Shape_Leng,Shape_Area,ksat,ksat_units
-0,Unknown,9999,9999,0.04,mm/h
-1,Aschoff Buttes Vent,7178.843084,3921321.71,42,mm/h
-2,Andesite of Zigzag Mountain and Lolo Pass,118364.0448,108163504.6,0.004,mm/h
-3,Andesite of Hiyu Mountain,63896.67752,73390072.59,42,mm/h
-4,Boring Lava,244619.1496,520990965.7,417,mm/h
-5,Basalt of Bull Run,881735.4779,1753971370,0.04,mm/h
-6,Wanapum Basalt,527830.7097,382308228.1,0.04,mm/h
-7,"Pliocene Lava Flows, Undivided",127567.9098,48145504.69,417,mm/h
-8,Troutdale Formation,207840.7373,124634394.6,4,mm/h
-9,Grande Ronde Basalt,237358.3341,129594890.9,0.04,mm/h
+0,Unknown,9999,9999,None,mm/h
+1,Aschoff Buttes Vent,7178.843084,3921321.71,None,mm/h
+2,Andesite of Zigzag Mountain and Lolo Pass,118364.0448,108163504.6,None,mm/h
+3,Andesite of Hiyu Mountain,63896.67752,73390072.59,None,mm/h
+4,Boring Lava,244619.1496,520990965.7,None,mm/h
+5,Basalt of Bull Run,881735.4779,1753971370,None,mm/h
+6,Wanapum Basalt,527830.7097,382308228.1,None,mm/h
+7,"Pliocene Lava Flows, Undivided",127567.9098,48145504.69,None,mm/h
+8,Troutdale Formation,207840.7373,124634394.6,None,mm/h
+9,Grande Ronde Basalt,237358.3341,129594890.9,None,mm/h
 10,Rhododendron Formation,849579.3075,407144800.8,0.0001,mm/h
-11,Andesite and Basalt of Ashchoff Butte,94896.97931,348573204.3,0.004,mm/h
+11,Andesite and Basalt of Ashchoff Butte,94896.97931,348573204.3,None,mm/h
