@@ -747,8 +747,8 @@ def runs0(runid, config):
     if ron.public:
         should_abort = False
 
-    if should_abort:
-        abort(404)
+    #if should_abort:
+    #    abort(404)
 
     topaz = Topaz.getInstance(wd)
     landuse = Landuse.getInstance(wd)
