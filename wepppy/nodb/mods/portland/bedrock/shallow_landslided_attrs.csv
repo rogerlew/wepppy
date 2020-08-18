@@ -1,6 +1,6 @@
 OBJECTID,Unit_Name,ksat,ksat_units
-1,low,0.0,mm/h
-2,moderate,0.01,mm/h
-3,high,0.1,mm/h
-255,other,0.1,mm/h
-None,other,0.1,mm/h
+1,low,0.5,mm/h
+2,moderate,0.05,mm/h
+3,high,0.005,mm/h
+255,other,0.05,mm/h
+None,other,0.05,mm/h
