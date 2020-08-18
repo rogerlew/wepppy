@@ -202,9 +202,8 @@ if __name__ == '__main__':
                                  .format(watershed=watershed['watershed'], scenario=scenario['wd'])\
                                  .format(cs=watershed['cs'])
 
-    config = 'portland.cfg'
     for proj in projects:
-
+         config = proj['cfg']
         watershed_name = proj['watershed']
         wd = proj['wd']
 
