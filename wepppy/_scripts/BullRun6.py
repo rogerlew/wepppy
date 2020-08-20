@@ -224,7 +224,7 @@ if __name__ == '__main__':
                                  .format(cs=watershed['cs'])
 
     for proj in projects:
-         config = proj['cfg']
+        config = proj['cfg']
         watershed_name = proj['watershed']
         wd = proj['wd']
 
