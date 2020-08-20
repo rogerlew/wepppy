@@ -255,7 +255,7 @@ if __name__ == '__main__':
                 shutil.rmtree(wd)
             os.mkdir(wd)
 
-            ron = Ron(wd, config)
+            ron = Ron(wd, config + '.cfg')
             ron.name = wd
             ron.set_map(extent, map_center, zoom=map_zoom)
             ron.fetch_dem()
