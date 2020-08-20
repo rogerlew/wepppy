@@ -4,7 +4,7 @@ from os.path import join as _join
 import warnings
 from osgeo import ogr
 
-from wepppy.all_your_base import RasterDatasetInterpolator, RDIOutOfBoundsException
+from wepppy.all_your_base import RasterDatasetInterpolator, RDIOutOfBoundsException, isfloat
 
 _thisdir = os.path.dirname(__file__)
 
@@ -21,7 +21,12 @@ class BullRunBedrock(object):
             csv_rdr = csv.DictReader(fp)
             d = {}
             for row in csv_rdr:
-                row['ksat'] = float(row['ksat'])
+                ksat = row['ksat']
+                if isfloat(ksat):
+                    ksat = float(ksat)
+                else:
+                    ksat = None
+                row['ksat'] = ksat
                 row['Shape_Leng'] = float(row['Shape_Leng'])
                 row['Shape_Area'] = float(row['Shape_Area'])
                 row['OBJECTID'] = int(row['OBJECTID'])
@@ -44,7 +49,12 @@ class ShallowLandSlideSusceptibility(object):
             csv_rdr = csv.DictReader(fp)
             d = {}
             for row in csv_rdr:
-                row['ksat'] = float(row['ksat'])
+                ksat = row['ksat']
+                if isfloat(ksat):
+                    ksat = float(ksat)
+                else:
+                    ksat = None
+                row['ksat'] = ksat
                 try:
                     row['OBJECTID'] = int(row['OBJECTID'])
                 except:
