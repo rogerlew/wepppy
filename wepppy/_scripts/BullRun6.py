@@ -479,11 +479,16 @@ if __name__ == '__main__':
 
         log_print('running wepp')
         wepp = Wepp.getInstance(wd)
+        wepp.parse_inputs(proj)
+		
         wepp.prep_hillslopes()
+	
+        log_print('running hillslopes')
         wepp.run_hillslopes()
 
         wepp = Wepp.getInstance(wd)
-        wepp.prep_watershed(erodibility=erod, critical_shear=cs, pmet=True)
+        wepp.prep_watershed(erodibility=erod, critical_shear=cs)
+        wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
         wepp.run_watershed()
         loss_report = wepp.report_loss()
 
