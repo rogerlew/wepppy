@@ -437,7 +437,7 @@ class Wepp(NoDbBase, LogMixin):
     #
     # hillslopes
     #
-    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None):
+    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None):
         self.log('Prepping Hillslopes... ')
 
         translator = Watershed.getInstance(self.wd).translator_factory()
@@ -459,6 +459,9 @@ class Wepp(NoDbBase, LogMixin):
 
         if (wepp_ui is None and self.run_wepp_ui) or wepp_ui:
             self._prep_wepp_ui()
+            
+        if (pmet is None and self.run_pmet) or pmet:
+            self._prep_pmet()
 
         self.log_done()
 
@@ -761,7 +764,7 @@ class Wepp(NoDbBase, LogMixin):
     # watershed
     #
     def prep_watershed(self, erodibility=None, critical_shear=None,
-                       tcr=None, pmet=None):
+                       tcr=None):
         self.log('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -777,9 +780,6 @@ class Wepp(NoDbBase, LogMixin):
 
         if (tcr is None and self.run_tcr) or tcr:
             self._prep_tcr()
-
-        if (pmet is None and self.run_pmet) or pmet:
-            self._prep_pmet()
 
         self._prep_watershed_managements(translator)
         self._make_watershed_run(translator)
