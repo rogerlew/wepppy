@@ -390,123 +390,123 @@ if __name__ == '__main__':
 
             if cli_mode == 'observed':
                 log_print('building observed')
-            if 'linveh' in wd:
-                climate.climate_mode = ClimateMode.ObservedDb
-            climate.climate_spatialmode = ClimateSpatialMode.Multiple
-            climate.input_years = 21
+                if 'linveh' in wd:
+                    climate.climate_mode = ClimateMode.ObservedDb
+                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                    climate.input_years = 21
 
-            climate.lock()
-            lng, lat = watershed.centroid
+                    climate.lock()
+                    lng, lat = watershed.centroid
 
-            cli_path = lvdm.closest_cli(lng, lat)
-            _dir, cli_fn = _split(cli_path)
-            shutil.copyfile(cli_path, _join(climate.cli_dir, cli_fn))
-            climate.cli_fn = cli_fn
+                    cli_path = lvdm.closest_cli(lng, lat)
+                    _dir, cli_fn = _split(cli_path)
+                    shutil.copyfile(cli_path, _join(climate.cli_dir, cli_fn))
+                    climate.cli_fn = cli_fn
 
-            par_path = lvdm.par_path
-            _dir, par_fn = _split(par_path)
-            shutil.copyfile(par_path, _join(climate.cli_dir, par_fn))
-            climate.par_fn = par_fn
+                    par_path = lvdm.par_path
+                    _dir, par_fn = _split(par_path)
+                    shutil.copyfile(par_path, _join(climate.cli_dir, par_fn))
+                    climate.par_fn = par_fn
 
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                log_print(topaz_id)
-            lng, lat = ss.centroid.lnglat
+                    sub_par_fns = {}
+                    sub_cli_fns = {}
+                    for topaz_id, ss in watershed._subs_summary.items():
+                        log_print(topaz_id)
+                    lng, lat = ss.centroid.lnglat
 
-            cli_path = lvdm.closest_cli(lng, lat)
-            _dir, cli_fn = _split(cli_path)
-            run_cli_path = _join(climate.cli_dir, cli_fn)
-            if not _exists(run_cli_path):
-                shutil.copyfile(cli_path, run_cli_path)
-            sub_cli_fns[topaz_id] = cli_fn
-            sub_par_fns[topaz_id] = par_fn
+                    cli_path = lvdm.closest_cli(lng, lat)
+                    _dir, cli_fn = _split(cli_path)
+                    run_cli_path = _join(climate.cli_dir, cli_fn)
+                    if not _exists(run_cli_path):
+                        shutil.copyfile(cli_path, run_cli_path)
+                    sub_cli_fns[topaz_id] = cli_fn
+                    sub_par_fns[topaz_id] = par_fn
 
-            climate.sub_par_fns = sub_par_fns
-            climate.sub_cli_fns = sub_cli_fns
-            climate.dump_and_unlock()
+                    climate.sub_par_fns = sub_par_fns
+                    climate.sub_cli_fns = sub_cli_fns
+                    climate.dump_and_unlock()
 
-            elif 'daymet' in wd:
-            stations = climate.find_closest_stations()
-            climate.climatestation = stations[0]['id']
+                elif 'daymet' in wd:
+                    stations = climate.find_closest_stations()
+                    climate.climatestation = stations[0]['id']
 
-            climate.climate_mode = ClimateMode.Observed
-            climate.climate_spatialmode = ClimateSpatialMode.Multiple
-            climate.set_observed_pars(start_year=1990, end_year=2017)
+                    climate.climate_mode = ClimateMode.Observed
+                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                    climate.set_observed_pars(start_year=1990, end_year=2017)
 
-            climate.build(verbose=1)
+                    climate.build(verbose=1)
 
-            climate.lock()
+                    climate.lock()
 
-            cli_dir = climate.cli_dir
-            adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
-            climate.cli_fn = adj_cli_fn
+                    cli_dir = climate.cli_dir
+                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                    climate.cli_fn = adj_cli_fn
 
-            for topaz_id in climate.sub_cli_fns:
-                adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-            climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                    for topaz_id in climate.sub_cli_fns:
+                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
-            climate.dump_and_unlock()
+                    climate.dump_and_unlock()
 
-            elif 'gridmet' in wd:
-            log_print('building gridmet')
-            stations = climate.find_closest_stations()
-            climate.climatestation = stations[0]['id']
+                elif 'gridmet' in wd:
+                    log_print('building gridmet')
+                    stations = climate.find_closest_stations()
+                    climate.climatestation = stations[0]['id']
 
-            climate.climate_mode = ClimateMode.GridMetPRISM
-            climate.climate_spatialmode = ClimateSpatialMode.Multiple
-            climate.set_observed_pars(start_year=1980, end_year=2019)
+                    climate.climate_mode = ClimateMode.GridMetPRISM
+                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                    climate.set_observed_pars(start_year=1980, end_year=2019)
 
-            climate.build(verbose=1)
+                    climate.build(verbose=1)
 
-            climate.lock()
+                    climate.lock()
 
             elif cli_mode == 'future':
-            log_print('building gridmet')
-            stations = climate.find_closest_stations()
-            climate.climatestation = stations[0]['id']
+                log_print('building gridmet')
+                stations = climate.find_closest_stations()
+                climate.climatestation = stations[0]['id']
 
-            climate.climate_mode = ClimateMode.Future
-            climate.climate_spatialmode = ClimateSpatialMode.Multiple
-            climate.set_future_pars(start_year=2006, end_year=2099)
+                climate.climate_mode = ClimateMode.Future
+                climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                climate.set_future_pars(start_year=2006, end_year=2099)
 
-            climate.build(verbose=1)
+                climate.build(verbose=1)
 
-            climate.lock()
+                climate.lock()
 
-            cli_dir = climate.cli_dir
-            adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
-            climate.cli_fn = adj_cli_fn
+                cli_dir = climate.cli_dir
+                adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                climate.cli_fn = adj_cli_fn
 
-            for topaz_id in climate.sub_cli_fns:
-                adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-            climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                for topaz_id in climate.sub_cli_fns:
+                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
-            climate.dump_and_unlock()
+                climate.dump_and_unlock()
 
-            elif cli_mode == 'PRISMadj':
-            stations = climate.find_closest_stations()
-            climate.climatestation = stations[0]['id']
+                elif cli_mode == 'PRISMadj':
+                stations = climate.find_closest_stations()
+                climate.climatestation = stations[0]['id']
 
-            log_print('climate_station:', climate.climatestation)
+                log_print('climate_station:', climate.climatestation)
 
-            climate.climate_mode = ClimateMode.PRISM
-            climate.climate_spatialmode = ClimateSpatialMode.Multiple
-            climate.input_years = 100
+                climate.climate_mode = ClimateMode.PRISM
+                climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                climate.input_years = 100
 
-            climate.build(verbose=1)
+                climate.build(verbose=1)
 
             elif cli_mode == 'vanilla':
-            stations = climate.find_closest_stations()
-            climate.climatestation = stations[0]['id']
+                stations = climate.find_closest_stations()
+                climate.climatestation = stations[0]['id']
 
-            log_print('climate_station:', climate.climatestation)
+                log_print('climate_station:', climate.climatestation)
 
-            climate.climate_mode = ClimateMode.Vanilla
-            climate.climate_spatialmode = ClimateSpatialMode.Single
-            climate.input_years = 100
+                climate.climate_mode = ClimateMode.Vanilla
+                climate.climate_spatialmode = ClimateSpatialMode.Single
+                climate.input_years = 100
 
-            climate.build(verbose=1)
+                climate.build(verbose=1)
 
             log_print('running wepp')
             wepp = Wepp.getInstance(wd)
