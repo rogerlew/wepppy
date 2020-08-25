@@ -380,7 +380,7 @@ if __name__ == '__main__':
             soils.dump_and_unlock()
             soils = Soils.getInstance(wd)
 
-            if _exists(_join(wd, 'lt.nodb'):
+            if _exists(_join(wd, 'lt.nodb')):
                 lt = LakeTahoe.GetInstance(wd)
             modify_soils(self, default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
 
