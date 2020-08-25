@@ -1327,11 +1327,12 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
+            cli_dir = self.cli_dir
 
             self.log('  running _build_climate_future... \n')
             assert self._input_years == (self._future_end_year - self._future_start_year) + 1
             watershed = Watershed.getInstance(self.wd)
-            lng, lat = watershed.centroid
+            ws_lng, ws_lat = watershed.centroid
             climatestation = self.climatestation
 
             self.log('  fetching future climate data... ')
@@ -1339,9 +1340,18 @@ class Climate(NoDbBase, LogMixin):
                 climatestation,
                 self._future_start_year,
                 self._future_end_year,
-                lng=lng, lat=lat
+                lng=ws_lng, lat=ws_lat
             )
             self.log_done()
+                    
+            self.log('  running cligen... ')
+            par_fn, cli_fn, monthlies = cc.unpack_json_result(
+                result,
+                climatestation,
+                cli_dir
+            )
+            
+            cli_path = _join(cli_dir, cli_fn)
 
             distance = 1e38
             closest_hill = None
@@ -1372,13 +1382,6 @@ class Climate(NoDbBase, LogMixin):
 
                     self.log_done()
                     
-            self.log('  running cligen... ')
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                result,
-                climatestation,
-                self.cli_dir
-            )
-
             self.monthlies = self.monthlies
             self.par_fn = par_fn
             self.cli_fn = cli_fn
