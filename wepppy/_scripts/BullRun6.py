@@ -382,7 +382,7 @@ if __name__ == '__main__':
             soils = Soils.getInstance(wd)
 
             if _exists(_join(wd, 'lt.nodb')):
-                lt = LakeTahoe.GetInstance(wd)
+                lt = LakeTahoe.getInstance(wd)
             modify_soils(self, default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
 
             climate = Climate.getInstance(wd)
