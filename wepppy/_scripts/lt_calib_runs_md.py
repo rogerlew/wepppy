@@ -331,7 +331,8 @@ if __name__ == '__main__':
                     cfg='lt-fire-future',
                     climate='future'),
                dict(wd='CurCond.202007.cl532.ki5krcs.chn_cs{cs}',
-                    landuse=None),
+                    landuse=None,
+                    lc_lookup_fn='ki5krcs.csv'),
                dict(wd='PrescFireS.202007.kikrcs.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)]),
                dict(wd='LowSevS.202007.kikrcs.chn_cs{cs}',
@@ -359,6 +360,7 @@ if __name__ == '__main__':
             projects.append(deepcopy(watershed))
             projects[-1]['cfg'] = scenario.get('cfg', 'lt')
             projects[-1]['landuse'] = scenario['landuse']
+            projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
             projects[-1]['wd'] = ('lt_%s_%s' % (watershed['wd'], scenario['wd'])).format(cs=watershed['cs'])
 
@@ -457,6 +459,11 @@ if __name__ == '__main__':
             soils = Soils.getInstance(wd)
             soils.mode = SoilsMode.Gridded
             soils.build()
+            
+            if _exists(_join(wd, 'lt.nodb')):
+                lt = LakeTahoe.getInstance(wd)
+                lt.modify_soils(default_wepp_type='Granitic', lc_lookup_fn=lc_lookup_fn)
+
 
             log_print('building climate')
 
