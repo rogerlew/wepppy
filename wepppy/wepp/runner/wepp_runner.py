@@ -22,7 +22,7 @@ _template_dir = _join(_thisdir, "templates")
 if IS_WINDOWS:
     _wepp = _join(_thisdir, "../", "bin", "wepp2014.exe")
 else:
-    _wepp = _join(_thisdir, "../", "bin", "wepp")
+    _wepp = _join(_thisdir, "../", "bin", "wepp_347f3bd")
 
 
 def _template_loader(fn):
