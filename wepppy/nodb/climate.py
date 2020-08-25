@@ -1376,12 +1376,16 @@ class Climate(NoDbBase, LogMixin):
                         closest_hill = topaz_id
                         distance = _d
                     
-                    # set the watershed climate file to be the one closest to the centroid
-                    assert closest_hill is not None
-                    self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
 
                     self.log_done()
                     
+                # set the watershed climate file to be the one closest to the centroid
+                assert closest_hill is not None
+                self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
+                
+                self.sub_par_fns = sub_par_fns
+                self.sub_cli_fns = sub_cli_fns
+
             self.monthlies = self.monthlies
             self.par_fn = par_fn
             self.cli_fn = cli_fn
