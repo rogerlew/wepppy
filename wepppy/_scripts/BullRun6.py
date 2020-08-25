@@ -182,6 +182,9 @@ if __name__ == '__main__':
                dict(wd='CurCond.202007.cl532_gridmet.chn_cs{cs}',
                     landuse=None,
                     cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+	       #dict(wd='CurCond.202007.cl532_future.chn_cs{cs}',
+               #     landuse=None,
+               #     cli_mode='future', clean=True, build_soils=True, build_landuse=True, build_climates=True),
                dict(wd='SimFire_Eagle.202007.cl532.chn_cs{cs}',
                     landuse=None,
                     cfg='portland-simfire-eagle',
@@ -438,6 +441,20 @@ if __name__ == '__main__':
                     climate.climate_mode = ClimateMode.GridMetPRISM
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
                     climate.set_observed_pars(start_year=1980, end_year=2019)
+    
+                    climate.build(verbose=1)
+    
+                    climate.lock()
+	
+	   elif cli_mode == 'future':
+	       if 'future' in wd:
+                    log_print('building gridmet')
+                    stations = climate.find_closest_stations()
+                    climate.climatestation = stations[0]['id']
+                        
+                    climate.climate_mode = ClimateMode.Future
+                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                    climate.set_future_pars(start_year=2006, end_year=2099)
     
                     climate.build(verbose=1)
     
