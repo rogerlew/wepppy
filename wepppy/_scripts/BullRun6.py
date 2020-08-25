@@ -178,33 +178,42 @@ if __name__ == '__main__':
     scenarios = [
                dict(wd='CurCond.202007.cl532.chn_cs{cs}',
                     landuse=None,
-                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='CurCond.202007.cl532_gridmet.chn_cs{cs}',
                     landuse=None,
-                    cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
 	       dict(wd='CurCond.202007.cl532_future.chn_cs{cs}',
                     landuse=None,
-                    cli_mode='future', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='future', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='SimFire_Eagle.202007.cl532.chn_cs{cs}',
                     landuse=None,
                     cfg='portland-simfire-eagle',
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='SimFire_Norse.202007.cl532.chn_cs{cs}',
                     landuse=None,
                     cfg='portland-simfire-norse',
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='PrescFireS.202007.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='LowSevS.202007.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='ModSevS.202007.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+		    lc_lookup_fn='landSoilLookup.csv'),
                dict(wd='HighSevS.202007.chn_cs{cs}',
                     landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
+                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+	            lc_lookup_fn='landSoilLookup.csv'),
                 ]
 
     wc = sys.argv[-1]
@@ -247,6 +256,7 @@ if __name__ == '__main__':
         mcl = proj['mcl']
         cs = proj['cs']
         erod = proj['erod']
+	lc_lookup_fn = proj['lc_lookup_fn']	
 
         clean = proj['clean']
         build_soils = proj['build_soils']
@@ -368,6 +378,10 @@ if __name__ == '__main__':
             soils.soils = _soils
             soils.dump_and_unlock()
             soils = Soils.getInstance(wd)
+	
+	    if _exists(_join(wd, 'lt.nodb'):
+                lt = LakeTahoe.GetInstance(wd)
+                modify_soils(self, default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
 
         climate = Climate.getInstance(wd)
         if build_climates:
