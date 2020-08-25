@@ -886,11 +886,12 @@ class Climate(NoDbBase, LogMixin):
             # build a climate for the channels.
             ws_lng, ws_lat = watershed.centroid
 
-            self.par_fn = '.par'
 
             distance = 1e38
             closest_hill = None
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.par_fn = '.par'
+            
                 # build a climate for each subcatchment
                 sub_par_fns = {}
                 sub_cli_fns = {}
@@ -911,14 +912,15 @@ class Climate(NoDbBase, LogMixin):
                         closest_hill = topaz_id
                         distance = _d
 
+                    # set the watershed climate file to be the one closest to the centroid
+                    assert closest_hill is not None
+                    self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
+
                     self.log_done()
+
 
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
-
-            # set the watershed climate file to be the one closest to the centroid
-            assert closest_hill is not None
-            self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
 
             self.log('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))
@@ -1341,6 +1343,35 @@ class Climate(NoDbBase, LogMixin):
             )
             self.log_done()
 
+            distance = 1e38
+            closest_hill = None
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                # build a climate for each subcatchment
+                sub_par_fns = {}
+                sub_cli_fns = {}
+                for topaz_id, ss in watershed._subs_summary.items():
+                    self.log('    Using prism to spatialize {}...'.format(topaz_id))
+
+                    hill_lng, hill_lat = ss.centroid.lnglat
+                    suffix = '_{}'.format(topaz_id)
+                    new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
+
+                    prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
+
+                    sub_par_fns[topaz_id] = '.par'
+                    sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
+
+                    _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
+                    if _d < distance:
+                        closest_hill = topaz_id
+                        distance = _d
+                    
+                    # set the watershed climate file to be the one closest to the centroid
+                    assert closest_hill is not None
+                    self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
+
+                    self.log_done()
+                    
             self.log('  running cligen... ')
             par_fn, cli_fn, monthlies = cc.unpack_json_result(
                 result,
