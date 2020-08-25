@@ -116,11 +116,11 @@ class LakeTahoe(NoDbBase):
             landuse.unlock('-f')
             raise
 
-    def modify_soils(self, default_wepp_type='Volcanic'):
+    def modify_soils(self, default_wepp_type='Volcanic', lc_lookup_fn='landSoilLookup.csv'):
         wd = self.wd
         soils_dir = self.soils_dir
         
-        lc_dict = read_lc_file(_join(_data_dir, 'landSoilLookup.csv'))
+        lc_dict = read_lc_file(_join(_data_dir, lc_lookup_fn))
         with open(_join(_data_dir, 'lc_soiltype_map.json')) as fp:
             soil_type_map = json.load(fp)
         
