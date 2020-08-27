@@ -24,7 +24,7 @@ from wepppy.wepp.soils.utils import simple_texture
 
 __version__ = 'v.0.1.0'
 
-ADJUST_FCWP = True
+ADJUST_FCWP = False
 
 _thisdir = os.path.dirname(__file__)
 # _ssurgo_cache_db = ":memory:"  # _join(_thisdir, 'ssurgo_cache.db')
@@ -784,7 +784,7 @@ Any comments:
 1 1
 'water_7778_2'		'Water'	1 	0.1600 	0.7500 	1.0000 	0.0100 	999.0000 	0.1000
 	210.000000 	0.800000 	100.000000 	10.000000 	0.242 	0.115 	66.800 	7.000 	3.000 	11.300	0.00000
-0 0 100'''
+1 10000 100'''
 
     def _build_water_v2006_2(self):
         return '''2006.2\n''' + self.description + '''
