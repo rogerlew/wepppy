@@ -277,6 +277,11 @@ class Wepp(NoDbBase, LogMixin):
             except:
                 _baseflow = _RUN_BASEFLOW_DEFAULT
 
+            try:
+                _wepp_bin = config.get('wepp', 'bin')
+            except:
+                _wepp_bin = None
+
 
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
@@ -289,6 +294,7 @@ class Wepp(NoDbBase, LogMixin):
             self._run_frost = _frost
             self._run_tcr = _tcr
             self._run_baseflow = _baseflow
+            self._wepp_bin = _wepp_bin
 
             self.baseflow_opts = BaseflowOpts()
             self.run_flowpaths = False
@@ -321,6 +327,13 @@ class Wepp(NoDbBase, LogMixin):
                 db.dump_and_unlock()
 
             return db
+
+    @property
+    def wepp_bin(self):
+        if not hasattr(self, "_wepp_bin"):
+            return None
+
+        return self._wepp_bin
 
     @property
     def _nodb(self):
@@ -659,6 +672,9 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
         run_flowpaths = getattr(self, 'run_flowpaths', False)
+        wepp_bin = self.wepp_bin
+
+        self.log('    wepp_bin:{}'.format(wepp_bin))
 
         pool = ThreadPoolExecutor(NCPU)
         futures = []
@@ -672,7 +688,7 @@ class Wepp(NoDbBase, LogMixin):
         for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
             self.log('  submitting topaz={} (hill {} of {})\n'.format(topaz_id, i+1, sub_n))
             wepp_id = translator.wepp(top=int(topaz_id))
-            futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir)))
+            futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
             futures[-1].add_done_callback(oncomplete)
 
             # run flowpaths if specified
@@ -686,7 +702,7 @@ class Wepp(NoDbBase, LogMixin):
                              .format(fp, i+1, sub_n, j + 1, fp_n))
 
                     # run wepp for flowpath
-                    futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir)))
+                    futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir, wepp_bin)))
                     futures[-1].add_done_callback(oncomplete)
 
                     self.log_done()
@@ -983,8 +999,10 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         wd = self.wd
         self.log('Running Watershed... ')
 
+        self.log('    wepp_bin:{}'.format(self.wepp_bin))
+
         runs_dir = self.runs_dir
-        assert run_watershed(runs_dir)
+        assert run_watershed(runs_dir, self.wepp_bin)
 
         for fn in glob(_join(self.runs_dir, '*.out')):
             dst_path = _join(self.output_dir, _split(fn)[1])

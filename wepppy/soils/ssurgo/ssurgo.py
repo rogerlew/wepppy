@@ -301,7 +301,9 @@ class Horizon:
   
     def _computeRock(self, rock_default, 
                      field_cap_default, wilt_pt_default):
-                     
+
+        # TODO: need to update wc and fc calculations
+
         desgnmaster = self.desgnmaster
         fraggt10_r = self.fraggt10_r
         frag3to10_r = self.frag3to10_r

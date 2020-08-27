@@ -141,6 +141,9 @@ class Ron(NoDbBase):
             if "lt" in self.mods:
                 wepppy.nodb.mods.LakeTahoe(wd, cfg_fn)
 
+            if "portland" in self.mods:
+                wepppy.nodb.mods.Portland(wd, cfg_fn)
+
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
                 sbs_map = config.get('landuse', 'sbs_map')

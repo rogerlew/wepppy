@@ -195,6 +195,10 @@ class NoDbBase(object):
             lt = wepppy.nodb.mods.LakeTahoe.getInstance(self.wd)
             lt.on(evt)
 
+        if 'portland' in self.mods:
+            lt = wepppy.nodb.mods.PortlandMod.getInstance(self.wd)
+            lt.on(evt)
+
         if 'baer' in self.mods:
             baer = wepppy.nodb.mods.Baer.getInstance(self.wd)
             baer.on(evt)
