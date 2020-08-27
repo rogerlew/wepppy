@@ -328,7 +328,7 @@ class Horizon:
         rock = (100.0-rocks_soil) / 100.0 * (100.0-sieveno10_r) + rocks_soil
         not_rock = 100.0 - rock
 
-        # calculate wc
+        # calculate fc
         if not_rock == 0.0:
             fc = 0.001
         elif not isfloat(wthirdbar_r):
@@ -336,7 +336,7 @@ class Horizon:
         else:
             fc = wthirdbar_r / not_rock
 
-        # calculate fc
+        # calculate wp
         if not_rock == 0.0:
             wc = 0.001
         elif not isfloat(wfifteenbar_r):
