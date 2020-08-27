@@ -461,6 +461,16 @@ if __name__ == '__main__':
                     climate.build(verbose=1)
 
                     climate.lock()
+                    
+                    cli_dir = climate.cli_dir
+                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                    climate.cli_fn = adj_cli_fn
+
+                    for topaz_id in climate.sub_cli_fns:
+                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+
+                    climate.dump_and_unlock()
 
             elif cli_mode == 'future':
                 log_print('building gridmet')
