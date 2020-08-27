@@ -178,7 +178,7 @@ class Watershed(NoDbBase):
             self.dump_and_unlock()
 
             ron = wepppy.Ron.getInstance(self.wd)
-            if any(['lt' in ron.mods, 'portland' in ron.mods]):
+            if any(['lt' in ron.mods, 'portland' in ron.mods, 'seattle' in ron.mods]):
                 wepp = wepppy.nodb.Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 

@@ -416,7 +416,7 @@ class Baer(NoDbBase):
                 domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
 
                 ron = Ron.getInstance(wd)
-                if 'lt' in ron.mods or 'portland' in ron.mods:
+                if 'lt' in ron.mods or 'portland' in ron.mods or 'seattle' in ron.mods:
                     for k, sbs in domlc_d.items():
                         # lt shrub
                         if landuse.domlc_d[k] == '104':
@@ -611,7 +611,7 @@ class Baer(NoDbBase):
         wd = self.wd
 
         ron = Ron.getInstance(wd)
-        if 'lt' in ron.mods or 'portland' in ron.mods:
+        if 'lt' in ron.mods or 'portland' in ron.mods or 'seattle' in ron.mods:
             return
 
         soils_dir = self.soils_dir

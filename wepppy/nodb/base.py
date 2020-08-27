@@ -196,8 +196,12 @@ class NoDbBase(object):
             lt.on(evt)
 
         if 'portland' in self.mods:
-            lt = wepppy.nodb.mods.PortlandMod.getInstance(self.wd)
-            lt.on(evt)
+            portland = wepppy.nodb.mods.PortlandMod.getInstance(self.wd)
+            portland.on(evt)
+
+        if 'seattle' in self.mods:
+            seattle = wepppy.nodb.mods.SeattleMod.getInstance(self.wd)
+            seattle.on(evt)
 
         if 'baer' in self.mods:
             baer = wepppy.nodb.mods.Baer.getInstance(self.wd)
