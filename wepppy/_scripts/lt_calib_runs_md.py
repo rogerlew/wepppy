@@ -388,6 +388,7 @@ if __name__ == '__main__':
             default_landuse = proj['landuse']
             cfg = proj['cfg']
             climate_mode = proj['climate']
+            lc_lookup_fn = proj['lc_lookup_fn']
 
             if wc is not None:
                 if not wc in wd:
