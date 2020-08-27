@@ -24,6 +24,8 @@ from wepppy.wepp.soils.utils import simple_texture
 
 __version__ = 'v.0.1.0'
 
+ADJUST_FCWP = True
+
 _thisdir = os.path.dirname(__file__)
 # _ssurgo_cache_db = ":memory:"  # _join(_thisdir, 'ssurgo_cache.db')
 _ssurgo_cache_db = _join(_thisdir, 'data', 'surgo', 'surgo_tabular.db')
@@ -345,6 +347,10 @@ class Horizon:
             wc = wilt_pt_default
         else:
             wc = wfifteenbar_r / not_rock
+
+        if ADJUST_FCWP:
+            fc *= 1.0 - min(50.0, rock) / 100.0
+            wc *= 1.0 - min(50.0, rock) / 100.0
 
         self.smr = rock
         self.field_cap = fc
