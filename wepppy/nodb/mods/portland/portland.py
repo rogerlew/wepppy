@@ -26,18 +26,18 @@ from wepppy.wepp.soils.utils import read_lc_file, soil_specialization
 from ...base import NoDbBase, TriggerEvents
 
 _thisdir = os.path.dirname(__file__)
-_data_dir = _join(_thisdir, 'data')
+_data_dir = _join(_thisdir)
 
 
-class LakeTahoeNoDbLockedException(Exception):
+class PortlandModNoDbLockedException(Exception):
     pass
 
 
-class LakeTahoe(NoDbBase):
-    __name__ = 'LakeTahoe'
+class PortlandMod(NoDbBase):
+    __name__ = 'PortlandMod'
 
     def __init__(self, wd, config):
-        super(LakeTahoe, self).__init__(wd, config)
+        super(PortlandMod, self).__init__(wd, config)
 
         self.lock()
 
@@ -49,7 +49,7 @@ class LakeTahoe(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-            
+
     #
     # Required for NoDbBase Subclass
     #
@@ -57,9 +57,9 @@ class LakeTahoe(NoDbBase):
     # noinspection PyPep8Naming
     @staticmethod
     def getInstance(wd):
-        with open(_join(wd, 'lt.nodb')) as fp:
+        with open(_join(wd, 'portland.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
-            assert isinstance(db, LakeTahoe), db
+            assert isinstance(db, PortlandMod), db
 
             if _exists(_join(wd, 'READONLY')):
                 return db
@@ -73,11 +73,11 @@ class LakeTahoe(NoDbBase):
 
     @property
     def _nodb(self):
-        return _join(self.wd, 'lt.nodb')
+        return _join(self.wd, 'portland.nodb')
 
     @property
     def _lock(self):
-        return _join(self.wd, 'lt.nodb.lock')
+        return _join(self.wd, 'portland.nodb.lock')
 
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
@@ -109,21 +109,21 @@ class LakeTahoe(NoDbBase):
             for topaz_id, dom in landuse.domlc_d.items():
                 if int(dom) not in lt_doms:
                     landuse.domlc_d[topaz_id] = lc_map[dom]
-            
+
             landuse.dump_and_unlock()
-            
+
         except Exception:
             landuse.unlock('-f')
             raise
 
-    def modify_soils(self, default_wepp_type='Granitic', lc_lookup_fn='landSoilLookup.csv'):
+    def modify_soils(self, default_wepp_type='Volcanic', lc_lookup_fn='landSoilLookup.csv'):
         wd = self.wd
         soils_dir = self.soils_dir
-        
+
         lc_dict = read_lc_file(_join(_data_dir, lc_lookup_fn))
         with open(_join(_data_dir, 'lc_soiltype_map.json')) as fp:
             soil_type_map = json.load(fp)
-        
+
         soils = Soils.getInstance(wd)
         soils.lock()
 
@@ -132,15 +132,15 @@ class LakeTahoe(NoDbBase):
             domsoil_d = soils.domsoil_d
 
             assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'no soils in domsoil_d'
-            
+
             landuse = Landuse.getInstance(wd)
             domlc_d = landuse.domlc_d
-            
+
             _soils = {}
             for topaz_id, mukey in domsoil_d.items():
                 dom = domlc_d[topaz_id]
                 wepp_type = soil_type_map.get(mukey, default_wepp_type)
-                
+
                 replacements = lc_dict[(dom, wepp_type)]
                 k = '%s-%s-%s' % (mukey, wepp_type, dom)
                 src_fn = _join(soils_dir, '%s.sol' % mukey)
@@ -152,9 +152,9 @@ class LakeTahoe(NoDbBase):
                     _soils[k].mukey = k
                     _soils[k].fname = '%s.sol' % k
                     _soils[k].area = 0.0
-                    
+
                 domsoil_d[topaz_id] = k
-                    
+
             # need to recalculate the pct_coverages
             watershed = Watershed.getInstance(self.wd)
             for topaz_id, k in domsoil_d.items():
@@ -166,14 +166,14 @@ class LakeTahoe(NoDbBase):
 
             assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'lost channels in domsoil_d'
 
-            soils.soils = _soils            
+            soils.soils = _soils
             soils.domsoil_d = domsoil_d
             soils.dump_and_unlock()
-        
+
         except Exception:
             soils.unlock('-f')
             raise
-            
+
     def determine_phosphorus(self):
         # watershed = Watershed.getInstance(self.wd)
         # lng, lat = watershed.centroid
