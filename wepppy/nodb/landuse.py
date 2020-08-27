@@ -431,7 +431,7 @@ class Landuse(NoDbBase):
         if 'baer' in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
 
-        if "lt" in self.mods:
+        if "lt" in self.mods or "portland" in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
 
         return landuseoptions

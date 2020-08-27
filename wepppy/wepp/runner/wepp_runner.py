@@ -99,10 +99,13 @@ def make_ss_hillslope_run(wepp_id, runs_dir):
         fp.write(s)
 
 
-def run_hillslope(wepp_id, runs_dir):
+def run_hillslope(wepp_id, runs_dir, wepp_bin=None):
     t0 = time()
 
-    cmd = [os.path.abspath(_wepp)]
+    if wepp_bin is not None:
+        cmd = [os.path.abspath(_join(_thisdir, "../", "bin", wepp_bin))]
+    else:
+        cmd = [os.path.abspath(_wepp)]
 
     assert _exists(_join(runs_dir, 'p%i.man' % wepp_id))
     assert _exists(_join(runs_dir, 'p%i.slp' % wepp_id))
@@ -128,10 +131,13 @@ def run_hillslope(wepp_id, runs_dir):
                     % (wepp_id, log_fn))
 
 
-def run_flowpath(flowpath, runs_dir):
+def run_flowpath(flowpath, runs_dir, wepp_bin=None):
     t0 = time()
 
-    cmd = [os.path.abspath(_wepp)]
+    if wepp_bin is not None:
+        cmd = [os.path.abspath(_join(_thisdir, "../", "bin", wepp_bin))]
+    else:
+        cmd = [os.path.abspath(_wepp)]
 
     assert _exists(_join(runs_dir, '%s.man' % flowpath))
     assert _exists(_join(runs_dir, '%s.slp' % flowpath))
@@ -191,10 +197,13 @@ def make_ss_watershed_run(wepp_ids, runs_dir):
         fp.write(s)
 
 
-def run_watershed(runs_dir):
+def run_watershed(runs_dir, wepp_bin=None):
     t0 = time()
 
-    cmd = [os.path.abspath(_wepp)]
+    if wepp_bin is not None:
+        cmd = [os.path.abspath(_join(_thisdir, "../", "bin", wepp_bin))]
+    else:
+        cmd = [os.path.abspath(_wepp)]
 
     assert _exists(_join(runs_dir, 'pw0.str'))
     assert _exists(_join(runs_dir, 'pw0.chn'))
