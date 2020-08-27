@@ -146,17 +146,20 @@ class LakeTahoe(NoDbBase):
                 src_fn = _join(soils_dir, '%s.sol' % mukey)
                 dst_fn = _join(soils_dir, '%s.sol' % k)
 
-                if soil_is_water(src_fn):
+                is_water = soil_is_water(src_fn)
+                if is_water:
                     _soils[mukey] = deepcopy(soils.soils[mukey])
                     _soils[mukey].area = 0.0
 
-                elif k not in _soils:
-                    soil_specialization(src_fn, dst_fn, replacements)
-                    _soils[k] = deepcopy(soils.soils[mukey])
-                    _soils[k].mukey = k
-                    _soils[k].fname = '%s.sol' % k
-                    _soils[k].area = 0.0
-                    
+                else:
+                    if k not in _soils:
+                        soil_specialization(src_fn, dst_fn, replacements)
+                        _soils[k] = deepcopy(soils.soils[mukey])
+                        _soils[k].mukey = k
+                        _soils[k].fname = '%s.sol' % k
+                        _soils[k].area = 0.0
+
+                if not is_water:
                     domsoil_d[topaz_id] = k
                     
             # need to recalculate the pct_coverages
