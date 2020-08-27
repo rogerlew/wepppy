@@ -379,6 +379,7 @@ if __name__ == '__main__':
                     .format(dom=dom, ksat_mod=ksat_mod, bedrock_name=name)
                 if _dom not in _soils:
                     _soil_fn = '{dom}.sol'.format(dom=_dom)
+                    log_print(_soil_fn)
                     src_soil_fn = _join(_soil.soils_dir, _soil.fname)
                     dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
                     log_print(src_soil_fn, dst_soil_fn, ksat, _dom)
