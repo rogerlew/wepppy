@@ -20,6 +20,19 @@ def _identify_outcrop_mukeys(soils: Soils):
     return outcrop_mukeys
 
 
+def bare_or_sodgrass_or_bunchgrass_selector(landuse:Landuse, soils:Soils):
+    domlc_d = landuse.domlc_d
+    domsoil_d = soils.domsoil_d
+    outcrop_mukeys = _identify_outcrop_mukeys(soils)
+
+    topaz_ids = []
+    for top in domsoil_d:
+        if domlc_d[top] in ['100', '101', '103']:
+            topaz_ids.append(top)
+
+    return topaz_ids
+
+
 def not_shrub_and_not_outcrop_selector(landuse:Landuse, soils:Soils):
     domlc_d = landuse.domlc_d
     domsoil_d = soils.domsoil_d
