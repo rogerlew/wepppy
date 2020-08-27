@@ -459,7 +459,7 @@ if __name__ == '__main__':
 
                     for topaz_id in climate.sub_cli_fns:
                         adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                     climate.dump_and_unlock()
 
@@ -482,7 +482,7 @@ if __name__ == '__main__':
 
                     for topaz_id in climate.sub_cli_fns:
                         adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                     climate.dump_and_unlock()
 
@@ -505,7 +505,7 @@ if __name__ == '__main__':
 
                 for topaz_id in climate.sub_cli_fns:
                     adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                 climate.dump_and_unlock()
 
