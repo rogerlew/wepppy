@@ -370,7 +370,7 @@ if __name__ == '__main__':
         # dict(wd='CurCond.202007.cl532.ki5krcs.chn_cs{cs}',
         #      landuse=None,
         #      lc_lookup_fn='ki5krcs.csv'),
-        dict(wd='CurCond.202008.obs_cl532.ssurgo_current.ki5krcs.chn_cs{cs}',
+        dict(wd='CurCond.202008.obs_cl532.ssurgo_fcwp_rev.ki5krcs.chn_cs{cs}',
              landuse=None,
              lc_lookup_fn='ki5krcs.csv',
              climate='observed'),
