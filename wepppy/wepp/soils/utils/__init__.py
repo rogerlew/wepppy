@@ -248,10 +248,6 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
             f.writelines(lines[5:])
 
 
-if __name__ == "__main__":
-    read_lc_file('/home/roger/wepppy/wepppy/nodb/mods/lt/data/landSoilLookup.csv')
-
-
 def modify_ksat(src_fn, dst_fn, ksat):
     with open(src_fn) as fp:
         lines = fp.readlines()
@@ -275,3 +271,7 @@ def soil_is_water(soil_fn):
     with open(soil_fn) as fp2:
         contents = fp2.read()
         return 'water' in contents.lower()
+
+
+if __name__ == "__main__":
+    read_lc_file('/home/roger/wepppy/wepppy/nodb/mods/lt/data/landSoilLookup.csv')
