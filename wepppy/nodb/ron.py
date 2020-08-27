@@ -142,7 +142,7 @@ class Ron(NoDbBase):
                 wepppy.nodb.mods.LakeTahoe(wd, cfg_fn)
 
             if "portland" in self.mods:
-                wepppy.nodb.mods.Portland(wd, cfg_fn)
+                wepppy.nodb.mods.PortlandMod(wd, cfg_fn)
 
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
