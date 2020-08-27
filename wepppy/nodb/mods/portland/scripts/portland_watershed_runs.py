@@ -10,7 +10,7 @@ from copy import deepcopy
 
 import wepppy
 from wepppy.climates.cligen import ClimateFile
-from wepppy.soils.utils import modify_ksat
+from wepppy.wepp.soils.utils import modify_ksat
 from wepppy.nodb import *
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
