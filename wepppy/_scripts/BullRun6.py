@@ -57,7 +57,7 @@ if __name__ == '__main__':
             'FirCreek': 0.916802717,
             'BRnearMultnoma': 1.180931876,
             'NorthFork': 1.267197533,
-            'LittleSandy': 1.007254747,
+            'LittleSandy': 1.007254747
         },
         'daymet': {
             'SmallTest': 1.100579816,
@@ -67,7 +67,7 @@ if __name__ == '__main__':
             'FirCreek': 0.885748368,
             'BRnearMultnoma': 1.254837877,
             'NorthFork': 1.180883364,
-            'LittleSandy': 1.008756432,
+            'LittleSandy': 1.008756432
         }
     }
 
@@ -168,6 +168,17 @@ if __name__ == '__main__':
              map_center=[-121.98875427246095, 45.43700828867391],
              map_zoom=11,
              outlet=[-122.17147271631961, 45.415421615033246],
+             landuse=None,
+             cs=110, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.80, p_coeff=0.80),
+        dict(watershed='SmallTest',
+             extent=[-121.97819709777833, 45.41688895432242, -121.91811561584474, 45.45904698953964],
+             map_center=[-121.94815635681154, 45.4379719091347],
+             map_zoom=14,
+             outlet=[-121.945938746661, 45.4398555878686],
              landuse=None,
              cs=110, erod=0.000001,
              csa=10, mcl=100,
