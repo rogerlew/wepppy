@@ -22,7 +22,7 @@ from ...landuse import Landuse
 from ...soils import Soils
 from ...watershed import Watershed
 from ...wepp import Wepp
-from wepppy.wepp.soils.utils import read_lc_file, soil_specialization
+from wepppy.wepp.soils.utils import read_lc_file, soil_specialization, soil_is_water
 from ...base import NoDbBase, TriggerEvents
 
 _thisdir = os.path.dirname(__file__)
@@ -146,7 +146,11 @@ class PortlandMod(NoDbBase):
                 src_fn = _join(soils_dir, '%s.sol' % mukey)
                 dst_fn = _join(soils_dir, '%s.sol' % k)
 
-                if k not in _soils:
+                if soil_is_water(src_fn):
+                    _soils[k] = deepcopy(soils.soils[mukey])
+                    _soils[k].area = 0.0
+
+                elif k not in _soils:
                     soil_specialization(src_fn, dst_fn, replacements)
                     _soils[k] = deepcopy(soils.soils[mukey])
                     _soils[k].mukey = k
