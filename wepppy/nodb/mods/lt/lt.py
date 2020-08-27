@@ -147,8 +147,8 @@ class LakeTahoe(NoDbBase):
                 dst_fn = _join(soils_dir, '%s.sol' % k)
 
                 if soil_is_water(src_fn):
-                    _soils[k] = deepcopy(soils.soils[mukey])
-                    _soils[k].area = 0.0
+                    _soils[mukey] = deepcopy(soils.soils[mukey])
+                    _soils[mukey].area = 0.0
 
                 elif k not in _soils:
                     soil_specialization(src_fn, dst_fn, replacements)
