@@ -1,6 +1,6 @@
 import os
 import sys
-import datetime
+from datetime import datetime, date
 
 import shutil
 from os.path import exists as _exists
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     def _daymet_cli_adjust(cli_dir, cli_fn, watershed):
         cli = ClimateFile(_join(cli_dir, cli_fn))
 
-        cli.discontinuous_temperature_adjustment(datetime.date(2005, 11, 2))
+        cli.discontinuous_temperature_adjustment(date(2005, 11, 2))
 
         pp_scale = precip_transforms['daymet'][watershed]
         cli.transform_precip(offset=0, scale=pp_scale)
@@ -475,11 +475,11 @@ if __name__ == '__main__':
                     climate.lock()
                     
                     cli_dir = climate.cli_dir
-                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
                     climate.cli_fn = adj_cli_fn
 
                     for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                        adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
                     climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                     climate.dump_and_unlock()
