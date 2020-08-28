@@ -12,7 +12,7 @@ from copy import deepcopy
 import wepppy
 
 from wepppy.all_your_base import isfloat
-from wepppy.wepp.soils.utils import modify_ksat
+from wepppy.soils.utils import modify_ksat
 from wepppy.nodb import *
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
@@ -24,6 +24,7 @@ from wepppy.nodb.mods.portland.livneh_daily_observed import LivnehDataManager
 from wepppy.nodb.mods.portland.bedrock import ShallowLandSlideSusceptibility, BullRunBedrock
 
 from osgeo import gdal, osr
+
 gdal.UseExceptions()
 
 from wepppy._scripts.utils import *
@@ -54,8 +55,6 @@ if __name__ == '__main__':
             'CedarCreek': 1.120768995,
             'BlazedAlder': 1.098866242,
             'FirCreek': 0.916802717,
-	    'FirCreek_1':0.916802717,
-	    'FirCreek_2':0.916802717,
             'BRnearMultnoma': 1.180931876,
             'NorthFork': 1.267197533,
             'LittleSandy': 1.007254747,
@@ -151,6 +150,47 @@ if __name__ == '__main__':
                     cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
                 ]
 
+    scenarios = [
+        dict(wd='CurCond.202007.cl532.chn_cs{cs}',
+             landuse=None,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='CurCond.202007.cl532_gridmet.chn_cs{cs}',
+             landuse=None,
+             cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='CurCond.202007.cl532_future.chn_cs{cs}',
+             landuse=None,
+             cli_mode='future', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='SimFire_Eagle.202007.cl532.chn_cs{cs}',
+             landuse=None,
+             cfg='portland-simfire-eagle',
+             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='SimFire_Norse.202007.cl532.chn_cs{cs}',
+             landuse=None,
+             cfg='portland-simfire-norse',
+             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='PrescFireS.202007.chn_cs{cs}',
+             landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
+             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='LowSevS.202007.chn_cs{cs}',
+             landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
+             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='ModSevS.202007.chn_cs{cs}',
+             landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
+             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='HighSevS.202007.chn_cs{cs}',
+             landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
+             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
+    ]
+
     wc = sys.argv[-1]
     if '.py' in wc:
         wc = None
@@ -166,9 +206,10 @@ if __name__ == '__main__':
             projects[-1]['build_soils'] = scenario['build_soils']
             projects[-1]['build_landuse'] = scenario['build_landuse']
             projects[-1]['build_climates'] = scenario['build_climates']
-            projects[-1]['wd'] = 'portland_{watershed}_{scenario}'\
-                                 .format(watershed=watershed['watershed'], scenario=scenario['wd'])\
-                                 .format(cs=watershed['cs'])
+            projects[-1]['lc_lookup_fn'] = scenario['lc_lookup_fn']
+            projects[-1]['wd'] = 'portland_{watershed}_{scenario}' \
+                .format(watershed=watershed['watershed'], scenario=scenario['wd']) \
+                .format(cs=watershed['cs'])
 
     for proj in projects:
         config = proj['cfg']
@@ -191,6 +232,7 @@ if __name__ == '__main__':
         mcl = proj['mcl']
         cs = proj['cs']
         erod = proj['erod']
+        lc_lookup_fn = proj['lc_lookup_fn']
 
         clean = proj['clean']
         build_soils = proj['build_soils']
@@ -313,92 +355,119 @@ if __name__ == '__main__':
             soils.dump_and_unlock()
             soils = Soils.getInstance(wd)
 
-        climate = Climate.getInstance(wd)
-        if build_climates:
-            log_print('building climate')
-            
+            if _exists(_join(wd, 'lt.nodb')):
+                lt = LakeTahoe.getInstance(wd)
+                lt.modify_soils(default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
+
+            climate = Climate.getInstance(wd)
+            if build_climates:
+                log_print('building climate')
+
             if cli_mode == 'observed':
                 log_print('building observed')
                 if 'linveh' in wd:
                     climate.climate_mode = ClimateMode.ObservedDb
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
                     climate.input_years = 21
-    
+
                     climate.lock()
                     lng, lat = watershed.centroid
-    
+
                     cli_path = lvdm.closest_cli(lng, lat)
                     _dir, cli_fn = _split(cli_path)
                     shutil.copyfile(cli_path, _join(climate.cli_dir, cli_fn))
                     climate.cli_fn = cli_fn
-    
+
                     par_path = lvdm.par_path
                     _dir, par_fn = _split(par_path)
                     shutil.copyfile(par_path, _join(climate.cli_dir, par_fn))
                     climate.par_fn = par_fn
-    
+
                     sub_par_fns = {}
                     sub_cli_fns = {}
                     for topaz_id, ss in watershed._subs_summary.items():
                         log_print(topaz_id)
-                        lng, lat = ss.centroid.lnglat
-    
-                        cli_path = lvdm.closest_cli(lng, lat)
-                        _dir, cli_fn = _split(cli_path)
-                        run_cli_path = _join(climate.cli_dir, cli_fn)
-                        if not _exists(run_cli_path):
-                            shutil.copyfile(cli_path, run_cli_path)
-                        sub_cli_fns[topaz_id] = cli_fn
-                        sub_par_fns[topaz_id] = par_fn
-    
+                    lng, lat = ss.centroid.lnglat
+
+                    cli_path = lvdm.closest_cli(lng, lat)
+                    _dir, cli_fn = _split(cli_path)
+                    run_cli_path = _join(climate.cli_dir, cli_fn)
+                    if not _exists(run_cli_path):
+                        shutil.copyfile(cli_path, run_cli_path)
+                    sub_cli_fns[topaz_id] = cli_fn
+                    sub_par_fns[topaz_id] = par_fn
+
                     climate.sub_par_fns = sub_par_fns
                     climate.sub_cli_fns = sub_cli_fns
                     climate.dump_and_unlock()
-    
+
                 elif 'daymet' in wd:
                     stations = climate.find_closest_stations()
                     climate.climatestation = stations[0]['id']
-    
+
                     climate.climate_mode = ClimateMode.Observed
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
                     climate.set_observed_pars(start_year=1990, end_year=2017)
-    
+
                     climate.build(verbose=1)
-    
+
                     climate.lock()
-    
+
                     cli_dir = climate.cli_dir
                     adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
                     climate.cli_fn = adj_cli_fn
-    
+
                     for topaz_id in climate.sub_cli_fns:
                         adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
-    
+                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+
                     climate.dump_and_unlock()
-    
+
                 elif 'gridmet' in wd:
                     log_print('building gridmet')
                     stations = climate.find_closest_stations()
                     climate.climatestation = stations[0]['id']
-                        
+
                     climate.climate_mode = ClimateMode.GridMetPRISM
                     climate.climate_spatialmode = ClimateSpatialMode.Multiple
                     climate.set_observed_pars(start_year=1980, end_year=2019)
-    
+
                     climate.build(verbose=1)
-    
+
                     climate.lock()
-    
+                    
                     cli_dir = climate.cli_dir
-                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
                     climate.cli_fn = adj_cli_fn
-    
+
                     for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
-    
+                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+
                     climate.dump_and_unlock()
+
+            elif cli_mode == 'future':
+                log_print('building gridmet')
+                stations = climate.find_closest_stations()
+                climate.climatestation = stations[0]['id']
+
+                climate.climate_mode = ClimateMode.Future
+                climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                climate.set_future_pars(start_year=2006, end_year=2099)
+
+                climate.build(verbose=1)
+
+                climate.lock()
+
+                cli_dir = climate.cli_dir
+                adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                climate.cli_fn = adj_cli_fn
+
+                for topaz_id in climate.sub_cli_fns:
+                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                climate.sub_cli_fns[topaz_id] = adj_cli_fn
+
+                climate.dump_and_unlock()
 
             elif cli_mode == 'PRISMadj':
                 stations = climate.find_closest_stations()
@@ -424,27 +493,27 @@ if __name__ == '__main__':
 
                 climate.build(verbose=1)
 
-        log_print('running wepp')
-        wepp = Wepp.getInstance(wd)
-        wepp.parse_inputs(proj)
-		
-        wepp.prep_hillslopes()
-	
-        log_print('running hillslopes')
-        wepp.run_hillslopes()
+            log_print('running wepp')
+            wepp = Wepp.getInstance(wd)
+            wepp.parse_inputs(proj)
 
-        wepp = Wepp.getInstance(wd)
-        wepp.prep_watershed(erodibility=erod, critical_shear=cs)
-        wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
-        wepp.run_watershed()
-        loss_report = wepp.report_loss()
+            wepp.prep_hillslopes()
 
-        log_print('running wepppost')
-        fn = _join(ron.export_dir, 'totalwatsed.csv')
+            log_print('running hillslopes')
+            wepp.run_hillslopes()
 
-        totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                wepp.baseflow_opts, wepp.phosphorus_opts)
-        totwatsed.export(fn)
-        assert _exists(fn)
+            wepp = Wepp.getInstance(wd)
+            wepp.prep_watershed(erodibility=erod, critical_shear=cs)
+            wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
+            wepp.run_watershed()
+            loss_report = wepp.report_loss()
 
-        arc_export(wd)
+            log_print('running wepppost')
+            fn = _join(ron.export_dir, 'totalwatsed.csv')
+
+            totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
+                                    wepp.baseflow_opts, wepp.phosphorus_opts)
+            totwatsed.export(fn)
+            assert _exists(fn)
+
+            arc_export(wd)
