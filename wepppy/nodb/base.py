@@ -192,15 +192,15 @@ class NoDbBase(object):
         import wepppy.nodb.mods
 
         if 'lt' in self.mods:
-            lt = wepppy.nodb.mods.LakeTahoe.getInstance(self.wd)
+            lt = wepppy.nodb.mods.locations.LakeTahoe.getInstance(self.wd)
             lt.on(evt)
 
         if 'portland' in self.mods:
-            portland = wepppy.nodb.mods.PortlandMod.getInstance(self.wd)
+            portland = wepppy.nodb.mods.locations.PortlandMod.getInstance(self.wd)
             portland.on(evt)
 
         if 'seattle' in self.mods:
-            seattle = wepppy.nodb.mods.SeattleMod.getInstance(self.wd)
+            seattle = wepppy.nodb.mods.locations.SeattleMod.getInstance(self.wd)
             seattle.on(evt)
 
         if 'baer' in self.mods:

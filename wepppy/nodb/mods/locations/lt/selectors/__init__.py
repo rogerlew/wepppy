@@ -1,14 +1,9 @@
-from wepppy.nodb import *
 
-from osgeo import gdal, osr
-gdal.UseExceptions()
-
-
-def all_hillslopes(landuse:Landuse, soils:Soils):
+def all_hillslopes(landuse, soils):
     return list(landuse.domlc_d.keys())
 
 
-def _identify_outcrop_mukeys(soils: Soils):
+def _identify_outcrop_mukeys(soils):
     outcrop_mukeys = []
     _soils = soils.subs_summary
     for top in _soils:
@@ -20,20 +15,18 @@ def _identify_outcrop_mukeys(soils: Soils):
     return outcrop_mukeys
 
 
-def bare_or_sodgrass_or_bunchgrass_selector(landuse:Landuse, soils:Soils):
+def bare_or_sodgrass_or_bunchgrass_selector(landuse, soils):
     domlc_d = landuse.domlc_d
-    domsoil_d = soils.domsoil_d
-    outcrop_mukeys = _identify_outcrop_mukeys(soils)
 
     topaz_ids = []
-    for top in domsoil_d:
+    for top in domlc_d:
         if domlc_d[top] in ['100', '101', '103']:
             topaz_ids.append(top)
 
     return topaz_ids
 
 
-def not_shrub_and_not_outcrop_selector(landuse:Landuse, soils:Soils):
+def not_shrub_and_not_outcrop_selector(landuse, soils):
     domlc_d = landuse.domlc_d
     domsoil_d = soils.domsoil_d
     outcrop_mukeys = _identify_outcrop_mukeys(soils)
@@ -46,7 +39,7 @@ def not_shrub_and_not_outcrop_selector(landuse:Landuse, soils:Soils):
     return topaz_ids
 
 
-def shrub_and_not_outcrop_selector(landuse:Landuse, soils:Soils):
+def shrub_and_not_outcrop_selector(landuse, soils):
     domlc_d = landuse.domlc_d
     domsoil_d = soils.domsoil_d
     outcrop_mukeys = _identify_outcrop_mukeys(soils)
@@ -59,8 +52,9 @@ def shrub_and_not_outcrop_selector(landuse:Landuse, soils:Soils):
     return topaz_ids
 
 
-def not_shrub_selector(landuse:Landuse, soils:Soils):
+def not_shrub_selector(landuse, soils):
     domlc_d = landuse.domlc_d
+
     topaz_ids = []
     for top in domlc_d:
         if str(domlc_d[top]) != '104':
@@ -69,7 +63,7 @@ def not_shrub_selector(landuse:Landuse, soils:Soils):
     return topaz_ids
 
 
-def shrub_selector(landuse:Landuse, soils:Soils):
+def shrub_selector(landuse, soils):
     domlc_d = landuse.domlc_d
     topaz_ids = []
     for top in domlc_d:
@@ -79,7 +73,7 @@ def shrub_selector(landuse:Landuse, soils:Soils):
     return topaz_ids
 
 
-def outcrop_selector(landuse:Landuse, soils:Soils):
+def outcrop_selector(landuse, soils):
     domsoil_d = soils.domsoil_d
     outcrop_mukeys = _identify_outcrop_mukeys(soils)
 
@@ -91,7 +85,7 @@ def outcrop_selector(landuse:Landuse, soils:Soils):
     return topaz_ids
 
 
-def not_outcrop_selector(landuse:Landuse, soils:Soils):
+def not_outcrop_selector(landuse, soils):
     domsoil_d = soils.domsoil_d
     outcrop_mukeys = _identify_outcrop_mukeys(soils)
 

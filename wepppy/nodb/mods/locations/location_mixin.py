@@ -26,80 +26,25 @@ from wepppy.wepp.soils.utils import read_lc_file, soil_specialization, soil_is_w
 from ...base import NoDbBase, TriggerEvents
 
 _thisdir = os.path.dirname(__file__)
-_data_dir = _join(_thisdir)
+_data_dir = _join(_thisdir, 'data')
 
 
-class PortlandModNoDbLockedException(Exception):
-    pass
-
-
-class PortlandMod(NoDbBase):
-    __name__ = 'PortlandMod'
-
-    def __init__(self, wd, config):
-        super(PortlandMod, self).__init__(wd, config)
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'portland.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, PortlandMod), db
-
-            if _exists(_join(wd, 'READONLY')):
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-            return db
+class LocationMixin(object):
 
     @property
-    def _nodb(self):
-        return _join(self.wd, 'portland.nodb')
+    def location_doms(self):
+        data_dir = self.data_dir
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'portland.nodb.lock')
-
-    def on(self, evt):
-        if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
-            self.remap_landuse()
-        if evt == TriggerEvents.LANDUSE_BUILD_COMPLETE:
-            pass
-        elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
-            self.modify_soils()
-        elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
-            self.determine_phosphorus()
-
-    @property
-    def lt_doms(self):
-        lc_dict = read_lc_file(_join(_data_dir, 'landSoilLookup.csv'))
+        lc_dict = read_lc_file(_join(data_dir, self.lc_lookup_fn))
         return set([lc_dict[k].LndcvrID for k in lc_dict])
 
     def remap_landuse(self):
+        data_dir = self.data_dir
 
-        with open(_join(_data_dir, 'landcover_map.json')) as fp:
+        with open(_join(data_dir, 'landcover_map.json')) as fp:
             lc_map = json.load(fp)
 
-        lt_doms = self.lt_doms
+        location_doms = self.location_doms
 
         landuse = Landuse.getInstance(self.wd)
         landuse.lock()
@@ -107,7 +52,7 @@ class PortlandMod(NoDbBase):
         # noinspection PyBroadException
         try:
             for topaz_id, dom in landuse.domlc_d.items():
-                if int(dom) not in lt_doms:
+                if int(dom) not in location_doms:
                     landuse.domlc_d[topaz_id] = lc_map[dom]
 
             landuse.dump_and_unlock()
@@ -116,12 +61,19 @@ class PortlandMod(NoDbBase):
             landuse.unlock('-f')
             raise
 
-    def modify_soils(self, default_wepp_type='Volcanic', lc_lookup_fn='landSoilLookup.csv'):
+    def modify_soils(self, default_wepp_type=None, lc_lookup_fn=None):
+        data_dir = self.data_dir
         wd = self.wd
         soils_dir = self.soils_dir
 
-        lc_dict = read_lc_file(_join(_data_dir, lc_lookup_fn))
-        with open(_join(_data_dir, 'lc_soiltype_map.json')) as fp:
+        if default_wepp_type is None:
+            default_wepp_type = self.default_wepp_type
+
+        if lc_lookup_fn is None:
+            lc_lookup_fn = self.lc_lookup_fn
+
+        lc_dict = read_lc_file(_join(data_dir, lc_lookup_fn))
+        with open(_join(data_dir, 'lc_soiltype_map.json')) as fp:
             soil_type_map = json.load(fp)
 
         soils = Soils.getInstance(wd)

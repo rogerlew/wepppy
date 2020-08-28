@@ -11,115 +11,25 @@ from time import sleep
 from datetime import datetime
 
 import wepppy
-from wepppy.nodb import *
+from wepppy.nodb import (
+    Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
+)
+from wepppy.nodb.mods.locations import LakeTahoe
+
 from os.path import join as _join
+from wepppy.nodb.mods.locations.lt.selectors import *
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
 
 from osgeo import gdal, osr
 gdal.UseExceptions()
 
-
-def all_hillslopes(landuse, soils):
-    return list(landuse.domlc_d.keys())
-
-
-def _identify_outcrop_mukeys(soils):
-    outcrop_mukeys = []
-    _soils = soils.subs_summary
-    for top in _soils:
-        desc = _soils[top]['desc'].lower()
-        if 'melody-rock outcrop' in desc or 'ellispeak-rock outcrop' in desc:
-            mukey = str(_soils[top]['mukey'])
-            outcrop_mukeys.append(mukey)
-
-    return outcrop_mukeys
-
-
-def bare_or_sodgrass_or_bunchgrass_selector(landuse:Landuse, soils:Soils):
-    domlc_d = landuse.domlc_d
-    domsoil_d = soils.domsoil_d
-    outcrop_mukeys = _identify_outcrop_mukeys(soils)
-
-    topaz_ids = []
-    for top in domsoil_d:
-        if domlc_d[top] in ['100', '101', '103']:
-            topaz_ids.append(top)
-
-    return topaz_ids
-
-
-def not_shrub_and_not_outcrop_selector(landuse, soils):
-    domlc_d = landuse.domlc_d
-    domsoil_d = soils.domsoil_d
-    outcrop_mukeys = _identify_outcrop_mukeys(soils)
-
-    topaz_ids = []
-    for top in domsoil_d:
-        if str(domsoil_d[top]) not in outcrop_mukeys and domlc_d[top] != '104':
-            topaz_ids.append(top)
-
-    return topaz_ids
-
-
-def shrub_and_not_outcrop_selector(landuse, soils):
-    domlc_d = landuse.domlc_d
-    domsoil_d = soils.domsoil_d
-    outcrop_mukeys = _identify_outcrop_mukeys(soils)
-
-    topaz_ids = []
-    for top in domsoil_d:
-        if str(domsoil_d[top]) not in outcrop_mukeys and domlc_d[top] == '104':
-            topaz_ids.append(top)
-
-    return topaz_ids
-
-
-def not_shrub_selector(landuse, soils):
-    domlc_d = landuse.domlc_d
-    topaz_ids = []
-    for top in domlc_d:
-        if str(domlc_d[top]) != '104':
-            topaz_ids.append(top)
-
-    return topaz_ids
-
-
-def shrub_selector(landuse, soils):
-    domlc_d = landuse.domlc_d
-    topaz_ids = []
-    for top in domlc_d:
-        if domlc_d[top] == '104':
-            topaz_ids.append(top)
-
-    return topaz_ids
-
-
-def outcrop_selector(landuse, soils):
-    domsoil_d = soils.domsoil_d
-    outcrop_mukeys = _identify_outcrop_mukeys(soils)
-
-    topaz_ids = []
-    for top in domsoil_d:
-        if domsoil_d[top] in outcrop_mukeys:
-            topaz_ids.append(top)
-
-    return topaz_ids
-
-
-def not_outcrop_selector(landuse, soils):
-    domsoil_d = soils.domsoil_d
-    outcrop_mukeys = _identify_outcrop_mukeys(soils)
-
-    topaz_ids = []
-    for top in domsoil_d:
-        if domsoil_d[top] not in outcrop_mukeys:
-            topaz_ids.append(top)
-
-    return topaz_ids
-
 wd = None
+
+
 def log_print(msg):
+    global wd
+
     now = datetime.now()
     print('[{now}] {wd}: {msg}'.format(now=now, wd=wd, msg=msg))
 
@@ -437,50 +347,21 @@ if __name__ == '__main__':
                 tops = []
 
                 for selector, dom in default_landuse:
-                    _topaz_ids = selector(landuse, soils)
-                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, soils)
+                    _topaz_ids = selector(landuse, None)
+                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
                     _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
 
                     landuse.modify(_topaz_ids, dom)
                     tops.extend(_topaz_ids)
-                #
-                # # all_hillslopes
-                # if '.2_Watershed' in wd:
-                #     assert '1251' in tops, default_landuse
-                #     assert '1752' in tops
-                #     assert '1222' in tops
-                #     assert '2203' in tops
-                #
-                # # not shrub
-                # elif '.3_Watershed' in wd:
-                #     assert '1251' in tops
-                #     assert '1752' not in tops
-                #     assert '1222' in tops
-                #     assert '2203' not in tops
-                #
-                # # not outcrop
-                # elif '.4_Watershed' in wd:
-                #     assert '1251' in tops
-                #     assert '1752' in tops
-                #     assert '1222' not in tops
-                #     assert '2203' not in tops
-                #
-                # # not shrub or not outcrop
-                # elif '.5_Watershed' in wd:
-                #     assert '1251' in tops
-                #     assert '1752' not in tops
-                #     assert '1222' not in tops
-                #     assert '2203' not in tops
 
             log_print('building soils')
+            if _exists(_join(wd, 'lt.nodb')):
+                lt = LakeTahoe.getInstance(wd)
+                lt.lc_lookup_fn = lc_lookup_fn
+
             soils = Soils.getInstance(wd)
             soils.mode = SoilsMode.Gridded
             soils.build()
-            
-            if _exists(_join(wd, 'lt.nodb')):
-                lt = LakeTahoe.getInstance(wd)
-                lt.modify_soils(default_wepp_type='Granitic', lc_lookup_fn=lc_lookup_fn)
-
 
             log_print('building climate')
 
