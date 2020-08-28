@@ -67,6 +67,8 @@ if __name__ == '__main__':
             'CedarCreek': 1.221992293,
             'BlazedAlder': 1.067938504,
             'FirCreek': 0.885748368,
+	    'FirCreek_1_reg_wepp': 0.916802717,
+	    'FirCreek_2_reg_wepp': 0.916802717,
             'BRnearMultnoma': 1.254837877,
             'NorthFork': 1.180883364,
             'LittleSandy': 1.008756432,
@@ -122,35 +124,6 @@ if __name__ == '__main__':
             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
             mid_season_crop_coeff=1.2, p_coeff=1.2)
     ]
-
-    scenarios = [
-               dict(wd='CurCond.202007.cl532.chn_cs{cs}',
-                    landuse=None,
-                    cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='CurCond.202007.cl532_gridmet.chn_cs{cs}',
-                    landuse=None,
-                    cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='SimFire_Eagle.202007.cl532.chn_cs{cs}',
-                    landuse=None,
-                    cfg='portland-simfire-eagle',
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='SimFire_Norse.202007.cl532.chn_cs{cs}',
-                    landuse=None,
-                    cfg='portland-simfire-norse',
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='PrescFireS.202007.chn_cs{cs}',
-                    landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='LowSevS.202007.chn_cs{cs}',
-                    landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='ModSevS.202007.chn_cs{cs}',
-                    landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-               dict(wd='HighSevS.202007.chn_cs{cs}',
-                    landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-                    cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True),
-                ]
 
     scenarios = [
         dict(wd='CurCond.202007.cl532.chn_cs{cs}',
