@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
 
     watersheds = [
-        dict(watershed='FirCreek_1',
+        dict(watershed='FirCreek_1_reg_wepp',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
             map_zoom=11,
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	    surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
             mid_season_crop_coeff=0.80, p_coeff=0.80),
-        dict(watershed='FirCreek_2',
+        dict(watershed='FirCreek_2_reg_wepp',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
             map_zoom=11,
