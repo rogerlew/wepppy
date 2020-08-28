@@ -7,7 +7,7 @@ import shutil
 class SoilReplacements(object):
     def __init__(self, Code=None, LndcvrID=None, WEPP_Type=None, New_WEPPman=None, ManName=None, Albedo=None,
                  iniSatLev=None, interErod=None, rillErod=None, critSh=None, effHC=None, soilDepth=None,
-                 Sand=None, Clay=None, OM=None, CEC=None, Comment=None):
+                 Sand=None, Clay=None, OM=None, CEC=None, Comment=None, fname=None):
         self.Code = Code
         self.LndcvrID = LndcvrID
         self.WEPP_Type = WEPP_Type
@@ -25,6 +25,7 @@ class SoilReplacements(object):
         self.OM = OM
         self.CEC = CEC
         self.Comment = Comment
+        self.fname = fname
 
     def __repr__(self):
         s = []
@@ -77,6 +78,9 @@ class SoilReplacements(object):
         if self.CEC is not None:
             s.append('CEC={}'.format(self.CEC))
 
+        if self.fname is not None:
+            s.append('fname={}'.format(self.fname))
+
         return 'SoilReplacements(' + ' '.join(s) + ')'
 
 
@@ -94,6 +98,7 @@ def read_lc_file(fname):
         for row in reader:
             row['Code'] = int(row['Code'])
             row['LndcvrID'] = int(row['LndcvrID'])
+            row['fname'] = fname
 
             for k in row:
                 v = row[k]
