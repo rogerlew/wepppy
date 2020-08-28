@@ -139,10 +139,13 @@ class Ron(NoDbBase):
             wepppy.nodb.Observed(wd, cfg_fn)
 
             if "lt" in self.mods:
-                wepppy.nodb.mods.LakeTahoe(wd, cfg_fn)
+                wepppy.nodb.mods.locations.LakeTahoe(wd, cfg_fn)
 
             if "portland" in self.mods:
-                wepppy.nodb.mods.PortlandMod(wd, cfg_fn)
+                wepppy.nodb.mods.locations.PortlandMod(wd, cfg_fn)
+
+            if "seattle" in self.mods:
+                wepppy.nodb.mods.locations.SeattleMod(wd, cfg_fn)
 
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)

@@ -29,77 +29,22 @@ _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
 
-class LakeTahoeNoDbLockedException(Exception):
-    pass
-
-
-class LakeTahoe(NoDbBase):
-    __name__ = 'LakeTahoe'
-
-    def __init__(self, wd, config):
-        super(LakeTahoe, self).__init__(wd, config)
-
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-            
-    #
-    # Required for NoDbBase Subclass
-    #
-
-    # noinspection PyPep8Naming
-    @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'lt.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
-            assert isinstance(db, LakeTahoe), db
-
-            if _exists(_join(wd, 'READONLY')):
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
-            return db
+class LocationMixin(object):
 
     @property
-    def _nodb(self):
-        return _join(self.wd, 'lt.nodb')
+    def location_doms(self):
+        data_dir = self.data_dir
 
-    @property
-    def _lock(self):
-        return _join(self.wd, 'lt.nodb.lock')
-
-    def on(self, evt):
-        if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
-            self.remap_landuse()
-        if evt == TriggerEvents.LANDUSE_BUILD_COMPLETE:
-            pass
-        elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
-            self.modify_soils()
-        elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
-            self.determine_phosphorus()
-
-    @property
-    def lt_doms(self):
-        lc_dict = read_lc_file(_join(_data_dir, 'landSoilLookup.csv'))
+        lc_dict = read_lc_file(_join(data_dir, self.lc_lookup_fn))
         return set([lc_dict[k].LndcvrID for k in lc_dict])
 
     def remap_landuse(self):
+        data_dir = self.data_dir
 
-        with open(_join(_data_dir, 'landcover_map.json')) as fp:
+        with open(_join(data_dir, 'landcover_map.json')) as fp:
             lc_map = json.load(fp)
 
-        lt_doms = self.lt_doms
+        location_doms = self.location_doms
 
         landuse = Landuse.getInstance(self.wd)
         landuse.lock()
@@ -107,23 +52,30 @@ class LakeTahoe(NoDbBase):
         # noinspection PyBroadException
         try:
             for topaz_id, dom in landuse.domlc_d.items():
-                if int(dom) not in lt_doms:
+                if int(dom) not in location_doms:
                     landuse.domlc_d[topaz_id] = lc_map[dom]
-            
+
             landuse.dump_and_unlock()
-            
+
         except Exception:
             landuse.unlock('-f')
             raise
 
-    def modify_soils(self, default_wepp_type='Granitic', lc_lookup_fn='landSoilLookup.csv'):
+    def modify_soils(self, default_wepp_type=None, lc_lookup_fn=None):
+        data_dir = self.data_dir
         wd = self.wd
         soils_dir = self.soils_dir
-        
-        lc_dict = read_lc_file(_join(_data_dir, lc_lookup_fn))
-        with open(_join(_data_dir, 'lc_soiltype_map.json')) as fp:
+
+        if default_wepp_type is None:
+            default_wepp_type = self.default_wepp_type
+
+        if lc_lookup_fn is None:
+            lc_lookup_fn = self.lc_lookup_fn
+
+        lc_dict = read_lc_file(_join(data_dir, lc_lookup_fn))
+        with open(_join(data_dir, 'lc_soiltype_map.json')) as fp:
             soil_type_map = json.load(fp)
-        
+
         soils = Soils.getInstance(wd)
         soils.lock()
 
@@ -132,15 +84,15 @@ class LakeTahoe(NoDbBase):
             domsoil_d = soils.domsoil_d
 
             assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'no soils in domsoil_d'
-            
+
             landuse = Landuse.getInstance(wd)
             domlc_d = landuse.domlc_d
-            
+
             _soils = {}
             for topaz_id, mukey in domsoil_d.items():
                 dom = domlc_d[topaz_id]
                 wepp_type = soil_type_map.get(mukey, default_wepp_type)
-                
+
                 replacements = lc_dict[(dom, wepp_type)]
                 k = '%s-%s-%s' % (mukey, wepp_type, dom)
                 src_fn = _join(soils_dir, '%s.sol' % mukey)
@@ -161,7 +113,7 @@ class LakeTahoe(NoDbBase):
 
                 if not is_water:
                     domsoil_d[topaz_id] = k
-                    
+
             # need to recalculate the pct_coverages
             watershed = Watershed.getInstance(self.wd)
             for topaz_id, k in domsoil_d.items():
@@ -173,14 +125,14 @@ class LakeTahoe(NoDbBase):
 
             assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'lost channels in domsoil_d'
 
-            soils.soils = _soils            
+            soils.soils = _soils
             soils.domsoil_d = domsoil_d
             soils.dump_and_unlock()
-        
+
         except Exception:
             soils.unlock('-f')
             raise
-            
+
     def determine_phosphorus(self):
         # watershed = Watershed.getInstance(self.wd)
         # lng, lat = watershed.centroid
