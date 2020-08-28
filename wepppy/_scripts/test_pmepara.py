@@ -55,6 +55,8 @@ if __name__ == '__main__':
             'CedarCreek': 1.120768995,
             'BlazedAlder': 1.098866242,
             'FirCreek': 0.916802717,
+	    'FirCreek_1_reg_wepp': 0.916802717,
+	    'FirCreek_2_reg_wepp': 0.916802717,
             'BRnearMultnoma': 1.180931876,
             'NorthFork': 1.267197533,
             'LittleSandy': 1.007254747,
