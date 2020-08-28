@@ -24,7 +24,7 @@ from wepppy.wepp.soils.utils import simple_texture
 
 __version__ = 'v.0.1.0'
 
-ADJUST_FCWP = False
+ERIN_ADJUST_FCWP = False
 
 _thisdir = os.path.dirname(__file__)
 # _ssurgo_cache_db = ":memory:"  # _join(_thisdir, 'ssurgo_cache.db')
@@ -332,21 +332,39 @@ class Horizon:
         rock = (100.0-rocks_soil) / 100.0 * (100.0-sieveno10_r) + rocks_soil
         not_rock = 100.0 - rock
 
-        # calculate fc
-        if not_rock == 0.0:
-            fc = 0.001
-        elif not isfloat(wthirdbar_r):
-            fc = field_cap_default
-        else:
-            fc = wthirdbar_r / (1.0 - min(50.0, rock) / 100.0)
+        if ERIN_ADJUST_FCWP:
+            # calculate fc
+            if not_rock == 0.0:
+                fc = 0.001
+            elif not isfloat(wthirdbar_r):
+                fc = field_cap_default
+            else:
+                fc = (0.01 * wthirdbar_r) / (1.0 - min(50.0, rock) / 100.0)
 
-        # calculate wp
-        if not_rock == 0.0:
-            wc = 0.001
-        elif not isfloat(wfifteenbar_r):
-            wc = wilt_pt_default
+            # calculate wp
+            if not_rock == 0.0:
+                wc = 0.001
+            elif not isfloat(wfifteenbar_r):
+                wc = wilt_pt_default
+            else:
+                wc = (0.01 * wfifteenbar_r) / (1.0 - min(50.0, rock) / 100.0)
+
         else:
-            wc = wfifteenbar_r / (1.0 - min(50.0, rock) / 100.0)
+            # calculate fc
+            if not_rock == 0.0:
+                fc = 0.001
+            elif not isfloat(wthirdbar_r):
+                fc = field_cap_default
+            else:
+                fc = wthirdbar_r / not_rock
+
+            # calculate wp
+            if not_rock == 0.0:
+                wc = 0.001
+            elif not isfloat(wfifteenbar_r):
+                wc = wilt_pt_default
+            else:
+                wc = wfifteenbar_r / not_rock
 
         self.smr = rock
         self.field_cap = fc
