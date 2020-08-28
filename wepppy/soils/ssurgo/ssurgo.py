@@ -338,7 +338,7 @@ class Horizon:
         elif not isfloat(wthirdbar_r):
             fc = field_cap_default
         else:
-            fc = wthirdbar_r / not_rock
+            fc = wthirdbar_r / (1.0 - min(50.0, rock) / 100.0)
 
         # calculate wp
         if not_rock == 0.0:
@@ -346,11 +346,7 @@ class Horizon:
         elif not isfloat(wfifteenbar_r):
             wc = wilt_pt_default
         else:
-            wc = wfifteenbar_r / not_rock
-
-        if ADJUST_FCWP:
-            fc *= 1.0 - min(50.0, rock) / 100.0
-            wc *= 1.0 - min(50.0, rock) / 100.0
+            wc = wfifteenbar_r / (1.0 - min(50.0, rock) / 100.0)
 
         self.smr = rock
         self.field_cap = fc
