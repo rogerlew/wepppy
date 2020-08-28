@@ -266,6 +266,8 @@ if __name__ == '__main__':
             log_print('building soils')
             soils.mode = SoilsMode.Gridded
             soils.build()
+	
+	    soils = Soils.getInstance(wd)
 
             log_print('adjusting restrictive layer ksat')
             ksat_mod = None
