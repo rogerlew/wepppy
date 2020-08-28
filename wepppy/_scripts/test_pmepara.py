@@ -1,29 +1,31 @@
 import os
 import sys
+from datetime import date
 
 import shutil
 from os.path import exists as _exists
 from os.path import split as _split
-from pprint import pprint
-from time import time
 from time import sleep
 from copy import deepcopy
 
-import wepppy
-
+from wepppy.nodb.mods.locations.lt.selectors import *
 from wepppy.all_your_base import isfloat
+from wepppy.nodb import (
+    Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
+)
+from wepppy.nodb.mods.locations import PortlandMod
+
 from wepppy.wepp.soils.utils import modify_ksat
-from wepppy.nodb import *
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
 
 from wepppy.climates.cligen import ClimateFile
 
-from wepppy.nodb.mods.portland.livneh_daily_observed import LivnehDataManager
-from wepppy.nodb.mods.portland.bedrock import ShallowLandSlideSusceptibility, BullRunBedrock
+from wepppy.nodb.mods.locations.portland import LivnehDataManager
+from wepppy.nodb.mods.locations.portland import ShallowLandSlideSusceptibility, BullRunBedrock
 
-from osgeo import gdal, osr
+from osgeo import gdal
 
 gdal.UseExceptions()
 
@@ -79,7 +81,7 @@ if __name__ == '__main__':
     def _daymet_cli_adjust(cli_dir, cli_fn, watershed):
         cli = ClimateFile(_join(cli_dir, cli_fn))
 
-        cli.discontinuous_temperature_adjustment(datetime.date(2005, 11, 2))
+        cli.discontinuous_temperature_adjustment(date(2005, 11, 2))
 
         pp_scale = precip_transforms['daymet'][watershed]
         cli.transform_precip(offset=0, scale=pp_scale)
@@ -98,7 +100,6 @@ if __name__ == '__main__':
         cli.write(_join(cli_dir, 'adj_' + cli_fn))
 
         return 'adj_' + cli_fn
-
 
     watersheds = [
         dict(watershed='FirCreek_1_reg_wepp',
@@ -174,7 +175,7 @@ if __name__ == '__main__':
     for scenario in scenarios:
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
-            projects[-1]['cfg'] = scenario.get('cfg', 'lt')
+            projects[-1]['cfg'] = scenario.get('cfg', 'portland')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['cli_mode'] = scenario.get('cli_mode', 'observed')
             projects[-1]['clean'] = scenario['clean']
@@ -266,7 +267,7 @@ if __name__ == '__main__':
             log_print('building soils')
             soils.mode = SoilsMode.Gridded
             soils.build()
-	
+
             soils = Soils.getInstance(wd)
 
             log_print('adjusting restrictive layer ksat')
@@ -316,6 +317,7 @@ if __name__ == '__main__':
                     .format(dom=dom, ksat_mod=ksat_mod, bedrock_name=name)
                 if _dom not in _soils:
                     _soil_fn = '{dom}.sol'.format(dom=_dom)
+                    log_print(_soil_fn)
                     src_soil_fn = _join(_soil.soils_dir, _soil.fname)
                     dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
                     log_print(src_soil_fn, dst_soil_fn, ksat, _dom)
@@ -333,8 +335,8 @@ if __name__ == '__main__':
             soils = Soils.getInstance(wd)
 
             if _exists(_join(wd, 'lt.nodb')):
-                lt = LakeTahoe.getInstance(wd)
-                lt.modify_soils(default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
+                location = PortlandMod.getInstance(wd)
+                location.modify_soils(default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
 
             climate = Climate.getInstance(wd)
             if build_climates:
@@ -396,7 +398,7 @@ if __name__ == '__main__':
 
                     for topaz_id in climate.sub_cli_fns:
                         adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                     climate.dump_and_unlock()
 
@@ -414,12 +416,12 @@ if __name__ == '__main__':
                     climate.lock()
                     
                     cli_dir = climate.cli_dir
-                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
+                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
                     climate.cli_fn = adj_cli_fn
 
                     for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                        adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
+                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                     climate.dump_and_unlock()
 
@@ -442,7 +444,7 @@ if __name__ == '__main__':
 
                 for topaz_id in climate.sub_cli_fns:
                     adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                climate.sub_cli_fns[topaz_id] = adj_cli_fn
+                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
 
                 climate.dump_and_unlock()
 
