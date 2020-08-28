@@ -370,7 +370,7 @@ if __name__ == '__main__':
         # dict(wd='CurCond.202007.cl532.ki5krcs.chn_cs{cs}',
         #      landuse=None,
         #      lc_lookup_fn='ki5krcs.csv'),
-        dict(wd='CurCond.202008.obs_cl532.ssurgo_fcwp_rev.ki5krcs.chn_cs{cs}',
+        dict(wd='CurCond.202008.obs_cl532.ssurgo_fcwp_rev2.ki5krcs.chn_cs{cs}',
              landuse=None,
              lc_lookup_fn='ki5krcs.csv',
              climate='observed'),
@@ -465,49 +465,21 @@ if __name__ == '__main__':
                 tops = []
 
                 for selector, dom in default_landuse:
-                    _topaz_ids = selector(landuse, soils)
-                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, soils)
+                    _topaz_ids = selector(landuse, None)
+                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
                     _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
 
                     landuse.modify(_topaz_ids, dom)
                     tops.extend(_topaz_ids)
-                #
-                # # all_hillslopes
-                # if '.2_Watershed' in wd:
-                #     assert '1251' in tops, default_landuse
-                #     assert '1752' in tops
-                #     assert '1222' in tops
-                #     assert '2203' in tops
-                #
-                # # not shrub
-                # elif '.3_Watershed' in wd:
-                #     assert '1251' in tops
-                #     assert '1752' not in tops
-                #     assert '1222' in tops
-                #     assert '2203' not in tops
-                #
-                # # not outcrop
-                # elif '.4_Watershed' in wd:
-                #     assert '1251' in tops
-                #     assert '1752' in tops
-                #     assert '1222' not in tops
-                #     assert '2203' not in tops
-                #
-                # # not shrub or not outcrop
-                # elif '.5_Watershed' in wd:
-                #     assert '1251' in tops
-                #     assert '1752' not in tops
-                #     assert '1222' not in tops
-                #     assert '2203' not in tops
 
             log_print('building soils')
+            if _exists(_join(wd, 'lt.nodb')):
+                lt = LakeTahoe.getInstance(wd)
+                lt.lc_lookup_fn = lc_lookup_fn
+
             soils = Soils.getInstance(wd)
             soils.mode = SoilsMode.Gridded
             soils.build()
-
-            if _exists(_join(wd, 'lt.nodb')):
-                lt = LakeTahoe.getInstance(wd)
-                lt.modify_soils(default_wepp_type='Granitic', lc_lookup_fn=lc_lookup_fn)
 
             log_print('building climate')
 
@@ -528,8 +500,8 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Future
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                climate.set_future_pars(start_year=2018, end_year=2018 + 27)
-                # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+                climate.set_future_pars(start_year=2018, end_year=2018+27)
+                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             elif climate_mode == 'vanilla':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -538,7 +510,7 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Vanilla
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             else:
                 raise Exception("Unknown climate_mode")
 
