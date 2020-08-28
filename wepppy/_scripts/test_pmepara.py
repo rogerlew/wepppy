@@ -12,7 +12,7 @@ from copy import deepcopy
 import wepppy
 
 from wepppy.all_your_base import isfloat
-from wepppy.soils.utils import modify_ksat
+#from wepppy.soils.utils import modify_ksat
 from wepppy.nodb import *
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
