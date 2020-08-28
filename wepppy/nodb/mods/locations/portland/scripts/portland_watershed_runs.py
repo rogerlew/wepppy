@@ -1,14 +1,10 @@
-import os
 import shutil
 from os.path import exists as _exists
 from os.path import split as _split
-from pprint import pprint
 import datetime
-from time import time
 from time import sleep
 from copy import deepcopy
 
-import wepppy
 from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.soils.utils import modify_ksat
 from wepppy.nodb import *
@@ -16,10 +12,11 @@ from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
 
-from wepppy.nodb.mods.portland.livneh_daily_observed import LivnehDataManager
-from wepppy.nodb.mods.portland.bedrock import ShallowLandSlideSusceptibility, BullRunBedrock
+from wepppy.nodb.mods.locations.portland import LivnehDataManager
+from wepppy.nodb.mods.locations.portland import ShallowLandSlideSusceptibility, BullRunBedrock
 
-from osgeo import gdal, osr
+from osgeo import gdal
+
 gdal.UseExceptions()
 
 os.chdir('/geodata/weppcloud_runs/')

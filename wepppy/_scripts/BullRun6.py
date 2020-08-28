@@ -1,30 +1,31 @@
 import os
 import sys
-from datetime import datetime, date
+from datetime import date
 
 import shutil
 from os.path import exists as _exists
 from os.path import split as _split
-from pprint import pprint
-from time import time
 from time import sleep
 from copy import deepcopy
 
-import wepppy
-
+from wepppy.nodb.mods.locations.lt.selectors import *
 from wepppy.all_your_base import isfloat
+from wepppy.nodb import (
+    Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
+)
+from wepppy.nodb.mods.locations import PortlandMod
+
 from wepppy.wepp.soils.utils import modify_ksat
-from wepppy.nodb import *
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
 
 from wepppy.climates.cligen import ClimateFile
 
-from wepppy.nodb.mods.portland.livneh_daily_observed import LivnehDataManager
-from wepppy.nodb.mods.portland.bedrock import ShallowLandSlideSusceptibility, BullRunBedrock
+from wepppy.nodb.mods.locations.portland import LivnehDataManager
+from wepppy.nodb.mods.locations.portland import ShallowLandSlideSusceptibility, BullRunBedrock
 
-from osgeo import gdal, osr
+from osgeo import gdal
 
 gdal.UseExceptions()
 
@@ -397,8 +398,8 @@ if __name__ == '__main__':
             soils = Soils.getInstance(wd)
 
             if _exists(_join(wd, 'lt.nodb')):
-                lt = LakeTahoe.getInstance(wd)
-                lt.modify_soils(default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
+                location = PortlandMod.getInstance(wd)
+                location.modify_soils(default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
 
             climate = Climate.getInstance(wd)
             if build_climates:
