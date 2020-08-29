@@ -24,7 +24,7 @@ from wepppy.wepp.soils.utils import simple_texture
 
 __version__ = 'v.0.1.0'
 
-ERIN_ADJUST_FCWP = False
+ERIN_ADJUST_FCWP = True
 
 _thisdir = os.path.dirname(__file__)
 # _ssurgo_cache_db = ":memory:"  # _join(_thisdir, 'ssurgo_cache.db')
