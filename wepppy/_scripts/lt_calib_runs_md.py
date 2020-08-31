@@ -106,7 +106,7 @@ if __name__ == '__main__':
              map_zoom=12,
              outlet=[-120.16243964836231, 39.13566898208961],
              landuse=None,
-             cs=70, erod=0.000001,
+             cs=60, erod=0.000001,
              surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
