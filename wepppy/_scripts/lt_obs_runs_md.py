@@ -159,7 +159,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='Edgewood_10336765', # 1500 ha
+        dict(wd='Edgewood_ED1_10336765', # 1500 ha
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -169,7 +169,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='Edgewood_ED_1_103367585', # 810 ha
+        dict(wd='Edgewood_ED3_103367585', # 810 ha
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
