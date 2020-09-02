@@ -287,7 +287,7 @@ if __name__ == '__main__':
              #      lc_lookup_fn='ki5krcs.csv',
              #      cfg='lt-fire-future',
              #      climate='future'),
-               dict(wd='CurCond.202008.cl532.ki5krcs.chn_cs{cs}',
+               dict(wd='CurCond.202009.cl532.ki5krcs.chn_cs{cs}',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv'),
              # dict(wd='PrescFireS.202008.kikrcs.chn_cs{cs}',
