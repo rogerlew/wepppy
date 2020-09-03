@@ -340,8 +340,7 @@ if __name__ == '__main__':
             cfg = proj['cfg']
             climate_mode = proj['climate']
             lc_lookup_fn = proj['lc_lookup_fn']
-            csa = proj['csa']
-            mcl = proj['mcl']
+            csa = proj.get('csa', 5)
 
             if wc is not None:
                 if not wc in wd:
@@ -363,7 +362,7 @@ if __name__ == '__main__':
 
             log_print('building channels')
             topaz = Topaz.getInstance(wd)
-            topaz.build_channels(csa=csa, mcl=mcl)
+            topaz.build_channels(csa=csa, mcl=60)
             topaz.set_outlet(*outlet)
             sleep(0.5)
 
