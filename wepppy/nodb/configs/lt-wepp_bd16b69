@@ -1,0 +1,38 @@
+[general]
+name=LakeTahoe
+cellsize=30
+w3w_api_key=XBL7LV7I
+
+[topaz]
+mcl=60
+csa=5
+zoom_min=11
+
+[landuse]
+enable_landuse_change=True
+cover_defaults=MODS_DIR/locations/lt/data/lt_cover_defaults.csv
+
+[soils]
+
+[map]
+center0 = [39.0597, -120.0119]
+zoom0 = 9
+# relative to static
+boundary = /static/mods/lt/lt_basin.json
+
+[nodb]
+mods = ['lt']
+
+[climate]
+observed_clis_wc = MODS_DIR/locations/lt/data/tahoe/observed/Daily/y2k_fixed/
+future_clis_wc = None
+daymet_observed = lt/daymet
+
+[phosphorus_opts]
+surf_runoff = 0.003
+lateral_flow = 0.004
+baseflow = 0.005
+sediment = 1200
+
+[wepp]
+bin = wepp_bd16b69
