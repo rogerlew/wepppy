@@ -797,7 +797,7 @@ def runs0(runid, config):
                            soildboptions=soildboptions,
                            precisions=wepppy.nodb.unitizer.precisions)
 
-
+# https://wepp1.nkn.uidaho.edu/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
 def hillslope0_ash(runid, config, topaz_id):
@@ -822,8 +822,8 @@ def hillslope0_ash(runid, config, topaz_id):
     if ron.public:
         should_abort = False
 
-    if should_abort:
-        abort(404)
+    #if should_abort:
+    #    abort(404)
 
     fire_date = request.args.get('fire_date', None)
     if fire_date is None:
