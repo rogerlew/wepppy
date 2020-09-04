@@ -131,9 +131,14 @@ class SnowOpts(object):
             self.ssd = ssd
 
     def parse_inputs(self, kwds):
-        self.rst = float(kwds['rst'])
-        self.newsnw = float(kwds['newsnw'])
-        self.ssd = float(kwds['ssd'])
+        if 'rst' in kwds:
+            self.rst = float(kwds['rst'])
+
+        if 'newsnw' in kwds:
+            self.newsnw = float(kwds['newsnw'])
+
+        if 'ssd' in kwds:
+            self.ssd = float(kwds['ssd'])
 
     @property
     def contents(self):
