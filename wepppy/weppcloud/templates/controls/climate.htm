@@ -92,8 +92,12 @@
             {%  endif %}
 
             {% elif 'eu' in ron.config_stem %}
+            <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
+                <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
             <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified (Europe)
                 <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a><br/>
+            </label><br/>
             <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
                 <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>

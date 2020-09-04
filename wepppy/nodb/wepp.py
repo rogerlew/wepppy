@@ -296,6 +296,21 @@ class Wepp(NoDbBase, LogMixin):
                 sediment = None
 
             try:
+                snow_rst = config.getfloat('snow_opts', 'rst')
+            except:
+                snow_rst = None
+
+            try:
+                snow_newsnw = config.getfloat('snow_opts', 'newsnw')
+            except:
+                snow_newsnw = None
+
+            try:
+                snow_ssd = config.getfloat('snow_opts', 'ssd')
+            except:
+                snow_ssd = None
+
+            try:
                 _wepp_ui = config.getboolean('wepp', 'wepp_ui')
             except:
                 _wepp_ui = _RUN_WEPP_UI_DEFAULT
@@ -342,7 +357,9 @@ class Wepp(NoDbBase, LogMixin):
             self._wepp_bin = _wepp_bin
 
             self.baseflow_opts = BaseflowOpts()
-            self.snow_opts = SnowOpts()
+            self.snow_opts = SnowOpts(rst=snow_rst,
+                                      newsnw=snow_newsnw,
+                                      ssd=snow_ssd)
             self.run_flowpaths = False
             self.loss_grid_d_path = None
 
@@ -373,13 +390,26 @@ class Wepp(NoDbBase, LogMixin):
                 db.dump_and_unlock()
 
             return db
-
     @property
     def wepp_bin(self):
         if not hasattr(self, "_wepp_bin"):
             return None
 
         return self._wepp_bin
+
+    @wepp_bin.setter
+    def wepp_bin(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._wepp_bin = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
 
     @property
     def _nodb(self):
@@ -481,6 +511,7 @@ class Wepp(NoDbBase, LogMixin):
         try:
             self.baseflow_opts.parse_inputs(kwds)
             self.phosphorus_opts.parse_inputs(kwds)
+            self.snow_opts.parse_inputs(kwds)
 
             self.dump_and_unlock()
 
