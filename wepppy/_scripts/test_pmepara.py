@@ -57,8 +57,8 @@ if __name__ == '__main__':
             'CedarCreek': 1.120768995,
             'BlazedAlder': 1.098866242,
             'FirCreek': 0.916802717,
-	    'FirCreek_1_pmetpara_wepp': 0.916802717,
-	    'FirCreek_2_pmetpara_wepp': 0.916802717,
+	    'FirCreek_1_pmetpara2_wepp': 0.916802717,
+	    'FirCreek_2_pmetpara2_wepp': 0.916802717,
             'BRnearMultnoma': 1.180931876,
             'NorthFork': 1.267197533,
             'LittleSandy': 1.007254747,
@@ -69,8 +69,8 @@ if __name__ == '__main__':
             'CedarCreek': 1.221992293,
             'BlazedAlder': 1.067938504,
             'FirCreek': 0.885748368,
-	    'FirCreek_1_pmetpara_wepp': 0.916802717,
-	    'FirCreek_2_pmetpara_wepp': 0.916802717,
+	    'FirCreek_1_pmetpara2_wepp': 0.916802717,
+	    'FirCreek_2_pmetpara2_wepp': 0.916802717,
             'BRnearMultnoma': 1.254837877,
             'NorthFork': 1.180883364,
             'LittleSandy': 1.008756432,
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         return 'adj_' + cli_fn
 
     watersheds = [
-        dict(watershed='FirCreek_1_pmetpara_wepp',
+        dict(watershed='FirCreek_1_pmetpara2_wepp',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
             map_zoom=11,
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 	    surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
             mid_season_crop_coeff=0.80, p_coeff=0.80),
-        dict(watershed='FirCreek_2_pmetpara_wepp',
+        dict(watershed='FirCreek_2_pmetpara2_wepp',
             extent=[-122.22908020019533, 45.268121280142886, -121.74842834472658, 45.60539133629575],
             map_center=[-121.98875427246095, 45.43700828867391],
             map_zoom=11,
@@ -176,7 +176,8 @@ if __name__ == '__main__':
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
             #projects[-1]['cfg'] = scenario.get('cfg', 'portland')
-            projects[-1]['cfg'] = scenario.get('cfg', 'portland-wepp_347f3bd')
+            #projects[-1]['cfg'] = scenario.get('cfg', 'portland-wepp_347f3bd')
+            projects[-1]['cfg'] = scenario.get('cfg', 'portland-wepp_bd16b69')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['cli_mode'] = scenario.get('cli_mode', 'observed')
             projects[-1]['clean'] = scenario['clean']
