@@ -12,4 +12,4 @@ def agdc_mod(par: int, years: int, lng: float, lat: float, wd: str,
 
     return par_mod(par=par, years=years, lng=lng, lat=lat, wd=wd, monthly_dataset='agdc',
                    nwds_method=nwds_method, randseed=randseed, cliver=cliver, suffix=suffix,
-                   logger=logger, version='au_stations.db')
+                   logger=logger, version='ghcn_stations.db')

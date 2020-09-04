@@ -2234,6 +2234,27 @@ def task_build_climate(runid, config):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_wepp_bin', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_wepp_bin/', methods=['POST'])
+def task_set_wepp_bin(runid, config):
+    try:
+        wepp_bin = request.json.get('wepp_bin', None)
+    except Exception:
+        return exception_factory('Error parsing routine')
+
+    if wepp_bin is None:
+        return error_factory('wepp_bin is None')
+
+    try:
+        wd = get_wd(runid)
+        wepp = Wepp.getInstance(wd)
+        wepp.wepp_bin = wepp_bin
+    except Exception:
+        return exception_factory('Error setting wepp_bin')
+
+    return success_factory()
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
 def task_set_hourly_seepage(runid, config):

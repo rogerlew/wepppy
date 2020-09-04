@@ -769,6 +769,10 @@ class CligenStationsManager:
             _db = _join(_thisdir, 'au_stations.db')
             _stations_dir = _join(_thisdir, 'au_par_files')
 
+        if 'ghcn' in str(version):
+            _db = _join(_thisdir, 'ghcn_stations.db')
+            _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations/30-year')
+
         conn = sqlite3.connect(_db)
         c = conn.cursor()
 
