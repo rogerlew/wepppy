@@ -881,7 +881,8 @@ def hillslope0_ash(runid, config, topaz_id):
         else:
             raise ValueError
 
-        return json.dumps(results)
+        results = json.loads(json.dumps(results))
+        annuals = json.loads(json.dumps(annuals))
 
         #return jsonify(dict(results=results, recurrence_intervals=recurrence))
 
