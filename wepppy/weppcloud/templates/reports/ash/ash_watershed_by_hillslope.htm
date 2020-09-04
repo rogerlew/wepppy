@@ -72,7 +72,7 @@
       <td class="text-right">{{ unitizer(ash_out[_topaz_id]['wind_transport (kg/ha)'], 'kg/ha') | safe }}</td>
       <td class="text-right">{{ unitizer(ash_out[_topaz_id]['water_transport (kg/ha)'], 'kg/ha') | safe }}</td>
       <td class="text-right">{{ unitizer(ash_out[_topaz_id]['ash_transport (kg/ha)'], 'kg/ha') | safe }}</td>
-      <td><a href="/runs/{{ ron.runid }}/{{ ron.config_stem }}/hillslope/{{ _topaz_id }}/ash/
+      <td><a href="/{{ site_prefix }} }}/runs/{{ ron.runid }}/{{ ron.config_stem }}/hillslope/{{ _topaz_id }}/ash/
 ?fire_date={{ fire_date.month }}.{{ fire_date.day }}&ash_type={{ ash.get_ash_type(row['TopazID']) }}
 &ini_ash_depth={{ ash.get_ini_ash_depth(row['TopazID']) }}" target="_blank">Ash Results</a></td>
     </tr>

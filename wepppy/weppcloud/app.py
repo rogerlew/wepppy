@@ -881,18 +881,18 @@ def hillslope0_ash(runid, config, topaz_id):
 
     return jsonify(dict(results=results, recurrence_intervals=recurrence))
 
-    return render_template('reports/ash/ash_hillslope.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           sub=sub,
-                           ash_type=ash_type,
-                           ini_ash_depth=5.0,
-                           fire_date=fire_date,
-                           recurrence_intervals=recurrence,
-                           results=results,
-                           annuals=annuals,
-                           ron=ron,
-                           user=current_user)
+    #return render_template('reports/ash/ash_hillslope.htm',
+    #                       unitizer_nodb=unitizer,
+    #                       precisions=wepppy.nodb.unitizer.precisions,
+    #                       sub=sub,
+    #                       ash_type=ash_type,
+    #                       ini_ash_depth=5.0,
+    #                       fire_date=fire_date,
+    #                       recurrence_intervals=recurrence,
+    #                       results=results,
+    #                       annuals=annuals,
+    #                       ron=ron,
+    #                       user=current_user)
 
 
 # noinspection PyBroadException
