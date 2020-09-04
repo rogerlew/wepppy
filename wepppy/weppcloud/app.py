@@ -807,93 +807,99 @@ def hillslope0_ash(runid, config, topaz_id):
     from wepppy.climates.cligen import ClimateFile
 
     wd = get_wd(runid)
-    owners = get_run_owners(runid)
-    ron = Ron.getInstance(wd)
 
-    should_abort = True
-    if current_user in owners:
-        should_abort = False
+    try:
+        owners = get_run_owners(runid)
+        ron = Ron.getInstance(wd)
 
-    if not owners:
-        should_abort = False
+        should_abort = True
+        if current_user in owners:
+            should_abort = False
 
-    if current_user.has_role('Admin'):
-        should_abort = False
+        if not owners:
+            should_abort = False
 
-    if ron.public:
-        should_abort = False
+        if current_user.has_role('Admin'):
+            should_abort = False
 
-    #if should_abort:
-    #    abort(404)
+        if ron.public:
+            should_abort = False
 
-    fire_date = request.args.get('fire_date', None)
-    if fire_date is None:
-        fire_date = '8/4'
-    _fire_date = YearlessDate.from_string(fire_date)
+        #if should_abort:
+        #    abort(404)
 
-    ini_ash_depth = request.args.get('ini_ash_depth', None)
-    if ini_ash_depth is None:
-        ini_ash_depth = 5.0
+        fire_date = request.args.get('fire_date', None)
+        if fire_date is None:
+            fire_date = '8/4'
+        _fire_date = YearlessDate.from_string(fire_date)
 
-    ash_type = request.args.get('ash_type', None)
-    if ash_type is None:
-        ash_type = 'black'
+        ini_ash_depth = request.args.get('ini_ash_depth', None)
+        if ini_ash_depth is None:
+            ini_ash_depth = 5.0
 
-    _ash_type = None
-    if 'black' in ash_type.lower():
-        _ash_type = AshType.BLACK
-    elif 'white' in ash_type.lower():
-        _ash_type = AshType.WHITE
+        ash_type = request.args.get('ash_type', None)
+        if ash_type is None:
+            ash_type = 'black'
 
-    ash_dir = _join(wd, '_ash')
-    if not _exists(ash_dir):
-        os.mkdir(ash_dir)
+        _ash_type = None
+        if 'black' in ash_type.lower():
+            _ash_type = AshType.BLACK
+        elif 'white' in ash_type.lower():
+            _ash_type = AshType.WHITE
 
-    unitizer = Unitizer.getInstance(wd)
-    watershed = Watershed.getInstance(wd)
-    translator = watershed.translator_factory()
-    wepp_id = translator.wepp(top=topaz_id)
-    sub = watershed.sub_summary(topaz_id)
-    climate = Climate.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
+        ash_dir = _join(wd, '_ash')
+        if not _exists(ash_dir):
+            os.mkdir(ash_dir)
 
-    cli_path = climate.cli_path
-    cli_df = ClimateFile(cli_path).as_dataframe()
+        unitizer = Unitizer.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        wepp_id = translator.wepp(top=topaz_id)
+        sub = watershed.sub_summary(topaz_id)
+        climate = Climate.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
 
-    element_fn = _join(wepp.output_dir, 'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
-    element = Element(element_fn)
+        cli_path = climate.cli_path
+        cli_df = ClimateFile(cli_path).as_dataframe()
 
-    hill_wat_fn = _join(wepp.output_dir, 'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
-    hill_wat = HillWat(hill_wat_fn)
+        element_fn = _join(wepp.output_dir, 'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
+        element = Element(element_fn)
 
-    prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
-    recurrence = [100, 50, 20, 10, 2.5, 1]
-    if _ash_type == AshType.BLACK:
-        _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
-                                                        ash_dir, prefix=prefix, recurrence=recurrence,
-                                                        ini_ash_depth=ini_ash_depth)
-    elif _ash_type == AshType.WHITE:
-        _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
-                                                        ash_dir, prefix=prefix, recurrence=recurrence,
-                                                        ini_ash_depth=ini_ash_depth)
-    else:
-        raise ValueError
+        hill_wat_fn = _join(wepp.output_dir, 'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
+        hill_wat = HillWat(hill_wat_fn)
 
-    #return jsonify(dict(results=results, recurrence_intervals=recurrence))
+        prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
+        recurrence = [100, 50, 20, 10, 2.5, 1]
+        if _ash_type == AshType.BLACK:
+            _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+                                                            ash_dir, prefix=prefix, recurrence=recurrence,
+                                                            ini_ash_depth=ini_ash_depth)
+        elif _ash_type == AshType.WHITE:
+            _, results, annuals = WhiteAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
+                                                            ash_dir, prefix=prefix, recurrence=recurrence,
+                                                            ini_ash_depth=ini_ash_depth)
+        else:
+            raise ValueError
 
-    return render_template('reports/ash/ash_hillslope.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           sub=sub,
-                           ash_type=ash_type,
-                           ini_ash_depth=5.0,
-                           fire_date=fire_date,
-                           recurrence_intervals=recurrence,
-                           results=results,
-                           annuals=annuals,
-                           ron=ron,
-                           user=current_user)
+        return json.dumps(results)
 
+        #return jsonify(dict(results=results, recurrence_intervals=recurrence))
+
+        return render_template('reports/ash/ash_hillslope.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               sub=sub,
+                               ash_type=ash_type,
+                               ini_ash_depth=5.0,
+                               fire_date=fire_date,
+                               recurrence_intervals=recurrence,
+                               results=results,
+                               annuals=annuals,
+                               ron=ron,
+                               user=current_user)
+
+    except:
+        return exception_factory('Error loading ash hillslope results')
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])
