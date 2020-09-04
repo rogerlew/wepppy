@@ -1006,7 +1006,7 @@ class Climate(NoDbBase, LogMixin):
             climatestation = self.climatestation
             years = self._input_years
 
-            result = cc.fetch_multiple_year(climatestation, years)
+            result = cc.fetch_multiple_year(climatestation, years, version=self.cligen_db)
             par_fn, cli_fn, monthlies = cc.unpack_json_result(result, climatestation,
                                                    self.cli_dir)
 
