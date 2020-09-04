@@ -797,7 +797,8 @@ def runs0(runid, config):
                            soildboptions=soildboptions,
                            precisions=wepppy.nodb.unitizer.precisions)
 
-# https://wepp1.nkn.uidaho.edu/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
+
+# https://wepp1.nkn.uidaho.edu/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
 def hillslope0_ash(runid, config, topaz_id):
@@ -877,6 +878,8 @@ def hillslope0_ash(runid, config, topaz_id):
                                                         ini_ash_depth=ini_ash_depth)
     else:
         raise ValueError
+
+    return jsonify(dict(results=results, recurrence_intervals=recurrence))
 
     return render_template('reports/ash/ash_hillslope.htm',
                            unitizer_nodb=unitizer,
