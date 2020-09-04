@@ -3835,7 +3835,7 @@ var Wepp = function () {
 
         that.set_run_wepp_routine = function (routine, state) {
             var self = instance;
-            var task_msg = "Setting hourly_seepage (" + state + ")";
+            var task_msg = "Setting " + routine + " (" + state + ")";
 
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
@@ -3843,6 +3843,31 @@ var Wepp = function () {
             $.post({
                 url: "tasks/set_run_wepp_routine/",
                 data: JSON.stringify({routine: routine, state: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                fail: function fail(error) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.set_wepp_bin = function (wepp_bin) {
+            var self = instance;
+            var task_msg = "Setting wepp_bin (" + wepp_bin + ")";
+
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/set_wepp_bin/",
+                data: JSON.stringify({wepp_bin: wepp_bin}),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
