@@ -99,11 +99,50 @@ _RUN_PMET_DEFAULT = True
 _RUN_FROST_DEFAULT = False
 _RUN_TCR_DEFAULT = False
 _RUN_BASEFLOW_DEFAULT = True
+_RUN_SNOW_DEFAULT = False
 
 
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
     MuskingumCunge = 4
+
+
+class SnowOpts(object):
+    def __init__(self, rst=None, newsnw=None, ssd=None):
+        """
+        Stores the coeffs that go into snow.txt
+        """
+        # rain-snow threshold
+        if rst is None:
+            self.rst = 0.0
+        else:
+            self.rst = rst
+
+        # density of new snow
+        if newsnw is None:
+            self.newsnw = 100.0
+        else:
+            self.newsnw = newsnw
+
+        # snow settling density
+        if ssd is None:
+            self.ssd = 250.0
+        else:
+            self.ssd = ssd
+
+    def parse_inputs(self, kwds):
+        self.rst = float(kwds['rst'])
+        self.newsnw = float(kwds['newsnw'])
+        self.ssd = float(kwds['ssd'])
+
+    @property
+    def contents(self):
+        return (
+            '{0.rst}  # rain-snow threshold\n'
+            '{0.newsnw}  # density of new snow\n'
+            '{0.ssd}  # snow settling density\n'
+            .format(self)
+        )
 
 
 class BaseflowOpts(object):
@@ -276,6 +315,11 @@ class Wepp(NoDbBase, LogMixin):
                 _baseflow = config.getboolean('wepp', 'baseflow')
             except:
                 _baseflow = _RUN_BASEFLOW_DEFAULT
+            try:
+                _snow = config.getboolean('wepp', 'snow')
+            except:
+                _snow = _RUN_SNOW_DEFAULT
+
 
             try:
                 _wepp_bin = config.get('wepp', 'bin')
@@ -294,9 +338,11 @@ class Wepp(NoDbBase, LogMixin):
             self._run_frost = _frost
             self._run_tcr = _tcr
             self._run_baseflow = _baseflow
+            self._run_snow = _snow
             self._wepp_bin = _wepp_bin
 
             self.baseflow_opts = BaseflowOpts()
+            self.snow_opts = SnowOpts()
             self.run_flowpaths = False
             self.loss_grid_d_path = None
 
@@ -389,6 +435,13 @@ class Wepp(NoDbBase, LogMixin):
 
         return self._run_baseflow
 
+    @property
+    def run_snow(self):
+        if not hasattr(self, "_run_snow"):
+            return _RUN_SNOW_DEFAULT
+
+        return self._run_snow
+
     def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
         self.lock()
 
@@ -450,7 +503,7 @@ class Wepp(NoDbBase, LogMixin):
     #
     # hillslopes
     #
-    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None):
+    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None):
         self.log('Prepping Hillslopes... ')
 
         translator = Watershed.getInstance(self.wd).translator_factory()
@@ -475,6 +528,9 @@ class Wepp(NoDbBase, LogMixin):
             
         if (pmet is None and self.run_pmet) or pmet:
             self._prep_pmet()
+
+        if (snow is None and self.run_snow) or snow:
+            self._prep_snow()
 
         self.log_done()
 
@@ -514,6 +570,11 @@ class Wepp(NoDbBase, LogMixin):
         if _exists(fn):
             if not validate_phosphorus_txt(fn):
                 os.remove(fn)
+
+    def _prep_snow(self):
+        fn = _join(self.runs_dir, 'snow.txt')
+        with open(fn, 'w') as fp:
+            fp.write(self.snow_opts.contents)
 
     def _prep_baseflow(self):
         fn = _join(self.runs_dir, 'gwcoeff.txt')
