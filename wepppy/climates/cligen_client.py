@@ -98,7 +98,7 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
         returnjson == 1 or returnjson == 0
 
     data['returnjson'] = returnjson
-    data['version'] = 2015
+    data['version'] = version
 
     r = requests.post(url, params=data)
 
