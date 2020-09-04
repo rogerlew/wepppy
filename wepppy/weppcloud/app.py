@@ -2245,6 +2245,11 @@ def task_set_wepp_bin(runid, config):
     if wepp_bin is None:
         return error_factory('wepp_bin is None')
 
+    assert wepp_bin[:4] == 'wepp'
+    assert '.' not in wepp_bin
+    assert '/' not in wepp_bin
+    assert '\\' not in wepp_bin
+
     try:
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
