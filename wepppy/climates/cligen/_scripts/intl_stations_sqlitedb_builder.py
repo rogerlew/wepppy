@@ -45,7 +45,13 @@ def _p(line):
 def readpar(par):
     fid = open(par)
     desc = fid.readline().strip()
-    state = desc.split()[0]
+
+    if "United States" in desc:
+        state = 'US'
+    elif "United Kingdom" in desc:
+        state = 'UK'
+    else:
+        state = desc.split()[0]
 
     line1 = _p(fid.readline())
     assert len(line1) == 4
@@ -56,8 +62,7 @@ def readpar(par):
     elevation, tp5, tp6 = line2
     fid.close()
 
-    return '"%s"' % state, '"%s"' % desc, '"%s"' % _split(par)[
-        -1], latitude, longitude, years, type, elevation, tp5, tp6
+    return '"%s"' % state, '"%s"' % desc.replace('"', ''), '"%s"' % _split(par)[-1], latitude, longitude, years, type, elevation, tp5, tp6
 
 
 _db_fn = 'ghcn_stations.db'
@@ -75,6 +80,7 @@ pars.extend(glob.glob("../GHCN_Intl_Stations/30-year/*.par"))
 for par in pars:
     print(par)
     line = ','.join(readpar(par))
+    print(line)
     c.execute("INSERT INTO stations VALUES (%s)" % line)
 
 print(len(pars))
