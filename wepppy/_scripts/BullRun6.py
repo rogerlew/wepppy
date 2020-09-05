@@ -205,28 +205,28 @@ if __name__ == '__main__':
         dict(wd='SimFire_Eagle.202009.cl532.chn_cs{cs}',
              landuse=None,
              cfg='portland-simfire-eagle',
-             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='SimFire_Norse.202009.cl532.chn_cs{cs}',
              landuse=None,
              cfg='portland-simfire-norse',
-             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='PrescFireS.202009.chn_cs{cs}',
              landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='LowSevS.202009.chn_cs{cs}',
              landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='ModSevS.202009.chn_cs{cs}',
              landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='HighSevS.202009.chn_cs{cs}',
              landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-             cli_mode='vanilla', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
     ]
 
@@ -238,7 +238,9 @@ if __name__ == '__main__':
     for scenario in scenarios:
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
-            projects[-1]['cfg'] = scenario.get('cfg', 'portland')
+            
+            #projects[-1]['cfg'] = scenario.get('cfg', 'portland')
+            projects[-1]['cfg'] = scenario.get('cfg', 'portland-wepp_64bf5aa_snow')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['cli_mode'] = scenario.get('cli_mode', 'observed')
             projects[-1]['clean'] = scenario['clean']
