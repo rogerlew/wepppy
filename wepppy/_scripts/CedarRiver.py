@@ -167,7 +167,7 @@ if __name__ == '__main__':
             projects[-1]['build_landuse'] = scenario['build_landuse']
             projects[-1]['build_climates'] = scenario['build_climates']
             projects[-1]['lc_lookup_fn'] = scenario['lc_lookup_fn']
-            projects[-1]['wd'] = 'portland_{watershed}_{scenario}' \
+            projects[-1]['wd'] = 'seattle_{watershed}_{scenario}' \
                 .format(watershed=watershed['watershed'], scenario=scenario['wd']) \
                 .format(cs=watershed['cs'])
 
