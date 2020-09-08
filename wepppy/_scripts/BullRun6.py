@@ -323,7 +323,7 @@ if __name__ == '__main__':
 
                 tops = []
                 for selector, dom in default_landuse:
-                    _topaz_ids = selector(landuse, soils)
+                    _topaz_ids = selector(landuse, None)
                     
                     bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
                     _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
