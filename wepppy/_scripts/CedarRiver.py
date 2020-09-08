@@ -13,7 +13,7 @@ from wepppy.all_your_base import isfloat
 from wepppy.nodb import (
     Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
 )
-from wepppy.nodb.mods.locations import PortlandMod
+from wepppy.nodb.mods.locations import SeattleMod
 
 from wepppy.wepp.soils.utils import modify_ksat
 from os.path import join as _join
@@ -21,9 +21,6 @@ from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
 
 from wepppy.climates.cligen import ClimateFile
-
-from wepppy.nodb.mods.locations.portland import LivnehDataManager
-from wepppy.nodb.mods.locations.portland import ShallowLandSlideSusceptibility, BullRunBedrock
 
 from osgeo import gdal
 
@@ -42,13 +39,6 @@ def log_print(*msg):
 
 
 if __name__ == '__main__':
-
-    lvdm = LivnehDataManager()
-
-    # Run 1 - Daymet (adjust for <2005 and runoff/pp ratio) + shallow groundwater + pmetpara
-    # Run 2 - Daymet (adjust for <2005 and runoff/pp ratio) + shallow landslides + pmetpara
-    # Run 3 - GridMet (adjust for runoff/pp ratio) + shallow groundwater + pmetpara
-    # Run 4 - GridMet (adjust for runoff/pp ratio) + shallow landslides + pmetpara
 
     precip_transforms = {
         'gridmet': {
