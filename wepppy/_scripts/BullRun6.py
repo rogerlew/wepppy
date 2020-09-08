@@ -204,12 +204,12 @@ if __name__ == '__main__':
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='SimFire_Eagle.202009.cl532.chn_cs{cs}',
              landuse=None,
-             cfg='portland-simfire-eagle',
+             cfg='portland-simfire-eagle-snow',
              cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='SimFire_Norse.202009.cl532.chn_cs{cs}',
              landuse=None,
-             cfg='portland-simfire-norse',
+             cfg='portland-simfire-norse-snow',
              cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
              lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='PrescFireS.202009.chn_cs{cs}',
@@ -240,7 +240,7 @@ if __name__ == '__main__':
             projects.append(deepcopy(watershed))
             
             #projects[-1]['cfg'] = scenario.get('cfg', 'portland')
-            projects[-1]['cfg'] = scenario.get('cfg', 'portland-wepp_64bf5aa_snow')
+            projects[-1]['cfg'] = scenario.get('cfg', 'portland-wepp_bd16b69_snow')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['cli_mode'] = scenario.get('cli_mode', 'observed')
             projects[-1]['clean'] = scenario['clean']
