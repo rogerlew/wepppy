@@ -170,7 +170,7 @@ if __name__ == '__main__':
             projects[-1]['build_landuse'] = scenario['build_landuse']
             projects[-1]['build_climates'] = scenario['build_climates']
             projects[-1]['lc_lookup_fn'] = scenario['lc_lookup_fn']
-            projects[-1]['wd'] = 'seattle_statsgo_{watershed}_{scenario}' \
+            projects[-1]['wd'] = 'seattle_{watershed}_{scenario}' \
                 .format(watershed=watershed['watershed'], scenario=scenario['wd']) \
                 .format(cs=watershed['cs'])
 
@@ -257,8 +257,8 @@ if __name__ == '__main__':
         if build_soils:
             log_print('building soils')
             soils.mode = SoilsMode.Gridded
-            #soils.build() # builds ssurgo soils
-            soils.build_statsgo()
+            soils.build() 
+            #soils.build_statsgo()
 
             soils = Soils.getInstance(wd)
 
