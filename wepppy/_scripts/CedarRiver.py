@@ -84,7 +84,7 @@ if __name__ == '__main__':
              map_zoom = 11,
              outlet = [-121.62271296763015, 47.36246108025578],
              landuse=None,
-             cs=100, erod=0.000001,
+             cs=200, erod=0.000001,
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
