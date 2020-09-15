@@ -110,7 +110,7 @@ if __name__ == '__main__':
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.15)
+             mid_season_crop_coeff=1.2, p_coeff=0.75, ksat=0.15)
               ]
     scenarios = [
         dict(wd='CurCond.202009.cl532.chn_cs{cs}',
