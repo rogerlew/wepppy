@@ -271,8 +271,8 @@ if __name__ == '__main__':
                 dom = _domsoil_d[str(topaz_id)]
                 _soil = deepcopy(_soils[dom])
 
-                _dom = '{dom}-{ksat_mod}_{bedrock_name}' \
-                    .format(dom=dom, ksat_mod=ksat_mod, bedrock_name=name)
+                _dom = '{dom}-{ksat_mod}' \
+                    .format(dom=dom, ksat_mod=ksat_mod)
                 
                 if _dom not in _soils:
                     _soil_fn = '{dom}.sol'.format(dom=_dom)
