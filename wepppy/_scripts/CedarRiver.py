@@ -88,7 +88,7 @@ if __name__ == '__main__':
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.75),
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.0999),
         dict(watershed='Tolt_NorthFork',
              extent=[-121.90086364746095, 47.56216409801383, -121.4202117919922, 47.88549944643875],
              map_center=[-121.66053771972658, 47.72408264363561],
@@ -99,7 +99,7 @@ if __name__ == '__main__':
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.75),
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.0999),
         dict(watershed='Taylor_Creek',
              extent=[-121.8981170654297, 47.26199018174824, -121.65779113769533, 47.424835479167825],
              map_center=[-121.77795410156251, 47.34347562236255],
@@ -110,7 +110,7 @@ if __name__ == '__main__':
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.75)
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.0999)
               ]
     scenarios = [
         dict(wd='CurCond.202009.cl532.chn_cs{cs}',
@@ -170,6 +170,7 @@ if __name__ == '__main__':
             projects[-1]['build_landuse'] = scenario['build_landuse']
             projects[-1]['build_climates'] = scenario['build_climates']
             projects[-1]['lc_lookup_fn'] = scenario['lc_lookup_fn']
+            projects[-1]['ksat'] = scenario['ksat']
             projects[-1]['wd'] = 'seattle_{watershed}_{scenario}' \
                 .format(watershed=watershed['watershed'], scenario=scenario['wd']) \
                 .format(cs=watershed['cs'])
@@ -178,6 +179,7 @@ if __name__ == '__main__':
         config = proj['cfg']
         watershed_name = proj['watershed']
         wd = proj['wd']
+        ksat = proj['ksat']
 
         log_print(wd)
         if wc is not None:
@@ -260,6 +262,37 @@ if __name__ == '__main__':
             soils.build() 
             #soils.build_statsgo()
 
+            ksat_mod = 'f'
+
+            _domsoil_d = soils.domsoil_d
+            _soils = soils.soils
+            for topaz_id, ss in watershed._subs_summary.items():
+                lng, lat = ss.centroid.lnglat
+
+                dom = _domsoil_d[str(topaz_id)]
+                _soil = deepcopy(_soils[dom])
+
+                _dom = '{dom}-{ksat_mod}_{bedrock_name}' \
+                    .format(dom=dom, ksat_mod=ksat_mod, bedrock_name=name)
+                
+                if _dom not in _soils:
+                    _soil_fn = '{dom}.sol'.format(dom=_dom)
+                    log_print(_soil_fn, dst_soil_fn, ksat)
+                    src_soil_fn = _join(_soil.soils_dir, _soil.fname)
+                    dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
+                    log_print(src_soil_fn, dst_soil_fn, ksat, _dom)
+                    modify_ksat(src_soil_fn, dst_soil_fn, ksat)
+
+                    _soil.fname = _soil_fn
+                    _soils[_dom] = _soil
+
+                _domsoil_d[str(topaz_id)] = _dom
+
+            soils.lock()
+            soils.domsoil_d = _domsoil_d
+            soils.soils = _soils
+            soils.dump_and_unlock()
+            
             soils = Soils.getInstance(wd)
 
             if _exists(_join(wd, 'lt.nodb')):
