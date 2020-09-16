@@ -522,7 +522,7 @@ def index():
 @app.route('/portland-municipal/')
 @app.route('/locations/portland-municipal')
 @app.route('/locations/portland-municipal/')
-def lt_index():
+def portland_index():
     if current_user.is_authenticated:
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
