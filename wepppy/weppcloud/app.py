@@ -732,7 +732,10 @@ def runs0(runid, config):
 
     wd = get_wd(runid)
     owners = get_run_owners(runid)
-    ron = Ron.getInstance(wd)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
 
     should_abort = True
     if current_user in owners:
