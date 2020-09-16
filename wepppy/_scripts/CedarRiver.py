@@ -261,6 +261,8 @@ if __name__ == '__main__':
             soils.build() 
             #soils.build_statsgo()
 
+            soils = Soils.getInstance(wd)
+
             ksat_mod = 'f'
 
             _domsoil_d = soils.domsoil_d
