@@ -25,20 +25,20 @@ if __name__ == "__main__":
 
     os.mkdir(outdir)
     
-        scenarios = [
-                     'CurCond.202009.cl532.chn_cs',
-                     'CurCond.202009.cl532_gridmet.chn_cs',
-                     'CurCond.202009.cl532_future.chn_cs',
-                     'CurCond.202009.cl532_future.chn_cs',
-                     'SimFire_Eagle.202009.cl532.chn_cs',
-                     'SimFire_Norse.202009.cl532.chn_cs',
-                     'SimFire_Norse.202009.cl532.chn_cs',
-                     'PrescFireS.202009.chn_cs',
-                     'LowSevS.202009.chn_cs',
-                     'ModSevS.202009.chn_cs',
-                     'HighSevS.202009.chn_cs'
-                    ]
-                    
+    scenarios = [
+                 'CurCond.202009.cl532.chn_cs',
+                 'CurCond.202009.cl532_gridmet.chn_cs',
+                 'CurCond.202009.cl532_future.chn_cs',
+                 'CurCond.202009.cl532_future.chn_cs',
+                 'SimFire_Eagle.202009.cl532.chn_cs',
+                 'SimFire_Norse.202009.cl532.chn_cs',
+                 'SimFire_Norse.202009.cl532.chn_cs',
+                 'PrescFireS.202009.chn_cs',
+                 'LowSevS.202009.chn_cs',
+                 'ModSevS.202009.chn_cs',
+                 'HighSevS.202009.chn_cs'
+                ]
+
     for prefix in scenarios:
         wds = glob(_join('/geodata/weppcloud_runs', 'portland*{}*'.format(prefix)))
         wds = [wd for wd in wds if os.path.isdir(wd)]
