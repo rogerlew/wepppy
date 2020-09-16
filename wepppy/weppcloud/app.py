@@ -518,8 +518,21 @@ def index():
     return render_template('index.htm', user=current_user, runs_counter=c)
 
 
+@app.route('/portland-municipal')
+@app.route('/portland-municipal/')
+@app.route('/locations/portland-municipal')
+@app.route('/locations/portland-municipal/')
+def lt_index():
+    if current_user.is_authenticated:
+        if not current_user.roles:
+            user_datastore.add_role_to_user(current_user.email, 'User')
+    return render_template('locations/portland/index.htm', user=current_user)
+
+
 @app.route('/lt')
 @app.route('/lt/')
+@app.route('/locations/lt')
+@app.route('/locations/lt/')
 def lt_index():
     if current_user.is_authenticated:
         if not current_user.roles:
@@ -534,15 +547,6 @@ def ltf_index():
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
     return render_template('ltf/index.htm', user=current_user)
-
-
-@app.route('/portland-municipal')
-@app.route('/portland-municipal/')
-def portland_index():
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
-    return render_template('portland-municipal/index.htm', user=current_user)
 
 
 @app.route('/seattle-municipal')
