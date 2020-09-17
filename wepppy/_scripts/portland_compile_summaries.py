@@ -14,24 +14,13 @@ os.chdir('/geodata/weppcloud_runs/')
 
 if __name__ == "__main__":
     prefix = 'portland202009'
-    outdir = '/home/roger/%s_csvs' % prefix
-
-    if _exists(outdir):
-        res = input('Outdir exists, Delete outdir?')
-        if not res.lower().startswith('y'):
-            sys.exit()
-
-        shutil.rmtree(outdir)
-
-    os.mkdir(outdir)
+    outdir = '/workdir/wepppy/wepppy/weppcloud/static/mods/portland/results/' % prefix
 
     scenarios = [
                  'CurCond.202009.cl532.chn_cs',
                  'CurCond.202009.cl532_gridmet.chn_cs',
                  'CurCond.202009.cl532_future.chn_cs',
-                 'CurCond.202009.cl532_future.chn_cs',
                  'SimFire_Eagle.202009.cl532.chn_cs',
-                 'SimFire_Norse.202009.cl532.chn_cs',
                  'SimFire_Norse.202009.cl532.chn_cs',
                  'PrescFireS.202009.chn_cs',
                  'LowSevS.202009.chn_cs',
