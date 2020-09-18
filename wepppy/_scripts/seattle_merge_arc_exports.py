@@ -29,7 +29,7 @@ if __name__ == "__main__":
                 ]
 
     for prefix in scenarios:
-        wds = glob(_join('/geodata/weppcloud_runs', 'seattle*{}*'.format(prefix)))
+        wds = glob(_join('/geodata/weppcloud_runs', 'seattle_k*{}*'.format(prefix)))
         wds = [wd for wd in wds if os.path.isdir(wd)]
 
         channels = []
