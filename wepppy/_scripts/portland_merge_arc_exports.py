@@ -14,7 +14,7 @@ os.chdir('/geodata/weppcloud_runs/')
 if __name__ == "__main__":
     import sys
 
-    outdir = '/workdir/wepppy/wepppy/weppcloud/static/mods/portland/results/' % prefix
+    outdir = '/workdir/wepppy/wepppy/weppcloud/static/mods/portland/results/'
 
     scenarios = [
                  'CurCond.202009.cl532.chn_cs',
