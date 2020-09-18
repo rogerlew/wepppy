@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     wds = []
     for wc in scenarios:
-        wds.extend(glob(_join('/geodata/weppcloud_runs', 'seattle*{}*'.format(wc))))
+        wds.extend(glob(_join('/geodata/weppcloud_runs', 'seattle_k*{}*'.format(wc))))
     wds = [wd for wd in wds if os.path.isdir(wd)]
 
     fp_hill = open(_join(outdir, '%s_hill_summary.csv' % prefix), 'w')
