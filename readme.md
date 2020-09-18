@@ -16,6 +16,10 @@ The wepppy repo is using Git LFS for some sqlite3 databases that are in the proj
 > git lfs pull
 ```
 
+### Docker
+A docker base image is provided though wepppy, though wepppy works better on a bare metal linux install
+https://github.com/rogerlew/wepppy-docker-base
+
 
 ### Windows
 
