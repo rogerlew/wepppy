@@ -555,7 +555,7 @@ def seattle_index():
     if current_user.is_authenticated:
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
-    return render_template('seattle-municipal/index.htm', user=current_user)
+    return render_template('locations/seattle/index.htm', user=current_user)
 
 
 @app.route('/create/<config>')
@@ -2770,6 +2770,7 @@ def report_wepp_loss(runid, config):
             fraction_under = None
 
     wd = get_wd(runid)
+    wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
     out_rpt = OutletSummary(loss)
@@ -3555,72 +3556,75 @@ def combined_ws_viewer_url_gen():
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
 
-    title = request.form.get('title', '')
-    runids = request.form.get('runids', '')
-    runids = runids.replace(',', ' ').split()
+    try:
+        title = request.form.get('title', '')
+        runids = request.form.get('runids', '')
+        runids = runids.replace(',', ' ').split()
 
-    ws = []
-    extents = None
-    center_lat = None
-    center_lng = None
-    zoom = None
-    has_phos = True
+        ws = []
+        extents = None
+        center_lat = None
+        center_lng = None
+        zoom = None
+        has_phos = True
 
-    for i, runid in enumerate(runids):
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        wepp = Wepp.getInstance(wd)
+        for i, runid in enumerate(runids):
+            wd = get_wd(runid)
+            ron = Ron.getInstance(wd)
+            wepp = Wepp.getInstance(wd)
 
-        has_phos = has_phos and wepp.phosphorus_opts.isvalid
+            has_phos = has_phos and wepp.phosphorus_opts.isvalid
 
-        if i == 0:
-            extents = ron.map.extent
-            zoom = ron.map.zoom
-        else:
-            _l, _b, _r, _t = ron.map.extent
-            l, b, r, t = extents
-
-            if _l < l:
-                extents[0] = l
-
-            if _b < b:
-                extents[1] = b
-
-            if _r > r:
-                extents[2] = r
-
-            if _t > t:
-                extents[3] = t
-
-            if ron.map.zoom < zoom:
+            if i == 0:
+                extents = ron.map.extent
                 zoom = ron.map.zoom
+            else:
+                _l, _b, _r, _t = ron.map.extent
+                l, b, r, t = extents
 
-        ws.append(dict(runid=runid, cfg=ron.config_stem))
+                if _l < l:
+                    extents[0] = l
 
-    if extents is not None:
-        center_lng = float(np.mean([extents[0], extents[2]]))
-        center_lat = float(np.mean([extents[1], extents[3]]))
+                if _b < b:
+                    extents[1] = b
 
-    if zoom is not None:
-        zoom -= 1
+                if _r > r:
+                    extents[2] = r
 
-    phos_opts = ('', '"phosphorus":1.0,')[has_phos]
+                if _t > t:
+                    extents[3] = t
 
-    _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
-           'ws={ws}&varopts={{"runoff":10,"subrunoff":10,"baseflow":10,{phos_opts}"loss":4000}}&' \
-           'varname=loss&title={title}'
+                if ron.map.zoom < zoom:
+                    zoom = ron.map.zoom
 
-    url = None
-    if center_lng is not None and \
-       center_lat is not None and \
-       zoom is not None and \
-       len(ws) > 0:
-        url = _url.format(center_lat=center_lat, center_lng=center_lng,
-                          zoom=zoom, ws=json.dumps(ws, allow_nan=False), title=title,
-                          phos_opts=phos_opts)
+            ws.append(dict(runid=runid, cfg=ron.config_stem))
 
-    return render_template('combined_ws_viewer_url_gen.htm',
-        url=url, user=current_user, title=title, runids=', '.join(runids))
+        if extents is not None:
+            center_lng = float(np.mean([extents[0], extents[2]]))
+            center_lat = float(np.mean([extents[1], extents[3]]))
+
+        if zoom is not None:
+            zoom -= 1
+
+        phos_opts = ('', '"phosphorus":1.0,')[has_phos]
+
+        _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
+               'ws={ws}&varopts={{"runoff":10,"subrunoff":10,"baseflow":10,{phos_opts}"loss":4000}}&' \
+               'varname=loss&title={title}'
+
+        url = None
+        if center_lng is not None and \
+           center_lat is not None and \
+           zoom is not None and \
+           len(ws) > 0:
+            url = _url.format(center_lat=center_lat, center_lng=center_lng,
+                              zoom=zoom, ws=json.dumps(ws, allow_nan=False), title=title,
+                              phos_opts=phos_opts)
+
+        return render_template('combined_ws_viewer_url_gen.htm',
+            url=url, user=current_user, title=title, runids=', '.join(runids))
+    except:
+        return error_factory('Error processing request')
 
 
 @app.route('/dev/usage_statistics')
@@ -3631,18 +3635,30 @@ def usage_statistics():
     return send_file(fn, mimetype='application/json')
 
 
+def get_project_name(wd):
+    ron = Ron.getInstance(wd)
+    return ron.name
+
+
 def get_config_stem(wd):
     ron = Ron.getInstance(wd)
     return ron.config_stem
 
 
-@app.route('/dev/runid_query/<wc>')
+@app.route('/dev/runid_query/')
 def runid_query(wc):
     if current_user.has_role('Root') or \
        current_user.has_role('Admin') or \
        current_user.has_role('Dev'):
 
+        wc = request.form.get('wc', '')
+        name = request.form.get('name', None)
+
         wds = glob(_join('/geodata/weppcloud_runs', '{}*'.format(wc)))
+
+        if name is not None:
+            wds = [wd for wd in wds if name in get_project_name(wd)]
+
         return jsonify([_join('weppcloud/runs', _split(wd)[-1], get_config_stem(wd)) for wd in wds])
     else:
         return error_factory('not authorized')
