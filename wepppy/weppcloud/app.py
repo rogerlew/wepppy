@@ -551,6 +551,8 @@ def ltf_index():
 
 @app.route('/seattle-municipal')
 @app.route('/seattle-municipal/')
+@app.route('/locations/seattle-municipal')
+@app.route('/locations/seattle-municipal/')
 def seattle_index():
     if current_user.is_authenticated:
         if not current_user.roles:
