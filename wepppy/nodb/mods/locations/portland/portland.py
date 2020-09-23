@@ -126,8 +126,8 @@ class PortlandMod(NoDbBase, LocationMixin):
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
             self.modify_soils_ksat()
-        elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
-            self.determine_phosphorus()
+        # elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
+        #     self.determine_phosphorus()
         elif evt == TriggerEvents.CLIMATE_BUILD_COMPLETE:
             climate = Climate.getInstance(self.wd)
 

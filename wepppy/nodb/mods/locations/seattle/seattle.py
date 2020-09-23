@@ -100,8 +100,8 @@ class SeattleMod(NoDbBase, LocationMixin):
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
             self.modify_soils_ksat()
-        elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
-            self.determine_phosphorus()
+        # elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
+        #     self.determine_phosphorus()
 
         elif evt == TriggerEvents.WEPP_PREP_WATERSHED_COMPLETE:
             self.modify_erod_cs()
