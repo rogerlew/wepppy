@@ -45,6 +45,8 @@ class TriggerEvents(Enum):
     SOILS_BUILD_COMPLETE = 3
     PREPPING_PHOSPHORUS = 4
     WATERSHED_ABSTRACTION_COMPLETE = 5
+    CLIMATE_BUILD_COMPLETE = 6
+    WEPP_PREP_WATERSHED_COMPLETE = 7
 
 # .nodb are jsonpickle files
 # The .nodb is used to distinguish these from regular json datafiles
