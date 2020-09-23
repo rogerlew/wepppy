@@ -287,3 +287,8 @@ class Rhem(NoDbBase, LogMixin):
         output_dir = self.output_dir
 
         raise NotImplementedError
+
+    def run_wepp_hillslopes(self):
+        wepp = Wepp.getInstance(self.wd)
+        wepp.prep_hillslopes()
+        wepp.run_hillslopes()

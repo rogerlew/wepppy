@@ -37,7 +37,7 @@ from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator, have
 from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules
-from .base import NoDbBase, DEFAULT_CLIGEN_DB
+from .base import NoDbBase, DEFAULT_CLIGEN_DB, TriggerEvents
 from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
@@ -862,6 +862,8 @@ class Climate(NoDbBase, LogMixin):
 
         elif climate_mode == ClimateMode.GridMetPRISM:
             self._build_climate_observed_gridmet_prism_revised()
+
+        self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
 
     def _build_climate_observed_cli_PRISM(self, verbose):
         self.lock()
