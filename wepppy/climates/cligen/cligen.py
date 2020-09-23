@@ -251,9 +251,19 @@ def build_gridmet_prn(gridmet_dir, start_year, end_year, prn_fn, verbose=False):
         d['tmmn'] = np.round(d['tmmn'])
 
         for i, (pr, tmmn, tmmx, _date) in enumerate(zip(d['pr'], d['tmmn'], d['tmmx'], d['dates'])):
-            #print(pr, tmmn, tmmx, _date)
             fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                      .format(_date.month, _date.day, _date.year, int(pr), int(tmmx), int(tmmn)))
+
+        if _date.month != 12 and _date.day != 31:
+            year = _date.year
+
+            _date += datetime.timedelta(1)
+            while _date.year == year:
+                fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                         .format(_date.month, _date.day, _date.year, 9999, 9999, 9999))
+                _date += datetime.timedelta(1)
+
+
     fp.close()
     
 
