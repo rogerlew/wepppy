@@ -109,5 +109,44 @@ a.disabled {
         <a href="{{ url_for('static', filename='mods/seattle/results/seattle202009_shps.zip') }}">Aggregated Shapefiles of Results (.zip)</a>
     </div>
     <hr>
+    <h2>Run WEPP</h2>
+    <div style="margin-left: 1.5em;">
+        <h3>Current conditions and managements</h3>
+        <div style="margin-left: 1.5em;">
+            <h4>Delineate new watershed</h4>
+            <div><a href="../create/seattle-snow">Run WEPP</a></div>
+            <div style="height: 1em;"></div>
+        </div>
+        <div style="height: 10em;"></div>
+
+        <h3>Simfire - Eagle</h3>
+        <div style="margin-left: 1.5em;">
+            <h4>Delineate new watershed</h4>
+            <div><a href="../create/seattle-simfire-eagle-snow">Run WEPP</a></div>
+            <div style="height: 1em;"></div>
+        </div>
+        <div style="height: 10em;"></div>
+
+        <h3>Simfire - Norse</h3>
+        <div style="margin-left: 1.5em;">
+            <h4>Delineate new watershed</h4>
+            <div><a href="../create/seattle-simfire-norse-snow">Run WEPP</a></div>
+            <div style="height: 1em;"></div>
+        </div>
+        <div style="height: 10em;"></div>
+    </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+     integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+     integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
+{% include("_analytics.htm") %}
+    </div>
   </body>
 </html>
