@@ -192,7 +192,6 @@ class PortlandMod(NoDbBase, LocationMixin):
 
     def modify_climates(self, adjust_func, pp_scale_raster):
         climate = Climate.getInstance(self.wd)
-        climate.build(verbose=1)
         climate.lock()
         watershed = Watershed.getInstance(self.wd)
         lng, lat = watershed.centroid
