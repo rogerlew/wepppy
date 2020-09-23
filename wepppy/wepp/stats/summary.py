@@ -47,6 +47,7 @@ _hill_ash_hdr = [
     'Burnclass'
 ]
 
+
 class HillSummary(ReportBase):
     def __init__(self, loss: Loss, class_fractions=False, fraction_under=None, subs_summary=None,
                  ash_out=None):
@@ -91,7 +92,8 @@ class HillSummary(ReportBase):
 
     @property
     def header(self):
-        return [colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for colname in self._hdr]
+        return [cname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for cname in self._hdr
+                if 'Subrunoff' not in cname and 'Baseflow' not in cname]
 
     def __iter__(self):
         subs_summary = self.subs_summary
@@ -99,8 +101,9 @@ class HillSummary(ReportBase):
 
         data = self.data
         for i in range(len(data)):
-            _data = [(colname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow'),
-                      data[i][parse_name(colname)]) for colname in _hill_default_hdr]
+            _data = [(cname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow'),
+                     data[i][parse_name(cname)]) for cname in _hill_default_hdr
+                     if 'Subrunoff' not in cname and 'Baseflow' not in cname]
 
             topaz_id = data[i]['TopazID']
 
@@ -195,14 +198,14 @@ class ChannelSummary(ReportBase):
 
     @property
     def header(self):
-        return [colname.replace(' Density', '')
-                       .replace('Area', 'Channel Area')
-                       .replace(' Volume', '')
-                       .replace('Subsuface', 'Lateral')
-                       .replace('(m^3)', '(mm)')
-                       .replace('(kg)', '(tonne)')
-                       .replace('Soil Loss', 'Channel Erosion')
-                       for colname in self._hdr]
+        return [cname.replace(' Density', '')
+                     .replace('Area', 'Channel Area')
+                     .replace(' Volume', '')
+                     .replace('Subsuface', 'Lateral')
+                     .replace('(m^3)', '(mm)')
+                     .replace('(kg)', '(tonne)')
+                     .replace('Soil Loss', 'Channel Erosion')
+                for cname in self._hdr if 'Upland' not in cname and 'Subsuface' not in cname]
 
     def __iter__(self):
         data = self.data
@@ -219,6 +222,12 @@ class ChannelSummary(ReportBase):
                                .replace(' Volume', '') \
                                .replace('Subsuface', 'Subsurface') \
                                .replace('Soil Loss', 'Channel Erosion')
+
+                if 'Upland Charge' in cname:
+                    continue
+
+                if 'Subsurface' in cname:
+                    continue
 
                 if 'Discharge' in colname:
                     if isfloat(data[i]['Discharge Volume']):
@@ -304,7 +313,7 @@ class OutletSummary(ReportBase):
         units = self.data[key]['units']
         v_norm = 1000.0 * v / (area * 10000.0)
         units_norm = 'mm/yr'
-        yield 'Water discharge', v, units, v_norm, units_norm
+        yield 'Stream discharge', v, units, v_norm, units_norm
 
         key = 'Avg. Ann. total hillslope soil loss'
         v = self.data[key]['v']
