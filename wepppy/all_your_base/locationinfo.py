@@ -21,6 +21,8 @@ from osgeo import gdal
 from osgeo import osr
 from osgeo.gdalconst import GA_ReadOnly
 
+# import numpy as np
+
 import utm
 
 from .geo_transformer import GeoTransformer
@@ -112,6 +114,9 @@ class RasterDatasetInterpolator:
 
         return x, y
 
+    def get_nodata_value(self, band):
+        return self.band[band].GetNoDataValue()
+
     @property
     def extent(self):
         proj2wgs_transformer = self.proj2wgs_transformer
@@ -149,6 +154,10 @@ class RasterDatasetInterpolator:
             z = []
             for i in range(nbands):
                 data = self.band[i].ReadAsArray(_x[0], _y[0], 2, 2)
+                # RL- interploate.interp2d seems to ignore masked values
+                # nodata = self.band[i].GetNoDataValue()
+                # if nodata is not None:
+                #     data = np.ma.masked_values(data, nodata)
                 func = interpolate.interp2d(_x, _y, data, kind='linear')
                 z.append(func(x, y)[0])
                 
@@ -172,6 +181,9 @@ class RasterDatasetInterpolator:
             z = []
             for i in range(nbands):
                 data = self.band[i].ReadAsArray(_x[0], _y[0], 5, 5)
+                # nodata = self.band[i].GetNoDataValue()
+                # if nodata is not None:
+                #     data = np.ma.masked_values(data, nodata)
                 func = interpolate.interp2d(_x, _y, data, kind='cubic')
                 z.append(func(x, y)[0])
         else:
@@ -185,7 +197,12 @@ class RasterDatasetInterpolator:
             z = []
             for i in range(nbands):
                 _z = self.band[i].ReadAsArray(x, y, 1, 1)
+                nodata = self.band[i].GetNoDataValue()
                 if _z is not None:
+                    # RL- comparison between np.float32 and float seems to be broken
+                    # if _z[0, 0] == nodata:
+                    #     z.append(None)
+                    # else:
                     z.append(_z[0, 0])
                 else:
                     z.append(float('nan'))
