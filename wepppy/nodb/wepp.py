@@ -346,7 +346,6 @@ class Wepp(NoDbBase, LogMixin):
             except:
                 _wepp_bin = None
 
-
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
                 lateral_flow=lateral_flow,
@@ -587,6 +586,10 @@ class Wepp(NoDbBase, LogMixin):
             fp.write('\n')
 
     def _prep_pmet(self, mid_season_crop_coeff=0.95, p_coeff=0.80):
+        self.log('nodb.Wepp._prep_pmet::mid_season_crop_coeff = {}, p_coeff = {} '
+                 .format(mid_season_crop_coeff, p_coeff))
+        self.log_done()
+
         pmetpara_prep(self.runs_dir,
                       mid_season_crop_coeff=mid_season_crop_coeff,
                       p_coeff=p_coeff)
@@ -899,6 +902,8 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
+        self.trigger(TriggerEvents.WEPP_PREP_WATERSHED_COMPLETE)
+
     def _prep_structure(self, translator):
         watershed = Watershed.getInstance(self.wd)
         structure = watershed.structure
@@ -927,6 +932,12 @@ class Wepp(NoDbBase, LogMixin):
 
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
                           channel_routing_method=ChannelRoutingMethod.MuskingumCunge):
+
+        if erodibility is not None or critical_shear is not None:
+            self.log('nodb.Wepp._prep_channel_chn::erodibility = {}, critical_shear = {} '
+                     .format(erodibility, critical_shear))
+            self.log_done()
+
         assert translator is not None
 
         watershed = Watershed.getInstance(self.wd)
@@ -969,6 +980,11 @@ class Wepp(NoDbBase, LogMixin):
             fp.write('1 600\n0\n1\n{}\n'.format(total))
 
     def _prep_channel_soils(self, translator, erodibility, critical_shear):
+        if erodibility is not None or critical_shear is not None:
+            self.log('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
+                     .format(erodibility, critical_shear))
+            self.log_done()
+
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         runs_dir = self.runs_dir
