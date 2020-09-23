@@ -135,7 +135,7 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
                             ts -= 273.15
                             units = 'C'
 
-                        print(desc, ts)
+                        # print(desc, ts)
 
                         dump(abbrv, year, key, ts, desc, units, met_dir)
                         #ts = [int(x) for x in ts]
