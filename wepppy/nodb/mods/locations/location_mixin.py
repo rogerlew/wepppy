@@ -132,30 +132,3 @@ class LocationMixin(object):
         except Exception:
             soils.unlock('-f')
             raise
-
-    def determine_phosphorus(self):
-        # watershed = Watershed.getInstance(self.wd)
-        # lng, lat = watershed.centroid
-
-        wepp = Wepp.getInstance(self.wd)
-
-        # d = {}
-        # for opt in ['runoff', 'lateral', 'baseflow', 'sediment']:
-        #    fn = _join(_data_dir, 'phosphorus', 'p_%s.tif' % opt)
-        #    assert _exists(fn), fn
-        #    raster = RasterDatasetInterpolator(fn)
-        #    d[opt] = raster.get_location_info(lng, lat)
-
-        d = dict(surf_runoff=0.004,
-                 lateral_flow=0.005,
-                 baseflow=0.006,
-                 sediment=800)
-
-        # noinspection PyBroadException
-        try:
-            wepp.lock()
-            wepp.phosphorus_opts.parse_inputs(d)
-            wepp.dump_and_unlock()
-        except Exception:
-            wepp.unlock('-f')
-            raise
