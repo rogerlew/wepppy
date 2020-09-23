@@ -377,11 +377,6 @@ class Baer(NoDbBase):
             else:
                 self.modify_soils()
 
-        """
-        elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
-            self.determine_phosphorus
-        """
-
     def remap_landuse(self):
         wd = self.wd
         baer_path = self.baer_path
