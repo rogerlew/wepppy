@@ -85,8 +85,8 @@ class LakeTahoe(NoDbBase, LocationMixin):
             pass
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
-        elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
-            self.determine_phosphorus()
+        # elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
+        #     self.determine_phosphorus()
 
     @property
     def lc_lookup_fn(self):
