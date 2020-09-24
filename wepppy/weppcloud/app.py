@@ -1507,11 +1507,14 @@ def task_fetch_dem(runid, config):
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/export/ermit/')
 def export_ermit(runid, config):
-    from wepppy.export import create_ermit_input
-    wd = get_wd(runid)
-    fn = create_ermit_input(wd)
-    name = _split(fn)[-1]
-    return send_file(fn, as_attachment=True, attachment_filename=name)
+    try:
+        from wepppy.export import create_ermit_input
+        wd = get_wd(runid)
+        fn = create_ermit_input(wd)
+        name = _split(fn)[-1]
+        return send_file(fn, as_attachment=True, attachment_filename=name)
+    except:
+        return exception_factory('Error exporting ERMiT')
 
 
 @app.route('/runs/<string:runid>/<config>/export/arcmap')
