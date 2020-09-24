@@ -188,8 +188,16 @@ def create_ermit_input(wd):
         dom = landuse.domlc_d[str(topaz_id)]
         man = landuse.managements[dom]
         burnclass = landml2burnclass.get(int(dom), 'N/A')
-        mukey = soils.ssurgo_domsoil_d[topaz_id]
+        mukey = soils.domsoil_d[topaz_id]
         soil_type = soils.soils[mukey].simple_texture
+
+        if soil_type is None:
+            try:
+                mukey = soils.ssurgo_domsoil_d[topaz_id]
+                soil_type = soils.soils[mukey].simple_texture
+            except KeyError:
+                soil_type = 'clay loam'
+
 
         slp_file = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
         v = readSlopeFile(slp_file)
