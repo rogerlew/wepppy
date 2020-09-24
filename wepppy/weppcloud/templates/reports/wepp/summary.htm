@@ -10,9 +10,9 @@
   <thead>
     <tr>
       <th>&nbsp;</th>
-      <th>per unit area of watershed</th>
-      <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
       <th>from outlet</th>
+      <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th>per unit area of watershed</th>
       <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
     </tr>
   </thead>
@@ -20,9 +20,9 @@
     {% for name, value, units, v_normed, units_normed in out_rpt %}
       <tr>
         <td>{{ name }}</td>
-        <td class="text-right">{{ unitizer(v_normed, units_normed) | safe }}</td>
-        <td>{{ unitizer_units(units) | safe }}</td>
         <td class="text-right">{{ unitizer(value, units) | safe }}</td>
+        <td>{{ unitizer_units(units) | safe }}</td>
+        <td class="text-right">{{ unitizer(v_normed, units_normed) | safe }}</td>
         <td>{{ unitizer_units(units_normed) | safe }}</td>
       </tr>
     {% endfor %}
