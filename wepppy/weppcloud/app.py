@@ -601,7 +601,7 @@ def create(config):
     try:
         user_datastore.create_run(runid, config, current_user)
     except Exception:
-        return exception_factory('Could not add run to user database: proceed to ' + url)
+        return exception_factory('Could not add run to user database: proceed to https://wepp1.nkn.uidaho.edu' + url)
 
     return redirect(url)
 
