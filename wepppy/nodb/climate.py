@@ -1034,7 +1034,7 @@ class Climate(NoDbBase, LogMixin):
 
             cli_dir = self.cli_dir
             start_year, end_year = self._observed_start_year, self._observed_end_year
-            self._input_years = end_year - start_year
+            self._input_years = end_year - start_year + 1
 
             stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
@@ -1132,7 +1132,7 @@ class Climate(NoDbBase, LogMixin):
 
             cli_dir = self.cli_dir
             start_year, end_year = self._observed_start_year, self._observed_end_year
-            self._input_years = end_year - start_year
+            self._input_years = end_year - start_year + 1
 
             stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
@@ -1238,7 +1238,7 @@ class Climate(NoDbBase, LogMixin):
 
             cli_dir = self.cli_dir
             start_year, end_year = self._observed_start_year, self._observed_end_year
-            self._input_years = end_year - start_year
+            self._input_years = end_year - start_year + 1
 
             stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
