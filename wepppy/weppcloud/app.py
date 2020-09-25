@@ -32,7 +32,7 @@ import awesome_codename
 
 
 from werkzeug.utils import secure_filename
-
+import psycopg2
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort
@@ -594,18 +594,18 @@ def create(config):
     try:
         Ron(wd, "%s.cfg" % config)
 
-        # for development convenience create a symlink
-        # to the this working directory
-        last = get_last()
-        if _exists(last):
-            os.unlink(last)
-        # make_symlink(wd, last)
-
-        user_datastore.create_run(runid, config, current_user)
-
-        return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config))
     except Exception:
-        return exception_factory()
+        return exception_factory('Could not create run')
+
+    url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
+
+    try:
+        user_datastore.create_run(runid, config, current_user)
+    except psycopg2.errors.IdleInTransactionSessionTimeout:
+
+        return exception_factory('Could not add run to user database: proceed to ' + url)
+
+    return redirect(url)
 
 
 @app.route('/runs/<string:runid>/<config>/create_fork')
