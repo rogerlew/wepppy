@@ -68,13 +68,13 @@ class HillslopeWatbal(ReportBase):
 
                 if Y not in d[topaz_id]['Precipitation (mm)']:
                     d[topaz_id]['Precipitation (mm)'][Y] = P
-                    d[topaz_id]['Streamflow (mm)'][Y] = Q
+                    d[topaz_id]['Streamflow (mm)'][Y] = Q + latqcc
                     d[topaz_id]['Transpiration + Evaporation (mm)'][Y] = Ep + Es + Er
                     d[topaz_id]['Percolation (mm)'][Y] = Dp
                     d[topaz_id]['Total Soil Water Storage (mm)'][Y] = TSW
                 else:
                     d[topaz_id]['Precipitation (mm)'][Y] += P
-                    d[topaz_id]['Streamflow (mm)'][Y] += Q
+                    d[topaz_id]['Streamflow (mm)'][Y] += Q + latqcc
                     d[topaz_id]['Transpiration + Evaporation (mm)'][Y] += Ep + Es + Er
                     d[topaz_id]['Percolation (mm)'][Y] += Dp
                     d[topaz_id]['Total Soil Water Storage (mm)'][Y] += TSW
@@ -135,6 +135,9 @@ class HillslopeWatbal(ReportBase):
         for topaz_id in data:
             row = OrderedDict([('TopazID', topaz_id)])
             for k in header:
+                if 'Total Soil Water Storage' in k:
+                    continue
+
                 row[k] = np.mean(list(data[topaz_id][k].values()))
 
             yield RowData(row)
