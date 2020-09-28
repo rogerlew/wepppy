@@ -122,11 +122,12 @@ class HillslopeWatbal(ReportBase):
 
     @property
     def avg_annual_header(self):
-        return ['TopazID'] + list(self.hdr)
+        x = ['TopazID'] + list(self.hdr)
+        return [_x for _x in x if 'Total Soil Water Storage' in _x]
 
     @property
     def avg_annual_units(self):
-        return [None] + list(self.units)
+        return [None] + list(self.units)[1:]
 
     def avg_annual_iter(self):
         data = self.data
