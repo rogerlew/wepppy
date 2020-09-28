@@ -183,7 +183,7 @@ class WeppPost(NoDbBase):
             self.unlock('-f')
             raise
 
-    def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=(0, 1)):
+    def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=(0, 1), stacked=False):
         ndays = self._ndays
         if source == 'Channel':
             assert self._chn_streamflow is not None
@@ -199,6 +199,11 @@ class WeppPost(NoDbBase):
         runoff = data['Daily Runoff (mm)']
         latqcc = data['Daily Lateral Flow (mm)']
         baseflow = data['Daily Baseflow (mm)']
+
+
+        if stacked:
+            latqcc += baseflow
+            runoff += latqcc
 
         assert ndays == len(runoff)
         assert ndays == len(latqcc)
