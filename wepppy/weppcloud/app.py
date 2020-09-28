@@ -2833,22 +2833,25 @@ def report_wepp_yearly_watbal(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
 def report_wepp_avg_annual_watbal(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
-    hill_rpt = wepp.report_hill_watbal()
-    # chn_rpt = wepp.report_chn_watbal()
 
-    unitizer = Unitizer.getInstance(wd)
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
+        hill_rpt = wepp.report_hill_watbal()
+        # chn_rpt = wepp.report_chn_watbal()
 
-    return render_template('reports/wepp/avg_annual_watbal.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           hill_rpt=hill_rpt,
-                           # chn_rpt=chn_rpt,
-                           ron=ron,
-                           user=current_user)
+        unitizer = Unitizer.getInstance(wd)
 
+        return render_template('reports/wepp/avg_annual_watbal.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               hill_rpt=hill_rpt,
+                               # chn_rpt=chn_rpt,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error running watbal')
 
 @app.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
 def resources_wepp_streamflow(runid, config):
