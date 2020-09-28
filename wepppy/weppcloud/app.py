@@ -2865,11 +2865,17 @@ def resources_wepp_streamflow(runid, config):
     except:
         exclude_yr_indxs = [0, 1]
 
+    stacked = request.args.get('stacked', None)
+    if stacked is None:
+        stacked = False
+    else:
+        stacked = stacked.lower() == 'true'
+
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepppost = WeppPost.getInstance(wd)
     fn = _join(ron.export_dir, 'daily_streamflow.csv')
-    wepppost.export_streamflow(fn, exclude_yr_indxs=exclude_yr_indxs)
+    wepppost.export_streamflow(fn, exclude_yr_indxs=exclude_yr_indxs, stacked=stacked)
 
     assert _exists(fn)
 
