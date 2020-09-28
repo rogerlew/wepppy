@@ -45,7 +45,8 @@ class HillslopeWatbal(ReportBase):
                            'Streamflow (mm)': {},
                            'Transpiration + Evaporation (mm)': {},
                            'Percolation (mm)': {},
-                           'Total Soil Water Storage (mm)': {}}
+                           # 'Total Soil Water Storage (mm)': {}
+                           }
 
             wat_fn = _join(output_dir, 'H{}.wat.dat'.format(wepp_id))
 
@@ -71,13 +72,13 @@ class HillslopeWatbal(ReportBase):
                     d[topaz_id]['Streamflow (mm)'][Y] = Q + latqcc
                     d[topaz_id]['Transpiration + Evaporation (mm)'][Y] = Ep + Es + Er
                     d[topaz_id]['Percolation (mm)'][Y] = Dp
-                    d[topaz_id]['Total Soil Water Storage (mm)'][Y] = TSW
+                    # d[topaz_id]['Total Soil Water Storage (mm)'][Y] = TSW
                 else:
                     d[topaz_id]['Precipitation (mm)'][Y] += P
                     d[topaz_id]['Streamflow (mm)'][Y] += Q + latqcc
                     d[topaz_id]['Transpiration + Evaporation (mm)'][Y] += Ep + Es + Er
                     d[topaz_id]['Percolation (mm)'][Y] += Dp
-                    d[topaz_id]['Total Soil Water Storage (mm)'][Y] += TSW
+                    # d[topaz_id]['Total Soil Water Storage (mm)'][Y] += TSW
 
         self.years = sorted(years)
         self.data = d
@@ -122,8 +123,7 @@ class HillslopeWatbal(ReportBase):
 
     @property
     def avg_annual_header(self):
-        x = ['TopazID'] + list(self.hdr)
-        return [_x for _x in x if 'Total Soil Water Storage' in _x]
+        return ['TopazID'] + list(self.hdr)
 
     @property
     def avg_annual_units(self):
@@ -136,9 +136,6 @@ class HillslopeWatbal(ReportBase):
         for topaz_id in data:
             row = OrderedDict([('TopazID', topaz_id)])
             for k in header:
-                if 'Total Soil Water Storage' in k:
-                    continue
-
                 row[k] = np.mean(list(data[topaz_id][k].values()))
 
             yield RowData(row)
