@@ -413,6 +413,8 @@ class Landuse(NoDbBase):
 
     @property
     def landuseoptions(self):
+
+        # TODO: filter landuse options for baer and for the landsoil map
         from wepppy.wepp import management
 
         if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
@@ -431,7 +433,7 @@ class Landuse(NoDbBase):
         if 'baer' in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
 
-        if "lt" in self.mods or "portland" in self.mods:
+        if "lt" in self.mods or "portland" in self.mods or "seattle" in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
 
         return landuseoptions
