@@ -200,11 +200,6 @@ class WeppPost(NoDbBase):
         latqcc = data['Daily Lateral Flow (mm)']
         baseflow = data['Daily Baseflow (mm)']
 
-
-        if stacked:
-            latqcc += baseflow
-            runoff += latqcc
-
         assert ndays == len(runoff)
         assert ndays == len(latqcc)
         assert ndays == len(baseflow)
@@ -220,6 +215,11 @@ class WeppPost(NoDbBase):
                 continue
 
             d = '%04i%02i%02i' % (yr, mo, da)
+
+            if stacked:
+                l += b
+                r += l
+
             fp.write('{},{},{},{}\n'.format(d, r, b, l))
         fp.close()
 
