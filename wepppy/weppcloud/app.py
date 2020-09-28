@@ -1044,11 +1044,13 @@ def task_setname(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/tasks/set_unit_preferences/', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_unit_preferences/', methods=['POST'])
 def task_set_unit_preferences(runid, config):
-    wd = get_wd(runid)
-    unitizer = Unitizer.getInstance(wd)
-    res = unitizer.set_preferences(request.form)
-    return success_factory(res)
-
+    try:
+        wd = get_wd(runid)
+        unitizer = Unitizer.getInstance(wd)
+        res = unitizer.set_preferences(request.form)
+        return success_factory(res)
+    except:
+        return exception_factory('Error setting unit preferences')
 
 @app.route('/runs/<string:runid>/<config>/query/topaz_pass')
 @app.route('/runs/<string:runid>/<config>/query/topaz_pass/')
