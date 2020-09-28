@@ -2717,6 +2717,7 @@ var RangelandCoverModify = function () {
                 }
             } else {
                 if (self.checkbox_box_select.prop("checked") === false) {
+                    self.selected = new Set();
                     self.hideModifyMap();
                 }
             }
