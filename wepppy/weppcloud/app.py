@@ -2837,7 +2837,7 @@ def report_wepp_avg_annual_watbal(runid, config):
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     hill_rpt = wepp.report_hill_watbal()
-    chn_rpt = wepp.report_chn_watbal()
+    # chn_rpt = wepp.report_chn_watbal()
 
     unitizer = Unitizer.getInstance(wd)
 
@@ -2845,7 +2845,7 @@ def report_wepp_avg_annual_watbal(runid, config):
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
                            hill_rpt=hill_rpt,
-                           chn_rpt=chn_rpt,
+                           # chn_rpt=chn_rpt,
                            ron=ron,
                            user=current_user)
 
@@ -2906,6 +2906,7 @@ def plot_wepp_streamflow(runid, config):
 
     unitizer = Unitizer.getInstance(wd)
 
+    # stack basefow, lateral flow, runoff
     return render_template('reports/wepp/daily_streamflow_graph.htm',
                            unitizer_nodb=unitizer,
                            precisions=wepppy.nodb.unitizer.precisions,
