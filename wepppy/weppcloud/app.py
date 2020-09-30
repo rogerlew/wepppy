@@ -101,7 +101,8 @@ from wepppy.nodb import (
     Rhem, RhemPost,
     Baer,
     DebrisFlow,
-    Ash, AshPost
+    Ash, AshPost,
+    get_configs
 )
 
 from wepppy.nodb.mods.ash_transport import BlackAshModel, WhiteAshModel, AshType
@@ -558,6 +559,14 @@ def seattle_index():
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
     return render_template('locations/seattle/index.htm', user=current_user)
+
+
+@app.route('/create')
+@app.route('/create/')
+def create_index():
+    configs = get_configs()
+    x = ['<a href="{0}">{0}</a>'.format(cfg) for cfg in configs]
+    return '<html>\n{}\n</html>'.format('<br/>\n'.join(x))
 
 
 @app.route('/create/<config>')
