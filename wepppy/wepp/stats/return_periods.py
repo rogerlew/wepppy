@@ -54,8 +54,6 @@ class ReturnPeriods:
         self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
 
-        weibull_series
-
         rec = weibull_series(recurrence, years)
 
         results = {}
