@@ -2032,7 +2032,7 @@ def set_climatestation_mode(runid, config):
 def set_climatestation(runid, config):
 
     try:
-        station = int(request.form.get('station', None))
+        station = request.form.get('station', None)
     except Exception:
         return exception_factory('Station not provided')
 
