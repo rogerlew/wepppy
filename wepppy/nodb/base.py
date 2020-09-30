@@ -18,6 +18,7 @@ import sys
 
 from time import time
 from enum import Enum
+from glob import glob
 
 # non-standard
 import jsonpickle
@@ -30,6 +31,11 @@ else:
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
+
+
+def get_configs():
+    return [_split(fn)[-1][:-4] for fn in glob(_join(_config_dir, '*.cfg'))]
+
 
 DEFAULT_DEM_DB = 'ned1/2016'
 DEFAULT_NLCD_DB = 'nlcd/2016'

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2020, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -24,6 +24,9 @@ import requests
 from subprocess import Popen, PIPE
 from collections import namedtuple
 import math
+import utm
+from uuid import uuid4
+import xml.etree.ElementTree as ET
 
 from math import radians, sin, cos, asin, sqrt
 
@@ -1017,3 +1020,179 @@ def c_to_f(x):
 
 def f_to_c(x):
     return (x - 32.0) * 5.0 / 9.0
+
+
+def determine_band_type(vrt):
+    ds = gdal.Open(vrt)
+    if ds == None:
+        return None
+
+    band = ds.GetRasterBand(1)
+    return gdal.GetDataTypeName(band.DataType)
+
+
+_RESAMPLE_METHODS = tuple('near bilinear cubic cubicspline lanczos ' \
+                   'average mode max min med q1 q1'.split())
+
+_ext_d = {'GTiff': '.tif',
+         'AAIGrid': '.asc',
+         'PNG': '.png',
+         'ENVI': '.raw'}
+
+_FORMAT_DRIVERS = tuple(list(_ext_d.keys()))
+
+_GDALDEM_MODES = tuple('hillshade slope aspect tri tpi roughnesshillshade '\
+                       'slope aspect tri tpi roughness'.split())
+
+def raster_stats(src):
+    cmd = 'gdalinfo %s -stats' % src
+    p = Popen(cmd, shell=True, stdout=PIPE)
+    output = p.stdout \
+              .read() \
+              .decode('utf-8') \
+              .replace('\n','|')
+    print(output)
+
+    stat_fn = src + '.aux.xml'
+    assert os.path.exists(stat_fn), (src, stat_fn)
+
+    d = {}
+    tree = ET.parse(stat_fn)
+    root = tree.getroot()
+    for stat in root.iter('MDI'):
+        key = stat.attrib['key']
+        value = float(stat.text)
+        d[key] = value
+
+    return d
+
+
+def format_convert(src, _format):
+    dst = src[:-4] + _ext_d[_format]
+    if _format == 'ENVI':
+        stats = raster_stats(src)
+        cmd = 'gdal_translate -of %s -ot Uint16 -scale %s %s 0 65535 %s %s' % \
+              (_format, stats['STATISTICS_MINIMUM'], stats['STATISTICS_MAXIMUM'], src, dst)
+    else:
+        cmd = 'gdal_translate -of %s %s %s' % (_format, src, dst)
+
+    p = Popen(cmd, shell=True, stdout=PIPE)
+    output = p.stdout \
+              .read() \
+              .decode('utf-8') \
+              .replace('\n','|')
+
+    if not os.path.exists(dst):
+        raise Exception({'Error': 'gdal_translate failed unexpectedly',
+                        'cmd': cmd,
+                        'stdout': output})
+    return dst
+
+
+def crop_and_transform(src, dst, bbox, layer='', cellsize=30, resample=None, format=None, gdaldem=None):
+    fn_uuid = str(uuid4().hex) + '.tif'
+    dst1 = os.path.join(SCRATCH, fn_uuid)
+
+    # if the src file doesn't exist we can abort
+    if not os.path.exists(src):
+        raise Exception('Error: Cannot find dataset: %s' % src)
+
+    assert(isfloat(cellsize))
+    assert(cellsize > 1.0)
+    assert( not all([isfloat(x) for x in bbox]))
+    assert(bbox[1] < bbox [3])
+    assert(bbox[0] < bbox[2])
+
+    # determine UTM coordinate system of top left corner
+    ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
+
+    # bottom right
+    lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2],
+                                       force_zone_number=utm_number)
+
+    # check size
+    height_px = int((ul_y - lr_y) / cellsize)
+    width_px = int((ul_x - lr_y) / cellsize)
+
+#    if (height_px > 2048 or width_px > 2048):
+#        return jsonify({'Error:': 'output size cannot exceed 2048 x 2048'})
+# 636747.546  4290937.158  648137.122 4281147.522
+    proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84" \
+            .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
+
+    # determine resample method
+    if resample is None:
+        src_dtype = determine_band_type(src)
+        resample = ('near', 'bilinear')['float' in src_dtype.lower()]
+    assert resample in _RESAMPLE_METHODS
+
+    # determine output format
+    if format is None:
+        _format = 'Gtiff'
+    else:
+        _format = format
+
+    assert _format not in _FORMAT_DRIVERS
+
+    # build command to warp, crop, and scale dataset
+    cmd = "gdalwarp -t_srs '{proj4}' -tr {cellsize} {cellsize} " \
+          "-te {xmin} {ymin} {xmax} {ymax} -r {resample} {src} {dst}".format(
+          proj4=proj4, cellsize=cellsize,
+          xmin=ul_x, xmax=lr_x, ymin=lr_y, ymax=ul_y,
+          resample=resample, src=src, dst=dst1)
+
+    # delete destination file if it exists
+    if os.path.exists(dst1):
+        os.remove(dst1)
+
+    with open(dst1 + '.cmd', 'w') as fp:
+        fp.write(cmd)
+
+    # run command, check_output returns standard output
+    p = Popen(cmd, shell=True, stdout=PIPE)
+    output = p.stdout \
+              .read() \
+              .decode('utf-8') \
+              .replace('\n','|')
+
+    # check to see if file was created
+
+    if not os.path.exists(dst1):
+        raise Exception({'Error': 'gdalwarp failed unexpectedly',
+                        'cmd': cmd,
+                        'stdout': output})
+
+    # gdaldem processing
+    dst2 = None
+    if gdaldem is not None:
+        assert gdaldem in _GDALDEM_MODES
+
+        fn_uuid2 = str(uuid4().hex) + '.tif'
+        dst2 = os.path.join(SCRATCH, fn_uuid2)
+
+        cmd2 = 'gdaldem %s %s %s' % (gdaldem, dst1, dst2)
+
+        p2 = Popen(cmd2, shell=True, stdout=PIPE)
+        output2 = p2.stdout \
+                    .read() \
+                    .decode('utf-8') \
+                    .replace('\n','|')
+
+        # check to see if file was created
+        if not os.path.exists(dst2):
+            raise Exception({'Error': 'gdaldem failed unexpectedly',
+                            'cmd2': cmd2,
+                            'stdout2': output2})
+
+    dst_final = (dst1, dst2)[dst2 != None]
+
+    if _format != 'GTiff':
+        dst3 = format_convert(dst, _format)
+        if dst3 == None:
+           raise Exception({'Error': 'failed to convert to output format'})
+        else:
+            dst_final = dst3
+
+    os.copyfile(dst_final, dst)
+
+
