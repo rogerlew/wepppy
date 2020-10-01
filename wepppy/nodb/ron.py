@@ -98,6 +98,8 @@ class Ron(NoDbBase):
         try:
             config = self.config
             self._configname = config.get('general', 'name')
+
+            # Map
             self._cellsize = float(config.get('general', 'cellsize'))
             self._center0 = config.get('map', 'center0')
             self._zoom0 = config.get('map', 'zoom0')
@@ -107,17 +109,30 @@ class Ron(NoDbBase):
                 _boundary = _boundary
 
             self._boundary = _boundary
-            self._dem_db = config.get('general', 'dem_db')
 
-            self._enable_landuse_change = config.getboolean('landuse', 'enable_landuse_change')
-
-            self._name = ''
-            self._map = None
-            self._w3w = None
-
+            # DEM
             dem_dir = self.dem_dir
             if not _exists(dem_dir):
                 os.mkdir(dem_dir)
+
+            self._dem_db = config.get('general', 'dem_db')
+
+            from wepppy.nodb.mods import MODS_DIR
+            _dem_map = config.get('general', 'dem_map', fallback=None)
+            if _dem_map is not None:
+                _dem_map = _dem_map.replace('MODS_DIR', MODS_DIR)
+            self._dem_map = _dem_map
+
+            if self.dem_map is not None:
+                shutil.copyfile(self.dem_map, self.dem_fn)
+
+            # Landuse
+            self._enable_landuse_change = config.getboolean('landuse', 'enable_landuse_change')
+
+            # Project
+            self._name = ''
+            self._map = None
+            self._w3w = None
 
             export_dir = self.export_dir
             if not _exists(export_dir):
@@ -146,6 +161,9 @@ class Ron(NoDbBase):
 
             if "seattle" in self.mods:
                 wepppy.nodb.mods.locations.SeattleMod(wd, cfg_fn)
+
+            if "turkey" in self.mods:
+                wepppy.nodb.mods.locations.TurkeyMod(wd, cfg_fn)
 
             if "baer" in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
@@ -349,13 +367,33 @@ class Ron(NoDbBase):
 
     @dem_db.setter
     def dem_db(self, value):
-        return
 
         self.lock()
 
         # noinspection PyBroadException
         try:
             self._dem_db = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def dem_map(self):
+        if not hasattr(self, "_dem_map"):
+            return None
+
+        return self._dem_map
+
+    @dem_map.setter
+    def dem_map(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._dem_map = value
             self.dump_and_unlock()
 
         except Exception:
