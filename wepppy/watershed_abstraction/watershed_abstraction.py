@@ -785,7 +785,6 @@ class WatershedAbstraction:
         network = {}
 
         for topaz_id in self.watershed["channels"]:
-            print(topaz_id)
             self.watershed["channels"][topaz_id].order = 1
 
         for chnum in data:
