@@ -38,6 +38,7 @@ _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
+_turkey_map_fn = _join(_management_dir, "turkey_map.json")
 
 
 def _parse_julian(x):
@@ -1724,6 +1725,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'lu10v5ua' in _map.lower():
         with open(_lu10v5ua_map_fn) as fp:
+            d = json.load(fp)
+    elif 'turkey' in _map.lower():
+        with open(_turkey_map_fn) as fp:
             d = json.load(fp)
 
     for k, v in d.items():
