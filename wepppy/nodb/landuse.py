@@ -67,6 +67,8 @@ class Landuse(NoDbBase):
 
         config = self.config
 
+        from wepppy.nodb.mods import MODS_DIR
+
         # noinspection PyBroadException
         try:
             self._mode = LanduseMode.Gridded
@@ -74,21 +76,27 @@ class Landuse(NoDbBase):
             self._single_man = None
             self.domlc_d = None  # topaz_id keys, ManagementSummary values
             self.managements = None
-            cover_defaults_fn = config.get('landuse', 'cover_defaults')
+            cover_defaults_fn = config.get('landuse', 'cover_defaults', fallback=None)
 
             if cover_defaults_fn is not None and cover_defaults_fn != '':
-                from wepppy.nodb.mods import MODS_DIR
                 cover_defaults_fn = cover_defaults_fn.replace('MODS_DIR', MODS_DIR)
                 self.cover_defaults_d = read_cover_defaults(cover_defaults_fn)
             else:
                 self.cover_defaults_d = None
 
-            self._nlcd_db = config.get('landuse', 'nlcd_db')
+            self._nlcd_db = config.get('landuse', 'nlcd_db', fallback=None)
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
                 os.mkdir(lc_dir)
 
+            _landuse_map = config.get('landuse', 'landuse_map', fallback=None)
+            if _landuse_map is not None:
+                _landuse_map = _landuse_map.replace('MODS_DIR', MODS_DIR)
+                shutil.copyfile(_landuse_map, self.lc_fn)
+                shutil.copyfile(_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj')
+
+            self._landuse_map = _landuse_map
             self.dump_and_unlock()
 
         except Exception:
@@ -438,17 +446,18 @@ class Landuse(NoDbBase):
 
         return landuseoptions
 
-    def build_managements(self):
+    def build_managements(self, _map=None):
         self.lock()
 
-        if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
-            _map = 'rred'
-        elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
-            _map = 'esdac'
-        elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
-            _map = 'lu10v5ua'
-        else:
-            _map = None
+        if _map is None:
+            if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
+                _map = 'rred'
+            elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
+                _map = 'esdac'
+            elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
+                _map = 'lu10v5ua'
+            else:
+                _map = None
 
         # noinspection PyBroadException
         try:
