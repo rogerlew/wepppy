@@ -4,6 +4,34 @@
 Runs
 {% endblock %}
 {% block content %}
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+
+<script>
+
+$(document).ready(function(){
+});
+
+function delete_run(runid) {
+  var res = confirm("Are you sure you want to delete '" + runid + "'?");
+  if (res === true)
+  {
+      $.post({
+          url: runid + "/0/tasks/delete/",
+          success: function success(response) {
+              console.log("run has been deleted");
+              $("#" + runid).hide();
+          },
+          fail: function fail(error) {
+              console.log(error);
+          }
+      });
+
+  }
+  console.log(res);
+}
+</script>
+
 <table class="table">
   <thead>
     <tr>
@@ -12,12 +40,13 @@ Runs
       <th>Link</th>
       <th>Creation Date</th>
       <th>Last Modified</th>
+      <th>Delete</th>
     </tr>
   </thead>
   <tbody>
     {% for run in user.runs %}
         {% if run_exists(run.runid) %}
-        <tr>
+        <tr id="{{ run.runid }}">
           <td>{{ get_run_name(run.runid) }}</td>
           <td>{{ w3w_center(run.runid) }}</td>
           <td>
@@ -27,6 +56,8 @@ Runs
           </td>
           <td>{{ run.date_created }}</td>
           <td>{{ get_last_modified(run.runid) }}</td>
+          <td>
+              <button type="button" class="btn btn-danger"  onclick="delete_run('{{ run.runid }}')">Delete</button>
         </tr>
         {% endif %}
     {% endfor %}
