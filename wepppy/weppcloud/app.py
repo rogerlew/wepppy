@@ -692,6 +692,31 @@ def create_fork(runid, config):
     return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config))
 
 
+@app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/delete/', methods=['POST'])
+def delete_run(runid, config):
+    owners = get_run_owners(runid)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if should_abort:
+        return error_factory('authentication error')
+
+    # get working dir of original directory
+    wd = get_wd(runid)
+
+    try:
+        shutil.rmtree(wd)
+        return success_factory()
+    except:
+        return exception_factory('Error Clearing Locks')
+
+
 @app.route('/runs/<string:runid>/<config>/tasks/clear_locks')
 @app.route('/runs/<string:runid>/<config>/tasks/clear_locks/')
 def clear_locks(runid, config):
@@ -2470,7 +2495,8 @@ def report_wepp_results(runid, config):
 
     try:
         return render_template('controls/wepp_reports.htm',
-                               climate=climate)
+                               climate=climate,
+                               user=current_user)
     except:
         return exception_factory('Error building reports template')
 
