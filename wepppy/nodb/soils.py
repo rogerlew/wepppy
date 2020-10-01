@@ -92,6 +92,17 @@ class Soils(NoDbBase):
             if not _exists(soils_dir):
                 os.mkdir(soils_dir)
 
+            _soils_map = config.get('soils', 'soils_map', fallback=None)
+            if _soils_map is not None:
+                from wepppy.nodb.mods import MODS_DIR
+                _soils_map = _soils_map.replace('MODS_DIR', MODS_DIR)
+                _soil_fn = _join(self.soils_dir, _split(_soils_map)[-1])
+                shutil.copyfile(_soils_map, _soil_fn)
+                shutil.copyfile(_soils_map[:-4] + '.prj', _soil_fn[:-4] + '.prj')
+                _soils_map = _split(_soils_map)[-1]
+
+            self._soils_map = _soils_map
+
             self.dump_and_unlock()
 
         except Exception:
@@ -150,6 +161,10 @@ class Soils(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+    @property
+    def soils_map(self):
+        return getattr(self, '_soils_map', None)
 
     @property
     def single_selection(self):
@@ -727,9 +742,9 @@ class Soils(NoDbBase):
         returns a list of managements sorted by coverage in
         descending order
         """
-        used_soils = set(self.domsoil_d.values())
+        used_soils = set([str(x) for x in self.domsoil_d.values()])
         report = [s for s in list(self.soils.values()) if str(s.mukey) in used_soils]
-        report.sort(key=lambda x: x.pct_coverage, reverse=True)
+
         return [soil.as_dict() for soil in report]
 
     def _x_summary(self, topaz_id):
