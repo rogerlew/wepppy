@@ -244,10 +244,10 @@ def determine_wateryear(y, j=None, mo=None):
     if j is not None:
         mo = int((datetime(int(y), 1, 1) + timedelta(int(j))).month)
 
-    if mo > 9:
-        return y + 1
+    if int(mo) > 9:
+        return int(y) + 1
 
-    return y
+    return int(y)
 
 
 def find_ranges(iterable, as_str=False):
