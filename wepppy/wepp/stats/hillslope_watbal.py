@@ -15,7 +15,7 @@ from glob import glob
 
 import numpy as np
 
-from wepppy.all_your_base import parse_units, RowData
+from wepppy.all_your_base import parse_units, RowData, determine_wateryear
 from .report_base import ReportBase
 
 
@@ -28,21 +28,29 @@ class HillslopeWatbal(ReportBase):
         translator = watershed.translator_factory()
         output_dir = _join(wd, 'wepp/output')
 
+        # find all the water output files
         wat_fns = glob(_join(output_dir, 'H*.wat.dat'))
         n = len(wat_fns)
         assert n > 0
 
+        # make sure we have all of them
         for wepp_id in range(1, n+1):
             assert _exists(_join(output_dir, 'H{}.wat.dat'.format(wepp_id)))
 
+        # create dictionaries for the waterbalance
         d = {}
         areas = {}
         years = set()
 
+        # loop over the hillslopes
         for wepp_id in range(1, n + 1):
+            # find the topaz_id
             topaz_id = translator.top(wepp=wepp_id)
+
+            # initialize the water
             d[topaz_id] = {'Precipitation (mm)': {},
-                           'Streamflow (mm)': {},
+                           'Surface Runoff (mm)': {},
+                           'Lateral Flow (mm)': {},
                            'Transpiration + Evaporation (mm)': {},
                            'Percolation (mm)': {},
                            # 'Total Soil Water Storage (mm)': {}
@@ -57,6 +65,8 @@ class HillslopeWatbal(ReportBase):
                 OFE, J, Y, P, RM, Q, Ep, Es, Er, Dp, UpStrmQ, \
                 SubRIn, latqcc, TSW, frozwt, SnowWater, QOFE, Tile, Irr, Area = wl.split()
 
+                water_year = determine_wateryear(Y, J)
+
                 J, Y, P, Q, Ep, Es, Er, Dp, latqcc, TSW, Area = \
                     int(J), int(Y), float(P), float(Q), float(Ep), float(Es), float(Er), float(Dp), float(latqcc), \
                     float(TSW), float(Area)
@@ -65,20 +75,22 @@ class HillslopeWatbal(ReportBase):
                     areas[topaz_id] = Area
 
                 if wepp_id == 1:
-                    years.add(Y)
+                    years.add(water_year)
 
-                if Y not in d[topaz_id]['Precipitation (mm)']:
-                    d[topaz_id]['Precipitation (mm)'][Y] = P
-                    d[topaz_id]['Streamflow (mm)'][Y] = Q + latqcc
-                    d[topaz_id]['Transpiration + Evaporation (mm)'][Y] = Ep + Es + Er
-                    d[topaz_id]['Percolation (mm)'][Y] = Dp
-                    # d[topaz_id]['Total Soil Water Storage (mm)'][Y] = TSW
+                if water_year not in d[topaz_id]['Precipitation (mm)']:
+                    d[topaz_id]['Precipitation (mm)'][water_year] = P
+                    d[topaz_id]['Surface Runoff (mm)'][water_year] = Q
+                    d[topaz_id]['Lateral Flow (mm)'][water_year] = latqcc
+                    d[topaz_id]['Transpiration + Evaporation (mm)'][water_year] = Ep + Es + Er
+                    d[topaz_id]['Percolation (mm)'][water_year] = Dp
+                    # d[topaz_id]['Total Soil Water Storage (mm)'][water_year] = TSW
                 else:
-                    d[topaz_id]['Precipitation (mm)'][Y] += P
-                    d[topaz_id]['Streamflow (mm)'][Y] += Q + latqcc
-                    d[topaz_id]['Transpiration + Evaporation (mm)'][Y] += Ep + Es + Er
-                    d[topaz_id]['Percolation (mm)'][Y] += Dp
-                    # d[topaz_id]['Total Soil Water Storage (mm)'][Y] += TSW
+                    d[topaz_id]['Precipitation (mm)'][water_year] += P
+                    d[topaz_id]['Surface Runoff (mm)'][water_year] += Q
+                    d[topaz_id]['Lateral Flow (mm)'][water_year] += latqcc
+                    d[topaz_id]['Transpiration + Evaporation (mm)'][water_year] += Ep + Es + Er
+                    d[topaz_id]['Percolation (mm)'][water_year] += Dp
+                    # d[topaz_id]['Total Soil Water Storage (mm)'][water_year] += TSW
 
         self.years = sorted(years)
         self.data = d
@@ -127,16 +139,18 @@ class HillslopeWatbal(ReportBase):
 
     @property
     def avg_annual_units(self):
-        return [None] + list(self.units)[1:]
+        return [None] + list(self.units)
 
     def avg_annual_iter(self):
         data = self.data
         header = self.header
 
+        num_water_years = len(self.years)
+
         for topaz_id in data:
             row = OrderedDict([('TopazID', topaz_id)])
             for k in header:
-                row[k] = np.mean(list(data[topaz_id][k].values()))
+                row[k] = np.sum(list(data[topaz_id][k].values())) / (num_water_years - 1)
 
             yield RowData(row)
 
