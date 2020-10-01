@@ -1,0 +1,5 @@
+The dem, landuse, and soil grid need to be aligned (same extent, resolution (cell size), and projection).
+
+The following gdal commands were used to align the rasters
+> gdalwarp -t_srs "+proj=utm +zone=37 +north +datum=WGS84 +ellps=WGS84" -of vrt soil.asc soil_.vrt
+> gdal_translate -of AAIGrid -projwin 636747.546  4290937.158  648137.122 4281147.522 -tr 10 10  soil_.vrt soil_.asc
