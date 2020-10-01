@@ -768,7 +768,7 @@ class Wepp(NoDbBase, LogMixin):
         self.log('Running Hillslopes\n')
         translator = Watershed.getInstance(self.wd).translator_factory()
         watershed = Watershed.getInstance(self.wd)
-        topaz = Topaz.getInstance(self.wd)
+        # topaz = Topaz.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
         run_flowpaths = getattr(self, 'run_flowpaths', False)
@@ -1173,23 +1173,12 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
-        print(1)
-
         ebe_pw0 = _join(output_dir, 'ebe_pw0.txt')
         ebe_rpt = Ebe(ebe_pw0)
 
-        print(2)
-
         climate = Climate.getInstance(self.wd)
-        print(3)
-
         cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
-
-        print(4, _join(climate.cli_dir, climate.cli_fn))
-
         cli_df = cli.as_dataframe(calc_peak_intensities=True)
-
-        print(3)
 
         return ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals)
 
