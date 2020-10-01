@@ -22,7 +22,9 @@
 <div>
     <h4>Water Balance Reports</h4>
     <p><a href="report/wepp/avg_annual_watbal/" target="_blank">Average Annual Report</a></p>
-    <!-- <p><a href="report/wepp/yearly_watbal/" target="_blank">Yearly Report</a></p> -->
+    {% if user.has_role('PowerUser') %}
+    <p><a href="report/wepp/yearly_watbal/" target="_blank">Yearly Report</a></p>
+    {% endif %}
     <p><a href="plot/wepp/streamflow/" target="_blank">Daily Runoff/Lateral Flow/Baseflow Graph</a></p>
 </div>
 {% endif %}
