@@ -1,0 +1,8 @@
+{
+  "1": {"Key": 1,   "Color": [226,226,193,255], "Description": "Ziraat", "ManagementFile": "Forest/DisturbedWEPPManagement/Tree-20 yr old forest.man"},
+  "2": {"Key": 2,   "Color": [104,170,99,255],  "Description": "Verimli Orman", "ManagementFile": "Forest/DisturbedWEPPManagement/Tree-20 yr old forest.man"},
+  "3": {"Key": 3,   "Color": [230,238,166,255], "Description": "Bozuk_Orman", "ManagementFile": "Forest/DisturbedWEPPManagement/Tree-5 yr old forest.man"},
+  "4": {"Key": 4,   "Color": [165,140,48,255],  "Description": "Kumul", "ManagementFile": "GeoWEPP/grass.man"},
+  "5": {"Key": 5,   "Color": [28,99,48,255],    "Description": "ciplak_toprak", "ManagementFile": "GeoWEPP/grass.man"},
+  "-9999": {"Key": -9999,   "Color": [28,99,48,255],    "Description": "No Data", "ManagementFile": "GeoWEPP/grass.man"}
+}
