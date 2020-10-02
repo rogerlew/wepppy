@@ -1678,11 +1678,12 @@ def query_watershed_summary_channels(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/watershed')
 @app.route('/runs/<string:runid>/<config>/report/watershed/')
 def query_watershed_summary(runid, config):
-    wd = get_wd(runid)
-
-    return render_template('reports/subcatchments.htm',
-                           watershed=Watershed.getInstance(wd))
-
+    try:
+        wd = get_wd(runid)
+        return render_template('reports/subcatchments.htm',
+                               watershed=Watershed.getInstance(wd))
+    except:
+        return exception_factory()
 
 @app.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
 def task_abstract_watershed(runid, config):
