@@ -18,6 +18,7 @@
         </dd>
     </dl>
 </div>
+{% if user.has_role('Dev') %}
 {% if watershed.greater300_n / watershed.sub_n > 0.05 %}
 <div>
     <div style="height: 1em;"> </div>
@@ -29,4 +30,5 @@
         between 5 - 10 m (16 - 33 ft) to limit hillslopes with lengths greater than 300 meters.
     </div>
 </div>
+{% endif %}
 {% endif %}
