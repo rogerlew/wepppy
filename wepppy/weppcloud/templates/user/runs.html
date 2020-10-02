@@ -44,8 +44,7 @@ function delete_run(runid) {
     </tr>
   </thead>
   <tbody>
-    {% for run in user.runs %}
-        {% if run_exists(run.runid) %}
+    {% for run in user_runs %}
         <tr id="{{ run.runid }}">
           <td>{{ get_run_name(run.runid) }}</td>
           <td>{{ w3w_center(run.runid) }}</td>
@@ -59,7 +58,6 @@ function delete_run(runid) {
           <td>
               <button type="button" class="btn btn-danger"  onclick="delete_run('{{ run.runid }}')">Delete</button>
         </tr>
-        {% endif %}
     {% endfor %}
   </tbody>
 </table>
