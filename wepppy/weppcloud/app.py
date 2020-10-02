@@ -283,32 +283,44 @@ def get_run_owners(runid):
 @app.route('/profile/')
 @login_required
 def profile():
-    return render_template('user/profile.html', user=current_user)
+    try:
+        return render_template('user/profile.html', user=current_user)
+    except:
+        return exception_factory()
 
 
 @app.route('/runs')
 @app.route('/runs/')
 @login_required
 def runs():
-    user_runs = [(_get_last_modified(run.runid), run) for run in current_user.runs if _run_exists(run.runid)]
-    user_runs.sort(key=lambda tup: tup[0], reverse=True)
-    user_runs = [tup[1] for tup in user_runs]
+    try:
+        user_runs = [(_get_last_modified(run.runid), run) for run in current_user.runs if _run_exists(run.runid)]
+        user_runs.sort(key=lambda tup: tup[0], reverse=True)
+        user_runs = [tup[1] for tup in user_runs]
 
-    return render_template('user/runs.html', user=current_user, user_runs=user_runs)
+        return render_template('user/runs.html', user=current_user, user_runs=user_runs)
+    except:
+        return exception_factory()
 
 
 @app.route('/allruns')
 @app.route('/allruns/')
 @roles_required('Admin')
 def allruns():
-    return render_template('user/allruns.html', user=current_user)
+    try:
+        return render_template('user/allruns.html', user=current_user)
+    except:
+        return exception_factory()
 
 
 @app.route('/usermod')
 @app.route('/usermod/')
 @roles_required('Root')
 def usermod():
-    return render_template('user/usermod.html', user=current_user)
+    try:
+        return render_template('user/usermod.html', user=current_user)
+    except:
+        return exception_factory()
 
 
 @app.route('/ispoweruser')
@@ -320,24 +332,27 @@ def ispoweruser():
 @app.route('/tasks/usermod/', methods=['POST'])
 @roles_required('Root')
 def task_usermod():
-    user_id = request.json.get('user_id')
-    role = request.json.get('role')
-    role_state = request.json.get('role_state')
+    try:
+        user_id = request.json.get('user_id')
+        role = request.json.get('role')
+        role_state = request.json.get('role_state')
 
-    user = User.query.filter(User.id == user_id).first()
-    assert user is not None
+        user = User.query.filter(User.id == user_id).first()
+        assert user is not None
 
-    if user.has_role(role) == role_state:
-        return error_factory('{} role {} already is {}'
-                             .format(user.email, role, role_state))
+        if user.has_role(role) == role_state:
+            return error_factory('{} role {} already is {}'
+                                 .format(user.email, role, role_state))
 
-    if role_state:
-        user_datastore.add_role_to_user(user, role)
-    else:
-        user_datastore.remove_role_from_user(user, role)
+        if role_state:
+            user_datastore.add_role_to_user(user, role)
+        else:
+            user_datastore.remove_role_from_user(user, role)
 
-    db.session.commit()
-    return success_factory()
+        db.session.commit()
+        return success_factory()
+    except:
+        return exception_factory()
 
 
 _thisdir = os.path.dirname(__file__)
