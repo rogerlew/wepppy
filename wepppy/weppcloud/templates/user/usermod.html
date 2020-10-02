@@ -63,7 +63,7 @@ $(document).ready(function() {
 	    var role_state = this.checked;
 
 	    $.post({
-            url: "/tasks/usermod/",
+            url: "../tasks/usermod/",
             data: JSON.stringify({
                 user_id: user_id,
                 role: role,
