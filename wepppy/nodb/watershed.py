@@ -103,6 +103,13 @@ class Watershed(NoDbBase):
         return len(self._subs_summary)
 
     @property
+    def greater300_n(self) -> int:
+        if self._subs_summary is None:
+            return 0
+
+        return sum(sub.length > 300 for sub in self._subs_summary.values())
+
+    @property
     def impoundment_n(self) -> int:
         return self._impoundment_n
 

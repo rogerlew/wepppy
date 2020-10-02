@@ -290,7 +290,11 @@ def profile():
 @app.route('/runs/')
 @login_required
 def runs():
-    return render_template('user/runs.html', user=current_user)
+    user_runs = [(_get_last_modified(run.runid), run) for run in current_user.runs if _run_exists(run.runid)]
+    user_runs.sort(key=lambda tup: tup[0], reverse=True)
+    user_runs = [tup[1] for tup in user_runs]
+
+    return render_template('user/runs.html', user=current_user, user_runs=user_runs)
 
 
 @app.route('/allruns')
@@ -436,71 +440,81 @@ def isfloat_processor():
     return dict(isfloat=isfloat)
 
 
+def _get_run_name(runid):
+    try:
+        wd = get_wd(runid)
+        name = Ron.getInstance(wd).name
+        return name
+    except:
+        return '-'
+
+
+def _run_exists(runid):
+    wd = get_wd(runid)
+    if not _exists(_join(wd, 'ron.nodb')):
+        return False
+
+    try:
+        ron = Ron.getInstance(wd)
+        return True
+    except:
+        return False
+
+
+def _get_run_owner(runid):
+    try:
+        run = Run.query.filter(Run.runid == runid).first()
+        if run.owner_id is None:
+            return 'anonymous'
+
+        owner = User.query.filter(User.id == run.owner_id).first()
+        return owner.email
+    except:
+        return '-'
+
+
+def _get_last_modified(runid):
+    wd = get_wd(runid)
+    nodbs = glob(_join(wd, '*.nodb'))
+
+    last = 0
+    for fn in nodbs:
+        statbuf = os.stat(fn)
+        if statbuf.st_mtime > last:
+            last = statbuf.st_mtime
+
+    return datetime.fromtimestamp(last)
+
+
+def _get_all_runs():
+    return [run for run in Run.query.order_by(Run.date_created).all() if run.valid]
+
+
+def _get_all_users():
+    return User.query.order
+    _by(User.last_login_at).all()
+
+
+def _get_anonymous_runs():
+    return Run.query.filter(Run.owner_id is None)
+
+
+def _w3w_center(runid):
+    wd = get_wd(runid)
+    return Ron.getInstance(wd).w3w
+
+
 @app.context_processor
 def security_processor():
-    def get_run_name(runid):
-        try:
-            wd = get_wd(runid)
-            name = Ron.getInstance(wd).name
-            return name
-        except:
-            return '-'
 
-    def run_exists(runid):
-        wd = get_wd(runid)
-        if not _exists(_join(wd, 'ron.nodb')):
-            return False
-
-        try:
-            ron = Ron.getInstance(wd)
-            return True
-        except:
-            return False
-
-    def get_run_owner(runid):
-        try:
-            run = Run.query.filter(Run.runid == runid).first()
-            if run.owner_id is None:
-                return 'anonymous'
-
-            owner = User.query.filter(User.id == run.owner_id).first()
-            return owner.email
-        except:
-            return '-'
-
-    def get_last_modified(runid):
-        wd = get_wd(runid)
-        nodbs = glob(_join(wd, '*.nodb'))
-
-        last = 0
-        for fn in nodbs:
-            statbuf = os.stat(fn)
-            if statbuf.st_mtime > last:
-                last = statbuf.st_mtime
-
-        return datetime.fromtimestamp(last)
-
-    def get_all_runs():
-        return [run for run in Run.query.order_by(Run.date_created).all() if run.valid]
-
-    def get_all_users():
-        return User.query.order_by(User.last_login_at).all()
-
-    def get_anonymous_runs():
-        return Run.query.filter(Run.owner_id is None)
-
-    def w3w_center(runid):
-        wd = get_wd(runid)
-        return Ron.getInstance(wd).w3w
-
-    return dict(run_exists=run_exists,
-                get_run_name=get_run_name,
-                get_run_owner=get_run_owner,
-                get_last_modified=get_last_modified,
-                get_anonymous_runs=get_anonymous_runs,
-                get_all_runs=get_all_runs,
-                w3w_center=w3w_center,
-                get_all_users=get_all_users)
+    return dict(run_exists=_run_exists,
+                get_run_name=_get_run_name,
+                get_run_owner=_get_run_owner,
+                get_last_modified=_get_last_modified,
+                get_anonymous_runs=_get_anonymous_runs,
+                get_all_runs=_get_all_runs,
+                w3w_center=_w3w_center,
+                get_all_users=_get_all_users)
 
 
 @app.route('/')
