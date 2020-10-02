@@ -1,17 +1,32 @@
- <dl class="dl-horizontal">
-    <dt>Hillslope Count:</dt>
-    <dd>{{ watershed.sub_n }}</dd>
-    <dt>Channel Count:</dt>
-    <dd>{{ watershed.chn_n }}</dd>
-    <dt>Total Area:</dt>
-    <dd>
-        <div class="row">
-            <div class="col-md-1"> 
-                {{  unitizer(watershed.totalarea, 'm^2') | safe  }} 
+
+<div>
+    <dl class="dl-horizontal">
+        <dt>Hillslope Count:</dt>
+        <dd>{{ watershed.sub_n }}  </dd>
+        <dt>Channel Count:</dt>
+        <dd>{{ watershed.chn_n }}</dd>
+        <dt>Total Area:</dt>
+        <dd>
+            <div class="row">
+                <div class="col-md-1">
+                    {{  unitizer(watershed.totalarea, 'm^2') | safe  }}
+                </div>
+                <div class="col-md-1">
+                {{ unitizer_units('m^2') | safe }}
+                </div>
             </div>
-            <div class="col-md-1"> 
-            {{ unitizer_units('m^2') | safe }}
-            </div>
-        </div>
-    </dd>
-</dl>
+        </dd>
+    </dl>
+</div>
+{% if watershed.greater300_n / watershed.sub_n > 0.05 %}
+<div>
+    <div style="height: 1em;"> </div>
+    <div class="alert alert-warning">
+        {{ watershed.greater300_n }} of {{ watershed.sub_n }}
+        ({{ (100.0 * watershed.greater300_n / watershed.sub_n) | round}}%) hillslopes have
+        lengths greater than 300 meters.
+        <br/><br/>We suggest keeping MCL between 60 - 100 m (195 - 328 ft) and CSA
+        between 5 - 10 m (16 - 33 ft) to limit hillslopes with lengths greater than 300 meters.
+    </div>
+</div>
+{% endif %}
