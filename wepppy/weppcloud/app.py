@@ -1681,6 +1681,7 @@ def query_watershed_summary(runid, config):
     try:
         wd = get_wd(runid)
         return render_template('reports/subcatchments.htm',
+                               user=current_user,
                                watershed=Watershed.getInstance(wd))
     except:
         return exception_factory()
