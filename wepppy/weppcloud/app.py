@@ -506,8 +506,7 @@ def _get_all_runs():
 
 
 def _get_all_users():
-    return User.query.order
-    _by(User.last_login_at).all()
+    return User.query.order_by(User.last_login_at).all()
 
 
 def _get_anonymous_runs():
