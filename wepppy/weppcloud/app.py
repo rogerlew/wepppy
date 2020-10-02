@@ -1686,6 +1686,7 @@ def query_watershed_summary(runid, config):
     except:
         return exception_factory()
 
+
 @app.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
 def task_abstract_watershed(runid, config):
     wd = get_wd(runid)
