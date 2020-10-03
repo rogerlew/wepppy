@@ -42,14 +42,14 @@ if __name__ == '__main__':
 
     precip_transforms = {
         'gridmet': {
-            'Cedar_River': 1,
-            'Tolt_NorthFork': 1,
-            'Taylor_Creek': 1
+            'N_Santiam_abvEvans_14181900': 1,
+            'N_Santiam_abvEvans_14181900': 1,
+            'N_Santiam_abvEvans_14181900': 1
         },
         'daymet': {
-            'Cedar_River': 1,
-            'Tolt_NorthFork': 1,
-            'Taylor_Creek': 1
+            'N_Santiam_abvEvans_14181900': 1,
+            'N_Santiam_abvEvans_14181900': 1,
+            'N_Santiam_abvEvans_14181900': 1
         }
     }
 
@@ -91,14 +91,14 @@ if __name__ == '__main__':
              mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05)
               ]
     scenarios = [
-        #dict(wd='CurCond.202009.cl532.chn_cs{cs}',
-        #     landuse=None,
-        #     cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
-        #     lc_lookup_fn='landSoilLookup.csv'),
         dict(wd='CurCond.202009.cl532_gridmet.chn_cs{cs}',
              landuse=None,
              cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True,
-             lc_lookup_fn='landSoilLookup.csv')
+             lc_lookup_fn='landSoilLookup.csv'),
+        dict(wd='ModSevS.202009.chn_cs{cs}',
+             landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
+             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
+             lc_lookup_fn='landSoilLookup.csv'),
    ]
 
     wc = sys.argv[-1]
