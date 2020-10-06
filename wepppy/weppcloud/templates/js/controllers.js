@@ -387,12 +387,21 @@ var Map = function () {
             transparent: true
         });
 
+        that.usgs_gage = L.geoJson.ajax(null,
+            {onEachFeature: (function (feature, layer)
+                {
+                    if (feature.properties && feature.properties.Description) {
+                        layer.bindPopup(feature.properties.Description);
+                    }
+                })
+        });
+
         that.baseMaps = {
             "Satellite": that.googleSat,
             "Terrain": that.googleTerrain,
             "2011 NLCD": that.nlcd
         };
-        that.overlayMaps = {};
+        that.overlayMaps = {'USGS Gage Locations': that.usgs_gage };
 
         that.googleSat.addTo(that);
         that.googleTerrain.addTo(that);
@@ -408,6 +417,7 @@ var Map = function () {
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
             $("#mapstatus").text("Center: " + lng + ", " + lat + " | Zoom: " + zoom);
+
         };
 
         that.hillQuery = function (query_url) {
@@ -436,6 +446,52 @@ var Map = function () {
             var self = instance;
             var query_url = "report/sub_summary/" + topazID + "/";
             self.hillQuery(query_url);
+        };
+
+
+        //
+        // View Methods
+        //
+        that.loadUSGSGageLocations = function () {
+            var self = instance;
+            if (self.getZoom() < 9) {
+                return;
+            }
+
+            var bounds = self.getBounds();
+            var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            var extent = [parseFloat(sw.lng), parseFloat(sw.lat), parseFloat(ne.lng), parseFloat(ne.lat)];
+
+            self.usgs_gage.refresh(
+                ['/resources/usgs/gage_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
+
+            // $.post({
+            //     url: "/resources/usgs/gage_locations/",
+            //     data: JSON.stringify({ bbox: extent }),
+            //     contentType: "application/json; charset=utf-8",
+            //     success: function success(response) {
+            //
+            //         self.usgs_gage = L.geoJson(response, {
+            //             style: {
+            //                 "color": "#ff7800",
+            //                 "weight": 5,
+            //                 "opacity": 0.65
+            //             },
+            //             onEachFeature: (function (feature, layer) {
+            //                 // does this feature have a property named popupContent?
+            //                 if (feature.properties && feature.properties.Description) {
+            //                     layer.bindPopup(feature.properties.Description);
+            //                 }
+            //             }),
+            //         });
+            //         self.usgs_gage.addTo(self);
+            //         self.ctrls.addOverlay(self.usgs_gage, "USGS Gage Locations");
+            //     },
+            //     fail: function fail(jqXHR, textStatus, errorThrown) {
+            //         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+            //     }
+            // });
         };
 
         return that;
