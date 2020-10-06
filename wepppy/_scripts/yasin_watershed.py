@@ -32,7 +32,7 @@ def log_print(*msg):
 if __name__ == "__main__":
 
     wd = 'yasin'
-    outlet = (40.5935646536361, 38.7291580351105)
+    outlet = (40.5866759978392, 38.7510854093549)
 
     log_print('Cleaning wd')
     if _exists(wd):
@@ -46,6 +46,11 @@ if __name__ == "__main__":
     # and the soil map in the config is copied to yasin/soils
     ron = Ron(wd, 'yasin.cfg')  # this file is in wepppy/nodb/configs/
 
+    # Setting these map parameters isn't strictly necessary for running WEPP but is needed for viewing the project on
+    # the web interface
+    ron.set_map(extent=(40.51792144775391, 38.65897345576361, 40.75824737548829, 38.84639268206848),
+                center=(40.6381, 38.7527), zoom=12)
+
     # double check that the dem was copied
     assert _exists(ron.dem_fn)  # the locations of these resources are specified as properties in the nodb base class
 
@@ -54,7 +59,7 @@ if __name__ == "__main__":
     # and other outputs in the dem/topaz directory. NETFUL.ARC is the channel map. The subcatchments are in the
     # SUBWTA.ARC map
     topaz = Topaz.getInstance(wd)
-    topaz.build_channels()
+    topaz.build_channels(csa=10, mcl=100)
 
     log_print('setting outlet')
     topaz.set_outlet(*outlet)  # sets the outlet specified on line 35 (lng, lat)
