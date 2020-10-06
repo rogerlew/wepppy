@@ -1292,6 +1292,9 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
 
+        if not _exists(loss_pw0):
+            return None
+
         report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         d = {}
@@ -1316,6 +1319,9 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
 
+        if not _exists(loss_pw0):
+            return None
+        
         report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         d = {}
