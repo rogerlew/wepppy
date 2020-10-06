@@ -17,6 +17,7 @@ from os.path import exists as _exists
 from operator import itemgetter
 from itertools import groupby
 import shutil
+import json
 
 from datetime import datetime, timedelta, date
 from urllib.request import urlopen
@@ -475,6 +476,26 @@ def wmesque_retrieve(dataset, extent, fname, cellsize):
         raise Exception("Error retrieving: %s" % url)
 
     return 1
+
+
+def crop_geojson(fn, bbox):
+    l, b, r, t = bbox
+
+    assert l < r
+    assert b < t
+    assert _exists(fn)
+
+    js = json.load(open(fn))
+
+    _features = []
+    for feature in js['features']:
+        lng, lat = feature['geometry']['coordinates']
+        if l < lng < r and b < lat < t:
+            _features.append(feature)
+
+    js['features'] = _features
+
+    return js
 
 
 def parse_datetime(s):
