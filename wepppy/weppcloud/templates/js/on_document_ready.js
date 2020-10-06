@@ -776,6 +776,14 @@ function onReady() {
         // add additional events here
     });
 
+    map.on("moveend", function (ev) {
+        map.loadUSGSGageLocations();
+    });
+
+    map.on("zoomend", function (ev) {
+        map.loadUSGSGageLocations();
+    });
+
     project.set_readonly_controls({{ ron.readonly | tojson }});
 
     // konami code!
