@@ -30,13 +30,14 @@ import markdown
 
 import awesome_codename
 
-
 from werkzeug.utils import secure_filename
+
 import psycopg2
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort
 )
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import (
     RegisterForm,
@@ -60,7 +61,8 @@ from wepppy.all_your_base import (
     parse_datetime,
     YearlessDate,
     read_raster,
-    make_symlink
+    make_symlink,
+    crop_geojson
 )
 
 from wepppy.soils.ssurgo import NoValidSoilsException
@@ -1114,6 +1116,7 @@ def task_set_unit_preferences(runid, config):
     except:
         return exception_factory('Error setting unit preferences')
 
+
 @app.route('/runs/<string:runid>/<config>/query/topaz_pass')
 @app.route('/runs/<string:runid>/<config>/query/topaz_pass/')
 def query_topaz_pass(runid, config):
@@ -1865,6 +1868,14 @@ def resources_sbs_legend(runid, config):
 
     return render_template('legends/landuse.htm',
                            legend=Baer.getInstance(wd).legend)
+
+
+@app.route('/resources/usgs/gage_locations/')
+def resources_usgs_gage_locations():
+    bbox = request.args.get('bbox')
+    bbox = literal_eval(bbox)
+    print('bbox', bbox)
+    return jsonify(crop_geojson(_join(_thisdir, 'static/resources/usgs/usgs_gage_locations.geojson'), bbox=bbox))
 
 
 @app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')
@@ -3727,15 +3738,17 @@ def get_config_stem(wd):
 
 
 @app.route('/dev/runid_query/')
-def runid_query(wc):
+def runid_query():
     if current_user.has_role('Root') or \
        current_user.has_role('Admin') or \
        current_user.has_role('Dev'):
 
-        wc = request.form.get('wc', '')
-        name = request.form.get('name', None)
+        wc = request.args.get('wc', '')
+        name = request.args.get('name', None)
 
         wds = glob(_join('/geodata/weppcloud_runs', '{}*'.format(wc)))
+
+        wds = [wd for wd in wds if _exists(_join(wd, 'ron.nodb'))]
 
         if name is not None:
             wds = [wd for wd in wds if name in get_project_name(wd)]
