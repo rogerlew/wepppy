@@ -41,6 +41,10 @@ if __name__ == "__main__":
     for i, wd in enumerate(wds):
         if not os.path.isdir(wd):
             continue
+
+        if 'SmallTest' in wd:
+            continue
+
         print(wd)
         write_header = i == 0
 
