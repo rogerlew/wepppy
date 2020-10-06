@@ -22,7 +22,7 @@ from osgeo import gdal
 
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization
+from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization, simple_texture
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
@@ -612,16 +612,22 @@ class Baer(NoDbBase):
         soils_dir = self.soils_dir
         baer_soils_dir = self.baer_soils_dir
 
-        if self._config == 'baer-exp.cfg':
-            soils_dict = {"130": "20-yr forest sandy loam.sol",
-                          "131": "Low severity fire-sandy loam.sol",
-                          "132": "High severity fire-sandy loam.sol",
-                          "133": "High severity fire-sandy loam.sol"}
-        else:
-            soils_dict = {"130": "20-yr forest sandy loam.sol",
-                          "131": "Low severity fire-sandy loam.sol",
-                          "132": "Low severity fire-sandy loam.sol",
-                          "133": "High severity fire-sandy loam.sol"}
+        soils_dict = {"130-clay loam": "20-yr forest clay loam.sol",
+                      "131-clay loam": "Low severity fire-clay loam.sol",
+                      "132-clay loam": "Low severity fire-clay loam.sol",
+                      "133-clay loam": "High severity fire-clay loam.sol",
+                      "130-loam": "20-yr forest loam.sol",
+                      "131-loam": "Low severity fire-loam.sol",
+                      "132-loam": "Low severity fire-loam.sol",
+                      "133-loam": "High severity fire-loam.sol",
+                      "130-sand loam": "20-yr forest sandy loam.sol",
+                      "131-sand loam": "Low severity fire-sandy loam.sol",
+                      "132-sand loam": "Low severity fire-sandy loam.sol",
+                      "133-sand loam": "High severity fire-sandy loam.sol",
+                      "130-silt loam": "20-yr forest silt loam.sol",
+                      "131-silt loam": "Low severity fire-silt loam.sol",
+                      "132-silt loam": "Low severity fire-silt loam.sol",
+                      "133-silt loam": "High severity fire-silt loam.sol"}
 
         _soils = {}
         for k, fn in soils_dict.items():
@@ -652,7 +658,13 @@ class Baer(NoDbBase):
             for topaz_id, mukey in soils.domsoil_d.items():
                 dom = domlc_d[topaz_id]
 
-                _domsoil_d[topaz_id] = dom
+                _s = soils.soils[mukey]
+                clay, sand = _s.clay, _s.sand
+                assert clay is not None
+                assert sand is not None
+
+                _simple_texture = simple_texture(clay, sand)
+                _domsoil_d[topaz_id] = '{}-{}'.format(dom, _simple_texture)
 
                 # need to recalculate the pct_coverages
                 #total_area = 0.0
