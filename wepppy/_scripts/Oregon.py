@@ -243,7 +243,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),        
-        dict(watershed='Archie_2_14319830 ', 
+        dict(watershed='Archie_2_14319830', 
              extent=[-123.16978454589845, 43.32193074630143, -122.92945861816408, 43.496518702067206],
              map_center = [-123.04962158203126, 43.4092876296596],
              map_zoom = 12,
