@@ -88,7 +88,157 @@ if __name__ == '__main__':
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        
+#        dict(watershed='Beachie_1_large', # redo the channel delineation
+#             extent=[-122.64381408691408, 44.807660241989545, -122.16316223144533, 45.14766341500922],
+#             map_center = [-122.4034881591797, 44.97791383818193],
+#             map_zoom = 11,
+#             outlet = [-122.479826383954, 45.0093080106265],
+#             landuse=None,
+#             cs=100, erod=0.000001,
+#             csa=10, mcl=100,
+#             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+#             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+#             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        
+#        dict(watershed='Beachie_1_unburned',    # use later to compare to the burned watershed
+#             extent=[-122.64381408691408, 44.807660241989545, -122.16316223144533, 45.14766341500922],
+#             map_center = [-122.4034881591797, 44.97791383818193],
+#             map_zoom = 11,
+#             outlet = [-122.410935185803, 44.9607590015012],
+#             landuse=None,
+#             cs=100, erod=0.000001,
+#             csa=10, mcl=100,
+#             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+#             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+#             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Beachie_1_burned',
+             extent=[-122.64381408691408, 44.807660241989545, -122.16316223144533, 45.14766341500922],
+             map_center = [-122.4034881591797, 44.97791383818193],
+             map_zoom = 11,
+             outlet = [-122.411445868674, 44.9579350096451],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        
+        
+        dict(watershed='Lionshead_1_14092750', #has streamflow data until 2020
+             extent=[-121.82155609130861, 44.63543682256858, -121.58123016357423, 44.80619874687245],
+             map_center = [-121.70139312744142, 44.72088078430762],
+             map_zoom = 12,
+             outlet = [-121.633965695813, 44.7498221140182],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Lionshead_2_14092750', #has streamflow data until 2009
+             extent=[-121.82155609130861, 44.63543682256858, -121.58123016357423, 44.80619874687245],
+             map_center = [-121.70139312744142, 44.72088078430762],
+             map_zoom = 12,
+             outlet = [-121.63999812761, 44.718836117739],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        
+        dict(watershed='Lionshead_3_14092750', #has streamflow data until 2009
+             extent=[-122.01793670654298, 44.675000833313895, -121.77761077880861, 44.84564611772204],
+             map_center = [-121.8977737426758, 44.76038647589176],
+             map_zoom = 12,
+             outlet = [-121.994033978259, 44.7795424145526],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        
+        
+        
+        
+        
+        
+        
+        
+        dict(watershed='Riverside_1',
+             extent=[-122.61085510253908, 44.88457998727908, -122.13020324707033, 45.224128104219425],
+             map_center = [-122.3705291748047, 45.05460605505183],
+             map_zoom = 11,
+             outlet = [-122.471488220428, 45.0879999089735],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Riverside_2',
+             extent=[-122.40554809570314, 44.92543221016552, -121.92489624023439, 45.26473839929064],
+             map_center = [-122.16522216796876, 45.09533731309455],
+             map_zoom = 11,
+             outlet = [-122.226748748065, 45.1958857733451],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Riverside_3',
+             extent=[-122.40554809570314, 44.92543221016552, -121.92489624023439, 45.26473839929064],
+             map_center = [-122.16522216796876, 45.09533731309455],
+             map_zoom = 11,
+             outlet = [-122.152497304551, 45.1548514514498],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        
+        
+        
+        
+        dict(watershed='Riverside_1',
+             extent=[-122.61085510253908, 44.88457998727908, -122.13020324707033, 45.224128104219425],
+             map_center = [-122.3705291748047, 45.05460605505183],
+             map_zoom = 11,
+             outlet = [-122.471488220428, 45.0879999089735],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Riverside_1',
+             extent=[-122.61085510253908, 44.88457998727908, -122.13020324707033, 45.224128104219425],
+             map_center = [-122.3705291748047, 45.05460605505183],
+             map_zoom = 11,
+             outlet = [-122.471488220428, 45.0879999089735],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Riverside_1',
+             extent=[-122.61085510253908, 44.88457998727908, -122.13020324707033, 45.224128104219425],
+             map_center = [-122.3705291748047, 45.05460605505183],
+             map_zoom = 11,
+             outlet = [-122.471488220428, 45.0879999089735],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05)
+        
               ]
     scenarios = [
         dict(wd='CurCond.202009.cl532_gridmet.chn_cs{cs}',
@@ -118,7 +268,7 @@ if __name__ == '__main__':
             projects[-1]['build_landuse'] = scenario['build_landuse']
             projects[-1]['build_climates'] = scenario['build_climates']
             projects[-1]['lc_lookup_fn'] = scenario['lc_lookup_fn']
-            projects[-1]['wd'] = 'seattle_k_{watershed}_{scenario}' \
+            projects[-1]['wd'] = 'oregon_{watershed}_{scenario}' \
                 .format(watershed=watershed['watershed'], scenario=scenario['wd']) \
                 .format(cs=watershed['cs'])
 
