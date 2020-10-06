@@ -237,22 +237,6 @@ if __name__ == '__main__':
         if build_landuse:
             landuse.mode = LanduseMode.Gridded
             landuse.build()
-            landuse = Landuse.getInstance(wd)
-
-            log_print('setting default landuses')
-
-            if default_landuse is not None:
-                log_print('setting default landuse')
-
-                tops = []
-                for selector, dom in default_landuse:
-                    _topaz_ids = selector(landuse, None)
-                    
-                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
-                    _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
-                    
-                    landuse.modify(_topaz_ids, dom)
-                    tops.extend(_topaz_ids)
 
         soils = Soils.getInstance(wd)
         if build_soils:
@@ -261,200 +245,89 @@ if __name__ == '__main__':
             soils.build() 
             #soils.build_statsgo()
 
-            soils = Soils.getInstance(wd)
+        climate = Climate.getInstance(wd)
+        if build_climates:
+            log_print('building climate')
 
-            ksat_mod = 'f'
+        if cli_mode == 'observed':
+            log_print('building observed')
+            if 'daymet' in wd:
+                stations = climate.find_closest_stations()
+                climate.climatestation = stations[0]['id']
 
-            _domsoil_d = soils.domsoil_d
-            _soils = soils.soils
-            for topaz_id, ss in watershed._subs_summary.items():
-                lng, lat = ss.centroid.lnglat
+                climate.climate_mode = ClimateMode.Observed
+                climate.climate_spatialmode = ClimateSpatialMode.Multiple
+                climate.set_observed_pars(start_year=1990, end_year=2017)
 
-                dom = _domsoil_d[str(topaz_id)]
-                _soil = deepcopy(_soils[dom])
+                climate.build(verbose=1)
 
-                _dom = '{dom}-{ksat_mod}' \
-                    .format(dom=dom, ksat_mod=ksat_mod)
-                
-                if _dom not in _soils:
-                    _soil_fn = '{dom}.sol'.format(dom=_dom)
-                    log_print(_soil_fn)
-                    src_soil_fn = _join(_soil.soils_dir, _soil.fname)
-                    dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
-                    log_print(src_soil_fn, dst_soil_fn, ksat, _dom)
-                    modify_ksat(src_soil_fn, dst_soil_fn, ksat)
-
-                    _soil.fname = _soil_fn
-                    _soils[_dom] = _soil
-
-                _domsoil_d[str(topaz_id)] = _dom
-
-            soils.lock()
-            soils.domsoil_d = _domsoil_d
-            soils.soils = _soils
-            soils.dump_and_unlock()
-            
-            soils = Soils.getInstance(wd)
-
-            if _exists(_join(wd, 'lt.nodb')):
-                location = SeattleMod.getInstance(wd)
-                location.modify_soils(default_wepp_type='Volcanic', lc_lookup_fn=lc_lookup_fn)
-
-            climate = Climate.getInstance(wd)
-            if build_climates:
-                log_print('building climate')
-
-            if cli_mode == 'observed':
-                log_print('building observed')
-                if 'linveh' in wd:
-                    climate.climate_mode = ClimateMode.ObservedDb
-                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                    climate.input_years = 21
-
-                    climate.lock()
-                    lng, lat = watershed.centroid
-
-                    cli_path = lvdm.closest_cli(lng, lat)
-                    _dir, cli_fn = _split(cli_path)
-                    shutil.copyfile(cli_path, _join(climate.cli_dir, cli_fn))
-                    climate.cli_fn = cli_fn
-
-                    par_path = lvdm.par_path
-                    _dir, par_fn = _split(par_path)
-                    shutil.copyfile(par_path, _join(climate.cli_dir, par_fn))
-                    climate.par_fn = par_fn
-
-                    sub_par_fns = {}
-                    sub_cli_fns = {}
-                    for topaz_id, ss in watershed._subs_summary.items():
-                        log_print(topaz_id)
-                    lng, lat = ss.centroid.lnglat
-
-                    cli_path = lvdm.closest_cli(lng, lat)
-                    _dir, cli_fn = _split(cli_path)
-                    run_cli_path = _join(climate.cli_dir, cli_fn)
-                    if not _exists(run_cli_path):
-                        shutil.copyfile(cli_path, run_cli_path)
-                    sub_cli_fns[topaz_id] = cli_fn
-                    sub_par_fns[topaz_id] = par_fn
-
-                    climate.sub_par_fns = sub_par_fns
-                    climate.sub_cli_fns = sub_cli_fns
-                    climate.dump_and_unlock()
-
-                elif 'daymet' in wd:
-                    stations = climate.find_closest_stations()
-                    climate.climatestation = stations[0]['id']
-
-                    climate.climate_mode = ClimateMode.Observed
-                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                    climate.set_observed_pars(start_year=1990, end_year=2017)
-
-                    climate.build(verbose=1)
-
-                    climate.lock()
-
-                    cli_dir = climate.cli_dir
-                    adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
-                    climate.cli_fn = adj_cli_fn
-
-                    for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _daymet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
-
-                    climate.dump_and_unlock()
-
-                elif 'gridmet' in wd:
-                    log_print('building gridmet')
-                    stations = climate.find_closest_stations()
-                    climate.climatestation = stations[0]['id']
-
-                    climate.climate_mode = ClimateMode.GridMetPRISM
-                    climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                    climate.set_observed_pars(start_year=1980, end_year=2019)
-
-                    climate.build(verbose=1)
-
-                    climate.lock()
-                    
-                    cli_dir = climate.cli_dir
-                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
-                    climate.cli_fn = adj_cli_fn
-
-                    for topaz_id in climate.sub_cli_fns:
-                        adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                        climate.sub_cli_fns[topaz_id] = adj_cli_fn
-
-                    climate.dump_and_unlock()
-
-            elif cli_mode == 'future':
+            elif 'gridmet' in wd:
                 log_print('building gridmet')
                 stations = climate.find_closest_stations()
                 climate.climatestation = stations[0]['id']
 
-                climate.climate_mode = ClimateMode.Future
+                climate.climate_mode = ClimateMode.GridMetPRISM
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.set_future_pars(start_year=2006, end_year=2099)
+                climate.set_observed_pars(start_year=1980, end_year=2019)
 
                 climate.build(verbose=1)
 
-                climate.lock()
+        elif cli_mode == 'future':
+            log_print('building gridmet')
+            stations = climate.find_closest_stations()
+            climate.climatestation = stations[0]['id']
 
-                cli_dir = climate.cli_dir
-                adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.cli_fn, watershed_name)
-                climate.cli_fn = adj_cli_fn
+            climate.climate_mode = ClimateMode.Future
+            climate.climate_spatialmode = ClimateSpatialMode.Multiple
+            climate.set_future_pars(start_year=2006, end_year=2099)
 
-                for topaz_id in climate.sub_cli_fns:
-                    adj_cli_fn = _gridmet_cli_adjust(cli_dir, climate.sub_cli_fns[topaz_id], watershed_name)
-                    climate.sub_cli_fns[topaz_id] = adj_cli_fn
+            climate.build(verbose=1)
 
-                climate.dump_and_unlock()
+        elif cli_mode == 'PRISMadj':
+            stations = climate.find_closest_stations()
+            climate.climatestation = stations[0]['id']
 
-            elif cli_mode == 'PRISMadj':
-                stations = climate.find_closest_stations()
-                climate.climatestation = stations[0]['id']
+            log_print('climate_station:', climate.climatestation)
 
-                log_print('climate_station:', climate.climatestation)
+            climate.climate_mode = ClimateMode.PRISM
+            climate.climate_spatialmode = ClimateSpatialMode.Multiple
+            climate.input_years = 100
 
-                climate.climate_mode = ClimateMode.PRISM
-                climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.input_years = 100
+            climate.build(verbose=1)
 
-                climate.build(verbose=1)
+        elif cli_mode == 'vanilla':
+            stations = climate.find_closest_stations()
+            climate.climatestation = stations[0]['id']
 
-            elif cli_mode == 'vanilla':
-                stations = climate.find_closest_stations()
-                climate.climatestation = stations[0]['id']
+            log_print('climate_station:', climate.climatestation)
 
-                log_print('climate_station:', climate.climatestation)
+            climate.climate_mode = ClimateMode.Vanilla
+            climate.climate_spatialmode = ClimateSpatialMode.Single
+            climate.input_years = 100
 
-                climate.climate_mode = ClimateMode.Vanilla
-                climate.climate_spatialmode = ClimateSpatialMode.Single
-                climate.input_years = 100
+            climate.build(verbose=1)
 
-                climate.build(verbose=1)
+        log_print('running wepp')
+        wepp = Wepp.getInstance(wd)
+        wepp.parse_inputs(proj)
 
-            log_print('running wepp')
-            wepp = Wepp.getInstance(wd)
-            wepp.parse_inputs(proj)
+        wepp.prep_hillslopes()
 
-            wepp.prep_hillslopes()
+        log_print('running hillslopes')
+        wepp.run_hillslopes()
 
-            log_print('running hillslopes')
-            wepp.run_hillslopes()
+        wepp = Wepp.getInstance(wd)
+        wepp.prep_watershed(erodibility=erod, critical_shear=cs)
+        wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
+        wepp.run_watershed()
+        loss_report = wepp.report_loss()
 
-            wepp = Wepp.getInstance(wd)
-            wepp.prep_watershed(erodibility=erod, critical_shear=cs)
-            wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
-            wepp.run_watershed()
-            loss_report = wepp.report_loss()
+        log_print('running wepppost')
+        fn = _join(ron.export_dir, 'totalwatsed.csv')
 
-            log_print('running wepppost')
-            fn = _join(ron.export_dir, 'totalwatsed.csv')
+        totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
+                                wepp.baseflow_opts, wepp.phosphorus_opts)
+        totwatsed.export(fn)
+        assert _exists(fn)
 
-            totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                    wepp.baseflow_opts, wepp.phosphorus_opts)
-            totwatsed.export(fn)
-            assert _exists(fn)
-
-            arc_export(wd)
+        arc_export(wd)
