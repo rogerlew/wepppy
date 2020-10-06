@@ -163,7 +163,7 @@ class TurkeyMod(NoDbBase, LocationMixin):
             raise
 
         landuse = Landuse.getInstance(self.wd)
-        landuse.build_managements(_map='turkey')
+        landuse.build_managements()
 
     def build_soils(self):
         from wepppy.nodb import Soils
