@@ -84,6 +84,8 @@ class Landuse(NoDbBase):
             else:
                 self.cover_defaults_d = None
 
+            self._mapping = config.get('landuse', 'mapping', fallback=None)
+
             self._nlcd_db = config.get('landuse', 'nlcd_db', fallback=None)
 
             lc_dir = self.lc_dir
@@ -134,6 +136,21 @@ class Landuse(NoDbBase):
     @property
     def mode(self):
         return self._mode
+
+    @property
+    def mapping(self):
+        if hasattr(self, '_mapping'):
+            return self._mapping
+
+        _mapping = None
+        if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
+            _mapping = 'rred'
+        elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
+            _mapping = 'esdac'
+        elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
+            _mapping = 'lu10v5ua'
+
+        return _mapping
 
     @mode.setter
     def mode(self, value):
@@ -210,7 +227,7 @@ class Landuse(NoDbBase):
     def _build_ESDAC(self):
         from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
-        _map = Ron.getInstance(self.wd).map
+        # _map = Ron.getInstance(self.wd).map
 
         domlc_d = {}
 
@@ -233,7 +250,7 @@ class Landuse(NoDbBase):
     def _build_lu10v5ua(self):
         from wepppy.au.landuse_201011 import Lu10v5ua
         lu = Lu10v5ua()
-        _map = Ron.getInstance(self.wd).map
+        # _map = Ron.getInstance(self.wd).map
 
         domlc_d = {}
 
@@ -425,16 +442,7 @@ class Landuse(NoDbBase):
         # TODO: filter landuse options for baer and for the landsoil map
         from wepppy.wepp import management
 
-        if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
-            _map = 'rred'
-        elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
-            _map = 'esdac'
-        elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
-            _map = 'lu10v5ua'
-        else:
-            _map = None
-
-        landuseoptions = management.load_map(_map).values()
+        landuseoptions = management.load_map(self.mapping).values()
         landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
         landuseoptions = [opt for opt in landuseoptions if 'DisturbedWEPPManagement' not in opt['ManagementFile']]
 
@@ -450,14 +458,7 @@ class Landuse(NoDbBase):
         self.lock()
 
         if _map is None:
-            if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
-                _map = 'rred'
-            elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
-                _map = 'esdac'
-            elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
-                _map = 'lu10v5ua'
-            else:
-                _map = None
+            _map = self.mapping
 
         # noinspection PyBroadException
         try:
