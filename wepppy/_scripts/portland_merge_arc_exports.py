@@ -39,6 +39,9 @@ if __name__ == "__main__":
             if wd.endswith('.zip'):
                 continue
 
+            if 'SmallTest' in wd:
+                continue
+
             print(wd)
 
             chn = _join(wd, 'export', 'arcmap', 'channels.shp')
