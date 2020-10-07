@@ -458,6 +458,10 @@ var Map = function () {
                 return;
             }
 
+            if (!self.hasLayer(self.usgs_gage)) {
+                return;
+            }
+
             var bounds = self.getBounds();
             var sw = bounds.getSouthWest();
             var ne = bounds.getNorthEast();
