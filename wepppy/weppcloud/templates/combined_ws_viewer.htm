@@ -112,6 +112,12 @@ $(document).ready(function () {
         varname = Object.keys(varopts)[0];
     }
 
+
+    var display_units = getURLParameter("units");
+    if (display_units === undefined) {
+        display_units = "SI";
+    }
+
     var tolerance = varopts[varname];
     var units = '';
     var numvars = Object.keys(varopts).length;
@@ -140,7 +146,6 @@ $(document).ready(function () {
                 return cmapperRunoff.map(v / r);
             };
             vmax = tolerance;
-            cmapname = 'winter';
             units = 'mm';
         } else if (varname === 'loss') {
             r = tolerance;
@@ -185,22 +190,56 @@ $(document).ready(function () {
             container.style.backgroundColor = 'white';
             container.style.width = '240px';
             container.style.height = '150px';
-            container.innerHTML =
-                '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
-                '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
-                '<div>' + units + '</div>' +
-                '<canvas id="legend_canvas" width=180 height=20 ' +
-                'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
-                '<div class="row">' +
-                '<div class="col-md-4"><span id="legend_vmin">' + vmin + '</span></div>' +
-                '<div class="col-md-4" style="text-align: center;">0</div>' +
-                '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + vmax + '</span></div>' +
-                '</div>' +
-                '<div class="row" style="padding-top: 18px;">' +
-                '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + tolerance + '"></div>' +
-                '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
-                '</div>' +
-                '</div>';
+
+            if (display_units === 'SI') {
+                container.innerHTML =
+                    '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                    '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
+                    '<div>' + units + '</div>' +
+                    '<canvas id="legend_canvas" width=180 height=20 ' +
+                    'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                    '<div class="row">' +
+                    '<div class="col-md-4"><span id="legend_vmin">' + vmin + '</span></div>' +
+                    '<div class="col-md-4" style="text-align: center;">0</div>' +
+                    '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + vmax + '</span></div>' +
+                    '</div>' +
+                    '<div class="row" style="padding-top: 18px;">' +
+                    '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + tolerance + '"></div>' +
+                    '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                    '</div>' +
+                    '</div>';
+            }  else {
+                var scale = undefined;
+                var _units = undefined;
+                if (units === 'mm') {
+                    scale = 1.0 / 25.4;
+                    _units = 'in';
+                } else if (units === 'kg/ha') {
+                    scale = 0.892179;
+                    _units = 'lb/ha';
+                }
+
+                var _vmin = parseFloat(vmin * scale).toFixed(2);;
+                var _vmax = parseFloat(vmin * scale).toFixed(2);;
+                var _tolerance = parseFloat(tolerance * scale).toFixed(2);;
+
+                container.innerHTML =
+                    '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                    '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
+                    '<div>' + _units + '</div>' +
+                    '<canvas id="legend_canvas" width=180 height=20 ' +
+                    'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                    '<div class="row">' +
+                    '<div class="col-md-4"><span id="legend_vmin">' + _vmin + '</span></div>' +
+                    '<div class="col-md-4" style="text-align: center;">0</div>' +
+                    '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + _vmax + '</span></div>' +
+                    '</div>' +
+                    '<div class="row" style="padding-top: 18px;">' +
+                    '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + _tolerance + '"></div>' +
+                    '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                    '</div>' +
+                    '</div>';
+            }
 
             return container;
         },
