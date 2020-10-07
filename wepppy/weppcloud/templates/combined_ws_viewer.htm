@@ -223,16 +223,16 @@ $(document).ready(function () {
                 var scale = undefined;
                 var _units = undefined;
                 if (units === 'mm') {
-                    scale = 1.0 / 25.4;
+                    scale = 0.0393701;
                     _units = 'in';
                 } else if (units === 'kg/ha') {
                     scale = 0.892179;
                     _units = 'lb/ha';
                 }
 
-                var _vmin = parseFloat(vmin * scale).toFixed(2);;
-                var _vmax = parseFloat(vmin * scale).toFixed(2);;
-                var _tolerance = parseFloat(tolerance * scale).toFixed(2);;
+                var _vmin = parseFloat(vmin * scale).toFixed(2);
+                var _vmax = parseFloat(vmin * scale).toFixed(2);
+                var _tolerance = parseFloat(tolerance * scale).toFixed(2);
 
                 container.innerHTML =
                     '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
