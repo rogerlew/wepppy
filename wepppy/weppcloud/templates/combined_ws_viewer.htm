@@ -171,7 +171,18 @@ $(document).ready(function () {
     }
 
     function set_tolerance() {
-        tolerance = parseFloat($('#tolerance-input').val());
+        var _scale = undefined;
+        if (display_units === 'SI') {
+            _scale = 1;
+        } else {
+            if (units === 'mm') {
+                _scale = 25.4;
+            } else if (units === 'kg/ha') {
+                _scale = 1.12085
+            }
+        }
+
+        tolerance = parseFloat($('#tolerance-input').val()) * _scale;
         prep_render();
         render_legend();
         render();
