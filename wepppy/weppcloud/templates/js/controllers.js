@@ -381,7 +381,7 @@ var Map = function () {
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
-        that.nlcd = L.tileLayer.wms("https://www.mrlc.gov/arcgis/services/LandCover/USGS_EROS_LandCover_NLCD/MapServer/WMSServer/?", {
+        that.nlcd = L.tileLayer.wms("https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
             layers: "1",
             format: "image/png",
             transparent: true
@@ -402,7 +402,7 @@ var Map = function () {
         that.baseMaps = {
             "Satellite": that.googleSat,
             "Terrain": that.googleTerrain,
-            "2011 NLCD": that.nlcd
+        //    "2016 NLCD": that.nlcd
         };
         that.overlayMaps = {'USGS Gage Locations': that.usgs_gage };
 
@@ -471,7 +471,7 @@ var Map = function () {
             var extent = [parseFloat(sw.lng), parseFloat(sw.lat), parseFloat(ne.lng), parseFloat(ne.lat)];
 
             self.usgs_gage.refresh(
-                ['/resources/usgs/gage_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
+                [ site_prefix + '/resources/usgs/gage_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
 
             // $.post({
             //     url: "/resources/usgs/gage_locations/",
