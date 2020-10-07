@@ -95,6 +95,11 @@ $(document).ready(function () {
     var ctrls = L.control.layers(baseMaps, overlayMaps);
     ctrls.addTo(map);
 
+    var display_units = getURLParameter("units");
+    if (display_units === undefined) {
+        display_units = 'SI';
+    }
+
     var ws = getURLParameter("ws");
     if (ws !== undefined) {
         ws = decodeURIComponent((ws + '').replace(/\+/g, '%20'));
@@ -105,17 +110,29 @@ $(document).ready(function () {
     if (varopts !== undefined) {
         varopts = decodeURIComponent((varopts + '').replace(/\+/g, '%20'));
         varopts = JSON.parse(varopts);
+
+        if (display_units !== 'SI') {
+            if ("runoff" in varopts) {
+                varopts["runoff"] *= 25.4;
+            }
+            if ("subrunoff" in varopts) {
+                varopts["subrunoff"] *= 25.4;
+            }
+            if ("baseflow" in varopts) {
+                varopts["baseflow"] *= 25.4;
+            }
+            if ("phosphorus" in varopts) {
+                varopts["phosphorus"] *= 1.12085;
+            }
+            if ("loss" in varopts) {
+                varopts["loss"] *= 1.12085;
+            }
+        }
     }
 
     var varname = getURLParameter("varname");
     if (varname === undefined) {
         varname = Object.keys(varopts)[0];
-    }
-
-
-    var display_units = getURLParameter("units");
-    if (display_units === undefined) {
-        display_units = "SI";
     }
 
     var tolerance = varopts[varname];
@@ -181,7 +198,7 @@ $(document).ready(function () {
             if (units === 'mm') {
                 _scale = 25.4;
             } else if (units === 'kg/ha') {
-                _scale = 1.12085
+                _scale = 1.12085;
             }
         }
 
