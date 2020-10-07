@@ -388,12 +388,15 @@ var Map = function () {
         });
 
         that.usgs_gage = L.geoJson.ajax(null,
-            {onEachFeature: (function (feature, layer)
-                {
-                    if (feature.properties && feature.properties.Description) {
-                        layer.bindPopup(feature.properties.Description);
-                    }
-                })
+    {onEachFeature: (function (feature, layer) {
+                if (feature.properties && feature.properties.Description) {
+                    layer.bindPopup(feature.properties.Description);
+                }
+             }),
+             pointToLayer: (function (feature, latlng) {
+                 return L.circleMarker(latlng,
+                     {radius: 8, fillColor: "#ff7800", color: "#000", weight: 1, opacity: 1, fillOpacity: 0.8});
+             })
         });
 
         that.baseMaps = {
