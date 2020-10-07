@@ -145,6 +145,7 @@ $(document).ready(function () {
             cmap = function (v) {
                 return cmapperRunoff.map(v / r);
             };
+            vmin = -tolerance;
             vmax = tolerance;
             units = 'mm';
         } else if (varname === 'loss') {
@@ -164,6 +165,7 @@ $(document).ready(function () {
             cmap = function (v) {
                 return cmapperPhosphorus.map(v / r);
             };
+            vmin = -tolerance;
             vmax = tolerance;
             cmapname = 'viridis';
             units = 'kg/ha';
