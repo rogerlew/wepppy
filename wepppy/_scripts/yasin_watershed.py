@@ -16,6 +16,7 @@ from wepppy.nodb.mods.locations import TurkeyMod
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
+from wepppy.climates.cligen import StationMeta, Cligen
 
 from osgeo import gdal, osr
 gdal.UseExceptions()
@@ -88,28 +89,7 @@ if __name__ == "__main__":
     turkey.build_soils()
     
     log_print('building climate')
-    climate = Climate.getInstance(wd)
-    climate.climatestation_mode = ClimateStationMode.EUHeuristic
-    climate.climate_spatialmode = ClimateSpatialMode.Single
-
-    # Right now this is trying to find a US climate station based on E-OBS monthly tmax, tmin, and precip values. But
-    # I don't think the match is that great.
-    #
-    # wepppy has three CLIGEN climate databases. These are in wepppy/climates/cligen. The .db files are sqlite3 files
-    # that can be viewed with "DB Browser for SQlite." The stations.db is the same as windows WEPP. The default is
-    # 2015_stations. This is specifed in the config as the climate/cligen_db attribute
-    stations = climate.find_eu_heuristic_stations()
-    climate.climatestation = stations[1]['id']
-
-    # alternatively could specify:
-    #climate.climatestation = 'wa456262'
-
-    # the Vanilla mode just runs CLIGEN to produce a stochastic climate file.
-    # It is also possible to use cligen to generate climate files from daily timeseries or to use your own cligen
-    # climate files.
-    climate.climate_mode = ClimateMode.Vanilla
-    climate.input_years = 100
-    climate.build()
+    turkey.build_climate(user_par='bingol2020.par', years=100)
 
     log_print('running wepp')
     wepp = Wepp.getInstance(wd)

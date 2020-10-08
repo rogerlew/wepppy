@@ -25,7 +25,8 @@ from ....base import NoDbBase, TriggerEvents
 
 from ..location_mixin import LocationMixin
 
-from ....climate import Climate, ClimateMode, ClimateSpatialMode
+from .....climates.cligen import StationMeta, Cligen, ClimateFile
+from ....climate import Climate, ClimateMode, ClimateSpatialMode, ClimateStationMode
 from ....soils import Soils
 from ....watershed import Watershed
 from ....wepp import Wepp
@@ -215,4 +216,40 @@ class TurkeyMod(NoDbBase, LocationMixin):
 
         except Exception:
             self.unlock('-f')
+            raise
+
+    def build_climate(self, user_par='bingol2020.par', years=100, cliver='4.3'):
+        wd = self.wd
+        climate = Climate.getInstance(wd)
+        climate.climatestation_mode = ClimateStationMode.UserDefined
+        climate.climatestation = 'bingol2020'
+        climate.climate_spatialmode = ClimateSpatialMode.Single
+        climate.climate_mode = ClimateMode.Vanilla
+        climate.input_years = years
+
+        stationmeta = StationMeta(state='Bingol, Turkey', desc='', par=_join(_data_dir, user_par),
+                                  latitude=38.88, longitude=40.49, years=45, _type=2,
+                                  elevation=3795.0, tp5=1.14, tp6=5.20, _distance=None)
+
+        cligen = Cligen(stationmeta, wd=climate.cli_dir, cliver=cliver)
+        cli_fn = cligen.run_multiple_year(years)
+
+        cli = ClimateFile(_join(climate.cli_dir, cli_fn))
+        monthlies = cli.calc_monthlies()
+
+        from pprint import pprint
+        pprint(monthlies)
+
+        climate.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            climate.monthlies = monthlies
+            climate.par_fn = user_par
+            climate.cli_fn = cli_fn
+            climate.dump_and_unlock()
+            climate.log_done()
+
+        except Exception:
+            climate.unlock('-f')
             raise
