@@ -169,7 +169,7 @@ def _make_clinp(wd, cliver, years, cli_fname, par):
     clinp = _join(wd, "clinp.txt")
     fid = open(clinp, "w")
 
-    if cliver in ["5.2", "5.3"]:
+    if cliver in ["5.2", "5.3", "5.3.2"]:
         fid.write("5\n1\n{years}\n{cli_fname}\nn\n\n"
                   .format(years=years, cli_fname=cli_fname))
     else:
@@ -699,8 +699,10 @@ class Station:
 class StationMeta:
     def __init__(self, state, desc, par, latitude, longitude, years, _type,
                  elevation, tp5, tp6, _distance=None):
+
+        par0, par1 = _split(par)
         self.state = state
-        self.par = par
+        self.par = par1
         self.latitude = latitude
         self.longitude = longitude
         self.years = years
@@ -717,7 +719,11 @@ class StationMeta:
 
         self.desc = desc.split(str(self.id))[0].strip()
 
-        self.parpath = _join(_stations_dir, par)
+        if par0 == '':
+            self.parpath = _join(_stations_dir, par)
+        else:
+            self.parpath = par
+
         assert _exists(self.parpath)
 
     def get_station(self):
@@ -981,7 +987,7 @@ class CligenStationsManager:
 
 
 class Cligen:
-    def __init__(self, station, wd='./', cliver="5.3"):
+    def __init__(self, station, wd='./', cliver="5.3.2"):
         assert _exists(wd), 'Working dir does not exist'
         self.wd = wd
 
@@ -990,6 +996,8 @@ class Cligen:
 
         self.cliver = cliver
 
+        self.cligen532 = _join(_thisdir, "bin", "cligen532")
+        self.cligen53 = _join(_thisdir, "bin", "cligen53")
         self.cligen52 = _join(_thisdir, "bin", "cligen52")
         self.cligen43 = _join(_thisdir, "bin", "cligen43")
 
@@ -1033,6 +1041,10 @@ class Cligen:
 
         if self.cliver == "5.2":
             cmd = [self.cligen52, "-i%s" % par]
+        elif self.cliver == "5.3":
+            cmd = [self.cligen53, "-i%s" % par]
+        elif self.cliver == "5.3.2":
+            cmd = [self.cligen532, "-i%s" % par]
         else:
             cmd = [self.cligen43]
 
@@ -1040,8 +1052,9 @@ class Cligen:
         cli_dir = self.wd
 
         # delete cli file if it exists
-        if _exists(_join(cli_dir, cli_fname)):
-            os.remove(_join(cli_dir, cli_fname))
+        cli_path = _join(cli_dir, cli_fname)
+        if _exists(cli_path):
+            os.remove(cli_path)
 
         _clinp = open(_join(cli_dir, "clinp.txt"))
         _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fname[:-4])), "w")
@@ -1050,7 +1063,9 @@ class Cligen:
         _clinp.close()
         _log.close()
 
-        assert _exists(cli_fname)
+        assert _exists(cli_path)
+
+        return cli_fname
 
     def run_observed(self, prn_fn, cli_fn='wepp.cli',
                      verbose=False):
