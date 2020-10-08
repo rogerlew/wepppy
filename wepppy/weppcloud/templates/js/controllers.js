@@ -382,7 +382,7 @@ var Map = function () {
         });
 
         that.nlcd = L.tileLayer.wms("https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
-            layers: "1",
+            layers: "NLCD_2016_Land_Cover_L48",
             format: "image/png",
             transparent: true
         });
@@ -402,7 +402,7 @@ var Map = function () {
         that.baseMaps = {
             "Satellite": that.googleSat,
             "Terrain": that.googleTerrain,
-        //    "2016 NLCD": that.nlcd
+            "2016 NLCD": that.nlcd
         };
         that.overlayMaps = {'USGS Gage Locations': that.usgs_gage };
 
