@@ -70,6 +70,8 @@ class ClimateStationMode(IntEnum):
     Heuristic = 1
     EUHeuristic = 2
     AUHeuristic = 3
+    UserDefined = 4
+
 
 
 class ClimateMode(IntEnum):
@@ -85,7 +87,6 @@ class ClimateMode(IntEnum):
     EOBS = 8       # Single or multiple
     AGDC = 10       # Single or multiple
     GridMetPRISM = 11    # Daymet, single or multiple
-
 
 class ClimateSpatialMode(IntEnum):
     Undefined = -1
