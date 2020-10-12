@@ -515,7 +515,9 @@ class Wepp(NoDbBase, LogMixin):
         try:
             self.baseflow_opts.parse_inputs(kwds)
             self.phosphorus_opts.parse_inputs(kwds)
-            self.snow_opts.parse_inputs(kwds)
+
+            if hasattr(self, 'snow_opts'):
+                self.snow_opts.parse_inputs(kwds)
 
             self.dump_and_unlock()
 
@@ -1321,7 +1323,7 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
 
         if not _exists(loss_pw0):
             return None
-        
+
         report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
         d = {}
