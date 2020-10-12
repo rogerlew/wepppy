@@ -418,7 +418,7 @@ def exception_factory(msg='Error Handling Request',
 
     return jsonify({'Success': False,
                     'Error': msg,
-                    'StackTrace': stacktrace.split('\n')})
+                    'StackTrace': stacktrace})
 
 
 def success_factory(kwds=None):
@@ -2841,40 +2841,42 @@ def report_wepp_loss(runid, config):
     except:
         exclude_yr_indxs = None
 
-    class_fractions = request.args.get('class_fractions', False)
-    class_fractions = str(class_fractions).lower() == 'true'
+    try:
+        class_fractions = request.args.get('class_fractions', False)
+        class_fractions = str(class_fractions).lower() == 'true'
 
-    fraction_under = request.args.get('fraction_under', None)
-    if fraction_under is not None:
-        try:
-            fraction_under = float(fraction_under)
-        except:
-            fraction_under = None
+        fraction_under = request.args.get('fraction_under', None)
+        if fraction_under is not None:
+            try:
+                fraction_under = float(fraction_under)
+            except:
+                fraction_under = None
 
-    wd = get_wd(runid)
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-    out_rpt = OutletSummary(loss)
-    hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-    chn_rpt = ChannelSummary(loss)
-    avg_annual_years = loss.avg_annual_years
-    excluded_years = loss.excluded_years
-    translator = Watershed.getInstance(wd).translator_factory()
-    unitizer = Unitizer.getInstance(wd)
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+        out_rpt = OutletSummary(loss)
+        hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+        chn_rpt = ChannelSummary(loss)
+        avg_annual_years = loss.avg_annual_years
+        excluded_years = loss.excluded_years
+        translator = Watershed.getInstance(wd).translator_factory()
+        unitizer = Unitizer.getInstance(wd)
 
 
-    return render_template('reports/wepp/summary.htm',
-                           out_rpt=out_rpt,
-                           hill_rpt=hill_rpt,
-                           chn_rpt=chn_rpt,
-                           avg_annual_years=avg_annual_years,
-                           excluded_years=excluded_years,
-                           translator=translator,
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/wepp/summary.htm',
+                               out_rpt=out_rpt,
+                               hill_rpt=hill_rpt,
+                               chn_rpt=chn_rpt,
+                               avg_annual_years=avg_annual_years,
+                               excluded_years=excluded_years,
+                               translator=translator,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory()
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')
