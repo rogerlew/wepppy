@@ -1073,7 +1073,7 @@ class Cligen:
         if verbose:
             print("running observed")
 
-        if self.cliver not in ['5.2', '5.3']:
+        if self.cliver not in ['5.2', '5.3', '5.3.2']:
             raise NotImplementedError('Cligen version must be greater than 5')
 
         if self.cliver == '5.2':
@@ -1081,7 +1081,12 @@ class Cligen:
                 raise NotImplementedError('Cligen52.exe is not available on Windows')
             else:
                 cligen_bin = _join(_bin_dir, 'cligen52')
-        else:
+        elif self.cliver == '5.3':
+            if IS_WINDOWS:
+                cligen_bin = _join(_bin_dir, 'cligen53.exe')
+            else:
+                cligen_bin = _join(_bin_dir, 'cligen53')
+        elif self.cliver == '5.3.2':
             if IS_WINDOWS:
                 cligen_bin = _join(_bin_dir, 'cligen532.exe')
             else:
