@@ -89,7 +89,7 @@ class Ron(NoDbBase):
     """
     __name__ = 'Ron'
 
-    def __init__(self, wd, cfg_fn="0.cfg"):
+    def __init__(self, wd, cfg_fn='0.cfg'):
         super(Ron, self).__init__(wd, cfg_fn)
 
         self.lock()
@@ -153,19 +153,22 @@ class Ron(NoDbBase):
             wepppy.nodb.WeppPost(wd, cfg_fn)
             wepppy.nodb.Observed(wd, cfg_fn)
 
-            if "lt" in self.mods:
+            if 'lt' in self.mods:
                 wepppy.nodb.mods.locations.LakeTahoe(wd, cfg_fn)
 
-            if "portland" in self.mods:
+            if 'portland' in self.mods:
                 wepppy.nodb.mods.locations.PortlandMod(wd, cfg_fn)
 
-            if "seattle" in self.mods:
+            if 'seattle' in self.mods:
                 wepppy.nodb.mods.locations.SeattleMod(wd, cfg_fn)
 
-            if "turkey" in self.mods:
+            if 'general' in self.mods:
+                wepppy.nodb.mods.locations.GeneralMod(wd, cfg_fn)
+
+            if 'turkey' in self.mods:
                 wepppy.nodb.mods.locations.TurkeyMod(wd, cfg_fn)
 
-            if "baer" in self.mods:
+            if 'baer' in self.mods:
                 wepppy.nodb.mods.Baer(wd, cfg_fn)
                 sbs_map = config.get('landuse', 'sbs_map')
 
@@ -350,7 +353,7 @@ class Ron(NoDbBase):
 
     @property
     def has_sbs(self):
-        if "baer" not in self.mods:
+        if 'baer' not in self.mods:
             return False
 
         from wepppy.nodb.mods import Baer
@@ -360,7 +363,7 @@ class Ron(NoDbBase):
 
     @property
     def dem_db(self):
-        if not hasattr(self, "_dem_db"):
+        if not hasattr(self, '_dem_db'):
             return DEFAULT_DEM_DB
 
         return self._dem_db
@@ -381,7 +384,7 @@ class Ron(NoDbBase):
 
     @property
     def dem_map(self):
-        if not hasattr(self, "_dem_map"):
+        if not hasattr(self, '_dem_map'):
             return None
 
         return self._dem_map
