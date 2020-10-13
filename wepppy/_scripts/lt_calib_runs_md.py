@@ -816,7 +816,7 @@ if __name__ == '__main__':
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
-            projects[-1]['wd'] = ('lt_%s_%s' % (watershed['wd'], scenario['wd'])).format(cs=watershed['cs'])
+            projects[-1]['wd'] = 'lt_202010_%s_%s' % (watershed['wd'], scenario['wd'])
 
     failed = open('failed', 'w')
     for proj in projects:
@@ -899,7 +899,7 @@ if __name__ == '__main__':
             if climate_mode == 'observed':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
-                climate.input_years = 27
+                climate.input_years = 30
                 climate.climatestation = stations[0]['id']
 
                 climate.climate_mode = ClimateMode.Observed
@@ -908,12 +908,12 @@ if __name__ == '__main__':
             elif climate_mode == 'future':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
-                climate.input_years = 27
+                climate.input_years = 30
                 climate.climatestation = stations[0]['id']
 
                 climate.climate_mode = ClimateMode.Future
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                climate.set_future_pars(start_year=2018, end_year=2018+27)
+                climate.set_future_pars(start_year=2018, end_year=2018+30)
                 #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             elif climate_mode == 'vanilla':
                 climate = Climate.getInstance(wd)
