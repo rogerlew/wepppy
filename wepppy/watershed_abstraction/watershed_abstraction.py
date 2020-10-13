@@ -1002,7 +1002,7 @@ class WatershedAbstraction:
 
         n = len(sub_ids)
         if n == 0:
-            raise Exception('SUBWTA contains no channels')
+            raise Exception('SUBWTA contains no subcatchments')
 
         for i, sub_id in enumerate(sub_ids):
             if verbose:
