@@ -1717,7 +1717,7 @@ def load_map(_map=None):
     if _map is None:
         with open(_map_fn) as fp:
             d = json.load(fp)
-    if 'rred' in _map.lower():
+    elif 'rred' in _map.lower():
         with open(_rred_map_fn) as fp:
             d = json.load(fp)
     elif 'esdac' in _map.lower():
