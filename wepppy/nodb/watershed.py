@@ -158,7 +158,7 @@ class Watershed(NoDbBase):
 
             _abs = WatershedAbstraction(topaz_wd, wat_dir)
             _abs.abstract(wepp_chn_type=self.wepp_chn_type)
-            _abs.write_slps(cell_width=cell_width)
+            _abs.write_slps()
 
             chns_summary = {}
             for k, v in _abs.watershed['channels'].items():

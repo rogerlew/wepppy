@@ -208,6 +208,8 @@ class Observed(NoDbBase):
         sim['Year'] = sim['year'] + year0 - 1
         sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
 
+        # TODO: Use chan.out for daily dischange
+
         results['Channels'] = self.run_measures(df, sim, 'Channels')
 
         self.lock()
