@@ -1714,10 +1714,7 @@ def merge_managements(mans):
 
 def load_map(_map=None):
 
-    if _map is None:
-        with open(_map_fn) as fp:
-            d = json.load(fp)
-    elif 'rred' in _map.lower():
+    if 'rred' in _map.lower():
         with open(_rred_map_fn) as fp:
             d = json.load(fp)
     elif 'esdac' in _map.lower():
@@ -1728,6 +1725,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'turkey' in _map.lower():
         with open(_turkey_map_fn) as fp:
+            d = json.load(fp)
+    else:
+        with open(_map_fn) as fp:
             d = json.load(fp)
 
     for k, v in d.items():
