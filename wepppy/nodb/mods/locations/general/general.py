@@ -13,6 +13,8 @@ from os.path import exists as _exists
 
 import jsonpickle
 
+from configparser import NoOptionError
+
 from ....base import NoDbBase, TriggerEvents
 
 from ..location_mixin import LocationMixin
@@ -36,7 +38,7 @@ class GeneralMod(NoDbBase, LocationMixin):
 
         try:
             _lc_lookup_fn = config.get('nodb', 'lc_lookup_fn')
-        except:
+        except NoOptionError:
             _lc_lookup_fn = 'landSoilLookup.csv'
 
         self._lc_lookup_fn = _lc_lookup_fn
@@ -44,7 +46,7 @@ class GeneralMod(NoDbBase, LocationMixin):
 
         try:
             _default_wepp_type = config.get('nodb', 'default_wepp_type')
-        except:
+        except NoOptionError:
             _default_wepp_type = 'Granitic'
 
         self._default_wepp_type = _default_wepp_type
