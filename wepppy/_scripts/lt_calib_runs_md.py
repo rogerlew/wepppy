@@ -610,7 +610,7 @@ if __name__ == '__main__':
              cs=30, erod=0.000001,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.8)),
+             mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(wd='46_Taylor_Creek',  # 5700 ha  Watershed_52
              extent=[-120.22338867187501, 38.65012583524745, -119.74273681640626, 39.02451827974919],
              map_center=[-119.98306274414064, 38.83756825896614],

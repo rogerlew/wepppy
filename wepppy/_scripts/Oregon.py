@@ -257,15 +257,15 @@ if __name__ == '__main__':
               ]
 
     scenarios = [
-        dict(wd='CurCond',
+        dict(wd='CurCond.gridmet',
              landuse=None,
              cli_mode='observed', cfg='oregon',
              clean=True, build_soils=True, build_landuse=True, build_climates=True),
-        dict(wd='SBS-Riverside',
+        dict(wd='SBS-Riverside.gridmet',
              landuse=None,
              cli_mode='observed', cfg='riverside-fire',
              clean=True, build_soils=True, build_landuse=True, build_climates=True),
-        dict(wd='SBS-Beachie',
+        dict(wd='SBS-Beachie.gridmet',
              landuse=None,
              cli_mode='observed', cfg='beachie-fire',
              clean=True, build_soils=True, build_landuse=True, build_climates=True)]
