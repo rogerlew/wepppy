@@ -1714,6 +1714,9 @@ def merge_managements(mans):
 
 def load_map(_map=None):
 
+    if _map is None:
+        with open(_map_fn) as fp:
+            d = json.load(fp)
     if 'rred' in _map.lower():
         with open(_rred_map_fn) as fp:
             d = json.load(fp)
