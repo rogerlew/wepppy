@@ -75,8 +75,8 @@ class RangelandCoverMode(IntEnum):
 class RangelandCover(NoDbBase):
     __name__ = 'RangelandCover'
 
-    def __init__(self, wd, config):
-        super(RangelandCover, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(RangelandCover, self).__init__(wd, cfg_fn)
 
         self.lock()
 
