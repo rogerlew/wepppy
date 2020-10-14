@@ -87,15 +87,12 @@ if __name__ == '__main__':
              mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05)
               ]
     scenarios = [
-        dict(wd='CurCond',
-             landuse=None,
-             cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True,
-             lc_lookup_fn='landSoilLookup.csv'),
+         dict(wd='CurCond', landuse=None, cli_mode='observed', cfg='fishfire',
+              clean=True, build_soils=True, build_landuse=True, build_climates=True),
 #        dict(wd='SBS',
 #             landuse=None,
-#             cfg='seattle-simfire-eagle-snow',
-#             cli_mode='PRISMadj', clean=True, build_soils=True, build_landuse=True, build_climates=True,
-#             lc_lookup_fn='landSoilLookup.csv'),
+#             cfg='fishfire-fire',
+#             cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True),
     ]
 
     wc = sys.argv[-1]
@@ -114,7 +111,6 @@ if __name__ == '__main__':
             projects[-1]['build_soils'] = scenario['build_soils']
             projects[-1]['build_landuse'] = scenario['build_landuse']
             projects[-1]['build_climates'] = scenario['build_climates']
-            projects[-1]['lc_lookup_fn'] = scenario['lc_lookup_fn']
             projects[-1]['wd'] = 'oregon_{watershed}_{scenario}' \
                 .format(watershed=watershed['watershed'], scenario=scenario['wd']) \
                 .format(cs=watershed['cs'])
@@ -141,7 +137,6 @@ if __name__ == '__main__':
         mcl = proj['mcl']
         cs = proj['cs']
         erod = proj['erod']
-        lc_lookup_fn = proj['lc_lookup_fn']
 
         clean = proj['clean']
         build_soils = proj['build_soils']
