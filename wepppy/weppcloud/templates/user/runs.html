@@ -46,7 +46,7 @@ function delete_run(runid) {
   <tbody>
     {% for run in user_runs %}
         <tr id="{{ run.runid }}">
-          <td>{{ get_run_name(run.runid) }}</td>
+          <td style="width:250px;">{{ get_run_name(run.runid) }}</td>
           <td>{{ w3w_center(run.runid) }}</td>
           <td>
               <a href="{{ site_prefix }}/runs/{{ run.runid }}/{{ run.config }}/">
