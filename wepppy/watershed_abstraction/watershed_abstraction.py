@@ -436,10 +436,16 @@ class SummaryBase(object):
 
         try:
             d['order'] = self.order
-            d['channel_type'] = self.channel_type
-            d['cell_width'] = self.cell_width
         except:
             pass
+
+        try:
+            d['channel_type'] = self.channel_type
+        except:
+            pass
+
+        if hasattr(self, 'cell_width'):
+            d['width'] = self.cell_width
 
         try:
             d['slopes'] = self.slopes
@@ -509,6 +515,7 @@ class ChannelSummary(SummaryBase):
 
     @property
     def cell_width(self) -> int:
+        """returns channel width in meters (not pixel units)"""
         return [None, 1, 2, 2, 3, 3, 3, 4, 4][self.order]
 
 
