@@ -436,7 +436,7 @@ class Baer(NoDbBase):
 
             landuse.dump_and_unlock()
             landuse = landuse.getInstance(wd)
-            landuse.build_managements(_map=None)
+            landuse.build_managements(_map='default')
 
         except Exception:
             self.unlock('-f')
