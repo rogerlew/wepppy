@@ -59,8 +59,8 @@ _soils_map = {
 class TurkeyMod(NoDbBase, LocationMixin):
     __name__ = 'PortlandMod'
 
-    def __init__(self, wd, config):
-        super(TurkeyMod, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(TurkeyMod, self).__init__(wd, cfg_fn)
 
         self._data_dir = _data_dir
 

@@ -71,8 +71,8 @@ def _gridmet_cli_adjust(cli_dir, cli_fn, pp_scale):
 class PortlandMod(NoDbBase, LocationMixin):
     __name__ = 'PortlandMod'
 
-    def __init__(self, wd, config):
-        super(PortlandMod, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(PortlandMod, self).__init__(wd, cfg_fn)
 
         self._lc_lookup_fn = 'landSoilLookup.csv'
         self._default_wepp_type = DEFAULT_WEPP_TYPE
