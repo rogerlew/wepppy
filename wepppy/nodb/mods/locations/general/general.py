@@ -25,7 +25,7 @@ class GeneralModNoDbLockedException(Exception):
     pass
 
 
-DEFAULT_WEPP_TYPE = 'Granitic'
+# DEFAULT_WEPP_TYPE = 'Granitic'
 
 
 class GeneralMod(NoDbBase, LocationMixin):
@@ -40,7 +40,14 @@ class GeneralMod(NoDbBase, LocationMixin):
             _lc_lookup_fn = 'landSoilLookup.csv'
 
         self._lc_lookup_fn = _lc_lookup_fn
-        self._default_wepp_type = DEFAULT_WEPP_TYPE
+
+
+        try:
+            _default_wepp_type = config.get('nodb', 'default_wepp_type')
+        except:
+            _default_wepp_type = 'Granitic'
+
+        self._default_wepp_type = _default_wepp_type
         self._data_dir = _data_dir
 
         self.lock()
