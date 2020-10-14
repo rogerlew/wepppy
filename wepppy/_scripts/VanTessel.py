@@ -74,7 +74,7 @@ if __name__ == '__main__':
         return 'adj_' + cli_fn
 
     watersheds = [    
-        dict(watershed='VanTessel.gridmet',
+        dict(watershed='VanTessel',
              extent=[-118.0360794067383, 34.091335914867344, -117.79575347900392, 34.290126479407164],
              map_center=[-117.91574941070836, 34.190777538504065],
              map_zoom=12,
@@ -86,8 +86,9 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05)
               ]
+
     scenarios = [
-         dict(wd='CurCond', landuse=None, cli_mode='observed', cfg='fishfire',
+         dict(wd='CurCond.gridmet', landuse=None, cli_mode='observed', cfg='fishfire',
               clean=True, build_soils=True, build_landuse=True, build_climates=True),
         dict(wd='SBS-FishFire.gridmet',
              landuse=None,
