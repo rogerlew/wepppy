@@ -43,8 +43,8 @@ class RredNoDbLockedException(Exception):
 class Rred(NoDbBase):
     __name__ = 'Rred'
 
-    def __init__(self, wd, config):
-        super(Rred, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(Rred, self).__init__(wd, cfg_fn)
 
         self.lock()
 

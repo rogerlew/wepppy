@@ -33,8 +33,10 @@ class GeneralModNoDbLockedException(Exception):
 class GeneralMod(NoDbBase, LocationMixin):
     __name__ = 'General'
 
-    def __init__(self, wd, config):
-        super(GeneralMod, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(GeneralMod, self).__init__(wd, cfg_fn)
+
+        config = self.config
 
         try:
             _lc_lookup_fn = config.get('nodb', 'lc_lookup_fn')
