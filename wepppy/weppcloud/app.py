@@ -821,52 +821,55 @@ def runs0(runid, config):
     #if should_abort:
     #    abort(404)
 
-    topaz = Topaz.getInstance(wd)
-    landuse = Landuse.getInstance(wd)
-    soils = Soils.getInstance(wd)
-    climate = Climate.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
-    unitizer = Unitizer.getInstance(wd)
-    site_prefix = app.config['SITE_PREFIX']
-
     try:
-        observed = Observed.getInstance(wd)
+        topaz = Topaz.getInstance(wd)
+        landuse = Landuse.getInstance(wd)
+        soils = Soils.getInstance(wd)
+        climate = Climate.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
+        unitizer = Unitizer.getInstance(wd)
+        site_prefix = app.config['SITE_PREFIX']
+
+        try:
+            observed = Observed.getInstance(wd)
+        except:
+            observed = Observed(wd, "%s.cfg" % config)
+
+        try:
+            rangeland_cover = RangelandCover.getInstance(wd)
+        except:
+            rangeland_cover = None
+
+        try:
+            rhem = Rhem.getInstance(wd)
+        except:
+            rhem = None
+
+        try:
+            ash = Ash.getInstance(wd)
+        except:
+            ash = None
+
+        landuseoptions = landuse.landuseoptions
+        soildboptions = soilsdb.load_db()
+
+        log_access(wd, current_user, request.remote_addr)
+        return render_template('0.html',
+                               user=current_user,
+                               site_prefix=site_prefix,
+                               topaz=topaz, soils=soils,
+                               ron=ron, landuse=landuse, climate=climate,
+                               wepp=wepp,
+                               rhem=rhem,
+                               ash=ash,
+                               unitizer_nodb=unitizer,
+                               observed=observed,
+                               rangeland_cover=rangeland_cover,
+                               landuseoptions=landuseoptions,
+                               soildboptions=soildboptions,
+                               precisions=wepppy.nodb.unitizer.precisions)
     except:
-        observed = Observed(wd, "%s.cfg" % config)
-
-    try:
-        rangeland_cover = RangelandCover.getInstance(wd)
-    except:
-        rangeland_cover = None
-
-    try:
-        rhem = Rhem.getInstance(wd)
-    except:
-        rhem = None
-
-    try:
-        ash = Ash.getInstance(wd)
-    except:
-        ash = None
-
-    landuseoptions = landuse.landuseoptions
-    soildboptions = soilsdb.load_db()
-
-    log_access(wd, current_user, request.remote_addr)
-    return render_template('0.html',
-                           user=current_user,
-                           site_prefix=site_prefix,
-                           topaz=topaz, soils=soils,
-                           ron=ron, landuse=landuse, climate=climate,
-                           wepp=wepp,
-                           rhem=rhem,
-                           ash=ash,
-                           unitizer_nodb=unitizer,
-                           observed=observed,
-                           rangeland_cover=rangeland_cover,
-                           landuseoptions=landuseoptions,
-                           soildboptions=soildboptions,
-                           precisions=wepppy.nodb.unitizer.precisions)
+        return exception_factory()
 
 
 # https://wepp1.nkn.uidaho.edu/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
