@@ -104,7 +104,7 @@ if __name__ == '__main__':
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
 
-            projects[-1]['cfg'] = scenario.get('cfg', 'seattle-snow')
+            projects[-1]['cfg'] = scenario['cfg']
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['cli_mode'] = scenario.get('cli_mode', 'observed')
             projects[-1]['clean'] = scenario['clean']
