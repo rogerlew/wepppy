@@ -13,7 +13,7 @@ from wepppy.all_your_base import isfloat
 from wepppy.nodb import (
     Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
 )
-from wepppy.nodb.mods.locations import SeattleMod
+from wepppy.nodb.mods.locations import GeneralMod
 
 from wepppy.wepp.soils.utils import modify_ksat
 from os.path import join as _join
@@ -96,17 +96,17 @@ if __name__ == '__main__':
         return 'adj_' + cli_fn
 
     watersheds = [    
-#        dict(watershed='Riverside_1',
-#             extent=[-122.61085510253908, 44.88457998727908, -122.13020324707033, 45.224128104219425],
-#             map_center = [-122.3705291748047, 45.05460605505183],
-#             map_zoom = 11,
-#             outlet = [-122.471488220428, 45.0879999089735],
-#             landuse=None,
-#             cs=100, erod=0.000001,
-#             csa=10, mcl=100,
-#             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
-#             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-#             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
+        dict(watershed='Riverside_1',
+             extent=[-122.61085510253908, 44.88457998727908, -122.13020324707033, 45.224128104219425],
+             map_center = [-122.3705291748047, 45.05460605505183],
+             map_zoom = 11,
+             outlet = [-122.471488220428, 45.0879999089735],
+             landuse=None,
+             cs=100, erod=0.000001,
+             csa=10, mcl=100,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05),
         dict(watershed='Riverside_2',
              extent=[-122.40554809570314, 44.92543221016552, -121.92489624023439, 45.26473839929064],
              map_center = [-122.16522216796876, 45.09533731309455],
@@ -263,7 +263,7 @@ if __name__ == '__main__':
         dict(wd='CurCond.202010.cl532_gridmet.chn_cs{cs}',
              landuse=None,
              cli_mode='observed', clean=True, build_soils=True, build_landuse=True, build_climates=True,
-             lc_lookup_fn='landSoilLookup.csv'),
+             lc_lookup_fn='oregon_landSoilLookup.csv'),
 #        dict(wd='CurCond.202009.cl532_future.chn_cs{cs}',
 #             landuse=None,
 #             cli_mode='future', clean=True, build_soils=True, build_landuse=True, build_climates=True,
