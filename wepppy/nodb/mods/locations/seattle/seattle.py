@@ -45,8 +45,8 @@ KSAT_DEFAULT = 0.05
 class SeattleMod(NoDbBase, LocationMixin):
     __name__ = 'SeattleMod'
 
-    def __init__(self, wd, config):
-        super(SeattleMod, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(SeattleMod, self).__init__(wd, cfg_fn)
 
         self._lc_lookup_fn = 'landSoilLookup.csv'
         self._default_wepp_type = DEFAULT_WEPP_TYPE

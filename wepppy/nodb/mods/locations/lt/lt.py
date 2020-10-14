@@ -31,8 +31,8 @@ DEFAULT_WEPP_TYPE = 'Granitic'
 class LakeTahoe(NoDbBase, LocationMixin):
     __name__ = 'LakeTahoe'
 
-    def __init__(self, wd, config):
-        super(LakeTahoe, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(LakeTahoe, self).__init__(wd, cfg_fn)
 
         self._lc_lookup_fn = 'landSoilLookup.csv'
         self._default_wepp_type = DEFAULT_WEPP_TYPE
