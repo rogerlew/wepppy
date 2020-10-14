@@ -55,8 +55,8 @@ sbs_soil_replacements = dict(
 class Baer(NoDbBase):
     __name__ = 'Baer'
 
-    def __init__(self, wd, config):
-        super(Baer, self).__init__(wd, config)
+    def __init__(self, wd, cfg_fn):
+        super(Baer, self).__init__(wd, cfg_fn)
 
         self.lock()
 
