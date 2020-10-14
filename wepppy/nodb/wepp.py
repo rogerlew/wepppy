@@ -979,7 +979,9 @@ class Wepp(NoDbBase, LogMixin):
 
         runs_dir = self.runs_dir
         with open(_join(runs_dir, 'chan.inp'), 'w') as fp:
-            fp.write('1 600\n0\n1\n{}\n'.format(total))
+            # 1 is the Peak Flow time and rate, 600s is the interval
+            # 2 Daily average discharge, 600 probably doesn't do anything
+            fp.write('2 600\n0\n1\n{}\n'.format(total))
 
     def _prep_channel_soils(self, translator, erodibility, critical_shear):
         if erodibility is not None or critical_shear is not None:
