@@ -184,6 +184,7 @@ def query_daily_catalog():
 def query_daily():
     """
     https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004
+    https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2019
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
