@@ -308,6 +308,7 @@ if __name__ == '__main__':
         # make sure the watershed matches the fire scenarios
         if scenario.startswith('SBS-'):
             _fire = scenario.split('-')[1]
+            print(_fire, watershed)
             if not watershed.startswith(_fire):
                 continue
 
