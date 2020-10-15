@@ -30,7 +30,7 @@ from ....climate import Climate, ClimateMode, ClimateSpatialMode, ClimateStation
 from ....soils import Soils
 from ....watershed import Watershed
 from ....wepp import Wepp
-from .....wepp.soils.utils import modify_ksat
+from .....wepp.soils.utils import modify_kslast
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')

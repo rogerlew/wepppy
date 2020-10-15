@@ -25,7 +25,7 @@ from ....climate import Climate, ClimateMode, ClimateSpatialMode
 from ....soils import Soils
 from ....watershed import Watershed
 from ....wepp import Wepp
-from .....wepp.soils.utils import modify_ksat
+from .....wepp.soils.utils import modify_kslast
 
 
 _thisdir = os.path.dirname(__file__)
@@ -99,7 +99,7 @@ class SeattleMod(NoDbBase, LocationMixin):
             pass
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
-            self.modify_soils_ksat()
+            self.modify_soils_kslast()
         # elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
         #     self.determine_phosphorus()
 
@@ -156,7 +156,7 @@ class SeattleMod(NoDbBase, LocationMixin):
 
         return self._data_dir
 
-    def modify_soils_ksat(self):
+    def modify_soils_kslast(self):
         wd = self.wd
         watershed = Watershed.getInstance(wd)
 
@@ -195,7 +195,7 @@ class SeattleMod(NoDbBase, LocationMixin):
                 _soil_fn = '{dom}.sol'.format(dom=_dom)
                 src_soil_fn = _join(_soil.soils_dir, _soil.fname)
                 dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
-                modify_ksat(src_soil_fn, dst_soil_fn, ksat)
+                modify_kslast(src_soil_fn, dst_soil_fn, ksat)
 
                 _soil.fname = _soil_fn
                 _soils[_dom] = _soil

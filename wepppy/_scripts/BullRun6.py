@@ -15,7 +15,7 @@ from wepppy.nodb import (
 )
 from wepppy.nodb.mods.locations import PortlandMod
 
-from wepppy.wepp.soils.utils import modify_ksat
+from wepppy.wepp.soils.utils import modify_kslast
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
