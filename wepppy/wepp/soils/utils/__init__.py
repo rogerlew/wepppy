@@ -253,7 +253,7 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
             f.writelines(lines[5:])
 
 
-def modify_ksat(src_fn, dst_fn, ksat):
+def modify_kslast(src_fn, dst_fn, ksat):
     with open(src_fn) as fp:
         lines = fp.readlines()
 

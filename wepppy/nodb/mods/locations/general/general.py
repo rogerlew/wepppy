@@ -12,10 +12,16 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import jsonpickle
+from copy import deepcopy
 
 from configparser import NoOptionError
 
+from .....all_your_base import isfloat
 from ....base import NoDbBase, TriggerEvents
+from ....soils import Soils
+from ....watershed import Watershed
+
+from .....wepp.soils.utils import modify_kslast
 
 from ..location_mixin import LocationMixin
 
@@ -50,6 +56,18 @@ class GeneralMod(NoDbBase, LocationMixin):
             _default_wepp_type = config.get('nodb', 'default_wepp_type')
         except NoOptionError:
             _default_wepp_type = 'Granitic'
+
+        try:
+            _kslast = config.get('nodb', 'kslast')
+
+            if isfloat(_kslast):
+                _kslast = float(_kslast)
+            else:
+                _kslast = None
+        except NoOptionError:
+            _kslast = None
+
+        self._kslast = _kslast
 
         self._default_wepp_type = _default_wepp_type
         self._data_dir = _data_dir
@@ -101,6 +119,7 @@ class GeneralMod(NoDbBase, LocationMixin):
             pass
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
+            self.modify_soils_kslast()
         # elif evt == TriggerEvents.PREPPING_PHOSPHORUS:
         #     self.determine_phosphorus()
 
@@ -125,10 +144,69 @@ class GeneralMod(NoDbBase, LocationMixin):
             raise
 
     @property
-    def default_wepp_type(self):
-        if not hasattr(self, '_default_wepp_type'):
-            return DEFAULT_WEPP_TYPE
+    def kslast(self):
+        if not hasattr(self, 'kslast'):
+            return None
 
+        return self._kslast
+
+    @kslast.setter
+    def kslast(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._kslast = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def modify_soils_kslast(self):
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+
+        kslast = self.kslast
+
+        if kslast is None:
+            return
+
+        soils = Soils.getInstance(wd)
+
+        ksat_mod = 'f'
+
+        _domsoil_d = soils.domsoil_d
+        _soils = soils.soils
+        for topaz_id, ss in watershed._subs_summary.items():
+            # lng, lat = ss.centroid.lnglat
+
+            dom = _domsoil_d[str(topaz_id)]
+            _soil = deepcopy(_soils[dom])
+
+            _dom = '{dom}-{ksat_mod}' \
+                .format(dom=dom, ksat_mod=ksat_mod)
+
+            _soil.mukey = _dom
+
+            if _dom not in _soils:
+                _soil_fn = '{dom}.sol'.format(dom=_dom)
+                src_soil_fn = _join(_soil.soils_dir, _soil.fname)
+                dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
+                modify_kslast(src_soil_fn, dst_soil_fn, kslast)
+
+                _soil.fname = _soil_fn
+                _soils[_dom] = _soil
+
+            _domsoil_d[str(topaz_id)] = _dom
+
+        soils.lock()
+        soils.domsoil_d = _domsoil_d
+        soils.soils = _soils
+        soils.dump_and_unlock()
+
+    @property
+    def default_wepp_type(self):
         return self._default_wepp_type
 
     @default_wepp_type.setter

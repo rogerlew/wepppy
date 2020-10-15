@@ -6,7 +6,7 @@ from time import sleep
 from copy import deepcopy
 
 from wepppy.climates.cligen import ClimateFile
-from wepppy.wepp.soils.utils import modify_ksat
+from wepppy.wepp.soils.utils import modify_kslast
 from wepppy.nodb import *
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
@@ -288,7 +288,7 @@ if __name__ == '__main__':
                                 src_soil_fn = _join(_soil.soils_dir, _soil.fname)
                                 dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
                                 print(src_soil_fn, dst_soil_fn, ksat, _dom)
-                                modify_ksat(src_soil_fn, dst_soil_fn, ksat)
+                                modify_kslast(src_soil_fn, dst_soil_fn, ksat)
 
                                 _soil.fname = _soil_fn
                                 _soils[_dom] = _soil
