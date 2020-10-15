@@ -145,7 +145,7 @@ class GeneralMod(NoDbBase, LocationMixin):
 
     @property
     def kslast(self):
-        if not hasattr(self, 'kslast'):
+        if not hasattr(self, '_kslast'):
             return None
 
         return self._kslast
