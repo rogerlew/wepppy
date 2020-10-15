@@ -262,7 +262,7 @@ def modify_kslast(src_fn, dst_fn, ksat):
 
     for i, line in enumerate(lines):
         if line.startswith('Any comments:'):
-            lines[i] += ' {} kslast modified to {}\n'.format(lines[i].strip(), ksat)
+            lines[i] = line.strip() + ' {} kslast modified to {}\n'.format(lines[i].strip(), ksat)
 
     lastline = lines[-1].split()
     lastline[-1] = '{}'.format(ksat)
