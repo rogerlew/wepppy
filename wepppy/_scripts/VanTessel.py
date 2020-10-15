@@ -15,7 +15,7 @@ from wepppy.nodb import (
 )
 from wepppy.nodb.mods.locations import SeattleMod
 
-from wepppy.wepp.soils.utils import modify_ksat
+from wepppy.wepp.soils.utils import modify_kslast
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export
@@ -84,7 +84,7 @@ if __name__ == '__main__':
              csa=10, mcl=100,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.75, ksat=0.05)
+             mid_season_crop_coeff=0.95, p_coeff=0.75)
               ]
 
     scenarios = [
@@ -119,7 +119,6 @@ if __name__ == '__main__':
         config = proj['cfg']
         watershed_name = proj['watershed']
         wd = proj['wd']
-        ksat = proj['ksat']
 
         log_print(wd)
         if wc is not None:
