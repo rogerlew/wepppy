@@ -207,7 +207,7 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.GridMetPRISM
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.set_observed_pars(start_year=2000, end_year=2019)
+                climate.set_observed_pars(start_year=2016, end_year=2017)
 
                 climate.build(verbose=1)
 
