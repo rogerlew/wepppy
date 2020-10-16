@@ -3,3 +3,5 @@ The dem, landuse, and soil grid need to be aligned (same extent, resolution (cel
 The following gdal commands were used to align the rasters
 > gdalwarp -t_srs "+proj=utm +zone=37 +north +datum=WGS84 +ellps=WGS84" -of vrt soil.asc soil_.vrt
 > gdal_translate -of AAIGrid -projwin 631726.524  4300825.442  652976.524 4280400.442 -tr 25 25  soil_.vrt soil_.asc
+
+After aligning the maps change the yasin.cfg to point to them.
