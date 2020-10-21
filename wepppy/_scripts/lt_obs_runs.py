@@ -388,7 +388,7 @@ if __name__ == '__main__':
 
             log_print('abstracting watershed')
             wat = Watershed.getInstance(wd)
-            wat.abstract_watershed(cell_width=None)
+            wat.abstract_watershed()
             translator = wat.translator_factory()
             topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
 
