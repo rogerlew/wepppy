@@ -3,6 +3,7 @@
 var site_prefix = "{{ site_prefix }}";
 var runid = "{{ ron.runid }}";
 var config = "{{ ron.config_stem }}";
+var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
 
 var error = null;
 
@@ -19,6 +20,7 @@ function onReady() {
      * Controller Singletons
      * =====================
      */
+
 
     var project = Project.getInstance();
     var team = Team.getInstance();
@@ -169,7 +171,7 @@ function onReady() {
         });
     }
 
-    {% if 'baer' in ron.mods %}
+    {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
     /*
      * Baer mod
      * ======================

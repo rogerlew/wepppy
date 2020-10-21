@@ -119,7 +119,7 @@ if __name__ == '__main__':
                      map_zoom=14,
                      outlet=[-120.10916060023823, 39.004865203316534],
                      landuse=None,
-                     cs=50, erod=0.000001, chn_cell_width=1.0),
+                     cs=50, erod=0.000001, chn_chn_wepp_width=1.0),
         #         dict(wd='SimFire_Watershed_16',
         #              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
         #              map_center=[-120.14408111572267, 39.003177506910475],
@@ -182,7 +182,7 @@ if __name__ == '__main__':
         topaz.build_subcatchments()
 
         wat = Watershed.getInstance(wd)
-        wat.abstract_watershed(cell_width=proj['chn_cell_width'])
+        wat.abstract_watershed(chn_wepp_width=proj['chn_chn_wepp_width'])
         translator = wat.translator_factory()
         topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
 

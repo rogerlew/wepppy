@@ -199,11 +199,11 @@ class Rred(NoDbBase):
                 desc = '{slid} - {texid}'.format(**yaml_soil.obj['ofes'][0])
 
                 _soils[sol] = SoilSummary(
-                    Mukey=sol,
-                    FileName=soil_fn,
+                    mukey=sol,
+                    fname=soil_fn,
                     soils_dir=self.soils_dir,
-                    BuildDate=str(datetime.now()),
-                    Description=desc
+                    build_date=str(datetime.now()),
+                    desc=desc
                 )
 
             # need to recalculate the pct_coverages

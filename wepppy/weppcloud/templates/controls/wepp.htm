@@ -48,13 +48,13 @@
             <h5>Baseflow Processing</h5>
 
             <div class="form-group row" id="gwstorage_container">
-            <div class="col-sm-4">
-                <label for="gwstorage">Initial groundwater storage (mm): </label>
-            </div>
-            <div class="col-sm-4">
-                <input id="gwstorage" name="gwstorage" class="form-control mr-sm-3" type="text"
-                value="{{ wepp.baseflow_opts.gwstorage }}" aria-label="Initial groundwater storage">
-            </div>
+                <div class="col-sm-4">
+                    <label for="gwstorage">Initial groundwater storage (mm): </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="gwstorage" name="gwstorage" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.baseflow_opts.gwstorage }}" aria-label="Initial groundwater storage">
+                </div>
             </div>
             <div class="form-group row" id="bfcoeff_container">
                 <div class="col-sm-4">
@@ -84,7 +84,26 @@
                 </div>
             </div>
 
-
+            <br/>
+            <h5>Channel Parameters</h5>
+            <div class="form-group row" id="channel_critical_shear_container">
+                <div class="col-sm-4">
+                    <label for="channel_critical_shear">Critical Shear: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="channel_critical_shear" name="channel_critical_shear" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.channel_critical_shear }}" aria-label="Watershed groundwater baseflow threshold area">
+                </div>
+            </div>
+            <div class="form-group row" id="channel_erodibility_container">
+                <div class="col-sm-4">
+                    <label for="channel_erodibility">Erodibility: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="channel_erodibility" name="channel_erodibility" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.channel_erodibility }}" aria-label="Watershed groundwater baseflow threshold area">
+                </div>
+            </div>
             <br/>
 
             {% if "lt" in ron.mods %}
