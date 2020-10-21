@@ -19,6 +19,9 @@
       <th>Dominant Landuse</th>
       <th>Dominant Soil</th>
       <th>Climate File</th>
+      <th>Longest Flowpath</th>
+      <th>Longest Flowpath Length</th>
+      <th>Longest Flowpath Slope</th>
     </tr>
   </thead>
   <tbody>
@@ -33,6 +36,10 @@
       <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>{{ unitizer_units("m") | safe }}</td>
+      <td>decimal</td>
     </tr>
     {% for d in subcatchments_summary %}
     <tr>
@@ -59,6 +66,25 @@
       {% else %}
       <td><a href="../../../browse/climate/{{ d.climate.cli_fn }}" target="_blank">{{ d.climate.cli_fn }}</a></td>
       {% endif %}
+
+      {% if d.watershed.fp_longest is not defined %}
+      <td></td>
+      {% else %}
+      <td>{{ d.watershed.fp_longest }}</td>
+      {% endif %}
+
+      {% if d.watershed.fp_longest_length is not defined %}
+      <td></td>
+      {% else %}
+      <td>{{ unitizer(d.watershed.fp_longest_length,"m") | safe }}</td>
+      {% endif %}
+
+      {% if d.watershed.fp_longest_slope is not defined %}
+      <td></td>
+      {% else %}
+      <td>{{ d.watershed.fp_longest_slope|round(3) }}</td>
+      {% endif %}
+
     </tr>
     {% endfor %}
   </tbody>
@@ -73,14 +99,14 @@
       <th>TOPAZ ID</th>
       <th>WEPP ID</th>
       <th>ChnEnum</th>
-      <th>Cell Width</th>
+      <th>WEPP Width</th>
       <th>Order</th>
       <th>Length</th>
       <th>Area</th>
       <th>Slope</th>
       <th>Aspect</th>
       <th>Slope File</th>
-      <th>Dominant Landuse</th>
+      <th>Channel Type</th>
       <th>Dominant Soil</th>
       <th>Channel Type</th>
       <th>Climate File</th>
@@ -91,7 +117,7 @@
       <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
-      <td>px</td>
+      <td>{{ unitizer_units("m") | safe }}</td>
       <td>{{ unitizer_units("m") | safe }}</td>
       <td>{{ unitizer_units("ha") | safe }}</td>
       <td>&nbsp;</td>
@@ -108,17 +134,17 @@
       <td>{{ d.meta.topaz_id }}</td>
       <td>{{ d.meta.wepp_id }}</td>
       <td>{{ d.meta.chn_enum }}</td>
-      <td>{{ d.watershed.cell_width }}</td>
+      <td>{{ unitizer(d.watershed.chn_wepp_width,"m") | safe }}</td>
       <td>{{ d.watershed.order }}</td>
       <td>{{ unitizer(d.watershed.length,"m") | safe }}</td>
       <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
       <td>{{ d.watershed.slope_scalar|round(3) }}</td>
       <td>{{ d.watershed.aspect|round(0) }}</td>
       <td><a href="../../../browse/watershed/{{ d.watershed.fname }}" target="_blank">{{ d.watershed.fname }}</a></td>
-      {% if d.landuse.desc is not defined %}
+      {% if d.watershed.channel_type is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.landuse.desc }} (<a href="../../../view/management/{{ d.landuse.key }}/" target="_blank">{{ d.landuse.key }}</a>)</td>
+      <td>{{ d.watershed.channel_type }}</td>
       {% endif %}
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>

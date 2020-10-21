@@ -201,11 +201,11 @@ class TurkeyMod(NoDbBase, LocationMixin):
             shutil.copyfile(_join(_data_dir, soil_fn),
                             _join(soils_dir, _split(soil_fn)[-1]))
             soils_d[str(k)] = SoilSummary(
-                Mukey=str(k),
-                FileName=_split(soil_fn)[-1],
+                mukey=str(k),
+                fname=_split(soil_fn)[-1],
                 soils_dir=soils_dir,
-                BuildDate="N/A",
-                Description=soil_fn,
+                build_date="N/A",
+                desc=soil_fn,
                 pct_coverage=-1
             )
 
