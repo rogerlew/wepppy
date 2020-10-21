@@ -860,6 +860,8 @@ def runs0(runid, config):
         landuseoptions = landuse.landuseoptions
         soildboptions = soilsdb.load_db()
 
+        critical_shear_options = management.load_channel_d50_cs()
+
         log_access(wd, current_user, request.remote_addr)
         return render_template('0.html',
                                user=current_user,
@@ -874,6 +876,7 @@ def runs0(runid, config):
                                rangeland_cover=rangeland_cover,
                                landuseoptions=landuseoptions,
                                soildboptions=soildboptions,
+                               critical_shear_options=critical_shear_options,
                                precisions=wepppy.nodb.unitizer.precisions)
     except:
         return exception_factory()
@@ -2645,6 +2648,7 @@ def submit_task_run_wepp(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
+    print(request.form)
     try:
         wepp.parse_inputs(request.form)
     except Exception:
