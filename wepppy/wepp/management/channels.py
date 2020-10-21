@@ -15,6 +15,13 @@ _thisdir = os.path.dirname(__file__)
 _datadir = _join(_thisdir, 'data')
 
 
+def _str(v):
+    ret = '%0.5f' % float(v)
+    if ret == '0.00000':
+        ret = '%1.e' % float(v)
+    return ret
+
+
 def load_channels():
     """
     loads the channel soil managements from the channel.defs file
@@ -33,9 +40,9 @@ def load_channels():
         desc = block[1]
         contents = block[2:-2]
         contents[3] = '\n'.join(contents[3].split())
-        contents[4] = ' '.join(['%0.5f' % float(v) for v in contents[4].split()])
-        contents[5] = ' '.join(['%0.5f' % float(v) for v in contents[5].split()])
-        contents[6] = ' '.join(['%0.5f' % float(v) for v in contents[6].split()])
+        contents[4] = ' '.join([_str(v) for v in contents[4].split()])
+        contents[5] = ' '.join([_str(v) for v in contents[5].split()])
+        contents[6] = ' '.join([_str(v) for v in contents[6].split()])
 #        contents[7] = ' '.join(['%0.5f' % float(v) for v in contents[7].split()])
         contents = '\n'.join(contents)
         rot = block[-1]
