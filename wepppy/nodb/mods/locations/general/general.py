@@ -14,10 +14,8 @@ from os.path import exists as _exists
 import jsonpickle
 from copy import deepcopy
 
-from configparser import NoOptionError
-
 from .....all_your_base import isfloat
-from ....base import NoDbBase, TriggerEvents
+from ....base import NoDbBase, TriggerEvents, config_get_path, config_get_str, config_get_float
 from ....soils import Soils
 from ....watershed import Watershed
 
@@ -33,7 +31,7 @@ class GeneralModNoDbLockedException(Exception):
     pass
 
 
-# DEFAULT_WEPP_TYPE = 'Granitic'
+DEFAULT_WEPP_TYPE = 'Granitic'
 
 
 class GeneralMod(NoDbBase, LocationMixin):
@@ -44,32 +42,10 @@ class GeneralMod(NoDbBase, LocationMixin):
 
         config = self.config
 
-        try:
-            _lc_lookup_fn = config.get('nodb', 'lc_lookup_fn')
-        except NoOptionError:
-            _lc_lookup_fn = 'landSoilLookup.csv'
+        self._lc_lookup_fn = config_get_path(config, 'nodb', 'lc_lookup_fn', 'landSoilLookup.csv')
+        self._default_wepp_type = config_get_str(config, 'nodb', 'default_wepp_type', DEFAULT_WEPP_TYPE)
+        self._kslast = config_get_float(config, 'nodb', 'kslast')
 
-        self._lc_lookup_fn = _lc_lookup_fn
-
-
-        try:
-            _default_wepp_type = config.get('nodb', 'default_wepp_type')
-        except NoOptionError:
-            _default_wepp_type = 'Granitic'
-
-        try:
-            _kslast = config.get('nodb', 'kslast')
-
-            if isfloat(_kslast):
-                _kslast = float(_kslast)
-            else:
-                _kslast = None
-        except NoOptionError:
-            _kslast = None
-
-        self._kslast = _kslast
-
-        self._default_wepp_type = _default_wepp_type
         self._data_dir = _data_dir
 
         self.lock()
