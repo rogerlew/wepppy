@@ -85,16 +85,16 @@
 
             <br/>
             <h5>Channel Parameters</h5>
+
             <div class="form-group row" id="channel_critical_shear_container">
                 <div class="col-sm-4">
-                    <label for="channel_critical_shear">Critical Shear Based on D50 Channel Particle Size: </label>
+                    <label for="channel_critical_shear">Critical Shear Based on Channel Particle Size: </label>
                 </div>
                 <div class="col-sm-4">
                     <select class="form-control disable-readonly" id="channel_critical_shear" name="channel_critical_shear" >
+                        <option value="{{ wepp.channel_critical_shear }}" selected>CS = {{ wepp.channel_critical_shear }}</option>
                         {% for opt in critical_shear_options %}
-                        <option value="{{ opt["cs"] }}"
-                                {% if wepp.channel_critical_shear <= opt["cs_max"] and
-                                      wepp.channel_critical_shear > opt["cs_min"] %}selected{% endif %}>
+                        <option value="{{ opt["cs"] }}">
                             {{ opt["particle_class"] }} ({{ opt["particle_diameter_range"] }} mm) CS = {{ opt["cs"] }}
                         </option>
                         {% endfor %}
