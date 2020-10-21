@@ -23,6 +23,7 @@ gdal.UseExceptions()
 def all_hillslopes(landuse, soils):
     return list(landuse.domlc_d.keys())
 
+
 def _identify_outcrop_mukeys(soils):
     outcrop_mukeys = []
     _soils = soils.subs_summary
@@ -341,7 +342,7 @@ if __name__ == '__main__':
 
             log_print('abstracting watershed')
             wat = Watershed.getInstance(wd)
-            wat.abstract_watershed(cell_width=None)
+            wat.abstract_watershed()
             translator = wat.translator_factory()
             topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
 
