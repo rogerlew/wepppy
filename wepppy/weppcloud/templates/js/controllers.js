@@ -4136,6 +4136,7 @@ var Wepp = function () {
         that.lateral_flow = $("#wepp_form #lateral_flow");
         that.baseflow = $("#wepp_form #baseflow");
         that.sediment = $("#wepp_form #sediment");
+        that.channel_critical_shear = $("#wepp_form #channel_critical_shear");
 
         that.attempts = 0;
 
@@ -4263,9 +4264,11 @@ var Wepp = function () {
             self.attempts = 0;
             setTimeout(self.status_loop, 5000);
 
+            var data = self.form.serialize() + '&channel_critical_shear=' + self.channel_critical_shear.val();
+
             $.post({
                 url: "tasks/run_wepp/",
-                data: self.form.serialize(),
+                data: data,
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... Success");
