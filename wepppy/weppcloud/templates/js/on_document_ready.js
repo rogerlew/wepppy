@@ -4,6 +4,7 @@ var site_prefix = "{{ site_prefix }}";
 var runid = "{{ ron.runid }}";
 var config = "{{ ron.config_stem }}";
 var ispoweruser = {{ current_user.has_role('PowerUser') | tojson }};
+var WEPP_channel_critical_shear = null;
 
 var error = null;
 
