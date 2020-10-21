@@ -1,0 +1,15 @@
+﻿Coarse cobble,128 – 256,170
+Fine cobble,64 – 128,83
+Very coarse gravel,32 – 64,40
+Coarse gravel,16 – 32,19
+Medium gravel,8 – 16,9
+Fine gravel,4 – 8,4.5
+Very fine gravel,2 – 4,3
+Very coarse sand,1 – 2,0.9
+Coarse sand,0.5 – 1,0.4
+Medium sand,0.25 – 0.5,0.2
+Fine sand,0.125 – 0.25,0.17
+Very fine sand,0.0625 – 0.125,0.13
+Coarse silt,0.0310 – 0.0625,0.1
+Medium silt,0.0156 – 0.0310,0.07
+Fine silt,0.0078 – 0.0156,0.05
