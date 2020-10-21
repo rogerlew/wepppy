@@ -36,6 +36,7 @@ _thisdir = os.path.dirname(__file__)
 _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
+_disturbed_map_fn = _join(_management_dir, "disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
@@ -1313,6 +1314,19 @@ class ManagementSummary(object):
         self.desc = kwargs["Description"]
         self.color = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
 
+        if "DisturbedClass" in kwargs:
+            disturbed_class = kwargs["DisturbedClass"]
+            if disturbed_class == '':
+                disturbed_class = None
+
+            assert disturbed_class in (None, 'bare', 'skid', 'mulch', 'forest', 'shrub', 'young forest',
+                                       'short grass', 'tall grass', 'forest high sev fire',
+                                       'forest low sev fire', 'forest prescribed',
+                                       'shrub high sev fire', 'shrub low sev fire',
+                                       'shrub prescribed')
+
+            self.disturbed_class = disturbed_class
+
         self.area = None
 
         self.pct_coverage = None
@@ -1359,7 +1373,7 @@ class ManagementSummary(object):
         if hasattr(self, "_map"):
             _map = self._map
 
-        return dict(key=self.key, _map=_map,
+        d = dict(key=self.key, _map=_map,
                     man_fn=self.man_fn, man_dir=self.man_dir, 
                     desc=self.desc, color=self.color, area=self.area, 
                     pct_coverage=self.pct_coverage,
@@ -1367,6 +1381,11 @@ class ManagementSummary(object):
                     cancov_override=self.cancov_override,
                     inrcov_override=self.inrcov_override,
                     rilcov_override=self.rilcov_override)
+
+        if hasattr(self, 'disturbed_class'):
+            d['disturbed_class'] = self.disturbed_class
+
+        return d
 
 
 class Management(object):
@@ -1728,6 +1747,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'turkey' in _map.lower():
         with open(_turkey_map_fn) as fp:
+            d = json.load(fp)
+    elif 'disturbed' in _map.lower():
+        with open(_disturbed_map_fn) as fp:
             d = json.load(fp)
     else:
         with open(_map_fn) as fp:

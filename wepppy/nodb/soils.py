@@ -25,22 +25,24 @@ import jsonpickle
 # wepppy
 from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
 from wepppy.watershed_abstraction import ischannel
-from wepppy.all_your_base import wmesque_retrieve, isfloat
+from wepppy.all_your_base import wmesque_retrieve, isfloat, NCPU
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents, DEFAULT_SSURGO_DB
+from .base import (
+    NoDbBase,
+    TriggerEvents,
+    DEFAULT_SSURGO_DB,
+    config_get_float,
+    config_get_bool,
+    config_get_int,
+    config_get_str,
+    config_get_path
+)
+
 from .ron import Ron
-from .watershed import Watershed
-
-
-try:
-    NCPU = int(os.environ['WEPPPY_NCPU'])
-except KeyError:
-    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-    if NCPU < 1:
-        NCPU = 1
+from .watershed import Watershed, WatershedNotAbstractedError
 
 
 class SoilsNoDbLockedException(Exception):
@@ -77,7 +79,7 @@ class Soils(NoDbBase):
             self._single_selection = 0
             self._single_dbselection = None
 
-            self._ssurgo_db = config.get('soils', 'ssurgo_db')
+            self._ssurgo_db = config_get_path(config, 'soils', 'ssurgo_db', DEFAULT_SSURGO_DB)
 
             self.domsoil_d = None  # topaz_id keys
             self.ssurgo_domsoil_d = None
@@ -92,13 +94,14 @@ class Soils(NoDbBase):
             if not _exists(soils_dir):
                 os.mkdir(soils_dir)
 
-            _soils_map = config.get('soils', 'soils_map', fallback=None)
+            _soils_map = config_get_path(config, 'soils', 'soils_map')
             if _soils_map is not None:
-                from wepppy.nodb.mods import MODS_DIR
-                _soils_map = _soils_map.replace('MODS_DIR', MODS_DIR)
                 _soil_fn = _join(self.soils_dir, _split(_soils_map)[-1])
                 shutil.copyfile(_soils_map, _soil_fn)
-                shutil.copyfile(_soils_map[:-4] + '.prj', _soil_fn[:-4] + '.prj')
+
+                if _exists(_soils_map[:-4] + '.prj'):
+                    shutil.copyfile(_soils_map[:-4] + '.prj', _soil_fn[:-4] + '.prj')
+
                 _soils_map = _split(_soils_map)[-1]
 
             self._soils_map = _soils_map
@@ -251,6 +254,11 @@ class Soils(NoDbBase):
             raise
 
     def build_statsgo(self):
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+        if not watershed.is_abstracted:
+            raise WatershedNotAbstractedError()
+
         soils_dir = self.soils_dir
 
         self.lock()
@@ -258,7 +266,7 @@ class Soils(NoDbBase):
         # noinspection PyBroadException
         try:
             statsgoSpatial = StatsgoSpatial()
-            watershed = Watershed.getInstance(self.wd)
+            watershed = Watershed.getInstance(wd)
 
             domsoil_d = {}
             for topaz_id, sub in watershed.sub_iter():
@@ -310,7 +318,7 @@ class Soils(NoDbBase):
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
-            self = self.getInstance(self.wd)  # reload instance from .nodb
+            self = self.getInstance(wd)  # reload instance from .nodb
 
         except Exception:
             self.unlock('-f')
@@ -365,6 +373,11 @@ class Soils(NoDbBase):
             raise
 
     def build(self):
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+        if not watershed.is_abstracted:
+            raise WatershedNotAbstractedError()
+
         if self.config_stem.startswith('ak'):
             self._build_ak()
         elif self.mode == SoilsMode.Gridded:
@@ -496,11 +509,11 @@ class Soils(NoDbBase):
 
             domsoil_d = {}
             soils = {str(mukey): SoilSummary(
-                        Mukey=mukey,
-                        FileName=None,
+                        mukey=mukey,
+                        fname=None,
                         soils_dir=None,
-                        BuildDate="N/A",
-                        Description=None,
+                        build_date=str(datetime.now()),
+                        desc=None,
                         pct_coverage=100.0
                     )}
 
@@ -613,11 +626,11 @@ class Soils(NoDbBase):
             fn = _split(sol)[-1]
 
             soils = {key: SoilSummary(
-                Mukey=key,
-                FileName=fn,
+                mukey=key,
+                fname=fn,
                 soils_dir=soils_dir,
-                BuildDate=str(datetime.now()),
-                Description=key
+                build_date=str(datetime.now()),
+                desc=key
             )}
 
             shutil.copyfile(sol, _join(soils_dir, fn))

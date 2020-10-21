@@ -21,7 +21,7 @@ import multiprocessing
 # wepppy
 from wepppy.landcover import LandcoverMap
 
-from wepppy.all_your_base import isfloat, isint, YearlessDate, probability_of_occurrence
+from wepppy.all_your_base import isfloat, isint, YearlessDate, probability_of_occurrence, NCPU
 
 from wepppy.wepp import Element
 from wepppy.climates.cligen import ClimateFile
@@ -89,13 +89,6 @@ from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
 
 from .rhempost import RhemPost
-
-try:
-    NCPU = int(os.environ['WEPPPY_NCPU'])
-except KeyError:
-    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-    if NCPU < 1:
-        NCPU = 1
 
 
 class RhemNoDbLockedException(Exception):
