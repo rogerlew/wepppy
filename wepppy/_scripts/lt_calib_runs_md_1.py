@@ -601,8 +601,8 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         # dict(wd='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
-             # extent=[-120.22338867187501, 38.65012583524745, -119.74273681640626, 39.02451827974919],
-             # map_center=[-119.98306274414064, 38.83756825896614],
+             # extent=[-120.25085449218751, 38.636718267483616, -119.77020263671876, 39.0111810513999],
+             # map_center=[-120.01052856445314, 38.82419583577267],
              # map_zoom=11,
              # outlet=[-120.00218219772862, 38.937957400165246],
              # landuse=None,
