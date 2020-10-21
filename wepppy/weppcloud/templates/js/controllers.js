@@ -71,6 +71,9 @@ var Project = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     console.log(error);
                 }
@@ -89,6 +92,9 @@ var Project = function () {
                         alert("Error clearing locks");
                     }
                 },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     alert("Error clearing locks");
                 }
@@ -103,6 +109,9 @@ var Project = function () {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                 }
@@ -119,6 +128,9 @@ var Project = function () {
                 dataType: "json",
                 success: function success(response) {
                     self.set_readonly_controls(state);
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                 }
@@ -175,6 +187,9 @@ var Project = function () {
                 data: unit_preferences,
                 success: function success(response) {
                     if (response.Success === true) {} else {}
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     console.log(error);
@@ -242,6 +257,9 @@ var Team = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     console.log(error);
                 }
@@ -262,6 +280,9 @@ var Team = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     console.log(error);
                 }
@@ -276,6 +297,9 @@ var Team = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -333,6 +357,9 @@ var Map = function () {
                     var lat = coordRound(ev.latlng.lat);
                     self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + lng + ", " + lat);
                     self.isFetchingElevation = false;
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     console.log(error);
@@ -432,6 +459,9 @@ var Map = function () {
                     self.drilldown.html(response);
                     var project = Project.getInstance();
                     project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     console.log(error);
@@ -558,6 +588,9 @@ var Baer = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -583,6 +616,9 @@ var Baer = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -618,6 +654,9 @@ var Baer = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -660,6 +699,9 @@ var Baer = function () {
                                     map.flyToBounds(self.baer_map._bounds);
                                 }
                             },
+                            error: function error(jqXHR)  {
+                                self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                            },
                             fail: function fail(jqXHR, textStatus, errorThrown) {
                                 self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                             }
@@ -667,6 +709,9 @@ var Baer = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -680,6 +725,9 @@ var Baer = function () {
                     success: function (response) {
                         var map = Map.getInstance();
                         map.sub_legend.html(response);
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -759,6 +807,9 @@ var ChannelDelineation = function () {
                 url: "query/has_dem/",
                 cache: false,
                 success: onSuccessCallback,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -803,6 +854,9 @@ var ChannelDelineation = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -830,6 +884,9 @@ var ChannelDelineation = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -853,28 +910,19 @@ var ChannelDelineation = function () {
             $("#map_bounds").val(extent);
             $("#map_distance").val(distance);
 
-            var ispoweruser = false;
+            if (zoom >= self.zoom_min || ispoweruser) {
+                $("#btn_build_channels").prop("disabled", false);
+                $("#hint_build_channels").text("");
 
-            $.get({
-                url: site_prefix + "/ispoweruser/",
-                success: function success(response) {
-                    ispoweruser = response;
-                }
-            }).always(function() {
-                if (zoom >= self.zoom_min || ispoweruser) {
-                    $("#btn_build_channels").prop("disabled", false);
-                    $("#hint_build_channels").text("");
+                $("#btn_build_channels_en").prop("disabled", false);
+                $("#hint_build_channels_en").text("");
+            } else {
+                $("#btn_build_channels_en").prop("disabled", true);
+                $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
 
-                    $("#btn_build_channels_en").prop("disabled", false);
-                    $("#hint_build_channels_en").text("");
-                } else {
-                    $("#btn_build_channels_en").prop("disabled", true);
-                    $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
-
-                    $("#btn_build_channels_en").prop("disabled", true);
-                    $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
-                }
-            });
+                $("#btn_build_channels_en").prop("disabled", true);
+                $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
+            }
         };
 
         that.show = function () {
@@ -912,6 +960,9 @@ var ChannelDelineation = function () {
                     }
                     self.status.html(task_msg + "... Success");
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -945,6 +996,9 @@ var ChannelDelineation = function () {
 
                     self.status.html(task_msg + "... Success");
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -969,6 +1023,9 @@ var ChannelDelineation = function () {
                 url: "resources/channels.json",
                 cache: false,
                 success: self.on2Success,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1030,6 +1087,9 @@ var ChannelDelineation = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1100,6 +1160,9 @@ var Outlet = function () {
                     map.ctrls.addOverlay(self.outletMarker, "Outlet");
                     self.status.html(task_msg + "... Success");
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1110,6 +1173,9 @@ var Outlet = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1153,6 +1219,9 @@ var Outlet = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1282,6 +1351,9 @@ var SubcatchmentDelineation = function () {
                 url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1428,6 +1500,9 @@ var SubcatchmentDelineation = function () {
                 url: "query/watershed/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1440,6 +1515,9 @@ var SubcatchmentDelineation = function () {
                     success: function (response) {
                         var map = Map.getInstance();
                         map.sub_legend.html(response);
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1455,6 +1533,9 @@ var SubcatchmentDelineation = function () {
                 url: "query/landuse/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1467,6 +1548,9 @@ var SubcatchmentDelineation = function () {
                     success: function (response) {
                         var map = Map.getInstance();
                         map.sub_legend.html(response);
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1482,6 +1566,9 @@ var SubcatchmentDelineation = function () {
                 url: "query/rangeland_cover/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1494,6 +1581,9 @@ var SubcatchmentDelineation = function () {
                     success: function (response) {
                         var map = Map.getInstance();
                         map.sub_legend.html(response);
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1509,6 +1599,9 @@ var SubcatchmentDelineation = function () {
                 url: "query/soils/subcatchments/",
                 cache: false,
                 success: that.cmapCallback,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1521,6 +1614,9 @@ var SubcatchmentDelineation = function () {
                     success: function (response) {
                         var map = Map.getInstance();
                         map.sub_legend.html(response);
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1551,6 +1647,9 @@ var SubcatchmentDelineation = function () {
                     self.dataPhosphorus = data;
                     self.renderPhosphorus();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1576,6 +1675,9 @@ var SubcatchmentDelineation = function () {
                     self.labelPhosphorusMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1588,6 +1690,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelPhosphorusUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1636,6 +1741,9 @@ var SubcatchmentDelineation = function () {
                     self.dataRunoff = data;
                     self.renderRunoff();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1654,6 +1762,9 @@ var SubcatchmentDelineation = function () {
                     self.dataRunoff = data;
                     self.renderRunoff();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1671,6 +1782,9 @@ var SubcatchmentDelineation = function () {
                     }
                     self.dataRunoff = data;
                     self.renderRunoff();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1693,6 +1807,9 @@ var SubcatchmentDelineation = function () {
                     self.labelRunoffMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1705,6 +1822,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelRunoffUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1755,6 +1875,9 @@ var SubcatchmentDelineation = function () {
                     self.dataLoss = data;
                     self.renderLoss();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1774,6 +1897,9 @@ var SubcatchmentDelineation = function () {
                     self.labelLossMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1787,6 +1913,9 @@ var SubcatchmentDelineation = function () {
                     self.labelLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1799,6 +1928,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelLossUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1886,6 +2018,9 @@ var SubcatchmentDelineation = function () {
                     self.labelGriddedLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1899,6 +2034,9 @@ var SubcatchmentDelineation = function () {
                     self.labelGriddedLossMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1911,6 +2049,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelGriddedLossUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -1966,6 +2107,9 @@ var SubcatchmentDelineation = function () {
                     self.dataRhemRunoff = data;
                     self.renderRhemRunoff();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1986,6 +2130,9 @@ var SubcatchmentDelineation = function () {
                     self.labelRhemRunoffMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -1998,6 +2145,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelRhemRunoffUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2048,6 +2198,9 @@ var SubcatchmentDelineation = function () {
                     self.dataRhemSedYield = data;
                     self.renderRhemSedYield();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2073,6 +2226,9 @@ var SubcatchmentDelineation = function () {
                     self.labelRhemSedYieldMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2085,6 +2241,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelRhemSedYieldUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2134,6 +2293,9 @@ var SubcatchmentDelineation = function () {
                     self.dataRhemSoilLoss = data;
                     self.renderRhemSoilLoss();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2153,6 +2315,9 @@ var SubcatchmentDelineation = function () {
                     self.labelRhemSoilLossMin.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2166,6 +2331,9 @@ var SubcatchmentDelineation = function () {
                     self.labelRhemSoilLossMax.html(response.Content);
                     Project.getInstance().set_preferred_units();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2178,6 +2346,9 @@ var SubcatchmentDelineation = function () {
                 success: function success(response) {
                     self.labelRhemSoilLossUnits.html(response.Content);
                     Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2238,6 +2409,9 @@ var SubcatchmentDelineation = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2262,6 +2436,9 @@ var SubcatchmentDelineation = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2284,6 +2461,9 @@ var SubcatchmentDelineation = function () {
                     self.info.html(response);
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2342,6 +2522,9 @@ var RangelandCover = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2355,6 +2538,9 @@ var RangelandCover = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2388,6 +2574,9 @@ var RangelandCover = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2446,6 +2635,9 @@ var Landuse = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2465,6 +2657,9 @@ var Landuse = function () {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2488,6 +2683,9 @@ var Landuse = function () {
                 success: function success(response) {
                     self.report();
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2501,6 +2699,9 @@ var Landuse = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2542,6 +2743,9 @@ var Landuse = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -2701,6 +2905,9 @@ var RangelandCoverModify = function () {
                     that.input_cryptogams.val(covers['cryptogams']);
 
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     console.log(error);
                 }
@@ -2760,6 +2967,9 @@ var RangelandCoverModify = function () {
                     map.removeLayer(that.selectionRect);
                     that.selectionRect = null;
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     console.log(error);
                 }
@@ -2801,6 +3011,9 @@ var RangelandCoverModify = function () {
                 url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -2905,6 +3118,9 @@ var RangelandCoverModify = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3065,6 +3281,9 @@ var LanduseModify = function () {
                     that.selectionRect = null;
 
                 },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     console.log(error);
                 }
@@ -3105,6 +3324,9 @@ var LanduseModify = function () {
                 url: "resources/subcatchments.json",
                 cache: false,
                 success: self.onShowSuccess,
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3198,6 +3420,9 @@ var LanduseModify = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3253,6 +3478,9 @@ var Soil = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3266,6 +3494,9 @@ var Soil = function () {
                 cache: false,
                 success: function success(response) {
                     self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3311,6 +3542,9 @@ var Soil = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3405,6 +3639,9 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3437,6 +3674,9 @@ var Climate = function () {
                         self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                    },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
@@ -3451,6 +3691,9 @@ var Climate = function () {
                         self.stationselection.html(response);
                         self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3467,6 +3710,9 @@ var Climate = function () {
                         self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                    },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
@@ -3481,6 +3727,9 @@ var Climate = function () {
                         self.stationselection.html(response);
                         self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
+                    },
+                    error: function error(jqXHR)  {
+                        self.pushResponseStacktrace(self, jqXHR.responseJSON);
                     },
                     fail: function fail(jqXHR, textStatus, errorThrown) {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3515,6 +3764,9 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3530,6 +3782,9 @@ var Climate = function () {
                 success: function success(response) {
                     $("#climate_monthlies").html(response);
                     project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3559,6 +3814,9 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3577,6 +3835,9 @@ var Climate = function () {
                 success: function success(response) {
                     self.info.html(response);
                     project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3633,6 +3894,9 @@ var Climate = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3827,6 +4091,9 @@ var Climate = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3891,6 +4158,9 @@ var Wepp = function () {
                     if (response.sediment !== null)
                         self.sediment.val(response.sediment.toFixed(0));
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3915,6 +4185,9 @@ var Wepp = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3941,6 +4214,9 @@ var Wepp = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(error) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -3965,6 +4241,9 @@ var Wepp = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(error) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -3995,6 +4274,9 @@ var Wepp = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -4018,6 +4300,9 @@ var Wepp = function () {
                 success: function success(response) {
                     $('#wepp-results').html(response);
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -4030,6 +4315,9 @@ var Wepp = function () {
                     self.info.html(response);
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -4115,6 +4403,9 @@ var Observed = function () {
                         self.hideControl();
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -4144,6 +4435,9 @@ var Observed = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -4210,6 +4504,9 @@ var DebrisFlow = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -4274,6 +4571,9 @@ var Ash = function () {
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
@@ -4368,6 +4668,9 @@ var Rhem = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -4391,6 +4694,9 @@ var Rhem = function () {
                 success: function success(response) {
                     $('#rhem-results').html(response);
                 },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
@@ -4403,6 +4709,9 @@ var Rhem = function () {
                     self.info.html(response);
                     self.status.html(task_msg + "... Success");
                     project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
                 },
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);

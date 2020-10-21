@@ -35,7 +35,7 @@ from werkzeug.utils import secure_filename
 import psycopg2
 from flask import (
     Flask, jsonify, request, render_template,
-    redirect, send_file, Response, abort
+    redirect, send_file, Response, abort, make_response
 )
 
 from flask_sqlalchemy import SQLAlchemy
@@ -102,6 +102,7 @@ from wepppy.nodb import (
     RangelandCover, RangelandCoverMode,
     Rhem, RhemPost,
     Baer,
+    Disturbed,
     DebrisFlow,
     Ash, AshPost,
     get_configs
@@ -325,10 +326,10 @@ def usermod():
         return exception_factory()
 
 
-@app.route('/ispoweruser')
-@app.route('/ispoweruser/')
-def ispoweruser():
-    return jsonify(current_user.has_role('PowerUser'))
+# @app.route('/ispoweruser')
+# @app.route('/ispoweruser/')
+# def ispoweruser():
+#     return jsonify(current_user.has_role('PowerUser'))
 
 
 @app.route('/tasks/usermod/', methods=['POST'])
@@ -410,15 +411,14 @@ def error_factory(msg='Error Handling Request'):
     return jsonify({'Success': False,
                     'Error': msg})
 
-
 def exception_factory(msg='Error Handling Request',
                       stacktrace=None):
     if stacktrace is None:
         stacktrace = traceback.format_exc()
 
-    return jsonify({'Success': False,
+    return make_response(jsonify({'Success': False,
                     'Error': msg,
-                    'StackTrace': stacktrace})
+                    'StackTrace': stacktrace}), 500)
 
 
 def success_factory(kwds=None):
@@ -774,9 +774,16 @@ def archive(runid, config):
     wd = get_wd(runid)
 
     from wepppy.export import archive_project, arc_export
+    from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
 
     try:
         arc_export(wd)
+    except Exception:
+        return exception_factory()
+
+    try:
+        export_hillslopes_prep_details(wd)
+        export_channels_prep_details(wd)
     except Exception:
         return exception_factory()
 
@@ -1868,9 +1875,14 @@ def resources_soil_legend(runid, config):
 @app.route('/runs/<string:runid>/<config>/resources/legends/sbs/')
 def resources_sbs_legend(runid, config):
     wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    if 'baer' in ron.mods:
+        baer = Baer.getInstance(wd)
+    else:
+        baer = Disturbed.getInstance(wd)
 
     return render_template('legends/landuse.htm',
-                           legend=Baer.getInstance(wd).legend)
+                           legend=baer.legend)
 
 
 @app.route('/resources/usgs/gage_locations/')
@@ -3303,7 +3315,12 @@ def unitizer_units_route(runid, config):
 def query_baer_wgs_bounds(runid, config):
     try:
         wd = get_wd(runid)
-        baer = Baer.getInstance(wd)
+        ron = Ron.getInstance(wd)
+        if 'baer' in ron.mods:
+            baer = Baer.getInstance(wd)
+        else:
+            baer = Disturbed.getInstance(wd)
+
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
 
@@ -3320,7 +3337,12 @@ def query_baer_wgs_bounds(runid, config):
 def query_baer_class_map(runid, config):
     try:
         wd = get_wd(runid)
-        baer = Baer.getInstance(wd)
+        ron = Ron.getInstance(wd)
+        if 'baer' in ron.mods:
+            baer = Baer.getInstance(wd)
+        else:
+            baer = Disturbed.getInstance(wd)
+
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
 
@@ -3353,12 +3375,16 @@ def task_baer_class_map(runid, config):
 def resources_baer_sbs(runid, config):
     try:
         wd = get_wd(runid)
-        baer = Baer.getInstance(wd)
+        ron = Ron.getInstance(wd)
+        if 'baer' in ron.mods:
+            baer = Baer.getInstance(wd)
+        else:
+            baer = Disturbed.getInstance(wd)
+
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
 
-        fn = _join(baer.baer_dir, 'baer.wgs.rgba.png')
-        return send_file(fn, mimetype='image/png')
+        return send_file(baer.baer_rgb_png, mimetype='image/png')
     except Exception:
         return exception_factory()
 
@@ -3367,7 +3393,12 @@ def resources_baer_sbs(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/upload_sbs/', methods=['POST'])
 def task_upload_sbs(runid, config):
     wd = get_wd(runid)
-    baer = Baer.getInstance(wd)
+
+    ron = Ron.getInstance(wd)
+    if 'baer' in ron.mods:
+        baer = Baer.getInstance(wd)
+    else:
+        baer = Disturbed.getInstance(wd)
 
     try:
         file = request.files['input_upload_sbs']
