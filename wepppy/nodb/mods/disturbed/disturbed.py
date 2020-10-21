@@ -549,7 +549,6 @@ class Disturbed(NoDbBase):
                 coverage = 100.0 * soils.soils[k].area / watershed.totalarea
                 soils.soils[k].pct_coverage = coverage
 
-
             soils.dump_and_unlock()
 
         except Exception:

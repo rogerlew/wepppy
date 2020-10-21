@@ -28,7 +28,8 @@ from wepppy.all_your_base import (
     isint,
     YearlessDate,
     probability_of_occurrence,
-    weibull_series
+    weibull_series,
+    NCPU
 )
 
 from wepppy.wepp import Element
@@ -48,13 +49,6 @@ from wepppy.nodb.wepp import Wepp
 
 from .wind_transport_thresholds import *
 from .ash_model import *
-
-try:
-    NCPU = int(os.environ['WEPPPY_NCPU'])
-except KeyError:
-    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-    if NCPU < 1:
-        NCPU = 1
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')

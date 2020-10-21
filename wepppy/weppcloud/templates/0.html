@@ -27,8 +27,9 @@
 {% include 'header.htm'%}
 {% include 'controls/poweruser_panel.htm'%}
 <div role="main" class="container">
+<div style="height: 2em;"> </div>
 {% include 'controls/map.htm'%}
-{% if 'baer' in ron.mods %}
+{% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
 {% if 'lt' not in ron.mods %}
 {% include 'controls/baer_upload.htm'%}
 {% endif %}

@@ -26,9 +26,18 @@ from wepppy.watershed_abstraction import ischannel
 from wepppy.all_your_base import wmesque_retrieve
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents, DEFAULT_NLCD_DB
+from .base import (
+    NoDbBase,
+    TriggerEvents,
+    DEFAULT_NLCD_DB,
+    config_get_path,
+    config_get_str,
+    config_get_bool,
+    config_get_int,
+    config_get_float
+)
 from .ron import Ron
-from .watershed import Watershed
+from .watershed import Watershed, WatershedNotAbstractedError
 
 
 class LanduseNoDbLockedException(Exception):
@@ -76,27 +85,28 @@ class Landuse(NoDbBase):
             self._single_man = None
             self.domlc_d = None  # topaz_id keys, ManagementSummary values
             self.managements = None
-            cover_defaults_fn = config.get('landuse', 'cover_defaults', fallback=None)
+            cover_defaults_fn = config_get_path(config, 'landuse', 'cover_defaults')
 
-            if cover_defaults_fn is not None and cover_defaults_fn != '':
+            if cover_defaults_fn is not None:
                 cover_defaults_fn = cover_defaults_fn.replace('MODS_DIR', MODS_DIR)
                 self.cover_defaults_d = read_cover_defaults(cover_defaults_fn)
             else:
                 self.cover_defaults_d = None
 
-            self._mapping = config.get('landuse', 'mapping', fallback=None)
+            self._mapping = config_get_str(config, 'landuse', 'mapping')
 
-            self._nlcd_db = config.get('landuse', 'nlcd_db', fallback=None)
+            self._nlcd_db = config_get_path(config, 'landuse', 'nlcd_db', DEFAULT_NLCD_DB)
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
                 os.mkdir(lc_dir)
 
-            _landuse_map = config.get('landuse', 'landuse_map', fallback=None)
+            _landuse_map = config_get_path(config, 'landuse', 'landuse_map')
             if _landuse_map is not None:
-                _landuse_map = _landuse_map.replace('MODS_DIR', MODS_DIR)
                 shutil.copyfile(_landuse_map, self.lc_fn)
-                shutil.copyfile(_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj')
+                prj = _landuse_map[:-4] + '.prj'
+                if _exists(prj):
+                    shutil.copyfile(_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj')
 
             self._landuse_map = _landuse_map
             self.dump_and_unlock()
@@ -318,11 +328,16 @@ class Landuse(NoDbBase):
 
     def build(self):
 
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+        if not watershed.is_abstracted:
+            raise WatershedNotAbstractedError()
+
         if self._mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]:
             import wepppy
-            rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
+            rred = wepppy.nodb.mods.Rred.getInstance(wd)
             rred.build_landuse(self._mode)
-            self = self.getInstance(self.wd)  # reload instance from .nodb
+            self = self.getInstance(wd)  # reload instance from .nodb
             self.build_managements()
             return
 
@@ -351,7 +366,7 @@ class Landuse(NoDbBase):
             self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
-            self = Landuse.getInstance(self.wd)
+            self = Landuse.getInstance(wd)
 
             self.build_managements()
             self.set_cover_defaults()
@@ -444,7 +459,7 @@ class Landuse(NoDbBase):
 
         landuseoptions = management.load_map(self.mapping).values()
         landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
-        landuseoptions = [opt for opt in landuseoptions if 'DisturbedWEPPManagement' not in opt['ManagementFile']]
+        # landuseoptions = [opt for opt in landuseoptions if 'DisturbedWEPPManagement' not in opt['ManagementFile']]
 
         if 'baer' in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
