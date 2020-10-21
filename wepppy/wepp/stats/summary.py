@@ -164,7 +164,7 @@ _chn_default_hdr = [
 
 
 _chn_summary_hdr = [
-    'CellWidth',
+    'Width',
     'Order',
     'Slope',
     'Landuse',
@@ -257,7 +257,7 @@ class ChannelSummary(ReportBase):
 
             if chns_summary:
                 chn_summary = chns_summary[topaz_id]
-                _data['CellWidth'] = chn_summary['watershed']['cell_width']
+                _data['Width'] = chn_summary['watershed']['chn_wepp_width']
                 _data['Order'] = chn_summary['watershed']['order']
                 _data['Slope'] = chn_summary['watershed']['slope_scalar']
                 _data['Landuse'] = chn_summary['landuse']['key']
