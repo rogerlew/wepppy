@@ -37,6 +37,9 @@
               {% if 'baer' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/baer.nodb">nodb.baer</a>
               {% endif %}
+              {% if 'disturbed' in ron.mods %}
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/disturbed.nodb">nodb.disturbed</a>
+              {% endif %}
               {% if 'rred' in ron.mods %}
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/rred.nodb">nodb.rred</a>
               {% endif %}
