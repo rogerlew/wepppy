@@ -200,6 +200,9 @@ class PortlandMod(NoDbBase, LocationMixin):
         if not isfloat(pp_scale):
             return
 
+        if pp_scale < 0.0:
+            return
+
         cli_dir = climate.cli_dir
         adj_cli_fn = adjust_func(cli_dir, climate.cli_fn, pp_scale)
         climate.cli_fn = adj_cli_fn
