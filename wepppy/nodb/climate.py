@@ -33,21 +33,14 @@ from wepppy.climates.prism import prism_mod, prism_revision
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn, build_gridmet_prn
-from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator, haversine
+from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator, haversine, NCPU
 from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules
-from .base import NoDbBase, DEFAULT_CLIGEN_DB, TriggerEvents
+from .base import NoDbBase, DEFAULT_CLIGEN_DB, TriggerEvents, config_get_path
 from .watershed import Watershed
 from .ron import Ron
 from .log_mixin import LogMixin
-
-try:
-    NCPU = int(os.environ['WEPPPY_NCPU'])
-except KeyError:
-    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-    if NCPU < 1:
-        NCPU = 1
 
 CLIMATE_MAX_YEARS = 1000
 
@@ -166,25 +159,10 @@ class Climate(NoDbBase, LogMixin):
 
             from wepppy.nodb.mods import MODS_DIR
             config = self.config
-            self._cligen_db = config.get('climate', 'cligen_db')
+            self._cligen_db = config_get_path(config, 'climate', 'cligen_db', DEFAULT_CLIGEN_DB)
 
-            _observed_clis_wc = config.get('climate', 'observed_clis_wc')
-            if _observed_clis_wc is not None:
-                _observed_clis_wc = _observed_clis_wc.replace('MODS_DIR', MODS_DIR)
-
-            if _observed_clis_wc == 'None':
-                _observed_clis_wc = None
-            else:
-                assert _exists(_observed_clis_wc), _observed_clis_wc
-
-            _future_clis_wc = config.get('climate', 'future_clis_wc')
-            if _future_clis_wc is not None:
-                _future_clis_wc = _future_clis_wc.replace('MODS_DIR', MODS_DIR)
-
-            if _future_clis_wc == 'None':
-                _future_clis_wc = None
-            else:
-                assert _exists(_future_clis_wc)
+            _observed_clis_wc = config_get_path(config, 'climate', 'observed_clis_wc')
+            _future_clis_wc = config_get_path(config, 'climate', 'future_clis_wc')
 
             self._observed_clis_wc = _observed_clis_wc
             self._future_clis_wc = _future_clis_wc
@@ -1056,7 +1034,7 @@ class Climate(NoDbBase, LogMixin):
             bbox = ','.join(str(v) for v in bbox)
 
             observed_data = {}
-            daymet_base = self.config.get('climate', 'daymet_observed')
+            daymet_base = config_get_path(self.config, 'climate', 'daymet_observed')
             for varname in ['prcp', 'tmin', 'tmax']:
                 for year in range(start_year, end_year + 1):
                     dataset = _join(daymet_base, varname)
@@ -1154,7 +1132,7 @@ class Climate(NoDbBase, LogMixin):
             bbox = ','.join(str(v) for v in bbox)
 
             observed_data = {}
-            daymet_base = self.config.get('climate', 'daymet_observed')
+            daymet_base = config_get_path(self.config, 'climate', 'daymet_observed')
             for varname in ['prcp', 'tmin', 'tmax']:
                 for year in range(start_year, end_year + 1):
                     dataset = _join(daymet_base, varname)
