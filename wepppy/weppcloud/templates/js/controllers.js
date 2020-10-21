@@ -4140,6 +4140,13 @@ var Wepp = function () {
 
         that.attempts = 0;
 
+        that.addChannelCriticalShear = function (x) {
+            var self = instance;
+            self.channel_critical_shear.append(new Option('User Defined: CS = ' + x, x, true, true));
+
+            console.log('User Defined critical shear has been added to selection');
+        };
+
         that.updatePhosphorus = function () {
             var self = instance;
 
@@ -4264,7 +4271,7 @@ var Wepp = function () {
             self.attempts = 0;
             setTimeout(self.status_loop, 5000);
 
-            var data = self.form.serialize() + '&channel_critical_shear=' + self.channel_critical_shear.val();
+            var data = self.form.serialize();
 
             $.post({
                 url: "tasks/run_wepp/",
