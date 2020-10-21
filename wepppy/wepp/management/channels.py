@@ -8,12 +8,29 @@
 
 import os
 from os.path import join as _join
+import csv
 
 from pprint import pprint
 
 _thisdir = os.path.dirname(__file__)
 _datadir = _join(_thisdir, 'data')
 
+
+def load_channel_d50_cs():
+    with open(_join(_datadir, 'channel_d50_cs.csv')) as fp:
+        rdr = csv.DictReader(fp)
+
+        ret = []
+        for row in rdr:
+            for k, v in row.items():
+                try:
+                    row[k] = float(v)
+                except ValueError:
+                    pass
+
+            ret.append(row)
+
+    return ret
 
 def _str(v):
     ret = '%0.5f' % float(v)

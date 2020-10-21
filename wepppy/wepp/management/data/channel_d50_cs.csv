@@ -1,15 +1,16 @@
-﻿Coarse cobble,128 – 256,170
-Fine cobble,64 – 128,83
-Very coarse gravel,32 – 64,40
-Coarse gravel,16 – 32,19
-Medium gravel,8 – 16,9
-Fine gravel,4 – 8,4.5
-Very fine gravel,2 – 4,3
-Very coarse sand,1 – 2,0.9
-Coarse sand,0.5 – 1,0.4
-Medium sand,0.25 – 0.5,0.2
-Fine sand,0.125 – 0.25,0.17
-Very fine sand,0.0625 – 0.125,0.13
-Coarse silt,0.0310 – 0.0625,0.1
-Medium silt,0.0156 – 0.0310,0.07
-Fine silt,0.0078 – 0.0156,0.05
+particle_class,particle_diameter_range,cs,cs_min,cs_max
+Coarse cobble,128 – 256,170,112,223
+Fine cobble,64 – 128,83,53.8,112
+Very coarse gravel,32 – 64,40,12.2,25.9
+Coarse gravel,16 – 32,19,5.7,12.2
+Medium gravel,8 – 16,9,2.7,5.7
+Fine gravel,4 – 8,4.5,1.3,2.7
+Very fine gravel,2 – 4,3,0.47,1.3
+Very coarse sand,1 – 2,0.9,0.27,0.47
+Coarse sand,0.5 – 1,0.4,0.194,0.27
+Medium sand,0.25 – 0.5,0.2,0.194,0.27
+Fine sand,0.125 – 0.25,0.17,0.145,0.194
+Very fine sand,0.0625 – 0.125,0.13,0.110,0.145
+Coarse silt,0.0310 – 0.0625,0.1,0.0826,0.110
+Medium silt,0.0156 – 0.0310,0.07,0.0630,0.0826
+Fine silt,0.0078 – 0.0156,0.05,0.0378,0.0630
