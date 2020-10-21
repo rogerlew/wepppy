@@ -308,7 +308,8 @@ def _multiple_year(par, _request, singleyearmode=False):
                         'randseed': randseed,
                         'cmd': cmd,
                         'clinp': clinp_contents,
-                        'monthlies': monthlies})
+                        'monthlies': monthlies,
+                        '_uuid': _uuid})
     
     else:
         r = Response(response=cli_contents, status=200, mimetype="text/plain")
@@ -455,7 +456,8 @@ def single_storm(par):
                         'cli_fn': cli_fn,
                         'cli_contents': cli_contents,
                         'cmd': cmd,
-                        'clinp': clinp_contents})
+                        'clinp': clinp_contents,
+                        '_uuid': _uuid})
     
     else:
         r = Response(response=cli_contents, status=200, mimetype="text/plain")
@@ -695,7 +697,8 @@ def future_rcp85(par):
                         'cmd': cmd,
                         'timeseries': ts_contents,
                         'metadata': 'Observed data from Daymet',
-                        'prn': prn_contents})
+                        'prn': prn_contents,
+                        '_uuid': _uuid})
     
     else:
         r = Response(response=climate.contents, status=200, mimetype="text/plain")
