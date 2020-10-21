@@ -439,7 +439,7 @@ class Baer(NoDbBase):
             landuse.build_managements(_map='default')
 
         except Exception:
-            self.unlock('-f')
+            landuse.unlock('-f')
             raise
 
     def _build_ssurgo_modified_soils(self):
@@ -460,11 +460,11 @@ class Baer(NoDbBase):
                 soil_specialization(src, dst, replacements)
 
                 _soils[key] = SoilSummary(
-                    Mukey=key,
-                    FileName=fn,
+                    mukey=key,
+                    fname=fn,
                     soils_dir=soils_dir,
-                    BuildDate="N/A",
-                    Description=soil_sum.desc + ' - ' + sbs
+                    build_date="N/A",
+                    desc=soil_sum.desc + ' - ' + sbs
                 )
 
         landuse = Landuse.getInstance(self.wd)
@@ -632,11 +632,11 @@ class Baer(NoDbBase):
         _soils = {}
         for k, fn in soils_dict.items():
             _soils[k] = SoilSummary(
-                Mukey=k,
-                FileName=fn,
+                mukey=k,
+                fname=fn,
                 soils_dir=soils_dir,
-                BuildDate="N/A",
-                Description=fn[:-4]
+                build_date="N/A",
+                desc=fn[:-4]
             )
 
             shutil.copyfile(_join(baer_soils_dir, fn),
