@@ -7,7 +7,7 @@ import shutil
 class SoilReplacements(object):
     def __init__(self, Code=None, LndcvrID=None, WEPP_Type=None, New_WEPPman=None, ManName=None, Albedo=None,
                  iniSatLev=None, interErod=None, rillErod=None, critSh=None, effHC=None, soilDepth=None,
-                 Sand=None, Clay=None, OM=None, CEC=None, Comment=None, fname=None):
+                 Sand=None, Clay=None, OM=None, CEC=None, Comment=None, fname=None, kslast=None):
         self.Code = Code
         self.LndcvrID = LndcvrID
         self.WEPP_Type = WEPP_Type
@@ -24,6 +24,7 @@ class SoilReplacements(object):
         self.Clay = Clay
         self.OM = OM
         self.CEC = CEC
+        self.kslast = kslast
         self.Comment = Comment
         self.fname = fname
 
@@ -77,6 +78,9 @@ class SoilReplacements(object):
 
         if self.CEC is not None:
             s.append('CEC={}'.format(self.CEC))
+
+        if self.kslast is not None:
+            s.append('kslast={}'.format(self.kslast))
 
         if self.fname is not None:
             s.append('fname={}'.format(self.fname))
@@ -243,6 +247,12 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
         line5[9] = _replace_parameter(line5[9], replacements.CEC)
     line5 = ' '.join(line5) + '\n'
 
+    if replacements.kslast is not None:
+        if len(lines) > 5 and len(lines[-1]) == 3:
+            lastline = lines[-1].split()
+            lastline[-1] = '{}'.format(replacements.kslast)
+            lines[-1] = ' '.join(lastline)
+
     # Create new soil files
     with open(dst, 'w') as f:
         f.writelines(header)
@@ -253,8 +263,8 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
             f.writelines(lines[5:])
 
 
-def modify_kslast(src_fn, dst_fn, ksat):
-    with open(src_fn) as fp:
+def modify_kslast(src, dst, kslast):
+    with open(src) as fp:
         lines = fp.readlines()
 
     while len(lines[-1].strip()) == 0:
@@ -262,13 +272,13 @@ def modify_kslast(src_fn, dst_fn, ksat):
 
     for i, line in enumerate(lines):
         if line.startswith('Any comments:'):
-            lines[i] = line.strip() + ' {} kslast modified to {}\n'.format(lines[i].strip(), ksat)
+            lines[i] = ' {} kslast modified to {}\n'.format(lines[i].strip(), kslast)
 
     lastline = lines[-1].split()
-    lastline[-1] = '{}'.format(ksat)
+    lastline[-1] = '{}'.format(kslast)
     lines[-1] = ' '.join(lastline)
 
-    with open(dst_fn, 'w') as fp:
+    with open(dst, 'w') as fp:
         fp.writelines(lines)
 
 
