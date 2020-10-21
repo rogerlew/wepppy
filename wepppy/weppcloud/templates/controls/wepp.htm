@@ -15,9 +15,9 @@
                 Run Flowpaths
             </label>
             <br/><br/>
-            {% if user.has_role('PowerUser') %}
             <h5>Hourly Seepage</h5>
-            <p>Computes hourly instead of daily seepage calculations.</p>
+            <p>Computes hourly instead of daily seepage calculations.
+               Only applies to projects with 7778 soils (Not WEPP-PEP).</p>
             <label class="form-check-label">
                 <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
                        onchange="Wepp.getInstance().set_run_wepp_routine('wepp_ui', this.checked);"
@@ -44,7 +44,6 @@
                 Run Frost (frost.txt)
             </label>
             <br/><br/>
-            {% endif %}
             <h5>Baseflow Processing</h5>
 
             <div class="form-group row" id="gwstorage_container">
@@ -88,11 +87,18 @@
             <h5>Channel Parameters</h5>
             <div class="form-group row" id="channel_critical_shear_container">
                 <div class="col-sm-4">
-                    <label for="channel_critical_shear">Critical Shear: </label>
+                    <label for="channel_critical_shear">Critical Shear Based on D50 Channel Particle Size: </label>
                 </div>
                 <div class="col-sm-4">
-                    <input id="channel_critical_shear" name="channel_critical_shear" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.channel_critical_shear }}" aria-label="Watershed groundwater baseflow threshold area">
+                    <select class="form-control disable-readonly" id="channel_critical_shear" name="channel_critical_shear" >
+                        {% for opt in critical_shear_options %}
+                        <option value="{{ opt["cs"] }}"
+                                {% if wepp.channel_critical_shear <= opt["cs_max"] and
+                                      wepp.channel_critical_shear > opt["cs_min"] %}selected{% endif %}>
+                            {{ opt["particle_class"] }} ({{ opt["particle_diameter_range"] }} mm) CS = {{ opt["cs"] }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
             <div class="form-group row" id="channel_erodibility_container">
