@@ -8,9 +8,14 @@
 
 from typing import List, Set, Union, Dict
 import csv
+import os
+import requests
 from os.path import join as _join
 from os.path import exists as _exists
 import warnings
+import numpy as np
+
+from datetime import datetime
 
 from xml.etree import ElementTree
 from math import exp
@@ -18,8 +23,12 @@ from collections import OrderedDict
 
 import sqlite3
 
-from wepppy.all_your_base import *
-
+from wepppy.all_your_base import (
+    try_parse,
+    try_parse_float,
+    isfloat,
+    isint
+)
 from wepppy.wepp.soils.utils import simple_texture
 
 __version__ = 'v.0.1.0'
@@ -405,21 +414,36 @@ colors = [
 
 class SoilSummary(object):
     def __init__(self, **kwargs):
-        mukey = kwargs.get("Mukey", None)
-        assert mukey is not None
+        self.mukey = None
+        if 'Mukey' in kwargs:
+            self.mukey = kwargs['Mukey']
+        elif 'mukey' in kwargs:
+            self.mukey = kwargs['mukey']
 
-        if isint(mukey):
-            self.mukey = int(mukey)
+        if isint(self.mukey):
             self.color = colors[self.mukey % len(colors)]
-
         else:
-            self.mukey = mukey
-            self.color = colors[sum(str.encode(mukey)) % len(colors)]
+            self.color = colors[sum(str.encode(self.mukey)) % len(colors)]
 
-        self.fname = kwargs["FileName"]
-        self.soils_dir = kwargs["soils_dir"]
-        self.build_date = kwargs["BuildDate"]
-        self.desc = kwargs["Description"]
+        assert 'FileName' in kwargs or 'fname' in kwargs
+        if 'FileName' in kwargs:
+            self.fname = kwargs['FileName']
+        else:
+            self.fname = kwargs['fname']
+        
+        self.soils_dir = kwargs['soils_dir']
+        
+        assert 'BuildDate' in kwargs or 'build_date' in kwargs
+        if 'BuildDate' in kwargs:
+            self.build_date = kwargs['BuildDate']
+        else:
+            self.build_date = kwargs['build_date']
+
+        assert 'Description' in kwargs or 'desc' in kwargs
+        if 'Description' in kwargs:
+            self.desc = kwargs['Description']
+        else:
+            self.desc = kwargs['desc']
 
         self.area = 0.0
         self.pct_coverage = kwargs.get('pct_coverage', None)
@@ -843,11 +867,11 @@ Any comments:
             fp.write(txt)
 
         return SoilSummary(
-            Mukey=int(mukey),
-            FileName=fname,
+            mukey=int(mukey),
+            fname=fname,
             soils_dir=wd,
-            BuildDate=str(datetime.now()),
-            Description=self.short_description
+            build_date=str(datetime.now()),
+            desc=self.short_description
         )
 
     def _write2006_2(self, wd, overwrite, fname, db_build):
@@ -876,11 +900,11 @@ Any comments:
             fp.write(txt)
 
         return SoilSummary(
-            Mukey=int(mukey),
-            FileName=fname,
+            mukey=int(mukey),
+            fname=fname,
             soils_dir=wd,
-            BuildDate=str(datetime.now()),
-            Description=self.short_description
+            build_date=str(datetime.now()),
+            desc=self.short_description
         )
 
     def write_log(self, wd='./', overwrite=True, fname=None, db_build=False):

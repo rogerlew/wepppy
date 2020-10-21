@@ -249,11 +249,11 @@ def build_esdac_soils(orders, soil_dir):
                 fp.write('\n'.join(s))
 
             soils[key] = SoilSummary(
-                Mukey=key,
-                FileName=fname,
+                mukey=key,
+                fname=fname,
                 soils_dir=soil_dir,
-                BuildDate=str(datetime.now),
-                Description=desc)
+                build_date=str(datetime.now),
+                desc=desc)
 
             # create low severity soil file
             lowmod_key = '{}_lowmod_sev'.format(key)
@@ -268,11 +268,11 @@ def build_esdac_soils(orders, soil_dir):
                 fp.write('\n'.join(s))
 
             soils[lowmod_key] = SoilSummary(
-                Mukey=lowmod_key,
-                FileName=fname,
+                mukey=lowmod_key,
+                fname=fname,
                 soils_dir=soil_dir,
-                BuildDate=str(datetime.now),
-                Description=desc)
+                build_date=str(datetime.now),
+                desc=desc)
 
             # create high severity soil file
             high_key = '{}_high_sev'.format(key)
@@ -287,11 +287,11 @@ def build_esdac_soils(orders, soil_dir):
                 fp.write('\n'.join(s))
 
             soils[high_key] = SoilSummary(
-                Mukey=high_key,
-                FileName=fname,
+                mukey=high_key,
+                fname=fname,
                 soils_dir=soil_dir,
-                BuildDate=str(datetime.now),
-                Description=desc)
+                build_date=str(datetime.now),
+                desc=desc)
 
         domsoil_d[topaz_id] = key
         clay_d[key] = horizon0['clay']
