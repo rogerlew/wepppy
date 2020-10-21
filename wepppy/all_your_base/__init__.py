@@ -32,6 +32,7 @@ import xml.etree.ElementTree as ET
 from math import radians, sin, cos, asin, sqrt
 
 import numpy as np
+import multiprocessing
 
 try:
     import win32com.shell.shell as shell
@@ -40,6 +41,13 @@ except:
 
 from osgeo import gdal, osr, ogr
 gdal.UseExceptions()
+
+try:
+    NCPU = int(os.environ['WEPPPY_NCPU'])
+except KeyError:
+    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
+    if NCPU < 1:
+        NCPU = 1
 
 geodata_dir = '/geodata/'
 
@@ -357,6 +365,11 @@ def isfloat(f):
         return False
 
 
+def isbool(x):
+    # noinspection PyBroadException
+    return x in (0, 1, True, False)
+
+
 def isnan(f):
     if not isfloat(f):
         return False
@@ -549,6 +562,7 @@ def centroid_px(indx, indy):
     """
     return (int(round(float(np.mean(indx)))),
             int(round(float(np.mean(indy)))))
+
 
 def translate_tif_to_asc(fn, fn2=None):
     assert fn.endswith(".tif")
@@ -1121,7 +1135,7 @@ def crop_and_transform(src, dst, bbox, layer='', cellsize=30, resample=None, for
     assert(isfloat(cellsize))
     assert(cellsize > 1.0)
     assert( not all([isfloat(x) for x in bbox]))
-    assert(bbox[1] < bbox [3])
+    assert(bbox[1] < bbox[3])
     assert(bbox[0] < bbox[2])
 
     # determine UTM coordinate system of top left corner
