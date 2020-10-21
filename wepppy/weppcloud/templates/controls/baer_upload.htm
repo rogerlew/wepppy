@@ -1,6 +1,6 @@
 {% extends "controls/_base.htm" %}
 {% block form_id %}sbs_upload_form{% endblock %}
-{% block form_title %}Upload Soil Burn Severity Map{% endblock %}
+{% block form_title %}Upload Soil Burn Severity Map {% if 'disturbed' in ron.mods %}(Optional){% endif %}{% endblock %}
 {% block inputs %}
     <p>Upload a raster SBS map (.img or .tif). The map can be a 4 class SBS map or a 256 dNBR map.</p>
     <div class="form-group row hide-readonly">
