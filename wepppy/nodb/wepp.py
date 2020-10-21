@@ -62,7 +62,8 @@ from wepppy.all_your_base import (
     read_arc,
     wgs84_proj4,
     isnan,
-    isinf
+    isinf,
+    NCPU
 )
 
 from wepppy.wepp.out import (
@@ -77,7 +78,15 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 
 # wepppy submodules
 from wepppy.wepp.stats.frq_flood import FrqFlood
-from .base import NoDbBase, TriggerEvents
+from .base import (
+    NoDbBase, 
+    TriggerEvents, 
+    config_get_path, 
+    config_get_str, 
+    config_get_int, 
+    config_get_float,
+    config_get_bool
+)
 from .landuse import Landuse, LanduseMode
 from .soils import Soils, SoilsMode
 from .climate import Climate, ClimateMode
@@ -86,20 +95,15 @@ from .topaz import Topaz
 from .wepppost import WeppPost
 from .log_mixin import LogMixin
 
-try:
-    NCPU = int(os.environ['WEPPPY_NCPU'])
-except KeyError:
-    NCPU = math.floor(multiprocessing.cpu_count() * 0.5)
-    if NCPU < 1:
-        NCPU = 1
-
-
 _RUN_WEPP_UI_DEFAULT = True
 _RUN_PMET_DEFAULT = True
 _RUN_FROST_DEFAULT = False
 _RUN_TCR_DEFAULT = False
 _RUN_BASEFLOW_DEFAULT = True
 _RUN_SNOW_DEFAULT = False
+
+_CHANNEL_ERODIBILITY_DEFAULT = 1E-6
+_CHANNEL_CRITICAL_SHEAR_DEFAULT = 12.0
 
 
 class ChannelRoutingMethod(IntEnum):
@@ -283,68 +287,27 @@ class Wepp(NoDbBase, LogMixin):
 
             config = self.config
 
-            try:
-                surf_runoff = config.getfloat('phosphorus_opts', 'surf_runoff')
-            except:
-                surf_runoff = None
-            try:
-                lateral_flow = config.getfloat('phosphorus_opts', 'lateral_flow')
-            except:
-                lateral_flow = None
-            try:
-                baseflow = config.getfloat('phosphorus_opts', 'baseflow')
-            except:
-                baseflow = None
-            try:
-                sediment = config.getfloat('phosphorus_opts', 'sediment')
-            except:
-                sediment = None
+            surf_runoff = config_get_float(config, 'phosphorus_opts', 'surf_runoff')
+            lateral_flow = config_get_float(config, 'phosphorus_opts', 'lateral_flow')
+            baseflow = config_get_float(config, 'phosphorus_opts', 'baseflow')
+            sediment = config_get_float(config, 'phosphorus_opts', 'sediment')
 
-            try:
-                snow_rst = config.getfloat('snow_opts', 'rst')
-            except:
-                snow_rst = None
+            snow_rst = config_get_float(config, 'snow_opts', 'rst')
+            snow_newsnw = config_get_float(config, 'snow_opts', 'newsnw')
+            snow_ssd = config_get_float(config, 'snow_opts', 'ssd')
 
-            try:
-                snow_newsnw = config.getfloat('snow_opts', 'newsnw')
-            except:
-                snow_newsnw = None
+            _wepp_ui = config_get_bool(config, 'wepp', 'wepp_ui', _RUN_WEPP_UI_DEFAULT)
+            _pmet = config_get_bool(config, 'wepp', 'pmet', _RUN_PMET_DEFAULT)
+            _frost = config_get_bool(config, 'wepp', 'frost', _RUN_FROST_DEFAULT)
+            _tcr = config_get_bool(config, 'wepp', 'tcr', _RUN_TCR_DEFAULT)
 
-            try:
-                snow_ssd = config.getfloat('snow_opts', 'ssd')
-            except:
-                snow_ssd = None
+            _baseflow = config_get_bool(config, 'wepp', 'baseflow', _RUN_BASEFLOW_DEFAULT)
+            _snow = config_get_bool(config, 'wepp', 'snow', _RUN_SNOW_DEFAULT)
 
-            try:
-                _wepp_ui = config.getboolean('wepp', 'wepp_ui')
-            except:
-                _wepp_ui = _RUN_WEPP_UI_DEFAULT
-            try:
-                _pmet = config.getboolean('wepp', 'pmet')
-            except:
-                _pmet = _RUN_PMET_DEFAULT
-            try:
-                _frost = config.getboolean('wepp', 'frost')
-            except:
-                _frost = _RUN_FROST_DEFAULT
-            try:
-                _tcr = config.getboolean('wepp', 'tcr')
-            except:
-                _tcr = _RUN_TCR_DEFAULT
-            try:
-                _baseflow = config.getboolean('wepp', 'baseflow')
-            except:
-                _baseflow = _RUN_BASEFLOW_DEFAULT
-            try:
-                _snow = config.getboolean('wepp', 'snow')
-            except:
-                _snow = _RUN_SNOW_DEFAULT
+            _channel_erodibility = config_get_float(config, 'wepp', 'channel_erodibility', _CHANNEL_ERODIBILITY_DEFAULT)
+            _channel_critical_shear = config_get_float(config, 'wepp', 'channel_critical_shear', _CHANNEL_CRITICAL_SHEAR_DEFAULT)
 
-
-            try:
-                _wepp_bin = config.get('wepp', 'bin')
-            except:
-                _wepp_bin = None
+            _wepp_bin = config_get_str(config, 'wepp', 'bin')
 
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
@@ -359,6 +322,8 @@ class Wepp(NoDbBase, LogMixin):
             self._run_baseflow = _baseflow
             self._run_snow = _snow
             self._wepp_bin = _wepp_bin
+            self._channel_erodibility = _channel_erodibility
+            self._channel_critical_shear = _channel_critical_shear
 
             self.baseflow_opts = BaseflowOpts()
             self.snow_opts = SnowOpts(rst=snow_rst,
@@ -394,6 +359,7 @@ class Wepp(NoDbBase, LogMixin):
                 db.dump_and_unlock()
 
             return db
+
     @property
     def wepp_bin(self):
         if not hasattr(self, "_wepp_bin"):
@@ -413,7 +379,6 @@ class Wepp(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-
 
     @property
     def _nodb(self):
@@ -476,6 +441,20 @@ class Wepp(NoDbBase, LogMixin):
 
         return self._run_snow
 
+    @property
+    def channel_erodibility(self):
+        if not hasattr(self, "_channel_erodibility"):
+            return _CHANNEL_ERODIBILITY_DEFAULT
+
+        return self._channel_erodibility
+
+    @property
+    def channel_critical_shear(self):
+        if not hasattr(self, "_channel_critical_shear"):
+            return _CHANNEL_CRITICAL_SHEAR_DEFAULT
+
+        return self._channel_critical_shear
+
     def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
         self.lock()
 
@@ -518,6 +497,14 @@ class Wepp(NoDbBase, LogMixin):
 
             if hasattr(self, 'snow_opts'):
                 self.snow_opts.parse_inputs(kwds)
+
+            _channel_critical_shear = kwds.get('channel_critical_shear', None)
+            if isfloat(_channel_critical_shear):
+                self._channel_critical_shear = float(_channel_critical_shear)
+
+            _channel_erodibility = kwds.get('channel_erodibility', None)
+            if isfloat(_channel_erodibility):
+                self._channel_erodibility = float(_channel_erodibility)
 
             self.dump_and_unlock()
 
@@ -940,6 +927,12 @@ class Wepp(NoDbBase, LogMixin):
                      .format(erodibility, critical_shear))
             self.log_done()
 
+        if erodibility is None:
+            erodibility = self.channel_erodibility
+
+        if critical_shear is None:
+            critical_shear = self.channel_critical_shear
+
         assert translator is not None
 
         watershed = Watershed.getInstance(self.wd)
@@ -989,6 +982,12 @@ class Wepp(NoDbBase, LogMixin):
                      .format(erodibility, critical_shear))
             self.log_done()
 
+        if erodibility is None:
+            erodibility = self.channel_erodibility
+
+        if critical_shear is None:
+            critical_shear = self.channel_critical_shear
+
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         runs_dir = self.runs_dir
@@ -1022,10 +1021,8 @@ class Wepp(NoDbBase, LogMixin):
         #
         # version = versions.pop()
 
-        if erodibility is None:
-            erodibility = 1E-6
-        if critical_shear is None:
-            critical_shear = 50.0
+        assert isfloat(erodibility)
+        assert isfloat(critical_shear)
 
         # iterate over soils and append them together
         fp = open(_join(runs_dir, 'pw0.sol'), 'w')

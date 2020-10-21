@@ -24,11 +24,23 @@ from wepppy.watershed_abstraction import (
     WeppTopTranslator
 )
 
-from .base import NoDbBase, TriggerEvents, DEFAULT_WEPP_CHN_TYPE
+from .base import NoDbBase, TriggerEvents, DEFAULT_WEPP_CHN_TYPE, config_get_str
 
 
 class WatershedNoDbLockedException(Exception):
     pass
+
+
+class WatershedNotAbstractedError(Exception):
+    """
+    The watershed has not been abstracted. The watershed must be delineated
+    in order to proceed.
+    """
+
+    __name__ = 'WatershedNotAbstractedError'
+
+    def __init__(self):
+        pass
 
 
 class Watershed(NoDbBase):
@@ -51,7 +63,7 @@ class Watershed(NoDbBase):
             self._outlet_top_id = None
 
             config = self.config
-            self._wepp_chn_type = config.get('soils', 'wepp_chn_type')
+            self._wepp_chn_type = config_get_str(config, 'soils', 'wepp_chn_type', DEFAULT_WEPP_CHN_TYPE)
 
             wat_dir = self.wat_dir
             if not _exists(wat_dir):
@@ -82,6 +94,11 @@ class Watershed(NoDbBase):
                 db.dump_and_unlock()
 
             return db
+
+
+    @property
+    def is_abstracted(self):
+        return self._subs_summary is not None and self._chns_summary is not None
 
     @property
     def _nodb(self):
@@ -145,7 +162,7 @@ class Watershed(NoDbBase):
     #
     # abstract watershed
     #
-    def abstract_watershed(self, cell_width=None):
+    def abstract_watershed(self, chn_wepp_width=None):
         self.lock()
 
         # noinspection PyBroadException

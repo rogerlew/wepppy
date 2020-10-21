@@ -342,12 +342,12 @@ def slp_asp_color(slope: float, aspect: float) -> str:
 
 class ChannelRoutingError(Exception):
     """
-    THE NETWORK STRUCTURE DELINEATED BY TOPAZ CONTAINS MORE THAN 3 CHANNELS
-    AS INPUT TO A SINGLE CHANNEL. WEPP CAN ONLY HANDLE 3 OR LESS CHANNELS
-    DRAINING INTO A SINGLE CHANNEL.
+    The network structure delineated by TOPAZ contains more than 3 channels
+    as input to a single channel. WEPP can only handle 3 or less channels
+    draining into a single channel.
 
-    THE CHANNELS SHOULD BE REDELINEATED AFTER ADJUSTING THE MINIMUM CHANNEL
-    LENGTH (MCL) AND/OR CRITICAL SOURCE AREA (CSA)
+    The channels should be redelineated after adjusting the minimum channel
+    length (mcl) and/or critical source area (csa)
     """
 
     __name__ = 'ChannelRoutingError'
@@ -444,8 +444,11 @@ class SummaryBase(object):
         except:
             pass
 
+        if hasattr(self, 'chn_wepp_width'):
+            d['chn_wepp_width'] = self.chn_wepp_width
+
         if hasattr(self, 'cell_width'):
-            d['width'] = self.cell_width
+            d['chn_wepp_width'] = self.chn_wepp_width
 
         try:
             d['slopes'] = self.slopes
@@ -453,7 +456,16 @@ class SummaryBase(object):
         except:
             pass
 
+        if hasattr(self, 'fp_longest'):
+            d['fp_longest'] = self.fp_longest
+        if hasattr(self, 'fp_longest_length'):
+            d['fp_longest_length'] = self.fp_longest_length
+        if hasattr(self, 'fp_longest_slope'):
+            d['fp_longest_slope'] = self.fp_longest_slope
+
         return d
+
+
 
 
 class HillSummary(SummaryBase):
@@ -461,6 +473,9 @@ class HillSummary(SummaryBase):
         super(HillSummary, self).__init__(**kwds)
         self.w_slopes = tuple(kwds['w_slopes'])
         self.pourpoint = tuple(kwds['pourpoint'])
+        self.fp_longest = kwds.get('fp_longest', None)
+        self.fp_longest_length = kwds.get('fp_longest_length', None)
+        self.fp_longest_slope = kwds.get('fp_longest_slope', None)
         
     @property
     def fname(self) -> str:
@@ -514,7 +529,7 @@ class ChannelSummary(SummaryBase):
         self._chn_type = value
 
     @property
-    def cell_width(self) -> int:
+    def chn_wepp_width(self) -> int:
         """returns channel width in meters (not pixel units)"""
         return [None, 1, 2, 2, 3, 3, 3, 4, 4][self.order]
 
@@ -675,7 +690,7 @@ class WatershedAbstraction:
         self.abstract_subcatchments(verbose=verbose, warn=warn)
         self.abstract_structure(verbose=verbose)
 
-    def write_slps(self, channels=1, subcatchments=1, flowpaths=1, cell_width=None):
+    def write_slps(self, channels=1, subcatchments=1, flowpaths=1):
         """
         Writes slope files to the specified wat_dir. The channels,
         subcatchments, and flowpaths args specify what slope files
@@ -683,7 +698,7 @@ class WatershedAbstraction:
         """
         out_dir = self.wat_dir
         if channels:
-            self._make_channel_slps(out_dir, cell_width=cell_width)
+            self._make_channel_slps(out_dir)
 
         if subcatchments:
             self._write_subcatchment_slps(out_dir)
@@ -691,7 +706,7 @@ class WatershedAbstraction:
         if flowpaths:
             self._write_flowpath_slps(out_dir)
 
-    def _make_channel_slps(self, out_dir, cell_width=None):
+    def _make_channel_slps(self, out_dir):
         ws = self.watershed
         translator = self.translator
 
@@ -709,19 +724,15 @@ class WatershedAbstraction:
             top = translator.top(chn_enum=chn_enum)
             chn_id = 'chn_%i' % top
             d = ws['channels'][chn_id]
-
-            if cell_width is None:
-                _cell_width = d.cell_width
-            else:
-                _cell_width = cell_width
+            _chn_wepp_width = d.chn_wepp_width
 
             slp_fn = _join(out_dir, '%s.slp' % chn_id)
             fp = open(slp_fn, 'w')
-            write_slp(d.aspect, d.width, _cell_width, d.length,
+            write_slp(d.aspect, d.width, _chn_wepp_width, d.length,
                       d.slopes, d.distance_p, fp, 97.3)
             fp.close()
 
-            write_slp(d.aspect, d.width, _cell_width, d.length,
+            write_slp(d.aspect, d.width, _chn_wepp_width, d.length,
                       d.slopes, d.distance_p, fp2, 99.1)
 
         fp2.close()
@@ -1188,6 +1199,8 @@ class WatershedAbstraction:
                                                  slopes[fp_indxs[0]],
                                                  distances[fp_indxs[0]])
 
+        fp_d = {key: value for key, value in sorted(fp_d.items(), key=lambda item: item[1].length, reverse=True)}
+
         return fp_d, subflows
 
     def abstract_subcatchment(self, sub_id, verbose=False, warn=False):
@@ -1242,6 +1255,10 @@ class WatershedAbstraction:
         fp_d, subflows = \
             self.abstract_flowpaths(sub_id, flowpaths, slopes, distances)
 
+        fp_longest = list(fp_d.keys())[0]
+        fp_longest_length = fp_d[fp_longest].length
+        fp_longest_slope = fp_d[fp_longest].slope_scalar
+
         watershed['flowpaths']['hill_%i' % sub_id] = fp_d
         
         # cast lists of ndarrays to list of lists so we can dump to json
@@ -1275,7 +1292,10 @@ class WatershedAbstraction:
             centroid=CentroidSummary(
                 px=_centroid_px,
                 lnglat=centroid_lnglat
-            )
+            ),
+            fp_longest=fp_longest,
+            fp_longest_length=fp_longest_length,
+            fp_longest_slope=fp_longest_slope
         )     
         watershed['hillslopes']['hill_%i' % sub_id] = sub_summary
 

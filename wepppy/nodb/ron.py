@@ -24,14 +24,23 @@ import what3words
 import requests
 
 # wepppy
-import wepppy
 from wepppy.all_your_base import (
     wmesque_retrieve,
     haversine
 )
 
 # wepppy submodules
-from .base import NoDbBase, TriggerEvents, DEFAULT_DEM_DB
+from .base import (
+    NoDbBase,
+    TriggerEvents,
+    DEFAULT_DEM_DB,
+    config_get_float,
+    config_get_bool,
+    config_get_int,
+    config_get_str,
+    config_get_path,
+    config_get_raw
+)
 
 
 _thisdir = os.path.dirname(__file__)
@@ -97,17 +106,14 @@ class Ron(NoDbBase):
         # noinspection PyBroadException
         try:
             config = self.config
-            self._configname = config.get('general', 'name')
+            self._configname = config_get_str(config, 'general', 'name')
 
             # Map
-            self._cellsize = float(config.get('general', 'cellsize'))
-            self._center0 = config.get('map', 'center0')
-            self._zoom0 = config.get('map', 'zoom0')
+            self._cellsize = config_get_float(config, 'general', 'cellsize')
+            self._center0 = config_get_raw(config, 'map', 'center0')
+            self._zoom0 = config_get_int(config, 'map', 'zoom0')
 
-            _boundary = config.get('map', 'boundary')
-            if _boundary is not None:
-                _boundary = _boundary
-
+            _boundary = config_get_path(config, 'map', 'boundary')
             self._boundary = _boundary
 
             # DEM
@@ -115,19 +121,16 @@ class Ron(NoDbBase):
             if not _exists(dem_dir):
                 os.mkdir(dem_dir)
 
-            self._dem_db = config.get('general', 'dem_db')
+            self._dem_db = config_get_path(config, 'general', 'dem_db', DEFAULT_DEM_DB)
 
-            from wepppy.nodb.mods import MODS_DIR
-            _dem_map = config.get('general', 'dem_map', fallback=None)
-            if _dem_map is not None:
-                _dem_map = _dem_map.replace('MODS_DIR', MODS_DIR)
+            _dem_map = config_get_path(config, 'general', 'dem_map')
             self._dem_map = _dem_map
 
             if self.dem_map is not None:
                 shutil.copyfile(self.dem_map, self.dem_fn)
 
             # Landuse
-            self._enable_landuse_change = config.getboolean('landuse', 'enable_landuse_change')
+            self._enable_landuse_change = config_get_bool(config, 'landuse', 'enable_landuse_change')
 
             # Project
             self._name = ''
@@ -140,6 +143,7 @@ class Ron(NoDbBase):
 
             # initialize the other controllers here
             # this will create the other .nodb files
+            import wepppy.nodb
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
@@ -168,12 +172,16 @@ class Ron(NoDbBase):
             if 'turkey' in self.mods:
                 wepppy.nodb.mods.locations.TurkeyMod(wd, cfg_fn)
 
-            if 'baer' in self.mods:
-                wepppy.nodb.mods.Baer(wd, cfg_fn)
-                sbs_map = config.get('landuse', 'sbs_map')
+            if 'baer' in self.mods or 'disturbed' in self.mods:
+                assert not ('baer' in self.mods and 'disturbed' in self.mods)
 
-                if sbs_map == '':
-                    sbs_map = None
+                if 'baer' in self.mods:
+                    Mod = wepppy.nodb.mods.Baer
+                else:
+                    Mod = wepppy.nodb.mods.Disturbed
+
+                baer = Mod(wd, cfg_fn)
+                sbs_map = config_get_path(config, 'landuse', 'sbs_map')
 
                 if sbs_map is not None:
                     from wepppy.nodb.mods import MODS_DIR
@@ -182,7 +190,6 @@ class Ron(NoDbBase):
                     # sbs_map = _join(_thisdir, sbs_map)
                     assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
                     assert not isdir(sbs_map)
-                    baer = wepppy.nodb.mods.Baer.getInstance(wd)
 
                     sbs_path = _join(baer.baer_dir, 'sbs.tif')
                     shutil.copyfile(sbs_map, sbs_path)
@@ -292,7 +299,7 @@ class Ron(NoDbBase):
             self._map = Map(extent, center, zoom, self.cellsize)
 
             config = self.config
-            w3w_api_key = config.get('general', 'w3w_api_key')
+            w3w_api_key = config_get_str(config, 'general', 'w3w_api_key')
 
             lng, lat = self.map.center
             w3w_geocoder = what3words.Geocoder(w3w_api_key)
@@ -353,12 +360,16 @@ class Ron(NoDbBase):
 
     @property
     def has_sbs(self):
-        if 'baer' not in self.mods:
-            return False
+        if 'baer' in self.mods:
+            from wepppy.nodb.mods import Baer
+            baer = Baer.getInstance(self.wd)
+            return baer.has_map
+        elif 'disturbed' in self.mods:
+            from wepppy.nodb.mods import Disturbed
+            baer = Disturbed.getInstance(self.wd)
+            return baer.has_map
 
-        from wepppy.nodb.mods import Baer
-        baer = Baer.getInstance(self.wd)
-        return baer.has_map
+        return False
 
 
     @property
@@ -422,6 +433,7 @@ class Ron(NoDbBase):
     #
     def subs_summary(self):
         wd = self.wd
+        import wepppy.nodb
         watershed = wepppy.nodb.Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
@@ -445,6 +457,7 @@ class Ron(NoDbBase):
 
     def sub_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
+        import wepppy.nodb
         watershed = wepppy.nodb.Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
@@ -468,6 +481,7 @@ class Ron(NoDbBase):
 
     def chns_summary(self):
         wd = self.wd
+        import wepppy.nodb
         watershed = wepppy.nodb.Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
@@ -493,6 +507,7 @@ class Ron(NoDbBase):
 
     def chn_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
+        import wepppy.nodb
         watershed = wepppy.nodb.Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
