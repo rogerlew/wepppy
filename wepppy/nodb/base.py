@@ -23,11 +23,19 @@ from glob import glob
 # non-standard
 import jsonpickle
 
-if sys.version_info > (2, 7):
-    from configparser import RawConfigParser
-else:
-    # noinspection PyUnresolvedReferences
-    from ConfigParser import RawConfigParser
+import re
+
+from configparser import (
+    RawConfigParser,
+    ConverterMapping,
+    SectionProxy,
+    Interpolation,
+    NoOptionError,
+    NoSectionError
+)
+
+
+from wepppy.all_your_base import isfloat, isint, isbool
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
@@ -54,8 +62,66 @@ class TriggerEvents(Enum):
     CLIMATE_BUILD_COMPLETE = 6
     WEPP_PREP_WATERSHED_COMPLETE = 7
 
-# .nodb are jsonpickle files
-# The .nodb is used to distinguish these from regular json datafiles
+
+def config_get_bool(config, section: str, option: str, default=None):
+    assert default is None or isbool(default)
+    
+    try:
+        val = config.get(section, option).lower()
+        if val.startswith('none') or val == '':
+            return default
+        return val.startswith('true')
+    except (NoSectionError, NoOptionError):
+        return default
+
+
+def config_get_float(config, section: str, option: str, default=None):
+    assert default is None or isfloat(default)
+
+    try:
+        val = config.get(section, option).lower()
+        if val.startswith('none') or val == '':
+            return default
+        return float(val)
+    except (NoSectionError, NoOptionError):
+        return default
+
+
+def config_get_int(config, section: str, option: str, default=None):
+    assert default is None or isint(default)
+
+    try:
+        val = config.get(section, option).lower()
+        if val.startswith('none') or val == '':
+            return default
+        return int(val)
+    except (NoSectionError, NoOptionError):
+        return default
+
+
+def config_get_str(config, section: str, option: str, default=None):
+
+    try:
+        val = config.get(section, option)
+        if val.lower().startswith('none') or val == '':
+            return default
+        return val
+    except (NoSectionError, NoOptionError):
+        return default
+
+
+def config_get_path(config, section: str, option: str, default=None):
+    from .mods import MODS_DIR
+    path = config_get_str(config, section, option, default)
+    if path is None:
+        return None
+    path = path.replace('MODS_DIR', MODS_DIR)
+    return path
+
+
+def config_get_raw(config, section: str, option: str, default=None):
+    val = config.get(section, option)
+    return val
 
 
 class NoDbBase(object):
@@ -164,16 +230,7 @@ class NoDbBase(object):
     def config(self):
         cfg = _join(_config_dir, self._config)
 
-        parser = RawConfigParser(
-            dict(boundary=None,
-                 cover_defaults=None,
-                 dem_db=DEFAULT_DEM_DB,
-                 nlcd_db=DEFAULT_NLCD_DB,
-                 ssurgo_db=DEFAULT_SSURGO_DB,
-                 wepp_chn_type=DEFAULT_WEPP_CHN_TYPE,
-                 cligen_db=DEFAULT_CLIGEN_DB),
-            allow_no_value=True
-        )
+        parser = RawConfigParser(allow_no_value=True)
         with open(_join(_config_dir, '0.cfg')) as fp:
             parser.read_file(fp)
 
@@ -218,6 +275,10 @@ class NoDbBase(object):
         if 'baer' in self.mods:
             baer = wepppy.nodb.mods.Baer.getInstance(self.wd)
             baer.on(evt)
+
+        if 'disturbed' in self.mods:
+            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
+            disturbed.on(evt)
 
         if 'rred' in self.mods:
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
