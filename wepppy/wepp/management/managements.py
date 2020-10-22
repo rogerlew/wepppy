@@ -1323,7 +1323,10 @@ class ManagementSummary(object):
                                        'short grass', 'tall grass', 'forest high sev fire',
                                        'forest low sev fire', 'forest prescribed',
                                        'shrub high sev fire', 'shrub low sev fire',
-                                       'shrub prescribed')
+                                       'shrub prescribed',
+                                       'grass high sev fire', 'grass low sev fire',
+                                       'grass prescribed',
+                                       )
 
             self.disturbed_class = disturbed_class
 
