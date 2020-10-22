@@ -2666,7 +2666,6 @@ def submit_task_run_wepp(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
-    print(request.form)
     try:
         wepp.parse_inputs(request.form)
     except Exception:
