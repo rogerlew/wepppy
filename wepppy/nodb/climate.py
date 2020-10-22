@@ -38,7 +38,7 @@ from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules
 from .base import NoDbBase, DEFAULT_CLIGEN_DB, TriggerEvents, config_get_path
-from .watershed import Watershed
+from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
 from .log_mixin import LogMixin
 
@@ -53,6 +53,27 @@ class ClimateSummary(object):
         self._cli_fn = None
 
 
+class NoClimateStationSelectedError(Exception):
+    """
+    Select a climate station before building climate.
+    """
+
+    __name__ = 'NoClimateStationSelectedError'
+
+    def __init__(self):
+        pass
+
+
+class ClimateModeIsUndefinedError(Exception):
+    """
+    Select a climate mode before building climate.
+    """
+
+    __name__ = 'ClimateModeIsUndefinedError'
+
+    def __init__(self):
+        pass
+
 class ClimateNoDbLockedException(Exception):
     pass
 
@@ -64,7 +85,6 @@ class ClimateStationMode(IntEnum):
     EUHeuristic = 2
     AUHeuristic = 3
     UserDefined = 4
-
 
 
 class ClimateMode(IntEnum):
@@ -80,6 +100,7 @@ class ClimateMode(IntEnum):
     EOBS = 8       # Single or multiple
     AGDC = 10       # Single or multiple
     GridMetPRISM = 11    # Daymet, single or multiple
+
 
 class ClimateSpatialMode(IntEnum):
     Undefined = -1
@@ -792,6 +813,14 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def build(self, verbose=False):
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+        if not watershed.is_abstracted:
+            raise WatershedNotAbstractedError()
+
+        if self.climatestation is None:
+            raise NoClimateStationSelectedError()
+
         cli_dir = self.cli_dir
         if _exists(cli_dir):
             try:
@@ -804,8 +833,11 @@ class Climate(NoDbBase, LogMixin):
 
         climate_mode = self.climate_mode
 
+        if climate_mode == ClimateMode.Undefined:
+            raise ClimateModeIsUndefinedError()
+
         # vanilla Cligen
-        if climate_mode == ClimateMode.Vanilla:
+        elif climate_mode == ClimateMode.Vanilla:
             self._build_climate_vanilla()
 
         # observed
