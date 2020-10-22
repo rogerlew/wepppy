@@ -3378,7 +3378,12 @@ def query_baer_class_map(runid, config):
 def task_baer_class_map(runid, config):
     try:
         wd = get_wd(runid)
-        baer = Baer.getInstance(wd)
+        ron = Ron.getInstance(wd)
+        if 'baer' in ron.mods:
+            baer = Baer.getInstance(wd)
+        else:
+            baer = Disturbed.getInstance(wd)
+
         if not baer.has_map:
             return error_factory('No SBS map has been specified')
 
