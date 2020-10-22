@@ -20,6 +20,18 @@ forest prescribed fire,loam,0.15,0.75,1000000,8.00E-05,1,20,45,20,5,20,20,400
 forest prescribed fire,sand loam,0.15,0.75,400000,0.00012,2,20,65,10,5,15,25,400
 forest prescribed fire,silt loam,0.15,0.75,1000000,0.0001,1.5,13,25,15,5,15,15,400
 short grass,clay loam,0.15,0.75,1500000,4.00E-05,0.5,20,25,30,5,25,15,400
+grass high sev fire,clay loam,0.1,0.75,1500000,6.00E-05,0.5,14,25,30,5,25,15,400
+grass high sev fire,loam,0.1,0.75,1000000,0.0001,1,15,45,20,5,20,20,400
+grass high sev fire,sand loam,0.1,0.75,400000,0.00014,2,15,65,10,5,15,25,400
+grass high sev fire,silt loam,0.1,0.75,1000000,0.00012,1.5,10,25,15,5,15,15,400
+grass low sev fire,clay loam,0.15,0.75,1500000,5.00E-05,0.5,18,25,30,5,25,15,400
+grass low sev fire,loam,0.15,0.75,1000000,8.00E-05,1,20,45,20,5,20,20,400
+grass low sev fire,sand loam,0.15,0.75,400000,0.00012,2,20,65,10,5,15,25,400
+grass low sev fire,silt loam,0.15,0.75,1000000,0.0001,1.5,13,25,15,5,15,15,400
+grass prescribed fire,clay loam,0.15,0.75,1500000,5.00E-05,0.5,18,25,30,5,25,15,400
+grass prescribed fire,loam,0.15,0.75,1000000,8.00E-05,1,20,45,20,5,20,20,400
+grass prescribed fire,sand loam,0.15,0.75,400000,0.00012,2,20,65,10,5,15,25,400
+grass prescribed fire,silt loam,0.15,0.75,1000000,0.0001,1.5,13,25,15,5,15,15,400
 short grass,loam,0.15,0.75,1000000,6.00E-05,1,25,45,20,5,20,20,400
 short grass,sand loam,0.15,0.75,400000,0.0001,2,25,65,10,5,15,25,400
 short grass,silt loam,0.15,0.75,1000000,8.00E-05,1.5,15,25,15,5,15,15,400
