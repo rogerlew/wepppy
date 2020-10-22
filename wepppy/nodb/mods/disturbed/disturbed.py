@@ -474,13 +474,15 @@ class Disturbed(NoDbBase):
                 if burn_class in ['131', '132', '133']:
                     dom = landuse.domlc_d[topaz_id]
                     man = get_management_summary(dom, _map=landuse.mapping)
-                    print(man.as_dict(), landuse.mapping)
 
                     if man.disturbed_class in ['forest', 'young forest']:
                         landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
 
                     elif man.disturbed_class == 'shrub':
                         landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+
+                    elif man.disturbed_class in ['short grass', 'tall grass']:
+                        landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
 
             landuse.dump_and_unlock()
 

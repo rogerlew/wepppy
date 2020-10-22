@@ -36,5 +36,9 @@
 "116": {"Key": 116, "Color": [0,255,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 90 Cover (Forwarder)", "ManagementFile": "Tahoe/Forward_Thinning_90_Cover.man"},
 "117": {"Key": 117, "Color": [0,255,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 85 Cover (Skidder)", "ManagementFile": "Tahoe/Skidder_Thinning_85_Cover.man"},
 "123": {"Key": 123, "Color": [0,250,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 96 Cover", "ManagementFile": "Tahoe/Tahoe_Thinning_96_Cover.man"},
-"124": {"Key": 124, "Color": [0,245,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 75 Cover", "ManagementFile": "Tahoe/Tahoe_Thinning_75_Cover.man"}
+"124": {"Key": 124, "Color": [0,245,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 75 Cover", "ManagementFile": "Tahoe/Tahoe_Thinning_75_Cover.man"},
+"129": {"Key": 129, "Color": [161,2,0,255],     "DisturbedClass": "grass high sev fire", "Description": "Grass High Severity Fire", "ManagementFile": "Tahoe/Tahoe_Shrub_High_Severity_Fire.man"},
+"130": {"Key": 130, "Color": [234,204,0,255],   "DisturbedClass": "grass low sev fire", "Description": "Grass Moderate Severity Fire", "ManagementFile": "Tahoe/Tahoe_Shrub_Moderate_Severity_Fire.man"},
+"131": {"Key": 131, "Color": [48,153,0,255],    "DisturbedClass": "grass low sev fire", "Description": "Grass Low Severity Fire", "ManagementFile": "Tahoe/Tahoe_Shrub_Low_Severity_Fire.man"},
+"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "Tahoe/Tahoe_Prescribed_Fire.man"}
 }
