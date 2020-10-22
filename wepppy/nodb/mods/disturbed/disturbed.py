@@ -75,14 +75,14 @@ def _replace_parameter(original, replacement):
 def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=50):
     """
     Creates a new soil file based on soil_in_fname and makes replacements
-    from the provided replacements namedtuple
+    from the provided replacements dictionary
     """
     # read the soil_in_fname file
     with open(src) as f:
         lines = f.readlines()
 
     header = [L for L in lines if L.startswith('#')]
-    header.append('# {}\n'.format(repr(replacements)))
+    header.append('# nodb.disturbed:disturbed_soil_specialization({})\n'.format(repr(replacements)))
 
     lines = [L for L in lines if not L.startswith('#')]
 
