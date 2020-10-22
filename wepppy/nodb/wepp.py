@@ -22,7 +22,7 @@ from datetime import datetime
 import time
 
 import pickle
-
+from copy import deepcopy
 from glob import glob
 
 import shutil
@@ -37,6 +37,8 @@ from osgeo import gdal
 from osgeo.gdalconst import *
 
 import wepppy
+
+from wepppy.wepp.soils.utils import modify_kslast
 
 # wepppy
 from wepppy.climates.cligen import ClimateFile
@@ -307,6 +309,8 @@ class Wepp(NoDbBase, LogMixin):
             _channel_erodibility = config_get_float(config, 'wepp', 'channel_erodibility', _CHANNEL_ERODIBILITY_DEFAULT)
             _channel_critical_shear = config_get_float(config, 'wepp', 'channel_critical_shear', _CHANNEL_CRITICAL_SHEAR_DEFAULT)
 
+            _kslast = config_get_float(config, 'wepp', 'kslast')
+
             _wepp_bin = config_get_str(config, 'wepp', 'bin')
 
             self.phosphorus_opts = PhosphorusOpts(
@@ -324,6 +328,7 @@ class Wepp(NoDbBase, LogMixin):
             self._wepp_bin = _wepp_bin
             self._channel_erodibility = _channel_erodibility
             self._channel_critical_shear = _channel_critical_shear
+            self._kslast = _kslast
 
             self.baseflow_opts = BaseflowOpts()
             self.snow_opts = SnowOpts(rst=snow_rst,
@@ -506,6 +511,10 @@ class Wepp(NoDbBase, LogMixin):
             if isfloat(_channel_erodibility):
                 self._channel_erodibility = float(_channel_erodibility)
 
+            _kslast = kwds.get('kslast', None)
+            if isfloat(_kslast):
+                self._kslast = float(_kslast)
+
             self.dump_and_unlock()
 
         except Exception:
@@ -535,6 +544,7 @@ class Wepp(NoDbBase, LogMixin):
         # get translator
         self._prep_slopes(translator)
         self._prep_managements(translator)
+        self._modify_soils_kslast()
         self._prep_soils(translator)
         self._prep_climates(translator)
         self._make_hillslope_runs(translator)
@@ -1385,3 +1395,65 @@ Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
         p.wait()
 
         assert _exists(loss_grid_wgs)
+
+    @property
+    def kslast(self):
+        if not hasattr(self, '_kslast'):
+            return None
+
+        return self._kslast
+
+    @kslast.setter
+    def kslast(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._kslast = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _modify_soils_kslast(self):
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+
+        kslast = self.kslast
+
+        if kslast is None:
+            return
+
+        soils = Soils.getInstance(wd)
+
+        ksat_mod = 'f'
+
+        _domsoil_d = soils.domsoil_d
+        _soils = soils.soils
+        for topaz_id, ss in watershed._subs_summary.items():
+            # lng, lat = ss.centroid.lnglat
+
+            dom = _domsoil_d[str(topaz_id)]
+            _soil = deepcopy(_soils[dom])
+
+            _dom = '{dom}-{ksat_mod}' \
+                .format(dom=dom, ksat_mod=ksat_mod)
+
+            _soil.mukey = _dom
+
+            if _dom not in _soils:
+                _soil_fn = '{dom}.sol'.format(dom=_dom)
+                src_soil_fn = _join(_soil.soils_dir, _soil.fname)
+                dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
+                modify_kslast(src_soil_fn, dst_soil_fn, kslast, caller='nodb.wepp')
+
+                _soil.fname = _soil_fn
+                _soils[_dom] = _soil
+
+            _domsoil_d[str(topaz_id)] = _dom
+
+        soils.lock()
+        soils.domsoil_d = _domsoil_d
+        soils.soils = _soils
+        soils.dump_and_unlock()
