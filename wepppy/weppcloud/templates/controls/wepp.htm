@@ -82,10 +82,9 @@
                     value="{{ wepp.baseflow_opts.bfthreshold }}" aria-label="Watershed groundwater baseflow threshold area">
                 </div>
             </div>
-
             <br/>
+        
             <h5>Channel Parameters</h5>
-
             <div class="form-group row" id="channel_critical_shear_container">
                 <div class="col-sm-4">
                     <label for="channel_critical_shear">Critical Shear Based on Channel Particle Size: </label>
@@ -112,6 +111,18 @@
             </div>
             <br/>
 
+            <h5>Bedrock</h5>
+            <div class="form-group row" id="kslast_container">
+                <div class="col-sm-4">
+                    <label for="kslast">ksat for restrictive layer: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="kslast" name="kslast" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.kslast }}" aria-label="ksat for restrictive layer">
+                </div>
+            </div>
+            <br/>
+        
             {% if "lt" in ron.mods %}
             <h5>Phosphorus Processing</h5>
             <p><i>Phosphorus coefficients determined by lt mod</i></p>
