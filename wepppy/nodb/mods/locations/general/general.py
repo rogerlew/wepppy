@@ -150,7 +150,7 @@ class GeneralMod(NoDbBase, LocationMixin):
 
         soils = Soils.getInstance(wd)
 
-        ksat_mod = 'f'
+        ksat_mod = 'general_kslast'
 
         _domsoil_d = soils.domsoil_d
         _soils = soils.soils
