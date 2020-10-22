@@ -208,7 +208,7 @@ def soil_texture(clay, sand):
     return res
 
 
-def soil_specialization(src, dst, replacements: SoilReplacements):
+def soil_specialization(src, dst, replacements: SoilReplacements, caller=''):
     """
     Creates a new soil file based on soil_in_fname and makes replacements
     from the provided replacements namedtuple
@@ -218,7 +218,7 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
         lines = f.readlines()
 
     header = [L for L in lines if L.startswith('#')]
-    header.append('# {}\n'.format(repr(replacements)))
+    header.append('# {}soil_specialization({})\n'.format(('', '%s:' % caller)[len(caller) > 0], repr(replacements)))
 
     lines = [L for L in lines if not L.startswith('#')]
 
@@ -263,22 +263,24 @@ def soil_specialization(src, dst, replacements: SoilReplacements):
             f.writelines(lines[5:])
 
 
-def modify_kslast(src, dst, kslast):
+def modify_kslast(src, dst, kslast, caller=''):
     with open(src) as fp:
         lines = fp.readlines()
 
     while len(lines[-1].strip()) == 0:
         del lines[-1]
 
-    for i, line in enumerate(lines):
-        if line.startswith('Any comments:'):
-            lines[i] = ' {} kslast modified to {}\n'.format(lines[i].strip(), kslast)
+    header = [L for L in lines if L.startswith('#')]
+    header.append('# {}modify_kslast({})\n'.format(('', '%s:' % caller)[len(caller) > 0], kslast))
+
+    lines = [L for L in lines if not L.startswith('#')]
 
     lastline = lines[-1].split()
     lastline[-1] = '{}'.format(kslast)
     lines[-1] = ' '.join(lastline)
 
     with open(dst, 'w') as fp:
+        fp.writelines(header)
         fp.writelines(lines)
 
 
