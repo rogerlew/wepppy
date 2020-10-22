@@ -491,7 +491,6 @@ class Landuse(NoDbBase):
                 area = watershed.area_of(topaz_id)
                 
                 if k not in managements:
-                    print(k, _map)
                     man = get_management_summary(k, _map)
                     man.area = area
                     managements[k] = man
