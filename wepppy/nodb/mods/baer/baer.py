@@ -457,7 +457,7 @@ class Baer(NoDbBase):
                 key = '{}-{}'.format(mukey, sbs)
                 fn = '%s.sol' % key
                 dst = _join(soils_dir, fn)
-                soil_specialization(src, dst, replacements)
+                soil_specialization(src, dst, replacements, caller='nodb.baer')
 
                 _soils[key] = SoilSummary(
                     mukey=key,
