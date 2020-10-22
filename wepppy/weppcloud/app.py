@@ -88,13 +88,23 @@ from wepppy.wepp.stats import (
     TotalWatbal
 )
 
+from wepppy.nodb.climate import (
+    Climate,
+    ClimateStationMode,
+    NoClimateStationSelectedError,
+    ClimateModeIsUndefinedError
+)
+
+from wepppy.nodb.watershed import (
+    Watershed,
+    WatershedNotAbstractedError
+)
+
 from wepppy.nodb import (
     Ron,
     Topaz,
-    Watershed,
     Landuse, LanduseMode,
     Soils, SoilsMode,
-    Climate, ClimateStationMode,
     Wepp, WeppPost,
     Unitizer,
     Observed,
@@ -1966,8 +1976,11 @@ def task_build_landuse(runid, config):
 
     try:
         landuse.build()
-    except Exception:
-        return exception_factory('Building Landuse Failed')
+    except Exception as e:
+        if isinstance(e, WatershedNotAbstractedError):
+            return exception_factory(e.__name__, e.__doc__)
+        else:
+            return exception_factory('Building Landuse Failed')
 
     return success_factory()
 
@@ -2093,7 +2106,7 @@ def task_build_soil(runid, config):
     try:
         soils.build()
     except Exception as e:
-        if isinstance(e, NoValidSoilsException):
+        if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
             return exception_factory(e.__name__, e.__doc__)
         else:
             return exception_factory('Building Soil Failed')
@@ -2333,8 +2346,13 @@ def task_build_climate(runid, config):
 
     try:
         climate.build()
-    except Exception:
-        return exception_factory('Error building climate')
+    except Exception as e:
+        if isinstance(e, NoClimateStationSelectedError) or \
+           isinstance(e, ClimateModeIsUndefinedError) or \
+           isinstance(e, WatershedNotAbstractedError):
+            return exception_factory(e.__name__, e.__doc__)
+        else:
+            return exception_factory('Error building climate')
 
     return success_factory()
 
