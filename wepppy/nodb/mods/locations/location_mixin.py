@@ -12,6 +12,7 @@ import csv
 
 from copy import deepcopy
 from os.path import join as _join
+from os.path import split as _split
 from os.path import exists as _exists
 
 import jsonpickle
@@ -105,7 +106,8 @@ class LocationMixin(object):
 
                 else:
                     if k not in _soils:
-                        soil_specialization(src_fn, dst_fn, replacements)
+                        caller = ':'.join(_split(self._nodb)[-1].split('.')[::-1])
+                        soil_specialization(src_fn, dst_fn, replacements, caller=caller)
                         _soils[k] = deepcopy(soils.soils[mukey])
                         _soils[k].mukey = k
                         _soils[k].fname = '%s.sol' % k
