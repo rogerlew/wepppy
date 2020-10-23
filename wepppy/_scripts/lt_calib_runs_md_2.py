@@ -39,7 +39,7 @@ if __name__ == '__main__':
     os.chdir('/geodata/weppcloud_runs/')
 
     watersheds = [
-        dict(wd='40_Edgewood_Creek',  # 1500 ha  Watershed_46_Edgewood
+        dict(watershed='40_Edgewood_Creek',  # 1500 ha  Watershed_46_Edgewood
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -49,7 +49,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='41_Intervening_Area_Bijou_Park_1',  # 490 ha  Watershed_47
+        dict(watershed='41_Intervening_Area_Bijou_Park_1',  # 490 ha  Watershed_47
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -59,7 +59,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='41_Intervening_Area_Bijou_Park_2',  # 310 ha  Watershed_48
+        dict(watershed='41_Intervening_Area_Bijou_Park_2',  # 310 ha  Watershed_48
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -69,7 +69,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='42_Bijou_Creek',  # 510 ha  Watershed_49
+        dict(watershed='42_Bijou_Creek',  # 510 ha  Watershed_49
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -79,7 +79,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='43_Trout_Creek',  # 11000 ha  Watershed_50_Trout
+        dict(watershed='43_Trout_Creek',  # 11000 ha  Watershed_50_Trout
              extent=[-120.22338867187501, 38.65012583524745, -119.74273681640626, 39.02451827974919],
              map_center=[-119.98306274414064, 38.83756825896614],
              map_zoom=11,
@@ -89,7 +89,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-       # dict(wd='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
+       # dict(watershed='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
        #      extent=[-120.25085449218751, 38.636718267483616, -119.77020263671876, 39.0111810513999],
        #      map_center=[-120.01052856445314, 38.82419583577267],
        #      map_zoom=11,
@@ -100,7 +100,7 @@ if __name__ == '__main__':
        #      surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
        #      gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
        #      mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='46_Taylor_Creek',  # 5700 ha  Watershed_52
+        dict(watershed='46_Taylor_Creek',  # 5700 ha  Watershed_52
              extent=[-120.22338867187501, 38.65012583524745, -119.74273681640626, 39.02451827974919],
              map_center=[-119.98306274414064, 38.83756825896614],
              map_zoom=11,
@@ -110,7 +110,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='47_Tallac_Creek',  # Watershed_20
+        dict(watershed='47_Tallac_Creek',  # Watershed_20
              extent=[-120.14305114746095, 38.877536817489165, -120.02288818359376, 38.97102081360566],
              map_center=[-120.08296966552736, 38.924294213302424],
              map_zoom=13,
@@ -120,7 +120,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='48_Cascade_Creek',  # Watershed_19
+        dict(watershed='48_Cascade_Creek',  # Watershed_19
              extent=[-120.22579193115236, 38.826603057341515, -119.98546600341798, 39.01358193815758],
              map_center=[-120.10562896728517, 38.92015408680781],
              map_zoom=12,
@@ -130,7 +130,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='49_Eagle_Creek',  # Watershed_18
+        dict(watershed='49_Eagle_Creek',  # Watershed_18
              extent=[-120.22579193115236, 38.826603057341515, -119.98546600341798, 39.01358193815758],
              map_center=[-120.10562896728517, 38.92015408680781],
              map_zoom=12,
@@ -140,7 +140,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='51_Rubicon_Creek_1',  # Watershed_17
+        dict(watershed='51_Rubicon_Creek_1',  # Watershed_17
              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
              map_center=[-120.14408111572267, 39.003177506910475],
              map_zoom=12,
@@ -150,7 +150,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='51_Rubicon_Creek_2',  # Watershed_16
+        dict(watershed='51_Rubicon_Creek_2',  # Watershed_16
              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
              map_center=[-120.14408111572267, 39.003177506910475],
              map_zoom=12,
@@ -160,7 +160,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='52_Paradise_Flat', # Watershed_15
+        dict(watershed='52_Paradise_Flat', # Watershed_15
              extent=[-120.15652656555177, 38.98636711600028, -120.09644508361818, 39.033052785617535],
              map_center=[-120.12648582458498, 39.00971380270266],
              map_zoom=14,
@@ -170,7 +170,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='53_Lonely_Gulch',  # Watershed_14
+        dict(watershed='53_Lonely_Gulch',  # Watershed_14
              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
              map_center=[-120.14408111572267, 39.003177506910475],
              map_zoom=12,
@@ -180,7 +180,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='54_Sierra_Creek', # Watershed_13
+        dict(watershed='54_Sierra_Creek', # Watershed_13
              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
              map_center=[-120.14408111572267, 39.003177506910475],
              map_zoom=12,
@@ -190,7 +190,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='55_Meeks_Creek', # Watershed_12_Meeks
+        dict(watershed='55_Meeks_Creek', # Watershed_12_Meeks
              extent=[-120.23197174072267, 38.9348437659246, -120.05619049072267, 39.07144530820888],
              map_center=[-120.14408111572267, 39.003177506910475],
              map_zoom=12,
@@ -200,7 +200,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='56_General_Creek', # Watershed_11_General_10336645
+        dict(watershed='56_General_Creek', # Watershed_11_General_10336645
              extent=[-120.27626037597658, 38.91561302513129, -120.03593444824219, 39.102357437817595],
              map_center=[-120.15609741210939, 39.00904686141452],
              map_zoom=12,
@@ -210,7 +210,7 @@ if __name__ == '__main__':
              surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='57_McKinney_Creek', # Watershed_10
+        dict(watershed='57_McKinney_Creek', # Watershed_10
              extent=[-120.29102325439453, 39.02451827974919, -120.11524200439455, 39.16094667321639],
              map_center=[-120.20313262939455, 39.09276546806873],
              map_zoom=12,
@@ -220,7 +220,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='62_Blackwood_Creek',  # Watershed_9_Blackwood_10336660
+        dict(watershed='62_Blackwood_Creek',  # Watershed_9_Blackwood_10336660
              extent=[-120.32329559326173, 38.99944220958143, -120.08296966552736, 39.18596539075659],
              map_center=[-120.20313262939455, 39.09276546806873],
              map_zoom=12,
@@ -230,7 +230,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1000.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='63_Intervening_Area_Ward_Creek', # Watershed_8
+        dict(watershed='63_Intervening_Area_Ward_Creek', # Watershed_8
              extent=[-120.29102325439453, 39.02451827974919, -120.11524200439455, 39.16094667321639],
              map_center=[-120.20313262939455, 39.09276546806873],
              map_zoom=12,
@@ -240,7 +240,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='63_Ward_Creek', # Watershed_7_Ward_10336676
+        dict(watershed='63_Ward_Creek', # Watershed_7_Ward_10336676
              extent=[-120.32329559326173, 38.99944220958143, -120.08296966552736, 39.18596539075659],
              map_center=[-120.20313262939455, 39.09276546806873],
              map_zoom=12,
@@ -253,44 +253,45 @@ if __name__ == '__main__':
     ]
 
     scenarios = [
-               dict(wd='SimFire.fccsFuels_obs_cli',
+               dict(scenario='SimFire.fccsFuels_obs_cli',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
                     cfg='lt-fire-snow'),
-               dict(wd='SimFire.landisFuels_obs_cli',
+               dict(scenario='SimFire.landisFuels_obs_cli',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
                     cfg='lt-fire-future-snow'),
-               dict(wd='SimFire.landisFuels_fut_cli_A2',
+               dict(scenario='SimFire.landisFuels_fut_cli_A2',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
                     cfg='lt-fire-future-snow',
                     climate='future'),
-               dict(wd='CurCond',
+               dict(scenario='CurCond',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='PrescFire',
+               dict(scenario='PrescFire',
                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='LowSev',
+               dict(scenario='LowSev',
                     landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='ModSev',
+               dict(scenario='ModSev',
                     landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='HighSev',
+               dict(scenario='HighSev',
                     landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='Thinn96',
+               dict(scenario='Thinn96',
                     landuse=[(not_shrub_selector, 123)],
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='Thinn93',
+               dict(scenario='Thinn93',
                     landuse=[(not_shrub_selector, 115)],
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='Thinn85',
+               dict(scenario='Thinn85',
                     landuse=[(not_shrub_selector, 117)],
-                    lc_lookup_fn='ki5krcs.csv'),
-                ]
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),  # <- EXAMPLE FOR COPYING CLIMATE
+    ]
 
     projects = []
 
@@ -305,7 +306,8 @@ if __name__ == '__main__':
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
-            projects[-1]['wd'] = 'lt_202010_%s_%s' % (watershed['wd'], scenario['wd'])
+            projects[-1]['scenario'] = scenario['scenario']
+            projects[-1]['wd'] = 'lt_202010_%s_%s' % (watershed['watershed'], scenario['scenario'])
 
     failed = open('failed', 'w')
     for proj in projects:
@@ -319,6 +321,9 @@ if __name__ == '__main__':
             cfg = proj['cfg']
             climate_mode = proj['climate']
             lc_lookup_fn = proj['lc_lookup_fn']
+
+            watershed = proj['watershed']
+            scenario = proj['scenario']
 
             if wc is not None:
                 if not wc in wd:
@@ -402,8 +407,8 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Future
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                climate.set_future_pars(start_year=2018, end_year=2018+30)
-                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+                climate.set_future_pars(start_year=2018, end_year=2018 + 30)
+                # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             elif climate_mode == 'vanilla':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -412,7 +417,17 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Vanilla
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+                # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+            elif 'copy' in climate_mode:
+                src_wd = 'lt_202010_%s_%s' % (watershed, climate_mode[4:])
+                shutil.rmtree(_join(wd, 'climate'))
+                shutil.copytree(_join(src_wd, 'climate'), _join(wd, 'climate'))
+                with open(_join(src_wd, 'climate.nodb')) as fp:
+                    contents = fp.read()
+
+                with open(_join(wd, 'climate.nodb'), 'w') as fp:
+                    fp.write(contents.replace(src_wd, wd))
+
             else:
                 raise Exception("Unknown climate_mode")
 
