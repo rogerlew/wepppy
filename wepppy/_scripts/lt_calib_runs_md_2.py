@@ -293,6 +293,8 @@ if __name__ == '__main__':
                     climate='copyCurCond'),  # <- EXAMPLE FOR COPYING CLIMATE
     ]
 
+    skip_completed = True
+
     projects = []
 
     wc = sys.argv[-1]
@@ -327,6 +329,11 @@ if __name__ == '__main__':
 
             if wc is not None:
                 if not wc in wd:
+                    continue
+
+            if skip_completed:
+                if _exists(_join(wd, 'wepp', 'output', 'loss_pw0.txt')):
+                    log_print('has loss_pw0.txt... skipping.')
                     continue
 
             log_print('cleaning dir')
