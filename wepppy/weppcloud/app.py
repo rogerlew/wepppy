@@ -558,7 +558,11 @@ def index():
     except:
         runs_counter = Counter()
 
-    return render_template('index.htm', user=current_user, runs_counter=c)
+    try:
+        return render_template('index.htm', user=current_user, runs_counter=runs_counter)
+
+    except Exception:
+        return exception_factory()
 
 
 @app.route('/portland-municipal')
