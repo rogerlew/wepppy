@@ -15,6 +15,8 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+from collections import Counter
+
 from io import BytesIO
 import uuid
 import json
@@ -549,12 +551,12 @@ def index():
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
 
-    from wepppy.weppcloud import RunStatistics
-    if not _exists('/geodata/weppcloud_runs/run_statistics.nodb'):
-        RunStatistics('/geodata/weppcloud_runs')
-
-    rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
-    c = rs.counter
+    try:
+        if _exists('/geodata/weppcloud_runs/runs_counter.json'):
+            with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
+                runs_counter = Counter(json.load(fp))
+    except:
+        runs_counter = Counter()
 
     return render_template('index.htm', user=current_user, runs_counter=c)
 
@@ -635,12 +637,12 @@ def create(config):
         os.mkdir(wd)
         dir_created = True
 
-    try:
-        from wepppy.weppcloud import RunStatistics
-        rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
-        rs.increment_projects(config)
-    except:
-        pass
+    # try:
+    #     from wepppy.weppcloud import RunStatistics
+    #     rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
+    #     rs.increment_projects(config)
+    # except:
+    #     pass
 
     try:
         Ron(wd, "%s.cfg" % config)
