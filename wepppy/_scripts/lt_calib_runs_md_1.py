@@ -557,11 +557,13 @@ if __name__ == '__main__':
         dict(scenario='SimFire.fccsFuels_obs_cli',
              landuse=None,
              lc_lookup_fn='ki5krcs.csv',
-             cfg='lt-fire-snow'),
+             cfg='lt-fire-snow',
+             climate='copyCurCond'),
         dict(scenario='SimFire.landisFuels_obs_cli',
              landuse=None,
              lc_lookup_fn='ki5krcs.csv',
-             cfg='lt-fire-future-snow'),
+             cfg='lt-fire-future-snow',
+             climate='copyCurCond'),
         dict(scenario='SimFire.landisFuels_fut_cli_A2',
              landuse=None,
              lc_lookup_fn='ki5krcs.csv',
@@ -572,22 +574,28 @@ if __name__ == '__main__':
              lc_lookup_fn='ki5krcs.csv'),
         dict(scenario='PrescFire',
              landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-             lc_lookup_fn='ki5krcs.csv'),
+             lc_lookup_fn='ki5krcs.csv',
+             climate='copyCurCond'),
         dict(scenario='LowSev',
              landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-             lc_lookup_fn='ki5krcs.csv'),
+             lc_lookup_fn='ki5krcs.csv',
+             climate='copyCurCond'),
         dict(scenario='ModSev',
              landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-             lc_lookup_fn='ki5krcs.csv'),
+             lc_lookup_fn='ki5krcs.csv',
+             climate='copyCurCond'),
         dict(scenario='HighSev',
              landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-             lc_lookup_fn='ki5krcs.csv'),
+             lc_lookup_fn='ki5krcs.csv',
+             climate='copyCurCond'),
         dict(scenario='Thinn96',
              landuse=[(not_shrub_selector, 123)],
-             lc_lookup_fn='ki5krcs.csv'),
+             lc_lookup_fn='ki5krcs.csv',
+             climate='copyCurCond'),
         dict(scenario='Thinn93',
              landuse=[(not_shrub_selector, 115)],
-             lc_lookup_fn='ki5krcs.csv'),
+             lc_lookup_fn='ki5krcs.csv',
+             climate='copyCurCond'),
         dict(scenario='Thinn85',
              landuse=[(not_shrub_selector, 117)],
              lc_lookup_fn='ki5krcs.csv',
@@ -739,7 +747,8 @@ if __name__ == '__main__':
             else:
                 raise Exception("Unknown climate_mode")
 
-            climate.build(verbose=1)
+            if 'copy' not in climate_mode:
+                climate.build(verbose=1)
 
             log_print('prepping wepp')
             wepp = Wepp.getInstance(wd)
