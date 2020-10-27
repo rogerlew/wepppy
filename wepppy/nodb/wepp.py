@@ -107,7 +107,6 @@ _RUN_SNOW_DEFAULT = False
 _CHANNEL_ERODIBILITY_DEFAULT = 1E-6
 _CHANNEL_CRITICAL_SHEAR_DEFAULT = 19.0
 
-
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
     MuskingumCunge = 4
@@ -568,7 +567,36 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
+
+    @property
+    def sol_versions(self):
+        sol_versions = set()
+
+        sol_fns = glob(_join(self.runs_dir, '*.sol'))
+        if len(sol_fns) == 0:
+            raise Exception('Soils have not been prepped')
+
+        for sol_fn in sol_fns:
+            with open(sol_fn) as fp:
+                for line in fp.readlines():
+                    line = line.strip()
+                    if line.startswith('#'):
+                        continue
+
+                    if line == '':
+                        continue
+
+                    sol_versions.add(line)
+                    break
+
+        return sol_versions
+
     def _prep_wepp_ui(self):
+
+        for sol_version in self.sol_versions:
+            if '2006' in sol_version:
+                return
+
         fn = _join(self.runs_dir, 'wepp_ui.txt')
         with open(fn, 'w') as fp:
             fp.write('')
@@ -879,7 +907,7 @@ class Wepp(NoDbBase, LogMixin):
     # watershed
     #
     def prep_watershed(self, erodibility=None, critical_shear=None,
-                       tcr=None):
+                       tcr=None, avke=None):
         self.log('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -889,7 +917,7 @@ class Wepp(NoDbBase, LogMixin):
         self._prep_channel_slopes()
         self._prep_channel_chn(translator, erodibility, critical_shear)
         self._prep_impoundment()
-        self._prep_channel_soils(translator, erodibility, critical_shear)
+        self._prep_channel_soils(translator, erodibility, critical_shear, avke)
         self._prep_channel_climate(translator)
         self._prep_channel_input()
 
@@ -986,7 +1014,7 @@ class Wepp(NoDbBase, LogMixin):
             # 2 Daily average discharge, 600 probably doesn't do anything
             fp.write('1 600\n0\n1\n{}\n'.format(total))
 
-    def _prep_channel_soils(self, translator, erodibility, critical_shear):
+    def _prep_channel_soils(self, translator, erodibility, critical_shear, avke):
         if erodibility is not None or critical_shear is not None:
             self.log('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
@@ -1013,46 +1041,68 @@ class Wepp(NoDbBase, LogMixin):
         for topaz_id, soil in soils.chn_iter():
             soil_c.append((translator.chn_enum(top=int(topaz_id)), soil))
         soil_c.sort(key=lambda x: x[0])
-        #
-        # versions = []
-        # for chn_enum, soil in soil_c:
-        #     soil_fn = _join(soils_dir, soil.fname)
-        #     lines = open(soil_fn).readlines()
-        #     version = lines[0].replace('#', '').strip()
-        #     versions.append(version)
-        #
-        # versions = set(versions)
-        # if len(versions) > 1:
-        #     raise Exception('Do not know how to merge '
-        #                     'soils of different versions')
-        #
-        # if len(versions) == 0:
-        #     raise Exception('Could not find any soils for channels.')
-        #
-        # version = versions.pop()
 
         assert isfloat(erodibility)
         assert isfloat(critical_shear)
 
-        # iterate over soils and append them together
-        fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-        fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
-                 .format(chn_n=chn_n))
-        i = 0
-        for chn_enum, soil in soil_c:
-            soil_fn = _join(soils_dir, soil.fname)
+        write_7778 = True
+        for sol_version in self.sol_versions:
+            if '2006' in sol_version:
+                write_7778 = False
 
-            with open(soil_fn) as fp2:
-                contents = fp2.read()
-                is_water = 'water' in contents.lower()
+        if write_7778:
+            # iterate over soils and append them together
+            fp = open(_join(runs_dir, 'pw0.sol'), 'w')
+            fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
+                     .format(chn_n=chn_n))
+            i = 0
+            for chn_enum, soil in soil_c:
+                soil_fn = _join(soils_dir, soil.fname)
 
-            fp.write("""\
+                with open(soil_fn) as fp2:
+                    contents = fp2.read()
+                    is_water = 'water' in contents.lower()
+
+                fp.write("""\
 Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
     400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20
 1 10000 0.0001
 """.format(erodibility=erodibility, critical_shear=critical_shear))
 
-        fp.close()
+            fp.close()
+
+        else:
+            if avke is not None:
+                self.log('nodb.Wepp._prep_channel_soils::avke = {} '
+                         .format(avke))
+                self.log_done()
+
+            if avke is None:
+                avke = 10
+
+            # iterate over soils and append them together
+            fp = open(_join(runs_dir, 'pw0.sol'), 'w')
+            fp.write('2006.2\ncomments: soil file\n{chn_n} 1\n'
+                     .format(chn_n=chn_n))
+            i = 0
+            for chn_enum, soil in soil_c:
+                _avke = soil.as_dict()['avke']
+                if _avke is None:
+                    _avke = avke
+
+                soil_fn = _join(soils_dir, soil.fname)
+
+                with open(soil_fn) as fp2:
+                    contents = fp2.read()
+                    is_water = 'water' in contents.lower()
+
+                fp.write("""\
+Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear} {avke}
+    400	66.8	7	3	11.3	20
+1 25 0.0001
+""".format(erodibility=erodibility, critical_shear=critical_shear, avke=_avke))
+
+            fp.close()
 
     def _prep_watershed_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
