@@ -22,6 +22,10 @@ class YamlSoil(object):
         lines = [L.strip() for L in lines if not L.startswith('#')]
 
         datver = lines[0]  # data version
+
+        if '2006' not in datver:
+            raise NotImplementedError('Can only read 2006 soils')
+
         solcom = lines[1]  # user comment line
 
         line2 = lines[2].split()
@@ -88,6 +92,18 @@ class YamlSoil(object):
     def dump_yaml(self, dst):
         with open(dst, 'w') as fp:
             fp.write(yaml.dump(self.obj))
+
+    @property
+    def sand(self):
+        return self.obj['ofes'][0]['horizons'][0]['sand']
+
+    @property
+    def clay(self):
+        return self.obj['ofes'][0]['horizons'][0]['clay']
+
+    @property
+    def avke(self):
+        return self.obj['ofes'][0]['avke']
 
 
 if __name__ == "__main__":
