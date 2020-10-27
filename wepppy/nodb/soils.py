@@ -119,7 +119,8 @@ class Soils(NoDbBase):
     @staticmethod
     def getInstance(wd):
         with open(_join(wd, 'soils.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
+            db = jsonpickle.decode(fp.read().replace('"simple_texture"', '"_simple_texture"')
+                                            .replace('"texture"', '"_texture"'))
             assert isinstance(db, Soils)
 
             if _exists(_join(wd, 'READONLY')):
@@ -304,8 +305,6 @@ class Soils(NoDbBase):
                 soils[k].sand = sand
                 soils[k].clay = clay
                 soils[k].ll = ll_d[k]
-                soils[k].simple_texture = simple_texture(clay, sand)
-                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -353,8 +352,6 @@ class Soils(NoDbBase):
                 soils[k].sand = sand
                 soils[k].clay = clay
                 # soils[k].ll = ll_d[k]
-                soils[k].simple_texture = simple_texture(clay, sand)
-                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -584,8 +581,6 @@ class Soils(NoDbBase):
                 soils[k].clay = clay
                 soils[k].sand = sand
                 soils[k].ll = ll_d[k]
-                soils[k].simple_texture = simple_texture(clay, sand)
-                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -728,8 +723,6 @@ class Soils(NoDbBase):
                 soils[k].clay = clay
                 soils[k].sand = sand
                 soils[k].ll = ll_d[k]
-                soils[k].simple_texture = simple_texture(clay, sand)
-                soils[k].texture = soil_texture(clay, sand)
 
             # store the soils dict
             self.domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
