@@ -31,6 +31,7 @@ from glob import glob
 from osgeo import ogr, osr, gdal
 gdal.UseExceptions()
 
+
 # example GDAL error handler function
 def gdal_error_handler(err_class, err_num, err_msg):
     errtype = {
@@ -45,6 +46,7 @@ def gdal_error_handler(err_class, err_num, err_msg):
     print('Error Number: %s' % (err_num))
     print('Error Type: %s' % (err_class))
     print('Error Message: %s' % (err_msg))
+
 
 # install error handler
 gdal.PushErrorHandler(gdal_error_handler)
@@ -200,7 +202,7 @@ def query_daily():
 
     bbox = parse_bbox(bbox)
 
-    if any([x==None for x in bbox]):
+    if any([x is None for x in bbox]):
         return jsonify({'Error': 'bbox contains non float values'})
 
     if bbox[1] > bbox[3] or bbox[0] > bbox[2]:
@@ -246,6 +248,7 @@ def query_daily():
 
     return response
 
+
 @app.route('/monthly/catalog')
 @app.route('/monthly/catalog/')
 def query_monthly_catalog():
@@ -271,7 +274,7 @@ def query_monthly():
         lng = request.args.get('lng', None)
         dataset = request.args.get('dataset', None)
         method = request.args.get('method', None)
-    else: # POST
+    else:  # POST
         d = request.get_json()
         lat = d.get('lat', None)
         lng = d.get('lng', None)
@@ -315,11 +318,11 @@ def query_monthly():
     
     assert len(data) == 12
     
-    return jsonify({'Latitude' : lat,
-                    'Longitude' : lng,
-                    'Dataset' : dataset,
-                    'Description' : monthly_catalog[dataset]['Description'],
-                    'Units' : monthly_catalog[dataset]['Units'],
+    return jsonify({'Latitude': lat,
+                    'Longitude': lng,
+                    'Dataset': dataset,
+                    'Description': monthly_catalog[dataset]['Description'],
+                    'Units': monthly_catalog[dataset]['Units'],
                     'Method': method,
                     'MonthlyValues': data})
 
