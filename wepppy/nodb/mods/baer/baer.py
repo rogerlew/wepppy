@@ -22,7 +22,7 @@ from osgeo import gdal
 
 from wepppy.all_your_base import wgs84_proj4, isint, read_arc
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization, simple_texture
+from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization, simple_texture, YamlSoil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
@@ -372,8 +372,6 @@ class Baer(NoDbBase):
                 self._assign_eu_soils()
             elif self._config == 'au-fire.cfg' or self._config == 'au-fire60.cfg':
                 self._assign_au_soils()
-            elif self._config == 'baer-ssurgo.cfg':
-                self._build_ssurgo_modified_soils()
             else:
                 self.modify_soils()
 
@@ -440,71 +438,6 @@ class Baer(NoDbBase):
 
         except Exception:
             landuse.unlock('-f')
-            raise
-
-    def _build_ssurgo_modified_soils(self):
-
-        soils = Soils.getInstance(self.wd)
-        soils_dir = soils.soils_dir
-
-        if soils.mode != SoilsMode.Gridded:
-            return
-
-        _soils = deepcopy(soils.soils)
-        for sbs, replacements in sbs_soil_replacements.items():
-            for mukey, soil_sum in soils.soils.items():
-                src = soil_sum.path
-                key = '{}-{}'.format(mukey, sbs)
-                fn = '%s.sol' % key
-                dst = _join(soils_dir, fn)
-                soil_specialization(src, dst, replacements, caller='nodb.baer')
-
-                _soils[key] = SoilSummary(
-                    mukey=key,
-                    fname=fn,
-                    soils_dir=soils_dir,
-                    build_date="N/A",
-                    desc=soil_sum.desc + ' - ' + sbs
-                )
-
-        landuse = Landuse.getInstance(self.wd)
-        domlc_d = landuse.domlc_d
-
-        _domsoil_d = {}
-        _sbs_lookup = {'130': '', '131': 'low', '132': 'moderate', '133': 'high'}
-
-        def _sbs_lookup_func(dom, mukey):
-            if dom == '130':
-                return mukey
-
-            sbs = _sbs_lookup[dom]
-            return '{}-{}'.format(mukey, sbs)
-
-        for topaz_id, dom in domlc_d.items():
-            mukey = soils.domsoil_d[topaz_id]
-            _domsoil_d[topaz_id] = _sbs_lookup_func(dom, mukey)
-
-        # need to recalculate the pct_coverages
-        for k in _soils:
-            _soils[k].area = 0.0
-
-        watershed = Watershed.getInstance(self.wd)
-        total_area = watershed.totalarea
-        for topaz_id, k in _domsoil_d.items():
-            _soils[k].area += watershed.area_of(topaz_id)
-
-        for k in _soils:
-            coverage = 100.0 * _soils[k].area / total_area
-            _soils[k].pct_coverage = coverage
-
-        try:
-            soils.lock()
-            soils.soils = _soils
-            soils.domsoil_d = _domsoil_d
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
             raise
 
     def _assign_eu_soils(self):
@@ -631,9 +564,14 @@ class Baer(NoDbBase):
 
         _soils = {}
         for k, fn in soils_dict.items():
+            yaml_soil = YamlSoil(_join(baer_soils_dir, fn))
+
             _soils[k] = SoilSummary(
                 mukey=k,
                 fname=fn,
+                clay=yaml_soil.clay,
+                sand=yaml_soil.sand,
+                avke=yaml_soil.avke,
                 soils_dir=soils_dir,
                 build_date="N/A",
                 desc=fn[:-4]
