@@ -39,7 +39,7 @@ if __name__ == '__main__':
     os.chdir('/geodata/weppcloud_runs/')
 
     watersheds = [
-        dict(wd='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
+        dict(watershed='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
              extent=[-120.25085449218751, 38.636718267483616, -119.77020263671876, 39.0111810513999],
              map_center=[-120.01052856445314, 38.82419583577267],
              map_zoom=11,
@@ -49,48 +49,59 @@ if __name__ == '__main__':
              cs=30, erod=0.000001,
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.8)
+             mid_season_crop_coeff=0.95, p_coeff=0.8),
     ]
 
     scenarios = [
-               dict(wd='SimFire.fccsFuels_obs_cli',
+               dict(scenario='SimFire.fccsFuels_obs_cli',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-snow'),
-               dict(wd='SimFire.landisFuels_obs_cli',
+                    cfg='lt-fire-snow',
+                    climate='copyCurCond'),
+               dict(scenario='SimFire.landisFuels_obs_cli',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-future-snow'),
-               dict(wd='SimFire.landisFuels_fut_cli_A2',
+                    cfg='lt-fire-future-snow',
+                    climate='copyCurCond'),
+               dict(scenario='SimFire.landisFuels_fut_cli_A2',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
                     cfg='lt-fire-future-snow',
                     climate='future'),
-               dict(wd='CurCond',
+               dict(scenario='CurCond',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='PrescFire',
+               dict(scenario='PrescFire',
                     landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='LowSev',
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),
+               dict(scenario='LowSev',
                     landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='ModSev',
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),
+               dict(scenario='ModSev',
                     landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='HighSev',
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),
+               dict(scenario='HighSev',
                     landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='Thinn96',
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),
+               dict(scenario='Thinn96',
                     landuse=[(not_shrub_selector, 123)],
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='Thinn93',
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),
+               dict(scenario='Thinn93',
                     landuse=[(not_shrub_selector, 115)],
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(wd='Thinn85',
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),
+               dict(scenario='Thinn85',
                     landuse=[(not_shrub_selector, 117)],
-                    lc_lookup_fn='ki5krcs.csv'),
-                ]
+                    lc_lookup_fn='ki5krcs.csv',
+                    climate='copyCurCond'),  # <- EXAMPLE FOR COPYING CLIMATE
+    ]
+
+    skip_completed = True
 
     projects = []
 
@@ -105,7 +116,8 @@ if __name__ == '__main__':
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
-            projects[-1]['wd'] = 'lt_202010_%s_%s' % (watershed['wd'], scenario['wd'])
+            projects[-1]['scenario'] = scenario['scenario']
+            projects[-1]['wd'] = 'lt_202010_%s_%s' % (watershed['watershed'], scenario['scenario'])
 
     failed = open('failed', 'w')
     for proj in projects:
@@ -120,8 +132,16 @@ if __name__ == '__main__':
             climate_mode = proj['climate']
             lc_lookup_fn = proj['lc_lookup_fn']
 
+            watershed = proj['watershed']
+            scenario = proj['scenario']
+
             if wc is not None:
                 if not wc in wd:
+                    continue
+
+            if skip_completed:
+                if _exists(_join(wd, 'wepp', 'output', 'loss_pw0.txt')):
+                    log_print('has loss_pw0.txt... skipping.')
                     continue
 
             log_print('cleaning dir')
@@ -202,8 +222,8 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Future
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                climate.set_future_pars(start_year=2018, end_year=2018+30)
-                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+                climate.set_future_pars(start_year=2018, end_year=2018 + 30)
+                # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             elif climate_mode == 'vanilla':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -212,7 +232,17 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Vanilla
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                #climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+                # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
+            elif 'copy' in climate_mode:
+                src_wd = 'lt_202010_%s_%s' % (watershed, climate_mode[4:])
+                shutil.rmtree(_join(wd, 'climate'))
+                shutil.copytree(_join(src_wd, 'climate'), _join(wd, 'climate'))
+                with open(_join(src_wd, 'climate.nodb')) as fp:
+                    contents = fp.read()
+
+                with open(_join(wd, 'climate.nodb'), 'w') as fp:
+                    fp.write(contents.replace(src_wd, wd))
+
             else:
                 raise Exception("Unknown climate_mode")
 
