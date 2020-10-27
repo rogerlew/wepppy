@@ -29,7 +29,7 @@ from wepppy.all_your_base import (
     isfloat,
     isint
 )
-from wepppy.wepp.soils.utils import simple_texture
+from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 __version__ = 'v.0.1.0'
 
@@ -448,11 +448,24 @@ class SoilSummary(object):
         self.area = 0.0
         self.pct_coverage = kwargs.get('pct_coverage', None)
 
-        self.clay = None
-        self.sand = None
-        self.ll = None
-        self.simple_texture = None
-        self.texture = None
+        self.clay = kwargs.get('clay', None)
+        self.sand = kwargs.get('sand', None)
+        self.ll = kwargs.get('ll', None)
+        self.avke = kwargs.get('avke', None)
+
+    @property
+    def simple_texture(self):
+        if not (isfloat(self.sand) and isfloat(self.clay)):
+            return None
+
+        return simple_texture(self.clay, self.sand)
+
+    @property
+    def texture(self):
+        if not (isfloat(self.sand) and isfloat(self.clay)):
+            return None
+
+        return soil_texture(self.clay, self.sand)
 
     def as_dict(self):
         return dict(mukey=self.mukey, fname=self.fname,
@@ -460,7 +473,7 @@ class SoilSummary(object):
                     build_date=self.build_date, desc=self.desc,
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage,
-                    clay=self.clay, sand=self.sand, ll=self.ll,
+                    clay=self.clay, sand=self.sand, ll=self.ll, avke=self.avke,
                     simple_texture=self.simple_texture)
 
     @property
