@@ -551,12 +551,13 @@ def index():
         if not current_user.roles:
             user_datastore.add_role_to_user(current_user.email, 'User')
 
+    runs_counter = Counter()
     try:
         if _exists('/geodata/weppcloud_runs/runs_counter.json'):
             with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
                 runs_counter = Counter(json.load(fp))
     except:
-        runs_counter = Counter()
+        pass
 
     try:
         return render_template('index.htm', user=current_user, runs_counter=runs_counter)
