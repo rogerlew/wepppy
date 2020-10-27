@@ -340,8 +340,8 @@ if __name__ == '__main__':
                     continue
 
             if skip_completed:
-                if _exists(_join(wd, 'wepp', 'output', 'loss_pw0.txt')):
-                    log_print('has loss_pw0.txt... skipping.')
+                if _exists(_join(wd, 'export', 'arcmap', 'channels.shp')):
+                    log_print('has channels.shp... skipping.')
                     continue
 
             log_print('cleaning dir')
