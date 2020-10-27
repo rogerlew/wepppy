@@ -26,12 +26,11 @@ body > .container-full {
 .container {
   width: auto;
   max-width: 1200px;
-  padding: 0 15px;
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-body > .container {
-  padding: 60px 0 0;
-}
 code {
   font-size: 80%;
 }
