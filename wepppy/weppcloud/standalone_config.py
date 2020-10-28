@@ -32,12 +32,6 @@ def _init(db, user_datastore):
     if exists('/geodata/weppcloud_runs/standalone.db'):
         return
 
-    from wepppy.weppcloud import RunStatistics
-    try:
-        RunStatistics('/geodata/weppcloud_runs')
-    except:
-        pass
-
     try:
         db.drop_all()
     except:
