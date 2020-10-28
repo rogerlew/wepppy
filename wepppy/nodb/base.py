@@ -105,6 +105,13 @@ class NoDbBase(object):
             val = self._configparser.get(section, option)
             if val.lower().startswith('none') or val == '':
                 return default
+
+            if val.startswith("'") and val.endswith("'"):
+                val = val[1:-1]
+
+            elif val.startswith('"') and val.endswith("'"):
+                val = val[1:-1]
+
             return val
         except (NoSectionError, NoOptionError):
             return default
