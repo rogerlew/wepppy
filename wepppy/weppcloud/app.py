@@ -659,13 +659,6 @@ def create(config):
         os.mkdir(wd)
         dir_created = True
 
-    # try:
-    #     from wepppy.weppcloud import RunStatistics
-    #     rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
-    #     rs.increment_projects(config)
-    # except:
-    #     pass
-
     try:
         Ron(wd, "%s.cfg" % config)
     except Exception:
@@ -2728,13 +2721,6 @@ def submit_task_run_wepp(runid, config):
         # Run Watershed
         wepp.run_watershed()
 
-        try:
-            from wepppy.weppcloud import RunStatistics
-            rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
-            rs.increment_hillruns(watershed.config_stem, watershed.sub_n)
-        except:
-            pass
-
     except Exception:
         return exception_factory('Error running wepp')
 
@@ -2960,7 +2946,7 @@ def report_wepp_yearly_watbal(runid, config):
 
     totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
     totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                            phosOpts=wepp.phosphorus_opts)
+                            phos_opts=wepp.phosphorus_opts)
     totwatbal = TotalWatbal(totwatsed,
                             exclude_yr_indxs=exclude_yr_indxs)
 
@@ -3807,14 +3793,6 @@ def combined_ws_viewer_url_gen():
         return error_factory('Error processing request')
 
 
-@app.route('/dev/usage_statistics')
-def usage_statistics():
-    from wepppy.weppcloud import RunStatistics
-    rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
-    fn = rs._json
-    return send_file(fn, mimetype='application/json')
-
-
 def get_project_name(wd):
     ron = Ron.getInstance(wd)
     return ron.name
@@ -3879,13 +3857,6 @@ def submit_task_run_rhem(runid, config):
 #            assert run_hillslope(rhem_id, runs_dir)
 
         rhem.run_hillslopes()
-
-        try:
-            from wepppy.weppcloud import RunStatistics
-            rs = RunStatistics.getInstance('/geodata/rhemcloud_runs')
-            rs.increment_hillruns(watershed.config_stem, watershed.sub_n)
-        except:
-            pass
 
     except Exception:
         return exception_factory('Error running rhem')
