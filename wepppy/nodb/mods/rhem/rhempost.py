@@ -43,7 +43,6 @@ class RhemPost(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            config = self.config
             self.hill_summaries = None
             self.periods = None
             self.watershed_annuals = None

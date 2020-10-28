@@ -8,17 +8,14 @@
 
 # standard library
 import os
-import math
 from enum import IntEnum
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
 from subprocess import Popen, PIPE
-import multiprocessing
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_EXCEPTION
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 
-from datetime import datetime
 import time
 
 import pickle
@@ -36,8 +33,6 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
-import wepppy
-
 from wepppy.wepp.soils.utils import modify_kslast
 
 # wepppy
@@ -54,7 +49,6 @@ from wepppy.wepp.runner import (
 )
 from wepppy.wepp.management import (
     get_channel,
-    merge_managements,
     pmetpara_prep
 )
 
@@ -72,8 +66,7 @@ from wepppy.wepp.out import (
     Loss,
     Ebe,
     PlotFile,
-    correct_daily_hillslopes_pl_path,
-    NumYearsIsZeroException
+    correct_daily_hillslopes_pl_path
 )
 
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
@@ -82,30 +75,16 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 from wepppy.wepp.stats.frq_flood import FrqFlood
 from .base import (
     NoDbBase, 
-    TriggerEvents, 
-    config_get_path, 
-    config_get_str, 
-    config_get_int, 
-    config_get_float,
-    config_get_bool
+    TriggerEvents
 )
-from .landuse import Landuse, LanduseMode
-from .soils import Soils, SoilsMode
+
+from .landuse import Landuse
+from .soils import Soils
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
-from .topaz import Topaz
 from .wepppost import WeppPost
-from .log_mixin import LogMixin
+from wepppy.nodb.mixins.log_mixin import LogMixin
 
-_RUN_WEPP_UI_DEFAULT = True
-_RUN_PMET_DEFAULT = True
-_RUN_FROST_DEFAULT = False
-_RUN_TCR_DEFAULT = False
-_RUN_BASEFLOW_DEFAULT = True
-_RUN_SNOW_DEFAULT = False
-
-_CHANNEL_ERODIBILITY_DEFAULT = 1E-6
-_CHANNEL_CRITICAL_SHEAR_DEFAULT = 19.0
 
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
@@ -286,31 +265,29 @@ class Wepp(NoDbBase, LogMixin):
             if not _exists(wepp_dir):
                 os.mkdir(wepp_dir)
 
-            config = self.config
+            surf_runoff = self.config_get_float('phosphorus_opts', 'surf_runoff')
+            lateral_flow = self.config_get_float('phosphorus_opts', 'lateral_flow')
+            baseflow = self.config_get_float('phosphorus_opts', 'baseflow')
+            sediment = self.config_get_float('phosphorus_opts', 'sediment')
 
-            surf_runoff = config_get_float(config, 'phosphorus_opts', 'surf_runoff')
-            lateral_flow = config_get_float(config, 'phosphorus_opts', 'lateral_flow')
-            baseflow = config_get_float(config, 'phosphorus_opts', 'baseflow')
-            sediment = config_get_float(config, 'phosphorus_opts', 'sediment')
+            snow_rst = self.config_get_float('snow_opts', 'rst')
+            snow_newsnw = self.config_get_float('snow_opts', 'newsnw')
+            snow_ssd = self.config_get_float('snow_opts', 'ssd')
 
-            snow_rst = config_get_float(config, 'snow_opts', 'rst')
-            snow_newsnw = config_get_float(config, 'snow_opts', 'newsnw')
-            snow_ssd = config_get_float(config, 'snow_opts', 'ssd')
+            _wepp_ui = self.config_get_bool('wepp', 'wepp_ui')
+            _pmet = self.config_get_bool('wepp', 'pmet')
+            _frost = self.config_get_bool('wepp', 'frost')
+            _tcr = self.config_get_bool('wepp', 'tcr')
 
-            _wepp_ui = config_get_bool(config, 'wepp', 'wepp_ui', _RUN_WEPP_UI_DEFAULT)
-            _pmet = config_get_bool(config, 'wepp', 'pmet', _RUN_PMET_DEFAULT)
-            _frost = config_get_bool(config, 'wepp', 'frost', _RUN_FROST_DEFAULT)
-            _tcr = config_get_bool(config, 'wepp', 'tcr', _RUN_TCR_DEFAULT)
+            _baseflow = self.config_get_bool('wepp', 'baseflow')
+            _snow = self.config_get_bool('wepp', 'snow')
 
-            _baseflow = config_get_bool(config, 'wepp', 'baseflow', _RUN_BASEFLOW_DEFAULT)
-            _snow = config_get_bool(config, 'wepp', 'snow', _RUN_SNOW_DEFAULT)
+            _channel_erodibility = self.config_get_float('wepp', 'channel_erodibility')
+            _channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
 
-            _channel_erodibility = config_get_float(config, 'wepp', 'channel_erodibility', _CHANNEL_ERODIBILITY_DEFAULT)
-            _channel_critical_shear = config_get_float(config, 'wepp', 'channel_critical_shear', _CHANNEL_CRITICAL_SHEAR_DEFAULT)
+            _kslast = self.config_get_float('wepp', 'kslast')
 
-            _kslast = config_get_float(config, 'wepp', 'kslast')
-
-            _wepp_bin = config_get_str(config, 'wepp', 'bin')
+            _wepp_bin = self.config_get_str('wepp', 'bin')
 
             self.phosphorus_opts = PhosphorusOpts(
                 surf_runoff=surf_runoff,
@@ -398,66 +375,39 @@ class Wepp(NoDbBase, LogMixin):
 
     @property
     def run_tcr(self):
-        if not hasattr(self, "_run_tcr"):
-            return _RUN_TCR_DEFAULT
-
-        return self._run_tcr
+        return getattr(self, '_run_tcr', self.config_get_bool('wepp', 'tcr'))
 
     @property
     def run_wepp_ui(self):
-        if not hasattr(self, "_run_wepp_ui"):
-            return _RUN_WEPP_UI_DEFAULT
-
-        return self._run_wepp_ui
+        return getattr(self, '_run_wepp_ui', self.config_get_bool('wepp', 'wepp_ui'))
 
     @property
     def run_pmet(self):
-        if not hasattr(self, "_run_pmet"):
-            return _RUN_PMET_DEFAULT
-
-        return self._run_pmet
+        return getattr(self, '_run_pmet', self.config_get_bool('wepp', 'pmet'))
 
     @property
     def run_frost(self):
-        if not hasattr(self, "_run_frost"):
-            return _RUN_FROST_DEFAULT
-
-        return self._run_frost
-
-    @property
-    def run_tcr(self):
-        if not hasattr(self, "_run_tcr"):
-            return _RUN_TCR_DEFAULT
-
-        return self._run_tcr
+        return getattr(self, '_run_frost', self.config_get_bool('wepp', 'frost'))
 
     @property
     def run_baseflow(self):
-        if not hasattr(self, "_run_baseflow"):
-            return _RUN_BASEFLOW_DEFAULT
-
-        return self._run_baseflow
+        return getattr(self, '_run_baseflow', self.config_get_bool('wepp', 'baseflow'))
 
     @property
     def run_snow(self):
-        if not hasattr(self, "_run_snow"):
-            return _RUN_SNOW_DEFAULT
-
-        return self._run_snow
+        return getattr(self, '_run_snow', self.config_get_bool('wepp', 'snow'))
 
     @property
     def channel_erodibility(self):
-        if not hasattr(self, "_channel_erodibility"):
-            return _CHANNEL_ERODIBILITY_DEFAULT
-
-        return self._channel_erodibility
+        return getattr(self, '_channel_erodibility', self.config_get_float('wepp', 'channel_erodibility'))
 
     @property
     def channel_critical_shear(self):
-        if not hasattr(self, "_channel_critical_shear"):
-            return _CHANNEL_CRITICAL_SHEAR_DEFAULT
+        return getattr(self, '_channel_critical_shear', self.config_get_float('wepp', 'channel_critical_shear'))
 
-        return self._channel_critical_shear
+    @property
+    def channel_2006_avke(self):
+        return getattr(self, '_channel_2006_avke', self.config_get_float('wepp', 'channel_2006_avke'))
 
     def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
         self.lock()
@@ -566,7 +516,6 @@ class Wepp(NoDbBase, LogMixin):
             self._prep_snow()
 
         self.log_done()
-
 
     @property
     def sol_versions(self):
@@ -721,8 +670,8 @@ class Wepp(NoDbBase, LogMixin):
                 fp.write(fn_contents)
 
             if getattr(self, 'run_flowpaths', False):
-                for fp in watershed.fps_summary(topaz_id):
-                    dst_fn = _join(fp_runs_dir, '{}.man'.format(fp))
+                for flowpath in watershed.fps_summary(topaz_id):
+                    dst_fn = _join(fp_runs_dir, '{}.man'.format(flowpath))
 
                     with open(dst_fn, 'w') as fp:
                         fp.write(fn_contents)
@@ -1015,6 +964,18 @@ class Wepp(NoDbBase, LogMixin):
             fp.write('1 600\n0\n1\n{}\n'.format(total))
 
     def _prep_channel_soils(self, translator, erodibility, critical_shear, avke):
+
+        write_7778 = True
+        for sol_version in self.sol_versions:
+            if '2006' in sol_version:
+                write_7778 = False
+
+        if write_7778:
+            self._prep_7778_channel_soils(erodibility, critical_shear)
+        else:
+            self._prep_2006_channel_soils(translator, erodibility, critical_shear, avke)
+
+    def _prep_7778_channel_soils(self, erodibility, critical_shear):
         if erodibility is not None or critical_shear is not None:
             self.log('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
                      .format(erodibility, critical_shear))
@@ -1026,15 +987,52 @@ class Wepp(NoDbBase, LogMixin):
         if critical_shear is None:
             critical_shear = self.channel_critical_shear
 
-        soils = Soils.getInstance(self.wd)
-        soils_dir = self.soils_dir
         runs_dir = self.runs_dir
 
         watershed = Watershed.getInstance(self.wd)
         chn_n = watershed.chn_n
 
-        translator = watershed.translator_factory()
-        outlet_chn_enum = translator.chn_enum(top=watershed.outlet_top_id)
+        assert isfloat(erodibility)
+        assert isfloat(critical_shear)
+
+        # iterate over soils and append them together
+        fp = open(_join(runs_dir, 'pw0.sol'), 'w')
+        fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
+                 .format(chn_n=chn_n))
+
+        for i in range(chn_n):
+            fp.write('Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}\n'
+                     .format(erodibility=erodibility, critical_shear=critical_shear))
+            fp.write('    400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20\n')
+            fp.write('1 10000 0.0001\n')
+
+        fp.close()
+
+    def _prep_2006_channel_soils(self, translator, erodibility, critical_shear, avke):
+        if erodibility is not None or critical_shear is not None:
+            self.log('nodb.Wepp._prep_channel_soils::erodibility = {}, critical_shear = {} '
+                     .format(erodibility, critical_shear))
+            self.log_done()
+
+        if erodibility is None:
+            erodibility = self.channel_erodibility
+
+        if critical_shear is None:
+            critical_shear = self.channel_critical_shear
+
+        if avke is not None:
+            self.log('nodb.Wepp._prep_channel_soils::avke = {} '
+                     .format(avke))
+            self.log_done()
+
+        if avke is None:
+            avke = self.channel_2006_avke
+
+        soils = Soils.getInstance(self.wd)
+        runs_dir = self.runs_dir
+
+        watershed = Watershed.getInstance(self.wd)
+        chn_n = watershed.chn_n
 
         # build list of soils
         soil_c = []
@@ -1045,89 +1043,28 @@ class Wepp(NoDbBase, LogMixin):
         assert isfloat(erodibility)
         assert isfloat(critical_shear)
 
-        write_7778 = True
-        for sol_version in self.sol_versions:
-            if '2006' in sol_version:
-                write_7778 = False
+        # iterate over soils and append them together
+        fp = open(_join(runs_dir, 'pw0.sol'), 'w')
+        fp.write('2006.2\ncomments: soil file\n{chn_n} 1\n'
+                 .format(chn_n=chn_n))
 
-        if write_7778:
-            # iterate over soils and append them together
-            fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-            fp.write('7778.0\ncomments: soil file\n{chn_n} 1\n'
-                     .format(chn_n=chn_n))
-            i = 0
-            for chn_enum, soil in soil_c:
-                soil_fn = _join(soils_dir, soil.fname)
+        for chn_enum, soil in soil_c:
+            _avke = soil.as_dict()['avke']
+            if _avke is None:
+                _avke = avke
 
-                with open(soil_fn) as fp2:
-                    contents = fp2.read()
-                    is_water = 'water' in contents.lower()
+            fp.write('Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear} {avke}\n'
+                     .format(erodibility=erodibility, critical_shear=critical_shear, avke=_avke))
+            fp.write('    400	66.8	7	3	11.3	20\n')
+            fp.write('1 25 0.0001\n')
 
-                fp.write("""\
-Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear}
-    400	1.5	0.5	1	0.242	0.1145	66.8	7	3	11.3	20
-1 10000 0.0001
-""".format(erodibility=erodibility, critical_shear=critical_shear))
-
-            fp.close()
-
-        else:
-            if avke is not None:
-                self.log('nodb.Wepp._prep_channel_soils::avke = {} '
-                         .format(avke))
-                self.log_done()
-
-            if avke is None:
-                avke = 10
-
-            # iterate over soils and append them together
-            fp = open(_join(runs_dir, 'pw0.sol'), 'w')
-            fp.write('2006.2\ncomments: soil file\n{chn_n} 1\n'
-                     .format(chn_n=chn_n))
-            i = 0
-            for chn_enum, soil in soil_c:
-                _avke = soil.as_dict()['avke']
-                if _avke is None:
-                    _avke = avke
-
-                soil_fn = _join(soils_dir, soil.fname)
-
-                with open(soil_fn) as fp2:
-                    contents = fp2.read()
-                    is_water = 'water' in contents.lower()
-
-                fp.write("""\
-Bidart_1 MPM 1 0.02 0.75 4649000 {erodibility} {critical_shear} {avke}
-    400	66.8	7	3	11.3	20
-1 25 0.0001
-""".format(erodibility=erodibility, critical_shear=critical_shear, avke=_avke))
-
-            fp.close()
+        fp.close()
 
     def _prep_watershed_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
         runs_dir = self.runs_dir
 
         years = Climate.getInstance(self.wd).input_years
-
-        """
-        # build list of managements
-        mans_c = []
-        for topaz_id, man in landuse.chn_iter():
-            man_obj = get_management(man.key)
-            chn_enum = translator.chn_enum(top=int(topaz_id))
-            mans_c.append((chn_enum, man_obj))
-            
-        # sort list of (chn_enum, Management) by chn_enum
-        mans_c.sort(key=lambda x: x[0]) 
-        mans_c = [v for k, v in mans_c]  # <- list of Management
-        
-        if len(mans_c) > 1:
-            chn_man = merge_managements(mans_c)
-        else:
-            chn_man = mans_c[0]
-            
-        """
 
         # Look at all the channel managements and use the most common channel type for all the channels
         keys = [man.key for topaz_id, man in landuse.chn_iter()]

@@ -8,8 +8,6 @@
 
 # standard library
 import os
-import math
-import multiprocessing
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -25,20 +23,13 @@ import jsonpickle
 # wepppy
 from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
 from wepppy.watershed_abstraction import ischannel
-from wepppy.all_your_base import wmesque_retrieve, isfloat, NCPU
+from wepppy.all_your_base import wmesque_retrieve, isfloat
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
-from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 # wepppy submodules
 from .base import (
     NoDbBase,
-    TriggerEvents,
-    DEFAULT_SSURGO_DB,
-    config_get_float,
-    config_get_bool,
-    config_get_int,
-    config_get_str,
-    config_get_path
+    TriggerEvents
 )
 
 from .ron import Ron
@@ -71,15 +62,13 @@ class Soils(NoDbBase):
 
         self.lock()
 
-        config = self.config
-
         # noinspection PyBroadException
         try:
             self._mode = SoilsMode.Gridded
             self._single_selection = 0
             self._single_dbselection = None
 
-            self._ssurgo_db = config_get_path(config, 'soils', 'ssurgo_db', DEFAULT_SSURGO_DB)
+            self._ssurgo_db = self.config_get_path('soils', 'ssurgo_db')
 
             self.domsoil_d = None  # topaz_id keys
             self.ssurgo_domsoil_d = None
@@ -94,7 +83,7 @@ class Soils(NoDbBase):
             if not _exists(soils_dir):
                 os.mkdir(soils_dir)
 
-            _soils_map = config_get_path(config, 'soils', 'soils_map')
+            _soils_map = self.config_get_path('soils', 'soils_map')
             if _soils_map is not None:
                 _soil_fn = _join(self.soils_dir, _split(_soils_map)[-1])
                 shutil.copyfile(_soils_map, _soil_fn)
@@ -236,10 +225,7 @@ class Soils(NoDbBase):
 
     @property
     def ssurgo_db(self):
-        if not hasattr(self, "_ssurgo_db"):
-            return DEFAULT_SSURGO_DB
-
-        return self._ssurgo_db
+        return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db'))
 
     @ssurgo_db.setter
     def ssurgo_db(self, value):
@@ -276,7 +262,7 @@ class Soils(NoDbBase):
                 domsoil_d[str(topaz_id)] = str(mukey)
 
             for topaz_id, chn in watershed.chn_iter():
-                lng, lat = sub.centroid.lnglat
+                lng, lat = chn.centroid.lnglat
                 mukey = statsgoSpatial.identify_mukey_point(lng, lat)
                 domsoil_d[str(topaz_id)] = str(mukey)
 
@@ -337,7 +323,7 @@ class Soils(NoDbBase):
                 orders.append([topaz_id, sub.centroid.lnglat])
 
             for topaz_id, chn in watershed.chn_iter():
-                orders.append([topaz_id, sub.centroid.lnglat])
+                orders.append([topaz_id, chn.centroid.lnglat])
 
             soils, domsoil_d, clay_d, sand_d = build_func(orders, soils_dir)
             for topaz_id, k in domsoil_d.items():
@@ -446,8 +432,8 @@ class Soils(NoDbBase):
                 ll_d[str(mukey)] = 13.2499999
                 cokey = None
             elif isfloat(horizon0.ll_r):
-                    ll_d[str(mukey)] = float(horizon0.ll_r)
-                    cokey = horizon0.cokey
+                ll_d[str(mukey)] = float(horizon0.ll_r)
+                cokey = horizon0.cokey
             else:
                 ll_d[str(mukey)] = 13.2499999
                 cokey = None

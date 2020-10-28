@@ -8,7 +8,6 @@
 
 # standard library
 import os
-import math
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -37,10 +36,10 @@ from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator, have
 from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules
-from .base import NoDbBase, DEFAULT_CLIGEN_DB, TriggerEvents, config_get_path
+from .base import NoDbBase, TriggerEvents
 from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
-from .log_mixin import LogMixin
+from wepppy.nodb.mixins.log_mixin import LogMixin
 
 CLIMATE_MAX_YEARS = 1000
 
@@ -178,12 +177,11 @@ class Climate(NoDbBase, LogMixin):
             if not _exists(cli_dir):
                 os.mkdir(cli_dir)
 
-            from wepppy.nodb.mods import MODS_DIR
-            config = self.config
-            self._cligen_db = config_get_path(config, 'climate', 'cligen_db', DEFAULT_CLIGEN_DB)
+            self._cligen_db = self.config_get_path('climate', 'cligen_db')
+            assert self._cligen_db is not None
 
-            _observed_clis_wc = config_get_path(config, 'climate', 'observed_clis_wc')
-            _future_clis_wc = config_get_path(config, 'climate', 'future_clis_wc')
+            _observed_clis_wc = self.config_get_path('climate', 'observed_clis_wc')
+            _future_clis_wc = self.config_get_path('climate', 'future_clis_wc')
 
             self._observed_clis_wc = _observed_clis_wc
             self._future_clis_wc = _future_clis_wc
@@ -225,7 +223,7 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def cligen_db(self):
-        return getattr(self, '_cligen_db', DEFAULT_CLIGEN_DB)
+        return getattr(self, '_cligen_db', self.config_get_str('climate', 'cligen_db'))
 
     @property
     def cli_path(self):
@@ -1066,7 +1064,7 @@ class Climate(NoDbBase, LogMixin):
             bbox = ','.join(str(v) for v in bbox)
 
             observed_data = {}
-            daymet_base = config_get_path(self.config, 'climate', 'daymet_observed')
+            daymet_base = self.config_get_path('climate', 'daymet_observed')
             for varname in ['prcp', 'tmin', 'tmax']:
                 for year in range(start_year, end_year + 1):
                     dataset = _join(daymet_base, varname)
@@ -1164,7 +1162,7 @@ class Climate(NoDbBase, LogMixin):
             bbox = ','.join(str(v) for v in bbox)
 
             observed_data = {}
-            daymet_base = config_get_path(self.config, 'climate', 'daymet_observed')
+            daymet_base = self.config_get_path('climate', 'daymet_observed')
             for varname in ['prcp', 'tmin', 'tmax']:
                 for year in range(start_year, end_year + 1):
                     dataset = _join(daymet_base, varname)
