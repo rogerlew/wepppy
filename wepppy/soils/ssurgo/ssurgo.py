@@ -468,12 +468,17 @@ class SoilSummary(object):
         return soil_texture(self.clay, self.sand)
 
     def as_dict(self):
+        avke = getattr(self, 'avke', None)
+        ll = getattr(self, 'll', None)
+        sand = getattr('sand', None)
+        clay = getattr('clay', None)
+
         return dict(mukey=self.mukey, fname=self.fname,
                     soils_dir=self.soils_dir,
                     build_date=self.build_date, desc=self.desc,
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage,
-                    clay=self.clay, sand=self.sand, ll=self.ll, avke=self.avke,
+                    clay=clay, sand=sand, ll=ll, avke=avke,
                     simple_texture=self.simple_texture)
 
     @property
