@@ -19,12 +19,15 @@ import warnings
 import numpy as np
 from scipy.stats import circmean
 
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+
 from wepppy.all_your_base import (
     isfloat,
     read_arc,
     wgs84_proj4,
     centroid_px,
-    GeoTransformer
+    GeoTransformer,
+    NCPU
 )
 from .wepp_top_translator import WeppTopTranslator
 
@@ -32,7 +35,7 @@ _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
 
 
-def ischannel(topaz_id: int) -> bool:
+def ischannel(topaz_id: Union[int, str]) -> bool:
     return str(topaz_id).endswith('4')
 
 
@@ -418,7 +421,8 @@ class SummaryBase(object):
             _d, _s = interpolate_slp(_d, _s, max_points)
 
         return ' '.join(["%0.6f, %0.3f" % (d, s) for d, s in zip(_d, _s)])
-        
+
+    # noinspection PyUnresolvedReferences
     def as_dict(self):
         d = dict(
             fname=self.fname,
@@ -464,8 +468,6 @@ class SummaryBase(object):
             d['fp_longest_slope'] = self.fp_longest_slope
 
         return d
-
-
 
 
 class HillSummary(SummaryBase):
@@ -775,7 +777,6 @@ class WatershedAbstraction:
         return lng, lat
 
     def _read_netw_tab(self):
-        translator = self.translator
 
         keys = "chnum order row col row1 col1 outr outc chnlen elevvup "\
                "elevdn areaup areadn1 areadn dda node1 node2 node3 node4 "\
@@ -828,19 +829,6 @@ class WatershedAbstraction:
             # node_indexes = [data[chnum]["node%i" % i] for i in range(1, 8)]
             # node_indexes = [indx for indx in node_indexes if indx != 0]
             self.watershed["channels"]["chn_{}".format(chnout_id)].order = int(data[chnum]["order"])
-
-            # Old broken order assignment
-            # for chn_enum in node_indexes:
-            #     if chn_enum > translator.channel_n:
-            #         continue
-            #
-            #    chn_id = "chn_%i" % translator.top(chn_enum=chn_enum)
-            #     if chn_id not in self.watershed["channels"]:
-            #       self.watershed["channels"][chn_id] = {}
-            #
-            #    order = data[chnum]["order"]
-            #    self.watershed["channels"][chn_id].order = order
-            #    # self.watershed["channels"][chn_id].width = self.cellsize / order
 
             if chnout_id == chn_id0:
                 continue
@@ -1008,6 +996,9 @@ class WatershedAbstraction:
         watershed['channels']['chn_%i' % chn_id] = chn_summary
         
     def abstract_subcatchments(self, verbose=False, warn=False):
+        pool = ThreadPoolExecutor(NCPU)
+        futures = []
+
         subwta = self.subwta
 
         # extract the subcatchment and channel ids from the subwta map
@@ -1025,7 +1016,10 @@ class WatershedAbstraction:
         for i, sub_id in enumerate(sub_ids):
             if verbose:
                 print('abstracting subtatchment %s (%i of %i)' % (sub_id, i+1, n))
-            self.abstract_subcatchment(sub_id, verbose=verbose, warn=warn)
+
+            futures.append(pool.submit(self.abstract_subcatchment, (sub_id)))
+
+        wait(futures, return_when=FIRST_EXCEPTION)
 
         self.hillslope_n = len(sub_ids)
         
