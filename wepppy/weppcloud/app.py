@@ -854,8 +854,8 @@ def runs0(runid, config):
     if ron.public:
         should_abort = False
 
-    #if should_abort:
-    #    abort(404)
+    if should_abort:
+        abort(404)
 
     try:
         topaz = Topaz.getInstance(wd)
