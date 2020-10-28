@@ -464,7 +464,7 @@ class Wepp(NoDbBase, LogMixin):
             if isfloat(_kslast):
                 self._kslast = float(_kslast)
             else:
-                if _kslast.lower.startswith('none') or _kslast == '':
+                if _kslast.lower().startswith('none') or _kslast == '':
                     self._kslast = None
 
             self.dump_and_unlock()
