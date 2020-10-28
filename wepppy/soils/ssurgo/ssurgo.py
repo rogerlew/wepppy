@@ -470,8 +470,8 @@ class SoilSummary(object):
     def as_dict(self):
         avke = getattr(self, 'avke', None)
         ll = getattr(self, 'll', None)
-        sand = getattr('sand', None)
-        clay = getattr('clay', None)
+        sand = getattr(self, 'sand', None)
+        clay = getattr(self, 'clay', None)
 
         return dict(mukey=self.mukey, fname=self.fname,
                     soils_dir=self.soils_dir,
