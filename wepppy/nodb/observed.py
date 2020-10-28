@@ -88,7 +88,6 @@ class Observed(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            config = self.config
             self.results = None
 
             if not _exists(self.observed_dir):
@@ -192,7 +191,7 @@ class Observed(NoDbBase):
         wepp = Wepp.getInstance(self.wd)
         totwatsed_fn = _join(self.output_dir, 'totalwatsed.txt')
         totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                                phosOpts=wepp.phosphorus_opts)
+                                phos_opts=wepp.phosphorus_opts)
         sim = totwatsed.d
         year0 = sorted(set(sim['Year']))[0]
         results['Hillslopes'] = self.run_measures(df, sim, 'Hillslopes')
