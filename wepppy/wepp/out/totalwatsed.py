@@ -33,8 +33,8 @@ class TotalWatSed(object):
              float, float, float, float, float, float, float, float, float]
 
     def __init__(self, fn,
-                 baseflowOpts,
-                 phosOpts=None):
+                 baseflow_opts,
+                 phos_opts=None):
 
         from wepppy.nodb import PhosphorusOpts, BaseflowOpts
         hdr = self.hdr
@@ -71,16 +71,16 @@ class TotalWatSed(object):
         d['Storage (mm)'] = d['Storage Vol (m^3)'] / d['Area (m^2)'] * 1000.0
 
         # calculate Res volume, baseflow, and aquifer losses
-        d['Reservoir Volume (mm)'] = [baseflowOpts.gwstorage]
+        d['Reservoir Volume (mm)'] = [baseflow_opts.gwstorage]
         d['Baseflow (mm)'] = [0.0]
         d['Aquifer Losses (mm)'] = []
 
         for perc in d['Percolation (mm)']:
-            d['Aquifer Losses (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.dscoeff)
+            d['Aquifer Losses (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflow_opts.dscoeff)
             d['Reservoir Volume (mm)'].append(d['Reservoir Volume (mm)'][-1] -
                                               d['Baseflow (mm)'][-1] + perc -
                                               d['Aquifer Losses (mm)'][-1])
-            d['Baseflow (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflowOpts.bfcoeff)
+            d['Baseflow (mm)'].append(d['Reservoir Volume (mm)'][-1] * baseflow_opts.bfcoeff)
 
         d['Reservoir Volume (mm)'] = np.array(d['Reservoir Volume (mm)'][1:])
         d['Baseflow (mm)'] = np.array(d['Baseflow (mm)'][1:])
@@ -95,13 +95,13 @@ class TotalWatSed(object):
 
         d['Sed. Del (tonne)'] = d['Sed. Del (kg)'] / 1000.0
 
-        if phosOpts is not None:
-            assert isinstance(phosOpts, PhosphorusOpts)
-            if phosOpts.isvalid:
-                d['P Load (mg)'] = d['Sed. Del (kg)'] * phosOpts.sediment
-                d['P Runoff (mg)'] = d['Runoff (mm)'] * phosOpts.surf_runoff * d['Area (ha)']
-                d['P Lateral (mg)'] = d['Lateral Flow (mm)'] * phosOpts.lateral_flow * d['Area (ha)']
-                d['P Baseflow (mg)'] = d['Baseflow (mm)'] * phosOpts.baseflow * d['Area (ha)']
+        if phos_opts is not None:
+            assert isinstance(phos_opts, PhosphorusOpts)
+            if phos_opts.isvalid:
+                d['P Load (mg)'] = d['Sed. Del (kg)'] * phos_opts.sediment
+                d['P Runoff (mg)'] = d['Runoff (mm)'] * phos_opts.surf_runoff * d['Area (ha)']
+                d['P Lateral (mg)'] = d['Lateral Flow (mm)'] * phos_opts.lateral_flow * d['Area (ha)']
+                d['P Baseflow (mg)'] = d['Baseflow (mm)'] * phos_opts.baseflow * d['Area (ha)']
                 d['Total P (kg)'] = (d['P Load (mg)'] +
                                                d['P Runoff (mg)'] +
                                                d['P Lateral (mg)'] +
@@ -176,5 +176,5 @@ if __name__ == "__main__":
     phosOpts.baseflow = 0.0196
     phosOpts.sediment = 1024
     baseflowOpts = BaseflowOpts()
-    totwatsed = TotalWatSed(fn, baseflowOpts, phosOpts=phosOpts)
+    totwatsed = TotalWatSed(fn, baseflowOpts, phos_opts=phosOpts)
     totwatsed.export('/home/weppdev/totwatsed.csv')
