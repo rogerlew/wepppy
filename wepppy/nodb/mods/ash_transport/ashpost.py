@@ -50,8 +50,6 @@ class AshPost(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            config = self.config
-
             self.summary_stats = None
             self.reservoir_stats = None
             self.pw0_stats = None

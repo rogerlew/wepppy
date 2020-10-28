@@ -20,7 +20,7 @@ import numpy.ma as ma
 from wepppy.topaz import TopazRunner
 from wepppy.all_your_base import read_arc, utm_srid
 
-from .base import NoDbBase, config_get_float, config_get_int
+from .base import NoDbBase
 
 
 class Outlet(object):
@@ -51,13 +51,11 @@ class Topaz(NoDbBase):
 
         self.lock()
 
-        config = self.config
-
         # noinspection PyBroadException
         try:
-            self.csa = config_get_float(config, 'topaz', 'csa')
-            self.mcl = config_get_float(config, 'topaz', 'mcl')
-            self.zoom_min = config_get_int(config, 'topaz', 'zoom_min')
+            self.csa = self.config_get_float('topaz', 'csa')
+            self.mcl = self.config_get_float('topaz', 'mcl')
+            self.zoom_min = self.config_get_int('topaz', 'zoom_min')
 
             self._outlet = None
             

@@ -29,12 +29,6 @@ from wepppy.all_your_base import wmesque_retrieve
 from .base import (
     NoDbBase,
     TriggerEvents,
-    DEFAULT_NLCD_DB,
-    config_get_path,
-    config_get_str,
-    config_get_bool,
-    config_get_int,
-    config_get_float
 )
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
@@ -74,8 +68,6 @@ class Landuse(NoDbBase):
 
         self.lock()
 
-        config = self.config
-
         from wepppy.nodb.mods import MODS_DIR
 
         # noinspection PyBroadException
@@ -85,23 +77,21 @@ class Landuse(NoDbBase):
             self._single_man = None
             self.domlc_d = None  # topaz_id keys, ManagementSummary values
             self.managements = None
-            cover_defaults_fn = config_get_path(config, 'landuse', 'cover_defaults')
+            cover_defaults_fn = self.config_get_path('landuse', 'cover_defaults')
 
             if cover_defaults_fn is not None:
-                cover_defaults_fn = cover_defaults_fn.replace('MODS_DIR', MODS_DIR)
                 self.cover_defaults_d = read_cover_defaults(cover_defaults_fn)
             else:
                 self.cover_defaults_d = None
 
-            self._mapping = config_get_str(config, 'landuse', 'mapping')
-
-            self._nlcd_db = config_get_path(config, 'landuse', 'nlcd_db', DEFAULT_NLCD_DB)
+            self._mapping = self.config_get_str('landuse', 'mapping')
+            self._nlcd_db = self.config_get_path('landuse', 'nlcd_db')
 
             lc_dir = self.lc_dir
             if not _exists(lc_dir):
                 os.mkdir(lc_dir)
 
-            _landuse_map = config_get_path(config, 'landuse', 'landuse_map')
+            _landuse_map = self.config_get_path('landuse', 'landuse_map')
             if _landuse_map is not None:
                 shutil.copyfile(_landuse_map, self.lc_fn)
                 prj = _landuse_map[:-4] + '.prj'
@@ -279,10 +269,7 @@ class Landuse(NoDbBase):
 
     @property
     def nlcd_db(self):
-        if not hasattr(self, "_nlcd_db"):
-            return DEFAULT_NLCD_DB
-
-        return self._nlcd_db
+        return getattr(self, '_nlcd_db', self.config_get_str('landuse', 'nlcd_db'))
 
     @nlcd_db.setter
     def nlcd_db(self, value):
