@@ -21,7 +21,6 @@ import shutil
 import jsonpickle
 import utm
 import what3words
-import requests
 
 # wepppy
 from wepppy.all_your_base import (
@@ -32,14 +31,7 @@ from wepppy.all_your_base import (
 # wepppy submodules
 from .base import (
     NoDbBase,
-    TriggerEvents,
-    DEFAULT_DEM_DB,
-    config_get_float,
-    config_get_bool,
-    config_get_int,
-    config_get_str,
-    config_get_path,
-    config_get_raw
+    TriggerEvents
 )
 
 
@@ -105,15 +97,14 @@ class Ron(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            config = self.config
-            self._configname = config_get_str(config, 'general', 'name')
+            self._configname = self.config_get_str('general', 'name')
 
             # Map
-            self._cellsize = config_get_float(config, 'general', 'cellsize')
-            self._center0 = config_get_raw(config, 'map', 'center0')
-            self._zoom0 = config_get_int(config, 'map', 'zoom0')
+            self._cellsize = self.config_get_float('general', 'cellsize')
+            self._center0 = self.config_get_raw('map', 'center0')
+            self._zoom0 = self.config_get_int('map', 'zoom0')
 
-            _boundary = config_get_path(config, 'map', 'boundary')
+            _boundary = self.config_get_path('map', 'boundary')
             self._boundary = _boundary
 
             # DEM
@@ -121,16 +112,16 @@ class Ron(NoDbBase):
             if not _exists(dem_dir):
                 os.mkdir(dem_dir)
 
-            self._dem_db = config_get_path(config, 'general', 'dem_db', DEFAULT_DEM_DB)
+            self._dem_db = self.config_get_str('general', 'dem_db')
 
-            _dem_map = config_get_path(config, 'general', 'dem_map')
+            _dem_map = self.config_get_path('general', 'dem_map')
             self._dem_map = _dem_map
 
             if self.dem_map is not None:
                 shutil.copyfile(self.dem_map, self.dem_fn)
 
             # Landuse
-            self._enable_landuse_change = config_get_bool(config, 'landuse', 'enable_landuse_change')
+            self._enable_landuse_change = self.config_get_bool('landuse', 'enable_landuse_change')
 
             # Project
             self._name = ''
@@ -181,7 +172,7 @@ class Ron(NoDbBase):
                     Mod = wepppy.nodb.mods.Disturbed
 
                 baer = Mod(wd, cfg_fn)
-                sbs_map = config_get_path(config, 'landuse', 'sbs_map')
+                sbs_map = self.config_get_path('landuse', 'sbs_map')
 
                 if sbs_map is not None:
                     from wepppy.nodb.mods import MODS_DIR
@@ -297,9 +288,7 @@ class Ron(NoDbBase):
         # noinspection PyBroadException
         try:
             self._map = Map(extent, center, zoom, self.cellsize)
-
-            config = self.config
-            w3w_api_key = config_get_str(config, 'general', 'w3w_api_key')
+            w3w_api_key = self.config_get_str('general', 'w3w_api_key')
 
             lng, lat = self.map.center
             w3w_geocoder = what3words.Geocoder(w3w_api_key)
@@ -371,13 +360,9 @@ class Ron(NoDbBase):
 
         return False
 
-
     @property
     def dem_db(self):
-        if not hasattr(self, '_dem_db'):
-            return DEFAULT_DEM_DB
-
-        return self._dem_db
+        return getattr(self, '_dem_db', self.config_get_str('general', 'dem_db'))
 
     @dem_db.setter
     def dem_db(self, value):

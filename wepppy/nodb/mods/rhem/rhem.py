@@ -1,43 +1,19 @@
-import math
-import csv
-import os
-import shutil
-import json
-import enum
-from glob import glob
-
-from os.path import join as _join
-from os.path import exists as _exists
-
-from copy import deepcopy
-from collections import Counter
-
 # non-standard
-import jsonpickle
-import numpy as np
-import pandas as pd
-import multiprocessing
 
 # wepppy
-from wepppy.landcover import LandcoverMap
 
-from wepppy.all_your_base import isfloat, isint, YearlessDate, probability_of_occurrence, NCPU
-
-from wepppy.wepp import Element
-from wepppy.climates.cligen import ClimateFile
+from wepppy.all_your_base import NCPU
 
 from wepppy.watershed_abstraction import SlopeFile
 
 # wepppy submodules
-from wepppy.nodb.log_mixin import LogMixin
+from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.mods import RangelandCover
 from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.soils import Soils
-from wepppy.nodb.topaz import Topaz
 from wepppy.nodb.climate import Climate
 
-from wepppy.nodb.mods import Baer
 from wepppy.nodb.wepp import Wepp
 
 # Copyright (c) 2016-2018, University of Idaho
@@ -50,20 +26,10 @@ from wepppy.nodb.wepp import Wepp
 
 # standard library
 import os
-import math
-from enum import IntEnum
 from os.path import join as _join
 from os.path import exists as _exists
-from os.path import split as _split
 
-from subprocess import Popen, PIPE
-import multiprocessing
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_EXCEPTION
-
-from datetime import datetime
-import time
-
-import pickle
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 
 from glob import glob
 
@@ -72,21 +38,11 @@ import shutil
 # non-standard
 import jsonpickle
 
-import numpy as np
-
-from osgeo import osr
-from osgeo import gdal
-from osgeo.gdalconst import *
-
-import wepppy
-
 # wepppy
 
 from wepppy.rhem import make_parameter_file, make_hillslope_run, run_hillslope
 
 from wepppy.climates.cligen import ClimateFile
-
-from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
 
 from .rhempost import RhemPost
 
@@ -109,7 +65,6 @@ class Rhem(NoDbBase, LogMixin):
             if not _exists(rhem_dir):
                 os.mkdir(rhem_dir)
 
-            config = self.config
             self.clean()
 
             self.dump_and_unlock()

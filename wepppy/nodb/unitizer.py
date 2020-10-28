@@ -18,7 +18,7 @@ from collections import OrderedDict
 import jsonpickle
 
 # weppy submodules
-from .base import NoDbBase, config_get_bool
+from .base import NoDbBase
 
 from wepppy.all_your_base import isfloat
 
@@ -289,8 +289,7 @@ class Unitizer(NoDbBase):
 
         self.lock()
 
-        config = self.config
-        is_english = config_get_bool(config, 'unitizer', 'is_english', False)
+        is_english = self.config_get_bool('unitizer', 'is_english')
 
         # noinspection PyBroadException
         try:
