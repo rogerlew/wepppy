@@ -14,8 +14,7 @@ from os.path import exists as _exists
 import jsonpickle
 from copy import deepcopy
 
-from .....all_your_base import isfloat
-from ....base import NoDbBase, TriggerEvents, config_get_path, config_get_str, config_get_float
+from ....base import NoDbBase, TriggerEvents
 from ....soils import Soils
 from ....watershed import Watershed
 
@@ -31,21 +30,15 @@ class GeneralModNoDbLockedException(Exception):
     pass
 
 
-DEFAULT_WEPP_TYPE = 'Granitic'
-
-
 class GeneralMod(NoDbBase, LocationMixin):
     __name__ = 'General'
 
     def __init__(self, wd, cfg_fn):
         super(GeneralMod, self).__init__(wd, cfg_fn)
 
-        config = self.config
-
-        self._lc_lookup_fn = config_get_path(config, 'nodb', 'lc_lookup_fn', 'landSoilLookup.csv')
-        self._default_wepp_type = config_get_str(config, 'nodb', 'default_wepp_type', DEFAULT_WEPP_TYPE)
-        self._kslast = config_get_float(config, 'nodb', 'kslast')
-
+        self._lc_lookup_fn = self.config_get_path('nodb', 'lc_lookup_fn', 'landSoilLookup.csv')
+        self._default_wepp_type = self.config_get_str('nodb', 'default_wepp_type')
+        self._kslast = self.config_get_float('nodb', 'kslast')
         self._data_dir = _data_dir
 
         self.lock()
@@ -154,6 +147,7 @@ class GeneralMod(NoDbBase, LocationMixin):
 
         _domsoil_d = soils.domsoil_d
         _soils = soils.soils
+        # noinspection PyProtectedMember
         for topaz_id, ss in watershed._subs_summary.items():
             # lng, lat = ss.centroid.lnglat
 
