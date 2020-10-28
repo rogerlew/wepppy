@@ -9,11 +9,9 @@
 import os
 from os.path import exists as _exists
 from os.path import join as _join
-from os.path import split as _split
 
 from glob import glob
 
-import shutil
 
 # non-standard
 import jsonpickle
@@ -44,7 +42,6 @@ class WeppPost(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            config = self.config
             self._hill_areas = {}
             self._chn_areas = {}
             self._wsarea = None
@@ -107,10 +104,10 @@ class WeppPost(NoDbBase):
             with open(chnwb_fn) as fp:
                 i = 0
                 while 1:
-                    L = fp.readline()
+                    line = fp.readline()
                     if i > 24:
-                        L = L.split()
-                        chn_enum, area = int(L[0]), float(L[-1])
+                        line = line.split()
+                        chn_enum, area = int(line[0]), float(line[-1])
 
                         if str(chn_enum) in _chn_areas:
                             break
@@ -132,10 +129,10 @@ class WeppPost(NoDbBase):
 
                 with open(wat_fn) as wat_fp:
                     ofe = None
-                    for i, L in enumerate(wat_fp.readlines()):
+                    for i, line in enumerate(wat_fp.readlines()):
                         if i == 23:
-                            L = L.split()
-                            ofe, area = int(L[0]), float(L[-1])
+                            line = line.split()
+                            ofe, area = int(line[0]), float(line[-1])
                             _hill_areas[str(wepp_id)] = area
                         elif i == 24:
                             assert ofe == 1, 'Multiple ofes not supported'
@@ -145,19 +142,19 @@ class WeppPost(NoDbBase):
 
             _days, _months, _years = [], [], []
             with open(ebe_fn) as fp:
-                for L in fp.readlines()[9:]:
-                    _days.append(int(L[0:5]))
-                    _months.append(int(L[5:10]))
-                    _years.append(int(L[10:16]))
+                for line in fp.readlines()[9:]:
+                    _days.append(int(line[0:5]))
+                    _months.append(int(line[5:10]))
+                    _years.append(int(line[10:16]))
 
             chanwb_fn = _join(output_dir, 'chanwb.out')
 
             _julians = []
             with open(chanwb_fn) as fp:
-                for L in fp.readlines()[11:]:
-                    _julians.append(int(L[6:13]))
+                for line in fp.readlines()[11:]:
+                    _julians.append(int(line[6:13]))
 
-            self._outletchn = int(L[21:28])
+            self._outletchn = int(line[21:28])
 
             if len(_julians) == 0:
                 raise IOError('chanwb.out does not contain data')
@@ -210,17 +207,17 @@ class WeppPost(NoDbBase):
             for indx in exclude_yr_indxs:
                 exclude_years.append(years[indx])
 
-        for yr, mo, da, r, l, b in zip(self._years, self._months, self._days, runoff, latqcc, baseflow):
+        for yr, mo, da, r, lf, b in zip(self._years, self._months, self._days, runoff, latqcc, baseflow):
             if yr in exclude_years:
                 continue
 
             d = '%04i%02i%02i' % (yr, mo, da)
 
             if stacked:
-                l += b
-                r += l
+                lf += b
+                r += lf
 
-            fp.write('{},{},{},{}\n'.format(d, r, b, l))
+            fp.write('{},{},{},{}\n'.format(d, r, b, lf))
         fp.close()
 
     def get_indx(self, year, day=None, month=None, julian=None):
@@ -253,13 +250,14 @@ class WeppPost(NoDbBase):
     def calc_hill_streamflow(self):
         from wepppy.nodb import Wepp
         wepp = Wepp.getInstance(self.wd)
-        phosOpts = wepp.phosphorus_opts
-        baseflowOpts = wepp.baseflow_opts
+        phos_opts = wepp.phosphorus_opts
+        baseflow_opts = wepp.baseflow_opts
         output_dir = self.output_dir
         totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
 
-        watsed = TotalWatSed(totalwatsed_fn, baseflowOpts, phosOpts=phosOpts)
+        watsed = TotalWatSed(totalwatsed_fn, baseflow_opts, phos_opts=phos_opts)
 
+        # noinspection PyDictCreation
         self._hill_streamflow = {}
         self._hill_streamflow['Daily Runoff (mm)'] = watsed.d['Runoff (mm)']
         self._hill_streamflow['Daily Sediment (tonne/ha)'] = watsed.d['Sed. Del Density (tonne/ha)']
@@ -288,11 +286,11 @@ class WeppPost(NoDbBase):
 
         runoff = []
         with open(chanwb_fn) as fp:
-            for i, L in enumerate(fp.readlines()):
+            for i, line in enumerate(fp.readlines()):
                 if i < 11:
                     continue
 
-                runoff.append(float(L[46:63]) / wsarea * 1000.0)
+                runoff.append(float(line[46:63]) / wsarea * 1000.0)
 
         assert len(runoff) == ndays
 
@@ -300,9 +298,9 @@ class WeppPost(NoDbBase):
 
         sed_yield, solub_reactive_p, particulate_p, total_p = [], [], [], []
         with open(ebe_fn) as fp:
-            for L in fp.readlines()[9:]:
+            for line in fp.readlines()[9:]:
                 day, mo, year, p, _runoff, peak_runoff, _sed_yield, _solub_reactive_p, _particulate_p, _total_p \
-                    = L.split()
+                    = line.split()
 
                 sed_yield.append(float(_sed_yield) / 1000.0 / ws_ha)
                 solub_reactive_p.append(float(_solub_reactive_p))
@@ -322,16 +320,16 @@ class WeppPost(NoDbBase):
         with open(chnwb_fn) as fp:
             i = 0
             while 1:
-                L = fp.readline()
-                if L == '':
+                line = fp.readline()
+                if line == '':
                     break
 
                 if i > 24:
-                    chn_enum = int(L[0:6])
+                    chn_enum = int(line[0:6])
 
                     if chn_enum == outletchn:
-                        latqcc.append(float(L[104:112]))
-                        baseflow.append(float(L[180:191]))
+                        latqcc.append(float(line[104:112]))
+                        baseflow.append(float(line[180:191]))
 
                 i += 1
 
