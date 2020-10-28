@@ -23,8 +23,8 @@ class YamlSoil(object):
 
         datver = lines[0]  # data version
 
-        if '2006' not in datver:
-            raise NotImplementedError('Can only read 2006 soils')
+        if '2006' not in datver or '97.3' in datver:
+            raise NotImplementedError('Can only read 97.3 and 2006 soils')
 
         solcom = lines[1]  # user comment line
 
