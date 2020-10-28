@@ -70,7 +70,7 @@ class SedimentDelivery(object):
 
         totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
         totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                                phosOpts=wepp.phosphorus_opts)
+                                phos_opts=wepp.phosphorus_opts)
 
         hill_class_fractions = totwatsed.class_fractions
 
