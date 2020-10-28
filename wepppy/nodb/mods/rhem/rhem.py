@@ -217,12 +217,6 @@ class Rhem(NoDbBase, LogMixin):
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
 
-        try:
-            from wepppy.weppcloud import RunStatistics
-            rs = RunStatistics.getInstance('/geodata/weppcloud_runs')
-            rs.increment_hillruns(watershed.config_stem, watershed.sub_n)
-        except Exception:
-            pass
 
         self.log_done()
 
