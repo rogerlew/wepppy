@@ -182,7 +182,7 @@ if __name__ == '__main__':
         topaz.build_subcatchments()
 
         wat = Watershed.getInstance(wd)
-        wat.abstract_watershed(chn_wepp_width=proj['chn_chn_wepp_width'])
+        wat.abstract_watershed()
         translator = wat.translator_factory()
         topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
 
