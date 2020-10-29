@@ -1636,10 +1636,37 @@ def export_arcmap(runid, config):
 
     try:
         arc_export(wd)
-        archive_path = archive_project(ron.export_arc_dir)
-        return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+
+        if not request.args.get('no_retrieve', None) is not None:
+            archive_path = archive_project(ron.export_arc_dir)
+            return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+        else:
+            return success_factory()
+
     except Exception:
         return exception_factory('Error running arc_export')
+
+
+@app.route('/runs/<string:runid>/<config>/export/prep_details')
+@app.route('/runs/<string:runid>/<config>/export/prep_details/')
+def export_prep_details(runid, config):
+    # get working dir of original directory
+    wd = get_wd(runid)
+
+    from wepppy.export import archive_project, arc_export
+    from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
+
+    try:
+        export_hillslopes_prep_details(wd)
+        fn = export_channels_prep_details(wd)
+    except Exception:
+        return exception_factory()
+
+    if not request.args.get('no_retrieve', None) is not None:
+        archive_path = archive_project(_split(fn)[0])
+        return send_file(archive_path, as_attachment=True, attachment_filename='{}_prep_details.zip'.format(runid))
+    else:
+        return success_factory()
 
 
 # noinspection PyBroadException
