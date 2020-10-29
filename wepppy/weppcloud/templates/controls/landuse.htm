@@ -9,6 +9,12 @@
         <div class="col-sm-6">
             <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="landuse_mode1" name="landuse_mode"> Single Landuse for Watershed</label>
         </div>
+        <div class="col-sm-6">
+            <label class="radio-inline"><input type="radio" class="disable-readonly" value="2" id="landuse_mode2" name="landuse_mode"> RRED Unburned</label>
+        </div>
+        <div class="col-sm-6">
+            <label class="radio-inline"><input type="radio" class="disable-readonly" value="3" id="landuse_mode3" name="landuse_mode"> RRED Burned</label>
+        </div>
     </div>
     <div id="landuse_mode0_controls" class="form-group row hide-readonly">
     </div>
@@ -21,6 +27,10 @@
                 {% endfor %}
             </select>
         </div>
+    </div>
+    <div id="landuse_mode2_controls" class="form-group row hide-readonly">
+    </div>
+    <div id="landuse_mode3_controls" class="form-group row hide-readonly">
     </div>
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
