@@ -1304,7 +1304,21 @@ class ManagementLoop(object):
 {0.loops}
 """.format(self, ofeindx=pad(self.ofeindx, 2))
 
-        
+
+def get_disturbed_classes():
+    with open(_join(_thisdir, 'data', 'disturbed.json')) as fp:
+        js = json.load(fp)
+
+    disturbed_classes = set()
+    for k, _d in js.items():
+        _c = _d['DisturbedClass']
+        if _c == '':
+            _c = None
+        disturbed_classes.add(_c)
+
+    return disturbed_classes
+
+
 class ManagementSummary(object):
     def __init__(self, **kwargs):
         self.key = kwargs["Key"]
@@ -1319,14 +1333,7 @@ class ManagementSummary(object):
             if disturbed_class == '':
                 disturbed_class = None
 
-            assert disturbed_class in (None, 'bare', 'skid', 'mulch', 'forest', 'shrub', 'young forest',
-                                       'short grass', 'tall grass', 'forest high sev fire',
-                                       'forest low sev fire', 'forest prescribed',
-                                       'shrub high sev fire', 'shrub low sev fire',
-                                       'shrub prescribed',
-                                       'grass high sev fire', 'grass low sev fire',
-                                       'grass prescribed',
-                                       )
+            assert disturbed_class in get_disturbed_classes(), disturbed_class
 
             self.disturbed_class = disturbed_class
 
