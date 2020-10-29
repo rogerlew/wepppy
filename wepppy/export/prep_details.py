@@ -16,8 +16,9 @@ def export_hillslopes_prep_details(wd):
     
     if not _exists(out_dir):
         os.mkdir(out_dir)
-        
-    fp = open(_join(out_dir, 'hillslopes.csv'), 'w')
+
+    fn = _join(out_dir, 'hillslopes.csv')
+    fp = open(fn, 'w')
     
     wtr = csv.DictWriter(fp, fieldnames)
     wtr.writeheader()
@@ -101,6 +102,7 @@ def export_hillslopes_prep_details(wd):
                           longest_fp_slope=longest_fp_slope))
 
     fp.close()
+    return fn
 
 
 def export_channels_prep_details(wd):
@@ -114,7 +116,8 @@ def export_channels_prep_details(wd):
     if not _exists(out_dir):
         os.mkdir(out_dir)
 
-    fp = open(_join(out_dir, 'channels.csv'), 'w')
+    fn = _join(out_dir, 'channels.csv')
+    fp = open(fn, 'w')
 
     wtr = csv.DictWriter(fp, fieldnames)
     wtr.writeheader()
@@ -190,3 +193,5 @@ def export_channels_prep_details(wd):
                           channel_type=channel_type, dom_soil=dom_soil, cli_fn=cli_fn))
 
     fp.close()
+
+    return fn
