@@ -3560,21 +3560,43 @@ var Soil = function () {
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").hide();
                 $("#soil_mode2_controls").hide();
+                $("#soil_mode3_controls").hide();
+                $("#soil_mode4_controls").hide();
             } else if (mode === 0) {
                 // gridded
                 $("#soil_mode0_controls").show();
                 $("#soil_mode1_controls").hide();
                 $("#soil_mode2_controls").hide();
+                $("#soil_mode3_controls").hide();
+                $("#soil_mode4_controls").hide();
             } else if (mode === 1) {
                 // single
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").show();
                 $("#soil_mode2_controls").hide();
+                $("#soil_mode3_controls").hide();
+                $("#soil_mode4_controls").hide();
             } else if (mode === 2) {
-                // single
+                // singledb
                 $("#soil_mode0_controls").hide();
                 $("#soil_mode1_controls").hide();
                 $("#soil_mode2_controls").show();
+                $("#soil_mode3_controls").hide();
+                $("#soil_mode4_controls").hide();
+            } else if (mode === 3) {
+                // RRED Unburned
+                $("#soil_mode0_controls").hide();
+                $("#soil_mode1_controls").hide();
+                $("#soil_mode2_controls").hide();
+                $("#soil_mode3_controls").show();
+                $("#soil_mode4_controls").hide();
+            } else if (mode === 4) {
+                // RRED Burned
+                $("#soil_mode0_controls").hide();
+                $("#soil_mode1_controls").hide();
+                $("#soil_mode2_controls").hide();
+                $("#soil_mode3_controls").hide();
+                $("#soil_mode4_controls").show();
             } else {
                 throw "ValueError: unknown mode";
             }
