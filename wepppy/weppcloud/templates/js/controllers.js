@@ -2760,14 +2760,32 @@ var Landuse = function () {
                 // neither
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").hide();
+                $("#landuse_mode2_controls").hide();
+                $("#landuse_mode3_controls").hide();
             } else if (mode === 0) {
                 // gridded
                 $("#landuse_mode0_controls").show();
                 $("#landuse_mode1_controls").hide();
+                $("#landuse_mode2_controls").hide();
+                $("#landuse_mode3_controls").hide();
             } else if (mode === 1) {
                 // single
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").show();
+                $("#landuse_mode2_controls").hide();
+                $("#landuse_mode3_controls").hide();
+            } else if (mode === 2) {
+                // single
+                $("#landuse_mode0_controls").hide();
+                $("#landuse_mode1_controls").hide();
+                $("#landuse_mode2_controls").show();
+                $("#landuse_mode3_controls").hide();
+            } else if (mode === 3) {
+                // single
+                $("#landuse_mode0_controls").hide();
+                $("#landuse_mode1_controls").hide();
+                $("#landuse_mode2_controls").hide();
+                $("#landuse_mode3_controls").show();
             } else {
                 throw "ValueError: unknown mode";
             }
@@ -3598,7 +3616,7 @@ var Soil = function () {
                 $("#soil_mode3_controls").hide();
                 $("#soil_mode4_controls").show();
             } else {
-                throw "ValueError: unknown mode";
+                throw "ValueError: Landuse unknown mode";
             }
         };
 
