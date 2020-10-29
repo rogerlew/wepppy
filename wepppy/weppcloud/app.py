@@ -423,14 +423,15 @@ def error_factory(msg='Error Handling Request'):
     return jsonify({'Success': False,
                     'Error': msg})
 
+
 def exception_factory(msg='Error Handling Request',
                       stacktrace=None):
     if stacktrace is None:
         stacktrace = traceback.format_exc()
 
     return make_response(jsonify({'Success': False,
-                    'Error': msg,
-                    'StackTrace': stacktrace}), 500)
+                         'Error': msg,
+                         'StackTrace': stacktrace}), 500)
 
 
 def success_factory(kwds=None):
@@ -1257,7 +1258,7 @@ def csv_to_html(path):
     return '\n'.join(s)
 
 
-def browse_response(path, args=None, show_up=True):
+def browse_response(path, args=None, show_up=True, headers=None):
     if not _exists(path):
         return error_factory('path does not exist')
 
@@ -1282,13 +1283,13 @@ def browse_response(path, args=None, show_up=True):
             try:
                 contents = fp.read()
             except UnicodeDecodeError:
-                if 'raw' in args:
+                if 'raw' in args or 'Raw' in headers:
                     return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
                     # return matplotlib_vis(path)
                 else:
                     return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
 
-        if 'raw' in args:
+        if 'raw' in args or 'Raw' in headers:
             r = Response(response=contents, status=200, mimetype="text/plain")
             r.headers["Content-Type"] = "text/plain; charset=utf-8"
             return r
@@ -1383,7 +1384,7 @@ def dev_tree1(runid, config, dir):
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir))
     assert dir.startswith(wd)
-    return browse_response(dir, args=request.args)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
 
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/')
@@ -1394,7 +1395,7 @@ def dev_tree2(runid, config, dir, dir2):
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2))
     assert dir.startswith(wd)
-    return browse_response(dir, args=request.args)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
 
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/')
@@ -1405,7 +1406,7 @@ def dev_tree32(runid, config, dir, dir2, dir3):
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3))
     assert dir.startswith(wd)
-    return browse_response(dir, args=request.args)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
 
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
@@ -1416,7 +1417,7 @@ def dev_tree432(runid, config, dir, dir2, dir3, dir4):
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
     assert dir.startswith(wd)
-    return browse_response(dir, args=request.args)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
 
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
@@ -1427,7 +1428,7 @@ def dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5):
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5))
     assert dir.startswith(wd)
-    return browse_response(dir, args=request.args)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
 
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
@@ -1438,7 +1439,7 @@ def dev_tree65432(runid, config, dir, dir2, dir3, dir4, dir5, dir6):
     wd = os.path.abspath(get_wd(runid))
     dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5, dir6))
     assert dir.startswith(wd)
-    return browse_response(dir, args=request.args)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
 
 def gdalinfo_response(path):
