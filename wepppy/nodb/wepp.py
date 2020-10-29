@@ -460,12 +460,11 @@ class Wepp(NoDbBase, LogMixin):
             if isfloat(_channel_erodibility):
                 self._channel_erodibility = float(_channel_erodibility)
 
-            _kslast = kwds.get('kslast', None)
+            _kslast = kwds.get('kslast', '')
             if isfloat(_kslast):
                 self._kslast = float(_kslast)
-            else:
-                if _kslast.lower().startswith('none') or _kslast == '':
-                    self._kslast = None
+            elif _kslast.lower().startswith('none') or _kslast == '':
+                self._kslast = None
 
             self.dump_and_unlock()
 
