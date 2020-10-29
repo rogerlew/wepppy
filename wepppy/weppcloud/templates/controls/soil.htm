@@ -15,6 +15,16 @@
             <label class="radio-inline">
             <input type="radio" value="2" class="disable-readonly" id="soil_mode2" name="soil_mode"> Single Soil for Watershed (Database)</label>
         </div>
+        {% if 'rred' in ron.mods %}
+        <div class="col-sm-12">
+            <label class="radio-inline">
+            <input type="radio" value="2" class="disable-readonly" id="soil_mode3" name="soil_mode"> RRED Unburned</label>
+        </div>
+        <div class="col-sm-12">
+            <label class="radio-inline">
+            <input type="radio" value="2" class="disable-readonly" id="soil_mode4" name="soil_mode"> RRED Burned</label>
+        </div>
+        {% endif %}
     </div>
     <div id="soil_mode0_controls" class="form-group row">
     </div>
@@ -34,11 +44,15 @@
             </select>
         </div>
     </div>
+    <div id="soil_mode3_controls" class="form-group row">
+    </div>
+    <div id="soil_mode4_controls" class="form-group row">
+    </div>
     {% if "lt" in ron.mods or "baer" in ron.mods %}
     <div>
     <p><i>Hillslopes with burn severity landuses will have soils altered to model burn severity.</i></p>
     </div>
-    {%- endif -%}
+    {% endif %}
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_build_soil"
