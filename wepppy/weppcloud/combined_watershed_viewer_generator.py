@@ -37,8 +37,12 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
 
     for i, runid in enumerate(runids):
         wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        wepp = Wepp.getInstance(wd)
+        try:
+            ron = Ron.getInstance(wd)
+            wepp = Wepp.getInstance(wd)
+        except:
+            print(wd)
+            raise
 
         has_phos = has_phos and wepp.phosphorus_opts.isvalid
 
