@@ -16,6 +16,8 @@ with open('lt_202010_runs.txt') as fp:
     runs = fp.read().split()
     runs = [run.strip() for run in runs]
 
+fp = open('lt_202010_ws_viewer.htm', 'w'
+          )
 for scn, title in scenarios:
     scn_runs = []
     for run in runs:
@@ -26,6 +28,5 @@ for scn, title in scenarios:
 
     url = combined_watershed_viewer_generator(runids=scn_runs, title=title)
 
-    print("""        <h3>{title}</h3>""".format(title=title))
-    print("""        <a href='{url}'>View {scn}</a>""".format(url=url, scn=scn))
-    print()
+    fp.write("""        <h3>{title}</h3>\n""".format(title=title))
+    fp.write("""        <a href='{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
