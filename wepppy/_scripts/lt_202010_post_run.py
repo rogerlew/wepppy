@@ -29,6 +29,6 @@ for scn, title in scenarios:
     url = combined_watershed_viewer_generator(runids=scn_runs, title=title)
 
     fp.write("""        <h3>{title}</h3>\n""".format(title=title))
-    fp.write("""        <a href='{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
+    fp.write("""        <a href='https://wepp1.nkn.uidaho.edu{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
 
 fp.close()
