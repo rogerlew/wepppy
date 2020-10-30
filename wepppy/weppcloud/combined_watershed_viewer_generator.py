@@ -71,14 +71,14 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
     if zoom is not None:
         zoom -= 1
 
-    phos_opts = ('{phosphorus}', '",')[has_phos]
+    phos_opts = ('{phosphorus}', ',"phosphorus":{phosphorus}')[has_phos]
 
     if not has_phos:
         phosphorus = ''
 
     _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
            'ws={ws}&varopts={{"runoff":{runoff},"subrunoff":{subrunoff},"baseflow":{baseflow},' \
-           '{phos_opts},"loss":{loss}}}&varname={varname}&title={title}&units={units}'.format(phos_opt=phos_opts)
+           '{phos_opts}"loss":{loss}}}&varname={varname}&title={title}&units={units}'
 
     url = None
     if center_lng is not None and \
@@ -87,7 +87,7 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
             len(ws) > 0:
         url = _url.format(center_lat=center_lat, center_lng=center_lng,
                           zoom=zoom, ws=json.dumps(ws, allow_nan=False), title=title,
-                          runoff=runoff, subrunoff=subrunoff, baseflow=baseflow, loss=loss, varname=varname,
-                          phosphorus=phosphorus, units=units)
+                          runoff=runoff, subrunoff=subrunoff, baseflow=baseflow, loss=loss, varname=varname, units=units,
+                          phos_opts=phos_opts.format(phosphorus=phosphorus))
 
     return url
