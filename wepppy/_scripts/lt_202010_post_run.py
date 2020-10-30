@@ -22,6 +22,25 @@ scenarios = [('SimFire.fccsFuels_obs_cli', 'Wildfire – current conditions - ob
              ('Thinn93', 'Uniform Thinning (Cable 93% Cover)'),
              ('Thinn85', 'Uniform Thinning (Skidder 85% Cover)')]
 
+run_li_template = '''\
+<li class="list-group-item"><a href="../runs/{runid}/{cfg}/">{watershed}</a></li>'''
+
+run_wepp_template = '''\
+    <h3>{title}</h3>
+    <div style="margin-left: 1.5em;">
+        <h4>Delineate new watershed</h4>
+        <div><a href="../create/{cfg}">Run WEPP</a></div>
+        <div style="height: 1em;"></div>
+        <h4>Pre-delineated watersheds</h4>
+        <div><a href="#run-{scn_id}-man" data-toggle="collapse">Select Watershed</a>
+        <div id="run-{scn_id}-man" class="collapse">
+        <ul class="list-group">
+            {runs_list}
+        </ul>
+        </div>
+        </div>
+    </div>
+    <div style="height: 1em;"></div>\n'''
 
 def identify_scenario_watershed(runid):
     global prefix
@@ -46,6 +65,7 @@ with open(prefix + '_runs.txt') as fp:
 
 # build the combined watershed generator urls
 fp = open(prefix + '_ws_viewer.htm', 'w')
+fp2 = open(prefix + '_runs.htm', 'w')
 
 shps_outdir = '/home/roger/{prefix}_shps'.format(prefix=prefix)
 csv_outdir = '/home/roger/{prefix}_csvs'.format(prefix=prefix)
@@ -56,7 +76,7 @@ if not _exists(shps_outdir):
 if not _exists(csv_outdir):
     os.mkdir(csv_outdir)
 
-for scn, title in scenarios:
+for i, (scn, title) in enumerate(scenarios):
     scn_runs = []
     for run in runs:
         if scn in run:
@@ -69,6 +89,19 @@ for scn, title in scenarios:
     fp.write("""        <h3>{title}</h3>\n""".format(title=title))
     fp.write("""        <a href='https://wepp1.nkn.uidaho.edu{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
 
+    runs_list = []
+    for scn_run in scn_runs:
+        wd = _join('/geodata/weppcloud_runs', scn_run)
+        ron = Ron.getInstance(wd)
+        cfg = ron.config_stem
+        _scn, watershed = identify_scenario_watershed(scn_run)
+
+        runs_list = run_li_template.format(runid=scn_run, cfg=cfg, watershed=watershed)
+
+    fp2.write(run_wepp_template.format(title=title, cfg=cfg, scn_id=i, runs_list='\n'.join(runs_list)))
+
+
+    continue
     # merge the arcmaps
     channels = []
     subcatchments = []
@@ -100,6 +133,10 @@ for scn, title in scenarios:
 
 
 fp.close()
+fp2.close()
+
+import sys
+sys.exit()
 
 print('merged shps are in', shps_outdir)
 
