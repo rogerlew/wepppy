@@ -85,13 +85,13 @@ for scn, title in scenarios:
     print(channels)
     print(sub)
 
-    argv = ['python3', 'ogrmerge.py', '-o', '%s/%s_channels.shp' % (shps_outdir, scn),
+    argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_channels.shp' % (shps_outdir, scn),
             '-single'] + channels
     print(argv)
     subprocess.call(argv)
     # ogrmerge.process(argv)
 
-    argv = ['python3', 'ogrmerge.py', '-o', '%s/%s_subcatchments.shp' % (shps_outdir, scn),
+    argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_subcatchments.shp' % (shps_outdir, scn),
             '-single'] + subcatchments
     print(argv)
     subprocess.call(argv)
