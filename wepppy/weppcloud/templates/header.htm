@@ -33,18 +33,22 @@
         <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
     </button>
     {% if user.is_authenticated %}
-    <label class="form-check-label">
-      <input id="checkbox_readonly" type="checkbox" class="form-check-input"
-             onchange="Project.getInstance().set_readonly(this.checked);"
-               {% if ron.readonly %}checked{% endif %}>
-        <span style="color: white;">Readonly</span>
-    </label>
-    <label class="form-check-label">
-      <input id="checkbox_public" type="checkbox" class="form-check-input"
-             onchange="Project.getInstance().set_public(this.checked);"
-               {% if ron.public %}checked{% endif %}>
-        <span style="color: white;">Public</span>
-    </label>
+    <span>
+        <label class="form-check-label">
+          <input id="checkbox_readonly" type="checkbox" class="form-check-input"
+                 onchange="Project.getInstance().set_readonly(this.checked);"
+                   {% if ron.readonly %}checked{% endif %}>
+            <span style="color: white;">Readonly</span>
+        </label>
+    </span>
+    <span>
+        <label class="form-check-label">
+          <input id="checkbox_public" type="checkbox" class="form-check-input"
+                 onchange="Project.getInstance().set_public(this.checked);"
+                   {% if ron.public %}checked{% endif %}>
+            <span style="color: white;">Public</span>
+        </label>
+    </span>
     {% include "user/navbar.html" %}
     {% endif %}
     </div>
