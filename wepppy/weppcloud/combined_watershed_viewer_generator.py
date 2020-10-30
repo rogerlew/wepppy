@@ -32,10 +32,12 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
     center_lng = None
     zoom = None
 
-
     has_phos = True
 
     for i, runid in enumerate(runids):
+        if runid.endswith('/'):
+            runid = runid[:-1]
+
         wd = get_wd(runid)
         try:
             ron = Ron.getInstance(wd)
