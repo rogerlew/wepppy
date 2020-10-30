@@ -748,8 +748,14 @@ def create_fork(runid, config):
     if _exists(fn):
         os.remove(fn)
 
+    url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
+    try:
+        user_datastore.create_run(new_runid, config, current_user)
+    except Exception:
+        return exception_factory('Could not add run to user database: proceed to https://wepp1.nkn.uidaho.edu' + url)
+
     # redirect to fork
-    return redirect('%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config))
+    return redirect(url)
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
