@@ -34,7 +34,7 @@ class WatershedNoDbLockedException(Exception):
 class WatershedNotAbstractedError(Exception):
     """
     The watershed has not been abstracted. The watershed must be delineated
-    in order to proceed.
+    to complete this operation.
     """
 
     __name__ = 'WatershedNotAbstractedError'
