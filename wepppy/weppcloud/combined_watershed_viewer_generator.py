@@ -17,12 +17,14 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
     if varname is None:
         varname = 'loss'
 
-    if varopts is not None:
-        runoff = varopts.get('runoff', (0.1, 10)[units == 'SI'])  # in, mm
-        subrunoff = varopts.get('subrunoff', (0.1, 10)[units == 'SI'])  # in, mm
-        baseflow = varopts.get('baseflow', (0.1, 10)[units == 'SI'])  # in, mm
-        loss = varopts.get('loss', (0.1, 10)[units == 'SI'])  # in, mm
-        phosphorus = varopts.get('loss', (0.1, 10)[units == 'SI'])  # in, mm
+    if varopts is None:
+        varopts = {}
+
+    runoff = varopts.get('runoff', (0.1, 10)[units == 'SI'])  # in, mm
+    subrunoff = varopts.get('subrunoff', (0.1, 10)[units == 'SI'])  # in, mm
+    baseflow = varopts.get('baseflow', (0.1, 10)[units == 'SI'])  # in, mm
+    loss = varopts.get('loss', (0.1, 10)[units == 'SI'])  # in, mm
+    phosphorus = varopts.get('loss', (0.1, 10)[units == 'SI'])  # in, mm
 
     ws = []
     extents = None
