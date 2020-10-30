@@ -3755,65 +3755,8 @@ def combined_ws_viewer_url_gen():
         runids = request.form.get('runids', '')
         runids = runids.replace(',', ' ').split()
 
-        ws = []
-        extents = None
-        center_lat = None
-        center_lng = None
-        zoom = None
-        has_phos = True
-
-        for i, runid in enumerate(runids):
-            wd = get_wd(runid)
-            ron = Ron.getInstance(wd)
-            wepp = Wepp.getInstance(wd)
-
-            has_phos = has_phos and wepp.phosphorus_opts.isvalid
-
-            if i == 0:
-                extents = ron.map.extent
-                zoom = ron.map.zoom
-            else:
-                _l, _b, _r, _t = ron.map.extent
-                l, b, r, t = extents
-
-                if _l < l:
-                    extents[0] = l
-
-                if _b < b:
-                    extents[1] = b
-
-                if _r > r:
-                    extents[2] = r
-
-                if _t > t:
-                    extents[3] = t
-
-                if ron.map.zoom < zoom:
-                    zoom = ron.map.zoom
-
-            ws.append(dict(runid=runid, cfg=ron.config_stem))
-
-        if extents is not None:
-            center_lng = float(np.mean([extents[0], extents[2]]))
-            center_lat = float(np.mean([extents[1], extents[3]]))
-
-        if zoom is not None:
-            zoom -= 1
-
-        phos_opts = ('', '"phosphorus":1.0,')[has_phos]
-
-        _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
-               'ws={ws}&varopts={{"runoff":10,"subrunoff":10,"baseflow":10,{phos_opts}"loss":4000}}&' \
-               'varname=loss&title={title}'
-
-        url = None
-        if center_lng is not None and \
-           center_lat is not None and \
-           zoom is not None and \
-           len(ws) > 0:
-            url = _url.format(center_lat=center_lat, center_lng=center_lng,
-                              zoom=zoom, ws=json.dumps(ws, allow_nan=False), title=title,
-                              phos_opts=phos_opts)
+        from .combined_watershed_viewer_generator import combined_watershed_viewer_generator
+        url = combined_watershed_viewer_generator(runids, title)
 
         return render_template('combined_ws_viewer_url_gen.htm',
             url=url, user=current_user, title=title, runids=', '.join(runids))
