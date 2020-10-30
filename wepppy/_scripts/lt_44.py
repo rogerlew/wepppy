@@ -247,8 +247,9 @@ if __name__ == '__main__':
             else:
                 raise Exception("Unknown climate_mode")
 
-            climate.build(verbose=1)
-
+            if 'copy' not in climate_mode:
+                climate.build(verbose=1)
+                
             log_print('prepping wepp')
             wepp = Wepp.getInstance(wd)
             wepp.parse_inputs(proj)
