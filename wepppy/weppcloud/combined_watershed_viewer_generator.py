@@ -41,8 +41,7 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
             ron = Ron.getInstance(wd)
             wepp = Wepp.getInstance(wd)
         except:
-            print(wd)
-            raise
+            raise Exception('Error acquiring nodb instances from ' + wd)
 
         has_phos = has_phos and wepp.phosphorus_opts.isvalid
 
