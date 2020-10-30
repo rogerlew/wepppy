@@ -9,12 +9,14 @@
         <div class="col-sm-6">
             <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="landuse_mode1" name="landuse_mode"> Single Landuse for Watershed</label>
         </div>
+        {% if 'rred' in ron.mods %}
         <div class="col-sm-6">
             <label class="radio-inline"><input type="radio" class="disable-readonly" value="2" id="landuse_mode2" name="landuse_mode"> RRED Unburned</label>
         </div>
         <div class="col-sm-6">
             <label class="radio-inline"><input type="radio" class="disable-readonly" value="3" id="landuse_mode3" name="landuse_mode"> RRED Burned</label>
         </div>
+        {% endif %}
     </div>
     <div id="landuse_mode0_controls" class="form-group row hide-readonly">
     </div>
