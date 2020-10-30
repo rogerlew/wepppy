@@ -30,3 +30,5 @@ for scn, title in scenarios:
 
     fp.write("""        <h3>{title}</h3>\n""".format(title=title))
     fp.write("""        <a href='{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
+
+fp.close()
