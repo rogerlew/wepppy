@@ -24,6 +24,8 @@ scenarios = [('SimFire.fccsFuels_obs_cli', 'Wildfire – current conditions - ob
 
 
 def identify_scenario_watershed(runid):
+    global prefix
+
     _scn = None
     for scn, title in scenarios:
         if scn in runid:
@@ -62,44 +64,44 @@ for scn, title in scenarios:
 
     print(scn, len(scn_runs))
 
-#     url = combined_watershed_viewer_generator(runids=scn_runs, title=title)
-#
-#     fp.write("""        <h3>{title}</h3>\n""".format(title=title))
-#     fp.write("""        <a href='https://wepp1.nkn.uidaho.edu{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
-#
-#     # merge the arcmaps
-#     channels = []
-#     subcatchments = []
-#
-#     for scn_run in scn_runs:
-#         wd = _join('/geodata/weppcloud_runs', scn_run)
-#
-#         chn = _join(wd, 'export', 'arcmap', 'channels.shp')
-#         assert _exists(chn), chn
-#         channels.append(chn)
-#
-#         sub = _join(wd, 'export', 'arcmap', 'subcatchments.shp')
-#         assert _exists(sub), sub
-#         subcatchments.append(sub)
-#
-#     print(channels)
-#     print(sub)
-#
-#     argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_channels.shp' % (shps_outdir, scn),
-#             '-single'] + channels
-#     print(argv)
-#     subprocess.call(argv)
-#     # ogrmerge.process(argv)
-#
-#     argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_subcatchments.shp' % (shps_outdir, scn),
-#             '-single'] + subcatchments
-#     print(argv)
-#     subprocess.call(argv)
-#
-#
-# fp.close()
-#
-# print('merged shps are in', shps_outdir)
+    url = combined_watershed_viewer_generator(runids=scn_runs, title=title)
+
+    fp.write("""        <h3>{title}</h3>\n""".format(title=title))
+    fp.write("""        <a href='https://wepp1.nkn.uidaho.edu{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
+
+    # merge the arcmaps
+    channels = []
+    subcatchments = []
+
+    for scn_run in scn_runs:
+        wd = _join('/geodata/weppcloud_runs', scn_run)
+
+        chn = _join(wd, 'export', 'arcmap', 'channels.shp')
+        assert _exists(chn), chn
+        channels.append(chn)
+
+        sub = _join(wd, 'export', 'arcmap', 'subcatchments.shp')
+        assert _exists(sub), sub
+        subcatchments.append(sub)
+
+    print(channels)
+    print(sub)
+
+    argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_channels.shp' % (shps_outdir, scn),
+            '-single'] + channels
+    print(argv)
+    subprocess.call(argv)
+    # ogrmerge.process(argv)
+
+    argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_subcatchments.shp' % (shps_outdir, scn),
+            '-single'] + subcatchments
+    print(argv)
+    subprocess.call(argv)
+
+
+fp.close()
+
+print('merged shps are in', shps_outdir)
 
 fp_hill = open(_join(csv_outdir, '%s_hill_summary.csv' % prefix), 'w')
 fp_chn = open(_join(csv_outdir, '%s_chn_summary.csv' % prefix), 'w')
