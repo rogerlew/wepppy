@@ -93,7 +93,7 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
             zoom is not None and \
             len(ws) > 0:
         url = _url.format(center_lat=center_lat, center_lng=center_lng,
-                          zoom=zoom, ws=json.dumps(ws, allow_nan=False), title=title,
+                          zoom=zoom, ws=json.dumps(ws, separators=(',', ':'), allow_nan=False), title=title,
                           runoff=runoff, subrunoff=subrunoff, baseflow=baseflow, loss=loss, varname=varname, units=units,
                           phos_opts=phos_opts.format(phosphorus=phosphorus))
 
