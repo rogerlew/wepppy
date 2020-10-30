@@ -96,7 +96,7 @@ for i, (scn, title) in enumerate(scenarios):
         cfg = ron.config_stem
         _scn, watershed = identify_scenario_watershed(scn_run)
 
-        runs_list = run_li_template.format(runid=scn_run, cfg=cfg, watershed=watershed)
+        runs_list.append(run_li_template.format(runid=scn_run, cfg=cfg, watershed=watershed))
 
     fp2.write(run_wepp_template.format(title=title, cfg=cfg, scn_id=i, runs_list='\n'.join(runs_list)))
 
