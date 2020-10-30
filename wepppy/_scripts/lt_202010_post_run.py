@@ -1,6 +1,8 @@
 from wepppy.weppcloud import combined_watershed_viewer_generator
 import os
 import subprocess
+import shutil
+
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -42,6 +44,7 @@ run_wepp_template = '''\
     </div>
     <div style="height: 1em;"></div>\n'''
 
+
 def identify_scenario_watershed(runid):
     global prefix
 
@@ -71,10 +74,12 @@ shps_outdir = '/home/roger/{prefix}_shps'.format(prefix=prefix)
 csv_outdir = '/home/roger/{prefix}_csvs'.format(prefix=prefix)
 
 if not _exists(shps_outdir):
-    os.mkdir(shps_outdir)
+    shutil.rmtree(shps_outdir)
+os.mkdir(shps_outdir)
 
 if not _exists(csv_outdir):
-    os.mkdir(csv_outdir)
+    shutil.rmtree(csv_outdir)
+os.mkdir(csv_outdir)
 
 for i, (scn, title) in enumerate(scenarios):
     scn_runs = []
@@ -100,8 +105,6 @@ for i, (scn, title) in enumerate(scenarios):
 
     fp2.write(run_wepp_template.format(title=title, cfg=cfg, scn_id=i, runs_list='\n'.join(runs_list)))
 
-
-    continue
     # merge the arcmaps
     channels = []
     subcatchments = []
@@ -124,19 +127,14 @@ for i, (scn, title) in enumerate(scenarios):
             '-single'] + channels
     print(argv)
     subprocess.call(argv)
-    # ogrmerge.process(argv)
 
     argv = ['python3', '/workdir/wepppy/wepppy/all_your_base/ogrmerge.py', '-o', '%s/%s_subcatchments.shp' % (shps_outdir, scn),
             '-single'] + subcatchments
     print(argv)
     subprocess.call(argv)
 
-
 fp.close()
 fp2.close()
-
-import sys
-sys.exit()
 
 print('merged shps are in', shps_outdir)
 
