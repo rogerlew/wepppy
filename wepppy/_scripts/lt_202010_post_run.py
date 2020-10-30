@@ -48,7 +48,7 @@ with open(prefix + '_runs.txt') as fp:
 fp = open(prefix + '_ws_viewer.htm', 'w')
 
 shps_outdir = '/home/roger/{prefix}_shps'.format(prefix=prefix)
-csv_outdir = '/home/roger/{prefix}_shps'.format(prefix=prefix)
+csv_outdir = '/home/roger/{prefix}_csvs'.format(prefix=prefix)
 
 if not _exists(shps_outdir):
     os.mkdir(shps_outdir)
