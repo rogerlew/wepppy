@@ -62,6 +62,57 @@ $(document).ready(function () {
     var varname;
     var title;
 
+    var map = L.map('map');
+
+    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"]
+    });
+
+    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"]
+    });
+
+    var baseMaps = {
+      "Satellite": googleSat,
+      "Terrain": googleTerrain,
+    };
+
+    var overlayMaps = {};
+
+    googleSat.addTo(map);
+    googleTerrain.addTo(map);
+
+    var ctrls = L.control.layers(baseMaps, overlayMaps);
+    ctrls.addTo(map);
+
+    var tolerance;
+    var units = '';
+    var numvars;
+    var defaultStyle;
+
+    var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
+    var cmapperLoss = createColormap({ colormap: "electric", nshades: 64 });
+    var cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
+
+    var cmap, r;
+    var vmin = 0.0;
+    var vmax;
+    var cmapname;
+
+    var Legend;
+    var legend;
+
+    var VarSelection;
+    var varSelection;
+
+    var TitleBox;
+
+    var polys;
+    var data;
+    var popup;
+
     var data_uri = getURLParameter("data_uri");
 
     if (data_uri !== undefined) {
@@ -143,58 +194,6 @@ $(document).ready(function () {
         callback();
 
     }
-
-
-    var map = L.map('map');
-
-    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
-      maxZoom: 20,
-      subdomains: ["mt0", "mt1", "mt2", "mt3"]
-    });
-
-    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-      maxZoom: 20,
-      subdomains: ["mt0", "mt1", "mt2", "mt3"]
-    });
-
-    var baseMaps = {
-      "Satellite": googleSat,
-      "Terrain": googleTerrain,
-    };
-
-    var overlayMaps = {};
-
-    googleSat.addTo(map);
-    googleTerrain.addTo(map);
-
-    var ctrls = L.control.layers(baseMaps, overlayMaps);
-    ctrls.addTo(map);
-
-    var tolerance;
-    var units = '';
-    var numvars;
-    var defaultStyle;
-
-    var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
-    var cmapperLoss = createColormap({ colormap: "electric", nshades: 64 });
-    var cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
-
-    var cmap, r;
-    var vmin = 0.0;
-    var vmax;
-    var cmapname;
-    
-    var Legend;
-    var legend;
-    
-    var VarSelection;
-    var varSelection;
-
-    var TitleBox;
-
-    var polys;
-    var data;
-    var popup;
 
     function prep_render() {
 
