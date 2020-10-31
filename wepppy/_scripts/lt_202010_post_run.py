@@ -59,6 +59,9 @@ def identify_scenario_watershed(runid):
 
     watershed = runid.replace(prefix + '_', '').replace('_' + _scn, '')
 
+    if watershed.endswith('/'):
+        watershed = watershed[:-1]
+
     return _scn, watershed
 
 
@@ -89,10 +92,16 @@ for i, (scn, title) in enumerate(scenarios):
 
     print(scn, len(scn_runs))
 
-    url = combined_watershed_viewer_generator(runids=scn_runs, title=title)
+    js = combined_watershed_viewer_generator(runids=scn_runs, title=title, asjson=True)
+
+    with open('/workdir/wepppy/wepppy/weppcloud/static/mods/lt/results/{prefix}_{scn}.json'
+              .format(prefix=prefix, scn=scn), 'w') as fp3:
+        fp3.write(js)
 
     fp.write("""        <h3>{title}</h3>\n""".format(title=title))
-    fp.write("""        <a href='https://wepp1.nkn.uidaho.edu{url}'>View {scn}</a>\n\n""".format(url=url, scn=scn))
+    fp.write("""        <a href='https://wepp1.nkn.uidaho.edu/weppcloud/combined_ws_viewer/"""
+             """?data_uri=../static/mods/lt/results/{prefix}_{scn}.json'>View {scn}</a>\n\n"""
+             .format(prefix=prefix, scn=scn))
 
     runs_list = []
     for scn_run in scn_runs:
