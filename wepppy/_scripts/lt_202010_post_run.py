@@ -76,11 +76,11 @@ fp2 = open(prefix + '_runs.htm', 'w')
 shps_outdir = '/home/roger/{prefix}_shps'.format(prefix=prefix)
 csv_outdir = '/home/roger/{prefix}_csvs'.format(prefix=prefix)
 
-if not _exists(shps_outdir):
+if _exists(shps_outdir):
     shutil.rmtree(shps_outdir)
 os.mkdir(shps_outdir)
 
-if not _exists(csv_outdir):
+if _exists(csv_outdir):
     shutil.rmtree(csv_outdir)
 os.mkdir(csv_outdir)
 
