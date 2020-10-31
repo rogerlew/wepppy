@@ -54,12 +54,13 @@ function render_legend_cmap(cmap, canvasID) {
 }
 
 $(document).ready(function () {
-    var center = undefined;
-    var zoom = undefined;
-    var display_units = undefined;
-    var ws = undefined;
-    var varopts = undefined;
-    var varname = undefined;
+    var center;
+    var zoom;
+    var display_units;
+    var ws;
+    var varopts;
+    var varname;
+    var title;
 
     var data_uri = getURLParameter("data_uri");
 
@@ -71,6 +72,9 @@ $(document).ready(function () {
             ws = data.ws;
             varopts = data.varopts;
             varname = data.varname;
+            title = data.title;
+
+            callback();
         });
 
     } else {
@@ -128,9 +132,20 @@ $(document).ready(function () {
         if (varname === undefined) {
             varname = Object.keys(varopts)[0];
         }
+
+        title = getURLParameter("title");
+        if (title !== undefined) {
+            title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
+            var titleBox = new TitleBox();
+            map.addControl(titleBox);
+        }
+
+        callback();
+
     }
 
-    var map = L.map('map').setView(center, zoom);
+
+    var map = L.map('map');
 
     var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
       maxZoom: 20,
@@ -155,18 +170,10 @@ $(document).ready(function () {
     var ctrls = L.control.layers(baseMaps, overlayMaps);
     ctrls.addTo(map);
 
-
-    var tolerance = varopts[varname];
+    var tolerance;
     var units = '';
-    var numvars = Object.keys(varopts).length;
-
-    var defaultStyle = {
-        "color": "#ff7800",
-        "weight": 2,
-        "opacity": 0.65,
-        "fillColor": "#ff7800",
-        "fillOpacity": 0.3
-    };
+    var numvars;
+    var defaultStyle;
 
     var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
     var cmapperLoss = createColormap({ colormap: "electric", nshades: 64 });
@@ -176,6 +183,19 @@ $(document).ready(function () {
     var vmin = 0.0;
     var vmax;
     var cmapname;
+    
+    var Legend;
+    var legend;
+    
+    var VarSelection;
+    var varSelection;
+
+    var TitleBox;
+
+    var polys;
+    var data;
+    var popup;
+
     function prep_render() {
 
         if (varname === 'runoff' || varname === 'subrunoff' || varname === 'baseflow') {
@@ -212,7 +232,7 @@ $(document).ready(function () {
     }
 
     function set_tolerance() {
-        var _scale = undefined;
+        var _scale;
         if (display_units === 'SI') {
             _scale = 1;
         } else {
@@ -228,80 +248,7 @@ $(document).ready(function () {
         render_legend();
         render();
     }
-
-    var Legend = L.Control.extend({
-        options: {
-            position: 'bottomleft'
-        },
-        initialize: function (options) {
-            // constructor
-        },
-        onAdd: function (map) {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-
-            container.style.backgroundColor = 'white';
-            container.style.width = '240px';
-            container.style.height = '150px';
-
-            if (display_units === 'SI') {
-                container.innerHTML =
-                    '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
-                    '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
-                    '<div>' + units + '</div>' +
-                    '<canvas id="legend_canvas" width=180 height=20 ' +
-                    'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
-                    '<div class="row">' +
-                    '<div class="col-md-4"><span id="legend_vmin">' + vmin + '</span></div>' +
-                    '<div class="col-md-4" style="text-align: center;">0</div>' +
-                    '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + vmax + '</span></div>' +
-                    '</div>' +
-                    '<div class="row" style="padding-top: 18px;">' +
-                    '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + tolerance + '"></div>' +
-                    '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
-                    '</div>' +
-                    '</div>';
-            }  else {
-                var scale = undefined;
-                var _units = undefined;
-                if (units === 'mm') {
-                    scale = 0.0393701;
-                    _units = 'in';
-                } else if (units === 'kg/ha') {
-                    scale = 0.892179;
-                    _units = 'lb/ha';
-                }
-
-                var _vmin = parseFloat(vmin * scale).toFixed(2);
-                var _vmax = parseFloat(vmax * scale).toFixed(2);
-                var _tolerance = parseFloat(tolerance * scale).toFixed(2);
-
-                container.innerHTML =
-                    '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
-                    '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
-                    '<div>' + _units + '</div>' +
-                    '<canvas id="legend_canvas" width=180 height=20 ' +
-                    'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
-                    '<div class="row">' +
-                    '<div class="col-md-4"><span id="legend_vmin">' + _vmin + '</span></div>' +
-                    '<div class="col-md-4" style="text-align: center;">0</div>' +
-                    '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + _vmax + '</span></div>' +
-                    '</div>' +
-                    '<div class="row" style="padding-top: 18px;">' +
-                    '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + _tolerance + '"></div>' +
-                    '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
-                    '</div>' +
-                    '</div>';
-            }
-
-            return container;
-        },
-        onRemove: function (map) {
-            // when removed
-        }
-    });
-
-    var legend;
-
+    
     function render_legend() {
         if (legend !== undefined) {
             legend.remove();
@@ -312,107 +259,6 @@ $(document).ready(function () {
         $('#set-tolerance-btn').on('click', set_tolerance);
 
     }
-
-    var VarSelection = L.Control.extend({
-        options: {
-            position: 'bottomleft'
-        },
-        initialize: function (options) {
-            // constructor
-        },
-        onAdd: function (map) {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-
-            container.style.backgroundColor = 'white';
-            container.style.width = '240px';
-            container.style.height = (30 + 28 * numvars)  + 'px';
-
-            let html  = '<div style="padding-left: 10px; padding-top: 5px;">';
-            html += '<h6>Select Variable</h6>';
-
-            for (let key in varopts) {
-
-                html += '<div class="radio"><label><input type="radio" id="varRadio" name="varRadio" value="' + key + '"';
-
-                if (key === varname) {
-                    html += 'checked';
-                }
-
-                if (key === 'runoff') {
-                    html += '> Runoff</label></div>';
-                }
-                else if (key === 'subrunoff') {
-                    html += '> Lateral Flow</label></div>';
-                }
-                else if (key === 'baseflow') {
-                    html += '> Baseflow</label></div>';
-                }
-                else if (key === 'phosphorus') {
-                    html += '> Total Phosphorus</label></div>';
-                }
-                else if (key === 'loss') {
-                    html += '> Soil Deposition/Loss</label></div>';
-                } else {
-                    html += '> ' + key + '</label></div>';
-                }
-            }
-            html += '</div>';
-            container.innerHTML = html;
-            return container;
-        },
-        onRemove: function (map) {
-            // when removed
-        }
-    });
-
-    var varSelection = new VarSelection();
-    map.addControl(varSelection);
-
-
-    var TitleBox = L.Control.extend({
-        options: {
-            position: 'bottomright'
-        },
-        initialize: function (options) {
-            // constructor
-        },
-        onAdd: function (map) {
-            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-
-            container.style.backgroundColor = 'transparent';
-            container.style.borderColor = 'transparent';
-            container.style.width = '500px';
-            container.style.height = '40px';
-
-            container.innerHTML = '<h4 style="text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;">' + title + '</h4>';
-            return container;
-        },
-        onRemove: function (map) {
-            // when removed
-        }
-    });
-
-    var title = getURLParameter("title");
-    if (title !== undefined) {
-        title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
-        var titleBox = new TitleBox();
-        map.addControl(titleBox);
-    }
-
-
-    $('input[type=radio][name=varRadio]').change(function() {
-        varname = this.value;
-        tolerance = varopts[varname];
-        data = undefined;
-
-        prep_render();
-        render_legend();
-        render();
-    });
-
-    var polys = {};
-    var data;
-    var popup;
 
     function render() {
         if (data === undefined) {
@@ -466,70 +312,246 @@ $(document).ready(function () {
         });
     }
 
+    
+    function callback() {
+        map.setView(center, zoom);
+        tolerance = varopts[varname];
+        units = '';
+        numvars = Object.keys(varopts).length;
 
-    if (ws !== null) {
-        for (let w of ws) {
-            let runid = w.runid;
-            let cfg = w.cfg;
-            polys[runid] = {};
+        defaultStyle = {
+            "color": "#ff7800",
+            "weight": 2,
+            "opacity": 0.65,
+            "fillColor": "#ff7800",
+            "fillOpacity": 0.3
+        };
 
-            $.get({
-                url: site_prefix + "/runs/" + runid + "/cfg/resources/subcatchments.json",
-                async: false,
-                success: function (response) {
-                    polys[runid] = L.geoJSON(response.features, {
-                        style: defaultStyle,
-                        onEachFeature: function (feature, layer) {
-                            layer.on({
-                                click: function click(ev) {
-                                    var topaz_id = ev.target.feature.properties.TopazID;
-                                    var query_url = site_prefix + "/runs/" + runid + "/cfg/report/sub_summary/" + topaz_id + "/";
-                                    $.get({
-                                        url: query_url,
-                                        success: function success(response) {
-                                            if (popup !== undefined) {
-                                                popup.remove();
-                                            }
-                                            const content =
-                                                '<h5>' + runid + '</h5>' +
-                                                response +
-                                                '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/">View Watershed Run</a>';
 
-                                            popup = L.popup()
-                                                .setLatLng(ev.latlng)
-                                                .setContent(content)
-                                                .openOn(map);
+        Legend = L.Control.extend({
+            options: {
+                position: 'bottomleft'
+            },
+            initialize: function (options) {
+                // constructor
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
 
-                                            if (display_units !== 'SI') {
-                                                $(".units-m").removeClass("invisible");
-                                                $(".units-ft").addClass("invisible");
+                container.style.backgroundColor = 'white';
+                container.style.width = '240px';
+                container.style.height = '150px';
 
-                                                $(".units-ha").removeClass("invisible");
-                                                $(".units-acre").addClass("invisible");
-                                            }
-                                        },
-                                        fail: function fail(error) {
-                                            console.log(error);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                if (display_units === 'SI') {
+                    container.innerHTML =
+                        '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                        '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
+                        '<div>' + units + '</div>' +
+                        '<canvas id="legend_canvas" width=180 height=20 ' +
+                        'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                        '<div class="row">' +
+                        '<div class="col-md-4"><span id="legend_vmin">' + vmin + '</span></div>' +
+                        '<div class="col-md-4" style="text-align: center;">0</div>' +
+                        '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + vmax + '</span></div>' +
+                        '</div>' +
+                        '<div class="row" style="padding-top: 18px;">' +
+                        '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + tolerance + '"></div>' +
+                        '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                        '</div>' +
+                        '</div>';
+                } else {
+                    var scale;
+                    var _units;
+                    if (units === 'mm') {
+                        scale = 0.0393701;
+                        _units = 'in';
+                    } else if (units === 'kg/ha') {
+                        scale = 0.892179;
+                        _units = 'lb/ha';
+                    }
 
-                    polys[runid].name = response.name;
-                    polys[runid].addTo(map);
-                    ctrls.addOverlay(polys[runid], runid);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    console.log(textStatus, errorThrown);
+                    var _vmin = parseFloat(vmin * scale).toFixed(2);
+                    var _vmax = parseFloat(vmax * scale).toFixed(2);
+                    var _tolerance = parseFloat(tolerance * scale).toFixed(2);
+
+                    container.innerHTML =
+                        '<div style="padding-left: 10px; padding-right: 10px; padding-top: 5px;">' +
+                        '<h6>' + varname.charAt(0).toUpperCase() + varname.slice(1) + ' Legend</h6>' +
+                        '<div>' + _units + '</div>' +
+                        '<canvas id="legend_canvas" width=180 height=20 ' +
+                        'style="width:200px;height:20px;display:table;margin:0 auto;"></canvas>' +
+                        '<div class="row">' +
+                        '<div class="col-md-4"><span id="legend_vmin">' + _vmin + '</span></div>' +
+                        '<div class="col-md-4" style="text-align: center;">0</div>' +
+                        '<div class="col-md-4" style="text-align: right;"><span id="legend_vmax">' + _vmax + '</span></div>' +
+                        '</div>' +
+                        '<div class="row" style="padding-top: 18px;">' +
+                        '<div class="col-md-4"><input class="form-control-sm" style="width:80px;" id="tolerance-input" type="text" value="' + _tolerance + '"></div>' +
+                        '<div class="col-md-8"><button id="set-tolerance-btn" class="btn btn-primary btn-sm">Set Tolerance</button></div>' +
+                        '</div>' +
+                        '</div>';
                 }
-            });
-        }
 
-        prep_render();
-        render_legend();
-        render();
+                return container;
+            },
+            onRemove: function (map) {
+                // when removed
+            }
+        });
+
+        VarSelection = L.Control.extend({
+            options: {
+                position: 'bottomleft'
+            },
+            initialize: function (options) {
+                // constructor
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+                container.style.backgroundColor = 'white';
+                container.style.width = '240px';
+                container.style.height = (30 + 28 * numvars) + 'px';
+
+                let html = '<div style="padding-left: 10px; padding-top: 5px;">';
+                html += '<h6>Select Variable</h6>';
+
+                for (let key in varopts) {
+
+                    html += '<div class="radio"><label><input type="radio" id="varRadio" name="varRadio" value="' + key + '"';
+
+                    if (key === varname) {
+                        html += 'checked';
+                    }
+
+                    if (key === 'runoff') {
+                        html += '> Runoff</label></div>';
+                    } else if (key === 'subrunoff') {
+                        html += '> Lateral Flow</label></div>';
+                    } else if (key === 'baseflow') {
+                        html += '> Baseflow</label></div>';
+                    } else if (key === 'phosphorus') {
+                        html += '> Total Phosphorus</label></div>';
+                    } else if (key === 'loss') {
+                        html += '> Soil Deposition/Loss</label></div>';
+                    } else {
+                        html += '> ' + key + '</label></div>';
+                    }
+                }
+                html += '</div>';
+                container.innerHTML = html;
+                return container;
+            },
+            onRemove: function (map) {
+                // when removed
+            }
+        });
+
+        varSelection = new VarSelection();
+        map.addControl(varSelection);
+
+        TitleBox = L.Control.extend({
+            options: {
+                position: 'bottomright'
+            },
+            initialize: function (options) {
+                // constructor
+            },
+            onAdd: function (map) {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+
+                container.style.backgroundColor = 'transparent';
+                container.style.borderColor = 'transparent';
+                container.style.width = '500px';
+                container.style.height = '40px';
+
+                container.innerHTML = '<h4 style="text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;">' + title + '</h4>';
+                return container;
+            },
+            onRemove: function (map) {
+                // when removed
+            }
+        });
+
+        $('input[type=radio][name=varRadio]').change(function () {
+            varname = this.value;
+            tolerance = varopts[varname];
+            data;
+
+            prep_render();
+            render_legend();
+            render();
+        });
+
+        polys = {};
+        data;
+        popup;
+
+
+        if (ws !== null) {
+            for (let w of ws) {
+                let runid = w.runid;
+                let cfg = w.cfg;
+                polys[runid] = {};
+
+                $.get({
+                    url: site_prefix + "/runs/" + runid + "/cfg/resources/subcatchments.json",
+                    async: false,
+                    success: function (response) {
+                        polys[runid] = L.geoJSON(response.features, {
+                            style: defaultStyle,
+                            onEachFeature: function (feature, layer) {
+                                layer.on({
+                                    click: function click(ev) {
+                                        var topaz_id = ev.target.feature.properties.TopazID;
+                                        var query_url = site_prefix + "/runs/" + runid + "/cfg/report/sub_summary/" + topaz_id + "/";
+                                        $.get({
+                                            url: query_url,
+                                            success: function success(response) {
+                                                if (popup !== undefined) {
+                                                    popup.remove();
+                                                }
+                                                const content =
+                                                    '<h5>' + runid + '</h5>' +
+                                                    response +
+                                                    '<a href="' + site_prefix + '/runs/' + runid + '/' + cfg + '/">View Watershed Run</a>';
+
+                                                popup = L.popup()
+                                                    .setLatLng(ev.latlng)
+                                                    .setContent(content)
+                                                    .openOn(map);
+
+                                                if (display_units !== 'SI') {
+                                                    $(".units-m").removeClass("invisible");
+                                                    $(".units-ft").addClass("invisible");
+
+                                                    $(".units-ha").removeClass("invisible");
+                                                    $(".units-acre").addClass("invisible");
+                                                }
+                                            },
+                                            fail: function fail(error) {
+                                                console.log(error);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+
+                        polys[runid].name = response.name;
+                        polys[runid].addTo(map);
+                        ctrls.addOverlay(polys[runid], runid);
+                    },
+                    fail: function fail(jqXHR, textStatus, errorThrown) {
+                        console.log(textStatus, errorThrown);
+                    }
+                });
+            }
+
+            prep_render();
+            render_legend();
+            render();
+        }
     }
 });
 </script>
