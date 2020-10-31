@@ -54,20 +54,80 @@ function render_legend_cmap(cmap, canvasID) {
 }
 
 $(document).ready(function () {
+    var center = undefined;
+    var zoom = undefined;
+    var display_units = undefined;
+    var ws = undefined;
+    var varopts = undefined;
+    var varname = undefined;
 
-    var center = getURLParameter("center");
-    if (center === undefined) {
-        center = [39.0, -99.0];
-    } else {
-        center = decodeURIComponent((center + '').replace(/\+/g, '%20'));
-        center = JSON.parse(center);
-    }
+    var data_uri = getURLParameter("data_uri");
 
-    var zoom = getURLParameter("zoom");
-    if (zoom === undefined) {
-        zoom = 5;
+    if (data_uri !== undefined) {
+        $.getJSON(data_uri, function (data) {
+            center = data.center;
+            zoom = data.zoom;
+            display_units = data.units;
+            ws = data.ws;
+            varopts = data.varopts;
+            varname = data.varname;
+        });
+
     } else {
-        zoom = JSON.parse(zoom);
+        center = getURLParameter("center");
+        if (center === undefined) {
+            center = [39.0, -99.0];
+        } else {
+            center = decodeURIComponent((center + '').replace(/\+/g, '%20'));
+            center = JSON.parse(center);
+        }
+
+        zoom = getURLParameter("zoom");
+        if (zoom === undefined) {
+            zoom = 5;
+        } else {
+            zoom = JSON.parse(zoom);
+        }
+
+        display_units = getURLParameter("units");
+        if (display_units === undefined) {
+            display_units = 'SI';
+        }
+
+        ws = getURLParameter("ws");
+        if (ws !== undefined) {
+            ws = decodeURIComponent((ws + '').replace(/\+/g, '%20'));
+            ws = JSON.parse(ws);
+        }
+
+        varopts = getURLParameter("varopts");
+        if (varopts !== undefined) {
+            varopts = decodeURIComponent((varopts + '').replace(/\+/g, '%20'));
+            varopts = JSON.parse(varopts);
+
+            if (display_units !== 'SI') {
+                if ("runoff" in varopts) {
+                    varopts["runoff"] *= 25.4;
+                }
+                if ("subrunoff" in varopts) {
+                    varopts["subrunoff"] *= 25.4;
+                }
+                if ("baseflow" in varopts) {
+                    varopts["baseflow"] *= 25.4;
+                }
+                if ("phosphorus" in varopts) {
+                    varopts["phosphorus"] *= 1.12085;
+                }
+                if ("loss" in varopts) {
+                    varopts["loss"] *= 1.12085;
+                }
+            }
+        }
+
+        varname = getURLParameter("varname");
+        if (varname === undefined) {
+            varname = Object.keys(varopts)[0];
+        }
     }
 
     var map = L.map('map').setView(center, zoom);
@@ -95,45 +155,6 @@ $(document).ready(function () {
     var ctrls = L.control.layers(baseMaps, overlayMaps);
     ctrls.addTo(map);
 
-    var display_units = getURLParameter("units");
-    if (display_units === undefined) {
-        display_units = 'SI';
-    }
-
-    var ws = getURLParameter("ws");
-    if (ws !== undefined) {
-        ws = decodeURIComponent((ws + '').replace(/\+/g, '%20'));
-        ws = JSON.parse(ws);
-    }
-
-    var varopts = getURLParameter("varopts");
-    if (varopts !== undefined) {
-        varopts = decodeURIComponent((varopts + '').replace(/\+/g, '%20'));
-        varopts = JSON.parse(varopts);
-
-        if (display_units !== 'SI') {
-            if ("runoff" in varopts) {
-                varopts["runoff"] *= 25.4;
-            }
-            if ("subrunoff" in varopts) {
-                varopts["subrunoff"] *= 25.4;
-            }
-            if ("baseflow" in varopts) {
-                varopts["baseflow"] *= 25.4;
-            }
-            if ("phosphorus" in varopts) {
-                varopts["phosphorus"] *= 1.12085;
-            }
-            if ("loss" in varopts) {
-                varopts["loss"] *= 1.12085;
-            }
-        }
-    }
-
-    var varname = getURLParameter("varname");
-    if (varname === undefined) {
-        varname = Object.keys(varopts)[0];
-    }
 
     var tolerance = varopts[varname];
     var units = '';
