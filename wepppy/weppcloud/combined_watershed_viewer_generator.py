@@ -10,7 +10,7 @@ def get_wd(runid):
     return _join('/geodata/weppcloud_runs', runid)
 
 
-def combined_watershed_viewer_generator(runids, title, units=None, varopts=None, varname=None):
+def combined_watershed_viewer_generator(runids, title, units=None, varopts=None, varname=None, asjson=False):
     if units is None:
         units = 'SI'
 
@@ -96,5 +96,18 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
                           zoom=zoom, ws=json.dumps(ws, separators=(',', ':'), allow_nan=False), title=title,
                           runoff=runoff, subrunoff=subrunoff, baseflow=baseflow, loss=loss, varname=varname, units=units,
                           phos_opts=phos_opts.format(phosphorus=phosphorus))
+
+    if asjson:
+        varopts = dict(runoff=runoff,
+                       subrunoff=subrunoff,
+                       baseflow=baseflow,
+                       loss=loss)
+
+        if has_phos:
+            varopts['phosphorus'] = phosphorus
+
+        return json.dumps(dict(zoom=zoom, center=[center_lat, center_lng], ws=ws,
+                               title=title, varopts=varopts, varname=varname, units=units),
+                          separators=(',', ':'), allow_nan=False)
 
     return url
