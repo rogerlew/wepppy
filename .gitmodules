@@ -1,0 +1,3 @@
+[submodule "wepppy/weppcloud/migrations/wepppy-weppcloud-migrations"]
+	path = wepppy/weppcloud/migrations/wepppy-weppcloud-migrations
+	url = https://github.com/rogerlew/wepppy-weppcloud-migrations.git
