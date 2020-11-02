@@ -590,6 +590,24 @@ def portland_index():
     return render_template('locations/portland/index.htm', user=current_user)
 
 
+@app.route('/portland-municipal/results/<file>')
+@app.route('/portland-municipal/results/<file>/')
+@app.route('/locations/portland-municipal/results/<file>/')
+@app.route('/locations/portland-municipal//results/<file>/')
+@roles_required('PortlandGroup')
+def portland_results(file):
+    """
+    recursive list the file structure of the working directory
+    """
+    import wepppy
+    fn = _join(wepppy.nodb.mods.locations.wepppy_locations_portland.portland._thisdir, 'results', file)
+    
+    if _exists(fn):
+        return send_file(fn, as_attachment=True)
+    else:
+        return error_factory('File does not exist')
+    
+
 @app.route('/lt')
 @app.route('/lt/')
 @app.route('/locations/lt')
@@ -611,6 +629,24 @@ def ltf_index():
 def seattle_index():
     return render_template('locations/seattle/index.htm', user=current_user)
 
+
+@app.route('/seattle-municipal/results/<file>')
+@app.route('/seattle-municipal/results/<file>/')
+@app.route('/locations/seattle-municipal/results/<file>/')
+@app.route('/locations/seattle-municipal//results/<file>/')
+# roles_required('SeattleGroup')
+def seattle_results(file):
+    """
+    recursive list the file structure of the working directory
+    """
+    import wepppy
+    fn = _join(wepppy.nodb.mods.locations.wepppy_locations_seattle.seattle._thisdir, 'results', file)
+
+    if _exists(fn):
+        return send_file(fn, as_attachment=True)
+    else:
+        return error_factory('File does not exist')
+    
 
 @app.route('/create')
 @app.route('/create/')
