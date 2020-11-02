@@ -187,8 +187,6 @@ $(document).ready(function () {
         title = getURLParameter("title");
         if (title !== undefined) {
             title = decodeURIComponent((title + '').replace(/\+/g, '%20'));
-            var titleBox = new TitleBox();
-            map.addControl(titleBox);
         }
 
         callback();
@@ -471,6 +469,8 @@ $(document).ready(function () {
                 // when removed
             }
         });
+        var titleBox = new TitleBox();
+        map.addControl(titleBox);
 
         $('input[type=radio][name=varRadio]').change(function () {
             varname = this.value;
