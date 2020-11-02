@@ -588,6 +588,7 @@ def stats():
 @app.route('/portland-municipal/')
 @app.route('/locations/portland-municipal')
 @app.route('/locations/portland-municipal/')
+@roles_required('PortlandGroup')
 def portland_index():
     if current_user.is_authenticated:
         if not current_user.roles:
