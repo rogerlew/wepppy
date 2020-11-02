@@ -8,8 +8,6 @@ from os.path import split as _split
 from time import sleep
 from copy import deepcopy
 
-from wepppy.nodb.mods.locations.lt.selectors import *
-from wepppy.all_your_base import isfloat
 from wepppy.nodb import (
     Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
 )
@@ -23,7 +21,6 @@ from wepppy.export import arc_export
 from wepppy.climates.cligen import ClimateFile
 
 from wepppy.nodb.mods.locations.portland import LivnehDataManager
-from wepppy.nodb.mods.locations.portland import ShallowLandSlideSusceptibility, BullRunBedrock
 
 from osgeo import gdal
 
