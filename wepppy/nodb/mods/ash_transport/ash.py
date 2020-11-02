@@ -417,7 +417,7 @@ class Ash(NoDbBase, LogMixin):
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha)
                 args.append(kwds)
-
+                
             pool = multiprocessing.Pool(NCPU)
             for out_fn in pool.imap_unordered(run_ash_model, args):
                 self.log('  completed running {}\n'.format(out_fn))
