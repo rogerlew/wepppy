@@ -548,9 +548,6 @@ def security_processor():
 
 @app.route('/')
 def index():
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
 
     runs_counter = Counter()
     try:
@@ -590,9 +587,6 @@ def stats():
 @app.route('/locations/portland-municipal/')
 @roles_required('PortlandGroup')
 def portland_index():
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
     return render_template('locations/portland/index.htm', user=current_user)
 
 
@@ -601,18 +595,12 @@ def portland_index():
 @app.route('/locations/lt')
 @app.route('/locations/lt/')
 def lt_index():
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
     return render_template('lt/index.htm', user=current_user)
 
 
 @app.route('/ltf')
 @app.route('/ltf/')
 def ltf_index():
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
     return render_template('ltf/index.htm', user=current_user)
 
 
@@ -621,9 +609,6 @@ def ltf_index():
 @app.route('/locations/seattle-municipal')
 @app.route('/locations/seattle-municipal/')
 def seattle_index():
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
     return render_template('locations/seattle/index.htm', user=current_user)
 
 
