@@ -7,3 +7,6 @@
 [submodule "wepppy/weppcloud/_migrations"]
 	path = wepppy/weppcloud/_migrations
 	url = https://github.com/rogerlew/wepppy-weppcloud-migrations
+[submodule "wepppy/nodb/mods/locations/seattle"]
+	path = wepppy/nodb/mods/locations/seattle
+	url = https://github.com/rogerlew/wepppy-locations-seattle
