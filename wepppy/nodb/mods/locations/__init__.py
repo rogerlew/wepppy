@@ -1,6 +1,6 @@
 from .lt import LakeTahoe
 try:
-    from .wepppy_locations_portland import PortlandMod
+    from .portland import PortlandMod
 except ImportError:
     pass
 
