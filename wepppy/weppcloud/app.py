@@ -127,7 +127,7 @@ from wepppy.nodb.mods.ash_transport import BlackAshModel, WhiteAshModel, AshType
 import socket
 _hostname = socket.gethostname()
 if 'wepp1' in _hostname:
-    from wepppy.weppcloud.app_config import config_app
+    from wepppy.weppcloud.wepp1_config import config_app
 else:
     from wepppy.weppcloud.standalone_config import config_app
 
@@ -283,7 +283,7 @@ security = Security(app, user_datastore,
 @app.before_first_request
 def init_db():
     if 'wepp1' in _hostname:
-        from wepppy.weppcloud.app_config import _init
+        from wepppy.weppcloud.wepp1_config import _init
     else:
         from wepppy.weppcloud.standalone_config import _init
 
