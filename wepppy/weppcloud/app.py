@@ -600,7 +600,7 @@ def portland_results(file):
     recursive list the file structure of the working directory
     """
     import wepppy
-    fn = _join(wepppy.nodb.mods.locations.wepppy_locations_portland.portland._thisdir, 'results', file)
+    fn = _join(wepppy.nodb.mods.locations.portland.portland._thisdir, 'results', file)
     
     if _exists(fn):
         return send_file(fn, as_attachment=True)
