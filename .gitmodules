@@ -4,3 +4,6 @@
 [submodule "wepppy/nodb/mods/locations/portland"]
 	path = wepppy/nodb/mods/locations/portland
 	url = https://github.com/rogerlew/wepppy-locations-portland
+[submodule "wepppy/weppcloud/migrations"]
+	path = wepppy/weppcloud/migrations
+	url = https://github.com/rogerlew/wepppy-weppcloud-migrations
