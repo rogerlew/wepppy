@@ -178,7 +178,10 @@ class NoDbBase(object):
 
     @property
     def runid(self):
-        return _split(self.wd)[-1].replace('/', '')
+        wd = self.wd
+        if wd.endswith('/'):
+            wd = wd[:-1]
+        return _split(wd)[-1]
 
     @readonly.setter
     def readonly(self, value):
