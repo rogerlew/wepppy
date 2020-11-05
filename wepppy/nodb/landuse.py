@@ -116,6 +116,7 @@ class Landuse(NoDbBase):
             assert isinstance(db, Landuse)
 
             if _exists(_join(wd, 'READONLY')):
+                db.wd = os.path.abspath(wd)
                 return db
 
             if os.path.abspath(wd) != os.path.abspath(db.wd):
