@@ -91,9 +91,9 @@ class Topaz(NoDbBase):
         with open(_join(wd, 'topaz.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Topaz)
-            db.wd = os.path.abspath(wd)
 
             if _exists(_join(wd, 'READONLY')):
+                db.wd = os.path.abspath(wd)
                 return db
 
             if os.path.abspath(wd) != os.path.abspath(db.wd):
