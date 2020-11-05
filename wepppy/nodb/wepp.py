@@ -332,6 +332,7 @@ class Wepp(NoDbBase, LogMixin):
             assert isinstance(db, Wepp)
 
             if _exists(_join(wd, 'READONLY')):
+                db.wd = os.path.abspath(wd)
                 return db
 
             if os.path.abspath(wd) != os.path.abspath(db.wd):

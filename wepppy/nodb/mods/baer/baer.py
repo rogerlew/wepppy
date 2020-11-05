@@ -92,6 +92,7 @@ class Baer(NoDbBase):
             assert isinstance(db, Baer), db
 
             if _exists(_join(wd, 'READONLY')):
+                db.wd = os.path.abspath(wd)
                 return db
 
             if os.path.abspath(wd) != os.path.abspath(db.wd):
