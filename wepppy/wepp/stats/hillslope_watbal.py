@@ -15,7 +15,8 @@ from glob import glob
 
 import numpy as np
 
-from wepppy.all_your_base import parse_units, RowData, determine_wateryear
+from wepppy.all_your_base import determine_wateryear
+from .row_data import RowData, parse_units
 from .report_base import ReportBase
 
 
