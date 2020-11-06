@@ -77,7 +77,7 @@ def findstation():
         method = request.args.get('method', None)
         version = request.args.get('version', None)
     else:  # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
         lat = d.get('lat', None)
         lng = d.get('lng', None)
         method = d.get('method', None)
@@ -118,7 +118,7 @@ def _fetch_par_contents(par, _request):
     if _request.method == 'GET':
         d = _request.args
     else:  # POST
-        d = _request.get_json()
+        d = _request.get_json(force=True)
 
     version = d.get('version', None)
 
@@ -227,7 +227,7 @@ def _multiple_year(par, _request, singleyearmode=False):
     if _request.method == 'GET':
         d = _request.args
     else:  # POST
-        d = _request.get_json()
+        d = _request.get_json(force=True)
 
     years = d.get('years', None)
     cliver = d.get('cliver', '5.3')
@@ -377,7 +377,7 @@ def single_storm(par):
     if request.method == 'GET':
         d = request.args
     else:  # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
 
     cliver = d.get('cliver', None)
     if cliver is None:
@@ -475,7 +475,7 @@ def observed_daymet(par):
     if request.method == 'GET':
         d = request.args
     else:  # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
 
 #    cliver = d.get('cliver', None)
 #    if cliver is None:
@@ -600,7 +600,7 @@ def future_rcp85(par):
     if request.method == 'GET':
         d = request.args
     else:  # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
 
 #    cliver = d.get('cliver', None)
 #    if cliver is None:
