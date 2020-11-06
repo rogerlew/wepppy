@@ -6,7 +6,7 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from typing import Tuple, List, Dict, Union
+from typing import Tuple
 
 from .locationinfo import RasterDatasetInterpolator, RDIOutOfBoundsException
 from .geo_transformer import GeoTransformer
@@ -314,7 +314,7 @@ def cp_chmod(src, dst, mode):
     os.chmod(dst, mode)
 
 
-def parse_datetime(x):
+def parse_date(x):
     if isinstance(x, datetime):
         return x
 
@@ -402,47 +402,6 @@ def try_parse_float(f):
         return float(f)
     except Exception:
         return 0.0
-
-
-def parse_name(colname):
-    units = parse_units(colname)
-    if units is None:
-        return colname
-
-    return colname.replace('({})'.format(units), '').strip()
-
-
-def parse_units(colname):
-    try:
-        colsplit = colname.strip().split()
-        if len(colsplit) < 2:
-            return None
-
-        if '(' in colsplit[-1]:
-            return colsplit[-1].replace('(', '').replace(')', '')
-
-        return None
-    except IndexError:
-        return None
-
-
-class RowData:
-    def __init__(self, row):
-
-        self.row = row
-
-    def __getitem__(self, item):
-        for colname in self.row:
-            if colname.startswith(item):
-                return self.row[colname]
-
-        raise KeyError
-
-    def __iter__(self):
-        for colname in self.row:
-            value = self.row[colname]
-            units = parse_units(colname)
-            yield value, units
 
 
 wmesque_url = 'https://wepp1.nkn.uidaho.edu/webservices/wmesque/'
