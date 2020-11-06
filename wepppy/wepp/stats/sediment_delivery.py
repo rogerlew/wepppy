@@ -6,7 +6,8 @@ from collections import OrderedDict
 from wepppy.wepp.out import TotalWatSed
 from wepppy.wepp.out.loss import _parse_tbl
 
-from wepppy.all_your_base import RowData, try_parse
+from wepppy.all_your_base import try_parse
+from .row_data import RowData
 
 
 class SedimentDelivery(object):

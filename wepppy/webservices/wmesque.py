@@ -61,7 +61,6 @@ def raster_stats(src):
               .read() \
               .decode('utf-8') \
               .replace('\n','|')
-    print(output)
 
     stat_fn = src + '.aux.xml'
     assert os.path.exists(stat_fn), (src, stat_fn)

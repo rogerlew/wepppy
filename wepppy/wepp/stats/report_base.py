@@ -8,7 +8,7 @@
 
 import csv
 
-from wepppy.all_your_base import parse_name, parse_units
+from wepppy.wepp.stats.row_data import parse_name, parse_units
 
 
 class ReportBase(object):
