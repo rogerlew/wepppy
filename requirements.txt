@@ -2,7 +2,7 @@ aenum==2.2.0
 amqp==1.4.9
 anyjson==0.3.3
 awesome-codename==1.0.0
-Babel==2.5.3
+Babel==2.8.0
 bcrypt==3.1.4
 beautifulsoup4==4.8.0
 billiard==3.3.0.22
@@ -17,6 +17,7 @@ command-not-found==0.3
 cycler==0.10.0
 download-espa-order==2.2.5
 Flask==1.0.2
+Flask-Babel==2.0.0
 Flask-BabelEx==0.9.3
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
@@ -74,6 +75,6 @@ unattended-upgrades==0.1
 urllib3==1.24.2
 utm==0.4.2
 virtualenv==15.0.1
-Werkzeug==1.0.1
+Werkzeug==0.16.1
 what3words==2.2.1
 WTForms==2.1
