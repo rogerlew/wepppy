@@ -15,7 +15,8 @@ from collections import OrderedDict
 
 from copy import deepcopy
 
-from wepppy.all_your_base import parse_units, parse_name, RowData, flatten, isfloat
+from wepppy.all_your_base import flatten, isfloat
+from .row_data import parse_name, parse_units, RowData
 
 from wepppy.wepp.out import Loss
 from wepppy.wepp.stats.report_base import ReportBase
