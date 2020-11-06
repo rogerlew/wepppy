@@ -12,8 +12,8 @@ from os.path import exists as _exists
 from datetime import datetime, timedelta
 
 from collections import OrderedDict
-import  numpy as np
-from wepppy.all_your_base import parse_units, RowData
+import numpy as np
+from .row_data import parse_units, RowData
 
 from .report_base import ReportBase
 
