@@ -9,7 +9,8 @@
 from collections import OrderedDict
 import  numpy as np
 from pandas import DataFrame, Series
-from wepppy.all_your_base import parse_units, RowData, parse_name, weibull_series
+from wepppy.all_your_base import weibull_series
+from .row_data import parse_name, parse_units, RowData
 
 from wepppy.wepp.out import Loss, Ebe
 

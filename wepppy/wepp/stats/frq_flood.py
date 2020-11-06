@@ -13,7 +13,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from wepppy.all_your_base import RowData
+from .row_data import RowData
 from wepppy.wepp.out import Loss, Ebe
 from .report_base import ReportBase
 
