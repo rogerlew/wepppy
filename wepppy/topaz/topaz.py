@@ -64,6 +64,7 @@ nodata_value     {no_data}
 
 _TIMEOUT = 60
 
+
 def _str_dem_val(f):
     """
     helper function to stringify the elevation values
@@ -90,6 +91,7 @@ class TopazUnexpectedTermination(Exception):
     """
 
     __name__ = 'Topaz Unexpected Termination'
+
 
 class WatershedBoundaryTouchesEdgeError(Exception):
     """
@@ -193,9 +195,8 @@ class TopazRunner:
         # parsing the dem loads attributes for the instance
         self._parse_dem()
 
-        # if the channel dataseet is found, load the channel and junction masks
+        # if the channel dataset is found, load the channel and junction masks
         self.junction_mask = None
-
 
     def _clean_dir(self, empty_only=False):
         """
@@ -331,7 +332,6 @@ class TopazRunner:
         data2, _transform2, _proj2 = read_arc(fname)
         assert data2.shape == data.shape
 
-
         return True
 
     def longlat_to_pixel(self, long, lat):
@@ -406,7 +406,6 @@ class TopazRunner:
         # we transpose the mask for the algorithm
         mask = self.junction_mask.T
         cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
-        ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
 
         if pixelcoords:
             x, y = long, lat
@@ -760,10 +759,10 @@ class TopazRunner:
            _exists(_join(topaz_wd, 'RELIEF.OUT')):
             return output
 
-        elif _pass == 2 and \
-            _exists(_join(topaz_wd, 'CHNJNT.ARC')) and \
-            _exists(_join(topaz_wd, 'CATWIN.TAB')) and \
-            _exists(_join(topaz_wd, 'BOUND.OUT')):
+        elif (_pass == 2 and \
+           _exists(_join(topaz_wd, 'CHNJNT.ARC')) and \
+           _exists(_join(topaz_wd, 'CATWIN.TAB')) and \
+           _exists(_join(topaz_wd, 'BOUND.OUT'))):
             return output
 
         raise DednmCrashedException(output)
@@ -794,17 +793,15 @@ class TopazRunner:
         with open(_join(self.topaz_wd, 'rasfor.log'), 'w') as fp:
             fp.write('\n'.join(output))
 
-        if _pass == 1 and \
-           _exists(_join(self.topaz_wd, 'FLOPAT.ARC')) and \
-           _exists(_join(self.topaz_wd, 'FLOVEC.ARC')) and \
-           _exists(_join(self.topaz_wd, 'NETFUL.ARC')) and \
-           _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
+        if _pass == 1 and _exists(_join(self.topaz_wd, 'FLOPAT.ARC')) and \
+                          _exists(_join(self.topaz_wd, 'FLOVEC.ARC')) and \
+                          _exists(_join(self.topaz_wd, 'NETFUL.ARC')) and \
+                          _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
             return output
 
-        elif _pass == 2 and \
-           _exists(_join(self.topaz_wd, 'TASPEC.ARC')) and \
-           _exists(_join(self.topaz_wd, 'SUBWTA.ARC')) and \
-           _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
+        elif _pass == 2 and _exists(_join(self.topaz_wd, 'TASPEC.ARC')) and \
+                            _exists(_join(self.topaz_wd, 'SUBWTA.ARC')) and \
+                            _exists(_join(self.topaz_wd, 'RELIEF.ARC')):
             return output
 
         raise RasforCrashedException(output)

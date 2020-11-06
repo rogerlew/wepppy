@@ -16,7 +16,7 @@ from glob import glob
 
 import numpy as np
 
-from wepppy.all_your_base import parse_units, RowData
+from .row_data import parse_units, RowData
 from .report_base import ReportBase
 
 

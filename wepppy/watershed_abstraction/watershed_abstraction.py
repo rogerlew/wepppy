@@ -72,7 +72,7 @@ def cummnorm_distance(distance: List[float]) -> np.array:
     return distance_p
 
 
-def representative_normalized_elevations(x: List[float], dy: List[float]) -> List[float]:
+def _representative_normalized_elevations(x: List[float], dy: List[float]) -> List[float]:
     """
     x should be a normed distance array between 0 and 1
     dy is an array of slopes
@@ -219,6 +219,8 @@ def _identify_subflows(flowpaths: List[np.array]) -> List[List[int]]:
 def _weighted_slope_average(flowpaths, slopes, distances, max_points=19):
     """
     calculates weighted slopes based on the flowpaths contained on the hillslope
+
+    eq. 3.3 in Thomas Cochrane's Dissertation
     """
     # determine longest flowpath
     lengths = [float(np.sum(d)) for d in distances]
@@ -965,7 +967,7 @@ class WatershedAbstraction:
         _centroid_px = centroid_px(indx, indy)
         centroid_lnglat = self.px_to_lnglat(*_centroid_px)
 
-        elevs = representative_normalized_elevations(distance_p, slope)
+        elevs = _representative_normalized_elevations(distance_p, slope)
         slope_scalar = float(abs(elevs[-1]))
         
         chn_summary = ChannelSummary(
@@ -1149,7 +1151,7 @@ class WatershedAbstraction:
         
         direction = compute_direction(head, tail)
         
-        elevs = representative_normalized_elevations(distance_p, slope)
+        elevs = _representative_normalized_elevations(distance_p, slope)
         slope_scalar = float(abs(elevs[-1]))
         color = slp_asp_color(slope_scalar, aspect)
 
@@ -1267,7 +1269,7 @@ class WatershedAbstraction:
         _centroid_px = centroid_px(indx, indy)
         centroid_lnglat = self.px_to_lnglat(*_centroid_px)
 
-        elevs = representative_normalized_elevations(distance_p, w_slopes)
+        elevs = _representative_normalized_elevations(distance_p, w_slopes)
         slope_scalar = float(abs(elevs[-1]))
 
         sub_summary = HillSummary(  
