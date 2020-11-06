@@ -194,7 +194,7 @@ def query_daily():
     if request.method == 'GET':
         d = request.args
     else:  # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
 
     bbox = d.get('bbox', None)
     dataset = d.get('dataset', None)
@@ -275,7 +275,7 @@ def query_monthly():
         dataset = request.args.get('dataset', None)
         method = request.args.get('method', None)
     else:  # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
         lat = d.get('lat', None)
         lng = d.get('lng', None)
         dataset = d.get('dataset', None)
