@@ -120,7 +120,7 @@ def validatemukeys():
     if request.method == 'GET':
         mukeys = request.args.get('mukeys', None)
     else: # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
         mukeys = d.get('mukeys', None)
     if mukeys is None:
         return jsonify({'Error': 'mukeys not supplied'})
@@ -163,7 +163,7 @@ def identifymukey():
         lng = request.args.get('lng', None)
         srs = request.args.get('srs', None)
     else: # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
         lat = d.get('lat', None)
         lng = d.get('lng', None)
         srs = d.get('srs', None)
@@ -215,7 +215,7 @@ def identifymukeys():
         bounds = request.args.get('bounds', None)
         srs = request.args.get('srs', None)
     else: # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
         bounds = d.get('bounds', None)
         srs = d.get('srs', None)
 
@@ -288,7 +288,7 @@ def fetchsoils():
     if request.method == 'GET':
         mukeys = request.args.get('mukeys', None)
     else: # POST
-        d = request.get_json()
+        d = request.get_json(force=True)
         mukeys = d.get('mukeys', None)
 
     mukeys = mukeys.split(',')

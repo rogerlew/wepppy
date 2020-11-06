@@ -86,7 +86,7 @@
 <dt>if _request.method == ‘GET’:</dt>
 <dd>d = _request.args</dd>
 <dt>else:  # POST</dt>
-<dd>d = _request.get_json()</dd>
+<dd>d = _request.get_json(force=True)</dd>
 </dl>
 <p>years = d.get(‘years’, None)
 cliver = d.get(‘cliver’, None)
