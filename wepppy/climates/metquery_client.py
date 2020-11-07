@@ -19,12 +19,11 @@ _metquery_url = "https://wepp1.nkn.uidaho.edu/webservices/metquery/"
 
 def _metquery_retrieve_monthly(dataset, lng, lat, method):
     global _metquery_url
-    
-    r = requests.post(urljoin(_metquery_url, 'monthly'), 
-                      params=dict(dataset=dataset, 
-                                  lat=lat, lng=lng,
-                                  method=method))
-        
+    query = urljoin(_metquery_url, 'monthly') + \
+                    '?lat={lat}&lng={lng}&dataset={dataset}&method={method}'\
+                    .format(dataset=dataset, lat=lat, lng=lng, method=method)
+    r = requests.get(query)
+
     if r.status_code != 200:
         raise Exception("Encountered error retrieving from metquery")
 
@@ -296,10 +295,10 @@ def get_agdc_monthly_ppt(lng, lat, method='cubic', units=None):
 def get_daily(dataset, bbox, year, dst):
     global _metquery_url
 
-    r = requests.post(urljoin(_metquery_url, 'daily'),
-                      params=dict(dataset=dataset,
-                                  bbox=bbox,
-                                  year=year))
+    query = urljoin(_metquery_url, 'daily') + \
+                    '?bbox={bbox}&dataset={dataset}&year={year}'\
+                    .format(bbox=bbox, dataset=dataset, year=year)
+    r = requests.get(query)
 
     if r.status_code == 418:
         raise Exception(r.content)
