@@ -6,10 +6,9 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
-from collections import OrderedDict
-import  numpy as np
+import numpy as np
 from pandas import DataFrame, Series
-from wepppy.all_your_base import weibull_series
+from wepppy.all_your_base.stats import weibull_series
 from .row_data import parse_name, parse_units, RowData
 
 from wepppy.wepp.out import Loss, Ebe

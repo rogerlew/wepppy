@@ -1,7 +1,5 @@
 import sys
 
-sys.path.append('/workdir/wepppy/')
-
 import shutil
 import os
 from os.path import join as _join
@@ -9,7 +7,7 @@ from os.path import exists as _exists
 
 from glob import glob
 
-from ogrmerge import process
+from wepppy.all_your_base.geo.ogrmerge import process
 
 if __name__ == "__main__":
 

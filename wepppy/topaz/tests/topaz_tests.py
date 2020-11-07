@@ -15,7 +15,7 @@ import unittest
 
 from osgeo import gdal, osr
 
-from wepppy.all_your_base import get_utm_zone
+from wepppy.all_your_base.geo import get_utm_zone
 from wepppy.topaz import TopazRunner
 
 gdal.UseExceptions()

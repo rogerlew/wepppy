@@ -12,7 +12,7 @@ import numpy as np
 import netCDF4
 
 from wepppy.all_your_base import SCRATCH
-from wepppy.all_your_base import RasterDatasetInterpolator
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 
 class GridMetVariable(Enum):

@@ -19,7 +19,8 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from wepppy.all_your_base import determine_wateryear
+from wepppy.all_your_base.hydro import determine_wateryear
+
 
 class TotalWatSed(object):
 

@@ -9,16 +9,17 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 
-from wepppy.all_your_base import (
+from wepppy.all_your_base.geo import (
     shapefile,
-    wmesque_retrieve,
     wgs84_proj4,
     read_raster,
     build_mask,
-    px_to_utm,
     px_to_lnglat,
-    centroid_px
+    centroid_px,
+    GeoTransformer
 )
+
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 
 if __name__ == "__main__":
