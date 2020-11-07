@@ -19,7 +19,7 @@ from datetime import datetime
 import numpy as np
 from osgeo import gdal
 
-from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent, GeoTransformer
+from wepppy.all_your_base.geo import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent, GeoTransformer
 from wepppy.landcover import LandcoverMap
 from wepppy.nodb.mods.rred import rred_api
 from wepppy.soils.ssurgo import SoilSummary

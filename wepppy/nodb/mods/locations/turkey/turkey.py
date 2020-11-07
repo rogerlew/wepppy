@@ -20,7 +20,8 @@ from datetime import date
 
 import jsonpickle
 
-from .....all_your_base import RasterDatasetInterpolator, isfloat, RDIOutOfBoundsException
+from .....all_your_base import isfloat
+from .....all_your_base.geo import RasterDatasetInterpolator, RDIOutOfBoundsException
 from ....base import NoDbBase, TriggerEvents
 
 from ..location_mixin import LocationMixin

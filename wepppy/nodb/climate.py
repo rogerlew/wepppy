@@ -32,7 +32,8 @@ from wepppy.climates.prism import prism_mod, prism_revision
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn, build_gridmet_prn
-from wepppy.all_your_base import isint, isfloat, RasterDatasetInterpolator, haversine, NCPU
+from wepppy.all_your_base import isint, isfloat, NCPU
+from wepppy.all_your_base.geo import RasterDatasetInterpolator, haversine
 from wepppy.watershed_abstraction import ischannel
 
 # wepppy submodules

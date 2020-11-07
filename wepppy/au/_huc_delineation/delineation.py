@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 from osgeo import gdal, osr, ogr
 
-from wepppy.all_your_base import (
+from wepppy.all_your_base.geo import (
     wgs84_proj4,
     read_raster,
     haversine,
@@ -24,7 +24,7 @@ from wepppy.all_your_base import (
     RDIOutOfBoundsException,
     GeoTransformer
 )
-from wepppy.all_your_base import shapefile
+from wepppy.all_your_base.geo import shapefile
 from wepppy.nodb import (
     Ron,
     Topaz,

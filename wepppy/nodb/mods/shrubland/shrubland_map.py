@@ -15,7 +15,7 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
-from wepppy.all_your_base import read_arc, read_raster
+from wepppy.all_your_base.geo import read_arc, read_raster
 
 
 class ShrublandMap:
