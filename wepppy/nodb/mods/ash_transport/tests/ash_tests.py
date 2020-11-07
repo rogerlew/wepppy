@@ -1,9 +1,5 @@
 import sys
-import math
-import csv
 import os
-import shutil
-import enum
 from pprint import pprint
 
 from os.path import join as _join
@@ -11,8 +7,8 @@ from os.path import exists as _exists
 
 sys.path.append('/home/roger/wepppy')
 
-from wepppy.all_your_base import YearlessDate, weibull_series
-from wepppy.nodb.mods.ash_transport import WhiteAshModel, BlackAshModel, lookup_wind_threshold_white_ash_proportion
+from wepppy.all_your_base.dateutils import YearlessDate
+from wepppy.nodb.mods.ash_transport import WhiteAshModel, BlackAshModel
 
 from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.out import Element

@@ -13,7 +13,7 @@ from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request
 from osgeo import ogr
 
-from wepppy.all_your_base import GeoTransformer, wgs84_proj4
+from wepppy.all_your_base.geo import GeoTransformer, wgs84_proj4
 
 geodata_dir = '/geodata/'
 

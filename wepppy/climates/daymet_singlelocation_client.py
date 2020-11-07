@@ -9,8 +9,9 @@
 import time
 import io
 import pandas as pd
+import requests
 
-from wepppy.all_your_base import *
+from wepppy.all_your_base import isint
 
 
 def retrieve_historical_timeseries(lon, lat, start_year, end_year):

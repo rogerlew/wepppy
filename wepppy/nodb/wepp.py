@@ -55,12 +55,11 @@ from wepppy.wepp.management import (
 
 from wepppy.all_your_base import (
     isfloat,
-    read_arc,
-    wgs84_proj4,
     isnan,
     isinf,
     NCPU
 )
+from wepppy.all_your_base.geo import read_arc, wgs84_proj4
 
 from wepppy.wepp.out import (
     Loss,

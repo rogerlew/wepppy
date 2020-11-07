@@ -7,11 +7,8 @@ from os.path import join as _join
 from copy import deepcopy
 import pandas as pd
 
-from wepppy.all_your_base import (
-    YearlessDate,
-    weibull_series,
-    probability_of_occurrence
-)
+from wepppy.all_your_base.dateutils import YearlessDate
+from wepppy.all_your_base.stats import weibull_series, probability_of_occurrence
 
 from wepppy.wepp.out import HillWat
 

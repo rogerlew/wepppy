@@ -10,22 +10,15 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
-import json
 from collections import Counter
 
 import numpy as np
 
 from osgeo import osr
 from osgeo import gdal
-from osgeo.gdalconst import (
-    GDT_Float32,
-    GDT_UInt32
-)
+from osgeo.gdalconst import GDT_UInt32
 
-from wepppy.all_your_base import (
-    read_arc,
-    read_raster
-)
+from wepppy.all_your_base.geo import read_arc, read_raster
 
 __version__ = 'v.0.1.0'
 

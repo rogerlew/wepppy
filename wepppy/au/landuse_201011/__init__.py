@@ -3,7 +3,7 @@ import json
 from os.path import exists as _exists
 from subprocess import check_output
 
-from wepppy.all_your_base import RasterDatasetInterpolator
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 _grid_path = '/geodata/au/landuse_201011/lu10v5ua'
 

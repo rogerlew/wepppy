@@ -21,13 +21,8 @@ import jsonpickle
 import numpy as np
 import pandas as pd
 
-from wepppy.all_your_base import (
-    isfloat,
-    isint,
-    YearlessDate,
-    probability_of_occurrence,
-    weibull_series
-)
+from wepppy.all_your_base import isfloat
+from wepppy.all_your_base.stats import probability_of_occurrence, weibull_series
 
 from wepppy.nodb.base import NoDbBase
 
