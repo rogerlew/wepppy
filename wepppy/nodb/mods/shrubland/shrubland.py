@@ -7,21 +7,14 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
-import shutil
 import jsonpickle
 
-from collections import namedtuple
 from os.path import join as _join
 from os.path import exists as _exists
 
-from glob import glob
-from datetime import datetime
-
-import numpy as np
 from osgeo import gdal
 
-from wepppy.all_your_base import wgs84_proj4, translate_asc_to_tif, read_raster, raster_extent, wmesque_retrieve
-from wepppy.landcover import LandcoverMap
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from ...ron import Ron
 from ...base import NoDbBase, TriggerEvents

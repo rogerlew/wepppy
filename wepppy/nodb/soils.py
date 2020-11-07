@@ -23,7 +23,8 @@ import jsonpickle
 # wepppy
 from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
 from wepppy.watershed_abstraction import ischannel
-from wepppy.all_your_base import wmesque_retrieve, isfloat
+from wepppy.all_your_base import isfloat
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
 
 # wepppy submodules

@@ -9,15 +9,17 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 
-from wepppy.all_your_base import (
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
+from wepppy.all_your_base.geo import (
     shapefile,
-    wmesque_retrieve,
     wgs84_proj4,
     read_raster,
     build_mask,
     px_to_lnglat,
     px_to_utm,
-    centroid_px)
+    centroid_px,
+    GeoTransformer
+)
 
 from wepppy.climates.cligen import CligenStationsManager
 
@@ -67,9 +69,7 @@ if __name__ == "__main__":
             mukey_map, transform, utmproj4 = read_raster(ssurgo_fn)
 
             # transform coordinates in shape file to utm
-            utm_proj = CRS.from_proj4(utmproj4)
-            wgs_proj = CRS.from_proj4(wgs84_proj4)
-            wgs2utm_transformer = Transformer.from_crs(utm_proj, wgs_proj, always_xy=True)
+            wgs2utm_transformer = GeoTransformer(utmproj4, wgs84_proj4)
             points = [wgs2utm_transformer.transform(lng, lat) for lng, lat in shape.points]
             assert len(points) > 0
 
