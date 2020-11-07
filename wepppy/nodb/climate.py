@@ -1167,7 +1167,7 @@ class Climate(NoDbBase, LogMixin):
             for varname in ['prcp', 'tmin', 'tmax']:
                 for year in range(start_year, end_year + 1):
                     dataset = _join(daymet_base, varname)
-                    self.log('  fetching {}... '.format(dict(dataset=dataset, bbox=bbox, year=yeardst)))
+                    self.log('  fetching {}... '.format(dict(dataset=dataset, bbox=bbox, year=year)))
                     dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
                     get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
                     observed_data[(varname, year)] = dst
