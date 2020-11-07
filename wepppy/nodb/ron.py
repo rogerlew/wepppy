@@ -23,10 +23,8 @@ import utm
 import what3words
 
 # wepppy
-from wepppy.all_your_base import (
-    wmesque_retrieve,
-    haversine
-)
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
+from wepppy.all_your_base.geo import haversine
 
 # wepppy submodules
 from .base import (

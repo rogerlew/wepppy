@@ -11,9 +11,7 @@ from os.path import exists as _exists
 import warnings
 from datetime import datetime
 
-from wepppy.all_your_base import (
-    parse_datetime
-)
+from wepppy.all_your_base.dateutils import parse_datetime
 
 
 class LogMixin(object):

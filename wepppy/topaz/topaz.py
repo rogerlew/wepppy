@@ -26,14 +26,8 @@ import utm
 
 import numpy as np
 
-from wepppy.all_your_base import (
-    read_arc,
-    get_utm_zone,
-    isfloat,
-    GeoTransformer,
-    wgs84_proj4,
-    IS_WINDOWS
-)
+from wepppy.all_your_base import isfloat, IS_WINDOWS
+from wepppy.all_your_base.geo import read_arc, get_utm_zone, GeoTransformer, wgs84_proj4
 
 from wepppy.watershed_abstraction import WeppTopTranslator
 

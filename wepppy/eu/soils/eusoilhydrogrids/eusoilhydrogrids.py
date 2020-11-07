@@ -1,9 +1,9 @@
 from os.path import join as _join
 from os.path import exists as _exists
 
-_euhydrogrids_dir = '/geodata/eu/eusoilhydrogrids'
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
-from wepppy.all_your_base import RasterDatasetInterpolator
+_euhydrogrids_dir = '/geodata/eu/eusoilhydrogrids'
 
 
 class SoilHydroGrids:

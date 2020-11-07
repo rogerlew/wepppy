@@ -23,7 +23,7 @@ import jsonpickle
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
 from wepppy.watershed_abstraction import ischannel
-from wepppy.all_your_base import wmesque_retrieve
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 # wepppy submodules
 from .base import (
