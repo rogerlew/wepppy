@@ -1,0 +1,24 @@
+[2020-03-13T12:16:46.497649] Prepping Hillslopes... done. (1.32s | 1.32s)
+[2020-03-13T12:16:47.817769] Running Hillslopes
+[2020-03-13T12:16:47.874114]   submitting topaz=41 (hill 1 of 8)
+[2020-03-13T12:16:47.878639]   submitting topaz=31 (hill 2 of 8)
+[2020-03-13T12:16:47.883340]   submitting topaz=22 (hill 3 of 8)
+[2020-03-13T12:16:47.900502]   submitting topaz=42 (hill 4 of 8)
+[2020-03-13T12:16:47.916878]   submitting topaz=23 (hill 5 of 8)
+[2020-03-13T12:16:47.953482]   submitting topaz=33 (hill 6 of 8)
+[2020-03-13T12:16:48.036414]   submitting topaz=32 (hill 7 of 8)
+[2020-03-13T12:16:48.079044]   submitting topaz=43 (hill 8 of 8)
+[2020-03-13T12:16:53.150997]   6 completed run in 5.271515369415283s
+[2020-03-13T12:16:53.510369]   7 completed run in 5.593314170837402s
+[2020-03-13T12:16:53.548837]   3 completed run in 5.6548473834991455s
+[2020-03-13T12:16:53.680178]   1 completed run in 5.7793190479278564s
+[2020-03-13T12:16:53.728162]   5 completed run in 5.691471815109253s
+[2020-03-13T12:16:53.884482]   2 completed run in 5.920424222946167s
+[2020-03-13T12:16:53.922758]   4 completed run in 5.83993673324585s
+[2020-03-13T12:16:53.958132] Prepping Watershed... [2020-03-13T12:16:53.957305]   8 completed run in 5.832807302474976s
+done. (0.66s | 8.12s)
+[2020-03-13T12:16:54.623483] Running Watershed... done. (17.11s | 25.24s)
+[2020-03-13T12:17:11.747499] Building totalsedwat.txt... done. (10.74s | 35.99s)
+[2020-03-13T12:17:22.486089] Running WeppPost... done. (1.45s | 37.44s)
+[2020-03-13T12:17:23.942923] Calculating hill streamflow measures... done. (0.88s | 38.33s)
+[2020-03-13T12:17:24.828864] Calculating channel streamflow measures... done. (4.26s | 42.59s)

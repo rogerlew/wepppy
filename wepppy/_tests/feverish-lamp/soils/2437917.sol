@@ -1,0 +1,62 @@
+7778
+# 
+#             WEPPcloud v.0.1.0 (c) University of Idaho
+# 
+#   Build Date: 2020-03-13 12:16:24.215967
+#   Source Data: Surgo
+# 
+# Mukey: 2437917
+# Major Component: 15771094 (comppct_r = 85.0)
+# Texture: silt loam
+# 
+#   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
+# ------------------------------------------------------------------------------------------------------------
+#  45672777   A              18.0     9.0        0.0         0.0         0.85    14.0    15.0     4.8     2.5
+#  45672778   Bw             60.0     2.7        0.0         0.0          1.4    12.0    45.0    12.6     1.5
+#  45672780   BC            120.0     2.7        0.0         0.0          1.4    12.0    45.0    11.4     1.5
+#  45672779   C             152.0    23.0        0.0         4.0          1.5     5.0    78.5     7.8     1.5
+# 
+# Restricting Layer:
+#     ksat threshold: 2.00000
+#     type: -
+#     ksat: -
+# 
+# defaults applied to missing chorizon data:
+#     sandtotal_r  ->      66.800
+#     claytotal_r  ->       7.000
+#     om_r         ->       7.000
+#     cec7_r       ->      11.300
+#     sandvf_r     ->      10.000
+#     ksat_r       ->      28.000
+#     dbthirdbar_r ->       1.400
+#     smr          ->      55.500
+#     field_cap    ->       0.242
+#     wilt_pt      ->       0.115
+# 
+# Build Notes:
+#   initial assumed ksat = 0.750
+# THIS FILE AND THE CONTAINED DATA IS PROVIDED BY THE UNIVERSITY OF IDAHO 
+# 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED 
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF IDAHO 
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
+# 
+# 
+#   If you change the original contexts of this file please 
+#   indicate it by putting an 'X' in the box here -> [ ]
+# 
+# 
+Any comments:
+1 1
+'Crumarine ashy silt loam, 0 to 8 percent slopes'		'ASHY-SIL'	4	0.2300	0.7500	5282180.00	0.0150	3.5000	0.0000
+	  180.000	    0.85	  32.4000	 10.0	   0.2250	   0.0680	  15.00	  14.00	   2.50	  13.50	   0.00
+	  600.000	    1.40	   9.7200	  1.0	   0.2480	   0.0878	  45.00	  12.00	   1.50	  10.80	   2.00
+	 1200.000	    1.40	   9.7200	  1.0	   0.2532	   0.0894	  45.00	  12.00	   1.50	  10.80	   6.00
+	 1520.000	    1.50	  82.8000	  1.0	   0.1795	   0.0673	  78.50	   5.00	   1.50	   7.10	  37.60
+1 10000.0 82.80000
