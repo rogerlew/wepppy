@@ -6,6 +6,7 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+# noinspection PyUnusedLocal
 """
 Provides functionality for reading and manipulating WEPP management files
 
@@ -21,6 +22,7 @@ in the db.
 """
 
 from glob import glob
+import os
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -30,7 +32,8 @@ from copy import deepcopy
 from enum import Enum
 import inspect
 
-from wepppy.all_your_base import *
+from wepppy.all_your_base import RGBA
+from wepppy.all_your_base.dateutils import Julian
 
 _thisdir = os.path.dirname(__file__)
 _management_dir = _join(_thisdir, "data")
@@ -68,12 +71,14 @@ def pad(vals, n):
 
 
 class ScenarioBase(object):
+    def __init__(self):
+        self.root = None
 
-    def _setroot(self, root):
+    def setroot(self, root):
         self.root = root
         for name, thing in inspect.getmembers(self):
             if isinstance(thing, ScenarioReference):
-                thing._setroot(root)
+                thing.setroot(root)
 
 
 class SectionType(Enum):
@@ -86,7 +91,7 @@ class SectionType(Enum):
     Year = 7
 
 
-def scenarioReference_factory(i, section_type, root, this):
+def _scenario_reference_factory(i, section_type, root, this):
     """
     builds and returns a ScenarioReference instance
     
@@ -136,10 +141,10 @@ class ScenarioReference(ScenarioBase):
     This is used to dynamically find the scenario
     indexes when we build the managements
     """
-    def __init__(self, section_type=None, loop_name=None, 
-                 root=None, this=None):
-        assert section_type is None or \
-               isinstance(section_type, SectionType)
+    def __init__(self, section_type=None, loop_name=None, root=None, this=None):
+        super().__init__()
+
+        assert section_type is None or isinstance(section_type, SectionType)
         
         self.section_type = section_type
         self.loop_name = loop_name
@@ -184,6 +189,8 @@ class ScenarioReference(ScenarioBase):
 
 class PlantLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.crunit = lines.pop(0)
         
@@ -249,6 +256,8 @@ class PlantLoopCropland(ScenarioBase):
 
 class PlantLoopRangeland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         line = lines.pop(0).split()
         assert len(line) == 10
@@ -307,20 +316,28 @@ class PlantLoopRangeland(ScenarioBase):
 """.format(self)
 
 
+# noinspection PyUnusedLocal
 class PlantLoopForest(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
-        
+
+# noinspection PyUnusedLocal
 class PlantLoopRoads(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
         
 class OpLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         line = lines.pop(0).split()
         assert len(line) == 3
@@ -377,26 +394,38 @@ class OpLoopCropland(ScenarioBase):
         return s
 
 
+# noinspection PyUnusedLocal
 class OpLoopRangeland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class OpLoopForest(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class OpLoopRoads(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class IniLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         line = lines.pop(0).split()
         assert len(line) == 6
@@ -408,7 +437,7 @@ class IniLoopCropland(ScenarioBase):
         self.inrcov = float(line.pop(0))  # interrill cover
 
         i = int(lines.pop(0))
-        self.iresd = scenarioReference_factory(i, SectionType.Plant, root, self)
+        self.iresd = _scenario_reference_factory(i, SectionType.Plant, root, self)
         
         self.imngmt = int(lines.pop(0))
         assert self.imngmt in [1, 2, 3]
@@ -450,6 +479,8 @@ class IniLoopCropland(ScenarioBase):
 
 class IniLoopRangeland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         line = lines.pop(0).split()
         assert len(line) == 9
@@ -482,25 +513,33 @@ class IniLoopRangeland(ScenarioBase):
 """.format(self)
 
 
+# noinspection PyUnusedLocal
 class IniLoopForest(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class IniLoopRoads(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
 class SurfLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.mdate = _parse_julian(lines.pop(0))
         
         i = int(lines.pop(0))
-        self.op = scenarioReference_factory(i, SectionType.Op, root, self)
+        self.op = _scenario_reference_factory(i, SectionType.Op, root, self)
         
         self.tildep = float(lines.pop(0))
         self.typtil = int(lines.pop(0))
@@ -515,26 +554,37 @@ class SurfLoopCropland(ScenarioBase):
 """.format(self)
 
 
+# noinspection PyUnusedLocal
 class SurfLoopRangeland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class SurfLoopForest(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class SurfLoopRoads(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
 class ContourLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         line = lines.pop(0).split()
         assert len(line) == 4
@@ -551,6 +601,8 @@ class ContourLoopCropland(ScenarioBase):
 
 class DrainLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         line = lines.pop(0).split()
         assert len(line) == 4
@@ -565,20 +617,28 @@ class DrainLoopCropland(ScenarioBase):
 """.format(self)
 
 
+# noinspection PyUnusedLocal
 class DrainLoopRangeland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
+# noinspection PyUnusedLocal
 class DrainLoopRoads(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
 
 
 class YearLoopCroplandAnnualFallowHerb(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdherb = _parse_julian(lines.pop(0))
       
@@ -590,6 +650,8 @@ class YearLoopCroplandAnnualFallowHerb(ScenarioBase):
 
 class YearLoopCroplandAnnualFallowBurn(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdburn = _parse_julian(lines.pop(0))
         self.fbrnag = float(lines.pop(0))
@@ -605,6 +667,8 @@ class YearLoopCroplandAnnualFallowBurn(ScenarioBase):
 
 class YearLoopCroplandAnnualFallowSillage(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdslge = _parse_julian(lines.pop(0))
 
@@ -616,6 +680,8 @@ class YearLoopCroplandAnnualFallowSillage(ScenarioBase):
 
 class YearLoopCroplandAnnualFallowCut(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdcut = _parse_julian(lines.pop(0))
         self.frcut = float(lines.pop(0))
@@ -631,6 +697,8 @@ class YearLoopCroplandAnnualFallowCut(ScenarioBase):
 
 class YearLoopCroplandAnnualFallowRemove(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdmove = _parse_julian(lines.pop(0))
         self.frmove = float(lines.pop(0))
@@ -646,6 +714,8 @@ class YearLoopCroplandAnnualFallowRemove(ScenarioBase):
 
 class YearLoopCroplandAnnualFallow(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdharv = _parse_julian(lines.pop(0))
         self.jdplt = _parse_julian(lines.pop(0))
@@ -681,6 +751,8 @@ class YearLoopCroplandAnnualFallow(ScenarioBase):
 
 class YearLoopCroplandPerennialCut(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.cutday = _parse_julian(lines.pop(0))
         
@@ -692,13 +764,15 @@ class YearLoopCroplandPerennialCut(ScenarioBase):
 
 class YearLoopCroplandPerennialGraze(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
-        L = lines.pop(0).split()
-        assert len(L) == 4
-        self.animal = float(L.pop(0))
-        self.area = float(L.pop(0))
-        self.bodywt = float(L.pop(0))
-        self.digest = float(L.pop(0))
+        line = lines.pop(0).split()
+        assert len(line) == 4
+        self.animal = float(line.pop(0))
+        self.area = float(line.pop(0))
+        self.bodywt = float(line.pop(0))
+        self.digest = float(line.pop(0))
         
         self.gday = _parse_julian(lines.pop(0))
         
@@ -714,6 +788,8 @@ class YearLoopCroplandPerennialGraze(ScenarioBase):
 
 class YearLoopCroplandPerennial(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.jdharv = _parse_julian(lines.pop(0))
         self.jdplt = _parse_julian(lines.pop(0))
@@ -752,19 +828,21 @@ class YearLoopCroplandPerennial(ScenarioBase):
 
 class YearLoopCropland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         
         i = int(lines.pop(0))
-        self.itype = scenarioReference_factory(i, SectionType.Plant, root, self)
+        self.itype = _scenario_reference_factory(i, SectionType.Plant, root, self)
         
         i = int(lines.pop(0))
-        self.tilseq = scenarioReference_factory(i, SectionType.Surf, root, self)
+        self.tilseq = _scenario_reference_factory(i, SectionType.Surf, root, self)
         
         i = int(lines.pop(0))
-        self.conset = scenarioReference_factory(i, SectionType.Drain, root, self)
+        self.conset = _scenario_reference_factory(i, SectionType.Drain, root, self)
         
         i = int(lines.pop(0))
-        self.drset = scenarioReference_factory(i, SectionType.Contour, root, self)
+        self.drset = _scenario_reference_factory(i, SectionType.Contour, root, self)
         
         self.imngmt = imngmt = int(lines.pop(0))
         assert imngmt in [1, 2, 3]
@@ -788,11 +866,13 @@ class YearLoopCropland(ScenarioBase):
 
 class YearLoopRangelandGrazeLoop(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
-        L = lines.pop(0).split()
-        assert len(L) == 2
-        self.animal = float(L.pop(0))
-        self.bodywt = float(L.pop(0))
+        line = lines.pop(0).split()
+        assert len(line) == 2
+        self.animal = float(line.pop(0))
+        self.bodywt = float(line.pop(0))
 
         self.gday = _parse_julian(lines.pop(0))
         self.gend = _parse_julian(lines.pop(0))
@@ -811,25 +891,27 @@ class YearLoopRangelandGrazeLoop(ScenarioBase):
 
 class YearLoopRangelandGraze(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
-        L = lines.pop(0).split()
-        assert len(L) == 5
+        line = lines.pop(0).split()
+        assert len(line) == 5
         
-        self.area = float(L.pop(0))
+        self.area = float(line.pop(0))
         
-        self.access = float(L.pop(0))
+        self.access = float(line.pop(0))
         assert self.access >= 0.0
         assert self.access <= 1.0
         
-        self.digmax = float(L.pop(0))
+        self.digmax = float(line.pop(0))
         assert self.digmax >= 0.0
         assert self.digmax <= 1.0
         
-        self.digmin = float(L.pop(0))
+        self.digmin = float(line.pop(0))
         assert self.digmin >= 0.0
         assert self.access <= 1.0
         
-        self.suppmt = float(L.pop(0))
+        self.suppmt = float(line.pop(0))
         assert self.suppmt >= 0.0
         assert self.suppmt <= 1.0
         
@@ -848,15 +930,17 @@ class YearLoopRangelandGraze(ScenarioBase):
 
 class YearLoopRangelandHerb(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.active = int(lines.pop(0))
         
-        L = lines.pop(0).split()
-        assert len(L) == 4
-        self.dleaf = float(L.pop(0))
-        self.herb = float(L.pop(0))
-        self.regrow = float(L.pop(0))
-        self.update = float(L.pop(0))
+        line = lines.pop(0).split()
+        assert len(line) == 4
+        self.dleaf = float(line.pop(0))
+        self.herb = float(line.pop(0))
+        self.regrow = float(line.pop(0))
+        self.update = float(line.pop(0))
         
         self.woody = int(lines.pop(0))
         
@@ -873,14 +957,16 @@ class YearLoopRangelandHerb(ScenarioBase):
 
 class YearLoopRangelandBurn(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
-        L = lines.pop(0).split()
-        assert len(L) == 5
-        self.alter = float(L.pop(0))
-        self.burned = float(L.pop(0))
-        self.change = float(L.pop(0))
-        self.hurt = float(L.pop(0))
-        self.reduce = float(L.pop(0))
+        line = lines.pop(0).split()
+        assert len(line) == 5
+        self.alter = float(line.pop(0))
+        self.burned = float(line.pop(0))
+        self.change = float(line.pop(0))
+        self.hurt = float(line.pop(0))
+        self.reduce = float(line.pop(0))
         
     def __str__(self):
         return """\
@@ -890,16 +976,18 @@ class YearLoopRangelandBurn(ScenarioBase):
 
 class YearLoopRangeland(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         
         i = int(lines.pop(0))
-        self.itype = scenarioReference_factory(i, SectionType.Plant, root, self)
+        self.itype = _scenario_reference_factory(i, SectionType.Plant, root, self)
         
         i = int(lines.pop(0))
-        self.tilseq = scenarioReference_factory(i, SectionType.Surf, root, self)
+        self.tilseq = _scenario_reference_factory(i, SectionType.Surf, root, self)
         
         i = int(lines.pop(0))
-        self.drset = scenarioReference_factory(i, SectionType.Contour, root, self)
+        self.drset = _scenario_reference_factory(i, SectionType.Contour, root, self)
         
         self.grazig = grazig = int(lines.pop(0))
         assert self.grazig in [0, 1]
@@ -943,26 +1031,36 @@ class YearLoopRangeland(ScenarioBase):
         return s
               
 
+# noinspection PyUnusedLocal
 class YearLoopForest(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
         
 
+# noinspection PyUnusedLocal
 class YearLoopRoads(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         raise NotImplementedError
             
 
 class Loops(list):
+    def __init__(self):
+        super().__init__()
+        self.root = None
+
     def __str__(self):
         return '\n'.join(str(v) for v in super(Loops, self).__iter__())
                
     def __contains__(self, loop):
         loop_str = str(loop)
-        for L in self:
-            if str(L) == loop_str:
+        for line in self:
+            if str(line) == loop_str:
                 return True
                 
         return False
@@ -974,10 +1072,10 @@ class Loops(list):
 
         return self.__getitem__(int(index)-1).name
 
-    def _setroot(self, root):
+    def setroot(self, root):
         self.root = root
         for loop in self:
-            loop._setroot(root)
+            loop.setroot(root)
                 
     def find(self, loop):
         loop_str = str(loop)
@@ -1053,6 +1151,8 @@ class YearLoops(Loops):
 
 class Loop(ScenarioBase):
     def __init__(self, lines, root):
+        super().__init__()
+
         self.root = root
         self.name = lines.pop(0)
         self.description = _parse_desc(lines, root)
@@ -1060,9 +1160,9 @@ class Loop(ScenarioBase):
         self.ntill = None
         self.data = None
 
-    def _setroot(self, root):
+    def setroot(self, root):
         self.root = root
-        self.data._setroot(root)
+        self.data.setroot(root)
         
     def __str__(self):
         if self.ntill is None:
@@ -1201,16 +1301,17 @@ class YearLoop(Loop):
 
 class ManagementLoopManLoop(object):
     def __init__(self, lines, parent, root):
+        self.root = root
         self.parent = parent
         self.nycrop = int(lines.pop(0))
 
         self.manindx = []
         for j in range(self.nycrop):
             i = int(lines.pop(0))
-            scn = scenarioReference_factory(i, SectionType.Year, root, self)
+            scn = _scenario_reference_factory(i, SectionType.Year, root, self)
             self.manindx.append(scn)
         
-    def _setroot(self, root):
+    def setroot(self, root):
         self.root = root
         self.manindx.root = root
             
@@ -1225,6 +1326,7 @@ class ManagementLoopManLoop(object):
 
 class ManagementLoopMan(object):
     def __init__(self, lines, parent, root):
+        self.root = root
         self.parent = parent
         nyears = int(lines.pop(0))
         
@@ -1235,10 +1337,10 @@ class ManagementLoopMan(object):
             for j in range(parent.nofes):
                 self.years[-1].append(ManagementLoopManLoop(lines, self, root))
     
-    def _setroot(self, root):
+    def setroot(self, root):
         self.root = root
         for L in self.years:
-            L._setroot(root)
+            L.setroot(root)
             
     @property
     def nyears(self):
@@ -1267,7 +1369,7 @@ class ManagementLoop(object):
         
         for i in range(nofes):
             j = int(lines.pop(0))
-            scen = scenarioReference_factory(j, SectionType.Ini, root, self)
+            scen = _scenario_reference_factory(j, SectionType.Ini, root, self)
             self.ofeindx.append(scen)
             
         nrots = int(lines.pop(0))
@@ -1283,13 +1385,13 @@ class ManagementLoop(object):
     def nrots(self):
         return len(self.loops)
         
-    def _setroot(self, root):
+    def setroot(self, root):
         self.root = root
         for L in self.loops:
-            L._setroot(root)
+            L.setroot(root)
             
         for L in self.ofeindx:
-            L._setroot(root)
+            L.setroot(root)
             
     def __str__(self):
         return """\
@@ -1384,13 +1486,13 @@ class ManagementSummary(object):
             _map = self._map
 
         d = dict(key=self.key, _map=_map,
-                    man_fn=self.man_fn, man_dir=self.man_dir, 
-                    desc=self.desc, color=self.color, area=self.area, 
-                    pct_coverage=self.pct_coverage,
-                    cancov=self.cancov, inrcov=self.inrcov, rilcov=self.rilcov,
-                    cancov_override=self.cancov_override,
-                    inrcov_override=self.inrcov_override,
-                    rilcov_override=self.rilcov_override)
+                 man_fn=self.man_fn, man_dir=self.man_dir,
+                 desc=self.desc, color=self.color, area=self.area,
+                 pct_coverage=self.pct_coverage,
+                 cancov=self.cancov, inrcov=self.inrcov, rilcov=self.rilcov,
+                 cancov_override=self.cancov_override,
+                 inrcov_override=self.inrcov_override,
+                 rilcov_override=self.rilcov_override)
 
         if hasattr(self, 'disturbed_class'):
             d['disturbed_class'] = self.disturbed_class
@@ -1410,6 +1512,7 @@ class Management(object):
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
         self.desc = kwargs["Description"]
         self.color = tuple(kwargs["Color"])
+        self.nofe = None
         
         if not _exists(_join(self.man_dir, self.man_fn)):
             raise Exception("management file '%s' does not exist"
@@ -1429,7 +1532,7 @@ class Management(object):
             
         desc_indxs = []
         for i, L in enumerate(lines):
-            if "#landuse" in L or  " # landuse" in L:
+            if "#landuse" in L or " # landuse" in L:
                 desc_indxs.append(i-1)
                 desc_indxs.append(i-2)
                 desc_indxs.append(i-3)
@@ -1495,16 +1598,15 @@ class Management(object):
     def nscen(self):
         return len(self.years)
             
-    def _setroot(self):
-        
-        self.plants._setroot(self)
-        self.ops._setroot(self)
-        self.inis._setroot(self)
-        self.surfs._setroot(self)
-        self.contours._setroot(self)
-        self.drains._setroot(self)
-        self.years._setroot(self)
-        self.man._setroot(self)
+    def setroot(self):
+        self.plants.setroot(self)
+        self.ops.setroot(self)
+        self.inis.setroot(self)
+        self.surfs.setroot(self)
+        self.contours.setroot(self)
+        self.drains.setroot(self)
+        self.years.setroot(self)
+        self.man.setroot(self)
 
     def make_multiple_ofe(self, nofe):
         assert self.nofe == 1
@@ -1561,12 +1663,12 @@ class Management(object):
                     assert len(self.man.loops) > i
                     assert len(self.man.loops[i].years) == yrs
 
-                    if len(self.man.loops[i].years[j%yrs]) > k:
-                        manLoopManLoop = deepcopy(self.man.loops[i].years[j%yrs][k])
+                    if len(self.man.loops[i].years[j % yrs]) > k:
+                        man_loop_man_loop = deepcopy(self.man.loops[i].years[j % yrs][k])
                     else:
-                        manLoopManLoop = deepcopy(self.man.loops[i].years[j%yrs][0])
+                        man_loop_man_loop = deepcopy(self.man.loops[i].years[j % yrs][0])
 
-                    _man.loops[-1].years[-1].append(manLoopManLoop)
+                    _man.loops[-1].years[-1].append(man_loop_man_loop)
     
         # now we just need to create a copy of self
         # and copy over the new ManagementLoop and set sim_years
@@ -1620,7 +1722,7 @@ class Management(object):
 #     Management Section    #
 #############################
 {0.man}
-""".format( self)
+""".format(self)
     
     def merge_loops(self, other):
         """
@@ -1697,9 +1799,9 @@ class Management(object):
             if i == -1:
                 last = mf.years[-1].name
                 last = int(''.join([v for v in last if v in '0123456789']))
-                next = 'Year {}'.format(last + 1)
-                other_year_map[loop.name] = next
-                loop.name = next
+                _next = 'Year {}'.format(last + 1)
+                other_year_map[loop.name] = _next
+                loop.name = _next
                 mf.years.append(loop)
            
         # update the ofeindx
@@ -1720,7 +1822,7 @@ class Management(object):
                     
                     mf.man.loops[-1].years[-1].append(other.man.loops[i].years[j][k])
                     
-        mf._setroot()
+        mf.setroot()
         
         _id = id(mf)
         for loops in mf.plants, mf.inis, mf.ops, mf.surfs, mf.drains, mf.years:
@@ -1801,7 +1903,7 @@ def get_management_summary(dom, _map=None) -> ManagementSummary:
     """
     d = load_map(_map=_map)
     k = str(dom)
-    if not k in d:
+    if k not in d:
         raise InvalidManagementKey
 
     return ManagementSummary(**d[k], _map=_map)
@@ -1813,7 +1915,10 @@ def get_management(dom, _map=None) -> Management:
     ----------
     dom : int
         dominant landcover code
-    
+
+    _map : str
+        specifies the .json map to load
+
     Returns
     -------
     Management
@@ -1822,7 +1927,7 @@ def get_management(dom, _map=None) -> Management:
     """
     d = load_map(_map=_map)
     k = str(dom)
-    if not k in d:
+    if k not in d:
         raise InvalidManagementKey
         
     return Management(**d[k])
@@ -1846,115 +1951,3 @@ def get_plant_loop_names(runs_dir):
         plant_loops.add(man.plants[0].name)
 
     return list(plant_loops)
-
-
-if __name__ == "__main__":
-    db = None  # 'lu10v5ua' #'esdac' # 'rred'
-
-    d = load_map(db)
-
-    print(d.keys())
-
-    for k in d:
-        man = get_management(k, _map=db)
-
-        print(k, man.desc)
-        man.build_multiple_year_man(30)
-        man.make_multiple_ofe(10)
-
-
-#    man_sum = get_management_summary(323, _map=db)
-#    print(man_sum.desc)
-
-#    m = get_management(323, _map=db)
-
-#    m2 = m.build_multiple_year_man(5)
-    #print(m2)
-
-    import csv
-
-    fp = open('tests/weppcloud_managements.csv', 'w')
-    wtr = csv.writer(fp)
-
-    wtr.writerow(['key', 'desc', 'man', 'cancov', 'inrcov', 'rilcov'])
-
-    for k in d:
-        m = get_management(k, _map=db)
-        #Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
-
-        assert len(m.inis) == 1
-        assert m.inis[0].landuse == 1
-        assert isinstance(m.inis[0].data, IniLoopCropland)
-        cancov, inrcov, rilcov = m.inis[0].data.cancov, m.inis[0].data.inrcov, m.inis[0].data.rilcov
-        man_fn = d[k]['ManagementFile']
-
-        print('{},{},{},{},{}'.format(k, m.desc, man_fn, cancov, inrcov, rilcov))
-
-        wtr.writerow([k, m.desc, cancov, inrcov, rilcov])
-
-    fp.close()
-
-    """
-    import jsonpickle
-    
-    with open(_map_fn) as fp:
-        d = json.load(fp)
-            
-            
-    m = get_management(100)
-    js = jsonpickle.encode(m)    
-    #print json.dumps(json.loads(js), sort_keys=True, indent=4, separators=(',', ': '))
-    
-    ms = []
-    ms.append(get_management(100))
-    ms.append(get_management(101))
-    ms.append(get_management(103))
-    
-    m2= merge_managements(ms)
-    
-    sys.exit()
-    
-    ms = []
-    for dom in d:
-        print d[str(dom)]
-        m = Management(**d[str(dom)])
-        ms.append(m)
-        
-        mf = m.build_multiple_year_man(100)
-        
-        js = jsonpickle.encode(m)
-        
-
-        m = jsonpickle.decode(js)
-        with open(_join('tests', d[str(dom)]['ManagementFile']
-                  .replace('/','.')), 'w') as fp:
-            fp.write(str(mf))
-       
-
-    merge_managements(ms[:20])
-    
-#    ms[0].merge(ms[1])       
-        
-        
-#    m = Management(ManagementFile='tests/pw0.man', 
-#               ManagementDir='./',
-#               Description='watershed test file')
-           
-   
-    with open(_join('tests', 'pw2.man'), 'w') as fp:
-        fp.write(str(m))
-               
-               
-    js = jsonpickle.encode(m)
-    
-    m = jsonpickle.decode(js)
-    
-    print m
-    
-    import json
-    js2 = json.dumps(json.loads(js), indent=4, sort_keys=True)
-    print js2
-    
-    with open(_join('tests', 'pw2.json'), 'w') as fp:
-        fp.write(js2)
-    """

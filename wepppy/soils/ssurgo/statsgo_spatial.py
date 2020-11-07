@@ -10,7 +10,7 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
-from wepppy.all_your_base import isint, isfloat, Extent
+from wepppy.all_your_base import isint, isfloat
 
 from shapely.geometry import Polygon, Point
 

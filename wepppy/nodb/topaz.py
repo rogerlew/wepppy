@@ -18,7 +18,7 @@ import numpy as np
 import numpy.ma as ma
 
 from wepppy.topaz import TopazRunner
-from wepppy.all_your_base import read_arc, utm_srid
+from wepppy.all_your_base.geo import read_arc, utm_srid
 
 from .base import NoDbBase
 

@@ -20,9 +20,10 @@ from os.path import exists as _exists
 import numpy as np
 from osgeo import gdal
 
-from wepppy.all_your_base import wgs84_proj4, isint, read_arc
+from wepppy.all_your_base import isint
+from wepppy.all_your_base.geo import wgs84_proj4, read_arc
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization, simple_texture, YamlSoil
+from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, YamlSoil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode

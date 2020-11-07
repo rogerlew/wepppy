@@ -8,14 +8,9 @@ from os.path import split as _split
 from time import sleep
 from copy import deepcopy
 
-from wepppy.nodb.mods.locations.lt.selectors import *
-from wepppy.all_your_base import isfloat
 from wepppy.nodb import (
     Ron, Topaz, Watershed, Landuse, Soils, Climate, Wepp, SoilsMode, ClimateMode, ClimateSpatialMode, LanduseMode
 )
-from wepppy.nodb.mods.locations import GeneralMod
-
-from wepppy.wepp.soils.utils import modify_kslast
 from os.path import join as _join
 from wepppy.wepp.out import TotalWatSed
 from wepppy.export import arc_export

@@ -16,7 +16,8 @@ from flask import Flask, jsonify, request, Response
 
 sys.path.append('/home/roger')
 from wepppy.soils.ssurgo import *
-from wepppy.all_your_base import isint, GeoTransformer, wgs84_proj4
+from wepppy.all_your_base import isint
+from wepppy.all_your_base.geo import GeoTransformer, wgs84_proj4
 import array
 import os
 from bisect import bisect_left

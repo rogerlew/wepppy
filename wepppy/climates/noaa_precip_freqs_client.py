@@ -1,7 +1,6 @@
 import requests
 import ast
 
-import numpy as np
 
 from wepppy.all_your_base import try_parse_float
 
