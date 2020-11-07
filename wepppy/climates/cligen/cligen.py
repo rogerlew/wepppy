@@ -26,14 +26,10 @@ import sqlite3
 
 import pandas as pd
 
-from wepppy.all_your_base import (
-    isfloat,
-    clamp,
-    elevationquery,
-    haversine,
-    RasterDatasetInterpolator,
-    IS_WINDOWS
-)
+from wepppy.all_your_base import isfloat, clamp, IS_WINDOWS
+
+from wepppy.all_your_base.geo.webclients import elevationquery
+from wepppy.all_your_base.geo import haversine, RasterDatasetInterpolator
 
 from wepppy.climates.metquery_client import (
     get_prism_monthly_tmin,

@@ -5,7 +5,7 @@ from os.path import join as _join
 
 from glob import glob
 
-from wepppy.all_your_base import RasterDatasetInterpolator
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 _esdac_esdb_raster_dir = '/geodata/eu/ESDAC_ESDB_rasters/'
 

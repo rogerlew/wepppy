@@ -1,10 +1,7 @@
 from os.path import join as _join
 from os.path import exists as _exists
 
-from wepppy.all_your_base import (
-    RasterDatasetInterpolator,
-    RDIOutOfBoundsException
-)
+from wepppy.all_your_base.geo import RasterDatasetInterpolator, RDIOutOfBoundsException
 
 _wd = '/geodata/Holden_WRF_atlas/'
 _nc = _join(_wd, 'WRF_prcp_freq_atlas.nc')

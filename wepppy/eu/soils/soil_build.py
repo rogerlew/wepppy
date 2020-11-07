@@ -10,7 +10,7 @@ from datetime import datetime
 from copy import deepcopy
 
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.all_your_base import RasterDatasetInterpolator
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 from wepppy.eu.soils.esdac import ESDAC, _attr_fmt
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
