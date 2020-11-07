@@ -24,12 +24,22 @@ from osgeo import osr
 
 from subprocess import Popen, PIPE
 from flask import Flask, jsonify, request, make_response, send_file
-from wepppy.all_your_base import RasterDatasetInterpolator, isint, GeoTransformer, wgs84_proj4
+from .locationinfo import  RasterDatasetInterpolator
+from .geo_transformer import GeoTransformer
 
 from glob import glob
 
 from osgeo import ogr, osr, gdal
 gdal.UseExceptions()
+
+wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+
+def isint(x):
+    # noinspection PyBroadException
+    try:
+        return float(int(x)) == float(x)
+    except Exception:
+        return False
 
 
 # example GDAL error handler function
