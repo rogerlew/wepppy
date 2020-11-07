@@ -2,5 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wepppy/all_your_base" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wepppy/nodb/mods/locations/portland" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wepppy/nodb/mods/locations/seattle" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wepppy/weppcloud/_migrations" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/wepppy/weppcloud/wepp1_config" vcs="Git" />
   </component>
 </project>
