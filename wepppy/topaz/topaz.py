@@ -491,7 +491,7 @@ class TopazRunner:
         srs = osr.SpatialReference()
         srs.ImportFromWkt(ds.GetProjectionRef())
 
-        utm_zone = get_utm_zone(srs)
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
         if utm_zone is None:
             raise Exception('input is not in utm')
 
