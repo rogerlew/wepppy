@@ -34,7 +34,7 @@ from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn, build_gridmet_prn
 from wepppy.all_your_base import isint, isfloat, NCPU
 from wepppy.all_your_base.geo import RasterDatasetInterpolator, haversine
-from wepppy.watershed_abstraction import ischannel
+from wepppy.watershed_abstraction.support import is_channel
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -1457,7 +1457,7 @@ class Climate(NoDbBase, LogMixin):
             return dict(cli_fn=self.cli_fn, par_fn=self.par_fn)
 
     def chn_summary(self, topaz_id):
-        if not ischannel(topaz_id):
+        if not is_channel(topaz_id):
             raise ValueError('topaz_id is not channel')
 
         if not self.has_climate:

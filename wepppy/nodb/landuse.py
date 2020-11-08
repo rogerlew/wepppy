@@ -22,7 +22,7 @@ import jsonpickle
 # wepppy
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
-from wepppy.watershed_abstraction import ischannel
+from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 # wepppy submodules
@@ -571,7 +571,7 @@ class Landuse(NoDbBase):
 
         summary = {}
         for topaz_id, k in domlc_d.items():
-            if ischannel(topaz_id):
+            if is_channel(topaz_id):
                 continue
 
             summary[topaz_id] = mans[k].as_dict()
@@ -586,7 +586,7 @@ class Landuse(NoDbBase):
 
         if domlc_d is not None:
             for topaz_id, k in domlc_d.items():
-                if ischannel(topaz_id):
+                if is_channel(topaz_id):
                     continue
 
                 yield topaz_id, mans[k]
@@ -604,7 +604,7 @@ class Landuse(NoDbBase):
         
         summary = {}
         for topaz_id, k in domlc_d.items():
-            if not ischannel(topaz_id):
+            if not is_channel(topaz_id):
                 continue
 
             summary[topaz_id] = mans[k].as_dict()
@@ -617,7 +617,7 @@ class Landuse(NoDbBase):
         
         if domlc_d is not None:
             for topaz_id, k in domlc_d.items():
-                if not ischannel(topaz_id):
+                if not is_channel(topaz_id):
                     continue
 
                 yield topaz_id, mans[k]
