@@ -22,7 +22,7 @@ import jsonpickle
 
 # wepppy
 from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
-from wepppy.watershed_abstraction import ischannel
+from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
@@ -774,7 +774,7 @@ class Soils(NoDbBase):
 
         summary = {}
         for topaz_id, k in domsoil_d.items():
-            if ischannel(topaz_id):
+            if is_channel(topaz_id):
                 continue
 
             summary[topaz_id] = soils[k].as_dict()
@@ -788,7 +788,7 @@ class Soils(NoDbBase):
         if domsoil_d is not None:
             for topaz_id, k in domsoil_d.items():
                 topaz_id = str(topaz_id)
-                if ischannel(topaz_id):
+                if is_channel(topaz_id):
                     continue
 
                 yield topaz_id, soils[k]
@@ -809,7 +809,7 @@ class Soils(NoDbBase):
         summary = {}
         for topaz_id, k in domsoil_d.items():
             topaz_id = str(topaz_id)
-            if not ischannel(topaz_id):
+            if not is_channel(topaz_id):
                 continue
 
             summary[topaz_id] = soils[k].as_dict()
@@ -823,7 +823,7 @@ class Soils(NoDbBase):
         if domsoil_d is not None:
             for topaz_id, k in domsoil_d.items():
                 topaz_id = str(topaz_id)
-                if not ischannel(topaz_id):
+                if not is_channel(topaz_id):
                     continue
 
                 yield topaz_id, soils[k]
