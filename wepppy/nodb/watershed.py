@@ -18,11 +18,10 @@ import jsonpickle
 
 import wepppy
 from wepppy.watershed_abstraction import (
-    HillSummary,
-    ChannelSummary,
     WatershedAbstraction,
     WeppTopTranslator
 )
+from wepppy.watershed_abstraction.support import HillSummary, ChannelSummary
 
 from .base import NoDbBase, TriggerEvents
 
