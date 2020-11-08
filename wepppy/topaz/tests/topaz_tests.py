@@ -29,8 +29,8 @@ class Test_get_utm_zone(unittest.TestCase):
         ds = gdal.Open('dems/ned1_2016_lg.tif')
         srs = osr.SpatialReference()
         srs.ImportFromWkt(ds.GetProjectionRef())
-        utm = get_utm_zone(srs)
-        self.assertEqual(utm, 10)
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
+        self.assertEqual(utm_zone, 10)
 
     def test_02(self):
         """
@@ -39,8 +39,8 @@ class Test_get_utm_zone(unittest.TestCase):
         ds = gdal.Open('dems/ned1_2016.tif')
         srs = osr.SpatialReference()
         srs.ImportFromWkt(ds.GetProjectionRef())
-        utm = get_utm_zone(srs)
-        self.assertEqual(utm, 11)
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
+        self.assertEqual(utm_zone, 11)
 
     def test_03(self):
         """
@@ -49,8 +49,8 @@ class Test_get_utm_zone(unittest.TestCase):
         ds = gdal.Open('dems/ned1_2016_ny.tif')
         srs = osr.SpatialReference()
         srs.ImportFromWkt(ds.GetProjectionRef())
-        utm = get_utm_zone(srs)
-        self.assertEqual(utm, 17)
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
+        self.assertEqual(utm_zone, 17)
 
     def test_04(self):
         """
@@ -59,15 +59,15 @@ class Test_get_utm_zone(unittest.TestCase):
         ds = gdal.Open('dems/nonutm.tif')
         srs = osr.SpatialReference()
         srs.ImportFromWkt(ds.GetProjectionRef())
-        utm = get_utm_zone(srs)
-        self.assertEqual(utm, None)
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
+        self.assertEqual(utm_zone, None)
 
     def test_05(self):
         """
         can only hand an osr.SpatialReference object
         """
         with self.assertRaises(TypeError):
-            utm = get_utm_zone('')
+            datum, utm_zone, hemisphere = get_utm_zone('')
 
 
 class Test_topaz01(unittest.TestCase):
