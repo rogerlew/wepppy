@@ -93,8 +93,7 @@ class HillSummary(ReportBase):
 
     @property
     def header(self):
-        return [cname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for cname in self._hdr
-                if 'Subrunoff' not in cname and 'Baseflow' not in cname]
+        return [cname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow') for cname in self._hdr]
 
     def __iter__(self):
         subs_summary = self.subs_summary
@@ -103,8 +102,7 @@ class HillSummary(ReportBase):
         data = self.data
         for i in range(len(data)):
             _data = [(cname.replace(' Density', '').replace('Subrunoff', 'Lateral Flow'),
-                      data[i][parse_name(cname)]) for cname in _hill_default_hdr
-                      if 'Subrunoff' not in cname and 'Baseflow' not in cname]
+                      data[i][parse_name(cname)]) for cname in _hill_default_hdr]
 
             topaz_id = data[i]['TopazID']
 
