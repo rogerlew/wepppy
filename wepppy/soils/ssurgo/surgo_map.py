@@ -94,19 +94,18 @@ class SurgoMap:
                 assert key in mukeys
         
         assert _exists(subwta_fn)
-        
-        subwta, transform, proj = read_arc(subwta_fn, dtype=np.int32)
-                
+
+        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
         top_ids = sorted(list(set(subwta.flatten())))
 
-        assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 0, 'subwta does not contain channels: %s' % str(top_ids)
+        # assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 0, 'subwta does not contain channels: %s' % str(top_ids)
         
         # determine dom for the watershed
         if bounds_fn is None:
             dom_dom = self._get_dominant(valid_mukeys=valid_mukeys)
         else:
             assert _exists(bounds_fn)
-            bounds, transform2, proj2 = read_arc(bounds_fn, dtype=np.int32)
+            bounds, transform2, proj2 = read_raster(bounds_fn, dtype=np.int32)
             indices = np.where(bounds == 1)
             dom_dom = self._get_dominant(indices, valid_mukeys)
             
@@ -149,6 +148,6 @@ class SurgoMap:
             
             assert _exists(soilgrid_fn)
 
-        assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'lost channels in domsoil_d'
+        # assert sum([(0, 1)[str(k).endswith('4')] for k in domsoil_d.keys()]) > 0, 'lost channels in domsoil_d'
 
         return domsoil_d
