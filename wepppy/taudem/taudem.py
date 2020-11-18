@@ -12,6 +12,8 @@ from os.path import exists as _exists
 from osgeo import gdal, osr
 import utm
 
+import warnings
+
 import numpy as np
 
 from wepppy.all_your_base import (
@@ -22,7 +24,7 @@ from wepppy.all_your_base import (
 from wepppy.all_your_base.geo import read_tif, utm_srid, GeoTransformer, wgs84_proj4, get_utm_zone
 
 _USE_MPI = True
-_DEBUG = True
+_DEBUG = False
 
 # This also assumes that MPICH2 is properly installed on your machine and that TauDEM command line executables exist
 # MPICH2.  Obtain from http://www.mcs.anl.gov/research/projects/mpich2/
@@ -44,6 +46,18 @@ _outlet_template_geojson = """{{
    "geometry": {{ "type": "Point", "coordinates": [ {easting}, {northing} ] }} }}
 ]
 }}"""
+
+_multi_outlet_template_geojson = """{{
+"type": "FeatureCollection",
+"name": "Outlets",
+"crs": {{ "type": "name", "properties": {{ "name": "urn:ogc:def:crs:EPSG::{epsg}" }} }},
+"features": [
+{points}
+]
+}}"""
+
+_point_template_geojson = """{{ "type": "Feature", "properties": {{ "Id": {id} }}, 
+   "geometry": {{ "type": "Point", "coordinates": [ {easting}, {northing} ] }} }}"""
 
 
 class TauDEMRunner:
@@ -146,7 +160,7 @@ class TauDEMRunner:
         self.ll_y = ll_y
         self.datum = datum
         self.hemisphere = hemisphere
-        self.epsg = utm_srid(utm_zone, datum, hemisphere)
+        self.epsg = utm_srid(utm_zone, hemisphere == 'N')
         self.utm_zone = utm_zone
         self.srs_proj4 = srs.ExportToProj4()
         srs.MorphToESRI()
@@ -164,7 +178,9 @@ class TauDEMRunner:
             _band = getattr(self, '_' + band)
             self._scratch[band], _, _ = read_tif(_band, dtype=dtype)
 
-        return self._scratch[band]
+        data = self._scratch[band]
+        assert data.shape == (self.num_cols, self.num_rows), (data.shape, self.num_cols, self.num_rows)
+        return data
 
     def get_elevation(self, easting, northing):
         z_data = self.data_fetcher('z', dtype=np.float64)
@@ -366,7 +382,7 @@ class TauDEMRunner:
     # drop
     @property
     def _drp(self):
-        return _join(self.wd, 'drp.txt')
+        return _join(self.wd, 'drp.csv')
 
     @property
     def _drp_args(self):
@@ -434,11 +450,6 @@ class TauDEMRunner:
     @property
     def _tlen_args(self):
         return ['-tlen', self._tlen]
-
-    # subwta
-    @property
-    def _subwta(self):
-        return _join(self.wd, 'subwta.tif')
 
     # dinf angle
     @property
@@ -650,33 +661,47 @@ class TauDEMRunner:
                        intent_in=(ssa,),
                        intent_out=(src,))
 
-    def run_src_threshold(self, threshold=1000):
+    def run_src_threshold(self, threshold=10):
         self._run_threshold(ssa=self._ad8, src=self._src, threshold=threshold)
 
-    def _make_outlet(self, long=None, lat=None, dst=None, easting=None, northing=None):
+    def _make_outlet_geojson(self, lng=None, lat=None, dst=None, easting=None, northing=None):
         assert dst is not None
 
-        if long is not None and lat is not None:
-            easting, northing = self.lnglat_to_utm(long=long, lat=lat)
+        if lng is not None and lat is not None:
+            easting, northing = self.lnglat_to_utm(long=lng, lat=lat)
 
         assert isfloat(easting), easting
         assert isfloat(northing), northing
 
         with open(dst, 'w') as fp:
-            fp.write(_outlet_template_geojson.format(epsg=self.epsg, easting=easting, northing=northing))
+            fp.write(_outlet_template_geojson
+                     .format(epsg=self.epsg, easting=easting, northing=northing))
 
         assert _exists(dst), dst
         return dst
 
-    def run_moveoutletstostrm(self, long, lat):
+    def _make_multiple_outlets_geojson(self, dst, en_points_dict):
+        points = []
+        for id, (easting, northing) in en_points_dict.items():
+            points.append(_point_template_geojson
+                          .format(id=id, easting=easting, northing=northing))
+
+        with open(dst, 'w') as fp:
+            fp.write(_multi_outlet_template_geojson
+                     .format(epsg=self.epsg, points=',\n'.join(points)))
+
+        assert _exists(dst), dst
+        return dst
+
+    def run_moveoutletstostrm(self, lng, lat):
         """
         This function finds the closest channel location to the requested location
 
-        :param long: requested longitude
+        :param lng: requested longitude
         :param lat: requested latitude
         """
-        self.user_outlet = long, lat
-        self._make_outlet(long=long, lat=lat, dst=self._uo)
+        self.user_outlet = lng, lat
+        self._make_outlet_geojson(lng=lng, lat=lat, dst=self._uo)
         self._sys_call(self.__moveoutletstostrm + self._p_args + self._src_args + ['-o', self._uo] + ['-om', self._o],
                        intent_in=(self._fd8, self._src, self._uo),
                        intent_out=(self._o,))
@@ -684,7 +709,7 @@ class TauDEMRunner:
         with open(self._o) as fp:
             js = json.load(fp)
             if js['features'][0]['properties']['Dist_moved'] == -1:
-                raise ValueError('Outlet location could not be processed')
+                warnings.warn('Outlet location did not move')
 
             o_e, o_n = js['features'][0]['geometry']['coordinates']
 
@@ -762,16 +787,22 @@ class TauDEMRunner:
         in: p
         out: gw
         """
-        long = kwargs.get('long', None)
+        lng = kwargs.get('lng', None)
         lat = kwargs.get('lat', None)
         easting = kwargs.get('easting', None)
         northing = kwargs.get('northing', None)
+        outlets_fn = kwargs.get('outlets_fn', None)
         dst = kwargs.get('dst', None)
 
-        point = self._make_outlet(long=long, lat=lat, easting=easting, northing=northing, dst=dst[:-4] + '.geojson')
-        self._sys_call(self.__gagewatershed + self._p_args + ['-o', point] + ['-gw', dst],
-                       intent_in=(point, self._fd8),
-                       intent_out=(dst,))
+        if outlets_fn is None:
+            point = self._make_outlet_geojson(lng=lng, lat=lat, easting=easting, northing=northing, dst=dst[:-4] + '.geojson')
+            self._sys_call(self.__gagewatershed + self._p_args + ['-o', point] + ['-gw', dst],
+                           intent_in=(point, self._fd8),
+                           intent_out=(dst,))
+        else:
+            self._sys_call(self.__gagewatershed + self._p_args + ['-o', outlets_fn] + ['-gw', dst],
+                           intent_in=(outlets_fn, self._fd8),
+                           intent_out=(dst,))
 
     def run_dinfflowdir(self):
         """
