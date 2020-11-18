@@ -36,9 +36,11 @@ def arc_export(wd, verbose=False):
 
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
-    topaz = Topaz.getInstance(wd)
+    #topaz = Topaz.getInstance(wd)
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
+    map = ron.map
+
 
     ash_out = None
     try:
@@ -175,7 +177,7 @@ def arc_export(wd, verbose=False):
     if verbose:
         print('done.')
 
-    cmd = ['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+    cmd = ['ogr2ogr', '-s_srs', map.srs_proj4, '-t_srs', map.srs_proj4,
            'subcatchments.shp', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -183,7 +185,7 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', map.srs_proj4, '-t_srs', map.srs_proj4,
            'subcatchments.kml', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -295,7 +297,7 @@ def arc_export(wd, verbose=False):
     with open(geojson_fn, 'w') as fp:
         fp.write(json_txt)
 
-    cmd = ['ogr2ogr', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+    cmd = ['ogr2ogr', '-s_srs', map.srs_proj4, '-t_srs', map.srs_proj4,
            'channels.shp', 'channels.json']
     if verbose:
         print(cmd)
@@ -303,7 +305,7 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'channels.shp')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', topaz.utmproj4, '-t_srs', topaz.utmproj4,
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', map.srs_proj4, '-t_srs', map.srs_proj4,
            'channels.kml', 'channels.json']
     if verbose:
         print(cmd)
