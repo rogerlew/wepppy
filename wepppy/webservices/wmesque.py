@@ -286,7 +286,7 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
 
     # determine output format
     if 'format' not in request.args:
-        _format = 'Gtiff'
+        _format = 'GTiff'
     else:
         _format = request.args['format']
         if _format not in format_drivers:
