@@ -867,6 +867,7 @@ class TopazRunner:
         srs = osr.SpatialReference()
         srs.ImportFromWkt(src_ds.GetProjectionRef())
         datum, utm_zone, hemisphere = get_utm_zone(srs)
+        epsg = utm_srid(utm_zone, hemisphere == 'N')
         srcband = src_ds.GetRasterBand(1)
         ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
         top_sub_ids = []
@@ -890,6 +891,9 @@ class TopazRunner:
         # and the channels
         with open(dst_fn) as fp:
             js = json.load(fp)
+
+        if "crs" not in js:
+            js["crs"] = {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::%s" % epsg}}
 
         _features = []
         for f in js['features']:
