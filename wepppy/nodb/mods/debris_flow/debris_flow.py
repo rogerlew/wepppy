@@ -193,11 +193,11 @@ class DebrisFlow(NoDbBase):
         try:
             wd = self.wd
             soils = Soils.getInstance(wd)
-            topaz = Topaz.getInstance(wd)
+            watershed = Watershed.getInstance(wd)
             baer = Baer.getInstance(wd)
 
-            A = topaz.area_gt30
-            A_pct = 100 * A / topaz.wsarea
+            A = watershed.area_gt30
+            A_pct = 100 * A / watershed.wsarea
             A /= 1000 * 1000  # to km^2
 
             try:
@@ -205,9 +205,9 @@ class DebrisFlow(NoDbBase):
             except:
                 sbs_coverage = soils.sbs_coverage
 
-            B = sbs_coverage['moderate'] * topaz.wsarea + \
-                sbs_coverage['high'] * topaz.wsarea
-            B_pct = 100 * B / topaz.wsarea
+            B = sbs_coverage['moderate'] * watershed.wsarea + \
+                sbs_coverage['high'] * watershed.wsarea
+            B_pct = 100 * B / watershed.wsarea
             B /= 1000 * 1000  # to km^2
 
             if cc is not None:
@@ -234,7 +234,7 @@ class DebrisFlow(NoDbBase):
             if not isfloat(LL):
                 LL = 13.25
 
-            R = topaz.ruggedness
+            R = watershed.ruggedness
 
             self.A = A
             self.B = B
@@ -243,7 +243,7 @@ class DebrisFlow(NoDbBase):
             self.C = C
             self.LL = LL
             self.R = R
-            self.wsarea = topaz.wsarea
+            self.wsarea = watershed.wsarea
 
             self.dump_and_unlock()
 

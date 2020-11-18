@@ -146,9 +146,11 @@ class Climate(NoDbBase, LogMixin):
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
 
-            if 'eu' in cfg_fn:
+            locales = self.config_get_list('general', 'locales')
+
+            if 'eu' in locales:
                 self._climate_mode = ClimateMode.EOBS
-            if 'au' in cfg_fn:
+            if 'au' in locales:
                 self._climate_mode = ClimateMode.AGDC
             else:
                 self._climate_mode = ClimateMode.Undefined
@@ -1039,7 +1041,7 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
-            self.log('  running _build_climate_observed (watershed)... \n')
+            self.log('  running _build_climate_observed (watershed)...')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
 
@@ -1137,7 +1139,7 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
-            self.log('  running _build_climate_observed (watershed)... \n')
+            self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
 
@@ -1243,7 +1245,7 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
-            self.log('  running _build_climate_observed (watershed)... \n')
+            self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
 

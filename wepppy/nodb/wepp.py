@@ -13,7 +13,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, call
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 
 import time
@@ -23,6 +23,8 @@ from copy import deepcopy
 from glob import glob
 
 import shutil
+
+from time import sleep
 
 # non-standard
 import jsonpickle
@@ -59,7 +61,7 @@ from wepppy.all_your_base import (
     isinf,
     NCPU
 )
-from wepppy.all_your_base.geo import read_arc, wgs84_proj4
+from wepppy.all_your_base.geo import read_raster, wgs84_proj4
 
 from wepppy.wepp.out import (
     Loss,
@@ -602,35 +604,18 @@ class Wepp(NoDbBase, LogMixin):
         if _exists(self.status_log):
             os.remove(self.status_log)
 
-        runs_dir = self.runs_dir
-        if _exists(runs_dir):
-            shutil.rmtree(runs_dir)
-        os.mkdir(runs_dir)
+        for _dir in (self.runs_dir, self.output_dir, self.plot_dir,
+                     self.stats_dir, self.fp_runs_dir, self.fp_output_dir):
 
-        output_dir = self.output_dir
-        if _exists(output_dir):
-            shutil.rmtree(output_dir)
-        os.mkdir(output_dir)
-
-        plot_dir = self.plot_dir
-        if _exists(plot_dir):
-            shutil.rmtree(plot_dir)
-        os.mkdir(plot_dir)
-
-        stats_dir = self.stats_dir
-        if _exists(stats_dir):
-            shutil.rmtree(stats_dir)
-        os.mkdir(stats_dir)
-
-        fp_runs_dir = self.fp_runs_dir
-        if _exists(fp_runs_dir):
-            shutil.rmtree(fp_runs_dir)
-        os.makedirs(fp_runs_dir)
-
-        fp_output_dir = self.fp_output_dir
-        if _exists(fp_output_dir):
-            shutil.rmtree(fp_output_dir)
-        os.mkdir(fp_output_dir)
+            self.log('cleaning' + _dir)
+            if _exists(_dir):
+                try:
+                    shutil.rmtree(_dir)
+                except FileNotFoundError:
+                    sleep(10.0)
+                    shutil.rmtree(_dir, ignore_errors=True)
+            os.makedirs(_dir)
+            self.log_done()
 
     def _prep_slopes(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -746,7 +731,6 @@ class Wepp(NoDbBase, LogMixin):
         self.log('Running Hillslopes\n')
         translator = Watershed.getInstance(self.wd).translator_factory()
         watershed = Watershed.getInstance(self.wd)
-        # topaz = Topaz.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
         run_flowpaths = getattr(self, 'run_flowpaths', False)
@@ -965,7 +949,7 @@ class Wepp(NoDbBase, LogMixin):
             # 2 Daily average discharge, 600 probably doesn't do anything
             fp.write('1 600\n0\n1\n{}\n'.format(total))
 
-    def _prep_channel_soils(self, translator, erodibility, critical_shear, avke):
+    def _prep_channel_soils(self, translator, erodibility, critical_shear, avke=None):
 
         write_7778 = True
         for sol_version in self.sol_versions:
@@ -1340,7 +1324,8 @@ class Wepp(NoDbBase, LogMixin):
         return d
 
     def make_loss_grid(self):
-        bound, transform, proj = read_arc(self.bound_arc, dtype=np.int32)
+        watershed = Watershed.getInstance(self.wd)
+        bound, transform, proj = read_raster(watershed.bound, dtype=np.int32)
 
         num_cols, num_rows = bound.shape
         loss_grid = np.zeros((num_cols, num_rows))
