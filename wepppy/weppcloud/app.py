@@ -934,6 +934,13 @@ def archive(runid, config):
     from wepppy.export import archive_project, arc_export
     from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
 
+    # jon fix. make sure the export dir doesn't contain irrelevent files inherited from forked
+    # runs
+    export_dir = _join(wd, 'export')
+    if _exists(export_dir):
+        shutil.rmtree(export_dir)
+    os.mkdir(export_dir)
+
     try:
         arc_export(wd)
     except Exception:
