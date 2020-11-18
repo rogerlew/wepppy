@@ -23,8 +23,11 @@ class LogMixin(object):
         try:
             with open(self.status_log) as fp:
                 lines = fp.readlines()
-                r0 = parse_datetime(lines[0])
-                t0 = parse_datetime(lines[-1])
+                try:
+                    r0 = parse_datetime(lines[0])
+                    t0 = parse_datetime(lines[-1])
+                except ValueError:
+                    return None, None, None
 
             r_elapsed = datetime.now() - r0
             t_elapsed = datetime.now() - t0

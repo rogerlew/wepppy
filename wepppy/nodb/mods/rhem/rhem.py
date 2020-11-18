@@ -34,6 +34,7 @@ from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 from glob import glob
 
 import shutil
+from time import sleep
 
 # non-standard
 import jsonpickle
@@ -185,13 +186,23 @@ class Rhem(NoDbBase, LogMixin):
 
         runs_dir = self.runs_dir
         if _exists(runs_dir):
-            shutil.rmtree(runs_dir)
-        os.mkdir(runs_dir)
+            try:
+                shutil.rmtree(runs_dir)
+            except FileNotFoundError:
+                sleep(10.0)
+                shutil.rmtree(runs_dir, ignore_errors=True)
+
+        os.makedirs(runs_dir)
 
         output_dir = self.output_dir
         if _exists(output_dir):
-            shutil.rmtree(output_dir)
-        os.mkdir(output_dir)
+            try:
+                shutil.rmtree(output_dir)
+            except FileNotFoundError:
+                sleep(10.0)
+                shutil.rmtree(output_dir, ignore_errors=True)
+
+        os.makedirs(output_dir)
 
     def run_hillslopes(self):
         self.log('Running Hillslopes\n')
