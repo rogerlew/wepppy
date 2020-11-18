@@ -258,9 +258,10 @@ class WatershedBoundaryDataset:
             print('building channels')
             topaz_pars = chn_routing_err_topaz_pars.get(huc12, dict(csa=10, mcl=200))
             topaz.build_channels(**topaz_pars)
+            map = ron.map
 
             print('find raster indices')
-            utm2wgs_transformer = GeoTransformer(src_proj4=wgs84_proj4, dst_proj4=topaz.utmproj4)
+            utm2wgs_transformer = GeoTransformer(src_proj4=wgs84_proj4, dst_proj4=map.srs_proj4)
             points = [utm2wgs_transformer.transform(lng, lat) for lng, lat in shape.points]
             mask = build_mask(points, ron.dem_fn)
             # plt.figure()
