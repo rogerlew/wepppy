@@ -890,7 +890,7 @@ class TauDEMTopazEmulator(TauDEMRunner):
         cellsize = self.cellsize
 
         for sub_id, d in subcatchments.items():
-            slp_fn = _join(out_dir, '%s.slp' % sub_id)
+            slp_fn = _join(out_dir, 'hill_%s.slp' % sub_id)
             fp = open(slp_fn, 'w')
             write_slp(d.aspect, d.width, cellsize, d.length,
                       d.w_slopes, d.distance_p, fp, 97.3)
