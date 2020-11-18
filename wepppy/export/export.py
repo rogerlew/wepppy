@@ -101,6 +101,11 @@ def archive_project(wd):
     if archive_path.endswith('/') or archive_path.endswith('\\'):
         archive_path = archive_path[:-1]
 
+    _zip_fn = archive_path + '.zip'
+
+    if _exists(_zip_fn):
+        os.remove(_zip_fn)
+
     shutil.make_archive(archive_path, 'zip', wd)
 
-    return archive_path + '.zip'
+    return _zip_fn
