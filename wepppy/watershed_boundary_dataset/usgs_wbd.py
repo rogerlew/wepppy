@@ -124,10 +124,11 @@ class WatershedBoundaryDataset:
             print('building channels')
             topaz.build_channels(csa=10, mcl=200)
 
+            map = ron.map
+
             print('find raster indices')
-            print('"', topaz.utmproj4, '"')
-            wgs2utm_transformer = GeoTransformer.from_crs(wgs84_proj4, topaz.utmproj4)
-            points = [wgs2utm_transformer.transform(lng, lat) for lng, lat in shape.points]
+            print('"', map.srs_proj4, '"')
+            points = [map.lnglat_to_utm(lng, lat) for lng, lat in shape.points]
             mask = build_mask(points, ron.dem_fn)
             plt.figure()
             plt.imshow(mask)
