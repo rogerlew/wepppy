@@ -100,10 +100,10 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
     data['returnjson'] = returnjson
     data['version'] = version
 
-    r = requests.post(url, params=data)
+    r = requests.post(url, json=data)
 
     if r.status_code != 200:
-        raise Exception('Encountered error retrieving from cligen')
+        raise Exception('Encountered error retrieving from cligen: {}'.format(r.text))
 
     if returnjson:
         return json.loads(r.text)
@@ -155,7 +155,7 @@ def selected_single_storm(par,
                 max_intensity_inches_per_hour=max_intensity_inches_per_hour,
                 cliver=cliver, returnjson=returnjson, version=version)
 
-    r = requests.post(url, params=data)
+    r = requests.post(url, json=data)
 
     if r.status_code != 200:
         raise Exception('Encountered error retrieving from cligen')
@@ -194,7 +194,7 @@ def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=Tr
                 lng=lng, lat=lat, returnjson=returnjson,
                 version=version)
 
-    r = requests.post(url, params=data)
+    r = requests.post(url, json=data)
 
     if r.status_code != 200:
         raise Exception("Encountered error retrieving from cligen")
@@ -230,7 +230,7 @@ def future_rcp85(par, start_year, end_year, lng=None, lat=None, returnjson=True,
                 lng=lng, lat=lat, returnjson=returnjson,
                 version=version)
 
-    r = requests.post(url, params=data)
+    r = requests.post(url, json=data)
 
     if r.status_code != 200:
         raise Exception("Encountered error retrieving from %s" % url)
