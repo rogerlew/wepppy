@@ -1,10 +1,21 @@
 import json
 from math import atan2, pi, hypot
 from typing import Union, List
+import os
+from os.path import exists as _exists
+
+import subprocess
 
 import numpy as np
+import utm
+from osgeo import gdal, osr, ogr
 
 from wepppy.all_your_base import isfloat
+from wepppy.all_your_base.geo import get_utm_zone, utm_srid
+
+from .wepp_top_translator import WeppTopTranslator
+
+gdal.UseExceptions()
 
 
 def is_channel(topaz_id: Union[int, str]) -> bool:
@@ -194,7 +205,6 @@ def weighted_slope_average(areas, slopes, lengths, max_points=19):
 
     eq. 3.3 in Thomas Cochrane's Dissertation
     """
-    areas = np.ceil(areas)
 
     # determine longest flowpath
     i = int(np.argmax(lengths))
@@ -209,37 +219,20 @@ def weighted_slope_average(areas, slopes, lengths, max_points=19):
         slope = float(slopes[i])
         return [slope, slope], [0.0, 1.0]
 
-    # determine weights for each flowpath
     kps = np.array([L * a for L, a in zip(lengths, areas)])
+    kpsum = np.sum(kps)
+
+    eps = []
+    for slp, length, kp in zip(slopes, lengths, kps):
+        eps.append((slp * kp) / kpsum)
 
     # build an array with equally spaced points to interpolate on
     distance_p = np.linspace(0, longest, num_points)
 
-    # this will hold the weighted slope estimates
-    eps = []
-
-    # we will weight the slope at each distance away from the channel
-    for d_p in distance_p:
-        num = 0  # to hold numerator value
-        kpsum = 0  # to hold k_p sum
-
-        for slp, rcd, kp in zip(slopes, areas, kps):
-
-            # we only want to interpolate where the slope is defined
-            if d_p - 1e-6 > rcd:
-                continue
-
-            num += slp * kp
-            kpsum += kp
-
-        # store the weighted slope estimate
-        eps.append(num / kpsum)
+    w_slopes = np.interp(distance_p, lengths, eps)
 
     # normalize distance_p array
     distance_p /= longest
-
-    # reverse weighted slopes and return
-    w_slopes = np.array(eps[::-1])
 
     return w_slopes.flatten().tolist(), distance_p.tolist()
 
@@ -258,6 +251,7 @@ slope_template = """\
 {aspect} {profile_width}
 {num_points} {length}
 {profile}"""
+
 colordict = {
   0:     "#787878",
   "n":  ["#9afb0c", "#9ddd5e", "#9fc085"],
@@ -269,6 +263,7 @@ colordict = {
   "w":  ["#ffab47", "#e2a66c", "#c5a58a"],
   "nw": ["#f4fa00", "#d6db5e", "#bdbf89"]
 }
+
 c_slope_breaks = [0.05, 0.15, 0.30]
 
 
@@ -325,6 +320,195 @@ def rect_to_polar(d):
     angle %= 2 * pi
 
     return angle
+
+
+def json_to_wgs(src_fn):
+
+    assert _exists(src_fn)
+
+    dst_wgs_fn = src_fn.split('.')
+    dst_wgs_fn.insert(-1, 'WGS')
+    dst_wgs_fn = '.'.join(dst_wgs_fn)
+
+    if _exists(dst_wgs_fn):
+        os.remove(dst_wgs_fn)
+
+    cmd = ['ogr2ogr', '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', dst_wgs_fn, src_fn]
+
+    # run command, check_output returns standard output
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output = p.stdout \
+              .read() \
+              .decode('utf-8')
+
+    if not _exists(dst_wgs_fn):
+        print(' '.join(cmd))
+        raise Exception(output)
+
+
+def polygonize_netful(src_fn, dst_fn):
+    assert _exists(src_fn)
+    src_ds = gdal.Open(src_fn)
+    srcband = src_ds.GetRasterBand(1)
+
+    drv = ogr.GetDriverByName("GeoJSON")
+    dst_ds = drv.CreateDataSource(dst_fn)
+
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(src_ds.GetProjectionRef())
+    datum, utm_zone, hemisphere = get_utm_zone(srs)
+    epsg = utm_srid(utm_zone, hemisphere == 'N')
+
+    dst_layer = dst_ds.CreateLayer("NETFUL", srs=srs)
+    dst_fieldname = 'TopazID'
+
+    fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
+    dst_layer.CreateField(fd)
+    dst_field = 0
+
+    prog_func = None
+
+    gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
+                    callback=prog_func)
+
+    del src_ds
+    del dst_ds
+
+    # remove the TopazID = 0 feature defining a bounding box
+    # and the channels
+    with open(dst_fn) as fp:
+        js = json.load(fp)
+
+    if "crs" not in js:
+        js["crs"] = {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::%s" % epsg}}
+
+    _features = []
+    for f in js['features']:
+        topaz_id = str(f['properties']['TopazID'])
+
+        if topaz_id == "1":
+            _features.append(f)
+
+    js['features'] = _features
+
+    with open(dst_fn, 'w') as fp:
+        json.dump(js, fp, allow_nan=False)
+
+    # create a version in WGS 1984 (lng/lat)
+    json_to_wgs(dst_fn)
+
+
+def polygonize_bound(bound_fn, dst_fn):
+    assert _exists(bound_fn)
+    src_ds = gdal.Open(bound_fn)
+    srcband = src_ds.GetRasterBand(1)
+
+    drv = ogr.GetDriverByName("GeoJSON")
+    dst_ds = drv.CreateDataSource(dst_fn)
+
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(src_ds.GetProjectionRef())
+    datum, utm_zone, hemisphere = get_utm_zone(srs)
+    epsg = utm_srid(utm_zone, hemisphere == 'N')
+
+    dst_layer = dst_ds.CreateLayer("BOUND", srs=srs)
+    dst_fieldname = 'Watershed'
+
+    fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
+    dst_layer.CreateField(fd)
+    dst_field = 0
+
+    prog_func = None
+
+    gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
+                    callback=prog_func)
+
+    del src_ds
+    del dst_ds
+
+    with open(dst_fn) as fp:
+        js = json.load(fp)
+
+    if "crs" not in js:
+        js["crs"] = {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::%s" % epsg}}
+
+    with open(dst_fn, 'w') as fp:
+        json.dump(js, fp, allow_nan=False)
+
+    json_to_wgs(dst_fn)
+
+
+def polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2=None):
+    assert _exists(subwta_fn)
+    src_ds = gdal.Open(subwta_fn)
+    srcband = src_ds.GetRasterBand(1)
+
+    drv = ogr.GetDriverByName("GeoJSON")
+    dst_ds = drv.CreateDataSource(dst_fn)
+
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(src_ds.GetProjectionRef())
+    datum, utm_zone, hemisphere = get_utm_zone(srs)
+    epsg = utm_srid(utm_zone, hemisphere == 'N')
+
+    dst_layer = dst_ds.CreateLayer("SUBWTA", srs=srs)
+    dst_fieldname = 'TopazID'
+
+    fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
+    dst_layer.CreateField(fd)
+    dst_field = 0
+
+    prog_func = None
+
+    gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
+                    callback=prog_func)
+
+    ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
+    top_sub_ids = []
+    top_chn_ids = []
+
+    for id in ids:
+        if id[-1] == '0':
+            continue
+        if id[-1] == '4':
+            top_chn_ids.append(int(id))
+        else:
+            top_sub_ids.append(int(id))
+
+    translator = WeppTopTranslator(top_chn_ids=top_chn_ids,
+                                   top_sub_ids=top_sub_ids)
+
+    del src_ds
+    del dst_ds
+
+    # remove the TopazID = 0 feature defining a bounding box
+    # and the channels
+    with open(dst_fn) as fp:
+        js = json.load(fp)
+
+    if "crs" not in js:
+        js["crs"] = {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::%s" % epsg}}
+
+    _features = []
+    for f in js['features']:
+        topaz_id = str(f['properties']['TopazID'])
+
+        if topaz_id[-1] in '04':
+            continue
+
+        wepp_id = translator.wepp(top=topaz_id)
+        f['properties']['WeppID'] = wepp_id
+        _features.append(f)
+
+    js['features'] = _features
+
+    if dst_fn2 is None:
+        dst_fn2 = dst_fn
+
+    with open(dst_fn2, 'w') as fp:
+        json.dump(js, fp, allow_nan=False)
+
+    json_to_wgs(dst_fn2)
 
 
 class CentroidSummary(object):
@@ -442,7 +626,9 @@ class HillSummary(SummaryBase):
     def __init__(self, **kwds):
         super(HillSummary, self).__init__(**kwds)
         self.w_slopes = tuple(kwds['w_slopes'])
-        self.pourpoint = tuple(kwds['pourpoint'])
+        self.pourpoint = kwds.get('pourpoint', None)
+        if self.pourpoint is not None:
+            self.pourpoint = tuple(self.pourpoint)
         self.fp_longest = kwds.get('fp_longest', None)
         self.fp_longest_length = kwds.get('fp_longest_length', None)
         self.fp_longest_slope = kwds.get('fp_longest_slope', None)
