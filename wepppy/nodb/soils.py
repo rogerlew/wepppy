@@ -285,7 +285,7 @@ class Soils(NoDbBase):
                 soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
-                coverage = 100.0 * soils[k].area / watershed.totalarea
+                coverage = 100.0 * soils[k].area / watershed.wsarea
                 soils[k].pct_coverage = coverage
                 clay = clay_d[k]
                 sand = sand_d[k]
@@ -332,7 +332,7 @@ class Soils(NoDbBase):
                 soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
-                coverage = 100.0 * soils[k].area / watershed.totalarea
+                coverage = 100.0 * soils[k].area / watershed.wsarea
                 soils[k].pct_coverage = coverage
                 clay = clay_d[k]
                 sand = sand_d[k]
@@ -363,13 +363,15 @@ class Soils(NoDbBase):
         if not watershed.is_abstracted:
             raise WatershedNotAbstractedError()
 
+        ron = Ron.getInstance(wd)
+
         if self.config_stem.startswith('ak'):
             self._build_ak()
         elif self.mode == SoilsMode.Gridded:
-            if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
+            if 'eu' in ron.locales:
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
-            elif self.config_stem in ['au', 'au-fire', 'au-fire60']:
+            elif 'au' in ron.locales:
                 from wepppy.au.soils import build_asris_soils
                 self._build_by_identify(build_asris_soils)
             else:
@@ -659,7 +661,6 @@ class Soils(NoDbBase):
             _map = Ron.getInstance(self.wd).map
             watershed = Watershed.getInstance(self.wd)
 
-            subwta_arc = self.subwta_arc
             ssurgo_fn = self.ssurgo_fn
 
             wmesque_retrieve(self.ssurgo_db, _map.extent,
@@ -678,8 +679,8 @@ class Soils(NoDbBase):
 
             try:
                 domsoil_d = sm.build_soilgrid(
-                    subwta_arc,
-                    bounds_fn=self.bound_arc,
+                    watershed.subwta,
+                    bounds_fn=watershed.bound,
                     valid_mukeys=valid
                 )
             except NoValidSoilsException:
@@ -698,7 +699,7 @@ class Soils(NoDbBase):
             for k in soils:
                 soils[k].area = 0.0
 
-            total_area = watershed.totalarea
+            total_area = watershed.wsarea
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.area_of(topaz_id)
 

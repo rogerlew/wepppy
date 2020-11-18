@@ -14,7 +14,7 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import GDT_Byte
 
-from wepppy.all_your_base.geo import read_arc, read_raster
+from wepppy.all_your_base.geo import read_raster
 
 
 class SoilBurnSeverityMap:
@@ -60,7 +60,7 @@ class SoilBurnSeverityMap:
         ids identified in the subwta_fn map
         """
         assert _exists(subwta_fn)
-        subwta, transform, proj = read_arc(subwta_fn, dtype=np.int32)
+        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
         _ids = sorted(list(set(subwta.flatten())))
         
         lcgrid = np.zeros(subwta.shape, np.int32)

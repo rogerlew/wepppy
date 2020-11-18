@@ -143,12 +143,14 @@ class Landuse(NoDbBase):
         if hasattr(self, '_mapping'):
             return self._mapping
 
+        ron = Ron.getInstance(self.wd)
+
         _mapping = None
         if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
             _mapping = 'rred'
-        elif self._mode == LanduseMode.Gridded and self.config_stem in ['eu']:
+        elif self._mode == LanduseMode.Gridded and 'eu' in ron.locales:
             _mapping = 'esdac'
-        elif self._mode == LanduseMode.Gridded and self.config_stem in ['au']:
+        elif self._mode == LanduseMode.Gridded and 'au' in ron.locales:
             _mapping = 'lu10v5ua'
 
         return _mapping
@@ -298,7 +300,8 @@ class Landuse(NoDbBase):
         # build the grid
         # domlc_fn map is a property of NoDbBase
         # domlc_d is a dictionary with topaz_id keys
-        self.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+        subwta_fn = Watershed.getInstance(self.wd).subwta
+        self.domlc_d = lc.build_lcgrid(subwta_fn, None)
 
     def _build_single_selection(self):
         assert self.single_selection is not None
@@ -315,7 +318,6 @@ class Landuse(NoDbBase):
         self.domlc_d = domlc_d
 
     def build(self):
-
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -331,14 +333,16 @@ class Landuse(NoDbBase):
 
         self.lock()
 
+        ron = Ron.getInstance(wd)
+
         # noinspection PyBroadException
         try:
             self.clean()
 
             if self._mode == LanduseMode.Gridded:
-                if self.config_stem in ['eu', 'eu-fire', 'eu-fire2']:
+                if 'eu' in ron.locales:
                     self._build_ESDAC()
-                elif self.config_stem in ['au', 'au-fire', 'au-fire60']:
+                if 'au' in ron.locales:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD()
@@ -474,7 +478,7 @@ class Landuse(NoDbBase):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            total_area = watershed.totalarea
+            total_area = watershed.wsarea
             for topaz_id, k in domlc_d.items():
                 area = watershed.area_of(topaz_id)
                 
