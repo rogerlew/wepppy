@@ -15,7 +15,7 @@ from os.path import split as _split
 from os.path import exists as _exists
 
 from time import time
-from enum import Enum
+from enum import Enum, IntEnum
 from glob import glob
 
 # non-standard
@@ -128,6 +128,14 @@ class NoDbBase(object):
         val = self._configparser.get(section, option, fallback=default)
         return val
 
+    def config_get_list(self, section: str, option: str, default=None):
+        val = self._configparser.get(section, option, fallback=default)
+
+        if val is not None:
+            val = ast.literal_eval(val)
+
+        return val
+
     def dump_and_unlock(self, validate=True):
         self.dump()
         self.unlock()
@@ -223,7 +231,9 @@ class NoDbBase(object):
 
     @property
     def _configparser(self):
-        cfg = _join(_config_dir, self._config)
+        _config = self._config.split('?')
+
+        cfg = _join(_config_dir, _config[0])
 
         parser = RawConfigParser(allow_no_value=True)
         with open(_default_config) as fp:
@@ -231,6 +241,24 @@ class NoDbBase(object):
 
         with open(cfg) as fp:
             parser.read_file(fp)
+
+        if len(_config) == 2:
+            overrides = _config[1].split('&')
+            overrides_d = {}
+            for override in overrides:
+                key, value = override.split('=')
+                section, name = key.split(':')
+
+                if section not in overrides_d:
+                    overrides_d[section] = {}
+                overrides_d[section][name] = value
+
+            print(overrides_d)
+            parser.read_dict(overrides_d)
+
+        from pprint import pprint
+        print(parser.get('watershed', 'delineation_backend'))
+
 
         return parser
 
@@ -296,28 +324,8 @@ class NoDbBase(object):
         return _join(self.wd, 'dem', 'topaz')
 
     @property
-    def chnjnt_arc(self):
-        return _join(self.topaz_wd, 'CHNJNT.ARC')
-
-    @property
-    def netful_arc(self):
-        return _join(self.topaz_wd, 'NETFUL.ARC')
-
-    @property
-    def subwta_arc(self):
-        return _join(self.topaz_wd, 'SUBWTA.ARC')
-
-    @property
-    def bound_arc(self):
-        return _join(self.topaz_wd, 'BOUND.ARC')
-
-    @property
-    def fvslop_arc(self):
-        return _join(self.topaz_wd, 'FVSLOP.ARC')
-
-    @property
-    def relief_arc(self):
-        return _join(self.topaz_wd, 'RELIEF.ARC')
+    def taudem_wd(self):
+        return _join(self.wd, 'dem', 'taudem')
 
     @property
     def wat_dir(self):

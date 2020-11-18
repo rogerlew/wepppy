@@ -16,7 +16,6 @@ from os.path import isdir
 
 import shutil
 
-
 # non-standard
 import jsonpickle
 import utm
@@ -24,7 +23,7 @@ import what3words
 
 # wepppy
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
-from wepppy.all_your_base.geo import haversine
+from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 
 # wepppy submodules
 from .base import (
@@ -45,19 +44,109 @@ class Map(object):
         assert l < r
         assert b < t
 
-        self.extent = [float(v) for v in _extent]
+        self.extent = [float(v) for v in _extent]  # in decimal degrees
         self.center = [float(v) for v in center]
         self.zoom = int(zoom)
         self.cellsize = cellsize
 
         # e.g. (395201.3103811303, 5673135.241182375, 32, 'U')
-        self.utm = utm.from_latlon(t, l)
+        ul_x, ul_y, zone_number, zone_letter = utm.from_latlon(latitude=t, longitude=l)
+        ul_x = float(ul_x)
+        ul_y = float(ul_y)
+        self.utm = ul_x, ul_y, zone_number, zone_letter
 
-        self.utmzone = self.utm[2]
+        lr_x, lr_y, _, _ = utm.from_latlon(longitude=r, latitude=b, force_zone_number=zone_number)
+        self._ul_x = float(ul_x)  # in utm
+        self._ul_y = float(ul_y)
+        self._lr_x = float(lr_x)
+        self._lr_y = float(lr_y)
+
+        self._num_cols = int(round((lr_x - ul_x) / cellsize))
+        self._num_rows = int(round((ul_y - lr_y) / cellsize))
 
     @property
-    def ul(self):
-        return self.extent[0], self.extent[3]
+    def utm_zone(self):
+        return self.utm[2]
+
+    @property
+    def zone_letter(self):
+        return self.utm[3]
+
+    @property
+    def srid(self):
+        return utm_srid(self.utm_zone, self.northern)
+
+    @property
+    def northern(self):
+        return self.extent[3] > 0.0
+
+    @property
+    def ul_x(self):
+        if hasattr(self, '_ul_x'):
+            return self._ul_x
+
+        l, b, r, t = self.extent
+        ul_x, ul_y, zone_number, zone_letter = utm.from_latlon(latitude=t, longitude=l)
+        self._ul_x = float(ul_x)
+        self._ul_y = float(ul_y)
+
+        return ul_x
+
+    @property
+    def ul_y(self):
+        if hasattr(self, '_ul_y'):
+            return self._ul_y
+
+        l, b, r, t = self.extent
+        ul_x, ul_y, zone_number, zone_letter = utm.from_latlon(latitude=t, longitude=l)
+        self._ul_x = float(ul_x)
+        self._ul_y = float(ul_y)
+
+        return ul_y
+
+    @property
+    def lr_x(self):
+        if hasattr(self, '_lr_x'):
+            return self._lr_x
+
+        l, b, r, t = self.extent
+        lr_x, lr_y, zone_number, zone_letter = utm.from_latlon(latitude=b, longitude=r)
+        self._lr_x = float(lr_x)
+        self._lr_y = float(lr_y)
+
+        return lr_x
+
+    @property
+    def lr_y(self):
+        if hasattr(self, '_lr_y'):
+            return self._lr_y
+
+        l, b, r, t = self.extent
+        lr_x, lr_y, zone_number, zone_letter = utm.from_latlon(latitude=b, longitude=r)
+        self._lr_x = float(lr_x)
+        self._lr_y = float(lr_y)
+
+        return lr_y
+
+    @property
+    def utm_extent(self):
+        return self.ul_x, self.lr_y, self.lr_x, self.ul_y
+
+    @property
+    def num_cols(self):
+        if hasattr(self, '_num_cols'):
+            return self._num_cols
+
+        self._num_cols = int(round((self.lr_x - self.ul_x) / self.cellsize))
+        return self._num_cols
+
+    @property
+    def num_rows(self):
+        if hasattr(self, '_num_rows'):
+            return self._num_rows
+
+        self._num_rows = int(round((self.lr_x - self.ul_x) / self.cellsize))
+        return self._num_rows
 
     @property
     def shape(self):
@@ -75,6 +164,115 @@ class Map(object):
         sw = [b, l]
         ne = [t, r]
         return str([sw, ne])
+
+    def utm_to_px(self, easting, northing):
+        """
+        return the utm coords from pixel coords
+        """
+
+        # unpack variables for instance
+        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
+        ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
+
+        x = int(round((easting - ul_x) / cellsize))
+        y = int(round((northing - ul_y) / -cellsize))
+
+        assert 0 <= y < num_rows, (y, (num_rows, num_cols))
+        assert 0 <= x < num_cols, (x, (num_rows, num_cols))
+
+        return x, y
+
+    def lnglat_to_px(self, long, lat):
+        """
+        return the x,y pixel coords of long, lat
+        """
+
+        # unpack variables for instance
+        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
+        ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
+
+        # find easting and northing
+        x, y, _, _ = utm.from_latlon(lat, long, self.utm_zone)
+
+        # assert this makes sense with the stored extent
+        assert round(x) >= round(ul_x), (x, ul_x)
+        assert round(x) <= round(lr_x), (x, lr_x)
+        assert round(y) >= round(lr_y), (y, lr_y)
+        assert round(y) <= round(y), (y, ul_y)
+
+        # determine pixel coords
+        _x = int(round((x - ul_x) / cellsize))
+        _y = int(round((ul_y - y) / cellsize))
+
+        # sanity check on the coords
+        assert 0 <= _x < num_cols, str(x)
+        assert 0 <= _y < num_rows, str(y)
+
+        return _x, _y
+
+    def px_to_utm(self, x, y):
+        """
+        return the utm coords from pixel coords
+        """
+
+        # unpack variables for instance
+        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
+        ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
+
+        assert 0 <= x < num_cols
+        assert 0 <= y < num_rows
+
+        easting = ul_x + cellsize * x
+        northing = ul_y - cellsize * y
+
+        return easting, northing
+
+    def lnglat_to_utm(self, lng, lat):
+        """
+        return the utm coords from lnglat coords
+        """
+        x, y, _, _ = utm.from_latlon(latitude=lat, longitude=lng, force_zone_number=self.utm_zone)
+        return float(x), float(y)
+
+    def px_to_lnglat(self, x, y):
+        """
+        return the long/lat (WGS84) coords from pixel coords
+        """
+
+        easting, northing = self.px_to_utm(x, y)
+        lat, lng, _, _ = utm.to_latlon(easting=easting, northing=northing,
+                                       zone_number=self.utm_zone, northern=self.northern)
+        return float(lng), float(lat)
+
+    def raster_intersection(self, extent, raster_fn, discard=None):
+        """
+        returns the subset of pixel values of raster_fn that are within the extent
+        :param extent: l, b, r, t in decimal degrees
+        :param raster_fn: path to a thematic raster with the same extent, projection, and cellsize as this instance
+        :param None or iterable, throwaway these values before returning
+
+        :return:  sorted list of the values
+        """
+        if not _exists(raster_fn):
+            return []
+
+        assert extent[0] < extent[2]
+        assert extent[1] < extent[3]
+
+        map = self.map
+
+        x0, y0 = map.lnglat_to_pixel(extent[0], extent[3])
+        xend, yend = map.lnglat_to_pixel(extent[2], extent[1])
+
+        assert x0 < xend
+        assert y0 < yend
+
+        data, transform, proj = read_raster(raster_fn)
+        the_set = set(data[x0:xend, y0:yend].flatten())
+        if discard is not None:
+            for val in discard:
+                the_set.discard(val)
+        return sorted(the_set)
 
 
 class RonNoDbLockedException(Exception):
@@ -126,6 +324,8 @@ class Ron(NoDbBase):
             self._map = None
             self._w3w = None
 
+            self._locales = self.config_get_list('general', 'locales')
+
             export_dir = self.export_dir
             if not _exists(export_dir):
                 os.mkdir(export_dir)
@@ -136,8 +336,10 @@ class Ron(NoDbBase):
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
-            wepppy.nodb.Topaz(wd, cfg_fn)
-            wepppy.nodb.Watershed(wd, cfg_fn)
+            watershed = wepppy.nodb.Watershed(wd, cfg_fn)
+            if watershed.delineation_backend == wepppy.nodb.watershed.DelineationBackend.TOPAZ:
+                wepppy.nodb.Topaz(wd, cfg_fn)
+
             wepppy.nodb.Landuse(wd, cfg_fn)
             wepppy.nodb.Soils(wd, cfg_fn)
             wepppy.nodb.Climate(wd, cfg_fn)
@@ -305,10 +507,11 @@ class Ron(NoDbBase):
 
     @property
     def w3w(self):
-        if self._w3w is None:
-            return ''
+        if hasattr(self, '_w3w'):
+            if self._w3w is not None:
+                return self._w3w.get('words', '')
 
-        return self._w3w.get('words', '')
+        return ''
 
     @property
     def extent(self):
@@ -336,6 +539,28 @@ class Ron(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+    @property
+    def locales(self):
+        if hasattr(self, '_locales'):
+            return self._locales
+
+        config_stem = self.config_stem
+
+        if config_stem in ('au', 'au-fire'):
+            return 'au',
+        elif config_stem in ('eu', 'eu-75', 'eu-fire', 'eu-fire2'):
+            return 'eu',
+        elif config_stem in ('lt', 'lt-fire-future-snow', 'lt-wepp_347f3bd', 'lt-wepp_bd16b69-snow'):
+            return 'us', 'lt',
+        elif config_stem in ('portland', 'portland-simfire-eagle-snow', 'portland-simfire-norse-snow',
+                             'portland-snow', 'portland-wepp_64bf5aa_snow', 'portland-wepp_347f3bd',
+                             'portland-wepp_bd16b69'):
+            return 'us', 'portland'
+        elif config_stem in ('seattle-simfire-eagle-snow', 'seattle-simfire-norse-snow', 'seattle-snow'):
+            return 'us', 'seattle'
+        else:
+            return 'us',
 
     @property
     def has_ash_results(self):

@@ -8,10 +8,10 @@ from .ron import (
     RonNoDbLockedException
 )
 from .topaz import (
-    Topaz, 
-    Outlet, 
+    Topaz,
     TopazNoDbLockedException
 )
+from wepppy.nodb.watershed import Outlet
 from .watershed import (
     Watershed, 
     WatershedNoDbLockedException

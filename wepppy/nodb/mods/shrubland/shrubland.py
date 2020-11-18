@@ -18,6 +18,7 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 
 from ...ron import Ron
 from ...base import NoDbBase, TriggerEvents
+from ...watershed import Watershed
 
 from .shrubland_map import ShrublandMap
 
@@ -190,7 +191,9 @@ class Shrubland(NoDbBase):
 
     def analyze(self):
         wd = self.wd
-        assert _exists(self.subwta_arc)
+        subwta_fn = Watershed.getInstance(wd).subwta
+
+        assert _exists(subwta_fn)
 
         self.lock()
         try:
@@ -198,7 +201,7 @@ class Shrubland(NoDbBase):
             data_ds = {}
             for ds in nlcd_shrubland_layers:
                 shrubland_map = self.load_shrub_map(ds)
-                data_ds[ds] = shrubland_map.spatial_aggregation(self.subwta_arc)
+                data_ds[ds] = shrubland_map.spatial_aggregation(subwta_fn)
 
             data = {}
             for topaz_id in data_ds['litter']:
@@ -216,13 +219,14 @@ class Shrubland(NoDbBase):
         if self.data is None:
             return None
         
-        wd = self.wd
-        assert _exists(self.bound_arc)
+        watershed = Watershed.getInstance(self.wd)
+        bound_fn = watershed.bound
+        assert _exists(bound_fn)
 
         d = {}
         for ds in nlcd_shrubland_layers:
             shrubland_map = self.load_shrub_map(ds)
-            d[ds] = shrubland_map.spatial_stats(self.bound_arc)
+            d[ds] = shrubland_map.spatial_stats(bound_fn)
 
         return d
 

@@ -23,22 +23,6 @@ from wepppy.all_your_base.geo import read_arc, utm_srid
 from .base import NoDbBase
 
 
-class Outlet(object):
-    def __init__(self,
-                 requested_loc,
-                 actual_loc,
-                 distance_from_requested,
-                 pixel_coords):
-        self.requested_loc = requested_loc
-        self.actual_loc = actual_loc
-        self.distance_from_requested = distance_from_requested
-        self.pixel_coords = pixel_coords
-        
-    def as_dict(self):
-        return dict(lng=self.actual_loc[0], 
-                    lat=self.actual_loc[1])
-
-
 class TopazNoDbLockedException(Exception):
     pass
 
@@ -55,16 +39,9 @@ class Topaz(NoDbBase):
         try:
             self.csa = self.config_get_float('topaz', 'csa')
             self.mcl = self.config_get_float('topaz', 'mcl')
-            self.zoom_min = self.config_get_int('topaz', 'zoom_min')
+            # self.zoom_min = self.config_get_int('topaz', 'zoom_min')
 
             self._outlet = None
-            
-            self._utmproj4 = None
-            self._utmextent = None
-
-            self.cellsize = None
-            self.num_cols = None
-            self.num_rows = None
 
             self.wsarea = None
             self.area_gt30 = None
@@ -112,6 +89,30 @@ class Topaz(NoDbBase):
         return _join(self.wd, 'topaz.nodb.lock')
 
     @property
+    def subwta_arc(self):
+        return _join(self.topaz_wd, 'SUBWTA.ARC')
+
+    @property
+    def bound_arc(self):
+        return _join(self.topaz_wd, 'BOUND.ARC')
+
+    @property
+    def chnjnt_arc(self):
+        return _join(self.topaz_wd, 'CHNJNT.ARC')
+
+    @property
+    def netful_arc(self):
+        return _join(self.topaz_wd, 'NETFUL.ARC')
+
+    @property
+    def fvslop_arc(self):
+        return _join(self.topaz_wd, 'FVSLOP.ARC')
+
+    @property
+    def relief_arc(self):
+        return _join(self.topaz_wd, 'RELIEF.ARC')
+
+    @property
     def topaz_pass(self):
         if _exists(self.subwta_arc):
             return 2
@@ -120,82 +121,6 @@ class Topaz(NoDbBase):
             return 1
 
         return 0
-
-    @property
-    def utmproj4(self):
-        return self._utmproj4
-
-    @property
-    def utmzone(self):
-        assert 'utm' in self._utmproj4
-        return int([tok for tok in self._utmproj4.split() if tok.startswith('+zone=')][0].replace('+zone=', ''))
-
-    @property
-    def hemisphere(self):
-        if '+south' in self._utmproj4:
-            return 'S'
-        else:
-            return 'N'
-
-    @property
-    def datum(self):
-        for tok in self._utmproj4.split():
-            if tok.startswith('+datum'):
-                return tok.split('=')[-1]
-
-        return None
-
-    @property
-    def srid(self):
-        return utm_srid(self.utmzone, datum=self.datum, hemisphere=self.hemisphere)
-
-    @property
-    def utmextent(self):
-        return self._utmextent
-
-    def longlat_to_pixel(self, long, lat):
-        """
-        return the x,y pixel coords of long, lat
-        """
-
-        ul_x, lr_y, lr_x, ul_y,  = self.utmextent
-
-        # unpack variables for instance
-        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
-
-        # find easting and northing
-        x, y, _, _ = utm.from_latlon(lat, long, self.utmzone)
-
-        # assert this makes sense with the stored extent
-        assert round(x) >= round(ul_x), (x, ul_x)
-        assert round(x) <= round(lr_x), (x, lr_x)
-        assert round(y) >= round(lr_y), (y, lr_y)
-        assert round(y) <= round(ul_y), (y, ul_y)
-
-        # determine pixel coords
-        _x = int(round((x - ul_x) / cellsize))
-        _y = int(round((ul_y - y) / cellsize))
-
-        # sanity check on the coords
-        assert 0 <= _x < num_cols, str(x)
-        assert 0 <= _y < num_rows, str(y)
-
-        return _x, _y
-
-    def sub_intersection(self, extent):
-        assert extent[0] < extent[2]
-        assert extent[1] < extent[3]
-
-        x0, y0 = self.longlat_to_pixel(extent[0], extent[3])
-        xend, yend = self.longlat_to_pixel(extent[2], extent[1])
-
-        assert x0 < xend
-        assert y0 < yend
-
-        data, transform, proj = read_arc(self.subwta_arc)
-        topaz_ids = set(data[x0:xend, y0:yend].flatten())
-        topaz_ids.discard(0)
-        return sorted(topaz_ids)
 
     #
     # channels
@@ -254,6 +179,8 @@ class Topaz(NoDbBase):
         return self._outlet is not None
 
     def set_outlet(self, lng, lat, pixelcoords=False):
+        from wepppy.nodb.watershed import Outlet
+
         self.lock()
 
         # noinspection PyBroadException
@@ -263,10 +190,10 @@ class Topaz(NoDbBase):
 
             (x, y), distance = top_runner.find_closest_channel(lng, lat, pixelcoords=pixelcoords)
 
-            _lng, _lat = top_runner.pixel_to_longlat(x, y)
+            _lng, _lat = top_runner.pixel_to_lnglat(x, y)
 
-            self._outlet = Outlet((lng, lat), (_lng, _lat),
-                                  distance, (x, y))
+            self._outlet = Outlet(requested_loc=(lng, lat), actual_loc=(_lng, _lat),
+                                  distance_from_requested=distance, pixel_coords=(x, y))
 
             self.dump_and_unlock()
 
