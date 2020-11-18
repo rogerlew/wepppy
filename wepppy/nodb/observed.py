@@ -23,8 +23,6 @@ import shutil
 import jsonpickle
 import numpy as np
 import pandas as pd
-from scipy import stats
-
 
 # wepppy submodules
 from wepppy.wepp.out import TotalWatSed, Chanwb, Ebe
@@ -44,7 +42,9 @@ def nse(Qm, Qo):
     return float(1.0 - np.sum((Qm - Qo) ** 2.0) / \
                        np.sum((Qo - np.mean(Qo)) ** 2.0))
 
+
 def r_square(Qm, Qo):
+    from scipy import stats
     validate(Qm, Qo)
 
     slope, intercept, r_value, p_value, std_err = stats.linregress(Qm, Qo)
