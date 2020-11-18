@@ -24,12 +24,10 @@ from imageio import imread
 from osgeo import gdal, ogr, osr
 import utm
 
-import utm
-
 import numpy as np
 
 from wepppy.all_your_base import isfloat, IS_WINDOWS
-from wepppy.all_your_base.geo import read_arc, get_utm_zone, wgs84_proj4
+from wepppy.all_your_base.geo import read_arc, get_utm_zone, wgs84_proj4, utm_srid
 
 from wepppy.watershed_abstraction import WeppTopTranslator
 from wepppy.watershed_abstraction.support import (
@@ -347,6 +345,7 @@ class TopazRunner:
 
         # find easting and northing
         x, y, _, _ = utm.from_latlon(lat, lng, self.utm_zone)
+        x, y = float(x), float(y)
 
         # assert this makes sense with the stored extent
         assert round(x) >= round(ul_x), (x, ul_x)
@@ -386,8 +385,10 @@ class TopazRunner:
         return the lng/lat (WGS84) coords from pixel coords
         """
         easting, northing = self.pixel_to_utm(x, y)
-        return utm.to_latlon(easting=easting, northing=northing,
+        lat, lng = utm.to_latlon(easting=easting, northing=northing,
                              zone_number=self.utm_zone, northern=self.hemisphere == 'N')
+        lng, lat = float(lng), float(lat)
+        return lng, lat
 
     def find_closest_channel(self, lng, lat, pixelcoords=False):
         """
