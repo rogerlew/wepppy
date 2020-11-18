@@ -171,7 +171,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'SUBCATCHMENTS.WGS.JSON')
         else:
-            return _join(self.taudem_wd, 'subwta.WGS.geojson')
+            return _join(self.taudem_wd, 'subcatchments.WGS.geojson')
 
     @property
     def bound(self):
@@ -431,6 +431,8 @@ class Watershed(NoDbBase):
             self._outlet_top_id = ws_stats['outlet_top_id']
 
             taudem.write_slps(out_dir=self.wat_dir)
+
+            self._structure = taudem.structure
 
             self.dump_and_unlock()
 
