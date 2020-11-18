@@ -11,7 +11,7 @@ from osgeo import gdal, osr
 
 import numpy as np
 from scipy.ndimage import label
-
+from subprocess import Popen, PIPE
 from pprint import pprint
 
 from wepppy.all_your_base.geo import read_tif, centroid_px
@@ -71,6 +71,11 @@ class TauDEMTopazEmulator(TauDEMRunner):
     def _subwta_shp(self):
         return _join(self.wd, 'subwta.geojson')
 
+    # subcatchments
+    @property
+    def _subcatchments_shp(self):
+       return _join(self.wd, 'subcatchments.geojson')
+
     # bound
     @property
     def _bound(self):
@@ -81,10 +86,14 @@ class TauDEMTopazEmulator(TauDEMRunner):
     def _bound_shp(self):
         return _join(self.wd, 'bound.geojson')
 
-    # bound
+    # net
     @property
     def _netful_shp(self):
         return _join(self.wd, 'netful.geojson')
+
+    @property
+    def _channels(self):
+        return _join(self.wd, 'channels.tif')
 
     def topaz2tau_translator_factory(self):
         d = self.tau2topaz_translator_factory()
@@ -105,6 +114,18 @@ class TauDEMTopazEmulator(TauDEMRunner):
 
         with open(self._net, 'w') as fp:
             json.dump(js, fp)
+
+        cmd = ['gdal_rasterize', '-a', 'TopazID', '-a_nodata', '0',
+               '-a_srs', 'epsg:{}'.format(self.epsg), 
+               '-te', self.ul_x, self.lr_y, self.lr_x, self.ul_y,
+               '-tr', self.cellsize, self.cellsize,
+               '-ot', 'UInt16', self._net, self._channels]
+        cmd = [str(v) for v in cmd]
+        print(' '.join(cmd))
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        p.wait()
+        assert _exists(self._channels)
 
     def build_channels(self, csa=None):
         if csa is None:
@@ -134,7 +155,7 @@ class TauDEMTopazEmulator(TauDEMRunner):
         json_to_wgs(self._net)
 
         self.delineate_subcatchments()
-        polygonize_subcatchments(self._subwta, self._subwta_shp)
+        polygonize_subcatchments(self._subwta, self._subwta_shp, self._subcatchments_shp)
 
         self.make_bound()
         polygonize_bound(self._bound, self._bound_shp)
@@ -241,7 +262,7 @@ class TauDEMTopazEmulator(TauDEMRunner):
     @property
     def structure(self):
         with open(self._structure) as fp:
-            return[[int(v) for v in line] for line in fp.readlines()]
+            return [[int(v) for v in line.split()] for line in fp.readlines()]
 
     def abstract_channels(self, wepp_chn_type=None):
         cellsize = self.cellsize
@@ -372,6 +393,7 @@ class TauDEMTopazEmulator(TauDEMRunner):
         subwta = self.data_fetcher('subwta', dtype=np.uint16)
         sub_ids = sorted(list(set(subwta.flatten())))
         sub_ids.remove(0)
+        sub_ids = [v for v in sub_ids if not str(v).endswith('4')]
 
         return sub_ids
 
@@ -714,7 +736,6 @@ class TauDEMTopazEmulator(TauDEMRunner):
                 # todo: compare performance to opencv connectedComponents
                 # https://stackoverflow.com/questions/46441893/connected-component-labeling-in-python
                 subcatchment_data, n_labels = label(_catchment_data)
-                print('n_labels', n_labels)
 
                 # isolated pixels in the channel can get misidentified as subcatchments
                 # this gets rid of those
@@ -749,6 +770,10 @@ class TauDEMTopazEmulator(TauDEMRunner):
                     else:
                         subwta[x0:xend, y0:yend][d['s_indx'], d['s_indy']] = int(str(catchment_id) + str(k))
                     k += 1
+
+        channels = self.data_fetcher('channels', dtype=np.int32)
+        ind = np.where(subwta == 0)
+        subwta[ind] = channels[ind]     
 
         driver = gdal.GetDriverByName('GTiff')
         dst_ds = driver.Create(self._subwta, xsize=subwta.shape[0], ysize=subwta.shape[1],
