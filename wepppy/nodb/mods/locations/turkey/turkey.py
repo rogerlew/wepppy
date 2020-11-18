@@ -12,26 +12,15 @@ import shutil
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
-from typing import Union
-
-from copy import deepcopy
-
-from datetime import date
-
 import jsonpickle
 
-from .....all_your_base import isfloat
-from .....all_your_base.geo import RasterDatasetInterpolator, RDIOutOfBoundsException
-from ....base import NoDbBase, TriggerEvents
+from ....base import NoDbBase
 
 from ..location_mixin import LocationMixin
 
 from .....climates.cligen import StationMeta, Cligen, ClimateFile
 from ....climate import Climate, ClimateMode, ClimateSpatialMode, ClimateStationMode
-from ....soils import Soils
 from ....watershed import Watershed
-from ....wepp import Wepp
-from .....wepp.soils.utils import modify_kslast
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
@@ -142,10 +131,11 @@ class TurkeyMod(NoDbBase, LocationMixin):
         return self._data_dir
 
     def build_landuse(self):
-        from wepppy.nodb import Landuse
+        from wepppy.nodb import Landuse, Watershed
         from wepppy.landcover import LandcoverMap
-
-        landuse = Landuse.getInstance(self.wd)
+        wd = self.wd
+        landuse = Landuse.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
 
         lc_fn = landuse.lc_fn
         assert _exists(landuse.lc_fn)
@@ -158,7 +148,7 @@ class TurkeyMod(NoDbBase, LocationMixin):
             # build the grid
             # domlc_fn map is a property of NoDbBase
             # domlc_d is a dictionary with topaz_id keys
-            landuse.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+            landuse.domlc_d = lc.build_lcgrid(watershed.subwta, None)
             landuse.dump_and_unlock()
 
         except Exception:
@@ -172,9 +162,11 @@ class TurkeyMod(NoDbBase, LocationMixin):
         from wepppy.nodb import Soils
         from wepppy.landcover import LandcoverMap
         from wepppy.soils.ssurgo import SoilSummary
+        wd = self.wd
 
         soils = Soils.getInstance(self.wd)
         soils_dir = soils.soils_dir
+        watershed = Watershed.getInstance(wd)
 
         lc_fn = soils.lc_fn
         assert _exists(soils.lc_fn)
@@ -187,7 +179,7 @@ class TurkeyMod(NoDbBase, LocationMixin):
             # build the grid
             # domlc_fn map is a property of NoDbBase
             # domlc_d is a dictionary with topaz_id keys
-            soils.domsoil_d = lc.build_lcgrid(self.subwta_arc, None)
+            soils.domsoil_d = lc.build_lcgrid(watershed.subwta, None)
             soils.dump_and_unlock()
 
         except Exception:
