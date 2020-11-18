@@ -64,7 +64,7 @@ class NoDbBase(object):
 
     @property
     def config_stem(self):
-        return self._config.replace('.cfg', '')
+        return self._config.split('.cfg')[0]
 
     def config_get_bool(self, section: str, option: str, default=None):
         assert default is None or isbool(default)
