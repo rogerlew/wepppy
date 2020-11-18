@@ -369,7 +369,7 @@ class Ash(NoDbBase, LogMixin):
             sbs.export_4class_map(baer_4class)
 
             lc = LandcoverMap(baer_4class)
-            sbs_d = lc.build_lcgrid(self.subwta_arc)
+            sbs_d = lc.build_lcgrid(watershed.subwta)
 
             translator = watershed.translator_factory()
 

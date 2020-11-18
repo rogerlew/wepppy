@@ -21,7 +21,7 @@ import numpy as np
 from osgeo import gdal
 
 from wepppy.all_your_base import isint
-from wepppy.all_your_base.geo import wgs84_proj4, read_arc
+from wepppy.all_your_base.geo import wgs84_proj4, read_raster
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, YamlSoil
 
@@ -73,6 +73,8 @@ class Baer(NoDbBase):
             self._nodata_vals = None
             self._is256 = None
 
+            self._legacy_mode = self.config_get_bool('baer', 'legacy_mode')
+
             self.sbs_coverage = None
 
             self.dump_and_unlock()
@@ -110,6 +112,10 @@ class Baer(NoDbBase):
     @property
     def _lock(self):
         return _join(self.wd, 'baer.nodb.lock')
+
+    @property
+    def legacy_mode(self):
+        return getattr(self, '_legacy_mode', False)
 
     @property
     def baer_dir(self):
@@ -360,7 +366,7 @@ class Baer(NoDbBase):
                 baer_4class = baer_cropped.replace('.tif', '.4class.tif')
                 sbs.export_4class_map(baer_4class)
 
-                srid = Topaz.getInstance(self.wd).srid
+                srid = Ron.getInstance(self.wd).map.srid
 
                 rred = Rred.getInstance(self.wd)
                 rred.request_project(baer_4class, srid=srid)
@@ -381,15 +387,17 @@ class Baer(NoDbBase):
         wd = self.wd
         baer_path = self.baer_path
 
+        watershed = Watershed.getInstance(wd)
+
         baer_cropped = self.baer_cropped
         if _exists(baer_cropped):
             os.remove(baer_cropped)
 
-        topaz = Topaz.getInstance(wd)
-        xmin, ymin, xmax, ymax = [str(v) for v in topaz.utmextent]
-        cellsize = str(Ron.getInstance(wd).map.cellsize)
+        map = Ron.getInstance(wd).map
+        xmin, ymin, xmax, ymax = [str(v) for v in map.utm_extent]
+        cellsize = str(map.cellsize)
 
-        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % topaz.srid,
+        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % map.srid,
                '-tr', cellsize, cellsize,
                '-te', xmin, ymin, xmax, ymax,
                '-r', 'near', baer_path, baer_cropped]
@@ -408,7 +416,7 @@ class Baer(NoDbBase):
             self._calc_sbs_coverage(sbs.data)
 
             if landuse.mode != LanduseMode.Single:
-                domlc_d = sbs.build_lcgrid(self.subwta_arc, None)
+                domlc_d = sbs.build_lcgrid(watershed.subwta, None)
 
                 ron = Ron.getInstance(wd)
                 if 'lt' in ron.mods or 'portland' in ron.mods or 'seattle' in ron.mods or 'general' in ron.mods:
@@ -473,7 +481,7 @@ class Baer(NoDbBase):
                     _soils[k].area = 0.0
 
                 watershed = Watershed.getInstance(self.wd)
-                total_area = watershed.totalarea
+                total_area = watershed.wsarea
                 for topaz_id, k in _domsoil_d.items():
                     _soils[k].area += watershed.area_of(topaz_id)
 
@@ -520,7 +528,7 @@ class Baer(NoDbBase):
                     _soils[k].area = 0.0
 
                 watershed = Watershed.getInstance(self.wd)
-                total_area = watershed.totalarea
+                total_area = watershed.wsarea
                 for topaz_id, k in _domsoil_d.items():
                     _soils[k].area += watershed.area_of(topaz_id)
 
@@ -539,6 +547,8 @@ class Baer(NoDbBase):
     def modify_soils(self):
 
         wd = self.wd
+
+        legacy_mode = self.legacy_mode
 
         ron = Ron.getInstance(wd)
         if 'lt' in ron.mods or 'portland' in ron.mods or 'seattle' in ron.mods or 'general' in ron.mods:
@@ -598,12 +608,16 @@ class Baer(NoDbBase):
             for topaz_id, mukey in soils.domsoil_d.items():
                 dom = domlc_d[topaz_id]
 
-                _s = soils.soils[mukey]
-                clay, sand = _s.clay, _s.sand
-                assert clay is not None
-                assert sand is not None
+                if not legacy_mode:
+                    _s = soils.soils[mukey]
+                    clay, sand = _s.clay, _s.sand
+                    assert clay is not None
+                    assert sand is not None
 
-                _simple_texture = simple_texture(clay, sand)
+                    _simple_texture = simple_texture(clay, sand)
+                else:
+                    _simple_texture = 'sand loam'
+
                 _domsoil_d[topaz_id] = '{}-{}'.format(dom, _simple_texture)
 
                 # need to recalculate the pct_coverages
@@ -612,7 +626,7 @@ class Baer(NoDbBase):
                     _soils[k].area = 0.0
 
                 watershed = Watershed.getInstance(self.wd)
-                total_area = watershed.totalarea
+                total_area = watershed.wsarea
                 for topaz_id, k in _domsoil_d.items():
                     _soils[k].area += watershed.area_of(topaz_id)
 
@@ -634,8 +648,8 @@ class Baer(NoDbBase):
 
         try:
 
-            topaz = Topaz.getInstance(self.wd)
-            bounds, transform, proj = read_arc(topaz.bound_arc)
+            watershed = Watershed.getInstance(self.wd)
+            bounds, transform, proj = read_raster(watershed.bound)
 
             assert bounds.shape == sbs.shape
 
