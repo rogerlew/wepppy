@@ -1,4 +1,0 @@
-TOPAZ    TauDEM
-RELIEF   fel
-FVSLOP   
-ASPECT
