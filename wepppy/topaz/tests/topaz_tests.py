@@ -204,28 +204,28 @@ class Test_topaz06(unittest.TestCase):
 
         os.mkdir('wd')
 
-    def test_longlat_to_pixel01(self):
+    def test_lnglat_to_pixel01(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
         lng = -( 116.0 +  55.0 / 60.0 + 45.50/3600.0)
         lat = 46.0 +  48.0 / 60.0 + 4.37/3600.0
 
-        x, y = top.longlat_to_pixel(lng,lat)
+        x, y = top.lnglat_to_pixel(lng,lat)
 
         self.assertEqual(x, 43)
         self.assertEqual(y, 69)
 
-    def test_longlat_to_pixel02(self):
+    def test_lnglat_to_pixel02(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
         lng = -120.0
         lat = 20.0
 
         with self.assertRaises(AssertionError):
-            x, y = top.longlat_to_pixel(lng,lat)
+            x, y = top.lnglat_to_pixel(lng,lat)
 
-    def test_longlat_to_pixel03(self):
+    def test_lnglat_to_pixel03(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
 
-        x, y = top.longlat_to_pixel(-116.9310440300905, 46.81997312092958)
+        x, y = top.lnglat_to_pixel(-116.9310440300905, 46.81997312092958)
 
         self.assertEqual(x, 39)
         self.assertEqual(y, 0)
@@ -284,35 +284,35 @@ class Test_topaz08(unittest.TestCase):
 
         os.mkdir('wd')
 
-    def test_pixel_to_longlat01(self):
+    def test_pixel_to_lnglat01(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
         top.build_channels()
 
-        x, y = top.pixel_to_longlat(0, 0)
+        x, y = top.pixel_to_lnglat(0, 0)
         self.assertEqual(x,  -116.94638213722368)
         self.assertEqual(y, 46.819981333488265)
 
-    def test_pixel_to_longlat02(self):
+    def test_pixel_to_lnglat02(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
         top.build_channels()
 
-        x, y = top.pixel_to_longlat(43, 70)
+        x, y = top.pixel_to_lnglat(43, 70)
         self.assertEqual(x,  -116.92949559048503)
         self.assertEqual(y, 46.80107414405755)
 
-    def test_pixel_to_longlat03(self):
+    def test_pixel_to_lnglat03(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
         top.build_channels()
 
-        x, y = top.pixel_to_longlat(86, 138)
+        x, y = top.pixel_to_lnglat(86, 138)
         self.assertEqual(x,  -116.91261999321354)
         self.assertEqual(y, 46.78270435450583)
 
-    def test_pixel_to_longlat04(self):
+    def test_pixel_to_lnglat04(self):
         top = TopazRunner('wd', 'dems/ned1_2016.tif')
         top.build_channels()
 
-        x, y = top.pixel_to_longlat(39, 0)
+        x, y = top.pixel_to_lnglat(39, 0)
         self.assertEqual(x,  -116.9310440300905)
         self.assertEqual(y, 46.81997312092958)
 
