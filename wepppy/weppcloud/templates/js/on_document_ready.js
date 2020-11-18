@@ -260,11 +260,11 @@ function onReady() {
     //
     // Initial Configuration
     //
-    channel_ctrl.zoom_min = {{ topaz.zoom_min }};
-    if ({{ topaz.has_channels | tojson }}) {
+    channel_ctrl.zoom_min = 11;
+    if ({{ watershed.has_channels | tojson }}) {
         channel_ctrl.report();
     }
-    if ({{ topaz.has_channels | tojson }} && !({{ topaz.has_subcatchments | tojson }})) {
+    if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
        channel_ctrl.show();
     }
 
@@ -305,7 +305,7 @@ function onReady() {
     });
 
     // Load outlet from server
-    if ({{ topaz.has_outlet | tojson }}) {
+    if ({{ watershed.has_outlet | tojson }}) {
         outlet.form.trigger("SETOUTLET_TASK_COMPLETED");
     }
 
@@ -314,8 +314,30 @@ function onReady() {
      * ===========================
      */
 
-    // bind Build button to the controller
+    //
+    // Bindings
+    //
+    var input_pkcsa = $("#input_pkcsa");
+    var input_pkcsa_en = $("#input_pkcsa_en");
+
+    input_pkcsa.on("input", function () {
+        console.log('on input_pkcsa change.');
+        var v = input_pkcsa.val();
+        if (v !== 'auto') {
+            input_pkcsa_en.val(parseFloat(v) * 2.47105);
+        }
+    });
+
+    input_pkcsa_en.on("input", function () {
+        console.log('on input_pkcsa_en change.');
+        var v = input_pkcsa_en.val();
+        if (v !== 'auto') {
+            input_pkcsa.val(parseFloat(v) / 2.47105);
+        }
+    });
+
     $("#btn_build_subcatchments").click(sub_ctrl.build);
+    $("#btn_build_subcatchments_en").click(sub_ctrl.build);
 
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
@@ -413,7 +435,7 @@ function onReady() {
     {% endif %}
 
     // load subcatchments
-    if ({{ topaz.has_subcatchments | tojson }}) {
+    if ({{ watershed.has_subcatchments | tojson }}) {
         sub_ctrl.show();
         sub_ctrl.report();
         channel_ctrl.show();
