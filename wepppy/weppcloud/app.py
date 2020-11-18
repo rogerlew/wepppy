@@ -8,6 +8,7 @@
 
 import os
 import csv
+import gzip
 from datetime import datetime
 
 from ast import literal_eval
@@ -22,7 +23,7 @@ import json
 import shutil
 import traceback
 from glob import glob
-from subprocess import check_output
+from subprocess import check_output, Popen, PIPE
 import matplotlib.pyplot as plt
 
 import markdown
@@ -33,7 +34,8 @@ from werkzeug.utils import secure_filename
 
 from flask import (
     Flask, jsonify, request, render_template,
-    redirect, send_file, Response, abort, make_response
+    redirect, send_file, Response, abort, make_response,
+    stream_with_context,
 )
 
 from flask_sqlalchemy import SQLAlchemy
@@ -119,6 +121,12 @@ if 'wepp1' in _hostname:
     from wepppy.weppcloud.wepp1_config import config_app
 else:
     from wepppy.weppcloud.standalone_config import config_app
+
+
+#
+# IE 11 "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"
+# "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; Win64; x64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.5072       7; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Zoom 3.6.0; wbx 1.0.0)"
+#
 
 # noinspection PyBroadException
 
@@ -581,8 +589,8 @@ def portland_index():
 
 @app.route('/portland-municipal/results/<file>')
 @app.route('/portland-municipal/results/<file>/')
+@app.route('/locations/portland-municipal/results/<file>')
 @app.route('/locations/portland-municipal/results/<file>/')
-@app.route('/locations/portland-municipal//results/<file>/')
 @roles_required('PortlandGroup')
 def portland_results(file):
     """
@@ -621,8 +629,8 @@ def seattle_index():
 
 @app.route('/seattle-municipal/results/<file>')
 @app.route('/seattle-municipal/results/<file>/')
+@app.route('/locations/seattle-municipal/results/<file>')
 @app.route('/locations/seattle-municipal/results/<file>/')
-@app.route('/locations/seattle-municipal//results/<file>/')
 # roles_required('SeattleGroup')
 def seattle_results(file):
     """
@@ -649,6 +657,13 @@ def create_index():
 @app.route('/create/<config>/')
 def create(config):
 
+    cfg = "%s.cfg" % config
+
+    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
+
+    if len(overrides) > 0:
+        cfg += '?%s' % overrides
+
     wd = None
     dir_created = False
     while not dir_created:
@@ -672,7 +687,7 @@ def create(config):
         dir_created = True
 
     try:
-        Ron(wd, "%s.cfg" % config)
+        Ron(wd, cfg)
     except Exception:
         return exception_factory('Could not create run')
 
@@ -686,9 +701,73 @@ def create(config):
     return redirect(url)
 
 
-@app.route('/runs/<string:runid>/<config>/create_fork')
-@app.route('/runs/<string:runid>/<config>/create_fork/')
-def create_fork(runid, config):
+@app.route('/runs/<string:runid>/<config>/fork-console')
+@app.route('/runs/<string:runid>/<config>/fork-console/')
+def fork_console(runid, config):
+    # get working dir of original directory
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+
+    should_abort = True
+
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if len(owners) == 0:
+        should_abort = False
+
+    else:
+        ron = Ron.getInstance(wd)
+        if ron.public:
+            should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    return Response('''\
+<html>
+  <head>
+    <title>fork</title>
+    <script type="text/javascript">
+window.onload = function(e){
+
+    var bottom = document.getElementById("bottom");
+    var the_console = document.getElementById("the_console");
+
+    // set headers
+    var xhr = new XMLHttpRequest();
+
+    xhr.open("GET", "../fork", true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+    xhr.onprogress = function (event) {
+        console.log(event);
+
+        the_console.innerHTML = event.srcElement.responseText; 
+        bottom.scrollIntoView();
+    };
+    xhr.send();
+}
+    </script>
+  </head>
+  <body>
+    <div style="margin-left:2em;">
+      <pre>
+      <span id="the_console"></span>
+      </pre
+    </div>
+    <div id="bottom"></div>
+  </body>
+</html>  
+''')
+
+
+@app.route('/runs/<string:runid>/<config>/fork')
+@app.route('/runs/<string:runid>/<config>/fork/')
+def fork(runid, config):
 
     # get working dir of original directory
     wd = get_wd(runid)
@@ -713,60 +792,92 @@ def create_fork(runid, config):
     if should_abort:
         abort(404)
 
-    dir_created = False
-    while not dir_created:
-        new_runid = awesome_codename.generate_codename().replace(' ', '-')
+    def generate():
 
-        email = getattr(current_user, 'email', '')
-        if email.startswith('rogerlew@'):
-            new_runid = 'rlew-' + new_runid
-        elif email.startswith('mdobre@'):
-            new_runid = 'mdobre-' + new_runid
-        elif request.remote_addr == '127.0.0.1':
-            new_runid = 'devvm-' + new_runid
+        yield 'generating new runid...'
 
-        new_wd = get_wd(new_runid)
-        if _exists(new_wd):
-            continue
+        dir_created = False
+        while not dir_created:
+            new_runid = awesome_codename.generate_codename().replace(' ', '-')
 
-        dir_created = True
+            email = getattr(current_user, 'email', '')
+            if email.startswith('rogerlew@'):
+                new_runid = 'rlew-' + new_runid
+            elif email.startswith('mdobre@'):
+                new_runid = 'mdobre-' + new_runid
+            elif request.remote_addr == '127.0.0.1':
+                new_runid = 'devvm-' + new_runid
 
-    assert not _exists(new_wd)
+            new_wd = get_wd(new_runid)
+            if _exists(new_wd):
+                continue
 
-    # copy the contents over
-    shutil.copytree(wd, new_wd)
+            dir_created = True
 
-    # replace the runid in the nodb files
-    nodbs = glob(_join(new_wd, '*.nodb'))
-    for fn in nodbs:
-        with open(fn) as fp:
-            s = fp.read()
+        assert not _exists(new_wd)
 
-        s = s.replace(runid, new_runid)
-        with open(fn, 'w') as fp:
-            fp.write(s)
+        yield ' done.\nNew runid: {}\n\nAdding new run to database...'.format(new_runid)
 
-    # delete any active locks
-    locks = glob(_join(new_wd, '*.lock'))
-    for fn in locks:
-        os.remove(fn)
-
-    fn = _join(new_wd, 'READONLY')
-    if _exists(fn):
-        os.remove(fn)
-
-    fn = _join(new_wd, 'PUBLIC')
-    if _exists(fn):
-        os.remove(fn)
-
-    url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
-    try:
         user_datastore.create_run(new_runid, config, current_user)
-    except Exception:
-        return exception_factory('Could not add run to user database: proceed to https://wepp1.nkn.uidaho.edu' + url)
 
-    # redirect to fork
-    return redirect(url)
+        yield ' done.\n\nCopying files...'.format(new_runid)
+
+        run_left = get_wd(runid)
+        if not run_left.endswith('/'):
+            run_left += '/'
+
+        run_right = get_wd(new_runid)
+        if not run_right.endswith('/'):
+            run_right += '/'
+
+        cmd = ['rsync', '-av', '--progress', run_left, run_right]
+
+        yield '\n   cmd: {}\n'.format(' '.join(cmd))
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+
+        while p.poll() is None:
+            output = p.stdout.readline()
+            yield output.decode('UTF-8')
+
+        yield 'done copying files.\n\nSetting wd in .nodbs...\n'
+
+        # replace the runid in the nodb files
+        nodbs = glob(_join(new_wd, '*.nodb'))
+        for fn in nodbs:
+
+            yield '  {fn}...'.format(fn=fn)
+            with open(fn) as fp:
+                s = fp.read()
+
+            s = s.replace(runid, new_runid)
+            with open(fn, 'w') as fp:
+                fp.write(s)
+
+            yield ' done.\n'
+
+        yield ' done setting wds.\n\nCleanup locks, READONLY, PUBLIC...'
+
+        # delete any active locks
+        locks = glob(_join(new_wd, '*.lock'))
+        for fn in locks:
+            os.remove(fn)
+
+        fn = _join(new_wd, 'READONLY')
+        if _exists(fn):
+            os.remove(fn)
+
+        fn = _join(new_wd, 'PUBLIC')
+        if _exists(fn):
+            os.remove(fn)
+
+        yield ' done.\n'
+
+        url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
+
+        yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
+
+    return Response(stream_with_context(generate()))
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
@@ -876,13 +987,20 @@ def runs0(runid, config):
         abort(404)
 
     try:
-        topaz = Topaz.getInstance(wd)
+
+
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
         climate = Climate.getInstance(wd)
         wepp = Wepp.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
         unitizer = Unitizer.getInstance(wd)
         site_prefix = app.config['SITE_PREFIX']
+
+        if watershed.delineation_backend_is_topaz:
+            topaz = Topaz.getInstance(wd)
+        else:
+            topaz = None
 
         try:
             observed = Observed.getInstance(wd)
@@ -918,6 +1036,7 @@ def runs0(runid, config):
                                wepp=wepp,
                                rhem=rhem,
                                ash=ash,
+                               watershed=watershed,
                                unitizer_nodb=unitizer,
                                observed=observed,
                                rangeland_cover=rangeland_cover,
@@ -1099,7 +1218,18 @@ def task_removeuser(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/users/')
 @login_required
 def report_users(runid, config):
+
     owners = get_run_owners(runid)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if should_abort:
+        return error_factory('Authentication Error')
 
     return render_template('reports/users.htm', owners=owners)
 
@@ -1109,7 +1239,8 @@ def report_users(runid, config):
 def resources_netful_geojson(runid, config):
     try:
         wd = get_wd(runid)
-        fn = _join(wd, 'dem', 'topaz', 'NETFUL.WGS.JSON')
+        watershed = Watershed.getInstance(wd)
+        fn = watershed.netful_shp
         return send_file(fn, mimetype='application/json')
     except Exception:
         return exception_factory()
@@ -1120,7 +1251,8 @@ def resources_netful_geojson(runid, config):
 def resources_subcatchments_geojson(runid, config):
     try:
         wd = get_wd(runid)
-        fn = _join(wd, 'dem', 'topaz', 'SUBCATCHMENTS.WGS.JSON')
+        watershed = Watershed.getInstance(wd)
+        fn = watershed.subwta_shp
 
         js = json.load(open(fn))
         ron = Ron.getInstance(wd)
@@ -1141,7 +1273,8 @@ def resources_subcatchments_geojson(runid, config):
 def resources_channels_geojson(runid, config):
     try:
         wd = get_wd(runid)
-        fn = _join(wd, 'dem', 'topaz', 'CHANNELS.WGS.JSON')
+        watershed = Watershed.getInstance(wd)
+        fn = watershed.channels_shp
 
         js = json.load(open(fn))
         ron = Ron.getInstance(wd)
@@ -1177,11 +1310,27 @@ def task_set_unit_preferences(runid, config):
         return exception_factory('Error setting unit preferences')
 
 
-@app.route('/runs/<string:runid>/<config>/query/topaz_pass')
-@app.route('/runs/<string:runid>/<config>/query/topaz_pass/')
+@app.route('/runs/<string:runid>/<config>/query/delineation_pass')
+@app.route('/runs/<string:runid>/<config>/query/delineation_pass/')
 def query_topaz_pass(runid, config):
-    wd = get_wd(runid)
-    return jsonify(Topaz.getInstance(wd).topaz_pass)
+    try:
+        wd = get_wd(runid)
+        watershed = Watershed.getInstance(wd)
+        has_channels = watershed.has_channels
+        has_subcatchments = watershed.has_subcatchments
+
+        if not has_channels:
+            return jsonify(0)
+
+        if has_channels and not has_subcatchments:
+            return jsonify(1)
+
+        if has_channels and has_subcatchments:
+            return jsonify(2)
+
+        return None
+    except:
+        return exception_factory()
 
 
 @app.route('/runs/<string:runid>/<config>/query/extent')
@@ -1206,7 +1355,7 @@ def report_channel(runid, config):
 def query_outlet(runid, config):
     wd = get_wd(runid)
 
-    return jsonify(Topaz.getInstance(wd)
+    return jsonify(Watershed.getInstance(wd)
                         .outlet
                         .as_dict())
 
@@ -1217,7 +1366,7 @@ def report_outlet(runid, config):
     wd = get_wd(runid)
 
     return render_template('reports/outlet.htm',
-                           outlet=Topaz.getInstance(wd).outlet,
+                           outlet=Watershed.getInstance(wd).outlet,
                            ron=Ron.getInstance(wd))
 
 
@@ -1231,10 +1380,10 @@ def task_setoutlet(runid, config):
         return exception_factory('latitude and longitude must be provided as floats')
 
     wd = get_wd(runid)
-    topaz = Topaz.getInstance(wd)
+    watershed = Watershed.getInstance(wd)
 
     try:
-        topaz.set_outlet(lng, lat)
+        watershed.set_outlet(lng, lat)
     except Exception:
         return exception_factory('Could not set outlet')
 
@@ -1296,14 +1445,15 @@ def browse_response(path, args=None, show_up=True, headers=None):
 #        return send_file(path, attachment_filename=basename)
 
     else:
-        with open(path) as fp:
-            try:
+        if path_lower.endswith('.gz'):
+            with gzip.open('loss_pw0.txt.gz', 'rt') as fp:
                 contents = fp.read()
-            except UnicodeDecodeError:
-                if 'raw' in args or 'Raw' in headers:
-                    return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
-                    # return matplotlib_vis(path)
-                else:
+            path_lower = path_lower[:-3]
+        else:
+            with open(path) as fp:
+                try:
+                    contents = fp.read()
+                except UnicodeDecodeError:
                     return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
 
         if 'raw' in args or 'Raw' in headers:
@@ -1344,6 +1494,7 @@ def browse_response(path, args=None, show_up=True, headers=None):
         r = Response(response=contents, status=200, mimetype="text/plain")
         r.headers["Content-Type"] = "text/plain; charset=utf-8"
         return r
+
 
 @app.route('/docs')
 @app.route('/docs//')
@@ -1582,7 +1733,7 @@ def _parse_map_change(form):
         return error, None
     try:
         center = [float(v) for v in center.split(',')]
-        zoom = int(zoom)
+        zoom = float(zoom)
         extent = [float(v) for v in bounds.split(',')]
         assert len(extent) == 4
         l, b, r, t = extent
@@ -1619,6 +1770,8 @@ def task_fetch_dem(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     ron.set_map(extent, center, zoom)
+
+    ron.fetch_dem()
 
     # Acquire DEM from wmesque server
     try:
@@ -1722,10 +1875,10 @@ def task_build_channels(runid, config):
             return exception_factory('Fetching DEM Failed')
 
     # Delineate channels
-
-    topaz = Topaz.getInstance(wd)
+    watershed = Watershed.getInstance(wd)
     try:
-        topaz.build_channels(csa=csa, mcl=mcl)
+        watershed.build_channels(csa=csa, mcl=mcl)
+
     except Exception as e:
         if isinstance(e, MinimumChannelLengthTooShortError):
             return exception_factory(e.__name__, e.__doc__)
@@ -1737,11 +1890,18 @@ def task_build_channels(runid, config):
 
 @app.route('/runs/<string:runid>/<config>/tasks/build_subcatchments/', methods=['POST'])
 def task_build_subcatchments(runid, config):
+
+    pkcsa = request.form.get('pkcsa', None)
+    try:
+        pkcsa = float(pkcsa)
+    except:
+        pass
+
     wd = get_wd(runid)
-    topaz = Topaz.getInstance(wd)
+    watershed = Watershed.getInstance(wd)
 
     try:
-        topaz.build_subcatchments()
+        watershed.build_subcatchments(pkcsa=pkcsa)
     except Exception as e:
         if isinstance(e, WatershedBoundaryTouchesEdgeError):
             return exception_factory(e.__name__, e.__doc__)
@@ -1796,13 +1956,20 @@ def task_abstract_watershed(runid, config):
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/sub_intersection/', methods=['POST'])
 def sub_intersection(runid, config):
-    wd = get_wd(runid)
+    try:
+        wd = get_wd(runid)
 
-    extent = request.json.get('extent', None)
+        extent = request.json.get('extent', None)
 
-    top = Topaz.getInstance(wd)
-    topaz_ids = top.sub_intersection(extent)
-    return jsonify(topaz_ids)
+        ron = Ron.getInstance(wd)
+        map = ron.map
+
+        subwta_fn = Watershed.getInstance(wd).subwta
+
+        topaz_ids = map.raster_intersection(extent, raster_fn=subwta_fn, discard=(0,))
+        return jsonify(topaz_ids)
+    except:
+        return exception_factory()
 
 
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])
@@ -3811,6 +3978,27 @@ def runid_query():
     else:
         return error_factory('not authorized')
 
+
+@app.route('/dev/access/')
+def dev_access():
+    if current_user.has_role('Root') or \
+       current_user.has_role('Admin') or \
+       current_user.has_role('Dev'):
+
+        try:
+
+            cmd = ['goaccess', '--log-format', 'COMBINED', '-o', 'html',
+                   '-f', '/var/log/apache2/access.log', '/var/log/apache2/access.log.1']
+
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            p.wait()
+            output = p.stdout.read().decode('UTF-8')
+            print(output)
+            return Response(output)
+        except:
+            return exception_factory()
+    else:
+        return error_factory('not authorized')
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_rhem', methods=['POST'])
