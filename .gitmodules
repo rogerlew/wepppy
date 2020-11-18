@@ -1,9 +1,6 @@
 [submodule "wepppy/nodb/mods/locations/portland"]
 	path = wepppy/nodb/mods/locations/portland
 	url = https://github.com/rogerlew/wepppy-locations-portland.git
-[submodule "wepppy/weppcloud/_migrations"]
-	path = wepppy/weppcloud/_migrations
-	url = https://github.com/rogerlew/wepppy-weppcloud-migrations.git
 [submodule "wepppy/nodb/mods/locations/seattle"]
 	path = wepppy/nodb/mods/locations/seattle
 	url = https://github.com/rogerlew/wepppy-locations-seattle.git
