@@ -12,7 +12,6 @@ import csv
 import shutil
 from collections import Counter
 import jsonpickle
-from copy import deepcopy
 from datetime import datetime
 from subprocess import Popen, PIPE
 from os.path import join as _join
@@ -22,16 +21,15 @@ import numpy as np
 from osgeo import gdal
 
 from wepppy.all_your_base import isint, isfloat
-from wepppy.all_your_base.geo import wgs84_proj4, read_arc
+from wepppy.all_your_base.geo import wgs84_proj4, read_raster
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import SoilReplacements, soil_specialization, simple_texture
+from wepppy.wepp.soils.utils import simple_texture
 
 from ...landuse import Landuse, LanduseMode
-from ...soils import Soils, SoilsMode
+from ...soils import Soils
 from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
-from ...mods.rred import Rred
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 from ....wepp.management import get_management_summary
@@ -446,11 +444,11 @@ class Disturbed(NoDbBase):
         if _exists(disturbed_cropped):
             os.remove(disturbed_cropped)
 
-        topaz = Topaz.getInstance(wd)
-        xmin, ymin, xmax, ymax = [str(v) for v in topaz.utmextent]
+        map = Ron.getInstance(wd).map
+        xmin, ymin, xmax, ymax = [str(v) for v in map.utm_extent]
         cellsize = str(Ron.getInstance(wd).map.cellsize)
 
-        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % topaz.srid,
+        cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % map.srid,
                '-tr', cellsize, cellsize,
                '-te', xmin, ymin, xmax, ymax,
                '-r', 'near', disturbed_path, disturbed_cropped]
@@ -463,6 +461,8 @@ class Disturbed(NoDbBase):
         landuse = Landuse.getInstance(wd)
         assert landuse.mode != LanduseMode.Single
 
+        watershed = Watershed.getInstance(wd)
+
         # noinspection PyBroadException
         try:
             landuse.lock()
@@ -470,7 +470,7 @@ class Disturbed(NoDbBase):
             sbs = SoilBurnSeverityMap(disturbed_cropped, self.breaks, self._nodata_vals)
             self._calc_sbs_coverage(sbs.data)
 
-            sbs_lc_d = sbs.build_lcgrid(self.subwta_arc, None)
+            sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
 
             for topaz_id, burn_class in sbs_lc_d.items():
                 if burn_class in ['131', '132', '133']:
@@ -550,7 +550,7 @@ class Disturbed(NoDbBase):
                 soils.soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / watershed.totalarea
+                coverage = 100.0 * soils.soils[k].area / watershed.wsarea
                 soils.soils[k].pct_coverage = coverage
 
             soils.dump_and_unlock()
@@ -565,8 +565,8 @@ class Disturbed(NoDbBase):
 
         try:
 
-            topaz = Topaz.getInstance(self.wd)
-            bounds, transform, proj = read_arc(topaz.bound_arc)
+            watershed = Watershed.getInstance(self.wd)
+            bounds, transform, proj = read_raster(watershed.bound_arc)
 
             assert bounds.shape == sbs.shape
 

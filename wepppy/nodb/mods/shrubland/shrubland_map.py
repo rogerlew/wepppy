@@ -15,7 +15,7 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
-from wepppy.all_your_base.geo import read_arc, read_raster
+from wepppy.all_your_base.geo import read_raster
 
 
 class ShrublandMap:
@@ -48,7 +48,7 @@ class ShrublandMap:
 
     def spatial_aggregation(self, subwta_fn):
         assert _exists(subwta_fn)
-        subwta, transform, proj = read_arc(subwta_fn, dtype=np.int32)
+        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
         _ids = sorted(list(set(subwta.flatten())))
 
         domlc_d = {}
@@ -65,7 +65,7 @@ class ShrublandMap:
 
     def spatial_stats(self, bounds_fn):
         assert _exists(bounds_fn)
-        bounds, transform, proj = read_arc(bounds_fn, dtype=np.int32)
+        bounds, transform, proj = read_raster(bounds_fn, dtype=np.int32)
         indices = np.where(bounds == 1)
 
         x = self.data[indices]

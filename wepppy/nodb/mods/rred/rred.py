@@ -146,10 +146,12 @@ class Rred(NoDbBase):
 
         landuse.lock()
 
+        watershed = Watershed.getInstance(self.wd)
+
         # noinspection PyBroadException
         try:
             landuse._mode = landuse_mode
-            landuse.domlc_d = lc.build_lcgrid(self.subwta_arc, None)
+            landuse.domlc_d = lc.build_lcgrid(watershed.subwta, None)
             landuse.dump_and_unlock()
         except Exception:
             landuse.unlock('-f')
@@ -185,9 +187,11 @@ class Rred(NoDbBase):
 
         soils.lock()
 
+        watershed = Watershed.getInstance(self.wd)
+
         # noinspection PyBroadException
         try:
-            _domsoil_d = lc.build_lcgrid(self.subwta_arc, None)
+            _domsoil_d = lc.build_lcgrid(watershed.subwta, None)
             _soils = {}
             for k, v in _domsoil_d.items():
                 sol = soilsmap[str(v)]
@@ -213,7 +217,7 @@ class Rred(NoDbBase):
                 _soils[k].area = 0.0
 
             watershed = Watershed.getInstance(self.wd)
-            total_area += watershed.totalarea
+            total_area += watershed.wsarea
             for topaz_id, k in _domsoil_d.items():
                 _soils[k].area += watershed.area_of(topaz_id)
 
