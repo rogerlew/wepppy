@@ -8,7 +8,7 @@ from wepppy.taudem import TauDEMTopazEmulator
 if __name__ == "__main__":
     t0 = time()
 
-    for test_dir in ['blackwood', 'logan', 'taylor_creek']:
+    for test_dir in ['blackwood', 'or_detroit', 'logan', 'taylor_creek']:
         wd = _join(test_dir, 'test')
 
         if _exists(wd):
@@ -30,10 +30,10 @@ if __name__ == "__main__":
         taudem.run_aread8()
         taudem.run_gridnet()
         taudem.run_src_threshold()
-        taudem.run_moveoutletstostrm(long=lng, lat=lat)
+        taudem.run_moveoutletstostrm(lng=lng, lat=lat)
 
         taudem.run_peukerdouglas()
-        taudem.run_peukerdouglas_stream_delineation()  #threshold=10)
+        taudem.run_peukerdouglas_stream_delineation()
         taudem.run_streamnet()
         taudem.run_dinfflowdir()
         taudem.run_areadinf()
@@ -48,4 +48,6 @@ if __name__ == "__main__":
     print(time() - t0)
 
 # gage_watershed for each subcatchment: 194.7 s
-# using support lib 178 s ???
+# using support lib: 178 s ???
+# single gage watershed with multiple outlets: 153
+# no debug outputs: 140 s
