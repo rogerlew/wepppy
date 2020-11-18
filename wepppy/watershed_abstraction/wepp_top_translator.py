@@ -6,6 +6,7 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+
 class WeppTopTranslator:
     """
     Utility class to translate between sub_ids, wepp_ids, 
@@ -70,10 +71,16 @@ class WeppTopTranslator:
         _wepp2top = self._wepp2top
 
         if sub_id is not None:
-            return int(sub_id.split('_')[1])
+            if '_' in str(sub_id):
+                return int(sub_id.split('_')[1])
+            else:
+                return sub_id
 
         if chn_id is not None:
-            return int(chn_id.split('_')[1])
+            if '_' in str(chn_id):
+                return int(chn_id.split('_')[1])
+            else:
+                return chn_id
 
         if chn_enum is not None:
             wepp = self.wepp(chn_enum=int(chn_enum))

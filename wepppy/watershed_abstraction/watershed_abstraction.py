@@ -11,27 +11,106 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 import math
+import json
 from collections import Counter
-from math import pi
+from math import pi, atan2
 import warnings
 
 import numpy as np
 from scipy.stats import circmean
 
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+from wepppy.all_your_base.geo import (
+    read_arc,
+    wgs84_proj4,
+    centroid_px,
+    GeoTransformer
+)
 
-from wepppy.all_your_base import NCPU
-from wepppy.all_your_base.geo import read_arc, wgs84_proj4, centroid_px, GeoTransformer
-from wepppy.watershed_abstraction.support import (
-    garbrecht_length, cummnorm_distance, representative_normalized_elevations, write_slp, identify_subflows,
-    weighted_slope_average, compute_direction, slp_asp_color, CentroidSummary, HillSummary, ChannelSummary,
+from .support import (
+    garbrecht_length,
+    cummnorm_distance,
+    representative_normalized_elevations,
+    write_slp,
+    identify_subflows,
+    compute_direction,
+    slp_asp_color,
+    CentroidSummary,
+    HillSummary,
+    ChannelSummary,
     FlowpathSummary
+
 )
 
 from .wepp_top_translator import WeppTopTranslator
 
 _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
+
+
+def weighted_slope_average_from_fps(flowpaths, slopes, distances, max_points=19):
+    """
+    calculates weighted slopes based on the flowpaths contained on the hillslope
+    """
+    # determine longest flowpath
+    lengths = [float(np.sum(d)) for d in distances]
+    i = int(np.argmax(lengths))
+    longest = float(lengths[i])
+
+    # determine number of points to define slope
+    num_points = len(distances[i])
+    if num_points > max_points:
+        num_points = max_points
+
+    if num_points == 1:
+        slope = float(slopes[i])
+        return [slope, slope], [0.0, 1.0]
+
+    # for each flowpath determine the distance from channel
+    # this requires reversing the elements in the distance
+    # array and calculating the cumulative sum
+    rev_cum_distances = [np.cumsum(d[::-1]) for d in distances]
+
+    # if we did this right, then the distance should equally the longest
+    # length
+    assert round(longest, 5) == round(rev_cum_distances[i][-1], 5)
+
+    # determine weights for each flowpath
+    areas = [f.shape[0] for f in flowpaths]
+    kps = np.array([L * a for L, a in zip(lengths, areas)])
+
+    # build an array with equally spaced points to interpolate on
+    distance_p = np.linspace(0, longest, num_points)
+
+    # this will hold the weighted slope estimates
+    eps = []
+
+    # we will weight the slope at each distance away from the channel
+    for d_p in distance_p:
+        num = 0  # to hold numerator value
+        kpsum = 0  # to hold k_p sum
+
+        for slp, rcd, kp in zip(slopes, rev_cum_distances, kps):
+            # reverse slopes
+            slp = slp[::-1]
+
+            # we only want to interpolate where the slope is defined
+            if d_p - 1e-6 > rcd[-1]:
+                continue
+
+            slp_p = np.interp(d_p, rcd, slp)
+            num += slp_p * kp
+            kpsum += kp
+
+        # store the weighted slope estimate
+        eps.append(num / kpsum)
+
+    # normalize distance_p array
+    distance_p /= longest
+
+    # reverse weighted slopes and return
+    w_slopes = np.array(eps[::-1])
+
+    return w_slopes.flatten().tolist(), distance_p.tolist()
 
 
 class ChannelRoutingError(Exception):
@@ -51,7 +130,6 @@ class ChannelRoutingError(Exception):
 
 
 class WatershedAbstraction:
-    # noinspection PyArgumentEqualDefault
     def __init__(self, wd, wat_dir):
         if not _exists(wd):
             raise Exception('Specified working directory does not exist')
@@ -76,15 +154,15 @@ class WatershedAbstraction:
         # we read in the maps with gdal and transpose so the
         # data is in row major order. This is less consistent
         # with maps but more consistent with numpy
-        sqrt2 = 2.0**0.5
+        sqrt2 = 2.0 ** 0.5
         self.paths = {1: ([-1, -1], sqrt2),
-                      2: ([0,  -1], 1),
-                      3: ([1,  -1], sqrt2),
-                      4: ([-1,  0], 1),
-                      6: ([0,   1], 1),
-                      7: ([-1,  1], sqrt2),
-                      8: ([0,   1], 1),
-                      9: ([1,   1], 1)}
+                      2: ([0, -1], 1),
+                      3: ([1, -1], sqrt2),
+                      4: ([-1, 0], 1),
+                      6: ([0, 1], 1),
+                      7: ([-1, 1], sqrt2),
+                      8: ([0, 1], 1),
+                      9: ([1, 1], 1)}
 
         # initialize datastructure containing json representation
         # of the abstracted watershed
@@ -106,12 +184,12 @@ class WatershedAbstraction:
         dnmcnt_inp = _join(wd, 'DNMCNT.INP')
 
         if not _exists(bound_fn) or \
-           not _exists(flopat_fn) or \
-           not _exists(flovec_fn) or \
-           not _exists(fvslop_fn) or \
-           not _exists(subwta_fn) or \
-           not _exists(relief_fn) or \
-           not _exists(taspec_fn):
+                not _exists(flopat_fn) or \
+                not _exists(flovec_fn) or \
+                not _exists(fvslop_fn) or \
+                not _exists(subwta_fn) or \
+                not _exists(relief_fn) or \
+                not _exists(taspec_fn):
             raise Exception('Missing required input file')
 
         bound, _transform, _proj = read_arc(bound_fn, dtype=np.uint8)
@@ -281,9 +359,10 @@ class WatershedAbstraction:
         return lng, lat
 
     def _read_netw_tab(self):
+        translator = self.translator
 
-        keys = "chnum order row col row1 col1 outr outc chnlen elevvup "\
-               "elevdn areaup areadn1 areadn dda node1 node2 node3 node4 "\
+        keys = "chnum order row col row1 col1 outr outc chnlen elevvup " \
+               "elevdn areaup areadn1 areadn dda node1 node2 node3 node4 " \
                "node5 node6 node7 slopedirect slopesmoothed".split()
 
         types = [int, int, int, int, int, int, int, int,
@@ -311,9 +390,9 @@ class WatershedAbstraction:
             self.watershed["channels"][topaz_id].order = 1
 
         for chnum in data:
-            head = data[chnum]["col"]-1, data[chnum]["row"]-1
-            center = data[chnum]["col1"]-1, data[chnum]["row1"]-1
-            tail = data[chnum]["outc"]-1, data[chnum]["outr"]-1
+            head = data[chnum]["col"] - 1, data[chnum]["row"] - 1
+            center = data[chnum]["col1"] - 1, data[chnum]["row1"] - 1
+            tail = data[chnum]["outc"] - 1, data[chnum]["outr"] - 1
 
             chn_id0 = subwta[head]
             chn_id1 = subwta[center]
@@ -333,6 +412,19 @@ class WatershedAbstraction:
             # node_indexes = [data[chnum]["node%i" % i] for i in range(1, 8)]
             # node_indexes = [indx for indx in node_indexes if indx != 0]
             self.watershed["channels"]["chn_{}".format(chnout_id)].order = int(data[chnum]["order"])
+
+            # Old broken order assignment
+            # for chn_enum in node_indexes:
+            #     if chn_enum > translator.channel_n:
+            #         continue
+            #
+            #    chn_id = "chn_%i" % translator.top(chn_enum=chn_enum)
+            #     if chn_id not in self.watershed["channels"]:
+            #       self.watershed["channels"][chn_id] = {}
+            #
+            #    order = data[chnum]["order"]
+            #    self.watershed["channels"][chn_id].order = order
+            #    # self.watershed["channels"][chn_id].width = self.cellsize / order
 
             if chnout_id == chn_id0:
                 continue
@@ -354,8 +446,8 @@ class WatershedAbstraction:
         with open(dnmcnt_inp) as fid:
             lines = fid.readlines()
 
-            row = int(lines[98])-1
-            col = int(lines[107])-1
+            row = int(lines[98]) - 1
+            col = int(lines[107]) - 1
 
             if not str(subwta[col, row]).endswith('4'):
                 raise Exception('Identified outlet location is not a channel')
@@ -383,7 +475,7 @@ class WatershedAbstraction:
 
         for i, chn_id in enumerate(chn_ids):
             if verbose:
-                print('abstracting channel %s (%i of %i)...' % (chn_id, i+1, n))
+                print('abstracting channel %s (%i of %i)...' % (chn_id, i + 1, n))
             self.abstract_channel(chn_id, wepp_chn_type=wepp_chn_type)
 
         self.channel_n = len(chn_ids)
@@ -463,7 +555,7 @@ class WatershedAbstraction:
         head = [float(v) for v in head]
         tail = [v * cellsize for v in flowpath[0]]
         tail = [float(v) for v in tail]
-        
+
         direction = compute_direction(head, tail)
 
         _centroid_px = centroid_px(indx, indy)
@@ -471,7 +563,7 @@ class WatershedAbstraction:
 
         elevs = representative_normalized_elevations(distance_p, slope)
         slope_scalar = float(abs(elevs[-1]))
-        
+
         chn_summary = ChannelSummary(
             topaz_id=chn_id,
             wepp_id=translator.wepp(top=chn_id),
@@ -494,15 +586,12 @@ class WatershedAbstraction:
                 px=_centroid_px,
                 lnglat=centroid_lnglat
             )
-        )     
-        
+        )
+
         # save channel abstraction to instance
         watershed['channels']['chn_%i' % chn_id] = chn_summary
-        
-    def abstract_subcatchments(self, verbose=False, warn=False):
-        pool = ThreadPoolExecutor(NCPU)
-        futures = []
 
+    def abstract_subcatchments(self, verbose=False, warn=False):
         subwta = self.subwta
 
         # extract the subcatchment and channel ids from the subwta map
@@ -519,14 +608,11 @@ class WatershedAbstraction:
 
         for i, sub_id in enumerate(sub_ids):
             if verbose:
-                print('abstracting subtatchment %s (%i of %i)' % (sub_id, i+1, n))
-
-            futures.append(pool.submit(self.abstract_subcatchment, (sub_id)))
-
-        wait(futures, return_when=FIRST_EXCEPTION)
+                print('abstracting subtatchment %s (%i of %i)' % (sub_id, i + 1, n))
+            self.abstract_subcatchment(sub_id, verbose=verbose, warn=warn)
 
         self.hillslope_n = len(sub_ids)
-        
+
     def _walk_flowpath(self, sub_id: int, c: int, r: int, warn=False) -> Tuple[np.array, np.array, np.array]:
         """
         walk down the gradient until we reach a channel
@@ -587,7 +673,7 @@ class WatershedAbstraction:
         # cast flowpath and distance as ndarrays
         flowpath = np.array(flowpath)
         distance = np.array(distance)
-        
+
         # extract the slope values for the flowpath. We don't take the
         # last flowpath so it is aligned with the distance array
         slope = fvslop[(flowpath[:-1, 0], flowpath[:-1, 1])]
@@ -616,7 +702,7 @@ class WatershedAbstraction:
         n = len(indx)
         for i, (c, r) in enumerate(zip(indx, indy)):
             if verbose:
-                print('walking flowpath %i of %i (%s)' % (i+1, n, sub_id))
+                print('walking flowpath %i of %i (%s)' % (i + 1, n, sub_id))
 
             flowpath, slope, distance = self._walk_flowpath(sub_id, c, r, warn=warn)
             flowpaths.append(flowpath)
@@ -650,9 +736,9 @@ class WatershedAbstraction:
         head = [float(v) for v in head]
         tail = [v * cellsize for v in [indx[0], indy[0]]]
         tail = [float(v) for v in tail]
-        
+
         direction = compute_direction(head, tail)
-        
+
         elevs = representative_normalized_elevations(distance_p, slope)
         slope_scalar = float(abs(elevs[-1]))
         color = slp_asp_color(slope_scalar, aspect)
@@ -674,8 +760,8 @@ class WatershedAbstraction:
                 px=_centroid_px,
                 lnglat=centroid_lnglat
             )
-        )     
-        
+        )
+
     def abstract_flowpaths(self, sub_id: int, flowpaths: List[np.array],
                            slopes: List[np.array], distances: List[np.array]) -> \
             Tuple[Dict[str, FlowpathSummary], List[List[int]]]:
@@ -691,7 +777,7 @@ class WatershedAbstraction:
         for j, fp_indxs in enumerate(subflows):
             # build the flowpath id
             # start at 1 to make sure wepp is happy
-            fp_id = 'flow_%i_%i' % (sub_id, j+1)
+            fp_id = 'flow_%i_%i' % (sub_id, j + 1)
 
             fp_d[fp_id] = self.abstract_flowpath(flowpaths[fp_indxs[0]],
                                                  slopes[fp_indxs[0]],
@@ -721,7 +807,7 @@ class WatershedAbstraction:
         # find corresponding chn_id
         chn_id = 'chn_%i' % (int(math.floor(sub_id / 10.0) * 10) + 4)
         chn_summary = watershed["channels"][chn_id]
-            
+
         # If subcatchment is a source type then we calculate the distance
         # by taking a weighted average based on the length of the flowpaths
         # contained in the subcatchment
@@ -735,7 +821,7 @@ class WatershedAbstraction:
         else:
             width = chn_summary.length
             length = area / width
-            
+
         direction = chn_summary.direction
         if str(sub_id).endswith('2'):
             direction += 90
@@ -746,9 +832,8 @@ class WatershedAbstraction:
         aspect = self._determine_aspect(indx, indy)
 
         # calculate weighted slope from flowpaths
-        areas = [f.shape[0] for f in flowpaths]
         w_slopes, distance_p = \
-            weighted_slope_average(areas, slopes, distances)
+            weighted_slope_average_from_fps(flowpaths, slopes, distances)
 
         # abstract the flowpaths
         fp_d, subflows = \
@@ -759,11 +844,11 @@ class WatershedAbstraction:
         fp_longest_slope = fp_d[fp_longest].slope_scalar
 
         watershed['flowpaths']['hill_%i' % sub_id] = fp_d
-        
+
         # cast lists of ndarrays to list of lists so we can dump to json
         flowpaths = [x.tolist() for x in flowpaths]
-#        distances = [x.tolist() for x in distances]
-#        slopes = [x.tolist() for x in slopes]
+        #        distances = [x.tolist() for x in distances]
+        #        slopes = [x.tolist() for x in slopes]
 
         # determine pourpoint from flowpaths
         pourpoint = Counter([tuple(fp[-1]) for fp in flowpaths]).most_common()[0][0]
@@ -775,11 +860,11 @@ class WatershedAbstraction:
         elevs = representative_normalized_elevations(distance_p, w_slopes)
         slope_scalar = float(abs(elevs[-1]))
 
-        sub_summary = HillSummary(  
+        sub_summary = HillSummary(
             topaz_id=sub_id,
             wepp_id=translator.wepp(top=sub_id),
             w_slopes=list(w_slopes),
-            pourpoint=list(pourpoint),     
+            pourpoint=list(pourpoint),
             length=float(length),
             width=float(width),
             area=float(area),
@@ -795,7 +880,7 @@ class WatershedAbstraction:
             fp_longest=fp_longest,
             fp_longest_length=fp_longest_length,
             fp_longest_slope=fp_longest_slope
-        )     
+        )
         watershed['hillslopes']['hill_%i' % sub_id] = sub_summary
 
     def abstract_structure(self, verbose=False):
@@ -849,3 +934,16 @@ class WatershedAbstraction:
             structure.append([int(v) for v in _structure])
 
         self._structure = structure
+
+
+if __name__ == '__main__':
+    watershed_a = WatershedAbstraction('/geodata/weppcloud_runs/419e3b7f-ae62-4bc1-af10-bba44266f494/dem/topaz',
+                                       '/geodata/weppcloud_runs/419e3b7f-ae62-4bc1-af10-bba44266f494/watershed')
+    watershed_a.abstract(verbose=False)
+#    watershed_a.write_slps(channels=1, subcatchments=1, flowpaths=1)
+#    js = watershed_a.json()
+
+#    watershed_b = WatershedAbstraction()
+#    watershed_b.load(js)
+#    watershed_b.dumpjson('wb.json')
+#    pprint(watershed_b.watershed["channels"])
