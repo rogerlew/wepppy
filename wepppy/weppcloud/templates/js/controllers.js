@@ -330,7 +330,9 @@ var Map = function () {
     function createInstance() {
 
         // Use leaflet map
-        var that = L.map("mapid");
+        var that = L.map("mapid", {
+            zoomSnap: 0.25
+        });
 
         that.scrollWheelZoom.disable();
 
@@ -774,7 +776,7 @@ var ChannelDelineation = function () {
             };
         };
 
-        that.labelStyle = "text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
+        that.labelStyle = "color:blue; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
 
         that.form = $("#build_channels_form");
         that.info = $("#build_channels_form #info");
@@ -939,12 +941,12 @@ var ChannelDelineation = function () {
             // eliminated we can just show the channels in the watershed. The
             // underlying vector will contain feature.properties.TopazID attributes
             $.get({
-                url: "query/topaz_pass/",
+                url: "query/delineation_pass/",
                 cache: false,
                 success: function success(response) {
                     response = parseInt(response, 10);
                     if ($.inArray(response, [0, 1, 2]) === -1) {
-                        self.pushResponseStacktrace(self, { Error: "Error Determining TOPAZ Pass" });
+                        self.pushResponseStacktrace(self, { Error: "Error Determining Delineation Pass" });
                         return;
                     }
 
@@ -1051,6 +1053,7 @@ var ChannelDelineation = function () {
 
         that.on2EachFeature = function (feature, layer) {
             var self = instance;
+            var topId = feature.properties.TopazID;
             layer.on({
                 zoomend: function zoomend() {
                     self.polys.setStyle(self.style);
@@ -1061,11 +1064,9 @@ var ChannelDelineation = function () {
                     map.chnQuery(topaz_id);
                 }
             });
-
             // build labels
-            var topId = feature.properties.TopazID;
             if ($.inArray(topId, self.topIds) === -1) {
-                var center = polylabel(feature.geometry.coordinates, 1.0);
+                var center = feature.geometry.coordinates[feature.geometry.coordinates.length - 1];
                 center = [center[1], center[0]];
                 var label = L.marker(center, {
                     icon: L.divIcon({
@@ -1329,7 +1330,7 @@ var SubcatchmentDelineation = function () {
             "fillOpacity": 0.0
         };
 
-        that.labelStyle = "font-size: smaller; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
+        that.labelStyle = "color: #ff7800; text-shadow: -1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF;";
 
         that.data = null; // JSON from Flask
         that.polys = null; // Leaflet geoJSON layer
@@ -2401,6 +2402,7 @@ var SubcatchmentDelineation = function () {
 
             $.post({
                 url: "tasks/build_subcatchments/",
+                data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("BUILD_SUBCATCHMENTS_TASK_COMPLETED");
