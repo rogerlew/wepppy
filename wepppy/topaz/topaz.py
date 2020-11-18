@@ -24,12 +24,17 @@ from imageio import imread
 from osgeo import gdal, ogr, osr
 import utm
 
+import utm
+
 import numpy as np
 
 from wepppy.all_your_base import isfloat, IS_WINDOWS
-from wepppy.all_your_base.geo import read_arc, get_utm_zone, GeoTransformer, wgs84_proj4
+from wepppy.all_your_base.geo import read_arc, get_utm_zone, wgs84_proj4
 
 from wepppy.watershed_abstraction import WeppTopTranslator
+from wepppy.watershed_abstraction.support import (
+    json_to_wgs, polygonize_netful, polygonize_bound, polygonize_subcatchments
+)
 
 os.environ["PYTHONUNBUFFERED"] = "1"
 
@@ -74,8 +79,11 @@ def _cp_chmod(src, dst, mode):
     helper function to copy a file and set chmod
     """
     shutil.copyfile(src, dst)
-    os.chmod(dst, mode)
 
+    try:
+        os.chmod(dst, mode)
+    except:
+        pass
 
 class TopazUnexpectedTermination(Exception):
     """
@@ -328,9 +336,9 @@ class TopazRunner:
 
         return True
 
-    def longlat_to_pixel(self, long, lat):
+    def lnglat_to_pixel(self, lng, lat):
         """
-        return the x,y pixel coords of long, lat
+        return the x,y pixel coords of lng, lat
         """
 
         # unpack variables for instance
@@ -338,7 +346,7 @@ class TopazRunner:
         ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
 
         # find easting and northing
-        x, y, _, _ = utm.from_latlon(lat, long, self.utm_zone)
+        x, y, _, _ = utm.from_latlon(lat, lng, self.utm_zone)
 
         # assert this makes sense with the stored extent
         assert round(x) >= round(ul_x), (x, ul_x)
@@ -373,22 +381,22 @@ class TopazRunner:
 
         return easting, northing
 
-    def pixel_to_longlat(self, x, y):
+    def pixel_to_lnglat(self, x, y):
         """
-        return the long/lat (WGS84) coords from pixel coords
+        return the lng/lat (WGS84) coords from pixel coords
         """
         easting, northing = self.pixel_to_utm(x, y)
-        proj2wgs_transformer = GeoTransformer(src_proj4=self.srs_proj4, dst_proj4=wgs84_proj4)
-        return proj2wgs_transformer.transform(easting, northing)
+        return utm.to_latlon(easting=easting, northing=northing,
+                             zone_number=self.utm_zone, northern=self.hemisphere == 'N')
 
-    def find_closest_channel(self, long, lat, pixelcoords=False):
+    def find_closest_channel(self, lng, lat, pixelcoords=False):
         """
-        find the closest channel give a long and lat or pixel coords
+        find the closest channel give a lng and lat or pixel coords
         (pixelcoords=True)
 
         returns (x, y), distance
            where (x, y) are pixel coords and distance is the distance from the
-           specified long, lat and distance is the distance from long, lat
+           specified lng, lat and distance is the distance from lng, lat
            in pixels
         """
 
@@ -402,9 +410,9 @@ class TopazRunner:
         cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
 
         if pixelcoords:
-            x, y = long, lat
+            x, y = lng, lat
         else:
-            x, y = self.longlat_to_pixel(long, lat)
+            x, y = self.lnglat_to_pixel(lng, lat)
 
         # the easy case
         if mask[y, x] == 2:
@@ -521,6 +529,7 @@ class TopazRunner:
         self.ll_x = ll_x
         self.ll_y = ll_y
         self.utm_zone = utm_zone
+        self.hemisphere = hemisphere
         self.srs_proj4 = srs.ExportToProj4()
         srs.MorphToESRI()
         self.srs_wkt = srs.ExportToWkt()
@@ -850,140 +859,14 @@ class TopazRunner:
 
         raise RasproCrashedException(output)
 
-    def _polygonize_subcatchments(self):
-        subwta_fn = _join(self.topaz_wd, "SUBWTA.ARC")
-        dst_fn = _join(self.topaz_wd, "SUBWTA.JSON")
-
-        assert _exists(subwta_fn)
-        src_ds = gdal.Open(subwta_fn)
-        srcband = src_ds.GetRasterBand(1)
-
-        drv = ogr.GetDriverByName("GeoJSON")
-        dst_ds = drv.CreateDataSource(dst_fn)
-
-        srs = osr.SpatialReference()
-        srs.ImportFromWkt(src_ds.GetProjectionRef())
-
-        dst_layer = dst_ds.CreateLayer("SUBWTA", srs=srs)
-        dst_fieldname = 'TopazID'
-
-        fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
-        dst_layer.CreateField(fd)
-        dst_field = 0
-
-        prog_func = None
-
-        gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
-                        callback=prog_func)
-
-        ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
-        top_sub_ids = []
-        top_chn_ids = []
-
-        for id in ids:
-            if id[-1] == '0':
-                continue
-            if id[-1] == '4':
-                top_chn_ids.append(int(id))
-            else:
-                top_sub_ids.append(int(id))
-
-        translator = WeppTopTranslator(top_chn_ids=top_chn_ids,
-                                       top_sub_ids=top_sub_ids)
-
-        del src_ds
-        del dst_ds
-
-        # remove the TopazID = 0 feature defining a bounding box
-        # and the channels
-        with open(dst_fn) as fp:
-            js = json.load(fp)
-
-        _features = []
-        for f in js['features']:
-            topaz_id = str(f['properties']['TopazID'])
-
-            if topaz_id[-1] in '04':
-                continue
-
-            wepp_id = translator.wepp(top=topaz_id)
-            f['properties']['WeppID'] = wepp_id
-            _features.append(f)
-
-        js['features'] = _features
-
-        dst_fn2 = _join(self.topaz_wd, 'SUBCATCHMENTS.JSON')
-        with open(dst_fn2, 'w') as fp:
-            json.dump(js, fp, allow_nan=False)
-
-        self._json_to_wgs(dst_fn2)
-
-    def _polygonize_bound(self):
-        bound_fn = _join(self.topaz_wd, "BOUND.ARC")
-        dst_fn = _join(self.topaz_wd, "BOUND.JSON")
-
-        assert _exists(bound_fn)
-        src_ds = gdal.Open(bound_fn)
-        srcband = src_ds.GetRasterBand(1)
-
-        drv = ogr.GetDriverByName("GeoJSON")
-        dst_ds = drv.CreateDataSource(dst_fn)
-
-        srs = osr.SpatialReference()
-        srs.ImportFromWkt(src_ds.GetProjectionRef())
-
-        dst_layer = dst_ds.CreateLayer("BOUND", srs=srs)
-        dst_fieldname = 'Watershed'
-
-        fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
-        dst_layer.CreateField(fd)
-        dst_field = 0
-
-        prog_func = None
-
-        gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
-                        callback=prog_func)
-
-        del src_ds
-        del dst_ds
-
-        self._json_to_wgs(dst_fn)
-
-    def _json_to_wgs(self, src_fn, verbose=True):
-
-        from pyproj import CRS, Transformer
-        proj2wgs_transformer = Transformer.from_crs(self.srs_proj4, wgs84_proj4, always_xy=True)
-
-        with open(src_fn) as fp:
-            js = json.load(fp)
-
-        _features = []
-        for f in js['features']:
-            coords = f['geometry']['coordinates']
-            coords = np.array(coords)
-            if len(coords.shape) < 3:
-                continue
-
-            wgs_lngs, wgs_lats = proj2wgs_transformer.transform(coords[0, :, 0],
-                                                                coords[0, :, 1])
-            coords[0, :, 0] = wgs_lngs
-            coords[0, :, 1] = wgs_lats
-            f['geometry']['coordinates'] = coords.tolist()
-            _features.append(f)
-
-        js['features'] = _features
-
-        dst_wgs_fn = src_fn.replace('.JSON', '.WGS.JSON')
-        with open(dst_wgs_fn, 'w') as fp:
-            json.dump(js, fp, allow_nan=False)
-
-        return
-
     def _polygonize_channels(self):
         subwta_fn = _join(self.topaz_wd, "SUBWTA.ARC")
 
         assert _exists(subwta_fn)
         src_ds = gdal.Open(subwta_fn)
+        srs = osr.SpatialReference()
+        srs.ImportFromWkt(src_ds.GetProjectionRef())
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
         srcband = src_ds.GetRasterBand(1)
         ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
         top_sub_ids = []
@@ -1024,57 +907,8 @@ class TopazRunner:
         with open(dst_fn2, 'w') as fp:
             json.dump(js, fp, allow_nan=False)
 
-        # create a version in WGS 1984 (long/lat)
-        self._json_to_wgs(dst_fn2)
-
-    def _polygonize_netful(self):
-        src_fn = _join(self.topaz_wd, 'NETFUL.ARC')
-        dst_fn = _join(self.topaz_wd, "NETFUL.JSON")
-
-        assert _exists(src_fn)
-        src_ds = gdal.Open(src_fn)
-        srcband = src_ds.GetRasterBand(1)
-
-        drv = ogr.GetDriverByName("GeoJSON")
-        dst_ds = drv.CreateDataSource(dst_fn)
-
-        srs = osr.SpatialReference()
-        srs.ImportFromWkt(src_ds.GetProjectionRef())
-
-        dst_layer = dst_ds.CreateLayer("NETFUL", srs=srs)
-        dst_fieldname = 'TopazID'
-
-        fd = ogr.FieldDefn(dst_fieldname, ogr.OFTInteger)
-        dst_layer.CreateField(fd)
-        dst_field = 0
-
-        prog_func = None
-
-        gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
-                        callback=prog_func)
-
-        del src_ds
-        del dst_ds
-
-        # remove the TopazID = 0 feature defining a bounding box
-        # and the channels
-        with open(dst_fn) as fp:
-            js = json.load(fp)
-
-        _features = []
-        for f in js['features']:
-            topaz_id = str(f['properties']['TopazID'])
-
-            if topaz_id == "1":
-                _features.append(f)
-
-        js['features'] = _features
-
-        with open(dst_fn, 'w') as fp:
-            json.dump(js, fp, allow_nan=False)
-
-        # create a version in WGS 1984 (long/lat)
-        self._json_to_wgs(dst_fn)
+        # create a version in WGS 1984 (lng/lat)
+        json_to_wgs(dst_fn2)
 
     def build_channels(self, create_channels=True):
         """
@@ -1100,7 +934,9 @@ class TopazRunner:
         self._clean_dir(True)
 
         if create_channels:
-            self._polygonize_netful()
+            src_fn = _join(self.topaz_wd, 'NETFUL.ARC')
+            dst_fn = _join(self.topaz_wd, "NETFUL.JSON")
+            polygonize_netful(src_fn, dst_fn)
 
     def create_channels_png(self):
         #
@@ -1136,12 +972,12 @@ class TopazRunner:
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, cwd=topaz_wd)
         p.wait()
 
-
     def build_subcatchments(self, outlet_px, polygonize_subwta=True):
         """
         run topaz to build the channels and subcatchments
         """
-        if not exists(_join(self.topaz_wd, 'NETFUL.OUT')):
+        topaz_wd = self.topaz_wd
+        if not exists(_join(topaz_wd, 'NETFUL.OUT')):
             raise Exception('Must build_channels before building subcatchment')
 
         self.outlet = outlet_px
@@ -1159,6 +995,13 @@ class TopazRunner:
         self._clean_dir(True)
 
         if polygonize_subwta:
-            self._polygonize_subcatchments()
+            subwta_fn = _join(topaz_wd, 'SUBWTA.ARC')
+            dst_fn = _join(topaz_wd, 'SUBWTA.JSON')
+            dst_fn2 = _join(topaz_wd, 'SUBCATCHMENTS.JSON')
+            polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2)
+
             self._polygonize_channels()
-            self._polygonize_bound()
+
+            bound_fn = _join(topaz_wd, "BOUND.ARC")
+            dst_fn = _join(topaz_wd, "BOUND.JSON")
+            polygonize_bound(bound_fn, dst_fn)
