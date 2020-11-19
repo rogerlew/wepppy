@@ -60,7 +60,8 @@ from wepppy.all_your_base import (
     isfloat,
     isnan,
     isinf,
-    NCPU
+    NCPU,
+    IS_WINDOWS
 )
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4
 
@@ -629,7 +630,11 @@ class Wepp(NoDbBase, LogMixin):
 
             src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            shutil.copyfile(src_fn, dst_fn)
+            
+            if IS_WINDOWS:
+                shutil.copyfile(src_fn, dst_fn)
+            else:
+                os.symlink(src_fn, dst_fn)
 
             # use getattr for old runs that don't have a run_flowpaths attribute
             if getattr(self, 'run_flowpaths', False):
@@ -637,7 +642,10 @@ class Wepp(NoDbBase, LogMixin):
                     fn = '{}.slp'.format(fp)
                     src_fn = _join(wat_dir, fn)
                     dst_fn = _join(fp_runs_dir, fn)
-                    shutil.copyfile(src_fn, dst_fn)
+                    if IS_WINDOWS:
+                        shutil.copyfile(src_fn, dst_fn)
+                    else:
+                        os.symlink(src_fn, dst_fn)
 
     def _prep_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
@@ -675,12 +683,20 @@ class Wepp(NoDbBase, LogMixin):
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = _join(soils_dir, soil.fname)
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-            shutil.copyfile(src_fn, dst_fn)
+
+            if IS_WINDOWS:
+                shutil.copyfile(src_fn, dst_fn)
+            else:
+                os.symlink(src_fn, dst_fn)
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
-                    shutil.copyfile(src_fn, dst_fn)
+
+                    if IS_WINDOWS:
+                        shutil.copyfile(src_fn, dst_fn)
+                    else:
+                        os.symlink(src_fn, dst_fn)
 
     def _prep_climates(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -694,13 +710,21 @@ class Wepp(NoDbBase, LogMixin):
             dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
 
             cli_summary = climate.sub_summary(topaz_id)
-            cli_path = _join(cli_dir, cli_summary['cli_fn'])
-            shutil.copyfile(cli_path, dst_fn)
+            src_fn = _join(cli_dir, cli_summary['cli_fn'])
+
+            if IS_WINDOWS:
+                shutil.copyfile(src_fn, dst_fn)
+            else:
+                os.symlink(src_fn, dst_fn)
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
-                    shutil.copyfile(cli_path, dst_fn)
+
+                    if IS_WINDOWS:
+                        shutil.copyfile(src_fn, dst_fn)
+                    else:
+                        os.symlink(src_fn, dst_fn)
 
     def _make_hillslope_runs(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -890,8 +914,13 @@ class Wepp(NoDbBase, LogMixin):
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
 
-        shutil.copyfile(_join(wat_dir, 'channels.slp'),
-                        _join(runs_dir, 'pw0.slp'))
+        src_fn = _join(wat_dir, 'channels.slp')
+        dst_fn = _join(runs_dir, 'pw0.slp')
+
+        if IS_WINDOWS:
+            shutil.copyfile(src_fn, dst_fn)
+        else:
+            os.symlink(src_fn, dst_fn)
 
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
                           channel_routing_method=ChannelRoutingMethod.MuskingumCunge):
@@ -1072,8 +1101,12 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         climate = Climate.getInstance(self.wd)
         dst_fn = _join(runs_dir, 'pw0.cli')
-        cli_path = _join(self.cli_dir, climate.cli_fn)
-        shutil.copyfile(cli_path, dst_fn)
+        src_fn = _join(self.cli_dir, climate.cli_fn)
+
+        if IS_WINDOWS:
+            shutil.copyfile(src_fn, dst_fn)
+        else:
+            os.symlink(src_fn, dst_fn)
 
     def _make_watershed_run(self, translator):
         runs_dir = self.runs_dir
