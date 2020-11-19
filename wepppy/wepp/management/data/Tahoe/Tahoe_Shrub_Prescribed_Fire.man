@@ -13,7 +13,6 @@
 
 1  # Number of plant scenarios
 
-
 Tah_1588
 With no Senescence or decomposition
 (null)
@@ -30,26 +29,13 @@ WeppWillSet
 # Operation Section   #
 #######################
 
-1  # Number of operation scenarios
-
-
-Tah_1837
-(null)
-W. Elliot 05/10
-(null)
-1  #landuse
-0.0000 0.0000 0
-4 # pcode - other
-0.0000 0.0000 0.0000 0.0000 0.0600 1.0000 0.0010
-
-
+0  # Number of operation scenarios
 
 ###############################
 # Initial Conditions Section  #
 ###############################
 
 1  # Number of initial scenarios
-
 
 Tah_1712
 For no growth, no decomp, no senescence
@@ -64,30 +50,11 @@ W. Elliot  05/10
 0.00000 0.00000 0.00000 0.00000 0.00000
 0.30000 0.30000
 
-
-
-
 ############################
 # Surface Effects Section  #
 ############################
 
-1  # Number of Surface Effects Scenarios
-
-
-#
-#   Surface Effects Scenario 1 of 1
-#
-Year 1
-From WEPP database
-Your name, phone
-(null)
-1  # landuse  - cropland
-1 # ntill - number of operations
-  2  # mdate  --- 1 / 2
-  1  # op --- Tah_1837
-      0.010  # depth
-      2  # type
-
+0  # Number of Surface Effects Scenarios
 
 #######################
 # Contouring Section  #
@@ -113,8 +80,6 @@ Your name, phone
 #
 Year 1
 
-
-
 1  # landuse <cropland>
 1  # plant growth scenario
 1  # surface effect scenario
@@ -126,7 +91,6 @@ Year 1
    0 # perennial stop growth date --- 0/0
    0.0000  # row width
    3  # neither cut or grazed
-
 
 #######################
 # Management Section  #
