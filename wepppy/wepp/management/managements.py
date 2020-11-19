@@ -1933,6 +1933,14 @@ def get_management(dom, _map=None) -> Management:
     return Management(**d[k])
 
 
+def get_channel_management():
+    return Management(**dict(Key=0, 
+                             ManagementFile='channel.man',
+                             ManagementDir=_join(_thisdir, 'data'),
+                             Description='Channel',
+                             Color=[0, 0, 255, 255]))
+
+
 def get_plant_loop_names(runs_dir):
     plant_loops = set()
     man_fns = glob(_join(runs_dir, '*.man'))

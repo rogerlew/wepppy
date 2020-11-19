@@ -51,7 +51,8 @@ from wepppy.wepp.runner import (
 )
 from wepppy.wepp.management import (
     get_channel,
-    pmetpara_prep
+    pmetpara_prep,
+    get_channel_management
 )
 
 
@@ -1052,14 +1053,9 @@ class Wepp(NoDbBase, LogMixin):
 
         years = Climate.getInstance(self.wd).input_years
 
-        # Look at all the channel managements and use the most common channel type for all the channels
-        keys = [man.key for topaz_id, man in landuse.chn_iter()]
-        from collections import Counter
-        mankey = Counter(keys).most_common()[0][0]
-
-        chn_man = landuse.managements[str(mankey)].get_management()
-        if len(keys) > 1:
-            chn_man.make_multiple_ofe(len(keys))
+        chn_n = Watershed.getInstance(self.wd).chn_n
+        chn_man = get_channel_management()
+        chn_man.make_multiple_ofe(chn_n)
 
         if years > 1:
             multi = chn_man.build_multiple_year_man(years)
