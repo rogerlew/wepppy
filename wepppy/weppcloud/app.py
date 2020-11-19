@@ -400,7 +400,13 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
                 if isdir(path):
                     s.append(_padding + '+-<a href="{file}">{file}</a>\n'.format(file=file))
                 else:
-                    f.append(_padding + '>-<a href="{file}">{file}</a>\n'.format(file=file))
+                    if os.path.islink(path):
+                        target = ' -> {}'.format('/'.join(os.readlink(path).split('/')[-2:]))
+                    else:
+                        target = ''
+
+                    f.append(_padding + '>-<a href="{file}">{file}</a>{target}\n'
+                             .format(file=file, target=target))
 
         s.extend(f)
         return s
@@ -1446,10 +1452,6 @@ def browse_response(path, args=None, show_up=True, headers=None):
             .format(up, htmltree(path))
 
         return Response(c, mimetype='text/html')
-
-#    elif path_lower.endswith('.tif') or path_lower.endswith('.png'):
-#        basename = path.split()[-1]
-#        return send_file(path, attachment_filename=basename)
 
     else:
         if path_lower.endswith('.gz'):
