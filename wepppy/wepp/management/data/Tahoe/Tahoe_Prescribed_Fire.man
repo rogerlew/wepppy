@@ -30,20 +30,8 @@ WeppWillSet
 # Operation Section   #
 #######################
 
-1  # Number of operation scenarios
-
-
-Tah_1837
-(null)
-W. Elliot 05/10
-(null)
-1  #landuse
-0.0000 0.0000 0
-4 # pcode - other 
-0.0000 0.0000 0.0000 0.0000 0.0600 1.0000 0.0010 
-
-
-
+0  # Number of operation scenarios
+ 
 ###############################
 # Initial Conditions Section  #
 ###############################
@@ -71,23 +59,7 @@ W. Elliot  05/10
 # Surface Effects Section  #
 ############################
 
-1  # Number of Surface Effects Scenarios
-
-
-#
-#   Surface Effects Scenario 1 of 1
-#
-Year 1
-From WEPP database
-Your name, phone
-(null)
-1  # landuse  - cropland
-1 # ntill - number of operations
-  2  # mdate  --- 1 / 2 
-  1  # op --- Tah_1837
-      0.010  # depth
-      2  # type
-
+0  # Number of Surface Effects Scenarios
 
 #######################
 # Contouring Section  #
