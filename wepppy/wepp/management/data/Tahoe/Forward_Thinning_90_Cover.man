@@ -77,7 +77,9 @@ W. Elliot  05/10
 # Yearly scenario 1 of 1
 #
 Year 1
-
+(null)
+(null)
+(null)
 1  # landuse <cropland>
 1  # plant growth scenario
 1  # surface effect scenario
