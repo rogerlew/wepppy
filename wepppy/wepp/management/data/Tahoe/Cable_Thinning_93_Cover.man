@@ -31,6 +31,7 @@ WeppWillSet
 
 0  # Number of operation scenarios
 
+
 ###############################
 # Initial Conditions Section  #
 ###############################
@@ -50,11 +51,13 @@ W. Elliot  05/10
 0.00000 0.00000 0.00000 0.00000 0.00000
 0.40000 0.40000
 
+
 ############################
 # Surface Effects Section  #
 ############################
 
 0  # Number of Surface Effects Scenarios
+
 
 #######################
 # Contouring Section  #
@@ -62,11 +65,13 @@ W. Elliot  05/10
 
 0  # Number of contour scenarios
 
+
 #######################
 # Drainage Section    #
 #######################
 
 0  # Number of drainage scenarios
+
 
 #######################
 # Yearly Section      #
@@ -76,7 +81,9 @@ W. Elliot  05/10
 #
 # Yearly scenario 1 of 1
 #
-Year 1
+Year 1 
+
+
 
 1  # landuse <cropland>
 1  # plant growth scenario
@@ -89,6 +96,7 @@ Year 1
    0 # perennial stop growth date --- 0/0
    0.0000  # row width
    3  # neither cut or grazed
+
 
 #######################
 # Management Section  #
@@ -109,3 +117,4 @@ description 3
 
    1	#  <plants/yr 1> - OFE: 1>
       1	# year index
+
