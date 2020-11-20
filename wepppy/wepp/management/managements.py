@@ -845,7 +845,7 @@ class YearLoopCropland(ScenarioBase):
         self.drset = _scenario_reference_factory(i, SectionType.Contour, root, self)
         
         self.imngmt = imngmt = int(lines.pop(0))
-        assert imngmt in [1, 2, 3]
+        assert imngmt in [1, 2, 3], lines
         
         self.annualfallow = self.perennial = ''
         if imngmt in [1, 3]:
