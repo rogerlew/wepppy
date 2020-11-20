@@ -20,7 +20,7 @@ from wepppy.export import arc_export
 
 from wepppy.climates.cligen import ClimateFile
 
-from wepppy.nodb.mods.locations.portland import LivnehDataManager
+# from wepppy.nodb.mods.locations.portland import LivnehDataManager
 
 from osgeo import gdal
 
@@ -40,7 +40,7 @@ def log_print(*msg):
 
 if __name__ == '__main__':
 
-    lvdm = LivnehDataManager()
+    lvdm = None
 
     # Run 1 - Daymet (adjust for <2005 and runoff/pp ratio) + shallow groundwater + pmetpara
     # Run 2 - Daymet (adjust for <2005 and runoff/pp ratio) + shallow landslides + pmetpara
