@@ -616,7 +616,10 @@ class Wepp(NoDbBase, LogMixin):
                 except FileNotFoundError:
                     sleep(10.0)
                     shutil.rmtree(_dir, ignore_errors=True)
-            os.makedirs(_dir)
+            
+            if not _exists(_dir):
+                os.makedirs(_dir)
+
             self.log_done()
 
     def _prep_slopes(self, translator):
@@ -1158,6 +1161,13 @@ class Wepp(NoDbBase, LogMixin):
             self.log('Calculating channel streamflow measures... ')
             wepppost.calc_channel_streamflow()
             self.log_done()
+
+        for fn in [_join(self.output_dir, 'pass_pw0.txt'),
+                   _join(self.output_dir, 'soil_pw0.txt')]:
+            if _exists(fn):
+                 p = subprocess.call('gzip %s' % fn, shell=True)
+                 p.wait()
+                 assert _exists(fn + '.gz')
 
     def _build_totalsedwat(self):
         output_dir = self.output_dir
