@@ -163,12 +163,15 @@ class ScenarioReference(ScenarioBase):
             
         elif section_type == SectionType.Op:
             i = [v.name for v in self.root.ops].index(loop_name)
-            
+        
         elif section_type == SectionType.Ini:
             i = [v.name for v in self.root.inis].index(loop_name)
             
         elif section_type == SectionType.Surf:
-            i = [v.name for v in self.root.surfs].index(loop_name)
+            if loop_name is None:
+                return "0"  # tilseq
+            else:
+                i = [v.name for v in self.root.surfs].index(loop_name)
             
         elif section_type == SectionType.Contour:
             i = [v.name for v in self.root.contours].index(loop_name)
