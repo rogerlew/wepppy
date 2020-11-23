@@ -386,7 +386,7 @@ if __name__ == '__main__':
             if default_landuse is not None:
                 log_print('setting default landuse')
 
-		tops = []
+                tops = []
                 for selector, dom in default_landuse:
                     _topaz_ids = selector(landuse, None)
 
