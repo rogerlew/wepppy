@@ -21,6 +21,7 @@ from wepppy.export import arc_export
 from wepppy.climates.cligen import ClimateFile
 
 # from wepppy.nodb.mods.locations.portland import LivnehDataManager
+from wepppy.nodb.mods.locations.lt.selectors import *
 
 from osgeo import gdal
 
