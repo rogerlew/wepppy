@@ -380,20 +380,20 @@ if __name__ == '__main__':
 		
             landuse = Landuse.getInstance(wd)
 
-             log_print('setting default landuses')
+            log_print('setting default landuses')
 
-             if default_landuse is not None:
-                 log_print('setting default landuse')
+            if default_landuse is not None:
+                log_print('setting default landuse')
 
-                 tops = []
-                 for selector, dom in default_landuse:
-                     _topaz_ids = selector(landuse, None)
+		tops = []
+                for selector, dom in default_landuse:
+                    _topaz_ids = selector(landuse, None)
 
-                     bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
-                     _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
+                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
+                    _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
 
-                     landuse.modify(_topaz_ids, dom)
-                     tops.extend(_topaz_ids)
+                    landuse.modify(_topaz_ids, dom)
+                    tops.extend(_topaz_ids)
 		
         soils = Soils.getInstance(wd)
         if build_soils:
