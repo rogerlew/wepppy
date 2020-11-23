@@ -377,7 +377,24 @@ if __name__ == '__main__':
         if build_landuse:
             landuse.mode = LanduseMode.Gridded
             landuse.build()
+		
+            landuse = Landuse.getInstance(wd)
 
+             log_print('setting default landuses')
+
+             if default_landuse is not None:
+                 log_print('setting default landuse')
+
+                 tops = []
+                 for selector, dom in default_landuse:
+                     _topaz_ids = selector(landuse, None)
+
+                     bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
+                     _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
+
+                     landuse.modify(_topaz_ids, dom)
+                     tops.extend(_topaz_ids)
+		
         soils = Soils.getInstance(wd)
         if build_soils:
             log_print('building soils')
