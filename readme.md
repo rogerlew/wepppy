@@ -50,7 +50,7 @@ University of Idaho 2015-Present, Swansea Unveristy 2019-Present (Wildfire Ash T
 
 ### Contributions
 
-Roger Lew, Mariana Dobre, William Elliot, Pete Robichaud, Erin Brooks, Anurag Srivastava, Jim Frakenberger, Jonay Neristome, Stefan Doerr, Cristina Santin, Mary E. Miller
+Roger Lew, Mariana Dobre, William Elliot, Pete Robichaud, Erin Brooks, Anurag Srivastava, Jim Frakenberger, Jonay Neris, Stefan Doerr, Cristina Santin, Mary E. Miller
 
 ### Acknowledgements
 
