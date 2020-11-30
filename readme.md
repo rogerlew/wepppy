@@ -46,7 +46,11 @@ copy rm.bat and ls.bat to C:\Windows
 
 ### Copyright
 
-University of Idaho 2015-Present
+University of Idaho 2015-Present, Swansea Unveristy 2019-Present (Wildfire Ash Transport And Risk estimation tool, WATAR).
+
+### Contributions
+
+Roger Lew, Mariana Dobre, William Elliot, Pete Robichaud, Erin Brooks, Anurag Srivastava, Jim Frakenberger, Jonay Neris, Stefan Doerr, Cristina Santin, Mary E. Miller
 
 ### Acknowledgements
 
