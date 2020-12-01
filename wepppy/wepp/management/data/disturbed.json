@@ -1,5 +1,5 @@
 {
-  "0": {"Key": 0,   "Color": [0,0,0,255],       "DisturbedClass": "", "Description": "No Data", "ManagementFile": "GIS/grass.man"},
+  "0": {"Key": 0,   "Color": [0,0,0,255],       "DisturbedClass": "", "Description": "No Data", "ManagementFile": "GeoWEPP/grass.man"},
  "11": {"Key": 11,  "Color": [71,107,160,255],  "DisturbedClass": "", "Description": "Open Water", "ManagementFile": "GeoWEPP/grass.man"},
  "12": {"Key": 12,  "Color": [209,221,249,255], "DisturbedClass": "", "Description": "Perennial Ice/Snow", "ManagementFile": "GIS/Bare.man"},
  "21": {"Key": 21,  "Color": [221,201,201,255], "DisturbedClass": "", "Description": "Low Intensity Residential", "ManagementFile": "GeoWEPP/grass.man"},
