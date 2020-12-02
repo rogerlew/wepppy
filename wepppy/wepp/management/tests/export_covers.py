@@ -32,11 +32,9 @@ for k in d:
     cancov, inrcov, rilcov = m.inis[0].data.cancov, m.inis[0].data.inrcov, m.inis[0].data.rilcov
     man_fn = d[k]['ManagementFile']
 
-    template = ','.join(['{%s}' % v for v in hdr])
-
-    row = template.format(key=k, desc=m.desc, man=man_fn, 
-                          ini=m.inis[0],
-                          plant=m.plants[0]).split(',')
+    row = [('{%s}' % v).format(key=k, desc=m.desc, man=man_fn, 
+                               ini=m.inis[0],
+                               plant=m.plants[0]) for v in hdr]
     print(row)
 
     wtr.writerow(row)
