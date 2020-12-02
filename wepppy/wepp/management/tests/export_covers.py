@@ -18,7 +18,10 @@ hdr = ['key', 'desc', 'man',
        'plant.data.dlai', 'plant.data.dropfc', 'plant.data.extnct', 'plant.data.fact', 'plant.data.flivmx', 
        'plant.data.gddmax', 'plant.data.hi', 'plant.data.hmax',
        'plant.data.mfocod',
-       'plant.data.oratea', 'plant.data.orater', 'plant.data.otemp', 'plant.data.pltol']
+       'plant.data.oratea', 'plant.data.orater', 'plant.data.otemp', 'plant.data.pltol',
+       'plant.data.pltsp', 'plant.data.rdmax', 'plant.data.rsr', 'plant.data.rtmmax', 
+       'plant.data.spriod', 'plant.data.tmpmax', 'plant.data.tmpmin',
+       'plant.data.xmxlai', 'plant.data.yld']
 
 wtr.writerow([v.replace('.data', '') for v in  hdr])
 
