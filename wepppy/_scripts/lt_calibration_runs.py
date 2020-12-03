@@ -69,16 +69,6 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(watershed='30_North_Logan_House_Creek',  # 290 ha  Watershed_36
-             extent=[-120.01396179199219, 39.019450429324046, -119.77363586425783, 39.20592074849823],
-             map_center=[-119.89379882812501, 39.11274726579313],
-             map_zoom=12,
-             outlet=[-119.94139490719957, 39.068905396563665],
-             landuse=None,
-             cs=30, erod=0.000001,
-             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
-             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='31_Logan_House_Creek',  # 530 ha  Watershed_37
              extent=[-120.01396179199219, 39.019450429324046, -119.77363586425783, 39.20592074849823],
              map_center=[-119.89379882812501, 39.11274726579313],
