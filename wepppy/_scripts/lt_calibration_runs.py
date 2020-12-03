@@ -393,16 +393,3 @@ if __name__ == '__main__':
             failed.write('%s\n' % wd)
             raise
 
-    © 2020 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Help
-    Contact GitHub
-    Pricing
-    API
-    Training
-    Blog
-    About
-
