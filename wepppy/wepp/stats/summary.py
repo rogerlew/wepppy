@@ -263,7 +263,7 @@ class ChannelSummary(ReportBase):
                 _data['LanduseDesc'] = chn_summary['landuse']['desc']
                 _data['Soil'] = chn_summary['soil']['mukey']
                 _data['SoilDesc'] = chn_summary['soil']['desc']
-                _data['ChannelType'] = chn_summary['soil']['desc']
+                _data['ChannelType'] = chn_summary['watershed']['channel_type']
 
             if self.has_phosphorus:
                 for colname in _chn_phos_hdr:
