@@ -35,7 +35,7 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
     assert isint(years)
 
     data = {'years': int(years),
-            'version': '2015'}
+            'version': version}
 
     if lng is not None:
         lng = float(lng)
