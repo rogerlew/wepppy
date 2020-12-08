@@ -245,10 +245,10 @@ def arc_export(wd, verbose=False):
         f['properties']['aspect'] = ss['watershed']['aspect']
 
         try:
-            f['properties']['Dis(m3/ha)'] = weppout['Discharge Volume'][topaz_id]['value'] / _area
-            f['properties']['Dis(m3/ha)'] = round(f['properties']['Dis(m3/ha)'], 3)
+            f['properties']['Disch(m3)'] = weppout['Discharge Volume'][topaz_id]['value'] 
+            f['properties']['Disch(m3)'] = round(f['properties']['Dis(m3)'], 3)
         except:
-            f['properties']['Dis(m3/ha)'] = -9999
+            f['properties']['Disch(m3)'] = -9999
 
         try:
             f['properties']['SdYd(tn/h)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
