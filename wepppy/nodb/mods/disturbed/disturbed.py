@@ -566,7 +566,7 @@ class Disturbed(NoDbBase):
         try:
 
             watershed = Watershed.getInstance(self.wd)
-            bounds, transform, proj = read_raster(watershed.bound_arc)
+            bounds, transform, proj = read_raster(watershed.bound)
 
             assert bounds.shape == sbs.shape
 
