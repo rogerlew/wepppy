@@ -34,6 +34,7 @@ class ReportBase(object):
             for cname, units in zip(self.hdr, self.units):
                 hdr.append(cname)
                 if units is not None:
+                    units = units.split(',')[0]
                     hdr[-1] += ' (%s)' % units
 
             if run_descriptors is not None:
