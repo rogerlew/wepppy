@@ -24,7 +24,7 @@ class SoilBurnSeverityMap:
             i = 0
 
             if nodata_vals is not None:
-                if v in nodata_vals:
+                if v in np.array(nodata_vals):
                     return 130
 
             for i, brk in enumerate(breaks):
@@ -106,7 +106,7 @@ class SoilBurnSeverityMap:
             i = 0
 
             if nodata_vals is not None:
-                if v in nodata_vals:
+                if v in np.array(nodata_vals):
                     return 255
 
             for i, brk in enumerate(breaks):
