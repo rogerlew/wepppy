@@ -19,19 +19,25 @@
     <div class="form-group row">
         <div class="col-sm-3">
             <label class="radio-inline">
-            <input type="radio" value="1" class="disable-readonly" id="climatestation_mode3"
+            <input type="radio" value="1" class="disable-readonly" id="ash_depth_mode"
             name="ash_depth_mode" {{ ('', 'checked')[ash.ash_depth_mode == 1] }}>
                 Specify Depth</label>
         </div>
         <div class="col-sm-3">
             <label class="radio-inline">
-            <input type="radio" value="0" class="disable-readonly" id="climatestation_mode3"
+            <input type="radio" value="0" class="disable-readonly" id="ash_depth_mode"
             name="ash_depth_mode" {{ ('', 'checked')[ash.ash_depth_mode == 0] }}>
                 Specify Load</label>
         </div>
+        <div class="col-sm-3">
+            <label class="radio-inline">
+            <input type="radio" value="2" class="disable-readonly" id="ash_depth_mode"
+            name="ash_depth_mode" {{ ('', 'checked')[ash.ash_depth_mode == 0] }}>
+                Upload Maps</label>
+        </div>
     </div>
 
-    <div  id="ash_depth_mode1_controls">
+    <div id="ash_depth_mode1_controls">
         <div class="form-group row">
             <div class="col-sm-5">
                 <label for="ini_black_depth">Initial Ash Depth for high severity</label>
@@ -54,7 +60,7 @@
         </div>
     </div>
 
-    <div  id="ash_depth_mode0_controls">
+    <div id="ash_depth_mode0_controls">
         <div class="form-group row">
             <div class="col-sm-5">
                 <label for="ini_black_load">Initial Ash Load for high severity</label>
@@ -78,9 +84,27 @@
     </div>
 
 
+    <div id="ash_depth_mode2_controls">
+      <h5>Load Map</h5>
+      <p>Upload a raster load map (.img or .tif). The map should contain ash loads in kg / m.</p>
+      <div class="form-group row hide-readonly">
+        <div class="col-md-6">
+          <input id="input_upload_ash_load" name="input_upload_ash_load" type="file" class="file">
+        </div>
+      </div>
+
+      <h5>Bulk Density Map (Optional)</h5>
+      <p>Upload a raster load map (.img or .tif). The map should contain ash bulk densities in g/m<sup>3</sup>.</p>
+      <div class="form-group row hide-readonly">
+        <div class="col-md-6">
+          <input id="input_upload_ash_bd" name="input_upload_ash_bd" type="file" class="file">
+        </div>
+      </div>
+    </div>
+
     <div class="form-group row">
         <div class="col-sm-5">
-            <label for="ini_black_bulkdensity">Initial Ash Bulk Density for high severity</label>
+            <label for="ini_black_bulkdensity">Default Initial Ash Bulk Density for high severity</label>
         </div>
         <div class="col-sm-3">
             <input input id="ini_black_bulkdensity" name="ini_black_bulkdensity"
@@ -90,7 +114,7 @@
     </div>
     <div class="form-group row">
         <div class="col-sm-5">
-            <label for="ini_white_bulkdensity">Initial Ash Bulk Density for moderate and low severity</label>
+            <label for="ini_white_bulkdensity">Default Initial Ash Bulk Density for moderate and low severity</label>
         </div>
         <div class="col-sm-3">
             <input input id="ini_white_bulkdensity" name="ini_white_bulkdensity"

@@ -107,7 +107,7 @@ from wepppy.nodb import (
     Baer,
     Disturbed,
     DebrisFlow,
-    Ash, AshPost,
+    Ash, AshPost, AshSpatialMode,
     get_configs
 )
 
@@ -3700,6 +3700,25 @@ def run_debris_flow(runid, config):
         return exception_factory('Error Running Debris Flow')
 
 
+def _task_upload_ash_map(wd, request, file_input_id):
+    ash = Ash.getInstance(wd)
+
+    file = request.files[file_input_id]
+    if file.filename == '':
+        raise Exception('no filename specified')
+
+    filename = secure_filename(file.filename)
+
+    file.save(_join(ash.ash_dir, filename))
+
+#    try:
+#        res = baer.validate(filename)
+#    except Exception:
+#        return exception_factory('Failed validating file')
+
+    return filename
+
+
 @app.route('/runs/<string:runid>/<config>/tasks/run_ash', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_ash/', methods=['POST'])
 def run_ash(runid, config):
@@ -3731,7 +3750,15 @@ def run_ash(runid, config):
             ini_white_ash_depth_mm = float(ini_white_ash_load_kgm2) / float(ini_white_ash_bulkdensity)
 
         ash = Ash.getInstance(wd)
-        ash.ash_depth_mode = ash_depth_mode
+
+        print('ash_depth_mode', ash_depth_mode)
+
+        if int(ash_depth_mode) == 2:
+            ash.spatial_mode = AshSpatialMode.Gridded
+            ash.ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
+            ash.ash_bulk_density_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_bd')
+
+        ash.ash_depth_mode = 1
 
         ash.run_ash(fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm))
         return success_factory()

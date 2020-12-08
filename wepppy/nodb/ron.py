@@ -332,7 +332,7 @@ class Ron(NoDbBase):
 
             # initialize the other controllers here
             # this will create the other .nodb files
-            import wepppy.nodb
+            import wepppy
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
