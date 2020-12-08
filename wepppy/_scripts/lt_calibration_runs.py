@@ -152,7 +152,7 @@ if __name__ == '__main__':
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         
         
-        dict(wd='63_Ward_Creek_WC3A', # 1200 ha
+        dict(watershed='63_Ward_Creek_WC3A', # 1200 ha
              extent=[-120.32329559326173, 38.99944220958143, -120.08296966552736, 39.18596539075659],
              map_center=[-120.20313262939455, 39.09276546806873],
              map_zoom=12,
@@ -162,7 +162,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='63_Ward_Creek_WC7A', # 2300 ha
+        dict(watershed='63_Ward_Creek_WC7A', # 2300 ha
              extent=[-120.32329559326173, 38.99944220958143, -120.08296966552736, 39.18596539075659],
              map_center=[-120.20313262939455, 39.09276546806873],
              map_zoom=12,
@@ -172,7 +172,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='19_Incline_Creek_IN2', # 1100 ha
+        dict(watershed='19_Incline_Creek_IN2', # 1100 ha
              extent=[-120.04760742187501, 39.16839998800286, -119.80728149414064, 39.35447606884594],
              map_center=[-119.92744445800783, 39.261499771230774],
              map_zoom=12,
@@ -182,7 +182,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='19_Incline_Creek_IN3', # 740 ha
+        dict(watershed='19_Incline_Creek_IN3', # 740 ha
              extent=[-120.04760742187501, 39.16839998800286, -119.80728149414064, 39.35447606884594],
              map_center=[-119.92744445800783, 39.261499771230774],
              map_zoom=12,
@@ -192,7 +192,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='43_Trout_Creek_TC2', # 6000 ha
+        dict(watershed='43_Trout_Creek_TC2', # 6000 ha
              extent=[-120.22338867187501, 38.65012583524745, -119.74273681640626, 39.02451827974919],
              map_center=[-119.98306274414064, 38.83756825896614],
              map_zoom=11,
@@ -202,7 +202,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='43_Trout_Creek_TC3', # 1900 ha
+        dict(watershed='43_Trout_Creek_TC3', # 1900 ha
              extent=[-120.22338867187501, 38.65012583524745, -119.74273681640626, 39.02451827974919],
              map_center=[-119.98306274414064, 38.83756825896614],
              map_zoom=11,
@@ -212,7 +212,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='44_Upper_Truckee_River_UT3', # 10000 ha
+        dict(watershed='44_Upper_Truckee_River_UT3', # 10000 ha
              extent=[-120.14476776123048, 38.68711770472172, -119.90444183349611, 38.874463110537214],
              map_center=[-120.0246047973633, 38.78085193143006],
              map_zoom=12,
@@ -223,7 +223,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8,
              csa=10),
-        dict(wd='44_Upper_Truckee_River_UT5', # 3700 ha
+        dict(watershed='44_Upper_Truckee_River_UT5', # 3700 ha
              extent=[-120.14476776123048, 38.68711770472172, -119.90444183349611, 38.874463110537214],
              map_center=[-120.0246047973633, 38.78085193143006],
              map_zoom=12,
@@ -233,7 +233,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='40_Edgewood_Creek_ED3', # 810 ha
+        dict(watershed='40_Edgewood_Creek_ED3', # 810 ha
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -243,7 +243,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='EagleRock_ED5', # 170 ha
+        dict(watershed='EagleRock_ED5', # 170 ha
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
@@ -253,7 +253,7 @@ if __name__ == '__main__':
              surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(wd='40_Edgewood_Creek_ED9', # 1500 ha
+        dict(watershed='40_Edgewood_Creek_ED9', # 1500 ha
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
              map_zoom=12,
