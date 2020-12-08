@@ -4,9 +4,12 @@ from glob import glob
 from os.path import join as _join
 from os.path import exists as _exists
 
-# non-standard
 import jsonpickle
 import multiprocessing
+
+from subprocess import Popen, PIPE
+
+from enum import IntEnum
 
 from collections import namedtuple
 
@@ -22,13 +25,15 @@ from wepppy.wepp import Element
 from wepppy.climates.cligen import ClimateFile
 
 # wepppy submodules
+from wepppy.nodb.parameter_map import ParameterMap
 from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.base import NoDbBase
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.climate import Climate
-from wepppy.nodb.mods import Baer
+from wepppy.nodb.mods import Baer, Disturbed
 from wepppy.nodb.wepp import Wepp
+from wepppy.nodb.ron import Ron
 
 from .ash_model import *
 
@@ -66,6 +71,31 @@ def run_ash_model(kwds):
     return out_fn
 
 
+def reproject_map(wd, src, dst):
+
+    if _exists(dst):
+        os.remove(dst)
+
+    map = Ron.getInstance(wd).map
+    xmin, ymin, xmax, ymax = [str(v) for v in map.utm_extent]
+    cellsize = str(map.cellsize)
+
+    cmd = ['gdalwarp', '-t_srs',  'epsg:%s' % map.srid,
+           '-tr', cellsize, cellsize,
+           '-te', xmin, ymin, xmax, ymax,
+           '-r', 'near', src, dst]
+
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.wait()
+
+    assert _exists(dst), ' '.join(cmd)
+
+
+class AshSpatialMode(IntEnum):
+    Single = 1
+    Gridded = 0
+
+
 class AshNoDbLockedException(Exception):
     pass
 
@@ -93,6 +123,13 @@ class Ash(NoDbBase, LogMixin):
             self._reservoir_capacity_m3 = 1000000
             self._reservoir_storage = 0.8
             self._ash_depth_mode = 1
+            self._spatial_mode = AshSpatialMode.Single           
+
+            self._ash_load_fn = None
+            self._ash_bulk_density_fn = None
+
+            self._ash_load_d = None
+            self._ash_bulk_density_d = None
 
             self.high_contaminant_concentrations = ContaminantConcentrations(
                 PO4=3950,  # mg*Kg-1
@@ -149,6 +186,11 @@ class Ash(NoDbBase, LogMixin):
                 Hg=42.9)
 
             self.dump_and_unlock()
+
+            ash_dir = self.ash_dir
+            if _exists(ash_dir):
+                shutil.rmtree(ash_dir)
+            os.mkdir(ash_dir)
 
         except Exception:
             self.unlock('-f')
@@ -293,6 +335,78 @@ class Ash(NoDbBase, LogMixin):
             raise
 
     @property
+    def ash_load_d(self):
+        return getattr(self, '_ash_load_d', None)
+
+    @property
+    def ash_bulk_density_d(self):
+        return getattr(self, '_ash_bulk_density_d', None)
+
+    @property
+    def ash_load_fn(self):
+        fn = getattr(self, '_ash_load_fn', None) 
+
+        if fn is None:
+            return None
+
+        return _join(self.ash_dir, fn)
+        
+    @ash_load_fn.setter
+    def ash_load_fn(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ash_load_fn = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+    @property
+    def ash_bulk_density_fn(self):
+        fn = getattr(self, '_ash_bulk_density_fn', None) 
+        if fn is None:
+            return None
+
+        return _join(self.ash_dir, fn)
+
+    @ash_bulk_density_fn.setter
+    def ash_bulk_density_fn(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ash_bulk_density_fn = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def ash_spatial_mode(self):
+        if not getattr(self, '_ash_spatial_mode'):
+            self.ash_spatial_mode = AshSpatialMode.Single
+
+        return self._ash_spatial_mode
+
+    @ash_spatial_mode.setter
+    def ash_spatial_mode(self, value):
+        assert isinstance(self, AshSpatialMode), value
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ash_spatial_mode = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
     def ash_depth_mode(self):
         if not getattr(self, '_ash_depth_mode'):
             self.ash_depth_mode = 1
@@ -336,6 +450,16 @@ class Ash(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    @property
+    def ash_bulk_density_cropped_fn(self):
+        return _join(self.ash_dir, 'ash_bulk_density_cropped.tif')
+
+    @property
+    def ash_load_cropped_fn(self):
+        return _join(self.ash_dir, 'ash_load_cropped.tif')
+
+
+
     def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
 
         self.lock()
@@ -350,11 +474,8 @@ class Ash(NoDbBase, LogMixin):
             wd = self.wd
             ash_dir = self.ash_dir
 
-            if _exists(ash_dir):
-                shutil.rmtree(ash_dir)
-            os.mkdir(ash_dir)
+            # todo: remove existing ash outputs
 
-            baer = Baer.getInstance(wd)
             watershed = Watershed.getInstance(wd)
             climate = Climate.getInstance(wd)
             wepp = Wepp.getInstance(wd)
@@ -362,15 +483,38 @@ class Ash(NoDbBase, LogMixin):
             cli_path = climate.cli_path
             cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=True)
 
-            # create LandcoverMap instance
-            sbs = SoilBurnSeverityMap(baer.baer_cropped, baer.breaks, baer._nodata_vals)
+            # make a 4class raster SBS
+            if 'baer' in self.mods:
+                baer = Baer.getInstance(wd)
+                sbs = SoilBurnSeverityMap(baer.baer_cropped, baer.breaks, baer.nodata_vals)
+                baer_4class = baer.baer_cropped.replace('.tif', '.4class.tif')
+            else:
+                disturbed = Disturbed.getInstance(wd)
+                sbs = SoilBurnSeverityMap(disturbed.disturbed_cropped, disturbed.breaks, disturbed.nodata_vals)
+                baer_4class = disturbed.disturbed_cropped.replace('.tif', '.4class.tif')
 
-            baer_4class = baer.baer_cropped.replace('.tif', '.4class.tif')
             sbs.export_4class_map(baer_4class)
 
             lc = LandcoverMap(baer_4class)
             sbs_d = lc.build_lcgrid(watershed.subwta)
 
+
+            if self.ash_load_fn is not None:
+                reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
+                load_map = ParameterMap(self.ash_load_cropped_fn)
+                load_d = load_map.build_ave_grid(watershed.subwta)
+            else:
+                load_d = None
+
+
+            if self.ash_bulk_density_fn is not None:
+                reproject_map(wd, self.ash_bulk_density_fn, self.ash_bulk_density_cropped_fn)
+                bd_map = ParameterMap(self.ash_bulk_density_cropped_fn)
+                bd_d = load_map.build_ave_grid(watershed.subwta)
+            else:
+                bd_d = None
+
+                
             translator = watershed.translator_factory()
 
             self.log_done()
@@ -389,13 +533,21 @@ class Ash(NoDbBase, LogMixin):
                 meta[topaz_id]['burn_class'] = burn_class
                 meta[topaz_id]['area_ha'] = area_ha
 
-                if burn_class in [2, 3]:
-                    ash_type = AshType.BLACK
-
-                elif burn_class in [4]:
-                    ash_type = AshType.WHITE
+                if bd_d is None:
+                    if burn_class in [2, 3]:
+                        ash_type = AshType.BLACK
+                    elif burn_class in [4]:
+                        ash_type = AshType.WHITE
+                    else:
+                        continue
                 else:
-                    continue
+                    bulk_density = bd_d[topaz_id]
+                    if bulk_density == 0.0:
+                        continue
+                    if bulk_density < 0.11:
+                        ash_type = AshType.WHITE
+                    else:
+                        ash_type = AshType.BLACK
 
                 meta[topaz_id]['ash_type'] = ash_type
 
@@ -407,9 +559,17 @@ class Ash(NoDbBase, LogMixin):
                                    'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
                 hill_wat = HillWat(hill_wat_fn)
 
+                if load_d is None:
+                    white_ash_depth = ini_white_ash_depth_mm
+                    black_ash_depth = ini_black_ash_depth_mm
+
+                else:
+                    white_ash_depth = load_d[topaz_id] / ini_white_ash_depth_mm
+                    black_ash_depth = load_d[topaz_id] / ini_black_ash_depth_mm
+
                 kwds = dict(ash_type=ash_type,
-                            ini_white_ash_depth_mm=ini_white_ash_depth_mm,
-                            ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                            ini_white_ash_depth_mm=white_ash_depth,
+                            ini_black_ash_depth_mm=black_ash_depth,
                             fire_date=fire_date,
                             element_d=element.d,
                             cli_df=cli_df,
@@ -423,6 +583,9 @@ class Ash(NoDbBase, LogMixin):
             for out_fn in pool.imap_unordered(run_ash_model, args):
                 self.log('  completed running {}\n'.format(out_fn))
                 self.log_done()
+
+            self._ash_load_d = load_d
+            self._ash_bulk_density_d = bd_d
 
             self.meta = meta
             try:
@@ -452,11 +615,21 @@ class Ash(NoDbBase, LogMixin):
             return 'white'
 
     def get_ini_ash_depth(self, topaz_id):
+        load_d = self.ash_load_d
+        black_bd = self.ini_black_ash_bulkdensity
+        white_bd = self.ini_white_ash_bulkdensity
+
         ash_type = self.meta[str(topaz_id)]['ash_type']
         if ash_type == AshType.BLACK:
-            return self.ini_black_ash_depth_mm
+            if load_d is None:
+                return self.ini_black_ash_depth_mm
+            else:
+                return load_d[str(topaz_id)] / (1000.0 * black_bd)
         elif ash_type == AshType.WHITE:
-            return self.ini_white_ash_depth_mm
+            if load_d is None:
+                return self.ini_white_ash_depth_mm
+            else:
+                return load_d[str(topaz_id)] / (1000 * white_bd)
 
     @property
     def ini_black_ash_bulkdensity(self):

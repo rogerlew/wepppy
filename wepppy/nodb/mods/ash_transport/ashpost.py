@@ -122,12 +122,27 @@ class AshPost(NoDbBase):
         ash = Ash.getInstance(self.wd)
         return ash.fire_date
 
+    @property
+    def ash_load_d(self):
+        from wepppy.nodb import Ash
+        ash = Ash.getInstance(self.wd)
+        return ash.ash_load_d
+
+    @property
+    def ash_bulk_density_d(self):
+        from wepppy.nodb import Ash
+        ash = Ash.getInstance(self.wd)
+        return ash.ash_bulk_density_d
+
     def _run_ash_out(self):
-        from wepppy.nodb import Watershed
+        from wepppy.nodb import Watershed, Ash
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
-        meta = self.meta
+
+        ash = Ash.getInstance(self.wd)
+        meta = ash.meta
+        load_d = ash.ash_load_d
 
         ash_out = {}
         for topaz_id, ss in watershed._subs_summary.items():
@@ -136,28 +151,43 @@ class AshPost(NoDbBase):
 
             ash_out[topaz_id] = {}
             ash_out[topaz_id]['burnclass'] = burnclass
+
+            # determine if slope has ash
+            no_ash = False
+            if load_d is not None:
+                if load_d[str(topaz_id)] < 0:
+                    no_ash = True
+            
             if burnclass <= 1 or burnclass == 255:
+                no_ash = True
+
+            if no_ash:
                 ash_out[topaz_id]['water_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['wind_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['ash_transport (kg/ha)'] = 0.0
-            else:
-                fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_water.csv'.format(wepp_id))
-                with open(fn) as fp:
-                    df = pd.read_csv(fp)
-                    series = df['cum_water_transport (tonne/ha)']
-                    ash_out[topaz_id]['water_transport (kg/ha)'] = 1000 * float(np.mean(series))
+                ash_out[topaz_id]['ash_ini_depth (mm)'] = 0.0
+                continue
 
-                fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_wind.csv'.format(wepp_id))
-                with open(fn) as fp:
-                    df = pd.read_csv(fp)
-                    series = df['cum_wind_transport (tonne/ha)']
-                    ash_out[topaz_id]['wind_transport (kg/ha)'] = 1000 * float(np.mean(series))
+            # if ash is present
+            fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_water.csv'.format(wepp_id))
+            with open(fn) as fp:
+                df = pd.read_csv(fp)
+                series = df['cum_water_transport (tonne/ha)']
+                ash_out[topaz_id]['water_transport (kg/ha)'] = 1000 * float(np.mean(series))
 
-                fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_ash.csv'.format(wepp_id))
-                with open(fn) as fp:
-                    df = pd.read_csv(fp)
-                    series = df['cum_ash_transport (tonne/ha)']
-                    ash_out[topaz_id]['ash_transport (kg/ha)'] = 1000 * float(np.mean(series))
+            fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_wind.csv'.format(wepp_id))
+            with open(fn) as fp:
+                df = pd.read_csv(fp)
+                series = df['cum_wind_transport (tonne/ha)']
+                ash_out[topaz_id]['wind_transport (kg/ha)'] = 1000 * float(np.mean(series))
+
+            fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_ash.csv'.format(wepp_id))
+            with open(fn) as fp:
+                df = pd.read_csv(fp)
+                series = df['cum_ash_transport (tonne/ha)']
+                ash_out[topaz_id]['ash_transport (kg/ha)'] = 1000 * float(np.mean(series))
+
+            ash_out[topaz_id]['ash_ini_depth (mm)'] = ash.get_ini_ash_depth(topaz_id)
 
         self._ash_out = ash_out
 
