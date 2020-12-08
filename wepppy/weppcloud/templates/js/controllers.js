@@ -4611,11 +4611,15 @@ var Ash = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
-            self.ash_depth_mode = 1;
+
+            var formData = new FormData($('#ash_form')[0]);
 
             $.post({
                 url: "tasks/run_ash/",
-                data: self.form.serialize(),
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... done.");
@@ -4650,10 +4654,17 @@ var Ash = function () {
             if (self.ash_depth_mode === 1) {
                 $("#ash_depth_mode0_controls").hide();
                 $("#ash_depth_mode1_controls").show();
-
-            } else {
+                $("#ash_depth_mode2_controls").hide();
+            } 
+            else if (self.ash_depth_mode === 2) {
+                $("#ash_depth_mode0_controls").hide();
+                $("#ash_depth_mode1_controls").hide();
+                $("#ash_depth_mode2_controls").show();
+            } 
+            else {
                 $("#ash_depth_mode0_controls").show();
                 $("#ash_depth_mode1_controls").hide();
+                $("#ash_depth_mode2_controls").hide();
             }
         }
 
