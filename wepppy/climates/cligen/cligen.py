@@ -634,14 +634,17 @@ class Station:
         new = deepcopy(self)
 
         if p_mean == 'prism':
-            ppts = get_prism_monthly_ppt(lng, lat, units='daily inch')
-            ppts /= self.nwds
+            prism_ppts = get_prism_monthly_ppt(lng, lat, units='daily inch')
+            ppts = prism_ppts / self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
         elif p_mean == 'daymet':
-            ppts = get_daymet_prcp_mean(lng, lat, units='daily inch')
-            ppts /= self.nwds
+            prism_ppts = get_daymet_prcp_mean(lng, lat, units='daily inch')
+            ppts = prism_ppt = self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
+
+        else:
+            prism_ppts = None
 
         if p_std == 'daymet':
             p_stds = get_daymet_prcp_std(lng, lat, units='inch')
@@ -650,24 +653,6 @@ class Station:
         if p_skew == 'daymet':
             p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
             new.lines[5] = ' SKEW P  ' + _row_formatter(p_skew) + '\r\n'
-
-        if p_ww == 'daymet':
-            p_wws = get_daymet_prcp_pww(lng, lat)
-            p_wws = [clamp(v, 0.01, 0.99) for v in p_wws]
-            new.lines[6] = ' P(W/W)  ' + _row_formatter(p_wws) + '\r\n'
-        elif isfloat(p_ww):
-            p_wws = self.pwws * float(p_ww)
-            p_wws = [clamp(v, 0.01, 0.99) for v in p_wws]
-            new.lines[6] = ' P(W/W)  ' + _row_formatter(p_wws) + '\r\n'
-
-        if p_wd == 'daymet':
-            p_wds = get_daymet_prcp_pwd(lng, lat)
-            p_wds = [clamp(v, 0.01, 0.99) for v in p_wds]
-            new.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
-        elif isfloat(p_wd):
-            p_wds = self.pwds * float(p_wd)
-            p_wds = [clamp(v, 0.01, 0.99) for v in p_wds]
-            new.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
 
         if tmax == 'prism':
             tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
@@ -684,6 +669,45 @@ class Station:
         if dewpoint == 'prism':
             tdmeans = get_prism_monthly_tdmean(lng, lat, units='f')
             new.lines[15] = ' DEW PT  ' + _row_formatter(tdmeans) + '\r\n'
+
+        if prism_ppts is not None:
+            par_monthlies = self.ppts * self.nwds
+
+            station_nwds = days_in_mo * (self.pwds / (1.0 - self.pwws + self.pwds))
+            delta = prism_ppts / par_monthlies
+            nwds = [float(v)for v in station_nwds]
+
+            # clamp between 50% and 200% of original value
+            # and between 0.1 days and the number of days in the month
+            for i, (d, nwd, days) in enumerate(zip(delta, nwds, days_in_mo)):
+
+                if d > 1.0:
+                    nwd *= 1.0 + (d - 1.0) / 2.0
+                else:
+                    nwd *= 1.0 - (1.0 - d) / 2.0
+
+                if nwd < station_nwds[i] / 2.0:
+                    nwd = station_nwds[i] / 2.0
+                if nwd < 0.1:
+                    nwd = 0.1
+                if nwd > station_nwds[i] * 2.0:
+                    nwd = station_nwds[i] * 2.0
+                if nwd > days - 0.25:
+                    nwd = days - 0.25
+
+                nwds[i] = nwd
+
+            pw = nwds / days_in_mo
+
+            assert np.all(pw >= 0.0)
+            assert np.all(pw <= 1.0), pw
+
+            ratio = self.pwds / self.pwws
+            p_wws = 1.0 / (1.0 - ratio + ratio / pw)
+            p_wds = ((p_wws - 1.0) * pw) / (pw - 1.0)
+
+            new.lines[6] = ' P(W/W)  ' + _row_formatter(p_wws) + '\r\n'
+            new.lines[7] = ' P(W/D)  ' + _row_formatter(p_wds) + '\r\n'
 
         return new
 
