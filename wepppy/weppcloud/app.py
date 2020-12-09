@@ -655,8 +655,14 @@ def seattle_results(file):
 @app.route('/create/')
 def create_index():
     configs = get_configs()
-    x = ['<a href="{0}">{0}</a>'.format(cfg) for cfg in configs]
-    return '<html>\n{}\n</html>'.format('<br/>\n'.join(x))
+    x = ['<tr><td><a href="{0}">{0}</a></td>'
+         '<td><a href="{0}?watershed:delineation_backend=taudem">{0} TauDEM</a></td></tr>'
+         .format(cfg) for cfg in configs if cfg != '_defaults']
+    return '<html><body>'\
+           '<link rel="stylesheet" '\
+           'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
+           'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
+           '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
 
 
 @app.route('/create/<config>')
@@ -3684,6 +3690,25 @@ def task_upload_sbs(runid, config):
 
     return success_factory(res)
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/remove_sbs/', methods=['POST'])
+def task_remove_sbs(runid, config):
+   
+    try:
+        wd = get_wd(runid)
+
+        ron = Ron.getInstance(wd)
+        if 'baer' in ron.mods:
+            return exception_factory('Baer.remove_sbs NotImplemented')
+        else:
+            baer = Disturbed.getInstance(wd)
+            baer.remove_sbs()
+        
+        return success_factory()
+
+    except:
+        return exception_factory()
 
 @app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow/', methods=['POST'])
