@@ -276,6 +276,28 @@ class Baer(NoDbBase):
             self.unlock('-f')
             raise
 
+    def remove_sbs(self):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            if _exists(self._baer_fn):
+                os.remove(self._baer_fn)
+
+            self._baer_fn = None
+            self._nodata_vals = None
+            self._bounds = None
+            self._is256 = None
+            self._classes = None
+            self._counts = None
+            self._breaks = None
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def validate(self, fn):
         self.lock()
 
