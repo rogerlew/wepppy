@@ -382,9 +382,8 @@ class OutletSummary(ReportBase):
                 row.append(v_norm)
 
         if write_header:
-
             if run_descriptors is not None:
-                hdr = [cname for cname, desc in run_descriptors] + hdr
+                hdr = [cname.replace(',3)', ')') for cname, desc in run_descriptors] + hdr
 
             wtr.writerow(hdr)
 
