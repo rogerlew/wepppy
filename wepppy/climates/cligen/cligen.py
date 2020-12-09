@@ -1276,6 +1276,8 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     # build par file
     par_fn = '{}{}.par'.format(par, suffix)
 
+    fp_log.write('par_fn = {}\n'.format(par_fn))
+    
     if _exists(par_fn):
         os.remove(par_fn)
 
@@ -1290,6 +1292,8 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     s2.lines[9] = ' TMIN AV ' + _row_formatter(prism_tmins) + '\r\n'
 
     s2.write(par_fn)
+
+    assert _exists(par_fn)
 
     # run cligen
     cli_fn = '{}{}.cli'.format(par, suffix)
