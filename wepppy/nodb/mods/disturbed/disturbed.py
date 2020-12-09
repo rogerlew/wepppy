@@ -345,6 +345,30 @@ class Disturbed(NoDbBase):
             self.unlock('-f')
             raise
 
+    def remove_sbs(self):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            disturbed_fn = getattr(self, '_disturbed_fn', None)
+
+            if disturbed_fn is not None and  _exists(disturbed_fn):
+                os.remove(disturbed_fn)
+
+            self._disturbed_fn = None
+            self._nodata_vals = None
+            self._bounds = None
+            self._is256 = None
+            self._classes = None
+            self._counts = None
+            self._breaks = None
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def validate(self, fn):
         self.lock()
 
