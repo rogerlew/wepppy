@@ -16,4 +16,15 @@
             <small id="hint_upload_sbs"></small>
         </div>
     </div>
+    {% if 'disturbed' in ron.mods %}
+    
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button id="btn_remove_sbs" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Remove SBS</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_remove_sbs"></small>
+        </div>
+    </div>
+    {% endif %}
 {% endblock %}
