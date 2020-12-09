@@ -331,8 +331,8 @@ var Map = function () {
 
         // Use leaflet map
         var that = L.map("mapid", {
-            zoomSnap: 0.25,
-            zoomDelta: 0.25
+            zoomSnap: 0.5,
+            zoomDelta: 0.5
         });
 
         that.scrollWheelZoom.disable();
@@ -695,7 +695,12 @@ var Baer = function () {
             var map = Map.getInstance();
             var sub = SubcatchmentDelineation.getInstance();
 
-            self.remove_sbs();
+
+            if (self.baer_map !== null) {
+                map.ctrls.removeLayer(self.baer_map);
+                map.removeLayer(self.baer_map);
+                self.baer_map = null;
+            }
 
             var task_msg = "Querying SBS map";
 
