@@ -392,7 +392,8 @@ class TauDEMTopazEmulator(TauDEMRunner):
     def topaz_sub_ids(self):
         subwta = self.data_fetcher('subwta', dtype=np.uint16)
         sub_ids = sorted(list(set(subwta.flatten())))
-        sub_ids.remove(0)
+        if 0 in sub_ids:        
+            sub_ids.remove(0)
         sub_ids = [v for v in sub_ids if not str(v).endswith('4')]
 
         return sub_ids
