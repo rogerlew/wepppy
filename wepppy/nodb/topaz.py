@@ -23,6 +23,26 @@ from wepppy.all_your_base.geo import read_arc, utm_srid
 from .base import NoDbBase
 
 
+# this needs to be here to unpickle old projects
+# todo: migrate all the topaz.nodb
+# wepppy.nodb.topaz.Outlet should be wepppy.nodb.watershed.Outlet
+# then it should be possible to remove this class
+class Outlet(object):
+    def __init__(self,
+                 requested_loc,
+                 actual_loc,
+                 distance_from_requested,
+                 pixel_coords):
+        self.requested_loc = requested_loc
+        self.actual_loc = actual_loc
+        self.distance_from_requested = distance_from_requested
+        self.pixel_coords = pixel_coords
+
+    def as_dict(self):
+        return dict(lng=self.actual_loc[0],
+                    lat=self.actual_loc[1])
+
+
 class TopazNoDbLockedException(Exception):
     pass
 
