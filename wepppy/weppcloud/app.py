@@ -3700,7 +3700,8 @@ def task_remove_sbs(runid, config):
 
         ron = Ron.getInstance(wd)
         if 'baer' in ron.mods:
-            return exception_factory('Baer.remove_sbs NotImplemented')
+            baer = Baer.getInstance(wd)
+            baer.remove_sbs()
         else:
             baer = Disturbed.getInstance(wd)
             baer.remove_sbs()
