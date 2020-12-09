@@ -331,7 +331,8 @@ var Map = function () {
 
         // Use leaflet map
         var that = L.map("mapid", {
-            zoomSnap: 0.25
+            zoomSnap: 0.25,
+            zoomDelta: 0.25
         });
 
         that.scrollWheelZoom.disable();
@@ -602,12 +603,35 @@ var Baer = function () {
         that.remove_sbs = function () {
             var self = instance;
             var map = Map.getInstance();
-
+   
+            $.post({
+                url: "tasks/remove_sbs/",
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("SBS_REMOVE_TASK_COMPLETE");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+   
             if (self.baer_map !== null) {
                 map.ctrls.removeLayer(self.baer_map);
                 map.removeLayer(self.baer_map);
                 self.baer_map = null;
             }
+
+            self.info.html('');
         };
 
         that.load_modify_class = function () {
