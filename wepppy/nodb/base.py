@@ -253,12 +253,7 @@ class NoDbBase(object):
                     overrides_d[section] = {}
                 overrides_d[section][name] = value
 
-            print(overrides_d)
             parser.read_dict(overrides_d)
-
-        from pprint import pprint
-        print(parser.get('watershed', 'delineation_backend'))
-
 
         return parser
 
