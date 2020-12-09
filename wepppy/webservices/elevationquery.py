@@ -36,14 +36,15 @@ def query_elevation():
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
         
-    if request.method == 'GET':
-        lat = request.args.get('lat', None)
-        lng = request.args.get('lng', None)
-        srs = request.args.get('srs', None)
-    else: # POST
-        lat = request.json.get('lat', None)
-        lng = request.json.get('lng', None)
-        srs = request.json.get('srs', None)
+    lat = request.args.get('lat', None)
+    lng = request.args.get('lng', None)
+    srs = request.args.get('srs', None)
+
+    if lat is None:
+        d = request.get_json(force=True)
+        lat = d.get('lat', None)
+        lng = d.get('lng', None)
+        srs = d.get('srs', None)
 
     if lat is None:
         return jsonify({'Error': 'lat not supplied'})
