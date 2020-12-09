@@ -185,10 +185,18 @@ function onReady() {
         baer.upload_sbs();
     });
 
+    $("#btn_remove_sbs").click(function () {
+        baer.remove_sbs();
+    });
+
     baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
         console.log("SBS_UPLOAD_TASK_COMPLETE");
         setTimeout(baer.show_sbs, 4000);
         setTimeout(baer.load_modify_class, 4000);
+    });
+
+    baer.form.on("SBS_REMOVE_TASK_COMPLETE", function () {
+        console.log("SBS_REMOVE_TASK_COMPLETE");
     });
 
     baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
