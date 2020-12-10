@@ -177,7 +177,7 @@ def arc_export(wd, verbose=False):
     if verbose:
         print('done.')
 
-    cmd = ['ogr2ogr', '-s_srs', map.srid, '-t_srs', map.srid,
+    cmd = ['ogr2ogr', '-s_srs', 'epsg:%s' %  map.srid, '-t_srs', 'epsg:%s' %  map.srid,
            'subcatchments.shp', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -185,7 +185,7 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', map.srid, '-t_srs', map.srid,
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
            'subcatchments.kml', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -297,7 +297,7 @@ def arc_export(wd, verbose=False):
     with open(geojson_fn, 'w') as fp:
         fp.write(json_txt)
 
-    cmd = ['ogr2ogr', '-s_srs', map.srid, '-t_srs', map.srid,
+    cmd = ['ogr2ogr', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
            'channels.shp', 'channels.json']
     if verbose:
         print(cmd)
@@ -305,7 +305,7 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'channels.shp')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', map.srid, '-t_srs', map.srid,
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
            'channels.kml', 'channels.json']
     if verbose:
         print(cmd)
