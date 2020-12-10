@@ -177,7 +177,7 @@ def arc_export(wd, verbose=False):
     if verbose:
         print('done.')
 
-    cmd = ['ogr2ogr', '-s_srs', map.srid '-t_srs', map.srid,
+    cmd = ['ogr2ogr', '-s_srs', map.srid, '-t_srs', map.srid,
            'subcatchments.shp', 'subcatchments.json']
     if verbose:
         print(cmd)
