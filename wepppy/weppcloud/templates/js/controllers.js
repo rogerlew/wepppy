@@ -998,6 +998,7 @@ var ChannelDelineation = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
+           
         };
 
         // Topaz Pass 1
@@ -1034,6 +1035,8 @@ var ChannelDelineation = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
+
+            self.report();
         };
 
         that.on1EachFeature = function (feature, layer) {
@@ -1061,6 +1064,8 @@ var ChannelDelineation = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
+
+            self.report();
         };
 
         that.on2Success = function (response) {
