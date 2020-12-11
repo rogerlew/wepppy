@@ -83,13 +83,9 @@ class Watershed(NoDbBase):
 
                 self._csa = self.config_get_float('watershed', 'csa')
                 self._pkcsa = self.config_get_str('watershed', 'pkcsa')
-                self._mcl = None
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
-                self._mcl = None
-                self._csa = None
-                self._pkcsa = None
 
             wat_dir = self.wat_dir
             if not _exists(wat_dir):
@@ -247,8 +243,7 @@ class Watershed(NoDbBase):
         if self.delineation_backend_is_topaz:
             return Topaz.getInstance(self.wd).mcl
 
-        if hasattr(self, '_mcl'):
-            return self._mcl
+        return None
 
     @property
     def outlet(self):
@@ -303,7 +298,7 @@ class Watershed(NoDbBase):
     #
     def build_channels(self, csa=None, mcl=None):
         if self.delineation_backend_is_topaz:
-            Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
+            Topaz.getInstance(self.wd).build_channels(csa=csa, mcl=mcl)
         else:
             self.lock()
             try:
