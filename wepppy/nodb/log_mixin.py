@@ -11,9 +11,7 @@ from os.path import exists as _exists
 import warnings
 from datetime import datetime
 
-from wepppy.all_your_base import (
-    parse_datetime
-)
+from wepppy.all_your_base.dateutils import parse_datetime
 
 
 class LogMixin(object):
@@ -87,3 +85,9 @@ class LogMixin(object):
             return
 
         self._write('done. ({:.2f}s | {:.2f}s)\n'.format(t_elapsed.total_seconds(), r_elapsed.total_seconds()))
+
+
+class Logger(LogMixin):
+    def __init__(self, fn):
+        self.status_log = fn
+
