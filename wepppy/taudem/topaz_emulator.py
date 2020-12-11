@@ -24,7 +24,7 @@ from wepppy.watershed_abstraction.support import (
 
 from .taudem import TauDEMRunner
 
-_USE_MPI = True
+_USE_MPI = False
 _DEBUG = False
 
 
@@ -689,6 +689,8 @@ class TauDEMTopazEmulator(TauDEMRunner):
                 catchment_data -= src_data
                 catchment_data = np.clip(catchment_data, a_min=0, a_max=1)
                 indx, indy = np.where(catchment_data == 1)
+
+                print(catchment_id, _pass, len(indx))
 
                 # the whole catchment drains through the top of the channel
                 if len(indx) == 0:
