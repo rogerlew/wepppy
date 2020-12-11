@@ -18,7 +18,30 @@ from wepppy.all_your_base import (
 
 class LogMixin(object):
 
-    #
+    @property
+    def fp(self):
+        fp = getattr(self, '_fp', None)
+
+        if fp is None:
+            if _exists(self.status_log):
+                mode = 'a'
+            else:
+                mode = 'w'
+                    
+        try:
+            with open(self.status_log, 'w') as fp:
+                self._fp = fp = open(self.status_log, mode)
+        except FileNotFoundError:
+            warnings.warn('FileNotFoundError: "%s"' % self.status_log)
+
+        return fp 
+
+    def __del__(self):
+        fp = getattr(self, '_fp', None)
+
+        if fp is not None:
+            fp.close()
+
     # Log methods
     #
     def _calc_log_elapsed(self):
@@ -36,15 +59,7 @@ class LogMixin(object):
             return None, None, None
 
     def _write(self, msg):
-        if _exists(self.status_log):
-            with open(self.status_log, 'a') as fp:
-                fp.write(msg)
-        else:
-            try:
-                with open(self.status_log, 'w') as fp:
-                    fp.write(msg)
-            except FileNotFoundError:
-                warnings.warn('FileNotFoundError: "%s"' % self.status_log)
+        self.fp.write(msg)
 
     def get_log_last(self):
         r_elapsed, t_elapsed, s = self._calc_log_elapsed()
