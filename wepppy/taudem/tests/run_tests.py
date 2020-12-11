@@ -8,7 +8,7 @@ from wepppy.taudem import TauDEMTopazEmulator
 if __name__ == "__main__":
     t0 = time()
 
-    for test_dir in ['blackwood', 'or_detroit', 'logan', 'taylor_creek']:
+    for test_dir in ['blackwood']: #, 'or_detroit', 'logan', 'taylor_creek']:
         wd = _join(test_dir, 'test')
 
         if _exists(wd):

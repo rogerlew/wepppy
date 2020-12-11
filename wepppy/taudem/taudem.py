@@ -26,6 +26,9 @@ from wepppy.all_your_base.geo import read_tif, utm_srid, GeoTransformer, wgs84_p
 _USE_MPI = True
 _DEBUG = False
 
+if NCPU > 4:
+    NCPU = 4
+
 # This also assumes that MPICH2 is properly installed on your machine and that TauDEM command line executables exist
 # MPICH2.  Obtain from http://www.mcs.anl.gov/research/projects/mpich2/
 # Install following instructions at http://hydrology.usu.edu/taudem/taudem5.0/downloads.html.
