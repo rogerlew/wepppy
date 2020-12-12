@@ -1371,7 +1371,6 @@ var SubcatchmentDelineation = function () {
         that.topIds = [];
         that.labels = L.layerGroup(); // collection of labels with topaz ids as keys
 
-
         // Gridded Plots
         that.grid = null;
         that.gridlabel = null;
