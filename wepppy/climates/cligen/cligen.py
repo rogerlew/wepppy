@@ -158,11 +158,11 @@ def cli2pat(prcp=50, dur=2, tp=0.3, ip=4, max_time=[10, 30, 60]):
     return I_peak
 
 
-def _make_clinp(wd, cliver, years, cli_fname, par):
+def _make_clinp(wd, cliver, years, cli_fname, par, clinp_fn='clinp.txt'):
     """
     makes an input file that is passed as stdin to cligen
     """
-    clinp = _join(wd, "clinp.txt")
+    clinp = _join(wd, clinp_fn)
     fid = open(clinp, "w")
 
     if cliver in ["5.2", "5.3", "5.3.2"]:
@@ -1057,7 +1057,7 @@ class Cligen:
         assert _exists(par_fn)
         _, par = os.path.split(par_fn)
 
-        _make_clinp(self.wd, self.cliver, years, cli_fname, par)
+        _clinp_path = _make_clinp(self.wd, self.cliver, years, cli_fname, par, clinp_fn=cli_fname[:-4] + '.inp')
 
         if self.cliver == "5.2":
             cmd = [self.cligen52, "-i%s" % par]
@@ -1076,7 +1076,7 @@ class Cligen:
         if _exists(cli_path):
             os.remove(cli_path)
 
-        _clinp = open(_join(cli_dir, "clinp.txt"))
+        _clinp = open(_clinp_path)
         _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fname[:-4])), "w")
         p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log, cwd=cli_dir)
         p.wait()
@@ -1302,7 +1302,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         os.remove(cli_fn)
 
     # create cligen input file
-    clinp_fn = _make_clinp(wd, cliver, years, cli_fn, par_fn)
+    _clinp_path = _make_clinp(wd, cliver, years, cli_fn, par_fn, clinp_fn='{}{}.inp'.format(par, suffix))
 
     # build cmd
     if cliver == "4.3":
@@ -1325,7 +1325,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         cmd.append('-r%s' % randseed)
 
     # run cligen
-    _clinp = open(clinp_fn)
+    _clinp = open(_clinp_path)
 
     if IS_WINDOWS:
         process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
@@ -1348,29 +1348,26 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     sim_nwds = cli.count_wetdays()
 
     if logger is not None:
-        logger.log('Note: CLIGEN uses English Units.\n\n')
-
-        logger.log('Station : %s\n' % _rowfmt(par_monthlies))
-        logger.log('%s   : %s\n' % (monthly_dataset, _rowfmt(prism_ppts)))
-        logger.log('Cligen  : %s\n' % _rowfmt(sim_ppts))
-
-        logger.log('Monthly number wet days\n')
-        logger.log('Station : %s\n' % _rowfmt(station.nwds))
-        logger.log('Target  : %s\n' % _rowfmt(nwds))
-        logger.log('Cligen  : %s\n' % _rowfmt(sim_nwds))
-
-        logger.log('p(w|w) and p(w|d)\n')
-        logger.log('Station p(w|w) : %s\n' % _rowfmt(station.pwws))
-        logger.log('Cligen p(w|w)  : %s\n' % _rowfmt(p_wws))
-        logger.log('Station p(w|d) : %s\n' % _rowfmt(station.pwds))
-        logger.log('Cligen p(w|d)  : %s\n' % _rowfmt(p_wds))
-
-        logger.log('Daily P for day precipitation occurs\n')
-        logger.log('Station : %s\n' % _rowfmt(station.ppts))
-        logger.log('Target  : %s\n' % _rowfmt(daily_ppts))
-
-        logger.log('%s TMAX (F): %s\n' % (monthly_dataset, _rowfmt(prism_tmaxs)))
-        logger.log('%s TMIN (F) : %s\n' % (monthly_dataset, _rowfmt(prism_tmins)))
+        logger.log(''.join(
+            ['Note: CLIGEN uses English Units.\n\n',
+              'Station : %s\n' % _rowfmt(par_monthlies),
+              '%s   : %s\n' % (monthly_dataset, _rowfmt(prism_ppts)),
+              'Cligen  : %s\n' % _rowfmt(sim_ppts),
+              'Monthly number wet days\n',
+              'Station : %s\n' % _rowfmt(station.nwds),
+              'Target  : %s\n' % _rowfmt(nwds),
+              'Cligen  : %s\n' % _rowfmt(sim_nwds),
+              'p(w|w) and p(w|d)\n',
+              'Station p(w|w) : %s\n' % _rowfmt(station.pwws),
+              'Cligen p(w|w)  : %s\n' % _rowfmt(p_wws),
+              'Station p(w|d) : %s\n' % _rowfmt(station.pwds),
+              'Cligen p(w|d)  : %s\n' % _rowfmt(p_wds),
+              'Daily P for day precipitation occurs\n',
+              'Station : %s\n' % _rowfmt(station.ppts),
+              'Target  : %s\n' % _rowfmt(daily_ppts),
+              '%s TMAX (F): %s\n' % (monthly_dataset, _rowfmt(prism_tmaxs)),
+              '%s TMIN (F) : %s\n' % (monthly_dataset, _rowfmt(prism_tmins)),
+             ]))
 
     os.chdir(curdir)
 
