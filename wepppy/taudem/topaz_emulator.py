@@ -160,11 +160,12 @@ class TauDEMTopazEmulator(TauDEMRunner):
         self.make_bound()
         polygonize_bound(self._bound, self._bound_shp)
 
-    def abstract_watershed(self, wepp_chn_type):
+    def abstract_watershed(self, wepp_chn_type,
+                           clip_hillslopes=False, clip_hillslope_length=300.0):
         self.abstract_channels(wepp_chn_type=wepp_chn_type)
-        self.abstract_subcatchments()
+        self.abstract_subcatchments(clip_hillslopes=clip_hillslopes, 
+                                    clip_hillslope_length=clip_hillslope_length)
         self.abstract_structure()
-
 
     @property
     def _abstracted_channels(self):
@@ -413,7 +414,7 @@ class TauDEMTopazEmulator(TauDEMRunner):
     def translator(self):
         return WeppTopTranslator(top_sub_ids=self.topaz_sub_ids, top_chn_ids=self.topaz_chn_ids)
 
-    def abstract_subcatchments(self):
+    def abstract_subcatchments(self, clip_hillslopes=False, clip_hillslope_length=300.0):
         """
         in: dinf_dd_horizontal, dinf_dd_vertical, dinf_dd_surface, dinf_slope, subwta
         :return:
@@ -482,27 +483,29 @@ class TauDEMTopazEmulator(TauDEMRunner):
                 fp_slopes = slopes[(indx, indy)]
 
                 length = float(np.sum(fp_lengths * fp_surface_areas) / np.sum(fp_surface_areas))
+                if clip_hillslopes and length > clip_hillslope_length:
+                    length = clip_hillslope_length
+
                 width = area / length
-                """
-                if str(sub_id).endswith('1'):
-                    # determine representative length and width
-                    # Cochrane dissertation eq 3.4
 
-                    #print('sub_id', sub_id)
-                    #pprint('fp_lengths')
-                    #pprint(fp_lengths)
-                    #pprint('fp_surface_areas')
-                    #pprint(fp_surface_areas)
-                    length = float(np.sum(fp_lengths * fp_surface_areas) / np.sum(fp_surface_areas))
-                    width = area / length
-
-                    #print('area', area)
-                    #print('width', width)
-                    #print('length', length, '\n\n\n')
-                else:
-                    width = chns_d[chn_id].length
-                    length = area / width
-                """
+#                if str(sub_id).endswith('1'):
+#                    # determine representative length and width
+#                    # Cochrane dissertation eq 3.4
+#
+#                    #print('sub_id', sub_id)
+#                    #pprint('fp_lengths')
+#                    #pprint(fp_lengths)
+#                    #pprint('fp_surface_areas')
+#                    #pprint(fp_surface_areas)
+#                    length = float(np.sum(fp_lengths * fp_surface_areas) / np.sum(fp_surface_areas))
+#                    width = area / length
+#
+#                    #print('area', area)
+#                    #print('width', width)
+#                    #print('length', length, '\n\n\n')
+#                else:
+#                    width = chns_d[chn_id].length
+#                    length = area / width
 
                 # determine representative slope profile
                 w_slopes, distance_p = weighted_slope_average(fp_surface_areas, fp_slopes, fp_lengths)
@@ -524,7 +527,6 @@ class TauDEMTopazEmulator(TauDEMRunner):
             # calculate centroid
             c_px, c_py = centroid_px(raw_indx, raw_indy)
             centroid_lnglat = self.px_to_lnglat(c_px, c_py)
-
 
             direction = chns_d[chn_id].direction
             if str(sub_id).endswith('2'):
