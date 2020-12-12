@@ -71,8 +71,11 @@ class Watershed(NoDbBase):
             self._centroid = None
             self._outlet_top_id = None
             self._outlet = None
-
+            
             self._wepp_chn_type = self.config_get_str('soils', 'wepp_chn_type')
+
+            self._clip_hillslope_length = self.config_get_float('watershed', 'clip_hillslope_length')
+            self._clip_hillslopes = self.config_get_bool('watershed', 'clip_hillslopes')
 
             delineation_backend = self.config_get_str('watershed', 'delineation_backend')
             if delineation_backend.lower().startswith('taudem'):
@@ -131,6 +134,42 @@ class Watershed(NoDbBase):
         if delineation_backend is None:
             return True
         return delineation_backend == DelineationBackend.TOPAZ
+
+    @property
+    def clip_hillslopes(self):
+        return getattr(self, '_clip_hillslopes', False)
+
+    @clip_hillslopes.setter
+    def clip_hillslopes(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._clip_hillslopes = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def clip_hillslope_length(self):
+        return getattr(self, '_clip_hillslope_length', 300.0)
+
+    @clip_hillslope_length.setter
+    def clip_hillslope_length(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._clip_hillslope_length = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def delineation_backend_is_taudem(self):
@@ -409,7 +448,9 @@ class Watershed(NoDbBase):
         # noinspection PyBroadException
         try:
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
-            taudem.abstract_watershed(wepp_chn_type=self.wepp_chn_type)
+            taudem.abstract_watershed(wepp_chn_type=self.wepp_chn_type,
+                                      clip_hillslopes=self.clip_hillslopes,
+                                      clip_hillslope_length=self.clip_hillslope_length)
 
             self._subs_summary = taudem.abstracted_subcatchments
             self._chns_summary = taudem.abstracted_channels
@@ -454,7 +495,9 @@ class Watershed(NoDbBase):
             assert _exists(topaz_wd)
 
             _abs = WatershedAbstraction(topaz_wd, wat_dir)
-            _abs.abstract(wepp_chn_type=self.wepp_chn_type)
+            _abs.abstract(wepp_chn_type=self.wepp_chn_type,
+                          clip_hillslopes=self.clip_hillslopes,
+                          clip_hillslope_length=self.clip_hillslope_length)
             _abs.write_slps()
 
             chns_summary = {}

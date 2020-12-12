@@ -1912,8 +1912,26 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
+    clip_hillslope_length = request.form.get('clip_hillslope_length', None)
+    try:
+        clip_hillslope_length = float(clip_hillslope_length)
+    except:
+        pass
+
+    clip_hillslopes = request.form.get('clip_hillslopes', None)
+    try:
+        clip_hillslopes = clip_hillslopes.lower().startswith('on')
+    except:
+        pass
+
     wd = get_wd(runid)
     watershed = Watershed.getInstance(wd)
+
+    if clip_hillslopes is not None:
+        watershed.clip_hillslopes = clip_hillslopes
+
+    if clip_hillslope_length is not None:
+        watershed.clip_hillslope_length = clip_hillslope_length
 
     try:
         watershed.build_subcatchments(pkcsa=pkcsa)

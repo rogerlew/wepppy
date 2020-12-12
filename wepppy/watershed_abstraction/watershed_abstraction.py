@@ -269,9 +269,12 @@ class WatershedAbstraction:
     def centroid(self) -> CentroidSummary:
         return self._centroid
 
-    def abstract(self, wepp_chn_type='Default', verbose=False, warn=False):
+    def abstract(self, wepp_chn_type='Default', verbose=False, warn=False,
+                 clip_hillslopes=False, clip_hillslope_length=300.0):
         self.abstract_channels(wepp_chn_type=wepp_chn_type, verbose=verbose)
-        self.abstract_subcatchments(verbose=verbose, warn=warn)
+        self.abstract_subcatchments(verbose=verbose, warn=warn,
+                                    clip_hillslopes=clip_hillslopes, 
+                                    clip_hillslope_length=clip_hillslope_length)
         self.abstract_structure(verbose=verbose)
 
     def write_slps(self, channels=1, subcatchments=1, flowpaths=1):
@@ -591,7 +594,8 @@ class WatershedAbstraction:
         # save channel abstraction to instance
         watershed['channels']['chn_%i' % chn_id] = chn_summary
 
-    def abstract_subcatchments(self, verbose=False, warn=False):
+    def abstract_subcatchments(self, verbose=False, warn=False,
+                               clip_hillslopes=False, clip_hillslope_length=300.0):
         subwta = self.subwta
 
         # extract the subcatchment and channel ids from the subwta map
@@ -609,7 +613,8 @@ class WatershedAbstraction:
         for i, sub_id in enumerate(sub_ids):
             if verbose:
                 print('abstracting subtatchment %s (%i of %i)' % (sub_id, i + 1, n))
-            self.abstract_subcatchment(sub_id, verbose=verbose, warn=warn)
+            self.abstract_subcatchment(sub_id, verbose=verbose, warn=warn,
+                                       clip_hillslopes=clip_hillslopes, clip_hillslope_length=clip_hillslope_length)
 
         self.hillslope_n = len(sub_ids)
 
@@ -787,7 +792,8 @@ class WatershedAbstraction:
 
         return fp_d, subflows
 
-    def abstract_subcatchment(self, sub_id, verbose=False, warn=False):
+    def abstract_subcatchment(self, sub_id, verbose=False, warn=False,
+                              clip_hillslopes=False, clip_hillslope_length=300.0):
         """
         define subcatchment abstraction for the purposes of running WEPP
         """
@@ -813,6 +819,8 @@ class WatershedAbstraction:
         # contained in the subcatchment
         if str(sub_id).endswith('1'):
             length = cellsize * garbrecht_length(distances)
+            if clip_hillslopes and length > clip_hillslope_length:
+                length = clip_hillslope_length
             width = area / length
 
         # Otherwise the  width of the subcatchment is determined by the
@@ -821,6 +829,10 @@ class WatershedAbstraction:
         else:
             width = chn_summary.length
             length = area / width
+
+            if clip_hillslopes and length > clip_hillslope_length:
+                length = clip_hillslope_length
+                width = area / length
 
         direction = chn_summary.direction
         if str(sub_id).endswith('2'):
