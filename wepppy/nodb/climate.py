@@ -21,6 +21,8 @@ import shutil
 from shutil import copyfile
 import multiprocessing
 
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+
 # non-standard
 import jsonpickle
 
@@ -31,7 +33,13 @@ from wepppy.climates.gridmet import client as gridmet_client
 from wepppy.climates.prism import prism_mod, prism_revision
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
-from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn, build_gridmet_prn
+from wepppy.climates.cligen import (
+    CligenStationsManager, 
+    ClimateFile, 
+    Cligen, 
+    build_daymet_prn, 
+    build_gridmet_prn
+)
 from wepppy.all_your_base import isint, isfloat, NCPU
 from wepppy.all_your_base.geo import RasterDatasetInterpolator, haversine
 from wepppy.watershed_abstraction.support import is_channel
@@ -44,6 +52,8 @@ from wepppy.nodb.mixins.log_mixin import LogMixin
 
 CLIMATE_MAX_YEARS = 1000
 
+if NCPU > 8:
+    NPCU = 8
 
 class ClimateSummary(object):
     def __init__(self):
@@ -132,6 +142,12 @@ def build_observed(kwds):
 
     return cli_fn
 
+
+def mod_func_wrapper_factory(mod_func):
+    def mod_func_wrapper(kwds):
+        mod_func(**kwds)
+
+    return mod_func_wrapper
 
 # noinspection PyUnusedLocal
 class Climate(NoDbBase, LogMixin):
@@ -949,7 +965,7 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def _build_climate_mod(self, mod_function, verbose):
-        self.log('  running _build_climate_prism... \n')
+        self.log('  running _build_climate_mod{}... \n'.format(mod_function.__name__))
 
         self.lock()
 
@@ -982,24 +998,39 @@ class Climate(NoDbBase, LogMixin):
             self.monthlies = monthlies
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.log('  building climates... \n')
+                self.log('  building climates for hillslopes... \n')
+
+                pool = multiprocessing.Pool(NCPU)
+                jobs = []
+
+                def callback(res):
+                    ppts = ['%.2f' % p  for p in  res['ppts']]
+                    self.log('job completed.  ppts: {} '.format(', '.join(ppts)))
+                    self.log_done()
+
                 # build a climate for each subcatchment
                 sub_par_fns = {}
                 sub_cli_fns = {}
                 for topaz_id, ss in watershed._subs_summary.items():
-                    self.log('fetching climate for {}... '.format(topaz_id))
+                    self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
 
                     lng, lat = ss.centroid.lnglat
                     suffix = '_{}'.format(topaz_id)
 
-                    mod_function(par=climatestation,
+                    kwds = dict(par=climatestation,
                                  years=years, lng=lng, lat=lat, wd=cli_dir,
-                                 suffix=suffix, logger=self, nwds_method='')
+                                 suffix=suffix, logger=None, nwds_method='')
 
                     sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
                     sub_cli_fns[topaz_id] = '{}{}.cli'.format(climatestation, suffix)
 
+                    jobs.append(pool.apply_async(mod_function, kwds=kwds, callback=callback))
+
                     self.log_done()
+
+                [j.wait() for j in jobs]
+
+                self.log_done()
 
                 self.sub_par_fns = sub_par_fns
                 self.sub_cli_fns = sub_cli_fns
