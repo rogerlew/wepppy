@@ -503,6 +503,7 @@ class Ash(NoDbBase, LogMixin):
                 reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
                 load_map = ParameterMap(self.ash_load_cropped_fn)
                 load_d = load_map.build_ave_grid(watershed.subwta)
+                load_d = {k: v * 0.1 for k, v in load_d.items()} # convert from tonne/ha to kg/m^2
             else:
                 load_d = None
 
