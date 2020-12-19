@@ -1,0 +1,4 @@
+p_runoff = 0.004
+p_lateral = 0.005
+p_baseflow = 0.006
+p_sediment = 1400
