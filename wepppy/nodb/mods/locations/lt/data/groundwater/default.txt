@@ -1,0 +1,2 @@
+baseflow coefficient = 0.04
+deep seepage coefficient = 0.00
