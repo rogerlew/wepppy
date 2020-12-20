@@ -279,7 +279,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=25, erod=0.000001,
              surf_runoff=0.008, lateral_flow=0.009, baseflow=0.010, sediment=700.0,
-             gwstorage=100, bfcoeff=0.013, dscoeff=0.013, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.013, dscoeff=0.0134, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='19_Incline_Creek',  # 1700 ha  Watershed_19_Incline
              extent=[-120.04760742187501, 39.16839998800286, -119.80728149414064, 39.35447606884594],
@@ -289,7 +289,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=35, erod=0.000001,
              surf_runoff=0.011, lateral_flow=0.012, baseflow=0.013, sediment=1500.0,
-             gwstorage=100, bfcoeff=0.002, dscoeff=0.001, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.0019, dscoeff=0.001, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='20_Mill_Creek',  # 500 ha  Watershed_20
              extent=[-120.04760742187501, 39.16839998800286, -119.80728149414064, 39.35447606884594],
@@ -449,7 +449,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=35, erod=0.000001,
              surf_runoff=0.015, lateral_flow=0.016, baseflow=0.017, sediment=3500.0,
-             gwstorage=100, bfcoeff=0.002, dscoeff=0.002, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.0018, dscoeff=0.0016, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='30_North_Logan_House_Creek',  # 290 ha  Watershed_36
              extent=[-120.01396179199219, 39.019450429324046, -119.77363586425783, 39.20592074849823],
