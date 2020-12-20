@@ -87,7 +87,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=45, erod=0.000001,
              surf_runoff=0.008, lateral_flow=0.009, baseflow=0.010, sediment=1800.0,
-             gwstorage=100, bfcoeff=0.010, dscoeff=0.006, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.0099, dscoeff=0.0063, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
              extent=[-120.25085449218751, 38.636718267483616, -119.77020263671876, 39.0111810513999],
