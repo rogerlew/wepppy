@@ -47,7 +47,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=45, erod=0.000001,
              surf_runoff=0.011, lateral_flow=0.012, baseflow=0.013, sediment=2800.0,
-             gwstorage=100, bfcoeff=0.001, dscoeff=0.0003, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.0013, dscoeff=0.0003, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='41_Intervening_Area_Bijou_Park_1',  # 490 ha  Watershed_47
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
