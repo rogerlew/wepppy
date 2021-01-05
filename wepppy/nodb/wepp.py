@@ -63,7 +63,7 @@ from wepppy.all_your_base import (
     NCPU,
     IS_WINDOWS
 )
-from wepppy.all_your_base.geo import read_raster, wgs84_proj4
+from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator
 
 from wepppy.wepp.out import (
     Loss,
@@ -273,6 +273,11 @@ class Wepp(NoDbBase, LogMixin):
             baseflow = self.config_get_float('phosphorus_opts', 'baseflow')
             sediment = self.config_get_float('phosphorus_opts', 'sediment')
 
+            self.p_surf_runoff_map = self.config_get_path('phosphorus_opts', 'surf_runoff_map')
+            self.p_lateral_flow_map = self.config_get_path('phosphorus_opts', 'lateral_flow_map')
+            self.p_baseflow_map = self.config_get_path('phosphorus_opts', 'baseflow_map')
+            self.p_sediment_map = self.config_get_path('phosphorus_opts', 'sediment_map')
+
             snow_rst = self.config_get_float('snow_opts', 'rst')
             snow_newsnw = self.config_get_float('snow_opts', 'newsnw')
             snow_ssd = self.config_get_float('snow_opts', 'ssd')
@@ -287,6 +292,8 @@ class Wepp(NoDbBase, LogMixin):
 
             _channel_erodibility = self.config_get_float('wepp', 'channel_erodibility')
             _channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
+
+            self.channel_critical_shear_map = self.config_get_path('wepp', 'channel_critical_shear_map')
 
             _kslast = self.config_get_float('wepp', 'kslast')
 
@@ -583,11 +590,66 @@ class Wepp(NoDbBase, LogMixin):
         # noinspection PyMethodFirstArgAssignment
         self = self.getInstance(self.wd)
 
-        fn = _join(self.runs_dir, 'phosphorus.txt')
-        if self.phosphorus_opts.isvalid:
-            with open(fn, 'w') as fp:
-                fp.write(self.phosphorus_opts.contents)
+        # get references to PhosphorusOpts
+        phos_opts = self.phosphorus_opts
 
+        # check to see if p maps are available
+        p_surf_runoff_map = getattr(self, 'p_surf_runoff_map', None)
+        p_lateral_flow_map = getattr(self, 'p_lateral_flow_map', None)
+        p_baseflow_map = getattr(self, 'p_baseflow_map', None)
+        p_sediment_map = getattr(self, 'p_sediment_map', None)
+
+        # if the maps are available read the p parameters from the maps
+        watershed = Watershed.getInstance(self.wd)
+        lng, lat = watershed.centroid
+        
+        if p_surf_runoff_map is not None:
+            p_surf_runoff = RasterDatasetInterpolator(p_surf_runoff_map).get_location_info(lng, lat, method='nearest')
+            if p_surf_runoff > 0.0:
+                self.log('wepp:_prep_phosphorus setting surf_runoff to {} from map'.format(p_surf_runoff))
+                phos_opts.surf_runoff = p_surf_runoff
+                self.log_done()
+            
+        if p_lateral_flow_map is not None:
+            p_lateral_flow = RasterDatasetInterpolator(p_lateral_flow_map).get_location_info(lng, lat, method='nearest')
+            if p_lateral_flow > 0.0:
+                self.log('wepp:_prep_phosphorus setting lateral_flow to {} from map'.format(p_lateral_flow))
+                phos_opts.lateral_flow = p_lateral_flow
+                self.log_done()
+
+        if p_baseflow_map is not None: 
+            p_baseflow = RasterDatasetInterpolator(p_baseflow_map).get_location_info(lng, lat, method='nearest')
+            if p_baseflow > 0.0:
+                self.log('wepp:_prep_phosphorus setting baseflow to {} from map'.format(p_baseflow))
+                phos_opts.baseflow = p_baseflow
+                self.log_done()
+
+        if  p_sediment_map is not None:
+            p_sediment = RasterDatasetInterpolator(p_sediment_map).get_location_info(lng, lat, method='nearest')
+            if p_sediment > 0.0:
+                self.log('wepp:_prep_phosphorus setting sediment to {} from map'.format(p_sediment))
+                phos_opts.sediment = p_sediment
+                self.log_done()
+
+        # save the phosphorus parameters to the .nodb
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.phosphorus_opts = phos_opts
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+        # create the phosphorus.txt file
+        fn = _join(self.runs_dir, 'phosphorus.txt')
+        if phos_opts.isvalid:
+            with open(fn, 'w') as fp:
+                fp.write(phos_opts.contents)
+
+        # make sure the file exists and validate the file
         if _exists(fn):
             if not validate_phosphorus_txt(fn):
                 os.remove(fn)
@@ -875,6 +937,15 @@ class Wepp(NoDbBase, LogMixin):
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
+
+        crit_shear_map = getattr(self, 'channel_critical_shear_map', None)
+        if crit_shear_map is not None:
+            lng, lat = watershed.centroid
+            crit_shear = RasterDatasetInterpolator(crit_shear_map).get_location_info(lng, lat, method='nearest')
+            if crit_shear > 0.0:
+                self.log('wepp:prep_watershed setting critical shear to {} from map'.format(crit_shear))
+                critical_shear = crit_shear
+                self.log_done()
 
         self._prep_structure(translator)
         self._prep_channel_slopes()
