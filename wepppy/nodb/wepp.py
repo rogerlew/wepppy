@@ -273,6 +273,12 @@ class Wepp(NoDbBase, LogMixin):
             baseflow = self.config_get_float('phosphorus_opts', 'baseflow')
             sediment = self.config_get_float('phosphorus_opts', 'sediment')
 
+            self.phosphorus_opts = PhosphorusOpts(
+                surf_runoff=surf_runoff,
+                lateral_flow=lateral_flow,
+                baseflow=baseflow,
+                sediment=sediment)
+
             self.p_surf_runoff_map = self.config_get_path('phosphorus_opts', 'surf_runoff_map')
             self.p_lateral_flow_map = self.config_get_path('phosphorus_opts', 'lateral_flow_map')
             self.p_baseflow_map = self.config_get_path('phosphorus_opts', 'baseflow_map')
@@ -287,6 +293,22 @@ class Wepp(NoDbBase, LogMixin):
             _frost = self.config_get_bool('wepp', 'frost')
             _tcr = self.config_get_bool('wepp', 'tcr')
 
+            baseflow_gwstorage = self.config_get_float('baseflow_opts', 'gwstorage')
+            baseflow_bfcoeff = self.config_get_float('baseflow_opts', 'bfcoeff')
+            baseflow_dscoeff = self.config_get_float('baseflow_opts', 'dscoeff')
+            baseflow_bfthreshold = self.config_get_float('baseflows_opts', 'bfthreshold')
+
+            self.baseflow_opts = BaseflowOpts(
+                gwstorage=baseflow_gwstorage,
+                bfcoeff=baseflow_bfcoeff,
+                dscoeff=baseflow_dscoeff,
+                bfthreshold=baseflow_bfthreshold)
+
+            self.baseflow_gwstorage_map = self.config_get_path('baseflow_opts', 'gwstorage_map')
+            self.baseflow_bfcoeff_map = self.config_get_path('baseflow_opts', 'bfcoeff_map')
+            self.baseflow_dscoeff_map = self.config_get_path('baseflow_opts', 'dscoeff_map')
+            self.baseflow_bfthreshold_map = self.config_get_path('baseflow_opts', 'bfthreshold_map')
+
             _baseflow = self.config_get_bool('wepp', 'baseflow')
             _snow = self.config_get_bool('wepp', 'snow')
 
@@ -299,12 +321,6 @@ class Wepp(NoDbBase, LogMixin):
 
             _wepp_bin = self.config_get_str('wepp', 'bin')
 
-            self.phosphorus_opts = PhosphorusOpts(
-                surf_runoff=surf_runoff,
-                lateral_flow=lateral_flow,
-                baseflow=baseflow,
-                sediment=sediment)
-
             self._run_wepp_ui = _wepp_ui
             self._run_pmet = _pmet
             self._run_frost = _frost
@@ -316,7 +332,6 @@ class Wepp(NoDbBase, LogMixin):
             self._channel_critical_shear = _channel_critical_shear
             self._kslast = _kslast
 
-            self.baseflow_opts = BaseflowOpts()
             self.snow_opts = SnowOpts(rst=snow_rst,
                                       newsnw=snow_newsnw,
                                       ssd=snow_ssd)
@@ -607,28 +622,28 @@ class Wepp(NoDbBase, LogMixin):
             p_surf_runoff = RasterDatasetInterpolator(p_surf_runoff_map).get_location_info(lng, lat, method='nearest')
             if p_surf_runoff > 0.0:
                 self.log('wepp:_prep_phosphorus setting surf_runoff to {} from map'.format(p_surf_runoff))
-                phos_opts.surf_runoff = p_surf_runoff
+                phos_opts.surf_runoff = float(p_surf_runoff)
                 self.log_done()
             
         if p_lateral_flow_map is not None:
             p_lateral_flow = RasterDatasetInterpolator(p_lateral_flow_map).get_location_info(lng, lat, method='nearest')
             if p_lateral_flow > 0.0:
                 self.log('wepp:_prep_phosphorus setting lateral_flow to {} from map'.format(p_lateral_flow))
-                phos_opts.lateral_flow = p_lateral_flow
+                phos_opts.lateral_flow = float(p_lateral_flow)
                 self.log_done()
 
         if p_baseflow_map is not None: 
             p_baseflow = RasterDatasetInterpolator(p_baseflow_map).get_location_info(lng, lat, method='nearest')
             if p_baseflow > 0.0:
                 self.log('wepp:_prep_phosphorus setting baseflow to {} from map'.format(p_baseflow))
-                phos_opts.baseflow = p_baseflow
+                phos_opts.baseflow = float(p_baseflow)
                 self.log_done()
 
         if  p_sediment_map is not None:
             p_sediment = RasterDatasetInterpolator(p_sediment_map).get_location_info(lng, lat, method='nearest')
             if p_sediment > 0.0:
                 self.log('wepp:_prep_phosphorus setting sediment to {} from map'.format(p_sediment))
-                phos_opts.sediment = p_sediment
+                phos_opts.sediment = float(p_sediment)
                 self.log_done()
 
         # save the phosphorus parameters to the .nodb
@@ -660,9 +675,59 @@ class Wepp(NoDbBase, LogMixin):
             fp.write(self.snow_opts.contents)
 
     def _prep_baseflow(self):
+        baseflow_opts = self.baseflow_opts
+
+        gwstorage_map = getattr(self, 'baseflow_gwstorage_map', None)
+        bfcoeff_map = getattr(self, 'baseflow_bfcoeff_map', None)
+        dscoeff_map = getattr(self, 'baseflow_dscoeff_map', None)
+        bfthreshold_map = getattr(self, 'baseflow_bfthreshold_map', None)
+
+        watershed = Watershed.getInstance(self.wd)
+        lng, lat = watershed.centroid
+
+        if gwstorage_map is not None:
+            gwstorage = RasterDatasetInterpolator(gwstorage_map).get_location_info(lng, lat, method='nearest')
+            if gwstorage >= 0.0:
+                self.log('wepp:_prep_baseflow setting gwstorage to {} from map'.format(gwstorage))
+                baseflow_opts.gwstorage = float(gwstorage)
+                self.log_done()
+
+        if bfcoeff_map is not None:
+            bfcoeff = RasterDatasetInterpolator(bfcoeff_map).get_location_info(lng, lat, method='nearest')
+            if bfcoeff >= 0.0:
+                self.log('wepp:_prep_baseflow setting bfcoeff to {} from map'.format(bfcoeff))
+                baseflow_opts.bfcoeff = float(bfcoeff)
+                self.log_done()
+
+        if dscoeff_map is not None:
+            dscoeff = RasterDatasetInterpolator(dscoeff_map).get_location_info(lng, lat, method='nearest')
+            if dscoeff >= 0.0:
+                self.log('wepp:_prep_baseflow setting dscoeff to {} from map'.format(dscoeff))
+                baseflow_opts.dscoeff = float(dscoeff)
+                self.log_done()
+
+        if bfthreshold_map is not None:
+            bfthreshold = RasterDatasetInterpolator(bfthreshold_map).get_location_info(lng, lat, method='nearest')
+            if bfthreshold >= 0.0:
+                self.log('wepp:_prep_baseflow setting bfthreshold to {} from map'.format(bfthreshold))
+                baseflow_opts.bfthreshold = float(bfthreshold)
+                self.log_done()
+
+        # save the baseflow parameters to the .nodb
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.baseflow_opts = baseflow_opts
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
         fn = _join(self.runs_dir, 'gwcoeff.txt')
         with open(fn, 'w') as fp:
-            fp.write(self.baseflow_opts.contents)
+            fp.write(baseflow_opts.contents)
 
     def clean(self):
         if _exists(self.status_log):
