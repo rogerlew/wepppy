@@ -620,7 +620,11 @@ class Ash(NoDbBase, LogMixin):
         black_bd = self.ini_black_ash_bulkdensity
         white_bd = self.ini_white_ash_bulkdensity
 
-        ash_type = self.meta[str(topaz_id)]['ash_type']
+        ash_type = getattr(self.meta[str(topaz_id)], 'ash_type', None)
+
+        if ash_type is None:
+            return None
+
         if ash_type == AshType.BLACK:
             if load_d is None:
                 return self.ini_black_ash_depth_mm
