@@ -463,6 +463,9 @@ class AshPost(NoDbBase):
             # unburned landuses won't have ash outputs
             if _exists(ash_fn):
                 burn_class = meta[topaz_id]['burn_class']
+                if burn_class == 1:
+                    continue
+
                 df = pd.read_csv(ash_fn)
                 water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
                 cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
