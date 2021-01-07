@@ -1223,7 +1223,8 @@ class Wepp(NoDbBase, LogMixin):
 
         chn_n = Watershed.getInstance(self.wd).chn_n
         chn_man = get_channel_management()
-        chn_man.make_multiple_ofe(chn_n)
+        if chn_n > 1:
+            chn_man.make_multiple_ofe(chn_n)
 
         if years > 1:
             multi = chn_man.build_multiple_year_man(years)
