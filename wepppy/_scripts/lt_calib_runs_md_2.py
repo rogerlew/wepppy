@@ -227,7 +227,7 @@ if __name__ == '__main__':
              outlet=[-120.16359931399549, 39.1067786663636],
              landuse=None,
              cs=10, erod=0.000001,
-             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=1300.0,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='63_Intervening_Area_Ward_Creek', # Watershed_8
@@ -237,7 +237,7 @@ if __name__ == '__main__':
              outlet=[-120.16237493339143, 39.12864047715305],
              landuse=None,
              cs=30, erod=0.000001,
-             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=1300.0,
+             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1300.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='63_Ward_Creek', # Watershed_7_Ward_10336676
