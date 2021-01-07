@@ -97,7 +97,7 @@ if __name__ == '__main__':
              landuse=None,
              csa=10, mcl = 100,
              cs=15, erod=0.000001,
-             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1300.0,
+             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='46_Taylor_Creek',  # 5700 ha  Watershed_52
