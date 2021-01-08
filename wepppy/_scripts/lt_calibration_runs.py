@@ -78,7 +78,7 @@ if __name__ == '__main__':
              cs=40, erod=0.000001,
              surf_runoff=0.001, lateral_flow=0.002, baseflow=0.003, sediment=2500.0,
              gwstorage=100, bfcoeff=0.0005, dscoeff=0.001, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.8),
+             mid_season_crop_coeff=1.1, p_coeff=0.8),
         dict(watershed='40_Edgewood_Creek',  # 1500 ha  Watershed_46_Edgewood
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
              map_center=[-119.94186401367189, 38.963947050281696],
