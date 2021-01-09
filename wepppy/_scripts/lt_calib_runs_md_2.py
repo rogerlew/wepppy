@@ -47,7 +47,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=45, erod=0.000001,
              surf_runoff=0.011, lateral_flow=0.012, baseflow=0.013, sediment=2800.0,
-             gwstorage=100, bfcoeff=0.0013, dscoeff=0.0003, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.00126, dscoeff=0.00031, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='41_Intervening_Area_Bijou_Park_1',  # 490 ha  Watershed_47
              extent=[-120.06202697753908, 38.87045372777545, -119.8217010498047, 39.05731715424236],
@@ -97,7 +97,7 @@ if __name__ == '__main__':
              landuse=None,
              csa=10, mcl = 100,
              cs=15, erod=0.000001,
-             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1300.0,
+             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='46_Taylor_Creek',  # 5700 ha  Watershed_52
@@ -227,7 +227,7 @@ if __name__ == '__main__':
              outlet=[-120.16359931399549, 39.1067786663636],
              landuse=None,
              cs=10, erod=0.000001,
-             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=1300.0,
+             surf_runoff=0.003, lateral_flow=0.004, baseflow=0.005, sediment=1100.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='63_Intervening_Area_Ward_Creek', # Watershed_8
@@ -237,7 +237,7 @@ if __name__ == '__main__':
              outlet=[-120.16237493339143, 39.12864047715305],
              landuse=None,
              cs=30, erod=0.000001,
-             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=1300.0,
+             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1300.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='63_Ward_Creek', # Watershed_7_Ward_10336676
@@ -249,7 +249,7 @@ if __name__ == '__main__':
              cs=30, erod=0.000001,
              surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1300.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.8),
+             mid_season_crop_coeff=0.95, p_coeff=0.8)
     ]
 
     scenarios = [
