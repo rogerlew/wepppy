@@ -13,7 +13,7 @@ from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, Sedime
 os.chdir('/geodata/weppcloud_runs/')
 
 if __name__ == "__main__":
-    prefix = 'lt2020_7'
+    prefix = 'lt2021_1'
     outdir = '/home/mariana/weppcloud_exports/%s_csvs' % prefix
 
     if _exists(outdir):
