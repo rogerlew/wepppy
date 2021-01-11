@@ -26,17 +26,17 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 'SimFire.202012._fccsFuels_obs_cli',
-                 'SimFire.202012._landisFuels_obs_cli',
-                 'SimFire.202012._landisFuels_fut_cli_A2',
-                 'CurCond.202012',
-                 'PrescFire.202012',
-                 'LowSev.202012',
-                 'ModSev.202012',
-                 'HighSev.202012',
-                 'Thinn96.202012',
-                 'Thinn93.202012',
-                 'Thinn85.202012'
+                 '202012.SimFire_fccsFuels_obs_cli',
+                 '202012.SimFire_landisFuels_obs_cli',
+                 '202012.SimFire_landisFuels_fut_cli_A2',
+                 '202012.CurCond',
+                 '202012.PrescFire',
+                 '202012.LowSev',
+                 '202012.ModSev',
+                 '202012.HighSev',
+                 '202012.Thinn96',
+                 '202012.Thinn93',
+                 '202012.Thinn85'
                 ]
 
     wds = []
