@@ -14,7 +14,7 @@ os.chdir('/geodata/weppcloud_runs/')
 
 if __name__ == "__main__":
     prefix = 'lt2020_7'
-    outdir = '/home/mariana/%s_csvs' % prefix
+    outdir = '/home/mariana/weppcloud_exports/%s_csvs' % prefix
 
     if _exists(outdir):
         res = input('Outdir exists, Delete outdir?')
