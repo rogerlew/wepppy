@@ -458,7 +458,7 @@ if __name__ == '__main__':
              outlet=[-119.94139490719957, 39.068905396563665],
              landuse=None,
              cs=40, erod=0.000001,
-             surf_runoff=0.001, lateral_flow=0.002, baseflow=0.003, sediment=2500.0,
+             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=2300.0,
              gwstorage=100, bfcoeff=0.002, dscoeff=0.002, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='31_Logan_House_Creek',  # 530 ha  Watershed_37
@@ -468,7 +468,7 @@ if __name__ == '__main__':
              outlet=[-119.93525510941215, 39.066581990025206],
              landuse=None,
              cs=40, erod=0.000001,
-             surf_runoff=0.001, lateral_flow=0.002, baseflow=0.003, sediment=2500.0,
+             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=2300.0,
              gwstorage=100, bfcoeff=0.0005, dscoeff=0.001, bfthreshold=1.001,
              mid_season_crop_coeff=1.1, p_coeff=0.8),
         dict(watershed='32_Intervening_Area_Logan_Shoals_1',  # 31 ha  Watershed_38
