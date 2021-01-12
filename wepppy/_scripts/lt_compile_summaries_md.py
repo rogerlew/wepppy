@@ -26,9 +26,9 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 'lt_202012*SimFire_fccsFuels_obs_cli',
-                 'lt_202012*SimFire_landisFuels_obs_cli',
-                 'lt_202012*SimFire_landisFuels_fut_cli_A2',
+                 'lt_202012*SimFire.fccsFuels_obs_cli',
+                 'lt_202012*SimFire.landisFuels_obs_cli',
+                 'lt_202012*SimFire.landisFuels_fut_cli_A2',
                  'lt_202012*CurCond',
                  'lt_202012*PrescFire',
                  'lt_202012*LowSev',
