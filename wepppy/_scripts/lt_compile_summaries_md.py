@@ -61,20 +61,16 @@ if __name__ == "__main__":
 
         name = ron.name
 
-        _wd = _split(wd)[-1].split('_')
-        if _wd[3][0] in 'BWG' or _wd[3].startswith('Me'):
-            indx = 4
-        else:
-            indx = 3
+        _wd = _split(wd)[-1]
+        for scn in scenarios:
+            lt_date, scn_desc = scn.split('*')
+            _wd = _wd.replace(lt_date, '')
+            if scn_desc in _wd:
+                scenario = scn_desc
+                _wd = _wd.replace(scn_desc, '')
+        watershed = _wd[1:-1]
 
-        scenario = '_'.join(_wd[indx:])
-        watershed = '_'.join(_wd[:indx])
-
-        run_descriptors = [('ProjectName', name), ('Scenario', scenario.replace('chn_cs25', '')
-                                                                       .replace('chn_cs10', '')
-                                                                       .replace('chn_cs30', '')
-                                                                       .replace('chn_cs75', '')
-                                                                       .replace('_', '')), ('Watershed', watershed)]
+        run_descriptors = [('ProjectName', name), ('Scenario', scenario), ('Watershed', watershed)]
 
         loss = Wepp.getInstance(wd).report_loss()
 
