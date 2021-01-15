@@ -76,7 +76,7 @@ if __name__ == '__main__':
              outlet=[-119.93525510941215, 39.066581990025206],
              landuse=None,
              cs=40, erod=0.000001,
-             surf_runoff=0.001, lateral_flow=0.002, baseflow=0.003, sediment=2500.0,
+             surf_runoff=0.002, lateral_flow=0.003, baseflow=0.004, sediment=2300.0,
              gwstorage=100, bfcoeff=0.0005, dscoeff=0.001, bfthreshold=1.001,
              mid_season_crop_coeff=1.1, p_coeff=0.8),
         dict(watershed='40_Edgewood_Creek',  # 1500 ha  Watershed_46_Edgewood
@@ -97,7 +97,7 @@ if __name__ == '__main__':
              landuse=None,
              cs=45, erod=0.000001,
              surf_runoff=0.008, lateral_flow=0.009, baseflow=0.010, sediment=1800.0,
-             gwstorage=100, bfcoeff=0.0099, dscoeff=0.0063, bfthreshold=1.001,
+             gwstorage=100, bfcoeff=0.0099, dscoeff=0.0062, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
         dict(watershed='44_Upper_Truckee_River_Big_Meadow_Creek',  # 14000 ha  Watershed_51_SLT
              extent=[-120.25085449218751, 38.636718267483616, -119.77020263671876, 39.0111810513999],
