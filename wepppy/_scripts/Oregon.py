@@ -254,7 +254,7 @@ if __name__ == '__main__':
     scenarios = [
         dict(wd='CurCond.gridmet',
              landuse=None,
-             cli_mode='observed', cfg='oregon',
+             cli_mode='observed', cfg='disturbed',
              clean=True, build_soils=True, build_landuse=True, build_climates=True),
         dict(wd='SBS-Riverside.gridmet',
              landuse=None,
@@ -283,7 +283,7 @@ if __name__ == '__main__':
             projects[-1]['build_climates'] = scenario['build_climates']
             projects[-1]['watershed'] = watershed['watershed']
             projects[-1]['scenario'] = scenario['wd']
-            projects[-1]['wd'] = 'oregon_202010_{watershed}_{scenario}' \
+            projects[-1]['wd'] = 'oregon_202101_{watershed}_{scenario}' \
                 .format(watershed=watershed['watershed'], scenario=scenario['wd'])
 
     for proj in projects:
