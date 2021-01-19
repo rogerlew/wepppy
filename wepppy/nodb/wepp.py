@@ -616,7 +616,7 @@ class Wepp(NoDbBase, LogMixin):
 
         # if the maps are available read the p parameters from the maps
         watershed = Watershed.getInstance(self.wd)
-        lng, lat = watershed.centroid
+        lng, lat = watershed.outlet.actual_loc
         
         if p_surf_runoff_map is not None:
             p_surf_runoff = RasterDatasetInterpolator(p_surf_runoff_map).get_location_info(lng, lat, method='nearest')
@@ -683,7 +683,7 @@ class Wepp(NoDbBase, LogMixin):
         bfthreshold_map = getattr(self, 'baseflow_bfthreshold_map', None)
 
         watershed = Watershed.getInstance(self.wd)
-        lng, lat = watershed.centroid
+        lng, lat = watershed.outlet.actual_loc
 
         if gwstorage_map is not None:
             gwstorage = RasterDatasetInterpolator(gwstorage_map).get_location_info(lng, lat, method='nearest')
@@ -1003,14 +1003,15 @@ class Wepp(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
-        crit_shear_map = getattr(self, 'channel_critical_shear_map', None)
-        if crit_shear_map is not None:
-            lng, lat = watershed.centroid
-            crit_shear = RasterDatasetInterpolator(crit_shear_map).get_location_info(lng, lat, method='nearest')
-            if crit_shear > 0.0:
-                self.log('wepp:prep_watershed setting critical shear to {} from map'.format(crit_shear))
-                critical_shear = crit_shear
-                self.log_done()
+        if critical_shear is None:
+            crit_shear_map = getattr(self, 'channel_critical_shear_map', None)
+            if crit_shear_map is not None:
+                lng, lat = watershed.outlet.actual_loc
+                crit_shear = RasterDatasetInterpolator(crit_shear_map).get_location_info(lng, lat, method='nearest')
+                if crit_shear > 0.0:
+                    self.log('wepp:prep_watershed setting critical shear to {} from map'.format(crit_shear))
+                    critical_shear = crit_shear
+                    self.log_done()
 
         self._prep_structure(translator)
         self._prep_channel_slopes()
