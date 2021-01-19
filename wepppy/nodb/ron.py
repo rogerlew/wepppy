@@ -387,8 +387,6 @@ class Ron(NoDbBase):
 
                     baer.validate(_split(sbs_path)[-1])
 
-                    baer.modify_burn_class([0, 1, 2, 3], None)
-
             if 'rred' in self.mods:
                 wepppy.nodb.mods.Rred(wd, cfg_fn)
 
