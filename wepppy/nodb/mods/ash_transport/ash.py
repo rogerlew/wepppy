@@ -578,13 +578,15 @@ class Ash(NoDbBase, LogMixin):
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha)
-                args.append(kwds)
+                run_ash_model(kwds)
+            #    args.append(kwds)
                 
-            pool = multiprocessing.Pool(NCPU)
-            for out_fn in pool.imap_unordered(run_ash_model, args):
-                self.log('  completed running {}\n'.format(out_fn))
-                self.log_done()
+            #pool = multiprocessing.Pool(NCPU)
+            #for out_fn in pool.imap_unordered(run_ash_model, args):
+            #    self.log('  completed running {}\n'.format(out_fn))
+            #    self.log_done()
 
+              
             self._ash_load_d = load_d
             self._ash_bulk_density_d = bd_d
 
