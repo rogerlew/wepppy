@@ -197,6 +197,10 @@ if __name__ == '__main__':
               ]
 
     scenarios = [
+        dict(wd='SBS.vanilla',
+             landuse=None,
+             cli_mode='vanilla', cfg='or-disturbed-{fire_name}-fire',
+             clean=True, build_soils=True, build_landuse=True, build_climates=True),
         dict(wd='CurCond.gridmet',
              landuse=None,
              cli_mode='observed', cfg='disturbed',
