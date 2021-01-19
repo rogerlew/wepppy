@@ -155,7 +155,7 @@ class AshPost(NoDbBase):
             # determine if slope has ash
             no_ash = False
             if load_d is not None:
-                if load_d[str(topaz_id)] < 0:
+                if load_d[str(topaz_id)] <= 0:
                     no_ash = True
             
             if burnclass <= 1 or burnclass == 255:
