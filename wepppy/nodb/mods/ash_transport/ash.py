@@ -125,8 +125,8 @@ class Ash(NoDbBase, LogMixin):
             self._ash_depth_mode = 1
             self._spatial_mode = AshSpatialMode.Single           
 
-            self._ash_load_fn = None
-            self._ash_bulk_density_fn = None
+            self._ash_load_fn = self.config_get_path('ash', 'ash_load_fn')
+            self._ash_bulk_density_fn = self.config_get_path('ash', 'ash_bulk_density_fn')
 
             self._ash_load_d = None
             self._ash_bulk_density_d = None
