@@ -406,6 +406,7 @@ class AshModel(object):
             _df = pd.DataFrame(data, columns=colnames)
             _df.to_csv(_join(out_dir, '%s_ash_stats_per_year_%s.csv' % (prefix, measure.split('_')[1])), index=False)
 
+        recurrence = [rec for rec in recurrence if rec <= num_fire_years]
         num_days = len(df.da)
         return_periods = {}
         for measure in ['wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)']:
