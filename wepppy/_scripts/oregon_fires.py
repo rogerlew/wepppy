@@ -201,6 +201,10 @@ if __name__ == '__main__':
              landuse=None,
              cli_mode='vanilla', cfg='or-disturbed-{fire_name}-fire',
              clean=True, build_soils=True, build_landuse=True, build_climates=True),
+        dict(wd='SBS.prism',
+             landuse=None,
+             cli_mode='prism', cfg='or-disturbed-{fire_name}-fire',
+             clean=True, build_soils=True, build_landuse=True, build_climates=True),
         dict(wd='CurCond.gridmet',
              landuse=None,
              cli_mode='observed', cfg='disturbed',
@@ -346,7 +350,7 @@ if __name__ == '__main__':
 
             climate.build(verbose=1)
 
-        elif cli_mode == 'PRISMadj':
+        elif cli_mode == 'prism':
             stations = climate.find_closest_stations()
             climate.climatestation = stations[0]['id']
 
@@ -354,7 +358,7 @@ if __name__ == '__main__':
 
             climate.climate_mode = ClimateMode.PRISM
             climate.climate_spatialmode = ClimateSpatialMode.Multiple
-            climate.input_years = 100
+            climate.input_years = 101
 
             climate.build(verbose=1)
 
@@ -366,7 +370,7 @@ if __name__ == '__main__':
 
             climate.climate_mode = ClimateMode.Vanilla
             climate.climate_spatialmode = ClimateSpatialMode.Single
-            climate.input_years = 100
+            climate.input_years = 101
 
             climate.build(verbose=1)
 
@@ -385,21 +389,24 @@ if __name__ == '__main__':
         wepp.run_watershed()
         loss_report = wepp.report_loss()
 
-        log_print('running wepppost')
         fn = _join(ron.export_dir, 'totalwatsed.csv')
 
+        log_print('running totalwatsed')
         totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
                                 wepp.baseflow_opts, wepp.phosphorus_opts)
         totwatsed.export(fn)
         assert _exists(fn)
 
+        log_print('running wepppost')
         wepppost = WeppPost.getInstance(wd)
         wepppost.run_post()
      
         if 'SBS' in scenario:
+            log_print('running ash')
             ash = Ash.getInstance(wd)
             ash.run_ash(fire_date=fire_date)
 
+            log_print('running ashpost')
             ashpost = AshPost.getInstance(wd)
             ashpost.run_post()
 
