@@ -578,13 +578,13 @@ class Ash(NoDbBase, LogMixin):
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha)
-                run_ash_model(kwds)
-            #    args.append(kwds)
+            #    run_ash_model(kwds)
+                args.append(kwds)
                 
-            #pool = multiprocessing.Pool(NCPU)
-            #for out_fn in pool.imap_unordered(run_ash_model, args):
-            #    self.log('  completed running {}\n'.format(out_fn))
-            #    self.log_done()
+            pool = multiprocessing.Pool(NCPU)
+            for out_fn in pool.imap_unordered(run_ash_model, args):
+                self.log('  completed running {}\n'.format(out_fn))
+                self.log_done()
 
               
             self._ash_load_d = load_d
@@ -611,7 +611,7 @@ class Ash(NoDbBase, LogMixin):
         ashpost.run_post()
 
     def get_ash_type(self, topaz_id):
-        ash_type = self.meta[str(topaz_id)]['ash_type']
+        ash_type = self.meta[str(topaz_id)].get('ash_type', None)
         if ash_type == AshType.BLACK:
             return 'black'
         elif ash_type == AshType.WHITE:
