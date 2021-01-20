@@ -1,8 +1,11 @@
 import shutil
 from glob import glob
 
+import os
 from os.path import join as _join
 from os.path import exists as _exists
+
+from time import sleep
 
 import jsonpickle
 import multiprocessing
@@ -474,7 +477,15 @@ class Ash(NoDbBase, LogMixin):
             wd = self.wd
             ash_dir = self.ash_dir
 
-            # todo: remove existing ash outputs
+            if _exists(ash_dir):
+                try:
+                    shutil.rmtree(ash_dir)
+                except FileNotFoundError:
+                    sleep(10.0)
+                    shutil.rmtree(ash_dir, ignore_errors=True)
+
+            if not _exists(ash_dir):
+                os.makedirs(ash_dir)
 
             watershed = Watershed.getInstance(wd)
             climate = Climate.getInstance(wd)
