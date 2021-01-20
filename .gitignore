@@ -1,4 +1,5 @@
 wepppy/validation/*
+*.swp
 *.pyc
 *.zip
 venv/*
