@@ -3860,38 +3860,42 @@ def _parse_rec_intervals(request, years):
 @app.route('/runs/<string:runid>/<config>/report/ash')
 @app.route('/runs/<string:runid>/<config>/report/ash/')
 def report_ash(runid, config):
-    wd = get_wd(runid)
+    try:
+        wd = get_wd(runid)
 
-    climate = Climate.getInstance(wd)
-    rec_intervals = _parse_rec_intervals(request, climate.years)
+        climate = Climate.getInstance(wd)
+        rec_intervals = _parse_rec_intervals(request, climate.years)
 
-    ron = Ron.getInstance(wd)
-    ash = Ash.getInstance(wd)
-    ashpost = AshPost.getInstance(wd)
+        ron = Ron.getInstance(wd)
+        ash = Ash.getInstance(wd)
+        ashpost = AshPost.getInstance(wd)
 
-    fire_date = ash.fire_date
-    ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
-    ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
-    unitizer = Unitizer.getInstance(wd)
+        fire_date = ash.fire_date
+        ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
+        ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
+        unitizer = Unitizer.getInstance(wd)
 
-    burnclass_summary = ash.burnclass_summary()
-    summary_stats = ashpost.summary_stats
-    recurrence_intervals = [str(v) for v in summary_stats['recurrence']]
-    results = summary_stats['return_periods']
-    annuals = summary_stats['annuals']
+        burnclass_summary = ash.burnclass_summary()
+        summary_stats = ashpost.summary_stats
+        recurrence_intervals = [str(v) for v in summary_stats['recurrence']]
+        results = summary_stats['return_periods']
+        annuals = summary_stats['annuals']
 
-    return render_template('reports/ash/ash_watershed.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           fire_date=fire_date,
-                           burnclass_summary=burnclass_summary,
-                           ini_black_ash_depth_mm=ini_black_ash_depth_mm,
-                           ini_white_ash_depth_mm=ini_white_ash_depth_mm,
-                           recurrence_intervals=recurrence_intervals,
-                           results=results,
-                           annuals=annuals,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/ash/ash_watershed.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               fire_date=fire_date,
+                               burnclass_summary=burnclass_summary,
+                               ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                               ini_white_ash_depth_mm=ini_white_ash_depth_mm,
+                               recurrence_intervals=recurrence_intervals,
+                               results=results,
+                               annuals=annuals,
+                               ron=ron,
+                               user=current_user)
+
+    except Exception:
+        return exception_factory('Error')
 
 
 @app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
@@ -3917,45 +3921,48 @@ def report_ash_by_hillslope(runid, config):
         except:
             fraction_under = None
 
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-    ash = Ash.getInstance(wd)
-    ashpost = AshPost.getInstance(wd)
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+        ash = Ash.getInstance(wd)
+        ashpost = AshPost.getInstance(wd)
 
-    out_rpt = OutletSummary(loss)
-    hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-    chn_rpt = ChannelSummary(loss)
-    avg_annual_years = loss.avg_annual_years
-    excluded_years = loss.excluded_years
-    translator = Watershed.getInstance(wd).translator_factory()
-    unitizer = Unitizer.getInstance(wd)
+        out_rpt = OutletSummary(loss)
+        hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+        chn_rpt = ChannelSummary(loss)
+        avg_annual_years = loss.avg_annual_years
+        excluded_years = loss.excluded_years
+        translator = Watershed.getInstance(wd).translator_factory()
+        unitizer = Unitizer.getInstance(wd)
 
-    fire_date = ash.fire_date
-    ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
-    ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
+        fire_date = ash.fire_date
+        ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
+        ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
 
-    burnclass_summary = ash.burnclass_summary()
-    ash_out = ashpost.ash_out
+        burnclass_summary = ash.burnclass_summary()
+        ash_out = ashpost.ash_out
 
-    return render_template('reports/ash/ash_watershed_by_hillslope.htm',
-                           out_rpt=out_rpt,
-                           hill_rpt=hill_rpt,
-                           chn_rpt=chn_rpt,
-                           avg_annual_years=avg_annual_years,
-                           excluded_years=excluded_years,
-                           translator=translator,
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           fire_date=fire_date,
-                           burnclass_summary=burnclass_summary,
-                           ini_black_ash_depth_mm=ini_black_ash_depth_mm,
-                           ini_white_ash_depth_mm=ini_white_ash_depth_mm,
-                           ash_out=ash_out,
-                           ash=ash,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/ash/ash_watershed_by_hillslope.htm',
+                               out_rpt=out_rpt,
+                               hill_rpt=hill_rpt,
+                               chn_rpt=chn_rpt,
+                               avg_annual_years=avg_annual_years,
+                               excluded_years=excluded_years,
+                               translator=translator,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               fire_date=fire_date,
+                               burnclass_summary=burnclass_summary,
+                               ini_black_ash_depth_mm=ini_black_ash_depth_mm,
+                               ini_white_ash_depth_mm=ini_white_ash_depth_mm,
+                               ash_out=ash_out,
+                               ash=ash,
+                               ron=ron,
+                               user=current_user)
 
+    except Exception:
+        return exception_factory('Error')
 
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
