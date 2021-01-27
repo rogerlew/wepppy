@@ -648,7 +648,7 @@ function onReady() {
         e.preventDefault();
 
         var station_id = $("#climate_station_selection").val();
-        var url = "https://wepp1.nkn.uidaho.edu/webservices/cligen/fetchpar/" + station_id;
+        var url = "https://wepp.cloud/webservices/cligen/fetchpar/" + station_id;
         var win = window.open(url, '_blank');
         if (win) {
             win.focus();
