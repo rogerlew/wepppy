@@ -207,7 +207,7 @@ if __name__ == '__main__':
              clean=True, build_soils=True, build_landuse=True, build_climates=True),
         dict(wd='CurCond.gridmet',
              landuse=None,
-             cli_mode='observed', cfg='disturbed',
+             cli_mode='observed', cfg='or-disturbed',
              clean=True, build_soils=True, build_landuse=True, build_climates=True),
         dict(wd='SBS.gridmet',
              landuse=None,
