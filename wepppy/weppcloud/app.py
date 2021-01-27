@@ -119,6 +119,8 @@ import socket
 _hostname = socket.gethostname()
 if 'wepp1' in _hostname:
     from wepppy.weppcloud.wepp1_config import config_app
+elif 'wepp2' in _hostname:
+    from wepppy.weppcloud.wepp2_config import config_app
 else:
     from wepppy.weppcloud.standalone_config import config_app
 
@@ -708,7 +710,7 @@ def create(config):
     try:
         user_datastore.create_run(runid, config, current_user)
     except Exception:
-        return exception_factory('Could not add run to user database: proceed to https://wepp1.nkn.uidaho.edu' + url)
+        return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
 
     return redirect(url)
 
@@ -1067,7 +1069,7 @@ def runs0(runid, config):
         return exception_factory()
 
 
-# https://wepp1.nkn.uidaho.edu/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
+# https://wepp.cloud/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash')
 @app.route('/runs/<string:runid>/<config>/hillslope/<topaz_id>/ash/')
 def hillslope0_ash(runid, config, topaz_id):
@@ -3415,7 +3417,7 @@ def query_rhem_sub_soil_loss(runid, config):
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/runoff/subcatchments/')
 def query_wepp_sub_runoff(runid, config):
-    # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
+    # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Runoff'))
@@ -3424,7 +3426,7 @@ def query_wepp_sub_runoff(runid, config):
 @app.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/subrunoff/subcatchments/')
 def query_wepp_sub_subrunoff(runid, config):
-    # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
+    # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Subrunoff'))
@@ -3433,7 +3435,7 @@ def query_wepp_sub_subrunoff(runid, config):
 @app.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/wepp/baseflow/subcatchments/')
 def query_wepp_sub_baseflow(runid, config):
-    # blackwood http://wepp1.nkn.uidaho.edu/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
+    # blackwood http://wepp.cloud/weppcloud/runs/7f6d9b28-9967-4547-b121-e160066ed687/0/
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
     return jsonify(wepp.query_sub_val('Baseflow'))
@@ -4132,6 +4134,6 @@ if __name__ == '__main__':
 
     # sudo docker run -i -p 5003:80 -v /Users/roger/geodata:/geodata -v /Users/roger/wepppy/wepppy:/workdir/wepppy/wepppy  -t wepppydocker-base
 
-#rsync -av --progress --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
-#rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp1.nkn.uidaho.edu:/usr/lib/python3/dist-packages/wepppy/
+#rsync -av --progress --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp.cloud:/usr/lib/python3/dist-packages/wepppy/
+#rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp.cloud:/usr/lib/python3/dist-packages/wepppy/
 
