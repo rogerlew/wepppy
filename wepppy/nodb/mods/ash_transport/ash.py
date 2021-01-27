@@ -118,7 +118,7 @@ class Ash(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             # config = self.config
-            self.fire_date = None
+            self.fire_date = YearlessDate(8, 4) 
             self.ini_black_ash_depth_mm = 5
             self.ini_white_ash_depth_mm = 5
             self.meta = None
