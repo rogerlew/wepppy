@@ -187,7 +187,7 @@ app = Flask(__name__)
 @app.route('/daily/catalog/')
 def query_daily_catalog():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/catalog/
+    https://wepp.cloud/webservices/metquery/daily/catalog/
     """
     return jsonify(daily_catalog)
 
@@ -196,8 +196,8 @@ def query_daily_catalog():
 @app.route('/daily/', methods=['GET', 'POST'])
 def query_daily():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2019
+    https://wepp.cloud/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004
+    https://wepp.cloud/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2019
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -264,7 +264,7 @@ def query_daily():
 @app.route('/monthly/catalog/')
 def query_monthly_catalog():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/catalog/
+    https://wepp.cloud/webservices/metquery/monthly/catalog/
     """
     return jsonify(monthly_catalog)
 
@@ -273,9 +273,9 @@ def query_monthly_catalog():
 @app.route('/monthly/', methods=['GET', 'POST'])
 def query_monthly():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
-    https://wepp1.nkn.uidaho.edu/webservices/metquery/monthly/?dataset=au/agdc/monthlies/rain&lng=146.80738449096683&lat=-37.69733638487025
+    https://wepp.cloud/webservices/metquery/monthly/?dataset=prism/ppt&lng=-116&lat=45
+    https://wepp.cloud/webservices/metquery/monthly/?dataset=daymet/prcp/mean&lng=-116&lat=45
+    https://wepp.cloud/webservices/metquery/monthly/?dataset=au/agdc/monthlies/rain&lng=146.80738449096683&lat=-37.69733638487025
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -342,5 +342,5 @@ if __name__ == '__main__':
     app.run()
 
 """ 
-curl -sS 'https://wepp1.nkn.uidaho.edu/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004'
+curl -sS 'https://wepp.cloud/webservices/metquery/daily/?dataset=daymet/prcp&bbox=-116,47,-115.98,47.02&year=2004'
 """
