@@ -15,7 +15,7 @@ import time
 
 from wepppy.all_your_base import isint, isfloat
 
-_cligen_url = "https://wepp1.nkn.uidaho.edu/webservices/cligen/"
+_cligen_url = "https://wepp.cloud/webservices/cligen/"
 
 
 def fetch_multiple_year(par, years,  lng=None, lat=None,
@@ -26,7 +26,7 @@ def fetch_multiple_year(par, years,  lng=None, lat=None,
                         returnjson=True, randseed=None,
                         version='2015'):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=5&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
+    https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=5&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
 
     """
 
@@ -168,7 +168,7 @@ def selected_single_storm(par,
 
 def observed_daymet(par, start_year, end_year, lng=None, lat=None, returnjson=True, version='2015'):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/observed_daymet/106152/?start_year=1980&end_year=2010&lng=-116&lat=47&returnjson=true
+    https://wepp.cloud/webservices/cligen/observed_daymet/106152/?start_year=1980&end_year=2010&lng=-116&lat=47&returnjson=true
     """
     url = urljoin(_cligen_url, "observed_daymet", str(par))
 
