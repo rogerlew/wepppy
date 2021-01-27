@@ -479,10 +479,12 @@ class Ash(NoDbBase, LogMixin):
 
             if _exists(ash_dir):
                 try:
-                    shutil.rmtree(ash_dir)
-                except FileNotFoundError:
+                    for fn in glob(_join(ash_dir, '*.csv')):
+                        os.remove(fn)
+                except:
                     sleep(10.0)
-                    shutil.rmtree(ash_dir, ignore_errors=True)
+                    for fn in glob(_join(ash_dir, '*.csv')):
+                        os.remove(fn)
 
             if not _exists(ash_dir):
                 os.makedirs(ash_dir)
