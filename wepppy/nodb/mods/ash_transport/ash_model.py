@@ -78,7 +78,7 @@ class AshModel(object):
             return lookup_wind_threshold_white_ash_proportion(w)
 
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 20, 10, 5, 2.5, 1], area_ha=None, ini_ash_depth=None):
+                  recurrence=[100, 50, 25, 20, 10, 5, 2], area_ha=None, ini_ash_depth=None):
         """
         Runs the ash model for a hillslope
 
