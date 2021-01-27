@@ -43,6 +43,7 @@ _disturbed_map_fn = _join(_management_dir, "disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
+_palouse_map_fn = _join(_management_dir, "palouse_map.json")
 
 
 def _parse_julian(x):
@@ -1853,6 +1854,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'rred' in _map.lower():
         with open(_rred_map_fn) as fp:
+            d = json.load(fp)
+    elif 'palouse' in _map.lower():
+        with open(_palouse_map_fn) as fp:
             d = json.load(fp)
     elif 'esdac' in _map.lower():
         with open(_esdac_map_fn) as fp:
