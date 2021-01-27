@@ -90,7 +90,7 @@ class AshPost(NoDbBase):
     def ash_out(self):
         return self._ash_out
 
-    def run_post(self, recurrence=(100, 50, 20, 10, 5, 2.5, 1)):
+    def run_post(self, recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
         ash_fns = glob(_join(self.ash_dir, '*_ash.csv'))
         if len(ash_fns) == 0:
             return
