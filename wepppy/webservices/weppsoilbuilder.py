@@ -111,7 +111,7 @@ def root():
 @app.route('/validatemukeys/', methods=['GET', 'POST'])
 def validatemukeys():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/validatemukeys/?mukeys=100000,100001,100003,400016,400017,200153,200545,200
+    https://wepp.cloud/webservices/weppsoilbuilder/validatemukeys/?mukeys=100000,100001,100003,400016,400017,200153,200545,200
     # 200153,200545 are invalid
     # 200 is unknown
     """
@@ -153,7 +153,7 @@ def validatemukeys():
 @app.route('/identifymukey/', methods=['GET', 'POST'])
 def identifymukey():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/identifymukey/?lng=-116&lat=47
+    https://wepp.cloud/webservices/weppsoilbuilder/identifymukey/?lng=-116&lat=47
     # mukey is 2396861
     """
     if request.method not in ['GET', 'POST']:
@@ -207,7 +207,7 @@ def identifymukey():
 @app.route('/identifymukeys/', methods=['GET', 'POST'])
 def identifymukeys():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/identifymukeys/?bounds=-116.1,46,-116,46.1
+    https://wepp.cloud/webservices/weppsoilbuilder/identifymukeys/?bounds=-116.1,46,-116,46.1
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -281,7 +281,7 @@ def identifymukeys():
 @app.route('/fetchsoils/', methods=['GET', 'POST'])
 def fetchsoils():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/fetchsoils/?mukeys=100000,100001,100003,400016,400017,200153,200545,200
+    https://wepp.cloud/webservices/weppsoilbuilder/fetchsoils/?mukeys=100000,100001,100003,400016,400017,200153,200545,200
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -329,7 +329,7 @@ def fetchsoils():
 @app.route('/fetchsoil/<mukey>/')
 def fetchsoil(mukey):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/weppsoilbuilder/fetchsoil/100000/
+    https://wepp.cloud/webservices/weppsoilbuilder/fetchsoil/100000/
     """
     fn = '%s.sol' % mukey
     fn_cache = _join(soil_dir, 'cache', fn[:3], fn)

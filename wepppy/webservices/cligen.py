@@ -64,9 +64,9 @@ def safe_float_parse(x):
 @app.route('/findstation/', methods=['GET', 'POST'])
 def findstation():
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/findstation/?lng=-117&lat=47
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/findstation/?lng=-117&lat=47&method=heuristic_search
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/findstation/?lng=-117&lat=47&method=closest
+    https://wepp.cloud/webservices/cligen/findstation/?lng=-117&lat=47
+    https://wepp.cloud/webservices/cligen/findstation/?lng=-117&lat=47&method=heuristic_search
+    https://wepp.cloud/webservices/cligen/findstation/?lng=-117&lat=47&method=closest
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -159,7 +159,7 @@ def _fetch_par_contents(par, _request):
 @app.route('/fetchstationmeta/<par>/', methods=['GET', 'POST'])
 def fetchstationmeta(par):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/fetchstationmeta/106152
+    https://wepp.cloud/webservices/cligen/fetchstationmeta/106152
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -182,8 +182,8 @@ def fetchstationmeta(par):
 @app.route('/fetchpar/<par>/', methods=['GET', 'POST'])
 def fetchpar(par):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/fetchpar/106152
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/fetchpar/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
+    https://wepp.cloud/webservices/cligen/fetchpar/106152
+    https://wepp.cloud/webservices/cligen/fetchpar/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
     """
 
     # noinspection PyBroadException
@@ -201,8 +201,8 @@ def fetchpar(par):
 @app.route('/single_year/<par>/', methods=['GET', 'POST'])
 def single_year_route(par):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/single_year/106152/?years=1
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/single_year/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
+    https://wepp.cloud/webservices/cligen/single_year/106152/?years=1
+    https://wepp.cloud/webservices/cligen/single_year/106152/?lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
     """
     return _multiple_year(par, request, singleyearmode=True)
 
@@ -211,9 +211,9 @@ def single_year_route(par):
 @app.route('/multiple_year/<par>/', methods=['GET', 'POST'])
 def multiple_year_route(par):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=1
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet&returnjson=True
+    https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1
+    https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
+    https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet&returnjson=True
     """
     
     return _multiple_year(par, request)
@@ -367,9 +367,9 @@ def _make_single_storm_clinp(wd, cli_fn, par_fn, cliver, kwds):
 @app.route('/selected_single_storm/<par>/', methods=['GET', 'POST'])
 def single_storm(par):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=4.3
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=5.3
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=5.3&returnjson=True
+    https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=4.3
+    https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=5.3
+    https://wepp.cloud/webservices/cligen/selected_single_storm/106152/?storm_date=6-10-2014&design_storm_amount_inches=6.3&duration_of_storm_in_hours=4&time_to_peak_intensity_pct=40&max_intensity_inches_per_hour=3.0&cliver=5.3&returnjson=True
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
@@ -591,8 +591,8 @@ def observed_daymet(par):
 @app.route('/future_rcp85/<par>/', methods=['GET', 'POST'])
 def future_rcp85(par):
     """
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/future_rcp85/106152/?lng=-116&lat=46.5&start_year=2010&end_year=2020
-    https://wepp1.nkn.uidaho.edu/webservices/cligen/future_rcp85/106152/?lng=-116&lat=46.5&start_year=2010&end_year=2020&returnjson=True
+    https://wepp.cloud/webservices/cligen/future_rcp85/106152/?lng=-116&lat=46.5&start_year=2010&end_year=2020
+    https://wepp.cloud/webservices/cligen/future_rcp85/106152/?lng=-116&lat=46.5&start_year=2010&end_year=2020&returnjson=True
     """
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
