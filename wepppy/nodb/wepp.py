@@ -740,10 +740,13 @@ class Wepp(NoDbBase, LogMixin):
             if _exists(_dir):
                 try:
                     shutil.rmtree(_dir)
-                except FileNotFoundError:
+                except:
                     sleep(10.0)
-                    shutil.rmtree(_dir, ignore_errors=True)
-            
+                    try:
+                        shutil.rmtree(_dir, ignore_errors=True)
+                    except:
+                        pass
+
             if not _exists(_dir):
                 os.makedirs(_dir)
 
