@@ -1,0 +1,752 @@
+98.4
+#
+#
+#
+#
+
+3 # number of OFE's
+30 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+2  # Number of plant scenarios
+
+
+Whe_27068
+`Wheat; Winter - for State of Washington
+JML, 3-28-01
+(null)
+1  #landuse
+WeppWillSet
+5.20000 3.00000 35.00196 3.00000 5.40026 60.00000 0.00000 0.15200 1.00000 0.00640
+0.80000 1.00000 0.65000 0.99000 3.00000 1700.00000 0.40000 1.00001
+2  # mfo - <non fragile>
+0.00850 0.00850 15.00000 0.25000 0.00500 1.49989 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000
+
+Bar_9949
+Barley using 3 c as base
+JML, 3/28/01
+(null)
+1  #landuse
+WeppWillSet
+5.20000 3.00000 35.00000 3.00000 6.40000 60.00000 0.00000 0.15200 1.00000 0.00640
+0.80000 1.00000 0.65000 0.99000 3.00000 1700.00000 0.42000 1.00000
+2  # mfo - <non fragile>
+0.00850 0.00850 15.00000 0.25000 0.00500 1.50000 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+7  # Number of operation scenarios
+
+
+CHISCOSW
+`Chisel plow with coulters and sweeps'
+(from WEPP distribution database)
+
+1  #landuse
+0.5500 0.3000 0
+4 # pcode - other 
+0.0500 0.3000 0.5500 0.3000 0.0230 1.0000 0.1500 
+
+HASP
+`Harrow-spike tooth'
+(from WEPP distribution database)
+
+1  #landuse
+0.3000 0.2000 0
+4 # pcode - other 
+0.0250 0.0500 0.3000 0.2000 0.0150 1.0000 0.0250 
+
+DRDDO
+`Drill with double disk opener'
+(from WEPP distribution database)
+
+1  #landuse
+0.3000 0.1000 20
+2 # pcode - drill
+0.0250 0.2000 0.3000 0.1000 0.0120 0.8500 0.0250 
+
+CHISELSW
+`Chisel plow with sweeps'
+(from WEPP distribution database)
+
+1  #landuse
+0.4500 0.2500 0
+4 # pcode - other 
+0.0500 0.3000 0.4500 0.2500 0.0230 1.0000 0.1500 
+
+FIEL0001
+`Field Cultivation'
+From converted V92.2 file `ANSI1.MAN'
+NOTE: MFO values are the min and max of original values.
+1  #landuse
+0.2500 0.2500 0
+4 # pcode - other 
+0.0250 0.1500 0.2500 0.2500 0.0150 1.0000 0.1000 
+
+RORRP
+`Rodweeder, plain rotary rod'
+(from WEPP distribution database)
+
+1  #landuse
+0.4000 0.1000 0
+4 # pcode - other 
+0.0250 0.1300 0.4000 0.1000 0.0100 1.0000 0.0500 
+
+ANHYDISK
+`Anhydrous applicator with closing disks'
+(from WEPP distribution database)
+
+1  #landuse
+0.6000 0.3500 0
+4 # pcode - other 
+0.0250 0.7500 0.6000 0.3500 0.0130 0.2500 0.0000 
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Aft_11389
+For continuous winter wheat, no till.  Wheat was planted Oct 1
+90   residue cover
+175 mm of rain since last tillage in fall prior
+1  #landuse
+1.10000 0.20000 90 150 0.00000 0.20000
+1 # iresd  <Whe_27068>
+1 # mang annual
+175.00000 0.02000 0.20000 0.01000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.40000 0.10000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+3  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 3
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+1 # ntill - number of operations
+  288  # mdate  --- 10 / 15 
+  1  # op --- CHISCOSW
+      0.050  # depth
+      2  # type
+
+#
+#   Surface Effects Scenario 2 of 3
+#
+Year 2
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+3 # ntill - number of operations
+  115  # mdate  --- 4 / 25 
+  2  # op --- HASP
+      0.050  # depth
+      2  # type
+  115  # mdate  --- 4 / 25 
+  3  # op --- DRDDO
+      0.050  # depth
+      2  # type
+  285  # mdate  --- 10 / 12 
+  4  # op --- CHISELSW
+      0.050  # depth
+      2  # type
+
+#
+#   Surface Effects Scenario 3 of 3
+#
+Year 3
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+6 # ntill - number of operations
+  115  # mdate  --- 4 / 25 
+  5  # op --- FIEL0001
+      0.050  # depth
+      2  # type
+  145  # mdate  --- 5 / 25 
+  2  # op --- HASP
+      0.050  # depth
+      2  # type
+  176  # mdate  --- 6 / 25 
+  6  # op --- RORRP
+      0.050  # depth
+      2  # type
+  206  # mdate  --- 7 / 25 
+  6  # op --- RORRP
+      0.050  # depth
+      2  # type
+  237  # mdate  --- 8 / 25 
+  6  # op --- RORRP
+      0.050  # depth
+      2  # type
+  268  # mdate  --- 9 / 25 
+  7  # op --- ANHYDISK
+      0.050  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+6  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 6
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15
+   274  # planting date --- 10 /1
+   0.8000  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 2 of 6
+#
+Year 2 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   365  # harvest date --- 12 / 31
+   228  # planting date --- 8 /16
+   0.0000  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 3 of 6
+#
+Year 3 
+
+
+
+1  # landuse <cropland>
+2  # plant growth scenario
+2  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15
+   115  # planting date --- 4 /25
+   1.2000  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 4 of 6
+#
+Year 4 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+2  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   365  # harvest date --- 12 / 31
+   228  # planting date --- 8 /16
+   0.0000  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 5 of 6
+#
+Year 5 
+
+
+
+1  # landuse <cropland>
+2  # plant growth scenario
+3  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   115  # harvest date --- 4 / 25
+   115  # planting date --- 4 /25
+   1.2000  # row width
+   1   # residue man - <herbicide app>
+       115   #  4 / 25
+#
+# Yearly scenario 6 of 6
+#
+Year 6 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+3  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15
+   274  # planting date --- 10 /1
+   0.8000  # row width
+   1   # residue man - <herbicide app>
+       115   #  4 / 25
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+3   # number of OFE's
+    1   # initial condition index
+    1   # initial condition index
+    1   # initial condition index
+10  # rotation repeats
+3  # years in rotation
+
+#
+# Rotation 1: year 1 to 3
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 2: year 4 to 6
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 3: year 7 to 9
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 4: year 10 to 12
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 5: year 13 to 15
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 6: year 16 to 18
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 7: year 19 to 21
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 8: year 22 to 24
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 9: year 25 to 27
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
+
+#
+# Rotation 10: year 28 to 30
+#
+
+   2	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 2>
+      1	# year index
+      2	# year index
+
+   2	#  <plants/yr 1> - OFE: 3>
+      1	# year index
+      2	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 2>
+      3	# year index
+      4	# year index
+
+   2	#  <plants/yr 2> - OFE: 3>
+      3	# year index
+      4	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 2>
+      5	# year index
+      6	# year index
+
+   2	#  <plants/yr 3> - OFE: 3>
+      5	# year index
+      6	# year index
