@@ -161,11 +161,14 @@ class AshPost(NoDbBase):
             if burnclass <= 1 or burnclass == 255:
                 no_ash = True
 
+            ash_out[topaz_id]['is_burned'] = not no_ash
+
             if no_ash:
                 ash_out[topaz_id]['water_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['wind_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['ash_transport (kg/ha)'] = 0.0
                 ash_out[topaz_id]['ash_ini_depth (mm)'] = 0.0
+                ash_out[topaz_id]['ash_type'] = None
                 continue
 
             # if ash is present
@@ -187,6 +190,7 @@ class AshPost(NoDbBase):
                 series = df['cum_ash_transport (tonne/ha)']
                 ash_out[topaz_id]['ash_transport (kg/ha)'] = 1000 * float(np.mean(series))
 
+            ash_out[topaz_id]['ash_type'] = ash.get_ash_type(topaz_id)
             ash_out[topaz_id]['ash_ini_depth (mm)'] = ash.get_ini_ash_depth(topaz_id)
 
         self._ash_out = ash_out
