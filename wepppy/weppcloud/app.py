@@ -3751,7 +3751,8 @@ def _task_upload_ash_map(wd, request, file_input_id):
 
     file = request.files[file_input_id]
     if file.filename == '':
-        raise Exception('no filename specified')
+        return None
+        # raise Exception('no filename specified')
 
     filename = secure_filename(file.filename)
 
@@ -3803,6 +3804,9 @@ def run_ash(runid, config):
             ash.spatial_mode = AshSpatialMode.Gridded
             ash.ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
             ash.ash_bulk_density_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_bd')
+
+            if ash.ash_load_fn is None:
+                raise Exception('Expecting ashload map')
 
         ash.ash_depth_mode = 1
 
