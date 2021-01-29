@@ -24,10 +24,11 @@ from wepppy.climates import holden_wrf_atlas
 
 # wepppy submodules
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.ron import Ron
 from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.soils import Soils
 from wepppy.nodb.topaz import Topaz
-from wepppy.nodb.mods import Baer
+from wepppy.nodb.mods import Baer, Disturbed
 
 
 def _duration_in_hours(duration):
@@ -194,7 +195,12 @@ class DebrisFlow(NoDbBase):
             wd = self.wd
             soils = Soils.getInstance(wd)
             watershed = Watershed.getInstance(wd)
-            baer = Baer.getInstance(wd)
+            ron = Ron.getInstance(wd)
+
+            if 'baer' in ron.mods:
+                baer = Baer.getInstance(wd)
+            else:
+                disturbed = Disturbed.getInstance(wd)
 
             A = watershed.area_gt30
             A_pct = 100 * A / watershed.wsarea
