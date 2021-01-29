@@ -546,6 +546,7 @@ class Ash(NoDbBase, LogMixin):
                 burn_class = int(sbs_d[topaz_id])
                 meta[topaz_id]['burn_class'] = burn_class
                 meta[topaz_id]['area_ha'] = area_ha
+                meta[topaz_id]['ini_ash_depth'] = None
 
                 if bd_d is None:
                     if burn_class in [2, 3]:
@@ -578,8 +579,15 @@ class Ash(NoDbBase, LogMixin):
                     black_ash_depth = ini_black_ash_depth_mm
 
                 else:
-                    white_ash_depth = load_d[topaz_id] / ini_white_ash_depth_mm
-                    black_ash_depth = load_d[topaz_id] / ini_black_ash_depth_mm
+                    _load_kg_m2 = load_d[topaz_id] * 0.1
+                    white_ash_depth = _load_kg_m2 / (WHITE_ASH_BD * 10.0) * 1000.0
+                    black_ash_depth = _load_kg_m2 / (BLACK_ASH_BD * 10.0) * 1000.0
+
+                if ash_type == AshType.WHITE:
+                    ini_ash_depth = white_ash_depth
+                else:
+                    ini_ash_depth = black_ash_depth
+                meta[topaz_id]['ini_ash_depth'] = ini_ash_depth
 
                 kwds = dict(ash_type=ash_type,
                             ini_white_ash_depth_mm=white_ash_depth,
@@ -631,11 +639,16 @@ class Ash(NoDbBase, LogMixin):
             return 'white'
 
     def get_ini_ash_depth(self, topaz_id):
+        _meta = self.meta[str(topaz_id)]
+
+        if 'ini_ash_depth' in _meta:
+            return _meta['ini_ash_depth']
+
         load_d = self.ash_load_d
         black_bd = self.ini_black_ash_bulkdensity
         white_bd = self.ini_white_ash_bulkdensity
 
-        ash_type = getattr(self.meta[str(topaz_id)], 'ash_type', None)
+        ash_type = _meta.get('ash_type', None)
 
         if ash_type is None:
             return None
