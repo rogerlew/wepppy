@@ -3808,9 +3808,17 @@ def run_ash(runid, config):
         print('ash_depth_mode', ash_depth_mode)
 
         if int(ash_depth_mode) == 2:
-            ash.spatial_mode = AshSpatialMode.Gridded
-            ash.ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
-            ash.ash_bulk_density_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_bd')
+          
+            ash.lock()
+
+            try:
+                ash._spatial_mode = AshSpatialMode.Gridded
+                ash._ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
+                ash._ash_bulk_density_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_bd')
+                ash.dump_and_unlock()
+            except Exception:
+                ash.unlock('-f')
+                raise
 
             if ash.ash_load_fn is None:
                 raise Exception('Expecting ashload map')
