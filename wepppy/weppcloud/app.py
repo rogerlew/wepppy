@@ -627,6 +627,13 @@ def ltf_index():
     return render_template('ltf/index.htm', user=current_user)
 
 
+@app.route('/lt/SteepSlopes')
+@app.route('/lt/SteepSlopes/')
+@app.route('/locations/lt/SteepSlopes')
+@app.route('/locations/lt/SteepSlopes/')
+def lt_steep_slope_index():
+    return render_template('lt/SteepSlopes.html', user=current_user)
+
 @app.route('/seattle-municipal')
 @app.route('/seattle-municipal/')
 @app.route('/locations/seattle-municipal')
@@ -3902,6 +3909,20 @@ def report_ash(runid, config):
 
     except Exception:
         return exception_factory('Error')
+
+
+@app.route('/runs/<string:runid>/<config>/query/ash_out')
+@app.route('/runs/<string:runid>/<config>/query/ash_out/')
+def query_ash_out(runid, config):
+    try:
+        wd = get_wd(runid)
+        ashpost = AshPost.getInstance(wd)
+        ash_out = ashpost.ash_out
+
+        return jsonify(ash_out)
+
+    except Exception:
+        return exception_factory()
 
 
 @app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
