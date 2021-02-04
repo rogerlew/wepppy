@@ -580,8 +580,8 @@ class Ash(NoDbBase, LogMixin):
 
                 else:
                     _load_kg_m2 = load_d[topaz_id] * 0.1
-                    white_ash_depth = _load_kg_m2 / (WHITE_ASH_BD * 10.0) * 1000.0
-                    black_ash_depth = _load_kg_m2 / (BLACK_ASH_BD * 10.0) * 1000.0
+                    white_ash_depth = _load_kg_m2 / WHITE_ASH_BD
+                    black_ash_depth = _load_kg_m2 / BLACK_ASH_BD
 
                 if ash_type == AshType.WHITE:
                     ini_ash_depth = white_ash_depth
