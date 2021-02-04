@@ -26,6 +26,8 @@ class AshType(enum.IntEnum):
 class AshNoDbLockedException(Exception):
     pass
 
+WHITE_ASH_BD = 0.06
+BLACK_ASH_BD = 0.16
 
 class AshModel(object):
     """
@@ -198,46 +200,6 @@ class AshModel(object):
                 available_ash[i] = available_ash[i-1] * (1.0 - daily_relative_ash_decay[i])
 
             #
-            # model wind transport
-            #
-            # identify peak wind values within the fire year
-            if _row['w-vl'] > w_vl_if:
-                w_vl_if = _row['w-vl']  # store daily wind threshold
-                w_vl_ifgt[i] = w_vl_if  # track max for comparison
-            else:
-                w_vl_ifgt[i] = 0.0  # if day is not a max for the year store 0.0
-
-            # identify the fraction removed by wind from the wind_transport_thresholds.csv
-            proportion_ash_transport[i] = self.lookup_wind_threshold_proportion(w_vl_ifgt[i])
-            assert proportion_ash_transport[i] >= 0.0
-
-            # if not the day of the fire adjust by the cumulative proportion of ash transport
-            if dff > 0:
-                proportion_ash_transport[i] -= cum_proportion_ash_transport[i-1]
-
-                # clamp to 0
-                if proportion_ash_transport[i] < 0.0:
-                    proportion_ash_transport[i] = 0.0
-
-            # calculate cumulative ash transport
-            if dff == 0:
-                # on the day of the fire it is the value from the wind thresholds table
-                cum_proportion_ash_transport[i] = proportion_ash_transport[i]
-            else:
-                # on subsequent days sum up the values
-                cum_proportion_ash_transport[i] = cum_proportion_ash_transport[i-1] + proportion_ash_transport[i]
-
-            # lookup yesterdays water transport
-            relative_ash_decay = 1.0 - cum_relative_ash_decay[i]
-
-            # calculate wind transport
-            wind_transport[i] = (self.ini_material_available_tonneperha - relative_ash_decay) * \
-                                (1.0 - daily_relative_ash_decay[i]) * proportion_ash_transport[i]
-
-            if wind_transport[i] < 0.0:
-                wind_transport[i] = 0.0
-
-            #
             # model runoff
             #
 
@@ -302,23 +264,51 @@ class AshModel(object):
                 water_transport[i] = effective_runoff[i] * self.water_transport_rate * \
                                      math.exp(self.water_transport_rate_k * cum_runoff[i])
 
-            #
-            # the wind_transport and water_transport can't exceed the available_ash
-            # so we adjust those based on their proportion
-            #
-            if wind_transport[i] + water_transport[i] > available_ash[i]:
-
-                #  avoid dividing by zero
-                if water_transport[i] != 0:
-                    _proportion_wind = wind_transport[i] / water_transport[i]
-                    wind_transport[i] = available_ash[i] * _proportion_wind
-                    water_transport[i] = available_ash[i] * (1.0 - _proportion_wind)
+            if water_transport[i] > 0:
+                available_ash[i] -= water_transport[i]
+            else:  # only apply wind transport if there is no water
+                #
+                # model wind transport
+                #
+                # identify peak wind values within the fire year
+                if _row['w-vl'] > w_vl_if:
+                    w_vl_if = _row['w-vl']  # store daily wind threshold
+                    w_vl_ifgt[i] = w_vl_if  # track max for comparison
                 else:
-                    wind_transport[i] = available_ash[i]
+                    w_vl_ifgt[i] = 0.0  # if day is not a max for the year store 0.0
 
-            # remove wind and water transported ash from the available ash
-            available_ash[i] -= wind_transport[i]
-            available_ash[i] -= water_transport[i]
+                # identify the fraction removed by wind from the wind_transport_thresholds.csv
+                proportion_ash_transport[i] = self.lookup_wind_threshold_proportion(w_vl_ifgt[i])
+                assert proportion_ash_transport[i] >= 0.0
+
+                # if not the day of the fire adjust by the cumulative proportion of ash transport
+                if dff > 0:
+                    proportion_ash_transport[i] -= cum_proportion_ash_transport[i-1]
+
+                    # clamp to 0
+                    if proportion_ash_transport[i] < 0.0:
+                        proportion_ash_transport[i] = 0.0
+
+                # calculate cumulative ash transport
+                if dff == 0:
+                    # on the day of the fire it is the value from the wind thresholds table
+                    cum_proportion_ash_transport[i] = proportion_ash_transport[i]
+                else:
+                    # on subsequent days sum up the values
+                    cum_proportion_ash_transport[i] = cum_proportion_ash_transport[i-1] + proportion_ash_transport[i]
+
+                # lookup yesterdays water transport
+                relative_ash_decay = 1.0 - cum_relative_ash_decay[i]
+
+                # calculate wind transport
+                wind_transport[i] = (self.ini_material_available_tonneperha - relative_ash_decay) * \
+                                    (1.0 - daily_relative_ash_decay[i]) * proportion_ash_transport[i]
+
+                if wind_transport[i] < 0.0:
+                    wind_transport[i] = 0.0
+
+                # remove wind and water transported ash from the available ash
+                available_ash[i] -= wind_transport[i]
 
             # clamp to 0
             if available_ash[i] < 0.0:
@@ -460,7 +450,7 @@ class WhiteAshModel(AshModel):
             proportion=1.0,
             ini_ash_depth_mm=5.0,
             decomposition_rate=1.8E-4,
-            bulk_density=0.06,
+            bulk_density=WHITE_ASH_BD,
             density_at_fc=0.68,
             fraction_water_retention_capacity_at_sat=0.8,
             runoff_threshold=0.0,
@@ -481,7 +471,7 @@ class BlackAshModel(AshModel):
             proportion=1.0,
             ini_ash_depth_mm=5.0,
             decomposition_rate=1.8E-4,
-            bulk_density=0.16,
+            bulk_density=BLACK_ASH_BD,
             density_at_fc=0.54,
             fraction_water_retention_capacity_at_sat=0.8,
             runoff_threshold=3.45,
