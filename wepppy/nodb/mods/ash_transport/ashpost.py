@@ -211,6 +211,7 @@ class AshPost(NoDbBase):
         translator = watershed.translator_factory()
         meta = self.meta
 
+        # compile all the hillslope ash outputs to a single dataframe
         water = []
         wind = []
         ash = []
@@ -233,6 +234,9 @@ class AshPost(NoDbBase):
                 cum_wind.append(df['cum_ash_delivery_by_wind (tonne)'].to_numpy())
                 cum_ash.append(df['cum_ash_delivery (tonne)'].to_numpy())
                 precip.append(df['precip (mm)'].to_numpy())
+
+        with open(_join(ash_dir, 'wind_agg.csv'), 'w') as fp:
+            print()
 
         water = np.array(water)
         water = np.sum(water, axis=0)
@@ -260,6 +264,7 @@ class AshPost(NoDbBase):
         df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(cum_wind, index=df.index)
         df['cum_ash_delivery (tonne)'] = pd.Series(cum_ash, index=df.index)
 
+        # identify the fire year breaks
         breaks = []    # list of indices of new fire years
         last_day = fire_date.yesterday
         for i, _row in df.iterrows():
