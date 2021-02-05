@@ -71,7 +71,7 @@ def _replace_parameter(original, replacement):
         return replacement
 
 
-def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=50):
+def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_max_om=None):
     """
     Creates a new soil file based on soil_in_fname and makes replacements
     from the provided replacements dictionary
@@ -94,10 +94,12 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=50):
 
     line5 = lines[4]
     line5 = line5.split()
-    if float(line5[0]) < 50:
-        line5[0] = '50'
+    if h0_min_depth is not None:
+        if float(line5[0]) < h0_min_depth:
+            line5[0] = str(h0_min_depth)
     line5[2] = _replace_parameter(line5[2], replacements['avke'])
-
+    h0_om = float(line5[8])
+ 
     if len(line5) < 5:  # no horizons (e.g. rock)
         shutil.copyfile(src, dst)
         return
@@ -115,7 +117,13 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=50):
         f.writelines(header)
         f.writelines(lines[:3])
         f.writelines(line4)
-        f.writelines(line5)
+
+        if h0_max_om is not None:
+            if h0_om < h0_max_om:
+                f.writelines(line5)
+        else:
+            f.writelines(line5)
+
         if len(lines) > 5:
             f.writelines(lines[5:])
 
@@ -145,7 +153,7 @@ class Disturbed(NoDbBase):
             self._is256 = None
 
             self.sbs_coverage = None
-
+            self._h0_max_om = self.config_get_float('disturbed', 'h0_max_om')
             self.dump_and_unlock()
 
         except Exception:
@@ -219,6 +227,10 @@ class Disturbed(NoDbBase):
     @property
     def breaks(self):
         return self._breaks
+
+    @property
+    def h0_max_om(self):
+        return getattr(self, '_h0_max_om', None)
 
     @property
     def nodata_vals(self):
@@ -554,9 +566,15 @@ class Disturbed(NoDbBase):
                 if disturbed_mukey not in soils.soils:
                     disturbed_fn = disturbed_mukey + '.sol'
                     replacements = _land_soil_replacements_d[key]
+ 
+                    if 'fire' in man.disturbed_class:
+                        _h0_max_om = self.h0_max_om
+                    else:
+                        _h0_max_om = None
+
                     disturbed_soil_specialization(_join(soils.soils_dir, _soil.fname),
                                                   _join(soils.soils_dir, disturbed_fn),
-                                                  replacements)
+                                                  replacements, h0_max_om=_h0_max_om)
                     desc = '{} - {}'.format(_soil.desc, man.disturbed_class)
                     soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
                                                                fname=disturbed_fn,
