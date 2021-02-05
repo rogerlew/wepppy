@@ -380,7 +380,8 @@ class Horizon:
         self.wilt_pt = wc
         
     def valid(self):
-        return isfloat(self.hzdepb_r) and \
+        return not self.desgnmaster.startswith('O') and \
+               isfloat(self.hzdepb_r) and \
                isfloat(self.sandtotal_r) and \
                isfloat(self.claytotal_r) and \
                isfloat(self.om_r) and \
