@@ -26,8 +26,10 @@ class AshType(enum.IntEnum):
 class AshNoDbLockedException(Exception):
     pass
 
+
 WHITE_ASH_BD = 0.06
 BLACK_ASH_BD = 0.16
+
 
 class AshModel(object):
     """

@@ -516,7 +516,6 @@ class Ash(NoDbBase, LogMixin):
                 reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
                 load_map = ParameterMap(self.ash_load_cropped_fn)
                 load_d = load_map.build_ave_grid(watershed.subwta)
-                load_d = {k: v * 0.1 for k, v in load_d.items()} # convert from tonne/ha to kg/m^2
             else:
                 load_d = None
 
@@ -524,7 +523,7 @@ class Ash(NoDbBase, LogMixin):
             if self.ash_bulk_density_fn is not None:
                 reproject_map(wd, self.ash_bulk_density_fn, self.ash_bulk_density_cropped_fn)
                 bd_map = ParameterMap(self.ash_bulk_density_cropped_fn)
-                bd_d = load_map.build_ave_grid(watershed.subwta)
+                bd_d = bd_map.build_ave_grid(watershed.subwta)
             else:
                 bd_d = None
 
@@ -657,12 +656,12 @@ class Ash(NoDbBase, LogMixin):
             if load_d is None:
                 return self.ini_black_ash_depth_mm
             else:
-                return load_d[str(topaz_id)] / (1000.0 * black_bd)
+                return load_d[str(topaz_id)] * 0.1 / black_bd
         elif ash_type == AshType.WHITE:
             if load_d is None:
                 return self.ini_white_ash_depth_mm
             else:
-                return load_d[str(topaz_id)] / (1000 * white_bd)
+                return load_d[str(topaz_id)] * 0.1 / white_bd
 
     @property
     def ini_black_ash_bulkdensity(self):
