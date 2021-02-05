@@ -267,6 +267,8 @@ class AshModel(object):
                                      math.exp(self.water_transport_rate_k * cum_runoff[i])
 
             if water_transport[i] > 0:
+                if water_transport[i] > available_ash[i]:
+                    water_transport[i] = available_ash[i]
                 available_ash[i] -= water_transport[i]
             else:  # only apply wind transport if there is no water
                 #
@@ -309,6 +311,8 @@ class AshModel(object):
                 if wind_transport[i] < 0.0:
                     wind_transport[i] = 0.0
 
+                if wind_transport[i] > available_ash[i]:
+                    wind_transport[i] = available_ash[i]
                 # remove wind and water transported ash from the available ash
                 available_ash[i] -= wind_transport[i]
 
