@@ -201,6 +201,7 @@ class Horizon:
         self.wfifteenbar_r = None
         self.ksat_r = None
         self.dbthirdbar_r = None
+        self.corrected_dbthirdbar_r = None
 
         for k, v in layer.items():
             # we want to copy the current the current layer
@@ -322,14 +323,6 @@ class Horizon:
         wthirdbar_r = self.wthirdbar_r
         wfifteenbar_r = self.wfifteenbar_r
         
-        if desgnmaster is None or \
-           desgnmaster.startswith('O') or \
-           not isfloat(sieveno10_r):
-            self.smr = rock_default
-            self.field_cap = field_cap_default
-            self.wilt_pt = wilt_pt_default
-            return
-            
         # calculate rock content
         if not isfloat(fraggt10_r):
             fraggt10_r = 0.0
@@ -338,14 +331,25 @@ class Horizon:
             frag3to10_r = 0.0
             
         rocks_soil = fraggt10_r + frag3to10_r
-        rock = (100.0-rocks_soil) / 100.0 * (100.0-sieveno10_r) + rocks_soil
+        _sieveno10_r = (sieveno10_r, 0.0)[sieveno10_r is None]
+        rock = (100.0-rocks_soil) / 100.0 * (100.0-_sieveno10_r) + rocks_soil
         not_rock = 100.0 - rock
+        rock_min50 = min(50.0, rock)
 	
-	# todo: correct bulk density based on rock
-	# .dbthirdbar_r
-	# rock_min50 = min(50.0, rock)
-        # dbthirdbar_r = 2.65 * (rock_min50/100.0 + dbthirdbar_r/2.65 - rock_min50 * dbthirdbar_r / 265.0)
+        # correct bulk density based on rock
+        dbthirdbar_r =  self.dbthirdbar_r
+        if dbthirdbar_r > 2.65:
+            dbthirdbear_r = 2.65
+        self.corrected_dbthirdbar_r = 2.65 * (rock_min50/100.0 + dbthirdbar_r/2.65 - rock_min50 * dbthirdbar_r / 265.0)
 	
+        if desgnmaster is None or \
+           desgnmaster.startswith('O') or \
+           not isfloat(sieveno10_r):
+            self.smr = rock_default
+            self.field_cap = field_cap_default
+            self.wilt_pt = wilt_pt_default
+            return
+            
         if ERIN_ADJUST_FCWP:
             # calculate fc
             if not_rock == 0.0:
@@ -353,7 +357,7 @@ class Horizon:
             elif not isfloat(wthirdbar_r):
                 fc = field_cap_default
             else:
-                fc = (0.01 * wthirdbar_r) / (1.0 - min(50.0, rock) / 100.0)
+                fc = (0.01 * wthirdbar_r) / (1.0 - rock_min50 / 100.0)
 
             # calculate wp
             if not_rock == 0.0:
@@ -361,7 +365,7 @@ class Horizon:
             elif not isfloat(wfifteenbar_r):
                 wc = wilt_pt_default
             else:
-                wc = (0.01 * wfifteenbar_r) / (1.0 - min(50.0, rock) / 100.0)
+                wc = (0.01 * wfifteenbar_r) / (1.0 - rock_min50 / 100.0)
 
         else:
             # calculate fc
@@ -1007,7 +1011,7 @@ Any comments:
                 if hzdepb_r10 < 210.0:
                     hzdepb_r10 = 210.0
 
-            s2 = '{hzdepb_r10:0.03f}\t{0.dbthirdbar_r:0.02f}\t{ksat:0.04f}\t'\
+            s2 = '{hzdepb_r10:0.03f}\t{0.corrected_dbthirdbar_r:0.02f}\t{ksat:0.04f}\t'\
                  '{0.anisotropy:0.01f}\t{0.field_cap:0.04f}\t{0.wilt_pt:0.04f}\t'\
                  '{0.sandtotal_r:0.2f}\t{0.claytotal_r:0.2f}\t{0.om_r:0.2f}\t'\
                  '{0.cec7_r:0.2f}\t{0.smr:0.2f}'\
