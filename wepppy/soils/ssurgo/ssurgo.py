@@ -340,6 +340,9 @@ class Horizon:
         rocks_soil = fraggt10_r + frag3to10_r
         rock = (100.0-rocks_soil) / 100.0 * (100.0-sieveno10_r) + rocks_soil
         not_rock = 100.0 - rock
+	
+	# todo: correct bulk density based on rock
+	# .dbthirdbar_r
 
         if ERIN_ADJUST_FCWP:
             # calculate fc
