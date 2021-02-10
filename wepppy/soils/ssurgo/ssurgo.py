@@ -343,7 +343,9 @@ class Horizon:
 	
 	# todo: correct bulk density based on rock
 	# .dbthirdbar_r
-
+	# rock_min50 = min(50.0, rock)
+        # dbthirdbar_r = 2.65 * (rock_min50/100.0 + dbthirdbar_r/2.65 - rock_min50 * dbthirdbar_r / 265.0)
+	
         if ERIN_ADJUST_FCWP:
             # calculate fc
             if not_rock == 0.0:
