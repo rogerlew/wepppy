@@ -97,5 +97,8 @@
 "180": {"Key": 180, "Color": [148,216,211,255], "Description": "Agriculture: Soybean- Spring Chisel Plow", "ManagementFile": "Agriculture/soybean-spring chisel plow.man"},
 "181": {"Key": 181, "Color": [148,216,211,255], "Description": "Agriculture: Winter Wheat- Continuous, No Till", "ManagementFile": "Agriculture/winter wheat, continuous,no till.man"},
 "182": {"Key": 182, "Color": [181,201,142,255], "Description": "Agriculture: Winter Wheat- Conventional Till", "ManagementFile": "Agriculture/winter wheat, Conventional till.man"},
-"183": {"Key": 183, "Color": [181,211,229,255], "Description": "Agriculture: Winter Wheat- Mulch Till", "ManagementFile": "Agriculture/winter wheat, mulch till.man"}
+"183": {"Key": 183, "Color": [181,211,229,255], "Description": "Agriculture: Winter Wheat- Mulch Till", "ManagementFile": "Agriculture/winter wheat, mulch till.man"},
+"201": {"Key": 201,  "Color": [170,112,40,255],  "Description": "Barley Fallow Int Precip CT 1", "ManagementFile": "Palouse/ww_barley_fallow_Int_Precip_ct_1.man"},
+"202": {"Key": 202,  "Color": [170,112,40,255],  "Description": "Barley Fallow Int Precip MT 1", "ManagementFile": "Palouse/ww_barley_fallow_Int_Precip_mt_1.man"},
+"203": {"Key": 203,  "Color": [170,112,40,255],  "Description": "Barley Fallow Int Precip NT 1", "ManagementFile": "Palouse/ww_barley_fallow_Int_Precip_nt_1.man"}
 }
