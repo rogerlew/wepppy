@@ -322,9 +322,10 @@ class Horizon:
         wthirdbar_r = self.wthirdbar_r
         wfifteenbar_r = self.wfifteenbar_r
         
-        if desgnmaster is None or \
-           desgnmaster.startswith('O') or \
-           not isfloat(sieveno10_r):
+        if desgnmaster is None:
+           desgnmaster = 'O'
+
+        if desgnmaster.startswith('O') or not isfloat(sieveno10_r):
             self.smr = rock_default
             self.field_cap = field_cap_default
             self.wilt_pt = wilt_pt_default
@@ -341,8 +342,8 @@ class Horizon:
         rock = (100.0-rocks_soil) / 100.0 * (100.0-sieveno10_r) + rocks_soil
         not_rock = 100.0 - rock
 	
-	# todo: correct bulk density based on rock
-	# .dbthirdbar_r
+	# This ended up being not necessary because the bulk-density is corrected up to 50 pct rock 
+	# 
 	# rock_min50 = min(50.0, rock)
         # dbthirdbar_r = 2.65 * (rock_min50/100.0 + dbthirdbar_r/2.65 - rock_min50 * dbthirdbar_r / 265.0)
 	
