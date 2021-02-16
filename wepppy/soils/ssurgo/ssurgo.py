@@ -386,7 +386,11 @@ class Horizon:
         self.wilt_pt = wc
         
     def valid(self):
-        return not self.desgnmaster.startswith('O') and \
+        desgnmaster = self.desgnmaster
+        if desgnmaster is None:
+            desgnmaster = 'O'
+
+        return not desgnmaster.startswith('O') and \
                isfloat(self.hzdepb_r) and \
                isfloat(self.sandtotal_r) and \
                isfloat(self.claytotal_r) and \
