@@ -460,7 +460,7 @@ class WhiteAshModel(AshModel):
             density_at_fc=0.68,
             fraction_water_retention_capacity_at_sat=0.87,
             runoff_threshold=0.0,
-            water_transport_rate=0.88989,
+            water_transport_rate=0.088989,
             water_transport_rate_k=-0.126,
             wind_threshold=6)
 
@@ -481,7 +481,7 @@ class BlackAshModel(AshModel):
             density_at_fc=0.54,
             fraction_water_retention_capacity_at_sat=0.87,
             runoff_threshold=3.45,
-            water_transport_rate=0.98509,
+            water_transport_rate=0.098509,
             water_transport_rate_k=None,
             wind_threshold=6)
 
