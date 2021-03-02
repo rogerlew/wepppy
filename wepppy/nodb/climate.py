@@ -36,7 +36,8 @@ from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import (
     CligenStationsManager, 
     ClimateFile, 
-    Cligen, 
+    Cligen,
+    extract_gridmet_var, 
     build_daymet_prn, 
     build_gridmet_prn
 )
@@ -1295,7 +1296,10 @@ class Climate(NoDbBase, LogMixin):
 
             variables = [gridmet_client.GridMetVariable.Precipitation,
                          gridmet_client.GridMetVariable.MinimumTemperature,
-                         gridmet_client.GridMetVariable.MaximumTemperature]
+                         gridmet_client.GridMetVariable.MaximumTemperature,
+                         gridmet_client.GridMetVariable.WindSpeed,
+                         gridmet_client.GridMetVariable.WindDirection]
+
             met_dir = _join(cli_dir, 'gridmet')
 
             self.log('  fetching gridmet timeseries...')
@@ -1310,9 +1314,20 @@ class Climate(NoDbBase, LogMixin):
                               prn_fn=_join(cli_dir, prn_fn))
 
             cligen.run_observed(prn_fn, cli_fn=cli_fn)
-
             cli_path = _join(cli_dir, cli_fn)
             climate = ClimateFile(cli_path)
+
+            # replace wind and velocity from gridmet
+            wvl_dates, wvl = extract_gridmet_var(_join(met_dir, 'pw0'),
+                              start_year=start_year, end_year=end_year,
+                              var='vs')
+            wdir_dates, wdir = extract_gridmet_var(_join(met_dir, 'pw0'),
+                              start_year=start_year, end_year=end_year,
+                              var='th')
+            climate.replace_var('w-vl', wvl_dates,  wvl)
+            climate.replace_var('w-dir', wdir_dates,  wdir)
+            climate.write(cli_path)
+
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
