@@ -113,7 +113,8 @@ def arc_export(wd, verbose=False):
         f['properties']['wepp_id'] = ss['meta']['wepp_id']
         f['properties']['width(m)'] = ss['watershed']['width']
         f['properties']['length(m)'] = ss['watershed']['length']
-        f['properties']['area(ha)'] = ss['watershed']['area'] * 0.0001
+        area_ha = ss['watershed']['area'] * 0.0001
+        f['properties']['area(ha)'] = area_ha
         f['properties']['slope'] = ss['watershed']['slope_scalar']
         f['properties']['aspect'] = ss['watershed']['aspect']
 
@@ -162,7 +163,39 @@ def arc_export(wd, verbose=False):
                 f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
                 f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
                 f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
+                f['properties']['Awat(tonne)'] = ash_out[topaz_id]['water_transport (kg/ha)'] * area_ha / 1000.0
+                f['properties']['Awnd(tonne)'] = ash_out[topaz_id]['wind_transport (kg/ha)'] * area_ha / 1000.0
+                f['properties']['AshT(tonne)'] = ash_out[topaz_id]['ash_transport (kg/ha)'] * area_ha / 1000.0
                 f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
+
+        for k, v in f['properties'].items():
+            if isnan(v) or isinf(v):
+                f['properties'][k] = None
+
+        js['features'][i] = f
+
+    geojson_fn = _join(export_dir, 'subcatchments.json')
+    with open(geojson_fn, 'w') as fp:
+        json.dump(js, fp, allow_nan=False)
+
+    if verbose:
+        print('done.')
+
+    cmd = ['ogr2ogr', '-s_srs', 'epsg:%s' %  map.srid, '-t_srs', 'epsg:%s' %  map.srid,
+           'subcatchments.shp', 'subcatchments.json']
+    if verbose:
+        print(cmd)
+    subprocess.check_call(cmd, cwd=export_dir)
+
+    assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
+
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
+           'subcatchments.kml', 'subcatchments.json']
+    if verbose:
+        print(cmd)
+    subprocess.check_call(cmd, cwd=export_dir)
+
+    assert _exists(_join(export_dir, 'subcatchments.kml')), cmd
 
         for k, v in f['properties'].items():
             if isnan(v) or isinf(v):
