@@ -14,7 +14,7 @@ os.chdir('/geodata/weppcloud_runs/')
 if __name__ == "__main__":
     import sys
 
-    outdir = '/home/mariana/lt2021_1'
+    outdir = '/home/chinmay/Palouse202103'
 
     if _exists(outdir):
         res = input('Outdir exixsts, Delete outdir?')
@@ -26,17 +26,9 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 'lt_202012*SimFire.fccsFuels_obs_cli',
-                 'lt_202012*SimFire.landisFuels_obs_cli',
-                 'lt_202012*SimFire.landisFuels_fut_cli_A2',
-                 'lt_202012*CurCond',
-                 'lt_202012*PrescFire',
-                 'lt_202012*LowSev',
-                 'lt_202012*ModSev',
-                 'lt_202012*HighSev',
-                 'lt_202012*Thinn96',
-                 'lt_202012*Thinn93',
-                 'lt_202012*Thinn85'
+                 'Palouse202103*Mulch_Till',
+                 'Palouse202103*No_Till',
+                 'Palouse202103*Conventional_Till'
                 ]
 
     for prefix in scenarios:
