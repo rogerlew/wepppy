@@ -220,6 +220,24 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     fp.close()
 
 
+def extract_gridmet_var(gridmet_dir, start_year, end_year, var, verbose=False):
+    """
+    extracts the timeseries for a gridmet variable
+    returns a list of date tuples (year, month, day) and list of data values
+    """
+    ts = []
+    _dates = []
+    for year in range(start_year, end_year + 1):
+        fn = _join(gridmet_dir, '%s_%s.npy' % (var, str(year)))
+        assert _exists(fn)
+     
+        for i, x in enumerate(list(np.load(fn))):
+            ts.append(float(x))
+            _date = datetime.datetime(year, 1, 1) + datetime.timedelta(i)
+            _dates.append((_date.year, _date.month, _date.day))
+
+    return _dates, ts
+
 def build_gridmet_prn(gridmet_dir, start_year, end_year, prn_fn, verbose=False):
 
     fp = open(prn_fn, 'w')
