@@ -13,8 +13,8 @@ from wepppy.wepp.stats import HillSummary, ChannelSummary, OutletSummary, Sedime
 os.chdir('/geodata/weppcloud_runs/')
 
 if __name__ == "__main__":
-    prefix = 'lt2021_1'
-    outdir = '/home/mariana/%s_csvs' % prefix
+    prefix = 'Palouse202103'
+    outdir = '/home/chinmay/%s_csvs' % prefix
 
     if _exists(outdir):
         res = input('Outdir exists, Delete outdir?')
@@ -26,17 +26,9 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 'lt_202012*SimFire.fccsFuels_obs_cli',
-                 'lt_202012*SimFire.landisFuels_obs_cli',
-                 'lt_202012*SimFire.landisFuels_fut_cli_A2',
-                 'lt_202012*CurCond',
-                 'lt_202012*PrescFire',
-                 'lt_202012*LowSev',
-                 'lt_202012*ModSev',
-                 'lt_202012*HighSev',
-                 'lt_202012*Thinn96',
-                 'lt_202012*Thinn93',
-                 'lt_202012*Thinn85'
+                 'Palouse202103*Mulch_Till',
+                 'Palouse202103*No_Till',
+                 'Palouse202103*Conventional_Till'
                 ]
 
     wds = []
