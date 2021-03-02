@@ -23,7 +23,11 @@ class GridMetVariable(Enum):
     PalmarDroughtSeverityIndex = 5
     PotentialEvapotranspiration = 6
     BurningIndex = 7
+    WindDirection = 8
+    WindSpeed = 9
 
+# http://www.climatologylab.org/gridmet.html
+# The variable names can be obtained by downloading the dataset for a year and looking at the attributes using HDFView
 
 _var_meta = {
     GridMetVariable.Precipitation: ('pr', 'precipitation_amount'),
@@ -33,6 +37,8 @@ _var_meta = {
     GridMetVariable.PalmarDroughtSeverityIndex: ('pdsi', 'palmer_drought_severity_index'),
     GridMetVariable.PotentialEvapotranspiration: ('pet', 'potential_evapotranspiration'),
     GridMetVariable.BurningIndex: ('bi', 'burning_index_g'),
+    GridMetVariable.WindDirection: ('th', 'wind_from_direction'),
+    GridMetVariable.WindSpeed: ('vs', 'wind_speed'),
 }
 
 
@@ -68,7 +74,7 @@ def _retrieve(gridvariable: GridMetVariable, bbox, year):
           'timeStride=1&accept=netcdf' \
         .format(year=year, east=east, west=west, south=south, north=north,
                 abbrv=abbrv, variable_name=variable_name)
-
+    print(url)
     referer = 'https://rangesat.nkn.uidaho.edu'
     s = requests.Session()
     response = s.get(url, headers={'referer': referer}, stream=True)
@@ -150,12 +156,12 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
 
 if __name__ == "__main__":
     locations = {'666': [-116.92849537373276, 46.80427719462155]}
-    variables = [GridMetVariable.Precipitation, GridMetVariable.MinimumTemperature, GridMetVariable.MaximumTemperature]
-    gridmet_dir = '/Users/roger/Downloads'
+    variables = [GridMetVariable.Precipitation, GridMetVariable.MinimumTemperature, GridMetVariable.MaximumTemperature, GridMetVariable.WindSpeed, GridMetVariable.WindDirection]
+    gridmet_dir = '/home/roger/Downloads'
     year = 1981
     retrieve_timeseries(variables, locations, year, year, gridmet_dir)
 
-    for var in ['pr', 'tmmn', 'tmmx']:
+    for var in ['pr', 'tmmn', 'tmmx', 'th', 'vs']:
         fn = _join(gridmet_dir, '666', '%s_%s.npy' % (var, str(year)))
         assert exists(fn)
         print(var, [float(x) for x in list(np.load(fn))])
