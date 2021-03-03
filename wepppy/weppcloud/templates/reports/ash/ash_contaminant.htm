@@ -130,22 +130,24 @@
     {% set _delivery_mod = rec_results['3'][_rec]['value'] %}
     {% set _delivery_high = rec_results['4'][_rec]['value'] %}
     {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
-<tr>
-    <td>{{ rec }}</td>
-    <td style="width:100px; text-align: right;" >{{ unitizer(_delivery, 'tonne') | safe }} </td>
-    {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
-        <td style="width:100px; text-align: right;" >
-            {% set cont_delivery = _delivery_low * low * 0.001 +
-                                   _delivery_mod + mod * 0.001 +
-                                   _delivery_high * high  * 0.001 %}
-            {% if units == 'mg/kg' %}
-                {{ unitizer(cont_delivery, 'kg') | safe }}
-            {% else %}
-                {{ unitizer(cont_delivery, 'g') | safe }}
-            {% endif %}
-        </td>
-    {% endfor %}
-</tr>
+    {% if _delivery > 0.0 %}
+    <tr>
+        <td>{{ rec }}</td>
+        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery, 'tonne') | safe }} </td>
+        {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+            <td style="width:100px; text-align: right;" >
+                {% set cont_delivery = _delivery_low * low * 0.001 +
+                                       _delivery_mod + mod * 0.001 +
+                                       _delivery_high * high  * 0.001 %}
+                {% if units == 'mg/kg' %}
+                    {{ unitizer(cont_delivery, 'kg') | safe }}
+                {% else %}
+                    {{ unitizer(cont_delivery, 'g') | safe }}
+                {% endif %}
+            </td>
+        {% endfor %}
+    </tr>
+    {% endif %}
 {% endfor %}
 </tbody>
 </table>
@@ -166,7 +168,7 @@
     <td><input type="text" name="reservoir_storage"
          class="form-control mr-sm-3 disable-readonly"
          value="{{ ash.reservoir_storage | round(2) }}"> </td>
-    <td>fraction</td>
+    <td>percent</td>
 </tr>
 <tr>
     <td>Current Volume</td>
@@ -201,6 +203,7 @@
     {% set _delivery_mod = rec_results['3'][_rec]['value'] %}
     {% set _delivery_high = rec_results['4'][_rec]['value'] %}
     {% set _delivery = _delivery_low + _delivery_mod + _delivery_high %}
+    {% if _delivery > 0.0 %}
     <tr>
         <td>{{ rec }}</td>
         <td style="width:100px; text-align: right;" >{{ unitizer(_delivery / reservoir_current_volume, 'tonne') | safe }} </td>
@@ -218,6 +221,7 @@
             </td>
         {% endfor %}
     </tr>
+    {% endif %}
 {% endfor %}
 </tbody>
 </table>
