@@ -197,12 +197,6 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'subcatchments.kml')), cmd
 
-        for k, v in f['properties'].items():
-            if isnan(v) or isinf(v):
-                f['properties'][k] = None
-
-        js['features'][i] = f
-
     geojson_fn = _join(export_dir, 'subcatchments.json')
     with open(geojson_fn, 'w') as fp:
         json.dump(js, fp, allow_nan=False)
