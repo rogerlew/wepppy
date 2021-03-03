@@ -1,7 +1,6 @@
 import math
 import enum
 
-
 from os.path import join as _join
 
 from copy import deepcopy
@@ -27,9 +26,10 @@ class AshNoDbLockedException(Exception):
     pass
 
 
-WHITE_ASH_BD = 0.31
-BLACK_ASH_BD = 0.22
+WHITE_ASH_BD = 0.14
+BLACK_ASH_BD = 0.31
 
+DISABLE_WIND_TRANSPORT = True
 
 class AshModel(object):
     """
@@ -270,7 +270,7 @@ class AshModel(object):
                 if water_transport[i] > available_ash[i]:
                     water_transport[i] = available_ash[i]
                 available_ash[i] -= water_transport[i]
-            else:  # only apply wind transport if there is no water
+            elif not DISABLE_WIND_TRANSPORT:  # only apply wind transport if there is no water
                 #
                 # model wind transport
                 #
