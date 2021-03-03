@@ -558,7 +558,7 @@ class Ash(NoDbBase, LogMixin):
                     bulk_density = bd_d[topaz_id]
                     if bulk_density == 0.0:
                         continue
-                    if bulk_density < 0.2515:
+                    if bulk_density > (WHITE_ASH_BD + BLACK_ASH_BD) / 2.0:
                         ash_type = AshType.BLACK
                     else:
                         ash_type = AshType.WHITE
