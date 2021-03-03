@@ -134,6 +134,8 @@ class Ash(NoDbBase, LogMixin):
             self._ash_load_d = None
             self._ash_bulk_density_d = None
 
+            self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
+
             self.high_contaminant_concentrations = ContaminantConcentrations(
                 PO4=3950,  # mg*Kg-1
                 Al=7500,
@@ -338,6 +340,23 @@ class Ash(NoDbBase, LogMixin):
             raise
 
     @property
+    def run_wind_transport(self):
+        return getattr(self, '_run_wind_transport', False)
+
+    @run_wind_transport.setter
+    def run_wind_transport(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._run_wind_transport = bool(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
     def ash_load_d(self):
         return getattr(self, '_ash_load_d', None)
 
@@ -366,6 +385,7 @@ class Ash(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
     @property
     def ash_bulk_density_fn(self):
         fn = getattr(self, '_ash_bulk_density_fn', None) 
@@ -464,6 +484,7 @@ class Ash(NoDbBase, LogMixin):
 
 
     def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
+        run_wind_transport = self.run_wind_transport
 
         self.lock()
 
@@ -558,10 +579,11 @@ class Ash(NoDbBase, LogMixin):
                     bulk_density = bd_d[topaz_id]
                     if bulk_density == 0.0:
                         continue
+                    
                     if bulk_density > (WHITE_ASH_BD + BLACK_ASH_BD) / 2.0:
-                        ash_type = AshType.BLACK
+                        ash_type = (AshType.WHITE, AshType.BLACK)[BLACK_ASH_BD > WHITE_ASH_BD]
                     else:
-                        ash_type = AshType.WHITE
+                        ash_type = (AshType.BLACK, AshType.WHITE)[BLACK_ASH_BD > WHITE_ASH_BD]
 
                 meta[topaz_id]['ash_type'] = ash_type
 
@@ -597,7 +619,8 @@ class Ash(NoDbBase, LogMixin):
                             hill_wat=hill_wat,
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
-                            area_ha=area_ha)
+                            area_ha=area_ha,
+                            run_wind_transport=run_wind_transport)
             #    run_ash_model(kwds)
                 args.append(kwds)
                 

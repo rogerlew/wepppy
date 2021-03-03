@@ -29,8 +29,6 @@ class AshNoDbLockedException(Exception):
 WHITE_ASH_BD = 0.14
 BLACK_ASH_BD = 0.31
 
-DISABLE_WIND_TRANSPORT = True
-
 class AshModel(object):
     """
     Base class for the hillslope ash models. This class is inherited by
@@ -82,7 +80,7 @@ class AshModel(object):
             return lookup_wind_threshold_white_ash_proportion(w)
 
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 25, 20, 10, 5, 2], area_ha=None, ini_ash_depth=None):
+                  recurrence=[100, 50, 25, 20, 10, 5, 2], area_ha=None, ini_ash_depth=None, run_wind_transport=True):
         """
         Runs the ash model for a hillslope
 
@@ -270,7 +268,7 @@ class AshModel(object):
                 if water_transport[i] > available_ash[i]:
                     water_transport[i] = available_ash[i]
                 available_ash[i] -= water_transport[i]
-            elif not DISABLE_WIND_TRANSPORT:  # only apply wind transport if there is no water
+            elif run_wind_transport:  # only apply wind transport if there is no water
                 #
                 # model wind transport
                 #
