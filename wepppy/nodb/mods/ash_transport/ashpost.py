@@ -462,9 +462,13 @@ class AshPost(NoDbBase):
         translator = watershed.translator_factory()
         meta = self.meta
 
+        # need to use the dates of the recurrence intervals identified across all the burnclasses
+        water_ret_periods = self.summary_stats['return_periods']['ash_delivery_by_water (tonne)']
+
         water = {2: [], 3: [], 4: []}
         cum_water = {2: [], 3: [], 4: []}
 
+        df = None
         for topaz_id, sub in watershed.sub_iter():
             wepp_id = translator.wepp(top=topaz_id)
             ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
@@ -479,7 +483,8 @@ class AshPost(NoDbBase):
                 water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
                 cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
 
-        df = deepcopy(df)
+        assert df is not None
+        _df = deepcopy(df)
 
         for burn_class in [2, 3, 4]:
             water[burn_class] = np.array(water[burn_class])
@@ -488,70 +493,35 @@ class AshPost(NoDbBase):
             cum_water[burn_class] = np.array(cum_water[burn_class])
             cum_water[burn_class] = np.sum(cum_water[burn_class], axis=0)
 
-            df['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)] = \
+            _df['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)] = \
                 pd.Series(water[burn_class], index=df.index)
-            df['burn_class={},cum_ash_delivery_by_water (tonne)'.format(burn_class)] = \
+            _df['burn_class={},cum_ash_delivery_by_water (tonne)'.format(burn_class)] = \
                 pd.Series(cum_water[burn_class], index=df.index)
-
-        breaks = []    # list of indices of new fire years
-        last_day = fire_date.yesterday
-        for i, _row in df.iterrows():
-            if _row.mo == last_day.month and _row.da == last_day.day:
-                breaks.append(i)  # record the index for the new year
-
-        num_fire_years = len(breaks)
-        num_days = len(df.da)
 
         return_periods = {2: {}, 3: {}, 4: {}}
         for burn_class in [2, 3, 4]:
             measure = 'burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)
-            df.sort_values(by=measure, ascending=False, inplace=True)
-
-            data = []
-            for j, (i, _row) in enumerate(df.iterrows()):
-                val = _row[measure]
-
-                if val == 0.0:
-                    break
-
-                dff = _row['days_from_fire (days)']
-                rank = j + 1
-                ri = (num_days + 1) / rank
-                ri /= 365.25
-                prob = probability_of_occurrence(ri, 1.0)
-                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri])
-
-            _df = pd.DataFrame(data,
-                               columns=['year', 'mo', 'da', 'days_from_fire',
-                                        measure, 'probability', 'rank', 'return_interval'])
-            _df.to_csv(_join(ash_dir, '%s_burnclass=%i,ash_stats_per_event_%s.csv' %
-                             ('pw0', burn_class, measure.replace(' (tonne)', ''))), index=False)
-
-            rec = weibull_series(recurrence, num_fire_years)
-
             num_events = len(_df.da)
             actual_reccurence = []
             for retperiod in recurrence:
-                if retperiod not in rec:
+                wat_row = water_ret_periods[retperiod]
+                if wat_row is None:
                     return_periods[burn_class][retperiod] = {'value': 0.0}
                 else:
-                    indx = rec[retperiod]
-                    if indx >= num_events:
-                        return_periods[burn_class][retperiod] = {'value': 0.0}
-                    elif indx != -1:
-                        _row = dict(_df.loc[indx, :])
+                    _row = dict(_df.loc[ (_df['year'] == wat_row['year']) & (_df['mo'] == wat_row['mo']) & (_df['da'] == wat_row['da']) ])
+                    print(retperiod, _row, wat_row)
 
-                        for _m in _row:
-                            if _m in ('year', 'mo', 'da', 'days_from_fire', 'rank'):
-                                _row[_m] = int(_row[_m])
-                            elif isfloat(_row[_m]):
-                                _row[_m] = float(_row[_m])
-                            else:
-                                _row[_m] = str(_row[_m])
+                    for _m in _row:
+                        if _m in ('year', 'mo', 'da', 'days_from_fire', 'rank'):
+                            _row[_m] = int(_row[_m])
+                        elif isfloat(_row[_m]):
+                            _row[_m] = float(_row[_m])
+                        else:
+                            _row[_m] = str(_row[_m])
 
-                        _row['value'] = _row['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)]
+                    _row['value'] = _row['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)]
 
-                        return_periods[burn_class][retperiod] = _row
+                    return_periods[burn_class][retperiod] = _row
 
                 actual_reccurence.append(retperiod)
 
