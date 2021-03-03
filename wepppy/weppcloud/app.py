@@ -3832,6 +3832,29 @@ def run_ash(runid, config):
         return exception_factory('Error Running Ash Transport')
 
 
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_ash_wind_transport/', methods=['POST'])
+def task_set_ash_wind_transport(runid, config):
+
+    try:
+        state = request.json.get('run_wind_transport', None)
+    except Exception:
+        return exception_factory('Error parsing state')
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        ash = Ash.getInstance(wd)
+        ash.run_wind_transport = state
+    except Exception:
+        return exception_factory('Error setting state')
+
+    return success_factory()
+
+
 @app.route('/runs/<string:runid>/<config>/report/debris_flow')
 @app.route('/runs/<string:runid>/<config>/report/debris_flow/')
 def report_debris_flow(runid, config):

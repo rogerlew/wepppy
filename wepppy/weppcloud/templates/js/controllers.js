@@ -4905,6 +4905,35 @@ var Ash = function () {
             self.showHideControls();
         }
 
+        that.set_wind_transport = function (state) {
+            var self = instance;
+            var task_msg = "Setting wind_transport(" + state + ")";
+
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/set_ash_wind_transport/",
+                data: JSON.stringify({ run_wind_transport: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+        };
+
         that.showHideControls = function () {
             var self = instance;
 
