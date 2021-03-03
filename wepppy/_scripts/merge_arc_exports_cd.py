@@ -7,6 +7,9 @@ from os.path import exists as _exists
 from glob import glob
 
 import subprocess
+
+from wepppy.export import arc_export
+
 #from wepppy.all_your_base import ogrmerge
 
 os.chdir('/geodata/weppcloud_runs/')
@@ -43,6 +46,8 @@ if __name__ == "__main__":
                 continue
 
             print(wd)
+            
+            arc_export(wd)
 
             chn = _join(wd, 'export', 'arcmap', 'channels.shp')
             assert _exists(chn), chn
