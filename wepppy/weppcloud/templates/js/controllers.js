@@ -1501,6 +1501,14 @@ var SubcatchmentDelineation = function () {
                 self.cmapRhemSedYield();
             } else if (cmap_name === "sub_rhem_soil_loss") {
                 self.cmapRhemSoilLoss();
+            } else if (cmap_name === "ash_load") {
+                self.cmapAshLoad();
+            } else if (cmap_name === "wind_transport (kg/ha)") {
+                self.cmapAshTransport();
+            } else if (cmap_name === "water_transport (kg/ha") {
+                self.cmapAshTransport();
+            } else if (cmap_name === "ash_transport (kg/ha)") {
+                self.cmapAshTransport();
             }
 
             if (cmap_name === "grd_loss") {
@@ -2304,6 +2312,221 @@ var SubcatchmentDelineation = function () {
         };
         // end RhemSedYield
 
+        //
+        // AshLoad
+        //
+        that.dataAshLoad = null;
+        that.rangeAshLoad = $('#ash_sub_cmap_range_load');
+        that.labelAshLoadMin = $('#ash_sub_cmap_canvas_load_min');
+        that.labelAshLoadMax = $('#ash_sub_cmap_canvas_load_max');
+        that.labelAshLoadUnits = $('#ash_sub_cmap_canvas_load_units');
+        that.cmapperAshLoad = createColormap({ colormap: "electric", nshades: 64 });
+
+        that.cmapAshLoad = function () {
+            var self = instance;
+            $.get({
+                url: "query/ash_out/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataAshLoad = data;
+                    self.renderAshLoad();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.renderAshLoad = function () {
+            var self = instance;
+
+            var r = parseFloat(self.rangeAshLoad.val());
+
+            $.get({
+                url: "unitizer/",
+                data: {value: 0 * r, in_units: 'mm'},
+                cache: false,
+                success: function success(response) {
+                    self.labelAshLoadMin.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer/",
+                data: {value: r, in_units: 'mm'},
+                cache: false,
+                success: function success(response) {
+                    self.labelAshLoadMax.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer_units/",
+                data: {in_units: 'mm'},
+                cache: false,
+                success: function success(response) {
+                    self.labelAshLoadUnits.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+
+            if (self.polys == null) {
+                return;
+            }
+
+            self.polys.eachLayer(function (layer) {
+                var topId = layer.feature.properties.TopazID;
+                var v = parseFloat(self.dataAshLoad[topId]['ash_ini_depth (mm)']);
+                var c = self.cmapperAshLoad.map(v / r);
+
+                layer.setStyle({
+                    color: c,
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: c,
+                    fillOpacity: 0.9
+                });
+            });
+        };
+        // end AshLoad 
+
+
+        //
+        // AshTransport
+        //
+        that.dataAshTransport = null;
+        that.rangeAshTransport = $('#ash_sub_cmap_range_transport');
+        that.labelAshTransportMin = $('#ash_sub_cmap_canvas_transport_min');
+        that.labelAshTransportMax = $('#ash_sub_cmap_canvas_transport_max');
+        that.labelAshTransportUnits = $('#ash_sub_cmap_canvas_transport_units');
+        that.cmapperAshTransport = createColormap({ colormap: "electric", nshades: 64 });
+
+        that.cmapAshTransport = function () {
+            var self = instance;
+            $.get({
+                url: "query/ash_out/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataAshTransport = data;
+                    self.renderAshTransport();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.getAshTransportMeasure = function () {
+            return $("input[name='wepp_sub_cmap_radio']:checked").val();
+        }
+
+        that.renderAshTransport = function () {
+            var self = instance;
+
+            var r = parseFloat(self.rangeAshTransport.val());
+
+            $.get({
+                url: "unitizer/",
+                data: {value: 0 * r, in_units: 'tonne/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelAshTransportMin.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer/",
+                data: {value: r, in_units: 'tonne/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelAshTransportMax.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+            $.get({
+                url: "unitizer_units/",
+                data: {in_units: 'tonne/ha'},
+                cache: false,
+                success: function success(response) {
+                    self.labelAshTransportUnits.html(response.Content);
+                    Project.getInstance().set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+
+            if (self.polys == null) {
+                return;
+            }
+
+            self.polys.eachLayer(function (layer) {
+                var measure = self.getAshTransportMeasure();
+                var topId = layer.feature.properties.TopazID;
+                var v = parseFloat(self.dataAshTransport[topId][measure]) / 1000.0;
+                var c = self.cmapperAshTransport.map(v / r);
+
+                layer.setStyle({
+                    color: c,
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: c,
+                    fillOpacity: 0.9
+                });
+            });
+        };
+        // end AshTransport 
 
         //
         // RhemSoilLoss

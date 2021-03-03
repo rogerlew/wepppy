@@ -49,26 +49,25 @@
     </div>
 </div>
 {% if wepp.has_phosphorus %}
-    <div class="radio radio-primary">
-        <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_phosphorus" value="sub_phosphorus" >
-        <label for="wepp_sub_cmap_radio_phosphorus">
-            Total Phosphorus
-        </label>
-        <br/>
-        <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="5" step="0.1">
-        <span id="wepp_sub_cmap_canvas_phosphorus_units"></span><br/>
-        <div style='width:240px;height:40px'>
-            <canvas id="wepp_sub_cmap_canvas_phosphorus" width=200 height=20
-                    style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
-            <div class="row">
-                <div class="col-md-4"><span id="wepp_sub_cmap_canvas_phosphorus_min"></span></div>
-                <div class="col-md-4" style="text-align: center;"></div>
-                <div class="col-md-4" style="text-align: right;">
-                    <span id="wepp_sub_cmap_canvas_phosphorus_max">
-
-                    </span></div>
-            </div>
+<div class="radio radio-primary">
+    <input type="radio" name="wepp_sub_cmap_radio" id="wepp_sub_cmap_radio_phosphorus" value="sub_phosphorus" >
+    <label for="wepp_sub_cmap_radio_phosphorus">
+        Total Phosphorus
+    </label>
+    <br/>
+    <input type="range" id="wepp_sub_cmap_range_phosphorus" min="0.0001" max="10" value="5" step="0.1">
+    <span id="wepp_sub_cmap_canvas_phosphorus_units"></span><br/>
+    <div style='width:240px;height:40px'>
+        <canvas id="wepp_sub_cmap_canvas_phosphorus" width=200 height=20
+                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+        <div class="row">
+            <div class="col-md-4"><span id="wepp_sub_cmap_canvas_phosphorus_min"></span></div>
+            <div class="col-md-4" style="text-align: center;"></div>
+            <div class="col-md-4" style="text-align: right;">
+                <span id="wepp_sub_cmap_canvas_phosphorus_max">
+                </span></div>
         </div>
+    </div>
 </div>
 {% endif %}
 <p style="padding-top: 1em;"><b><i>Gridded Visualizations</i></b></p>
@@ -92,3 +91,58 @@
         </div>
     </div>
 </div>
+
+{% if 'ash' in ron.mods %}
+<p><b><i>Ash Transport Visualizations</i></b></p>
+
+<div class="radio radio-primary">
+    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_load" value="ash_load">
+    <label for="ash_sub_cmap_radio_load">
+        Ash Load
+    </label>
+    <br/>
+    <input type="range" id="ash_sub_cmap_range_load" min="0.0001" max="10" value="1" step="0.01">
+    <span id="ash_sub_cmap_canvas_load_units"></span><br/>
+    <div style='width:240px;height:40px'>
+        <canvas id="ash_sub_cmap_canvas_load" width=200 height=20
+                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+        <div class="row">
+            <div class="col-md-4"><span id="ash_sub_cmap_canvas_load_min"></span></div>
+            <div class="col-md-4" style="text-align: center;">0</div>
+            <div class="col-md-4" style="text-align: right;">
+                <span id="ash_sub_cmap_canvas_load_max"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="radio radio-primary">
+    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_wind" value="wind_transport (kg/ha)" >
+    <label for="ash_sub_cmap_radio_wind">
+        Wind
+    </label>&nbsp;&nbsp;
+    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_water" value="water_transport (kg/ha)" >
+    <label for="ash_sub_cmap_radio_water">
+        Water
+    </label>&nbsp;&nbsp;
+    <input type="radio" name="wepp_sub_cmap_radio" id="ash_sub_cmap_radio_windwater" value="ash_transport (kg/ha)" >
+    <label for="ash_sub_cmap_radio_windwater">
+        Wind/Water
+    </label>
+    <br/>
+    <input type="range" id="ash_sub_cmap_range_transport" min="0.0001" max="100" value="10" step="0.1">
+    <span id="ash_sub_cmap_canvas_transport_units"></span><br/>
+    <div style='width:240px;height:40px'>
+        <canvas id="ash_sub_cmap_canvas_transport" width=200 height=20
+                style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+        <div class="row">
+            <div class="col-md-4"><span id="ash_sub_cmap_canvas_transport_min"></span></div>
+            <div class="col-md-4" style="text-align: center;"></div>
+            <div class="col-md-4" style="text-align: right;">
+                <span id="ash_sub_cmap_canvas_transport_max"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
