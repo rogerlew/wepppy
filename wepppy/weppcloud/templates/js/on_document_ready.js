@@ -442,6 +442,22 @@ function onReady() {
         });
     {% endif %}
 
+    {% if 'ash' in ron.mods %}
+        // Ash Load
+        render_legend("electric", "ash_sub_cmap_canvas_load");
+        sub_ctrl.renderAshLoad();
+        $('#ash_sub_cmap_range_load').on('input', function () {
+            sub_ctrl.renderAshLoad();
+        });
+
+        // Ash Transport
+        render_legend("electric", "ash_sub_cmap_canvas_transport");
+        sub_ctrl.renderAshTransport();
+        $('#ash_sub_cmap_range_transport').on('input', function () {
+            sub_ctrl.renderAshTransport();
+        });
+    {% endif %}
+
     // load subcatchments
     if ({{ watershed.has_subcatchments | tojson }}) {
         sub_ctrl.show();
