@@ -12,6 +12,11 @@ WEPP outputs and performs streamflow and water balance calculations.
 
 The calculations were provided by Mariana Dobre.
 """
+
+from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
+
 from collections import OrderedDict
 import csv
 
@@ -21,6 +26,7 @@ import numpy as np
 
 from wepppy.all_your_base.hydro import determine_wateryear
 
+from wepppy.wepp.out import watershed_swe
 
 class TotalWatSed(object):
 
@@ -38,6 +44,8 @@ class TotalWatSed(object):
                  phos_opts=None):
 
         from wepppy.nodb import PhosphorusOpts, BaseflowOpts
+        wd = _join(_split(fn)[0], '../../')
+
         hdr = self.hdr
         types = self.types
 
@@ -89,12 +97,9 @@ class TotalWatSed(object):
 
         d['Streamflow (mm)'] = d['Runoff (mm)'] + d['Lateral Flow (mm)'] + d['Baseflow (mm)']
 
-        d['SWE (mm)'] = [0.0]
-        for p, rm in zip(d['Precipitation (mm)'], d['Rain + Melt (mm)']):
-            d['SWE (mm)'].append(p - rm + d['SWE (mm)'][-1])
-        d['SWE (mm)'] = np.array(d['SWE (mm)'][1:])
-
         d['Sed. Del (tonne)'] = d['Sed. Del (kg)'] / 1000.0
+
+        d['SWE (mm)'] = watershed_swe(wd)
 
         if phos_opts is not None:
             assert isinstance(phos_opts, PhosphorusOpts)
@@ -169,7 +174,7 @@ class TotalWatSed(object):
 
 if __name__ == "__main__":
     from pprint import pprint
-    fn = '/geodata/weppcloud_runs/ef264d6f-5449-4c6d-bce9-f6d4e5938be3/wepp/output/totalwatsed.txt'
+    fn = '/geodata/weppcloud_runs/srivas42-greatest-ballad/wepp/output/totalwatsed.txt'
     from wepppy.nodb import PhosphorusOpts, BaseflowOpts
     phosOpts = PhosphorusOpts()
     phosOpts.surf_runoff = 0.0118
@@ -178,4 +183,4 @@ if __name__ == "__main__":
     phosOpts.sediment = 1024
     baseflowOpts = BaseflowOpts()
     totwatsed = TotalWatSed(fn, baseflowOpts, phos_opts=phosOpts)
-    totwatsed.export('/home/weppdev/totwatsed.csv')
+    totwatsed.export('/home/roger/totwatsed.csv')
