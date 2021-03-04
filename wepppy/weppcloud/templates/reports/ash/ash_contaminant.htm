@@ -46,7 +46,8 @@
 <div style="height: 2em;">  </div>
 
 <h3>Average Annual Delivery by Burn Severity</h3>
-<table class="table table-nonfluid">
+<p><a onclick="javascript:copytable('annual_by_sev_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
+<table class="table table-nonfluid" id="annual_by_sev_tbl">
 <tbody>
 <tr>
     <th>Severity</th>
@@ -102,7 +103,8 @@
 </table>
 
 <h2>Recurrence Intervals</h2>
-<table class="table table-nonfluid">
+<p><a onclick="javascript:copytable('rec_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
+<table class="table table-nonfluid" id="rec_tbl">
 <tbody>
 <tr>
     <th>Recurrence Interval</th>
@@ -181,7 +183,8 @@
 <input style="width: 300px" class="form-control"  type="submit" value="Save Reservoir Parameters">
 <div style="height: 2em;">  </div>
 
-<table class="table table-nonfluid">
+<p><a onclick="javascript:copytable('res_loading_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
+<table class="table table-nonfluid" id="res_loading_tbl">
 <tbody>
 <tr>
     <th>Recurrence Interval</th>
