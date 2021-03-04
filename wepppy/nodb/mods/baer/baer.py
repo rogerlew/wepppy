@@ -21,7 +21,7 @@ import numpy as np
 from osgeo import gdal
 
 from wepppy.all_your_base import isint
-from wepppy.all_your_base.geo import wgs84_proj4, read_raster
+from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, YamlSoil
 
@@ -245,6 +245,63 @@ class Baer(NoDbBase):
         cmd = ['gdal_translate', '-of', 'PNG', baer_rgb, baer_rgb_png]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
+
+     @property
+     def sbs_wgs_n(self):
+         """
+         number of pixels in the WGS projected SBS
+         """
+         return sum(self._counts.values())
+
+     @property
+     def sbs_wgs_area_ha(self):
+         """
+         area of the WGS projected SBS in ha
+         """
+         [[sw_y, sw_x], [ne_y, ne_x]] = self.bounds
+         nw_y, nw_x = ne_y, sw_x
+
+         width = haversine((nw_x, nw_y), (ne_x, ne_y)) * 1000
+         height = haversine((nw_x, nw_y), (sw_x, sw_y)) * 1000
+         return width * height * 0.0001
+
+     @property
+     def sbs_class_counts(self):
+         """
+         dictionary with burn class keys and pixel counts of the WGS projected SBS
+         """
+         counts = Counter()
+         for v in self.classes:
+             counts[self.classify(v)] += self._counts[str(v)]
+
+         return counts
+
+     @property
+     def sbs_class_pcts(self):
+         """
+         dictionary with burn class keys percentages of cover of the WGS projected SBS
+         """
+         counts = self.sbs_class_counts
+         pcts = {}
+         tot_px = counts['Low Severity Burn'] + counts['Moderate Severity Burn'] + counts['High Severity Burn']
+         for k in counts:
+             pcts[k] = 100.0 * counts[k] / tot_px
+
+         return pcts
+
+     @property
+     def sbs_class_areas(self):
+         """
+         dictionary with burn class keys and areas (ha) of the WGS projected SBS
+         """
+         ha__px = self.sbs_wgs_area_ha / self.sbs_wgs_n
+         counts = self.sbs_class_counts
+         areas = {}
+         tot_px = sum(counts.values()) # total count of non-nodata pixels 
+         for k in counts:
+             areas[k] = counts[k] * ha__px 
+
+         return areas
 
     @property
     def class_map(self):
