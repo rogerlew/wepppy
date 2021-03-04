@@ -283,7 +283,7 @@ class Baer(NoDbBase):
         """
         counts = self.sbs_class_counts
         pcts = {}
-        tot_px = counts['Low Severity Burn'] + counts['Moderate Severity Burn'] + counts['High Severity Burn']
+        tot_px = counts.get('Low Severity Burn', 0) + counts.get('Moderate Severity Burn', 0) + counts.get('High Severity Burn', 0)
         for k in counts:
             pcts[k] = 100.0 * counts[k] / tot_px
 
