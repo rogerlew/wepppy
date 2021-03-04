@@ -25,7 +25,7 @@
     <div class="col-sm-3">
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_areas['No Burn'], 'ha') | safe }}
+        {{ unitizer(sbs_class_areas.get('No Burn', 0), 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
@@ -37,10 +37,10 @@
         value="{{ baer.breaks[1] }}">
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_pcts['Low Severity Burn'], '%') | safe }}
+        {{ unitizer(sbs_class_pcts.get('Low Severity Burn', 0), '%') | safe }}
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_areas['Low Severity Burn'], 'ha') | safe }}
+        {{ unitizer(sbs_class_areas.get('Low Severity Burn', 0), 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
@@ -52,10 +52,10 @@
         value="{{ baer.breaks[2] }}">
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_pcts['Moderate Severity Burn'], '%') | safe }}
+        {{ unitizer(sbs_class_pcts.get('Moderate Severity Burn', 0), '%') | safe }}
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_areas['Moderate Severity Burn'], 'ha') | safe }}
+        {{ unitizer(sbs_class_areas.get('Moderate Severity Burn', 0), 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
@@ -67,10 +67,10 @@
         value="{{ baer.breaks[3] }}">
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_pcts['High Severity Burn'], '%') | safe }}
+        {{ unitizer(sbs_class_pcts.get('High Severity Burn', 0), '%') | safe }}
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_areas['High Severity Burn'], 'ha') | safe }}
+        {{ unitizer(sbs_class_areas.get('High Severity Burn', 0), 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
@@ -91,9 +91,9 @@
     <div class="col-sm-3">
     </div>
     <div class="col-sm-3">
-        {{ unitizer(sbs_class_areas['Low Severity Burn'] + 
-                    sbs_class_areas['Moderate Severity Burn'] +
-                    sbs_class_areas['High Severity Burn'], 'ha') | safe }}
+        {{ unitizer(sbs_class_areas.get('Low Severity Burn', 0) + 
+                    sbs_class_areas.get('Moderate Severity Burn', 0) +
+                    sbs_class_areas.get('High Severity Burn', 0), 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
