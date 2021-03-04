@@ -1,47 +1,99 @@
-<h5>Breaks</h5>
+{% set sbs_class_pcts = baer.sbs_class_pcts %}
+{% set sbs_class_areas = baer.sbs_class_areas %}
+<div class="form-group row">
+    <div class="col-sm-4">
+        <b>Class</b>
+    </div>
+    <div class="col-sm-2">
+        <b>Break</b>
+    </div>
+    <div class="col-sm-3">
+        <b>{{ unitizer_units('%') | safe }} of Burned</b>
+    </div>
+    <div class="col-sm-3">
+        <b>{{ unitizer_units('ha') | safe }}</b>
+    </div>
+</div>
 <div class="form-group row">
     <div class="col-sm-4">
         <label for="baer_brk0">No Burn &le; </label>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-2">
         <input id="baer_brk0" name="baer_brk0" class="form-control mr-sm-3" type="text" 
         value="{{ baer.breaks[0] }}">
+    </div>
+    <div class="col-sm-3">
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_areas['No Burn'], 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-4">
         <label for="baer_brk1">Low Severity Fire &le; </label>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-2">
         <input id="baer_brk1" name="baer_brk1" class="form-control mr-sm-3" type="text" 
         value="{{ baer.breaks[1] }}">
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_pcts['Low Severity Burn'], '%') | safe }}
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_areas['Low Severity Burn'], 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-4">
         <label for="baer_brk2">Moderate Severity Fire &le; </label>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-2">
         <input id="baer_brk2" name="baer_brk2" class="form-control mr-sm-3" type="text" 
         value="{{ baer.breaks[2] }}">
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_pcts['Moderate Severity Burn'], '%') | safe }}
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_areas['Moderate Severity Burn'], 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-4">
         <label for="baer_brk3">High Severity Fire &le; </label>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-2">
         <input id="baer_brk3" name="baer_brk3" class="form-control mr-sm-3" type="text" 
         value="{{ baer.breaks[3] }}">
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_pcts['High Severity Burn'], '%') | safe }}
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_areas['High Severity Burn'], 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-4">
         <label for="baer_brk3">No Data = </label>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-2">
         <input id="baer_nodata" name="baer_nodata" class="form-control mr-sm-3" type="text"
         value="{{ baer.nodata_vals }}">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-4">
+        <i>Total Burned</i>
+    </div>
+    <div class="col-sm-2">
+    </div>
+    <div class="col-sm-3">
+    </div>
+    <div class="col-sm-3">
+        {{ unitizer(sbs_class_areas['Low Severity Burn'] + 
+                    sbs_class_areas['Moderate Severity Burn'] +
+                    sbs_class_areas['High Severity Burn'], 'ha') | safe }}
     </div>
 </div>
 <div class="form-group row">
