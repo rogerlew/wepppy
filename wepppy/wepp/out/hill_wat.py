@@ -6,8 +6,10 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from os.path import join as _join
 from os.path import exists as _exists
 from datetime import datetime, timedelta
+from glob import glob
 from collections import OrderedDict
 import numpy as np
 import os
@@ -145,13 +147,38 @@ class HillWat:
 
         return i0 + 1, iend
 
+def watershed_swe(wd):
+    wat_fns = glob(_join(wd, 'wepp/output/*.wat.dat'))
+
+    total_area = 0.0
+    cumulative_swe = None
+    for wat_fn in wat_fns:
+        wat = HillWat(wat_fn)
+        area = wat.data['Area (m^2)'][0]
+        total_area += area
+       
+        # calc swe in m^3 
+        swe = wat.data['Snow-Water (mm)'] * 0.001 * area
+        if cumulative_swe is None:
+            cumulative_swe = swe
+        else:
+            cumulative_swe += swe
+
+    return cumulative_swe / total_area * 1000
+
 
 if __name__ == "__main__":
     from pprint import pprint
     from glob import glob
     from os.path import join as _join
 
-    test_wd = '/Users/roger/wepppy/wepppy/tests/feverish-lamp/wepp/output'
+    import sys
+
+    print(watershed_swe('/geodata/weppcloud_runs/srivas42-greatest-ballad'))
+    sys.exit()
+
+    test_wd = '/geodata/weppcloud_runs/srivas42-greatest-ballad/wepp/output'
+
     fns = glob(_join(test_wd, '*.wat.dat'))
     for fn in fns:
         print(fn)
