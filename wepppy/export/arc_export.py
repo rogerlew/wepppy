@@ -273,7 +273,7 @@ def arc_export(wd, verbose=False):
 
         try:
             f['properties']['Disch(m3)'] = weppout['Discharge Volume'][topaz_id]['value'] 
-            f['properties']['Disch(m3)'] = round(f['properties']['Dis(m3)'], 3)
+            f['properties']['Disch(m3)'] = round(f['properties']['Disch(m3)'], 3)
         except:
             f['properties']['Disch(m3)'] = -9999
 
