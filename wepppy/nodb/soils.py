@@ -17,6 +17,8 @@ import shutil
 from enum import IntEnum
 from copy import deepcopy
 
+from collections import Counter
+
 # non-standard
 import jsonpickle
 
@@ -278,6 +280,18 @@ class Soils(NoDbBase):
             sand_d = self._sand_d(surgo_c)
             clay_d = self._clay_d(surgo_c)
             ll_d = self._ll_d(surgo_c)
+
+            # all the mukeys might not be valid. Need to identify the most common so we can use this instead
+            valid_k_counts = Counter() 
+            for topaz_id, k in domsoil_d.items():
+                if k in soils:
+                    valid_k_counts[k] += 1
+
+            # now assign hillslopes with invalid mukeys the most common valid mukey
+            most_common_k = valid_k_counts.most_common()[0][0]
+            for topaz_id, k in domsoil_d.items():
+                if k not in soils:
+                    domsoil_d[topaz_id] = most_common_k
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
