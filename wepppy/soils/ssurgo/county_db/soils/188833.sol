@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.760249
+#   Build Date: 2021-04-01 12:52:32.098270
 #   Source Data: Surgo
 # 
 # Mukey: 188833
-# Major Component: 15492659 (comppct_r = 55.0)
-# Texture: silt loam
+# Major Component: 15492658 (comppct_r = 35.0)
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44903839   Oa1            10.0    21.7        0.0         0.0         0.28    40.0    10.0     2.1    82.5
-#  44903840   Oa2           152.0    21.7        0.0         0.0          0.2    25.0    10.0     2.1    87.5
+#  44903838   Oa     X       76.0    21.7        0.0         0.0         0.43    40.0    10.0     2.1    82.5
+#  44903837   H2            152.0    92.0        0.0         0.0         1.58     6.0    92.1     8.2    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +40,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +52,6 @@
 # 
 Any comments:
 1 1
-'Houghton and Adrian mucks'		'MUCK'	2	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
-	  100.000	  10.00	  40.00	  82.50	 153.00	  55.50
-	 1520.000	  10.00	  25.00	  87.50	 159.10	  55.50
-1 10000.0 78.12000
+'Houghton and Adrian mucks'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
+	 1520.000	   6.00	   6.00	   0.25	   3.90	  20.00
+1 10000.0 331.20000

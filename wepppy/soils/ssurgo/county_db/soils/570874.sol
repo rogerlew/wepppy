@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.063401
+#   Build Date: 2021-04-01 12:52:32.412572
 #   Source Data: Surgo
 # 
 # Mukey: 570874
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44534178   Oi              2.0    92.0         -           -           0.1     7.0    66.8    10.0    69.0
+#  44534178   Oi     X        2.0    92.0         -           -           0.1     7.0    66.8    10.0    69.0
 #  44534173   A              12.0    28.0        0.0        16.0          1.5    11.5    57.0    14.9    1.25
 #  44534174   E              24.0    28.0        0.0        15.0         1.59    10.0    57.0    14.9    0.75
 #  44534175   Bt1            46.0     9.0        0.0         8.0         1.56    27.5    38.5    12.0     0.5
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,11 +56,10 @@
 # 
 Any comments:
 1 1
-'Sherless-Littlefir complex, 8 to 15 percent slopes, stony'		'SPM'	6	0.2300	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   20.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  120.000	  57.00	  11.50	   1.25	  11.30	  26.92
-	  240.000	  57.00	  10.00	   0.75	  11.30	  26.05
-	  460.000	  38.50	  27.50	   0.50	  11.30	  16.28
-	  860.000	  38.50	  29.00	   0.25	  11.30	  25.74
-	 1110.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Sherless-Littlefir complex, 8 to 15 percent slopes, stony'		'SPM'	5	0.2300	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  120.000	  11.50	  11.50	   1.25	  11.30	  26.92
+	  240.000	  10.00	  10.00	   0.75	  11.30	  26.05
+	  460.000	  27.50	  27.50	   0.50	  11.30	  16.28
+	  860.000	  29.00	  29.00	   0.25	  11.30	  25.74
+	 1110.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 27.93600

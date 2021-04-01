@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.876352
+#   Build Date: 2021-04-01 12:52:30.114344
 #   Source Data: Surgo
 # 
 # Mukey: 150420
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43386105   Oi              3.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
+#  43386105   Oi     X        3.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
 #  43386107   A              31.0     9.0        0.0         4.0         1.18    20.0    26.5     8.8     5.5
 #  43386104   AB             51.0     9.0        0.0         0.0          1.3    20.0    26.5     8.8    1.75
 #  43386106   Bt            152.0     7.7        3.0        36.0         1.45    26.0    18.1     8.0    0.75
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'ABLA/OSCH,PAMY Edgway-ABLA/THOC Jumpstart-PSMEG/ARTRV Tophat complex, 15 to 50 percent slopes'		'SPM'	4	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   30.000	  35.00	  15.00	  75.00	  11.30	  55.50
-	  310.000	  26.50	  20.00	   5.50	  20.00	  20.32
-	  510.000	  26.50	  20.00	   1.75	  13.50	  10.00
-	 1520.000	  18.10	  26.00	   0.75	  18.50	  61.57
+'ABLA/OSCH,PAMY Edgway-ABLA/THOC Jumpstart-PSMEG/ARTRV Tophat complex, 15 to 50 percent slopes'		'SPM'	3	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  310.000	  20.00	  20.00	   5.50	  20.00	  20.32
+	  510.000	  20.00	  20.00	   1.75	  13.50	  10.00
+	 1520.000	  26.00	  26.00	   0.75	  18.50	  61.57
 1 10000.0 27.72000

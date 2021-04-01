@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.715270
+#   Build Date: 2021-04-01 12:52:30.994256
 #   Source Data: Surgo
 # 
 # Mukey: 189733
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45022168   Oe              2.0   300.0        0.0         0.0         0.15     7.0    66.8    10.0    85.0
+#  45022168   Oe     X        2.0   300.0        0.0         0.0         0.15     7.0    66.8    10.0    85.0
 #  45022165   A               8.0    55.0        0.0         0.0          1.4     2.0    93.0     3.7    3.96
 #  45022166   Bw             48.0    55.0        0.0         0.0          1.5     2.0    94.0     4.1    0.35
 #  45022167   C             203.0    55.0        0.0         0.0         1.62     1.0    96.0     1.3    0.05
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Grayling sand, 0 to 6 percent slopes'		'MPM'	4	0.0900	0.7500	4649000.00	0.0050	2.5450	1080.0000
-	   20.000	  66.80	   7.00	  85.00	  11.30	  55.50
-	   80.000	  93.00	   2.00	   3.96	  11.30	   0.00
-	  480.000	  94.00	   2.00	   0.35	   2.50	   2.00
-	 2030.000	  96.00	   1.00	   0.05	   1.00	   5.00
+'Grayling sand, 0 to 6 percent slopes'		'MPM'	3	0.0900	0.7500	4649000.00	0.0050	2.5450	1080.0000
+	   80.000	   2.00	   2.00	   3.96	  11.30	   0.00
+	  480.000	   2.00	   2.00	   0.35	   2.50	   2.00
+	 2030.000	   1.00	   1.00	   0.05	   1.00	   5.00
 1 10000.0 198.00000

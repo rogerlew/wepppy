@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.404525
+#   Build Date: 2021-04-01 12:52:28.575150
 #   Source Data: Surgo
 # 
 # Mukey: 461957
@@ -13,7 +13,7 @@
 # ------------------------------------------------------------------------------------------------------------
 #  43514577   H1             58.0     9.0        0.0         0.0         1.55    20.0    26.5     8.8    0.75
 #  43514575   H2     R       71.0   0.215        0.0         0.0         1.58    42.5    27.6     8.3     0.0
-#  43514574   H3            137.0   0.005         -           -           1.4     0.0    66.8    10.0     7.0
+#  43514574   H3     X      137.0   0.005         -           -           1.4     0.0    66.8    10.0     7.0
 #  43514576   H4            152.0    0.91        0.0         0.0          1.7    17.5    43.0    12.1     0.0
 # 
 # Restricting Layer:
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'San Joaquin silt loam, leveled, 0 to 1 percent slopes'		'SIL'	1	0.2500	0.7500	4951400.00	0.0094	3.5000	32.4000
-	  580.000	  26.50	  20.00	   0.75	  15.00	   2.50
+	  580.000	  20.00	  20.00	   0.75	  15.00	   2.50
 1 10000.0 0.77400

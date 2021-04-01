@@ -91,7 +91,7 @@ if __name__ == "__main__":
         surgo_c = SurgoSoilCollection(statsgo_mukeys[i0:iend], use_statsgo=True)
         surgo_c.makeWeppSoils()
 
-        surgo_c.writeWeppSoils('soils', write_logs=True, version='2006.2')
+        surgo_c.writeWeppSoils('soils', write_logs=True, version='2006.2ag')
 
         print(set(statsgo_mukeys[i0:iend]).difference(surgo_c.invalidSoils.keys()))
         print(set(surgo_c.invalidSoils.keys()))

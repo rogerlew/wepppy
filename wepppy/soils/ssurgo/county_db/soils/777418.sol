@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.564353
+#   Build Date: 2021-04-01 12:52:29.793729
 #   Source Data: Surgo
 # 
 # Mukey: 777418
 # Major Component: 15806495 (comppct_r = 60.0)
-# Texture: silt loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45806848   Oi              5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    50.0
+#  45806848   Oi     X        5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    50.0
 #  45806851   A              18.0     9.0        0.0         0.0         0.85    10.0    44.8    36.1     3.0
 #  45806852   Bw1            48.0     9.0        0.0         0.0          0.9    10.0    44.8    36.1     2.0
 #  45806853   2Bw2           69.0    23.0        0.0         3.0         1.48    13.5    42.9    34.6    0.75
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,12 +57,11 @@
 # 
 Any comments:
 1 1
-'Dullaxe-Vassar complex, 35 to 70 percent slopes'		'SPM'	7	0.2300	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   50.000	  35.00	  15.00	  50.00	  11.30	  55.50
-	  180.000	  44.80	  10.00	   3.00	  11.50	   5.00
-	  480.000	  44.80	  10.00	   2.00	  10.50	   5.00
-	  690.000	  42.90	  13.50	   0.75	   8.00	  12.70
-	  960.000	  67.40	  13.00	   0.25	   7.00	  24.35
-	 1170.000	  67.00	  13.50	   0.25	   7.50	  10.00
-	 1680.000	  83.80	   7.00	   0.25	  11.30	  10.00
+'Dullaxe-Vassar complex, 35 to 70 percent slopes'		'SPM'	6	0.2300	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  180.000	  10.00	  10.00	   3.00	  11.50	   5.00
+	  480.000	  10.00	  10.00	   2.00	  10.50	   5.00
+	  690.000	  13.50	  13.50	   0.75	   8.00	  12.70
+	  960.000	  13.00	  13.00	   0.25	   7.00	  24.35
+	 1170.000	  13.50	  13.50	   0.25	   7.50	  10.00
+	 1680.000	   7.00	   7.00	   0.25	  11.30	  10.00
 1 10000.0 280.80000

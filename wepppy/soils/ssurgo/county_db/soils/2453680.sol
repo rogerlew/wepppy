@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.647791
+#   Build Date: 2021-04-01 12:52:33.031095
 #   Source Data: Surgo
 # 
 # Mukey: 2453680
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45499762   Oa              8.0   300.0        0.0         0.0          0.5    11.0    30.0     9.3    85.0
+#  45499762   Oa     X        8.0   300.0        0.0         0.0          0.5    11.0    30.0     9.3    85.0
 #  45499763   E              38.0   28.22        0.0        25.0          1.4    11.0    30.0     9.3    0.75
 #  45499764   E/B            51.0   28.22        0.0        25.0          1.4    12.0    55.0    14.0     0.5
 #  45499765   Bt1           122.0   28.22        0.0        37.0          1.5    12.0    50.0    14.1    0.25
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Frisco-Agneston association, 5 to 50 percent slopes'		'HPM'	5	0.3000	0.7500	4514530.00	0.0048	2.8456	1080.0000
-	   80.000	  30.00	  11.00	  85.00	 146.00	  55.50
-	  380.000	  30.00	  11.00	   0.75	   7.50	  40.00
-	  510.000	  55.00	  12.00	   0.50	   7.10	  40.00
-	 1220.000	  50.00	  12.00	   0.25	   7.10	  56.53
-	 1600.000	  55.00	  12.00	   0.25	   7.10	  55.48
+'Frisco-Agneston association, 5 to 50 percent slopes'		'HPM'	4	0.3000	0.7500	4514530.00	0.0048	2.8456	1080.0000
+	  380.000	  11.00	  11.00	   0.75	   7.50	  40.00
+	  510.000	  12.00	  12.00	   0.50	   7.10	  40.00
+	 1220.000	  12.00	  12.00	   0.25	   7.10	  56.53
+	 1600.000	  12.00	  12.00	   0.25	   7.10	  55.48
 1 10000.0 101.59200

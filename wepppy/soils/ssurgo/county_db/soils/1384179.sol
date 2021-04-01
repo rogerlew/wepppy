@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.919183
+#   Build Date: 2021-04-01 12:52:32.260859
 #   Source Data: Surgo
 # 
 # Mukey: 1384179
 # Major Component: 15254753 (comppct_r = 50.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44113399   Oi              3.0    92.0         -           -           0.1     7.0    66.8    10.0    69.0
+#  44113399   Oi     X        3.0    92.0         -           -           0.1     7.0    66.8    10.0    69.0
 #  44113398   A              11.0    9.17        0.0         8.0          1.2    14.0    16.0     7.0     3.9
 #  44113395   BA             13.0    9.17        0.0         6.0         1.48    18.0    15.0     7.0    0.76
 #  44113396   Bt             76.0    9.17        0.0        12.0         1.55    28.0    19.0     8.0    0.56
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Gilpin-Peabody silt loams, 35 to 70 percent slopes, very stony'		'SPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  110.000	  16.00	  14.00	   3.90	  11.30	  17.20
-	  130.000	  15.00	  18.00	   0.76	  11.30	  13.52
-	  760.000	  19.00	  28.00	   0.56	  11.30	  26.08
-	 1010.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Gilpin-Peabody silt loams, 35 to 70 percent slopes, very stony'		'SPM'	4	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  110.000	  14.00	  14.00	   3.90	  11.30	  17.20
+	  130.000	  18.00	  18.00	   0.76	  11.30	  13.52
+	  760.000	  28.00	  28.00	   0.56	  11.30	  26.08
+	 1010.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 27.93600

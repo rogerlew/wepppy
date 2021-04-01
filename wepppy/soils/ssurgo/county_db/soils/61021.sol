@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.300588
+#   Build Date: 2021-04-01 12:52:31.615861
 #   Source Data: Surgo
 # 
 # Mukey: 61021
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42866985   Oi              5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
+#  42866985   Oi     X        5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
 #  42866986   H1             20.0     9.0        0.0         0.0          1.2    21.5    11.2     6.5     3.0
 #  42866987   H2             89.0     9.0        0.0         0.0          1.2    30.0     6.9     2.8     1.5
 #  42866988   H3            157.0     3.0        0.0         0.0          1.2    42.5     6.8     4.1    0.55
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Bacona silt loam, 3 to 30 percent slopes'		'SPM'	4	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   50.000	  35.00	  15.00	  75.00	  11.30	  55.50
-	  200.000	  11.20	  21.50	   3.00	  12.50	  17.50
-	  890.000	   6.90	  30.00	   1.50	  12.50	   5.00
-	 1570.000	   6.80	  42.50	   0.55	  12.50	   2.50
+'Bacona silt loam, 3 to 30 percent slopes'		'SPM'	3	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  200.000	  21.50	  21.50	   3.00	  12.50	  17.50
+	  890.000	  30.00	  30.00	   1.50	  12.50	   5.00
+	 1570.000	  42.50	  42.50	   0.55	  12.50	   2.50
 1 10000.0 10.80000
