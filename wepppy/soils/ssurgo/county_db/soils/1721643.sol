@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.635808
+#   Build Date: 2021-04-01 15:01:42.143972
 #   Source Data: Surgo
 # 
 # Mukey: 1721643
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Ouachita, Ochlockonee and Guyton soils, 0 to 3 percent slopes, frequently flooded'		'SIL'	3	0.2900	0.7500	5144355.00	0.0118	3.5000	33.0120
+'Ouachita, Ochlockonee and Guyton soils, 0 to 3 percent slopes, frequently flooded'		'SIL'	3	0.2900	0.7500	5144355.00	0.0118	3.5000	3.4332
 	  100.000	  16.50	  16.50	   1.50	  11.30	   0.00
 	 1020.000	  16.50	  16.50	   0.75	  11.30	   0.00
 	 1530.000	  26.50	  26.50	   0.75	  11.30	   0.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

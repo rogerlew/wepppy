@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.022971
+#   Build Date: 2021-04-01 15:01:45.539139
 #   Source Data: Surgo
 # 
 # Mukey: 121032
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Kempsville-Emporia complex, 2 to 6 percent slopes'		'LS'	4	0.3600	0.7500	5013990.00	0.0094	2.6298	100.8000
+'Kempsville-Emporia complex, 2 to 6 percent slopes'		'LS'	4	0.3600	0.7500	5013990.00	0.0094	2.6298	19.4880
 	  480.000	  10.00	  10.00	   1.25	   5.30	   0.00
 	  940.000	  25.00	  25.00	   0.75	   6.20	   5.95
 	 1650.000	  40.00	  40.00	   0.25	   7.20	   5.95
 	 3810.000	  22.00	  22.00	   0.25	   4.90	  12.70
-1 10000.0 32.40000
+0 0 0.000000 0.000000

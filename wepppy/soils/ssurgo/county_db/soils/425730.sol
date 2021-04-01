@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.673433
+#   Build Date: 2021-04-01 15:01:44.192355
 #   Source Data: Surgo
 # 
 # Mukey: 425730
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Hochheim loam, 6 to 12 percent slopes, eroded'		'SIL'	2	0.2300	0.7500	4264800.00	0.0045	3.1810	33.0120
+'Hochheim loam, 6 to 12 percent slopes, eroded'		'SIL'	2	0.2300	0.7500	4264800.00	0.0045	3.1810	10.2335
 	  180.000	  15.00	  15.00	   3.00	   8.20	   7.85
 	  410.000	  35.00	  35.00	   0.75	  18.60	  17.44
-1 10000.0 3.31200
+0 0 0.000000 0.000000

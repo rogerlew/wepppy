@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.168868
+#   Build Date: 2021-04-01 15:01:41.675559
 #   Source Data: Surgo
 # 
 # Mukey: 174683
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hoyleton-Darmstadt silt loams, 0 to 2 percent slopes'		'SIL'	4	0.2300	0.7500	5232563.00	0.0137	3.5000	33.0120
+'Hoyleton-Darmstadt silt loams, 0 to 2 percent slopes'		'SIL'	4	0.2300	0.7500	5232563.00	0.0137	3.5000	1.7436
 	  200.000	  14.90	  14.90	   3.00	  13.30	   0.00
 	  270.000	  21.00	  21.00	   0.60	  17.00	   0.00
 	  990.000	  39.00	  39.00	   0.30	  11.30	   0.00
 	 1950.000	  26.00	  26.00	   0.10	  19.20	   2.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

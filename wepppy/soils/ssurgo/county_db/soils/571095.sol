@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.729901
+#   Build Date: 2021-04-01 15:01:41.235189
 #   Source Data: Surgo
 # 
 # Mukey: 571095
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Lexington-Smithdale complex, 5 to 40 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	33.0120
+'Lexington-Smithdale complex, 5 to 40 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	2.2706
 	  120.000	  21.00	  21.00	   1.05	  11.30	   4.00
 	  890.000	  26.50	  26.50	   0.25	  11.30	   4.00
 	 2030.000	  22.00	  22.00	   0.25	  11.30	   4.00
-1 10000.0 101.62800
+0 0 0.000000 0.000000

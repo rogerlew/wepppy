@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.789123
+#   Build Date: 2021-04-01 15:01:42.297725
 #   Source Data: Surgo
 # 
 # Mukey: 463318
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Ahwahnee and Vista rocky coarse sandy loams, 8 to 30 percent slopes'		'COSL'	2	0.2500	0.7500	4091910.00	0.0065	3.0707	100.8000
+'Ahwahnee and Vista rocky coarse sandy loams, 8 to 30 percent slopes'		'COSL'	2	0.2500	0.7500	4091910.00	0.0065	3.0707	19.0097
 	  200.000	  12.50	  12.50	   1.50	  10.00	  10.00
 	 1220.000	  16.00	  16.00	   0.75	   7.50	  10.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

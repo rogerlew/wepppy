@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.543458
+#   Build Date: 2021-04-01 15:01:43.054180
 #   Source Data: Surgo
 # 
 # Mukey: 2534787
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Scholten gravelly silt loam, 3 to 8 percent slopes'		'GR-SIL'	2	0.1600	0.7500	5204998.00	0.0131	3.5000	100.8000
+'Scholten gravelly silt loam, 3 to 8 percent slopes'		'GR-SIL'	2	0.1600	0.7500	5204998.00	0.0131	3.5000	5.7603
 	  200.000	  15.40	  15.40	   2.10	   9.30	  40.00
 	  480.000	  26.00	  26.00	   0.50	  12.50	  62.60
-1 10000.0 0.72000
+0 0 0.000000 0.000000

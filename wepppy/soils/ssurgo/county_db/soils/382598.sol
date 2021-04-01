@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.372593
+#   Build Date: 2021-04-01 15:01:44.892829
 #   Source Data: Surgo
 # 
 # Mukey: 382598
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Renfrow silt loam, 3 to 5 percent slopes, eroded'		'SIL'	1	0.1600	0.7500	4940374.00	0.0093	3.5000	32.4000
+'Renfrow silt loam, 3 to 5 percent slopes, eroded'		'SIL'	1	0.1600	0.7500	4940374.00	0.0093	3.5000	3.9562
 	  210.000	  20.20	  20.20	   1.00	  17.20	   0.00
-1 10000.0 0.77400
+0 0 0.000000 0.000000

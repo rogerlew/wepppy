@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.497039
+#   Build Date: 2021-04-01 15:01:44.015647
 #   Source Data: Surgo
 # 
 # Mukey: 2765436
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hubbard-Mosford complex, Mississippi River Valley, 0 to 3 percent slopes'		'LS'	4	0.1600	0.7500	3342720.00	0.0043	2.8744	324.0000
+'Hubbard-Mosford complex, Mississippi River Valley, 0 to 3 percent slopes'		'LS'	4	0.1600	0.7500	3342720.00	0.0043	2.8744	28.6154
 	  200.000	   6.00	   6.00	   1.80	   6.60	   3.00
 	  500.000	   6.00	   6.00	   1.10	   6.30	   3.00
 	  810.000	   5.00	   5.00	   0.70	   5.10	   3.00
 	 2000.000	   1.00	   1.00	   0.10	   0.80	   8.00
-1 10000.0 324.00000
+0 0 0.000000 0.000000

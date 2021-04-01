@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.107346
+#   Build Date: 2021-04-01 15:01:42.616976
 #   Source Data: Surgo
 # 
 # Mukey: 2480316
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Hartsells-Hector complex, 15 to 35 percent slopes, rocky'		'L'	3	0.3000	0.7500	3803760.00	0.0043	3.3202	83.8440
+'Hartsells-Hector complex, 15 to 35 percent slopes, rocky'		'L'	3	0.3000	0.7500	3803760.00	0.0043	3.3202	9.7280
 	  200.000	  15.00	  15.00	   2.25	  11.30	   2.98
 	  610.000	  29.00	  29.00	   0.25	  11.30	   2.98
 	  740.000	  25.00	  25.00	   0.25	  11.30	   2.98
-1 10000.0 0.00000
+0 0 0.000000 0.000000

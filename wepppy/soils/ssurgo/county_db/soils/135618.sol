@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.079454
+#   Build Date: 2021-04-01 15:01:42.588359
 #   Source Data: Surgo
 # 
 # Mukey: 135618
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Othello, Fallsington, and Trussum soils, 0 to 2 percent slopes'		'MPT'	5	0.3000	0.7500	6397110.00	0.0077	2.2122	100.8000
+'Othello, Fallsington, and Trussum soils, 0 to 2 percent slopes'		'MPT'	5	0.3000	0.7500	6397110.00	0.0077	2.2122	8.1338
 	  330.000	  10.00	  10.00	   1.50	   3.50	   0.00
 	  810.000	  18.00	  18.00	   0.25	   8.30	   0.00
 	 1020.000	  35.00	  35.00	   0.25	  17.70	   0.00
 	 1520.000	   5.00	   5.00	   0.25	   1.90	   0.00
 	 2030.000	   3.50	   3.50	   0.25	   1.20	   0.00
-1 10000.0 330.26400
+0 0 0.000000 0.000000

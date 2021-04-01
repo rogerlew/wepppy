@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.995766
+#   Build Date: 2021-04-01 15:01:43.512881
 #   Source Data: Surgo
 # 
 # Mukey: 455889
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Ben Lomond-Catelli-Sur complex, 30 to 75 percent slopes'		'SL'	3	0.1600	0.7500	4764260.00	0.0076	2.9652	100.8000
+'Ben Lomond-Catelli-Sur complex, 30 to 75 percent slopes'		'SL'	3	0.1600	0.7500	4764260.00	0.0076	2.9652	18.0202
 	  480.000	  14.00	  14.00	   1.50	  12.50	  10.27
 	 1170.000	  14.00	  14.00	   0.75	  12.50	  10.27
 	 1500.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

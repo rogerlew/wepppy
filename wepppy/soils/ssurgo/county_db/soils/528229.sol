@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.873768
+#   Build Date: 2021-04-01 15:01:41.379314
 #   Source Data: Surgo
 # 
 # Mukey: 528229
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Gladeville-Rock outcrop complex, 2 to 15 percent slopes, extremely stony'		'FLV-SICL'	2	0.1700	0.7500	4069320.00	0.0070	3.5000	33.0120
+'Gladeville-Rock outcrop complex, 2 to 15 percent slopes, extremely stony'		'FLV-SICL'	2	0.1700	0.7500	4069320.00	0.0070	3.5000	1.5079
 	  200.000	  36.00	  36.00	   4.00	  19.60	  62.04
 	  250.000	  55.00	  55.00	   1.00	  29.10	  65.83
-1 10000.0 0.75600
+0 0 0.000000 0.000000

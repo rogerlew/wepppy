@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.712889
+#   Build Date: 2021-04-01 15:01:45.234805
 #   Source Data: Surgo
 # 
 # Mukey: 571123
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Iuka-Dela association, frequently flooded'		'FSL'	3	0.1600	0.7500	6262640.00	0.0090	2.2853	101.6280
+'Iuka-Dela association, frequently flooded'		'FSL'	3	0.1600	0.7500	6262640.00	0.0090	2.2853	18.7404
 	  280.000	  10.50	  10.50	   1.75	  11.30	   5.00
 	  760.000	  13.00	  13.00	   0.25	  11.30	   7.50
 	 1900.000	  10.00	  10.00	   0.25	  11.30	   5.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

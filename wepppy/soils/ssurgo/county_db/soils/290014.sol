@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.925662
+#   Build Date: 2021-04-01 15:01:42.434413
 #   Source Data: Surgo
 # 
 # Mukey: 290014
@@ -57,9 +57,9 @@
 # 
 Any comments:
 1 1
-'Mardin channery silt loam, 8 to 15 percent slopes'		'CN-SIL'	4	0.2900	0.7500	5282180.00	0.0150	3.5000	36.0000
+'Mardin channery silt loam, 8 to 15 percent slopes'		'CN-SIL'	4	0.2900	0.7500	5282180.00	0.0150	3.5000	5.2443
 	  200.000	  14.00	  14.00	   5.00	   7.70	  34.43
 	  300.000	  12.00	  12.00	   0.50	   6.40	  23.64
 	  410.000	  14.00	  14.00	   1.50	   7.60	  32.77
 	  510.000	  14.00	  14.00	   1.50	  11.30	  32.77
-1 10000.0 0.36000
+0 0 0.000000 0.000000

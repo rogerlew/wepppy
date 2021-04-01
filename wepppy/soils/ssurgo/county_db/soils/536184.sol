@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.082356
+#   Build Date: 2021-04-01 15:01:44.602086
 #   Source Data: Surgo
 # 
 # Mukey: 536184
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Steinsburg-Shelocta association, very steep'		'L'	3	0.2300	0.7500	5129250.00	0.0067	2.9200	101.6280
+'Steinsburg-Shelocta association, very steep'		'L'	3	0.2300	0.7500	5129250.00	0.0067	2.9200	9.5017
 	  100.000	  15.00	  15.00	   2.00	  11.30	   7.85
 	  760.000	  15.00	  15.00	   0.25	  11.30	  21.60
 	  890.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 33.01200
+0 0 0.000000 0.000000

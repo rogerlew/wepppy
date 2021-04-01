@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.575457
+#   Build Date: 2021-04-01 15:01:43.086847
 #   Source Data: Surgo
 # 
 # Mukey: 1456520
@@ -58,10 +58,10 @@
 # 
 Any comments:
 1 1
-'Big Iron-Flintsteel-Gull Point, frequently flooded, complex, dissected, 1 to 15 percent slopes'		'SPM'	5	0.2300	0.7500	4649000.00	0.0050	2.5450	330.8400
+'Big Iron-Flintsteel-Gull Point, frequently flooded, complex, dissected, 1 to 15 percent slopes'		'SPM'	5	0.2300	0.7500	4649000.00	0.0050	2.5450	9.2149
 	   80.000	   6.60	   6.60	   8.00	  11.30	   1.00
 	  100.000	   7.90	   7.90	   2.00	  11.30	   2.00
 	  280.000	  12.10	  12.10	   2.00	  11.30	   3.00
 	  430.000	  10.10	  10.10	   0.60	  11.30	   6.00
 	 1190.000	  10.60	  10.60	   0.08	  12.00	   3.00
-1 10000.0 0.79200
+0 0 0.000000 0.000000

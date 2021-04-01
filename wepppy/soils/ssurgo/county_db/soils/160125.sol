@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.760219
+#   Build Date: 2021-04-01 15:01:42.268205
 #   Source Data: Surgo
 # 
 # Mukey: 160125
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Hosmer silt loam, 2 to 5 percent slopes, eroded'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	33.0120
+'Hosmer silt loam, 2 to 5 percent slopes, eroded'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	2.2261
 	  180.000	  15.00	  15.00	   1.50	   8.10	   0.00
 	  740.000	  24.00	  24.00	   0.50	  11.30	   0.00
-1 10000.0 1.47600
+0 0 0.000000 0.000000

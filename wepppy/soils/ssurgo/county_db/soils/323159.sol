@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.582779
+#   Build Date: 2021-04-01 15:01:41.087831
 #   Source Data: Surgo
 # 
 # Mukey: 323159
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Smyrna-Smyrna, wet, fine sand, 0 to 2 percent slopes'		'FS'	4	0.0400	0.7500	3650080.00	0.0034	2.7296	330.2640
+'Smyrna-Smyrna, wet, fine sand, 0 to 2 percent slopes'		'FS'	4	0.0400	0.7500	3650080.00	0.0034	2.7296	28.7943
 	  100.000	   5.20	   5.20	   6.54	  11.30	   0.00
 	  430.000	   2.50	   2.50	   0.70	  11.30	   0.00
 	  690.000	   6.80	   6.80	   4.50	  11.30	   0.00
 	 2030.000	   3.20	   3.20	   0.10	   2.30	   0.00
-1 10000.0 330.26400
+0 0 0.000000 0.000000

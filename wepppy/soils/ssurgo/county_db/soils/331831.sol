@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.401300
+#   Build Date: 2021-04-01 15:01:42.910720
 #   Source Data: Surgo
 # 
 # Mukey: 331831
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cuthbert, Dulac, and Ruston soils, 12 to 35 percent slopes (sweatman, providence and smithdale)'		'FSL'	4	0.3000	0.7500	5897650.00	0.0108	2.5255	33.0120
+'Cuthbert, Dulac, and Ruston soils, 12 to 35 percent slopes (sweatman, providence and smithdale)'		'FSL'	4	0.3000	0.7500	5897650.00	0.0108	2.5255	18.3796
 	  150.000	  12.50	  12.50	   1.25	  11.30	   0.00
 	  740.000	  45.00	  45.00	   0.25	  11.30	   2.50
 	  940.000	  45.00	  45.00	   0.15	  11.30	  10.00
 	 1270.000	   9.80	   9.80	   0.10	  11.30	  15.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

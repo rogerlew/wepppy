@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.524574
+#   Build Date: 2021-04-01 15:01:45.045112
 #   Source Data: Surgo
 # 
 # Mukey: 2502545
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Doniphan very gravelly silt loam, 3 to 8 percent slopes'		'SPM'	2	0.3000	0.7500	4649000.00	0.0050	2.5450	327.6000
+'Doniphan very gravelly silt loam, 3 to 8 percent slopes'		'SPM'	2	0.3000	0.7500	4649000.00	0.0050	2.5450	6.9563
 	  130.000	  16.40	  16.40	   4.60	   6.20	  64.85
 	  330.000	  16.90	  16.90	   1.30	  11.30	  50.41
-1 10000.0 0.75600
+0 0 0.000000 0.000000

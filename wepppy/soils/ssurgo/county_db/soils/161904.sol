@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.513861
+#   Build Date: 2021-04-01 15:01:42.022006
 #   Source Data: Surgo
 # 
 # Mukey: 161904
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Fairpoint-Bethesda complex, 25 to 70 percent slopes'		'PCNV-SICL'	2	0.3000	0.7500	4344970.00	0.0072	3.5000	101.6280
+'Fairpoint-Bethesda complex, 25 to 70 percent slopes'		'PCNV-SICL'	2	0.3000	0.7500	4344970.00	0.0072	3.5000	1.9740
 	   80.000	  31.00	  31.00	   4.50	  17.00	   6.90
 	 1520.000	  26.00	  26.00	   2.25	  14.00	  14.50
-1 10000.0 101.62800
+0 0 0.000000 0.000000

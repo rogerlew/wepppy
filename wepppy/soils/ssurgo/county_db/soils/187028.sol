@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.271928
+#   Build Date: 2021-04-01 15:01:44.792592
 #   Source Data: Surgo
 # 
 # Mukey: 187028
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Parkhill loam, 0 to 1 percent slopes'		'L'	1	0.2300	0.7500	4437690.00	0.0047	3.6488	14.4000
+'Parkhill loam, 0 to 1 percent slopes'		'L'	1	0.2300	0.7500	4437690.00	0.0047	3.6488	10.1348
 	  230.000	  23.00	  23.00	   4.40	  18.90	   3.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.357768
+#   Build Date: 2021-04-01 15:01:41.865410
 #   Source Data: Surgo
 # 
 # Mukey: 514149
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Dekalb-Elliber-Blackthorn association, 35 to 55 percent slopes, stony'		'CNV-SL'	3	0.1807	0.7500	4668210.00	0.0052	3.0592	331.2000
+'Dekalb-Elliber-Blackthorn association, 35 to 55 percent slopes, stony'		'CNV-SL'	3	0.1807	0.7500	4668210.00	0.0052	3.0592	17.0325
 	   80.000	  15.00	  15.00	   3.00	  10.50	  50.62
 	  680.000	  12.50	  12.50	   0.50	   4.20	  55.73
 	  790.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000

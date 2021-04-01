@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.657715
+#   Build Date: 2021-04-01 15:01:42.166160
 #   Source Data: Surgo
 # 
 # Mukey: 2479437
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Spears Mountain silt loam,  7 to 15 percent slopes'		'SIL'	2	0.5429	0.7500	5034095.00	0.0102	3.5000	32.4000
+'Spears Mountain silt loam,  7 to 15 percent slopes'		'SIL'	2	0.5429	0.7500	5034095.00	0.0102	3.5000	5.1870
 	  180.000	  18.50	  18.50	   0.25	   9.10	   7.93
 	  710.000	  45.00	  45.00	   0.25	   9.80	   7.93
-1 10000.0 5.40000
+0 0 0.000000 0.000000

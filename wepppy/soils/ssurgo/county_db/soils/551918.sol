@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.418417
+#   Build Date: 2021-04-01 15:01:44.939117
 #   Source Data: Surgo
 # 
 # Mukey: 551918
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Fairmount-Woolper complex, 30 to 65 percent slopes'		'FL-SICL'	3	0.2300	0.7500	4207145.00	0.0071	3.5000	7.9200
+'Fairmount-Woolper complex, 30 to 65 percent slopes'		'FL-SICL'	3	0.2300	0.7500	4207145.00	0.0071	3.5000	2.7045
 	  100.000	  33.50	  33.50	   5.00	  18.30	  46.04
 	  430.000	  47.50	  47.50	   0.50	  24.90	  39.65
 	  680.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

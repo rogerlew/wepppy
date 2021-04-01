@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.299129
+#   Build Date: 2021-04-01 15:01:43.815648
 #   Source Data: Surgo
 # 
 # Mukey: 210745
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Avonburg silt loam, 0 to 2 percent slopes'		'SIL'	3	0.3700	0.7500	5337310.00	0.0169	3.5000	33.0120
+'Avonburg silt loam, 0 to 2 percent slopes'		'SIL'	3	0.3700	0.7500	5337310.00	0.0169	3.5000	3.2353
 	  280.000	  13.00	  13.00	   1.50	  12.00	   0.00
 	  530.000	  16.00	  16.00	   0.50	   7.00	   0.00
 	 1010.000	  27.00	  27.00	   0.25	  11.30	   0.00
-1 10000.0 4.68000
+0 0 0.000000 0.000000

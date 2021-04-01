@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.348497
+#   Build Date: 2021-04-01 15:01:41.856015
 #   Source Data: Surgo
 # 
 # Mukey: 73631
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Elochoman silt loam, 8 to 30 percent slopes'		'MEDL-SIL'	3	0.1600	0.7500	5227050.00	0.0136	3.5000	32.4000
+'Elochoman silt loam, 8 to 30 percent slopes'		'MEDL-SIL'	3	0.1600	0.7500	5227050.00	0.0136	3.5000	1.2968
 	  300.000	  15.00	  15.00	  10.50	  55.00	   0.00
 	  530.000	  20.00	  20.00	   3.50	  55.00	   0.00
 	 1520.000	  20.00	  20.00	   0.50	  44.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

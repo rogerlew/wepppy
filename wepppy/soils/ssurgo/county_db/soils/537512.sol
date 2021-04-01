@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.479079
+#   Build Date: 2021-04-01 15:01:43.997480
 #   Source Data: Surgo
 # 
 # Mukey: 537512
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cincinnati silt loam, 8 to 15 percent slopes, eroded'		'SIL'	4	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
+'Cincinnati silt loam, 8 to 15 percent slopes, eroded'		'SIL'	4	0.3000	0.7500	4951400.00	0.0094	3.5000	1.6017
 	  200.000	  20.00	  20.00	   2.00	  15.00	   0.00
 	  790.000	  26.50	  26.50	   0.30	  15.00	   5.00
 	 1420.000	  29.50	  29.50	   0.30	  15.00	  10.00
 	 2030.000	  32.00	  32.00	   0.20	  19.00	  10.00
-1 10000.0 8.38800
+0 0 0.000000 0.000000

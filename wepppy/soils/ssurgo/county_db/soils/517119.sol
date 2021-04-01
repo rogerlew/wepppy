@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.343443
+#   Build Date: 2021-04-01 15:01:41.850868
 #   Source Data: Surgo
 # 
 # Mukey: 517119
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Berks and Weikert soils, 25 to 65 percent slopes'		'CNV-L'	3	0.2500	0.7500	4610580.00	0.0059	3.0116	82.8000
+'Berks and Weikert soils, 25 to 65 percent slopes'		'CNV-L'	3	0.2500	0.7500	4610580.00	0.0059	3.0116	5.9553
 	  180.000	  14.00	  14.00	   2.00	   9.00	  45.00
 	  580.000	  14.00	  14.00	   0.25	   6.00	  60.00
 	  840.000	  14.00	  14.00	   0.25	   6.00	  80.00
-1 10000.0 0.03600
+0 0 0.000000 0.000000

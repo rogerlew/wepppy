@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.259467
+#   Build Date: 2021-04-01 15:01:44.779784
 #   Source Data: Surgo
 # 
 # Mukey: 279801
@@ -58,10 +58,10 @@
 # 
 Any comments:
 1 1
-'Monadnock-Lyman-Rock outcrop complex, 8 to 15 percent slopes'		'HPM'	5	0.6700	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Monadnock-Lyman-Rock outcrop complex, 8 to 15 percent slopes'		'HPM'	5	0.6700	0.7500	4649000.00	0.0050	2.5450	16.0756
 	  200.000	   3.00	   3.00	   2.30	  11.30	  13.55
 	  250.000	   3.00	   3.00	   4.00	  11.30	  19.96
 	  300.000	   3.00	   3.00	   4.00	  11.30	  17.28
 	  560.000	   3.00	   3.00	   1.60	  11.30	  32.55
 	  630.000	   3.00	   3.00	   1.00	  11.30	  36.76
-1 10000.0 36.00000
+0 0 0.000000 0.000000

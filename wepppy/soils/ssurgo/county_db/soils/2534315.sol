@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.366004
+#   Build Date: 2021-04-01 15:01:42.874974
 #   Source Data: Surgo
 # 
 # Mukey: 2534315
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Viraton silt loam, 2 to 5 percent slopes'		'SIL'	2	0.3000	0.7500	5315258.00	0.0161	3.5000	32.4000
+'Viraton silt loam, 2 to 5 percent slopes'		'SIL'	2	0.3000	0.7500	5315258.00	0.0161	3.5000	1.5649
 	  150.000	  13.40	  13.40	   4.80	  16.80	  10.00
 	  530.000	  24.00	  24.00	   0.70	  12.00	  10.00
-1 10000.0 0.79200
+0 0 0.000000 0.000000

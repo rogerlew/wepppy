@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.561701
+#   Build Date: 2021-04-01 15:01:45.082934
 #   Source Data: Surgo
 # 
 # Mukey: 2533112
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Goss very gravelly silt loam, 14 to 45 percent slopes'		'GRV-SIL'	2	0.3000	0.7500	5193972.00	0.0128	3.5000	32.4000
+'Goss very gravelly silt loam, 14 to 45 percent slopes'		'GRV-SIL'	2	0.3000	0.7500	5193972.00	0.0128	3.5000	3.0187
 	  150.000	  15.60	  15.60	   2.00	   8.50	  46.00
 	  480.000	  16.10	  16.10	   0.30	   8.50	  62.17
-1 10000.0 3.60000
+0 0 0.000000 0.000000

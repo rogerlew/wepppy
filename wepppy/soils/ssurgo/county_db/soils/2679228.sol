@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.751944
+#   Build Date: 2021-04-01 15:01:41.257706
 #   Source Data: Surgo
 # 
 # Mukey: 2679228
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Evard-Cowee complex, escarpment, 30 to 50 percent slopes, stony'		'SL'	4	0.2300	0.7500	4841100.00	0.0054	2.7470	100.8000
+'Evard-Cowee complex, escarpment, 30 to 50 percent slopes, stony'		'SL'	4	0.2300	0.7500	4841100.00	0.0054	2.7470	19.1505
 	  150.000	  11.00	  11.00	   3.00	  11.30	  21.00
 	  710.000	  27.00	  27.00	   0.25	  11.30	  13.87
 	  940.000	  21.00	  21.00	   0.25	  11.30	  21.79
 	 2030.000	  11.00	  11.00	   0.25	  11.30	  21.79
-1 10000.0 101.62800
+0 0 0.000000 0.000000

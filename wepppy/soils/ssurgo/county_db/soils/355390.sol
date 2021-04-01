@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.684884
+#   Build Date: 2021-04-01 15:01:43.195495
 #   Source Data: Surgo
 # 
 # Mukey: 355390
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Houdek-Stickney-Tetonka complex, 0 to 2 percent slopes'		'L'	4	0.3000	0.7500	5033200.00	0.0057	3.4040	33.0120
+'Houdek-Stickney-Tetonka complex, 0 to 2 percent slopes'		'L'	4	0.3000	0.7500	5033200.00	0.0057	3.4040	6.9987
 	  150.000	  22.00	  22.00	   3.00	  18.90	   8.00
 	  480.000	  32.00	  32.00	   2.00	  26.00	   7.00
 	 1070.000	  28.00	  28.00	   0.75	  19.30	   7.00
 	 2000.000	  28.00	  28.00	   0.25	  17.10	   9.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

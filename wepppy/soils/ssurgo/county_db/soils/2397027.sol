@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.629766
+#   Build Date: 2021-04-01 15:01:42.137830
 #   Source Data: Surgo
 # 
 # Mukey: 2397027
@@ -58,11 +58,11 @@
 # 
 Any comments:
 1 1
-'Bouldercreek family, weakly weathered metasedimentary belt geology, mountain slopes, north aspects'		'SPM'	6	0.2300	0.7500	5502700.00	0.0250	3.5000	1342.8000
+'Bouldercreek family, weakly weathered metasedimentary belt geology, mountain slopes, north aspects'		'SPM'	6	0.2300	0.7500	5502700.00	0.0250	3.5000	4.8167
 	  190.000	   6.00	   6.00	   5.00	  16.60	  45.00
 	  390.000	   6.00	   6.00	   2.00	   9.50	  52.00
 	  550.000	   6.00	   6.00	   0.75	   6.50	  59.00
 	  770.000	  14.00	  14.00	   0.25	   8.30	  63.00
 	 1310.000	  12.00	  12.00	   0.25	   7.00	  78.88
 	 1610.000	  10.00	  10.00	   0.10	   5.20	  91.60
-1 10000.0 100.80000
+0 0 0.000000 0.000000

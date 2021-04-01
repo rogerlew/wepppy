@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.803177
+#   Build Date: 2021-04-01 15:01:44.322227
 #   Source Data: Surgo
 # 
 # Mukey: 1542698
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Lupton and Cathro soils, 0 to 1 percent slopes'		'MUCK'	2	0.0400	0.7500	5502700.00	0.0250	3.5000	79.2000
+'Lupton and Cathro soils, 0 to 1 percent slopes'		'MUCK'	2	0.0400	0.7500	5502700.00	0.0250	3.5000	9.5816
 	 1240.000	  20.00	  20.00	   0.25	   7.00	  17.83
 	 2000.000	  18.00	  18.00	   0.25	   6.70	  17.83
-1 10000.0 28.80000
+0 0 0.000000 0.000000

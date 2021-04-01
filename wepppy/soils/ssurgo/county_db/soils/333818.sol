@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.639165
+#   Build Date: 2021-04-01 15:01:44.157298
 #   Source Data: Surgo
 # 
 # Mukey: 333818
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Okeelala, Luverne, and Smithdale soils, 5 to 45 percent slopes'		'FSL'	3	0.3000	0.7500	6108960.00	0.0111	2.3642	101.6280
+'Okeelala, Luverne, and Smithdale soils, 5 to 45 percent slopes'		'FSL'	3	0.3000	0.7500	6108960.00	0.0111	2.3642	17.6681
 	  250.000	  11.00	  11.00	   1.25	  11.30	  13.67
 	  910.000	  26.50	  26.50	   0.20	  11.30	  10.00
 	 1570.000	  10.00	  10.00	   0.10	  11.30	  10.00
-1 10000.0 101.62800
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.553819
+#   Build Date: 2021-04-01 15:01:45.074926
 #   Source Data: Surgo
 # 
 # Mukey: 325817
@@ -57,7 +57,7 @@
 # 
 Any comments:
 1 1
-'Osier and Bibb soils, 0 to 2 percent slopes, frequently flooded'		'S'	7	0.1700	0.7500	7146300.00	0.0089	1.8560	329.4000
+'Osier and Bibb soils, 0 to 2 percent slopes, frequently flooded'		'S'	7	0.1700	0.7500	7146300.00	0.0089	1.8560	26.0760
 	   80.000	   8.00	   8.00	   3.50	  11.30	   0.00
 	  200.000	   8.00	   8.00	   1.25	  11.30	   0.00
 	  410.000	   8.00	   8.00	   0.25	  11.30	   0.00
@@ -65,4 +65,4 @@ Any comments:
 	 1220.000	   2.60	   2.60	   0.25	  11.30	   0.00
 	 1520.000	   2.60	   2.60	   0.25	  11.30	   0.00
 	 1910.000	   2.60	   2.60	   0.25	  11.30	   0.00
-1 10000.0 507.60000
+0 0 0.000000 0.000000

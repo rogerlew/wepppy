@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.594132
+#   Build Date: 2021-04-01 15:01:41.099408
 #   Source Data: Surgo
 # 
 # Mukey: 80838
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Power-Purdam silt loams, 0 to 1 percent slopes'		'SIL'	3	0.3000	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Power-Purdam silt loams, 0 to 1 percent slopes'		'SIL'	3	0.3000	0.7500	4951400.00	0.0094	3.5000	1.9255
 	  230.000	  20.00	  20.00	   1.50	  15.00	   0.00
 	  430.000	  26.50	  26.50	   0.75	  22.50	   0.00
 	 1520.000	  17.50	  17.50	   0.25	  12.50	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

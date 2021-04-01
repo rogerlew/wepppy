@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.352937
+#   Build Date: 2021-04-01 15:01:41.860529
 #   Source Data: Surgo
 # 
 # Mukey: 2513089
@@ -58,9 +58,9 @@
 # 
 Any comments:
 1 1
-'Berks-Highsplint-Sharondale complex, 35 to 80 percent slopes, very stony'		'SPM'	4	0.0000	0.7500	0.00	0.0000	0.0000	331.2000
+'Berks-Highsplint-Sharondale complex, 35 to 80 percent slopes, very stony'		'SPM'	4	0.0000	0.7500	0.00	0.0000	0.0000	3.4930
 	  190.000	  20.00	  20.00	   8.00	  17.70	  54.10
 	  280.000	  19.00	  19.00	   3.25	  10.00	  48.70
 	  760.000	  19.00	  19.00	   1.40	   9.10	  55.80
 	  980.000	  22.00	  22.00	   0.70	   9.30	  74.70
-1 10000.0 5.07600
+0 0 0.000000 0.000000

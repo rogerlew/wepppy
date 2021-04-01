@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.014356
+#   Build Date: 2021-04-01 15:01:41.520118
 #   Source Data: Surgo
 # 
 # Mukey: 458938
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bressa-Dibble complex, 30 to 50 percent slopes'		'SIL'	3	0.3600	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Bressa-Dibble complex, 30 to 50 percent slopes'		'SIL'	3	0.3600	0.7500	4951400.00	0.0094	3.5000	4.7944
 	  250.000	  20.00	  20.00	   1.75	  10.80	   7.50
 	  840.000	  31.00	  31.00	   0.75	  16.50	  17.50
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

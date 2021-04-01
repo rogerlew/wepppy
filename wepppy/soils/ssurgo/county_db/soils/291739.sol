@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.348141
+#   Build Date: 2021-04-01 15:01:43.865626
 #   Source Data: Surgo
 # 
 # Mukey: 291739
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Vly-Halcott complex, very steep, very rocky'		'CN-SIL'	2	0.3000	0.7500	4610580.00	0.0049	3.0116	32.4000
+'Vly-Halcott complex, very steep, very rocky'		'CN-SIL'	2	0.3000	0.7500	4610580.00	0.0049	3.0116	5.6093
 	   50.000	  14.00	  14.00	   4.50	  11.30	  35.14
 	  710.000	  17.00	  17.00	   1.00	  11.30	  67.63
-1 10000.0 0.03600
+0 0 0.000000 0.000000

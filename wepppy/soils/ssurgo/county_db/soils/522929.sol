@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.936621
+#   Build Date: 2021-04-01 15:01:42.445465
 #   Source Data: Surgo
 # 
 # Mukey: 522929
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Limestone rockland rough'		'ST-SIC'	2	0.3000	0.7500	3573150.00	0.0069	3.5000	9.7200
+'Limestone rockland rough'		'ST-SIC'	2	0.3000	0.7500	3573150.00	0.0069	3.5000	1.4941
 	  150.000	  45.00	  45.00	   1.75	  32.10	  26.20
 	  460.000	  47.50	  47.50	   1.00	  31.40	  36.45
-1 10000.0 0.36000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.657406
+#   Build Date: 2021-04-01 15:01:44.175889
 #   Source Data: Surgo
 # 
 # Mukey: 396345
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Ahmeek-Normanna-Canosia complex, 0 to 18 percent slopes'		'GR-SIL'	4	0.1600	0.7500	4591370.00	0.0049	2.8874	33.0120
+'Ahmeek-Normanna-Canosia complex, 0 to 18 percent slopes'		'GR-SIL'	4	0.1600	0.7500	4591370.00	0.0049	2.8874	5.7762
 	   50.000	  12.00	  12.00	   5.00	  16.70	  16.48
 	  100.000	   8.00	   8.00	   1.00	   7.30	  10.76
 	  360.000	   8.00	   8.00	   0.10	   4.30	  25.90
 	  840.000	   6.00	   6.00	   0.10	   3.70	  29.70
-1 10000.0 0.18000
+0 0 0.000000 0.000000

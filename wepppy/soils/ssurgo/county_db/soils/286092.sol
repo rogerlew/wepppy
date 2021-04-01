@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.104266
+#   Build Date: 2021-04-01 15:01:42.613814
 #   Source Data: Surgo
 # 
 # Mukey: 286092
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Canton and Charlton fine sandy loams, 8 to 15 percent slopes, very stony'		'SPM'	4	0.1700	0.7500	4649000.00	0.0050	2.5450	360.0000
+'Canton and Charlton fine sandy loams, 8 to 15 percent slopes, very stony'		'SPM'	4	0.1700	0.7500	4649000.00	0.0050	2.5450	15.7410
 	  130.000	   7.30	   7.30	   7.75	  11.30	  10.00
 	  410.000	   6.30	   6.30	   0.57	  11.30	   8.00
 	  560.000	   2.30	   2.30	   0.43	  11.30	  24.00
 	 1700.000	   2.00	   2.00	   0.10	  11.30	  35.00
-1 10000.0 252.00000
+0 0 0.000000 0.000000

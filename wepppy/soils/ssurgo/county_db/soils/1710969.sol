@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.416267
+#   Build Date: 2021-04-01 15:01:42.925318
 #   Source Data: Surgo
 # 
 # Mukey: 1710969
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Contrary-Monona-Ida complex, 6 to 17 percent slopes'		'SICL'	3	0.2300	0.7500	4455230.00	0.0073	3.5000	10.1520
+'Contrary-Monona-Ida complex, 6 to 17 percent slopes'		'SICL'	3	0.2300	0.7500	4455230.00	0.0073	3.5000	0.9082
 	  170.000	  29.00	  29.00	   1.50	  23.00	   0.00
 	 1400.000	  29.00	  29.00	   1.00	  22.00	   0.00
 	 2030.000	  28.00	  28.00	   0.30	  20.00	   0.00
-1 10000.0 15.22800
+0 0 0.000000 0.000000

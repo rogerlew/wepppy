@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.087614
+#   Build Date: 2021-04-01 15:01:42.596670
 #   Source Data: Surgo
 # 
 # Mukey: 328759
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Dothan and Malbis sandy loams, 1 to 5 percent slopes'		'SL'	3	0.2900	0.7500	4764260.00	0.0149	2.9652	100.8000
+'Dothan and Malbis sandy loams, 1 to 5 percent slopes'		'SL'	3	0.2900	0.7500	4764260.00	0.0149	2.9652	18.1558
 	  300.000	  14.00	  14.00	   0.75	  11.30	   8.00
 	 1120.000	  26.50	  26.50	   0.25	  11.30	   7.00
 	 1900.000	  29.00	  29.00	   0.25	  11.30	   7.00
-1 10000.0 9.72000
+0 0 0.000000 0.000000

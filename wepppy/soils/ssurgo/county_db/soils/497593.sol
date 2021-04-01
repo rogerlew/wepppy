@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.003002
+#   Build Date: 2021-04-01 15:01:43.520223
 #   Source Data: Surgo
 # 
 # Mukey: 497593
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Nunn clay loam, 1 to 3 percent slopes'		'CL'	1	0.2300	0.7500	6377900.00	0.0101	3.5830	10.1520
+'Nunn clay loam, 1 to 3 percent slopes'		'CL'	1	0.2300	0.7500	6377900.00	0.0101	3.5830	8.2701
 	  230.000	  31.00	  31.00	   1.50	  24.50	   0.00
-1 10000.0 3.29400
+0 0 0.000000 0.000000

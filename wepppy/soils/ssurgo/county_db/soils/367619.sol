@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.880241
+#   Build Date: 2021-04-01 15:01:41.385893
 #   Source Data: Surgo
 # 
 # Mukey: 367619
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Pickton loamy fine sand, 1 to 8 percent slopes'		'LFS'	3	0.3000	0.7500	7107880.00	0.0127	1.8676	331.2000
+'Pickton loamy fine sand, 1 to 8 percent slopes'		'LFS'	3	0.3000	0.7500	7107880.00	0.0127	1.8676	25.9896
 	  200.000	   8.00	   8.00	   1.25	  10.00	   2.50
 	 1270.000	   7.50	   7.50	   0.55	  10.00	   2.50
 	 2030.000	  24.00	  24.00	   0.55	  22.50	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

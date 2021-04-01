@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.364080
+#   Build Date: 2021-04-01 15:01:41.871852
 #   Source Data: Surgo
 # 
 # Mukey: 2561545
@@ -58,7 +58,7 @@
 # 
 Any comments:
 1 1
-'Majik, cool-Ponycreek complex, lake plain, 0 to 3 percent slopes'		'MPM'	7	0.1700	0.7500	4649000.00	0.0050	2.5450	252.0000
+'Majik, cool-Ponycreek complex, lake plain, 0 to 3 percent slopes'		'MPM'	7	0.1700	0.7500	4649000.00	0.0050	2.5450	30.4861
 	  150.000	   4.00	   4.00	   3.50	  11.30	   0.00
 	  230.000	   4.00	   4.00	   0.75	  11.30	   0.00
 	  410.000	   3.00	   3.00	   0.50	  11.30	   0.00
@@ -66,4 +66,4 @@ Any comments:
 	  630.000	   1.00	   1.00	   0.25	  11.30	   0.00
 	  790.000	   1.00	   1.00	   0.25	  11.30	   0.00
 	 2000.000	   1.00	   1.00	   0.25	  11.30	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

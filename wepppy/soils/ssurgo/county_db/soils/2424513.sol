@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.405492
+#   Build Date: 2021-04-01 15:01:42.914973
 #   Source Data: Surgo
 # 
 # Mukey: 2424513
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Tomlin sandy clay loam, 6 to 10 percent slopes, moderately eroded'		'L'	5	0.2300	0.7500	4668210.00	0.0089	4.0342	32.4000
+'Tomlin sandy clay loam, 6 to 10 percent slopes, moderately eroded'		'L'	5	0.2300	0.7500	4668210.00	0.0089	4.0342	14.9793
 	  250.000	  30.00	  30.00	   1.25	   4.80	  12.00
 	  710.000	  55.00	  55.00	   0.25	   6.10	   6.00
 	 1220.000	  35.00	  35.00	   0.25	   4.10	   8.00
 	 1700.000	  10.00	  10.00	   0.25	   4.60	   2.00
 	 2030.000	  25.00	  25.00	   0.25	   3.10	   8.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

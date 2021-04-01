@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.935470
+#   Build Date: 2021-04-01 15:01:44.454623
 #   Source Data: Surgo
 # 
 # Mukey: 422685
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Markey and Cathro mucks, 0 to 2 percent slopes'		'MUCK'	1	0.0400	0.7500	0.00	0.0000	0.0000	78.7680
+'Markey and Cathro mucks, 0 to 2 percent slopes'		'MUCK'	1	0.0400	0.7500	0.00	0.0000	0.0000	34.6080
 	 2000.000	   5.00	   5.00	   0.25	   3.50	  22.00
-1 10000.0 330.26400
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.362492
+#   Build Date: 2021-04-01 15:01:43.880389
 #   Source Data: Surgo
 # 
 # Mukey: 2229711
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Exira silty clay loam, 9 to 14 percent slopes, moderately eroded'		'SICL'	4	0.2300	0.7500	4400100.00	0.0072	3.5000	10.8000
+'Exira silty clay loam, 9 to 14 percent slopes, moderately eroded'		'SICL'	4	0.2300	0.7500	4400100.00	0.0072	3.5000	0.7930
 	  150.000	  30.00	  30.00	   2.80	  24.90	   0.00
 	  830.000	  27.00	  27.00	   0.90	  21.70	   0.00
 	  940.000	  25.00	  25.00	   0.30	  19.40	   0.00
 	 2030.000	  25.00	  25.00	   0.30	  19.40	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

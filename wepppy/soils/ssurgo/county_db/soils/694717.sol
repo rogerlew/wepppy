@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.932066
+#   Build Date: 2021-04-01 15:01:42.440844
 #   Source Data: Surgo
 # 
 # Mukey: 694717
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Remlik and Nevarc soils, 15 to 60 percent slopes'		'FS'	3	0.4900	0.7500	5686340.00	0.0163	2.1018	331.2000
+'Remlik and Nevarc soils, 15 to 60 percent slopes'		'FS'	3	0.4900	0.7500	5686340.00	0.0163	2.1018	27.3930
 	  560.000	   5.00	   5.00	   0.75	   2.90	   0.00
 	  970.000	  22.00	  22.00	   0.25	   6.10	   0.00
 	 1780.000	  15.00	  15.00	   0.10	   4.00	   0.00
-1 10000.0 82.80000
+0 0 0.000000 0.000000

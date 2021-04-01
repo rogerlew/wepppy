@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.797012
+#   Build Date: 2021-04-01 15:01:42.305713
 #   Source Data: Surgo
 # 
 # Mukey: 549292
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Strip mine (bethesda,fairpoint)'		'GR-SICL'	2	0.3000	0.7500	4234710.00	0.0071	3.5000	33.0120
+'Strip mine (bethesda,fairpoint)'		'GR-SICL'	2	0.3000	0.7500	4234710.00	0.0071	3.5000	1.9494
 	  130.000	  33.00	  33.00	   0.25	  11.30	  36.35
 	 1520.000	  30.00	  30.00	   0.10	  11.30	  46.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

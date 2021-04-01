@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.957053
+#   Build Date: 2021-04-01 15:01:42.466149
 #   Source Data: Surgo
 # 
 # Mukey: 2521420
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Snead-Rock outcrop complex, 14 to 30 percent slopes'		'SICL'	1	0.1600	0.7500	4207145.00	0.0071	3.5000	10.8000
+'Snead-Rock outcrop complex, 14 to 30 percent slopes'		'SICL'	1	0.1600	0.7500	4207145.00	0.0071	3.5000	2.3609
 	  210.000	  33.50	  33.50	   3.00	  27.60	   5.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

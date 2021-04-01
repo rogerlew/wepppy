@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.487334
+#   Build Date: 2021-04-01 15:01:41.995083
 #   Source Data: Surgo
 # 
 # Mukey: 366249
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Reagan silty clay loam, 0 to 1 percent slopes'		'SICL'	3	0.3000	0.7500	4344970.00	0.0072	3.5000	32.4000
+'Reagan silty clay loam, 0 to 1 percent slopes'		'SICL'	3	0.3000	0.7500	4344970.00	0.0072	3.5000	1.1153
 	  250.000	  31.00	  31.00	   1.60	  22.90	   0.00
 	  740.000	  32.00	  32.00	   1.00	  19.60	   0.00
 	 2030.000	  37.00	  37.00	   0.30	  13.70	   0.00
-1 10000.0 14.40000
+0 0 0.000000 0.000000

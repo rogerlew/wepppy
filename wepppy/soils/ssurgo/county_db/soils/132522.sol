@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.866669
+#   Build Date: 2021-04-01 15:01:41.372082
 #   Source Data: Surgo
 # 
 # Mukey: 132522
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Argent-Okeetee association'		'FSL'	1	0.0600	0.7500	5897650.00	0.0079	2.5255	100.8000
+'Argent-Okeetee association'		'FSL'	1	0.0600	0.7500	5897650.00	0.0079	2.5255	18.3796
 	  210.000	  12.50	  12.50	   2.00	  11.30	   2.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.765153
+#   Build Date: 2021-04-01 15:01:42.273177
 #   Source Data: Surgo
 # 
 # Mukey: 128286
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Beltsville silt loam, 2 to 5 percent slopes, moderately eroded'		'SIL'	3	0.1600	0.7500	4399270.00	0.0050	2.6789	18.0000
+'Beltsville silt loam, 2 to 5 percent slopes, moderately eroded'		'SIL'	3	0.1600	0.7500	4399270.00	0.0050	2.6789	8.6113
 	   80.000	   7.90	   7.90	   2.50	   9.50	   0.00
 	  200.000	  11.50	  11.50	   1.03	   4.60	   0.00
 	  510.000	  21.70	  21.70	   0.41	   7.60	   0.00
-1 10000.0 0.46800
+0 0 0.000000 0.000000

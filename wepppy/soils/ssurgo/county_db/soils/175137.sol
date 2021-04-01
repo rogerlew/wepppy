@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.540439
+#   Build Date: 2021-04-01 15:01:45.061151
 #   Source Data: Surgo
 # 
 # Mukey: 175137
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Belknap silt loam, 0 to 2 percent slopes, occasionally flooded'		'SIL'	3	0.2500	0.7500	5171920.00	0.0124	3.5000	27.9360
+'Belknap silt loam, 0 to 2 percent slopes, occasionally flooded'		'SIL'	3	0.2500	0.7500	5171920.00	0.0124	3.5000	2.1531
 	  180.000	  16.00	  16.00	   2.50	   8.70	   0.00
 	 1500.000	  16.00	  16.00	   1.00	  11.30	   0.00
 	 2000.000	  11.00	  11.00	   0.50	  11.30	   0.00
-1 10000.0 27.93600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.377154
+#   Build Date: 2021-04-01 15:01:44.897514
 #   Source Data: Surgo
 # 
 # Mukey: 328991
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Lakeland loamy fine sand, 5 to 12 percent slopes'		'LFS'	2	0.3000	0.7500	7319190.00	0.0189	1.7388	331.2000
+'Lakeland loamy fine sand, 5 to 12 percent slopes'		'LFS'	2	0.3000	0.7500	7319190.00	0.0189	1.7388	27.9106
 	 1350.000	   7.00	   7.00	   0.75	  11.30	   5.00
 	 2030.000	  25.00	  25.00	   0.00	  11.30	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

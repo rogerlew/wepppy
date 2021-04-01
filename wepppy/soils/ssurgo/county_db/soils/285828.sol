@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.053328
+#   Build Date: 2021-04-01 15:01:41.559792
 #   Source Data: Surgo
 # 
 # Mukey: 285828
@@ -57,9 +57,9 @@
 # 
 Any comments:
 1 1
-'Skerry-Colonel association, 0 to 15 percent slopes, very stony'		'HPM'	4	0.0400	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Skerry-Colonel association, 0 to 15 percent slopes, very stony'		'HPM'	4	0.0400	0.7500	4649000.00	0.0050	2.5450	14.4375
 	  100.000	   3.00	   3.00	   4.00	  11.30	  15.45
 	  150.000	   6.00	   6.00	   7.00	  11.30	  21.80
 	  510.000	   6.00	   6.00	   4.00	  11.30	  28.24
 	  640.000	   3.00	   3.00	   4.00	  11.30	  36.52
-1 10000.0 3.60000
+0 0 0.000000 0.000000

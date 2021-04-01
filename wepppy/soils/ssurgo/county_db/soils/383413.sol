@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.766500
+#   Build Date: 2021-04-01 15:01:41.272529
 #   Source Data: Surgo
 # 
 # Mukey: 383413
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Renthin clay loam, 1 to 3 percent slopes'		'CL'	2	0.1600	0.7500	4764260.00	0.0061	4.0702	32.4000
+'Renthin clay loam, 1 to 3 percent slopes'		'CL'	2	0.1600	0.7500	4764260.00	0.0061	4.0702	6.0317
 	  250.000	  31.00	  31.00	   2.00	  25.30	   0.00
 	  410.000	  36.00	  36.00	   2.00	  29.00	   0.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

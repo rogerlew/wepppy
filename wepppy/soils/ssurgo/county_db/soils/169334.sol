@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.325757
+#   Build Date: 2021-04-01 15:01:43.842727
 #   Source Data: Surgo
 # 
 # Mukey: 169334
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Ragsdale silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.1600	0.7500	4455230.00	0.0073	3.5000	33.0120
+'Ragsdale silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.1600	0.7500	4455230.00	0.0073	3.5000	1.3088
 	  330.000	  29.00	  29.00	   5.75	  24.80	   0.00
 	 1270.000	  27.00	  27.00	   1.25	  21.90	   0.00
 	 2000.000	  12.00	  12.00	   0.25	   9.90	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

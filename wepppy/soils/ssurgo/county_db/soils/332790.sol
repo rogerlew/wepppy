@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.624396
+#   Build Date: 2021-04-01 15:01:44.142321
 #   Source Data: Surgo
 # 
 # Mukey: 332790
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Sweatman-Smithdale association, 12 to 35 percent slopes'		'FSL'	3	0.3000	0.7500	6185800.00	0.0112	2.2760	33.0120
+'Sweatman-Smithdale association, 12 to 35 percent slopes'		'FSL'	3	0.3000	0.7500	6185800.00	0.0112	2.2760	18.2451
 	  150.000	  10.00	  10.00	   1.25	  11.30	   0.00
 	  660.000	  48.00	  48.00	   0.25	  11.30	   0.00
 	 2030.000	  25.00	  25.00	   0.10	  11.30	   0.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

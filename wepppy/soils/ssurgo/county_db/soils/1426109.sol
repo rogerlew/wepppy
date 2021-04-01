@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.091332
+#   Build Date: 2021-04-01 15:01:42.600488
 #   Source Data: Surgo
 # 
 # Mukey: 1426109
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Lampshire-Graham-Rock outcrop association, steep'		'CBV-L'	1	0.2300	0.7500	5071620.00	0.0081	3.2624	32.4000
+'Lampshire-Graham-Rock outcrop association, steep'		'CBV-L'	1	0.2300	0.7500	5071620.00	0.0081	3.2624	8.5329
 	  210.000	  20.00	  20.00	   1.50	  14.00	  61.48
-1 10000.0 0.12600
+0 0 0.000000 0.000000

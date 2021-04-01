@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.491491
+#   Build Date: 2021-04-01 15:01:44.010064
 #   Source Data: Surgo
 # 
 # Mukey: 2799849
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Percy loam, 0 to 1 percent slopes, very cobbly'		'L'	3	0.0900	0.7500	4898730.00	0.0054	2.9896	33.0120
+'Percy loam, 0 to 1 percent slopes, very cobbly'		'L'	3	0.0900	0.7500	4898730.00	0.0054	2.9896	9.3125
 	  200.000	  15.00	  15.00	   6.50	  12.10	  11.89
 	  760.000	  15.00	  15.00	   0.75	   7.20	  14.64
 	 2000.000	  15.00	  15.00	   0.25	   9.20	  12.78
-1 10000.0 10.15200
+0 0 0.000000 0.000000

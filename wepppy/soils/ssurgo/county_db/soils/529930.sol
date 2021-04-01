@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.729425
+#   Build Date: 2021-04-01 15:01:43.240720
 #   Source Data: Surgo
 # 
 # Mukey: 529930
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Waynesboro loam, 5 to 12 percent slopes, eroded'		'L'	3	0.3600	0.7500	4917940.00	0.0069	3.6338	33.0120
+'Waynesboro loam, 5 to 12 percent slopes, eroded'		'L'	3	0.3600	0.7500	4917940.00	0.0069	3.6338	7.7367
 	  200.000	  25.00	  25.00	   1.75	  11.30	  12.70
 	  560.000	  29.00	  29.00	   0.25	  11.30	  10.27
 	 1520.000	  42.50	  42.50	   0.25	  11.30	  12.70
-1 10000.0 33.01200
+0 0 0.000000 0.000000

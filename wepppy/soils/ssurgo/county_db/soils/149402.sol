@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.738622
+#   Build Date: 2021-04-01 15:01:41.244116
 #   Source Data: Surgo
 # 
 # Mukey: 149402
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Garlet-Worock-Waldbillig families, complex, moderately steep young moraines, cool'		'GR-SL'	4	0.1600	0.7500	4725840.00	0.0055	3.0418	32.4000
+'Garlet-Worock-Waldbillig families, complex, moderately steep young moraines, cool'		'GR-SL'	4	0.1600	0.7500	4725840.00	0.0055	3.0418	17.5424
 	  100.000	  15.00	  15.00	   2.50	  13.30	  35.83
 	  480.000	  10.00	  10.00	   1.50	   9.00	  64.00
 	 1170.000	  10.00	  10.00	   0.75	   8.80	  63.25
 	 1780.000	  12.00	  12.00	   0.25	   9.90	  64.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

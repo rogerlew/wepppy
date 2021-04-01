@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.566947
+#   Build Date: 2021-04-01 15:01:41.071668
 #   Source Data: Surgo
 # 
 # Mukey: 565137
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Bibb silt loam (guyton)'		'SIL'	1	0.2300	0.7500	5171920.00	0.0124	3.5000	32.4000
+'Bibb silt loam (guyton)'		'SIL'	1	0.2300	0.7500	5171920.00	0.0124	3.5000	2.5760
 	  580.000	  16.00	  16.00	   2.25	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

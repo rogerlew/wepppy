@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.235135
+#   Build Date: 2021-04-01 15:01:44.755014
 #   Source Data: Surgo
 # 
 # Mukey: 368541
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Tarrant-Eckrant association, gently undulating'		'ST-C'	2	0.0900	0.7500	3297500.00	0.0069	3.5000	9.7200
+'Tarrant-Eckrant association, gently undulating'		'ST-C'	2	0.0900	0.7500	3297500.00	0.0069	3.5000	0.8688
 	  230.000	  50.00	  50.00	   4.50	  42.50	  63.76
 	  250.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

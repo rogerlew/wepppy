@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.363074
+#   Build Date: 2021-04-01 15:01:41.870815
 #   Source Data: Surgo
 # 
 # Mukey: 1532144
@@ -60,9 +60,9 @@
 # 
 Any comments:
 1 1
-'Gogebic, very stony-Pence, very stony-Cathro complex, 0 to 18 percent slopes'		'SPM'	4	0.1600	0.7500	4649000.00	0.0050	2.5450	78.7500
+'Gogebic, very stony-Pence, very stony-Cathro complex, 0 to 18 percent slopes'		'SPM'	4	0.1600	0.7500	4649000.00	0.0050	2.5450	15.1441
 	  130.000	   8.20	   8.20	   3.00	  19.80	  16.40
 	  200.000	   7.00	   7.00	   1.00	   6.70	  16.40
 	  300.000	   2.70	   2.70	   3.00	   9.50	  16.40
 	  510.000	   2.00	   2.00	   2.00	   6.00	  14.64
-1 10000.0 0.82800
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.011851
+#   Build Date: 2021-04-01 15:01:41.517587
 #   Source Data: Surgo
 # 
 # Mukey: 566378
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Enders-Mountainburg complex, 20 to 40 percent slopes'		'ST-FSL'	3	0.2900	0.7500	5820810.00	0.0070	2.7112	32.4000
+'Enders-Mountainburg complex, 20 to 40 percent slopes'		'ST-FSL'	3	0.2900	0.7500	5820810.00	0.0070	2.7112	17.5363
 	   80.000	  15.00	  15.00	   3.00	  11.30	  39.65
 	  180.000	  17.50	  17.50	   2.00	  11.30	  42.20
 	  280.000	  36.00	  36.00	   0.75	  11.30	  19.09
-1 10000.0 0.75600
+0 0 0.000000 0.000000

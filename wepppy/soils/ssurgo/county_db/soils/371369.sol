@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.419574
+#   Build Date: 2021-04-01 15:01:44.940351
 #   Source Data: Surgo
 # 
 # Mukey: 371369
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Veal-Paloduro association, undulating'		'L'	3	0.2300	0.7500	4917940.00	0.0151	3.6338	32.4000
+'Veal-Paloduro association, undulating'		'L'	3	0.2300	0.7500	4917940.00	0.0151	3.6338	7.9152
 	  150.000	  25.00	  25.00	   0.75	  10.00	   5.00
 	  360.000	  27.50	  27.50	   0.30	  17.50	   5.95
 	 1520.000	  27.50	  27.50	   0.30	  17.50	  10.90
-1 10000.0 32.40000
+0 0 0.000000 0.000000

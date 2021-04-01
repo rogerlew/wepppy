@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.373669
+#   Build Date: 2021-04-01 15:01:42.882801
 #   Source Data: Surgo
 # 
 # Mukey: 2532951
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Urban land-Harvester complex, 2 to 9 percent slopes'		'SIL'	3	0.2300	0.7500	4786010.00	0.0082	3.5000	32.4000
+'Urban land-Harvester complex, 2 to 9 percent slopes'		'SIL'	3	0.2300	0.7500	4786010.00	0.0082	3.5000	0.8962
 	  180.000	  23.00	  23.00	   0.50	  24.00	   0.00
 	  790.000	  30.00	  30.00	   0.50	  22.00	   0.00
 	 2030.000	  30.00	  30.00	   0.40	  17.00	   0.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

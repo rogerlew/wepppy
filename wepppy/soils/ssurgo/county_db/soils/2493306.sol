@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.675902
+#   Build Date: 2021-04-01 15:01:45.196824
 #   Source Data: Surgo
 # 
 # Mukey: 2493306
@@ -56,6 +56,6 @@
 # 
 Any comments:
 1 1
-'Wagstaff silty clay loam, 1 to 3 percent slopes'		'SICL'	1	0.1600	0.7500	4289840.00	0.0071	3.5000	9.7200
+'Wagstaff silty clay loam, 1 to 3 percent slopes'		'SICL'	1	0.1600	0.7500	4289840.00	0.0071	3.5000	1.4375
 	  210.000	  32.00	  32.00	   5.00	  17.50	   0.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

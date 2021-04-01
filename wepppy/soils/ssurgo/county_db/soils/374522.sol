@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.490958
+#   Build Date: 2021-04-01 15:01:41.998752
 #   Source Data: Surgo
 # 
 # Mukey: 374522
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Palobia loamy fine sand, 1 to 3 percent slopes'		'FSL'	3	0.2300	0.7500	7530500.00	0.0207	1.5320	100.8000
+'Palobia loamy fine sand, 1 to 3 percent slopes'		'FSL'	3	0.2300	0.7500	7530500.00	0.0207	1.5320	27.6290
 	  350.000	   4.80	   4.80	   0.67	   2.60	   0.00
 	  780.000	  24.40	  24.40	   0.56	  12.90	   0.00
 	 2030.000	  22.70	  22.70	   0.08	  11.70	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

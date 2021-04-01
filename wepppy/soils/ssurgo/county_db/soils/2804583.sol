@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.084854
+#   Build Date: 2021-04-01 15:01:42.593832
 #   Source Data: Surgo
 # 
 # Mukey: 2804583
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Gassville very cherty silt loam, 8 to 20 percent slopes'		'GRV-SIL'	2	0.1600	0.7500	5034095.00	0.0102	3.5000	100.8000
+'Gassville very cherty silt loam, 8 to 20 percent slopes'		'GRV-SIL'	2	0.1600	0.7500	5034095.00	0.0102	3.5000	5.0376
 	  230.000	  18.50	  18.50	   1.75	  10.00	  65.50
 	  580.000	  40.00	  40.00	   0.75	  11.30	  65.50
-1 10000.0 0.75600
+0 0 0.000000 0.000000

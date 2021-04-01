@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.771333
+#   Build Date: 2021-04-01 15:01:42.279569
 #   Source Data: Surgo
 # 
 # Mukey: 480132
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Pookaloo-Cavehill-Rock outcrop association'		'GRV-L'	3	0.3000	0.7500	5225300.00	0.0068	2.8260	28.8000
+'Pookaloo-Cavehill-Rock outcrop association'		'GRV-L'	3	0.3000	0.7500	5225300.00	0.0068	2.8260	9.5720
 	  100.000	  14.00	  14.00	   2.00	  12.70	  59.00
 	  230.000	  14.00	  14.00	   1.00	  10.40	  61.00
 	  480.000	  14.00	  14.00	   1.50	  11.10	  60.00
-1 10000.0 0.01800
+0 0 0.000000 0.000000

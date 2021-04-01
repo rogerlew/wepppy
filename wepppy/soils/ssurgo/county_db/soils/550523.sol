@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.035782
+#   Build Date: 2021-04-01 15:01:43.553373
 #   Source Data: Surgo
 # 
 # Mukey: 550523
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Faywood-Lowell complex, 12 to 35 percent slopes'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Faywood-Lowell complex, 12 to 35 percent slopes'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	4.6754
 	  150.000	  21.00	  21.00	   2.50	  11.40	   0.00
 	  840.000	  47.50	  47.50	   0.30	  24.70	  12.60
 	 1090.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

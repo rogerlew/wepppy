@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.646612
+#   Build Date: 2021-04-01 15:01:42.154901
 #   Source Data: Surgo
 # 
 # Mukey: 1155389
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bigheart-Niotaze-Rock outcrop complex, 1 to 8 percent slopes'		'FSL'	3	0.1600	0.7500	6320270.00	0.0100	2.1704	32.4000
+'Bigheart-Niotaze-Rock outcrop complex, 1 to 8 percent slopes'		'FSL'	3	0.1600	0.7500	6320270.00	0.0100	2.1704	20.7707
 	   80.000	   9.00	   9.00	   1.50	   4.90	   0.00
 	  300.000	   9.00	   9.00	   0.50	   4.80	  27.00
 	  550.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.08000
+0 0 0.000000 0.000000

@@ -993,7 +993,7 @@ Any comments:
             "{horizon0.shear:0.4f}\t0.0000"
 
         s = [s.format(self, majorComponent=self.majorComponent,
-                      horizon0=self.horizons[0])]
+                      horizon0=self.getFirstHorizon())]
 
         ksat_last = 0.0
         
@@ -1058,10 +1058,11 @@ Any comments:
         if self.is_water:
             return self._build_water_v2006_2()
 
+        h0 = self.getFirstHorizon()
         if ag:
-            ksat = self.horizons[0].conductivity
+            ksat = h0.conductivity
         else:
-            ksat = self.horizons[0].ksat_r * 3.6
+            ksat = h0.ksat_r * 3.6
 
         s = "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} 1\n" \
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t" \

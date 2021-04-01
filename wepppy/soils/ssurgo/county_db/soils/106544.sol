@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.376505
+#   Build Date: 2021-04-01 15:01:44.896854
 #   Source Data: Surgo
 # 
 # Mukey: 106544
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Clarksville gravelly silt loam, 1 to 8 percent slopes'		'GR-SIL'	4	0.2300	0.7500	4951400.00	0.0094	3.5000	101.5992
+'Clarksville gravelly silt loam, 1 to 8 percent slopes'		'GR-SIL'	4	0.2300	0.7500	4951400.00	0.0094	3.5000	5.8601
 	  410.000	  20.00	  20.00	   1.25	   6.00	  39.10
 	  760.000	  30.00	  30.00	   0.25	  10.00	  69.55
 	 1550.000	  30.00	  30.00	   0.25	  10.00	  69.55
 	 2030.000	  57.50	  57.50	   0.25	  17.00	  74.50
-1 10000.0 33.02460
+0 0 0.000000 0.000000

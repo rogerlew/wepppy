@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.373054
+#   Build Date: 2021-04-01 15:01:44.893306
 #   Source Data: Surgo
 # 
 # Mukey: 332992
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Rosebloom and Arkabutla soils, frequently flooded'		'SIL'	2	0.3000	0.7500	4868705.00	0.0087	3.5000	33.0120
+'Rosebloom and Arkabutla soils, frequently flooded'		'SIL'	2	0.3000	0.7500	4868705.00	0.0087	3.5000	2.2598
 	  200.000	  21.50	  21.50	   2.00	  11.30	   0.00
 	 1220.000	  27.50	  27.50	   0.30	  11.30	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

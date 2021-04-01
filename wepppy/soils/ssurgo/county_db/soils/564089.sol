@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.086232
+#   Build Date: 2021-04-01 15:01:42.595243
 #   Source Data: Surgo
 # 
 # Mukey: 564089
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Henry silt loam, 0 to 1 percent slopes'		'SIL'	2	0.4200	0.7500	5309745.00	0.0159	3.5000	32.4000
+'Henry silt loam, 0 to 1 percent slopes'		'SIL'	2	0.4200	0.7500	5309745.00	0.0159	3.5000	2.6145
 	  150.000	  13.50	  13.50	   1.25	  11.30	   0.00
 	  510.000	  15.00	  15.00	   0.75	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

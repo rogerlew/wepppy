@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.366519
+#   Build Date: 2021-04-01 15:01:41.874415
 #   Source Data: Surgo
 # 
 # Mukey: 502985
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bosler-Rock River sandy loams, 1 to 8 percent slopes'		'SL'	3	0.2300	0.7500	4552950.00	0.0145	3.0940	101.6280
+'Bosler-Rock River sandy loams, 1 to 8 percent slopes'		'SL'	3	0.2300	0.7500	4552950.00	0.0145	3.0940	15.1067
 	   80.000	  15.00	  15.00	   0.75	   7.50	  12.50
 	  790.000	  22.50	  22.50	   0.25	  12.50	  12.50
 	 1520.000	   2.50	   2.50	   0.25	   7.50	  56.00
-1 10000.0 330.26400
+0 0 0.000000 0.000000

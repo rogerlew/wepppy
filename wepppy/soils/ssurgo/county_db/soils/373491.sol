@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.701993
+#   Build Date: 2021-04-01 15:01:43.212828
 #   Source Data: Surgo
 # 
 # Mukey: 373491
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Raymondville clay loam'		'CL'	1	0.2300	0.7500	4341640.00	0.0055	4.5878	9.7200
+'Raymondville clay loam'		'CL'	1	0.2300	0.7500	4341640.00	0.0055	4.5878	4.6156
 	  410.000	  37.00	  37.00	   2.00	  32.50	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

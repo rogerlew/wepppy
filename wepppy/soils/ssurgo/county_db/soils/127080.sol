@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.166469
+#   Build Date: 2021-04-01 15:01:41.673128
 #   Source Data: Surgo
 # 
 # Mukey: 127080
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Georgeville clay loam, 6 to 10 percent slopes, eroded'		'CL'	4	0.3000	0.7500	4764260.00	0.0254	4.0702	32.4000
+'Georgeville clay loam, 6 to 10 percent slopes, eroded'		'CL'	4	0.3000	0.7500	4764260.00	0.0254	4.0702	6.8753
 	   80.000	  31.00	  31.00	   0.25	  11.30	   6.90
 	  180.000	  31.00	  31.00	   0.25	  11.30	   6.90
 	 1190.000	  50.00	  50.00	   0.25	  11.30	   3.48
 	 1520.000	  27.50	  27.50	   0.25	  11.30	   7.85
-1 10000.0 32.40000
+0 0 0.000000 0.000000

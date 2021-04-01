@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.542221
+#   Build Date: 2021-04-01 15:01:43.052922
 #   Source Data: Surgo
 # 
 # Mukey: 2532563
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Armstrong loam, 5 to 9 percent slopes, eroded'		'L'	1	0.1600	0.7500	4533740.00	0.0053	3.3143	32.4000
+'Armstrong loam, 5 to 9 percent slopes, eroded'		'L'	1	0.1600	0.7500	4533740.00	0.0053	3.3143	5.7133
 	  210.000	  18.30	  18.30	   2.40	  14.40	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

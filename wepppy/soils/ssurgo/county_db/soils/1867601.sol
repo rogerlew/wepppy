@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.261769
+#   Build Date: 2021-04-01 15:01:44.782142
 #   Source Data: Surgo
 # 
 # Mukey: 1867601
@@ -57,9 +57,9 @@
 # 
 Any comments:
 1 1
-'Ernest silt loam, 3 to 15 percent slopes, extremely stony'		'MPM'	4	0.2300	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Ernest silt loam, 3 to 15 percent slopes, extremely stony'		'MPM'	4	0.2300	0.7500	4649000.00	0.0050	2.5450	2.5887
 	  100.000	  19.00	  19.00	   7.00	  11.30	  16.34
 	  180.000	  18.00	  18.00	   3.50	  11.30	   6.90
 	  280.000	  21.00	  21.00	   1.80	  11.30	   6.90
 	  580.000	  28.00	  28.00	   0.50	  11.30	  10.82
-1 10000.0 3.29400
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.890408
+#   Build Date: 2021-04-01 15:01:41.396271
 #   Source Data: Surgo
 # 
 # Mukey: 2230087
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Rock outcrop-Needle complex, 2 to 30 percent slopes'		'S'	2	0.2300	0.7500	4264800.00	0.0198	2.5960	1522.8000
+'Rock outcrop-Needle complex, 2 to 30 percent slopes'		'S'	2	0.2300	0.7500	4264800.00	0.0198	2.5960	31.4851
 	   30.000	   6.00	   6.00	   0.50	   5.00	   0.00
 	  280.000	   6.00	   6.00	   0.20	   4.00	   0.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

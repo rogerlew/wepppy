@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.911528
+#   Build Date: 2021-04-01 15:01:42.420134
 #   Source Data: Surgo
 # 
 # Mukey: 1421089
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Wekiva-Shired-Tooles complex, occasionally flooded'		'FS'	4	0.1600	0.7500	5494240.00	0.0064	2.0948	331.2000
+'Wekiva-Shired-Tooles complex, occasionally flooded'		'FS'	4	0.1600	0.7500	5494240.00	0.0064	2.0948	37.2968
 	  150.000	   4.00	   4.00	   3.50	   2.20	   2.98
 	  410.000	   3.50	   3.50	   0.50	   1.90	   2.98
 	  640.000	  18.50	  18.50	   0.50	   9.80	   3.97
 	  740.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 280.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.062685
+#   Build Date: 2021-04-01 15:01:41.569432
 #   Source Data: Surgo
 # 
 # Mukey: 1456040
@@ -60,9 +60,9 @@
 # 
 Any comments:
 1 1
-'Gogebic fine sandy loam, 1 to 6 percent slopes, stony'		'MPM'	4	0.1700	0.7500	5502700.00	0.0250	3.5000	330.1920
+'Gogebic fine sandy loam, 1 to 6 percent slopes, stony'		'MPM'	4	0.1700	0.7500	5502700.00	0.0250	3.5000	12.8874
 	  100.000	   6.00	   6.00	   6.00	  11.30	  18.52
 	  130.000	   5.00	   5.00	   2.00	  11.30	  17.55
 	  230.000	   5.00	   5.00	   4.00	  11.30	  17.55
 	  500.000	   5.00	   5.00	   2.00	  11.30	  17.55
-1 10000.0 1.01520
+0 0 0.000000 0.000000

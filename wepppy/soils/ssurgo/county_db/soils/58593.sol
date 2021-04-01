@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.877737
+#   Build Date: 2021-04-01 15:01:41.383346
 #   Source Data: Surgo
 # 
 # Mukey: 58593
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Penwell-Pyote association, undulating'		'FS'	2	0.3000	0.7500	5897650.00	0.0272	2.1355	331.2000
+'Penwell-Pyote association, undulating'		'FS'	2	0.3000	0.7500	5897650.00	0.0272	2.1355	34.3435
 	  330.000	   6.50	   6.50	   0.30	   3.00	   1.00
 	 2030.000	   7.50	   7.50	   0.30	   3.00	   1.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

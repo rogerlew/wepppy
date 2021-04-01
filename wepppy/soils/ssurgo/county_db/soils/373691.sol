@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.702549
+#   Build Date: 2021-04-01 15:01:43.213375
 #   Source Data: Surgo
 # 
 # Mukey: 373691
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Somervell-Aledo complex, 1 to 8 percent slopes'		'GRV-L'	3	0.0900	0.7500	4783470.00	0.0062	3.9994	32.4000
+'Somervell-Aledo complex, 1 to 8 percent slopes'		'GRV-L'	3	0.0900	0.7500	4783470.00	0.0062	3.9994	6.6544
 	  250.000	  30.00	  30.00	   2.00	  15.00	  64.45
 	  940.000	  30.00	  30.00	   0.55	  15.00	  64.45
 	 1140.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

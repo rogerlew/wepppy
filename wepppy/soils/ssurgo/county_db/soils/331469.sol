@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.913450
+#   Build Date: 2021-04-01 15:01:41.419675
 #   Source Data: Surgo
 # 
 # Mukey: 331469
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Alamuchee-Mooreville complex, 0 to 2 percent slopes, frequently flooded'		'SL'	2	0.2900	0.7500	4629790.00	0.0059	3.2333	198.0000
+'Alamuchee-Mooreville complex, 0 to 2 percent slopes, frequently flooded'		'SL'	2	0.2900	0.7500	4629790.00	0.0059	3.2333	18.3347
 	  120.000	  17.50	  17.50	   2.00	  11.30	   5.00
 	 1320.000	  25.00	  25.00	   0.75	  11.30	   5.00
-1 10000.0 1.98000
+0 0 0.000000 0.000000

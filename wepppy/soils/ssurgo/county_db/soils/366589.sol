@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.554848
+#   Build Date: 2021-04-01 15:01:45.075971
 #   Source Data: Surgo
 # 
 # Mukey: 366589
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Degola clay loam, 0 to 1 percent slopes, frequently flooded'		'CL'	2	0.1600	0.7500	4745050.00	0.0061	3.7835	32.4000
+'Degola clay loam, 0 to 1 percent slopes, frequently flooded'		'CL'	2	0.1600	0.7500	4745050.00	0.0061	3.7835	6.1740
 	  640.000	  26.50	  26.50	   2.00	  20.00	   2.50
 	 2030.000	  26.50	  26.50	   1.25	  20.00	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

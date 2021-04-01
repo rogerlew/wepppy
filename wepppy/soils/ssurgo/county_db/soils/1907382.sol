@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.637437
+#   Build Date: 2021-04-01 15:01:44.155555
 #   Source Data: Surgo
 # 
 # Mukey: 1907382
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Stephenville-Darnell complex, 3 to 8 percent slopes, rocky'		'FSL'	4	0.2300	0.7500	7146300.00	0.0098	2.1160	100.8000
+'Stephenville-Darnell complex, 3 to 8 percent slopes, rocky'		'FSL'	4	0.2300	0.7500	7146300.00	0.0098	2.1160	19.6509
 	  200.000	  12.00	  12.00	   2.00	   6.50	   0.00
 	  330.000	  10.00	  10.00	   0.75	   5.40	   0.00
 	  590.000	  28.00	  28.00	   0.50	  14.80	   4.00
 	  840.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

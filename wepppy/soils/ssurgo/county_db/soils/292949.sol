@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.959151
+#   Build Date: 2021-04-01 15:01:42.468272
 #   Source Data: Surgo
 # 
 # Mukey: 292949
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Urban land-Riverhead complex, 0 to 3 percent slopes'		'SPM'	4	0.2300	0.7500	8491000.00	0.0110	1.5800	79.2000
+'Urban land-Riverhead complex, 0 to 3 percent slopes'		'SPM'	4	0.2300	0.7500	8491000.00	0.0110	1.5800	19.4262
 	  100.000	  10.00	  10.00	   3.00	  11.30	   8.00
 	  640.000	  10.00	  10.00	   1.00	  11.30	  15.00
 	  910.000	   5.00	   5.00	   0.50	  11.30	   8.00
 	 1520.000	   2.00	   2.00	   0.25	   1.10	  36.95
-1 10000.0 507.60000
+0 0 0.000000 0.000000
