@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.795033
+#   Build Date: 2021-04-01 15:01:42.303688
 #   Source Data: Surgo
 # 
 # Mukey: 1906751
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Brownstown channery silt loam, 25 to 75 percent slopes'		'SIL'	3	0.2300	0.7500	5392440.00	0.0191	3.5000	26.1720
+'Brownstown channery silt loam, 25 to 75 percent slopes'		'SIL'	3	0.2300	0.7500	5392440.00	0.0191	3.5000	3.0099
 	  150.000	  12.00	  12.00	   2.50	   6.00	  35.00
 	  460.000	  13.00	  13.00	   0.75	   6.00	  52.00
 	  910.000	  13.00	  13.00	   0.25	   6.00	  78.40
-1 10000.0 4.68000
+0 0 0.000000 0.000000

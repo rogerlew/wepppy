@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.156614
+#   Build Date: 2021-04-01 15:01:45.673103
 #   Source Data: Surgo
 # 
 # Mukey: 330812
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Troup-Benndale association, rolling'		'LS'	3	0.3000	0.7500	5090830.00	0.0072	2.4116	331.2000
+'Troup-Benndale association, rolling'		'LS'	3	0.3000	0.7500	5090830.00	0.0072	2.4116	26.5023
 	  100.000	   7.00	   7.00	   1.75	  11.30	   0.00
 	 1750.000	   7.00	   7.00	   0.10	  11.30	   0.00
 	 2180.000	  16.00	  16.00	   0.00	  11.30	   3.00
-1 10000.0 50.40000
+0 0 0.000000 0.000000

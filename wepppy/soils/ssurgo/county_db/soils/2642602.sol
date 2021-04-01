@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.074135
+#   Build Date: 2021-04-01 15:01:42.582876
 #   Source Data: Surgo
 # 
 # Mukey: 2642602
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Bearden silty clay loam, moderately saline, 0 to 2 percent slopes'		'SICL'	4	0.0900	0.7500	4234710.00	0.0071	3.5000	33.0120
+'Bearden silty clay loam, moderately saline, 0 to 2 percent slopes'		'SICL'	4	0.0900	0.7500	4234710.00	0.0071	3.5000	0.9005
 	  210.000	  33.00	  33.00	   5.00	  27.70	   0.00
 	  390.000	  28.00	  28.00	   2.00	  20.10	   0.00
 	  990.000	  28.00	  28.00	   1.00	  18.80	   0.00
 	 2000.000	  28.00	  28.00	   0.50	  19.70	   0.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.226978
+#   Build Date: 2021-04-01 15:01:44.746754
 #   Source Data: Surgo
 # 
 # Mukey: 333019
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Mantachie fine sandy loam, 0 to 2 percent slopes, occasionally flooded'		'FSL'	4	0.3000	0.7500	6070540.00	0.0082	2.2133	33.0120
+'Mantachie fine sandy loam, 0 to 2 percent slopes, occasionally flooded'		'FSL'	4	0.3000	0.7500	6070540.00	0.0082	2.2133	17.1870
 	  280.000	   8.50	   8.50	   2.00	  11.30	  10.76
 	  480.000	  26.00	  26.00	   0.30	  11.30	  10.76
 	  890.000	  26.00	  26.00	   0.30	  11.30	  10.76
 	 2000.000	  26.00	  26.00	   0.30	  11.30	  10.76
-1 10000.0 33.01200
+0 0 0.000000 0.000000

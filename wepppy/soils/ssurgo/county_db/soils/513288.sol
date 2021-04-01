@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.004046
+#   Build Date: 2021-04-01 15:01:45.520078
 #   Source Data: Surgo
 # 
 # Mukey: 513288
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Gilpin-Upshur complex, 40 to 55 percent slopes'		'HPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Gilpin-Upshur complex, 40 to 55 percent slopes'		'HPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	4.6057
 	  100.000	  21.00	  21.00	   2.25	  12.00	  19.97
 	  540.000	  35.00	  35.00	   0.40	   8.00	  42.62
 	  770.000	  25.00	  25.00	   0.20	   8.00	  71.30
-1 10000.0 2.52000
+0 0 0.000000 0.000000

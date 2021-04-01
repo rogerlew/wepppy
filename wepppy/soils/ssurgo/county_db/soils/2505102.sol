@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.531402
+#   Build Date: 2021-04-01 15:01:45.052020
 #   Source Data: Surgo
 # 
 # Mukey: 2505102
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Crofton silt loam, 8 to 17 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4758445.00	0.0081	3.5000	32.4000
+'Crofton silt loam, 8 to 17 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4758445.00	0.0081	3.5000	1.5098
 	  150.000	  23.50	  23.50	   1.25	  14.30	   0.00
 	  300.000	  23.50	  23.50	   0.75	  13.30	   0.00
 	 2030.000	  21.00	  21.00	   0.25	  11.00	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

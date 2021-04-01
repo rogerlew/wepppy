@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.092425
+#   Build Date: 2021-04-01 15:01:44.612396
 #   Source Data: Surgo
 # 
 # Mukey: 2707125
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Badland-Arikara-Cabbart complex, 15 to 70 percent slopes'		'SIL'	2	0.3700	0.7500	4841140.00	0.0085	3.5000	33.0120
+'Badland-Arikara-Cabbart complex, 15 to 70 percent slopes'		'SIL'	2	0.3700	0.7500	4841140.00	0.0085	3.5000	4.0243
 	   50.000	  22.00	  22.00	   1.00	  19.00	   9.79
 	 1520.000	  20.00	  20.00	   0.25	  17.50	   0.00
-1 10000.0 7.95600
+0 0 0.000000 0.000000

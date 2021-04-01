@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.527263
+#   Build Date: 2021-04-01 15:01:43.037561
 #   Source Data: Surgo
 # 
 # Mukey: 1725597
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Feliciana and Natchez silt loams, 8 to 60 percent slopes'		'SIL'	4	0.2300	0.7500	5386927.00	0.0188	3.5000	33.0120
+'Feliciana and Natchez silt loams, 8 to 60 percent slopes'		'SIL'	4	0.2300	0.7500	5386927.00	0.0188	3.5000	1.7182
 	  130.000	  12.10	  12.10	   2.50	  11.30	   0.00
 	  380.000	  23.00	  23.00	   0.75	  11.30	   0.00
 	  730.000	  27.60	  27.60	   0.25	  11.30	   0.00
 	 2000.000	  20.60	  20.60	   0.11	  10.70	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

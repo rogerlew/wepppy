@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.069177
+#   Build Date: 2021-04-01 15:01:42.577818
 #   Source Data: Surgo
 # 
 # Mukey: 125617
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Madison gravelly sandy clay loam, 10 to 15 percent slopes, eroded'		'GR-FSL'	3	0.3000	0.7500	6012910.00	0.0110	2.3282	331.2000
+'Madison gravelly sandy clay loam, 10 to 15 percent slopes, eroded'		'GR-FSL'	3	0.3000	0.7500	6012910.00	0.0110	2.3282	18.9046
 	  130.000	  10.00	  10.00	   1.25	   4.00	  32.58
 	  910.000	  30.00	  30.00	   0.25	  11.30	   9.35
 	 1320.000	  12.50	  12.50	   0.10	  11.30	  12.70
-1 10000.0 32.40000
+0 0 0.000000 0.000000

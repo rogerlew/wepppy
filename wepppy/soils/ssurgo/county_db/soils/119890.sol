@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.344071
+#   Build Date: 2021-04-01 15:01:41.851496
 #   Source Data: Surgo
 # 
 # Mukey: 119890
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Nason silt loam, 7 to 15 percent slopes, eroded'		'SIL'	3	0.2500	0.7500	5034095.00	0.0102	3.5000	32.4000
+'Nason silt loam, 7 to 15 percent slopes, eroded'		'SIL'	3	0.2500	0.7500	5034095.00	0.0102	3.5000	5.1870
 	  230.000	  18.50	  18.50	   2.00	   9.10	  17.55
 	  960.000	  32.00	  32.00	   0.75	   9.70	  17.55
 	 1270.000	  17.50	  17.50	   0.25	   4.90	  46.65
-1 10000.0 0.72000
+0 0 0.000000 0.000000

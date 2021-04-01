@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.251419
+#   Build Date: 2021-04-01 15:01:44.771562
 #   Source Data: Surgo
 # 
 # Mukey: 2738666
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Valentine fine sand, rolling, 9 to 24 percent slopes'		'FS'	3	0.2300	0.7500	5417400.00	0.0159	2.0530	331.2000
+'Valentine fine sand, rolling, 9 to 24 percent slopes'		'FS'	3	0.2300	0.7500	5417400.00	0.0159	2.0530	35.8045
 	  130.000	   3.00	   3.00	   0.75	   2.70	   0.00
 	  300.000	   3.00	   3.00	   0.50	   2.60	   0.00
 	 2000.000	   3.00	   3.00	   0.25	   2.40	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

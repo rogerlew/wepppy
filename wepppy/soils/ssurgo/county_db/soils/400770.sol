@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.392138
+#   Build Date: 2021-04-01 15:01:42.901520
 #   Source Data: Surgo
 # 
 # Mukey: 400770
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Mt. Carroll silt loam, 2 to 6 percent slopes, moderately eroded'		'SIL'	3	0.2300	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Mt. Carroll silt loam, 2 to 6 percent slopes, moderately eroded'		'SIL'	3	0.2300	0.7500	5006530.00	0.0099	3.5000	1.6774
 	  200.000	  19.00	  19.00	   3.00	  16.50	   0.00
 	  960.000	  21.00	  21.00	   0.50	  16.90	   0.00
 	 2000.000	   6.00	   6.00	   0.25	   5.30	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

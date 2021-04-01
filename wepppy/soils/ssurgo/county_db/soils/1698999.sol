@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.387555
+#   Build Date: 2021-04-01 15:01:44.908156
 #   Source Data: Surgo
 # 
 # Mukey: 1698999
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Valent loamy sand, 3 to 9 percent slopes'		'LFS'	3	0.2300	0.7500	5647920.00	0.0162	2.1784	330.2640
+'Valent loamy sand, 3 to 9 percent slopes'		'LFS'	3	0.2300	0.7500	5647920.00	0.0162	2.1784	25.1058
 	  150.000	   6.00	   6.00	   0.75	   4.90	   0.00
 	  280.000	   3.00	   3.00	   0.25	   2.40	   0.00
 	 2030.000	   3.00	   3.00	   0.25	   2.40	   0.00
-1 10000.0 508.10400
+0 0 0.000000 0.000000

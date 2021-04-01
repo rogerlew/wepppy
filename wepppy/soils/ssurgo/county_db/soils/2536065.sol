@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.372244
+#   Build Date: 2021-04-01 15:01:42.881344
 #   Source Data: Surgo
 # 
 # Mukey: 2536065
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Scholten-Bendavis-Poynor complex, 8 to 15 percent slopes'		'GRV-SIL'	2	0.2300	0.7500	5447570.00	0.0217	3.5000	72.0000
+'Scholten-Bendavis-Poynor complex, 8 to 15 percent slopes'		'GRV-SIL'	2	0.2300	0.7500	5447570.00	0.0217	3.5000	4.0161
 	  180.000	  11.00	  11.00	   2.00	  10.00	  55.36
 	  530.000	  16.00	  16.00	   0.50	   8.00	  65.80
-1 10000.0 0.90000
+0 0 0.000000 0.000000

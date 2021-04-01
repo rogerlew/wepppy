@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.941129
+#   Build Date: 2021-04-01 15:01:42.450040
 #   Source Data: Surgo
 # 
 # Mukey: 1670836
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Highsplint-Shelocta complex, 55 to 80 percent slopes, very stony'		'CNV-SPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Highsplint-Shelocta complex, 55 to 80 percent slopes, very stony'		'CNV-SPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	4.6245
 	  110.000	  22.00	  22.00	   2.75	  11.30	  66.20
 	  290.000	  24.00	  24.00	   0.50	  11.30	  64.36
 	  710.000	  28.00	  28.00	   0.50	  11.30	  63.82
 	 1220.000	  22.00	  22.00	   0.50	  11.30	  65.20
 	 2160.000	  22.00	  22.00	   0.45	  11.30	  62.80
-1 10000.0 27.93600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.396824
+#   Build Date: 2021-04-01 15:01:42.906216
 #   Source Data: Surgo
 # 
 # Mukey: 111641
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Enon sandy loam, 2 to 8 percent slopes'		'L'	2	0.3000	0.7500	6070540.00	0.0111	2.4733	100.8000
+'Enon sandy loam, 2 to 8 percent slopes'		'L'	2	0.3000	0.7500	6070540.00	0.0111	2.4733	20.3581
 	  180.000	  12.50	  12.50	   1.25	   9.10	  13.87
 	  250.000	  28.00	  28.00	   0.50	  15.10	  14.86
-1 10000.0 3.60000
+0 0 0.000000 0.000000

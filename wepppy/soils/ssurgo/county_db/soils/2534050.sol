@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.652101
+#   Build Date: 2021-04-01 15:01:44.170460
 #   Source Data: Surgo
 # 
 # Mukey: 2534050
@@ -57,7 +57,7 @@
 # 
 Any comments:
 1 1
-'Cliquot-Bolivar complex, 3 to 8 percent slopes'		'FSL'	2	0.3000	0.7500	3477190.00	0.0031	2.7168	32.4000
+'Cliquot-Bolivar complex, 3 to 8 percent slopes'		'FSL'	2	0.3000	0.7500	3477190.00	0.0031	2.7168	14.1984
 	   80.000	   4.20	   4.20	   4.70	  30.00	  10.00
 	  330.000	  10.50	  10.50	   2.20	   9.20	  59.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.820410
+#   Build Date: 2021-04-01 15:01:44.339922
 #   Source Data: Surgo
 # 
 # Mukey: 74665
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Kapowsin gravelly ashy loam, 0 to 6 percent slopes'		'GR-ASHY-L'	4	0.2300	0.7500	4937150.00	0.0054	2.6530	50.4000
+'Kapowsin gravelly ashy loam, 0 to 6 percent slopes'		'GR-ASHY-L'	4	0.2300	0.7500	4937150.00	0.0054	2.6530	8.7626
 	  180.000	  10.00	  10.00	   6.00	  30.00	  42.00
 	  280.000	  10.00	  10.00	   1.50	  25.00	  42.00
 	  380.000	  10.00	  10.00	   0.50	  25.00	  42.00
 	  640.000	  10.00	  10.00	   0.25	   6.00	  18.00
-1 10000.0 0.00000
+0 0 0.000000 0.000000

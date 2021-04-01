@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.114344
+#   Build Date: 2021-04-01 15:01:42.624114
 #   Source Data: Surgo
 # 
 # Mukey: 150420
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'ABLA/OSCH,PAMY Edgway-ABLA/THOC Jumpstart-PSMEG/ARTRV Tophat complex, 15 to 50 percent slopes'		'SPM'	3	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+'ABLA/OSCH,PAMY Edgway-ABLA/THOC Jumpstart-PSMEG/ARTRV Tophat complex, 15 to 50 percent slopes'		'SPM'	3	0.1600	0.7500	3688500.00	0.0035	3.3550	4.0825
 	  310.000	  20.00	  20.00	   5.50	  20.00	  20.32
 	  510.000	  20.00	  20.00	   1.75	  13.50	  10.00
 	 1520.000	  26.00	  26.00	   0.75	  18.50	  61.57
-1 10000.0 27.72000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.876114
+#   Build Date: 2021-04-01 15:01:41.381710
 #   Source Data: Surgo
 # 
 # Mukey: 362984
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Brackett-Eckrant association, hilly'		'GR-CL'	3	0.3700	0.7500	4860310.00	0.0063	3.4887	32.4000
+'Brackett-Eckrant association, hilly'		'GR-CL'	3	0.3700	0.7500	4860310.00	0.0063	3.4887	6.9846
 	  200.000	  22.50	  22.50	   2.00	  15.00	  31.75
 	  380.000	  26.50	  26.50	   1.25	  15.00	  10.27
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

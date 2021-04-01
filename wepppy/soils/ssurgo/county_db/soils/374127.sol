@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.703186
+#   Build Date: 2021-04-01 15:01:43.214006
 #   Source Data: Surgo
 # 
 # Mukey: 374127
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Uvalde silty clay loam, dry, 0 to 2 percent slopes'		'SICL'	4	0.1600	0.7500	4179580.00	0.0070	3.5000	32.4000
+'Uvalde silty clay loam, dry, 0 to 2 percent slopes'		'SICL'	4	0.1600	0.7500	4179580.00	0.0070	3.5000	2.0726
 	  430.000	  34.00	  34.00	   2.50	  20.00	   2.00
 	  860.000	  39.00	  39.00	   1.50	  20.00	   2.00
 	 1270.000	  39.00	  39.00	   0.75	  15.00	   2.00
 	 2030.000	  39.00	  39.00	   0.50	  12.00	   5.00
-1 10000.0 9.72000
+0 0 0.000000 0.000000

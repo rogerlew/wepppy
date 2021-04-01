@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.565210
+#   Build Date: 2021-04-01 15:01:41.069954
 #   Source Data: Surgo
 # 
 # Mukey: 331342
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Troup-Springhill-Luverne complex, 10 to 30 percent slopes'		'LS'	2	0.3000	0.7500	5090830.00	0.0154	2.4116	331.2000
+'Troup-Springhill-Luverne complex, 10 to 30 percent slopes'		'LS'	2	0.3000	0.7500	5090830.00	0.0154	2.4116	26.5023
 	 1270.000	   7.00	   7.00	   0.75	  11.30	   5.00
 	 1650.000	  25.00	  25.00	   0.00	  11.30	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

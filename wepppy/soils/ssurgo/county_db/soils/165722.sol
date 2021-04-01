@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.229927
+#   Build Date: 2021-04-01 15:01:42.738942
 #   Source Data: Surgo
 # 
 # Mukey: 165722
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Nabb silt loam, 2 to 6 percent slopes, eroded'		'SIL'	3	0.2900	0.7500	5337310.00	0.0169	3.5000	33.0120
+'Nabb silt loam, 2 to 6 percent slopes, eroded'		'SIL'	3	0.2900	0.7500	5337310.00	0.0169	3.5000	4.0926
 	  180.000	  13.00	  13.00	   2.00	   7.10	   0.00
 	  330.000	  15.00	  15.00	   0.50	  11.30	   0.00
 	  840.000	  27.00	  27.00	   0.25	  11.30	   0.00
-1 10000.0 1.47600
+0 0 0.000000 0.000000

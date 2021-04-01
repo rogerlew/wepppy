@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.140018
+#   Build Date: 2021-04-01 15:01:45.656120
 #   Source Data: Surgo
 # 
 # Mukey: 2549951
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Aurelie-Burnham association, 0 to 8 percent slopes, very stony'		'MPM'	1	0.1600	0.7500	4951400.00	0.0094	3.5000	147.6000
+'Aurelie-Burnham association, 0 to 8 percent slopes, very stony'		'MPM'	1	0.1600	0.7500	4951400.00	0.0094	3.5000	3.2543
 	  210.000	  23.20	  23.20	   2.10	  43.60	  73.16
-1 10000.0 2.55600
+0 0 0.000000 0.000000

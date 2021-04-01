@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.872508
+#   Build Date: 2021-04-01 15:01:41.378035
 #   Source Data: Surgo
 # 
 # Mukey: 528541
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Dandridge shaly silty clay loam, 35 to 60 percent slopes'		'CN-SICL'	2	0.3600	0.7500	4124450.00	0.0070	3.5000	33.0120
+'Dandridge shaly silty clay loam, 35 to 60 percent slopes'		'CN-SICL'	2	0.3600	0.7500	4124450.00	0.0070	3.5000	2.3199
 	  150.000	  35.00	  35.00	   1.25	  20.50	  48.25
 	  410.000	  42.50	  42.50	   0.25	  19.30	  70.00
-1 10000.0 2.55600
+0 0 0.000000 0.000000

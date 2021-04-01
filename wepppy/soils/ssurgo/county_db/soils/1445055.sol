@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.771702
+#   Build Date: 2021-04-01 15:01:44.290201
 #   Source Data: Surgo
 # 
 # Mukey: 1445055
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Pungo-Belhaven soils, 0 to 1 percent slopes, frequently ponded'		'MUCK'	1	0.2500	0.7500	4649000.00	0.0050	2.5450	32.4000
+'Pungo-Belhaven soils, 0 to 1 percent slopes, frequently ponded'		'MUCK'	1	0.2500	0.7500	4649000.00	0.0050	2.5450	19.5645
 	 2000.000	  15.00	  15.00	   2.00	   8.20	   0.00
-1 10000.0 50.40000
+0 0 0.000000 0.000000

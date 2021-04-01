@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.194438
+#   Build Date: 2021-04-01 15:01:41.701440
 #   Source Data: Surgo
 # 
 # Mukey: 115257
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Pungo muck, 0 to 2 percent slopes, rarely flooded'		'WD-MUCK'	1	0.1100	0.7500	4649000.00	0.0050	2.5450	82.8000
+'Pungo muck, 0 to 2 percent slopes, rarely flooded'		'WD-MUCK'	1	0.1100	0.7500	4649000.00	0.0050	2.5450	0.3852
 	 2130.000	  60.00	  60.00	   2.50	  11.30	   0.00
-1 10000.0 79.20000
+0 0 0.000000 0.000000

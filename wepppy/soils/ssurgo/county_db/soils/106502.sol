@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.692337
+#   Build Date: 2021-04-01 15:01:43.203043
 #   Source Data: Surgo
 # 
 # Mukey: 106502
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Dennis silt loam, 1 to 3 percent slopes'		'SIL'	2	0.2300	0.7500	5006530.00	0.0099	3.5000	33.0246
+'Dennis silt loam, 1 to 3 percent slopes'		'SIL'	2	0.2300	0.7500	5006530.00	0.0099	3.5000	4.1582
 	  280.000	  19.00	  19.00	   2.50	  10.30	   4.00
 	  430.000	  31.00	  31.00	   1.20	  16.60	   4.00
-1 10000.0 3.96000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.379943
+#   Build Date: 2021-04-01 15:01:44.900350
 #   Source Data: Surgo
 # 
 # Mukey: 2501623
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Clarksville-Scholten complex, 15 to 45 percent slopes, very stony'		'SPM'	5	0.3700	0.7500	5431031.00	0.0209	3.5000	327.6000
+'Clarksville-Scholten complex, 15 to 45 percent slopes, very stony'		'SPM'	5	0.3700	0.7500	5431031.00	0.0209	3.5000	3.6929
 	  150.000	  11.30	  11.30	   3.60	  11.30	  53.50
 	  320.000	  11.20	  11.20	   1.20	  11.30	  47.53
 	  530.000	  14.60	  14.60	   0.90	  11.30	  55.84
 	 1090.000	  31.70	  31.70	   0.50	  11.30	  76.48
 	 2000.000	  52.00	  52.00	   0.20	  11.30	  53.94
-1 10000.0 32.40000
+0 0 0.000000 0.000000

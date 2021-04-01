@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.241601
+#   Build Date: 2021-04-01 15:01:44.761584
 #   Source Data: Surgo
 # 
 # Mukey: 125181
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Pelham loamy sand, occasionally flooded'		'LS'	2	0.2300	0.7500	5071620.00	0.0081	2.4499	331.2000
+'Pelham loamy sand, occasionally flooded'		'LS'	2	0.2300	0.7500	5071620.00	0.0081	2.4499	26.3421
 	  840.000	   7.50	   7.50	   1.50	  11.30	   2.50
 	 1520.000	  22.50	  22.50	   0.25	  11.30	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

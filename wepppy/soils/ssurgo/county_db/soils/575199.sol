@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.483675
+#   Build Date: 2021-04-01 15:01:41.991405
 #   Source Data: Surgo
 # 
 # Mukey: 575199
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Fuller fine sandy loam, 1 to 4 percent slopes'		'FSL'	2	0.1600	0.7500	6051330.00	0.0081	2.2516	32.4000
+'Fuller fine sandy loam, 1 to 4 percent slopes'		'FSL'	2	0.1600	0.7500	6051330.00	0.0081	2.2516	17.0136
 	  250.000	   9.00	   9.00	   2.00	  11.30	   1.00
 	  990.000	   9.00	   9.00	   1.25	  11.30	   1.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

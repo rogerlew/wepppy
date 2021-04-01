@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.675140
+#   Build Date: 2021-04-01 15:01:45.196062
 #   Source Data: Surgo
 # 
 # Mukey: 413074
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Haig silt loam, 0 to 2 percent slopes'		'SIL'	1	0.0400	0.7500	4675750.00	0.0078	3.5000	32.4000
+'Haig silt loam, 0 to 2 percent slopes'		'SIL'	1	0.0400	0.7500	4675750.00	0.0078	3.5000	1.4458
 	  210.000	  25.00	  25.00	   4.00	  21.00	   0.00
-1 10000.0 0.32400
+0 0 0.000000 0.000000

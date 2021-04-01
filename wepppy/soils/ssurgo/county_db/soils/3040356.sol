@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.626322
+#   Build Date: 2021-04-01 15:01:44.144283
 #   Source Data: Surgo
 # 
 # Mukey: 3040356
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bainville-Chama silt loams, 15 to 30 percent slopes'		'SIL'	3	0.3000	0.7500	5034095.00	0.0102	3.5000	32.4000
+'Bainville-Chama silt loams, 15 to 30 percent slopes'		'SIL'	3	0.3000	0.7500	5034095.00	0.0102	3.5000	4.5747
 	  100.000	  18.50	  18.50	   2.00	  14.10	  17.55
 	  280.000	  27.50	  27.50	   0.75	   7.50	   7.85
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

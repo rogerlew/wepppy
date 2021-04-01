@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.462757
+#   Build Date: 2021-04-01 15:01:41.970151
 #   Source Data: Surgo
 # 
 # Mukey: 498748
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Peyton-Pring-Crowfoot sandy loams, 5 to 25 percent slopes'		'SL'	4	0.1600	0.7500	4725840.00	0.0052	3.0418	83.8080
+'Peyton-Pring-Crowfoot sandy loams, 5 to 25 percent slopes'		'SL'	4	0.1600	0.7500	4725840.00	0.0052	3.0418	17.4004
 	  280.000	  15.00	  15.00	   3.00	  15.00	  10.00
 	  760.000	  27.50	  27.50	   1.25	  17.50	  10.00
 	 1020.000	  19.00	  19.00	   0.25	  12.50	  10.00
 	 1520.000	  12.50	  12.50	   0.25	   8.50	  10.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

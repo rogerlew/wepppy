@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.614727
+#   Build Date: 2021-04-01 15:01:41.120286
 #   Source Data: Surgo
 # 
 # Mukey: 1397862
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Cynthiana-Rock outcrop complex, 12 to 30 percent slopes'		'SICL'	3	0.3000	0.7500	4234710.00	0.0071	3.5000	32.4000
+'Cynthiana-Rock outcrop complex, 12 to 30 percent slopes'		'SICL'	3	0.3000	0.7500	4234710.00	0.0071	3.5000	2.8131
 	  100.000	  33.00	  33.00	   2.50	  17.80	  23.00
 	  460.000	  50.00	  50.00	   0.20	  25.90	  32.35
 	  710.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

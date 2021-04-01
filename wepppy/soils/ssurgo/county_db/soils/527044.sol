@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.475632
+#   Build Date: 2021-04-01 15:01:41.983248
 #   Source Data: Surgo
 # 
 # Mukey: 527044
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bodine gravelly silt loam, 20 to 40 percent slopes'		'GR-SIL'	3	0.2900	0.7500	5227050.00	0.0136	3.5000	101.6280
+'Bodine gravelly silt loam, 20 to 40 percent slopes'		'GR-SIL'	3	0.2900	0.7500	5227050.00	0.0136	3.5000	3.4839
 	  130.000	  15.00	  15.00	   1.50	  11.30	  32.68
 	  510.000	  29.00	  29.00	   0.35	  11.30	  49.12
 	 2030.000	  29.00	  29.00	   0.25	  11.30	  75.20
-1 10000.0 101.62800
+0 0 0.000000 0.000000

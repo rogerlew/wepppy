@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.930564
+#   Build Date: 2021-04-01 15:01:44.449849
 #   Source Data: Surgo
 # 
 # Mukey: 2945664
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Forman-Aastad complex, 1 to 4 percent slopes'		'CL'	3	0.0900	0.7500	4649000.00	0.0050	3.9750	10.8000
+'Forman-Aastad complex, 1 to 4 percent slopes'		'CL'	3	0.0900	0.7500	4649000.00	0.0050	3.9750	5.4171
 	  230.000	  29.00	  29.00	   6.00	  24.90	   4.00
 	  640.000	  34.00	  34.00	   0.70	  26.40	   3.00
 	 2000.000	  30.00	  30.00	   0.20	  19.70	   3.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

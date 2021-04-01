@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.604898
+#   Build Date: 2021-04-01 15:01:42.112600
 #   Source Data: Surgo
 # 
 # Mukey: 2805725
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Metcalf-Timpson complex, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5254615.00	0.0143	3.5000	33.0120
+'Metcalf-Timpson complex, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5254615.00	0.0143	3.5000	2.6016
 	  250.000	  14.50	  14.50	   1.25	  11.30	   0.00
 	 1170.000	  30.00	  30.00	   0.25	  11.30	   0.00
-1 10000.0 0.79200
+0 0 0.000000 0.000000

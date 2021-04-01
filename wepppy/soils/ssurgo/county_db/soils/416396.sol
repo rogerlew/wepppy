@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.064144
+#   Build Date: 2021-04-01 15:01:41.570910
 #   Source Data: Surgo
 # 
 # Mukey: 416396
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Markey and Carbondale mucks'		'MPM'	1	0.0900	0.7500	5502700.00	0.0250	3.5000	50.7960
+'Markey and Carbondale mucks'		'MPM'	1	0.0900	0.7500	5502700.00	0.0250	3.5000	39.2678
 	 2030.000	   0.50	   0.50	   0.50	   1.40	   0.00
-1 10000.0 432.00000
+0 0 0.000000 0.000000

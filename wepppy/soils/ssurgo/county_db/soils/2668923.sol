@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.268389
+#   Build Date: 2021-04-01 15:01:42.778168
 #   Source Data: Surgo
 # 
 # Mukey: 2668923
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Crete silty clay loam, 3 to 7 percent slopes, eroded, loess plains and breaks'		'SICL'	1	0.0900	0.7500	4400100.00	0.0072	3.5000	9.7200
+'Crete silty clay loam, 3 to 7 percent slopes, eroded, loess plains and breaks'		'SICL'	1	0.0900	0.7500	4400100.00	0.0072	3.5000	1.2323
 	  210.000	  30.00	  30.00	   2.50	  20.00	   0.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

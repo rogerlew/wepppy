@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.176543
+#   Build Date: 2021-04-01 15:01:41.683373
 #   Source Data: Surgo
 # 
 # Mukey: 403504
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Colo-Judson silty clay loams, 0 to 5 percent slopes, occasionally flooded'		'SICL'	5	0.0200	0.7500	4400100.00	0.0072	3.5000	10.8000
+'Colo-Judson silty clay loams, 0 to 5 percent slopes, occasionally flooded'		'SICL'	5	0.0200	0.7500	4400100.00	0.0072	3.5000	0.9583
 	  200.000	  30.00	  30.00	   6.00	  25.60	   0.00
 	  860.000	  31.00	  31.00	   3.00	  25.70	   0.00
 	 1170.000	  33.00	  33.00	   1.70	  26.60	   0.00
 	 1320.000	  32.00	  32.00	   1.10	  25.40	   0.00
 	 2000.000	  30.00	  30.00	   1.00	  23.90	   0.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

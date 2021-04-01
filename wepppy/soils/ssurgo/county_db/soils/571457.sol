@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.148377
+#   Build Date: 2021-04-01 15:01:45.664683
 #   Source Data: Surgo
 # 
 # Mukey: 571457
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Carnasaw stony loam, 15 to 35 percent slopes, extremely stony'		'ST-L'	2	0.1600	0.7500	5052410.00	0.0095	3.3007	33.0246
+'Carnasaw stony loam, 15 to 35 percent slopes, extremely stony'		'ST-L'	2	0.1600	0.7500	5052410.00	0.0095	3.3007	8.7781
 	  150.000	  20.50	  20.50	   1.25	  11.30	  31.11
 	  280.000	  39.00	  39.00	   0.25	  11.30	  19.00
-1 10000.0 3.30264
+0 0 0.000000 0.000000

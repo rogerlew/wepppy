@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.009028
+#   Build Date: 2021-04-01 15:01:43.526243
 #   Source Data: Surgo
 # 
 # Mukey: 762994
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Frisco-Catamount, moist families complex, 5 to 40 percent slopes'		'SPM'	4	0.0900	0.7500	3688500.00	0.0035	3.3550	1080.0000
+'Frisco-Catamount, moist families complex, 5 to 40 percent slopes'		'SPM'	4	0.0900	0.7500	3688500.00	0.0035	3.3550	15.5735
 	  120.000	  10.00	  10.00	   2.00	   9.10	   9.00
 	  320.000	  15.00	  15.00	   1.00	  12.80	  37.95
 	  810.000	  20.00	  20.00	   0.50	  16.20	  67.80
 	 1580.000	  14.00	  14.00	   0.00	  10.30	  73.21
-1 10000.0 101.59200
+0 0 0.000000 0.000000

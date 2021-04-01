@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.239242
+#   Build Date: 2021-04-01 15:01:42.748425
 #   Source Data: Surgo
 # 
 # Mukey: 160929
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Wawasee fine sandy loam, 2 to 6 percent slopes'		'FSL'	3	0.3000	0.7500	4649000.00	0.0059	2.5450	33.0120
+'Wawasee fine sandy loam, 2 to 6 percent slopes'		'FSL'	3	0.3000	0.7500	4649000.00	0.0059	2.5450	14.8145
 	  200.000	   7.00	   7.00	   2.00	  11.50	   5.00
 	  970.000	  23.00	  23.00	   0.75	  13.00	   5.95
 	 1520.000	  13.00	  13.00	   0.75	   9.50	  16.09
-1 10000.0 10.15200
+0 0 0.000000 0.000000

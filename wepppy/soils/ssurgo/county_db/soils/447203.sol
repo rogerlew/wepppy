@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.230251
+#   Build Date: 2021-04-01 15:01:44.750108
 #   Source Data: Surgo
 # 
 # Mukey: 447203
@@ -58,8 +58,8 @@
 # 
 Any comments:
 1 1
-'Ladoga silty clay loam, 5 to 9 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4510360.00	0.0074	3.5000	10.8000
+'Ladoga silty clay loam, 5 to 9 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4510360.00	0.0074	3.5000	0.8633
 	  150.000	  28.00	  28.00	   2.50	  22.80	   0.00
 	  250.000	  28.00	  28.00	   1.00	  22.10	   0.00
 	  480.000	  33.00	  33.00	   0.75	  25.30	   0.00
-1 10000.0 3.96000
+0 0 0.000000 0.000000

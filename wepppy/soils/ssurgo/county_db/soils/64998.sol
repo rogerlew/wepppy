@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.647389
+#   Build Date: 2021-04-01 15:01:42.155677
 #   Source Data: Surgo
 # 
 # Mukey: 64998
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Fritsland-Bravo-Cassiday complex, 30 to 60 percent south slopes'		'SPM'	4	0.2300	0.7500	3688500.00	0.0035	3.3550	1342.8000
+'Fritsland-Bravo-Cassiday complex, 30 to 60 percent south slopes'		'SPM'	4	0.2300	0.7500	3688500.00	0.0035	3.3550	8.4530
 	  250.000	  20.00	  20.00	   4.00	  15.00	   7.50
 	  860.000	  27.50	  27.50	   1.50	  15.00	  17.50
 	 1270.000	  27.50	  27.50	   0.75	  15.00	  37.50
 	 1370.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

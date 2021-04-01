@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.870223
+#   Build Date: 2021-04-01 15:01:41.375752
 #   Source Data: Surgo
 # 
 # Mukey: 526495
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Unicoi-Rock outcrop complex, 50 to 80 percent slopes'		'CB-SL'	3	0.2300	0.7500	4649000.00	0.0050	2.9350	101.6280
+'Unicoi-Rock outcrop complex, 50 to 80 percent slopes'		'CB-SL'	3	0.2300	0.7500	4649000.00	0.0050	2.9350	18.6951
 	  130.000	  13.00	  13.00	   4.00	  11.30	  43.12
 	  460.000	  13.00	  13.00	   0.50	  11.30	  62.83
 	 2030.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 78.12000
+0 0 0.000000 0.000000

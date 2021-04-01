@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.914052
+#   Build Date: 2021-04-01 15:01:41.420293
 #   Source Data: Surgo
 # 
 # Mukey: 523261
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Tallapoosa-Tatum association, hilly'		'GR-SIL'	2	0.3000	0.7500	5061660.00	0.0106	3.5000	32.4000
+'Tallapoosa-Tatum association, hilly'		'GR-SIL'	2	0.3000	0.7500	5061660.00	0.0106	3.5000	5.4444
 	  180.000	  18.00	  18.00	   0.25	  11.30	  35.60
 	  510.000	  35.00	  35.00	   0.25	  11.30	  31.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

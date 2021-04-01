@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.837318
+#   Build Date: 2021-04-01 15:01:45.359405
 #   Source Data: Surgo
 # 
 # Mukey: 1413696
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Mowata-Vidrine complex, 0 to 1 percent slopes, rarely flooded'		'SIL'	2	0.2300	0.7500	5171920.00	0.0124	3.5000	10.1520
+'Mowata-Vidrine complex, 0 to 1 percent slopes, rarely flooded'		'SIL'	2	0.2300	0.7500	5171920.00	0.0124	3.5000	1.6815
 	  200.000	  16.00	  16.00	   2.25	  14.00	   0.00
 	  460.000	  16.00	  16.00	   1.00	  13.70	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.787965
+#   Build Date: 2021-04-01 15:01:42.296586
 #   Source Data: Surgo
 # 
 # Mukey: 564690
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Guyton soils, frequently flooded'		'SIL'	2	0.3000	0.7500	5171920.00	0.0124	3.5000	32.4000
+'Guyton soils, frequently flooded'		'SIL'	2	0.3000	0.7500	5171920.00	0.0124	3.5000	2.5760
 	   80.000	  16.00	  16.00	   2.25	  11.30	   0.00
 	  480.000	  16.00	  16.00	   2.25	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

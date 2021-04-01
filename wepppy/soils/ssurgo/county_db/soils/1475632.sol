@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.808858
+#   Build Date: 2021-04-01 15:01:42.317737
 #   Source Data: Surgo
 # 
 # Mukey: 1475632
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Fullerton-Pailo complex, 20 to 35 percent slopes'		'GR-SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	33.0120
+'Fullerton-Pailo complex, 20 to 35 percent slopes'		'GR-SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	4.6245
 	   50.000	  21.00	  21.00	   1.25	  11.30	  31.13
 	  180.000	  21.00	  21.00	   0.75	  11.30	  31.13
 	 1780.000	  55.00	  55.00	   0.25	  11.30	  37.69
-1 10000.0 33.01200
+0 0 0.000000 0.000000

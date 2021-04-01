@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.809490
+#   Build Date: 2021-04-01 15:01:42.318379
 #   Source Data: Surgo
 # 
 # Mukey: 567379
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Loring silt loam, 8 to 12 percent slopes, severely eroded'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	32.4000
+'Loring silt loam, 8 to 12 percent slopes, severely eroded'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	1.6565
 	  100.000	  15.00	  15.00	   1.25	  11.30	   0.00
 	  510.000	  25.00	  25.00	   0.30	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

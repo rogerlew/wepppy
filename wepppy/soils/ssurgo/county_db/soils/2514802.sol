@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.245822
+#   Build Date: 2021-04-01 15:01:44.765865
 #   Source Data: Surgo
 # 
 # Mukey: 2514802
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Groseclose-Needmore-Urban land complex, 0 to 15 percent slopes'		'SIL'	5	0.3600	0.7500	4951400.00	0.0094	3.5000	100.8000
+'Groseclose-Needmore-Urban land complex, 0 to 15 percent slopes'		'SIL'	5	0.3600	0.7500	4951400.00	0.0094	3.5000	5.2799
 	   80.000	  20.00	  20.00	   1.50	   8.00	   4.00
 	  200.000	  22.00	  22.00	   0.75	   7.00	   4.00
 	  380.000	  35.00	  35.00	   0.25	   9.00	   4.00
 	 1400.000	  55.00	  55.00	   0.25	  14.00	   7.88
 	 1650.000	  42.00	  42.00	   0.25	  11.00	  12.64
-1 10000.0 9.72000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.808095
+#   Build Date: 2021-04-01 15:01:44.327310
 #   Source Data: Surgo
 # 
 # Mukey: 365109
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Heatly-Nobscot complex, 0 to 5 percent slopes'		'FS'	3	0.2300	0.7500	5878440.00	0.0209	2.1738	331.2000
+'Heatly-Nobscot complex, 0 to 5 percent slopes'		'FS'	3	0.2300	0.7500	5878440.00	0.0209	2.1738	33.4113
 	  610.000	   7.00	   7.00	   0.55	   3.80	   0.00
 	 1570.000	  27.00	  27.00	   0.30	  14.20	   0.00
 	 2030.000	  17.00	  17.00	   0.30	   9.00	   0.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

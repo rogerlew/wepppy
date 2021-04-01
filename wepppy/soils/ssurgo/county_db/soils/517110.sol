@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.783515
+#   Build Date: 2021-04-01 15:01:44.302216
 #   Source Data: Surgo
 # 
 # Mukey: 517110
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Unison-Urban land complex, 2 to 7 percent slopes'		'L'	3	0.3600	0.7500	5052410.00	0.0117	3.1057	82.8000
+'Unison-Urban land complex, 2 to 7 percent slopes'		'L'	3	0.3600	0.7500	5052410.00	0.0117	3.1057	9.6387
 	  380.000	  17.50	  17.50	   1.00	   8.00	   7.85
 	 1470.000	  50.00	  50.00	   0.25	  18.00	   7.85
 	 2000.000	  38.00	  38.00	   0.25	  14.00	   7.85
-1 10000.0 82.80000
+0 0 0.000000 0.000000

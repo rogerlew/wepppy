@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.801147
+#   Build Date: 2021-04-01 15:01:42.309940
 #   Source Data: Surgo
 # 
 # Mukey: 294172
@@ -60,7 +60,7 @@
 # 
 Any comments:
 1 1
-'Worth and Empeyville soils, 8 to 15 percent slopes, very stony'		'SPM'	8	0.1100	0.7500	5502700.00	0.0250	3.5000	360.0000
+'Worth and Empeyville soils, 8 to 15 percent slopes, very stony'		'SPM'	8	0.1100	0.7500	5502700.00	0.0250	3.5000	14.1615
 	   80.000	   7.00	   7.00	   3.00	  14.00	   5.95
 	  100.000	   7.00	   7.00	   7.50	  25.00	   5.00
 	  190.000	   7.00	   7.00	   6.50	  25.00	   8.92
@@ -69,4 +69,4 @@ Any comments:
 	  840.000	   2.00	   2.00	   0.25	   5.00	  64.00
 	 1270.000	   2.00	   2.00	   0.25	   5.00	  37.00
 	 2000.000	   2.00	   2.00	   0.15	   5.00	  37.00
-1 10000.0 144.00000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.685300
+#   Build Date: 2021-04-01 15:01:45.206359
 #   Source Data: Surgo
 # 
 # Mukey: 516693
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Nolichucky very stony sandy loam, 30 to 65 percent slopes'		'GR-SL'	4	0.3600	0.7500	4725840.00	0.0090	3.0418	32.4000
+'Nolichucky very stony sandy loam, 30 to 65 percent slopes'		'GR-SL'	4	0.3600	0.7500	4725840.00	0.0090	3.0418	18.2837
 	  200.000	  15.00	  15.00	   1.25	   8.10	  43.00
 	  810.000	  30.00	  30.00	   0.25	  11.10	  10.00
 	 1090.000	  30.00	  30.00	   0.25	  11.10	  28.75
 	 1780.000	  37.00	  37.00	   0.25	  13.50	  15.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

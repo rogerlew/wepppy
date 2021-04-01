@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.162281
+#   Build Date: 2021-04-01 15:01:43.679624
 #   Source Data: Surgo
 # 
 # Mukey: 406084
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Monona silt loam, 9 to 14 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4730880.00	0.0080	3.5000	32.4000
+'Monona silt loam, 9 to 14 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4730880.00	0.0080	3.5000	1.0376
 	  180.000	  24.00	  24.00	   2.70	  20.30	   0.00
 	  760.000	  24.00	  24.00	   0.70	  18.90	   0.00
 	 2000.000	  20.00	  20.00	   0.30	  16.90	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

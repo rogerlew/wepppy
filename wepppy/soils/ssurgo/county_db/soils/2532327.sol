@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.668197
+#   Build Date: 2021-04-01 15:01:44.186905
 #   Source Data: Surgo
 # 
 # Mukey: 2532327
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Maplegrove silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	5282180.00	0.0150	3.5000	32.4000
+'Maplegrove silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	5282180.00	0.0150	3.5000	2.3387
 	  280.000	  14.00	  14.00	   2.50	  13.70	   1.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

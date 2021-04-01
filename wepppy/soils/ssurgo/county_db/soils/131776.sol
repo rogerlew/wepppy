@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.338040
+#   Build Date: 2021-04-01 15:01:41.845447
 #   Source Data: Surgo
 # 
 # Mukey: 131776
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Troup sand, 0 to 6 percent slopes, Carolina and Georgia Sand Hills'		'S'	3	0.1600	0.7500	4072700.00	0.0138	2.5890	331.2000
+'Troup sand, 0 to 6 percent slopes, Carolina and Georgia Sand Hills'		'S'	3	0.1600	0.7500	4072700.00	0.0138	2.5890	31.6391
 	  250.000	   5.00	   5.00	   0.75	  11.30	   0.00
 	 1370.000	   5.00	   5.00	   0.30	  11.30	   0.00
 	 2030.000	  22.00	  22.00	   0.25	  11.30	   0.00
-1 10000.0 36.00000
+0 0 0.000000 0.000000

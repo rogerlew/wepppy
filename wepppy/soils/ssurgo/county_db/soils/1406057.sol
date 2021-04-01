@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.681307
+#   Build Date: 2021-04-01 15:01:43.191941
 #   Source Data: Surgo
 # 
 # Mukey: 1406057
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Blount silt loam, ground moraine, 0 to 2 percent slopes'		'SIL'	1	0.2900	0.7500	4841140.00	0.0085	3.5000	33.0120
+'Blount silt loam, ground moraine, 0 to 2 percent slopes'		'SIL'	1	0.2900	0.7500	4841140.00	0.0085	3.5000	3.2895
 	  250.000	  22.00	  22.00	   2.50	  18.00	   6.90
-1 10000.0 3.31200
+0 0 0.000000 0.000000

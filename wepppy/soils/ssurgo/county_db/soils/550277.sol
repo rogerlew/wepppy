@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.041142
+#   Build Date: 2021-04-01 15:01:41.547308
 #   Source Data: Surgo
 # 
 # Mukey: 550277
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Berks-Brownsville complex, 30 to 55 percent slopes, very rocky, eroded'		'CN-SIL'	3	0.3700	0.7500	4610580.00	0.0051	3.0116	82.8000
+'Berks-Brownsville complex, 30 to 55 percent slopes, very rocky, eroded'		'CN-SIL'	3	0.3700	0.7500	4610580.00	0.0051	3.0116	5.6093
 	   80.000	  14.00	  14.00	   3.00	  11.30	  26.53
 	  640.000	  18.50	  18.50	   0.25	  11.30	  55.38
 	  890.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

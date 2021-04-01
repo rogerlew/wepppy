@@ -42,7 +42,7 @@ if __name__ == "__main__":
         surgo_c = SurgoSoilCollection(mukeys[i0:iend])
         surgo_c.makeWeppSoils()
 
-        surgo_c.writeWeppSoils('soils', write_logs=True, version='2006.2')
+        surgo_c.writeWeppSoils('soils', write_logs=True, version='2006.2ag')
 
         print(surgo_c.invalidSoils.keys())
 

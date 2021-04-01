@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.242215
+#   Build Date: 2021-04-01 15:01:44.762204
 #   Source Data: Surgo
 # 
 # Mukey: 125451
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Madison gravelly fine sandy loam, 6 to 10 percent slopes, moderately eroded'		'GR-FSL'	4	0.2900	0.7500	5782390.00	0.0106	2.5278	100.8000
+'Madison gravelly fine sandy loam, 6 to 10 percent slopes, moderately eroded'		'GR-FSL'	4	0.2900	0.7500	5782390.00	0.0106	2.5278	17.3612
 	  150.000	  12.00	  12.00	   1.25	  11.30	  31.84
 	  760.000	  48.00	  48.00	   0.25	  11.30	  14.86
 	  970.000	  30.00	  30.00	   0.25	  11.30	  15.85
 	 2030.000	  12.00	  12.00	   0.10	  11.30	  21.43
-1 10000.0 32.40000
+0 0 0.000000 0.000000

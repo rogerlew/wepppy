@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.520254
+#   Build Date: 2021-04-01 15:01:44.039069
 #   Source Data: Surgo
 # 
 # Mukey: 2628668
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Kirkland silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	5006530.00	0.0099	3.5000	32.4000
+'Kirkland silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	5006530.00	0.0099	3.5000	3.2107
 	  210.000	  19.00	  19.00	   2.00	  16.30	   0.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

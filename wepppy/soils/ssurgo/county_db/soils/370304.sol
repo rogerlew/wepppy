@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.025215
+#   Build Date: 2021-04-01 15:01:45.541472
 #   Source Data: Surgo
 # 
 # Mukey: 370304
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Rader fine sandy loam, 1 to 3 percent slopes'		'FSL'	3	0.2300	0.7500	6301060.00	0.0114	2.1762	100.8000
+'Rader fine sandy loam, 1 to 3 percent slopes'		'FSL'	3	0.2300	0.7500	6301060.00	0.0114	2.1762	19.1505
 	  290.000	   9.00	   9.00	   1.25	  11.30	   4.00
 	  570.000	   9.00	   9.00	   0.75	  11.30	   5.00
 	  730.000	  24.00	  24.00	   0.75	  11.30	   7.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

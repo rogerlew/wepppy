@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.589199
+#   Build Date: 2021-04-01 15:01:41.094389
 #   Source Data: Surgo
 # 
 # Mukey: 125556
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Georgeville fine sandy loam, 2 to 6 percent slopes'		'FSL'	4	0.3000	0.7500	5897650.00	0.0108	2.5255	32.4000
+'Georgeville fine sandy loam, 2 to 6 percent slopes'		'FSL'	4	0.3000	0.7500	5897650.00	0.0108	2.5255	18.3796
 	  180.000	  12.50	  12.50	   1.25	  11.30	  11.80
 	 1170.000	  31.00	  31.00	   0.25	  11.30	   6.90
 	 1420.000	  50.00	  50.00	   0.25	  11.30	   3.48
 	 1630.000	  26.00	  26.00	   0.25	  11.30	   7.85
-1 10000.0 32.40000
+0 0 0.000000 0.000000

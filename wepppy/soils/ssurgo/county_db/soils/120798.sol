@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.023507
+#   Build Date: 2021-04-01 15:01:45.539683
 #   Source Data: Surgo
 # 
 # Mukey: 120798
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Craven-Uchee complex, 6 to 10 percent slopes'		'FSL'	1	0.3600	0.7500	5993700.00	0.0109	2.7890	28.8000
+'Craven-Uchee complex, 6 to 10 percent slopes'		'FSL'	1	0.3600	0.7500	5993700.00	0.0109	2.7890	19.6975
 	  230.000	  17.00	  17.00	   1.25	   7.10	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

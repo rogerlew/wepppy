@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.031738
+#   Build Date: 2021-04-01 15:01:45.548131
 #   Source Data: Surgo
 # 
 # Mukey: 323641
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Sparr fine sand, bouldery subsurface, 0 to 5 percent slopes'		'FS'	4	0.3700	0.7500	5436610.00	0.0077	2.0472	331.2000
+'Sparr fine sand, bouldery subsurface, 0 to 5 percent slopes'		'FS'	4	0.3700	0.7500	5436610.00	0.0077	2.0472	43.1858
 	  200.000	   3.00	   3.00	   1.75	   0.60	   6.40
 	 1170.000	   3.00	   3.00	   0.25	   0.60	  14.20
 	 1470.000	  23.50	  23.50	   0.25	   4.60	   2.50
 	 2030.000	  35.50	  35.50	   0.25	   7.00	   2.50
-1 10000.0 7.20000
+0 0 0.000000 0.000000

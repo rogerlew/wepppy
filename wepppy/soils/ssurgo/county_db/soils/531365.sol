@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.025802
+#   Build Date: 2021-04-01 15:01:43.543207
 #   Source Data: Surgo
 # 
 # Mukey: 531365
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Tallapoosa fine sandy loam, 15 to 25 percent slopes'		'FSL'	3	0.3000	0.7500	5936070.00	0.0167	2.4814	32.4000
+'Tallapoosa fine sandy loam, 15 to 25 percent slopes'		'FSL'	3	0.3000	0.7500	5936070.00	0.0167	2.4814	18.5145
 	  100.000	  12.00	  12.00	   0.75	  11.30	  17.20
 	  250.000	  24.00	  24.00	   0.25	  11.30	  14.90
 	  480.000	  16.50	  16.50	   0.25	  11.30	  28.80
-1 10000.0 0.00000
+0 0 0.000000 0.000000

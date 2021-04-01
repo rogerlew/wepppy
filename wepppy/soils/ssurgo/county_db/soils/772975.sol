@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.673969
+#   Build Date: 2021-04-01 15:01:45.194864
 #   Source Data: Surgo
 # 
 # Mukey: 772975
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Colby silt loam, 10 to 25 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	21.6000
+'Colby silt loam, 10 to 25 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	1.8117
 	  150.000	  21.00	  21.00	   1.25	  16.00	   0.00
 	 2000.000	  21.00	  21.00	   0.50	  13.20	   0.00
-1 10000.0 21.60000
+0 0 0.000000 0.000000

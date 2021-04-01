@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.072002
+#   Build Date: 2021-04-01 15:01:42.580670
 #   Source Data: Surgo
 # 
 # Mukey: 1427993
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Woodson silt loam, 1 to 3 percent slopes'		'SICL'	1	0.2300	0.7500	4786010.00	0.0082	3.5000	10.8000
+'Woodson silt loam, 1 to 3 percent slopes'		'SICL'	1	0.2300	0.7500	4786010.00	0.0082	3.5000	1.2651
 	  210.000	  23.00	  23.00	   2.50	  19.30	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

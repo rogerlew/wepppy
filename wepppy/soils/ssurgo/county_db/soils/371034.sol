@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.950600
+#   Build Date: 2021-04-01 15:01:44.470017
 #   Source Data: Surgo
 # 
 # Mukey: 371034
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Oplin very gravelly clay loam, 1 to 8 percent slopes'		'GRV-CL'	2	0.2300	0.7500	4706630.00	0.0051	3.8926	32.4000
+'Oplin very gravelly clay loam, 1 to 8 percent slopes'		'GRV-CL'	2	0.2300	0.7500	4706630.00	0.0051	3.8926	6.0898
 	  300.000	  28.00	  28.00	   6.00	  17.50	  56.42
 	  460.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000

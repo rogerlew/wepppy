@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.872716
+#   Build Date: 2021-04-01 15:01:45.395727
 #   Source Data: Surgo
 # 
 # Mukey: 456427
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Hugo and Josephine sandy loams, very steep'		'SL'	3	0.3600	0.7500	4725840.00	0.0055	3.0418	100.8000
+'Hugo and Josephine sandy loams, very steep'		'SL'	3	0.3600	0.7500	4725840.00	0.0055	3.0418	17.9348
 	  200.000	  15.00	  15.00	   2.50	  10.00	  15.00
 	 1140.000	  15.00	  15.00	   0.60	  10.00	  39.38
 	 1240.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

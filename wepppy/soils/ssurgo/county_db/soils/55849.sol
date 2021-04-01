@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.677079
+#   Build Date: 2021-04-01 15:01:43.187653
 #   Source Data: Surgo
 # 
 # Mukey: 55849
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Wink-Madurez association, gently sloping'		'FSL'	2	0.2300	0.7500	6051330.00	0.0274	2.5116	101.6280
+'Wink-Madurez association, gently sloping'		'FSL'	2	0.2300	0.7500	6051330.00	0.0274	2.5116	20.0530
 	  230.000	  13.00	  13.00	   0.25	   9.80	  10.27
 	 1520.000	  13.00	  13.00	   0.25	   9.80	  10.27
-1 10000.0 101.62800
+0 0 0.000000 0.000000

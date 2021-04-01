@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.621878
+#   Build Date: 2021-04-01 15:01:42.129878
 #   Source Data: Surgo
 # 
 # Mukey: 625743
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Hawthorne-Bodine complex, 20 to 60 percent slopes'		'GR-SIL'	2	0.3600	0.7500	5034095.00	0.0102	3.5000	101.6280
+'Hawthorne-Bodine complex, 20 to 60 percent slopes'		'GR-SIL'	2	0.3600	0.7500	5034095.00	0.0102	3.5000	4.8591
 	  360.000	  18.50	  18.50	   1.00	  11.30	  38.25
 	  860.000	  23.50	  23.50	   0.25	  11.30	  48.83
-1 10000.0 2.55600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.021640
+#   Build Date: 2021-04-01 15:01:43.538968
 #   Source Data: Surgo
 # 
 # Mukey: 2450687
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Rofork very gravelly sandy loam, 5 to 55 percent slopes'		'GRV-SL'	3	0.1600	0.7500	4802680.00	0.0054	2.8886	101.6280
+'Rofork very gravelly sandy loam, 5 to 55 percent slopes'		'GRV-SL'	3	0.1600	0.7500	4802680.00	0.0054	2.8886	18.5193
 	  130.000	  13.00	  13.00	   3.00	  12.90	  60.00
 	  230.000	  13.00	  13.00	   3.00	  12.90	  77.00
 	  360.000	   7.00	   7.00	   0.25	   5.20	  81.00
-1 10000.0 1.80000
+0 0 0.000000 0.000000

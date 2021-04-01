@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.580869
+#   Build Date: 2021-04-01 15:01:41.085848
 #   Source Data: Surgo
 # 
 # Mukey: 1381605
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Pickney, Dorovan, and Bibb soils, frequently flooded'		'S'	2	0.1600	0.7500	4053490.00	0.0040	2.5818	331.2000
+'Pickney, Dorovan, and Bibb soils, frequently flooded'		'S'	2	0.1600	0.7500	4053490.00	0.0040	2.5818	30.7725
 	 1040.000	   4.80	   4.80	   5.60	  11.30	   0.00
 	 2030.000	   5.50	   5.50	   2.20	  11.30	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

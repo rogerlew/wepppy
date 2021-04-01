@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.092598
+#   Build Date: 2021-04-01 15:01:42.601765
 #   Source Data: Surgo
 # 
 # Mukey: 498625
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Travelers very stony loam, 3 to 25 percent slopes'		'STV-L'	1	0.2300	0.7500	5052410.00	0.0153	3.1057	33.0120
+'Travelers very stony loam, 3 to 25 percent slopes'		'STV-L'	1	0.2300	0.7500	5052410.00	0.0153	3.1057	9.2674
 	  410.000	  17.50	  17.50	   0.75	  10.00	  91.25
-1 10000.0 3.31200
+0 0 0.000000 0.000000

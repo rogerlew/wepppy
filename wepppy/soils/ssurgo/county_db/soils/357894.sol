@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.470031
+#   Build Date: 2021-04-01 15:01:43.988310
 #   Source Data: Surgo
 # 
 # Mukey: 357894
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Busher-Tassel loamy very fine sands, 6 to 30 percent slopes'		'LVFS'	4	0.1600	0.7500	10412000.00	0.0144	0.9350	295.2000
+'Busher-Tassel loamy very fine sands, 6 to 30 percent slopes'		'LVFS'	4	0.1600	0.7500	10412000.00	0.0144	0.9350	25.2997
 	  250.000	   9.00	   9.00	   2.50	   9.40	   1.00
 	  740.000	   9.00	   9.00	   1.00	   8.50	   3.00
 	 1120.000	   8.00	   8.00	   0.75	   7.50	   7.00
 	 2000.000	   6.00	   6.00	   0.20	  11.30	  55.50
-1 10000.0 50.79600
+0 0 0.000000 0.000000

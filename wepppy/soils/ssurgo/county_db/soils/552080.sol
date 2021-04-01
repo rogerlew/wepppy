@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.044790
+#   Build Date: 2021-04-01 15:01:41.551021
 #   Source Data: Surgo
 # 
 # Mukey: 552080
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Eden flaggy silty clay, 20 to 30 percent slopes, severely eroded'		'FL-SIC'	1	0.3000	0.7500	3793670.00	0.0069	3.5000	8.3880
+'Eden flaggy silty clay, 20 to 30 percent slopes, severely eroded'		'FL-SIC'	1	0.3000	0.7500	3793670.00	0.0069	3.5000	2.5359
 	  210.000	  41.00	  41.00	   1.75	  22.60	  28.22
-1 10000.0 3.31200
+0 0 0.000000 0.000000

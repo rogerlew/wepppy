@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.604000
+#   Build Date: 2021-04-01 15:01:41.109362
 #   Source Data: Surgo
 # 
 # Mukey: 404362
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Fayette silt loam, 5 to 9 percent slopes, moderately eroded'		'SIL'	3	0.2300	0.7500	4620620.00	0.0076	3.5000	32.4000
+'Fayette silt loam, 5 to 9 percent slopes, moderately eroded'		'SIL'	3	0.2300	0.7500	4620620.00	0.0076	3.5000	1.3407
 	  200.000	  26.00	  26.00	   2.00	  21.50	   0.00
 	 1420.000	  30.00	  30.00	   0.25	  11.30	   0.00
 	 1830.000	  24.00	  24.00	   0.25	  17.50	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

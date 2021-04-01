@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.403323
+#   Build Date: 2021-04-01 15:01:44.924342
 #   Source Data: Surgo
 # 
 # Mukey: 272554
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Glynwood silt loam, 2 to 6 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	4620620.00	0.0076	3.5000	10.1520
+'Glynwood silt loam, 2 to 6 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	4620620.00	0.0076	3.5000	3.2895
 	  210.000	  26.00	  26.00	   1.75	  18.00	   7.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

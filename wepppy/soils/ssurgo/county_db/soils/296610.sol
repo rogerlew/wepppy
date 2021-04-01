@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.335794
+#   Build Date: 2021-04-01 15:01:41.843143
 #   Source Data: Surgo
 # 
 # Mukey: 296610
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Morris channery loam, 0 to 8 percent slopes, rubbly'		'MPM'	3	0.2900	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Morris channery loam, 0 to 8 percent slopes, rubbly'		'MPM'	3	0.2900	0.7500	4649000.00	0.0050	2.5450	6.6838
 	  120.000	  18.00	  18.00	  10.00	  10.00	  34.40
 	  310.000	  16.00	  16.00	   1.50	  11.30	  33.78
 	  410.000	  14.00	  14.00	   1.00	  11.30	  33.78
-1 10000.0 0.36000
+0 0 0.000000 0.000000

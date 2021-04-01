@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.312027
+#   Build Date: 2021-04-01 15:01:43.828714
 #   Source Data: Surgo
 # 
 # Mukey: 185238
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Knobcreek-Navilleton silt loams, 6 to 12 percent slopes, eroded'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
+'Knobcreek-Navilleton silt loams, 6 to 12 percent slopes, eroded'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	1.4742
 	  180.000	  20.00	  20.00	   1.70	  14.00	   2.00
 	  450.000	  34.00	  34.00	   0.50	  16.00	   2.00
-1 10000.0 5.07600
+0 0 0.000000 0.000000

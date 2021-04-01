@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.661570
+#   Build Date: 2021-04-01 15:01:42.170116
 #   Source Data: Surgo
 # 
 # Mukey: 1389407
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Alderwood gravelly sandy loam, 8 to 15 percent slopes'		'GR-SL'	4	0.2300	0.7500	4898730.00	0.0054	2.5346	100.8000
+'Alderwood gravelly sandy loam, 8 to 15 percent slopes'		'GR-SL'	4	0.2300	0.7500	4898730.00	0.0054	2.5346	16.6700
 	  180.000	   8.00	   8.00	   9.00	  21.00	  36.00
 	  530.000	   8.00	   8.00	   2.50	  10.00	  55.00
 	  750.000	   8.00	   8.00	   2.50	  10.00	  60.00
 	  890.000	   8.00	   8.00	   0.50	   9.00	  63.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.653359
+#   Build Date: 2021-04-01 15:01:42.161708
 #   Source Data: Surgo
 # 
 # Mukey: 58584
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Kimbrough-Stegall association, nearly level'		'L'	3	0.1600	0.7500	5110040.00	0.0081	3.1858	32.4000
+'Kimbrough-Stegall association, nearly level'		'L'	3	0.1600	0.7500	5110040.00	0.0081	3.1858	9.7581
 	  180.000	  19.00	  19.00	   1.50	   7.50	  20.00
 	  740.000	   7.00	   7.00	   7.00	  11.30	  55.50
 	 1020.000	  20.00	  20.00	   0.25	   7.50	  65.80
-1 10000.0 27.72000
+0 0 0.000000 0.000000

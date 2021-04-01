@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.319680
+#   Build Date: 2021-04-01 15:01:43.836505
 #   Source Data: Surgo
 # 
 # Mukey: 150409
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'ABLA/ACGL Koffgo-ABLA/ACGL Rhylow-ARTRV-SYOR2/FEID Povey complex, 35 to 60 percent slopes'		'SPM'	4	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+'ABLA/ACGL Koffgo-ABLA/ACGL Rhylow-ARTRV-SYOR2/FEID Povey complex, 35 to 60 percent slopes'		'SPM'	4	0.1600	0.7500	3688500.00	0.0035	3.3550	9.5936
 	  280.000	  11.50	  11.50	   2.50	  13.50	  47.54
 	  460.000	  10.50	  10.50	   0.75	  10.50	  81.00
 	 1420.000	   8.50	   8.50	   0.50	   6.50	  91.63
 	 1520.000	   0.50	   0.50	   0.00	   0.50	  95.00
-1 10000.0 1522.80000
+0 0 0.000000 0.000000

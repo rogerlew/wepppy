@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.858162
+#   Build Date: 2021-04-01 15:01:43.374887
 #   Source Data: Surgo
 # 
 # Mukey: 416867
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Kranzburg-Brookings silty clay loams, 1 to 6 percent slopes'		'SICL'	4	0.0900	0.7500	4455230.00	0.0073	3.5000	10.1520
+'Kranzburg-Brookings silty clay loams, 1 to 6 percent slopes'		'SICL'	4	0.0900	0.7500	4455230.00	0.0073	3.5000	1.0709
 	  200.000	  29.00	  29.00	   3.00	  24.20	   0.00
 	  720.000	  29.00	  29.00	   2.00	  23.80	   2.00
 	 1580.000	  30.00	  30.00	   0.75	  20.80	   9.00
 	 2000.000	  30.00	  30.00	   0.25	  18.50	   9.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

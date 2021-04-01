@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.553429
+#   Build Date: 2021-04-01 15:01:43.064350
 #   Source Data: Surgo
 # 
 # Mukey: 537103
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Lowell-Westmoreland silt loams, benched, 30 to 70 percent slopes'		'SIL'	5	0.3700	0.7500	4813575.00	0.0084	3.5000	33.0120
+'Lowell-Westmoreland silt loams, benched, 30 to 70 percent slopes'		'SIL'	5	0.3700	0.7500	4813575.00	0.0084	3.5000	3.5556
 	  180.000	  22.50	  22.50	   2.50	  15.00	   2.50
 	  460.000	  30.00	  30.00	   0.75	  22.50	   3.48
 	 1070.000	  47.50	  47.50	   0.25	  22.50	   7.85
 	 1270.000	  31.00	  31.00	   0.25	  28.00	  41.27
 	 1320.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 7.59600
+0 0 0.000000 0.000000

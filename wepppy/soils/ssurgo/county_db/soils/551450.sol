@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.680123
+#   Build Date: 2021-04-01 15:01:45.201128
 #   Source Data: Surgo
 # 
 # Mukey: 551450
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Garmon-Carpenter-Newbern complex, rocky, 30 to 65 percent slopes'		'L'	3	0.2300	0.7500	5071620.00	0.0072	3.0674	101.6280
+'Garmon-Carpenter-Newbern complex, rocky, 30 to 65 percent slopes'		'L'	3	0.2300	0.7500	5071620.00	0.0072	3.0674	10.2058
 	   80.000	  17.00	  17.00	   1.75	   6.30	  18.00
 	  610.000	  26.00	  26.00	   0.25	   9.10	  37.90
 	  860.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

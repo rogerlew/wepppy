@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.635945
+#   Build Date: 2021-04-01 15:01:44.154045
 #   Source Data: Surgo
 # 
 # Mukey: 539175
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Hartleton channery silt loam, 25 to 60 percent slopes'		'SPM'	4	0.3700	0.7500	4514530.00	0.0048	2.7806	331.2000
+'Hartleton channery silt loam, 25 to 60 percent slopes'		'SPM'	4	0.3700	0.7500	4514530.00	0.0048	2.7806	5.3055
 	  160.000	  17.50	  17.50	   2.00	  11.30	  32.00
 	  940.000	  21.00	  21.00	   0.25	  11.30	  65.62
 	 1170.000	  21.00	  21.00	   0.25	  11.30	  85.75
 	 1270.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 15.22800
+0 0 0.000000 0.000000

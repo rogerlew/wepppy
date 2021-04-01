@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.168443
+#   Build Date: 2021-04-01 15:01:45.685225
 #   Source Data: Surgo
 # 
 # Mukey: 58623
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Wickett-Sharvana complex, gently undulating'		'LFS'	4	0.1600	0.7500	7242350.00	0.0244	1.8595	331.2000
+'Wickett-Sharvana complex, gently undulating'		'LFS'	4	0.1600	0.7500	7242350.00	0.0244	1.8595	30.2619
 	  380.000	   8.50	   8.50	   0.50	   3.00	   1.00
 	  910.000	  13.00	  13.00	   0.25	   6.00	   1.00
 	 1600.000	   7.00	   7.00	   7.00	  11.30	  55.50
 	 2030.000	  11.50	  11.50	   0.30	   6.00	  27.25
-1 10000.0 100.80000
+0 0 0.000000 0.000000
