@@ -2,17 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.641275
+#   Build Date: 2021-04-01 12:52:33.024504
 #   Source Data: Surgo
 # 
 # Mukey: 111783
-# Major Component: 14694764 (comppct_r = 90.0)
-# Texture: sand loam
+# Major Component: 14694765 (comppct_r = 6.0)
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42324238   Oa1            13.0     9.0        0.0         0.0          0.3     7.0    66.8    10.0    50.0
-#  42324239   Oa2           274.0     9.0        0.0         0.0          0.3     7.0    66.8    10.0    40.0
+#  42324240   A              15.0    23.0        0.0         0.0         1.46    16.0    25.0    15.0     1.5
+#  42324241   Cg             69.0    23.0        0.0         0.0          1.4    31.0    10.0     4.2    0.25
+#  42324242   2Oa    X      203.0    22.0        0.0         0.0         0.26     7.0    66.8    10.0    50.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Dorovan muck, 0 to 2 percent slopes, frequently flooded'		'MUCK'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	32.4000
-	  130.000	  66.80	   7.00	  50.00	  11.30	  55.50
-	 2740.000	  66.80	   7.00	  40.00	  11.30	  55.50
-1 10000.0 32.40000
+'Dorovan muck, 0 to 2 percent slopes, frequently flooded'		'L'	2	0.2300	0.7500	5171920.00	0.0124	3.5000	82.8000
+	  150.000	  16.00	  16.00	   1.50	   8.70	   4.00
+	  690.000	  31.00	  31.00	   0.25	  16.20	   4.00
+1 10000.0 82.80000

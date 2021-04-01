@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.549057
+#   Build Date: 2021-04-01 12:52:29.777996
 #   Source Data: Surgo
 # 
 # Mukey: 513488
 # Major Component: 15253809 (comppct_r = 45.0)
-# Texture: sand loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44110064   Oe              3.0    92.0        0.0         0.0         0.18     7.0    66.8    10.0    70.0
+#  44110064   Oe     X        3.0    92.0        0.0         0.0         0.18     7.0    66.8    10.0    70.0
 #  44110068   A              20.0    23.0        0.0        17.0         1.35    15.0    37.0    10.4     2.5
 #  44110065   BA+Bw+BC          89.0    23.0        0.0        15.0          1.4    20.0    40.0    11.5     0.3
 #  44110066   C              99.0    28.0        0.0        20.0          1.4    20.0    40.0    11.5    0.28
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,9 +57,8 @@
 # 
 Any comments:
 1 1
-'Berks-Pineville association, very steep, very stony'		'MPM'	4	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  70.00	  80.00	  55.50
-	  200.000	  37.00	  15.00	   2.50	  22.00	  50.20
-	  890.000	  40.00	  20.00	   0.30	   8.00	  60.05
-	  990.000	  40.00	  20.00	   0.28	   6.00	  66.40
+'Berks-Pineville association, very steep, very stony'		'MPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  200.000	  15.00	  15.00	   2.50	  22.00	  50.20
+	  890.000	  20.00	  20.00	   0.30	   8.00	  60.05
+	  990.000	  20.00	  20.00	   0.28	   6.00	  66.40
 1 10000.0 2.52000

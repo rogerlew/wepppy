@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.754255
+#   Build Date: 2021-04-01 12:52:33.142722
 #   Source Data: Surgo
 # 
 # Mukey: 1481039
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41731045   Oa             48.0    21.0        0.0         0.0         0.53     7.0    66.8    10.0    42.5
+#  41731045   Oa     X       48.0    21.0        0.0         0.0         0.53     7.0    66.8    10.0    42.5
 #  41731043   2A            107.0    22.0        0.0         0.0          1.5    14.0    76.8    12.2    12.5
 #  41731044   2Cg           203.0     8.0        0.0         0.0          1.5    22.5    69.6    15.9    2.75
 # 
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,7 @@
 # 
 Any comments:
 1 1
-'Croatan, Surrency, and Pantego soils, depressional'		'MUCK'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	75.6000
-	  480.000	  66.80	   7.00	  42.50	  11.30	  55.50
-	 1070.000	  76.80	  14.00	  12.50	  11.30	   0.00
-	 2030.000	  69.60	  22.50	   2.75	  11.30	   0.00
+'Croatan, Surrency, and Pantego soils, depressional'		'MUCK'	2	0.1600	0.7500	4649000.00	0.0050	2.5450	75.6000
+	 1070.000	  14.00	  14.00	  12.50	  11.30	   0.00
+	 2030.000	  22.50	  22.50	   2.75	  11.30	   0.00
 1 10000.0 28.80000

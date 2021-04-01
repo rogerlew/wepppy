@@ -2,17 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:18:05.094140
+#   Build Date: 2021-04-01 12:53:57.108885
 #   Source Data: StatsGo
 # 
 # Mukey: 676924
-# Major Component: 14273283 (comppct_r = 20.0)
-# Texture: loam
+# Major Component: 14273288 (comppct_r = 20.0)
+# Texture: clay loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41082793   H1             15.0  9.1743        0.0         0.0          1.2    22.5    39.8    11.8     1.5
-#  41082794   H2            152.0  9.1743        0.0         0.0         1.33    26.5    37.9    11.2     7.0
+#  41082809   H1             10.0  9.1743        0.0         3.0         1.15    31.5    35.3    10.6     2.0
+#  41082810   H2             38.0  9.1743        0.0         0.0         1.25    27.5    34.7    10.4    0.75
+#  41082811   H3             48.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -42,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,7 +55,8 @@
 # 
 Any comments:
 1 1
-'Zigweid-Thedalund-Shingle-Midway-Kishona-Cambria (s8982)'		'L'	2	0.3293	0.7500	4994780.00	0.0080	3.4481	33.0275
-	  150.000	  39.80	  22.50	   1.50	   0.00	  12.50
-	 1520.000	  37.90	  26.50	   7.00	   0.00	  12.50
-1 10000.0 33.02748
+'Zigweid-Thedalund-Shingle-Midway-Kishona-Cambria (s8982)'		'CL'	3	0.2696	0.7500	4764260.00	0.0061	4.1027	6.8484
+	  100.000	  31.50	  31.50	   2.00	  11.30	  15.12
+	  380.000	  27.50	  27.50	   0.75	  11.30	  12.50
+	  480.000	   7.00	   7.00	   7.00	  11.30	  55.50
+0 0 0.000000 0.000000

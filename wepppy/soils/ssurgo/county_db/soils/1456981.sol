@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.652026
+#   Build Date: 2021-04-01 12:52:33.035282
 #   Source Data: Surgo
 # 
 # Mukey: 1456981
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44835752   Oe              8.0    23.0        0.0         0.0         0.15     7.0    66.8    10.0    90.0
-#  44835751   Oa             51.0    20.0        0.0         0.0         0.25     7.0    66.8    10.0    87.5
+#  44835752   Oe     X        8.0    23.0        0.0         0.0         0.15     7.0    66.8    10.0    90.0
+#  44835751   Oa     X       51.0    20.0        0.0         0.0         0.25     7.0    66.8    10.0    87.5
 #  44835750   Cg            203.0    99.0        0.0         0.0         1.52     2.0    96.5     7.2    0.25
 # 
 # Restricting Layer:
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Markey mucky peat'		'MPT'	3	0.0900	0.7500	4649000.00	0.0050	2.5450	82.8000
-	   80.000	  66.80	   7.00	  90.00	  11.30	  55.50
-	  510.000	  66.80	   7.00	  87.50	 147.10	  55.50
-	 2030.000	  96.50	   2.00	   0.25	   2.20	   5.00
+'Markey mucky peat'		'MPT'	1	0.0900	0.7500	4649000.00	0.0050	2.5450	82.8000
+	 2030.000	   2.00	   2.00	   0.25	   2.20	   5.00
 1 10000.0 356.40000

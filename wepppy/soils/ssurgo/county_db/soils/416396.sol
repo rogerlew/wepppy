@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.869227
+#   Build Date: 2021-04-01 12:52:29.064144
 #   Source Data: Surgo
 # 
 # Mukey: 416396
 # Major Component: 15449634 (comppct_r = 45.0)
-# Texture: silt loam
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44771336   Oe              8.0   14.11        0.0         0.0         0.15     5.0     5.0     5.0    75.0
-#  44771335   Oa             51.0    21.7        0.0         0.0         0.18     5.0     5.0     5.0    75.0
+#  44771336   Oe     X        8.0   14.11        0.0         0.0         0.15     5.0     5.0     5.0    75.0
+#  44771335   Oa     X       51.0    21.7        0.0         0.0         0.18     5.0     5.0     5.0    75.0
 #  44771337   Cg            203.0   120.0        0.0         0.0         1.55     0.5    94.0    12.3     0.5
 # 
 # Restricting Layer:
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Markey and Carbondale mucks'		'MPM'	3	0.0900	0.7500	5502700.00	0.0250	3.5000	50.7960
-	   80.000	   5.00	   5.00	  75.00	 104.60	  55.50
-	  510.000	   5.00	   5.00	  75.00	 138.70	  55.50
-	 2030.000	  94.00	   0.50	   0.50	   1.40	   0.00
+'Markey and Carbondale mucks'		'MPM'	1	0.0900	0.7500	5502700.00	0.0250	3.5000	50.7960
+	 2030.000	   0.50	   0.50	   0.50	   1.40	   0.00
 1 10000.0 432.00000

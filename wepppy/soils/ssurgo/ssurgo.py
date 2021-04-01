@@ -227,7 +227,8 @@ class Horizon:
         
         # conductivity
         if sand == 0.0 or clay == 0.0 or cec == 0.0:
-            return conductivity
+            self.conductivity = None
+            return
             
         if clay <= 40.0:
             if cec > 1.0:
@@ -390,12 +391,24 @@ class Horizon:
         if desgnmaster is None:
             desgnmaster = 'O'
 
+        sand_valid = isfloat(self.sandtotal_r)
+        if sand_valid:
+            sand_valid = float(self.sandtotal_r) > 0.0
+
+        clay_valid = isfloat(self.claytotal_r)
+        if clay_valid:
+            clay_valid = float(self.claytotal_r) > 0.0
+
+        cec7_valid = isfloat(self.cec7_r)
+        if cec7_valid:
+            cec7_valid = float(self.cec7_r) > 0.0
+
         return not desgnmaster.startswith('O') and \
                isfloat(self.hzdepb_r) and \
-               isfloat(self.sandtotal_r) and \
-               isfloat(self.claytotal_r) and \
+               sand_valid and \
+               clay_valid and \
                isfloat(self.om_r) and \
-               isfloat(self.cec7_r) and \
+               cec7_valid and \
                isfloat(self.sandvf_r) and \
                isfloat(self.ksat_r) and \
                isfloat(self.dbthirdbar_r)
@@ -861,14 +874,14 @@ Any comments:
 0\t0\t0'''
 
     def write(self, wd='./', overwrite=True, fname=None, db_build=False, version='7778') -> SoilSummary:
-        assert version in ['7778', '2006.2']
+        assert version in ['7778', '2006.2', '2006.2ag']
         assert _exists(wd), wd
 
         if version == '7778':
             return self._write7778(wd, overwrite, fname, db_build)
 
         else:
-            return self._write2006_2(wd, overwrite, fname, db_build)
+            return self._write2006_2(wd, overwrite, fname, db_build, ag='ag' in version)
 
     def _write7778(self, wd, overwrite, fname, db_build):
         txt = self.build_file_contents()
@@ -903,8 +916,8 @@ Any comments:
             desc=self.short_description
         )
 
-    def _write2006_2(self, wd, overwrite, fname, db_build):
-        txt = self.build_file_contents_v2006_2()
+    def _write2006_2(self, wd, overwrite, fname, db_build, ag=False):
+        txt = self.build_file_contents_v2006_2(ag)
         txt = txt.replace('\r\n', '\n').replace('\r', '\n')
         txt = '\r\n'.join(txt.splitlines())
 
@@ -1036,7 +1049,7 @@ Any comments:
             
         return '\n'.join(s)
 
-    def build_file_contents_v2006_2(self):
+    def build_file_contents_v2006_2(self, ag=False):
         assert self.valid()
 
         if self.is_urban:
@@ -1044,6 +1057,11 @@ Any comments:
 
         if self.is_water:
             return self._build_water_v2006_2()
+
+        if ag:
+            ksat = self.horizons[0].conductivity
+        else:
+            ksat = self.horizons[0].ksat_r * 3.6
 
         s = "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} 1\n" \
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t" \
@@ -1053,7 +1071,7 @@ Any comments:
 
         s = [s.format(self, majorComponent=self.majorComponent,
                       horizon0=self.horizons[0],
-                      ksat=self.horizons[0].ksat_r * 3.6)]
+                      ksat=ksat)]
 
         ksat_last = 0.0
 
@@ -1094,14 +1112,17 @@ Any comments:
             # make the layers easier to read by making cols fixed width
             # aligning to the right.
             s2 = '{0:>9}\t' \
-                 '{1:>7}\t{2:>7}\t{3:>7}\t' \
+                 '{2:>7}\t{2:>7}\t{3:>7}\t' \
                  '{4:>7}\t{5:>7}'.format(*s2.split())
 
 
             s.append('\t' + s2)
             depth = 0.0
 
-        if self.res_lyr_i is None:
+
+        if ag:
+            s.append('0 0 0.000000 0.000000')
+        elif self.res_lyr_i is None:
             s.append('1 10000.0 %0.5f' % ksat_last)
         else:
             s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))

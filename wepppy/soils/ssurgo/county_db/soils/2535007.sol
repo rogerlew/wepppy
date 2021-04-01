@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.296023
+#   Build Date: 2021-04-01 12:52:30.559714
 #   Source Data: Surgo
 # 
 # Mukey: 2535007
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42345917   Oi              3.0    91.0        0.0        36.0          0.3     9.0    57.0     2.0    50.0
+#  42345917   Oi     X        3.0    91.0        0.0        36.0          0.3     9.0    57.0     2.0    50.0
 #  42345918   A              15.0    60.0        0.0        29.0         1.46     9.0    57.0     2.0     2.0
 #  42345919   Bt1            74.0    30.0        0.0        28.0         1.64    14.0    55.0     2.0     0.3
 #  42345920   Bt2           107.0    28.0       16.0        22.0         1.62    18.0    53.0     2.0     0.2
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Coulstone-Bender complex, 15 to 50 percent slopes, very stony'		'SPM'	5	0.2300	0.7500	3112200.00	0.0026	3.1390	327.6000
-	   30.000	  57.00	   9.00	  50.00	  11.30	  55.50
-	  150.000	  57.00	   9.00	   2.00	  11.30	  77.28
-	  740.000	  55.00	  14.00	   0.30	  11.30	  75.52
-	 1070.000	  53.00	  18.00	   0.20	   6.30	  73.96
-	 2000.000	  40.00	  28.00	   0.10	  11.30	  70.85
+'Coulstone-Bender complex, 15 to 50 percent slopes, very stony'		'SPM'	4	0.2300	0.7500	3112200.00	0.0026	3.1390	327.6000
+	  150.000	   9.00	   9.00	   2.00	  11.30	  77.28
+	  740.000	  14.00	  14.00	   0.30	  11.30	  75.52
+	 1070.000	  18.00	  18.00	   0.20	   6.30	  73.96
+	 2000.000	  28.00	  28.00	   0.10	  11.30	  70.85
 1 10000.0 72.00000

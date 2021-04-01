@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.604252
+#   Build Date: 2021-04-01 12:52:30.878567
 #   Source Data: Surgo
 # 
 # Mukey: 790408
-# Major Component: 15481638 (comppct_r = 55.0)
+# Major Component: 15481637 (comppct_r = 30.0)
 # Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44870668   Oe            107.0    55.0        0.0         0.0         0.26     0.0     0.0     0.0    64.0
-#  44870669   Oa            150.0    55.0        0.0         0.0         0.26     0.0     0.0     0.0    64.0
+#  44870667   Oe     X       48.0    55.0        0.0         0.0         0.26     0.0     0.0     0.0    65.0
+#  44870666   Cg            150.0     5.5        0.0         0.0         1.18     3.0    33.0    18.0     3.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +40,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +52,6 @@
 # 
 Any comments:
 1 1
-'Ipswich and Westbrook mucky peats, 0 to 2 percent slopes, very frequently flooded'		'PEAT'	2	0.4200	0.7500	0.00	0.0000	0.0000	198.0000
-	 1070.000	   0.00	   0.00	  64.00	  93.70	  55.50
-	 1500.000	   0.00	   0.00	  64.00	 130.20	  55.50
-1 10000.0 198.00000
+'Ipswich and Westbrook mucky peats, 0 to 2 percent slopes, very frequently flooded'		'MUCK'	1	0.1600	0.7500	0.00	0.0000	0.0000	198.0000
+	 1500.000	   3.00	   3.00	   3.00	   6.00	   0.00
+1 10000.0 19.80000

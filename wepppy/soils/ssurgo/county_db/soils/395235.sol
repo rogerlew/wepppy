@@ -2,20 +2,19 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.541877
+#   Build Date: 2021-04-01 12:52:28.722145
 #   Source Data: Surgo
 # 
 # Mukey: 395235
-# Major Component: 15451346 (comppct_r = 55.0)
+# Major Component: 15451349 (comppct_r = 35.0)
 # Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44777591   Oa1            15.0   21.88        0.0         0.0         0.35     7.0    66.8    10.0    82.5
-#  44777590   Oa2            58.0   21.88        0.0         0.0         0.18     7.0    66.8    10.0    87.5
-#  44777594   Oa3            97.0   21.88        0.0         0.0         0.18     7.0    66.8    10.0    87.5
-#  44777593   Oe1           173.0   23.29        0.0         0.0         0.14     7.0    66.8    10.0    92.5
-#  44777592   Oe2           203.0   23.29        0.0         0.0         0.14     7.0    66.8    10.0    92.5
+#  44777607   Oa1    X       15.0   21.88        0.0         0.0         0.25     5.0     5.0     5.0    75.0
+#  44777606   Oa2    X       38.0   21.88        0.0         0.0         0.18     5.0     5.0     5.0    75.0
+#  44777605   Oa3    X       64.0   21.88        0.0         0.0         0.18     5.0     5.0     5.0    75.0
+#  44777604   Cg            203.0   91.74        0.0         0.0         1.53     0.2    96.0     7.2     2.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -43,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +54,6 @@
 # 
 Any comments:
 1 1
-'Carbondale and Tawas soils'		'MUCK'	5	0.1600	0.7500	4649000.00	0.0050	2.5450	78.7680
-	  150.000	  66.80	   7.00	  82.50	 190.00	  55.50
-	  580.000	  66.80	   7.00	  87.50	 190.00	  55.50
-	  970.000	  66.80	   7.00	  87.50	 190.00	  55.50
-	 1730.000	  66.80	   7.00	  92.50	 175.00	  55.50
-	 2030.000	  66.80	   7.00	  92.50	 175.00	  55.50
-1 10000.0 83.84400
+'Carbondale and Tawas soils'		'MUCK'	1	0.0900	0.7500	5502700.00	0.0250	3.5000	78.7680
+	 2030.000	   0.20	   0.20	   2.00	   1.40	   0.00
+1 10000.0 330.26400

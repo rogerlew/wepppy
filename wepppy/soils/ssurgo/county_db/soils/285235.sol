@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.601279
+#   Build Date: 2021-04-01 12:52:30.875323
 #   Source Data: Surgo
 # 
 # Mukey: 285235
 # Major Component: 14673921 (comppct_r = 45.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42246973   Oe              8.0    35.0       25.0        25.0          0.2     7.0    66.8    10.0    53.0
+#  42246973   Oe     X        8.0    35.0       25.0        25.0          0.2     7.0    66.8    10.0    53.0
 #  42246974   Eg             15.0     6.0        0.0         0.0          1.1    15.0    30.0     5.2     5.0
 #  42246972   Bg             51.0     4.0        0.0         0.0          1.5    16.0    34.0     5.7    1.78
 #  42246975   Cd     R      165.0    0.71        0.0         0.0         1.83    17.0    33.0     5.7     0.3
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,8 +54,7 @@
 # 
 Any comments:
 1 1
-'Monarda-Burnham complex, 0 to 3 percent slopes, very stony'		'MPT'	3	0.0400	0.7500	4649000.00	0.0050	2.5450	126.0000
-	   80.000	  66.80	   7.00	  53.00	  11.30	  55.50
-	  150.000	  30.00	  15.00	   5.00	  11.30	  11.00
-	  510.000	  34.00	  16.00	   1.78	  11.30	  16.00
+'Monarda-Burnham complex, 0 to 3 percent slopes, very stony'		'MPT'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	126.0000
+	  150.000	  15.00	  15.00	   5.00	  11.30	  11.00
+	  510.000	  16.00	  16.00	   1.78	  11.30	  16.00
 1 10000.0 2.55600

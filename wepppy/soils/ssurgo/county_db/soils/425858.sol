@@ -2,17 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.186927
+#   Build Date: 2021-04-01 12:52:32.547017
 #   Source Data: Surgo
 # 
 # Mukey: 425858
-# Major Component: 15331279 (comppct_r = 90.0)
+# Major Component: 15331275 (comppct_r = 2.0)
 # Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44381393   Oap            15.0    22.0        0.0         0.0         0.33     0.0     0.0     0.0    45.0
-#  44381394   Oa            200.0    22.0        0.0         0.0         0.38     0.0     0.0     0.0    55.0
+#  44381387   Oap    X       33.0   21.88        0.0         0.0         0.28     0.0     0.0     0.0    55.0
+#  44381389   Oa     X       76.0    23.0        0.0         0.0         0.35     0.0     0.0     0.0    70.0
+#  44381388   2Cg           200.0     8.0        0.0         0.0          1.6    30.0    18.0     5.4     2.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +53,6 @@
 # 
 Any comments:
 1 1
-'Houghton muck, 0 to 2 percent slopes'		'MUCK'	2	0.1600	0.7500	0.00	0.0000	0.0000	79.2000
-	  150.000	   0.00	   0.00	  45.00	  11.30	  55.50
-	 2000.000	   0.00	   0.00	  55.00	  11.30	  55.50
-1 10000.0 79.20000
+'Houghton muck, 0 to 2 percent slopes'		'MUCK'	1	0.1600	0.7500	0.00	0.0000	0.0000	78.7680
+	 2000.000	  30.00	  30.00	   2.00	  16.70	   0.00
+1 10000.0 28.80000

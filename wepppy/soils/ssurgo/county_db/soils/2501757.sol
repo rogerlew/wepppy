@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.774450
+#   Build Date: 2021-04-01 12:52:33.162941
 #   Source Data: Surgo
 # 
 # Mukey: 2501757
 # Major Component: 14798788 (comppct_r = 85.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42661097   Oi              2.0    91.0        0.0         6.0          0.1     7.0    66.8    10.0    69.0
+#  42661097   Oi     X        2.0    91.0        0.0         6.0          0.1     7.0    66.8    10.0    69.0
 #  42661101   A               8.0     9.0        0.0         3.0          1.3    22.0    13.7     1.7     3.0
 #  42661098   E              15.0     9.0        0.0         7.0         1.42    18.1    21.5     1.6     2.0
 #  42661099   Bt1            25.0     2.5        0.0         5.0         1.38    27.1    19.4     1.6    1.28
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,9 +56,8 @@
 # 
 Any comments:
 1 1
-'Sonsac gravelly silt loam, 15 to 40 percent slopes, very stony'		'SPM'	4	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
-	   20.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	   80.000	  13.70	  22.00	   3.00	  12.00	  34.04
-	  150.000	  21.50	  18.10	   2.00	   9.80	  67.45
-	  250.000	  19.40	  27.10	   1.28	  14.50	  53.45
+'Sonsac gravelly silt loam, 15 to 40 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
+	   80.000	  22.00	  22.00	   3.00	  12.00	  34.04
+	  150.000	  18.10	  18.10	   2.00	   9.80	  67.45
+	  250.000	  27.10	  27.10	   1.28	  14.50	  53.45
 1 10000.0 3.24000

@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.433345
+#   Build Date: 2021-04-01 12:52:30.706096
 #   Source Data: Surgo
 # 
 # Mukey: 421080
-# Major Component: 15311980 (comppct_r = 35.0)
-# Texture: silt loam
+# Major Component: 15311982 (comppct_r = 30.0)
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44318202   Oa1,Oa2          89.0    22.0        0.0         0.0         0.35     0.0     0.0    10.0    60.0
-#  44318203   Oe            152.0    23.0        0.0         0.0         0.14     0.0     0.0    10.0    60.0
+#  44318206   Oa1,Oa2  X       66.0    22.0        0.0         0.0          0.3     0.0     0.0    10.0    70.0
+#  44318207   C1,C2         152.0    92.0        0.0         0.0         1.53     5.0    93.6     7.0    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +40,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +52,6 @@
 # 
 Any comments:
 1 1
-'Carbondale, Lupton, and Markey mucks, 0 to 1 percent slopes'		'MUCK'	2	0.0900	0.7500	0.00	0.0000	0.0000	79.2000
-	  890.000	   0.00	   0.00	  60.00	 190.00	  55.50
-	 1520.000	   0.00	   0.00	  60.00	 175.00	  55.50
-1 10000.0 82.80000
+'Carbondale, Lupton, and Markey mucks, 0 to 1 percent slopes'		'MUCK'	1	0.0900	0.7500	0.00	0.0000	0.0000	79.2000
+	 1520.000	   5.00	   5.00	   0.25	   2.00	  20.00
+1 10000.0 331.20000

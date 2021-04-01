@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.568634
+#   Build Date: 2021-04-01 12:52:29.798130
 #   Source Data: Surgo
 # 
 # Mukey: 149556
@@ -13,7 +13,7 @@
 # ------------------------------------------------------------------------------------------------------------
 #  42636686   A              13.0    28.0        0.0         3.0          1.3    10.0    67.8     7.8     3.0
 #  42636685   Bw             30.0    92.0        0.0         5.0          1.3     7.5    81.9     7.3     1.5
-#  42636684   Cr            152.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
+#  42636684   Cr     X      152.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,7 @@
 # 
 Any comments:
 1 1
-'Windyridge-Como-Hiore families, complex, low relief mountain slopes and ridges'		'COSL'	3	0.3000	0.7500	4226380.00	0.0045	2.8676	100.8000
-	  130.000	  67.80	  10.00	   3.00	   8.50	  12.70
-	  300.000	  81.90	   7.50	   1.50	   6.20	  21.62
-	 1520.000	  66.80	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+'Windyridge-Como-Hiore families, complex, low relief mountain slopes and ridges'		'COSL'	2	0.3000	0.7500	4226380.00	0.0045	2.8676	100.8000
+	  130.000	  10.00	  10.00	   3.00	   8.50	  12.70
+	  300.000	   7.50	   7.50	   1.50	   6.20	  21.62
+1 10000.0 331.20000

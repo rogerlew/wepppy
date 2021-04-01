@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.251897
+#   Build Date: 2021-04-01 12:52:29.463949
 #   Source Data: Surgo
 # 
 # Mukey: 1380340
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41798414   Oe             15.0     9.0        0.0         0.0         0.33     7.0    66.8    10.0    70.0
-#  41798415   Oa            178.0     9.0        0.0         0.0         0.45     7.0    66.8    10.0    70.0
+#  41798414   Oe     X       15.0     9.0        0.0         0.0         0.33     7.0    66.8    10.0    70.0
+#  41798415   Oa     X      178.0     9.0        0.0         0.0         0.45     7.0    66.8    10.0    70.0
 #  41798416   C             203.0    92.0        0.0         0.0         1.53     6.0    90.0    20.6     2.0
 # 
 # Restricting Layer:
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Dorovan and Pamlico soils, depressional'		'MUCK'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	32.4000
-	  150.000	  66.80	   7.00	  70.00	  11.30	  55.50
-	 1780.000	  66.80	   7.00	  70.00	  11.30	  55.50
-	 2030.000	  90.00	   6.00	   2.00	  11.30	   0.00
+'Dorovan and Pamlico soils, depressional'		'MUCK'	1	0.1600	0.7500	4649000.00	0.0050	2.5450	32.4000
+	 2030.000	   6.00	   6.00	   2.00	  11.30	   0.00
 1 10000.0 331.20000

@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.393593
+#   Build Date: 2021-04-01 12:52:29.613772
 #   Source Data: Surgo
 # 
 # Mukey: 2549859
 # Major Component: 14705098 (comppct_r = 40.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42351680   Oe              8.0    35.0       20.0         7.0          0.2     7.0    66.8    10.0    53.0
+#  42351680   Oe     X        8.0    35.0       20.0         7.0          0.2     7.0    66.8    10.0    53.0
 #  42351681   E              13.0     6.0        0.0         0.0          1.1    14.0    34.0     9.9     2.8
 #  42351682   Bs             33.0     6.0        0.0         4.0         1.05    14.0    38.0     7.8     5.2
 #  42351684   BC             48.0     4.0        0.0         0.0          1.5    15.0    38.0     7.8    1.25
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Telos-Chesuncook-Ragmuff association, 3 to 15 percent slopes, very stony'		'HPM'	4	0.1700	0.7500	4649000.00	0.0050	2.5450	126.0000
-	   80.000	  66.80	   7.00	  53.00	  11.30	  55.50
-	  130.000	  34.00	  14.00	   2.80	  11.30	  11.00
-	  330.000	  38.00	  14.00	   5.20	  11.30	  22.24
-	  480.000	  38.00	  15.00	   1.25	  11.30	   9.00
+'Telos-Chesuncook-Ragmuff association, 3 to 15 percent slopes, very stony'		'HPM'	3	0.1700	0.7500	4649000.00	0.0050	2.5450	126.0000
+	  130.000	  14.00	  14.00	   2.80	  11.30	  11.00
+	  330.000	  14.00	  14.00	   5.20	  11.30	  22.24
+	  480.000	  15.00	  15.00	   1.25	  11.30	   9.00
 1 10000.0 2.55600

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.877058
+#   Build Date: 2021-04-01 12:52:30.115054
 #   Source Data: Surgo
 # 
 # Mukey: 2396834
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41906877   Oi              3.0   373.0        0.0         0.0          0.2     6.0    29.0     9.3    75.0
+#  41906877   Oi     X        3.0   373.0        0.0         0.0          0.2     6.0    29.0     9.3    75.0
 #  41906881   A1              8.0     9.0        0.0         0.0          0.8     6.0    29.0     9.3     5.0
 #  41906880   A2             41.0     9.0        0.0        19.0          0.8     6.0    29.0     9.3     2.0
 #  41906879   2Bw            84.0     9.0        0.0        22.0          1.4    10.0    35.0    10.7    0.75
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Andic Humudepts-Typic Udivitrands-Pearsoncreek families, dense substratum complex, glaciated mountain slopes, granitic geology, south aspects'		'SPM'	5	0.2300	0.7500	5502700.00	0.0250	3.5000	1342.8000
-	   30.000	  29.00	   6.00	  75.00	  84.30	  55.50
-	   80.000	  29.00	   6.00	   5.00	  15.30	  45.00
-	  410.000	  29.00	   6.00	   2.00	   9.50	  86.23
-	  840.000	  35.00	  10.00	   0.75	   8.20	  88.30
-	 1520.000	  90.00	   5.00	   0.25	   3.80	  80.42
+'Andic Humudepts-Typic Udivitrands-Pearsoncreek families, dense substratum complex, glaciated mountain slopes, granitic geology, south aspects'		'SPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	1342.8000
+	   80.000	   6.00	   6.00	   5.00	  15.30	  45.00
+	  410.000	   6.00	   6.00	   2.00	   9.50	  86.23
+	  840.000	  10.00	  10.00	   0.75	   8.20	  88.30
+	 1520.000	   5.00	   5.00	   0.25	   3.80	  80.42
 1 10000.0 720.00000

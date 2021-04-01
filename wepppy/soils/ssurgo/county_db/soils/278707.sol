@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.658875
+#   Build Date: 2021-04-01 12:52:33.042011
 #   Source Data: Surgo
 # 
 # Mukey: 278707
 # Major Component: 15484580 (comppct_r = 61.0)
-# Texture: sand loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44880773   Oe              3.0    55.0        0.0         0.0         0.26     7.0    66.8    10.0    80.0
+#  44880773   Oe     X        3.0    55.0        0.0         0.0         0.26     7.0    66.8    10.0    80.0
 #  44880778   A              13.0    10.0        2.0         2.0         0.86     6.0    47.0    13.0    13.0
 #  44880777   E              15.0    10.0        1.0         1.0         1.49     3.0    58.0    24.0     4.0
 #  44880775   Bs1            18.0    10.0        2.0         4.0          1.0     6.0    53.0    14.0     7.0
@@ -47,7 +47,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -59,12 +59,11 @@
 # 
 Any comments:
 1 1
-'Peru-Marlow association, 3 to 15 percent slopes, extremely stony'		'MPM'	7	0.0400	0.7500	4649000.00	0.0050	2.5450	198.0000
-	   30.000	  66.80	   7.00	  80.00	  11.30	  55.50
-	  130.000	  47.00	   6.00	  13.00	  11.30	  12.64
-	  150.000	  58.00	   3.00	   4.00	  11.30	   6.90
-	  180.000	  53.00	   6.00	   7.00	  11.30	  10.70
-	  330.000	  53.00	   3.00	   4.00	  11.30	  10.70
-	  460.000	  55.00	   1.00	   4.00	  11.30	  10.70
-	  540.000	  58.00	   1.00	   1.00	  11.30	   7.84
+'Peru-Marlow association, 3 to 15 percent slopes, extremely stony'		'MPM'	6	0.0400	0.7500	4649000.00	0.0050	2.5450	198.0000
+	  130.000	   6.00	   6.00	  13.00	  11.30	  12.64
+	  150.000	   3.00	   3.00	   4.00	  11.30	   6.90
+	  180.000	   6.00	   6.00	   7.00	  11.30	  10.70
+	  330.000	   3.00	   3.00	   4.00	  11.30	  10.70
+	  460.000	   1.00	   1.00	   4.00	  11.30	  10.70
+	  540.000	   1.00	   1.00	   1.00	  11.30	   7.84
 1 10000.0 3.60036
