@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.502191
+#   Build Date: 2021-04-01 15:01:42.010131
 #   Source Data: Surgo
 # 
 # Mukey: 283153
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Glover-Vershire complex, 15 to 35 percent slopes, very rocky'		'SPM'	2	0.2300	0.7500	6032120.00	0.0071	2.1274	101.5999
+'Glover-Vershire complex, 15 to 35 percent slopes, very rocky'		'SPM'	2	0.2300	0.7500	6032120.00	0.0071	2.1274	19.9381
 	  100.000	   7.00	   7.00	   5.00	   3.90	  15.72
 	  350.000	   7.00	   7.00	   1.75	   3.80	  15.52
-1 10000.0 0.77400
+0 0 0.000000 0.000000

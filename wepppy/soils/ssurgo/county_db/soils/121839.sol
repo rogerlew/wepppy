@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.428243
+#   Build Date: 2021-04-01 15:01:44.949817
 #   Source Data: Surgo
 # 
 # Mukey: 121839
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Tatum silt loam, undulating phase'		'SIL'	2	0.3600	0.7500	4978965.00	0.0096	3.5000	32.4000
+'Tatum silt loam, undulating phase'		'SIL'	2	0.3600	0.7500	4978965.00	0.0096	3.5000	5.0147
 	  100.000	  19.50	  19.50	   1.25	   9.60	  17.55
 	 1220.000	  39.00	  39.00	   0.25	  18.90	  17.55
-1 10000.0 0.72000
+0 0 0.000000 0.000000

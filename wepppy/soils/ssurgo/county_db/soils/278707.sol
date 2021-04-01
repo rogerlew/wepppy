@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.042011
+#   Build Date: 2021-04-01 15:01:45.558513
 #   Source Data: Surgo
 # 
 # Mukey: 278707
@@ -59,11 +59,11 @@
 # 
 Any comments:
 1 1
-'Peru-Marlow association, 3 to 15 percent slopes, extremely stony'		'MPM'	6	0.0400	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Peru-Marlow association, 3 to 15 percent slopes, extremely stony'		'MPM'	6	0.0400	0.7500	4649000.00	0.0050	2.5450	10.3902
 	  130.000	   6.00	   6.00	  13.00	  11.30	  12.64
 	  150.000	   3.00	   3.00	   4.00	  11.30	   6.90
 	  180.000	   6.00	   6.00	   7.00	  11.30	  10.70
 	  330.000	   3.00	   3.00	   4.00	  11.30	  10.70
 	  460.000	   1.00	   1.00	   4.00	  11.30	  10.70
 	  540.000	   1.00	   1.00	   1.00	  11.30	   7.84
-1 10000.0 3.60036
+0 0 0.000000 0.000000

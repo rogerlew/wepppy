@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.994179
+#   Build Date: 2021-04-01 15:01:45.510091
 #   Source Data: Surgo
 # 
 # Mukey: 110919
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Rains fine sandy loam, 0 to 2 percent slopes, Southern Coastal Plain'		'FSL'	3	0.1600	0.7500	6070540.00	0.0073	2.4668	100.8000
+'Rains fine sandy loam, 0 to 2 percent slopes, Southern Coastal Plain'		'FSL'	3	0.1600	0.7500	6070540.00	0.0073	2.4668	20.0302
 	  200.000	  12.40	  12.40	   3.50	  11.30	   4.00
 	  330.000	  17.00	  17.00	   0.75	  11.30	   3.00
 	 1830.000	  25.00	  25.00	   0.75	  11.30	   3.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

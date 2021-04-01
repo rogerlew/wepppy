@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.863367
+#   Build Date: 2021-04-01 15:01:45.386164
 #   Source Data: Surgo
 # 
 # Mukey: 542114
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Rayne-Gilpin channery silt loams, 25 to 65 percent slopes'		'CN-SIL'	4	0.3700	0.7500	5034095.00	0.0102	3.5000	33.0120
+'Rayne-Gilpin channery silt loams, 25 to 65 percent slopes'		'CN-SIL'	4	0.3700	0.7500	5034095.00	0.0102	3.5000	4.8591
 	  200.000	  18.50	  18.50	   2.00	  11.30	  35.88
 	 1190.000	  27.50	  27.50	   0.25	  11.30	  35.60
 	 1400.000	  27.50	  27.50	   0.25	  11.30	  61.05
 	 1500.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 26.17200
+0 0 0.000000 0.000000

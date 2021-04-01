@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.518408
+#   Build Date: 2021-04-01 15:01:44.037263
 #   Source Data: Surgo
 # 
 # Mukey: 382351
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Quinlan-Woodward complex, 5 to 12 percent slopes'		'L'	3	0.2300	0.7500	9220980.00	0.0182	2.0096	32.4000
+'Quinlan-Woodward complex, 5 to 12 percent slopes'		'L'	3	0.2300	0.7500	9220980.00	0.0182	2.0096	8.5021
 	  200.000	  20.00	  20.00	   1.00	  14.00	   0.00
 	  330.000	  21.00	  21.00	   0.75	  10.50	   0.00
 	 1630.000	  14.00	  14.00	   0.15	  10.40	   0.00
-1 10000.0 10.08000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.473411
+#   Build Date: 2021-04-01 15:01:43.991720
 #   Source Data: Surgo
 # 
 # Mukey: 1673452
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Brennyville, wet-Cebana complex, 0 to 4 percent slopes, stony'		'SIL'	4	0.2300	0.7500	4629790.00	0.0051	2.8758	33.0120
+'Brennyville, wet-Cebana complex, 0 to 4 percent slopes, stony'		'SIL'	4	0.2300	0.7500	4629790.00	0.0051	2.8758	5.9405
 	  200.000	  12.00	  12.00	   3.00	  12.00	   5.92
 	  280.000	  10.00	  10.00	   0.75	   6.50	   5.92
 	  530.000	  11.00	  11.00	   0.25	   6.00	   5.92
 	  970.000	  12.00	  12.00	   0.25	   6.50	  16.70
-1 10000.0 3.60000
+0 0 0.000000 0.000000

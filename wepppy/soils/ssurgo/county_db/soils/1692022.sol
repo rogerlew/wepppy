@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.945364
+#   Build Date: 2021-04-01 15:01:44.464672
 #   Source Data: Surgo
 # 
 # Mukey: 1692022
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Holdrege soils, 3 to 7 percent slopes, severely eroded'		'SICL'	3	0.1600	0.7500	4317405.00	0.0071	3.5000	33.1200
+'Holdrege soils, 3 to 7 percent slopes, severely eroded'		'SICL'	3	0.1600	0.7500	4317405.00	0.0071	3.5000	0.9962
 	  150.000	  31.50	  31.50	   1.25	  25.00	   0.00
 	  530.000	  31.50	  31.50	   0.75	  22.50	   0.00
 	 1520.000	  23.50	  23.50	   0.25	  16.50	   0.00
-1 10000.0 33.12000
+0 0 0.000000 0.000000

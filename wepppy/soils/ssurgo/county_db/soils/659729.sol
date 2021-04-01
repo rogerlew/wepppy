@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:53:57.237222
+#   Build Date: 2021-04-01 15:03:09.146903
 #   Source Data: StatsGo
 # 
 # Mukey: 659729
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Snowdon-Rock outcrop-Needleton (s1408)'		'SPM'	4	0.3000	0.7500	5502700.00	0.0250	3.5000	1.6244
+'Snowdon-Rock outcrop-Needleton (s1408)'		'SPM'	4	0.3000	0.7500	5502700.00	0.0250	3.5000	9.0889
 	  410.000	  18.50	  18.50	   0.75	  11.30	  57.38
 	  660.000	  22.50	  22.50	   0.75	  17.50	  60.00
 	 1220.000	  26.50	  26.50	   0.25	  17.50	  78.75

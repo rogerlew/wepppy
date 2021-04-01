@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.482422
+#   Build Date: 2021-04-01 15:01:41.990127
 #   Source Data: Surgo
 # 
 # Mukey: 567328
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Adler silt loam, frequently flooded'		'SIL'	2	0.3600	0.7500	5171920.00	0.0124	3.5000	32.4000
+'Adler silt loam, frequently flooded'		'SIL'	2	0.3600	0.7500	5171920.00	0.0124	3.5000	1.7400
 	  130.000	  16.00	  16.00	   1.25	  11.90	   0.00
 	 1520.000	  13.00	  13.00	   0.50	   9.30	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.368005
+#   Build Date: 2021-04-01 15:01:41.875936
 #   Source Data: Surgo
 # 
 # Mukey: 330857
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Saffell-Lucy (flomaton) complex, 15 to 35 percent slopes'		'GRV-SL'	4	0.2900	0.7500	5013990.00	0.0080	2.6298	100.8000
+'Saffell-Lucy (flomaton) complex, 15 to 35 percent slopes'		'GRV-SL'	4	0.2900	0.7500	5013990.00	0.0080	2.6298	18.0666
 	   80.000	  10.00	  10.00	   1.50	  11.30	  68.00
 	  250.000	  12.50	  12.50	   0.50	  11.30	  22.40
 	 1020.000	  23.50	  23.50	   0.25	  11.30	  51.50
 	 2030.000	  10.00	  10.00	   0.15	  11.30	  67.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.710902
+#   Build Date: 2021-04-01 15:01:43.221829
 #   Source Data: Surgo
 # 
 # Mukey: 2409964
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Cabot-Colonel complex, 8 to 15 percent slopes, very stony'		'SPM'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Cabot-Colonel complex, 8 to 15 percent slopes, very stony'		'SPM'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	6.5053
 	  230.000	   9.00	   9.00	   9.10	  11.30	  12.78
 	  360.000	   9.00	   9.00	   1.10	  11.30	  15.52
 	  430.000	   6.00	   6.00	   0.70	  11.30	  24.31
-1 10000.0 1.98000
+0 0 0.000000 0.000000

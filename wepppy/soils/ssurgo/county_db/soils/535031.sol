@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.057399
+#   Build Date: 2021-04-01 15:01:41.564014
 #   Source Data: Surgo
 # 
 # Mukey: 535031
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Mt. Airy channery loam, 8 to 15 percent slopes'		'CN-L'	2	0.2696	0.7500	5052410.00	0.0066	3.3007	32.4000
+'Mt. Airy channery loam, 8 to 15 percent slopes'		'CN-L'	2	0.2696	0.7500	5052410.00	0.0066	3.3007	8.7781
 	  180.000	  20.50	  20.50	   2.00	  11.30	  52.50
 	  560.000	  22.50	  22.50	   0.25	  11.30	  63.20
-1 10000.0 0.00000
+0 0 0.000000 0.000000

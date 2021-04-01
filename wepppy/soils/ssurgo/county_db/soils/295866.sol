@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.072664
+#   Build Date: 2021-04-01 15:01:42.581344
 #   Source Data: Surgo
 # 
 # Mukey: 295866
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Bice very bouldery fine sandy loam, sloping'		'MPM'	3	0.3400	0.7500	8491000.00	0.0110	1.5800	32.4000
+'Bice very bouldery fine sandy loam, sloping'		'MPM'	3	0.3400	0.7500	8491000.00	0.0110	1.5800	18.9221
 	  130.000	  10.00	  10.00	   3.50	  11.30	  11.00
 	  610.000	  10.00	  10.00	   1.00	  11.30	   8.00
 	 1520.000	  10.00	  10.00	   0.50	  11.30	   8.00
-1 10000.0 28.80000
+0 0 0.000000 0.000000

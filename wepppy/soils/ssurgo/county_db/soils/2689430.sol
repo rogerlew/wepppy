@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.980969
+#   Build Date: 2021-04-01 15:01:43.497878
 #   Source Data: Surgo
 # 
 # Mukey: 2689430
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Plainfield sand, lake plain, 0 to 6 percent slopes'		'FS'	4	0.1600	0.7500	3208250.00	0.0027	2.6550	198.0000
+'Plainfield sand, lake plain, 0 to 6 percent slopes'		'FS'	4	0.1600	0.7500	3208250.00	0.0027	2.6550	31.0601
 	  200.000	   2.00	   2.00	   5.00	  11.30	   0.00
 	  690.000	   2.00	   2.00	   1.00	  11.30	   1.00
 	  900.000	   0.50	   0.50	   0.00	   0.50	   1.00
 	 2030.000	   0.20	   0.20	   0.00	   0.30	   3.00
-1 10000.0 198.00000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.867734
+#   Build Date: 2021-04-01 15:01:43.384641
 #   Source Data: Surgo
 # 
 # Mukey: 370792
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Windthorst and Duffau soils, 2 to 8 percent slopes, severely eroded'		'FSL'	4	0.2300	0.7500	6185800.00	0.0112	2.4060	100.8000
+'Windthorst and Duffau soils, 2 to 8 percent slopes, severely eroded'		'FSL'	4	0.2300	0.7500	6185800.00	0.0112	2.4060	19.2009
 	   80.000	  12.00	  12.00	   1.25	   6.50	   0.00
 	  860.000	  38.00	  38.00	   0.50	  20.00	   0.00
 	 1140.000	  34.00	  34.00	   0.50	  17.90	   0.00
 	 2030.000	  25.00	  25.00	   0.25	  13.10	   2.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

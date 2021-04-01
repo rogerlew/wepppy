@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.714105
+#   Build Date: 2021-04-01 15:01:45.236026
 #   Source Data: Surgo
 # 
 # Mukey: 416664
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Wentworth-Chancellor silty clay loams, 0 to 2 percent slopes'		'SICL'	3	0.1600	0.7500	4344970.00	0.0072	3.5000	32.4000
+'Wentworth-Chancellor silty clay loams, 0 to 2 percent slopes'		'SICL'	3	0.1600	0.7500	4344970.00	0.0072	3.5000	1.0539
 	  180.000	  31.00	  31.00	   4.50	  24.50	   0.00
 	  640.000	  30.00	  30.00	   1.50	  15.00	   0.00
 	 1520.000	  28.00	  28.00	   0.50	  12.50	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

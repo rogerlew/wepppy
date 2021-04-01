@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.885148
+#   Build Date: 2021-04-01 15:01:41.390915
 #   Source Data: Surgo
 # 
 # Mukey: 371749
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Silstid loamy fine sand, 1 to 5 percent slopes'		'LFS'	3	0.4200	0.7500	7146300.00	0.0186	1.7910	327.6000
+'Silstid loamy fine sand, 1 to 5 percent slopes'		'LFS'	3	0.4200	0.7500	7146300.00	0.0186	1.7910	29.2440
 	  230.000	   7.00	   7.00	   0.75	   3.00	  14.86
 	  730.000	   7.00	   7.00	   0.50	   3.00	  14.86
 	 2030.000	  25.00	  25.00	   0.65	   9.00	  13.87
-1 10000.0 32.40000
+0 0 0.000000 0.000000

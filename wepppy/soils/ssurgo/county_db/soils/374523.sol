@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.881698
+#   Build Date: 2021-04-01 15:01:41.387374
 #   Source Data: Surgo
 # 
 # Mukey: 374523
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Padrones fine sand, 0 to 3 percent slopes'		'LFS'	2	0.2300	0.7500	5417400.00	0.0240	2.1050	100.8000
+'Padrones fine sand, 0 to 3 percent slopes'		'LFS'	2	0.2300	0.7500	5417400.00	0.0240	2.1050	37.8778
 	  650.000	   3.80	   3.80	   0.42	   2.10	   0.00
 	 2030.000	  30.50	  30.50	   0.16	  15.80	   0.00
-1 10000.0 9.72000
+0 0 0.000000 0.000000

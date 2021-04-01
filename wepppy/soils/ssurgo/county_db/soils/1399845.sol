@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.253499
+#   Build Date: 2021-04-01 15:01:42.762962
 #   Source Data: Surgo
 # 
 # Mukey: 1399845
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Chillicothe silt loam, 2 to 5 percent slopes'		'SIL'	3	0.1600	0.7500	4675750.00	0.0078	3.5000	32.4000
+'Chillicothe silt loam, 2 to 5 percent slopes'		'SIL'	3	0.1600	0.7500	4675750.00	0.0078	3.5000	1.0075
 	  150.000	  25.00	  25.00	   4.00	  21.00	   0.00
 	  250.000	  26.00	  26.00	   3.00	  21.50	   0.00
 	  340.000	  31.00	  31.00	   2.50	  24.90	   0.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

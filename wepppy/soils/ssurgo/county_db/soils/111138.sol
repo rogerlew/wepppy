@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.756757
+#   Build Date: 2021-04-01 15:01:41.262620
 #   Source Data: Surgo
 # 
 # Mukey: 111138
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Rains fine sandy loam, 0 to 2 percent slopes, Atlantic Coast Flatwoods'		'FSL'	5	0.1600	0.7500	6070540.00	0.0082	2.4668	100.8000
+'Rains fine sandy loam, 0 to 2 percent slopes, Atlantic Coast Flatwoods'		'FSL'	5	0.1600	0.7500	6070540.00	0.0082	2.4668	20.0302
 	  180.000	  12.40	  12.40	   2.00	  11.30	   3.00
 	  410.000	  17.00	  17.00	   0.75	  11.30	   3.00
 	 1040.000	  25.00	  25.00	   0.75	  11.30	   3.00
 	 1680.000	  26.00	  26.00	   0.75	  11.30	   0.00
 	 2030.000	  30.00	  30.00	   0.75	  11.30	   2.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

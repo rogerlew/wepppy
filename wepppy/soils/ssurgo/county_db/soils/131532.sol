@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.815226
+#   Build Date: 2021-04-01 15:01:44.334631
 #   Source Data: Surgo
 # 
 # Mukey: 131532
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Mouzon and Hobcaw soils, frequently flooded'		'SL'	2	0.0600	0.7500	4956360.00	0.0061	2.7447	331.2000
+'Mouzon and Hobcaw soils, frequently flooded'		'SL'	2	0.0600	0.7500	4956360.00	0.0061	2.7447	19.4708
 	  200.000	  11.50	  11.50	   2.25	   4.30	   5.00
 	  280.000	  11.50	  11.50	   2.25	   4.30	   5.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

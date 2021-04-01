@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.720414
+#   Build Date: 2021-04-01 15:01:41.225397
 #   Source Data: Surgo
 # 
 # Mukey: 1588028
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Carbondale, Lupton, and Rifle soils'		'MUCK'	1	0.0900	0.7500	4649000.00	0.0050	2.5450	78.1200
+'Carbondale, Lupton, and Rifle soils'		'MUCK'	1	0.0900	0.7500	4649000.00	0.0050	2.5450	17.4428
 	 1520.000	  20.00	  20.00	   0.25	  11.00	  15.12
-1 10000.0 27.72000
+0 0 0.000000 0.000000

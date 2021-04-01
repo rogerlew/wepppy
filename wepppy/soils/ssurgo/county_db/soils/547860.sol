@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.759298
+#   Build Date: 2021-04-01 15:01:41.265179
 #   Source Data: Surgo
 # 
 # Mukey: 547860
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Porters-Unaka complex, 50 to 95 percent slopes, rocky'		'L'	2	0.2300	0.7500	5090830.00	0.0057	2.9966	100.8000
+'Porters-Unaka complex, 50 to 95 percent slopes, rocky'		'L'	2	0.2300	0.7500	5090830.00	0.0057	2.9966	8.4805
 	  230.000	  16.00	  16.00	  10.00	  25.90	  18.00
 	 1370.000	  16.00	  16.00	   0.50	   9.00	  31.84
-1 10000.0 0.12600
+0 0 0.000000 0.000000

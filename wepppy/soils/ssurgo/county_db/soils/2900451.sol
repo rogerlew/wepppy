@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.830655
+#   Build Date: 2021-04-01 15:01:43.346654
 #   Source Data: Surgo
 # 
 # Mukey: 2900451
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Ravenna silt loam, 3 to 8 percent slopes'		'SIL'	3	0.3000	0.7500	5171920.00	0.0124	3.5000	19.8000
+'Ravenna silt loam, 3 to 8 percent slopes'		'SIL'	3	0.3000	0.7500	5171920.00	0.0124	3.5000	4.8208
 	  200.000	  16.00	  16.00	   2.90	   8.70	   4.00
 	  300.000	  21.00	  21.00	   0.70	  11.30	   5.00
 	  560.000	  26.00	  26.00	   0.50	  11.30	   9.00
-1 10000.0 1.98000
+0 0 0.000000 0.000000

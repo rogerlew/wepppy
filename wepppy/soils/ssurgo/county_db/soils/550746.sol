@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.915343
+#   Build Date: 2021-04-01 15:01:42.423970
 #   Source Data: Surgo
 # 
 # Mukey: 550746
@@ -58,11 +58,11 @@
 # 
 Any comments:
 1 1
-'Shelocta-Highsplint-Gilpin complex, 20 to 75 percent slopes, very stony'		'SPM'	6	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Shelocta-Highsplint-Gilpin complex, 20 to 75 percent slopes, very stony'		'SPM'	6	0.3000	0.7500	4649000.00	0.0050	2.5450	5.8786
 	   80.000	  14.00	  14.00	   3.00	   7.80	  25.48
 	  180.000	  23.00	  23.00	   3.44	  12.50	  14.50
 	  580.000	  22.00	  22.00	   1.28	  11.30	  22.57
 	  860.000	  22.00	  22.00	   0.50	  11.30	  35.40
 	 1140.000	  23.00	  23.00	   0.50	  11.30	  49.95
 	 1500.000	  21.00	  21.00	   0.15	  11.30	   0.00
-1 10000.0 0.01800
+0 0 0.000000 0.000000

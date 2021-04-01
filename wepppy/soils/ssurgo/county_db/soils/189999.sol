@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.576398
+#   Build Date: 2021-04-01 15:01:43.087801
 #   Source Data: Surgo
 # 
 # Mukey: 189999
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Carbondale muck, 0 to 2 percent slopes'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
+'Carbondale muck, 0 to 2 percent slopes'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	9.6124
 	 1520.000	  20.00	  20.00	   0.25	   7.00	  19.97
-1 10000.0 27.72000
+0 0 0.000000 0.000000

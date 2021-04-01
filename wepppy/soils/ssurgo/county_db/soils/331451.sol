@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.565849
+#   Build Date: 2021-04-01 15:01:41.070560
 #   Source Data: Surgo
 # 
 # Mukey: 331451
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Nauvoo-Sunlight complex, 15 to 25 percent slopes'		'L'	3	0.3000	0.7500	4284010.00	0.0083	3.3702	100.8000
+'Nauvoo-Sunlight complex, 15 to 25 percent slopes'		'L'	3	0.3000	0.7500	4284010.00	0.0083	3.3702	9.0889
 	  130.000	  18.00	  18.00	   1.25	  11.30	  11.00
 	 1020.000	  27.00	  27.00	   0.75	  11.30	   7.93
 	 1220.000	  23.00	  23.00	   0.25	  11.30	  10.00
-1 10000.0 1.80000
+0 0 0.000000 0.000000

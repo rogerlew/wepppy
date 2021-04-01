@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.098305
+#   Build Date: 2021-04-01 15:01:42.607682
 #   Source Data: Surgo
 # 
 # Mukey: 566108
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Carnasaw-Pirum-Clebit association, steep'		'ST-SIL'	3	0.2300	0.7500	4923835.00	0.0091	3.5000	32.4000
+'Carnasaw-Pirum-Clebit association, steep'		'ST-SIL'	3	0.2300	0.7500	4923835.00	0.0091	3.5000	4.7089
 	  100.000	  20.50	  20.50	   1.25	  11.30	  50.50
 	  280.000	  24.00	  24.00	   0.75	  11.30	  16.88
 	  690.000	  38.00	  38.00	   0.25	  11.30	  14.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

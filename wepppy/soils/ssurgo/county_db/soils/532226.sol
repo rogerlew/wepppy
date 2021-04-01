@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.008319
+#   Build Date: 2021-04-01 15:01:45.524337
 #   Source Data: Surgo
 # 
 # Mukey: 532226
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Pineville-Berks association, very steep, extremely stony'		'SPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Pineville-Berks association, very steep, extremely stony'		'SPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	8.5735
 	  130.000	  20.00	  20.00	   2.75	  13.20	  48.03
 	 1140.000	  20.00	  20.00	   0.75	  10.40	  38.25
 	 1650.000	  10.00	  10.00	   0.40	   7.90	  56.50
-1 10000.0 82.80000
+0 0 0.000000 0.000000

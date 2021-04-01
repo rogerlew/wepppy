@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.723113
+#   Build Date: 2021-04-01 15:01:43.234293
 #   Source Data: Surgo
 # 
 # Mukey: 122543
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Nevarc-Remlik complex, 6 to 10 percent slopes'		'VFSL'	1	0.2500	0.7500	5186880.00	0.0097	2.7726	100.8000
+'Nevarc-Remlik complex, 6 to 10 percent slopes'		'VFSL'	1	0.2500	0.7500	5186880.00	0.0097	2.7726	10.9516
 	  210.000	  13.00	  13.00	   1.25	   6.10	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

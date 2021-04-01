@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.364092
+#   Build Date: 2021-04-01 15:01:43.882064
 #   Source Data: Surgo
 # 
 # Mukey: 294498
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Lordstown and Oquaga very stony soils, 0 to 35 percent slopes'		'CN-SIL'	3	0.3400	0.7500	4629790.00	0.0050	2.8758	32.4000
+'Lordstown and Oquaga very stony soils, 0 to 35 percent slopes'		'CN-SIL'	3	0.3400	0.7500	4629790.00	0.0050	2.8758	6.7703
 	  200.000	  12.00	  12.00	   4.00	   7.20	  43.88
 	  530.000	  12.00	  12.00	   1.00	  11.30	  39.55
 	  690.000	  12.00	  12.00	   0.50	   6.20	  46.45
-1 10000.0 0.01800
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.043320
+#   Build Date: 2021-04-01 15:01:43.560957
 #   Source Data: Surgo
 # 
 # Mukey: 325471
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Grady loam, 0 to 2 percent slopes, frequently ponded'		'L'	1	0.2900	0.7500	4284010.00	0.0048	3.7082	32.4000
+'Grady loam, 0 to 2 percent slopes, frequently ponded'		'L'	1	0.2900	0.7500	4284010.00	0.0048	3.7082	6.1222
 	  210.000	  23.20	  23.20	   2.50	  11.30	   0.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.100453
+#   Build Date: 2021-04-01 15:01:42.609910
 #   Source Data: Surgo
 # 
 # Mukey: 564562
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Gepp very gravelly silt loam, 12 to 30 percent slopes'		'GRV-SIL'	4	0.3000	0.7500	5089225.00	0.0109	3.5000	32.4000
+'Gepp very gravelly silt loam, 12 to 30 percent slopes'		'GRV-SIL'	4	0.3000	0.7500	5089225.00	0.0109	3.5000	4.9497
 	  150.000	  17.50	  17.50	   2.50	  15.00	  71.08
 	  300.000	  32.50	  32.50	   0.75	  11.30	  33.25
 	 1470.000	  72.50	  72.50	   0.45	  11.30	  27.25
 	 1830.000	  72.50	  72.50	   0.45	  30.00	  33.25
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.722834
+#   Build Date: 2021-04-01 15:01:45.244993
 #   Source Data: Surgo
 # 
 # Mukey: 288697
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Burdett silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	4868705.00	0.0087	3.5000	32.4000
+'Burdett silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	4868705.00	0.0087	3.5000	4.5861
 	  200.000	  21.50	  21.50	   4.50	  11.80	  10.00
 	  330.000	  22.00	  22.00	   1.50	  11.90	  20.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

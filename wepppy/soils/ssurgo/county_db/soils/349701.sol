@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.005371
+#   Build Date: 2021-04-01 15:01:45.521417
 #   Source Data: Surgo
 # 
 # Mukey: 349701
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Taluce-Rock outcrop-Shingle complex, 6 to 45 percent slopes'		'FSL'	3	0.3000	0.7500	6051330.00	0.0169	2.5116	101.6280
+'Taluce-Rock outcrop-Shingle complex, 6 to 45 percent slopes'		'FSL'	3	0.3000	0.7500	6051330.00	0.0169	2.5116	20.3932
 	  130.000	  13.00	  13.00	   0.75	   8.00	   7.50
 	  410.000	  14.00	  14.00	   0.25	   7.00	   7.50
 	  660.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.15200
+0 0 0.000000 0.000000

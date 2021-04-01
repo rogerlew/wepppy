@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.561756
+#   Build Date: 2021-04-01 15:01:43.072899
 #   Source Data: Surgo
 # 
 # Mukey: 2450427
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Gilpin-Upshur-Steinsburg association, steep'		'MPM'	4	0.3000	0.7500	0.00	0.0000	0.0000	331.2000
+'Gilpin-Upshur-Steinsburg association, steep'		'MPM'	4	0.3000	0.7500	0.00	0.0000	0.0000	5.0569
 	  150.000	  21.00	  21.00	   2.25	  11.30	  19.97
 	  840.000	  21.00	  21.00	   0.50	  11.30	  42.62
 	  910.000	  30.00	  30.00	   0.25	  11.30	  71.30
 	  960.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 33.01200
+0 0 0.000000 0.000000

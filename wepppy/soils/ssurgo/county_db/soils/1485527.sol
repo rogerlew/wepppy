@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.157815
+#   Build Date: 2021-04-01 15:01:43.675089
 #   Source Data: Surgo
 # 
 # Mukey: 1485527
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Cid-Lignum complex, 2 to 6 percent slopes'		'SIL'	3	0.3700	0.7500	5089225.00	0.0109	3.5000	32.4000
+'Cid-Lignum complex, 2 to 6 percent slopes'		'SIL'	3	0.3700	0.7500	5089225.00	0.0109	3.5000	6.0534
 	   50.000	  17.50	  17.50	   1.25	   7.20	  17.55
 	  130.000	  17.50	  17.50	   1.25	   7.20	  17.55
 	  360.000	  35.00	  35.00	   0.25	  12.40	  18.52
-1 10000.0 3.60000
+0 0 0.000000 0.000000

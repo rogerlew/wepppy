@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.212082
+#   Build Date: 2021-04-01 15:01:42.720886
 #   Source Data: Surgo
 # 
 # Mukey: 153456
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Honeyjones-Ahrs association, very rocky, 35 to 75 percent slopes'		'MPM'	5	0.3000	0.7500	3688500.00	0.0035	3.3550	1342.8000
+'Honeyjones-Ahrs association, very rocky, 35 to 75 percent slopes'		'MPM'	5	0.3000	0.7500	3688500.00	0.0035	3.3550	3.5366
 	  100.000	   8.00	   8.00	   5.30	  14.30	  15.00
 	  710.000	   8.00	   8.00	   2.70	   8.80	  15.00
 	 1040.000	  10.00	  10.00	   1.80	   8.30	  70.00
 	 1240.000	   8.00	   8.00	   0.40	   4.20	  85.00
 	 1570.000	   8.00	   8.00	   0.29	  11.30	  80.00
-1 10000.0 21.60000
+0 0 0.000000 0.000000

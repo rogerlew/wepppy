@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.361078
+#   Build Date: 2021-04-01 15:01:41.868754
 #   Source Data: Surgo
 # 
 # Mukey: 433572
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Portwing-Herbster complex, 0 to 6 percent slopes'		'SIL'	2	0.3000	0.7500	5034095.00	0.0102	3.5000	33.0120
+'Portwing-Herbster complex, 0 to 6 percent slopes'		'SIL'	2	0.3000	0.7500	5034095.00	0.0102	3.5000	4.0909
 	  100.000	  18.50	  18.50	   2.00	  23.00	   9.35
 	  230.000	  25.00	  25.00	   0.75	  19.50	   7.50
-1 10000.0 3.31200
+0 0 0.000000 0.000000

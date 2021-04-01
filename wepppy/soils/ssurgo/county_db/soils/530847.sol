@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.716116
+#   Build Date: 2021-04-01 15:01:43.227127
 #   Source Data: Surgo
 # 
 # Mukey: 530847
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Biffle-Sulphura-Rock outcrop association, very steep'		'GR-SIL'	3	0.3600	0.7500	5034095.00	0.0102	3.5000	101.6280
+'Biffle-Sulphura-Rock outcrop association, very steep'		'GR-SIL'	3	0.3600	0.7500	5034095.00	0.0102	3.5000	4.8591
 	  300.000	  18.50	  18.50	   1.00	  11.30	  41.80
 	  810.000	  26.00	  26.00	   0.25	  11.30	  39.38
 	 1060.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 8.38800
+0 0 0.000000 0.000000

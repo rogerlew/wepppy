@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.032465
+#   Build Date: 2021-04-01 15:01:43.550019
 #   Source Data: Surgo
 # 
 # Mukey: 522736
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Cookeville silt loam eroded undulating phase'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Cookeville silt loam eroded undulating phase'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	2.8904
 	  200.000	  21.00	  21.00	   2.00	   7.70	   2.50
 	  710.000	  28.50	  28.50	   0.25	  11.30	   2.50
 	 1830.000	  42.50	  42.50	   0.25	  11.30	  39.38
-1 10000.0 32.40000
+0 0 0.000000 0.000000

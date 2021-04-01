@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.063388
+#   Build Date: 2021-04-01 15:01:41.570155
 #   Source Data: Surgo
 # 
 # Mukey: 186789
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Shebeon loam, 0 to 2 percent slopes'		'L'	1	0.3000	0.7500	4552950.00	0.0053	3.0290	19.8000
+'Shebeon loam, 0 to 2 percent slopes'		'L'	1	0.3000	0.7500	4552950.00	0.0053	3.0290	8.3579
 	  230.000	  14.00	  14.00	   2.35	  15.90	   5.00
-1 10000.0 1.98000
+0 0 0.000000 0.000000

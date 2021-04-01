@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.657180
+#   Build Date: 2021-04-01 15:01:42.165622
 #   Source Data: Surgo
 # 
 # Mukey: 834396
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Weikert-Berks-Rough complex, 35 to 55 percent slopes'		'CN-SIL'	3	0.3600	0.7500	4591370.00	0.0110	3.0824	100.8000
+'Weikert-Berks-Rough complex, 35 to 55 percent slopes'		'CN-SIL'	3	0.3600	0.7500	4591370.00	0.0110	3.0824	6.6681
 	  100.000	  15.00	  15.00	   1.00	   6.00	  32.10
 	  410.000	  20.00	  20.00	   0.25	   5.60	  67.45
 	  660.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

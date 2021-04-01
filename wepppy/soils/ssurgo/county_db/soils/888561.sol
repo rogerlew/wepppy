@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.475306
+#   Build Date: 2021-04-01 15:01:43.993678
 #   Source Data: Surgo
 # 
 # Mukey: 888561
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Keswick clay loam, 9 to 20 percent slopes, severely eroded'		'CL'	1	0.2500	0.7500	4124450.00	0.0070	3.5000	10.8000
+'Keswick clay loam, 9 to 20 percent slopes, severely eroded'		'CL'	1	0.2500	0.7500	4124450.00	0.0070	3.5000	3.6461
 	  210.000	  35.00	  35.00	   0.75	  22.00	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

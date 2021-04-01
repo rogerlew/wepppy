@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.948925
+#   Build Date: 2021-04-01 15:01:44.468303
 #   Source Data: Surgo
 # 
 # Mukey: 370581
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Eckrant-Rock outcrop association, 1 to 10 percent slopes'		'CBV-C'	3	0.0900	0.7500	3738540.00	0.0069	3.5000	9.7200
+'Eckrant-Rock outcrop association, 1 to 10 percent slopes'		'CBV-C'	3	0.0900	0.7500	3738540.00	0.0069	3.5000	2.2008
 	  100.000	  42.00	  42.00	   6.00	  55.00	  74.70
 	  280.000	  45.00	  45.00	   5.00	  55.00	  80.65
 	 2030.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

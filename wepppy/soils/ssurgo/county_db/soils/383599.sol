@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.096738
+#   Build Date: 2021-04-01 15:01:44.616794
 #   Source Data: Surgo
 # 
 # Mukey: 383599
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Coyle-Ironmound complex, 3 to 5 percent slopes, eroded'		'L'	2	0.1600	0.7500	5052410.00	0.0117	3.3007	32.4000
+'Coyle-Ironmound complex, 3 to 5 percent slopes, eroded'		'L'	2	0.1600	0.7500	5052410.00	0.0117	3.3007	8.8160
 	  330.000	  20.50	  20.50	   1.00	  11.00	   0.00
 	  940.000	  27.50	  27.50	   0.75	  14.60	  13.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

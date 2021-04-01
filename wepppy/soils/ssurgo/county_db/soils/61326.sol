@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.728269
+#   Build Date: 2021-04-01 15:01:43.239541
 #   Source Data: Surgo
 # 
 # Mukey: 61326
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Quincy loamy fine sand, 2 to 12 percent slopes'		'LFS'	2	0.2300	0.7500	8587050.00	0.0208	1.1285	331.2000
+'Quincy loamy fine sand, 2 to 12 percent slopes'		'LFS'	2	0.2300	0.7500	8587050.00	0.0208	1.1285	35.1962
 	  150.000	   3.50	   3.50	   0.75	   4.50	   0.00
 	 1520.000	   4.00	   4.00	   0.25	   3.50	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.947727
+#   Build Date: 2021-04-01 15:01:44.467076
 #   Source Data: Surgo
 # 
 # Mukey: 526953
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Montevallo shaly silt loam, eroded rolling phase'		'CN-SIL'	2	0.3600	0.7500	4675750.00	0.0078	3.5000	33.0120
+'Montevallo shaly silt loam, eroded rolling phase'		'CN-SIL'	2	0.3600	0.7500	4675750.00	0.0078	3.5000	3.3666
 	  130.000	  25.00	  25.00	   1.25	  11.30	  39.38
 	  250.000	  25.00	  25.00	   0.25	  11.30	  64.59
-1 10000.0 2.55600
+0 0 0.000000 0.000000

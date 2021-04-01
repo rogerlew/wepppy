@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.677927
+#   Build Date: 2021-04-01 15:01:43.188529
 #   Source Data: Surgo
 # 
 # Mukey: 301193
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Odessa and Schoharie soils, 0 to 5 percent slopes'		'SICL'	2	0.2900	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Odessa and Schoharie soils, 0 to 5 percent slopes'		'SICL'	2	0.2900	0.7500	4951400.00	0.0094	3.5000	1.8858
 	  200.000	  20.00	  20.00	   6.00	  25.00	   0.00
 	  250.000	  38.00	  38.00	   1.00	  25.00	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

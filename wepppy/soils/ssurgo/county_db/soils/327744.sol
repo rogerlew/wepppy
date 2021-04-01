@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.220503
+#   Build Date: 2021-04-01 15:01:44.740181
 #   Source Data: Surgo
 # 
 # Mukey: 327744
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Moderately gullied land Lexington-Ruston materials (Lexington-Smithdale) complex'		'FSL'	3	0.3600	0.7500	6339480.00	0.0115	2.1321	101.6280
+'Moderately gullied land Lexington-Ruston materials (Lexington-Smithdale) complex'		'FSL'	3	0.3600	0.7500	6339480.00	0.0115	2.1321	19.4724
 	  410.000	   8.50	   8.50	   1.25	  11.30	   7.50
 	  660.000	  25.50	  25.50	   0.10	  11.30	   7.50
 	 1520.000	  16.00	  16.00	   0.00	  11.30	   7.50
-1 10000.0 101.62800
+0 0 0.000000 0.000000

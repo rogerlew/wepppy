@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.026107
+#   Build Date: 2021-04-01 15:01:45.542388
 #   Source Data: Surgo
 # 
 # Mukey: 811142
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Roanoke and Warne soils, 0 to 2 percent slopes, occasionally flooded'		'SIL'	3	0.3000	0.7500	5148460.00	0.0067	2.8492	32.4000
+'Roanoke and Warne soils, 0 to 2 percent slopes, occasionally flooded'		'SIL'	3	0.3000	0.7500	5148460.00	0.0067	2.8492	10.4384
 	  200.000	  14.00	  14.00	   2.00	   7.10	  11.00
 	  250.000	  17.00	  17.00	   0.25	   4.80	  11.00
 	 1090.000	  47.50	  47.50	   0.25	  12.40	  10.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

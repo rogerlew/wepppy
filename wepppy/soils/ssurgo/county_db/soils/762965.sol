@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.577143
+#   Build Date: 2021-04-01 15:01:41.082071
 #   Source Data: Surgo
 # 
 # Mukey: 762965
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Cypher-Wetmore-Ratake families complex, 5 to 40 percent slopes'		'SPM'	3	0.2300	0.7500	3688500.00	0.0035	3.3550	1080.0000
+'Cypher-Wetmore-Ratake families complex, 5 to 40 percent slopes'		'SPM'	3	0.2300	0.7500	3688500.00	0.0035	3.3550	18.5283
 	   80.000	  10.00	  10.00	   2.00	   9.10	  33.00
 	  280.000	  10.00	  10.00	   0.50	   8.60	  53.89
 	  440.000	  22.00	  22.00	   0.50	  17.60	  59.11
-1 10000.0 0.75600
+0 0 0.000000 0.000000

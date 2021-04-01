@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.481123
+#   Build Date: 2021-04-01 15:01:41.988817
 #   Source Data: Surgo
 # 
 # Mukey: 529682
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Cataska-Sylco complex, 25 to 80 percent slopes'		'CN-SIL'	2	0.3600	0.7500	5171920.00	0.0124	3.5000	101.6280
+'Cataska-Sylco complex, 25 to 80 percent slopes'		'CN-SIL'	2	0.3600	0.7500	5171920.00	0.0124	3.5000	5.4444
 	   50.000	  16.00	  16.00	   2.00	  11.30	  41.50
 	  300.000	  16.00	  16.00	   0.25	  11.30	  75.70
-1 10000.0 2.66400
+0 0 0.000000 0.000000

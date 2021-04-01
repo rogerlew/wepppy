@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.488408
+#   Build Date: 2021-04-01 15:01:44.006887
 #   Source Data: Surgo
 # 
 # Mukey: 2399585
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Hoytville clay loam, 0 to 1 percent slopes'		'CL'	2	0.2300	0.7500	4069320.00	0.0070	3.5000	27.9360
+'Hoytville clay loam, 0 to 1 percent slopes'		'CL'	2	0.2300	0.7500	4069320.00	0.0070	3.5000	3.5397
 	  200.000	  36.00	  36.00	   4.75	  26.50	   6.00
 	  890.000	  46.00	  46.00	   1.00	  26.00	   7.93
-1 10000.0 3.31200
+0 0 0.000000 0.000000

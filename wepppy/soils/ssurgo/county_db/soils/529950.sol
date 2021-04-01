@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.997960
+#   Build Date: 2021-04-01 15:01:45.513878
 #   Source Data: Surgo
 # 
 # Mukey: 529950
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Clarksville cherty silt loam, steep phase'		'CR-SIL'	3	0.3600	0.7500	4951400.00	0.0094	3.5000	101.6280
+'Clarksville cherty silt loam, steep phase'		'CR-SIL'	3	0.3600	0.7500	4951400.00	0.0094	3.5000	4.7302
 	  330.000	  20.00	  20.00	   1.25	  11.30	  36.92
 	 1190.000	  30.00	  30.00	   0.25	  11.30	  69.55
 	 2030.000	  57.50	  57.50	   0.25	  11.30	  65.20
-1 10000.0 33.01200
+0 0 0.000000 0.000000

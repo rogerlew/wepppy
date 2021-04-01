@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.848115
+#   Build Date: 2021-04-01 15:01:43.364625
 #   Source Data: Surgo
 # 
 # Mukey: 391901
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Potter soils, 3 to 20 percent slopes'		'GR-L'	2	0.2300	0.7500	7031040.00	0.0087	2.8203	32.4000
+'Potter soils, 3 to 20 percent slopes'		'GR-L'	2	0.2300	0.7500	7031040.00	0.0087	2.8203	9.1547
 	  150.000	  22.30	  22.30	   3.90	  19.80	  22.00
 	  380.000	  18.20	  18.20	   0.66	   7.30	  53.00
-1 10000.0 2.16000
+0 0 0.000000 0.000000

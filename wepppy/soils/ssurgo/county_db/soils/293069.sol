@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.375043
+#   Build Date: 2021-04-01 15:01:42.884244
 #   Source Data: Surgo
 # 
 # Mukey: 293069
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Charlton-Chatfield complex, 0 to 15 percent slopes, very rocky'		'SPM'	3	0.0400	0.7500	4649000.00	0.0050	2.5450	360.0000
+'Charlton-Chatfield complex, 0 to 15 percent slopes, very rocky'		'SPM'	3	0.0400	0.7500	4649000.00	0.0050	2.5450	14.0417
 	  100.000	   9.00	   9.00	  10.00	  11.30	  16.00
 	  690.000	   8.00	   8.00	   1.50	  11.30	  23.37
 	 1650.000	  10.00	  10.00	   0.50	  11.30	  36.76
-1 10000.0 36.00000
+0 0 0.000000 0.000000

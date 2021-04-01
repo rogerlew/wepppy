@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.701329
+#   Build Date: 2021-04-01 15:01:45.222771
 #   Source Data: Surgo
 # 
 # Mukey: 1487714
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Santa ashy silt loam, 8 to 15 percent slopes'		'ASHY-SIL'	3	0.1600	0.7500	5227050.00	0.0136	3.5000	47.5200
+'Santa ashy silt loam, 8 to 15 percent slopes'		'ASHY-SIL'	3	0.1600	0.7500	5227050.00	0.0136	3.5000	1.9139
 	  200.000	  15.00	  15.00	   3.25	  13.40	   0.00
 	  480.000	  15.00	  15.00	   1.10	  12.90	   0.00
 	  740.000	  12.00	  12.00	   0.63	  10.30	   0.00
-1 10000.0 0.25200
+0 0 0.000000 0.000000

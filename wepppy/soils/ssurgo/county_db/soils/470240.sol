@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.788550
+#   Build Date: 2021-04-01 15:01:42.297166
 #   Source Data: Surgo
 # 
 # Mukey: 470240
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Clallam family, moderately deep-Hugo family, deep,maymen family association, 35 to 70 percent slopes'		'GRV-L'	3	0.2300	0.7500	5071620.00	0.0066	3.2624	32.4000
+'Clallam family, moderately deep-Hugo family, deep,maymen family association, 35 to 70 percent slopes'		'GRV-L'	3	0.2300	0.7500	5071620.00	0.0066	3.2624	8.4530
 	  100.000	  20.00	  20.00	   2.00	  15.00	  57.00
 	  660.000	  25.00	  25.00	   0.50	  15.00	  65.80
 	  760.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 180.00000
+0 0 0.000000 0.000000

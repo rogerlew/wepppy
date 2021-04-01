@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.832037
+#   Build Date: 2021-04-01 15:01:43.348065
 #   Source Data: Surgo
 # 
 # Mukey: 2434183
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Macove channery silt loam, 25 to 65 percent slopes, extremely stony'		'SPM'	4	0.3700	0.7500	0.00	0.0000	0.0000	331.2000
+'Macove channery silt loam, 25 to 65 percent slopes, extremely stony'		'SPM'	4	0.3700	0.7500	0.00	0.0000	0.0000	5.7530
 	   80.000	  19.00	  19.00	  10.70	  11.30	  30.88
 	  160.000	  17.00	  17.00	   1.50	  11.30	  23.74
 	 1270.000	  22.00	  22.00	   0.50	  11.30	  61.66
 	 1980.000	  20.00	  20.00	   0.25	  11.30	  74.63
-1 10000.0 101.62800
+0 0 0.000000 0.000000

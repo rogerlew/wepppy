@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.576259
+#   Build Date: 2021-04-01 15:01:41.081214
 #   Source Data: Surgo
 # 
 # Mukey: 460521
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'San Joaquin loam, 0 to 1 percent slopes'		'L'	1	0.3000	0.7500	5071620.00	0.0153	3.2624	32.4000
+'San Joaquin loam, 0 to 1 percent slopes'		'L'	1	0.3000	0.7500	5071620.00	0.0153	3.2624	8.4530
 	  410.000	  20.00	  20.00	   0.75	  15.00	   2.50
-1 10000.0 0.77400
+0 0 0.000000 0.000000

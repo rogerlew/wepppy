@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.666698
+#   Build Date: 2021-04-01 15:01:44.185392
 #   Source Data: Surgo
 # 
 # Mukey: 992983
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Hartwell silt loam, 1 to 3 percent slopes'		'SIL'	2	0.1600	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Hartwell silt loam, 1 to 3 percent slopes'		'SIL'	2	0.1600	0.7500	4896270.00	0.0089	3.5000	4.6754
 	  250.000	  21.00	  21.00	   3.00	  11.40	   0.00
 	  380.000	  23.50	  23.50	   1.50	  12.70	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

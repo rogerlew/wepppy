@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.934300
+#   Build Date: 2021-04-01 15:01:44.453440
 #   Source Data: Surgo
 # 
 # Mukey: 368849
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Brackett gravelly clay loam, 3 to 8 percent slopes'		'GR-CL'	3	0.3700	0.7500	4706630.00	0.0060	3.8926	32.4000
+'Brackett gravelly clay loam, 3 to 8 percent slopes'		'GR-CL'	3	0.3700	0.7500	4706630.00	0.0060	3.8926	6.2539
 	  230.000	  28.00	  28.00	   2.00	  15.00	  31.75
 	  430.000	  29.00	  29.00	   1.25	  15.00	  10.27
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

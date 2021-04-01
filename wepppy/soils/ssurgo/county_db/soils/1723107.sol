@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.415347
+#   Build Date: 2021-04-01 15:01:44.936260
 #   Source Data: Surgo
 # 
 # Mukey: 1723107
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Slagle fine sandy loam, 2 to 6 percent slopes'		'FSL'	3	0.2900	0.7500	5820810.00	0.0107	2.7112	100.8000
+'Slagle fine sandy loam, 2 to 6 percent slopes'		'FSL'	3	0.2900	0.7500	5820810.00	0.0107	2.7112	17.5363
 	  200.000	  15.00	  15.00	   1.25	  11.30	   0.00
 	 1300.000	  22.00	  22.00	   0.25	   4.30	   0.00
 	 1780.000	  15.00	  15.00	   0.25	  11.30	   0.00
-1 10000.0 7.20000
+0 0 0.000000 0.000000

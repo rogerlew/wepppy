@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.070631
+#   Build Date: 2021-04-01 15:01:44.590163
 #   Source Data: Surgo
 # 
 # Mukey: 535518
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Brownstown-Gilwood silt loams, 25 to 75 percent slopes'		'CN-SIL'	3	0.2300	0.7500	5171920.00	0.0124	3.5000	26.1720
+'Brownstown-Gilwood silt loams, 25 to 75 percent slopes'		'CN-SIL'	3	0.2300	0.7500	5171920.00	0.0124	3.5000	1.8800
 	  150.000	  16.00	  16.00	   2.50	  11.30	   8.86
 	  460.000	  13.00	  13.00	   0.75	  11.30	  40.84
 	  910.000	  13.00	  13.00	   0.25	  11.30	  77.50
-1 10000.0 4.68000
+0 0 0.000000 0.000000

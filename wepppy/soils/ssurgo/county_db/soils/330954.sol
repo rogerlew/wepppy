@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.912210
+#   Build Date: 2021-04-01 15:01:41.418428
 #   Source Data: Surgo
 # 
 # Mukey: 330954
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Mantachie, Kinston and Iuka soils, 0 to 1 percent slopes, frequently flooded'		'SCL'	4	0.2300	0.7500	4917940.00	0.0078	3.8483	32.4000
+'Mantachie, Kinston and Iuka soils, 0 to 1 percent slopes, frequently flooded'		'SCL'	4	0.2300	0.7500	4917940.00	0.0078	3.8483	10.5593
 	  150.000	  28.30	  28.30	   1.50	  11.30	   4.00
 	  740.000	  20.00	  20.00	   0.75	  11.30	   4.00
 	 1570.000	  26.50	  26.50	   0.50	  11.30	   3.00
 	 2030.000	  18.00	  18.00	   0.50	  11.30	   3.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.367342
+#   Build Date: 2021-04-01 15:01:41.875258
 #   Source Data: Surgo
 # 
 # Mukey: 762733
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Nankin-Springhill-Lucy complex, 15 to 35 percent slopes'		'FSL'	4	0.1700	0.7500	5782390.00	0.0106	2.7878	32.4000
+'Nankin-Springhill-Lucy complex, 15 to 35 percent slopes'		'FSL'	4	0.1700	0.7500	5782390.00	0.0106	2.7878	17.1435
 	   80.000	  16.00	  16.00	   1.25	  11.30	   0.00
 	 1070.000	  42.50	  42.50	   0.25	  11.30	   0.00
 	 1450.000	  31.00	  31.00	   0.25	  11.30	   0.00
 	 2030.000	  17.00	  17.00	   0.25	  11.30	  16.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

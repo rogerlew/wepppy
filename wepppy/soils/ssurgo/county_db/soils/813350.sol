@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.745000
+#   Build Date: 2021-04-01 15:01:41.250622
 #   Source Data: Surgo
 # 
 # Mukey: 813350
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Urban land, Boonton substratum - Boonton complex, red sandstone lowland, 0 to 8 percent slopes'		'MAT'	2	0.0365	0.7500	4649000.00	0.0050	2.5450	100.8000
+'Urban land, Boonton substratum - Boonton complex, red sandstone lowland, 0 to 8 percent slopes'		'MAT'	2	0.0365	0.7500	4649000.00	0.0050	2.5450	18.1558
 	  300.000	   7.00	   7.00	   7.00	  11.30	  55.50
 	 1700.000	  11.10	  11.10	   1.60	   6.40	  38.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

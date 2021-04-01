@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.097367
+#   Build Date: 2021-04-01 15:01:44.617434
 #   Source Data: Surgo
 # 
 # Mukey: 384885
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Stephenville and Littleaxe soils, 3 to 5 percent slopes'		'FSL'	4	0.2300	0.7500	5820810.00	0.0165	2.7112	101.5992
+'Stephenville and Littleaxe soils, 3 to 5 percent slopes'		'FSL'	4	0.2300	0.7500	5820810.00	0.0165	2.7112	17.7947
 	  100.000	  15.00	  15.00	   0.75	   9.50	  15.82
 	  230.000	  10.00	  10.00	   0.25	   7.00	  14.90
 	  960.000	  26.50	  26.50	   0.75	  16.00	   1.00
 	 1270.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.15992
+0 0 0.000000 0.000000

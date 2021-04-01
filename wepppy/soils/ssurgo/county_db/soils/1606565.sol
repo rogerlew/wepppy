@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.005925
+#   Build Date: 2021-04-01 15:01:45.521962
 #   Source Data: Surgo
 # 
 # Mukey: 1606565
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Goldsboro sandy loam, 0 to 2 percent slopes'		'SL'	3	0.1600	0.7500	5013990.00	0.0094	2.6298	100.8000
+'Goldsboro sandy loam, 0 to 2 percent slopes'		'SL'	3	0.1600	0.7500	5013990.00	0.0094	2.6298	20.4178
 	  200.000	  10.00	  10.00	   1.25	   3.80	   4.00
 	  890.000	  24.00	  24.00	   0.10	   2.60	   4.00
 	 2030.000	  27.00	  27.00	   0.10	   2.90	   4.00
-1 10000.0 36.00000
+0 0 0.000000 0.000000

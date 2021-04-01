@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.048382
+#   Build Date: 2021-04-01 15:01:41.554695
 #   Source Data: Surgo
 # 
 # Mukey: 1414669
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Crowley-Vidrine complex, 0 to 1 percent slopes'		'SIL'	1	0.2300	0.7500	5028582.00	0.0101	3.5000	10.1520
+'Crowley-Vidrine complex, 0 to 1 percent slopes'		'SIL'	1	0.2300	0.7500	5028582.00	0.0101	3.5000	3.8929
 	  210.000	  18.60	  18.60	   1.66	  11.30	   0.00
-1 10000.0 1.44000
+0 0 0.000000 0.000000

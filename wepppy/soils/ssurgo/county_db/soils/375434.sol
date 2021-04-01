@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.579407
+#   Build Date: 2021-04-01 15:01:45.100957
 #   Source Data: Surgo
 # 
 # Mukey: 375434
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Dacosta sandy clay loam, 0 to 1 percent slopes'		'SCL'	1	0.1600	0.7500	6512370.00	0.0091	3.4449	7.2000
+'Dacosta sandy clay loam, 0 to 1 percent slopes'		'SCL'	1	0.1600	0.7500	6512370.00	0.0091	3.4449	12.2973
 	  260.000	  29.50	  29.50	   1.86	  18.80	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

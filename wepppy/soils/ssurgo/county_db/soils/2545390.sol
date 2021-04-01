@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.864448
+#   Build Date: 2021-04-01 15:01:45.387265
 #   Source Data: Surgo
 # 
 # Mukey: 2545390
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Sugargrove-Sengtown-Hawthorne complex, 12 to 25 percent slopes'		'GR-SIL'	3	0.3500	0.7500	4813575.00	0.0084	3.5000	83.8440
+'Sugargrove-Sengtown-Hawthorne complex, 12 to 25 percent slopes'		'GR-SIL'	3	0.3500	0.7500	4813575.00	0.0084	3.5000	3.8560
 	   50.000	  22.50	  22.50	   2.00	  11.30	  32.50
 	  150.000	  20.00	  20.00	   0.25	  11.30	  32.50
 	  710.000	  26.00	  26.00	   0.25	  11.30	  37.90
-1 10000.0 2.55600
+0 0 0.000000 0.000000

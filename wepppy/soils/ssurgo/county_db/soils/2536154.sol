@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.485942
+#   Build Date: 2021-04-01 15:01:44.004433
 #   Source Data: Surgo
 # 
 # Mukey: 2536154
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Nixa very gravelly silt loam, 3 to 8 percent slopes'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
+'Nixa very gravelly silt loam, 3 to 8 percent slopes'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	2.6668
 	   80.000	  11.00	  11.00	   1.50	  11.30	  51.00
 	  250.000	  13.50	  13.50	   0.75	  11.30	  66.00
 	  510.000	  13.20	  13.20	   0.25	  11.30	  51.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

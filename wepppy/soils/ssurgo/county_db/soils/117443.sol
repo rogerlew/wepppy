@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.969772
+#   Build Date: 2021-04-01 15:01:44.489598
 #   Source Data: Surgo
 # 
 # Mukey: 117443
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Georgeville silty clay loam, 2 to 8 percent slopes, moderately eroded'		'SICL'	3	0.3000	0.7500	4344970.00	0.0072	3.5000	32.4000
+'Georgeville silty clay loam, 2 to 8 percent slopes, moderately eroded'		'SICL'	3	0.3000	0.7500	4344970.00	0.0072	3.5000	3.0912
 	  180.000	  31.00	  31.00	   0.25	  12.00	  13.76
 	 1520.000	  50.00	  50.00	   0.25	  12.00	   8.92
 	 2030.000	  27.50	  27.50	   0.25	  11.00	  14.64
-1 10000.0 32.40000
+0 0 0.000000 0.000000

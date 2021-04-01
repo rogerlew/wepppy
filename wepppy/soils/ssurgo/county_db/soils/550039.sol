@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.616962
+#   Build Date: 2021-04-01 15:01:41.122566
 #   Source Data: Surgo
 # 
 # Mukey: 550039
@@ -57,10 +57,10 @@
 # 
 Any comments:
 1 1
-'Marrowbone-Clifftop-Matewan complex, 35 to 75 percent slopes, very rocky'		'SPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Marrowbone-Clifftop-Matewan complex, 35 to 75 percent slopes, very rocky'		'SPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	13.9823
 	  130.000	  14.00	  14.00	   2.00	   5.20	  12.64
 	  250.000	  14.00	  14.00	   0.25	  11.30	   5.95
 	  430.000	  14.00	  14.00	   0.25	  11.30	  12.64
 	  580.000	  14.00	  14.00	   0.25	  11.30	  12.64
 	  710.000	  14.00	  14.00	   0.25	  11.30	  24.56
-1 10000.0 0.18000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.503739
+#   Build Date: 2021-04-01 15:01:44.022463
 #   Source Data: Surgo
 # 
 # Mukey: 168128
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Blount loam, 2 to 6 percent slopes'		'L'	1	0.2900	0.7500	4456900.00	0.0056	3.7730	33.0120
+'Blount loam, 2 to 6 percent slopes'		'L'	1	0.2900	0.7500	4456900.00	0.0056	3.7730	5.4496
 	  230.000	  25.00	  25.00	   2.00	  18.00	   5.95
-1 10000.0 3.31200
+0 0 0.000000 0.000000

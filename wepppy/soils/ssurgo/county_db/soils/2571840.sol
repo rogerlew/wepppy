@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.775406
+#   Build Date: 2021-04-01 15:01:44.293994
 #   Source Data: Surgo
 # 
 # Mukey: 2571840
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Standingstone-Hayter complex, 15 to 40 percent slopes, very rocky'		'SPM'	4	0.2300	0.7500	4764260.00	0.0052	2.5102	1008.0000
+'Standingstone-Hayter complex, 15 to 40 percent slopes, very rocky'		'SPM'	4	0.2300	0.7500	4764260.00	0.0052	2.5102	11.8390
 	   80.000	  13.50	  13.50	   4.66	  10.10	  20.80
 	  150.000	  13.80	  13.80	   1.47	   6.10	  14.44
 	  330.000	  21.50	  21.50	   0.84	  13.20	  24.32
 	 2030.000	  52.60	  52.60	   0.35	  18.80	   2.98
-1 10000.0 9.00000
+0 0 0.000000 0.000000

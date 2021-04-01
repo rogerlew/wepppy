@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.492154
+#   Build Date: 2021-04-01 15:01:44.010694
 #   Source Data: Surgo
 # 
 # Mukey: 2959627
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Shelby clay loam, dissected till plain, 9 to 14 percent slopes, eroded'		'CL'	4	0.1700	0.7500	4207170.00	0.0045	4.1734	10.8000
+'Shelby clay loam, dissected till plain, 9 to 14 percent slopes, eroded'		'CL'	4	0.1700	0.7500	4207170.00	0.0045	4.1734	5.4171
 	  180.000	  30.00	  30.00	   2.90	  24.90	  11.00
 	  930.000	  35.00	  35.00	   1.10	  27.60	  16.58
 	 1150.000	  31.00	  31.00	   0.40	  22.90	  16.58
 	 2000.000	  31.00	  31.00	   0.30	  22.70	  16.58
-1 10000.0 10.80000
+0 0 0.000000 0.000000

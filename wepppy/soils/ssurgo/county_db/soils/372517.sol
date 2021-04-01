@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.022170
+#   Build Date: 2021-04-01 15:01:45.538325
 #   Source Data: Surgo
 # 
 # Mukey: 372517
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Ector-Rock outcrop association, 1 to 15 percent slopes'		'GRV-L'	4	0.1600	0.7500	4053490.00	0.0040	3.9598	32.4000
+'Ector-Rock outcrop association, 1 to 15 percent slopes'		'GRV-L'	4	0.1600	0.7500	4053490.00	0.0040	3.9598	4.6282
 	  100.000	  26.00	  26.00	   7.00	  26.80	  62.62
 	  200.000	  26.00	  26.00	   8.00	  22.30	  70.84
 	  380.000	  26.00	  26.00	   3.00	  17.40	  91.18
 	 1020.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.477270
+#   Build Date: 2021-04-01 15:01:43.995612
 #   Source Data: Surgo
 # 
 # Mukey: 2605876
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Coly-Hobbs silt loams, 3 to 60 percent slopes'		'SIL'	2	0.1600	0.7500	4786010.00	0.0082	3.5000	32.4000
+'Coly-Hobbs silt loams, 3 to 60 percent slopes'		'SIL'	2	0.1600	0.7500	4786010.00	0.0082	3.5000	3.7935
 	  100.000	  23.00	  23.00	   2.00	  19.50	   0.00
 	 2000.000	  20.00	  20.00	   0.50	  16.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

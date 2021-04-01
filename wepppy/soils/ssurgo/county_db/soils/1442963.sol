@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.076582
+#   Build Date: 2021-04-01 15:01:44.596248
 #   Source Data: Surgo
 # 
 # Mukey: 1442963
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Adyeville-Wellston silt loams, 18 to 50 percent slopes'		'SIL'	3	0.3000	0.7500	5502700.00	0.0250	3.5000	33.0120
+'Adyeville-Wellston silt loams, 18 to 50 percent slopes'		'SIL'	3	0.3000	0.7500	5502700.00	0.0250	3.5000	4.5425
 	   80.000	   9.00	   9.00	   3.80	  12.00	   2.00
 	  230.000	  10.00	  10.00	   1.75	   5.00	   4.00
 	  610.000	  17.00	  17.00	   0.25	   5.00	  24.00
-1 10000.0 4.68000
+0 0 0.000000 0.000000

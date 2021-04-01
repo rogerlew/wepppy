@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.234668
+#   Build Date: 2021-04-01 15:01:44.754547
 #   Source Data: Surgo
 # 
 # Mukey: 2531102
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Gara loam, 14 to 18 percent slopes, moderately eroded'		'L'	1	0.2300	0.7500	4841100.00	0.0059	3.2020	32.4000
+'Gara loam, 14 to 18 percent slopes, moderately eroded'		'L'	1	0.2300	0.7500	4841100.00	0.0059	3.2020	10.5214
 	  210.000	  18.00	  18.00	   2.23	  27.50	  15.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

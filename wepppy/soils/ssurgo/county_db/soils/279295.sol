@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.320911
+#   Build Date: 2021-04-01 15:01:41.828057
 #   Source Data: Surgo
 # 
 # Mukey: 279295
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Chatfield-Hollis-Canton complex, 8 to 15 percent slopes, rocky'		'HPM'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	360.0000
+'Chatfield-Hollis-Canton complex, 8 to 15 percent slopes, rocky'		'HPM'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	14.4375
 	   50.000	   9.00	   9.00	  10.00	  11.30	  12.00
 	  760.000	   8.00	   8.00	   1.50	  11.30	  31.92
-1 10000.0 0.01800
+0 0 0.000000 0.000000

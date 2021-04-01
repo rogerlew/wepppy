@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.793440
+#   Build Date: 2021-04-01 15:01:44.312317
 #   Source Data: Surgo
 # 
 # Mukey: 520305
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Shottower-Urban land complex, 2 to 15 percent slopes'		'L'	3	0.3000	0.7500	5033200.00	0.0094	3.3390	82.8000
+'Shottower-Urban land complex, 2 to 15 percent slopes'		'L'	3	0.3000	0.7500	5033200.00	0.0094	3.3390	10.2757
 	  460.000	  21.00	  21.00	   1.25	   4.90	   5.95
 	  860.000	  38.00	  38.00	   0.25	   4.40	  19.25
 	 1570.000	  55.00	  55.00	   0.25	   6.10	  19.25
-1 10000.0 32.40000
+0 0 0.000000 0.000000

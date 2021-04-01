@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.929643
+#   Build Date: 2021-04-01 15:01:42.438399
 #   Source Data: Surgo
 # 
 # Mukey: 536498
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Gilpin-Summitville-Upshur complex, 35 to 70 percent slopes, benched'		'SIL'	4	0.3000	0.7500	4896270.00	0.0089	3.5000	33.0120
+'Gilpin-Summitville-Upshur complex, 35 to 70 percent slopes, benched'		'SIL'	4	0.3000	0.7500	4896270.00	0.0089	3.5000	4.5521
 	  180.000	  21.00	  21.00	   2.25	  12.50	  19.25
 	  560.000	  26.50	  26.50	   0.25	   8.50	  48.00
 	  660.000	  25.00	  25.00	   0.25	   0.50	  56.25
 	  710.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.93600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.530711
+#   Build Date: 2021-04-01 15:01:43.041112
 #   Source Data: Surgo
 # 
 # Mukey: 2403455
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Smithdale fine sandy loam, 5 to 15 percent slopes'		'FSL'	3	0.3000	0.7500	6070540.00	0.0111	2.2133	101.6280
+'Smithdale fine sandy loam, 5 to 15 percent slopes'		'FSL'	3	0.3000	0.7500	6070540.00	0.0111	2.2133	17.1870
 	  410.000	   8.50	   8.50	   1.25	  11.30	   7.50
 	  910.000	  25.50	  25.50	   0.60	  11.30	   9.00
 	 2030.000	  17.00	  17.00	   0.30	  11.30	   9.00
-1 10000.0 101.62800
+0 0 0.000000 0.000000

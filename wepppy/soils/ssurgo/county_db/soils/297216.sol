@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.165227
+#   Build Date: 2021-04-01 15:01:45.681952
 #   Source Data: Surgo
 # 
 # Mukey: 297216
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Wurtsboro stony fine sandy loam, 0 to 8 percent slopes, extremely stony'		'ST-FSL'	2	0.3000	0.7500	6012910.00	0.0073	2.5882	33.0120
+'Wurtsboro stony fine sandy loam, 0 to 8 percent slopes, extremely stony'		'ST-FSL'	2	0.3000	0.7500	6012910.00	0.0073	2.5882	18.5918
 	  100.000	  14.00	  14.00	   3.00	  25.00	  37.23
 	  560.000	  14.00	  14.00	   0.50	   5.00	  34.03
-1 10000.0 3.31200
+0 0 0.000000 0.000000

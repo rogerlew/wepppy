@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.510503
+#   Build Date: 2021-04-01 15:01:44.029328
 #   Source Data: Surgo
 # 
 # Mukey: 2534926
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Bendavis-Poynor complex, 8 to 15 percent slopes, stony'		'GRV-SIL'	3	0.3000	0.7500	5442057.00	0.0215	3.5000	100.8000
+'Bendavis-Poynor complex, 8 to 15 percent slopes, stony'		'GRV-SIL'	3	0.3000	0.7500	5442057.00	0.0215	3.5000	3.5450
 	  130.000	  11.10	  11.10	   2.00	   9.30	  60.00
 	  230.000	  12.70	  12.70	   1.70	   9.00	  60.00
 	  640.000	  16.00	  16.00	   0.80	   9.00	  60.00
-1 10000.0 0.18000
+0 0 0.000000 0.000000

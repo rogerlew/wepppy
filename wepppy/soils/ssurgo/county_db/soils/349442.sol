@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.838838
+#   Build Date: 2021-04-01 15:01:43.355007
 #   Source Data: Surgo
 # 
 # Mukey: 349442
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Forkwood-Cambria-Cushman loams, 0 to 12 percent slopes'		'L'	3	0.3000	0.7500	5033200.00	0.0080	3.1440	33.0120
+'Forkwood-Cambria-Cushman loams, 0 to 12 percent slopes'		'L'	3	0.3000	0.7500	5033200.00	0.0080	3.1440	8.7109
 	  100.000	  18.00	  18.00	   1.50	  15.30	   0.00
 	  530.000	  29.00	  29.00	   0.75	  22.90	   0.00
 	 2000.000	  24.00	  24.00	   0.25	  18.50	   3.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

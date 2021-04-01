@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.571872
+#   Build Date: 2021-04-01 15:01:43.083225
 #   Source Data: Surgo
 # 
 # Mukey: 171134
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Miamian silt loam, 6 to 12 percent slopes, moderately eroded'		'SIL'	4	0.3000	0.7500	4923835.00	0.0091	3.5000	33.0120
+'Miamian silt loam, 6 to 12 percent slopes, moderately eroded'		'SIL'	4	0.3000	0.7500	4923835.00	0.0091	3.5000	4.4329
 	  150.000	  20.50	  20.50	   2.00	  14.00	   2.50
 	  250.000	  30.00	  30.00	   0.75	  17.00	  10.00
 	  690.000	  41.50	  41.50	   0.65	  22.50	  12.70
 	 1520.000	  23.50	  23.50	   0.30	  11.50	  19.97
-1 10000.0 10.15200
+0 0 0.000000 0.000000

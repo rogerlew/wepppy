@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.746876
+#   Build Date: 2021-04-01 15:01:41.252539
 #   Source Data: Surgo
 # 
 # Mukey: 376299
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Chispa-Armesa-Redona association, 2 to 7 percent slopes'		'FSL'	3	0.1600	0.7500	5974490.00	0.0095	2.8273	101.6280
+'Chispa-Armesa-Redona association, 2 to 7 percent slopes'		'FSL'	3	0.1600	0.7500	5974490.00	0.0095	2.8273	18.7161
 	  180.000	  17.50	  17.50	   1.50	  11.50	   7.50
 	  810.000	  30.00	  30.00	   0.75	  15.00	   7.50
 	 1520.000	  25.00	  25.00	   0.25	  13.00	  12.70
-1 10000.0 33.01200
+0 0 0.000000 0.000000

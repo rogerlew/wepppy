@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.910872
+#   Build Date: 2021-04-01 15:01:42.419464
 #   Source Data: Surgo
 # 
 # Mukey: 497654
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Wetmore-Boyle-Rock outcrop complex, 5 to 60 percent slopes'		'GR-COSL'	2	0.1600	0.7500	4226380.00	0.0140	2.7051	101.5920
+'Wetmore-Boyle-Rock outcrop complex, 5 to 60 percent slopes'		'GR-COSL'	2	0.1600	0.7500	4226380.00	0.0140	2.7051	19.7415
 	  130.000	   7.50	   7.50	   0.75	   6.50	  40.20
 	  410.000	  15.00	  15.00	   0.25	   9.50	  73.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.656452
+#   Build Date: 2021-04-01 15:01:42.164886
 #   Source Data: Surgo
 # 
 # Mukey: 503696
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Travessilla-Rock outcrop-Gerst complex'		'BYX-L'	2	0.3000	0.7500	5090830.00	0.0081	3.0291	101.6280
+'Travessilla-Rock outcrop-Gerst complex'		'BYX-L'	2	0.3000	0.7500	5090830.00	0.0081	3.0291	9.4250
 	   50.000	  16.50	  16.50	   1.50	  10.00	  99.10
 	  300.000	  13.00	  13.00	   0.25	   6.00	  12.70
-1 10000.0 3.31200
+0 0 0.000000 0.000000

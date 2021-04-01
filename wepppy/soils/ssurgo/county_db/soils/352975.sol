@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.694191
+#   Build Date: 2021-04-01 15:01:43.204927
 #   Source Data: Surgo
 # 
 # Mukey: 352975
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Anselmo-Longpine fine sandy loams, 9 to 21 percent slopes'		'FSL'	4	0.1600	0.7500	6012910.00	0.0095	2.5882	82.8000
+'Anselmo-Longpine fine sandy loams, 9 to 21 percent slopes'		'FSL'	4	0.1600	0.7500	6012910.00	0.0095	2.5882	19.0703
 	  180.000	  14.00	  14.00	   1.50	  15.00	   0.00
 	  360.000	  14.00	  14.00	   0.75	  10.00	   0.00
 	  560.000	  14.00	  14.00	   0.75	  10.00	   0.00
 	 2030.000	   7.50	   7.50	   0.25	   5.00	   0.00
-1 10000.0 151.92000
+0 0 0.000000 0.000000

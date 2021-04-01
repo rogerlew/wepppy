@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.175847
+#   Build Date: 2021-04-01 15:01:41.682664
 #   Source Data: Surgo
 # 
 # Mukey: 162156
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Patton silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.1700	0.7500	4234710.00	0.0071	3.5000	33.0120
+'Patton silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.1700	0.7500	4234710.00	0.0071	3.5000	1.0473
 	  300.000	  33.00	  33.00	   5.00	  27.70	   0.00
 	 1020.000	  34.00	  34.00	   1.25	  27.00	   0.00
 	 1520.000	  19.00	  19.00	   0.75	  12.80	   0.00
-1 10000.0 27.93600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.626306
+#   Build Date: 2021-04-01 15:01:42.134324
 #   Source Data: Surgo
 # 
 # Mukey: 455721
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Santa Lucia-Reliz association'		'CN-CL'	2	0.2500	0.7500	4649000.00	0.0050	4.0400	32.4000
+'Santa Lucia-Reliz association'		'CN-CL'	2	0.2500	0.7500	4649000.00	0.0050	4.0400	5.1261
 	  610.000	  30.00	  30.00	   6.00	  50.00	  62.50
 	  740.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000
