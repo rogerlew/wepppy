@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.710946
+#   Build Date: 2021-04-01 12:52:28.898627
 #   Source Data: Surgo
 # 
 # Mukey: 518420
@@ -14,7 +14,7 @@
 #  45465298   H1             38.0    78.0        0.0        20.0          1.3    13.5    70.1    17.2     2.5
 #  45465299   H2             58.0    78.0        3.0        23.0          1.3    17.0    43.3    12.2    0.25
 #  45465300   H3             74.0    78.0        3.0        30.0          1.3    17.0    43.3    12.2    0.25
-#  45465301   H4             99.0    21.0        0.0         0.0          1.4     7.0    66.8    10.0     0.0
+#  45465301   H4     X       99.0    21.0        0.0         0.0          1.4     7.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Lehew, Dekalb, and Calvin soils, 45 to 65 percent slopes, very stony'		'CB-SL'	4	0.3600	0.7500	6032120.00	0.0075	2.5499	280.8000
-	  380.000	  70.10	  13.50	   2.50	   9.00	  44.00
-	  580.000	  43.30	  17.00	   0.25	   4.80	  77.80
-	  740.000	  43.30	  17.00	   0.25	   4.80	  83.25
-	  990.000	  66.80	   7.00	   0.00	   0.00	 100.00
-1 10000.0 75.60000
+'Lehew, Dekalb, and Calvin soils, 45 to 65 percent slopes, very stony'		'CB-SL'	3	0.3600	0.7500	6032120.00	0.0075	2.5499	280.8000
+	  380.000	  13.50	  13.50	   2.50	   9.00	  44.00
+	  580.000	  17.00	  17.00	   0.25	   4.80	  77.80
+	  740.000	  17.00	  17.00	   0.25	   4.80	  83.25
+1 10000.0 280.80000

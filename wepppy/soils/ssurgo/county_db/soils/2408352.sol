@@ -2,17 +2,19 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.906817
+#   Build Date: 2021-04-01 12:52:31.197021
 #   Source Data: Surgo
 # 
 # Mukey: 2408352
-# Major Component: 14623500 (comppct_r = 55.0)
-# Texture: silt loam
+# Major Component: 14623502 (comppct_r = 10.0)
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42108725   Oe            127.0    23.0        0.0         0.0         0.33     0.0     0.0     0.0    69.5
-#  42108724   Oa            203.0     9.0        0.0         0.0         0.45     0.0     0.0     0.0    50.0
+#  42108730   Oe     X       10.0    23.0        0.0         0.0         0.33     0.0     0.0     0.0    69.5
+#  42108731   Oa     X       71.0    4.23        0.0         0.0         0.53     0.0     0.0     0.0    42.5
+#  42108728   Ag            152.0    4.23        0.0         0.0          1.5    18.0    75.0    18.5    13.0
+#  42108729   Cg            203.0    4.23        0.0         0.0          1.5    30.0    55.0    10.1    2.75
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,6 +55,6 @@
 Any comments:
 1 1
 'Dasher-Dorovan-Croatan association, ponded, 0 to 1 percent slopes'		'MPT'	2	0.1700	0.7500	0.00	0.0000	0.0000	82.8000
-	 1270.000	   0.00	   0.00	  69.50	  11.30	  55.50
-	 2030.000	   0.00	   0.00	  50.00	  11.30	  55.50
-1 10000.0 32.40000
+	 1520.000	  18.00	  18.00	  13.00	  11.30	   0.00
+	 2030.000	  30.00	  30.00	   2.75	  11.30	   0.00
+1 10000.0 15.22800

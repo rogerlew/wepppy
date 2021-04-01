@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.569402
+#   Build Date: 2021-04-01 12:52:29.798936
 #   Source Data: Surgo
 # 
 # Mukey: 150316
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43184307   Oe              2.0   106.0        0.0         0.0         0.15     8.5    46.8    10.0    60.0
+#  43184307   Oe     X        2.0   106.0        0.0         0.0         0.15     8.5    46.8    10.0    60.0
 #  43184304   E               5.0    28.0       19.0        17.0          0.7     8.5    46.8    13.1     2.0
 #  43184303   Bw             23.0    28.0       19.0        17.0          0.7     8.5    46.8    13.1     3.0
 #  43184305   2BC            48.0    78.0        6.0        10.0         1.58     7.0    69.1    12.0    0.75
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Rock outcrop-Roman family-Rubble land association, cirque headwalls and scoured basins'		'MPM'	5	0.3000	0.7500	4649000.00	0.0050	2.6425	381.6000
-	   20.000	  46.80	   8.50	  60.00	  11.30	  55.50
-	   50.000	  46.80	   8.50	   2.00	  11.30	  56.48
-	  230.000	  46.80	   8.50	   3.00	  11.30	  56.48
-	  480.000	  69.10	   7.00	   0.75	  11.30	  59.68
-	 1520.000	  79.40	   2.50	   0.25	  11.30	  71.51
+'Rock outcrop-Roman family-Rubble land association, cirque headwalls and scoured basins'		'MPM'	4	0.3000	0.7500	4649000.00	0.0050	2.6425	381.6000
+	   50.000	   8.50	   8.50	   2.00	  11.30	  56.48
+	  230.000	   8.50	   8.50	   3.00	  11.30	  56.48
+	  480.000	   7.00	   7.00	   0.75	  11.30	  59.68
+	 1520.000	   2.50	   2.50	   0.25	  11.30	  71.51
 1 10000.0 507.60000

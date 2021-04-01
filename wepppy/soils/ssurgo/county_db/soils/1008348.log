@@ -9,10 +9,10 @@ analyzing chkey 42474566
 analyzing chkey 42474565
 analyzing chkey 42474567
 analyzing chkey 42474568
-horizons mask: [True, True, True, True, True, True]
+horizons mask: [False, True, True, True, True, True]
 computing erodibility for h0
 building major component
-identified 4 layers, ksat_min=0.2
+identified 3 layers, ksat_min=0.2
 done
 Validity: all checks passed
 Validity: all checks passed

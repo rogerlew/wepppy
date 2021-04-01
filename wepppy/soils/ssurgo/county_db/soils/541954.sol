@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.123809
+#   Build Date: 2021-04-01 12:52:29.332338
 #   Source Data: Surgo
 # 
 # Mukey: 541954
 # Major Component: 15370524 (comppct_r = 60.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44506018   Oi              4.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
+#  44506018   Oi     X        4.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
 #  44506019   A              11.0    23.9        0.0        16.0         1.35    14.0    29.0     2.9     2.2
 #  44506020   Bw1            24.0    23.9        0.0        22.0          1.4    18.0    28.0     2.1    0.36
 #  44506021   Bw2            39.0    23.9        0.0        27.0          1.4    18.0    28.0     2.1    0.36
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,12 +57,11 @@
 # 
 Any comments:
 1 1
-'Berks-Weikert association, steep'		'SPM'	7	0.2900	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   40.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  110.000	  29.00	  14.00	   2.20	  11.30	  31.96
-	  240.000	  28.00	  18.00	   0.36	  11.30	  43.84
-	  390.000	  28.00	  18.00	   0.36	  11.30	  54.74
-	  550.000	  30.00	  18.00	   0.31	  11.30	  77.06
-	  910.000	  37.00	  12.00	   0.23	  11.30	  88.24
-	 1160.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Berks-Weikert association, steep'		'SPM'	6	0.2900	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  110.000	  14.00	  14.00	   2.20	  11.30	  31.96
+	  240.000	  18.00	  18.00	   0.36	  11.30	  43.84
+	  390.000	  18.00	  18.00	   0.36	  11.30	  54.74
+	  550.000	  18.00	  18.00	   0.31	  11.30	  77.06
+	  910.000	  12.00	  12.00	   0.23	  11.30	  88.24
+	 1160.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 18.00000

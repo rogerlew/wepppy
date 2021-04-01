@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.367339
+#   Build Date: 2021-04-01 12:52:32.738056
 #   Source Data: Surgo
 # 
 # Mukey: 514660
 # Major Component: 15255226 (comppct_r = 45.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44115225   Oi              3.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
+#  44115225   Oi     X        3.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
 #  44115221   A               8.0     2.7        0.0         0.0         1.35    23.0    21.0     8.5     1.9
 #  44115224   Bt     R       50.0     0.9        0.0         0.0         1.45    48.0     5.0     2.0     0.6
 #  44115223   C              58.0     2.2        0.0         0.0         1.45    50.0     7.0     3.0    0.25
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,7 +55,6 @@
 # 
 Any comments:
 1 1
-'Peabody-Gilpin silt loams, 35 to 70 percent slopes, severely eroded'		'SPM'	2	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  210.000	  21.00	  23.00	   1.90	  11.30	   0.00
+'Peabody-Gilpin silt loams, 35 to 70 percent slopes, severely eroded'		'SPM'	1	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  210.000	  23.00	  23.00	   1.90	  11.30	   0.00
 1 10000.0 3.24000

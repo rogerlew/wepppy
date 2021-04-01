@@ -5,10 +5,16 @@ analyzing cokey 15481638
 found 2 layers
 analyzing chkey 44870668
 analyzing chkey 44870669
-horizons mask: [True, True]
+horizons mask: [False, False]
+computing erodibility for h0
+analyzing cokey 15481637
+found 2 layers
+analyzing chkey 44870667
+analyzing chkey 44870666
+horizons mask: [False, True]
 computing erodibility for h0
 building major component
-identified 2 layers, ksat_min=55.0
+identified 1 layers, ksat_min=5.5
 done
 Validity: all checks passed
 Validity: all checks passed

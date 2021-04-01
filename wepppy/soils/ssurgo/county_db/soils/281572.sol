@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.443330
+#   Build Date: 2021-04-01 12:52:31.765366
 #   Source Data: Surgo
 # 
 # Mukey: 281572
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45927359   O1              5.0    28.0        0.0         0.0         0.34     6.5    71.1    19.2    85.0
+#  45927359   O1     X        5.0    28.0        0.0         0.0         0.34     6.5    71.1    19.2    85.0
 #  45927360   H1             10.0  9.1722        1.0         1.0         0.85     6.5    71.1    19.2     6.0
 #  45927361   H2             94.0  9.1722        3.0         3.0         0.95     6.5    71.1    19.2     4.0
 #  45927362   H3            170.0  9.1722        2.0         3.0         1.65     6.5    71.1    19.2    1.25
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Houghtonville-Rawsonville association, hilly, rocky'		'SPM'	4	0.2300	0.7500	6416320.00	0.0077	1.9789	100.8000
-	   50.000	  71.10	   6.50	  85.00	  74.00	  55.50
-	  100.000	  71.10	   6.50	   6.00	  11.30	  11.80
-	  940.000	  71.10	   6.50	   4.00	  11.30	  22.92
-	 1700.000	  71.10	   6.50	   1.25	  11.30	  18.30
+'Houghtonville-Rawsonville association, hilly, rocky'		'SPM'	3	0.2300	0.7500	6416320.00	0.0077	1.9789	100.8000
+	  100.000	   6.50	   6.50	   6.00	  11.30	  11.80
+	  940.000	   6.50	   6.50	   4.00	  11.30	  22.92
+	 1700.000	   6.50	   6.50	   1.25	  11.30	  18.30
 1 10000.0 33.01992

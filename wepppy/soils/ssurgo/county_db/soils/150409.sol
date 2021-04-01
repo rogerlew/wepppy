@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.018071
+#   Build Date: 2021-04-01 12:52:31.319680
 #   Source Data: Surgo
 # 
 # Mukey: 150409
 # Major Component: 15017980 (comppct_r = 40.0)
-# Texture: silt loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43386198   Oi              5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
+#  43386198   Oi     X        5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
 #  43386200   A              28.0     9.0        4.0        10.0         1.13    11.5    45.3    12.7     2.5
 #  43386201   Bw             46.0     9.0       22.0        28.0         1.38    10.5    66.3    11.7    0.75
 #  43386199   BC            142.0    28.0       38.0        31.0         1.55     8.5    68.0    11.9     0.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'ABLA/ACGL Koffgo-ABLA/ACGL Rhylow-ARTRV-SYOR2/FEID Povey complex, 35 to 60 percent slopes'		'SPM'	5	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   50.000	  35.00	  15.00	  75.00	  11.30	  55.50
-	  280.000	  45.30	  11.50	   2.50	  13.50	  47.54
-	  460.000	  66.30	  10.50	   0.75	  10.50	  81.00
-	 1420.000	  68.00	   8.50	   0.50	   6.50	  91.63
-	 1520.000	  99.50	   0.50	   0.00	   0.50	  95.00
+'ABLA/ACGL Koffgo-ABLA/ACGL Rhylow-ARTRV-SYOR2/FEID Povey complex, 35 to 60 percent slopes'		'SPM'	4	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  280.000	  11.50	  11.50	   2.50	  13.50	  47.54
+	  460.000	  10.50	  10.50	   0.75	  10.50	  81.00
+	 1420.000	   8.50	   8.50	   0.50	   6.50	  91.63
+	 1520.000	   0.50	   0.50	   0.00	   0.50	  95.00
 1 10000.0 1522.80000

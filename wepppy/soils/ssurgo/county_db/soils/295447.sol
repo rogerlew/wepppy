@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.423485
+#   Build Date: 2021-04-01 12:52:29.644313
 #   Source Data: Surgo
 # 
 # Mukey: 295447
 # Major Component: 15869792 (comppct_r = 40.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45988668   O               3.0     9.0        0.0         0.0         0.65    10.0    60.0    30.0    50.0
+#  45988668   O      X        3.0     9.0        0.0         0.0         0.65    10.0    60.0    30.0    50.0
 #  45988669   H1             11.0     9.0        0.0         8.0         1.25    14.0    30.4     9.8     4.5
 #  45988670   H2             46.0     9.0        0.0        18.0         1.35    14.0    30.4     9.8     1.0
 #  45988671   H3     R       56.0   0.005        0.0         0.0          1.4     7.0    66.8    10.0     7.0
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,8 +54,7 @@
 # 
 Any comments:
 1 1
-'Arnot-Oquaga-Rock outcrop complex, very steep'		'MPM'	3	0.2000	0.7500	8491000.00	0.0110	1.5800	32.4000
-	   30.000	  60.00	  10.00	  50.00	  11.30	  55.50
-	  110.000	  30.40	  14.00	   4.50	  11.30	  37.90
-	  460.000	  30.40	  14.00	   1.00	  11.30	  67.20
+'Arnot-Oquaga-Rock outcrop complex, very steep'		'MPM'	2	0.2000	0.7500	8491000.00	0.0110	1.5800	32.4000
+	  110.000	  14.00	  14.00	   4.50	  11.30	  37.90
+	  460.000	  14.00	  14.00	   1.00	  11.30	  67.20
 1 10000.0 0.01800

@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.728743
+#   Build Date: 2021-04-01 12:52:31.008193
 #   Source Data: Surgo
 # 
 # Mukey: 192001
 # Major Component: 15489193 (comppct_r = 95.0)
-# Texture: silt loam
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44894855   Oe              5.0   21.87        0.0         0.0         0.15    37.0     6.0     3.6    65.0
+#  44894855   Oe     X        5.0   21.87        0.0         0.0         0.15    37.0     6.0     3.6    65.0
 #  44894856   A              18.0   28.22        0.0         0.0         1.42    12.0    71.3    17.5    2.25
 #  44894857   Bw             25.0   28.22        0.0         0.0         1.57    12.0    68.3    10.8     0.5
 #  44894858   Eg             36.0   28.22        0.0         0.0         1.57    12.0    68.3    10.8     1.0
@@ -46,7 +46,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -58,13 +58,12 @@
 # 
 Any comments:
 1 1
-'Capac fine sandy loam, 2 to 6 percent slopes'		'MPM'	8	0.3000	0.7500	4014190.00	0.0070	3.5000	78.7320
-	   50.000	   6.00	  37.00	  65.00	  92.20	  55.50
-	  180.000	  71.30	  12.00	   2.25	   6.60	   5.00
-	  250.000	  68.30	  12.00	   0.50	  11.30	   5.00
-	  360.000	  68.30	  12.00	   1.00	  11.30	   5.00
-	  510.000	  33.30	  35.00	   0.50	  18.40	   7.00
-	  790.000	  33.30	  35.00	   0.50	  18.40	   7.00
-	  910.000	  33.50	  30.00	   0.50	  15.80	   7.00
-	 2030.000	  43.20	  18.00	   0.50	   9.60	   7.00
+'Capac fine sandy loam, 2 to 6 percent slopes'		'MPM'	7	0.3000	0.7500	4014190.00	0.0070	3.5000	78.7320
+	  180.000	  12.00	  12.00	   2.25	   6.60	   5.00
+	  250.000	  12.00	  12.00	   0.50	  11.30	   5.00
+	  360.000	  12.00	  12.00	   1.00	  11.30	   5.00
+	  510.000	  35.00	  35.00	   0.50	  18.40	   7.00
+	  790.000	  35.00	  35.00	   0.50	  18.40	   7.00
+	  910.000	  30.00	  30.00	   0.50	  15.80	   7.00
+	 2030.000	  18.00	  18.00	   0.50	   9.60	   7.00
 1 10000.0 33.01200

@@ -2,17 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.540053
+#   Build Date: 2021-04-01 12:52:28.719003
 #   Source Data: Surgo
 # 
 # Mukey: 796346
-# Major Component: 15345122 (comppct_r = 85.0)
+# Major Component: 15345119 (comppct_r = 5.0)
 # Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44425721   Oe              5.0    10.0        0.0         0.0         0.08     7.0    66.8    10.0    82.0
-#  44425720   Oa            200.0    10.0        0.0         0.0         0.12     7.0    66.8    10.0    87.0
+#  44425707   Oa1    X       61.0    10.0        0.0         0.0         0.28     7.0    66.8    10.0    65.0
+#  44425708   Oa2    X       86.0    10.0        0.0         0.0         0.28     7.0    66.8    10.0    65.0
+#  44425709   Cg            200.0   100.0        0.0         0.0          1.0     2.0    90.0     7.0    0.05
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +53,6 @@
 # 
 Any comments:
 1 1
-'Freetown muck, 0 to 1 percent slopes'		'MPT'	2	0.1700	0.7500	4649000.00	0.0050	2.5450	36.0000
-	   50.000	  66.80	   7.00	  82.00	  11.30	  55.50
-	 2000.000	  66.80	   7.00	  87.00	  11.30	  55.50
-1 10000.0 36.00000
+'Freetown muck, 0 to 1 percent slopes'		'MUCK'	1	0.1600	0.7500	4649000.00	0.0050	2.5450	36.0000
+	 2000.000	   2.00	   2.00	   0.05	  11.30	   0.00
+1 10000.0 360.00000

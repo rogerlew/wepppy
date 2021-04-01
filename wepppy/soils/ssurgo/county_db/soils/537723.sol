@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.316920
+#   Build Date: 2021-04-01 12:52:30.584188
 #   Source Data: Surgo
 # 
 # Mukey: 537723
 # Major Component: 14645698 (comppct_r = 40.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42169560   Oi              3.0    91.5         -           -           1.4     7.0    66.8    10.0     7.0
+#  42169560   Oi     X        3.0    91.5         -           -           1.4     7.0    66.8    10.0     7.0
 #  42169558   A               8.0     9.0        0.0         7.0         1.36    16.0    21.0     9.3     2.0
 #  42169556   E              20.0     9.0        0.0         7.0         1.48    18.0    22.0    10.5     1.7
 #  42169557   BE             38.0     9.0        0.0        15.0         1.45    17.0    35.0    14.0     0.9
@@ -47,7 +47,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -59,14 +59,13 @@
 # 
 Any comments:
 1 1
-'Shelocta-Brownsville association, steep'		'SPM'	9	0.2300	0.7500	4649000.00	0.0050	2.5450	329.4000
-	   30.000	  66.80	   7.00	   7.00	  11.30	  55.50
-	   80.000	  21.00	  16.00	   2.00	  11.30	  14.44
-	  200.000	  22.00	  18.00	   1.70	  11.30	  14.44
-	  380.000	  35.00	  17.00	   0.90	  11.30	  29.45
-	  710.000	  31.00	  21.00	   0.80	  11.30	  28.62
-	 1190.000	  18.00	  25.00	   0.60	  11.30	  14.44
-	 1420.000	  19.00	  23.00	   0.40	  11.30	  27.76
-	 1930.000	  26.00	  21.00	   0.30	  11.30	  74.80
-	 2180.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Shelocta-Brownsville association, steep'		'SPM'	8	0.2300	0.7500	4649000.00	0.0050	2.5450	329.4000
+	   80.000	  16.00	  16.00	   2.00	  11.30	  14.44
+	  200.000	  18.00	  18.00	   1.70	  11.30	  14.44
+	  380.000	  17.00	  17.00	   0.90	  11.30	  29.45
+	  710.000	  21.00	  21.00	   0.80	  11.30	  28.62
+	 1190.000	  25.00	  25.00	   0.60	  11.30	  14.44
+	 1420.000	  23.00	  23.00	   0.40	  11.30	  27.76
+	 1930.000	  21.00	  21.00	   0.30	  11.30	  74.80
+	 2180.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 100.80000

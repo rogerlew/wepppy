@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.683699
+#   Build Date: 2021-04-01 12:52:29.913662
 #   Source Data: Surgo
 # 
 # Mukey: 1884670
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44088706   Oi              3.0    92.0        0.0         0.0          0.1     0.0     0.0     0.0    69.0
+#  44088706   Oi     X        3.0    92.0        0.0         0.0          0.1     0.0     0.0     0.0    69.0
 #  44088707   A               8.0     9.0        0.0         1.0         1.23    17.5    29.1     9.4    2.75
 #  44088708   Bt1            99.0     9.0        0.0        13.0         1.43    25.0    20.0     8.5     0.5
 #  44088709   Bt2           129.0    23.0        0.0        31.0         1.43    26.0    18.0     7.9    0.25
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Shelocta-Handshoe-Fedscreek complex, 30 to 60 percent slopes, stony'		'SPM'	4	0.2300	0.7500	0.00	0.0000	0.0000	331.2000
-	   30.000	   0.00	   0.00	  69.00	  50.00	  55.50
-	   80.000	  29.10	  17.50	   2.75	  11.30	   5.95
-	  990.000	  20.00	  25.00	   0.50	  11.30	  24.31
-	 1290.000	  18.00	  26.00	   0.25	  11.30	  57.22
+'Shelocta-Handshoe-Fedscreek complex, 30 to 60 percent slopes, stony'		'SPM'	3	0.2300	0.7500	0.00	0.0000	0.0000	331.2000
+	   80.000	  17.50	  17.50	   2.75	  11.30	   5.95
+	  990.000	  25.00	  25.00	   0.50	  11.30	  24.31
+	 1290.000	  26.00	  26.00	   0.25	  11.30	  57.22
 1 10000.0 3.24000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.301605
+#   Build Date: 2021-04-01 12:52:30.565518
 #   Source Data: Surgo
 # 
 # Mukey: 192185
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45048503   Oa1            20.0    10.0        0.0         0.0         0.19     7.0    66.8    10.0    78.4
-#  45048504   Oa2            61.0    10.0        0.0         0.0         0.23     7.0    66.8    10.0    84.8
+#  45048503   Oa1    X       20.0    10.0        0.0         0.0         0.19     7.0    66.8    10.0    78.4
+#  45048504   Oa2    X       61.0    10.0        0.0         0.0         0.23     7.0    66.8    10.0    84.8
 #  45048505   C             203.0    55.0        0.0         0.0         1.55     2.0    93.0     1.5     0.3
 # 
 # Restricting Layer:
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Tawas and Lupton mucks, 0 to 1 percent slopes'		'MUCK'	3	0.0200	0.7500	4649000.00	0.0050	2.5450	36.0000
-	  200.000	  66.80	   7.00	  78.40	 121.00	  55.50
-	  610.000	  66.80	   7.00	  84.80	 171.00	  55.50
-	 2030.000	  93.00	   2.00	   0.30	   0.50	   3.00
+'Tawas and Lupton mucks, 0 to 1 percent slopes'		'MUCK'	1	0.0200	0.7500	4649000.00	0.0050	2.5450	36.0000
+	 2030.000	   2.00	   2.00	   0.30	   0.50	   3.00
 1 10000.0 198.00000
