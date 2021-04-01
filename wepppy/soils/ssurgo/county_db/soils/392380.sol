@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.765841
+#   Build Date: 2021-04-01 15:01:41.271874
 #   Source Data: Surgo
 # 
 # Mukey: 392380
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Hollister silty clay loam, 0 to 1 percent slopes MLRA 78C'		'SICL'	1	0.1700	0.7500	3959060.00	0.0070	3.5000	9.7200
+'Hollister silty clay loam, 0 to 1 percent slopes MLRA 78C'		'SICL'	1	0.1700	0.7500	3959060.00	0.0070	3.5000	1.6511
 	  210.000	  38.00	  38.00	   1.00	  28.80	   2.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

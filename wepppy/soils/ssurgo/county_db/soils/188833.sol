@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.098270
+#   Build Date: 2021-04-01 15:01:44.618361
 #   Source Data: Surgo
 # 
 # Mukey: 188833
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Houghton and Adrian mucks'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
+'Houghton and Adrian mucks'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	33.3878
 	 1520.000	   6.00	   6.00	   0.25	   3.90	  20.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

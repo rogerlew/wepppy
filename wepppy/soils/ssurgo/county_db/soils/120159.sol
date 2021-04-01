@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.896848
+#   Build Date: 2021-04-01 15:01:41.402760
 #   Source Data: Surgo
 # 
 # Mukey: 120159
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Cecil sandy clay loam, 7 to 15 percent slopes, severely eroded'		'SCL'	3	0.2300	0.7500	5359770.00	0.0158	3.5004	100.8000
+'Cecil sandy clay loam, 7 to 15 percent slopes, severely eroded'		'SCL'	3	0.2300	0.7500	5359770.00	0.0158	3.5004	20.6966
 	  200.000	  25.00	  25.00	   0.75	   4.20	  10.00
 	 1500.000	  52.50	  52.50	   0.10	   5.50	   5.00
 	 1650.000	  22.00	  22.00	   0.25	   2.80	   5.00
-1 10000.0 82.80000
+0 0 0.000000 0.000000

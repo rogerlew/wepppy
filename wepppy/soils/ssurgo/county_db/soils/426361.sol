@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.711536
+#   Build Date: 2021-04-01 15:01:43.222478
 #   Source Data: Surgo
 # 
 # Mukey: 426361
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Plano silt loam, gravelly substratum, 0 to 2 percent slopes'		'SIL'	4	0.1600	0.7500	4813575.00	0.0084	3.5000	33.0120
+'Plano silt loam, gravelly substratum, 0 to 2 percent slopes'		'SIL'	4	0.1600	0.7500	4813575.00	0.0084	3.5000	1.2704
 	  410.000	  22.50	  22.50	   4.00	  19.50	   0.00
 	 1170.000	  31.00	  31.00	   1.25	  24.80	   0.00
 	 1450.000	  26.50	  26.50	   0.25	  20.30	  21.43
 	 2000.000	   3.00	   3.00	   0.25	   2.80	  34.72
-1 10000.0 290.05200
+0 0 0.000000 0.000000

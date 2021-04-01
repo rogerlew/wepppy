@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.636754
+#   Build Date: 2021-04-01 15:01:44.154865
 #   Source Data: Surgo
 # 
 # Mukey: 106645
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Taloka silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2300	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Taloka silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2300	0.7500	4951400.00	0.0094	3.5000	2.5288
 	  200.000	  20.00	  20.00	   2.00	  10.80	   2.00
 	  510.000	  23.00	  23.00	   0.75	  12.30	   2.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

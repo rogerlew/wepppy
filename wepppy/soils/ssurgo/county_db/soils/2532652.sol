@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.735026
+#   Build Date: 2021-04-01 15:01:41.240491
 #   Source Data: Surgo
 # 
 # Mukey: 2532652
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Adco silt loam, 1 to 5 percent slopes'		'SIL'	2	0.1600	0.7500	5100251.00	0.0111	3.5000	32.4000
+'Adco silt loam, 1 to 5 percent slopes'		'SIL'	2	0.1600	0.7500	5100251.00	0.0111	3.5000	1.5246
 	  230.000	  17.30	  17.30	   2.00	  12.30	   0.00
 	  410.000	  16.20	  16.20	   0.60	  10.20	   0.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

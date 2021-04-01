@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.650599
+#   Build Date: 2021-04-01 15:01:42.158937
 #   Source Data: Surgo
 # 
 # Mukey: 524533
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Muskingum stony fine sandy loam (st-l)'		'ST-L'	2	0.3600	0.7500	5052410.00	0.0066	3.1057	83.8440
+'Muskingum stony fine sandy loam (st-l)'		'ST-L'	2	0.3600	0.7500	5052410.00	0.0066	3.1057	9.0889
 	  130.000	  17.50	  17.50	   2.00	  11.30	  34.55
 	  660.000	  22.50	  22.50	   0.25	  11.30	  35.60
-1 10000.0 2.55600
+0 0 0.000000 0.000000

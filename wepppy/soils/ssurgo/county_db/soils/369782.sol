@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.418980
+#   Build Date: 2021-04-01 15:01:44.939715
 #   Source Data: Surgo
 # 
 # Mukey: 369782
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Castell sandy loam, 1 to 5 percent slopes'		'SL'	3	0.2300	0.7500	5033200.00	0.0144	2.4940	100.8000
+'Castell sandy loam, 1 to 5 percent slopes'		'SL'	3	0.2300	0.7500	5033200.00	0.0144	2.4940	23.5613
 	  200.000	   8.00	   8.00	   0.80	   5.00	   3.00
 	  760.000	  40.00	  40.00	   0.50	  22.50	   5.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

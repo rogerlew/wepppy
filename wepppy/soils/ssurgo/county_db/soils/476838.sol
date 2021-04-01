@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.486728
+#   Build Date: 2021-04-01 15:01:44.005224
 #   Source Data: Surgo
 # 
 # Mukey: 476838
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Pintwater-Blacktop-Rock outcrop association'		'GRV-FSL'	2	0.3400	0.7500	5801600.00	0.0271	2.6520	100.8000
+'Pintwater-Blacktop-Rock outcrop association'		'GRV-FSL'	2	0.3400	0.7500	5801600.00	0.0271	2.6520	17.9790
 	  100.000	  14.00	  14.00	   0.25	  10.00	  63.20
 	  500.000	  14.00	  14.00	   0.25	  10.00	  75.50
-1 10000.0 0.00000
+0 0 0.000000 0.000000

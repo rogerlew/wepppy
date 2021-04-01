@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.558052
+#   Build Date: 2021-04-01 15:01:45.079253
 #   Source Data: Surgo
 # 
 # Mukey: 112349
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'White Store sandy loam, 6 to 10 percent slopes'		'SL'	1	0.3700	0.7500	4783470.00	0.0091	2.8619	32.4000
+'White Store sandy loam, 6 to 10 percent slopes'		'SL'	1	0.3700	0.7500	4783470.00	0.0091	2.8619	18.8284
 	  210.000	  12.50	  12.50	   1.25	  10.00	   7.93
-1 10000.0 0.72000
+0 0 0.000000 0.000000

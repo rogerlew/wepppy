@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.854151
+#   Build Date: 2021-04-01 15:01:45.376686
 #   Source Data: Surgo
 # 
 # Mukey: 2639039
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Cataula-Cecil complex, 6 to 15 percent slopes, moderately eroded'		'SL'	3	0.3000	0.7500	4706630.00	0.0148	3.1126	100.8000
+'Cataula-Cecil complex, 6 to 15 percent slopes, moderately eroded'		'SL'	3	0.3000	0.7500	4706630.00	0.0148	3.1126	17.3612
 	   80.000	  16.00	  16.00	   0.75	  11.30	   0.00
 	  180.000	  25.00	  25.00	   0.25	  11.30	   0.00
 	  430.000	  45.00	  45.00	   0.10	  11.30	   2.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

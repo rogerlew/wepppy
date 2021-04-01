@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.797557
+#   Build Date: 2021-04-01 15:01:42.306270
 #   Source Data: Surgo
 # 
 # Mukey: 1478823
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Rigley stony fine sandy loam, 30 to 60 percent slopes'		'FSL'	3	0.3000	0.7500	6070540.00	0.0087	2.4733	100.8000
+'Rigley stony fine sandy loam, 30 to 60 percent slopes'		'FSL'	3	0.3000	0.7500	6070540.00	0.0087	2.4733	20.8923
 	  230.000	  12.50	  12.50	   1.75	   6.80	  16.00
 	 1140.000	  12.50	  12.50	   0.25	  11.30	  28.75
 	 1520.000	  15.00	  15.00	   0.25	  11.30	  48.25
-1 10000.0 100.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.957647
+#   Build Date: 2021-04-01 15:01:44.477144
 #   Source Data: Surgo
 # 
 # Mukey: 531124
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Garmon-Newbern complex, 40 to 80 percent slopes, rocky'		'CN-SIL'	2	0.3600	0.7500	5116790.00	0.0114	3.5000	101.6280
+'Garmon-Newbern complex, 40 to 80 percent slopes, rocky'		'CN-SIL'	2	0.3600	0.7500	5116790.00	0.0114	3.5000	6.4436
 	  150.000	  17.00	  17.00	   1.75	   6.30	  40.62
 	  740.000	  26.00	  26.00	   0.22	   9.10	  37.90
-1 10000.0 0.75960
+0 0 0.000000 0.000000

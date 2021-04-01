@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.925590
+#   Build Date: 2021-04-01 15:01:44.444701
 #   Source Data: Surgo
 # 
 # Mukey: 374488
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Lufkin-Rader complex'		'FSL'	1	0.3700	0.7500	6224220.00	0.0113	2.3619	32.4000
+'Lufkin-Rader complex'		'FSL'	1	0.3700	0.7500	6224220.00	0.0113	2.3619	19.2730
 	  210.000	  11.50	  11.50	   1.25	   7.00	  12.70
-1 10000.0 0.75600
+0 0 0.000000 0.000000

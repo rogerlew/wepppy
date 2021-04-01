@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.365499
+#   Build Date: 2021-04-01 15:01:43.883508
 #   Source Data: Surgo
 # 
 # Mukey: 2707339
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Patent, frequently flooded-Badland-Cabbart complex, 6 to 50 percent slopes'		'L'	3	0.3000	0.7500	7242350.00	0.0090	2.6720	33.0120
+'Patent, frequently flooded-Badland-Cabbart complex, 6 to 50 percent slopes'		'L'	3	0.3000	0.7500	7242350.00	0.0090	2.6720	6.5469
 	  100.000	  21.00	  21.00	   4.50	  17.00	   0.00
 	  330.000	  24.00	  24.00	   3.00	  18.00	   0.00
 	 2000.000	  26.00	  26.00	   1.50	  18.00	   3.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

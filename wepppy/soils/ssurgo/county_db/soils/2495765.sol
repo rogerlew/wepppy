@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.717510
+#   Build Date: 2021-04-01 15:01:41.222451
 #   Source Data: Surgo
 # 
 # Mukey: 2495765
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Brinklow channery loam, 8 to 15 percent slopes'		'CN-SIL'	3	0.4200	0.7500	5225300.00	0.0068	3.1510	9.7200
+'Brinklow channery loam, 8 to 15 percent slopes'		'CN-SIL'	3	0.4200	0.7500	5225300.00	0.0068	3.1510	9.7280
 	  250.000	  19.00	  19.00	   2.00	  11.30	  36.64
 	  480.000	  23.50	  23.50	   0.38	  11.30	  44.49
 	  640.000	  26.50	  26.50	   0.38	  11.30	  46.00
-1 10000.0 0.00000
+0 0 0.000000 0.000000

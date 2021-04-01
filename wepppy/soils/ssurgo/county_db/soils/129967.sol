@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.340576
+#   Build Date: 2021-04-01 15:01:41.848002
 #   Source Data: Surgo
 # 
 # Mukey: 129967
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Lynchburg sandy loam, 0 to 2 percent slopes'		'SL'	3	0.1700	0.7500	4668210.00	0.0052	2.9292	100.8000
+'Lynchburg sandy loam, 0 to 2 percent slopes'		'SL'	3	0.1700	0.7500	4668210.00	0.0052	2.9292	16.9272
 	  180.000	  13.00	  13.00	   2.75	  11.30	   0.00
 	  360.000	  26.00	  26.00	   0.25	  11.30	   0.00
 	 2030.000	  26.00	  26.00	   0.25	  11.30	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

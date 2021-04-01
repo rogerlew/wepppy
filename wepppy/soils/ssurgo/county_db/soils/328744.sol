@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.562934
+#   Build Date: 2021-04-01 15:01:41.067647
 #   Source Data: Surgo
 # 
 # Mukey: 328744
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Troup-Orangeburg association, 8 to 25 percent slopes'		'LS'	3	0.2900	0.7500	4226380.00	0.0080	2.7636	331.2000
+'Troup-Orangeburg association, 8 to 25 percent slopes'		'LS'	3	0.2900	0.7500	4226380.00	0.0080	2.7636	26.7168
 	  180.000	   8.40	   8.40	   1.28	  11.30	   7.00
 	 1570.000	   7.00	   7.00	   0.75	  11.30	   7.00
 	 2340.000	  25.00	  25.00	   0.00	  11.30	   7.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

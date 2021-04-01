@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.571916
+#   Build Date: 2021-04-01 15:01:45.093373
 #   Source Data: Surgo
 # 
 # Mukey: 527595
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bodine cherty silt loam, steep phase'		'GR-SIL'	3	0.3600	0.7500	4610580.00	0.0074	3.2066	100.8000
+'Bodine cherty silt loam, steep phase'		'GR-SIL'	3	0.3600	0.7500	4610580.00	0.0074	3.2066	5.6093
 	  200.000	  17.00	  17.00	   1.50	  11.30	  39.52
 	  460.000	  24.00	  24.00	   0.25	  11.30	  67.28
 	 1520.000	  26.00	  26.00	   0.25	  11.30	  69.20
-1 10000.0 101.62800
+0 0 0.000000 0.000000

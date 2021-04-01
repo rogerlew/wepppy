@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.740073
+#   Build Date: 2021-04-01 15:01:41.245578
 #   Source Data: Surgo
 # 
 # Mukey: 347753
@@ -56,6 +56,6 @@
 # 
 Any comments:
 1 1
-'Scobey-Kevin clay loams, 2 to 8 percent slopes'		'CL'	1	0.2300	0.7500	5033200.00	0.0065	4.0540	9.7200
+'Scobey-Kevin clay loams, 2 to 8 percent slopes'		'CL'	1	0.2300	0.7500	5033200.00	0.0065	4.0540	5.9218
 	  210.000	  32.00	  32.00	   2.00	  25.40	  13.67
-1 10000.0 3.27600
+0 0 0.000000 0.000000

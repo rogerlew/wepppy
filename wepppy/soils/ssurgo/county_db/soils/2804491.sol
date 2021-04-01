@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.082521
+#   Build Date: 2021-04-01 15:01:42.591480
 #   Source Data: Surgo
 # 
 # Mukey: 2804491
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Arkana-Moko complex, 20 to 40 percent slopes, very rocky'		'GRV-SPM'	2	0.1600	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Arkana-Moko complex, 20 to 40 percent slopes, very rocky'		'GRV-SPM'	2	0.1600	0.7500	4649000.00	0.0050	2.5450	4.4118
 	  180.000	  18.00	  18.00	   5.00	   9.90	  71.20
 	  210.000	  18.00	  18.00	   1.00	   9.70	  69.60
-1 10000.0 0.75600
+0 0 0.000000 0.000000

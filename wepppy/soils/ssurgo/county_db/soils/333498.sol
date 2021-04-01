@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.729352
+#   Build Date: 2021-04-01 15:01:41.234629
 #   Source Data: Surgo
 # 
 # Mukey: 333498
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Mathiston silt loam, 0 to 2 percent slopes, occasionally flooded'		'SIL'	4	0.2900	0.7500	5061660.00	0.0106	3.5000	33.0120
+'Mathiston silt loam, 0 to 2 percent slopes, occasionally flooded'		'SIL'	4	0.2900	0.7500	5061660.00	0.0106	3.5000	2.2386
 	  150.000	  18.00	  18.00	   2.00	  11.30	   0.00
 	  360.000	  22.00	  22.00	   0.30	  11.30	   0.00
 	  990.000	  22.00	  22.00	   0.30	  11.30	   0.00
 	 2030.000	  30.00	  30.00	   0.30	  11.30	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

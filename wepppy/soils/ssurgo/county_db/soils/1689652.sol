@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.551062
+#   Build Date: 2021-04-01 15:01:45.072056
 #   Source Data: Surgo
 # 
 # Mukey: 1689652
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Dunmore silty clay loam, 5 to 12 percent slopes, eroded'		'SICL'	2	0.3700	0.7500	4014190.00	0.0070	3.5000	33.0120
+'Dunmore silty clay loam, 5 to 12 percent slopes, eroded'		'SICL'	2	0.3700	0.7500	4014190.00	0.0070	3.5000	3.3173
 	  200.000	  37.00	  37.00	   0.75	  11.30	  17.00
 	 2030.000	  52.00	  52.00	   0.25	  11.30	  23.37
-1 10000.0 33.01200
+0 0 0.000000 0.000000

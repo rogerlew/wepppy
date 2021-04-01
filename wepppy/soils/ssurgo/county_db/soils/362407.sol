@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.652153
+#   Build Date: 2021-04-01 15:01:42.160488
 #   Source Data: Surgo
 # 
 # Mukey: 362407
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Jalmar-Penwell association, undulating'		'FS'	3	0.2300	0.7500	5897650.00	0.0108	2.1355	331.2000
+'Jalmar-Penwell association, undulating'		'FS'	3	0.2300	0.7500	5897650.00	0.0108	2.1355	34.3435
 	  360.000	   6.50	   6.50	   1.25	   3.00	   1.00
 	  660.000	   6.50	   6.50	   0.25	   3.00	   1.00
 	 2030.000	  26.50	  26.50	   0.25	  10.00	   1.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

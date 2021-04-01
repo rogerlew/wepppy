@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.931497
+#   Build Date: 2021-04-01 15:01:42.440280
 #   Source Data: Surgo
 # 
 # Mukey: 543589
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Abbottstown silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	5089225.00	0.0109	3.5000	33.0120
+'Abbottstown silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	5089225.00	0.0109	3.5000	5.5640
 	  250.000	  17.50	  17.50	   2.50	   9.50	  18.16
 	  510.000	  24.50	  24.50	   0.25	  11.30	  16.34
-1 10000.0 3.31200
+0 0 0.000000 0.000000

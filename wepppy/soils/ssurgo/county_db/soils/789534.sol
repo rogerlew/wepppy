@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.269335
+#   Build Date: 2021-04-01 15:01:44.789932
 #   Source Data: Surgo
 # 
 # Mukey: 789534
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Parent loam, 0 to 2 percent slopes, stony'		'L'	2	0.0900	0.7500	5071620.00	0.0056	3.2299	32.4000
+'Parent loam, 0 to 2 percent slopes, stony'		'L'	2	0.0900	0.7500	5071620.00	0.0056	3.2299	8.1901
 	  180.000	  19.50	  19.50	   5.50	  21.50	  16.70
 	  710.000	  11.50	  11.50	   2.50	  11.50	  17.55
-1 10000.0 3.60000
+0 0 0.000000 0.000000

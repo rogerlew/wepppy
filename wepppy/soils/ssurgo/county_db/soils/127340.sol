@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.963604
+#   Build Date: 2021-04-01 15:01:44.483232
 #   Source Data: Surgo
 # 
 # Mukey: 127340
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Ashlar-Pacolet-Wedowee complex, 4 to 15 percent slopes'		'SL'	3	0.3000	0.7500	4956360.00	0.0152	2.7122	100.8000
+'Ashlar-Pacolet-Wedowee complex, 4 to 15 percent slopes'		'SL'	3	0.3000	0.7500	4956360.00	0.0152	2.7122	17.6681
 	  760.000	  11.00	  11.00	   0.75	  11.30	  13.38
 	  840.000	  11.00	  11.00	   0.25	  11.30	  28.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

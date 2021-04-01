@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.089143
+#   Build Date: 2021-04-01 15:01:44.609077
 #   Source Data: Surgo
 # 
 # Mukey: 537312
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Shelocta-Brownsville association, very steep'		'SIL'	2	0.2300	0.7500	5089225.00	0.0109	3.5000	33.0120
+'Shelocta-Brownsville association, very steep'		'SIL'	2	0.2300	0.7500	5089225.00	0.0109	3.5000	5.3055
 	  230.000	  17.50	  17.50	   2.75	  11.30	  18.40
 	 1520.000	  26.00	  26.00	   1.25	  11.30	  32.58
-1 10000.0 33.01200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.736225
+#   Build Date: 2021-04-01 15:01:41.241679
 #   Source Data: Surgo
 # 
 # Mukey: 341922
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Castner-Perma-Rock outcrop complex, 10 to 60 percent slopes'		'CB-L'	4	0.1600	0.7500	5148460.00	0.0059	2.8492	82.8000
+'Castner-Perma-Rock outcrop complex, 10 to 60 percent slopes'		'CB-L'	4	0.1600	0.7500	5148460.00	0.0059	2.8492	9.5275
 	  150.000	  14.00	  14.00	   3.00	  12.50	  46.52
 	  250.000	  14.00	  14.00	   1.50	  12.50	  70.00
 	  410.000	  14.00	  14.00	   0.75	   7.50	  78.22
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.557195
+#   Build Date: 2021-04-01 15:01:43.068263
 #   Source Data: Surgo
 # 
 # Mukey: 416116
@@ -60,9 +60,9 @@
 # 
 Any comments:
 1 1
-'Munising-Skanee complex, 0 to 8 percent slopes'		'MPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	108.0000
+'Munising-Skanee complex, 0 to 8 percent slopes'		'MPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	22.4856
 	   50.000	   4.00	   4.00	   5.00	  11.30	   3.00
 	  250.000	   4.00	   4.00	   1.00	  11.30	   3.00
 	  360.000	   9.00	   9.00	   3.00	  11.30	   3.00
 	  560.000	   9.00	   9.00	   2.00	  11.30	   3.00
-1 10000.0 0.79200
+0 0 0.000000 0.000000

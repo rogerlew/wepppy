@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.698709
+#   Build Date: 2021-04-01 15:01:43.209501
 #   Source Data: Surgo
 # 
 # Mukey: 421056
@@ -58,7 +58,7 @@
 # 
 Any comments:
 1 1
-'Kennan, very bouldery and Kennan sandy loams, 15 to 30 percent slopes'		'SL'	8	0.2300	0.7500	3688500.00	0.0035	2.9650	101.6280
+'Kennan, very bouldery and Kennan sandy loams, 15 to 30 percent slopes'		'SL'	8	0.2300	0.7500	3688500.00	0.0035	2.9650	12.8874
 	   80.000	   9.00	   9.00	   5.00	  11.30	   7.93
 	  150.000	   8.00	   8.00	   1.00	  11.30	   5.95
 	  300.000	   8.00	   8.00	   0.75	  11.30	   5.95
@@ -67,4 +67,4 @@ Any comments:
 	 1020.000	  12.00	  12.00	   0.15	  11.30	  16.70
 	 1220.000	   8.00	   8.00	   0.15	   6.70	  19.64
 	 2000.000	   7.00	   7.00	   0.10	   5.90	  24.67
-1 10000.0 330.26400
+0 0 0.000000 0.000000

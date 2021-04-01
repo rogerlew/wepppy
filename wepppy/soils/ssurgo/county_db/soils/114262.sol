@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.802527
+#   Build Date: 2021-04-01 15:01:42.311320
 #   Source Data: Surgo
 # 
 # Mukey: 114262
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Lignum loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	5089225.00	0.0109	3.5000	32.4000
+'Lignum loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	5089225.00	0.0109	3.5000	5.9015
 	   50.000	  17.50	  17.50	   1.50	   7.80	  15.00
 	  300.000	  17.50	  17.50	   1.00	   7.20	  15.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

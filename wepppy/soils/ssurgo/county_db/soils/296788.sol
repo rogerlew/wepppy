@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.809503
+#   Build Date: 2021-04-01 15:01:44.328810
 #   Source Data: Surgo
 # 
 # Mukey: 296788
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Volusia channery silt loam, 8 to 15 percent slopes'		'CN-SIL'	3	0.3000	0.7500	5061660.00	0.0106	3.5000	36.0000
+'Volusia channery silt loam, 8 to 15 percent slopes'		'CN-SIL'	3	0.3000	0.7500	5061660.00	0.0106	3.5000	4.0315
 	  230.000	  18.00	  18.00	   5.00	   9.90	  24.47
 	  380.000	  20.00	  20.00	   3.00	  10.90	  30.40
 	  430.000	  18.00	  18.00	   1.00	   9.70	  30.40
-1 10000.0 0.36000
+0 0 0.000000 0.000000

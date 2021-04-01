@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.882161
+#   Build Date: 2021-04-01 15:01:45.405345
 #   Source Data: Surgo
 # 
 # Mukey: 1542889
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Sherless-Littlefir-Nashoba complex, 8 to 15 percent slopes'		'CB-FSL'	4	0.2300	0.7500	6224220.00	0.0113	2.3619	101.6280
+'Sherless-Littlefir-Nashoba complex, 8 to 15 percent slopes'		'CB-FSL'	4	0.2300	0.7500	6224220.00	0.0113	2.3619	18.4695
 	  130.000	  11.50	  11.50	   1.25	  11.30	  44.00
 	  200.000	  11.50	  11.50	   0.75	  11.30	  14.00
 	  430.000	  14.00	  14.00	   0.75	  11.30	  12.00
 	  690.000	  22.50	  22.50	   0.25	  11.30	  12.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

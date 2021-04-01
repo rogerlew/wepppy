@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.166543
+#   Build Date: 2021-04-01 15:01:43.683965
 #   Source Data: Surgo
 # 
 # Mukey: 142635
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Lloyd clay loam, 6 to 15 percent slopes, severely eroded'		'CL'	3	0.3000	0.7500	5340560.00	0.0099	3.3437	32.4000
+'Lloyd clay loam, 6 to 15 percent slopes, severely eroded'		'CL'	3	0.3000	0.7500	5340560.00	0.0099	3.3437	16.0380
 	  150.000	  22.50	  22.50	   1.25	   6.50	   3.48
 	 1320.000	  47.50	  47.50	   0.25	   9.50	   3.48
 	 1520.000	  21.00	  21.00	   0.25	   6.00	  10.76
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.627507
+#   Build Date: 2021-04-01 15:01:44.145487
 #   Source Data: Surgo
 # 
 # Mukey: 542372
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Laidig extremely stony loam, 25 to 45 percent slopes'		'CN-L'	3	0.3700	0.7500	0.00	0.0000	0.0000	83.8440
+'Laidig extremely stony loam, 25 to 45 percent slopes'		'CN-L'	3	0.3700	0.7500	0.00	0.0000	0.0000	9.1833
 	  150.000	  17.00	  17.00	   0.00	  11.30	  55.80
 	  810.000	  26.50	  26.50	   0.00	  11.30	  39.10
 	 1800.000	  26.50	  26.50	   0.00	  11.30	  46.25
-1 10000.0 8.38800
+0 0 0.000000 0.000000

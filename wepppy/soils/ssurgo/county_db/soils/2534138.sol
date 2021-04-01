@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.579811
+#   Build Date: 2021-04-01 15:01:43.091249
 #   Source Data: Surgo
 # 
 # Mukey: 2534138
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Rueter-Goss-Jollymill complex, 15 to 35 percent slopes'		'GRX-SIL'	4	0.4400	0.7500	5502700.00	0.0250	3.5000	100.8000
+'Rueter-Goss-Jollymill complex, 15 to 35 percent slopes'		'GRX-SIL'	4	0.4400	0.7500	5502700.00	0.0250	3.5000	4.0191
 	  100.000	   8.50	   8.50	   2.20	  12.00	  75.00
 	  460.000	  10.20	  10.20	   0.50	   8.00	  75.50
 	  840.000	  20.10	  20.10	   0.20	  10.00	  77.50
 	 2030.000	  69.20	  69.20	   0.10	  30.00	  70.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

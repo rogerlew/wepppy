@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.933951
+#   Build Date: 2021-04-01 15:01:42.442744
 #   Source Data: Surgo
 # 
 # Mukey: 515812
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Gilpin-Upshur complex, 35 to 70 percent slopes, severely eroded'		'SIL'	3	0.2439	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Gilpin-Upshur complex, 35 to 70 percent slopes, severely eroded'		'SIL'	3	0.2439	0.7500	4896270.00	0.0089	3.5000	4.8662
 	  130.000	  21.00	  21.00	   2.25	  10.00	  10.00
 	  560.000	  28.00	  28.00	   0.40	   7.00	  45.10
 	  810.000	  25.00	  25.00	   0.31	   6.00	  66.07
-1 10000.0 2.52000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.856339
+#   Build Date: 2021-04-01 15:01:43.373017
 #   Source Data: Surgo
 # 
 # Mukey: 516104
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Pineville-Gilpin-Laidig association, very steep, extremely stony'		'SPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Pineville-Gilpin-Laidig association, very steep, extremely stony'		'SPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	7.1081
 	  100.000	  20.00	  20.00	   3.80	  13.20	  38.58
 	 1370.000	  24.00	  24.00	   0.75	  10.40	  38.25
 	 1650.000	  22.00	  22.00	   0.37	   7.90	  56.50
-1 10000.0 83.84400
+0 0 0.000000 0.000000

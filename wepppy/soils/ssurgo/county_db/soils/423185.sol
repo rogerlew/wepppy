@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.132056
+#   Build Date: 2021-04-01 15:01:45.648011
 #   Source Data: Surgo
 # 
 # Mukey: 423185
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Norden and Eleva soils and rock outcrop, 12 to 60 percent slopes'		'L'	4	0.3000	0.7500	5206090.00	0.0083	2.7343	32.4000
+'Norden and Eleva soils and rock outcrop, 12 to 60 percent slopes'		'L'	4	0.3000	0.7500	5206090.00	0.0083	2.7343	10.2496
 	   80.000	  12.50	  12.50	   1.50	   9.30	  15.00
 	  180.000	  22.50	  22.50	   0.25	  12.50	  15.00
 	  710.000	  24.00	  24.00	   0.25	  13.30	  15.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	 100.00
-1 10000.0 28.80000
+0 0 0.000000 0.000000

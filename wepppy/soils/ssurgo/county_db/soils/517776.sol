@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.892784
+#   Build Date: 2021-04-01 15:01:41.398635
 #   Source Data: Surgo
 # 
 # Mukey: 517776
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Frederick-Christian silt loams, 7 to 15 percent slopes, eroded'		'SIL'	4	0.1600	0.7500	4951400.00	0.0094	3.5000	100.8000
+'Frederick-Christian silt loams, 7 to 15 percent slopes, eroded'		'SIL'	4	0.1600	0.7500	4951400.00	0.0094	3.5000	5.1934
 	  180.000	  20.00	  20.00	   1.50	   8.40	   7.85
 	  360.000	  38.00	  38.00	   0.25	  14.30	  17.55
 	 1270.000	  55.00	  55.00	   0.25	  15.60	  12.70
 	 1780.000	  55.00	  55.00	   0.25	  15.60	  12.70
-1 10000.0 32.40000
+0 0 0.000000 0.000000

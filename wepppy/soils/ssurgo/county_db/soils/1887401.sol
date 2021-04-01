@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.149924
+#   Build Date: 2021-04-01 15:01:45.666285
 #   Source Data: Surgo
 # 
 # Mukey: 1887401
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Gilpin-Petros complex, 35 to 70 percent slopes'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	33.0120
+'Gilpin-Petros complex, 35 to 70 percent slopes'		'SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	4.6877
 	  150.000	  21.00	  21.00	   2.25	  11.30	   8.86
 	  530.000	  31.00	  31.00	   0.75	  11.30	  12.70
 	  640.000	  30.00	  30.00	   0.25	  11.30	  24.67
-1 10000.0 0.00000
+0 0 0.000000 0.000000

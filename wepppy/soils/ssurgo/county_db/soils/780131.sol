@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.059781
+#   Build Date: 2021-04-01 15:01:41.566456
 #   Source Data: Surgo
 # 
 # Mukey: 780131
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Whitman fine sandy loam, 0 to 3 percent slopes, extremely stony'		'MUCK'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	360.0000
+'Whitman fine sandy loam, 0 to 3 percent slopes, extremely stony'		'MUCK'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	14.0417
 	  250.000	   8.00	   8.00	  10.00	  11.30	  31.15
 	  430.000	   8.00	   8.00	   1.10	  11.30	  21.88
-1 10000.0 0.19800
+0 0 0.000000 0.000000

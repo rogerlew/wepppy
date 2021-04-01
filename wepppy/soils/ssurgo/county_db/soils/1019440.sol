@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.344521
+#   Build Date: 2021-04-01 15:01:43.861942
 #   Source Data: Surgo
 # 
 # Mukey: 1019440
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Drummer-Milford silty clay loams, 0 to 2 percent slopes'		'SICL'	4	0.0900	0.7500	4400100.00	0.0072	3.5000	33.0120
+'Drummer-Milford silty clay loams, 0 to 2 percent slopes'		'SICL'	4	0.0900	0.7500	4400100.00	0.0072	3.5000	1.1133
 	  360.000	  30.00	  30.00	   5.50	  25.60	   2.00
 	 1040.000	  31.00	  31.00	   1.25	  24.80	   2.00
 	 1190.000	  25.00	  25.00	   0.35	  13.20	  10.00
 	 1520.000	  17.00	  17.00	   0.25	   8.90	  11.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

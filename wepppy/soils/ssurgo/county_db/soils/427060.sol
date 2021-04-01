@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.633225
+#   Build Date: 2021-04-01 15:01:44.151266
 #   Source Data: Surgo
 # 
 # Mukey: 427060
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Nora silt loam, 6 to 11 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4758445.00	0.0081	3.5000	32.4000
+'Nora silt loam, 6 to 11 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4758445.00	0.0081	3.5000	1.3099
 	  200.000	  23.50	  23.50	   1.25	  20.00	   0.00
 	  710.000	  31.00	  31.00	   1.25	  22.50	   0.00
 	 1520.000	  25.00	  25.00	   0.75	  17.50	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

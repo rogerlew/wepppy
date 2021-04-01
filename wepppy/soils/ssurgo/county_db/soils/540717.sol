@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.962845
+#   Build Date: 2021-04-01 15:01:42.472018
 #   Source Data: Surgo
 # 
 # Mukey: 540717
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Calvin-Leck Kill shaly silt loams, 3 to 8 percent slopes, moderately eroded'		'CN-SIL'	4	0.3700	0.7500	5089225.00	0.0109	3.5000	101.6280
+'Calvin-Leck Kill shaly silt loams, 3 to 8 percent slopes, moderately eroded'		'CN-SIL'	4	0.3700	0.7500	5089225.00	0.0109	3.5000	4.8150
 	  200.000	  17.50	  17.50	   2.00	  17.00	  26.40
 	  760.000	  17.50	  17.50	   0.25	  11.00	  33.30
 	  890.000	  17.50	  17.50	   0.25	  11.00	  73.00
 	 1140.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 78.76800
+0 0 0.000000 0.000000

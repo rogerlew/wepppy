@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.562420
+#   Build Date: 2021-04-01 15:01:41.067125
 #   Source Data: Surgo
 # 
 # Mukey: 328565
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Boykin-Luverne-Smithdale complex, 15 to 35 percent slopes'		'LS'	3	0.2900	0.7500	6954200.00	0.0183	1.6540	190.8000
+'Boykin-Luverne-Smithdale complex, 15 to 35 percent slopes'		'LS'	3	0.2900	0.7500	6954200.00	0.0183	1.6540	21.9934
 	  200.000	   4.00	   4.00	   0.75	  11.30	   0.00
 	  970.000	   4.00	   4.00	   0.10	  11.30	   0.00
 	 2030.000	  23.00	  23.00	   0.10	  11.30	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.632342
+#   Build Date: 2021-04-01 15:01:42.140481
 #   Source Data: Surgo
 # 
 # Mukey: 612216
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Shelocta-Highsplint-Sequoia complex, 30 to 80 percent slopes, rocky'		'SIL'	3	0.3000	0.7500	5089225.00	0.0109	3.5000	33.0120
+'Shelocta-Highsplint-Sequoia complex, 30 to 80 percent slopes, rocky'		'SIL'	3	0.3000	0.7500	5089225.00	0.0109	3.5000	5.3055
 	  100.000	  17.50	  17.50	   2.75	  11.30	   9.00
 	 1220.000	  28.00	  28.00	   1.25	  11.30	  15.92
 	 1650.000	  24.50	  24.50	   0.25	  11.30	  21.80
-1 10000.0 83.84400
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.168977
+#   Build Date: 2021-04-01 15:01:45.685764
 #   Source Data: Surgo
 # 
 # Mukey: 371971
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Roughcreek very stony clay loam, gently rolling'		'STV-CL'	1	0.1600	0.7500	4668210.00	0.0060	4.3592	9.7200
+'Roughcreek very stony clay loam, gently rolling'		'STV-CL'	1	0.1600	0.7500	4668210.00	0.0060	4.3592	5.3073
 	  210.000	  35.00	  35.00	   2.00	  32.50	  98.22
-1 10000.0 3.60000
+0 0 0.000000 0.000000

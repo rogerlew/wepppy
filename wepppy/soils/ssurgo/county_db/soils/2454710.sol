@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.776448
+#   Build Date: 2021-04-01 15:01:42.284870
 #   Source Data: Surgo
 # 
 # Mukey: 2454710
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Spanaway gravelly sandy loam, 0 to 3 percent slopes'		'GR-SL'	2	0.0900	0.7500	5033200.00	0.0056	2.4940	100.8000
+'Spanaway gravelly sandy loam, 0 to 3 percent slopes'		'GR-SL'	2	0.0900	0.7500	5033200.00	0.0056	2.4940	17.7587
 	  380.000	   8.00	   8.00	  10.00	  33.00	  39.38
 	 1520.000	   2.50	   2.50	   0.50	   2.50	  79.50
-1 10000.0 1080.00000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.571948
+#   Build Date: 2021-04-01 15:01:41.076789
 #   Source Data: Surgo
 # 
 # Mukey: 2747731
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Los Gatos-Los Osos complex, 30 to 75 percent slopes, eroded, MLRA 15'		'L'	2	0.1600	0.7500	4937150.00	0.0056	3.3030	32.4000
+'Los Gatos-Los Osos complex, 30 to 75 percent slopes, eroded, MLRA 15'		'L'	2	0.1600	0.7500	4937150.00	0.0056	3.3030	8.1660
 	  280.000	  20.00	  20.00	   3.00	  10.90	   0.00
 	 1000.000	  25.00	  25.00	   0.75	  13.30	   0.00
-1 10000.0 0.00000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.574482
+#   Build Date: 2021-04-01 15:01:41.079430
 #   Source Data: Surgo
 # 
 # Mukey: 463135
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Redding gravelly loam, 0 to 8 percent slopes, dry, MLRA 17'		'GR-L'	2	0.1600	0.7500	4745050.00	0.0052	2.9710	32.4000
+'Redding gravelly loam, 0 to 8 percent slopes, dry, MLRA 17'		'GR-L'	2	0.1600	0.7500	4745050.00	0.0052	2.9710	7.5938
 	  130.000	  14.00	  14.00	   3.52	  11.30	  46.00
 	  430.000	  17.00	  17.00	   0.93	   9.10	  40.00
-1 10000.0 0.77400
+0 0 0.000000 0.000000

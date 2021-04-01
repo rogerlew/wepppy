@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.354170
+#   Build Date: 2021-04-01 15:01:41.861763
 #   Source Data: Surgo
 # 
 # Mukey: 1710269
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Poplimento silt loam, 3 to 8 percent slopes'		'SIL'	3	0.3639	0.7500	4841140.00	0.0085	3.5000	32.4000
+'Poplimento silt loam, 3 to 8 percent slopes'		'SIL'	3	0.3639	0.7500	4841140.00	0.0085	3.5000	5.3967
 	  230.000	  22.00	  22.00	   1.25	   4.40	  24.16
 	 1470.000	  47.50	  47.50	   0.25	   9.40	  21.43
 	 1830.000	  38.50	  38.50	   0.25	   7.60	  52.57
-1 10000.0 9.72000
+0 0 0.000000 0.000000

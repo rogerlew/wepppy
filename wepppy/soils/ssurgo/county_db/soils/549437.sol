@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.091918
+#   Build Date: 2021-04-01 15:01:44.611898
 #   Source Data: Surgo
 # 
 # Mukey: 549437
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Wellston silt loam, 12 to 30 percent slopes, severely eroded'		'SIL'	3	0.3000	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Wellston silt loam, 12 to 30 percent slopes, severely eroded'		'SIL'	3	0.3000	0.7500	4951400.00	0.0094	3.5000	2.3028
 	   80.000	  20.00	  20.00	   1.50	  10.80	   0.00
 	  630.000	  30.00	  30.00	   0.25	  11.30	   3.97
 	 1520.000	  17.00	  17.00	   0.25	  11.30	   0.00
-1 10000.0 0.03600
+0 0 0.000000 0.000000

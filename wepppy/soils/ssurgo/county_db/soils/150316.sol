@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.798936
+#   Build Date: 2021-04-01 15:01:42.307641
 #   Source Data: Surgo
 # 
 # Mukey: 150316
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Rock outcrop-Roman family-Rubble land association, cirque headwalls and scoured basins'		'MPM'	4	0.3000	0.7500	4649000.00	0.0050	2.6425	381.6000
+'Rock outcrop-Roman family-Rubble land association, cirque headwalls and scoured basins'		'MPM'	4	0.3000	0.7500	4649000.00	0.0050	2.6425	10.3229
 	   50.000	   8.50	   8.50	   2.00	  11.30	  56.48
 	  230.000	   8.50	   8.50	   3.00	  11.30	  56.48
 	  480.000	   7.00	   7.00	   0.75	  11.30	  59.68
 	 1520.000	   2.50	   2.50	   0.25	  11.30	  71.51
-1 10000.0 507.60000
+0 0 0.000000 0.000000

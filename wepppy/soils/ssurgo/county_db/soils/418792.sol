@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.853423
+#   Build Date: 2021-04-01 15:01:43.370020
 #   Source Data: Surgo
 # 
 # Mukey: 418792
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Poinsett-Buse-Waubay complex, 1 to 6 percent slopes'		'SICL'	4	0.1600	0.7500	4455230.00	0.0073	3.5000	10.1520
+'Poinsett-Buse-Waubay complex, 1 to 6 percent slopes'		'SICL'	4	0.1600	0.7500	4455230.00	0.0073	3.5000	1.0709
 	  200.000	  29.00	  29.00	   3.00	  24.20	   0.00
 	  620.000	  28.00	  28.00	   2.00	  23.10	   2.00
 	 1570.000	  28.00	  28.00	   0.75	  19.30	   2.00
 	 2000.000	  30.00	  30.00	   0.25	  18.50	   9.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

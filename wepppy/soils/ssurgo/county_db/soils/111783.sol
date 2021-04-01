@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.024504
+#   Build Date: 2021-04-01 15:01:45.540723
 #   Source Data: Surgo
 # 
 # Mukey: 111783
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Dorovan muck, 0 to 2 percent slopes, frequently flooded'		'L'	2	0.2300	0.7500	5171920.00	0.0124	3.5000	82.8000
+'Dorovan muck, 0 to 2 percent slopes, frequently flooded'		'L'	2	0.2300	0.7500	5171920.00	0.0124	3.5000	4.8208
 	  150.000	  16.00	  16.00	   1.50	   8.70	   4.00
 	  690.000	  31.00	  31.00	   0.25	  16.20	   4.00
-1 10000.0 82.80000
+0 0 0.000000 0.000000

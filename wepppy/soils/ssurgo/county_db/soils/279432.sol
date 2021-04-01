@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.169545
+#   Build Date: 2021-04-01 15:01:45.686345
 #   Source Data: Surgo
 # 
 # Mukey: 279432
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Tunbridge-Woodstock very rocky fine sandy loams, 8 to 25 percent slopes'		'FSL'	2	0.1600	0.7500	6397110.00	0.0077	2.0172	33.0199
+'Tunbridge-Woodstock very rocky fine sandy loams, 8 to 25 percent slopes'		'FSL'	2	0.1600	0.7500	6397110.00	0.0077	2.0172	18.6047
 	  180.000	   7.00	   7.00	   5.00	  11.30	  17.75
 	  740.000	   5.00	   5.00	   2.50	   3.80	  20.10
-1 10000.0 0.77400
+0 0 0.000000 0.000000

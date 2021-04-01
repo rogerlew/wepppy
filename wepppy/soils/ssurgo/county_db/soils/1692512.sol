@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.718453
+#   Build Date: 2021-04-01 15:01:45.240483
 #   Source Data: Surgo
 # 
 # Mukey: 1692512
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Tassel-Busher-Rock outcrop complex, 20 to 60 percent slopes'		'LVFS'	3	0.3000	0.7500	10412000.00	0.0149	0.8700	331.2000
+'Tassel-Busher-Rock outcrop complex, 20 to 60 percent slopes'		'LVFS'	3	0.3000	0.7500	10412000.00	0.0149	0.8700	24.6332
 	  230.000	   8.00	   8.00	   2.00	  10.00	   5.00
 	  410.000	   8.50	   8.50	   1.25	  20.00	  10.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 180.00000
+0 0 0.000000 0.000000

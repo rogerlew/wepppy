@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.487746
+#   Build Date: 2021-04-01 15:01:44.006253
 #   Source Data: Surgo
 # 
 # Mukey: 2452469
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Doorkiss-Ister-Ceejay association'		'GRV-L'	2	0.3400	0.7500	5013990.00	0.0080	2.8898	32.4000
+'Doorkiss-Ister-Ceejay association'		'GRV-L'	2	0.3400	0.7500	5013990.00	0.0080	2.8898	8.7051
 	  100.000	  14.00	  14.00	   1.50	  12.20	  63.20
 	  380.000	  31.00	  31.00	   0.25	  23.30	  71.12
-1 10000.0 0.01800
+0 0 0.000000 0.000000

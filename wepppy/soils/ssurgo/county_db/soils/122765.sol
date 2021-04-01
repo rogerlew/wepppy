@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.080014
+#   Build Date: 2021-04-01 15:01:42.588916
 #   Source Data: Surgo
 # 
 # Mukey: 122765
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Sandy alluvial land, poorly to somewhat poorly drained'		'L'	3	0.3000	0.7500	5052410.00	0.0060	3.1057	32.4000
+'Sandy alluvial land, poorly to somewhat poorly drained'		'L'	3	0.3000	0.7500	5052410.00	0.0060	3.1057	8.8477
 	  250.000	  17.50	  17.50	   2.50	  13.60	   2.50
 	 1120.000	  15.00	  15.00	   2.00	  11.70	   2.50
 	 1520.000	   5.00	   5.00	   0.30	   9.00	  12.50
-1 10000.0 331.20000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.764416
+#   Build Date: 2021-04-01 15:01:41.270427
 #   Source Data: Surgo
 # 
 # Mukey: 172171
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Pewamo silty clay loam, 0 to 1 percent slopes'		'SICL'	3	0.1600	0.7500	4207145.00	0.0071	3.5000	33.0120
+'Pewamo silty clay loam, 0 to 1 percent slopes'		'SICL'	3	0.1600	0.7500	4207145.00	0.0071	3.5000	2.4342
 	  300.000	  33.50	  33.50	   7.50	  25.00	  10.27
 	  840.000	  42.50	  42.50	   1.25	  15.00	  10.27
 	 2030.000	  32.50	  32.50	   0.50	  10.00	  16.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

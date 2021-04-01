@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.370343
+#   Build Date: 2021-04-01 15:01:42.879402
 #   Source Data: Surgo
 # 
 # Mukey: 381624
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Mobeetie-Devol complex, 3 to 12 percent slopes'		'FSL'	3	0.2300	0.7500	5840020.00	0.0165	2.6404	101.5992
+'Mobeetie-Devol complex, 3 to 12 percent slopes'		'FSL'	3	0.2300	0.7500	5840020.00	0.0165	2.6404	18.0232
 	  150.000	  14.00	  14.00	   0.75	  10.00	   7.85
 	  410.000	  14.00	  14.00	   0.75	  10.00	   7.85
 	 1570.000	  14.00	  14.00	   0.75	  10.00	  10.27
-1 10000.0 101.59920
+0 0 0.000000 0.000000

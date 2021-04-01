@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.616376
+#   Build Date: 2021-04-01 15:01:42.124245
 #   Source Data: Surgo
 # 
 # Mukey: 404124
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Arispe silty clay loam, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.0900	0.7500	4234710.00	0.0071	3.5000	10.8000
+'Arispe silty clay loam, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.0900	0.7500	4234710.00	0.0071	3.5000	0.8233
 	  210.000	  33.00	  33.00	   3.00	  26.40	   0.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

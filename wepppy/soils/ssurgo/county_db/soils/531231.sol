@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.144287
+#   Build Date: 2021-04-01 15:01:43.661175
 #   Source Data: Surgo
 # 
 # Mukey: 531231
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Chewacla silt loam, 0 to 2 percent slopes, frequently flooded'		'SIL'	3	0.2300	0.7500	4813575.00	0.0084	3.5000	32.4000
+'Chewacla silt loam, 0 to 2 percent slopes, frequently flooded'		'SIL'	3	0.2300	0.7500	4813575.00	0.0084	3.5000	4.3774
 	  230.000	  22.50	  22.50	   2.50	  11.30	   6.00
 	 1270.000	  26.50	  26.50	   1.25	  11.30	   5.00
 	 2000.000	  18.00	  18.00	   0.25	   9.50	   5.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

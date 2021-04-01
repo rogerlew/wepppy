@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.578700
+#   Build Date: 2021-04-01 15:01:45.100239
 #   Source Data: Surgo
 # 
 # Mukey: 366796
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Nahatche clay loam, frequently flooded'		'CL'	2	0.2300	0.7500	4745050.00	0.0061	3.7835	32.4000
+'Nahatche clay loam, frequently flooded'		'CL'	2	0.2300	0.7500	4745050.00	0.0061	3.7835	6.4658
 	  150.000	  26.50	  26.50	   2.00	  15.00	   0.00
 	 1520.000	  30.00	  30.00	   0.55	   9.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

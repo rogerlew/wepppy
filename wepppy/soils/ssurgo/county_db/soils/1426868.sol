@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.239168
+#   Build Date: 2021-04-01 15:01:44.759116
 #   Source Data: Surgo
 # 
 # Mukey: 1426868
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Parsons silt loam, 0 to 1 percent slopes'		'SIL'	2	0.1600	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Parsons silt loam, 0 to 1 percent slopes'		'SIL'	2	0.1600	0.7500	4951400.00	0.0094	3.5000	2.5155
 	  200.000	  20.00	  20.00	   3.30	  10.90	   2.00
 	  350.000	  23.00	  23.00	   1.60	  11.30	   2.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.562431
+#   Build Date: 2021-04-01 15:01:45.083684
 #   Source Data: Surgo
 # 
 # Mukey: 2532369
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Barden silt loam, 1 to 5 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Barden silt loam, 1 to 5 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	4.6245
 	  280.000	  21.00	  21.00	   2.50	  11.30	   0.00
 	  460.000	  25.00	  25.00	   1.00	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

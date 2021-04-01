@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.495633
+#   Build Date: 2021-04-01 15:01:44.014257
 #   Source Data: Surgo
 # 
 # Mukey: 536299
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Coshocton-Guernsey silt loams, 15 to 25 percent slopes'		'SIL'	4	0.3000	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Coshocton-Guernsey silt loams, 15 to 25 percent slopes'		'SIL'	4	0.3000	0.7500	5006530.00	0.0099	3.5000	4.5614
 	  200.000	  19.00	  19.00	   2.00	  14.00	  12.70
 	  640.000	  24.00	  24.00	   0.40	  13.30	  12.70
 	 1090.000	  26.00	  26.00	   0.30	  11.30	  22.40
 	 1520.000	  30.00	  30.00	   0.20	  11.30	  31.00
-1 10000.0 8.38800
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.112783
+#   Build Date: 2021-04-01 15:01:44.633060
 #   Source Data: Surgo
 # 
 # Mukey: 125351
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Leefield loamy sand, 0 to 3 percent slopes'		'LS'	3	0.2300	0.7500	5071620.00	0.0081	2.4499	331.2000
+'Leefield loamy sand, 0 to 3 percent slopes'		'LS'	3	0.2300	0.7500	5071620.00	0.0081	2.4499	26.3421
 	  580.000	   7.50	   7.50	   1.50	  11.30	   2.50
 	  840.000	  20.00	  20.00	   0.25	  11.30	   3.50
 	 1910.000	  22.50	  22.50	   0.25	  11.30	   2.50
-1 10000.0 10.80000
+0 0 0.000000 0.000000

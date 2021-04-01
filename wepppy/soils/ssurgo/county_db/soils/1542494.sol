@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.071254
+#   Build Date: 2021-04-01 15:01:42.579933
 #   Source Data: Surgo
 # 
 # Mukey: 1542494
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Oconee-Darmstadt-Coulterville silt loams, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5227050.00	0.0136	3.5000	33.0120
+'Oconee-Darmstadt-Coulterville silt loams, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5227050.00	0.0136	3.5000	1.4848
 	  200.000	  15.00	  15.00	   2.50	  13.30	   0.00
 	  410.000	  22.00	  22.00	   0.75	  17.30	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

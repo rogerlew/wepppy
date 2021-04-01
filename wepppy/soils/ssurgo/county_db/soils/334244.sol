@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.218046
+#   Build Date: 2021-04-01 15:01:41.725388
 #   Source Data: Surgo
 # 
 # Mukey: 334244
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Smithdale-Ruston association, 5 to 40 percent slopes'		'FSL'	3	0.2900	0.7500	5110040.00	0.0096	2.5033	101.6280
+'Smithdale-Ruston association, 5 to 40 percent slopes'		'FSL'	3	0.2900	0.7500	5110040.00	0.0096	2.5033	17.1870
 	  150.000	   8.50	   8.50	   1.25	  11.30	   8.00
 	 1170.000	  20.50	  20.50	   0.60	  11.30	   8.00
 	 2000.000	  17.00	  17.00	   0.30	  11.30	   8.00
-1 10000.0 101.62800
+0 0 0.000000 0.000000

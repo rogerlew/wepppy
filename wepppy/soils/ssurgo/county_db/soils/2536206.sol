@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.484507
+#   Build Date: 2021-04-01 15:01:44.002933
 #   Source Data: Surgo
 # 
 # Mukey: 2536206
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Wrengart silt loam, 8 to 15 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5116790.00	0.0114	3.5000	32.4000
+'Wrengart silt loam, 8 to 15 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5116790.00	0.0114	3.5000	2.0087
 	  100.000	  17.00	  17.00	   2.20	   9.20	   0.00
 	  180.000	  17.00	  17.00	   1.50	   9.20	   0.00
 	  740.000	  33.00	  33.00	   0.70	  17.50	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

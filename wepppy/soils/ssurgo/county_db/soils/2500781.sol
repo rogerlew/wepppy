@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.731330
+#   Build Date: 2021-04-01 15:01:41.236659
 #   Source Data: Surgo
 # 
 # Mukey: 2500781
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Calhoun silt loam, 0 to 1 percent slopes, occasionally flooded'		'SIL'	3	0.3000	0.7500	4620620.00	0.0076	3.5000	32.4000
+'Calhoun silt loam, 0 to 1 percent slopes, occasionally flooded'		'SIL'	3	0.3000	0.7500	4620620.00	0.0076	3.5000	1.2866
 	  150.000	  26.00	  26.00	   2.60	  15.00	   0.00
 	  640.000	  17.70	  17.70	   0.20	  10.00	   0.00
 	 1270.000	  19.40	  19.40	   0.20	  11.30	   0.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

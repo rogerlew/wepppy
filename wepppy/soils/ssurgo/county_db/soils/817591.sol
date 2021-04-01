@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.731243
+#   Build Date: 2021-04-01 15:01:43.242551
 #   Source Data: Surgo
 # 
 # Mukey: 817591
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Ucross-Iwait-Fairburn loams, 3 to 30 percent slopes'		'L'	2	0.2300	0.7500	5609500.00	0.0074	3.1000	33.0120
+'Ucross-Iwait-Fairburn loams, 3 to 30 percent slopes'		'L'	2	0.2300	0.7500	5609500.00	0.0074	3.1000	7.6896
 	  130.000	  20.00	  20.00	   2.00	  16.90	   0.00
 	  790.000	  30.00	  30.00	   0.25	  21.30	   0.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

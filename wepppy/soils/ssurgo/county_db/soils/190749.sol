@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.586041
+#   Build Date: 2021-04-01 15:01:43.097600
 #   Source Data: Surgo
 # 
 # Mukey: 190749
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Montcalm-Graycalm complex, 0 to 6 percent slopes'		'LS'	3	0.3000	0.7500	5110040.00	0.0072	2.3408	100.8000
+'Montcalm-Graycalm complex, 0 to 6 percent slopes'		'LS'	3	0.3000	0.7500	5110040.00	0.0072	2.3408	31.3706
 	  180.000	   6.00	   6.00	   1.75	   2.30	  13.38
 	 1070.000	  11.50	  11.50	   1.25	   4.20	  13.38
 	 1520.000	  10.00	  10.00	   0.25	   3.60	   8.43
-1 10000.0 100.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.871973
+#   Build Date: 2021-04-01 15:01:45.394969
 #   Source Data: Surgo
 # 
 # Mukey: 579207
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Sacul-Sawyer complex, 1 to 8 percent slopes'		'FSL'	2	0.2300	0.7500	6070540.00	0.0082	2.4733	32.4000
+'Sacul-Sawyer complex, 1 to 8 percent slopes'		'FSL'	2	0.2300	0.7500	6070540.00	0.0082	2.4733	20.0302
 	  130.000	  12.50	  12.50	   2.00	  11.30	  12.50
 	  300.000	  13.50	  13.50	   0.75	  11.30	  12.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

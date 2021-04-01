@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.427349
+#   Build Date: 2021-04-01 15:01:42.937704
 #   Source Data: Surgo
 # 
 # Mukey: 1725667
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Savannah-sacul association, gently sloping'		'FSL'	3	0.1600	0.7500	6301060.00	0.0091	2.2087	33.0120
+'Savannah-sacul association, gently sloping'		'FSL'	3	0.1600	0.7500	6301060.00	0.0091	2.2087	19.1047
 	  230.000	   9.50	   9.50	   1.75	  11.30	   5.00
 	  740.000	  25.00	  25.00	   0.25	  11.30	   5.00
 	 1830.000	  25.00	  25.00	   0.25	  11.30	   5.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

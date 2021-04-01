@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.656685
+#   Build Date: 2021-04-01 15:01:44.175147
 #   Source Data: Surgo
 # 
 # Mukey: 540927
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Laidig and Meckesville extremely stony soils, 8 to 25 percent slopes'		'GR-L'	3	0.3000	0.7500	4514530.00	0.0051	3.2356	83.8440
+'Laidig and Meckesville extremely stony soils, 8 to 25 percent slopes'		'GR-L'	3	0.3000	0.7500	4514530.00	0.0051	3.2356	9.1833
 	  100.000	  17.00	  17.00	   2.50	  11.30	  41.90
 	  840.000	  26.50	  26.50	   0.30	  11.30	  39.10
 	 1650.000	  26.50	  26.50	   0.20	  11.30	  47.80
-1 10000.0 8.38800
+0 0 0.000000 0.000000

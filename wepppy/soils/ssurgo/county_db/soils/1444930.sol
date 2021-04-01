@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.702667
+#   Build Date: 2021-04-01 15:01:45.224191
 #   Source Data: Surgo
 # 
 # Mukey: 1444930
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Cisne silt loam, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5227050.00	0.0136	3.5000	33.0120
+'Cisne silt loam, 0 to 2 percent slopes'		'SIL'	2	0.2300	0.7500	5227050.00	0.0136	3.5000	1.6062
 	  200.000	  15.00	  15.00	   1.75	  13.20	   0.00
 	  430.000	  14.00	  14.00	   0.50	  11.90	   0.00
-1 10000.0 2.79360
+0 0 0.000000 0.000000

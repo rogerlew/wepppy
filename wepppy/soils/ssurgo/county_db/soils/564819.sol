@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.994899
+#   Build Date: 2021-04-01 15:01:43.512031
 #   Source Data: Surgo
 # 
 # Mukey: 564819
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Steprock-Mountainburg-Rock outcrop complex, 40 to 60 percent slopes'		'ST-FSL'	4	0.2900	0.7500	5878440.00	0.0108	2.5638	100.8000
+'Steprock-Mountainburg-Rock outcrop complex, 40 to 60 percent slopes'		'ST-FSL'	4	0.2900	0.7500	5878440.00	0.0108	2.5638	21.9380
 	   50.000	  13.00	  13.00	   1.25	   2.60	  32.77
 	  200.000	  13.00	  13.00	   0.75	  11.30	  39.97
 	  690.000	  22.50	  22.50	   0.25	  11.30	  65.35
 	  940.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

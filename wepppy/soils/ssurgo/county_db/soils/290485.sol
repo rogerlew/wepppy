@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.889373
+#   Build Date: 2021-04-01 15:01:45.412665
 #   Source Data: Surgo
 # 
 # Mukey: 290485
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Halcott, Mongaup, and Vly soils, 15 to 35 percent slopes, very rocky'		'CN-L'	3	0.3000	0.7500	5148460.00	0.0058	2.7192	32.4000
+'Halcott, Mongaup, and Vly soils, 15 to 35 percent slopes, very rocky'		'CN-L'	3	0.3000	0.7500	5148460.00	0.0058	2.7192	9.7280
 	   80.000	  12.00	  12.00	   4.00	  11.30	  38.25
 	  280.000	  12.00	  12.00	   0.50	  11.30	  53.50
 	  460.000	  12.00	  12.00	   0.50	  11.30	  63.60
-1 10000.0 1.51200
+0 0 0.000000 0.000000

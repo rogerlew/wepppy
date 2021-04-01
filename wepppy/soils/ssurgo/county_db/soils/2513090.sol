@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.152668
+#   Build Date: 2021-04-01 15:01:45.669107
 #   Source Data: Surgo
 # 
 # Mukey: 2513090
@@ -59,10 +59,10 @@
 # 
 Any comments:
 1 1
-'Layland-Dekalb-Guyandotte complex, 35 to 70 percent slopes, extremely stony'		'SPM'	5	0.0000	0.7500	0.00	0.0000	0.0000	331.2000
+'Layland-Dekalb-Guyandotte complex, 35 to 70 percent slopes, extremely stony'		'SPM'	5	0.0000	0.7500	0.00	0.0000	0.0000	7.1032
 	  150.000	  18.00	  18.00	  11.00	  17.00	  48.13
 	  230.000	  19.00	  19.00	   3.00	   7.70	  38.36
 	 1170.000	  21.00	  21.00	   0.70	   6.40	  49.40
 	 1450.000	  22.00	  22.00	   0.40	   7.20	  64.72
 	 2000.000	  22.00	  22.00	   0.30	   7.20	  65.20
-1 10000.0 33.12000
+0 0 0.000000 0.000000

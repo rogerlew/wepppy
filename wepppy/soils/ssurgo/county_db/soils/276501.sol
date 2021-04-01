@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.877877
+#   Build Date: 2021-04-01 15:01:43.394971
 #   Source Data: Surgo
 # 
 # Mukey: 276501
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Carver coarse sand, 3 to 8 percent slopes'		'COS'	3	0.3700	0.7500	3784550.00	0.0046	2.5460	508.1040
+'Carver coarse sand, 3 to 8 percent slopes'		'COS'	3	0.3700	0.7500	3784550.00	0.0046	2.5460	30.2579
 	  180.000	   3.00	   3.00	   2.00	  11.30	  15.12
 	  430.000	   3.00	   3.00	   0.50	  11.30	  15.12
 	 1630.000	   1.00	   1.00	   0.50	  11.30	  15.12
-1 10000.0 508.10400
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.493255
+#   Build Date: 2021-04-01 15:01:42.001079
 #   Source Data: Surgo
 # 
 # Mukey: 575575
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Conroe loamy fine sand, 0 to 5 percent slopes'		'LFS'	1	0.3700	0.7500	7472870.00	0.0118	1.6274	100.8000
+'Conroe loamy fine sand, 0 to 5 percent slopes'		'LFS'	1	0.3700	0.7500	7472870.00	0.0118	1.6274	26.6031
 	  640.000	   6.00	   6.00	   1.50	   3.00	  11.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

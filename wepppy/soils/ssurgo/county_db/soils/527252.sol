@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.566404
+#   Build Date: 2021-04-01 15:01:45.087778
 #   Source Data: Surgo
 # 
 # Mukey: 527252
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Rockland,limestone,steep and very steep'		'SICL'	2	0.3600	0.7500	4179580.00	0.0070	3.5000	33.0120
+'Rockland,limestone,steep and very steep'		'SICL'	2	0.3600	0.7500	4179580.00	0.0070	3.5000	2.3931
 	  150.000	  34.00	  34.00	   1.25	  20.20	   5.00
 	  940.000	  50.00	  50.00	   0.25	  25.90	   5.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.407966
+#   Build Date: 2021-04-01 15:01:42.917513
 #   Source Data: Surgo
 # 
 # Mukey: 331969
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Bibb and Chastain fine sandy loams (bibb and una)'		'FSL'	2	0.3000	0.7500	6012910.00	0.0081	2.3282	33.0120
+'Bibb and Chastain fine sandy loams (bibb and una)'		'FSL'	2	0.3000	0.7500	6012910.00	0.0081	2.3282	16.7123
 	  300.000	  10.00	  10.00	   2.00	  11.30	  10.76
 	 1520.000	  10.00	  10.00	   0.75	  11.30	  40.48
-1 10000.0 33.01200
+0 0 0.000000 0.000000

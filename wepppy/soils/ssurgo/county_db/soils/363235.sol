@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.810124
+#   Build Date: 2021-04-01 15:01:42.319002
 #   Source Data: Surgo
 # 
 # Mukey: 363235
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Tabor fine sandy loam, 0 to 2 percent slopes'		'FSL'	2	0.3000	0.7500	5840020.00	0.0165	2.6404	100.8000
+'Tabor fine sandy loam, 0 to 2 percent slopes'		'FSL'	2	0.3000	0.7500	5840020.00	0.0165	2.6404	18.6040
 	  160.000	  14.00	  14.00	   0.75	   7.00	  20.00
 	  340.000	  14.00	  14.00	   0.71	   7.00	  19.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

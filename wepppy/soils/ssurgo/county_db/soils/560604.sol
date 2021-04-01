@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.139388
+#   Build Date: 2021-04-01 15:01:45.655484
 #   Source Data: Surgo
 # 
 # Mukey: 560604
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Biffle, Hawthorne, and Sulphura soils, very steep, rocky'		'GR-SIL'	2	0.3600	0.7500	5034095.00	0.0102	3.5000	101.6280
+'Biffle, Hawthorne, and Sulphura soils, very steep, rocky'		'GR-SIL'	2	0.3600	0.7500	5034095.00	0.0102	3.5000	4.8591
 	  250.000	  18.50	  18.50	   1.00	  11.30	  41.80
 	  810.000	  26.00	  26.00	   0.25	  11.30	  39.38
-1 10000.0 0.77400
+0 0 0.000000 0.000000

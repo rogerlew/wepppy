@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.469724
+#   Build Date: 2021-04-01 15:01:41.977293
 #   Source Data: Surgo
 # 
 # Mukey: 355020
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Eakin-Ethan complex, 2 to 6 percent slopes'		'SIL'	3	0.1600	0.7500	4786010.00	0.0082	3.5000	32.4000
+'Eakin-Ethan complex, 2 to 6 percent slopes'		'SIL'	3	0.1600	0.7500	4786010.00	0.0082	3.5000	1.5692
 	  180.000	  23.00	  23.00	   3.00	  17.50	   0.00
 	  740.000	  31.50	  31.50	   1.25	  20.00	   2.50
 	 1520.000	  35.00	  35.00	   0.50	  20.00	   7.50
-1 10000.0 10.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.158523
+#   Build Date: 2021-04-01 15:01:41.665000
 #   Source Data: Surgo
 # 
 # Mukey: 125463
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Tallapoosa gravelly fine sandy loam, 15 to 25 percent slopes, eroded'		'GR-FSL'	3	0.3000	0.7500	5936070.00	0.0167	2.4814	32.4000
+'Tallapoosa gravelly fine sandy loam, 15 to 25 percent slopes, eroded'		'GR-FSL'	3	0.3000	0.7500	5936070.00	0.0167	2.4814	18.5145
 	  100.000	  12.00	  12.00	   0.75	  11.30	  35.60
 	  250.000	  24.00	  24.00	   0.25	  11.30	  31.00
 	  480.000	  16.50	  16.50	   0.25	  11.30	  37.70
-1 10000.0 0.72000
+0 0 0.000000 0.000000

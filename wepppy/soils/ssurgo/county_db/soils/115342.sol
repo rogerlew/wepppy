@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.412691
+#   Build Date: 2021-04-01 15:01:42.921848
 #   Source Data: Surgo
 # 
 # Mukey: 115342
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Cid channery silt loam, 1 to 5 percent slopes'		'CN-SIL'	1	0.3700	0.7500	5089225.00	0.0109	3.5000	32.4000
+'Cid channery silt loam, 1 to 5 percent slopes'		'CN-SIL'	1	0.3700	0.7500	5089225.00	0.0109	3.5000	6.0534
 	  230.000	  17.50	  17.50	   1.25	   7.20	  38.56
-1 10000.0 3.60000
+0 0 0.000000 0.000000

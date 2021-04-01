@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.888024
+#   Build Date: 2021-04-01 15:01:41.393852
 #   Source Data: Surgo
 # 
 # Mukey: 575980
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Depcor-Huntsburg association, gently undulating'		'LFS'	1	0.3000	0.7500	7146300.00	0.0229	1.8235	331.2000
+'Depcor-Huntsburg association, gently undulating'		'LFS'	1	0.3000	0.7500	7146300.00	0.0229	1.8235	28.7482
 	  660.000	   7.50	   7.50	   0.55	   3.50	   5.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

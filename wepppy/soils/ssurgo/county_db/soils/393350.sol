@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.783323
+#   Build Date: 2021-04-01 15:01:42.291877
 #   Source Data: Surgo
 # 
 # Mukey: 393350
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Freestone-Hicota complex, 0 to 3 percent slopes'		'FSL'	2	0.3000	0.7500	6012910.00	0.0110	2.3282	100.8000
+'Freestone-Hicota complex, 0 to 3 percent slopes'		'FSL'	2	0.3000	0.7500	6012910.00	0.0110	2.3282	16.8908
 	  410.000	  10.00	  10.00	   1.25	  10.00	   2.50
 	  840.000	  27.00	  27.00	   0.55	  22.50	   2.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

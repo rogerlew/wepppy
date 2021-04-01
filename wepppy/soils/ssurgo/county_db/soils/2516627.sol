@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.911344
+#   Build Date: 2021-04-01 15:01:44.430056
 #   Source Data: Surgo
 # 
 # Mukey: 2516627
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Cateache-Berks channery silt loams, 30 to 70 percent slopes'		'CN-SIL'	3	0.2207	0.7500	5227050.00	0.0136	3.5000	32.4000
+'Cateache-Berks channery silt loams, 30 to 70 percent slopes'		'CN-SIL'	3	0.2207	0.7500	5227050.00	0.0136	3.5000	3.4839
 	  130.000	  15.00	  15.00	   2.50	  11.30	  21.43
 	  580.000	  15.00	  15.00	   1.50	  11.30	  54.43
 	  890.000	  15.00	  15.00	   1.50	   8.10	  67.60
-1 10000.0 2.52000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.777531
+#   Build Date: 2021-04-01 15:01:44.296155
 #   Source Data: Surgo
 # 
 # Mukey: 122438
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Tomotley-Urban land complex, 0 to 2 percent slopes'		'FSL'	4	0.3600	0.7500	6089750.00	0.0073	2.4675	100.8000
+'Tomotley-Urban land complex, 0 to 2 percent slopes'		'FSL'	4	0.3600	0.7500	6089750.00	0.0073	2.4675	18.2757
 	  100.000	  12.50	  12.50	   3.50	  12.20	   0.00
 	  380.000	  15.00	  15.00	   0.25	   7.60	   0.00
 	 1650.000	  26.50	  26.50	   0.75	  11.00	   0.00
 	 1900.000	  12.00	  12.00	   0.25	   4.80	   0.00
-1 10000.0 28.80000
+0 0 0.000000 0.000000

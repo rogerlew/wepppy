@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.883400
+#   Build Date: 2021-04-01 15:01:45.406581
 #   Source Data: Surgo
 # 
 # Mukey: 762995
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Leighcan family-Rock outcrop complex, 40 to 150 percent slopes, south aspects'		'CB-SIL'	5	0.1600	0.7500	5061660.00	0.0106	3.5000	33.0120
+'Leighcan family-Rock outcrop complex, 40 to 150 percent slopes, south aspects'		'CB-SIL'	5	0.1600	0.7500	5061660.00	0.0106	3.5000	2.3569
 	   50.000	  18.00	  18.00	   1.00	  15.10	  35.03
 	  230.000	  18.00	  18.00	   1.00	  15.10	  70.33
 	  710.000	   6.00	   6.00	   0.50	   5.50	  63.43
 	 1140.000	   2.00	   2.00	   0.50	   2.00	  77.68
 	 1520.000	   2.00	   2.00	   0.00	   1.80	  81.44
-1 10000.0 101.59200
+0 0 0.000000 0.000000

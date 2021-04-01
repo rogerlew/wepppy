@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.295881
+#   Build Date: 2021-04-01 15:01:43.812356
 #   Source Data: Surgo
 # 
 # Mukey: 2398729
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Maxfield silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.0900	0.7500	4510360.00	0.0074	3.5000	10.8000
+'Maxfield silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.0900	0.7500	4510360.00	0.0074	3.5000	1.0709
 	  310.000	  28.00	  28.00	   7.00	  24.20	   0.00
 	  480.000	  28.00	  28.00	   5.00	  23.90	   0.00
 	  740.000	  29.00	  29.00	   1.25	  23.40	   0.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.374891
+#   Build Date: 2021-04-01 15:01:44.895201
 #   Source Data: Surgo
 # 
 # Mukey: 2536112
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Beemont gravelly silt loam, 15 to 35 percent slopes'		'GR-SIL'	2	0.3000	0.7500	5502700.00	0.0250	3.5000	32.4000
+'Beemont gravelly silt loam, 15 to 35 percent slopes'		'GR-SIL'	2	0.3000	0.7500	5502700.00	0.0250	3.5000	7.5208
 	  150.000	   9.50	   9.50	   1.20	   4.00	  30.00
 	  510.000	   8.80	   8.80	   0.68	   2.80	  66.75
-1 10000.0 1.00800
+0 0 0.000000 0.000000

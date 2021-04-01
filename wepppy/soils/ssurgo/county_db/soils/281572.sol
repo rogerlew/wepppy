@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.765366
+#   Build Date: 2021-04-01 15:01:44.283714
 #   Source Data: Surgo
 # 
 # Mukey: 281572
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Houghtonville-Rawsonville association, hilly, rocky'		'SPM'	3	0.2300	0.7500	6416320.00	0.0077	1.9789	100.8000
+'Houghtonville-Rawsonville association, hilly, rocky'		'SPM'	3	0.2300	0.7500	6416320.00	0.0077	1.9789	20.1239
 	  100.000	   6.50	   6.50	   6.00	  11.30	  11.80
 	  940.000	   6.50	   6.50	   4.00	  11.30	  22.92
 	 1700.000	   6.50	   6.50	   1.25	  11.30	  18.30
-1 10000.0 33.01992
+0 0 0.000000 0.000000

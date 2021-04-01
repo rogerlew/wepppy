@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.052419
+#   Build Date: 2021-04-01 15:01:41.558819
 #   Source Data: Surgo
 # 
 # Mukey: 284979
@@ -57,10 +57,10 @@
 # 
 Any comments:
 1 1
-'Colonel-Peru association, 3 to 15 percent slopes, very stony'		'HPM'	5	0.1100	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Colonel-Peru association, 3 to 15 percent slopes, very stony'		'HPM'	5	0.1100	0.7500	4649000.00	0.0050	2.5450	13.6513
 	   50.000	   2.00	   2.00	   3.00	  11.30	  16.28
 	   80.000	   3.00	   3.00	  10.00	  11.30	  22.57
 	  230.000	   3.00	   3.00	   6.00	  11.30	  20.80
 	  300.000	   3.00	   3.00	   3.00	  11.30	  20.80
 	  450.000	   3.00	   3.00	   1.00	  11.30	  22.81
-1 10000.0 1.80000
+0 0 0.000000 0.000000

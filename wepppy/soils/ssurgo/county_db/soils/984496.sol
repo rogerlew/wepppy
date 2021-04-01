@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.330648
+#   Build Date: 2021-04-01 15:01:41.837932
 #   Source Data: Surgo
 # 
 # Mukey: 984496
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Made land, schist and gneiss materials'		'SIL'	1	0.3700	0.7500	4951400.00	0.0094	3.5000	8.3880
+'Made land, schist and gneiss materials'		'SIL'	1	0.3700	0.7500	4951400.00	0.0094	3.5000	4.3972
 	  210.000	  20.00	  20.00	   1.50	  14.70	  12.70
-1 10000.0 3.31200
+0 0 0.000000 0.000000

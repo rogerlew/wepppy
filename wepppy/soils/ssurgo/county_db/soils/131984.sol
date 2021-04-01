@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.864552
+#   Build Date: 2021-04-01 15:01:41.369868
 #   Source Data: Surgo
 # 
 # Mukey: 131984
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Alpin sand, 0 to 6 percent slopes, Carolina and Georgia Sandhills'		'S'	3	0.1600	0.7500	4284010.00	0.0229	2.6552	331.2000
+'Alpin sand, 0 to 6 percent slopes, Carolina and Georgia Sandhills'		'S'	3	0.1600	0.7500	4284010.00	0.0229	2.6552	31.9075
 	  250.000	   7.00	   7.00	   0.40	   5.30	   0.00
 	 1240.000	   4.00	   4.00	   0.25	   3.10	   0.00
 	 2030.000	   6.00	   6.00	   0.25	  11.30	   0.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

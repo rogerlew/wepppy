@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.420616
+#   Build Date: 2021-04-01 15:01:44.941398
 #   Source Data: Surgo
 # 
 # Mukey: 58662
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Elgee-Penwell complex, gently undulating'		'FS'	2	0.2300	0.7500	5417400.00	0.0265	2.1180	331.2000
+'Elgee-Penwell complex, gently undulating'		'FS'	2	0.2300	0.7500	5417400.00	0.0265	2.1180	36.2171
 	 1570.000	   4.00	   4.00	   0.30	   3.00	   0.00
 	 2030.000	  11.50	  11.50	   0.30	   6.00	   0.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

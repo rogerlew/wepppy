@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.916498
+#   Build Date: 2021-04-01 15:01:44.435251
 #   Source Data: Surgo
 # 
 # Mukey: 58463
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Brewster association, hilly'		'GR-CL'	1	0.2300	0.7500	4898730.00	0.0057	3.8346	32.4000
+'Brewster association, hilly'		'GR-CL'	1	0.2300	0.7500	4898730.00	0.0057	3.8346	7.2380
 	  210.000	  28.00	  28.00	   2.50	  15.00	  70.67
-1 10000.0 5.04000
+0 0 0.000000 0.000000

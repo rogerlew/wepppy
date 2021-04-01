@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.263308
+#   Build Date: 2021-04-01 15:01:42.772949
 #   Source Data: Surgo
 # 
 # Mukey: 991611
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Judson-Ackmore-Colo, overwash complex, 1 to 5 percent slopes'		'SICL'	4	0.0900	0.7500	4510360.00	0.0074	3.5000	10.8000
+'Judson-Ackmore-Colo, overwash complex, 1 to 5 percent slopes'		'SICL'	4	0.0900	0.7500	4510360.00	0.0074	3.5000	0.9903
 	  230.000	  28.00	  28.00	   3.50	  23.60	   0.00
 	  710.000	  29.50	  29.50	   3.50	  24.70	   0.00
 	  890.000	  32.50	  32.50	   2.00	  26.40	   0.00
 	 1520.000	  28.50	  28.50	   0.50	  22.20	   0.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

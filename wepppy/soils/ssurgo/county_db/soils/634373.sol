@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.596985
+#   Build Date: 2021-04-01 15:01:41.102308
 #   Source Data: Surgo
 # 
 # Mukey: 634373
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Ozaukee silt loam, 2 to 4 percent slopes'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Ozaukee silt loam, 2 to 4 percent slopes'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	2.5068
 	  100.000	  19.00	  19.00	   2.00	  12.00	   2.00
 	  250.000	  21.00	  21.00	   0.60	  11.50	   2.00
 	  530.000	  41.00	  41.00	   0.50	  18.50	   7.93
-1 10000.0 3.31200
+0 0 0.000000 0.000000

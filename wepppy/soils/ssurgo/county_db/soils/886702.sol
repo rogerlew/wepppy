@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.561084
+#   Build Date: 2021-04-01 15:01:45.082314
 #   Source Data: Surgo
 # 
 # Mukey: 886702
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Kenoma silt loam, 4 to 7 percent slopes'		'SIL'	1	0.0900	0.7500	4813575.00	0.0084	3.5000	32.4000
+'Kenoma silt loam, 4 to 7 percent slopes'		'SIL'	1	0.0900	0.7500	4813575.00	0.0084	3.5000	3.6310
 	  210.000	  22.50	  22.50	   3.00	  22.40	   7.50
-1 10000.0 0.75600
+0 0 0.000000 0.000000

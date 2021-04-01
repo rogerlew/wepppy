@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.949720
+#   Build Date: 2021-04-01 15:01:42.458730
 #   Source Data: Surgo
 # 
 # Mukey: 523389
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Stony rough land, sandstone'		'ST-SL'	2	0.3000	0.7500	4783470.00	0.0091	2.8619	100.8000
+'Stony rough land, sandstone'		'ST-SL'	2	0.3000	0.7500	4783470.00	0.0091	2.8619	22.5546
 	  150.000	  12.50	  12.50	   1.25	   2.50	  43.75
 	  360.000	  17.50	  17.50	   0.25	  11.30	  28.70
-1 10000.0 1.80000
+0 0 0.000000 0.000000

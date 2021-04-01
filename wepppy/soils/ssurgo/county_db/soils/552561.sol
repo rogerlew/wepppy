@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.618572
+#   Build Date: 2021-04-01 15:01:41.124218
 #   Source Data: Surgo
 # 
 # Mukey: 552561
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Garmon-Shelocta complex, 25 to 60 percent slope'		'SIL'	3	0.3700	0.7500	5116790.00	0.0114	3.5000	101.6280
+'Garmon-Shelocta complex, 25 to 60 percent slope'		'SIL'	3	0.3700	0.7500	5116790.00	0.0114	3.5000	6.3741
 	  130.000	  17.00	  17.00	   1.75	   6.30	  15.00
 	  740.000	  16.00	  16.00	   0.25	   5.70	  37.90
 	  990.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.15200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.481995
+#   Build Date: 2021-04-01 15:01:41.989696
 #   Source Data: Surgo
 # 
 # Mukey: 528381
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Sulphura channery silt loam, 25 to 65 percent slopes'		'CN-SIL'	2	0.3600	0.7500	5061660.00	0.0106	3.5000	101.6280
+'Sulphura channery silt loam, 25 to 65 percent slopes'		'CN-SIL'	2	0.3600	0.7500	5061660.00	0.0106	3.5000	4.6887
 	   80.000	  18.00	  18.00	   2.50	  13.30	  28.00
 	  690.000	  25.00	  25.00	   0.25	  12.60	  58.67
-1 10000.0 0.75600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.996227
+#   Build Date: 2021-04-01 15:01:43.513343
 #   Source Data: Surgo
 # 
 # Mukey: 460942
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Toomes very rocky loam, 10 to 30 percent slopes'		'STV-L'	2	0.2500	0.7500	5052410.00	0.0080	3.1057	32.4000
+'Toomes very rocky loam, 10 to 30 percent slopes'		'STV-L'	2	0.2500	0.7500	5052410.00	0.0080	3.1057	8.4412
 	  300.000	  17.50	  17.50	   1.50	  20.00	  38.40
 	  410.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 255.60000
+0 0 0.000000 0.000000

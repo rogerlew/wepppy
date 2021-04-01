@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.804456
+#   Build Date: 2021-04-01 15:01:42.313291
 #   Source Data: Surgo
 # 
 # Mukey: 384976
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Tillman and Foard soils, 1 to 3 percent slopes'		'SICL'	1	0.0900	0.7500	4344970.00	0.0072	3.5000	10.1599
+'Tillman and Foard soils, 1 to 3 percent slopes'		'SICL'	1	0.0900	0.7500	4344970.00	0.0072	3.5000	3.1281
 	  210.000	  31.00	  31.00	   2.00	  15.00	   0.00
-1 10000.0 3.30264
+0 0 0.000000 0.000000
