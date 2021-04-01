@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.556136
+#   Build Date: 2021-04-01 12:52:28.737790
 #   Source Data: Surgo
 # 
 # Mukey: 148589
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41436598   Oi              8.0   140.0        0.0         0.0          1.4     0.0     0.0    10.0    50.0
+#  41436598   Oi     X        8.0   140.0        0.0         0.0          1.4     0.0     0.0    10.0    50.0
 #  41436602   A              11.0     9.0        0.0         5.0         0.93     9.0    33.3    10.2     4.0
 #  41436601   Bw             33.0     9.0        0.0         5.0         0.93     9.0    33.3    10.2     2.5
 #  41436600   2E             51.0    28.0        0.0         5.0          0.9     5.0    64.3    17.1     1.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Upsata-Bata-Petty families, complex, glacial moraines'		'SPM'	5	0.3000	0.7500	0.00	0.0000	0.0000	504.0000
-	   80.000	   0.00	   0.00	  50.00	  11.30	  55.50
-	  110.000	  33.30	   9.00	   4.00	  25.00	  35.88
-	  330.000	  33.30	   9.00	   2.50	  25.00	  35.88
-	  510.000	  64.30	   5.00	   1.50	   4.50	  38.25
-	 1520.000	  80.50	   2.50	   0.25	   2.00	  71.14
+'Upsata-Bata-Petty families, complex, glacial moraines'		'SPM'	4	0.3000	0.7500	0.00	0.0000	0.0000	504.0000
+	  110.000	   9.00	   9.00	   4.00	  25.00	  35.88
+	  330.000	   9.00	   9.00	   2.50	  25.00	  35.88
+	  510.000	   5.00	   5.00	   1.50	   4.50	  38.25
+	 1520.000	   2.50	   2.50	   0.25	   2.00	  71.14
 1 10000.0 507.60000

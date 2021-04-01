@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.204587
+#   Build Date: 2021-04-01 12:52:32.565254
 #   Source Data: Surgo
 # 
 # Mukey: 2536083
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42822140   Oi              3.0    91.0        0.0         0.0          0.1    10.0    24.0     2.0    50.0
+#  42822140   Oi     X        3.0    91.0        0.0         0.0          0.1    10.0    24.0     2.0    50.0
 #  42822141   A              13.0    20.0        0.0         0.0         1.25    10.0    24.0     2.0     2.0
 #  42822142   BE             28.0    20.0        0.0         0.0          1.3    11.0    23.0     2.0     1.0
 #  42822143   Bt1           107.0     8.0        0.0         8.0          1.4    24.0    24.0     2.0     0.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Clarksville extremely gravelly silt loam, 15 to 50 percent slopes'		'SPM'	5	0.2100	0.7500	5502700.00	0.0250	3.5000	327.6000
-	   30.000	  24.00	  10.00	  50.00	  25.00	  55.50
-	  130.000	  24.00	  10.00	   2.00	  13.00	  73.00
-	  280.000	  23.00	  11.00	   1.00	  10.00	  55.00
+'Clarksville extremely gravelly silt loam, 15 to 50 percent slopes'		'SPM'	4	0.2100	0.7500	5502700.00	0.0250	3.5000	327.6000
+	  130.000	  10.00	  10.00	   2.00	  13.00	  73.00
+	  280.000	  11.00	  11.00	   1.00	  10.00	  55.00
 	 1070.000	  24.00	  24.00	   0.50	  12.00	  77.92
-	 2030.000	  11.00	  55.00	   0.10	  28.00	  52.47
+	 2030.000	  55.00	  55.00	   0.10	  28.00	  52.47
 1 10000.0 18.00000

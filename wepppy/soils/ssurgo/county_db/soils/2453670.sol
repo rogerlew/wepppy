@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.214230
+#   Build Date: 2021-04-01 12:52:32.575137
 #   Source Data: Surgo
 # 
 # Mukey: 2453670
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45499646   Oe              5.0   300.0        0.0         0.0          0.5    25.0    20.0     8.5    85.0
+#  45499646   Oe     X        5.0   300.0        0.0         0.0          0.5    25.0    20.0     8.5    85.0
 #  45499647   E              15.0    9.17       27.0         0.0          1.3    25.0    20.0     8.5     2.0
 #  45499650   B/E            23.0    2.82       31.0         0.0         1.45    28.0    34.4    10.3     1.0
 #  45499649   Bt1            46.0    2.82       51.0         0.0          1.4    35.0    16.9    10.4     0.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Cryoboralfs-Rock outcrop complex, 35 to 75 percent slopes'		'MPM'	4	0.3000	0.7500	4675750.00	0.0078	3.5000	1080.0000
-	   50.000	  20.00	  25.00	  85.00	 115.00	  55.50
-	  150.000	  20.00	  25.00	   2.00	  17.00	  27.00
-	  230.000	  34.40	  28.00	   1.00	  16.70	  31.00
-	  460.000	  16.90	  35.00	   0.50	  18.70	  53.94
+'Cryoboralfs-Rock outcrop complex, 35 to 75 percent slopes'		'MPM'	3	0.3000	0.7500	4675750.00	0.0078	3.5000	1080.0000
+	  150.000	  25.00	  25.00	   2.00	  17.00	  27.00
+	  230.000	  28.00	  28.00	   1.00	  16.70	  31.00
+	  460.000	  35.00	  35.00	   0.50	  18.70	  53.94
 1 10000.0 3.27600

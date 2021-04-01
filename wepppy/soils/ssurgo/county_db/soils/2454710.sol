@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.547515
+#   Build Date: 2021-04-01 12:52:29.776448
 #   Source Data: Surgo
 # 
 # Mukey: 2454710
@@ -12,7 +12,7 @@
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
 #  45820394   H1             38.0    28.0        0.0         3.0         0.93     8.0    68.2    12.0    10.0
-#  45820395   H2             51.0    28.0        0.0         5.0         1.15    13.0    45.4    12.7     2.0
+#  45820395   H2     X       51.0    28.0        0.0         5.0         1.15    13.0    45.4    12.7     2.0
 #  45820396   H3            152.0   300.0        0.0        18.0          1.5     2.5    96.0     7.2     0.5
 # 
 # Restricting Layer:
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,7 @@
 # 
 Any comments:
 1 1
-'Spanaway gravelly sandy loam, 0 to 3 percent slopes'		'GR-SL'	3	0.0900	0.7500	5033200.00	0.0056	2.4940	100.8000
-	  380.000	  68.20	   8.00	  10.00	  33.00	  39.38
-	  510.000	  45.40	  13.00	   2.00	   0.00	  66.75
-	 1520.000	  96.00	   2.50	   0.50	   2.50	  79.50
+'Spanaway gravelly sandy loam, 0 to 3 percent slopes'		'GR-SL'	2	0.0900	0.7500	5033200.00	0.0056	2.4940	100.8000
+	  380.000	   8.00	   8.00	  10.00	  33.00	  39.38
+	 1520.000	   2.50	   2.50	   0.50	   2.50	  79.50
 1 10000.0 1080.00000

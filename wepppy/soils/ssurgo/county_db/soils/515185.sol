@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.142364
+#   Build Date: 2021-04-01 12:52:29.351327
 #   Source Data: Surgo
 # 
 # Mukey: 515185
 # Major Component: 15274708 (comppct_r = 50.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44182879   Oi              6.0    91.5        4.0         0.0         0.07     7.0    66.8    10.0    85.0
+#  44182879   Oi     X        6.0    91.5        4.0         0.0         0.07     7.0    66.8    10.0    85.0
 #  44182880   A              14.0     9.0        0.0         3.0          1.3    21.0    25.0     9.9    2.25
 #  44182882   BA + Bt          72.0     9.0        0.0        13.0         1.35    35.0    10.0     3.8     0.4
 #  44182883   C              87.0     9.0        0.0        13.0         1.35    35.0    10.0     3.8     0.2
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,10 +57,9 @@
 # 
 Any comments:
 1 1
-'Gilpin-Peabody complex, 35 to 70 percent slopes, severely eroded'		'SPM'	5	0.0000	0.7500	4649000.00	0.0050	2.5450	329.4000
-	   60.000	  66.80	   7.00	  85.00	  80.20	  55.50
-	  140.000	  25.00	  21.00	   2.25	  12.00	  24.34
-	  720.000	  10.00	  35.00	   0.40	   8.00	  48.67
-	  870.000	  10.00	  35.00	   0.20	   8.00	  66.07
-	  970.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Gilpin-Peabody complex, 35 to 70 percent slopes, severely eroded'		'SPM'	4	0.0000	0.7500	4649000.00	0.0050	2.5450	329.4000
+	  140.000	  21.00	  21.00	   2.25	  12.00	  24.34
+	  720.000	  35.00	  35.00	   0.40	   8.00	  48.67
+	  870.000	  35.00	  35.00	   0.20	   8.00	  66.07
+	  970.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 27.72000

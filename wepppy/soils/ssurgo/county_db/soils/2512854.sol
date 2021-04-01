@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.718550
+#   Build Date: 2021-04-01 12:52:28.906344
 #   Source Data: Surgo
 # 
 # Mukey: 2512854
 # Major Component: 15286062 (comppct_r = 40.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44225136   Oe              3.0    92.0         -           -          0.18     7.0    66.8    10.0    70.0
+#  44225136   Oe     X        3.0    92.0         -           -          0.18     7.0    66.8    10.0    70.0
 #  44225138   A              10.0     9.0        0.0         3.0          1.3    15.0    25.0     8.1    2.25
 #  44225139   BA+Bt1+Bt2          71.0     9.0        0.0        15.0         1.35    20.0    20.0     6.6     0.4
 #  44225140   C              89.0     9.0        0.0        18.0         1.35    15.0    45.0    12.7    0.31
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,9 +57,8 @@
 # 
 Any comments:
 1 1
-'Gilpin-Pineville-Guyandotte association, very steep, extremely stony'		'MPM'	4	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  70.00	  80.00	  55.50
-	  100.000	  25.00	  15.00	   2.25	  10.10	  19.97
+'Gilpin-Pineville-Guyandotte association, very steep, extremely stony'		'MPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  100.000	  15.00	  15.00	   2.25	  10.10	  19.97
 	  710.000	  20.00	  20.00	   0.40	   9.70	  42.62
-	  890.000	  45.00	  15.00	   0.31	   5.70	  71.30
+	  890.000	  15.00	  15.00	   0.31	   5.70	  71.30
 1 10000.0 2.52000

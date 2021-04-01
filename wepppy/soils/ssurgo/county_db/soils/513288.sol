@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.621846
+#   Build Date: 2021-04-01 12:52:33.004046
 #   Source Data: Surgo
 # 
 # Mukey: 513288
 # Major Component: 15244875 (comppct_r = 40.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44086587   Oa              3.0    92.0         -           -          0.18     7.0    66.8    10.0    60.0
+#  44086587   Oa     X        3.0    92.0         -           -          0.18     7.0    66.8    10.0    60.0
 #  44086583   A1             10.0     9.0        0.0         3.0          1.3    21.0    26.3     8.6    2.25
 #  44086584   B1+Bt          54.0     9.0        0.0        15.0         1.35    35.0    10.0     6.1     0.4
 #  44086585   B3             77.0     9.0        0.0        18.0         1.35    25.0    38.5    11.4     0.2
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,9 +57,8 @@
 # 
 Any comments:
 1 1
-'Gilpin-Upshur complex, 40 to 55 percent slopes'		'HPM'	4	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  60.00	  80.00	  55.50
-	  100.000	  26.30	  21.00	   2.25	  12.00	  19.97
-	  540.000	  10.00	  35.00	   0.40	   8.00	  42.62
-	  770.000	  38.50	  25.00	   0.20	   8.00	  71.30
+'Gilpin-Upshur complex, 40 to 55 percent slopes'		'HPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  100.000	  21.00	  21.00	   2.25	  12.00	  19.97
+	  540.000	  35.00	  35.00	   0.40	   8.00	  42.62
+	  770.000	  25.00	  25.00	   0.20	   8.00	  71.30
 1 10000.0 2.52000

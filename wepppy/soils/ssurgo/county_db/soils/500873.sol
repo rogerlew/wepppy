@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.753497
+#   Build Date: 2021-04-01 12:52:33.141872
 #   Source Data: Surgo
 # 
 # Mukey: 500873
 # Major Component: 15707751 (comppct_r = 85.0)
-# Texture: sand loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45526644   Oi              5.0   300.0        0.0         0.0          0.5    13.6    69.4    10.1    85.0
+#  45526644   Oi     X        5.0   300.0        0.0         0.0          0.5    13.6    69.4    10.1    85.0
 #  45526645   E              66.0    9.17        0.0         0.0          1.5    22.5    39.8    11.9    0.75
 #  45526646   E and B          74.0    9.17        0.0         0.0         1.67    26.0    35.0    10.4     0.5
 #  45526647   Bt            102.0    2.82        0.0         0.0         1.44    39.0    28.0     7.8     0.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Dunton loam, 4 to 25 percent slopes'		'SPM'	4	0.3000	0.7500	4668210.00	0.0050	2.9682	1080.0000
-	   50.000	  69.40	  13.60	  85.00	  60.00	  55.50
-	  660.000	  39.80	  22.50	   0.75	  18.20	   0.00
-	  740.000	  35.00	  26.00	   0.50	  20.30	   0.00
-	 1020.000	  28.00	  39.00	   0.50	  28.80	   0.00
+'Dunton loam, 4 to 25 percent slopes'		'SPM'	3	0.3000	0.7500	4668210.00	0.0050	2.9682	1080.0000
+	  660.000	  22.50	  22.50	   0.75	  18.20	   0.00
+	  740.000	  26.00	  26.00	   0.50	  20.30	   0.00
+	 1020.000	  39.00	  39.00	   0.50	  28.80	   0.00
 1 10000.0 0.75600

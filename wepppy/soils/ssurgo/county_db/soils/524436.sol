@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.049077
+#   Build Date: 2021-04-01 12:52:32.397375
 #   Source Data: Surgo
 # 
 # Mukey: 524436
 # Major Component: 15026490 (comppct_r = 85.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43414958   Oi              3.0    91.0        0.0         0.0          0.1     7.0    66.8    10.0    50.0
+#  43414958   Oi     X        3.0    91.0        0.0         0.0          0.1     7.0    66.8    10.0    50.0
 #  43414957   A              13.0   28.23        0.0         0.0         1.36    18.9    15.1     1.6     2.0
 #  43414955   AE             30.0   28.23        0.0         0.0         1.38    18.9    15.5     1.6     1.5
 #  43414956   Bw             46.0   28.23        0.0         0.0         1.45    19.3    18.8     1.9    0.25
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,10 +56,9 @@
 # 
 Any comments:
 1 1
-'Hawthorne gravelly silt loam, 20 to 60 percent slopes'		'SPM'	5	0.3700	0.7500	4649000.00	0.0050	2.5450	327.6000
-	   30.000	  66.80	   7.00	  50.00	  25.00	  55.50
-	  130.000	  15.10	  18.90	   2.00	  11.10	  34.00
-	  300.000	  15.50	  18.90	   1.50	   5.30	  33.00
-	  460.000	  18.80	  19.30	   0.25	   4.90	  61.00
-	  660.000	  24.20	  21.60	   0.10	   5.80	  66.00
+'Hawthorne gravelly silt loam, 20 to 60 percent slopes'		'SPM'	4	0.3700	0.7500	4649000.00	0.0050	2.5450	327.6000
+	  130.000	  18.90	  18.90	   2.00	  11.10	  34.00
+	  300.000	  18.90	  18.90	   1.50	   5.30	  33.00
+	  460.000	  19.30	  19.30	   0.25	   4.90	  61.00
+	  660.000	  21.60	  21.60	   0.10	   5.80	  66.00
 1 10000.0 2.55600

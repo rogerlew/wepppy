@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.675711
+#   Build Date: 2021-04-01 12:52:29.905620
 #   Source Data: Surgo
 # 
 # Mukey: 3054927
 # Major Component: 15617035 (comppct_r = 50.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45318726   Oi              2.0    92.0       27.0         7.0          0.1     7.0    66.8    10.0    69.0
-#  45318727   Oa              6.0    92.0       26.0         6.0          0.2     7.0    66.8    10.0    52.0
+#  45318726   Oi     X        2.0    92.0       27.0         7.0          0.1     7.0    66.8    10.0    69.0
+#  45318727   Oa     X        6.0    92.0       26.0         6.0          0.2     7.0    66.8    10.0    52.0
 #  45318729   A              15.0     9.0        0.0        26.0         0.88    24.0    18.0     7.2     9.5
 #  45318734   AB             26.0     9.0        0.0        28.0         1.21    27.0    14.0     7.0    5.75
 #  45318733   BA             38.0     9.0        0.0        26.0         1.36    32.0     9.0     5.0    2.48
@@ -47,7 +47,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -59,14 +59,12 @@
 # 
 Any comments:
 1 1
-'Highsplint-Berks association, moist, 35 to 80 percent slopes, extremely stony'		'SPM'	9	0.0400	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   20.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	   60.000	  66.80	   7.00	  52.00	 121.40	  55.50
-	  150.000	  18.00	  24.00	   9.50	  11.30	  51.90
-	  260.000	  14.00	  27.00	   5.75	  11.30	  55.36
-	  380.000	   9.00	  32.00	   2.48	  11.30	  52.64
-	  640.000	  19.00	  28.00	   0.82	  11.30	  78.65
-	 1060.000	  24.00	  22.00	   0.48	  11.30	  63.28
-	 1310.000	  27.00	  18.00	   0.25	  11.30	  71.20
-	 1670.000	  27.00	  19.00	   0.19	  11.30	  68.32
+'Highsplint-Berks association, moist, 35 to 80 percent slopes, extremely stony'		'SPM'	7	0.0400	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  150.000	  24.00	  24.00	   9.50	  11.30	  51.90
+	  260.000	  27.00	  27.00	   5.75	  11.30	  55.36
+	  380.000	  32.00	  32.00	   2.48	  11.30	  52.64
+	  640.000	  28.00	  28.00	   0.82	  11.30	  78.65
+	 1060.000	  22.00	  22.00	   0.48	  11.30	  63.28
+	 1310.000	  18.00	  18.00	   0.25	  11.30	  71.20
+	 1670.000	  19.00	  19.00	   0.19	  11.30	  68.32
 1 10000.0 27.72000

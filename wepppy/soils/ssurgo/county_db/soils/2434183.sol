@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.554912
+#   Build Date: 2021-04-01 12:52:30.832037
 #   Source Data: Surgo
 # 
 # Mukey: 2434183
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45106903   Oi              3.0    92.0       34.0         0.0          0.1     0.0     0.0    10.0    69.0
-#  45106904   Oe              5.0    92.0       33.0         0.0         0.15     0.0     0.0    10.0    60.0
+#  45106903   Oi     X        3.0    92.0       34.0         0.0          0.1     0.0     0.0    10.0    69.0
+#  45106904   Oe     X        5.0    92.0       33.0         0.0         0.15     0.0     0.0    10.0    60.0
 #  45106905   A               8.0    23.0        0.0         4.0         1.04    19.0    31.0     7.2    10.7
 #  45106906   E              16.0   28.23        7.0        11.0          1.3    17.0    29.3     9.4     1.5
 #  45106907   Bt            127.0   28.23       17.0        29.0          1.4    22.0    27.0     8.9     0.5
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,11 +56,9 @@
 # 
 Any comments:
 1 1
-'Macove channery silt loam, 25 to 65 percent slopes, extremely stony'		'SPM'	6	0.3700	0.7500	0.00	0.0000	0.0000	331.2000
-	   30.000	   0.00	   0.00	  69.00	  11.30	  55.50
-	   50.000	   0.00	   0.00	  60.00	  11.30	  55.50
-	   80.000	  31.00	  19.00	  10.70	  11.30	  30.88
-	  160.000	  29.30	  17.00	   1.50	  11.30	  23.74
-	 1270.000	  27.00	  22.00	   0.50	  11.30	  61.66
-	 1980.000	  42.10	  20.00	   0.25	  11.30	  74.63
+'Macove channery silt loam, 25 to 65 percent slopes, extremely stony'		'SPM'	4	0.3700	0.7500	0.00	0.0000	0.0000	331.2000
+	   80.000	  19.00	  19.00	  10.70	  11.30	  30.88
+	  160.000	  17.00	  17.00	   1.50	  11.30	  23.74
+	 1270.000	  22.00	  22.00	   0.50	  11.30	  61.66
+	 1980.000	  20.00	  20.00	   0.25	  11.30	  74.63
 1 10000.0 101.62800

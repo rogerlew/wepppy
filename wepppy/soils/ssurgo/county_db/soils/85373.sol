@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.544220
+#   Build Date: 2021-04-01 12:52:29.773073
 #   Source Data: Surgo
 # 
 # Mukey: 85373
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42911806   Oi              3.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
+#  42911806   Oi     X        3.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
 #  42911807   A              20.0     9.0        0.0         3.0          1.4    32.0    10.0     6.1     5.0
 #  42911808   BA             43.0     2.7        0.0         3.0         1.38    40.0    10.0     4.8     4.0
 #  42911809   Bw1            79.0     2.7        0.0         5.0         1.42    48.0    10.0     4.8     2.5
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,12 +57,11 @@
 # 
 Any comments:
 1 1
-'Price-MacDunn-Ritner complex, 30 to 60 percent slopes'		'SPM'	7	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   30.000	  35.00	  15.00	  75.00	  11.30	  55.50
-	  200.000	  10.00	  32.00	   5.00	  40.00	  17.55
-	  430.000	  10.00	  40.00	   4.00	  35.00	  17.55
-	  790.000	  10.00	  48.00	   2.50	  40.00	  19.25
-	 1370.000	  10.00	  50.00	   1.50	  40.00	  19.25
-	 2180.000	  12.00	  39.00	   0.75	  40.00	  44.75
-	 2280.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Price-MacDunn-Ritner complex, 30 to 60 percent slopes'		'SPM'	6	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  200.000	  32.00	  32.00	   5.00	  40.00	  17.55
+	  430.000	  40.00	  40.00	   4.00	  35.00	  17.55
+	  790.000	  48.00	  48.00	   2.50	  40.00	  19.25
+	 1370.000	  50.00	  50.00	   1.50	  40.00	  19.25
+	 2180.000	  39.00	  39.00	   0.75	  40.00	  44.75
+	 2280.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 100.80000

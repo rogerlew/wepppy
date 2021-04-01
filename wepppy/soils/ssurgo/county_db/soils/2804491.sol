@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.842419
+#   Build Date: 2021-04-01 12:52:30.082521
 #   Source Data: Surgo
 # 
 # Mukey: 2804491
 # Major Component: 15072329 (comppct_r = 55.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43554756   Oi              2.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
+#  43554756   Oi     X        2.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
 #  43554759   A              18.0     9.0        4.0        16.0         1.15    18.0    24.0     2.0     5.0
 #  43554755   E              21.0     9.0        4.0        16.0         1.25    18.0    28.0     3.0     1.0
 #  43554760   Bt1    R       36.0    0.21        0.0         4.0          1.4    58.0    12.0     1.0     1.7
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,8 +56,7 @@
 # 
 Any comments:
 1 1
-'Arkana-Moko complex, 20 to 40 percent slopes, very rocky'		'GRV-SPM'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   20.000	  66.80	   7.00	  69.00	  55.00	  55.50
-	  180.000	  24.00	  18.00	   5.00	   9.90	  71.20
-	  210.000	  28.00	  18.00	   1.00	   9.70	  69.60
+'Arkana-Moko complex, 20 to 40 percent slopes, very rocky'		'GRV-SPM'	2	0.1600	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  180.000	  18.00	  18.00	   5.00	   9.90	  71.20
+	  210.000	  18.00	  18.00	   1.00	   9.70	  69.60
 1 10000.0 0.75600

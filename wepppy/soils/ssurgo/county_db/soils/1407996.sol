@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.790851
+#   Build Date: 2021-04-01 12:52:33.180230
 #   Source Data: Surgo
 # 
 # Mukey: 1407996
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42939981   Oe              5.0    70.6        0.0         0.0         0.23     1.0     0.0     0.0    68.0
+#  42939981   Oe     X        5.0    70.6        0.0         0.0         0.23     1.0     0.0     0.0    68.0
 #  42939980   A              25.0     9.0        0.0         0.0         1.49    13.2    29.0     6.4    2.69
 #  42939977   Btg1           58.0     3.0        0.0         0.0         1.69    24.3    23.7     5.2    0.44
 #  42939978   2Btg2          79.0     3.0        0.0         0.0         1.69    24.7    29.2     7.6    0.31
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Quindocqua silt loam, 0 to 2 percent slopes'		'MPM'	5	0.0900	0.7500	0.00	0.0000	0.0000	254.1600
-	   50.000	   0.00	   1.00	  68.00	  60.00	  55.50
-	  250.000	  29.00	  13.20	   2.69	   8.00	   0.00
-	  580.000	  23.70	  24.30	   0.44	  10.10	   0.00
-	  790.000	  29.20	  24.70	   0.31	   8.80	   0.00
-	 2030.000	  83.40	   3.40	   0.07	   1.50	   7.50
+'Quindocqua silt loam, 0 to 2 percent slopes'		'MPM'	4	0.0900	0.7500	0.00	0.0000	0.0000	254.1600
+	  250.000	  13.20	  13.20	   2.69	   8.00	   0.00
+	  580.000	  24.30	  24.30	   0.44	  10.10	   0.00
+	  790.000	  24.70	  24.70	   0.31	   8.80	   0.00
+	 2030.000	   3.40	   3.40	   0.07	   1.50	   7.50
 1 10000.0 254.16000

@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.398336
+#   Build Date: 2021-04-01 12:52:29.618504
 #   Source Data: Surgo
 # 
 # Mukey: 149518
 # Major Component: 14793236 (comppct_r = 30.0)
-# Texture: silt loam
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42640753   Oi              3.0   140.0        0.0         0.0          1.4     0.0     0.0    10.0    50.0
+#  42640753   Oi     X        3.0   140.0        0.0         0.0          1.4     0.0     0.0    10.0    50.0
 #  42640756   E              21.0    28.0        0.0         0.0         1.45    14.0    66.8    10.6     2.0
 #  42640755   E/Bw           39.0    28.0        0.0         5.0          1.5    14.0    66.8    10.6    0.75
 #  42640754   BC            152.0    92.0        0.0        13.0         1.65     5.0    93.6     7.0    0.25
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Como-Windyridge-Hiore families, complex, low relief mountain slopes and ridges'		'SPM'	4	0.1600	0.7500	0.00	0.0000	0.0000	504.0000
-	   30.000	   0.00	   0.00	  50.00	  11.30	  55.50
-	  210.000	  66.80	  14.00	   2.00	  10.50	  37.50
-	  390.000	  66.80	  14.00	   0.75	   9.20	  64.38
-	 1520.000	  93.60	   5.00	   0.25	   3.50	  67.38
+'Como-Windyridge-Hiore families, complex, low relief mountain slopes and ridges'		'SPM'	3	0.1600	0.7500	0.00	0.0000	0.0000	504.0000
+	  210.000	  14.00	  14.00	   2.00	  10.50	  37.50
+	  390.000	  14.00	  14.00	   0.75	   9.20	  64.38
+	 1520.000	   5.00	   5.00	   0.25	   3.50	  67.38
 1 10000.0 331.20000

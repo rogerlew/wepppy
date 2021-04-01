@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.289299
+#   Build Date: 2021-04-01 12:52:29.502191
 #   Source Data: Surgo
 # 
 # Mukey: 283153
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42924794   O1              5.0 28.2222        0.0         0.0         0.34     7.0    65.7    17.2    85.0
+#  42924794   O1     X        5.0 28.2222        0.0         0.0         0.34     7.0    65.7    17.2    85.0
 #  42924795   H1             10.0  9.1722        0.0         2.0          0.7     7.0    65.7    17.2     5.0
 #  42924796   H2             35.0  9.1722        2.0         2.0         0.85     7.0    65.7    17.2    1.75
 #  42924793   R      R       60.0   0.215         -           -           1.4     7.0    66.8    10.0     7.0
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,8 +54,7 @@
 # 
 Any comments:
 1 1
-'Glover-Vershire complex, 15 to 35 percent slopes, very rocky'		'SPM'	3	0.2300	0.7500	6032120.00	0.0071	2.1274	101.5999
-	   50.000	  65.70	   7.00	  85.00	  74.00	  55.50
-	  100.000	  65.70	   7.00	   5.00	   3.90	  15.72
-	  350.000	  65.70	   7.00	   1.75	   3.80	  15.52
+'Glover-Vershire complex, 15 to 35 percent slopes, very rocky'		'SPM'	2	0.2300	0.7500	6032120.00	0.0071	2.1274	101.5999
+	  100.000	   7.00	   7.00	   5.00	   3.90	  15.72
+	  350.000	   7.00	   7.00	   1.75	   3.80	  15.52
 1 10000.0 0.77400

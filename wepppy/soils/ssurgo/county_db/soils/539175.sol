@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.320268
+#   Build Date: 2021-04-01 12:52:31.635945
 #   Source Data: Surgo
 # 
 # Mukey: 539175
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45887268   Oi              2.0    92.0        0.0         0.0          0.1    10.0    31.0     9.3    69.0
-#  45887264   Oe              4.0    92.0       33.0         0.0         0.15    10.0    40.0    12.0    60.0
+#  45887268   Oi     X        2.0    92.0        0.0         0.0          0.1    10.0    31.0     9.3    69.0
+#  45887264   Oe     X        4.0    92.0       33.0         0.0         0.15    10.0    40.0    12.0    60.0
 #  45887269   A              16.0   23.29        0.0        15.0          1.3    17.5    29.1     9.4     2.0
 #  45887266   Bt             94.0   23.29        0.0        45.0          1.5    21.0    26.3     8.6    0.25
 #  45887267   C             117.0   23.29        0.0        70.0          1.5    21.0    41.6    12.0    0.25
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,11 +56,9 @@
 # 
 Any comments:
 1 1
-'Hartleton channery silt loam, 25 to 60 percent slopes'		'SPM'	6	0.3700	0.7500	4514530.00	0.0048	2.7806	331.2000
-	   20.000	  31.00	  10.00	  69.00	  11.30	  55.50
-	   40.000	  40.00	  10.00	  60.00	  11.30	  55.50
-	  160.000	  29.10	  17.50	   2.00	  11.30	  32.00
-	  940.000	  26.30	  21.00	   0.25	  11.30	  65.62
-	 1170.000	  41.60	  21.00	   0.25	  11.30	  85.75
-	 1270.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Hartleton channery silt loam, 25 to 60 percent slopes'		'SPM'	4	0.3700	0.7500	4514530.00	0.0048	2.7806	331.2000
+	  160.000	  17.50	  17.50	   2.00	  11.30	  32.00
+	  940.000	  21.00	  21.00	   0.25	  11.30	  65.62
+	 1170.000	  21.00	  21.00	   0.25	  11.30	  85.75
+	 1270.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 15.22800

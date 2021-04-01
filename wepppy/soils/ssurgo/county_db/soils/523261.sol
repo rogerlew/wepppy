@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.726041
+#   Build Date: 2021-04-01 12:52:28.914052
 #   Source Data: Surgo
 # 
 # Mukey: 523261
@@ -13,7 +13,7 @@
 # ------------------------------------------------------------------------------------------------------------
 #  44915609   H1             18.0     9.0        3.0         5.0         1.45    18.0    29.7     5.5    0.25
 #  44915610   H2             51.0     9.0        3.0         5.0         1.45    35.0    15.0     9.2    0.25
-#  44915611   H3            203.0     5.0        0.0         0.0          1.4     0.0    66.8    10.0     0.0
+#  44915611   H3     X      203.0     5.0        0.0         0.0          1.4     0.0    66.8    10.0     0.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,7 @@
 # 
 Any comments:
 1 1
-'Tallapoosa-Tatum association, hilly'		'GR-SIL'	3	0.3000	0.7500	5061660.00	0.0106	3.5000	32.4000
-	  180.000	  29.70	  18.00	   0.25	  11.30	  35.60
-	  510.000	  15.00	  35.00	   0.25	  11.30	  31.00
-	 2030.000	  66.80	   0.00	   0.00	  11.30	  55.50
-1 10000.0 18.00000
+'Tallapoosa-Tatum association, hilly'		'GR-SIL'	2	0.3000	0.7500	5061660.00	0.0106	3.5000	32.4000
+	  180.000	  18.00	  18.00	   0.25	  11.30	  35.60
+	  510.000	  35.00	  35.00	   0.25	  11.30	  31.00
+1 10000.0 32.40000

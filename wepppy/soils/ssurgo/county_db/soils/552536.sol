@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.745403
+#   Build Date: 2021-04-01 12:52:33.133745
 #   Source Data: Surgo
 # 
 # Mukey: 552536
 # Major Component: 15241697 (comppct_r = 55.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44075917   Oi              3.0    92.0        0.0         8.0         0.07     7.0    66.8    10.0    69.0
+#  44075917   Oi     X        3.0    92.0        0.0         8.0         0.07     7.0    66.8    10.0    69.0
 #  44075918   A               8.0     9.0        0.0         8.0         0.73    14.0    29.0     7.0     3.0
 #  44075919   BA             18.0     9.0        0.0         5.0         1.48    23.0    29.0     7.0    3.44
 #  44075920   Bt1            58.0     9.0        0.0        11.0         1.39    22.0    26.0     9.0    1.28
@@ -46,7 +46,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -58,12 +58,11 @@
 # 
 Any comments:
 1 1
-'Shelocta-Highsplint-Gilpin complex, 20 to 75 percent slopes, very stony'		'SPM'	7	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  69.00	  79.80	  55.50
-	   80.000	  29.00	  14.00	   3.00	   7.80	  25.48
-	  180.000	  29.00	  23.00	   3.44	  12.50	  14.50
-	  580.000	  26.00	  22.00	   1.28	  11.30	  22.57
-	  860.000	  20.00	  22.00	   0.50	  11.30	  35.40
-	 1140.000	  21.00	  23.00	   0.50	  11.30	  49.95
-	 1500.000	  20.00	  21.00	   0.15	  11.30	   0.00
+'Shelocta-Highsplint-Gilpin complex, 20 to 75 percent slopes, very stony'		'SPM'	6	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	   80.000	  14.00	  14.00	   3.00	   7.80	  25.48
+	  180.000	  23.00	  23.00	   3.44	  12.50	  14.50
+	  580.000	  22.00	  22.00	   1.28	  11.30	  22.57
+	  860.000	  22.00	  22.00	   0.50	  11.30	  35.40
+	 1140.000	  23.00	  23.00	   0.50	  11.30	  49.95
+	 1500.000	  21.00	  21.00	   0.15	  11.30	   0.00
 1 10000.0 0.01800
