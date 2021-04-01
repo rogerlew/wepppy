@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.943196
+#   Build Date: 2021-04-01 15:01:44.462472
 #   Source Data: Surgo
 # 
 # Mukey: 331733
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cahaba-Ruston association, hilly, (ruston, smithdale)'		'FSL'	4	0.3000	0.7500	5993700.00	0.0086	2.3990	33.0120
+'Cahaba-Ruston association, hilly, (ruston, smithdale)'		'FSL'	4	0.3000	0.7500	5993700.00	0.0086	2.3990	17.0829
 	  180.000	  11.00	  11.00	   1.75	   7.50	   7.50
 	  460.000	  26.50	  26.50	   0.25	  11.30	   7.50
 	  990.000	  15.00	  15.00	   0.15	  11.30	   7.50
 	 2160.000	  23.50	  23.50	   0.10	  11.30	   7.50
-1 10000.0 33.01200
+0 0 0.000000 0.000000

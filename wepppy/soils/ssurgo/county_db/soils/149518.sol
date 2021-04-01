@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.618504
+#   Build Date: 2021-04-01 15:01:42.126423
 #   Source Data: Surgo
 # 
 # Mukey: 149518
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Como-Windyridge-Hiore families, complex, low relief mountain slopes and ridges'		'SPM'	3	0.1600	0.7500	0.00	0.0000	0.0000	504.0000
+'Como-Windyridge-Hiore families, complex, low relief mountain slopes and ridges'		'SPM'	3	0.1600	0.7500	0.00	0.0000	0.0000	18.2610
 	  210.000	  14.00	  14.00	   2.00	  10.50	  37.50
 	  390.000	  14.00	  14.00	   0.75	   9.20	  64.38
 	 1520.000	   5.00	   5.00	   0.25	   3.50	  67.38
-1 10000.0 331.20000
+0 0 0.000000 0.000000

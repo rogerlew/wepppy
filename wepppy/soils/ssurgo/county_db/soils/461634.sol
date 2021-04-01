@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.944886
+#   Build Date: 2021-04-01 15:01:42.453839
 #   Source Data: Surgo
 # 
 # Mukey: 461634
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Millsholm-Contra Costa association, 30 to 75 percent slopes'		'L'	4	0.3000	0.7500	5033200.00	0.0153	3.3390	32.4000
+'Millsholm-Contra Costa association, 30 to 75 percent slopes'		'L'	4	0.3000	0.7500	5033200.00	0.0153	3.3390	8.2995
 	   50.000	  21.00	  21.00	   0.75	  15.00	  10.00
 	  200.000	  21.00	  21.00	   0.75	  15.00	  10.00
 	  360.000	  22.50	  22.50	   0.25	  15.00	  20.00
 	  610.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

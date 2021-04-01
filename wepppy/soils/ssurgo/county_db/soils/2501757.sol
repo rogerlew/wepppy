@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.162941
+#   Build Date: 2021-04-01 15:01:45.679559
 #   Source Data: Surgo
 # 
 # Mukey: 2501757
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Sonsac gravelly silt loam, 15 to 40 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
+'Sonsac gravelly silt loam, 15 to 40 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	2.4688
 	   80.000	  22.00	  22.00	   3.00	  12.00	  34.04
 	  150.000	  18.10	  18.10	   2.00	   9.80	  67.45
 	  250.000	  27.10	  27.10	   1.28	  14.50	  53.45
-1 10000.0 3.24000
+0 0 0.000000 0.000000

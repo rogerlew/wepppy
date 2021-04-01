@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.617849
+#   Build Date: 2021-04-01 15:01:42.125765
 #   Source Data: Surgo
 # 
 # Mukey: 147525
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Musselshell-Crago channery loams, 15 to 35 percent slopes'		'CN-L'	4	0.3000	0.7500	4956360.00	0.0064	3.5247	32.4000
+'Musselshell-Crago channery loams, 15 to 35 percent slopes'		'CN-L'	4	0.3000	0.7500	4956360.00	0.0064	3.5247	7.4191
 	  130.000	  23.50	  23.50	   2.00	  17.50	  37.00
 	  660.000	  18.50	  18.50	   0.75	  12.50	  26.38
 	 1090.000	  14.00	  14.00	   0.25	   7.50	  26.40
 	 1520.000	  14.00	  14.00	   0.25	   7.50	  63.02
-1 10000.0 100.80000
+0 0 0.000000 0.000000

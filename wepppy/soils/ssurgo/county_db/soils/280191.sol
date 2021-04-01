@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.568423
+#   Build Date: 2021-04-01 15:01:43.079709
 #   Source Data: Surgo
 # 
 # Mukey: 280191
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Tunbridge-Lyman-Becket complex, 15 to 25 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.4150	100.8000
+'Tunbridge-Lyman-Becket complex, 15 to 25 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.4150	19.9834
 	  100.000	   7.00	   7.00	   5.00	  11.30	  40.55
 	  530.000	   6.00	   6.00	   4.00	  11.30	  29.48
 	  840.000	   5.00	   5.00	   1.50	   7.10	  29.48
-1 10000.0 0.77400
+0 0 0.000000 0.000000

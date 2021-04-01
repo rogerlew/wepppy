@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.396104
+#   Build Date: 2021-04-01 15:01:42.905503
 #   Source Data: Surgo
 # 
 # Mukey: 3050324
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cullen clay loam, 2 to 6 percent slopes, moderately eroded'		'L'	4	0.2900	0.7500	4783470.00	0.0091	4.1944	32.4000
+'Cullen clay loam, 2 to 6 percent slopes, moderately eroded'		'L'	4	0.2900	0.7500	4783470.00	0.0091	4.1944	6.1461
 	  250.000	  33.00	  33.00	   1.25	  10.20	   5.00
 	 1270.000	  64.00	  64.00	   0.25	  11.30	  10.00
 	 1750.000	  42.00	  42.00	   0.25	  11.30	   0.00
 	 2030.000	  32.00	  32.00	   0.25	  11.30	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

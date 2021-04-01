@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.875323
+#   Build Date: 2021-04-01 15:01:43.392359
 #   Source Data: Surgo
 # 
 # Mukey: 285235
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Monarda-Burnham complex, 0 to 3 percent slopes, very stony'		'MPT'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	126.0000
+'Monarda-Burnham complex, 0 to 3 percent slopes, very stony'		'MPT'	2	0.0400	0.7500	4649000.00	0.0050	2.5450	5.5147
 	  150.000	  15.00	  15.00	   5.00	  11.30	  11.00
 	  510.000	  16.00	  16.00	   1.78	  11.30	  16.00
-1 10000.0 2.55600
+0 0 0.000000 0.000000

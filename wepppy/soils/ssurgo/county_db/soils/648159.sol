@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.961313
+#   Build Date: 2021-04-01 15:01:42.470470
 #   Source Data: Surgo
 # 
 # Mukey: 648159
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Grandmore and Grandfield loamy sands, 0 to 3 percent slopes'		'LS'	4	0.2300	0.7500	5743970.00	0.0164	2.0584	330.2460
+'Grandmore and Grandfield loamy sands, 0 to 3 percent slopes'		'LS'	4	0.2300	0.7500	5743970.00	0.0164	2.0584	29.7671
 	  460.000	   4.60	   4.60	   0.75	   3.50	   0.00
 	  970.000	  24.00	  24.00	   0.50	   9.40	   0.00
 	 1170.000	  18.30	  18.30	   0.30	  12.50	   0.00
 	 2030.000	  30.00	  30.00	   0.15	  19.60	   0.00
-1 10000.0 10.15992
+0 0 0.000000 0.000000

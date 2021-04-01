@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.626964
+#   Build Date: 2021-04-01 15:01:44.144935
 #   Source Data: Surgo
 # 
 # Mukey: 541789
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Dystrocrepts-Rock outcrop complex, 35 to 70 percent slopes'		'STX-SL'	4	0.3700	0.7500	4783470.00	0.0053	2.8619	330.2640
+'Dystrocrepts-Rock outcrop complex, 35 to 70 percent slopes'		'STX-SL'	4	0.3700	0.7500	4783470.00	0.0053	2.8619	17.8155
 	  150.000	  12.50	  12.50	   3.00	  25.00	  56.88
 	 1020.000	  12.50	  12.50	   0.25	   6.00	  57.45
 	 1520.000	  10.00	  10.00	   0.25	   6.00	  65.50
 	 1620.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.081727
+#   Build Date: 2021-04-01 15:01:42.590673
 #   Source Data: Surgo
 # 
 # Mukey: 122811
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Tatum-Tallapoosa-Fruithurst association, steep'		'L'	2	0.3000	0.7500	6608420.00	0.0119	2.7659	32.4000
+'Tatum-Tallapoosa-Fruithurst association, steep'		'L'	2	0.3000	0.7500	6608420.00	0.0119	2.7659	8.9017
 	  150.000	  19.50	  19.50	   1.25	  11.30	  12.70
 	 1070.000	  35.00	  35.00	   0.10	  11.30	  17.55
-1 10000.0 0.72000
+0 0 0.000000 0.000000

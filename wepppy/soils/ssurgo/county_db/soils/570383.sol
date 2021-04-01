@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.756308
+#   Build Date: 2021-04-01 15:01:42.264206
 #   Source Data: Surgo
 # 
 # Mukey: 570383
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Grenada-Calhoun silt loams complex, 0 to 3 percent slopes'		'SIL'	3	0.2900	0.7500	5282180.00	0.0150	3.5000	32.4000
+'Grenada-Calhoun silt loams complex, 0 to 3 percent slopes'		'SIL'	3	0.2900	0.7500	5282180.00	0.0150	3.5000	1.6565
 	  150.000	  14.00	  14.00	   1.25	  11.30	   0.00
 	  430.000	  24.00	  24.00	   0.30	  11.30	   0.00
 	  500.000	  14.00	  14.00	   0.20	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

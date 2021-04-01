@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.036883
+#   Build Date: 2021-04-01 15:01:41.543021
 #   Source Data: Surgo
 # 
 # Mukey: 549705
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Zanesville silt loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	5061660.00	0.0106	3.5000	33.0120
+'Zanesville silt loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	5061660.00	0.0106	3.5000	1.9575
 	  180.000	  18.00	  18.00	   1.50	  11.30	   0.00
 	  790.000	  25.00	  25.00	   0.30	  11.30	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.241158
+#   Build Date: 2021-04-01 15:01:44.761136
 #   Source Data: Surgo
 # 
 # Mukey: 1444694
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Lakeland sand, 0 to 5 percent slopes'		'S'	2	0.2900	0.7500	4072700.00	0.0138	2.4070	331.2000
+'Lakeland sand, 0 to 5 percent slopes'		'S'	2	0.2900	0.7500	4072700.00	0.0138	2.4070	31.8138
 	  180.000	   2.20	   2.20	   0.75	  11.30	   0.00
 	 2030.000	   2.30	   2.30	   0.25	  11.30	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

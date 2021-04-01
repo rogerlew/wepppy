@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.475106
+#   Build Date: 2021-04-01 15:01:41.982713
 #   Source Data: Surgo
 # 
 # Mukey: 523409
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bodine-Sulphura complex, 20 to 50 percent slopes'		'GR-SIL'	3	0.3600	0.7500	4610580.00	0.0059	3.0116	101.6280
+'Bodine-Sulphura complex, 20 to 50 percent slopes'		'GR-SIL'	3	0.3600	0.7500	4610580.00	0.0059	3.0116	5.6093
 	  130.000	  14.00	  14.00	   2.00	  11.30	  59.62
 	  510.000	  24.00	  24.00	   0.25	  11.30	  67.28
 	 1650.000	  30.50	  30.50	   0.25	  11.30	  69.20
-1 10000.0 101.62800
+0 0 0.000000 0.000000

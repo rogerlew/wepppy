@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.426752
+#   Build Date: 2021-04-01 15:01:42.937088
 #   Source Data: Surgo
 # 
 # Mukey: 1586097
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Caddo-Messer complex, 0 to 1 percent slopes'		'SIL'	1	0.3000	0.7500	7376820.00	0.0113	1.6109	33.0120
+'Caddo-Messer complex, 0 to 1 percent slopes'		'SIL'	1	0.3000	0.7500	7376820.00	0.0113	1.6109	5.8745
 	  210.000	   5.30	   5.30	   1.60	  11.30	   0.00
-1 10000.0 1.08000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.393226
+#   Build Date: 2021-04-01 15:01:44.914063
 #   Source Data: Surgo
 # 
 # Mukey: 1652613
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Tipsaw-Adyeville complex, 25 to 75 percent slopes'		'CN-SIL'	4	0.3000	0.7500	5502700.00	0.0250	3.5000	33.0120
+'Tipsaw-Adyeville complex, 25 to 75 percent slopes'		'CN-SIL'	4	0.3000	0.7500	5502700.00	0.0250	3.5000	4.5425
 	   50.000	   9.00	   9.00	   3.75	  12.00	  29.45
 	  130.000	   5.00	   5.00	   1.70	  11.30	  15.00
 	  510.000	   9.00	   9.00	   0.60	  11.30	  44.56
 	  710.000	  15.00	  15.00	   0.25	  11.30	  47.20
-1 10000.0 4.68000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.728885
+#   Build Date: 2021-04-01 15:01:43.240175
 #   Source Data: Surgo
 # 
 # Mukey: 530009
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Barfield-Ashwood-Rock outcrop complex, 20 to 50 percent slopes'		'SICL'	3	0.1600	0.7500	4234710.00	0.0071	3.5000	33.0120
+'Barfield-Ashwood-Rock outcrop complex, 20 to 50 percent slopes'		'SICL'	3	0.1600	0.7500	4234710.00	0.0071	3.5000	1.0384
 	  150.000	  33.00	  33.00	   5.00	  37.20	  14.44
 	  300.000	  55.00	  55.00	   3.00	  45.20	  14.44
 	  460.000	  60.00	  60.00	   0.50	  47.00	  31.96
-1 10000.0 0.03600
+0 0 0.000000 0.000000

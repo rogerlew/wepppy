@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.377770
+#   Build Date: 2021-04-01 15:01:44.898138
 #   Source Data: Surgo
 # 
 # Mukey: 2531291
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Kilwinning silt loam, 1 to 5 percent slopes'		'SIL'	1	0.2300	0.7500	4571003.00	0.0075	3.5000	32.4000
+'Kilwinning silt loam, 1 to 5 percent slopes'		'SIL'	1	0.2300	0.7500	4571003.00	0.0075	3.5000	0.9711
 	  210.000	  26.90	  26.90	   3.00	  22.70	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.251804
+#   Build Date: 2021-04-01 15:01:42.761184
 #   Source Data: Surgo
 # 
 # Mukey: 2505132
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Pawnee clay loam, 4 to 8 percent slopes, eroded'		'CL'	2	0.1600	0.7500	4344970.00	0.0072	3.5000	9.7200
+'Pawnee clay loam, 4 to 8 percent slopes, eroded'		'CL'	2	0.1600	0.7500	4344970.00	0.0072	3.5000	3.1993
 	  150.000	  31.00	  31.00	   2.00	  24.70	   6.00
 	  220.000	  33.00	  33.00	   2.00	  26.10	   6.00
-1 10000.0 0.79200
+0 0 0.000000 0.000000

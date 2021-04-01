@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.385640
+#   Build Date: 2021-04-01 15:01:44.906135
 #   Source Data: Surgo
 # 
 # Mukey: 2534033
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Hailey-Rueter complex, 15 to 35 percent slopes, very rocky'		'GRX-SI'	3	0.0900	0.7500	5502700.00	0.0250	3.5000	331.2000
+'Hailey-Rueter complex, 15 to 35 percent slopes, very rocky'		'GRX-SI'	3	0.0900	0.7500	5502700.00	0.0250	3.5000	2.3682
 	  250.000	   6.00	   6.00	   3.10	  13.10	  82.50
 	 1520.000	   7.70	   7.70	   0.25	   4.90	  92.30
 	 2030.000	  55.20	  55.20	   0.10	  26.00	  75.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

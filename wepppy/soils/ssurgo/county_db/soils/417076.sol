@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.543362
+#   Build Date: 2021-04-01 15:01:45.064142
 #   Source Data: Surgo
 # 
 # Mukey: 417076
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Forman-Buse-Aastad loams, 1 to 6 percent slopes'		'L'	3	0.0900	0.7500	5013990.00	0.0055	3.4423	32.4000
+'Forman-Buse-Aastad loams, 1 to 6 percent slopes'		'L'	3	0.0900	0.7500	5013990.00	0.0055	3.4423	7.3649
 	  200.000	  22.50	  22.50	   6.00	  22.50	   7.85
 	  380.000	  32.50	  32.50	   2.00	  15.00	   7.85
 	 1520.000	  27.50	  27.50	   0.25	  15.00	   7.85
-1 10000.0 9.72000
+0 0 0.000000 0.000000

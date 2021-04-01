@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.923286
+#   Build Date: 2021-04-01 15:01:42.432013
 #   Source Data: Surgo
 # 
 # Mukey: 125207
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Davidson loam, 2 to 6 percent slopes, moderately eroded'		'L'	4	0.1700	0.7500	5052410.00	0.0095	3.3332	32.4000
+'Davidson loam, 2 to 6 percent slopes, moderately eroded'		'L'	4	0.1700	0.7500	5052410.00	0.0095	3.3332	8.7781
 	  180.000	  21.00	  21.00	   1.25	  11.30	  12.00
 	  300.000	  33.50	  33.50	   0.25	  11.30	   8.00
 	 1350.000	  57.50	  57.50	   0.25	  11.30	   6.00
 	 1830.000	  52.50	  52.50	   0.25	  11.30	   9.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

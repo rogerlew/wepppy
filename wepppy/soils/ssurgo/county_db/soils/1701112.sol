@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.587853
+#   Build Date: 2021-04-01 15:01:41.093030
 #   Source Data: Surgo
 # 
 # Mukey: 1701112
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Surrency mucky sand, 0 to 1 percent slopes, frequently flooded'		'MK-S'	3	0.1600	0.7500	4053490.00	0.0040	2.5948	331.2000
+'Surrency mucky sand, 0 to 1 percent slopes, frequently flooded'		'MK-S'	3	0.1600	0.7500	4053490.00	0.0040	2.5948	31.9889
 	  560.000	   5.00	   5.00	  14.00	  11.30	   0.00
 	  890.000	  10.00	  10.00	   0.25	  11.30	   0.00
 	 2030.000	  27.00	  27.00	   0.25	  11.30	   0.00
-1 10000.0 9.72000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.575137
+#   Build Date: 2021-04-01 15:01:45.096658
 #   Source Data: Surgo
 # 
 # Mukey: 2453670
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Cryoboralfs-Rock outcrop complex, 35 to 75 percent slopes'		'MPM'	3	0.3000	0.7500	4675750.00	0.0078	3.5000	1080.0000
+'Cryoboralfs-Rock outcrop complex, 35 to 75 percent slopes'		'MPM'	3	0.3000	0.7500	4675750.00	0.0078	3.5000	2.9933
 	  150.000	  25.00	  25.00	   2.00	  17.00	  27.00
 	  230.000	  28.00	  28.00	   1.00	  16.70	  31.00
 	  460.000	  35.00	  35.00	   0.50	  18.70	  53.94
-1 10000.0 3.27600
+0 0 0.000000 0.000000

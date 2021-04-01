@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.628653
+#   Build Date: 2021-04-01 15:01:42.136693
 #   Source Data: Surgo
 # 
 # Mukey: 1023328
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Blanton-Alpin-Bonneau complex, 0 to 5 percent slopes'		'FS'	4	0.2900	0.7500	4860310.00	0.0150	2.1107	330.2640
+'Blanton-Alpin-Bonneau complex, 0 to 5 percent slopes'		'FS'	4	0.2900	0.7500	4860310.00	0.0150	2.1107	32.5170
 	  130.000	   1.30	   1.30	   0.75	  11.30	   5.00
 	 1040.000	   1.30	   1.30	   0.25	  11.30	   5.00
 	 1220.000	  13.80	  13.80	   0.25	  11.30	   4.00
 	 2030.000	  31.00	  31.00	   0.25	  11.30	   4.00
-1 10000.0 27.93600
+0 0 0.000000 0.000000

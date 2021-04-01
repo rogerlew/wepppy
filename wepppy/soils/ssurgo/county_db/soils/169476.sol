@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.093945
+#   Build Date: 2021-04-01 15:01:44.613962
 #   Source Data: Surgo
 # 
 # Mukey: 169476
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Crosby silt loam, Southern Ohio Till Plain, 0 to 2 percent slopes'		'SIL'	4	0.3000	0.7500	5061660.00	0.0106	3.5000	33.0120
+'Crosby silt loam, Southern Ohio Till Plain, 0 to 2 percent slopes'		'SIL'	4	0.3000	0.7500	5061660.00	0.0106	3.5000	3.3671
 	  200.000	  18.00	  18.00	   2.50	   9.80	   0.00
 	  280.000	  17.00	  17.00	   1.50	   9.20	   9.00
 	  360.000	  24.00	  24.00	   0.75	  12.80	   8.00
 	  710.000	  38.00	  38.00	   0.75	  20.10	  15.52
-1 10000.0 3.31200
+0 0 0.000000 0.000000

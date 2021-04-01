@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.077309
+#   Build Date: 2021-04-01 15:01:42.586151
 #   Source Data: Surgo
 # 
 # Mukey: 567934
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Riedtown silt loam, 0 to 2 percent slopes, occasionally flooded'		'SIL'	4	0.2900	0.7500	5337310.00	0.0169	3.5000	32.4000
+'Riedtown silt loam, 0 to 2 percent slopes, occasionally flooded'		'SIL'	4	0.2900	0.7500	5337310.00	0.0169	3.5000	2.4319
 	  180.000	  13.00	  13.00	   2.00	   7.10	   0.00
 	  690.000	  15.00	  15.00	   0.25	   7.90	   0.00
 	 1070.000	  20.00	  20.00	   0.20	  10.50	   0.00
 	 2030.000	  21.00	  21.00	   0.25	  11.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

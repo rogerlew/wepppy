@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.628320
+#   Build Date: 2021-04-01 15:01:44.146300
 #   Source Data: Surgo
 # 
 # Mukey: 571726
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Endsaw-Hector association, 12 to 20 percent slopes'		'L'	3	0.2300	0.7500	5052410.00	0.0058	3.1057	33.0246
+'Endsaw-Hector association, 12 to 20 percent slopes'		'L'	3	0.2300	0.7500	5052410.00	0.0058	3.1057	9.2674
 	   50.000	  17.50	  17.50	   3.00	  10.00	  13.52
 	  130.000	  17.50	  17.50	   2.50	  10.00	  16.00
 	  230.000	  36.00	  36.00	   1.25	  10.00	  24.00
-1 10000.0 0.78120
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.101087
+#   Build Date: 2021-04-01 15:01:44.621177
 #   Source Data: Surgo
 # 
 # Mukey: 567569
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Smithdale-Providence-Lexington association, hilly'		'SL'	3	0.3000	0.7500	4994780.00	0.0094	2.5381	101.6280
+'Smithdale-Providence-Lexington association, hilly'		'SL'	3	0.3000	0.7500	4994780.00	0.0094	2.5381	18.6047
 	  200.000	   8.50	   8.50	   1.25	  11.30	   7.50
 	  530.000	  25.50	  25.50	   0.25	  11.30	   7.50
 	 2030.000	  19.50	  19.50	   0.10	  11.30	   7.50
-1 10000.0 101.62800
+0 0 0.000000 0.000000

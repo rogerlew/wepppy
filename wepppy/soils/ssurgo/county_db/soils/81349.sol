@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.221245
+#   Build Date: 2021-04-01 15:01:42.730133
 #   Source Data: Surgo
 # 
 # Mukey: 81349
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Lolalita-Saralegui association, steep'		'COSL'	2	0.2300	0.7500	4168750.00	0.0139	2.9825	101.6280
+'Lolalita-Saralegui association, steep'		'COSL'	2	0.2300	0.7500	4168750.00	0.0139	2.9825	17.7070
 	  180.000	  11.50	  11.50	   0.75	   9.50	   6.00
 	 1520.000	  11.50	  11.50	   0.75	   9.50	   6.00
-1 10000.0 101.62800
+0 0 0.000000 0.000000

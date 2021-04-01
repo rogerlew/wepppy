@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.063172
+#   Build Date: 2021-04-01 15:01:44.582639
 #   Source Data: Surgo
 # 
 # Mukey: 373596
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Aluf and Hitilo soils, undulating'		'FS'	2	0.3000	0.7500	5378980.00	0.0158	2.1946	331.2000
+'Aluf and Hitilo soils, undulating'		'FS'	2	0.3000	0.7500	5378980.00	0.0158	2.1946	38.6542
 	 1170.000	   5.00	   5.00	   0.75	   1.60	   0.00
 	 2510.000	  20.00	  20.00	   0.30	   2.80	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

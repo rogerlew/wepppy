@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.034943
+#   Build Date: 2021-04-01 15:01:41.541053
 #   Source Data: Surgo
 # 
 # Mukey: 550158
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Lowell-Faywood silt loams, 6 to 12 percent slopes'		'SIL'	2	0.3000	0.7500	5337310.00	0.0169	3.5000	32.7960
+'Lowell-Faywood silt loams, 6 to 12 percent slopes'		'SIL'	2	0.3000	0.7500	5337310.00	0.0169	3.5000	3.7209
 	  200.000	  13.00	  13.00	   1.75	   7.10	   0.00
 	 1040.000	  50.80	  50.80	   0.25	  26.40	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

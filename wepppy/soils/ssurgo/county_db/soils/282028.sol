@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.717609
+#   Build Date: 2021-04-01 15:01:43.228707
 #   Source Data: Surgo
 # 
 # Mukey: 282028
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Rawsonville-Hogback fine sandy loams, 25 to 50 percent slopes, rocky'		'FSL'	3	0.1600	0.7500	6416320.00	0.0077	1.9789	33.0199
+'Rawsonville-Hogback fine sandy loams, 25 to 50 percent slopes, rocky'		'FSL'	3	0.1600	0.7500	6416320.00	0.0077	1.9789	18.7404
 	   30.000	   6.50	   6.50	   6.00	  11.30	  16.00
 	  480.000	   6.50	   6.50	   5.00	  11.30	  19.25
 	  710.000	   6.50	   6.50	   4.00	  11.30	  20.10
-1 10000.0 0.77400
+0 0 0.000000 0.000000

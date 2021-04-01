@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.660741
+#   Build Date: 2021-04-01 15:01:42.169280
 #   Source Data: Surgo
 # 
 # Mukey: 71978
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Cinebar stony silt loam, 30 to 70 percent slopes'		'MEDL-ST-SIL'	3	0.1600	0.7500	4841140.00	0.0085	3.5000	32.4000
+'Cinebar stony silt loam, 30 to 70 percent slopes'		'MEDL-ST-SIL'	3	0.1600	0.7500	4841140.00	0.0085	3.5000	0.9678
 	  330.000	  22.00	  22.00	  10.00	  55.00	  25.60
 	 1220.000	  22.00	  22.00	   3.50	  55.00	  12.70
 	 1520.000	  22.00	  22.00	   0.75	  33.00	  12.70
-1 10000.0 32.40000
+0 0 0.000000 0.000000

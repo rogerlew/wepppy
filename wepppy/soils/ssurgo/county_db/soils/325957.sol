@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.879614
+#   Build Date: 2021-04-01 15:01:43.396731
 #   Source Data: Surgo
 # 
 # Mukey: 325957
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Herod and Muckalee sandy loams, frequently flooded'		'SL'	3	0.3000	0.7500	4725840.00	0.0051	3.0418	32.4000
+'Herod and Muckalee sandy loams, frequently flooded'		'SL'	3	0.3000	0.7500	4725840.00	0.0051	3.0418	17.7942
 	  230.000	  15.00	  15.00	   4.00	  11.00	   2.50
 	 1070.000	  27.50	  27.50	   0.25	   3.00	   2.50
 	 1650.000	  19.00	  19.00	   0.25	   3.00	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.897449
+#   Build Date: 2021-04-01 15:01:41.403366
 #   Source Data: Surgo
 # 
 # Mukey: 120213
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cecil fine sandy loam, 2 to 7 percent slopes, eroded'		'FSL'	4	0.3600	0.7500	6070540.00	0.0169	2.4733	100.8000
+'Cecil fine sandy loam, 2 to 7 percent slopes, eroded'		'FSL'	4	0.3600	0.7500	6070540.00	0.0169	2.4733	23.3277
 	  100.000	  12.50	  12.50	   0.75	   2.90	  17.55
 	  200.000	  27.50	  27.50	   0.25	   3.30	   6.90
 	 1450.000	  52.50	  52.50	   0.10	   5.50	   6.90
 	 1680.000	  15.00	  15.00	   0.10	   1.70	   6.90
-1 10000.0 32.40000
+0 0 0.000000 0.000000

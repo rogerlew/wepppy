@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.808267
+#   Build Date: 2021-04-01 15:01:42.317148
 #   Source Data: Surgo
 # 
 # Mukey: 525017
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Dewey-Etowah complex, 20 to 35 percent slopes'		'SIL'	3	0.3600	0.7500	4841140.00	0.0085	3.5000	33.0120
+'Dewey-Etowah complex, 20 to 35 percent slopes'		'SIL'	3	0.3600	0.7500	4841140.00	0.0085	3.5000	4.6245
 	  100.000	  22.00	  22.00	   1.25	  11.30	  10.00
 	  610.000	  42.50	  42.50	   0.25	  11.30	  10.00
 	 1570.000	  52.50	  52.50	   0.25	  11.30	  13.38
-1 10000.0 33.01200
+0 0 0.000000 0.000000

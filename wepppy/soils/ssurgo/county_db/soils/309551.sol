@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.354785
+#   Build Date: 2021-04-01 15:01:43.872495
 #   Source Data: Surgo
 # 
 # Mukey: 309551
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Burdett-Scriba channery silt loams, 3 to 8 percent slopes'		'CN-SIL'	2	0.3000	0.7500	4841140.00	0.0085	3.5000	32.4000
+'Burdett-Scriba channery silt loams, 3 to 8 percent slopes'		'CN-SIL'	2	0.3000	0.7500	4841140.00	0.0085	3.5000	3.0645
 	  230.000	  22.00	  22.00	   4.50	  12.10	  31.40
 	  410.000	  22.00	  22.00	   1.50	  11.90	  31.40
-1 10000.0 3.27600
+0 0 0.000000 0.000000

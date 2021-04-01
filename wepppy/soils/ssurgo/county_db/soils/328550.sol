@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.080641
+#   Build Date: 2021-04-01 15:01:42.589561
 #   Source Data: Surgo
 # 
 # Mukey: 328550
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Talladega channery silt loam, 15 to 45 percent slopes'		'CN-SIL'	3	0.3000	0.7500	4380060.00	0.0055	3.2112	32.4000
+'Talladega channery silt loam, 15 to 45 percent slopes'		'CN-SIL'	3	0.3000	0.7500	4380060.00	0.0055	3.2112	6.3248
 	  230.000	  16.00	  16.00	   2.00	  11.30	  47.20
 	  560.000	  27.50	  27.50	   0.00	  11.30	  61.75
 	  660.000	   7.00	   7.00	   0.00	  11.30	  55.50
-1 10000.0 3.24000
+0 0 0.000000 0.000000

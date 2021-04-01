@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.525265
+#   Build Date: 2021-04-01 15:01:43.035490
 #   Source Data: Surgo
 # 
 # Mukey: 2525947
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Werner-Amor-Arnegard loams, 9 to 50 percent slopes'		'L'	3	0.1600	0.7500	6339480.00	0.0078	2.8796	33.0120
+'Werner-Amor-Arnegard loams, 9 to 50 percent slopes'		'L'	3	0.1600	0.7500	6339480.00	0.0078	2.8796	6.2778
 	  150.000	  20.00	  20.00	   3.00	  17.00	   3.00
 	  330.000	  20.00	  20.00	   2.50	  16.00	   1.00
 	  430.000	  26.00	  26.00	   1.25	  19.00	   3.97
-1 10000.0 4.50000
+0 0 0.000000 0.000000

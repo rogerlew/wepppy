@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.616539
+#   Build Date: 2021-04-01 15:01:44.134331
 #   Source Data: Surgo
 # 
 # Mukey: 571680
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Carnasaw-Bengal-Clebit complex, 15 to 30 percent slopes'		'ST-L'	3	0.2300	0.7500	5052410.00	0.0095	3.3007	33.0246
+'Carnasaw-Bengal-Clebit complex, 15 to 30 percent slopes'		'ST-L'	3	0.2300	0.7500	5052410.00	0.0095	3.3007	8.6425
 	   80.000	  20.50	  20.50	   1.25	  12.50	  39.70
 	  200.000	  20.50	  20.50	   1.25	  15.00	  14.50
 	  610.000	  38.00	  38.00	   0.25	  24.00	  14.50
-1 10000.0 3.30264
+0 0 0.000000 0.000000

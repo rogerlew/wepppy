@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.238703
+#   Build Date: 2021-04-01 15:01:42.747864
 #   Source Data: Surgo
 # 
 # Mukey: 210634
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Blount-Glynwood, thin solum complex, 0 to 3 percent slopes'		'SIL'	2	0.3700	0.7500	4896270.00	0.0089	3.5000	33.0120
+'Blount-Glynwood, thin solum complex, 0 to 3 percent slopes'		'SIL'	2	0.3700	0.7500	4896270.00	0.0089	3.5000	2.9614
 	  230.000	  21.00	  21.00	   2.50	  15.00	   7.85
 	  610.000	  42.00	  42.00	   0.75	  24.00	   5.42
-1 10000.0 3.31200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.197019
+#   Build Date: 2021-04-01 15:01:41.704007
 #   Source Data: Surgo
 # 
 # Mukey: 2699155
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Cabba-Chama-Shambo loams, 9 to 50 percent slopes'		'L'	3	0.2300	0.7500	6339480.00	0.0086	2.8146	33.0120
+'Cabba-Chama-Shambo loams, 9 to 50 percent slopes'		'L'	3	0.2300	0.7500	6339480.00	0.0086	2.8146	6.3414
 	   80.000	  19.00	  19.00	   2.00	  16.00	  11.68
 	  200.000	  22.00	  22.00	   1.00	  15.00	   4.96
 	  300.000	  22.00	  22.00	   0.50	  15.00	   5.95
-1 10000.0 4.50000
+0 0 0.000000 0.000000

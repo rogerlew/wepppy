@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.098819
+#   Build Date: 2021-04-01 15:01:44.618913
 #   Source Data: Surgo
 # 
 # Mukey: 199212
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Virden silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.1600	0.7500	4344970.00	0.0072	3.5000	33.0120
+'Virden silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.1600	0.7500	4344970.00	0.0072	3.5000	0.8522
 	  410.000	  31.00	  31.00	   4.50	  25.40	   0.00
 	 1240.000	  39.00	  39.00	   1.00	  29.40	   0.00
 	 1520.000	  31.00	  31.00	   0.25	  23.10	   0.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

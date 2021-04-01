@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.378483
+#   Build Date: 2021-04-01 15:01:44.898861
 #   Source Data: Surgo
 # 
 # Mukey: 2532773
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Mexico silt loam, 1 to 4 percent slopes, eroded'		'SIL'	2	0.2300	0.7500	5078199.00	0.0108	3.5000	32.4000
+'Mexico silt loam, 1 to 4 percent slopes, eroded'		'SIL'	2	0.2300	0.7500	5078199.00	0.0108	3.5000	1.3739
 	  180.000	  17.70	  17.70	   1.87	  15.20	   0.00
 	  380.000	  25.00	  25.00	   1.02	  20.10	   0.00
-1 10000.0 1.08000
+0 0 0.000000 0.000000

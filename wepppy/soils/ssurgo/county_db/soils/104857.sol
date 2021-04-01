@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.731854
+#   Build Date: 2021-04-01 15:01:43.243155
 #   Source Data: Surgo
 # 
 # Mukey: 104857
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Jayem-Manter-Trelona complex, 3 to 20 percent slopes'		'FSL'	3	0.2300	0.7500	6185800.00	0.0078	2.2760	100.8000
+'Jayem-Manter-Trelona complex, 3 to 20 percent slopes'		'FSL'	3	0.2300	0.7500	6185800.00	0.0078	2.2760	16.8087
 	  250.000	  10.00	  10.00	   2.50	   9.20	   0.00
 	  560.000	  12.00	  12.00	   0.75	  10.40	   0.00
 	 2000.000	  12.00	  12.00	   0.40	  10.10	   0.00
-1 10000.0 97.20000
+0 0 0.000000 0.000000

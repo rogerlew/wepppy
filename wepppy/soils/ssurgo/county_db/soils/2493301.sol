@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.019227
+#   Build Date: 2021-04-01 15:01:41.525056
 #   Source Data: Surgo
 # 
 # Mukey: 2493301
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Travessilla-Rock outcrop complex, 25 to 65 percent slopes'		'SL'	3	0.2300	0.7500	4994780.00	0.0094	2.6356	100.8000
+'Travessilla-Rock outcrop complex, 25 to 65 percent slopes'		'SL'	3	0.2300	0.7500	4994780.00	0.0094	2.6356	18.5018
 	  130.000	  10.00	  10.00	   1.25	   9.00	   0.00
 	  280.000	  14.00	  14.00	   0.25	  11.40	   0.00
 	  360.000	  16.00	  16.00	   0.25	  12.90	   0.00
-1 10000.0 3.29400
+0 0 0.000000 0.000000

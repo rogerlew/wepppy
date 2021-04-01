@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.838290
+#   Build Date: 2021-04-01 15:01:43.354452
 #   Source Data: Surgo
 # 
 # Mukey: 1480223
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Almaholt-Roundor-High loams, 3 to 30 percent slopes'		'L'	3	0.1600	0.7500	5609500.00	0.0089	2.7750	32.4000
+'Almaholt-Roundor-High loams, 3 to 30 percent slopes'		'L'	3	0.1600	0.7500	5609500.00	0.0089	2.7750	9.7157
 	   80.000	  15.00	  15.00	   1.50	  11.40	   4.00
 	  280.000	  25.00	  25.00	   0.75	  17.90	   9.00
 	  460.000	  25.00	  25.00	   0.25	  15.70	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.613342
+#   Build Date: 2021-04-01 15:01:44.131108
 #   Source Data: Surgo
 # 
 # Mukey: 342106
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cabbart-Rock outcrop-Delpoint complex, 15 to 50 percent slopes'		'L'	4	0.2300	0.7500	4476110.00	0.0071	3.6372	32.4000
+'Cabbart-Rock outcrop-Delpoint complex, 15 to 50 percent slopes'		'L'	4	0.2300	0.7500	4476110.00	0.0071	3.6372	7.6047
 	   80.000	  23.00	  23.00	   1.50	  18.40	  15.00
 	  310.000	  26.00	  26.00	   0.75	  17.90	  14.00
 	  380.000	  26.00	  26.00	   0.75	  17.90	  14.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

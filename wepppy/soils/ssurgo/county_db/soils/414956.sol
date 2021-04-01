@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.952700
+#   Build Date: 2021-04-01 15:01:42.461755
 #   Source Data: Surgo
 # 
 # Mukey: 414956
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Carbondale and Tacoosh mucks'		'MUCK'	2	0.0900	0.7500	5502700.00	0.0250	3.5000	76.2120
+'Carbondale and Tacoosh mucks'		'MUCK'	2	0.0900	0.7500	5502700.00	0.0250	3.5000	7.0826
 	  910.000	  10.00	  10.00	   0.25	   5.00	  44.00
 	 2030.000	   5.00	   5.00	   0.25	   3.50	  15.00
-1 10000.0 50.79600
+0 0 0.000000 0.000000

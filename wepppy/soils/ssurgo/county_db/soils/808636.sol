@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.013812
+#   Build Date: 2021-04-01 15:01:45.529814
 #   Source Data: Surgo
 # 
 # Mukey: 808636
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Frost silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	10.1520
+'Frost silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2900	0.7500	5227050.00	0.0136	3.5000	3.0943
 	  100.000	  15.00	  15.00	   2.25	   8.20	   0.00
 	  510.000	  15.00	  15.00	   0.75	   8.00	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

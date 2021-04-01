@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.938237
+#   Build Date: 2021-04-01 15:01:42.447113
 #   Source Data: Surgo
 # 
 # Mukey: 363647
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Laredo silty clay loam 0 to 1 percent slopes, rarely flooded'		'SICL'	3	0.1600	0.7500	4400100.00	0.0072	3.5000	32.4000
+'Laredo silty clay loam 0 to 1 percent slopes, rarely flooded'		'SICL'	3	0.1600	0.7500	4400100.00	0.0072	3.5000	2.3616
 	  460.000	  30.00	  30.00	   2.00	  23.80	   0.00
 	 1040.000	  25.00	  25.00	   0.65	  16.30	   0.00
 	 2030.000	  28.00	  28.00	   0.30	  19.40	   2.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

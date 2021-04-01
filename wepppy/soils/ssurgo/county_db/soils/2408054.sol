@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.573828
+#   Build Date: 2021-04-01 15:01:41.078762
 #   Source Data: Surgo
 # 
 # Mukey: 2408054
@@ -57,7 +57,7 @@
 # 
 Any comments:
 1 1
-'Urban land-Hueneme, drained-San Emigdio complex, 0 to 2 percent slopes'		'SL'	7	0.2300	0.7500	4937150.00	0.0116	2.6530	100.8000
+'Urban land-Hueneme, drained-San Emigdio complex, 0 to 2 percent slopes'		'SL'	7	0.2300	0.7500	4937150.00	0.0116	2.6530	17.7258
 	  120.000	  10.00	  10.00	   1.00	   8.90	   0.00
 	  400.000	   8.00	   8.00	   1.00	   7.30	   0.00
 	  550.000	   4.00	   4.00	   0.50	   3.80	   0.00
@@ -65,4 +65,4 @@ Any comments:
 	 1350.000	  10.00	  10.00	   0.25	   8.40	   0.00
 	 1950.000	  12.00	  12.00	   0.50	  10.20	   0.00
 	 2000.000	   3.00	   3.00	   0.25	   2.80	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

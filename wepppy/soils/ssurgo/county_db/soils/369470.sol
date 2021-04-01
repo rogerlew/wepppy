@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.941350
+#   Build Date: 2021-04-01 15:01:44.460587
 #   Source Data: Surgo
 # 
 # Mukey: 369470
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Quanah soils, 3 to 5 percent slopes'		'L'	2	0.1600	0.7500	5013990.00	0.0065	3.4423	32.4000
+'Quanah soils, 3 to 5 percent slopes'		'L'	2	0.1600	0.7500	5013990.00	0.0065	3.4423	7.9795
 	  300.000	  22.50	  22.50	   2.00	  12.50	   5.00
 	 1680.000	  28.00	  28.00	   0.30	  12.50	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

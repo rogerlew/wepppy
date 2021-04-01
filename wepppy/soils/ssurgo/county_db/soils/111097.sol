@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.187338
+#   Build Date: 2021-04-01 15:01:43.705073
 #   Source Data: Surgo
 # 
 # Mukey: 111097
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Pacolet sandy clay loam, 8 to 15 percent slopes, moderately eroded'		'SCL'	4	0.3000	0.7500	4860310.00	0.0150	3.8137	32.4000
+'Pacolet sandy clay loam, 8 to 15 percent slopes, moderately eroded'		'SCL'	4	0.3000	0.7500	4860310.00	0.0150	3.8137	15.2176
 	  180.000	  27.50	  27.50	   0.75	   4.40	   9.00
 	  610.000	  50.00	  50.00	   0.25	   5.60	  13.00
 	  840.000	  28.00	  28.00	   0.25	   2.80	  17.83
 	 2030.000	  17.50	  17.50	   0.25	   2.30	  23.56
-1 10000.0 32.40000
+0 0 0.000000 0.000000

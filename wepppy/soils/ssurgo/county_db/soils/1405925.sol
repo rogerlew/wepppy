@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.619298
+#   Build Date: 2021-04-01 15:01:42.127238
 #   Source Data: Surgo
 # 
 # Mukey: 1405925
@@ -56,11 +56,11 @@
 # 
 Any comments:
 1 1
-'Berryland and Mullica soils, 0 to 2 percent slopes, occassionally flooded'		'S'	6	0.3000	0.7500	4053490.00	0.0042	2.4973	330.2640
+'Berryland and Mullica soils, 0 to 2 percent slopes, occassionally flooded'		'S'	6	0.3000	0.7500	4053490.00	0.0042	2.4973	34.3538
 	  280.000	   3.50	   3.50	   3.00	   2.70	   7.00
 	  480.000	   3.50	   3.50	   0.25	   1.20	   5.00
 	  810.000	   3.50	   3.50	   0.00	   0.50	   8.00
 	 1020.000	   3.50	   3.50	   0.25	   1.20	  18.00
 	 1120.000	   3.50	   3.50	   0.00	   0.50	   5.00
 	 2030.000	   9.50	   9.50	   0.00	   0.50	   5.00
-1 10000.0 261.68400
+0 0 0.000000 0.000000

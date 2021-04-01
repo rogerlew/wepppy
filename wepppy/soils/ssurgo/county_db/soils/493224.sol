@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.851449
+#   Build Date: 2021-04-01 15:01:45.373919
 #   Source Data: Surgo
 # 
 # Mukey: 493224
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Toiyabe-Corbett-Rock outcrop complex, 30 to 50 percent slopes'		'BYV-LCOS'	2	0.1600	0.7500	4476110.00	0.0071	2.3372	331.2000
+'Toiyabe-Corbett-Rock outcrop complex, 30 to 50 percent slopes'		'BYV-LCOS'	2	0.1600	0.7500	4476110.00	0.0071	2.3372	25.1232
 	  180.000	   3.00	   3.00	   1.50	   6.00	  67.50
 	  380.000	   3.00	   3.00	   0.25	   3.00	  33.30
-1 10000.0 3.60000
+0 0 0.000000 0.000000

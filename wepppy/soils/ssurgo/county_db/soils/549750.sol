@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.030292
+#   Build Date: 2021-04-01 15:01:43.547826
 #   Source Data: Surgo
 # 
 # Mukey: 549750
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Dandridge and Westmoreland shaly silt loams, 20 to 50 percent slopes (dandridge, garmon)'		'CN-SIL'	4	0.3000	0.7500	5116790.00	0.0114	3.5000	101.6280
+'Dandridge and Westmoreland shaly silt loams, 20 to 50 percent slopes (dandridge, garmon)'		'CN-SIL'	4	0.3000	0.7500	5116790.00	0.0114	3.5000	6.3741
 	  180.000	  17.00	  17.00	   1.75	   6.30	  26.00
 	  330.000	  28.00	  28.00	   0.25	   9.80	  37.90
 	  640.000	  28.00	  28.00	   0.25	   9.80	  37.90
 	  890.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

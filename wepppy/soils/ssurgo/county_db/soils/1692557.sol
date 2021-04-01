@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.251896
+#   Build Date: 2021-04-01 15:01:44.772046
 #   Source Data: Surgo
 # 
 # Mukey: 1692557
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Tassel-Blanche sandy loams, 3 to 9 percent slopes'		'SL'	2	0.3000	0.7500	4898730.00	0.0151	2.5671	100.8000
+'Tassel-Blanche sandy loams, 3 to 9 percent slopes'		'SL'	2	0.3000	0.7500	4898730.00	0.0151	2.5671	17.3655
 	  150.000	   8.50	   8.50	   0.75	  10.00	  22.92
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 180.00000
+0 0 0.000000 0.000000

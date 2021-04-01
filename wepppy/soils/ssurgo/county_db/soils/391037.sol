@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.882747
+#   Build Date: 2021-04-01 15:01:41.388458
 #   Source Data: Surgo
 # 
 # Mukey: 391037
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bolar-Brackett complex, 1 to 8 percent slopes'		'GR-CL'	3	0.1600	0.7500	4649000.00	0.0059	4.0400	32.4000
+'Bolar-Brackett complex, 1 to 8 percent slopes'		'GR-CL'	3	0.1600	0.7500	4649000.00	0.0059	4.0400	5.8561
 	  360.000	  30.00	  30.00	   2.00	  17.50	  41.76
 	  740.000	  30.00	  30.00	   0.55	  15.00	  11.68
 	 1020.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

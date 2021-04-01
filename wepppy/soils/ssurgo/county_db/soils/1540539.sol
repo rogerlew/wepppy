@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.964145
+#   Build Date: 2021-04-01 15:01:44.483782
 #   Source Data: Surgo
 # 
 # Mukey: 1540539
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Menfro-Wellston silt loams, 18 to 35 percent slopes'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Menfro-Wellston silt loams, 18 to 35 percent slopes'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	1.4710
 	  250.000	  19.00	  19.00	   1.25	  13.00	   0.00
 	 1570.000	  29.00	  29.00	   0.25	  18.00	   0.00
 	 2030.000	  14.00	  14.00	   0.25	   8.00	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

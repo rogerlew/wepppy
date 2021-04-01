@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.849736
+#   Build Date: 2021-04-01 15:01:43.366233
 #   Source Data: Surgo
 # 
 # Mukey: 2230275
@@ -57,9 +57,9 @@
 # 
 Any comments:
 1 1
-'Elwha-Zylstra-Morancreek, cool, complex, 2 to 12 percent slopes'		'SPM'	4	0.1600	0.7500	5206090.00	0.0058	2.2468	1342.8000
+'Elwha-Zylstra-Morancreek, cool, complex, 2 to 12 percent slopes'		'SPM'	4	0.1600	0.7500	5206090.00	0.0058	2.2468	17.3991
 	  150.000	   8.00	   8.00	   2.50	  11.00	  27.00
 	  360.000	   8.00	   8.00	   2.50	  11.00	  35.20
 	  660.000	   8.00	   8.00	   1.75	   9.00	  42.40
 	  890.000	  11.00	  11.00	   0.50	   9.00	  33.97
-1 10000.0 0.36000
+0 0 0.000000 0.000000

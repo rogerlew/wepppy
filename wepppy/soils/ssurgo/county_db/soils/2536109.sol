@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.232885
+#   Build Date: 2021-04-01 15:01:44.752753
 #   Source Data: Surgo
 # 
 # Mukey: 2536109
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Bardley very gravelly silt loam, 8 to 35 percent slopes, stony'		'GR-SIL'	3	0.3000	0.7500	4620620.00	0.0076	3.5000	32.4000
+'Bardley very gravelly silt loam, 8 to 35 percent slopes, stony'		'GR-SIL'	3	0.3000	0.7500	4620620.00	0.0076	3.5000	3.8722
 	  100.000	  26.00	  26.00	   1.25	  13.90	  55.00
 	  250.000	  26.00	  26.00	   0.75	  13.80	  50.00
 	  760.000	  67.50	  67.50	   0.25	  34.90	  30.00
-1 10000.0 0.36000
+0 0 0.000000 0.000000

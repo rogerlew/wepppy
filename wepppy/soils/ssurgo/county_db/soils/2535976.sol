@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.652744
+#   Build Date: 2021-04-01 15:01:44.171114
 #   Source Data: Surgo
 # 
 # Mukey: 2535976
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Gatewood-Moko complex, 8 to 20 percent slopes, very stony'		'GR-SIL'	2	0.2300	0.7500	3189040.00	0.0027	3.5448	32.4000
+'Gatewood-Moko complex, 8 to 20 percent slopes, very stony'		'GR-SIL'	2	0.2300	0.7500	3189040.00	0.0027	3.5448	5.5203
 	   80.000	  15.60	  15.60	   3.80	  20.10	  40.00
 	  230.000	  16.10	  16.10	   2.00	  10.50	  66.75
-1 10000.0 3.24000
+0 0 0.000000 0.000000

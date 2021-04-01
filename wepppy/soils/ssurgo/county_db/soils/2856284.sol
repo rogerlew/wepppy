@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.880461
+#   Build Date: 2021-04-01 15:01:43.397549
 #   Source Data: Surgo
 # 
 # Mukey: 2856284
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Estate-Portia-Moko association, steep'		'ST-SL'	3	0.2300	0.7500	4783470.00	0.0067	2.8619	82.8000
+'Estate-Portia-Moko association, steep'		'ST-SL'	3	0.2300	0.7500	4783470.00	0.0067	2.8619	18.5143
 	   50.000	  12.50	  12.50	   1.75	  12.50	  51.88
 	  180.000	  12.50	  12.50	   0.75	  10.00	  60.85
 	  330.000	  19.00	  19.00	   0.55	  15.00	  20.95
-1 10000.0 3.60000
+0 0 0.000000 0.000000

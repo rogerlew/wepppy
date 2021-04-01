@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.899160
+#   Build Date: 2021-04-01 15:01:41.405114
 #   Source Data: Surgo
 # 
 # Mukey: 522152
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Oriskany gravelly fine sandy loam, 15 to 35 percent slopes, very stony'		'GR-FSL'	3	0.1600	0.7500	6281850.00	0.0114	2.2470	100.8000
+'Oriskany gravelly fine sandy loam, 15 to 35 percent slopes, very stony'		'GR-FSL'	3	0.1600	0.7500	6281850.00	0.0114	2.2470	19.9446
 	  150.000	  10.00	  10.00	   1.25	   6.30	  42.77
 	  360.000	  15.00	  15.00	   0.25	   5.80	  58.14
 	 1550.000	  25.00	  25.00	   0.25	   5.80	  72.40
-1 10000.0 100.80000
+0 0 0.000000 0.000000

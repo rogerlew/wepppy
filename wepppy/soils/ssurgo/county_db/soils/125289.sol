@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.209768
+#   Build Date: 2021-04-01 15:01:42.718521
 #   Source Data: Surgo
 # 
 # Mukey: 125289
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Toccoa sandy loam, 0 to 2 percent slopes, occasionally flooded'		'SL'	3	0.4200	0.7500	4879520.00	0.0078	2.6704	100.8000
+'Toccoa sandy loam, 0 to 2 percent slopes, occasionally flooded'		'SL'	3	0.4200	0.7500	4879520.00	0.0078	2.6704	18.0880
 	  130.000	  10.00	  10.00	   1.50	   5.40	  13.00
 	 1220.000	  10.50	  10.50	   0.25	   5.60	   9.00
 	 2030.000	  10.00	  10.00	   0.25	   5.30	   9.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

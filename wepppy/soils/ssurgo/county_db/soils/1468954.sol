@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.095460
+#   Build Date: 2021-04-01 15:01:44.615498
 #   Source Data: Surgo
 # 
 # Mukey: 1468954
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Clareson-Rock outcrop complex, 3 to 15 percent slopes'		'SICL'	2	0.0900	0.7500	4234710.00	0.0071	3.5000	7.2000
+'Clareson-Rock outcrop complex, 3 to 15 percent slopes'		'SICL'	2	0.0900	0.7500	4234710.00	0.0071	3.5000	0.8015
 	  180.000	  33.00	  33.00	   3.00	  27.20	   0.00
 	  410.000	  45.00	  45.00	   2.00	  35.40	   9.79
-1 10000.0 3.24000
+0 0 0.000000 0.000000

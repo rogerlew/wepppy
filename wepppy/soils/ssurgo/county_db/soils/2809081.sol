@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.770083
+#   Build Date: 2021-04-01 15:01:42.278284
 #   Source Data: Surgo
 # 
 # Mukey: 2809081
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Typic Haplocryands-Rock outcrop complex, cirque headwalls'		'MPM'	4	0.3000	0.7500	4649000.00	0.0050	2.5450	360.0000
+'Typic Haplocryands-Rock outcrop complex, cirque headwalls'		'MPM'	4	0.3000	0.7500	4649000.00	0.0050	2.5450	3.6574
 	   40.000	  14.00	  14.00	   2.50	  11.30	  73.00
 	  150.000	  14.00	  14.00	   2.50	  11.30	  73.00
 	  430.000	  14.00	  14.00	   0.75	  11.30	  78.22
 	  900.000	  14.00	  14.00	   0.50	  11.30	  80.92
-1 10000.0 1.44000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.339308
+#   Build Date: 2021-04-01 15:01:41.846715
 #   Source Data: Surgo
 # 
 # Mukey: 132308
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Ailey-Vaucluse complex, 6 to 15 percent slopes'		'S'	3	0.1600	0.7500	4072700.00	0.0138	2.5890	331.2000
+'Ailey-Vaucluse complex, 6 to 15 percent slopes'		'S'	3	0.1600	0.7500	4072700.00	0.0138	2.5890	40.3910
 	  180.000	   5.00	   5.00	   0.75	   1.10	  18.00
 	  740.000	   5.00	   5.00	   0.25	   0.90	  18.00
 	 1020.000	  25.00	  25.00	   0.25	  11.30	  15.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

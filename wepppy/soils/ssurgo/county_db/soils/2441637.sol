@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.926684
+#   Build Date: 2021-04-01 15:01:44.445826
 #   Source Data: Surgo
 # 
 # Mukey: 2441637
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Hebbronville loamy fine sand, 0 to 3 percent slopes'		'LFS'	3	0.3000	0.7500	6570000.00	0.0177	2.0300	100.8000
+'Hebbronville loamy fine sand, 0 to 3 percent slopes'		'LFS'	3	0.3000	0.7500	6570000.00	0.0177	2.0300	25.9276
 	  400.000	   8.00	   8.00	   0.75	   5.30	   0.00
 	 1120.000	  14.50	  14.50	   0.30	   9.00	   0.00
 	 2180.000	  15.50	  15.50	   0.30	  10.00	   5.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

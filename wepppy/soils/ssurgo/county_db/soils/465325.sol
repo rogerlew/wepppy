@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.996775
+#   Build Date: 2021-04-01 15:01:43.513897
 #   Source Data: Surgo
 # 
 # Mukey: 465325
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Inks-Lodo-Agua Dulce families complex, 30 to 80 percent slopes'		'GR-SL'	3	0.4022	0.7500	4725840.00	0.0112	3.0418	100.8000
+'Inks-Lodo-Agua Dulce families complex, 30 to 80 percent slopes'		'GR-SL'	3	0.4022	0.7500	4725840.00	0.0112	3.0418	17.9348
 	   80.000	  15.00	  15.00	   1.00	  10.00	  34.04
 	  200.000	  25.00	  25.00	   0.50	  15.00	  63.14
 	  300.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

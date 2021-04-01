@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.400636
+#   Build Date: 2021-04-01 15:01:42.910042
 #   Source Data: Surgo
 # 
 # Mukey: 2216182
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Mt. Carroll-Hersey complex, 6 to 12 percent slopes, moderately eroded'		'SIL'	5	0.2300	0.7500	5116790.00	0.0114	3.5000	32.4000
+'Mt. Carroll-Hersey complex, 6 to 12 percent slopes, moderately eroded'		'SIL'	5	0.2300	0.7500	5116790.00	0.0114	3.5000	1.9919
 	  180.000	  17.00	  17.00	   3.00	  15.00	   0.00
 	  430.000	  17.00	  17.00	   1.50	  14.60	   0.00
 	 1400.000	  22.00	  22.00	   0.50	  17.60	   0.00
 	 1570.000	  20.00	  20.00	   0.25	  15.70	   0.00
 	 2030.000	  14.00	  14.00	   0.25	  11.40	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

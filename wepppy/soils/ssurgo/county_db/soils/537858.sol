@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.671978
+#   Build Date: 2021-04-01 15:01:44.190854
 #   Source Data: Surgo
 # 
 # Mukey: 537858
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Berks-Westmoreland complex, 40 to 70 percent slopes'		'CN-SIL'	3	0.3000	0.7500	4591370.00	0.0064	3.0174	83.8440
+'Berks-Westmoreland complex, 40 to 70 percent slopes'		'CN-SIL'	3	0.3000	0.7500	4591370.00	0.0064	3.0174	5.5147
 	  250.000	  14.00	  14.00	   1.75	  11.30	  48.25
 	  560.000	  12.00	  12.00	   0.25	  11.30	  68.00
 	  610.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 26.85600
+0 0 0.000000 0.000000

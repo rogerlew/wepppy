@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.516836
+#   Build Date: 2021-04-01 15:01:44.035650
 #   Source Data: Surgo
 # 
 # Mukey: 2533961
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Tonti silt loam, 3 to 8 percent slopes'		'SIL'	2	0.2300	0.7500	5282180.00	0.0150	3.5000	32.4000
+'Tonti silt loam, 3 to 8 percent slopes'		'SIL'	2	0.2300	0.7500	5282180.00	0.0150	3.5000	2.2659
 	  200.000	  14.00	  14.00	   2.80	  12.00	  10.00
 	  510.000	  30.00	  30.00	   0.30	  17.00	  30.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

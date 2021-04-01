@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.108525
+#   Build Date: 2021-04-01 15:01:44.628744
 #   Source Data: Surgo
 # 
 # Mukey: 296754
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Dystrudepts, deep-Wellsboro-Oquaga association, steep, rubbly'		'BYV-L'	3	0.3000	0.7500	5206090.00	0.0060	2.7343	330.2640
+'Dystrudepts, deep-Wellsboro-Oquaga association, steep, rubbly'		'BYV-L'	3	0.3000	0.7500	5206090.00	0.0060	2.7343	9.1227
 	   50.000	  12.50	  12.50	   3.00	  25.00	  59.38
 	  710.000	  12.50	  12.50	   0.25	   6.00	  57.45
 	 2030.000	  10.00	  10.00	   0.25	   6.00	  65.50
-1 10000.0 330.26400
+0 0 0.000000 0.000000

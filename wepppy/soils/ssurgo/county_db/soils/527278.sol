@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.621341
+#   Build Date: 2021-04-01 15:01:42.129328
 #   Source Data: Surgo
 # 
 # Mukey: 527278
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bodine cherty silt loam, 20 to 45 percent slopes'		'GRV-SIL'	3	0.3600	0.7500	4610580.00	0.0074	3.0116	101.6280
+'Bodine cherty silt loam, 20 to 45 percent slopes'		'GRV-SIL'	3	0.3600	0.7500	4610580.00	0.0074	3.0116	5.6093
 	  280.000	  14.00	  14.00	   1.50	  11.30	  56.30
 	  510.000	  29.00	  29.00	   0.25	  11.30	  67.28
 	 1520.000	  30.50	  30.50	   0.25	  11.30	  69.20
-1 10000.0 101.62800
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.151809
+#   Build Date: 2021-04-01 15:01:45.668227
 #   Source Data: Surgo
 # 
 # Mukey: 68876
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Quincy fine sand, 2 to 15 percent slopes'		'FS'	2	0.2300	0.7500	5436610.00	0.0159	2.0797	331.2000
+'Quincy fine sand, 2 to 15 percent slopes'		'FS'	2	0.2300	0.7500	5436610.00	0.0159	2.0797	35.1962
 	  230.000	   3.50	   3.50	   0.75	   4.50	   0.00
 	 1520.000	   4.00	   4.00	   0.25	   3.50	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

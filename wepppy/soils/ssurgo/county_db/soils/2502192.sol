@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.550617
+#   Build Date: 2021-04-01 15:01:43.061507
 #   Source Data: Surgo
 # 
 # Mukey: 2502192
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Alred-Wrengart complex, 15 to 35 percent slopes, rocky, very stony'		'SPM'	3	0.3000	0.7500	5502700.00	0.0250	3.5000	327.6000
+'Alred-Wrengart complex, 15 to 35 percent slopes, rocky, very stony'		'SPM'	3	0.3000	0.7500	5502700.00	0.0250	3.5000	3.5268
 	  100.000	   9.90	   9.90	   2.00	   6.40	  34.00
 	  200.000	  11.30	  11.30	   1.00	   5.00	  31.00
 	  560.000	  29.00	  29.00	   0.20	  10.60	  59.95
-1 10000.0 3.24000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.460292
+#   Build Date: 2021-04-01 15:01:41.967589
 #   Source Data: Surgo
 # 
 # Mukey: 565661
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Sacul fine sandy loam, 3 to 8 percent slopes'		'FSL'	2	0.2300	0.7500	6070540.00	0.0082	2.4733	100.8000
+'Sacul fine sandy loam, 3 to 8 percent slopes'		'FSL'	2	0.2300	0.7500	6070540.00	0.0082	2.4733	20.0302
 	   50.000	  12.50	  12.50	   2.00	  11.30	  25.00
 	  250.000	  13.50	  13.50	   1.25	  11.30	  24.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

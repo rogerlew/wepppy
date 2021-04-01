@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.663984
+#   Build Date: 2021-04-01 15:01:44.182647
 #   Source Data: Surgo
 # 
 # Mukey: 539245
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hazleton channery sandy loam, 8 to 25 percent slopes, extremely stony'		'CN-SL'	4	0.3700	0.7500	4783470.00	0.0053	2.8619	101.6280
+'Hazleton channery sandy loam, 8 to 25 percent slopes, extremely stony'		'CN-SL'	4	0.3700	0.7500	4783470.00	0.0053	2.8619	18.6499
 	  180.000	  12.50	  12.50	   3.00	  11.30	  44.75
 	  910.000	  12.50	  12.50	   0.25	  11.30	  44.50
 	 1780.000	  10.00	  10.00	   0.25	  11.30	  52.55
 	 1880.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 101.62800
+0 0 0.000000 0.000000

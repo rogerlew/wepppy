@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.958919
+#   Build Date: 2021-04-01 15:01:44.478432
 #   Source Data: Surgo
 # 
 # Mukey: 327494
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Smithdale loam, 12 to 25 percent slopes, severely eroded'		'L'	4	0.2900	0.7500	5186880.00	0.0074	3.0976	101.6280
+'Smithdale loam, 12 to 25 percent slopes, severely eroded'		'L'	4	0.2900	0.7500	5186880.00	0.0074	3.0976	9.0889
 	   80.000	  18.00	  18.00	   1.75	  11.30	   0.00
 	  330.000	   8.50	   8.50	   0.75	  11.30	   8.00
 	 1350.000	  25.50	  25.50	   0.60	  11.30	   8.00
 	 1510.000	  17.00	  17.00	   0.30	  11.30	   8.00
-1 10000.0 101.62800
+0 0 0.000000 0.000000

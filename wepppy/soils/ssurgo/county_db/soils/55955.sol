@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.502283
+#   Build Date: 2021-04-01 15:01:44.020987
 #   Source Data: Surgo
 # 
 # Mukey: 55955
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Ector-Rock outcrop complex, 9 to 30 percent slopes'		'CB-L'	2	0.1600	0.7500	4917940.00	0.0064	3.6338	33.0120
+'Ector-Rock outcrop complex, 9 to 30 percent slopes'		'CB-L'	2	0.1600	0.7500	4917940.00	0.0064	3.6338	7.6011
 	  360.000	  25.00	  25.00	   2.00	  12.50	  66.40
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 26.17200
+0 0 0.000000 0.000000

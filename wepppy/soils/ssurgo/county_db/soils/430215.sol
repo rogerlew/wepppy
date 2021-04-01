@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.209785
+#   Build Date: 2021-04-01 15:01:41.716952
 #   Source Data: Surgo
 # 
 # Mukey: 430215
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Harps-Glencoe-Seaforth complex, 0 to 3 percent slopes'		'CL'	4	0.1600	0.7500	4456900.00	0.0047	4.2280	10.1520
+'Harps-Glencoe-Seaforth complex, 0 to 3 percent slopes'		'CL'	4	0.1600	0.7500	4456900.00	0.0047	4.2280	4.7290
 	  200.000	  32.00	  32.00	   7.00	  23.50	  11.80
 	  410.000	  32.00	  32.00	   5.00	  23.20	   8.00
 	 1600.000	  25.00	  25.00	   1.50	  16.90	   7.00
 	 2000.000	  21.00	  21.00	   0.25	  14.30	   7.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

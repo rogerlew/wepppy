@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.195869
+#   Build Date: 2021-04-01 15:01:43.713663
 #   Source Data: Surgo
 # 
 # Mukey: 125763
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Davidson clay loam, 6 to 10 percent slopes, severely eroded'		'CL'	4	0.1700	0.7500	4975570.00	0.0094	3.7789	32.4000
+'Davidson clay loam, 6 to 10 percent slopes, severely eroded'		'CL'	4	0.1700	0.7500	4975570.00	0.0094	3.7789	6.6888
 	  180.000	  27.50	  27.50	   1.25	  11.30	  12.00
 	  300.000	  47.50	  47.50	   0.25	  11.30	   7.00
 	 1350.000	  57.50	  57.50	   0.25	  11.30	   6.00
 	 1830.000	  52.50	  52.50	   0.25	  11.30	   9.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

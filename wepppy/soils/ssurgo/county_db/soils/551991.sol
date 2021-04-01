@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.388819
+#   Build Date: 2021-04-01 15:01:42.898243
 #   Source Data: Surgo
 # 
 # Mukey: 551991
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Fairmount-Rock outcrop complex, 30 to 60 percent slopes'		'FL-SIC'	2	0.2300	0.7500	3573150.00	0.0069	3.5000	7.9200
+'Fairmount-Rock outcrop complex, 30 to 60 percent slopes'		'FL-SIC'	2	0.2300	0.7500	3573150.00	0.0069	3.5000	1.4941
 	  280.000	  45.00	  45.00	   5.00	  24.50	  48.48
 	  430.000	  48.00	  48.00	   0.50	  25.20	  44.20
-1 10000.0 0.00360
+0 0 0.000000 0.000000

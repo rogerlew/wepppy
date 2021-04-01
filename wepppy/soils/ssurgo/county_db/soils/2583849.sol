@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.142880
+#   Build Date: 2021-04-01 15:01:43.659730
 #   Source Data: Surgo
 # 
 # Mukey: 2583849
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Alford silt loam, 6 to 12 percent slopes, severely eroded'		'SIL'	4	0.3700	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Alford silt loam, 6 to 12 percent slopes, severely eroded'		'SIL'	4	0.3700	0.7500	5006530.00	0.0099	3.5000	1.3369
 	  100.000	  19.00	  19.00	   1.00	  15.80	   0.00
 	 1120.000	  28.00	  28.00	   0.50	  11.30	   0.00
 	 1830.000	  20.00	  20.00	   0.25	  11.30	   0.00
 	 2030.000	  13.00	  13.00	   0.15	  10.50	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

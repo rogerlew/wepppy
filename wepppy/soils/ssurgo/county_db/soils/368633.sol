@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.726335
+#   Build Date: 2021-04-01 15:01:45.248568
 #   Source Data: Surgo
 # 
 # Mukey: 368633
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Cottonwood-Knoco complex, 3 to 20 percent slopes'		'L'	3	0.3000	0.7500	4764260.00	0.0149	3.4852	32.4000
+'Cottonwood-Knoco complex, 3 to 20 percent slopes'		'L'	3	0.3000	0.7500	4764260.00	0.0149	3.4852	6.8878
 	  310.000	  22.00	  22.00	   0.75	  10.40	   2.00
 	  480.000	   7.00	   7.00	   7.00	  11.30	  55.50
 	 2030.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

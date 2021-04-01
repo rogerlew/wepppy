@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.929325
+#   Build Date: 2021-04-01 15:01:44.448591
 #   Source Data: Surgo
 # 
 # Mukey: 1542502
@@ -57,7 +57,7 @@
 # 
 Any comments:
 1 1
-'Amnicon-Cuttre complex, 0 to 4 percent slopes'		'SICL'	2	0.3000	0.7500	4344970.00	0.0072	3.5000	10.1520
+'Amnicon-Cuttre complex, 0 to 4 percent slopes'		'SICL'	2	0.3000	0.7500	4344970.00	0.0072	3.5000	2.1148
 	   50.000	  31.00	  31.00	   5.00	  30.00	   5.95
 	  210.000	  35.00	  35.00	   1.25	  27.50	   5.95
-1 10000.0 2.66400
+0 0 0.000000 0.000000

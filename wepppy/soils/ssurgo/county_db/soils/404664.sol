@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.716042
+#   Build Date: 2021-04-01 15:01:45.238029
 #   Source Data: Surgo
 # 
 # Mukey: 404664
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Edina silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Edina silt loam, 0 to 1 percent slopes'		'SIL'	2	0.2300	0.7500	4896270.00	0.0089	3.5000	1.2132
 	  230.000	  21.00	  21.00	   2.50	  17.80	   0.00
 	  460.000	  20.00	  20.00	   0.75	  17.10	   0.00
-1 10000.0 0.32400
+0 0 0.000000 0.000000

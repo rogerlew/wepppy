@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.681879
+#   Build Date: 2021-04-01 15:01:43.192518
 #   Source Data: Surgo
 # 
 # Mukey: 536382
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Germano-Gilpin complex, 25 to 40 percent slopes'		'SL'	3	0.3000	0.7500	4994780.00	0.0065	2.6356	101.6280
+'Germano-Gilpin complex, 25 to 40 percent slopes'		'SL'	3	0.3000	0.7500	4994780.00	0.0065	2.6356	18.8697
 	  100.000	  10.00	  10.00	   2.00	   7.50	  14.50
 	  940.000	  13.00	  13.00	   0.60	   8.50	  28.95
 	 1020.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.93600
+0 0 0.000000 0.000000

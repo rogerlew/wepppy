@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.521511
+#   Build Date: 2021-04-01 15:01:44.040402
 #   Source Data: Surgo
 # 
 # Mukey: 332173
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Ruston fine sandy loam, 2 to 5 percent slopes, moderately eroded'		'FSL'	5	0.2900	0.7500	6954200.00	0.0110	1.9140	100.8000
+'Ruston fine sandy loam, 2 to 5 percent slopes, moderately eroded'		'FSL'	5	0.2900	0.7500	6954200.00	0.0110	1.9140	18.6951
 	  130.000	   8.00	   8.00	   1.50	  11.30	   0.00
 	  230.000	   7.00	   7.00	   0.50	  11.30	   0.00
 	  940.000	  23.00	  23.00	   0.25	  11.30	   0.00
 	 1170.000	  17.00	  17.00	   0.10	  11.30	   0.00
 	 2110.000	  25.00	  25.00	   0.10	  11.30	   2.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

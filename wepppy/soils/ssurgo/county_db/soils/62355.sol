@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.104449
+#   Build Date: 2021-04-01 15:01:44.624603
 #   Source Data: Surgo
 # 
 # Mukey: 62355
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Kilchis-Klickitat complex, 60 to 90 percent slopes'		'ST-L'	3	0.2300	0.7500	5013990.00	0.0055	3.4423	100.8000
+'Kilchis-Klickitat complex, 60 to 90 percent slopes'		'ST-L'	3	0.2300	0.7500	5013990.00	0.0055	3.4423	7.3649
 	  100.000	  22.50	  22.50	   6.00	  22.50	  38.12
 	  380.000	  22.50	  22.50	   3.00	  15.00	  75.78
 	  480.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

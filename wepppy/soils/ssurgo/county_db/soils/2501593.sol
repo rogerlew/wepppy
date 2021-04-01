@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.106563
+#   Build Date: 2021-04-01 15:01:44.626737
 #   Source Data: Surgo
 # 
 # Mukey: 2501593
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Alred-Rueter complex, 15 to 35 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	5502700.00	0.0250	3.5000	327.6000
+'Alred-Rueter complex, 15 to 35 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	5502700.00	0.0250	3.5000	2.5382
 	  100.000	   9.90	   9.90	   2.00	  11.30	  33.00
 	  200.000	  11.30	  11.30	   1.00	  11.30	  30.00
 	  560.000	  29.00	  29.00	   0.20	  11.30	  60.84
-1 10000.0 3.24000
+0 0 0.000000 0.000000

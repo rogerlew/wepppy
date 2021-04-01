@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.869358
+#   Build Date: 2021-04-01 15:01:45.392296
 #   Source Data: Surgo
 # 
 # Mukey: 514900
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Gilpin-Peabody complex, 35 to 70 percent slopes, severely eroded, very stony'		'SIL'	4	0.2439	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Gilpin-Peabody complex, 35 to 70 percent slopes, severely eroded, very stony'		'SIL'	4	0.2439	0.7500	4896270.00	0.0089	3.5000	4.8510
 	   80.000	  21.00	  21.00	   2.25	  10.10	  18.10
 	  560.000	  15.00	  15.00	   0.40	   7.00	  31.12
 	  640.000	  30.00	  30.00	   0.31	   5.70	  46.40
 	  740.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000

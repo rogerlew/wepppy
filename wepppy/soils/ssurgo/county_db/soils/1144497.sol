@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.834714
+#   Build Date: 2021-04-01 15:01:45.356800
 #   Source Data: Surgo
 # 
 # Mukey: 1144497
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Hector-Endsaw complex, 5 to 30 percent slopes, stony'		'ST-FSL'	2	0.2300	0.7500	4802680.00	0.0062	2.5636	101.5992
+'Hector-Endsaw complex, 5 to 30 percent slopes, stony'		'ST-FSL'	2	0.2300	0.7500	4802680.00	0.0062	2.5636	21.8540
 	  150.000	   8.00	   8.00	   2.00	   1.60	  41.07
 	  380.000	  10.00	  10.00	   1.10	  11.30	  40.78
-1 10000.0 2.55960
+0 0 0.000000 0.000000

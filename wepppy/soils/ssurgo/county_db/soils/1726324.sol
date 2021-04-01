@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.040111
+#   Build Date: 2021-04-01 15:01:45.556564
 #   Source Data: Surgo
 # 
 # Mukey: 1726324
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Edgemont-Culpeper complex, 7 to 15 percent slopes'		'L'	3	0.3600	0.7500	4629790.00	0.0053	3.0708	100.8000
+'Edgemont-Culpeper complex, 7 to 15 percent slopes'		'L'	3	0.3600	0.7500	4629790.00	0.0053	3.0708	15.2966
 	  280.000	  15.00	  15.00	   2.50	  10.90	   0.00
 	  940.000	  25.00	  25.00	   0.00	  10.80	   0.00
 	 2130.000	  15.00	  15.00	   0.00	   5.20	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

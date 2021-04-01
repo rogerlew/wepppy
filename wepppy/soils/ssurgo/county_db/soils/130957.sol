@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.779486
+#   Build Date: 2021-04-01 15:01:42.287995
 #   Source Data: Surgo
 # 
 # Mukey: 130957
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hayesville and Cecil fine sandy loams, 25 to 45 percent slopes'		'FSL'	4	0.3600	0.7500	5936070.00	0.0131	2.4814	100.8000
+'Hayesville and Cecil fine sandy loams, 25 to 45 percent slopes'		'FSL'	4	0.3600	0.7500	5936070.00	0.0131	2.4814	18.6951
 	  280.000	  12.00	  12.00	   1.00	  11.30	   0.00
 	  990.000	  38.00	  38.00	   0.75	  11.30	   0.00
 	 1140.000	  30.00	  30.00	   0.25	  11.30	   0.00
 	 1520.000	  15.00	  15.00	   0.25	  11.30	   0.00
-1 10000.0 50.40000
+0 0 0.000000 0.000000

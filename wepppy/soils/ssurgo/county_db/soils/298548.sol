@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.799977
+#   Build Date: 2021-04-01 15:01:42.308707
 #   Source Data: Surgo
 # 
 # Mukey: 298548
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Rockaway sandy loam, 8 to 15 percent slopes, very stony'		'SL'	3	0.1500	0.7500	4783470.00	0.0062	2.8944	33.0120
+'Rockaway sandy loam, 8 to 15 percent slopes, very stony'		'SL'	3	0.1500	0.7500	4783470.00	0.0062	2.8944	18.4245
 	  100.000	  13.00	  13.00	   2.00	  11.30	  43.30
 	  200.000	  13.00	  13.00	   2.00	  11.30	  43.30
 	  510.000	  13.00	  13.00	   0.25	  11.30	  31.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

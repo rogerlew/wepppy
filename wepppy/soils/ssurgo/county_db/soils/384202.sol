@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.714113
+#   Build Date: 2021-04-01 15:01:43.225103
 #   Source Data: Surgo
 # 
 # Mukey: 384202
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Stephenville-Darsil-Gullied land complex, 3 to 8 percent slopes'		'FSL'	3	0.1600	0.7500	6185800.00	0.0083	2.4060	100.8000
+'Stephenville-Darsil-Gullied land complex, 3 to 8 percent slopes'		'FSL'	3	0.1600	0.7500	6185800.00	0.0083	2.4060	19.6509
 	  130.000	  12.00	  12.00	   2.00	   6.50	   0.00
 	  300.000	  28.00	  28.00	   0.50	  11.30	   0.00
 	  560.000	  22.00	  22.00	   0.35	  11.30	   0.00
-1 10000.0 1.80000
+0 0 0.000000 0.000000

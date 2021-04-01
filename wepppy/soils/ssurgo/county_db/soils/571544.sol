@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.714749
+#   Build Date: 2021-04-01 15:01:43.225751
 #   Source Data: Surgo
 # 
 # Mukey: 571544
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Bengal-Clebit-Clearview complex, 5 to 30 percent slopes'		'ST-FSL'	2	0.2300	0.7500	5820810.00	0.0107	2.7112	33.0246
+'Bengal-Clebit-Clearview complex, 5 to 30 percent slopes'		'ST-FSL'	2	0.2300	0.7500	5820810.00	0.0107	2.7112	17.8823
 	  100.000	  15.00	  15.00	   1.25	   9.00	  41.38
 	  230.000	  33.50	  33.50	   0.75	  20.00	  36.92
-1 10000.0 3.30264
+0 0 0.000000 0.000000

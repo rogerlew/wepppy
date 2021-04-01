@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.554083
+#   Build Date: 2021-04-01 15:01:43.065030
 #   Source Data: Surgo
 # 
 # Mukey: 169817
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Wynn silt loam, 6 to 12 percent slopes, moderately eroded'		'SIL'	3	0.3000	0.7500	4841140.00	0.0085	3.5000	33.0120
+'Wynn silt loam, 6 to 12 percent slopes, moderately eroded'		'SIL'	3	0.3000	0.7500	4841140.00	0.0085	3.5000	4.2321
 	  200.000	  22.00	  22.00	   1.25	  15.50	   0.00
 	  410.000	  35.00	  35.00	   0.70	  18.00	   0.00
 	  840.000	  41.00	  41.00	   0.30	  21.50	  14.50
-1 10000.0 0.36000
+0 0 0.000000 0.000000
