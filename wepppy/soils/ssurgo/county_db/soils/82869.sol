@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.167016
+#   Build Date: 2021-04-01 15:01:41.673707
 #   Source Data: Surgo
 # 
 # Mukey: 82869
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Valmar-Camelback-Hades complex, 30 to 60 percent slopes'		'CBV-SIL'	3	0.1600	0.7500	5144355.00	0.0118	3.5000	32.4000
+'Valmar-Camelback-Hades complex, 30 to 60 percent slopes'		'CBV-SIL'	3	0.1600	0.7500	5144355.00	0.0118	3.5000	5.0728
 	  360.000	  16.50	  16.50	   3.00	  14.60	  62.80
 	  610.000	  24.00	  24.00	   0.75	  19.30	  86.89
 	  860.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

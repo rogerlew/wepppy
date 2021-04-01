@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.812085
+#   Build Date: 2021-04-01 15:01:44.331450
 #   Source Data: Surgo
 # 
 # Mukey: 2516649
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Gilpin-Berks channery silt loams, warm, 35 to 70 percent slopes'		'SPM'	5	0.1600	0.7500	0.00	0.0000	0.0000	331.2000
+'Gilpin-Berks channery silt loams, warm, 35 to 70 percent slopes'		'SPM'	5	0.1600	0.7500	0.00	0.0000	0.0000	5.7530
 	   70.000	  19.00	  19.00	  10.70	  11.30	  30.58
 	  170.000	  22.00	  22.00	   3.80	  11.30	  19.16
 	  620.000	  26.00	  26.00	   1.40	  11.30	  34.64
 	  800.000	  24.00	  24.00	   0.50	  11.30	  80.78
 	 1050.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 26.17200
+0 0 0.000000 0.000000

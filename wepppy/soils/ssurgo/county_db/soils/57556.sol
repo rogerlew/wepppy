@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.852578
+#   Build Date: 2021-04-01 15:01:45.375069
 #   Source Data: Surgo
 # 
 # Mukey: 57556
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Romberg, extremely stony-Crosscan, very bouldery-Rock outcrop complex, 25 to 80 percent slopes'		'STV-L'	3	0.1600	0.7500	5033200.00	0.0080	3.3390	36.0000
+'Romberg, extremely stony-Crosscan, very bouldery-Rock outcrop complex, 25 to 80 percent slopes'		'STV-L'	3	0.1600	0.7500	5033200.00	0.0080	3.3390	8.1297
 	   50.000	  21.00	  21.00	   1.50	  17.60	  64.30
 	  510.000	  31.00	  31.00	   0.75	  22.90	  74.00
 	 1520.000	  30.00	  30.00	   0.25	  21.30	  72.94
-1 10000.0 10.80000
+0 0 0.000000 0.000000

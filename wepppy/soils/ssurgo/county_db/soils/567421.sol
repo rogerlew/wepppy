@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.213880
+#   Build Date: 2021-04-01 15:01:41.721120
 #   Source Data: Surgo
 # 
 # Mukey: 567421
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Memphis silt loam, 17 to 60 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5227050.00	0.0136	3.5000	32.4000
+'Memphis silt loam, 17 to 60 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5227050.00	0.0136	3.5000	2.5887
 	  180.000	  15.00	  15.00	   1.50	  11.30	   0.00
 	  530.000	  27.50	  27.50	   0.15	  11.30	   0.00
 	 1960.000	  18.50	  18.50	   0.10	  11.30	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

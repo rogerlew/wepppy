@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.493963
+#   Build Date: 2021-04-01 15:01:42.001794
 #   Source Data: Surgo
 # 
 # Mukey: 370922
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Crockett fine sandy loam, 1 to 3 percent slopes'		'FSL'	1	0.2900	0.7500	5743970.00	0.0106	2.6044	100.8000
+'Crockett fine sandy loam, 1 to 3 percent slopes'		'FSL'	1	0.2900	0.7500	5743970.00	0.0106	2.6044	16.8453
 	  210.000	  13.00	  13.00	   1.25	  12.00	   4.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

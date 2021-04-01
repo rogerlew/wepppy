@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.900639
+#   Build Date: 2021-04-01 15:01:41.406602
 #   Source Data: Surgo
 # 
 # Mukey: 700115
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Touhey complex, 0 to 8 percent slopes'		'ASHY-FSL'	3	0.2300	0.7500	6397110.00	0.0101	2.0172	101.6280
+'Touhey complex, 0 to 8 percent slopes'		'ASHY-FSL'	3	0.2300	0.7500	6397110.00	0.0101	2.0172	20.6527
 	  300.000	   7.00	   7.00	   1.50	   7.50	  12.70
 	  610.000	   7.00	   7.00	   0.75	   6.50	  44.65
 	  970.000	   9.00	   9.00	   0.75	   7.50	  44.65
-1 10000.0 3.31200
+0 0 0.000000 0.000000

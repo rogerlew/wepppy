@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.262693
+#   Build Date: 2021-04-01 15:01:42.772325
 #   Source Data: Surgo
 # 
 # Mukey: 410653
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Olmitz-Zook-Humeston complex, 0 to 5 percent slopes'		'L'	2	0.0900	0.7500	4898730.00	0.0054	3.6721	32.4000
+'Olmitz-Zook-Humeston complex, 0 to 5 percent slopes'		'L'	2	0.0900	0.7500	4898730.00	0.0054	3.6721	6.8722
 	  710.000	  25.50	  25.50	   3.50	  22.50	   5.00
 	 1520.000	  26.00	  26.00	   2.50	  22.50	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

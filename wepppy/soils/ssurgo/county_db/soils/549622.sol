@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.173173
+#   Build Date: 2021-04-01 15:01:45.690035
 #   Source Data: Surgo
 # 
 # Mukey: 549622
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Rosine-Gilpin-Lenberg complex, very rocky, 20 to 30 percent slopes'		'SIL'	5	0.2300	0.7500	5337310.00	0.0169	3.5000	33.0120
+'Rosine-Gilpin-Lenberg complex, very rocky, 20 to 30 percent slopes'		'SIL'	5	0.2300	0.7500	5337310.00	0.0169	3.5000	2.4646
 	  180.000	  13.00	  13.00	   3.00	  11.30	   0.00
 	  530.000	  26.80	  26.80	   0.60	  11.30	  15.00
 	 1370.000	  34.00	  34.00	   0.20	  11.30	  28.00
 	 1620.000	  38.60	  38.60	   0.30	  13.40	  18.40
 	 1870.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.951780
+#   Build Date: 2021-04-01 15:01:44.471212
 #   Source Data: Surgo
 # 
 # Mukey: 390853
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Aledo-Bolar association, 1 to 8 percent slopes'		'GR-CL'	3	0.1600	0.7500	4841100.00	0.0062	3.9820	32.4000
+'Aledo-Bolar association, 1 to 8 percent slopes'		'GR-CL'	3	0.1600	0.7500	4841100.00	0.0062	3.9820	6.6299
 	  100.000	  30.00	  30.00	   2.00	  20.80	  32.84
 	  410.000	  30.00	  30.00	   0.75	  14.40	  78.88
 	 2030.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

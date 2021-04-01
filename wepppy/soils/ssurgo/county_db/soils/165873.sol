@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.245380
+#   Build Date: 2021-04-01 15:01:42.754666
 #   Source Data: Surgo
 # 
 # Mukey: 165873
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Ava silt loam, 2 to 6 percent slopes, eroded'		'SIL'	2	0.3000	0.7500	5171920.00	0.0124	3.5000	33.0120
+'Ava silt loam, 2 to 6 percent slopes, eroded'		'SIL'	2	0.3000	0.7500	5171920.00	0.0124	3.5000	2.2136
 	  200.000	  16.00	  16.00	   2.50	   8.70	   0.00
 	  690.000	  26.00	  26.00	   0.40	  11.30	   0.00
-1 10000.0 1.47600
+0 0 0.000000 0.000000

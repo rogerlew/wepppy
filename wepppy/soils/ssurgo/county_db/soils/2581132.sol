@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.736413
+#   Build Date: 2021-04-01 15:01:45.258899
 #   Source Data: Surgo
 # 
 # Mukey: 2581132
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hamerly-Tonka-Parnell complex, 0 to 3 percent slopes'		'L'	4	0.1600	0.7500	4898730.00	0.0054	3.5096	32.4000
+'Hamerly-Tonka-Parnell complex, 0 to 3 percent slopes'		'L'	4	0.1600	0.7500	4898730.00	0.0054	3.5096	7.5310
 	  200.000	  23.00	  23.00	   4.00	  19.90	   4.96
 	  890.000	  26.00	  26.00	   2.00	  17.80	   6.94
 	 1100.000	  26.00	  26.00	   0.50	  17.60	   9.91
 	 2000.000	  26.00	  26.00	   0.30	  18.00	   9.91
-1 10000.0 27.72000
+0 0 0.000000 0.000000

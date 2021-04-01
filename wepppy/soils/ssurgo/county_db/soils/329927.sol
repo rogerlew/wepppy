@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.907286
+#   Build Date: 2021-04-01 15:01:42.415835
 #   Source Data: Surgo
 # 
 # Mukey: 329927
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Montevallo-Nauvoo association, 6 to 45 percent slopes'		'CN-SIL'	2	0.3000	0.7500	5006530.00	0.0099	3.5000	32.4000
+'Montevallo-Nauvoo association, 6 to 45 percent slopes'		'CN-SIL'	2	0.3000	0.7500	5006530.00	0.0099	3.5000	5.2826
 	  150.000	  19.00	  19.00	   1.25	  11.30	  41.52
 	  410.000	  25.00	  25.00	   0.25	  11.30	  57.07
-1 10000.0 3.24000
+0 0 0.000000 0.000000

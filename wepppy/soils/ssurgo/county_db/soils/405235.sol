@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.154836
+#   Build Date: 2021-04-01 15:01:43.672047
 #   Source Data: Surgo
 # 
 # Mukey: 405235
@@ -58,7 +58,7 @@
 # 
 Any comments:
 1 1
-'Taintor silty clay loam, 0 to 2 percent slopes'		'SICL'	2	0.1600	0.7500	4400100.00	0.0072	3.5000	10.8000
+'Taintor silty clay loam, 0 to 2 percent slopes'		'SICL'	2	0.1600	0.7500	4400100.00	0.0072	3.5000	0.8024
 	  230.000	  30.00	  30.00	   4.00	  24.60	   0.00
 	  410.000	  34.00	  34.00	   3.00	  27.10	   0.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

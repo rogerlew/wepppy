@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.347543
+#   Build Date: 2021-04-01 15:01:43.865028
 #   Source Data: Surgo
 # 
 # Mukey: 290700
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Nassau-Cardigan complex, hilly, very rocky'		'CN-SIL'	2	0.3000	0.7500	4860310.00	0.0053	2.8062	32.4000
+'Nassau-Cardigan complex, hilly, very rocky'		'CN-SIL'	2	0.3000	0.7500	4860310.00	0.0053	2.8062	7.1743
 	  130.000	  12.00	  12.00	   4.00	  11.30	  45.62
 	  410.000	  12.00	  12.00	   1.00	  11.30	  67.20
-1 10000.0 0.78120
+0 0 0.000000 0.000000

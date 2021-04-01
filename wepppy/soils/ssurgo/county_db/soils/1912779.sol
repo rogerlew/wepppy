@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.185436
+#   Build Date: 2021-04-01 15:01:41.692425
 #   Source Data: Surgo
 # 
 # Mukey: 1912779
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Spivey-Santeetlah complex, 30 to 50 percent slopes, very bouldery'		'FLX-L'	2	0.1600	0.7500	5206090.00	0.0058	2.7343	82.8000
+'Spivey-Santeetlah complex, 30 to 50 percent slopes, very bouldery'		'FLX-L'	2	0.1600	0.7500	5206090.00	0.0058	2.7343	9.9571
 	  300.000	  12.50	  12.50	  10.00	  11.30	  62.04
 	 2030.000	  12.50	  12.50	   3.00	  11.30	  64.72
-1 10000.0 82.80000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.628896
+#   Build Date: 2021-04-01 15:01:44.146869
 #   Source Data: Surgo
 # 
 # Mukey: 106582
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Coweta-Bates complex, 1 to 5 percent slopes'		'GR-L'	3	0.0900	0.7500	5033200.00	0.0065	3.2740	101.5992
+'Coweta-Bates complex, 1 to 5 percent slopes'		'GR-L'	3	0.0900	0.7500	5033200.00	0.0065	3.2740	8.2875
 	  230.000	  20.00	  20.00	   2.00	  17.00	  15.45
 	  380.000	  20.00	  20.00	   0.50	  16.20	  37.52
 	  630.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.15992
+0 0 0.000000 0.000000

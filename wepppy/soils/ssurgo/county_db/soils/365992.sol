@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.842358
+#   Build Date: 2021-04-01 15:01:43.358662
 #   Source Data: Surgo
 # 
 # Mukey: 365992
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Duval very fine sandy loam, 1 to 3 percent slopes'		'VFSL'	4	0.1600	0.7500	10412000.00	0.0237	1.1950	100.8000
+'Duval very fine sandy loam, 1 to 3 percent slopes'		'VFSL'	4	0.1600	0.7500	10412000.00	0.0237	1.1950	24.2891
 	  410.000	  13.00	  13.00	   0.75	   7.00	   0.00
 	 1120.000	  26.00	  26.00	   0.40	  13.70	   0.00
 	 1320.000	  24.00	  24.00	   0.20	  12.00	  10.00
 	 2030.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000

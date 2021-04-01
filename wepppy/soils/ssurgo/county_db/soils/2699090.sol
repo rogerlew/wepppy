@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.994840
+#   Build Date: 2021-04-01 15:01:45.510764
 #   Source Data: Surgo
 # 
 # Mukey: 2699090
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Flasher-Vebar-Parshall complex, 9 to 35 percent slopes'		'LFS'	4	0.1600	0.7500	6973410.00	0.0110	1.8432	330.2640
+'Flasher-Vebar-Parshall complex, 9 to 35 percent slopes'		'LFS'	4	0.1600	0.7500	6973410.00	0.0110	1.8432	27.6858
 	   80.000	   7.00	   7.00	   1.50	   6.00	   8.00
 	  230.000	   5.00	   5.00	   1.00	   4.00	   8.00
 	  360.000	   5.00	   5.00	   0.50	   4.00	   7.00
 	 2000.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 13.86000
+0 0 0.000000 0.000000

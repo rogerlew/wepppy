@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.631912
+#   Build Date: 2021-04-01 15:01:44.149924
 #   Source Data: Surgo
 # 
 # Mukey: 333327
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Mantachie soils (bibb) (0 to 2 percent slopes)'		'FSL'	2	0.3000	0.7500	6012910.00	0.0081	2.3282	33.0120
+'Mantachie soils (bibb) (0 to 2 percent slopes)'		'FSL'	2	0.3000	0.7500	6012910.00	0.0081	2.3282	16.7123
 	  300.000	  10.00	  10.00	   2.00	  11.30	  10.76
 	 1570.000	  10.00	  10.00	   0.75	  11.30	  40.48
-1 10000.0 33.01200
+0 0 0.000000 0.000000

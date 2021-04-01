@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.421262
+#   Build Date: 2021-04-01 15:01:42.930999
 #   Source Data: Surgo
 # 
 # Mukey: 568141
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Bude silt loam, 2 to 5 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	5034095.00	0.0102	3.5000	33.0120
+'Bude silt loam, 2 to 5 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	5034095.00	0.0102	3.5000	2.3142
 	  430.000	  18.50	  18.50	   1.25	  11.30	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.559714
+#   Build Date: 2021-04-01 15:01:43.070821
 #   Source Data: Surgo
 # 
 # Mukey: 2535007
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Coulstone-Bender complex, 15 to 50 percent slopes, very stony'		'SPM'	4	0.2300	0.7500	3112200.00	0.0026	3.1390	327.6000
+'Coulstone-Bender complex, 15 to 50 percent slopes, very stony'		'SPM'	4	0.2300	0.7500	3112200.00	0.0026	3.1390	14.0417
 	  150.000	   9.00	   9.00	   2.00	  11.30	  77.28
 	  740.000	  14.00	  14.00	   0.30	  11.30	  75.52
 	 1070.000	  18.00	  18.00	   0.20	   6.30	  73.96
 	 2000.000	  28.00	  28.00	   0.10	  11.30	  70.85
-1 10000.0 72.00000
+0 0 0.000000 0.000000

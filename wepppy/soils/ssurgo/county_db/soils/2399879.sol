@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.893419
+#   Build Date: 2021-04-01 15:01:41.399275
 #   Source Data: Surgo
 # 
 # Mukey: 2399879
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Matewan-Gilpin-Rock outcrop complex, 35 to 80 percent slopes, extremely stony'		'FL-FSL'	4	0.2500	0.7500	5993700.00	0.0132	2.0740	330.1200
+'Matewan-Gilpin-Rock outcrop complex, 35 to 80 percent slopes, extremely stony'		'FL-FSL'	4	0.2500	0.7500	5993700.00	0.0132	2.0740	18.9046
 	  100.000	   6.00	   6.00	   1.00	   4.00	  32.76
 	  530.000	   8.00	   8.00	   0.25	   3.00	  60.31
 	  970.000	   3.00	   3.00	   0.10	   1.00	  61.05
 	 1220.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

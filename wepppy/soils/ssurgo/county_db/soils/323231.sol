@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.542182
+#   Build Date: 2021-04-01 15:01:45.062943
 #   Source Data: Surgo
 # 
 # Mukey: 323231
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Tavares sand, 0 to 5 percent slopes'		'S'	2	0.1600	0.7500	5859230.00	0.0093	1.8546	712.8000
+'Tavares sand, 0 to 5 percent slopes'		'S'	2	0.1600	0.7500	5859230.00	0.0093	1.8546	32.1645
 	  180.000	   2.00	   2.00	   1.50	  11.30	   2.50
 	 2030.000	   1.50	   1.50	   0.18	   1.30	   2.50
-1 10000.0 712.80000
+0 0 0.000000 0.000000

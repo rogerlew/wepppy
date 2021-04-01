@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.750721
+#   Build Date: 2021-04-01 15:01:41.256467
 #   Source Data: Surgo
 # 
 # Mukey: 294407
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Oakville loamy fine sand, undulating'		'LFS'	3	0.4000	0.7500	7607340.00	0.0106	1.5218	331.2000
+'Oakville loamy fine sand, undulating'		'LFS'	3	0.4000	0.7500	7607340.00	0.0106	1.5218	26.5109
 	  180.000	   5.00	   5.00	   2.00	   4.50	   0.00
 	  940.000	   5.00	   5.00	   0.50	   4.00	   0.00
 	 2290.000	   5.00	   5.00	   0.25	   3.80	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

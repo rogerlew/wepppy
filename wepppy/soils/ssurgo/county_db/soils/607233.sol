@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.169891
+#   Build Date: 2021-04-01 15:01:43.687344
 #   Source Data: Surgo
 # 
 # Mukey: 607233
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Grantsburg silt loam, 5 to 10 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Grantsburg silt loam, 5 to 10 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	1.3805
 	  180.000	  19.00	  19.00	   1.75	  14.00	   0.00
 	  530.000	  25.00	  25.00	   0.30	  11.30	   0.00
 	  890.000	  30.00	  30.00	   0.10	  11.30	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

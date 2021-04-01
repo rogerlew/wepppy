@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.142722
+#   Build Date: 2021-04-01 15:01:45.658871
 #   Source Data: Surgo
 # 
 # Mukey: 1481039
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Croatan, Surrency, and Pantego soils, depressional'		'MUCK'	2	0.1600	0.7500	4649000.00	0.0050	2.5450	75.6000
+'Croatan, Surrency, and Pantego soils, depressional'		'MUCK'	2	0.1600	0.7500	4649000.00	0.0050	2.5450	22.8831
 	 1070.000	  14.00	  14.00	  12.50	  11.30	   0.00
 	 2030.000	  22.50	  22.50	   2.75	  11.30	   0.00
-1 10000.0 28.80000
+0 0 0.000000 0.000000

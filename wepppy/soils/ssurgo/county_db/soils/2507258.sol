@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.020022
+#   Build Date: 2021-04-01 15:01:45.536182
 #   Source Data: Surgo
 # 
 # Mukey: 2507258
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Culberspeth-Kahn complex, moist, 1 to 8 percent slopes'		'GR-L'	2	0.1600	0.7500	5148460.00	0.0096	2.8492	32.4000
+'Culberspeth-Kahn complex, moist, 1 to 8 percent slopes'		'GR-L'	2	0.1600	0.7500	5148460.00	0.0096	2.8492	9.8115
 	  190.000	  14.00	  14.00	   1.25	  10.20	  24.00
 	  490.000	  22.00	  22.00	   0.75	  14.90	  16.00
-1 10000.0 1.00800
+0 0 0.000000 0.000000

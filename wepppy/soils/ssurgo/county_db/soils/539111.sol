@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.649318
+#   Build Date: 2021-04-01 15:01:44.167554
 #   Source Data: Surgo
 # 
 # Mukey: 539111
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Oquaga and Lordstown very stony loams, 25 to 70 percent slopes'		'CN-L'	2	0.3000	0.7500	5071620.00	0.0060	3.0674	33.0120
+'Oquaga and Lordstown very stony loams, 25 to 70 percent slopes'		'CN-L'	2	0.3000	0.7500	5071620.00	0.0060	3.0674	9.1833
 	  180.000	  17.00	  17.00	   2.50	  11.30	  56.00
 	  760.000	  17.00	  17.00	   0.50	  11.30	  67.60
-1 10000.0 5.07960
+0 0 0.000000 0.000000

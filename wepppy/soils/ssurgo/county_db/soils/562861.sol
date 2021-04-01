@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.922672
+#   Build Date: 2021-04-01 15:01:42.431372
 #   Source Data: Surgo
 # 
 # Mukey: 562861
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Montevallo-Townley complex, 6 to 15 percent slopes'		'CNV-L'	2	0.3000	0.7500	5071620.00	0.0095	3.0674	33.0120
+'Montevallo-Townley complex, 6 to 15 percent slopes'		'CNV-L'	2	0.3000	0.7500	5071620.00	0.0095	3.0674	9.9868
 	  130.000	  17.00	  17.00	   1.25	   7.00	  43.00
 	  260.000	  25.00	  25.00	   0.50	   7.50	  59.50
-1 10000.0 2.52000
+0 0 0.000000 0.000000

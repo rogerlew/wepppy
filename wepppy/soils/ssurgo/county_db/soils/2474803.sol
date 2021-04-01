@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.371617
+#   Build Date: 2021-04-01 15:01:42.880718
 #   Source Data: Surgo
 # 
 # Mukey: 2474803
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Cathro muck, occasionally ponded, 0 to 1 percent slopes'		'MUCK'	1	0.0200	0.7500	4649000.00	0.0050	2.5450	100.8000
+'Cathro muck, occasionally ponded, 0 to 1 percent slopes'		'MUCK'	1	0.0200	0.7500	4649000.00	0.0050	2.5450	7.3643
 	 2000.000	  25.00	  25.00	   0.25	   7.80	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

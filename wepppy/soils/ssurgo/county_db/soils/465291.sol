@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.154432
+#   Build Date: 2021-04-01 15:01:45.670881
 #   Source Data: Surgo
 # 
 # Mukey: 465291
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Millerton-Millsholm-Agua Dulce families association, 30 to 60 percent slopes'		'SL'	3	0.3639	0.7500	4783470.00	0.0091	2.8944	100.8000
+'Millerton-Millsholm-Agua Dulce families association, 30 to 60 percent slopes'		'SL'	3	0.3639	0.7500	4783470.00	0.0091	2.8944	18.6030
 	  100.000	  13.00	  13.00	   1.25	  10.00	  17.00
 	  460.000	  20.00	  20.00	   0.50	  10.00	  19.49
 	  560.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

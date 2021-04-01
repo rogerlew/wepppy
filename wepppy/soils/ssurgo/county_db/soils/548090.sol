@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.679511
+#   Build Date: 2021-04-01 15:01:45.200511
 #   Source Data: Surgo
 # 
 # Mukey: 548090
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Porters gravelly loam, 30 to 50 percent slopes, stony'		'GR-L'	2	0.2300	0.7500	5090830.00	0.0057	2.9966	100.8000
+'Porters gravelly loam, 30 to 50 percent slopes, stony'		'GR-L'	2	0.2300	0.7500	5090830.00	0.0057	2.9966	8.4635
 	  230.000	  16.00	  16.00	  10.00	  26.50	  30.16
 	 1370.000	  16.00	  16.00	   0.50	   5.10	  14.50
-1 10000.0 0.12600
+0 0 0.000000 0.000000

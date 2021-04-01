@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.386448
+#   Build Date: 2021-04-01 15:01:44.906978
 #   Source Data: Surgo
 # 
 # Mukey: 1700117
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Detroit silt loam, 0 to 1 percent slopes'		'SIL'	2	0.0900	0.7500	4730880.00	0.0080	3.5000	32.4000
+'Detroit silt loam, 0 to 1 percent slopes'		'SIL'	2	0.0900	0.7500	4730880.00	0.0080	3.5000	1.4848
 	  160.000	  24.00	  24.00	   3.00	  20.10	   0.00
 	  400.000	  26.00	  26.00	   2.00	  21.20	   0.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

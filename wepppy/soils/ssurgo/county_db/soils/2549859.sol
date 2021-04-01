@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.613772
+#   Build Date: 2021-04-01 15:01:42.121577
 #   Source Data: Surgo
 # 
 # Mukey: 2549859
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Telos-Chesuncook-Ragmuff association, 3 to 15 percent slopes, very stony'		'HPM'	3	0.1700	0.7500	4649000.00	0.0050	2.5450	126.0000
+'Telos-Chesuncook-Ragmuff association, 3 to 15 percent slopes, very stony'		'HPM'	3	0.1700	0.7500	4649000.00	0.0050	2.5450	6.5053
 	  130.000	  14.00	  14.00	   2.80	  11.30	  11.00
 	  330.000	  14.00	  14.00	   5.20	  11.30	  22.24
 	  480.000	  15.00	  15.00	   1.25	  11.30	   9.00
-1 10000.0 2.55600
+0 0 0.000000 0.000000

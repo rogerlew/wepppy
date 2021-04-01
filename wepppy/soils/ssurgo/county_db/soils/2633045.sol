@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.138829
+#   Build Date: 2021-04-01 15:01:45.654913
 #   Source Data: Surgo
 # 
 # Mukey: 2633045
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Venango silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	5116790.00	0.0114	3.5000	36.0000
+'Venango silt loam, 3 to 8 percent slopes'		'SIL'	2	0.3000	0.7500	5116790.00	0.0114	3.5000	4.0244
 	  200.000	  17.00	  17.00	   4.20	  11.30	  10.00
 	  520.000	  23.00	  23.00	   0.57	  11.30	  11.00
-1 10000.0 0.36000
+0 0 0.000000 0.000000

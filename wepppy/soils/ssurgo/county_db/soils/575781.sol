@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.812034
+#   Build Date: 2021-04-01 15:01:42.320925
 #   Source Data: Surgo
 # 
 # Mukey: 575781
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Laneville loam, 0 to 1 percent slopes, frequently flooded'		'L'	3	0.3000	0.7500	8394950.00	0.0118	2.1290	32.4000
+'Laneville loam, 0 to 1 percent slopes, frequently flooded'		'L'	3	0.3000	0.7500	8394950.00	0.0118	2.1290	7.8604
 	  380.000	  18.00	  18.00	   2.00	   9.80	   4.00
 	  560.000	  27.00	  27.00	   0.55	  11.30	   4.00
 	  910.000	  27.00	  27.00	   0.55	  11.30	   4.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

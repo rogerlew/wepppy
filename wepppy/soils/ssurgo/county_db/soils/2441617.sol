@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.780532
+#   Build Date: 2021-04-01 15:01:44.299179
 #   Source Data: Surgo
 # 
 # Mukey: 2441617
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Ramsey-Lily complex, 5 to 20 percent slopes, very rocky'		'SL'	3	0.2300	0.7500	6070540.00	0.0087	2.7008	330.2640
+'Ramsey-Lily complex, 5 to 20 percent slopes, very rocky'		'SL'	3	0.2300	0.7500	6070540.00	0.0087	2.7008	9.7280
 	  130.000	  16.00	  16.00	   1.75	  11.30	   6.94
 	  250.000	  19.00	  19.00	   0.25	  11.30	  14.00
 	  410.000	  18.00	  18.00	   0.25	  11.30	  39.10
-1 10000.0 2.55600
+0 0 0.000000 0.000000

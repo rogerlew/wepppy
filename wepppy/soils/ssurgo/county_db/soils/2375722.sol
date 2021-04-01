@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.933113
+#   Build Date: 2021-04-01 15:01:44.452239
 #   Source Data: Surgo
 # 
 # Mukey: 2375722
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Stovho-Trebor complex, 10 to 40 percent slopes'		'SPM'	3	0.1600	0.7500	4649000.00	0.0050	2.1550	1800.0000
+'Stovho-Trebor complex, 10 to 40 percent slopes'		'SPM'	3	0.1600	0.7500	4649000.00	0.0050	2.1550	2.0982
 	   80.000	  19.00	  19.00	   8.00	  17.00	   3.00
 	  180.000	  16.00	  16.00	   1.75	  13.90	   4.00
 	  230.000	  33.00	  33.00	   0.75	  25.30	   6.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

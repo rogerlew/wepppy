@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.542842
+#   Build Date: 2021-04-01 15:01:43.053559
 #   Source Data: Surgo
 # 
 # Mukey: 2521267
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Marshall silty clay loam, 5 to 9 percent slopes, eroded'		'SICL'	4	0.2300	0.7500	4234710.00	0.0071	3.5000	10.8000
+'Marshall silty clay loam, 5 to 9 percent slopes, eroded'		'SICL'	4	0.2300	0.7500	4234710.00	0.0071	3.5000	0.7593
 	  170.000	  33.00	  33.00	   3.00	  27.20	   0.00
 	 1500.000	  29.00	  29.00	   0.80	  22.40	   0.00
 	 1800.000	  28.00	  28.00	   0.40	  21.80	   0.00
 	 2000.000	  27.00	  27.00	   0.20	  21.90	   0.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

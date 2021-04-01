@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.936037
+#   Build Date: 2021-04-01 15:01:44.455194
 #   Source Data: Surgo
 # 
 # Mukey: 371523
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Mobeetie-Veal-Potter complex, 3 to 20 percent slopes'		'FSL'	3	0.2300	0.7500	5840020.00	0.0165	2.6404	100.8000
+'Mobeetie-Veal-Potter complex, 3 to 20 percent slopes'		'FSL'	3	0.2300	0.7500	5840020.00	0.0165	2.6404	17.9199
 	  250.000	  14.00	  14.00	   0.75	  10.40	   2.00
 	 1070.000	  14.00	  14.00	   0.30	   9.20	   5.00
 	 2030.000	  14.00	  14.00	   0.30	   9.20	   2.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

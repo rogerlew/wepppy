@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.507771
+#   Build Date: 2021-04-01 15:01:44.026533
 #   Source Data: Surgo
 # 
 # Mukey: 429052
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Lacrescent silt loam, rocky, 45 to 70 percent slopes'		'SIL'	3	0.1600	0.7500	4813575.00	0.0084	3.5000	32.4000
+'Lacrescent silt loam, rocky, 45 to 70 percent slopes'		'SIL'	3	0.1600	0.7500	4813575.00	0.0084	3.5000	3.7530
 	  250.000	  22.50	  22.50	   4.00	  19.50	  17.20
 	  810.000	  15.50	  15.50	   1.25	  10.50	  38.75
 	 1520.000	  16.00	  16.00	   0.25	   7.50	  66.40
-1 10000.0 100.80000
+0 0 0.000000 0.000000

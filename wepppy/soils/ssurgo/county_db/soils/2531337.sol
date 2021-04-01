@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.474705
+#   Build Date: 2021-04-01 15:01:43.993068
 #   Source Data: Surgo
 # 
 # Mukey: 2531337
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Lagonda silty clay loam, 5 to 9 percent slopes, eroded'		'SICL'	1	0.1600	0.7500	4515873.00	0.0074	3.5000	9.7200
+'Lagonda silty clay loam, 5 to 9 percent slopes, eroded'		'SICL'	1	0.1600	0.7500	4515873.00	0.0074	3.5000	1.1337
 	  210.000	  27.90	  27.90	   2.75	  22.80	   0.00
-1 10000.0 3.24000
+0 0 0.000000 0.000000

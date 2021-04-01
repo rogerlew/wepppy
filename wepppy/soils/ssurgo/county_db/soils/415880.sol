@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.953616
+#   Build Date: 2021-04-01 15:01:42.462705
 #   Source Data: Surgo
 # 
 # Mukey: 415880
@@ -57,9 +57,9 @@
 # 
 Any comments:
 1 1
-'Wabeno-Goodwit silt loams, 1 to 6 percent slopes, very stony'		'SIL'	4	0.0400	0.7500	5502700.00	0.0250	3.5000	33.0120
+'Wabeno-Goodwit silt loams, 1 to 6 percent slopes, very stony'		'SIL'	4	0.0400	0.7500	5502700.00	0.0250	3.5000	5.2826
 	   80.000	   7.00	   7.00	   6.00	  11.30	  14.50
 	  130.000	   6.00	   6.00	   1.00	  11.30	  12.70
 	  320.000	   6.00	   6.00	   1.50	  11.30	  12.70
 	  660.000	   8.00	   8.00	   0.50	  11.30	  14.64
-1 10000.0 3.31200
+0 0 0.000000 0.000000

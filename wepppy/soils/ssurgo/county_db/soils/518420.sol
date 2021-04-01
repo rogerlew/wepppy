@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.898627
+#   Build Date: 2021-04-01 15:01:41.404576
 #   Source Data: Surgo
 # 
 # Mukey: 518420
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Lehew, Dekalb, and Calvin soils, 45 to 65 percent slopes, very stony'		'CB-SL'	3	0.3600	0.7500	6032120.00	0.0075	2.5499	280.8000
+'Lehew, Dekalb, and Calvin soils, 45 to 65 percent slopes, very stony'		'CB-SL'	3	0.3600	0.7500	6032120.00	0.0075	2.5499	20.0035
 	  380.000	  13.50	  13.50	   2.50	   9.00	  44.00
 	  580.000	  17.00	  17.00	   0.25	   4.80	  77.80
 	  740.000	  17.00	  17.00	   0.25	   4.80	  83.25
-1 10000.0 280.80000
+0 0 0.000000 0.000000

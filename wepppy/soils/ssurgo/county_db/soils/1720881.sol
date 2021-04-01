@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.772696
+#   Build Date: 2021-04-01 15:01:41.278822
 #   Source Data: Surgo
 # 
 # Mukey: 1720881
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Gilpin channery silt loam, 8 to 15 percent slopes'		'CN-SIL'	4	0.2900	0.7500	6032120.00	0.0083	2.2184	33.0120
+'Gilpin channery silt loam, 8 to 15 percent slopes'		'CN-SIL'	4	0.2900	0.7500	6032120.00	0.0083	2.2184	5.8501
 	  200.000	   8.40	   8.40	   1.90	  11.30	  32.85
 	  610.000	  25.30	  25.30	   0.76	  11.30	  37.75
 	  760.000	  25.90	  25.90	   0.76	  11.30	  71.19
 	 1010.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.93600
+0 0 0.000000 0.000000

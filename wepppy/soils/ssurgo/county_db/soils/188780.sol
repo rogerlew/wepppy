@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.563589
+#   Build Date: 2021-04-01 15:01:43.074784
 #   Source Data: Surgo
 # 
 # Mukey: 188780
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hillsdale-Riddles sandy loams, 1 to 6 percent slopes'		'SL'	4	0.3000	0.7500	4994780.00	0.0065	2.5381	100.8000
+'Hillsdale-Riddles sandy loams, 1 to 6 percent slopes'		'SL'	4	0.3000	0.7500	4994780.00	0.0065	2.5381	18.7832
 	  250.000	   8.50	   8.50	   2.00	  10.00	  15.12
 	  380.000	  14.00	  14.00	   0.25	   8.50	  15.12
 	 1600.000	  10.00	  10.00	   0.25	   8.50	  15.12
 	 1680.000	  10.00	  10.00	   0.25	   8.50	  15.12
-1 10000.0 82.80000
+0 0 0.000000 0.000000

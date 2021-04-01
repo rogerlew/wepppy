@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.215971
+#   Build Date: 2021-04-01 15:01:42.724818
 #   Source Data: Surgo
 # 
 # Mukey: 201289
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Winfield silt loam, 5 to 10 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	4841140.00	0.0085	3.5000	33.0120
+'Winfield silt loam, 5 to 10 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	4841140.00	0.0085	3.5000	1.1292
 	  180.000	  22.00	  22.00	   1.50	  18.40	   0.00
 	  840.000	  31.00	  31.00	   0.25	  23.30	   0.00
 	 1520.000	  22.00	  22.00	   0.25	  17.10	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

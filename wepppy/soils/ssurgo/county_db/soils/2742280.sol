@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.387007
+#   Build Date: 2021-04-01 15:01:44.907564
 #   Source Data: Surgo
 # 
 # Mukey: 2742280
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Crofton-Nora complex, 6 to 11 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4675750.00	0.0078	3.5000	32.4000
+'Crofton-Nora complex, 6 to 11 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4675750.00	0.0078	3.5000	1.5196
 	  160.000	  25.00	  25.00	   2.00	  24.80	   0.00
 	  360.000	  25.00	  25.00	   0.50	  21.10	   0.00
 	 2000.000	  24.00	  24.00	   0.25	  17.50	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

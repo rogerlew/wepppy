@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.758745
+#   Build Date: 2021-04-01 15:01:41.264605
 #   Source Data: Surgo
 # 
 # Mukey: 2393502
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Ashe-Edneyville complex, 30 to 50 percent slopes, very rocky'		'GR-FSL'	3	0.2300	0.7500	6032120.00	0.0071	2.5499	100.8000
+'Ashe-Edneyville complex, 30 to 50 percent slopes, very rocky'		'GR-FSL'	3	0.2300	0.7500	6032120.00	0.0071	2.5499	19.4252
 	  130.000	  13.50	  13.50	   4.50	  13.50	  25.00
 	  530.000	  17.00	  17.00	   0.50	   5.40	  28.72
 	  740.000	  10.00	  10.00	   0.50	   3.60	  35.03
-1 10000.0 0.12600
+0 0 0.000000 0.000000

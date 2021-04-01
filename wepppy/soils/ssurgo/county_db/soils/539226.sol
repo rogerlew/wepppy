@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.738466
+#   Build Date: 2021-04-01 15:01:43.249888
 #   Source Data: Surgo
 # 
 # Mukey: 539226
@@ -58,8 +58,8 @@
 # 
 Any comments:
 1 1
-'Cookport silt loam, 0 to 15 percent slopes, extremely stony'		'SPM'	3	0.3700	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Cookport silt loam, 0 to 15 percent slopes, extremely stony'		'SPM'	3	0.3700	0.7500	4649000.00	0.0050	2.5450	5.9976
 	  150.000	  16.00	  16.00	   3.50	  11.30	  20.88
 	  250.000	  17.00	  17.00	   2.00	  11.30	   7.84
 	  610.000	  23.00	  23.00	   0.45	  11.30	  20.80
-1 10000.0 3.31200
+0 0 0.000000 0.000000

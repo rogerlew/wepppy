@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.090418
+#   Build Date: 2021-04-01 15:01:44.610379
 #   Source Data: Surgo
 # 
 # Mukey: 383109
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Quinlan-Rock outcrop-Yomont complex, 0 to 45 percent slopes'		'L'	3	0.2300	0.7500	5033200.00	0.0153	3.3390	33.0246
+'Quinlan-Rock outcrop-Yomont complex, 0 to 45 percent slopes'		'L'	3	0.2300	0.7500	5033200.00	0.0153	3.3390	8.4232
 	  200.000	  21.00	  21.00	   0.75	  13.50	   0.00
 	  360.000	  20.00	  20.00	   0.75	  12.50	   0.00
 	  460.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.15992
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.309330
+#   Build Date: 2021-04-01 15:01:41.816281
 #   Source Data: Surgo
 # 
 # Mukey: 894197
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Dundee-Silverdale, rarely flooded, loamy sands, 0 to 1 percent slopes'		'LS'	4	0.3700	0.7500	6454740.00	0.0232	1.7268	331.2000
+'Dundee-Silverdale, rarely flooded, loamy sands, 0 to 1 percent slopes'		'LS'	4	0.3700	0.7500	6454740.00	0.0232	1.7268	28.7279
 	  230.000	   2.80	   2.80	   0.50	   4.50	   0.00
 	  460.000	  17.00	  17.00	   1.80	  15.00	   0.00
 	 1420.000	  30.80	  30.80	   0.30	  18.00	   0.00
 	 2030.000	  10.50	  10.50	   0.20	  10.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

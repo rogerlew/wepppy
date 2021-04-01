@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.563530
+#   Build Date: 2021-04-01 15:01:41.068260
 #   Source Data: Surgo
 # 
 # Mukey: 329289
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Rough broken land (cecil soil materials)'		'GR-L'	3	0.3000	0.7500	4130330.00	0.0244	3.4166	32.4000
+'Rough broken land (cecil soil materials)'		'GR-L'	3	0.3000	0.7500	4130330.00	0.0244	3.4166	11.7114
 	  100.000	  18.00	  18.00	   0.25	  11.30	  35.60
 	  250.000	  33.00	  33.00	   0.25	  11.30	  31.00
 	  450.000	  16.50	  16.50	   0.25	  11.30	  37.70
-1 10000.0 5.04000
+0 0 0.000000 0.000000

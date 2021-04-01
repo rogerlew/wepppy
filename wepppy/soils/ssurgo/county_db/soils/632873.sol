@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.478053
+#   Build Date: 2021-04-01 15:01:41.985698
 #   Source Data: Surgo
 # 
 # Mukey: 632873
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Minvale-Bodine-Fullerton complex, 25 to 50 percent slopes, stony'		'GR-SICL'	2	0.3600	0.7500	4898730.00	0.0256	3.7046	33.0120
+'Minvale-Bodine-Fullerton complex, 25 to 50 percent slopes, stony'		'GR-SICL'	2	0.3600	0.7500	4898730.00	0.0256	3.7046	7.5938
 	  230.000	  26.00	  26.00	   0.25	  11.30	  12.50
 	 1520.000	  34.00	  34.00	   0.25	  11.30	  39.38
-1 10000.0 33.01200
+0 0 0.000000 0.000000

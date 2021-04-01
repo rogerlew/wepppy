@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.944240
+#   Build Date: 2021-04-01 15:01:42.453184
 #   Source Data: Surgo
 # 
 # Mukey: 1722283
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Gertie silt loam, 0 to 2 percent slopes'		'L'	2	0.1600	0.7500	5061660.00	0.0106	3.5000	32.4000
+'Gertie silt loam, 0 to 2 percent slopes'		'L'	2	0.1600	0.7500	5061660.00	0.0106	3.5000	5.5974
 	  100.000	  18.00	  18.00	   1.25	   7.40	   4.00
 	  230.000	  18.00	  18.00	   0.25	   7.40	   4.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

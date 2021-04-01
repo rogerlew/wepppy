@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.627325
+#   Build Date: 2021-04-01 15:01:42.135339
 #   Source Data: Surgo
 # 
 # Mukey: 58347
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Zyme-Rock outcrop complex, 12 to 65 percent slopes'		'CL'	1	0.2300	0.7500	4303220.00	0.0069	4.6319	10.1520
+'Zyme-Rock outcrop complex, 12 to 65 percent slopes'		'CL'	1	0.2300	0.7500	4303220.00	0.0069	4.6319	4.7123
 	  210.000	  37.50	  37.50	   1.50	  25.50	  17.20
-1 10000.0 3.31200
+0 0 0.000000 0.000000

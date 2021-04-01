@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.196362
+#   Build Date: 2021-04-01 15:01:41.703350
 #   Source Data: Surgo
 # 
 # Mukey: 2715121
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Zahl-Cabba-Maschetah complex, 6 to 70 percent slopes'		'L'	3	0.1600	0.7500	4994780.00	0.0065	3.4156	32.4000
+'Zahl-Cabba-Maschetah complex, 6 to 70 percent slopes'		'L'	3	0.1600	0.7500	4994780.00	0.0065	3.4156	7.9235
 	  130.000	  22.00	  22.00	   2.00	  18.60	   5.92
 	  510.000	  30.00	  30.00	   1.00	  21.70	   5.92
 	 1520.000	  32.00	  32.00	   0.50	  22.60	   5.92
-1 10000.0 10.80000
+0 0 0.000000 0.000000

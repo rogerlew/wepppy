@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.971093
+#   Build Date: 2021-04-01 15:01:44.490925
 #   Source Data: Surgo
 # 
 # Mukey: 171729
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Kokomo silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.2300	0.7500	4344970.00	0.0072	3.5000	10.1520
+'Kokomo silty clay loam, 0 to 2 percent slopes'		'SICL'	3	0.2300	0.7500	4344970.00	0.0072	3.5000	2.6170
 	  280.000	  31.00	  31.00	   4.50	  26.10	   1.00
 	 1040.000	  36.00	  36.00	   1.50	  28.60	   2.00
 	 1630.000	  36.00	  36.00	   1.50	  28.60	   5.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

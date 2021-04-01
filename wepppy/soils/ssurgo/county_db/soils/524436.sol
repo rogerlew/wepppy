@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.397375
+#   Build Date: 2021-04-01 15:01:44.918281
 #   Source Data: Surgo
 # 
 # Mukey: 524436
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Hawthorne gravelly silt loam, 20 to 60 percent slopes'		'SPM'	4	0.3700	0.7500	4649000.00	0.0050	2.5450	327.6000
+'Hawthorne gravelly silt loam, 20 to 60 percent slopes'		'SPM'	4	0.3700	0.7500	4649000.00	0.0050	2.5450	2.7588
 	  130.000	  18.90	  18.90	   2.00	  11.10	  34.00
 	  300.000	  18.90	  18.90	   1.50	   5.30	  33.00
 	  460.000	  19.30	  19.30	   0.25	   4.90	  61.00
 	  660.000	  21.60	  21.60	   0.10	   5.80	  66.00
-1 10000.0 2.55600
+0 0 0.000000 0.000000

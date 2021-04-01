@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.486263
+#   Build Date: 2021-04-01 15:01:41.994008
 #   Source Data: Surgo
 # 
 # Mukey: 1900704
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Culberspeth-Chilicotal complex, 1 to 8 percent slopes'		'GR-L'	2	0.2300	0.7500	5090830.00	0.0095	2.9966	32.4000
+'Culberspeth-Chilicotal complex, 1 to 8 percent slopes'		'GR-L'	2	0.2300	0.7500	5090830.00	0.0095	2.9966	9.3295
 	   60.000	  16.00	  16.00	   1.25	  11.40	  35.00
 	  210.000	  25.00	  25.00	   0.75	  17.10	  37.00
-1 10000.0 1.00800
+0 0 0.000000 0.000000

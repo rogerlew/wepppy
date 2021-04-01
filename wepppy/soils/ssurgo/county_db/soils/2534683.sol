@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.475958
+#   Build Date: 2021-04-01 15:01:43.994316
 #   Source Data: Surgo
 # 
 # Mukey: 2534683
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Rueter very gravelly silt loam, 15 to 35 percent slopes, very stony'		'GRV-SIL'	3	0.3000	0.7500	3419560.00	0.0069	2.7862	100.8000
+'Rueter very gravelly silt loam, 15 to 35 percent slopes, very stony'		'GRV-SIL'	3	0.3000	0.7500	3419560.00	0.0069	2.7862	7.4356
 	   80.000	   5.00	   5.00	   1.25	  10.00	  61.20
 	  360.000	   5.50	   5.50	   0.90	   4.40	  66.05
 	 1140.000	  19.50	  19.50	   0.30	  10.00	  78.85
-1 10000.0 0.86400
+0 0 0.000000 0.000000

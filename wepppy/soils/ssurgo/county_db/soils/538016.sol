@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.554762
+#   Build Date: 2021-04-01 15:01:43.065719
 #   Source Data: Surgo
 # 
 # Mukey: 538016
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Westmoreland-Coshocton silt loams, 15 to 25 percent slopes'		'SIL'	3	0.3000	0.7500	4813575.00	0.0084	3.5000	33.0120
+'Westmoreland-Coshocton silt loams, 15 to 25 percent slopes'		'SIL'	3	0.3000	0.7500	4813575.00	0.0084	3.5000	3.9115
 	  130.000	  22.50	  22.50	   2.50	  11.30	  10.00
 	  940.000	  27.50	  27.50	   0.25	  11.30	  31.00
 	 1650.000	  26.50	  26.50	   0.25	  15.00	  48.25
-1 10000.0 2.70000
+0 0 0.000000 0.000000

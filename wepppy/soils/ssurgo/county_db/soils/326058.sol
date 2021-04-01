@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.135780
+#   Build Date: 2021-04-01 15:01:45.651814
 #   Source Data: Surgo
 # 
 # Mukey: 326058
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Lakeland and Troup soils, 0 to 8 percent slopes'		'S'	2	0.2300	0.7500	4053490.00	0.0138	2.5948	331.2000
+'Lakeland and Troup soils, 0 to 8 percent slopes'		'S'	2	0.2300	0.7500	4053490.00	0.0138	2.5948	31.9889
 	 1090.000	   5.00	   5.00	   0.75	  11.30	   5.00
 	 2030.000	   3.50	   3.50	   0.25	  11.30	   5.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

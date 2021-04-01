@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.876834
+#   Build Date: 2021-04-01 15:01:41.382418
 #   Source Data: Surgo
 # 
 # Mukey: 363504
@@ -55,6 +55,6 @@
 # 
 Any comments:
 1 1
-'Crockett soils, 2 to 5 percent slopes, eroded'		'L'	1	0.2900	0.7500	5878440.00	0.0108	2.6288	32.4000
+'Crockett soils, 2 to 5 percent slopes, eroded'		'L'	1	0.2900	0.7500	5878440.00	0.0108	2.6288	7.8981
 	  210.000	  14.00	  14.00	   1.25	  14.00	   3.00
-1 10000.0 3.27600
+0 0 0.000000 0.000000

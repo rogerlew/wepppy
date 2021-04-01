@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.473388
+#   Build Date: 2021-04-01 15:01:41.980989
 #   Source Data: Surgo
 # 
 # Mukey: 524269
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Muskingum-Sequoia-Petros complex, 30 to 60 percent slopes'		'SIL'	2	0.3600	0.7500	5089225.00	0.0109	3.5000	83.8440
+'Muskingum-Sequoia-Petros complex, 30 to 60 percent slopes'		'SIL'	2	0.3600	0.7500	5089225.00	0.0109	3.5000	5.3055
 	  150.000	  17.50	  17.50	   2.00	  11.30	  21.62
 	  610.000	  22.50	  22.50	   0.25	  11.30	  35.60
-1 10000.0 2.55600
+0 0 0.000000 0.000000

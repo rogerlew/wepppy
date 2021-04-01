@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.766570
+#   Build Date: 2021-04-01 15:01:44.284933
 #   Source Data: Surgo
 # 
 # Mukey: 2514894
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Wolfgap-Derroc-Urban land complex, 0 to 3 percent slopes, rarely flooded'		'L'	3	0.2500	0.7500	5110040.00	0.0058	3.1208	32.4000
+'Wolfgap-Derroc-Urban land complex, 0 to 3 percent slopes, rarely flooded'		'L'	3	0.2500	0.7500	5110040.00	0.0058	3.1208	9.1642
 	  560.000	  18.00	  18.00	   3.00	  11.20	   0.00
 	 1320.000	  20.00	  20.00	   1.00	   7.20	   0.00
 	 1650.000	  12.00	  12.00	   0.50	   4.10	  25.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

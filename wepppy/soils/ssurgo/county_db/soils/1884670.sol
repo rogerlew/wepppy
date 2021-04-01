@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.913662
+#   Build Date: 2021-04-01 15:01:42.422272
 #   Source Data: Surgo
 # 
 # Mukey: 1884670
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Shelocta-Handshoe-Fedscreek complex, 30 to 60 percent slopes, stony'		'SPM'	3	0.2300	0.7500	0.00	0.0000	0.0000	331.2000
+'Shelocta-Handshoe-Fedscreek complex, 30 to 60 percent slopes, stony'		'SPM'	3	0.2300	0.7500	0.00	0.0000	0.0000	5.3055
 	   80.000	  17.50	  17.50	   2.75	  11.30	   5.95
 	  990.000	  25.00	  25.00	   0.50	  11.30	  24.31
 	 1290.000	  26.00	  26.00	   0.25	  11.30	  57.22
-1 10000.0 3.24000
+0 0 0.000000 0.000000

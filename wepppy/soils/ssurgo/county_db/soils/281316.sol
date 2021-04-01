@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.728757
+#   Build Date: 2021-04-01 15:01:45.251019
 #   Source Data: Surgo
 # 
 # Mukey: 281316
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Vergennes clay, 2 to 6 percent slopes'		'C'	1	0.2300	0.7500	2828895.00	0.0069	3.5000	8.3819
+'Vergennes clay, 2 to 6 percent slopes'		'C'	1	0.2300	0.7500	2828895.00	0.0069	3.5000	0.4275
 	  210.000	  58.50	  58.50	   4.00	  31.10	   0.00
-1 10000.0 2.54016
+0 0 0.000000 0.000000

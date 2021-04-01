@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.868106
+#   Build Date: 2021-04-01 15:01:45.391010
 #   Source Data: Surgo
 # 
 # Mukey: 120452
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Appling-Wedowee sandy loams, 7 to 15 percent slopes, eroded'		'SL'	3	0.3600	0.7500	4783470.00	0.0091	2.8619	100.8000
+'Appling-Wedowee sandy loams, 7 to 15 percent slopes, eroded'		'SL'	3	0.3600	0.7500	4783470.00	0.0091	2.8619	20.7679
 	  230.000	  12.50	  12.50	   1.25	   4.10	   2.00
 	 1190.000	  47.50	  47.50	   0.25	   5.30	   0.00
 	 2000.000	  15.00	  15.00	   0.00	   1.50	  15.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

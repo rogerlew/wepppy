@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.988322
+#   Build Date: 2021-04-01 15:01:45.504253
 #   Source Data: Surgo
 # 
 # Mukey: 149345
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Waldbillig-Bata-Upsata families, complex, glacial moraines'		'SPM'	4	0.3000	0.7500	5206090.00	0.0058	2.5718	1342.8000
+'Waldbillig-Bata-Upsata families, complex, glacial moraines'		'SPM'	4	0.3000	0.7500	5206090.00	0.0058	2.5718	10.3315
 	  110.000	  10.00	  10.00	   4.00	   9.40	  37.90
 	  260.000	  10.00	  10.00	   2.50	   9.20	  37.90
 	 1100.000	  12.50	  12.50	   0.75	  10.70	  64.30
 	 1520.000	  12.50	  12.50	   0.25	  10.30	  65.35
-1 10000.0 100.80000
+0 0 0.000000 0.000000

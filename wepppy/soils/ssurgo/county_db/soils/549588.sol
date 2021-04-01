@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.398894
+#   Build Date: 2021-04-01 15:01:44.919798
 #   Source Data: Surgo
 # 
 # Mukey: 549588
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hammack-Baxter complex, karst, 6 to 12 percent slopes, eroded'		'SIL'	4	0.3000	0.7500	4868705.00	0.0087	3.5000	33.0120
+'Hammack-Baxter complex, karst, 6 to 12 percent slopes, eroded'		'SIL'	4	0.3000	0.7500	4868705.00	0.0087	3.5000	2.3232
 	  230.000	  21.50	  21.50	   2.60	   7.70	   8.00
 	  690.000	  28.00	  28.00	   0.30	   9.80	   2.50
 	 1020.000	  33.00	  33.00	   0.20	  11.30	  63.62
 	 2180.000	  74.00	  74.00	   0.20	  11.30	  22.50
-1 10000.0 33.01200
+0 0 0.000000 0.000000

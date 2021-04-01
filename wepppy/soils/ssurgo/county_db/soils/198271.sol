@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.679842
+#   Build Date: 2021-04-01 15:01:43.190455
 #   Source Data: Surgo
 # 
 # Mukey: 198271
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Celina silt loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	4951400.00	0.0094	3.5000	10.1520
+'Celina silt loam, 2 to 6 percent slopes'		'SIL'	2	0.3700	0.7500	4951400.00	0.0094	3.5000	4.6887
 	  230.000	  20.00	  20.00	   2.00	  10.80	   0.00
 	  970.000	  36.00	  36.00	   0.75	  19.10	   3.00
-1 10000.0 0.86400
+0 0 0.000000 0.000000

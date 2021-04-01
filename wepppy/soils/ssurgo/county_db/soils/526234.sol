@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.720258
+#   Build Date: 2021-04-01 15:01:43.231373
 #   Source Data: Surgo
 # 
 # Mukey: 526234
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Bouldery colluvium, allen soil material (bouldin)'		'STV-SL'	2	0.3600	0.7500	4725840.00	0.0075	3.0418	101.6280
+'Bouldery colluvium, allen soil material (bouldin)'		'STV-SL'	2	0.3600	0.7500	4725840.00	0.0075	3.0418	17.7563
 	  460.000	  15.00	  15.00	   1.50	  11.30	  51.00
 	 1520.000	  30.00	  30.00	   0.20	  11.30	  74.15
-1 10000.0 101.62800
+0 0 0.000000 0.000000

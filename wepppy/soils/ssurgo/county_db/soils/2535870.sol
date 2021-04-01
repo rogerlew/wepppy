@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.233595
+#   Build Date: 2021-04-01 15:01:44.753472
 #   Source Data: Surgo
 # 
 # Mukey: 2535870
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Ocie-Gatewood complex, 15 to 35 percent slopes, very stony'		'GR-SIL'	3	0.3000	0.7500	5392440.00	0.0191	3.5000	32.4000
+'Ocie-Gatewood complex, 15 to 35 percent slopes, very stony'		'GR-SIL'	3	0.3000	0.7500	5392440.00	0.0191	3.5000	2.9720
 	  130.000	  12.00	  12.00	   2.00	  13.00	  44.00
 	  280.000	  11.00	  11.00	   0.90	   8.00	  52.00
 	  610.000	  25.00	  25.00	   0.50	  15.00	  58.60
-1 10000.0 3.60000
+0 0 0.000000 0.000000

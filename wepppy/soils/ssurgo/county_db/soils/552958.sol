@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.413259
+#   Build Date: 2021-04-01 15:01:42.922445
 #   Source Data: Surgo
 # 
 # Mukey: 552958
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Garmon channery silt loam, 25 to 80 percent slopes, rocky'		'CN-SIL'	2	0.3000	0.7500	5116790.00	0.0114	3.5000	101.6280
+'Garmon channery silt loam, 25 to 80 percent slopes, rocky'		'CN-SIL'	2	0.3000	0.7500	5116790.00	0.0114	3.5000	3.6245
 	   80.000	  17.00	  17.00	   2.06	   7.70	  26.00
 	  660.000	  26.00	  26.00	   0.65	   8.00	  37.90
-1 10000.0 2.55600
+0 0 0.000000 0.000000

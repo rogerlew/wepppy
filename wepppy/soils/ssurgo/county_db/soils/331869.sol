@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.066190
+#   Build Date: 2021-04-01 15:01:44.585654
 #   Source Data: Surgo
 # 
 # Mukey: 331869
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Adaton silt loam, 0 to 2 percent slopes'		'SIL'	1	0.3000	0.7500	5337310.00	0.0169	3.5000	33.0120
+'Adaton silt loam, 0 to 2 percent slopes'		'SIL'	1	0.3000	0.7500	5337310.00	0.0169	3.5000	2.6274
 	  210.000	  13.00	  13.00	   2.00	  11.30	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

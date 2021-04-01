@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.107132
+#   Build Date: 2021-04-01 15:01:44.627317
 #   Source Data: Surgo
 # 
 # Mukey: 3057230
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Leonard silt loam, 1 to 6 percent slopes, eroded'		'SIL'	1	0.2300	0.7500	4675750.00	0.0078	3.5000	32.4000
+'Leonard silt loam, 1 to 6 percent slopes, eroded'		'SIL'	1	0.2300	0.7500	4675750.00	0.0078	3.5000	1.0717
 	  210.000	  25.00	  25.00	   2.70	  20.70	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.150583
+#   Build Date: 2021-04-01 15:01:45.666959
 #   Source Data: Surgo
 # 
 # Mukey: 374451
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Tehran-Letney association, hilly'		'LS'	2	0.2300	0.7500	5686340.00	0.0163	2.1018	331.2000
+'Tehran-Letney association, hilly'		'LS'	2	0.2300	0.7500	5686340.00	0.0163	2.1018	24.0955
 	 1300.000	   5.00	   5.00	   0.75	  11.30	   2.50
 	 1910.000	  25.00	  25.00	   0.30	  11.30	   2.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

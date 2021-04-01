@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.316225
+#   Build Date: 2021-04-01 15:01:41.823212
 #   Source Data: Surgo
 # 
 # Mukey: 148040
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Mannixlee-Clunton, frequently flooded-Meadowcreek complex, 0 to 4 percent slopes'		'PEAT'	5	0.1600	0.7500	4649000.00	0.0050	2.5450	108.0000
+'Mannixlee-Clunton, frequently flooded-Meadowcreek complex, 0 to 4 percent slopes'		'PEAT'	5	0.1600	0.7500	4649000.00	0.0050	2.5450	5.3499
 	  230.000	  23.00	  23.00	   5.00	  20.00	   0.00
 	  630.000	  28.00	  28.00	   3.00	  23.50	   0.00
 	 1140.000	  22.00	  22.00	   1.50	  18.40	  21.80
 	 1320.000	  10.00	  10.00	   0.75	   8.80	  14.56
 	 1500.000	   8.00	   8.00	   0.25	   6.90	  74.08
-1 10000.0 360.00000
+0 0 0.000000 0.000000

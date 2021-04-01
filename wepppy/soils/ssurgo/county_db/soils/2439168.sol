@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.572454
+#   Build Date: 2021-04-01 15:01:45.093921
 #   Source Data: Surgo
 # 
 # Mukey: 2439168
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Christian-Baxter complex, 5 to 20 percent slopes, eroded'		'SIL'	3	0.3600	0.7500	4675750.00	0.0078	3.5000	101.6280
+'Christian-Baxter complex, 5 to 20 percent slopes, eroded'		'SIL'	3	0.3600	0.7500	4675750.00	0.0078	3.5000	3.5698
 	  130.000	  25.00	  25.00	   1.50	  11.30	  10.27
 	  360.000	  32.50	  32.50	   0.25	  11.30	  28.75
 	 1650.000	  50.00	  50.00	   0.25	  11.30	  28.75
-1 10000.0 33.01200
+0 0 0.000000 0.000000

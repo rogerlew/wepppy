@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.175770
+#   Build Date: 2021-04-01 15:01:45.692658
 #   Source Data: Surgo
 # 
 # Mukey: 346067
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Midway-Thedalund complex, hilly'		'SICL'	1	0.3000	0.7500	4207145.00	0.0071	3.5000	10.8000
+'Midway-Thedalund complex, hilly'		'SICL'	1	0.3000	0.7500	4207145.00	0.0071	3.5000	2.3301
 	  210.000	  33.50	  33.50	   0.75	  22.50	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

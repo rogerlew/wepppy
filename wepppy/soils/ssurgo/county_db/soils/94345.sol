@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.003545
+#   Build Date: 2021-04-01 15:01:43.520774
 #   Source Data: Surgo
 # 
 # Mukey: 94345
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Wiley complex, 0 to 3 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Wiley complex, 0 to 3 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4896270.00	0.0089	3.5000	2.1350
 	   80.000	  21.00	  21.00	   0.75	  12.50	   0.00
 	  580.000	  26.50	  26.50	   0.25	  15.00	   0.00
 	 1520.000	  26.50	  26.50	   0.25	  12.50	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

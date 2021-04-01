@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.796887
+#   Build Date: 2021-04-01 15:01:44.315802
 #   Source Data: Surgo
 # 
 # Mukey: 363899
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Renfrow-Kirkland-Anocon association, nearly level'		'L'	3	0.2300	0.7500	5052410.00	0.0066	3.3007	100.8000
+'Renfrow-Kirkland-Anocon association, nearly level'		'L'	3	0.2300	0.7500	5052410.00	0.0066	3.3007	8.5021
 	  330.000	  20.50	  20.50	   2.00	  14.00	   2.50
 	 1370.000	  42.50	  42.50	   0.75	  22.50	   2.50
 	 2030.000	  32.50	  32.50	   0.25	  18.50	   5.00
-1 10000.0 9.72000
+0 0 0.000000 0.000000

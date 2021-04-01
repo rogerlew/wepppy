@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.501804
+#   Build Date: 2021-04-01 15:01:44.020506
 #   Source Data: Surgo
 # 
 # Mukey: 55625
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Bluepoint loamy fine sand, 1 to 9 percent slopes'		'LFS'	4	0.3000	0.7500	7607340.00	0.0202	1.4568	330.2640
+'Bluepoint loamy fine sand, 1 to 9 percent slopes'		'LFS'	4	0.3000	0.7500	7607340.00	0.0202	1.4568	27.2238
 	  120.000	   4.00	   4.00	   0.70	   3.40	   9.00
 	  710.000	   4.00	   4.00	   0.30	   3.20	   8.00
 	 1340.000	   4.00	   4.00	   0.30	   3.20	   8.00
 	 1520.000	   4.00	   4.00	   0.30	   3.20	   8.00
-1 10000.0 330.26400
+0 0 0.000000 0.000000

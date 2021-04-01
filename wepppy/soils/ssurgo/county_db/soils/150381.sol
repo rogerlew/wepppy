@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.595194
+#   Build Date: 2021-04-01 15:01:41.100505
 #   Source Data: Surgo
 # 
 # Mukey: 150381
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'PICO/VASC Islandpark-PSMEG/SYAL Potrmound-PICO/ARTRV Spliten complex, 0 to 35 percent slopes'		'ASHY-SIL'	5	0.2300	0.7500	5502700.00	0.0250	3.5000	32.4000
+'PICO/VASC Islandpark-PSMEG/SYAL Potrmound-PICO/ARTRV Spliten complex, 0 to 35 percent slopes'		'ASHY-SIL'	5	0.2300	0.7500	5502700.00	0.0250	3.5000	3.6929
 	  150.000	   9.50	   9.50	   3.50	  11.30	   0.00
 	  910.000	   9.50	   9.50	   0.50	  11.30	   7.00
 	 1650.000	  11.50	  11.50	   0.25	  10.00	  10.00
 	 1900.000	  29.50	  29.50	   0.25	  17.50	  10.00
 	 2150.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

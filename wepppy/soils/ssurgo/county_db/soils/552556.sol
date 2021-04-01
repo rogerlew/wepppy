@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.023595
+#   Build Date: 2021-04-01 15:01:43.540950
 #   Source Data: Surgo
 # 
 # Mukey: 552556
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Frederick silt loam, 6 to 12 percent slopes'		'SIL'	3	0.3000	0.7500	4841140.00	0.0085	3.5000	101.6280
+'Frederick silt loam, 6 to 12 percent slopes'		'SIL'	3	0.3000	0.7500	4841140.00	0.0085	3.5000	3.6574
 	  250.000	  22.00	  22.00	   1.50	  11.30	   4.00
 	  410.000	  38.00	  38.00	   0.50	  11.30	   4.00
 	 1780.000	  55.00	  55.00	   0.25	  11.30	   8.82
-1 10000.0 33.01200
+0 0 0.000000 0.000000

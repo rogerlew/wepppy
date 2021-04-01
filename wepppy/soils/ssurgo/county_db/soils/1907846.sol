@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.836812
+#   Build Date: 2021-04-01 15:01:43.352927
 #   Source Data: Surgo
 # 
 # Mukey: 1907846
@@ -52,6 +52,6 @@
 # 
 Any comments:
 1 1
-'Wheaton-Glenelg complex, 2 to 7 percent slopes'		'FSL'	1	0.3600	0.7500	5609500.00	0.0141	2.9050	9.7200
+'Wheaton-Glenelg complex, 2 to 7 percent slopes'		'FSL'	1	0.3600	0.7500	5609500.00	0.0141	2.9050	12.0186
 	  230.000	  17.00	  17.00	   0.88	   5.60	   5.00
-1 10000.0 4.32000
+0 0 0.000000 0.000000
