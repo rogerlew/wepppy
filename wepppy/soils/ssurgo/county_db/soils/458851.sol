@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.863521
+#   Build Date: 2021-04-01 12:52:30.101268
 #   Source Data: Surgo
 # 
 # Mukey: 458851
 # Major Component: 14656078 (comppct_r = 85.0)
-# Texture: sand loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42193877   Oi              2.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
-#  42193878   Oe              4.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
+#  42193877   Oi     X        2.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
+#  42193878   Oe     X        4.0    28.0         -           -           1.4     7.0    66.8    10.0     7.0
 #  42193873   A1             12.0     9.0        0.0         3.0         1.43    20.0    42.1    12.2     1.5
 #  42193874   A2             42.0     9.0        0.0         3.0         1.43    20.0    42.1    12.2     1.5
 #  42193875   Bw             75.0     9.0        0.0         8.0         1.43    20.0    42.1    12.2    0.75
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,11 +56,9 @@
 # 
 Any comments:
 1 1
-'Sheetiron gravelly loam, 30 to 50 percent slopes, MLRA 5'		'N/A'	6	0.2500	0.7500	4649000.00	0.0050	2.5450	100.8000
-	   20.000	  66.80	   7.00	   7.00	  11.30	  55.50
-	   40.000	  66.80	   7.00	   7.00	  11.30	  55.50
-	  120.000	  42.10	  20.00	   1.50	  17.50	  41.80
-	  420.000	  42.10	  20.00	   1.50	  17.50	  41.80
-	  750.000	  42.10	  20.00	   0.75	  12.50	  60.90
-	 1000.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Sheetiron gravelly loam, 30 to 50 percent slopes, MLRA 5'		'N/A'	4	0.2500	0.7500	4649000.00	0.0050	2.5450	100.8000
+	  120.000	  20.00	  20.00	   1.50	  17.50	  41.80
+	  420.000	  20.00	  20.00	   1.50	  17.50	  41.80
+	  750.000	  20.00	  20.00	   0.75	  12.50	  60.90
+	 1000.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 255.60000

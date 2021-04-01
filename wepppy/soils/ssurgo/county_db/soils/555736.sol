@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.148209
+#   Build Date: 2021-04-01 12:52:29.357193
 #   Source Data: Surgo
 # 
 # Mukey: 555736
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44058338   Oi              2.0    92.0        0.0         0.0          0.1     0.0     0.0     0.0    69.0
+#  44058338   Oi     X        2.0    92.0        0.0         0.0          0.1     0.0     0.0     0.0    69.0
 #  44058339   A               8.0   28.23        0.0        13.0         1.35    20.8    27.0     5.7     2.5
 #  44058341   Bw             33.0   28.23        0.0         7.0         1.47    20.0    35.0     6.8    0.65
 #  44058340   R              58.0    21.0        0.0         0.0          1.4     7.0    66.8    10.0     7.0
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Weikert-Berks very channery silt loams, 25 to 70 percent slopes'		'SPM'	4	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
-	   20.000	   0.00	   0.00	  69.00	  11.30	  55.50
-	   80.000	  27.00	  20.80	   2.50	  11.30	  61.72
-	  330.000	  35.00	  20.00	   0.65	  11.30	  73.96
-	  580.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Weikert-Berks very channery silt loams, 25 to 70 percent slopes'		'SPM'	3	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
+	   80.000	  20.80	  20.80	   2.50	  11.30	  61.72
+	  330.000	  20.00	  20.00	   0.65	  11.30	  73.96
+	  580.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 75.60000

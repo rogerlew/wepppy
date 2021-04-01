@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.454376
+#   Build Date: 2021-04-01 12:52:31.776904
 #   Source Data: Surgo
 # 
 # Mukey: 2525400
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45473166   Oe              3.0    92.0        0.0         0.0         0.15     0.0     0.0     0.0    60.0
+#  45473166   Oe     X        3.0    92.0        0.0         0.0         0.15     0.0     0.0     0.0    60.0
 #  45473163   A               8.0    23.0        0.0        15.0          1.4    15.0    25.0    10.0     1.0
 #  45473162   Bw             56.0    23.0        0.0        17.0          1.4    20.0    25.0    10.0    0.25
 #  45473164   C              66.0    28.0        0.0        42.0          1.4    20.0    25.0    10.0    0.25
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Berks-Weikert complex, 35 to 60 percent slopes'		'MPM'	5	0.3600	0.7500	0.00	0.0000	0.0000	331.2000
-	   30.000	   0.00	   0.00	  60.00	  11.30	  55.50
-	   80.000	  25.00	  15.00	   1.00	   6.00	  31.15
-	  560.000	  25.00	  20.00	   0.25	   5.50	  50.20
-	  660.000	  25.00	  20.00	   0.25	   5.50	  84.92
-	  910.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Berks-Weikert complex, 35 to 60 percent slopes'		'MPM'	4	0.3600	0.7500	0.00	0.0000	0.0000	331.2000
+	   80.000	  15.00	  15.00	   1.00	   6.00	  31.15
+	  560.000	  20.00	  20.00	   0.25	   5.50	  50.20
+	  660.000	  20.00	  20.00	   0.25	   5.50	  84.92
+	  910.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 7.20000

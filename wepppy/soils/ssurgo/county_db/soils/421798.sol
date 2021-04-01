@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.457787
+#   Build Date: 2021-04-01 12:52:32.831476
 #   Source Data: Surgo
 # 
 # Mukey: 421798
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43868956   Oe              2.0    70.0        0.0         0.0         0.24     7.0    66.8    10.0    80.0
+#  43868956   Oe     X        2.0    70.0        0.0         0.0         0.24     7.0    66.8    10.0    80.0
 #  43868954   A               7.0    92.0        0.0         0.0         1.65     3.0    92.0    10.0     2.0
 #  43868955   Bw1            17.0    92.0        0.0         0.0         1.66     3.0    93.0     7.0     0.5
 #  43868957   Bw2            63.0    92.0        0.0         0.0         1.64     2.0    94.0     6.0    0.25
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,11 +56,10 @@
 # 
 Any comments:
 1 1
-'Simescreek sand, 0 to 3 percent slopes'		'MPM'	6	0.1700	0.7500	4649000.00	0.0050	2.5450	252.0000
-	   20.000	  66.80	   7.00	  80.00	  11.30	  55.50
-	   70.000	  92.00	   3.00	   2.00	  11.30	   0.00
-	  170.000	  93.00	   3.00	   0.50	  11.30	   0.00
-	  630.000	  94.00	   2.00	   0.25	  11.30	   0.00
-	  830.000	  95.00	   2.00	   0.25	  11.30	   0.00
-	 2000.000	  96.00	   2.00	   0.25	  11.30	   0.00
+'Simescreek sand, 0 to 3 percent slopes'		'MPM'	5	0.1700	0.7500	4649000.00	0.0050	2.5450	252.0000
+	   70.000	   3.00	   3.00	   2.00	  11.30	   0.00
+	  170.000	   3.00	   3.00	   0.50	  11.30	   0.00
+	  630.000	   2.00	   2.00	   0.25	  11.30	   0.00
+	  830.000	   2.00	   2.00	   0.25	  11.30	   0.00
+	 2000.000	   2.00	   2.00	   0.25	  11.30	   0.00
 1 10000.0 331.20000

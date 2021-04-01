@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.768494
+#   Build Date: 2021-04-01 12:52:32.106563
 #   Source Data: Surgo
 # 
 # Mukey: 2501593
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42938795   Oi              2.0    91.0        0.0         0.0          0.3     9.9    13.6     2.8    50.0
+#  42938795   Oi     X        2.0    91.0        0.0         0.0          0.3     9.9    13.6     2.8    50.0
 #  42938797   A              10.0     9.0        0.0         0.0         1.32     9.9    13.6     2.8     2.0
 #  42938793   E              20.0     9.0        0.0         0.0         1.48    11.3    10.2     2.5     1.0
 #  42938796   Bt1            56.0     9.0        5.0         6.0         1.47    29.0    15.8     2.6     0.2
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Alred-Rueter complex, 15 to 35 percent slopes, very stony'		'SPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	327.6000
-	   20.000	  13.60	   9.90	  50.00	  11.30	  55.50
-	  100.000	  13.60	   9.90	   2.00	  11.30	  33.00
-	  200.000	  10.20	  11.30	   1.00	  11.30	  30.00
-	  560.000	  15.80	  29.00	   0.20	  11.30	  60.84
+'Alred-Rueter complex, 15 to 35 percent slopes, very stony'		'SPM'	3	0.2300	0.7500	5502700.00	0.0250	3.5000	327.6000
+	  100.000	   9.90	   9.90	   2.00	  11.30	  33.00
+	  200.000	  11.30	  11.30	   1.00	  11.30	  30.00
+	  560.000	  29.00	  29.00	   0.20	  11.30	  60.84
 1 10000.0 3.24000

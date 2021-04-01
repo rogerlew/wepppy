@@ -2,22 +2,20 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.866365
+#   Build Date: 2021-04-01 12:52:29.061211
 #   Source Data: Surgo
 # 
 # Mukey: 309452
-# Major Component: 15345809 (comppct_r = 1.0)
-# Texture: silt loam
+# Major Component: 15345811 (comppct_r = 1.0)
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44429148   Oi1             3.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
-#  44429149   Oi2             6.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
-#  44429147   Oe             18.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
-#  44429150   Oa1            29.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
-#  44429151   Oa2            51.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
-#  44429152   Oa3           173.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
-#  44429153   Oa4           213.0    23.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
+#  44429155   Oi     X        3.0    50.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
+#  44429156   Oe     X       12.0    50.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
+#  44429154   Oa     X       64.0    50.0        0.0         0.0          0.4     0.0     0.0     0.0    65.0
+#  44429158   2Cg           142.0    91.5        0.0         5.0         1.58     2.0    90.0     5.0     0.5
+#  44429157   2C            153.0    91.5        0.0         5.0         1.58     2.0    90.0     5.0     0.5
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -45,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,12 +55,7 @@
 # 
 Any comments:
 1 1
-'Water'		'PEAT'	7	0.0100	0.7500	0.00	0.0000	0.0000	82.8000
-	   30.000	   0.00	   0.00	  65.00	  11.30	  55.50
-	   60.000	   0.00	   0.00	  65.00	  11.30	  55.50
-	  180.000	   0.00	   0.00	  65.00	  11.30	  55.50
-	  290.000	   0.00	   0.00	  65.00	  11.30	  55.50
-	  510.000	   0.00	   0.00	  65.00	  11.30	  55.50
-	 1730.000	   0.00	   0.00	  65.00	  11.30	  55.50
-	 2130.000	   0.00	   0.00	  65.00	  11.30	  55.50
-1 10000.0 82.80000
+'Water'		'PEAT'	2	0.0100	0.7500	0.00	0.0000	0.0000	180.0000
+	 1420.000	   2.00	   2.00	   0.50	  11.30	  28.75
+	 1530.000	   2.00	   2.00	   0.50	  11.30	  28.75
+1 10000.0 329.40000

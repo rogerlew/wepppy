@@ -2,17 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.432915
+#   Build Date: 2021-04-01 12:52:30.705133
 #   Source Data: Surgo
 # 
 # Mukey: 426083
-# Major Component: 15310480 (comppct_r = 90.0)
+# Major Component: 15310483 (comppct_r = 2.0)
 # Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44313341   Oep            20.0   23.29        0.0         0.0         0.22     0.0     0.0     0.0    67.0
-#  44313342   Oe            200.0   23.29        0.0         0.0         0.19     0.0     0.0     0.0    75.0
+#  44313344   Oep    X       28.0   23.29        0.0         0.0         0.23     0.0     0.0     0.0    73.0
+#  44313346   Oe     X       71.0   23.29        0.0         0.0         0.23     0.0     0.0     0.0    73.0
+#  44313345   2C            200.0     8.0        0.0         0.0          1.6    10.0    15.0     9.2     2.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +53,6 @@
 # 
 Any comments:
 1 1
-'Houghton mucky peat, 0 to 2 percent slopes'		'MPT'	2	0.0400	0.7500	0.00	0.0000	0.0000	83.8440
-	  200.000	   0.00	   0.00	  67.00	  11.30	  55.50
-	 2000.000	   0.00	   0.00	  75.00	  11.30	  55.50
-1 10000.0 83.84400
+'Houghton mucky peat, 0 to 2 percent slopes'		'MPT'	1	0.0900	0.7500	0.00	0.0000	0.0000	83.8440
+	 2000.000	  10.00	  10.00	   2.00	   9.70	   0.00
+1 10000.0 28.80000

@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.114637
+#   Build Date: 2021-04-01 12:52:29.322903
 #   Source Data: Surgo
 # 
 # Mukey: 777780
 # Major Component: 15546627 (comppct_r = 90.0)
-# Texture: silt loam
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45074648   Oi              5.0    92.0        0.0         0.0         0.18     1.0     0.0     0.0    85.0
+#  45074648   Oi     X        5.0    92.0        0.0         0.0         0.18     1.0     0.0     0.0    85.0
 #  45074649   A              10.0   91.74        0.0         0.0          1.2     1.5    93.5     6.9     3.0
 #  45074650   E              66.0   91.74        0.0         0.0         1.65     1.0    93.0     6.9     0.0
 #  45074651   Bhs            86.0   91.74        0.0         0.0         1.65     3.5    90.0     6.9     1.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Atsion sand, 0 to 2 percent slopes, Northern Tidewater Area'		'PEAT'	5	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
-	   50.000	   0.00	   1.00	  85.00	  11.30	  55.50
-	  100.000	  93.50	   1.50	   3.00	  11.30	   7.00
-	  660.000	  93.00	   1.00	   0.00	  11.30	   5.00
-	  860.000	  90.00	   3.50	   1.50	  11.30	   5.00
-	 2030.000	  91.50	   3.50	   0.25	  11.30	   5.00
+'Atsion sand, 0 to 2 percent slopes, Northern Tidewater Area'		'PEAT'	4	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
+	  100.000	   1.50	   1.50	   3.00	  11.30	   7.00
+	  660.000	   1.00	   1.00	   0.00	  11.30	   5.00
+	  860.000	   3.50	   3.50	   1.50	  11.30	   5.00
+	 2030.000	   3.50	   3.50	   0.25	  11.30	   5.00
 1 10000.0 330.26400

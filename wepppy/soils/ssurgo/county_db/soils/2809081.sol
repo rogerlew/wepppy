@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.541305
+#   Build Date: 2021-04-01 12:52:29.770083
 #   Source Data: Surgo
 # 
 # Mukey: 2809081
 # Major Component: 14420089 (comppct_r = 60.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41530287   Oe              3.0   100.0        0.0         0.0          0.2     7.0    66.8    10.0    75.0
+#  41530287   Oe     X        3.0   100.0        0.0         0.0          0.2     7.0    66.8    10.0    75.0
 #  41530284   E               4.0    10.0        6.0        19.0          0.8    14.0    21.0     6.7     2.5
 #  41530285   Bw1            15.0    10.0        6.0        19.0          0.8    14.0    21.0     6.7     2.5
 #  41530286   Bw2            43.0    10.0        7.0        27.0          0.8    14.0    21.0     6.7    0.75
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,10 +56,9 @@
 # 
 Any comments:
 1 1
-'Typic Haplocryands-Rock outcrop complex, cirque headwalls'		'MPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	360.0000
-	   30.000	  66.80	   7.00	  75.00	  11.30	  55.50
-	   40.000	  21.00	  14.00	   2.50	  11.30	  73.00
-	  150.000	  21.00	  14.00	   2.50	  11.30	  73.00
-	  430.000	  21.00	  14.00	   0.75	  11.30	  78.22
-	  900.000	  66.00	  14.00	   0.50	  11.30	  80.92
+'Typic Haplocryands-Rock outcrop complex, cirque headwalls'		'MPM'	4	0.3000	0.7500	4649000.00	0.0050	2.5450	360.0000
+	   40.000	  14.00	  14.00	   2.50	  11.30	  73.00
+	  150.000	  14.00	  14.00	   2.50	  11.30	  73.00
+	  430.000	  14.00	  14.00	   0.75	  11.30	  78.22
+	  900.000	  14.00	  14.00	   0.50	  11.30	  80.92
 1 10000.0 1.44000

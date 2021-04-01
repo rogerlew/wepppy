@@ -2,18 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.309312
+#   Build Date: 2021-04-01 12:52:30.576398
 #   Source Data: Surgo
 # 
 # Mukey: 189999
-# Major Component: 15593836 (comppct_r = 85.0)
-# Texture: silt loam
+# Major Component: 15593837 (comppct_r = 5.0)
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45231981   Oa1            30.0    21.7        0.0         0.0         0.35    40.0    10.0     2.1    82.5
-#  45231982   Oa2            61.0    21.7        0.0         0.0         0.18    25.0    10.0     2.1    87.5
-#  45231983   Oe            152.0    23.0        0.0         0.0         0.14    25.0    10.0     2.1    92.5
+#  45231984   Oa1    X       23.0    21.7        0.0         0.0         0.35    40.0    10.0     2.1    82.5
+#  45231985   Oa2    X       58.0    21.7        0.0         0.0         0.18    25.0    10.0     2.1    87.5
+#  45231986   H3            152.0     7.7        0.0         3.0          1.6    20.0    42.1    12.1    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Carbondale muck, 0 to 2 percent slopes'		'MUCK'	3	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
-	  300.000	  10.00	  40.00	  82.50	 156.00	  55.50
-	  610.000	  10.00	  25.00	  87.50	 162.10	  55.50
-	 1520.000	  10.00	  25.00	  92.50	 128.30	  55.50
-1 10000.0 82.80000
+'Carbondale muck, 0 to 2 percent slopes'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
+	 1520.000	  20.00	  20.00	   0.25	   7.00	  19.97
+1 10000.0 27.72000

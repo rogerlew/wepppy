@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.582570
+#   Build Date: 2021-04-01 12:52:30.856339
 #   Source Data: Surgo
 # 
 # Mukey: 516104
 # Major Component: 15109191 (comppct_r = 35.0)
-# Texture: sand loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43681365   Oi              3.0    92.0         -           -          0.07     7.0    66.8    10.0    85.0
-#  43681366   Oe              5.0    92.0         -           -          0.18     7.0    66.8    10.0    70.0
+#  43681365   Oi     X        3.0    92.0         -           -          0.07     7.0    66.8    10.0    85.0
+#  43681366   Oe     X        5.0    92.0         -           -          0.18     7.0    66.8    10.0    70.0
 #  43681368   A              10.0    9.17        0.0         9.0         1.15    20.0    37.0    10.7     3.8
 #  43681369   BA+Bt1-3         137.0    9.17        0.0         5.0         1.45    24.0    37.0    11.0    0.75
 #  43681367   C             165.0   23.29        0.0        13.0         1.45    22.0    39.0    11.1    0.37
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,10 +57,8 @@
 # 
 Any comments:
 1 1
-'Pineville-Gilpin-Laidig association, very steep, extremely stony'		'SPM'	5	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  85.00	  80.00	  55.50
-	   50.000	  66.80	   7.00	  70.00	  80.00	  55.50
-	  100.000	  37.00	  20.00	   3.80	  13.20	  38.58
-	 1370.000	  37.00	  24.00	   0.75	  10.40	  38.25
-	 1650.000	  39.00	  22.00	   0.37	   7.90	  56.50
+'Pineville-Gilpin-Laidig association, very steep, extremely stony'		'SPM'	3	0.0000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  100.000	  20.00	  20.00	   3.80	  13.20	  38.58
+	 1370.000	  24.00	  24.00	   0.75	  10.40	  38.25
+	 1650.000	  22.00	  22.00	   0.37	   7.90	  56.50
 1 10000.0 83.84400
