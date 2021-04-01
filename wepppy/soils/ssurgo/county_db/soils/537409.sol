@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.547046
+#   Build Date: 2021-04-01 15:01:43.057872
 #   Source Data: Surgo
 # 
 # Mukey: 537409
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Westmoreland-Guernsey silt loams, benched, 40 to 70 percent slopes'		'SIL'	4	0.3000	0.7500	4813575.00	0.0084	3.5000	33.0120
+'Westmoreland-Guernsey silt loams, benched, 40 to 70 percent slopes'		'SIL'	4	0.3000	0.7500	4813575.00	0.0084	3.5000	4.3774
 	  100.000	  22.50	  22.50	   2.50	  11.30	  10.00
 	  810.000	  27.50	  27.50	   0.25	  11.30	  31.00
 	 1170.000	  27.00	  27.00	   0.25	  15.00	  48.25
 	 1270.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.39800
+0 0 0.000000 0.000000

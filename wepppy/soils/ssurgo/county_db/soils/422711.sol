@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.686006
+#   Build Date: 2021-04-01 15:01:45.207080
 #   Source Data: Surgo
 # 
 # Mukey: 422711
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hortonville fine sandy loam, 2 to 6 percent slopes'		'FSL'	4	0.3000	0.7500	4610580.00	0.0110	2.6866	32.4000
+'Hortonville fine sandy loam, 2 to 6 percent slopes'		'FSL'	4	0.3000	0.7500	4610580.00	0.0110	2.6866	18.4184
 	  230.000	   9.00	   9.00	   1.00	   4.90	   3.00
 	  310.000	  25.40	  25.40	   0.40	  13.40	   5.00
 	  710.000	  29.80	  29.80	   0.31	  15.60	  12.70
 	 2000.000	  16.20	  16.20	   0.09	   7.30	  15.61
-1 10000.0 32.40000
+0 0 0.000000 0.000000

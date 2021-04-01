@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.829392
+#   Build Date: 2021-04-01 15:01:43.345366
 #   Source Data: Surgo
 # 
 # Mukey: 121853
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Appling coarse sandy loam, undulating phase'		'COSL'	4	0.8100	0.7500	4091910.00	0.0080	3.0707	100.8000
+'Appling coarse sandy loam, undulating phase'		'COSL'	4	0.8100	0.7500	4091910.00	0.0080	3.0707	20.9491
 	  300.000	  12.50	  12.50	   1.25	   4.10	  17.55
 	  680.000	  39.00	  39.00	   0.25	   4.50	   7.85
 	 1090.000	  35.00	  35.00	   0.25	   4.10	   7.85
 	 1500.000	  20.00	  20.00	   0.10	   2.20	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.911529
+#   Build Date: 2021-04-01 15:01:41.417742
 #   Source Data: Surgo
 # 
 # Mukey: 330699
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Hartsells (Nauvoo) fine sandy loam, 2 to 6 percent slopes, eroded'		'FSL'	3	0.3000	0.7500	5743970.00	0.0106	2.8969	100.8000
+'Hartsells (Nauvoo) fine sandy loam, 2 to 6 percent slopes, eroded'		'FSL'	3	0.3000	0.7500	5743970.00	0.0106	2.8969	16.5413
 	  180.000	  17.50	  17.50	   1.25	  11.30	   4.00
 	  610.000	  26.50	  26.50	   0.75	  11.30	   9.00
 	 1100.000	  22.50	  22.50	   0.25	  11.30	  17.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

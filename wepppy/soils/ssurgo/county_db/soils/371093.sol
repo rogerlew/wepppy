@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.951212
+#   Build Date: 2021-04-01 15:01:44.470638
 #   Source Data: Surgo
 # 
 # Mukey: 371093
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Sherm clay loam, 0 to 1 percent slopes'		'CL'	1	0.1600	0.7500	4649000.00	0.0059	4.3000	9.7200
+'Sherm clay loam, 0 to 1 percent slopes'		'CL'	1	0.1600	0.7500	4649000.00	0.0059	4.3000	5.3433
 	  210.000	  34.00	  34.00	   2.00	  27.50	   0.00
-1 10000.0 1.98000
+0 0 0.000000 0.000000

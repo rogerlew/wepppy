@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.013143
+#   Build Date: 2021-04-01 15:01:41.518896
 #   Source Data: Surgo
 # 
 # Mukey: 749409
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Yancopin silty clay loam, 0 to 3 percent slopes, frequently flooded'		'SICL'	3	0.2300	0.7500	4207145.00	0.0071	3.5000	9.7200
+'Yancopin silty clay loam, 0 to 3 percent slopes, frequently flooded'		'SICL'	3	0.2300	0.7500	4207145.00	0.0071	3.5000	1.3039
 	  100.000	  33.50	  33.50	   2.00	  17.50	   0.00
 	 1420.000	  30.00	  30.00	   0.75	  17.50	   0.00
 	 1930.000	  30.00	  30.00	   0.55	  17.50	   0.00
-1 10000.0 28.80000
+0 0 0.000000 0.000000

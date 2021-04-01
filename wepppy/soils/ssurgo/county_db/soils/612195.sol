@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.347967
+#   Build Date: 2021-04-01 15:01:41.855453
 #   Source Data: Surgo
 # 
 # Mukey: 612195
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Typic Vitricryands-Andic Haplocryods complex, till substratum, 25 to 75 percent slopes'		'ASHY-SIL'	4	0.2300	0.7500	4725840.00	0.0052	2.5218	100.8000
+'Typic Vitricryands-Andic Haplocryods complex, till substratum, 25 to 75 percent slopes'		'ASHY-SIL'	4	0.2300	0.7500	4725840.00	0.0052	2.5218	5.8317
 	  120.000	   7.00	   7.00	   3.00	  20.00	   5.00
 	  390.000	   7.00	   7.00	   3.00	  20.00	  23.50
 	  540.000	   5.00	   5.00	   2.00	  20.00	  32.00
 	  730.000	   2.50	   2.50	   0.25	   3.00	  57.50
-1 10000.0 0.18000
+0 0 0.000000 0.000000

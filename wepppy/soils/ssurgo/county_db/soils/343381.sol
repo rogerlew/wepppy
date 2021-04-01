@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.517492
+#   Build Date: 2021-04-01 15:01:44.036346
 #   Source Data: Surgo
 # 
 # Mukey: 343381
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Cambeth-Cabbart-Yawdim complex, 15 to 25 percent slopes'		'SIL'	4	0.2300	0.7500	4730880.00	0.0080	3.5000	32.4000
+'Cambeth-Cabbart-Yawdim complex, 15 to 25 percent slopes'		'SIL'	4	0.2300	0.7500	4730880.00	0.0080	3.5000	3.8993
 	   80.000	  24.00	  24.00	   2.00	  12.40	   0.00
 	  280.000	  26.00	  26.00	   0.75	  13.20	   0.00
 	  810.000	  26.00	  26.00	   0.75	  11.70	   0.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

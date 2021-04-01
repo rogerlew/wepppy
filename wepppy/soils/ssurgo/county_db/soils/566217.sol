@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.225020
+#   Build Date: 2021-04-01 15:01:44.744771
 #   Source Data: Surgo
 # 
 # Mukey: 566217
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Carnasaw-Townley association, steep'		'GR-SIL'	2	0.2300	0.7500	4923835.00	0.0091	3.5000	32.4000
+'Carnasaw-Townley association, steep'		'GR-SIL'	2	0.2300	0.7500	4923835.00	0.0091	3.5000	4.7089
 	   80.000	  20.50	  20.50	   1.25	  11.30	  36.25
 	  210.000	  39.00	  39.00	   0.25	  11.30	  14.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

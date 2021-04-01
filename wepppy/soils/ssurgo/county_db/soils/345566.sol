@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.741667
+#   Build Date: 2021-04-01 15:01:41.247184
 #   Source Data: Surgo
 # 
 # Mukey: 345566
@@ -57,7 +57,7 @@
 # 
 Any comments:
 1 1
-'Phillips-Kevin complex, 2 to 8 percent slopes'		'L'	2	0.2300	0.7500	5916860.00	0.0079	3.1372	32.4000
+'Phillips-Kevin complex, 2 to 8 percent slopes'		'L'	2	0.2300	0.7500	5916860.00	0.0079	3.1372	7.9037
 	   50.000	  22.00	  22.00	   2.00	  18.40	  11.73
 	  210.000	  19.00	  19.00	   1.50	  16.10	  10.76
-1 10000.0 3.27600
+0 0 0.000000 0.000000

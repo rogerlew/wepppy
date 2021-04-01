@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.885696
+#   Build Date: 2021-04-01 15:01:43.402870
 #   Source Data: Surgo
 # 
 # Mukey: 190385
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Klacking-McGinn loamy sands, 8 to 50 percent slopes, dissected'		'LS'	3	0.1600	0.7500	5071620.00	0.0081	2.4174	331.2000
+'Klacking-McGinn loamy sands, 8 to 50 percent slopes, dissected'		'LS'	3	0.1600	0.7500	5071620.00	0.0081	2.4174	26.5023
 	   80.000	   7.00	   7.00	   1.50	  11.30	   7.50
 	  680.000	   5.00	   5.00	   0.25	   1.80	   7.50
 	 1520.000	   8.50	   8.50	   0.25	   3.10	   7.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

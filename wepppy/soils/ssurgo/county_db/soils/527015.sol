@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.473932
+#   Build Date: 2021-04-01 15:01:41.981539
 #   Source Data: Surgo
 # 
 # Mukey: 527015
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Hawthorne-Sulphura association, 20 to 60 percent slopes'		'GR-SIL'	2	0.4200	0.7500	5006530.00	0.0099	3.5000	101.6280
+'Hawthorne-Sulphura association, 20 to 60 percent slopes'		'GR-SIL'	2	0.4200	0.7500	5006530.00	0.0099	3.5000	4.8375
 	  150.000	  19.00	  19.00	   2.00	  11.30	  32.55
 	  840.000	  22.00	  22.00	   0.25	  11.30	  67.81
-1 10000.0 2.55600
+0 0 0.000000 0.000000

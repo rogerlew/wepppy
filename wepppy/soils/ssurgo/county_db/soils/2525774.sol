@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.065719
+#   Build Date: 2021-04-01 15:01:44.585178
 #   Source Data: Surgo
 # 
 # Mukey: 2525774
@@ -57,8 +57,8 @@
 # 
 Any comments:
 1 1
-'Belfield-Daglum complex, 0 to 2 percent slopes'		'SIL'	3	0.1600	0.7500	4786010.00	0.0082	3.5000	46.3500
+'Belfield-Daglum complex, 0 to 2 percent slopes'		'SIL'	3	0.1600	0.7500	4786010.00	0.0082	3.5000	1.9177
 	  180.000	  23.00	  23.00	   4.00	  24.00	   0.00
 	  250.000	  23.00	  23.00	   4.00	  24.00	   0.00
 	  330.000	  30.00	  30.00	   3.00	  27.00	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

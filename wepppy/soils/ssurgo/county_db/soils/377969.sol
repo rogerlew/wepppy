@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.966627
+#   Build Date: 2021-04-01 15:01:42.475867
 #   Source Data: Surgo
 # 
 # Mukey: 377969
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Pantex silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.0900	0.7500	4185093.00	0.0071	3.5000	9.7200
+'Pantex silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.0900	0.7500	4185093.00	0.0071	3.5000	1.5828
 	  210.000	  33.90	  33.90	   2.40	  23.90	   0.00
-1 10000.0 2.16000
+0 0 0.000000 0.000000

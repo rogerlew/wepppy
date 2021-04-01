@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.790122
+#   Build Date: 2021-04-01 15:01:42.298729
 #   Source Data: Surgo
 # 
 # Mukey: 498265
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Ustic Torriorthents, bouldery-Rock outcrop complex, 35 to 90 percent slopes'		'BYV-SL'	3	0.1600	0.7500	4783470.00	0.0076	2.8944	101.5920
+'Ustic Torriorthents, bouldery-Rock outcrop complex, 35 to 90 percent slopes'		'BYV-SL'	3	0.1600	0.7500	4783470.00	0.0076	2.8944	18.5878
 	  100.000	  13.00	  13.00	   1.50	  10.10	  71.00
 	  180.000	  13.00	  13.00	   0.25	   8.80	  84.78
 	  460.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 3.31200
+0 0 0.000000 0.000000

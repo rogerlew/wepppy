@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.903277
+#   Build Date: 2021-04-01 15:01:41.409303
 #   Source Data: Surgo
 # 
 # Mukey: 514855
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Matewan-Pineville-Guyandotte association, very steep, extremely stony'		'CNV-MPM'	4	0.2300	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Matewan-Pineville-Guyandotte association, very steep, extremely stony'		'CNV-MPM'	4	0.2300	0.7500	4649000.00	0.0050	2.5450	17.8005
 	  100.000	  10.00	  10.00	   3.00	  11.30	  54.57
 	  200.000	   9.00	   9.00	   1.00	  11.30	  58.20
 	  760.000	  20.00	  20.00	   0.50	  11.30	  66.08
 	  840.000	  10.00	  10.00	   0.25	  11.30	  79.33
-1 10000.0 0.18000
+0 0 0.000000 0.000000

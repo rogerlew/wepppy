@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.325211
+#   Build Date: 2021-04-01 15:01:41.832427
 #   Source Data: Surgo
 # 
 # Mukey: 697516
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Downer loamy sand, 0 to 5 percent slopes, Northern Tidewater Area'		'LS'	5	0.1500	0.7500	3381140.00	0.0069	2.6938	330.2640
+'Downer loamy sand, 0 to 5 percent slopes, Northern Tidewater Area'		'LS'	5	0.1500	0.7500	3381140.00	0.0069	2.6938	30.4550
 	  250.000	   3.40	   3.40	   1.25	   1.90	   5.00
 	  410.000	   5.00	   5.00	   0.25	   1.80	   8.00
 	  710.000	  14.00	  14.00	   0.10	   4.20	   8.00
 	 1220.000	   3.00	   3.00	   0.00	   1.50	  16.00
 	 2030.000	   5.00	   5.00	   0.00	   1.50	  16.00
-1 10000.0 279.46800
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.910294
+#   Build Date: 2021-04-01 15:01:41.416470
 #   Source Data: Surgo
 # 
 # Mukey: 330467
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Kinston-Mooreville complex, 0 to 1 percent slopes, frequently flooded'		'FSL'	3	0.3000	0.7500	5955280.00	0.0071	2.4431	100.8000
+'Kinston-Mooreville complex, 0 to 1 percent slopes, frequently flooded'		'FSL'	3	0.3000	0.7500	5955280.00	0.0071	2.4431	14.6375
 	  180.000	  11.50	  11.50	   3.50	  11.30	   1.00
 	 1470.000	  26.50	  26.50	   1.50	  11.30	   2.50
 	 2030.000	   8.00	   8.00	   0.25	  11.30	   2.50
-1 10000.0 331.20000
+0 0 0.000000 0.000000

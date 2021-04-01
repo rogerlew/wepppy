@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.787757
+#   Build Date: 2021-04-01 15:01:44.306524
 #   Source Data: Surgo
 # 
 # Mukey: 362421
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Bluegrove fine sandy loam, 1 to 5 percent slopes'		'FSL'	3	0.2300	0.7500	5974490.00	0.0086	2.6648	100.8000
+'Bluegrove fine sandy loam, 1 to 5 percent slopes'		'FSL'	3	0.2300	0.7500	5974490.00	0.0086	2.6648	19.2375
 	  200.000	  15.00	  15.00	   1.75	  10.00	   1.00
 	  740.000	  43.50	  43.50	   1.25	  22.50	   5.42
 	 1140.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000

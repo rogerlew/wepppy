@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.007644
+#   Build Date: 2021-04-01 15:01:45.523664
 #   Source Data: Surgo
 # 
 # Mukey: 68664
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Roloff-Bakeoven-Rock outcrop complex, 0 to 15 percent slopes'		'SIL'	4	0.2300	0.7500	4668210.00	0.0074	2.7342	32.4000
+'Roloff-Bakeoven-Rock outcrop complex, 0 to 15 percent slopes'		'SIL'	4	0.2300	0.7500	4668210.00	0.0074	2.7342	6.1987
 	  200.000	  10.00	  10.00	   1.50	  11.50	  10.27
 	  380.000	  10.00	  10.00	   0.75	  11.50	  19.25
 	  580.000	  10.00	  10.00	   0.25	  11.50	  31.12
 	  680.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

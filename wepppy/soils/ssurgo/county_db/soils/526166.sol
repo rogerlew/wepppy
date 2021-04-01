@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.478746
+#   Build Date: 2021-04-01 15:01:41.986404
 #   Source Data: Surgo
 # 
 # Mukey: 526166
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Fullerton gravelly silt loam, 5 to 12 percent slopes, eroded'		'GR-SIL'	5	0.3000	0.7500	4813575.00	0.0084	3.5000	33.0120
+'Fullerton gravelly silt loam, 5 to 12 percent slopes, eroded'		'GR-SIL'	5	0.3000	0.7500	4813575.00	0.0084	3.5000	4.8414
 	   50.000	  22.50	  22.50	   1.25	   8.30	  32.10
 	  300.000	  27.40	  27.40	   0.75	  11.30	  32.10
 	  480.000	  35.00	  35.00	   0.25	  11.30	  43.36
 	 1520.000	  55.00	  55.00	   0.25	  11.30	  40.48
 	 2290.000	  55.00	  55.00	   0.25	  11.30	  42.80
-1 10000.0 33.01200
+0 0 0.000000 0.000000

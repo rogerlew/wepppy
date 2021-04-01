@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.569540
+#   Build Date: 2021-04-01 15:01:41.074323
 #   Source Data: Surgo
 # 
 # Mukey: 565732
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Clarksville very cherty silt loam, 20 to 40 percent slopes'		'GRV-SIL'	3	0.2300	0.7500	5116790.00	0.0114	3.5000	100.8000
+'Clarksville very cherty silt loam, 20 to 40 percent slopes'		'GRV-SIL'	3	0.2300	0.7500	5116790.00	0.0114	3.5000	6.4815
 	  360.000	  17.00	  17.00	   1.25	   6.00	  71.30
 	 1830.000	  30.00	  30.00	   0.25	   6.00	  69.55
 	 1930.000	  57.50	  57.50	   0.25	   6.00	  65.20
-1 10000.0 32.40000
+0 0 0.000000 0.000000

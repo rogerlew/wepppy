@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.010023
+#   Build Date: 2021-04-01 15:01:45.526008
 #   Source Data: Surgo
 # 
 # Mukey: 626018
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Lithnip-Rock outcrop-Fishsnooze complex, 30 to 75 percent slopes'		'GRX-SL'	2	0.3000	0.7500	4764260.00	0.0076	2.9652	100.8000
+'Lithnip-Rock outcrop-Fishsnooze complex, 30 to 75 percent slopes'		'GRX-SL'	2	0.3000	0.7500	4764260.00	0.0076	2.9652	18.0202
 	   30.000	  14.00	  14.00	   1.50	  12.50	  83.00
 	  210.000	  15.00	  15.00	   0.75	  12.50	  71.50
-1 10000.0 0.01800
+0 0 0.000000 0.000000

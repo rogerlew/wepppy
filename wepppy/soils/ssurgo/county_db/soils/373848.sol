@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.782137
+#   Build Date: 2021-04-01 15:01:42.290663
 #   Source Data: Surgo
 # 
 # Mukey: 373848
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Katy fine sandy loam, 0 to 1 percent slopes'		'FSL'	3	0.3000	0.7500	6934990.00	0.0136	1.8158	32.4000
+'Katy fine sandy loam, 0 to 1 percent slopes'		'FSL'	3	0.3000	0.7500	6934990.00	0.0136	1.8158	13.0763
 	  300.000	   6.40	   6.40	   1.10	  11.30	   0.00
 	  640.000	   8.50	   8.50	   0.80	  11.30	   0.00
 	  710.000	  24.00	  24.00	   0.50	  11.30	   0.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.782991
+#   Build Date: 2021-04-01 15:01:44.301687
 #   Source Data: Surgo
 # 
 # Mukey: 2481790
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Mattaponi-Urban land complex, 0 to 6 percent slopes'		'L'	2	0.2500	0.7500	4956360.00	0.0093	2.7447	82.8000
+'Mattaponi-Urban land complex, 0 to 6 percent slopes'		'L'	2	0.2500	0.7500	4956360.00	0.0093	2.7447	18.6993
 	  330.000	  11.50	  11.50	   1.25	   5.80	   6.00
 	 1830.000	  40.00	  40.00	   0.00	  10.00	  15.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

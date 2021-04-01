@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.891964
+#   Build Date: 2021-04-01 15:01:41.397815
 #   Source Data: Surgo
 # 
 # Mukey: 508208
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Rock outcrop-Starley family complex, 30 to 70 percent slopes'		'CBV-L'	3	0.1600	0.7500	4994780.00	0.0059	3.4481	33.0120
+'Rock outcrop-Starley family complex, 30 to 70 percent slopes'		'CBV-L'	3	0.1600	0.7500	4994780.00	0.0059	3.4481	7.5670
 	  150.000	  22.50	  22.50	   2.50	  18.00	  61.65
 	  380.000	  22.50	  22.50	   1.50	  15.00	  76.50
 	  480.000	  22.50	  22.50	   0.75	  15.00	  76.50
-1 10000.0 0.01800
+0 0 0.000000 0.000000

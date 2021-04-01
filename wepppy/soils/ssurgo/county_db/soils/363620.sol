@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.380578
+#   Build Date: 2021-04-01 15:01:44.900995
 #   Source Data: Surgo
 # 
 # Mukey: 363620
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Throck-Speck association, undulating'		'ST-CL'	1	0.1600	0.7500	4668210.00	0.0089	4.3592	9.7200
+'Throck-Speck association, undulating'		'ST-CL'	1	0.1600	0.7500	4668210.00	0.0089	4.3592	5.4904
 	  210.000	  35.00	  35.00	   1.25	  25.00	  38.40
-1 10000.0 3.60000
+0 0 0.000000 0.000000

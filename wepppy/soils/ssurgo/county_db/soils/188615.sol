@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.002314
+#   Build Date: 2021-04-01 15:01:43.519511
 #   Source Data: Surgo
 # 
 # Mukey: 188615
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Williamstown-Conover complex, 1 to 6 percent slopes'		'L'	3	0.3000	0.7500	5052410.00	0.0066	3.2682	32.4000
+'Williamstown-Conover complex, 1 to 6 percent slopes'		'L'	3	0.3000	0.7500	5052410.00	0.0066	3.2682	8.4918
 	  250.000	  20.00	  20.00	   2.00	  14.50	   0.00
 	  840.000	  29.50	  29.50	   0.25	  15.50	  10.00
 	 1520.000	  21.00	  21.00	   0.25	  11.00	   3.48
-1 10000.0 9.72000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.252419
+#   Build Date: 2021-04-01 15:01:44.772586
 #   Source Data: Surgo
 # 
 # Mukey: 140117
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Turbeville-Urban land complex, 2 to 6 percent slopes'		'FSL'	3	0.4900	0.7500	6262640.00	0.0114	2.2853	100.8000
+'Turbeville-Urban land complex, 2 to 6 percent slopes'		'FSL'	3	0.4900	0.7500	6262640.00	0.0114	2.2853	20.1161
 	  280.000	  10.50	  10.50	   1.25	   5.40	  10.90
 	 1570.000	  40.50	  40.50	   0.75	   9.80	  10.90
 	 1780.000	  25.00	  25.00	   0.25	  11.80	  27.25
-1 10000.0 32.40000
+0 0 0.000000 0.000000

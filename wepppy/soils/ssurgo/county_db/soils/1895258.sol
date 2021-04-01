@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.658243
+#   Build Date: 2021-04-01 15:01:42.166695
 #   Source Data: Surgo
 # 
 # Mukey: 1895258
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Middleburg loam, 2 to 7 percent slopes, frequently flooded'		'SIL'	3	0.3600	0.7500	4879520.00	0.0057	3.2229	100.8000
+'Middleburg loam, 2 to 7 percent slopes, frequently flooded'		'SIL'	3	0.3600	0.7500	4879520.00	0.0057	3.2229	7.8171
 	  230.000	  18.50	  18.50	   2.50	  12.10	   5.00
 	 1220.000	  30.00	  30.00	   0.25	  10.20	  10.00
 	 1550.000	  18.50	  18.50	   0.10	   6.70	   5.00
-1 10000.0 72.00000
+0 0 0.000000 0.000000

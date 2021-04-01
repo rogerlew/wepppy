@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.111319
+#   Build Date: 2021-04-01 15:01:44.631558
 #   Source Data: Surgo
 # 
 # Mukey: 543201
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Urban land-Duffield complex, 0 to 8 percent slopes'		'VAR'	1	0.0365	0.7500	4649000.00	0.0050	2.5450	100.8000
+'Urban land-Duffield complex, 0 to 8 percent slopes'		'VAR'	1	0.0365	0.7500	4649000.00	0.0050	2.5450	18.1558
 	  210.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

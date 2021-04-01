@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.790050
+#   Build Date: 2021-04-01 15:01:44.308867
 #   Source Data: Surgo
 # 
 # Mukey: 373942
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Brackett association, 1 to 8 percent slopes'		'CL'	3	0.3000	0.7500	4495320.00	0.0057	3.9564	32.4000
+'Brackett association, 1 to 8 percent slopes'		'CL'	3	0.3000	0.7500	4495320.00	0.0057	3.9564	5.4496
 	  130.000	  28.00	  28.00	   2.00	  18.00	  12.00
 	  360.000	  30.00	  30.00	   1.25	  17.10	  17.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

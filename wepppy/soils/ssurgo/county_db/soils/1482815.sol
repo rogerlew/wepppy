@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.329368
+#   Build Date: 2021-04-01 15:01:41.836636
 #   Source Data: Surgo
 # 
 # Mukey: 1482815
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Cedarcreek extremely channery loam, moderately steep'		'CNX-L'	2	0.4912	0.7500	4783470.00	0.0206	3.2194	101.6280
+'Cedarcreek extremely channery loam, moderately steep'		'CNX-L'	2	0.4912	0.7500	4783470.00	0.0206	3.2194	7.8624
 	  610.000	  18.00	  18.00	   0.50	   8.00	  86.70
 	 1780.000	  30.00	  30.00	   0.05	   8.00	  77.25
-1 10000.0 254.80800
+0 0 0.000000 0.000000

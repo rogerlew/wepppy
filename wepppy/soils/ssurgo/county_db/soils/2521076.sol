@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.467283
+#   Build Date: 2021-04-01 15:01:43.985594
 #   Source Data: Surgo
 # 
 # Mukey: 2521076
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Higginsville silt loam, 5 to 9 percent slopes, eroded'		'SIL'	4	0.0900	0.7500	4686776.00	0.0078	3.5000	32.4000
+'Higginsville silt loam, 5 to 9 percent slopes, eroded'		'SIL'	4	0.0900	0.7500	4686776.00	0.0078	3.5000	1.1180
 	  300.000	  24.80	  24.80	   2.60	  18.90	   0.00
 	  710.000	  28.70	  28.70	   1.00	  21.10	   0.00
 	 1220.000	  28.00	  28.00	   0.50	  23.30	   0.00
 	 1780.000	  26.80	  26.80	   0.30	  23.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

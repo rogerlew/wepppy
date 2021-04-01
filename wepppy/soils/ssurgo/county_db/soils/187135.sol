@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.007212
+#   Build Date: 2021-04-01 15:01:43.524437
 #   Source Data: Surgo
 # 
 # Mukey: 187135
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Filer loam, 6 to 12 percent slopes'		'L'	1	0.3000	0.7500	4649000.00	0.0059	3.0650	7.2000
+'Filer loam, 6 to 12 percent slopes'		'L'	1	0.3000	0.7500	4649000.00	0.0059	3.0650	11.5317
 	  210.000	  15.00	  15.00	   2.00	  10.50	   3.00
-1 10000.0 1.80000
+0 0 0.000000 0.000000

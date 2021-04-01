@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.600190
+#   Build Date: 2021-04-01 15:01:41.105525
 #   Source Data: Surgo
 # 
 # Mukey: 1678191
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Vertrees-Haggatt-Caneyville complex, karst, hilly, severely eroded'		'GR-SIL'	4	0.3700	0.7500	4841140.00	0.0085	3.5000	33.0120
+'Vertrees-Haggatt-Caneyville complex, karst, hilly, severely eroded'		'GR-SIL'	4	0.3700	0.7500	4841140.00	0.0085	3.5000	2.6835
 	  100.000	  22.00	  22.00	   1.25	   7.00	  31.40
 	  500.000	  68.00	  68.00	   0.50	  23.00	  31.40
 	 1170.000	  68.00	  68.00	   0.35	  23.00	   7.00
 	 2030.000	  68.00	  68.00	   0.25	  23.00	  15.72
-1 10000.0 10.15200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.646038
+#   Build Date: 2021-04-01 15:01:42.154339
 #   Source Data: Surgo
 # 
 # Mukey: 114080
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Wehadkee loam, 0 to 2 percent slopes, frequently flooded'		'L'	3	0.3000	0.7500	5206090.00	0.0059	2.7343	100.8000
+'Wehadkee loam, 0 to 2 percent slopes, frequently flooded'		'L'	3	0.3000	0.7500	5206090.00	0.0059	2.7343	9.8216
 	  180.000	  12.50	  12.50	   3.50	  12.50	   4.00
 	 1470.000	  26.50	  26.50	   1.00	  15.00	   2.00
 	 2130.000	  12.50	  12.50	   1.00	   5.40	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

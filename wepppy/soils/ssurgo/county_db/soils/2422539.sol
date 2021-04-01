@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.201517
+#   Build Date: 2021-04-01 15:01:43.719413
 #   Source Data: Surgo
 # 
 # Mukey: 2422539
@@ -56,6 +56,6 @@
 # 
 Any comments:
 1 1
-'Zook-Olmitz-Vesser complex, 0 to 5 percent slopes'		'SICL'	1	0.0900	0.7500	4179580.00	0.0070	3.5000	10.8000
+'Zook-Olmitz-Vesser complex, 0 to 5 percent slopes'		'SICL'	1	0.0900	0.7500	4179580.00	0.0070	3.5000	0.9671
 	  210.000	  34.00	  34.00	   6.00	  27.80	   0.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

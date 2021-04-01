@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.018405
+#   Build Date: 2021-04-01 15:01:45.534525
 #   Source Data: Surgo
 # 
 # Mukey: 527925
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Ranger channery silt loam, 25 to 60 percent slopes'		'CN-SIL'	2	0.3600	0.7500	4951400.00	0.0094	3.5000	33.0120
+'Ranger channery silt loam, 25 to 60 percent slopes'		'CN-SIL'	2	0.3600	0.7500	4951400.00	0.0094	3.5000	4.7302
 	  150.000	  20.00	  20.00	   2.00	  11.30	  31.00
 	  660.000	  22.00	  22.00	   0.25	  11.30	  74.50
-1 10000.0 0.75600
+0 0 0.000000 0.000000

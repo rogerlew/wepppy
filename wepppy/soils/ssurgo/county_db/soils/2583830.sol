@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.046384
+#   Build Date: 2021-04-01 15:01:41.552665
 #   Source Data: Surgo
 # 
 # Mukey: 2583830
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Caneyville-Rock outcrop-Standingstone complex, 12 to 35 percent slopes'		'SIL'	2	0.3600	0.7500	4455230.00	0.0073	3.5000	33.0120
+'Caneyville-Rock outcrop-Standingstone complex, 12 to 35 percent slopes'		'SIL'	2	0.3600	0.7500	4455230.00	0.0073	3.5000	2.9109
 	  180.000	  29.00	  29.00	   3.00	  15.70	  18.52
 	  790.000	  51.00	  51.00	   0.20	  26.40	  31.00
-1 10000.0 0.00360
+0 0 0.000000 0.000000

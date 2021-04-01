@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.400430
+#   Build Date: 2021-04-01 15:01:44.921366
 #   Source Data: Surgo
 # 
 # Mukey: 1444052
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Boonton-Urban land-Haledon complex, 0 to 8 percent slopes'		'L'	2	0.1500	0.7500	5167670.00	0.0059	2.6484	33.0120
+'Boonton-Urban land-Haledon complex, 0 to 8 percent slopes'		'L'	2	0.1500	0.7500	5167670.00	0.0059	2.6484	9.9242
 	  200.000	  11.00	  11.00	   3.00	  11.30	  22.45
 	  910.000	  14.00	  14.00	   0.75	   5.50	  31.12
-1 10000.0 3.31200
+0 0 0.000000 0.000000

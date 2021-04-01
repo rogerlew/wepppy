@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.509059
+#   Build Date: 2021-04-01 15:01:42.017119
 #   Source Data: Surgo
 # 
 # Mukey: 375859
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'San Jon-Lacoca-Rock outcrop complex, 1 to 10 percent slopes'		'L'	2	0.2300	0.7500	5052410.00	0.0080	3.2682	33.0120
+'San Jon-Lacoca-Rock outcrop complex, 1 to 10 percent slopes'		'L'	2	0.2300	0.7500	5052410.00	0.0080	3.2682	8.5329
 	   80.000	  20.00	  20.00	   1.50	  14.00	   5.00
 	  610.000	  25.00	  25.00	   0.50	  15.00	   5.00
-1 10000.0 2.52000
+0 0 0.000000 0.000000

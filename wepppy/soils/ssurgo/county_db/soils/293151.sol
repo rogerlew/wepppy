@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.725130
+#   Build Date: 2021-04-01 15:01:45.247329
 #   Source Data: Surgo
 # 
 # Mukey: 293151
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Buckland very stony loam, sloping'		'L'	2	0.3400	0.7500	5148460.00	0.0058	2.7192	32.4000
+'Buckland very stony loam, sloping'		'L'	2	0.3400	0.7500	5148460.00	0.0058	2.7192	11.5777
 	   50.000	  12.00	  12.00	   3.50	   4.50	  17.55
 	  560.000	  12.00	  12.00	   1.00	   4.40	  38.25
-1 10000.0 3.27600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.153879
+#   Build Date: 2021-04-01 15:01:45.670326
 #   Source Data: Surgo
 # 
 # Mukey: 566045
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Amy association, frequently flooded'		'SIL'	2	0.3000	0.7500	5227050.00	0.0136	3.5000	32.4000
+'Amy association, frequently flooded'		'SIL'	2	0.3000	0.7500	5227050.00	0.0136	3.5000	2.5887
 	  100.000	  15.00	  15.00	   1.75	  11.30	   2.50
 	  460.000	  12.50	  12.50	   0.75	  11.30	   2.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

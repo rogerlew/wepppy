@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.349194
+#   Build Date: 2021-04-01 15:01:41.856751
 #   Source Data: Surgo
 # 
 # Mukey: 71398
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Ritzville silt loam, 8 to 30 percent slopes'		'SIL'	3	0.2300	0.7500	5502700.00	0.0250	3.5000	32.4000
+'Ritzville silt loam, 8 to 30 percent slopes'		'SIL'	3	0.2300	0.7500	5502700.00	0.0250	3.5000	4.4520
 	  200.000	   7.50	   7.50	   1.50	   7.50	   2.50
 	  910.000	   7.50	   7.50	   0.75	   7.50	   0.00
 	 1520.000	   7.50	   7.50	   0.25	   7.50	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

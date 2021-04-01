@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.852022
+#   Build Date: 2021-04-01 15:01:45.374494
 #   Source Data: Surgo
 # 
 # Mukey: 460223
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Josephine-Mariposa complex, 15 to 50 percent slopes, eroded'		'GR-L'	2	0.1600	0.7500	5455820.00	0.0063	3.2114	32.4000
+'Josephine-Mariposa complex, 15 to 50 percent slopes, eroded'		'GR-L'	2	0.1600	0.7500	5455820.00	0.0063	3.2114	7.9531
 	  300.000	  21.00	  21.00	   3.50	  17.50	  39.38
 	 1270.000	  31.00	  31.00	   1.25	  17.50	  39.38
-1 10000.0 1.00800
+0 0 0.000000 0.000000

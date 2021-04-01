@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.545154
+#   Build Date: 2021-04-01 15:01:45.065946
 #   Source Data: Surgo
 # 
 # Mukey: 376433
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Kimbrough-Lea complex, dry, 0 to 3 percent slopes'		'GR-L'	2	0.1600	0.7500	7914700.00	0.0103	2.3130	32.4000
+'Kimbrough-Lea complex, dry, 0 to 3 percent slopes'		'GR-L'	2	0.1600	0.7500	7914700.00	0.0103	2.3130	9.2556
 	   80.000	  18.60	  18.60	   2.90	  13.30	  25.00
 	  250.000	  22.40	  22.40	   2.30	  19.00	   2.00
-1 10000.0 0.21600
+0 0 0.000000 0.000000

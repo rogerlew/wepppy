@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.067975
+#   Build Date: 2021-04-01 15:01:44.587453
 #   Source Data: Surgo
 # 
 # Mukey: 384354
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Stephenville-Darsil-Newalla complex, 3 to 8 percent slopes'		'LFS'	3	0.2300	0.7500	7088670.00	0.0103	1.8734	100.8000
+'Stephenville-Darsil-Newalla complex, 3 to 8 percent slopes'		'LFS'	3	0.2300	0.7500	7088670.00	0.0103	1.8734	27.4604
 	  130.000	   8.00	   8.00	   1.75	   4.40	   0.00
 	  380.000	  10.00	  10.00	   0.40	  11.30	   0.00
 	  840.000	  28.00	  28.00	   0.55	  11.30	   0.00
-1 10000.0 1.80000
+0 0 0.000000 0.000000

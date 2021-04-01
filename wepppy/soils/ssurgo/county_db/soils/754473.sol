@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.522837
+#   Build Date: 2021-04-01 15:01:44.041733
 #   Source Data: Surgo
 # 
 # Mukey: 754473
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Lonna-Cambeth silt loams, 2 to 8 percent slopes'		'SICL'	4	0.2300	0.7500	4736393.00	0.0080	3.5000	32.4000
+'Lonna-Cambeth silt loams, 2 to 8 percent slopes'		'SICL'	4	0.2300	0.7500	4736393.00	0.0080	3.5000	3.8677
 	  130.000	  23.90	  23.90	   2.00	  12.90	   0.00
 	  250.000	  26.00	  26.00	   0.75	  13.20	   0.00
 	  760.000	  26.50	  26.50	   0.25	   2.40	   0.00
 	 1520.000	  23.40	  23.40	   0.25	   5.50	   0.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

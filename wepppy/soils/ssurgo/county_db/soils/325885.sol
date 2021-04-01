@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.167078
+#   Build Date: 2021-04-01 15:01:43.684496
 #   Source Data: Surgo
 # 
 # Mukey: 325885
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Faceville fine sandy loam, 0 to 2 percent slopes'		'FSL'	3	0.3000	0.7500	5897650.00	0.0108	2.5255	331.2000
+'Faceville fine sandy loam, 0 to 2 percent slopes'		'FSL'	3	0.3000	0.7500	5897650.00	0.0108	2.5255	18.3796
 	  130.000	  12.50	  12.50	   1.25	  11.30	   7.50
 	  280.000	  28.00	  28.00	   0.25	  11.30	   5.00
 	 1830.000	  45.00	  45.00	   0.25	  11.30	   2.50
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.180590
+#   Build Date: 2021-04-01 15:01:45.697509
 #   Source Data: Surgo
 # 
 # Mukey: 132087
@@ -51,6 +51,6 @@
 # 
 Any comments:
 1 1
-'Gullied land, friable materials, 10 to 35 percent slopes'		'SCL'	1	0.4900	0.7500	4687420.00	0.0253	4.0284	32.4000
+'Gullied land, friable materials, 10 to 35 percent slopes'		'SCL'	1	0.4900	0.7500	4687420.00	0.0253	4.0284	13.5921
 	 2000.000	  30.00	  30.00	   0.10	  10.30	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.240572
+#   Build Date: 2021-04-01 15:01:42.749772
 #   Source Data: Surgo
 # 
 # Mukey: 162062
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Brookston silty clay loam, 0 to 2 percent slopes'		'SICL'	4	0.1700	0.7500	4510360.00	0.0074	3.5000	33.0120
+'Brookston silty clay loam, 0 to 2 percent slopes'		'SICL'	4	0.1700	0.7500	4510360.00	0.0074	3.5000	1.6005
 	  410.000	  28.00	  28.00	   4.00	  26.00	   0.00
 	  810.000	  34.00	  34.00	   1.25	  26.30	   0.00
 	 1120.000	  25.00	  25.00	   1.25	  20.50	  13.87
 	 1520.000	  15.00	  15.00	   0.75	  11.90	  12.88
-1 10000.0 10.15200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.342064
+#   Build Date: 2021-04-01 15:01:43.859449
 #   Source Data: Surgo
 # 
 # Mukey: 286794
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Conneaut silt loam, 0 to 1 percent slopes'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
+'Conneaut silt loam, 0 to 1 percent slopes'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	1.9255
 	  230.000	  20.00	  20.00	   2.00	  15.00	   2.50
 	 1370.000	  27.50	  27.50	   0.75	  15.80	   2.50
-1 10000.0 3.31200
+0 0 0.000000 0.000000

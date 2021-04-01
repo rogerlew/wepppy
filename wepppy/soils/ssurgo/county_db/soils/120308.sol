@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.775933
+#   Build Date: 2021-04-01 15:01:42.284342
 #   Source Data: Surgo
 # 
 # Mukey: 120308
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Emporia fine sandy loam, 2 to 6 percent slopes'		'L'	3	0.3600	0.7500	5897650.00	0.0108	2.5255	100.8000
+'Emporia fine sandy loam, 2 to 6 percent slopes'		'L'	3	0.3600	0.7500	5897650.00	0.0108	2.5255	19.5474
 	  200.000	  12.50	  12.50	   1.25	   5.90	   0.00
 	 1270.000	  28.00	  28.00	   0.25	   7.20	   0.00
 	 1630.000	  30.50	  30.50	   0.25	   8.20	   0.00
-1 10000.0 7.20000
+0 0 0.000000 0.000000

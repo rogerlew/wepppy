@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.030385
+#   Build Date: 2021-04-01 15:01:45.546756
 #   Source Data: Surgo
 # 
 # Mukey: 459572
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Maymen-Etsel-Snook complex, 30 to 75 percent slopes'		'GR-L'	2	0.3000	0.7500	5052410.00	0.0210	3.1057	32.4000
+'Maymen-Etsel-Snook complex, 30 to 75 percent slopes'		'GR-L'	2	0.3000	0.7500	5052410.00	0.0210	3.1057	9.7581
 	  300.000	  17.50	  17.50	   0.50	   7.50	  39.38
 	  550.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 27.72000
+0 0 0.000000 0.000000

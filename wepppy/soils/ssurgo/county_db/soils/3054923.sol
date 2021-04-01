@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.359675
+#   Build Date: 2021-04-01 15:01:41.867384
 #   Source Data: Surgo
 # 
 # Mukey: 3054923
@@ -59,7 +59,7 @@
 # 
 Any comments:
 1 1
-'Highsplint-Berks association, moist, 35 to 80 percent slopes, extremely stony'		'SPM'	7	0.0400	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Highsplint-Berks association, moist, 35 to 80 percent slopes, extremely stony'		'SPM'	7	0.0400	0.7500	4649000.00	0.0050	2.5450	3.1575
 	  150.000	  24.00	  24.00	   9.50	  11.30	  51.90
 	  260.000	  27.00	  27.00	   5.75	  11.30	  55.36
 	  380.000	  32.00	  32.00	   2.48	  11.30	  52.64
@@ -67,4 +67,4 @@ Any comments:
 	 1060.000	  22.00	  22.00	   0.48	  11.30	  63.28
 	 1310.000	  18.00	  18.00	   0.25	  11.30	  71.20
 	 1670.000	  19.00	  19.00	   0.19	  11.30	  68.32
-1 10000.0 27.72000
+0 0 0.000000 0.000000

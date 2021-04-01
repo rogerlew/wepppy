@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.757540
+#   Build Date: 2021-04-01 15:01:42.265432
 #   Source Data: Surgo
 # 
 # Mukey: 124824
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Dothan-Urban land complex, 2 to 5 percent slopes'		'LS'	3	0.3000	0.7500	5129250.00	0.0260	2.5950	100.8000
+'Dothan-Urban land complex, 2 to 5 percent slopes'		'LS'	3	0.3000	0.7500	5129250.00	0.0260	2.5950	27.5281
 	  200.000	  10.00	  10.00	   0.25	  11.30	   4.00
 	 1270.000	  26.50	  26.50	   0.25	  11.30	   4.00
 	 1520.000	  29.00	  29.00	   0.25	  11.30	   4.00
-1 10000.0 10.80000
+0 0 0.000000 0.000000

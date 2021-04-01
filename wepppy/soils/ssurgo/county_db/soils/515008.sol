@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.360325
+#   Build Date: 2021-04-01 15:01:41.867997
 #   Source Data: Surgo
 # 
 # Mukey: 515008
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Dekalb-Gilpin complex, 35 to 65 percent slopes, very stony'		'CN-SL'	3	0.1807	0.7500	4937150.00	0.0056	2.6530	331.2000
+'Dekalb-Gilpin complex, 35 to 65 percent slopes, very stony'		'CN-SL'	3	0.1807	0.7500	4937150.00	0.0056	2.6530	17.5096
 	   30.000	  10.00	  10.00	   3.00	  10.20	  55.62
 	  840.000	  12.00	  12.00	   1.68	   8.00	  55.73
 	  940.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 9.72000
+0 0 0.000000 0.000000

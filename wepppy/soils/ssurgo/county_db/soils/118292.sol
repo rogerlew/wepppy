@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.721305
+#   Build Date: 2021-04-01 15:01:43.232439
 #   Source Data: Surgo
 # 
 # Mukey: 118292
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Tatum silt loam, 2 to 7 percent slopes'		'SIL'	2	0.4900	0.7500	4951400.00	0.0094	3.5000	32.4000
+'Tatum silt loam, 2 to 7 percent slopes'		'SIL'	2	0.4900	0.7500	4951400.00	0.0094	3.5000	5.3261
 	  250.000	  20.00	  20.00	   1.25	   7.80	  19.00
 	 1040.000	  50.00	  50.00	   0.25	  13.10	  12.00
-1 10000.0 0.72000
+0 0 0.000000 0.000000

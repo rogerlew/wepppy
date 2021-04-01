@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.654919
+#   Build Date: 2021-04-01 15:01:44.173337
 #   Source Data: Surgo
 # 
 # Mukey: 1709659
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Leshara silt loam, occasionally flooded'		'SIL'	3	0.0900	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Leshara silt loam, occasionally flooded'		'SIL'	3	0.0900	0.7500	4896270.00	0.0089	3.5000	1.8436
 	  300.000	  21.00	  21.00	   2.00	  16.00	   0.00
 	 1170.000	  19.50	  19.50	   0.75	  12.50	   0.00
 	 1520.000	   4.00	   4.00	   0.25	   2.50	  20.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.575701
+#   Build Date: 2021-04-01 15:01:41.080650
 #   Source Data: Surgo
 # 
 # Mukey: 2747715
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Gaviota gravelly loam, 30 to 75 percent slopes, eroded, MLRA 15'		'GR-L'	2	0.3000	0.7500	5148460.00	0.0155	2.8492	32.4000
+'Gaviota gravelly loam, 30 to 75 percent slopes, eroded, MLRA 15'		'GR-L'	2	0.3000	0.7500	5148460.00	0.0155	2.8492	9.5923
 	  130.000	  14.00	  14.00	   0.75	  11.90	   0.00
 	  480.000	  14.00	  14.00	   0.75	  11.90	  23.37
-1 10000.0 0.10800
+0 0 0.000000 0.000000

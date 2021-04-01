@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.180161
+#   Build Date: 2021-04-01 15:01:41.687071
 #   Source Data: Surgo
 # 
 # Mukey: 507830
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Luhon-Travelers complex, 3 to 7 percent slopes'		'L'	3	0.1600	0.7500	5033200.00	0.0153	3.3390	33.0120
+'Luhon-Travelers complex, 3 to 7 percent slopes'		'L'	3	0.1600	0.7500	5033200.00	0.0153	3.3390	8.5199
 	  300.000	  21.00	  21.00	   0.75	  12.50	  12.70
 	  810.000	  28.00	  28.00	   0.25	  15.00	  12.70
 	 1520.000	  24.00	  24.00	   0.25	  15.00	  31.12
-1 10000.0 33.01200
+0 0 0.000000 0.000000

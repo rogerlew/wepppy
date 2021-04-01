@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.167230
+#   Build Date: 2021-04-01 15:01:45.684028
 #   Source Data: Surgo
 # 
 # Mukey: 530677
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Gilpin-Boulin-Petros complex, 25 to 80 percent slopes, very stony'		'L'	5	0.2900	0.7500	4649000.00	0.0054	2.8700	32.4000
+'Gilpin-Boulin-Petros complex, 25 to 80 percent slopes, very stony'		'L'	5	0.2900	0.7500	4649000.00	0.0054	2.8700	7.0375
 	  110.000	  12.00	  12.00	   2.50	  11.30	  10.70
 	  180.000	  16.00	  16.00	   2.00	  11.30	  18.10
 	  380.000	  21.00	  21.00	   0.50	  11.30	  15.37
 	  590.000	  28.00	  28.00	   0.25	  11.30	  14.44
 	  840.000	  35.00	  35.00	   0.10	  11.30	  22.57
-1 10000.0 0.18000
+0 0 0.000000 0.000000

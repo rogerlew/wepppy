@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.558538
+#   Build Date: 2021-04-01 15:01:43.069608
 #   Source Data: Surgo
 # 
 # Mukey: 2521343
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Sharpsburg silt loam, 5 to 9 percent slopes, eroded'		'SIL'	3	0.1600	0.7500	4620620.00	0.0076	3.5000	32.4000
+'Sharpsburg silt loam, 5 to 9 percent slopes, eroded'		'SIL'	3	0.1600	0.7500	4620620.00	0.0076	3.5000	0.7936
 	  180.000	  26.00	  26.00	   3.00	  27.50	   0.00
 	 1220.000	  36.70	  36.70	   0.80	  27.50	   0.00
 	 1520.000	  29.10	  29.10	   0.50	  27.50	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

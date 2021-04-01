@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.321470
+#   Build Date: 2021-04-01 15:01:41.828629
 #   Source Data: Surgo
 # 
 # Mukey: 279877
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Gloucester extremely stony fine sandy loam, 8 to 25 percent slopes'		'STX-FSL'	3	0.3496	0.7500	6012910.00	0.0103	1.9707	330.1999
+'Gloucester extremely stony fine sandy loam, 8 to 25 percent slopes'		'STX-FSL'	3	0.3496	0.7500	6012910.00	0.0103	1.9707	17.3612
 	  360.000	   4.50	   4.50	   1.35	  11.30	  45.62
 	  710.000	   4.50	   4.50	   7.00	  11.30	  52.85
 	 1020.000	   2.50	   2.50	   7.00	  11.30	  71.20
-1 10000.0 330.19992
+0 0 0.000000 0.000000

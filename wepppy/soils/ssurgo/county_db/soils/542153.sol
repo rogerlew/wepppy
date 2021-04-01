@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.805973
+#   Build Date: 2021-04-01 15:01:42.314833
 #   Source Data: Surgo
 # 
 # Mukey: 542153
@@ -56,6 +56,6 @@
 # 
 Any comments:
 1 1
-'Dormont-Culleoka complex, 25 to 50 percent slopes'		'SIL'	1	0.3000	0.7500	4841140.00	0.0085	3.5000	16.7652
+'Dormont-Culleoka complex, 25 to 50 percent slopes'		'SIL'	1	0.3000	0.7500	4841140.00	0.0085	3.5000	1.8745
 	  280.000	  22.00	  22.00	   2.60	  18.80	   8.80
-1 10000.0 3.16080
+0 0 0.000000 0.000000

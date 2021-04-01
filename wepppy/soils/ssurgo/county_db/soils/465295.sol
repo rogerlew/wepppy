@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.010595
+#   Build Date: 2021-04-01 15:01:45.526567
 #   Source Data: Surgo
 # 
 # Mukey: 465295
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Millsholm-Exchequer-Stonyford families complex, 30 to 75 percent slopes'		'GR-SL'	3	0.4022	0.7500	4725840.00	0.0112	3.0418	100.8000
+'Millsholm-Exchequer-Stonyford families complex, 30 to 75 percent slopes'		'GR-SL'	3	0.4022	0.7500	4725840.00	0.0112	3.0418	17.9348
 	   50.000	  15.00	  15.00	   1.00	  10.00	  37.00
 	  360.000	  15.00	  15.00	   0.50	   7.00	  37.00
 	  460.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

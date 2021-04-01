@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.140636
+#   Build Date: 2021-04-01 15:01:45.656755
 #   Source Data: Surgo
 # 
 # Mukey: 621833
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Andic Cryochrepts-Rock outcrop complex, mountain slopes'		'SPM'	3	0.0000	0.7500	0.00	0.0000	0.0000	504.0000
+'Andic Cryochrepts-Rock outcrop complex, mountain slopes'		'SPM'	3	0.0000	0.7500	0.00	0.0000	0.0000	5.0182
 	  250.000	  15.00	  15.00	   3.00	  17.50	   7.50
 	 1090.000	  20.00	  20.00	   1.00	   5.50	  65.00
 	 1520.000	  20.00	  20.00	   0.25	   5.50	  65.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.500586
+#   Build Date: 2021-04-01 15:01:44.019242
 #   Source Data: Surgo
 # 
 # Mukey: 2536122
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Clarksville-Gepp complex, 15 to 35 percent slopes, stony'		'GRV-SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	32.4000
+'Clarksville-Gepp complex, 15 to 35 percent slopes, stony'		'GRV-SIL'	3	0.3000	0.7500	4896270.00	0.0089	3.5000	8.1227
 	  100.000	  21.00	  21.00	   1.25	   2.80	  60.64
 	  560.000	  12.90	  12.90	   1.00	  21.50	  77.46
 	 1400.000	  30.00	  30.00	   0.25	   5.20	  63.46
-1 10000.0 3.24000
+0 0 0.000000 0.000000

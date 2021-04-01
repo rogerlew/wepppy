@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.461962
+#   Build Date: 2021-04-01 15:01:41.969343
 #   Source Data: Surgo
 # 
 # Mukey: 463243
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Auburn very rocky loam, 15 to 30 percent slopes'		'L'	2	0.2300	0.7500	5052410.00	0.0095	3.1057	32.4000
+'Auburn very rocky loam, 15 to 30 percent slopes'		'L'	2	0.2300	0.7500	5052410.00	0.0095	3.1057	8.9533
 	   80.000	  17.50	  17.50	   1.25	  12.50	   5.00
 	  410.000	  21.00	  21.00	   0.50	  12.50	   5.00
-1 10000.0 0.01800
+0 0 0.000000 0.000000

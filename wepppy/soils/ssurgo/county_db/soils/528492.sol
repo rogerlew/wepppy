@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.037830
+#   Build Date: 2021-04-01 15:01:45.554276
 #   Source Data: Surgo
 # 
 # Mukey: 528492
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Talbott silt loam, 5 to 20 percent slopes, eroded, rocky'		'SIL'	2	0.3600	0.7500	4620620.00	0.0076	3.5000	33.0120
+'Talbott silt loam, 5 to 20 percent slopes, eroded, rocky'		'SIL'	2	0.3600	0.7500	4620620.00	0.0076	3.5000	2.9865
 	  130.000	  26.00	  26.00	   1.25	  16.30	   5.00
 	  760.000	  50.00	  50.00	   0.20	  25.90	   5.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

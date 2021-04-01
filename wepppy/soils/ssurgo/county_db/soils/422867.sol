@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.947182
+#   Build Date: 2021-04-01 15:01:44.466520
 #   Source Data: Surgo
 # 
 # Mukey: 422867
@@ -53,6 +53,6 @@
 # 
 Any comments:
 1 1
-'Kewaunee loam, 2 to 6 percent slopes'		'L'	1	0.3000	0.7500	4706630.00	0.0060	3.1126	33.0120
+'Kewaunee loam, 2 to 6 percent slopes'		'L'	1	0.3000	0.7500	4706630.00	0.0060	3.1126	9.8084
 	  210.000	  16.00	  16.00	   2.00	   8.70	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.218317
+#   Build Date: 2021-04-01 15:01:44.737994
 #   Source Data: Surgo
 # 
 # Mukey: 331560
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Sunlight-Townley complex, 15 to 45 percent slopes'		'CN-SIL'	3	0.3000	0.7500	5039608.00	0.0103	3.5000	32.4000
+'Sunlight-Townley complex, 15 to 45 percent slopes'		'CN-SIL'	3	0.3000	0.7500	5039608.00	0.0103	3.5000	4.8808
 	   80.000	  18.40	  18.40	   1.50	  11.30	  23.64
 	  130.000	  27.80	  27.80	   0.75	  11.30	  43.05
 	  300.000	  35.40	  35.40	   0.25	  11.30	  70.36
-1 10000.0 3.24000
+0 0 0.000000 0.000000

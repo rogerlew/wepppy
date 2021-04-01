@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.222526
+#   Build Date: 2021-04-01 15:01:42.731401
 #   Source Data: Surgo
 # 
 # Mukey: 1862673
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Osco silt loam, 2 to 5 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4730880.00	0.0080	3.5000	33.0120
+'Osco silt loam, 2 to 5 percent slopes, eroded'		'SIL'	3	0.2300	0.7500	4730880.00	0.0080	3.5000	1.0153
 	  180.000	  24.00	  24.00	   2.50	  20.30	   0.00
 	 1220.000	  31.00	  31.00	   0.50	  24.00	   0.00
 	 1520.000	  25.00	  25.00	   0.25	  19.20	   0.00
-1 10000.0 33.01200
+0 0 0.000000 0.000000

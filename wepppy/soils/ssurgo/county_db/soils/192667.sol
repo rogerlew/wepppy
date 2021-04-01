@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.262340
+#   Build Date: 2021-04-01 15:01:44.782719
 #   Source Data: Surgo
 # 
 # Mukey: 192667
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Granby loamy sand, lake plain, 0 to 2 percent slopes'		'LS'	3	0.1600	0.7500	3361930.00	0.0030	2.8036	198.0000
+'Granby loamy sand, lake plain, 0 to 2 percent slopes'		'LS'	3	0.1600	0.7500	3361930.00	0.0030	2.8036	27.1859
 	  290.000	   5.00	   5.00	   4.00	  11.00	   0.00
 	  860.000	   3.00	   3.00	   0.60	   2.00	   2.00
 	 2030.000	   1.50	   1.50	   0.20	   1.00	   2.00
-1 10000.0 198.00000
+0 0 0.000000 0.000000

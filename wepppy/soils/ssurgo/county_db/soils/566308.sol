@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.987568
+#   Build Date: 2021-04-01 15:01:43.504643
 #   Source Data: Surgo
 # 
 # Mukey: 566308
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Carnasaw-Sherless complex, 20 to 35 percent slopes'		'CB-SIL'	3	0.2300	0.7500	5061660.00	0.0106	3.5000	32.4000
+'Carnasaw-Sherless complex, 20 to 35 percent slopes'		'CB-SIL'	3	0.2300	0.7500	5061660.00	0.0106	3.5000	4.9026
 	  100.000	  18.00	  18.00	   1.25	  11.30	  40.50
 	  280.000	  20.50	  20.50	   0.75	  11.30	  50.50
 	  690.000	  40.00	  40.00	   0.25	  11.30	  14.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

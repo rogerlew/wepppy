@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.755363
+#   Build Date: 2021-04-01 15:01:41.261219
 #   Source Data: Surgo
 # 
 # Mukey: 115964
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Croatan muck, ponded, 0 to 2 percent slopes'		'MUCK'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	75.6000
+'Croatan muck, ponded, 0 to 2 percent slopes'		'MUCK'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	18.6951
 	  840.000	  15.00	  15.00	  12.00	  11.30	   0.00
 	 1520.000	  25.00	  25.00	   2.75	  11.30	   0.00
 	 2030.000	   5.00	   5.00	   0.00	  11.30	   0.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

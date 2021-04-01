@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.896135
+#   Build Date: 2021-04-01 15:01:41.402039
 #   Source Data: Surgo
 # 
 # Mukey: 120526
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Galestown-Sassafras complex, 15 to 30 percent slopes'		'S'	3	0.2500	0.7500	6992620.00	0.0111	1.9999	280.8000
+'Galestown-Sassafras complex, 15 to 30 percent slopes'		'S'	3	0.2500	0.7500	6992620.00	0.0111	1.9999	25.7132
 	  300.000	   9.50	   9.50	   1.50	   5.80	   5.00
 	 2130.000	  10.00	  10.00	   0.25	   3.10	   5.00
 	 2510.000	   4.00	   4.00	   0.25	   2.60	  10.00
-1 10000.0 255.60000
+0 0 0.000000 0.000000

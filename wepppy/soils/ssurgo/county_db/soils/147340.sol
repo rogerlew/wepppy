@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.314478
+#   Build Date: 2021-04-01 15:01:41.821449
 #   Source Data: Surgo
 # 
 # Mukey: 147340
@@ -54,6 +54,6 @@
 # 
 Any comments:
 1 1
-'Danvers-Judith clay loams, 0 to 2 percent slopes'		'CL'	1	0.2300	0.7500	4764260.00	0.0053	4.0702	32.4000
+'Danvers-Judith clay loams, 0 to 2 percent slopes'		'CL'	1	0.2300	0.7500	4764260.00	0.0053	4.0702	6.1252
 	  210.000	  31.00	  31.00	   3.00	  22.50	   7.85
-1 10000.0 3.27600
+0 0 0.000000 0.000000

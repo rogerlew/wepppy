@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.643642
+#   Build Date: 2021-04-01 15:01:42.151908
 #   Source Data: Surgo
 # 
 # Mukey: 293935
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Mardin gravelly silt loam, 3 to 8 percent slopes'		'SIL'	3	0.2900	0.7500	5282180.00	0.0150	3.5000	36.0000
+'Mardin gravelly silt loam, 3 to 8 percent slopes'		'SIL'	3	0.2900	0.7500	5282180.00	0.0150	3.5000	5.2443
 	  200.000	  14.00	  14.00	   5.00	   7.70	  34.72
 	  380.000	  14.00	  14.00	   1.50	   7.60	  33.76
 	  510.000	  12.00	  12.00	   0.50	   6.40	  31.84
-1 10000.0 0.36000
+0 0 0.000000 0.000000

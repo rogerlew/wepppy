@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.021523
+#   Build Date: 2021-04-01 15:01:45.537671
 #   Source Data: Surgo
 # 
 # Mukey: 2888459
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hatliff-Pluck-Kian complex, 0 to 1 percent slopes,  frequently flooded'		'L'	4	0.3000	0.7500	5494240.00	0.0160	2.3418	100.8000
+'Hatliff-Pluck-Kian complex, 0 to 1 percent slopes,  frequently flooded'		'L'	4	0.3000	0.7500	5494240.00	0.0160	2.3418	10.5254
 	  300.000	   7.80	   7.80	   0.75	  11.30	   0.00
 	  970.000	   9.80	   9.80	   0.25	  11.30	   0.00
 	 1570.000	  11.80	  11.80	   0.25	  11.30	   0.00
 	 2030.000	  15.80	  15.80	   0.25	  11.30	   0.00
-1 10000.0 100.80000
+0 0 0.000000 0.000000

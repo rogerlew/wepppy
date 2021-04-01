@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.204954
+#   Build Date: 2021-04-01 15:01:42.713636
 #   Source Data: Surgo
 # 
 # Mukey: 83988
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Ririe silt loam, 4 to 8 percent slopes'		'SIL'	2	0.2300	0.7500	5144355.00	0.0118	3.5000	32.4000
+'Ririe silt loam, 4 to 8 percent slopes'		'SIL'	2	0.2300	0.7500	5144355.00	0.0118	3.5000	2.2074
 	  230.000	  16.50	  16.50	   3.00	  15.00	   7.00
 	 1520.000	  15.00	  15.00	   0.75	  11.00	   7.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

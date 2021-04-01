@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.569893
+#   Build Date: 2021-04-01 15:01:43.081226
 #   Source Data: Surgo
 # 
 # Mukey: 1398070
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Dekalb-Shelocta-Rock outcrop complex, 40 to 70 percent slopes'		'CN-FSL'	4	0.2300	0.7500	5974490.00	0.0072	2.6648	330.2640
+'Dekalb-Shelocta-Rock outcrop complex, 40 to 70 percent slopes'		'CN-FSL'	4	0.2300	0.7500	5974490.00	0.0072	2.6648	19.2375
 	  100.000	  15.00	  15.00	   3.00	  10.00	  46.88
 	  460.000	  12.50	  12.50	   0.75	   7.50	  53.80
 	  810.000	  10.00	  10.00	   0.25	   7.50	  65.00
 	  890.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.39800
+0 0 0.000000 0.000000

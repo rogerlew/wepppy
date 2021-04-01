@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.243965
+#   Build Date: 2021-04-01 15:01:44.763995
 #   Source Data: Surgo
 # 
 # Mukey: 2536129
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Gasconade-Gatewood-Rock outcrop complex, 15 to 50 percent slopes'		'FLV-CL'	2	0.0900	0.7500	4687420.00	0.0052	4.5159	32.4000
+'Gasconade-Gatewood-Rock outcrop complex, 15 to 50 percent slopes'		'FLV-CL'	2	0.0900	0.7500	4687420.00	0.0052	4.5159	4.8306
 	  200.000	  37.50	  37.50	   3.00	  22.00	  69.62
 	  430.000	  38.00	  38.00	   0.75	  22.50	  86.37
-1 10000.0 0.01800
+0 0 0.000000 0.000000

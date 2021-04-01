@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.409556
+#   Build Date: 2021-04-01 15:01:42.918894
 #   Source Data: Surgo
 # 
 # Mukey: 2642207
@@ -56,7 +56,7 @@
 # 
 Any comments:
 1 1
-'Lorman-Petal complex, 5 to 15 percent slopes'		'FSL'	2	0.2900	0.7500	5897650.00	0.0166	2.5255	33.0120
+'Lorman-Petal complex, 5 to 15 percent slopes'		'FSL'	2	0.2900	0.7500	5897650.00	0.0166	2.5255	18.4305
 	   80.000	  12.50	  12.50	   0.75	  10.90	   0.00
 	  230.000	  12.50	  12.50	   0.38	  10.90	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

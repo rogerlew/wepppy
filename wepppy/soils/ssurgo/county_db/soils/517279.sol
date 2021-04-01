@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.344697
+#   Build Date: 2021-04-01 15:01:41.852137
 #   Source Data: Surgo
 # 
 # Mukey: 517279
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Sylvatus-Sylco complex, 35 to 55 percent slopes'		'CN-SIL'	3	0.1600	0.7500	5034095.00	0.0102	3.5000	32.4000
+'Sylvatus-Sylco complex, 35 to 55 percent slopes'		'CN-SIL'	3	0.1600	0.7500	5034095.00	0.0102	3.5000	5.5539
 	  130.000	  18.50	  18.50	   1.25	   7.40	  37.00
 	  430.000	  22.50	  22.50	   0.25	   6.20	  59.95
 	  480.000	  20.00	  20.00	   0.25	   5.60	  80.25
-1 10000.0 0.75600
+0 0 0.000000 0.000000

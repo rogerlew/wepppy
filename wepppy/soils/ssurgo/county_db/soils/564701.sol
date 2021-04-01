@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.392481
+#   Build Date: 2021-04-01 15:01:44.913294
 #   Source Data: Surgo
 # 
 # Mukey: 564701
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Carnasaw-Bismarck-Zafra complex, 8 to 20 percent slopes'		'GR-SIL'	2	0.2300	0.7500	4923835.00	0.0091	3.5000	32.4000
+'Carnasaw-Bismarck-Zafra complex, 8 to 20 percent slopes'		'GR-SIL'	2	0.2300	0.7500	4923835.00	0.0091	3.5000	4.7089
 	  100.000	  20.50	  20.50	   1.25	  11.30	  28.75
 	  380.000	  40.00	  40.00	   0.25	  11.30	  14.50
-1 10000.0 3.60000
+0 0 0.000000 0.000000

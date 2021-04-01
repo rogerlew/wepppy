@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.161068
+#   Build Date: 2021-04-01 15:01:41.667570
 #   Source Data: Surgo
 # 
 # Mukey: 324905
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Troup fine sand, 1 to 5 percent slopes'		'FS'	2	0.3000	0.7500	5916860.00	0.0167	2.0647	331.2000
+'Troup fine sand, 1 to 5 percent slopes'		'FS'	2	0.3000	0.7500	5916860.00	0.0167	2.0647	31.7555
 	 1370.000	   5.50	   5.50	   0.75	  11.30	   5.00
 	 2030.000	  25.00	  25.00	   0.25	  11.30	   5.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

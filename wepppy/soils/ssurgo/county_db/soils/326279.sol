@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.161733
+#   Build Date: 2021-04-01 15:01:41.668286
 #   Source Data: Surgo
 # 
 # Mukey: 326279
@@ -55,10 +55,10 @@
 # 
 Any comments:
 1 1
-'Tifton sandy loam, 2 to 5 percent slopes, moderately eroded'		'SL'	5	0.2900	0.7500	5013990.00	0.0153	2.9548	100.8000
+'Tifton sandy loam, 2 to 5 percent slopes, moderately eroded'		'SL'	5	0.2900	0.7500	5013990.00	0.0153	2.9548	25.7310
 	  180.000	  15.00	  15.00	   0.75	   2.60	  20.00
 	  280.000	  29.90	  29.90	   0.26	   4.00	  13.00
 	  910.000	  29.90	  29.90	   0.12	   3.40	  20.00
 	 1070.000	  29.90	  29.90	   0.12	   3.40	  23.00
 	 1570.000	  29.90	  29.90	   0.03	   2.60	   3.00
-1 10000.0 9.72000
+0 0 0.000000 0.000000

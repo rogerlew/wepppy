@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.717052
+#   Build Date: 2021-04-01 15:01:45.239057
 #   Source Data: Surgo
 # 
 # Mukey: 382640
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Lucien-Nash complex, 5 to 12 percent slopes'		'SIL'	2	0.0900	0.7500	4951400.00	0.0094	3.5000	101.5992
+'Lucien-Nash complex, 5 to 12 percent slopes'		'SIL'	2	0.0900	0.7500	4951400.00	0.0094	3.5000	4.6482
 	  180.000	  20.00	  20.00	   2.00	  12.00	  14.90
 	  460.000	  17.50	  17.50	   1.25	  10.50	  16.75
-1 10000.0 0.78120
+0 0 0.000000 0.000000

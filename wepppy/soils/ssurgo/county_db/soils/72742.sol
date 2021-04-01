@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.868727
+#   Build Date: 2021-04-01 15:01:45.391647
 #   Source Data: Surgo
 # 
 # Mukey: 72742
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hazeldell gravelly silt loam, 30 to 65 percent slopes'		'GR-SIL'	4	0.2300	0.7500	4758445.00	0.0081	3.5000	32.4000
+'Hazeldell gravelly silt loam, 30 to 65 percent slopes'		'GR-SIL'	4	0.2300	0.7500	4758445.00	0.0081	3.5000	3.9612
 	  180.000	  23.50	  23.50	   7.50	  15.00	  32.50
 	  710.000	  25.00	  25.00	   1.50	  15.00	  37.90
 	 1020.000	  27.50	  27.50	   0.50	  15.00	  46.60
 	 1520.000	  39.00	  39.00	   0.25	  25.00	  41.80
-1 10000.0 32.40000
+0 0 0.000000 0.000000

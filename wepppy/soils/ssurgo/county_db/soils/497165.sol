@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.014839
+#   Build Date: 2021-04-01 15:01:43.532067
 #   Source Data: Surgo
 # 
 # Mukey: 497165
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Torriorthents-Rock outcrop, sandstone complex, 25 to 75 percent slopes'		'SL'	3	0.1600	0.7500	4802680.00	0.0113	2.8236	101.6280
+'Torriorthents-Rock outcrop, sandstone complex, 25 to 75 percent slopes'		'SL'	3	0.1600	0.7500	4802680.00	0.0113	2.8236	18.9364
 	   80.000	  12.00	  12.00	   1.00	  10.50	   0.00
 	  940.000	  12.00	  12.00	   0.50	   9.40	  20.00
 	 1520.000	   6.00	   6.00	   0.25	   3.70	  36.00
-1 10000.0 330.26400
+0 0 0.000000 0.000000

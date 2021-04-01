@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.709172
+#   Build Date: 2021-04-01 15:01:43.220081
 #   Source Data: Surgo
 # 
 # Mukey: 527125
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Sengtown gravelly silt loam, 5 to 12 percent slopes'		'GR-SIL'	3	0.3600	0.7500	4978965.00	0.0096	3.5000	33.0120
+'Sengtown gravelly silt loam, 5 to 12 percent slopes'		'GR-SIL'	3	0.3600	0.7500	4978965.00	0.0096	3.5000	4.7729
 	  230.000	  19.50	  19.50	   2.00	  11.30	  32.50
 	  380.000	  31.50	  31.50	   0.25	  11.30	  32.50
 	 1520.000	  50.00	  50.00	   0.25	  11.30	  44.80
-1 10000.0 33.01200
+0 0 0.000000 0.000000

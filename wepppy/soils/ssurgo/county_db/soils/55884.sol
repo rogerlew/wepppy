@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.326413
+#   Build Date: 2021-04-01 15:01:41.833646
 #   Source Data: Surgo
 # 
 # Mukey: 55884
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Kermit-Berino fine sands, 0 to 3 percent slopes'		'FS'	2	0.2300	0.7500	5378980.00	0.0264	2.1946	508.1040
+'Kermit-Berino fine sands, 0 to 3 percent slopes'		'FS'	2	0.2300	0.7500	5378980.00	0.0264	2.1946	42.0587
 	  180.000	   5.00	   5.00	   0.15	   1.00	   0.00
 	 1520.000	   5.00	   5.00	   0.10	   1.00	  12.50
-1 10000.0 508.10400
+0 0 0.000000 0.000000

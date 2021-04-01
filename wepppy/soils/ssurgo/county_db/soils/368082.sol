@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.556737
+#   Build Date: 2021-04-01 15:01:45.077905
 #   Source Data: Surgo
 # 
 # Mukey: 368082
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Nueces-Sarita association, 0 to 3 percent slopes'		'FS'	4	0.3000	0.7500	5244510.00	0.0213	2.1702	329.4000
+'Nueces-Sarita association, 0 to 3 percent slopes'		'FS'	4	0.3000	0.7500	5244510.00	0.0213	2.1702	34.3079
 	  280.000	   4.00	   4.00	   0.50	   2.00	   0.00
 	  860.000	   4.00	   4.00	   0.30	   1.50	   0.00
 	 1140.000	  26.00	  26.00	   0.30	  13.00	   0.00
 	 2030.000	  24.00	  24.00	   0.20	  14.00	   0.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.851474
+#   Build Date: 2021-04-01 15:01:43.368067
 #   Source Data: Surgo
 # 
 # Mukey: 158429
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Manley ashy silt loam, 40 to 65 percent slopes'		'MPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	1342.8000
+'Manley ashy silt loam, 40 to 65 percent slopes'		'MPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	5.4755
 	  250.000	   8.00	   8.00	   3.50	  10.70	  21.00
 	  450.000	   6.00	   6.00	   2.00	   6.10	  29.44
 	  700.000	   6.00	   6.00	   0.25	   2.70	  54.64
-1 10000.0 0.18000
+0 0 0.000000 0.000000

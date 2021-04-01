@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.834154
+#   Build Date: 2021-04-01 15:01:45.356228
 #   Source Data: Surgo
 # 
 # Mukey: 571600
@@ -54,7 +54,7 @@
 # 
 Any comments:
 1 1
-'Homa-Hector complex, 12 to 20 percent slopes'		'FSL'	2	0.2300	0.7500	5840020.00	0.0165	2.6404	101.5992
+'Homa-Hector complex, 12 to 20 percent slopes'		'FSL'	2	0.2300	0.7500	5840020.00	0.0165	2.6404	18.2874
 	   50.000	  14.00	  14.00	   0.75	   8.50	   1.00
 	  210.000	  14.00	  14.00	   0.75	   8.50	   1.00
-1 10000.0 3.30264
+0 0 0.000000 0.000000

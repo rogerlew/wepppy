@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.031095
+#   Build Date: 2021-04-01 15:01:45.547478
 #   Source Data: Surgo
 # 
 # Mukey: 2453680
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Frisco-Agneston association, 5 to 50 percent slopes'		'HPM'	4	0.3000	0.7500	4514530.00	0.0048	2.8456	1080.0000
+'Frisco-Agneston association, 5 to 50 percent slopes'		'HPM'	4	0.3000	0.7500	4514530.00	0.0048	2.8456	6.1839
 	  380.000	  11.00	  11.00	   0.75	   7.50	  40.00
 	  510.000	  12.00	  12.00	   0.50	   7.10	  40.00
 	 1220.000	  12.00	  12.00	   0.25	   7.10	  56.53
 	 1600.000	  12.00	  12.00	   0.25	   7.10	  55.48
-1 10000.0 101.59200
+0 0 0.000000 0.000000

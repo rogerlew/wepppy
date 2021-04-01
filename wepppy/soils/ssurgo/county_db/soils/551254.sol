@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.065949
+#   Build Date: 2021-04-01 15:01:42.574533
 #   Source Data: Surgo
 # 
 # Mukey: 551254
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Frondorf-Wellston-Rosine silt loams, 20 to 30 percent slopes'		'SIL'	3	0.2300	0.7500	4813575.00	0.0084	3.5000	33.0120
+'Frondorf-Wellston-Rosine silt loams, 20 to 30 percent slopes'		'SIL'	3	0.2300	0.7500	4813575.00	0.0084	3.5000	3.9115
 	  510.000	  22.50	  22.50	   1.25	  11.30	   5.00
 	  910.000	  26.50	  26.50	   0.25	  11.30	  49.38
 	 1160.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

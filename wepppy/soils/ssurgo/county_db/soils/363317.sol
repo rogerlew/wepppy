@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.544499
+#   Build Date: 2021-04-01 15:01:45.065289
 #   Source Data: Surgo
 # 
 # Mukey: 363317
@@ -52,7 +52,7 @@
 # 
 Any comments:
 1 1
-'Falfurrias fine sand, 0 to 5 percent slopes'		'FS'	2	0.3700	0.7500	5455820.00	0.0203	1.9764	331.2000
+'Falfurrias fine sand, 0 to 5 percent slopes'		'FS'	2	0.3700	0.7500	5455820.00	0.0203	1.9764	39.5201
 	  970.000	   2.00	   2.00	   0.55	   1.80	   0.00
 	 2030.000	   2.00	   2.00	   0.30	   1.70	   0.00
-1 10000.0 331.20000
+0 0 0.000000 0.000000

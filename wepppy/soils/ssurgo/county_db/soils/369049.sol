@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.860881
+#   Build Date: 2021-04-01 15:01:43.377656
 #   Source Data: Surgo
 # 
 # Mukey: 369049
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Tremona loamy fine sand, 1 to 5 percent slopes'		'LFS'	2	0.2300	0.7500	7799440.00	0.0196	1.5288	327.6000
+'Tremona loamy fine sand, 1 to 5 percent slopes'		'LFS'	2	0.2300	0.7500	7799440.00	0.0196	1.5288	29.2440
 	  270.000	   6.00	   6.00	   0.75	   3.00	   4.00
 	  670.000	   4.00	   4.00	   0.40	   2.00	   3.00
-1 10000.0 0.79200
+0 0 0.000000 0.000000

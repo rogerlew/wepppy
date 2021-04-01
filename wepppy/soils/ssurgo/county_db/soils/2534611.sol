@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.379110
+#   Build Date: 2021-04-01 15:01:44.899502
 #   Source Data: Surgo
 # 
 # Mukey: 2534611
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Bender-Rock outcrop complex, 15 to 35 percent slopes, very stony'		'CBV-FSL'	3	0.2300	0.7500	2958520.00	0.0053	3.0619	100.8000
+'Bender-Rock outcrop complex, 15 to 35 percent slopes, very stony'		'CBV-FSL'	3	0.2300	0.7500	2958520.00	0.0053	3.0619	12.7686
 	  100.000	   7.10	   7.10	   1.40	   8.00	  56.60
 	  300.000	   6.40	   6.40	   0.50	   4.20	  56.60
 	  580.000	  13.00	  13.00	   0.50	   6.80	  84.70
-1 10000.0 0.01800
+0 0 0.000000 0.000000

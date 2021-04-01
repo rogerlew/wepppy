@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.115054
+#   Build Date: 2021-04-01 15:01:42.624866
 #   Source Data: Surgo
 # 
 # Mukey: 2396834
@@ -55,9 +55,9 @@
 # 
 Any comments:
 1 1
-'Andic Humudepts-Typic Udivitrands-Pearsoncreek families, dense substratum complex, glaciated mountain slopes, granitic geology, south aspects'		'SPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	1342.8000
+'Andic Humudepts-Typic Udivitrands-Pearsoncreek families, dense substratum complex, glaciated mountain slopes, granitic geology, south aspects'		'SPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	4.9046
 	   80.000	   6.00	   6.00	   5.00	  15.30	  45.00
 	  410.000	   6.00	   6.00	   2.00	   9.50	  86.23
 	  840.000	  10.00	  10.00	   0.75	   8.20	  88.30
 	 1520.000	   5.00	   5.00	   0.25	   3.80	  80.42
-1 10000.0 720.00000
+0 0 0.000000 0.000000

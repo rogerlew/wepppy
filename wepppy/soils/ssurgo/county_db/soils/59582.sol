@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.495262
+#   Build Date: 2021-04-01 15:01:42.003117
 #   Source Data: Surgo
 # 
 # Mukey: 59582
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Murray-Marfa-Boracho association, 1 to 5 percent slopes'		'FSL'	4	0.2300	0.7500	5955280.00	0.0080	2.8656	100.8000
+'Murray-Marfa-Boracho association, 1 to 5 percent slopes'		'FSL'	4	0.2300	0.7500	5955280.00	0.0080	2.8656	18.3550
 	  220.000	  18.00	  18.00	   2.00	  13.20	   4.00
 	  650.000	  25.00	  25.00	   1.25	  14.70	   6.00
 	 1200.000	  22.00	  22.00	   0.75	  14.70	  17.00
 	 2030.000	  12.00	  12.00	   0.30	  10.00	  17.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.611617
+#   Build Date: 2021-04-01 15:01:42.119379
 #   Source Data: Surgo
 # 
 # Mukey: 470333
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Clallam, deep-Deadwood families association, 50 to 90 percent slopes.'		'GRV-L'	4	0.2300	0.7500	4898730.00	0.0054	3.7046	100.8000
+'Clallam, deep-Deadwood families association, 50 to 90 percent slopes.'		'GRV-L'	4	0.2300	0.7500	4898730.00	0.0054	3.7046	7.2380
 	  180.000	  26.00	  26.00	   4.00	  15.00	  58.29
 	  760.000	  28.00	  28.00	   0.50	  15.00	  65.80
 	 1070.000	  28.00	  28.00	   0.30	  12.00	  65.80
 	 1170.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 180.00000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.724300
+#   Build Date: 2021-04-01 15:01:43.235484
 #   Source Data: Surgo
 # 
 # Mukey: 61192
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Milbury-Bohannon-Umpcoos association, 50 to 80 percent slopes'		'SPM'	3	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+'Milbury-Bohannon-Umpcoos association, 50 to 80 percent slopes'		'SPM'	3	0.1600	0.7500	3688500.00	0.0035	3.3550	18.6878
 	  280.000	  12.50	  12.50	   3.50	  11.00	  62.00
 	  940.000	  14.00	  14.00	   1.25	   8.00	  67.28
 	 1050.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

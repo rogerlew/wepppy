@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.745644
+#   Build Date: 2021-04-01 15:01:41.251280
 #   Source Data: Surgo
 # 
 # Mukey: 548653
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Penn channery silt loam, 6 to 12 percent slopes, eroded'		'CN-SIL'	4	0.1500	0.7500	4591370.00	0.0050	3.0824	83.8440
+'Penn channery silt loam, 6 to 12 percent slopes, eroded'		'CN-SIL'	4	0.1500	0.7500	4591370.00	0.0050	3.0824	5.5382
 	  230.000	  15.00	  15.00	   3.00	  11.30	  28.00
 	  560.000	  22.00	  22.00	   0.25	  11.30	  38.25
 	  760.000	  21.50	  21.50	   0.00	  11.30	  59.50
 	 2030.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

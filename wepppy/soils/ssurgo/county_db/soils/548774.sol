@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.796564
+#   Build Date: 2021-04-01 15:01:42.305262
 #   Source Data: Surgo
 # 
 # Mukey: 548774
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Trimble gravelly silt loam, 20 to 50 percent slopes'		'GR-SIL'	3	0.3000	0.7500	4951400.00	0.0094	3.5000	33.0120
+'Trimble gravelly silt loam, 20 to 50 percent slopes'		'GR-SIL'	3	0.3000	0.7500	4951400.00	0.0094	3.5000	4.7302
 	  230.000	  20.00	  20.00	   1.25	  11.30	  27.00
 	 1320.000	  25.00	  25.00	   0.30	  11.30	  21.62
 	 1600.000	  28.00	  28.00	   0.20	  11.30	  35.88
-1 10000.0 33.01200
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.385123
+#   Build Date: 2021-04-01 15:01:42.894490
 #   Source Data: Surgo
 # 
 # Mukey: 295349
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Erie channery silt loam, 3 to 8 percent slopes'		'SIL'	3	0.3000	0.7500	4730880.00	0.0080	3.5000	19.8000
+'Erie channery silt loam, 3 to 8 percent slopes'		'SIL'	3	0.3000	0.7500	4730880.00	0.0080	3.5000	3.2794
 	  220.000	  24.00	  24.00	   5.40	  13.20	  29.02
 	  320.000	  22.00	  22.00	   1.50	  11.90	  29.02
 	  380.000	  21.00	  21.00	   0.66	  11.20	  23.74
-1 10000.0 1.98000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.121867
+#   Build Date: 2021-04-01 15:01:44.642231
 #   Source Data: Surgo
 # 
 # Mukey: 282154
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Taconic-Hubbardton-Macomber complex, 25 to 80 percent slopes, very rocky'		'CNV-SIL'	2	0.2300	0.7500	5034095.00	0.0102	3.5000	33.0199
+'Taconic-Hubbardton-Macomber complex, 25 to 80 percent slopes, very rocky'		'CNV-SIL'	2	0.2300	0.7500	5034095.00	0.0102	3.5000	4.8591
 	   80.000	  18.50	  18.50	   4.00	  11.30	  53.75
 	  460.000	  18.50	  18.50	   0.50	  11.30	  64.00
-1 10000.0 0.77400
+0 0 0.000000 0.000000

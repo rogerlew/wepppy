@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.246005
+#   Build Date: 2021-04-01 15:01:42.755302
 #   Source Data: Surgo
 # 
 # Mukey: 159786
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Reesville silt loam, 0 to 2 percent slopes'		'SIL'	3	0.1700	0.7500	5116790.00	0.0114	3.5000	33.0120
+'Reesville silt loam, 0 to 2 percent slopes'		'SIL'	3	0.1700	0.7500	5116790.00	0.0114	3.5000	1.6246
 	  300.000	  17.00	  17.00	   2.00	  14.70	   0.00
 	  860.000	  29.00	  29.00	   0.75	  24.40	   0.00
 	 1470.000	  20.00	  20.00	   0.75	  16.40	   0.00
-1 10000.0 3.31200
+0 0 0.000000 0.000000

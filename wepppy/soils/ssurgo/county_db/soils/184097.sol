@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.161730
+#   Build Date: 2021-04-01 15:01:43.679080
 #   Source Data: Surgo
 # 
 # Mukey: 184097
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Bunkum silty clay loam, 5 to 10 percent slopes, severely eroded'		'SICL'	4	0.2900	0.7500	4344970.00	0.0072	3.5000	10.1520
+'Bunkum silty clay loam, 5 to 10 percent slopes, severely eroded'		'SICL'	4	0.2900	0.7500	4344970.00	0.0072	3.5000	0.8831
 	  140.000	  31.00	  31.00	   0.75	  24.40	   0.00
 	 1270.000	  31.00	  31.00	   0.25	  23.30	   0.00
 	 1650.000	  24.00	  24.00	   0.75	  19.30	   0.00
 	 2000.000	  22.50	  22.50	   0.25	  17.50	   0.00
-1 10000.0 10.15200
+0 0 0.000000 0.000000

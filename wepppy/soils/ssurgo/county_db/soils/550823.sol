@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:33.013153
+#   Build Date: 2021-04-01 15:01:45.529174
 #   Source Data: Surgo
 # 
 # Mukey: 550823
@@ -56,8 +56,8 @@
 # 
 Any comments:
 1 1
-'Carpenter-Bledsoe-Berks complex, 20 to 70 percent slopes, stony'		'MPM'	3	0.2900	0.7500	4649000.00	0.0050	2.5450	331.2000
+'Carpenter-Bledsoe-Berks complex, 20 to 70 percent slopes, stony'		'MPM'	3	0.2900	0.7500	4649000.00	0.0050	2.5450	3.3485
 	  150.000	  14.00	  14.00	   2.50	   5.20	  18.10
 	  710.000	  22.00	  22.00	   1.00	   7.90	  38.44
 	  910.000	  32.00	  32.00	   1.00	  11.40	  32.80
-1 10000.0 3.27600
+0 0 0.000000 0.000000

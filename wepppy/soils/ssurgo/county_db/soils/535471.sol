@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.602715
+#   Build Date: 2021-04-01 15:01:41.108070
 #   Source Data: Surgo
 # 
 # Mukey: 535471
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Crider silt loam, 6 to 12 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	33.0120
+'Crider silt loam, 6 to 12 percent slopes, eroded'		'SIL'	3	0.3000	0.7500	5006530.00	0.0099	3.5000	1.8841
 	  150.000	  19.00	  19.00	   1.50	  10.30	   0.00
 	  660.000	  31.00	  31.00	   0.50	  11.30	   2.00
 	 2030.000	  65.00	  65.00	   0.25	  11.30	   9.00
-1 10000.0 27.93600
+0 0 0.000000 0.000000

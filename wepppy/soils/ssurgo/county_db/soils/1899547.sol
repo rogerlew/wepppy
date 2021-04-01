@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.964613
+#   Build Date: 2021-04-01 15:01:42.473818
 #   Source Data: Surgo
 # 
 # Mukey: 1899547
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Ramsey stony fine sandy loam, very steep phase'		'ST-FSL'	2	0.3600	0.7500	5897650.00	0.0079	2.7855	330.2640
+'Ramsey stony fine sandy loam, very steep phase'		'ST-FSL'	2	0.3600	0.7500	5897650.00	0.0079	2.7855	18.5596
 	  180.000	  16.50	  16.50	   2.00	  11.30	  32.50
 	  460.000	  16.50	  16.50	   0.50	  11.30	  32.50
-1 10000.0 2.55600
+0 0 0.000000 0.000000

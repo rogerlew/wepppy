@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.663057
+#   Build Date: 2021-04-01 15:01:42.171605
 #   Source Data: Surgo
 # 
 # Mukey: 2861506
@@ -56,10 +56,10 @@
 # 
 Any comments:
 1 1
-'Onaway-Ossineke fine sandy loams, moraine, 1 to 6 percent slopes'		'FSL'	5	0.2300	0.7500	4841100.00	0.0062	2.5520	100.8000
+'Onaway-Ossineke fine sandy loams, moraine, 1 to 6 percent slopes'		'FSL'	5	0.2300	0.7500	4841100.00	0.0062	2.5520	16.3503
 	  200.000	   8.00	   8.00	   2.00	   4.40	   9.00
 	  360.000	   7.00	   7.00	   0.75	   3.80	   9.00
 	  460.000	  21.00	  21.00	   0.25	  11.00	   8.00
 	  640.000	  23.00	  23.00	   0.25	  12.10	   8.92
 	  970.000	  12.00	  12.00	   0.25	   6.30	  18.40
-1 10000.0 3.27600
+0 0 0.000000 0.000000

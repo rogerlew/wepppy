@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.740779
+#   Build Date: 2021-04-01 15:01:41.246273
 #   Source Data: Surgo
 # 
 # Mukey: 348107
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Delpoint-Yamacall-Cabbart loams, 8 to 25 percent slopes'		'L'	4	0.3000	0.7500	4956360.00	0.0064	3.5247	36.0000
+'Delpoint-Yamacall-Cabbart loams, 8 to 25 percent slopes'		'L'	4	0.3000	0.7500	4956360.00	0.0064	3.5247	7.3053
 	   80.000	  23.50	  23.50	   2.00	  19.70	  10.00
 	  300.000	  26.50	  26.50	   0.75	  21.10	   9.00
 	  710.000	  26.50	  26.50	   0.25	  14.70	   8.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 10.08000
+0 0 0.000000 0.000000

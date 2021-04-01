@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.803833
+#   Build Date: 2021-04-01 15:01:44.322886
 #   Source Data: Surgo
 # 
 # Mukey: 325758
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Kinston and Bibb soils, 0 to 2 percent slopes, frequently flooded'		'L'	4	0.2900	0.7500	5110040.00	0.0058	3.5108	32.4000
+'Kinston and Bibb soils, 0 to 2 percent slopes, frequently flooded'		'L'	4	0.2900	0.7500	5110040.00	0.0058	3.5108	8.0268
 	  200.000	  24.00	  24.00	   3.00	  11.30	   0.00
 	  380.000	  30.00	  30.00	   1.00	  11.30	   4.00
 	  840.000	  12.00	  12.00	   2.00	  11.30	   0.00
 	 2030.000	  26.50	  26.50	   0.75	  11.30	   3.00
-1 10000.0 32.40000
+0 0 0.000000 0.000000

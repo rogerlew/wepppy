@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.687142
+#   Build Date: 2021-04-01 15:01:43.197842
 #   Source Data: Surgo
 # 
 # Mukey: 2607249
@@ -56,9 +56,9 @@
 # 
 Any comments:
 1 1
-'Scottsville-Latex complex, 0 to 2 percent slopes'		'VFSL'	4	0.2300	0.7500	10277530.00	0.0176	0.8456	100.8000
+'Scottsville-Latex complex, 0 to 2 percent slopes'		'VFSL'	4	0.2300	0.7500	10277530.00	0.0176	0.8456	17.8005
 	  100.000	   7.00	   7.00	   1.25	  11.30	   4.00
 	  310.000	   7.00	   7.00	   0.75	  11.30	   4.00
 	  490.000	  22.50	  22.50	   0.50	  11.30	   5.00
 	  850.000	  22.50	  22.50	   0.30	  11.30	   5.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.459478
+#   Build Date: 2021-04-01 15:01:41.966801
 #   Source Data: Surgo
 # 
 # Mukey: 565391
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Mountainburg stony fine sandy loam, 12 to 40 percent slopes, rocky'		'ST-FSL'	3	0.2300	0.7500	5955280.00	0.0080	2.4431	100.8000
+'Mountainburg stony fine sandy loam, 12 to 40 percent slopes, rocky'		'ST-FSL'	3	0.2300	0.7500	5955280.00	0.0080	2.4431	16.2865
 	  130.000	  11.50	  11.50	   2.00	  11.30	  40.80
 	  230.000	  11.50	  11.50	   1.10	  11.30	  64.72
 	  410.000	  19.00	  19.00	   1.10	  11.30	  60.24
-1 10000.0 3.60000
+0 0 0.000000 0.000000

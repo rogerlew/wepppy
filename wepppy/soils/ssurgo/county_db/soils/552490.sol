@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.042010
+#   Build Date: 2021-04-01 15:01:43.559635
 #   Source Data: Surgo
 # 
 # Mukey: 552490
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Garmon-Caneyville association, very steep'		'CN-SIL'	4	0.3700	0.7500	5122303.00	0.0115	3.5000	101.6280
+'Garmon-Caneyville association, very steep'		'CN-SIL'	4	0.3700	0.7500	5122303.00	0.0115	3.5000	4.0272
 	   50.000	  16.90	  16.90	   1.75	   6.30	  24.00
 	  300.000	  26.00	  26.00	   0.25	   9.10	  37.90
 	  660.000	  26.00	  26.00	   0.25	   9.10	  37.90
 	  910.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 100.80000
+0 0 0.000000 0.000000

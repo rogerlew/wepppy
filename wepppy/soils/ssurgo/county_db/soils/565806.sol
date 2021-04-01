@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:28.570237
+#   Build Date: 2021-04-01 15:01:41.075033
 #   Source Data: Surgo
 # 
 # Mukey: 565806
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Foley-Calhoun complex, 0 to 1 percent slopes'		'SIL'	3	0.2900	0.7500	5227050.00	0.0136	3.5000	32.4000
+'Foley-Calhoun complex, 0 to 1 percent slopes'		'SIL'	3	0.2900	0.7500	5227050.00	0.0136	3.5000	3.1162
 	  180.000	  15.00	  15.00	   1.25	   8.10	   0.00
 	  280.000	   5.00	   5.00	   0.75	   2.70	   0.00
 	  580.000	   4.00	   4.00	   0.75	   2.20	   0.00
-1 10000.0 0.75600
+0 0 0.000000 0.000000

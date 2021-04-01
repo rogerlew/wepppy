@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.357193
+#   Build Date: 2021-04-01 15:01:41.864850
 #   Source Data: Surgo
 # 
 # Mukey: 555736
@@ -54,8 +54,8 @@
 # 
 Any comments:
 1 1
-'Weikert-Berks very channery silt loams, 25 to 70 percent slopes'		'SPM'	3	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
+'Weikert-Berks very channery silt loams, 25 to 70 percent slopes'		'SPM'	3	0.1700	0.7500	0.00	0.0000	0.0000	4.8375
 	   80.000	  20.80	  20.80	   2.50	  11.30	  61.72
 	  330.000	  20.00	  20.00	   0.65	  11.30	  73.96
 	  580.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 75.60000
+0 0 0.000000 0.000000

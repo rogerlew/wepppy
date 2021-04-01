@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:32.221039
+#   Build Date: 2021-04-01 15:01:44.740720
 #   Source Data: Surgo
 # 
 # Mukey: 373943
@@ -53,8 +53,8 @@
 # 
 Any comments:
 1 1
-'Brackett-Real association, 10 to 30 percent slopes'		'GR-CL'	3	0.2300	0.7500	4629790.00	0.0059	4.0458	32.4000
+'Brackett-Real association, 10 to 30 percent slopes'		'GR-CL'	3	0.2300	0.7500	4629790.00	0.0059	4.0458	5.9531
 	  150.000	  30.00	  30.00	   2.00	  20.20	  25.00
 	  360.000	  30.00	  30.00	   1.25	  17.10	  32.00
 	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 25.92000
+0 0 0.000000 0.000000

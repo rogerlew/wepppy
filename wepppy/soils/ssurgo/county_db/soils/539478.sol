@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.635133
+#   Build Date: 2021-04-01 15:01:44.153220
 #   Source Data: Surgo
 # 
 # Mukey: 539478
@@ -54,9 +54,9 @@
 # 
 Any comments:
 1 1
-'Hartleton channery silt loam, 3 to 12 percent slopes, moderately eroded'		'CN-SIL'	4	0.3700	0.7500	5089225.00	0.0109	3.5000	83.8440
+'Hartleton channery silt loam, 3 to 12 percent slopes, moderately eroded'		'CN-SIL'	4	0.3700	0.7500	5089225.00	0.0109	3.5000	4.8786
 	  200.000	  17.50	  17.50	   2.00	  16.00	  37.10
 	  760.000	  22.50	  22.50	   0.25	  11.00	  65.62
 	  890.000	  21.00	  21.00	   0.25	  11.00	  85.75
 	  990.000	   7.00	   7.00	   7.00	  11.30	  55.50
-1 10000.0 18.00000
+0 0 0.000000 0.000000

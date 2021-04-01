@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.516183
+#   Build Date: 2021-04-01 15:01:44.035007
 #   Source Data: Surgo
 # 
 # Mukey: 2502292
@@ -55,8 +55,8 @@
 # 
 Any comments:
 1 1
-'Alred-Sonsac complex, 15 to 35 percent slopes, very rocky, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
+'Alred-Sonsac complex, 15 to 35 percent slopes, very rocky, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	6.7950
 	  150.000	   7.80	   7.80	   3.30	  11.30	  33.00
 	  270.000	   8.70	   8.70	   1.40	  11.30	  38.00
 	  780.000	  21.20	  21.20	   0.30	  11.30	  64.00
-1 10000.0 3.60000
+0 0 0.000000 0.000000

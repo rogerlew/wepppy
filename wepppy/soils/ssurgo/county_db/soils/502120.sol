@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:31.015421
+#   Build Date: 2021-04-01 15:01:43.532640
 #   Source Data: Surgo
 # 
 # Mukey: 502120
@@ -53,7 +53,7 @@
 # 
 Any comments:
 1 1
-'Pinon-Bowdish-Rock outcrop complex, 3 to 30 percent slopes'		'L'	2	0.2300	0.7500	5013990.00	0.0065	3.4423	33.0120
+'Pinon-Bowdish-Rock outcrop complex, 3 to 30 percent slopes'		'L'	2	0.2300	0.7500	5013990.00	0.0065	3.4423	7.6366
 	  130.000	  22.50	  22.50	   2.00	  16.80	  13.05
 	  410.000	  22.50	  22.50	   0.75	  16.10	  21.80
-1 10000.0 3.31200
+0 0 0.000000 0.000000

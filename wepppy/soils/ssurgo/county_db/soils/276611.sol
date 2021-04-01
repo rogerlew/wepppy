@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:30.539901
+#   Build Date: 2021-04-01 15:01:43.050501
 #   Source Data: Surgo
 # 
 # Mukey: 276611
@@ -57,10 +57,10 @@
 # 
 Any comments:
 1 1
-'Lyman-Tunbridge association, 15 to 60 percent slopes, extremely stony'		'SPM'	5	0.0400	0.7500	4649000.00	0.0050	2.5450	198.0000
+'Lyman-Tunbridge association, 15 to 60 percent slopes, extremely stony'		'SPM'	5	0.0400	0.7500	4649000.00	0.0050	2.5450	12.1457
 	   80.000	   7.00	   7.00	   7.60	  11.30	   0.00
 	  130.000	   4.00	   4.00	   3.20	  11.30	  16.00
 	  180.000	   7.00	   7.00	  10.00	  11.30	  23.00
 	  280.000	   7.00	   7.00	   7.00	  11.30	  23.00
 	  460.000	   7.00	   7.00	   3.60	  11.30	  28.62
-1 10000.0 3.60000
+0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 12:52:29.780747
+#   Build Date: 2021-04-01 15:01:42.289265
 #   Source Data: Surgo
 # 
 # Mukey: 2749865
@@ -55,7 +55,7 @@
 # 
 Any comments:
 1 1
-'Dickson silt loam, 2 to 5 percent slopes'		'SIL'	2	0.3700	0.7500	5475135.00	0.0233	3.5000	18.0000
+'Dickson silt loam, 2 to 5 percent slopes'		'SIL'	2	0.3700	0.7500	5475135.00	0.0233	3.5000	5.1204
 	  250.000	  10.50	  10.50	   2.80	   5.00	   0.00
 	  610.000	  19.40	  19.40	   0.30	   8.00	   0.00
-1 10000.0 2.55600
+0 0 0.000000 0.000000
