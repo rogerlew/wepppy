@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.207523
+#   Build Date: 2021-04-01 12:52:31.516183
 #   Source Data: Surgo
 # 
 # Mukey: 2502292
 # Major Component: 14886098 (comppct_r = 45.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42928122   Oi              2.0    91.0       13.0        44.0          0.1     7.0    66.8    10.0    69.0
+#  42928122   Oi     X        2.0    91.0       13.0        44.0          0.1     7.0    66.8    10.0    69.0
 #  42928123   A              15.0     9.0        0.0         0.0          1.3     7.8    35.1     2.6     3.3
 #  42928124   E              27.0     9.0        0.0         0.0          1.5     8.7    33.2     3.0     1.4
 #  42928125   Bt1            78.0     9.0        0.0         0.0         1.56    21.2    28.3     2.7     0.3
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Alred-Sonsac complex, 15 to 35 percent slopes, very rocky, very stony'		'SPM'	4	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
-	   20.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  150.000	  35.10	   7.80	   3.30	  11.30	  33.00
-	  270.000	  33.20	   8.70	   1.40	  11.30	  38.00
-	  780.000	  28.30	  21.20	   0.30	  11.30	  64.00
+'Alred-Sonsac complex, 15 to 35 percent slopes, very rocky, very stony'		'SPM'	3	0.2300	0.7500	4649000.00	0.0050	2.5450	327.6000
+	  150.000	   7.80	   7.80	   3.30	  11.30	  33.00
+	  270.000	   8.70	   8.70	   1.40	  11.30	  38.00
+	  780.000	  21.20	  21.20	   0.30	  11.30	  64.00
 1 10000.0 3.60000

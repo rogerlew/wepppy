@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.343864
+#   Build Date: 2021-04-01 12:52:31.660022
 #   Source Data: Surgo
 # 
 # Mukey: 1008348
 # Major Component: 14743768 (comppct_r = 65.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42474569   Oi              2.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
+#  42474569   Oi     X        2.0    92.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
 #  42474570   A               8.0     9.0        0.0         0.0         1.36    11.0    14.6     3.8     1.5
 #  42474566   E              25.0     9.0        0.0         0.0         1.52    13.5    21.2     3.1    0.75
 #  42474565   BE             58.0     9.0        0.0         0.0         1.42    13.2    13.3     4.0    0.25
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,9 +56,8 @@
 # 
 Any comments:
 1 1
-'Nixa-Clarksville complex, 3 to 8 percent slopes'		'SPM'	4	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   20.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	   80.000	  14.60	  11.00	   1.50	  11.30	  52.00
-	  250.000	  21.20	  13.50	   0.75	  11.30	  64.00
-	  580.000	  13.30	  13.20	   0.25	  11.30	  51.00
+'Nixa-Clarksville complex, 3 to 8 percent slopes'		'SPM'	3	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	   80.000	  11.00	  11.00	   1.50	  11.30	  52.00
+	  250.000	  13.50	  13.50	   0.75	  11.30	  64.00
+	  580.000	  13.20	  13.20	   0.25	  11.30	  51.00
 1 10000.0 0.72000

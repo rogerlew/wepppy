@@ -2,18 +2,18 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.540653
+#   Build Date: 2021-04-01 12:52:28.720414
 #   Source Data: Surgo
 # 
 # Mukey: 1588028
-# Major Component: 15168075 (comppct_r = 35.0)
+# Major Component: 15168071 (comppct_r = 4.0)
 # Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43860223   H1             10.0    23.0        0.0         0.0         0.35     7.0    66.8    10.0    90.0
-#  43860224   H2             81.0    21.7        0.0         0.0         0.18     7.0    66.8    10.0    87.5
-#  43860225   H3            152.0    23.0        0.0         0.0         0.14     7.0    66.8    10.0    92.5
+#  43860212   H1     X       28.0    21.7        0.0         0.0         0.37     7.0    66.8    10.0    82.5
+#  43860213   H2     X       58.0    21.7        0.0         0.0         0.23     7.0    66.8    10.0    87.5
+#  43860211   H3            152.0     7.7        0.0         3.0          1.6    20.0    65.1     9.5    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Carbondale, Lupton, and Rifle soils'		'MPT'	3	0.0900	0.7500	4649000.00	0.0050	2.5450	82.8000
-	  100.000	  66.80	   7.00	  90.00	 175.00	  55.50
-	  810.000	  66.80	   7.00	  87.50	 190.00	  55.50
-	 1520.000	  66.80	   7.00	  92.50	 175.00	  55.50
-1 10000.0 82.80000
+'Carbondale, Lupton, and Rifle soils'		'MUCK'	1	0.0900	0.7500	4649000.00	0.0050	2.5450	78.1200
+	 1520.000	  20.00	  20.00	   0.25	  11.00	  15.12
+1 10000.0 27.72000

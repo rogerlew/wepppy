@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.733697
+#   Build Date: 2021-04-01 12:52:29.969169
 #   Source Data: Surgo
 # 
 # Mukey: 520814
 # Major Component: 15685600 (comppct_r = 50.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45465981   Oi              3.0    92.0         -           -           0.1     7.0    66.8    10.0    69.0
+#  45465981   Oi     X        3.0    92.0         -           -           0.1     7.0    66.8    10.0    69.0
 #  45465983   A              11.0   28.23        0.0        19.0         1.36    20.8    27.0     5.7     2.5
 #  45465985   Bw             39.0   28.23        0.0        26.0         1.47    20.0    27.0     4.8    0.25
 #  45465984   C              49.0   28.23        0.0        43.0         1.41    21.2    24.0     2.7    0.25
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Weikert-Berks channery silt loams, 15 to 35 percent slopes'		'SPM'	5	0.1700	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  110.000	  27.00	  20.80	   2.50	  11.30	  39.25
-	  390.000	  27.00	  20.00	   0.25	  11.30	  54.12
-	  490.000	  24.00	  21.20	   0.25	  11.30	  88.03
-	  740.000	  66.80	   7.00	   0.00	  11.30	  55.50
+'Weikert-Berks channery silt loams, 15 to 35 percent slopes'		'SPM'	4	0.1700	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  110.000	  20.80	  20.80	   2.50	  11.30	  39.25
+	  390.000	  20.00	  20.00	   0.25	  11.30	  54.12
+	  490.000	  21.20	  21.20	   0.25	  11.30	  88.03
+	  740.000	   7.00	   7.00	   0.00	  11.30	  55.50
 1 10000.0 75.60000

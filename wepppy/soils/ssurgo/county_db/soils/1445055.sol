@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.449264
+#   Build Date: 2021-04-01 12:52:31.771702
 #   Source Data: Surgo
 # 
 # Mukey: 1445055
-# Major Component: 15555384 (comppct_r = 60.0)
+# Major Component: 15555385 (comppct_r = 38.0)
 # Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45109913   H1              8.0     9.0        0.0         0.0         0.33     7.0    66.8    10.0    50.0
-#  45109914   H2            200.0     9.0        0.0         0.0         0.45     7.0    66.8    10.0    50.0
+#  45109915   H1     X       66.0     9.0        0.0         0.0         0.45     7.0    66.8    10.0    50.0
+#  45109916   H2            200.0    14.0        0.0         0.0         1.55    15.0    68.8    16.9     2.0
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +40,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +52,6 @@
 # 
 Any comments:
 1 1
-'Pungo-Belhaven soils, 0 to 1 percent slopes, frequently ponded'		'MPT'	2	0.2500	0.7500	4649000.00	0.0050	2.5450	32.4000
-	   80.000	  66.80	   7.00	  50.00	 113.00	  55.50
-	 2000.000	  66.80	   7.00	  50.00	 113.00	  55.50
-1 10000.0 32.40000
+'Pungo-Belhaven soils, 0 to 1 percent slopes, frequently ponded'		'MUCK'	1	0.2500	0.7500	4649000.00	0.0050	2.5450	32.4000
+	 2000.000	  15.00	  15.00	   2.00	   8.20	   0.00
+1 10000.0 50.40000

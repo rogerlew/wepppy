@@ -6,10 +6,17 @@ found 3 layers
 analyzing chkey 43875438
 analyzing chkey 43875437
 analyzing chkey 43875436
-horizons mask: [True, True, True]
+horizons mask: [False, False, False]
+computing erodibility for h0
+analyzing cokey 15173823
+found 3 layers
+analyzing chkey 43875431
+analyzing chkey 43875430
+analyzing chkey 43875429
+horizons mask: [False, False, True]
 computing erodibility for h0
 building major component
-identified 3 layers, ksat_min=21.7
+identified 1 layers, ksat_min=7.7
 done
 Validity: all checks passed
 Validity: all checks passed

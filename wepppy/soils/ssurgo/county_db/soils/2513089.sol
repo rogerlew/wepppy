@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.143955
+#   Build Date: 2021-04-01 12:52:29.352937
 #   Source Data: Surgo
 # 
 # Mukey: 2513089
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44209980   Oi              2.0    92.0       13.0         0.0          0.1     0.0     0.0     0.0    69.0
+#  44209980   Oi     X        2.0    92.0       13.0         0.0          0.1     0.0     0.0     0.0    69.0
 #  44209981   A              19.0    23.0        4.0        11.0          1.0    20.0    23.0     9.9     8.0
 #  44209976   BA             28.0    23.0        0.0        10.0          1.1    19.0    26.0     9.1    3.25
 #  44209977   Bw             76.0    23.0        0.0        15.0         1.45    19.0    20.0     6.9     1.4
@@ -46,7 +46,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -58,10 +58,9 @@
 # 
 Any comments:
 1 1
-'Berks-Highsplint-Sharondale complex, 35 to 80 percent slopes, very stony'		'SPM'	5	0.0000	0.7500	0.00	0.0000	0.0000	331.2000
-	   20.000	   0.00	   0.00	  69.00	  58.00	  55.50
-	  190.000	  23.00	  20.00	   8.00	  17.70	  54.10
-	  280.000	  26.00	  19.00	   3.25	  10.00	  48.70
-	  760.000	  20.00	  19.00	   1.40	   9.10	  55.80
-	  980.000	  12.00	  22.00	   0.70	   9.30	  74.70
+'Berks-Highsplint-Sharondale complex, 35 to 80 percent slopes, very stony'		'SPM'	4	0.0000	0.7500	0.00	0.0000	0.0000	331.2000
+	  190.000	  20.00	  20.00	   8.00	  17.70	  54.10
+	  280.000	  19.00	  19.00	   3.25	  10.00	  48.70
+	  760.000	  19.00	  19.00	   1.40	   9.10	  55.80
+	  980.000	  22.00	  22.00	   0.70	   9.30	  74.70
 1 10000.0 5.07600

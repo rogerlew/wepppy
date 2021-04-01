@@ -2,17 +2,17 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.708086
+#   Build Date: 2021-04-01 12:52:29.942698
 #   Source Data: Surgo
 # 
 # Mukey: 1455281
-# Major Component: 15146251 (comppct_r = 30.0)
-# Texture: silt loam
+# Major Component: 15146254 (comppct_r = 30.0)
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43794249   Oi             10.0   91.74        0.0         0.0          0.1     5.0     5.0     5.0    75.0
-#  43794248   Oa            203.0   21.88        0.0         0.0         0.25     5.0     5.0     5.0    75.0
+#  43794263   Oa     X       66.0    21.7        0.0         0.0         0.25     7.0    66.8    10.0    82.5
+#  43794264   C             203.0    92.0        0.0         0.0         1.39     0.5    97.9     7.3    0.25
 # 
 # Restricting Layer:
 #     ksat threshold: 2.00000
@@ -40,7 +40,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -52,7 +52,6 @@
 # 
 Any comments:
 1 1
-'Carbondale, Lupton, and Tawas soils'		'PEAT'	2	0.0900	0.7500	5502700.00	0.0250	3.5000	330.2640
-	  100.000	   5.00	   5.00	  75.00	  95.80	  55.50
-	 2030.000	   5.00	   5.00	  75.00	 193.00	  55.50
-1 10000.0 78.76800
+'Carbondale, Lupton, and Tawas soils'		'MUCK'	1	0.2300	0.7500	4649000.00	0.0050	2.5450	78.1200
+	 2030.000	   0.50	   0.50	   0.25	   1.10	   5.00
+1 10000.0 331.20000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.723794
+#   Build Date: 2021-04-01 12:52:29.959151
 #   Source Data: Surgo
 # 
 # Mukey: 292949
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43700400   Oi              3.0    22.0        0.0         0.0         0.25    10.0    60.0    30.0    90.0
+#  43700400   Oi     X        3.0    22.0        0.0         0.0         0.25    10.0    60.0    30.0    90.0
 #  43700401   H1             10.0    28.0        0.0         0.0         1.25    10.0    69.6    12.3     3.0
 #  43700402   H2             64.0    28.0        0.0         0.0          1.4    10.0    66.9    11.8     1.0
 #  43700403   H3             91.0    28.0        0.0         0.0          1.4     5.0    78.5    15.2     0.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Urban land-Riverhead complex, 0 to 3 percent slopes'		'SPM'	5	0.2300	0.7500	8491000.00	0.0110	1.5800	79.2000
-	   30.000	  60.00	  10.00	  90.00	  11.30	  55.50
-	  100.000	  69.60	  10.00	   3.00	  11.30	   8.00
-	  640.000	  66.90	  10.00	   1.00	  11.30	  15.00
-	  910.000	  78.50	   5.00	   0.50	  11.30	   8.00
-	 1520.000	  96.50	   2.00	   0.25	   1.10	  36.95
+'Urban land-Riverhead complex, 0 to 3 percent slopes'		'SPM'	4	0.2300	0.7500	8491000.00	0.0110	1.5800	79.2000
+	  100.000	  10.00	  10.00	   3.00	  11.30	   8.00
+	  640.000	  10.00	  10.00	   1.00	  11.30	  15.00
+	  910.000	   5.00	   5.00	   0.50	  11.30	   8.00
+	 1520.000	   2.00	   2.00	   0.25	   1.10	  36.95
 1 10000.0 507.60000

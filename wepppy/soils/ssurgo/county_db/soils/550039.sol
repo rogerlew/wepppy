@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.445323
+#   Build Date: 2021-04-01 12:52:28.616962
 #   Source Data: Surgo
 # 
 # Mukey: 550039
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44785943   Oi              3.0    92.0         -           -          0.07     7.0    66.8    10.0    69.7
+#  44785943   Oi     X        3.0    92.0         -           -          0.07     7.0    66.8    10.0    69.7
 #  44785942   A              13.0    28.0        0.0         4.0         1.61    14.0    53.0     7.0     2.0
 #  44785944   Bw1            25.0    28.0        0.0         1.0         1.68    14.0    51.0     7.0    0.25
 #  44785945   Bw2            43.0    28.0        0.0         4.0         1.75    14.0    53.0     6.0    0.25
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,11 +57,10 @@
 # 
 Any comments:
 1 1
-'Marrowbone-Clifftop-Matewan complex, 35 to 75 percent slopes, very rocky'		'SPM'	6	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
-	   30.000	  66.80	   7.00	  69.70	  11.30	  55.50
-	  130.000	  53.00	  14.00	   2.00	   5.20	  12.64
-	  250.000	  51.00	  14.00	   0.25	  11.30	   5.95
-	  430.000	  53.00	  14.00	   0.25	  11.30	  12.64
-	  580.000	  50.00	  14.00	   0.25	  11.30	  12.64
-	  710.000	  49.00	  14.00	   0.25	  11.30	  24.56
+'Marrowbone-Clifftop-Matewan complex, 35 to 75 percent slopes, very rocky'		'SPM'	5	0.3000	0.7500	4649000.00	0.0050	2.5450	331.2000
+	  130.000	  14.00	  14.00	   2.00	   5.20	  12.64
+	  250.000	  14.00	  14.00	   0.25	  11.30	   5.95
+	  430.000	  14.00	  14.00	   0.25	  11.30	  12.64
+	  580.000	  14.00	  14.00	   0.25	  11.30	  12.64
+	  710.000	  14.00	  14.00	   0.25	  11.30	  24.56
 1 10000.0 0.18000

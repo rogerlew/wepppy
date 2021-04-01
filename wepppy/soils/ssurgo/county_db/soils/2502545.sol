@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:33.166005
+#   Build Date: 2021-04-01 12:52:32.524574
 #   Source Data: Surgo
 # 
 # Mukey: 2502545
 # Major Component: 14804623 (comppct_r = 85.0)
-# Texture: sand loam
+# Texture: silt loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42678614   Oi              2.0    91.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
+#  42678614   Oi     X        2.0    91.0        0.0         0.0          0.1     7.0    66.8    10.0    69.0
 #  42678615   A              13.0     9.0        1.0         4.0         1.25    16.4    31.6     2.2     4.6
 #  42678616   BE             33.0     9.0        2.0        11.0         1.38    16.9    28.4     2.1     1.3
 #  42678617   2Bt1   R       79.0    0.21        0.0         4.0         1.19    68.6     7.1     1.3     0.5
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,8 +55,7 @@
 # 
 Any comments:
 1 1
-'Doniphan very gravelly silt loam, 3 to 8 percent slopes'		'SPM'	3	0.3000	0.7500	4649000.00	0.0050	2.5450	327.6000
-	   20.000	  66.80	   7.00	  69.00	  11.30	  55.50
-	  130.000	  31.60	  16.40	   4.60	   6.20	  64.85
-	  330.000	  28.40	  16.90	   1.30	  11.30	  50.41
+'Doniphan very gravelly silt loam, 3 to 8 percent slopes'		'SPM'	2	0.3000	0.7500	4649000.00	0.0050	2.5450	327.6000
+	  130.000	  16.40	  16.40	   4.60	   6.20	  64.85
+	  330.000	  16.90	  16.90	   1.30	  11.30	  50.41
 1 10000.0 0.75600

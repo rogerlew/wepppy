@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.293603
+#   Build Date: 2021-04-01 12:52:30.557195
 #   Source Data: Surgo
 # 
 # Mukey: 416116
 # Major Component: 15183219 (comppct_r = 57.0)
-# Texture: silt loam
+# Texture: sand loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43903251   Oe              3.0    30.0        0.0         0.0         0.15     5.0     5.0     5.0    75.0
+#  43903251   Oe     X        3.0    30.0        0.0         0.0         0.15     5.0     5.0     5.0    75.0
 #  43903256   A               5.0    12.0        0.0         0.0         1.45     4.0    76.0    14.0     5.0
 #  43903249   E              25.0    12.0        0.0         0.0         1.45     4.0    76.0    14.6     1.0
 #  43903252   Bhs            36.0     9.0        0.0         0.0         1.55     9.0    68.0    12.0     3.0
@@ -48,7 +48,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -60,10 +60,9 @@
 # 
 Any comments:
 1 1
-'Munising-Skanee complex, 0 to 8 percent slopes'		'MPM'	5	0.2300	0.7500	5502700.00	0.0250	3.5000	108.0000
-	   30.000	   5.00	   5.00	  75.00	  11.30	  55.50
-	   50.000	  76.00	   4.00	   5.00	  11.30	   3.00
-	  250.000	  76.00	   4.00	   1.00	  11.30	   3.00
-	  360.000	  68.00	   9.00	   3.00	  11.30	   3.00
-	  560.000	  68.00	   9.00	   2.00	  11.30	   3.00
+'Munising-Skanee complex, 0 to 8 percent slopes'		'MPM'	4	0.2300	0.7500	5502700.00	0.0250	3.5000	108.0000
+	   50.000	   4.00	   4.00	   5.00	  11.30	   3.00
+	  250.000	   4.00	   4.00	   1.00	  11.30	   3.00
+	  360.000	   9.00	   9.00	   3.00	  11.30	   3.00
+	  560.000	   9.00	   9.00	   2.00	  11.30	   3.00
 1 10000.0 0.79200

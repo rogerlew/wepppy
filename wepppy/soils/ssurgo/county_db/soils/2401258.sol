@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.860566
+#   Build Date: 2021-04-01 12:52:29.054884
 #   Source Data: Surgo
 # 
 # Mukey: 2401258
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42105159   Oi              3.0    92.0        0.0         0.0          0.1     0.0     0.0     0.0    69.0
+#  42105159   Oi     X        3.0    92.0        0.0         0.0          0.1     0.0     0.0     0.0    69.0
 #  42105156   A              13.0   28.23        0.0        21.0         1.36    20.8    27.0     5.7     3.0
 #  42105157   Bw             25.0   28.23        0.0         7.0         1.47    20.0    27.0     4.8    0.65
 #  42105158   C              33.0   28.23        0.0        26.0         1.41    21.2    24.0     2.7    0.65
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Weikert channery silt loam, 25 to 45 percent slopes'		'SPM'	5	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
-	   30.000	   0.00	   0.00	  69.00	  11.30	  55.50
-	  130.000	  27.00	  20.80	   3.00	  11.30	  46.28
-	  250.000	  27.00	  20.00	   0.65	  11.30	  71.17
-	  330.000	  24.00	  21.20	   0.65	  11.30	  91.12
-	  580.000	  66.80	   7.00	   0.00	  11.30	  55.50
+'Weikert channery silt loam, 25 to 45 percent slopes'		'SPM'	4	0.1700	0.7500	0.00	0.0000	0.0000	331.2000
+	  130.000	  20.80	  20.80	   3.00	  11.30	  46.28
+	  250.000	  20.00	  20.00	   0.65	  11.30	  71.17
+	  330.000	  21.20	  21.20	   0.65	  11.30	  91.12
+	  580.000	   7.00	   7.00	   0.00	  11.30	  55.50
 1 10000.0 75.60000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:29.574803
+#   Build Date: 2021-04-01 12:52:28.755363
 #   Source Data: Surgo
 # 
 # Mukey: 115964
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42847716   Oa             71.0    21.0        0.0         0.0          0.4     7.0    66.8    10.0    42.5
+#  42847716   Oa     X       71.0    21.0        0.0         0.0          0.4     7.0    66.8    10.0    42.5
 #  42847715   Ag             84.0    22.0        0.0         0.0          1.0    15.0    68.0    19.0    12.0
 #  42847713   Cg1           152.0     8.0        0.0         0.0         1.58    25.0    60.0    15.0    2.75
 #  42847714   Cg2           203.0    28.0        0.0         0.0         1.62     5.0    80.0    20.0     0.0
@@ -42,7 +42,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -54,9 +54,8 @@
 # 
 Any comments:
 1 1
-'Croatan muck, ponded, 0 to 2 percent slopes'		'MUCK'	4	0.1600	0.7500	4649000.00	0.0050	2.5450	75.6000
-	  710.000	  66.80	   7.00	  42.50	  11.30	  55.50
-	  840.000	  68.00	  15.00	  12.00	  11.30	   0.00
-	 1520.000	  60.00	  25.00	   2.75	  11.30	   0.00
-	 2030.000	  80.00	   5.00	   0.00	  11.30	   0.00
+'Croatan muck, ponded, 0 to 2 percent slopes'		'MUCK'	3	0.1600	0.7500	4649000.00	0.0050	2.5450	75.6000
+	  840.000	  15.00	  15.00	  12.00	  11.30	   0.00
+	 1520.000	  25.00	  25.00	   2.75	  11.30	   0.00
+	 2030.000	   5.00	   5.00	   0.00	  11.30	   0.00
 1 10000.0 100.80000
