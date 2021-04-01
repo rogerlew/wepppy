@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.299289
+#   Build Date: 2021-04-01 12:52:29.512311
 #   Source Data: Surgo
 # 
 # Mukey: 464692
 # Major Component: 14572191 (comppct_r = 40.0)
-# Texture: silt loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41987271   Oi              5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
+#  41987271   Oi     X        5.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
 #  41987269   A              15.0     9.0        0.0         0.0         1.25    23.0    39.0    11.5     5.0
 #  41987270   Bt1            48.0     9.0        0.0         0.0         1.44    23.0    22.0     8.9     1.0
 #  41987268   Bt2            74.0     9.0        0.0         0.0         1.44    23.0    22.0     8.9     1.0
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,9 +55,8 @@
 # 
 Any comments:
 1 1
-'Hurlbut-Deadwood-Rock outcrop complex, 30 to 75 percent slopes, MLRA 22A'		'SPM'	4	0.3000	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   50.000	  35.00	  15.00	  75.00	  84.30	  55.50
-	  150.000	  39.00	  23.00	   5.00	  20.00	  35.00
-	  480.000	  22.00	  23.00	   1.00	  18.80	  32.00
-	  740.000	  22.00	  23.00	   1.00	  18.80	  17.00
+'Hurlbut-Deadwood-Rock outcrop complex, 30 to 75 percent slopes, MLRA 22A'		'SPM'	3	0.3000	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  150.000	  23.00	  23.00	   5.00	  20.00	  35.00
+	  480.000	  23.00	  23.00	   1.00	  18.80	  32.00
+	  740.000	  23.00	  23.00	   1.00	  18.80	  17.00
 1 10000.0 0.00000

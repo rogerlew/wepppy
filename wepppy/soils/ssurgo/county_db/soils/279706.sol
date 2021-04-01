@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:32.184062
+#   Build Date: 2021-04-01 12:52:31.493888
 #   Source Data: Surgo
 # 
 # Mukey: 279706
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  41851662   Oe              8.0    55.0        0.0         0.0         0.25     7.0    66.8    10.0    85.0
-#  41851666   Oa             13.0    55.0        0.0         0.0         0.25     7.0    66.8    10.0    85.0
+#  41851662   Oe     X        8.0    55.0        0.0         0.0         0.25     7.0    66.8    10.0    85.0
+#  41851666   Oa     X       13.0    55.0        0.0         0.0         0.25     7.0    66.8    10.0    85.0
 #  41851667   E              20.0    10.0        0.0         8.0         1.51     4.0    59.0    15.0     3.2
 #  41851665   Bhs            28.0    10.0        0.0         4.0          1.0     7.0    59.0    15.0    10.0
 #  41851664   Bs             66.0    10.0        0.0         6.0         1.01     4.0    59.0    15.0     7.0
@@ -45,7 +45,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -57,11 +57,9 @@
 # 
 Any comments:
 1 1
-'Tunbridge-Lyman-Rock outcrop complex, 15 to 25 percent slopes'		'MPM'	6	0.1700	0.7500	4649000.00	0.0050	2.5450	198.0000
-	   80.000	  66.80	   7.00	  85.00	  11.30	  55.50
-	  130.000	  66.80	   7.00	  85.00	  11.30	  55.50
-	  200.000	  59.00	   4.00	   3.20	  11.30	  16.28
-	  280.000	  59.00	   7.00	  10.00	  11.30	  26.08
-	  660.000	  59.00	   4.00	   7.00	  11.30	  27.62
-	  710.000	  59.00	   4.00	   2.50	  11.30	   9.00
+'Tunbridge-Lyman-Rock outcrop complex, 15 to 25 percent slopes'		'MPM'	4	0.1700	0.7500	4649000.00	0.0050	2.5450	198.0000
+	  200.000	   4.00	   4.00	   3.20	  11.30	  16.28
+	  280.000	   7.00	   7.00	  10.00	  11.30	  26.08
+	  660.000	   4.00	   4.00	   7.00	  11.30	  27.62
+	  710.000	   4.00	   4.00	   2.50	  11.30	   9.00
 1 10000.0 3.60000

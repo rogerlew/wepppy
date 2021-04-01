@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.119315
+#   Build Date: 2021-04-01 12:52:29.327692
 #   Source Data: Surgo
 # 
 # Mukey: 60907
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  42855139   Oi              2.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
+#  42855139   Oi     X        2.0   373.0        0.0         0.0          0.2    15.0    35.0     5.0    75.0
 #  42855140   H1             40.0     9.0        0.0         0.0         0.95    23.5     9.4     6.6     4.0
 #  42855141   H2             88.0     9.0        0.0         0.0          1.1    28.0     7.1     2.9     1.5
 #  42855142   H3            124.0     9.0        0.0         0.0          1.1    25.0    32.2    23.9    0.75
@@ -43,7 +43,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -55,10 +55,9 @@
 # 
 Any comments:
 1 1
-'Rinearson silt loam, 30 to 60 percent slopes'		'SPM'	5	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
-	   20.000	  35.00	  15.00	  75.00	  11.30	  55.50
-	  400.000	   9.40	  23.50	   4.00	  17.50	   2.50
-	  880.000	   7.10	  28.00	   1.50	  15.00	   2.50
-	 1240.000	  32.20	  25.00	   0.75	  15.00	   7.50
-	 1340.000	  66.80	   7.00	   7.00	  11.30	  55.50
+'Rinearson silt loam, 30 to 60 percent slopes'		'SPM'	4	0.1600	0.7500	3688500.00	0.0035	3.3550	1342.8000
+	  400.000	  23.50	  23.50	   4.00	  17.50	   2.50
+	  880.000	  28.00	  28.00	   1.50	  15.00	   2.50
+	 1240.000	  25.00	  25.00	   0.75	  15.00	   7.50
+	 1340.000	   7.00	   7.00	   7.00	  11.30	  55.50
 1 10000.0 100.80000

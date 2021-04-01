@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.711700
+#   Build Date: 2021-04-01 12:52:29.946369
 #   Source Data: Surgo
 # 
 # Mukey: 190871
@@ -11,8 +11,8 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45527872   Oa1            15.0    21.7        0.0         0.0         0.23    40.0    10.0     2.1    82.5
-#  45527873   Oa2            86.0    21.7        0.0         0.0         0.23    25.0    10.0     2.1    87.5
+#  45527872   Oa1    X       15.0    21.7        0.0         0.0         0.23    40.0    10.0     2.1    82.5
+#  45527873   Oa2    X       86.0    21.7        0.0         0.0         0.23    25.0    10.0     2.1    87.5
 #  45527874   H3            152.0     7.7        0.0         3.0          1.6    29.0    18.9     3.8    0.25
 # 
 # Restricting Layer:
@@ -41,7 +41,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -53,8 +53,6 @@
 # 
 Any comments:
 1 1
-'Cathro muck'		'MUCK'	3	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
-	  150.000	  10.00	  40.00	  82.50	 180.40	  55.50
-	  860.000	  10.00	  25.00	  87.50	 193.00	  55.50
-	 1520.000	  18.90	  29.00	   0.25	   8.40	  19.97
+'Cathro muck'		'MUCK'	1	0.0900	0.7500	3848800.00	0.0069	3.5000	78.1200
+	 1520.000	  29.00	  29.00	   0.25	   8.40	  19.97
 1 10000.0 27.72000

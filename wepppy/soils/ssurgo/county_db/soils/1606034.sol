@@ -2,16 +2,16 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:30.392299
+#   Build Date: 2021-04-01 12:52:29.612450
 #   Source Data: Surgo
 # 
 # Mukey: 1606034
 # Major Component: 15090208 (comppct_r = 38.0)
-# Texture: silt loam
+# Texture: loam
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  43612763   Oe              5.0   600.0        0.0         0.0         0.24     1.0     0.0     0.0    68.0
+#  43612763   Oe     X        5.0   600.0        0.0         0.0         0.24     1.0     0.0     0.0    68.0
 #  43612766   A              25.0    28.0        0.0         0.0         1.65    16.0    49.0     5.9    1.75
 #  43612765   Btg            81.0     9.0        0.0         0.0         1.58    25.0    60.0     8.0     0.5
 #  43612768   BCg           100.0    92.0        0.0         0.0          1.7     8.0    80.0     7.0    0.25
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,9 +56,8 @@
 # 
 Any comments:
 1 1
-'Fallsington loams, 0 to 2 percent slopes, Mid-Altlantic Coastal Plain'		'MPT'	4	0.0900	0.7500	0.00	0.0000	0.0000	2160.0000
-	   50.000	   0.00	   1.00	  68.00	  11.30	  55.50
-	  250.000	  49.00	  16.00	   1.75	  11.30	   5.00
-	  810.000	  60.00	  25.00	   0.50	  11.30	   5.00
-	 1000.000	  80.00	   8.00	   0.25	  11.30	   5.00
+'Fallsington loams, 0 to 2 percent slopes, Mid-Altlantic Coastal Plain'		'MPT'	3	0.0900	0.7500	0.00	0.0000	0.0000	2160.0000
+	  250.000	  16.00	  16.00	   1.75	  11.30	   5.00
+	  810.000	  25.00	  25.00	   0.50	  11.30	   5.00
+	 1000.000	   8.00	   8.00	   0.25	  11.30	   5.00
 1 10000.0 3.60000

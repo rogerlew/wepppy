@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.277841
+#   Build Date: 2021-04-01 12:52:30.540926
 #   Source Data: Surgo
 # 
 # Mukey: 278841
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  44418217   Oe              2.0    35.0         -           -           0.5     7.0    66.8    10.0    95.0
+#  44418217   Oe     X        2.0    35.0         -           -           0.5     7.0    66.8    10.0    95.0
 #  44418218   A              10.0    10.5        0.0         7.0         0.99     9.0    59.0    16.0     7.5
 #  44418219   Bw1            23.0    16.0        0.0        10.0          1.0     7.0    62.0    16.0    4.28
 #  44418220   Bw2            48.0    16.0        5.0         9.0          1.1     6.0    63.0    17.0    1.45
@@ -46,7 +46,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -58,12 +58,11 @@
 # 
 Any comments:
 1 1
-'Chatfield-Hollis complex, 25 to 60 percent slopes, rocky'		'MPM'	7	0.2300	0.7500	4649000.00	0.0050	2.5450	126.0000
-	   20.000	  66.80	   7.00	  95.00	 126.80	  55.50
-	  100.000	  59.00	   9.00	   7.50	  11.30	  19.09
-	  230.000	  62.00	   7.00	   4.28	  11.30	  32.50
-	  480.000	  63.00	   6.00	   1.45	  11.30	  34.64
-	  760.000	  62.00	   4.00	   4.10	  11.30	  26.68
-	  860.000	  67.00	   3.00	   0.58	  11.30	  40.15
-	  940.000	  67.00	   3.00	   0.33	   2.90	  50.00
+'Chatfield-Hollis complex, 25 to 60 percent slopes, rocky'		'MPM'	6	0.2300	0.7500	4649000.00	0.0050	2.5450	126.0000
+	  100.000	   9.00	   9.00	   7.50	  11.30	  19.09
+	  230.000	   7.00	   7.00	   4.28	  11.30	  32.50
+	  480.000	   6.00	   6.00	   1.45	  11.30	  34.64
+	  760.000	   4.00	   4.00	   4.10	  11.30	  26.68
+	  860.000	   3.00	   3.00	   0.58	  11.30	  40.15
+	  940.000	   3.00	   3.00	   0.33	   2.90	  50.00
 1 10000.0 5.40000

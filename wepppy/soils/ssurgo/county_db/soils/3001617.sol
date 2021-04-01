@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2020-06-05 11:16:31.305248
+#   Build Date: 2021-04-01 12:52:30.569228
 #   Source Data: Surgo
 # 
 # Mukey: 3001617
@@ -11,7 +11,7 @@
 # 
 #   Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om
 # ------------------------------------------------------------------------------------------------------------
-#  45217212   Oi              3.0    91.5        0.0         0.0         0.18    15.5    44.4    10.0    85.0
+#  45217212   Oi     X        3.0    91.5        0.0         0.0         0.18    15.5    44.4    10.0    85.0
 #  45217213   Ap             25.0    28.0        0.0         0.0         1.52    15.5    44.4    10.0    2.75
 #  45217214   Bt             46.0    28.0        0.0         0.0          1.5    11.2    68.5    10.0    0.59
 #  45217215   2C1            74.0    91.5       51.0         7.0         1.45     5.4    83.4     4.0    0.25
@@ -44,7 +44,7 @@
 # BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHElementTreeHER IN 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHERE IN 
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 # ARISING IN ANY WAY OUT OF THE USE OF THIS FILE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
@@ -56,11 +56,10 @@
 # 
 Any comments:
 1 1
-'Hazen-Paulins Kill complex, 3 to 8 percent slopes, very stony'		'SPM'	6	0.1500	0.7500	4649000.00	0.0050	3.0975	329.4000
-	   30.000	  44.40	  15.50	  85.00	  94.40	  55.50
-	  250.000	  44.40	  15.50	   2.75	   5.90	   7.00
-	  460.000	  68.50	  11.20	   0.59	   5.40	  15.00
-	  740.000	  83.40	   5.40	   0.25	   3.50	  63.88
-	 1040.000	  95.50	   0.80	   0.25	   1.60	  66.46
-	 1520.000	  95.50	   0.80	   0.12	   1.60	  75.51
+'Hazen-Paulins Kill complex, 3 to 8 percent slopes, very stony'		'SPM'	5	0.1500	0.7500	4649000.00	0.0050	3.0975	329.4000
+	  250.000	  15.50	  15.50	   2.75	   5.90	   7.00
+	  460.000	  11.20	  11.20	   0.59	   5.40	  15.00
+	  740.000	   5.40	   5.40	   0.25	   3.50	  63.88
+	 1040.000	   0.80	   0.80	   0.25	   1.60	  66.46
+	 1520.000	   0.80	   0.80	   0.12	   1.60	  75.51
 1 10000.0 329.40000
