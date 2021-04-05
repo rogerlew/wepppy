@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.465968
+#   Build Date: 2021-04-05 10:36:24.793021
 #   Source Data: Surgo
 # 
 # Mukey: 424777
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Newglarus silt loam, moderately deep, 12 to 20 percent slopes, moderately eroded'		'SIL'	2	0.2900	0.7500	4978965.00	0.0096	3.5000	1.8310
-	  180.000	  19.50	  19.50	   2.00	  16.70	   0.00
-	  510.000	  27.50	  27.50	   0.25	  20.90	   0.00
+	  180.000	  11.60	  19.50	   2.00	  16.70	   0.00
+	  510.000	   7.10	  27.50	   0.25	  20.90	   0.00
 0 0 0.000000 0.000000

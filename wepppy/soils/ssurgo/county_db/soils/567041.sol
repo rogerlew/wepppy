@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.159410
+#   Build Date: 2021-04-05 10:36:22.493903
 #   Source Data: Surgo
 # 
 # Mukey: 567041
@@ -53,6 +53,6 @@
 Any comments:
 1 1
 'Collins silt loam, 0 to 2 percent slopes, occasionally flooded, brief duration'		'SIL'	2	0.2900	0.7500	5420005.00	0.0203	3.5000	3.7775
-	  200.000	  11.50	  11.50	   1.25	   6.20	   0.00
-	 1570.000	  16.00	  16.00	   0.50	  11.30	   0.00
+	  200.000	  15.00	  11.50	   1.25	   6.20	   0.00
+	 1570.000	   8.00	  16.00	   0.50	  11.30	   0.00
 0 0 0.000000 0.000000

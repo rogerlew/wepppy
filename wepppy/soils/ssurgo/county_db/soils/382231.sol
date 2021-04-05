@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.031611
+#   Build Date: 2021-04-05 10:36:24.357241
 #   Source Data: Surgo
 # 
 # Mukey: 382231
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Tillman-Foard complex, 1 to 3 percent slopes'		'SIL'	1	0.0900	0.7500	4813575.00	0.0084	3.5000	4.0215
-	  210.000	  22.50	  22.50	   2.00	  15.00	   0.00
+	  210.000	  24.80	  22.50	   2.00	  15.00	   0.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.687704
+#   Build Date: 2021-04-05 10:36:26.010556
 #   Source Data: Surgo
 # 
 # Mukey: 2532587
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Keswick silt loam, 5 to 9 percent slopes, eroded'		'SIL'	1	0.1700	0.7500	4786010.00	0.0082	3.5000	3.7888
-	  210.000	  23.00	  23.00	   2.40	  19.60	   0.00
+	  210.000	  25.00	  23.00	   2.40	  19.60	   0.00
 0 0 0.000000 0.000000

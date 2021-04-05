@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.841266
+#   Build Date: 2021-04-05 10:36:22.180197
 #   Source Data: Surgo
 # 
 # Mukey: 296289
@@ -56,6 +56,6 @@
 Any comments:
 1 1
 'Chippewa and Norwich soils, 0 to 8 percent slopes, extremely stony'		'MPM'	2	0.1700	0.7500	4649000.00	0.0050	2.5450	4.2179
-	  120.000	  23.00	  23.00	   7.00	  11.30	  36.25
-	  380.000	  20.00	  20.00	   3.00	  10.90	  23.50
+	  120.000	  24.00	  23.00	   7.00	  11.30	  36.25
+	  380.000	  27.00	  20.00	   3.00	  10.90	  23.50
 0 0 0.000000 0.000000

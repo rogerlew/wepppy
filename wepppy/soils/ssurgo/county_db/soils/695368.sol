@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.131066
+#   Build Date: 2021-04-05 10:36:22.465864
 #   Source Data: Surgo
 # 
 # Mukey: 695368
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Roanoke loam, 0 to 2 percent slopes, frequently flooded'		'L'	1	0.4900	0.7500	5110040.00	0.0096	3.1533	9.7837
-	  210.000	  18.50	  18.50	   1.25	   7.40	   7.50
+	  210.000	  43.00	  18.50	   1.25	   7.40	   7.50
 0 0 0.000000 0.000000

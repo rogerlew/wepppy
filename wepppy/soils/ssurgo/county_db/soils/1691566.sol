@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.181969
+#   Build Date: 2021-04-05 10:36:24.506792
 #   Source Data: Surgo
 # 
 # Mukey: 1691566
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Wymore silty clay, 3 to 6 percent slopes, eroded'		'SIC'	1	0.1600	0.7500	3738540.00	0.0069	3.5000	2.2008
-	  210.000	  42.00	  42.00	   2.00	  31.60	   0.00
+	  210.000	   3.00	  42.00	   2.00	  31.60	   0.00
 0 0 0.000000 0.000000

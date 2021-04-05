@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.071114
+#   Build Date: 2021-04-05 10:36:21.409202
 #   Source Data: Surgo
 # 
 # Mukey: 52279
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Mellenthin-Rock outcrop-Torriorthents complex , 10 to 70 percent slopes'		'GRV-L'	2	0.1600	0.7500	5129250.00	0.0154	2.9200	10.1709
-	   50.000	  15.00	  15.00	   0.75	   7.50	  62.00
-	  250.000	  15.00	  15.00	   0.75	   7.50	  62.00
+	   50.000	  44.30	  15.00	   0.75	   7.50	  62.00
+	  250.000	  44.30	  15.00	   0.75	   7.50	  62.00
 0 0 0.000000 0.000000

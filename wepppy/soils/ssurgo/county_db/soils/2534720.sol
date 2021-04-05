@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.011324
+#   Build Date: 2021-04-05 10:36:24.337178
 #   Source Data: Surgo
 # 
 # Mukey: 2534720
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Gatewood very gravelly silt loam, 15 to 35 percent slopes, stony'		'GRV-SIL'	2	0.2300	0.7500	5227050.00	0.0136	3.5000	4.3647
-	   50.000	  15.00	  15.00	   3.80	  28.00	  55.00
-	  250.000	  14.00	  14.00	   0.75	  11.00	  66.75
+	   50.000	  29.00	  15.00	   3.80	  28.00	  55.00
+	  250.000	  29.00	  14.00	   0.75	  11.00	  66.75
 0 0 0.000000 0.000000

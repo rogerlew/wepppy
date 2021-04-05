@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.971337
+#   Build Date: 2021-04-05 10:36:22.307740
 #   Source Data: Surgo
 # 
 # Mukey: 1380340
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Dorovan and Pamlico soils, depressional'		'MUCK'	1	0.1600	0.7500	4649000.00	0.0050	2.5450	29.9171
-	 2030.000	   6.00	   6.00	   2.00	  11.30	   0.00
+	 2030.000	  90.00	   6.00	   2.00	  11.30	   0.00
 0 0 0.000000 0.000000

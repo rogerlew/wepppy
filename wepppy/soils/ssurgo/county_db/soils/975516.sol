@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.710371
+#   Build Date: 2021-04-05 10:36:22.049280
 #   Source Data: Surgo
 # 
 # Mukey: 975516
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Westill clay loam, 1 to 3 percent slopes'		'CL'	1	0.0900	0.7500	4706630.00	0.0060	4.2176	5.9854
-	  230.000	  33.00	  33.00	   2.00	  19.50	   1.00
+	  230.000	  34.40	  33.00	   2.00	  19.50	   1.00
 0 0 0.000000 0.000000

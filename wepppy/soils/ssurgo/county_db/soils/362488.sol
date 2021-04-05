@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.380599
+#   Build Date: 2021-04-05 10:36:21.719793
 #   Source Data: Surgo
 # 
 # Mukey: 362488
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Pullman silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.1600	0.7500	4185093.00	0.0071	3.5000	1.5828
-	  210.000	  33.90	  33.90	   2.40	  23.90	   0.00
+	  210.000	  12.30	  33.90	   2.40	  23.90	   0.00
 0 0 0.000000 0.000000
