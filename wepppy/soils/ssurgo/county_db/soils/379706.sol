@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.515145
+#   Build Date: 2021-04-05 10:36:25.838516
 #   Source Data: Surgo
 # 
 # Mukey: 379706
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Sorter-Dallardsville complex, 0 to 1 percent slopes'		'VFSL'	1	0.2300	0.7500	8855990.00	0.0117	0.9628	11.7911
-	  210.000	   2.20	   2.20	   3.00	   8.90	   0.00
+	  210.000	  50.00	   2.20	   3.00	   8.90	   0.00
 0 0 0.000000 0.000000

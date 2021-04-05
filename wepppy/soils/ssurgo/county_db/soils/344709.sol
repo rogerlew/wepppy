@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.504955
+#   Build Date: 2021-04-05 10:36:25.828307
 #   Source Data: Surgo
 # 
 # Mukey: 344709
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Gerdrum-Vanda-Creed complex, 0 to 8 percent slopes'		'CL'	1	0.3000	0.7500	4706630.00	0.0060	4.2501	5.6820
-	  210.000	  33.50	  33.50	   2.00	  26.40	  22.00
+	  210.000	  34.20	  33.50	   2.00	  26.40	  22.00
 0 0 0.000000 0.000000

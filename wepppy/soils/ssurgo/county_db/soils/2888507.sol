@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.389730
+#   Build Date: 2021-04-05 10:36:21.728984
 #   Source Data: Surgo
 # 
 # Mukey: 2888507
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Evadale-Gist complex, 0 to 1 percent slopes'		'SIL'	1	0.2300	0.7500	5348336.00	0.0173	3.5000	3.3950
-	  210.000	  12.80	  12.80	   1.92	  10.70	   0.00
+	  210.000	  19.00	  12.80	   1.92	  10.70	   0.00
 0 0 0.000000 0.000000

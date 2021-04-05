@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.293244
+#   Build Date: 2021-04-05 10:36:24.617628
 #   Source Data: Surgo
 # 
 # Mukey: 2232549
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Maubila-Smithdale complex, 15 to 35 percent slopes'		'FL-L'	1	0.3000	0.7500	5321350.00	0.0085	3.0570	10.3902
-	  210.000	  18.00	  18.00	   1.50	  11.30	  33.40
+	  210.000	  47.00	  18.00	   1.50	  11.30	  33.40
 0 0 0.000000 0.000000

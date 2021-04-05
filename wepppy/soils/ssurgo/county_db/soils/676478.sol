@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.052144
+#   Build Date: 2021-04-05 10:37:48.791210
 #   Source Data: StatsGo
 # 
 # Mukey: 676478
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Monongahela-Markland-Cotaco (s8858)'		'SIL'	1	0.2696	0.7500	4758445.00	0.0081	3.5000	3.6269
-	  210.000	  23.50	  23.50	   2.00	  12.70	   0.00
+	  210.000	  21.70	  23.50	   2.00	  12.70	   0.00
 0 0 0.000000 0.000000

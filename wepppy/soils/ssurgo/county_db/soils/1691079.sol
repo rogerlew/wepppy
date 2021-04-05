@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.095922
+#   Build Date: 2021-04-05 10:36:25.419073
 #   Source Data: Surgo
 # 
 # Mukey: 1691079
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Wymore silty clay loam, 3 to 11 percent slopes, eroded'		'SICL'	1	0.1600	0.7500	3959060.00	0.0070	3.5000	0.7858
-	  210.000	  38.00	  38.00	   3.00	  27.80	   0.00
+	  210.000	   4.00	  38.00	   3.00	  27.80	   0.00
 0 0 0.000000 0.000000

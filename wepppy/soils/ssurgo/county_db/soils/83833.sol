@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.713196
+#   Build Date: 2021-04-05 10:36:23.049590
 #   Source Data: Surgo
 # 
 # Mukey: 83833
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Terreton silty clay loam'		'SICL'	1	0.3000	0.7500	4179580.00	0.0070	3.5000	2.2681
-	  210.000	  34.00	  34.00	   0.75	  27.50	   0.00
+	  210.000	  18.10	  34.00	   0.75	  27.50	   0.00
 0 0 0.000000 0.000000

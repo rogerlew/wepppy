@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.321760
+#   Build Date: 2021-04-05 10:36:22.656586
 #   Source Data: Surgo
 # 
 # Mukey: 483015
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'GOSHUTE GRAVELLY LOAM-DERA-UVADA FAMILIES ASSOCIATION, 0 TO 8 PERCENT SLOPES'		'GR-L'	1	0.4445	0.7500	4956360.00	0.0152	3.5247	8.6084
-	  210.000	  23.50	  23.50	   0.75	   7.50	  35.00
+	  210.000	  39.20	  23.50	   0.75	   7.50	  35.00
 0 0 0.000000 0.000000

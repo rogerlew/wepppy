@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.106797
+#   Build Date: 2021-04-05 10:37:48.845333
 #   Source Data: StatsGo
 # 
 # Mukey: 658086
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Wrightsville-McKamie-Louin-Acadia (s258)'		'SIL'	1	0.2980	0.7500	5089225.00	0.0109	3.5000	5.3055
-	  430.000	  17.50	  17.50	   1.75	  11.30	   2.50
+	  430.000	  29.10	  17.50	   1.75	  11.30	   2.50
 0 0 0.000000 0.000000

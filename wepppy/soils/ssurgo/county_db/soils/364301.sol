@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.161138
+#   Build Date: 2021-04-05 10:36:22.495605
 #   Source Data: Surgo
 # 
 # Mukey: 364301
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Nada-Cieno frequently ponded complex, 0 to 1 percent slopes'		'FSL'	1	0.2300	0.7500	6012910.00	0.0141	2.1787	21.5549
-	  210.000	   7.70	   7.70	   0.93	  11.30	   0.00
+	  210.000	  74.10	   7.70	   0.93	  11.30	   0.00
 0 0 0.000000 0.000000

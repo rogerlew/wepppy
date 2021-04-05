@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.237387
+#   Build Date: 2021-04-05 10:36:25.559807
 #   Source Data: Surgo
 # 
 # Mukey: 1544682
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Sharpsburg-Nira complex, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.2300	0.7500	4317405.00	0.0071	3.5000	0.8070
-	  210.000	  31.50	  31.50	   3.20	  25.50	   0.00
+	  210.000	   3.00	  31.50	   3.20	  25.50	   0.00
 0 0 0.000000 0.000000

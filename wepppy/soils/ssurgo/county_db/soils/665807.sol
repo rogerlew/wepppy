@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.124736
+#   Build Date: 2021-04-05 10:37:48.862996
 #   Source Data: StatsGo
 # 
 # Mukey: 665807
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Pojoaque-Panky-Fivemile (s5145)'		'FSL'	1	0.3293	0.7500	5878440.00	0.0093	3.0188	17.8447
-	  210.000	  20.00	  20.00	   1.50	  11.30	   0.00
+	  210.000	  66.10	  20.00	   1.50	  11.30	   0.00
 0 0 0.000000 0.000000

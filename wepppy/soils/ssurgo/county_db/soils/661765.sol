@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.143787
+#   Build Date: 2021-04-05 10:37:48.881871
 #   Source Data: StatsGo
 # 
 # Mukey: 661765
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Starhope-Friedman-Elksel (s1908)'		'CBV-L'	1	0.1480	0.7500	4937150.00	0.0055	3.5955	7.0730
-	  250.000	  24.50	  24.50	   3.50	  22.50	  62.88
+	  250.000	  38.80	  24.50	   3.50	  22.50	  62.88
 0 0 0.000000 0.000000

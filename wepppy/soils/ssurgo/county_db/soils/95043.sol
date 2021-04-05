@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.604979
+#   Build Date: 2021-04-05 10:36:22.940985
 #   Source Data: Surgo
 # 
 # Mukey: 95043
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Weld silt loam, 0 to 3 percent slopes'		'SIL'	1	0.2300	0.7500	4984478.00	0.0097	3.5000	4.3348
-	  210.000	  19.40	  19.40	   2.00	  16.50	   0.00
+	  210.000	  26.80	  19.40	   2.00	  16.50	   0.00
 0 0 0.000000 0.000000

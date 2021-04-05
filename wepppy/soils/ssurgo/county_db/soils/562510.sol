@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.376311
+#   Build Date: 2021-04-05 10:36:21.715401
 #   Source Data: Surgo
 # 
 # Mukey: 562510
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Nonaburg channery silt loam, 25 to 60 percent slopes, severely eroded, rocky'		'CN-SIL'	2	0.3000	0.7500	4675750.00	0.0078	3.5000	3.2608
-	   80.000	  25.00	  25.00	   1.30	  13.40	  22.57
-	  250.000	  48.00	  48.00	   0.25	  24.90	  40.80
+	   80.000	  20.00	  25.00	   1.30	  13.40	  22.57
+	  250.000	  23.00	  48.00	   0.25	  24.90	  40.80
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.753921
+#   Build Date: 2021-04-05 10:36:25.080461
 #   Source Data: Surgo
 # 
 # Mukey: 2521323
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Sampsel silty clay loam, 5 to 9 percent slopes, severely eroded'		'SICL'	1	0.2300	0.7500	4344970.00	0.0072	3.5000	1.0275
-	  210.000	  31.00	  31.00	   3.50	  31.10	   0.00
+	  210.000	   8.70	  31.00	   3.50	  31.10	   0.00
 0 0 0.000000 0.000000

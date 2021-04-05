@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.038384
+#   Build Date: 2021-04-05 10:37:48.777498
 #   Source Data: StatsGo
 # 
 # Mukey: 659555
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Tellura-Ryman-Leaps-Callings-Baird Hollow-Adel (s1234)'		'CL'	1	0.1807	0.7500	4764260.00	0.0053	4.1027	5.8830
-	  580.000	  31.50	  31.50	   3.00	  30.00	  14.50
+	  580.000	  35.30	  31.50	   3.00	  30.00	  14.50
 0 0 0.000000 0.000000

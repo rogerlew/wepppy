@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.415020
+#   Build Date: 2021-04-05 10:36:21.754418
 #   Source Data: Surgo
 # 
 # Mukey: 329158
@@ -58,6 +58,6 @@
 Any comments:
 1 1
 'Hartsells (Wynnville) fine sandy loam, 2 to 6 percent slopes, eroded'		'FSL'	2	0.3000	0.7500	4456900.00	0.0085	2.8630	16.4987
-	  180.000	  11.00	  11.00	   1.25	  11.30	  10.00
-	  580.000	  18.00	  18.00	   0.75	  11.30	  14.00
+	  180.000	  63.00	  11.00	   1.25	  11.30	  10.00
+	  580.000	  46.00	  18.00	   0.75	  11.30	  14.00
 0 0 0.000000 0.000000

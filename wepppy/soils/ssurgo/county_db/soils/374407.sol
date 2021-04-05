@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.163687
+#   Build Date: 2021-04-05 10:36:22.498120
 #   Source Data: Surgo
 # 
 # Mukey: 374407
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Woodtell loam, 5 to 12 percent slopes'		'L'	1	0.0900	0.7500	5206090.00	0.0083	2.7343	9.9571
-	  210.000	  12.50	  12.50	   1.50	  11.30	  10.90
+	  210.000	  45.70	  12.50	   1.50	  11.30	  10.90
 0 0 0.000000 0.000000
