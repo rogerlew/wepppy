@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.818830
+#   Build Date: 2021-04-05 10:36:22.157857
 #   Source Data: Surgo
 # 
 # Mukey: 888271
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Arispe silt loam, 5 to 9 percent slopes, eroded'		'SIL'	1	0.1600	0.7500	4923835.00	0.0091	3.5000	1.3202
-	  210.000	  20.50	  20.50	   2.00	  17.00	   0.00
+	  210.000	   6.00	  20.50	   2.00	  17.00	   0.00
 0 0 0.000000 0.000000

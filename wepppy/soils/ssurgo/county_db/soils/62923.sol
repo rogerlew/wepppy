@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.313837
+#   Build Date: 2021-04-05 10:36:22.648399
 #   Source Data: Surgo
 # 
 # Mukey: 62923
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Tub cobbly clay loam, 12 to 40 percent slopes'		'SIL'	1	0.2300	0.7500	4813575.00	0.0084	3.5000	1.3391
-	  300.000	  22.50	  22.50	   5.50	  22.50	   2.50
+	  300.000	   9.50	  22.50	   5.50	  22.50	   2.50
 0 0 0.000000 0.000000

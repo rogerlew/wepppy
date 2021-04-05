@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.144824
+#   Build Date: 2021-04-05 10:36:22.479391
 #   Source Data: Surgo
 # 
 # Mukey: 129360
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Othello silt loams, 0 to 2 percent slopes, Northern Tidewater Area'		'SIL'	1	0.1500	0.7500	5227050.00	0.0136	3.5000	3.0943
-	  230.000	  15.00	  15.00	   2.22	   8.20	   0.00
+	  230.000	  14.00	  15.00	   2.22	   8.20	   0.00
 0 0 0.000000 0.000000

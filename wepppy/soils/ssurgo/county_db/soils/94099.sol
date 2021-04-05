@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.570481
+#   Build Date: 2021-04-05 10:36:22.906759
 #   Source Data: Surgo
 # 
 # Mukey: 94099
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Weld loam, 1 to 3 percent slopes'		'L'	1	0.2300	0.7500	8721520.00	0.0123	2.3229	7.5249
-	  210.000	  22.50	  22.50	   2.00	  18.80	   0.00
+	  210.000	  39.80	  22.50	   2.00	  18.80	   0.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.142886
+#   Build Date: 2021-04-05 10:36:24.467819
 #   Source Data: Surgo
 # 
 # Mukey: 345487
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Midway-Bainville complex'		'CL'	1	0.3000	0.7500	4706630.00	0.0148	4.2501	5.8073
-	  210.000	  33.50	  33.50	   0.75	  22.50	   0.00
+	  210.000	  34.20	  33.50	   0.75	  22.50	   0.00
 0 0 0.000000 0.000000

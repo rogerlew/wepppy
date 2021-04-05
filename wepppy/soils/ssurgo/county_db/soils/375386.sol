@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.357982
+#   Build Date: 2021-04-05 10:36:23.686764
 #   Source Data: Surgo
 # 
 # Mukey: 375386
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Edge fine sandy loam, 5 to 12 percent slopes'		'FSL'	1	0.2900	0.7500	6339480.00	0.0173	2.1321	20.6023
-	  210.000	   8.50	   8.50	   0.75	   6.00	   4.00
+	  210.000	  69.70	   8.50	   0.75	   6.00	   4.00
 0 0 0.000000 0.000000

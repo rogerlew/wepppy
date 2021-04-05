@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.395666
+#   Build Date: 2021-04-05 10:36:23.724511
 #   Source Data: Surgo
 # 
 # Mukey: 790408
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Ipswich and Westbrook mucky peats, 0 to 2 percent slopes, very frequently flooded'		'MUCK'	1	0.1600	0.7500	0.00	0.0000	0.0000	7.3783
-	 1500.000	   3.00	   3.00	   3.00	   6.00	   0.00
+	 1500.000	  33.00	   3.00	   3.00	   6.00	   0.00
 0 0 0.000000 0.000000

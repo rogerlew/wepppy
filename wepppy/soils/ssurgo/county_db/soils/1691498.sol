@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.089062
+#   Build Date: 2021-04-05 10:36:25.412257
 #   Source Data: Surgo
 # 
 # Mukey: 1691498
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Yutan silty clay loam, 6 to 11 percent slopes, eroded'		'SICL'	1	0.2300	0.7500	4069320.00	0.0070	3.5000	0.9329
-	  210.000	  36.00	  36.00	   2.30	  29.20	   0.00
+	  210.000	   7.00	  36.00	   2.30	  29.20	   0.00
 0 0 0.000000 0.000000

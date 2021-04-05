@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.024424
+#   Build Date: 2021-04-05 10:37:48.763562
 #   Source Data: StatsGo
 # 
 # Mukey: 659529
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Lamphier-Jerry-Cochetopa-Adel (s1208)'		'CL'	1	0.0992	0.7500	4764260.00	0.0052	4.0702	5.8334
-	  300.000	  31.00	  31.00	   4.50	  33.80	  15.12
+	  300.000	  35.40	  31.00	   4.50	  33.80	  15.12
 0 0 0.000000 0.000000

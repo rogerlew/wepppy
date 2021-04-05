@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.194766
+#   Build Date: 2021-04-05 10:37:48.932505
 #   Source Data: StatsGo
 # 
 # Mukey: 662348
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Pewamo-Morley-Glynwood-Blount (s2309)'		'SIL'	1	0.2696	0.7500	4868705.00	0.0087	3.5000	4.2821
-	  230.000	  21.50	  21.50	   2.00	  15.10	   5.00
+	  230.000	  26.10	  21.50	   2.00	  15.10	   5.00
 0 0 0.000000 0.000000

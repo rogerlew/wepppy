@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.067912
+#   Build Date: 2021-04-05 10:36:25.391214
 #   Source Data: Surgo
 # 
 # Mukey: 425858
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Houghton muck, 0 to 2 percent slopes'		'MUCK'	1	0.1600	0.7500	0.00	0.0000	0.0000	2.6853
-	 2000.000	  30.00	  30.00	   2.00	  16.70	   0.00
+	 2000.000	  18.00	  30.00	   2.00	  16.70	   0.00
 0 0 0.000000 0.000000

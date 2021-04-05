@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.518320
+#   Build Date: 2021-04-05 10:36:23.847282
 #   Source Data: Surgo
 # 
 # Mukey: 415199
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Carbondale and Cathro mucks'		'MUCK'	1	0.0900	0.7500	4649000.00	0.0050	2.5450	19.4641
-	 1520.000	  14.00	  14.00	   0.25	  11.00	  15.12
+	 1520.000	  69.60	  14.00	   0.25	  11.00	  15.12
 0 0 0.000000 0.000000

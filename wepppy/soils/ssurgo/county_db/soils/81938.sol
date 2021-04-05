@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.639193
+#   Build Date: 2021-04-05 10:36:24.965220
 #   Source Data: Surgo
 # 
 # Mukey: 81938
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Tschamman-Hobby-Bray complex, 2 to 8 percent slopes'		'CBV-SICL'	1	0.2300	0.7500	4317405.00	0.0071	3.5000	2.6495
-	  210.000	  31.50	  31.50	   1.50	  25.00	  53.92
+	  210.000	  20.00	  31.50	   1.50	  25.00	  53.92
 0 0 0.000000 0.000000

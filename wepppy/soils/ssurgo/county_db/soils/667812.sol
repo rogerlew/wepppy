@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.105485
+#   Build Date: 2021-04-05 10:37:48.844042
 #   Source Data: StatsGo
 # 
 # Mukey: 667812
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Memphis-Calloway-Calhoun (s2993)'		'SIL'	1	0.3639	0.7500	4951400.00	0.0094	3.5000	2.2814
-	  760.000	  20.00	  20.00	   1.25	  11.30	   0.00
+	  760.000	  11.40	  20.00	   1.25	  11.30	   0.00
 0 0 0.000000 0.000000

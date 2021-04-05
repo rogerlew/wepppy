@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.237295
+#   Build Date: 2021-04-05 10:36:21.574768
 #   Source Data: Surgo
 # 
 # Mukey: 2534519
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Niangua-Bardley complex, 15 to 50 percent slopes, extremely stony'		'GRV-SIL'	2	0.1600	0.7500	5447570.00	0.0217	3.5000	3.5252
-	   80.000	  11.00	  11.00	   2.20	   8.20	  55.00
+	   80.000	  17.10	  11.00	   2.20	   8.20	  55.00
 	  360.000	  14.20	  14.20	   0.85	   6.80	  70.00
 0 0 0.000000 0.000000

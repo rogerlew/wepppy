@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.508797
+#   Build Date: 2021-04-05 10:36:23.837751
 #   Source Data: Surgo
 # 
 # Mukey: 2493453
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Wagstaff-Shidler complex, 1 to 8 percent slopes'		'SICL'	1	0.1600	0.7500	4289840.00	0.0071	3.5000	1.4375
-	  210.000	  32.00	  32.00	   5.00	  17.50	   0.00
+	  210.000	   8.00	  32.00	   5.00	  17.50	   0.00
 0 0 0.000000 0.000000

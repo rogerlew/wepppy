@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.324686
+#   Build Date: 2021-04-05 10:36:24.649595
 #   Source Data: Surgo
 # 
 # Mukey: 364426
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Cho gravelly loam, dry, 1 to 8 percent slopes'		'GR-L'	1	0.2300	0.7500	3285090.00	0.0053	4.1268	6.9419
-	  230.000	  25.00	  25.00	   1.50	  15.20	  26.00
+	  230.000	  37.00	  25.00	   1.50	  15.20	  26.00
 0 0 0.000000 0.000000

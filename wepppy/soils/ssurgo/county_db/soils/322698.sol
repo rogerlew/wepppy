@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.531280
+#   Build Date: 2021-04-05 10:36:21.870379
 #   Source Data: Surgo
 # 
 # Mukey: 322698
@@ -53,6 +53,6 @@
 Any comments:
 1 1
 'Rutlege and Plummer soils, frequently ponded, 0 to 1 percent slopes'		'FS'	2	0.0400	0.7500	5378980.00	0.0061	2.2076	32.3405
-	  300.000	   5.20	   5.20	   6.00	  11.30	   5.00
-	 2030.000	   4.50	   4.50	   1.75	  11.30	   3.00
+	  300.000	  94.20	   5.20	   6.00	  11.30	   5.00
+	 2030.000	  94.90	   4.50	   1.75	  11.30	   3.00
 0 0 0.000000 0.000000

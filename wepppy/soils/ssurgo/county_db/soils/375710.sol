@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.467442
+#   Build Date: 2021-04-05 10:36:22.803437
 #   Source Data: Surgo
 # 
 # Mukey: 375710
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Partri-Carnero-Bernal association, undulating'		'L'	1	0.1600	0.7500	4994780.00	0.0065	3.4481	7.7979
-	  210.000	  22.50	  22.50	   2.00	  14.50	   0.00
+	  210.000	  39.80	  22.50	   2.00	  14.50	   0.00
 0 0 0.000000 0.000000

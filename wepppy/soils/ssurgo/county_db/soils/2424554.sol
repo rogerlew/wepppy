@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.259850
+#   Build Date: 2021-04-05 10:36:21.597128
 #   Source Data: Surgo
 # 
 # Mukey: 2424554
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Rasalo fine sandy loam, 2 to 8 percent slopes'		'SL'	1	0.3000	0.7500	6070540.00	0.0111	2.4733	20.3581
-	  230.000	  12.50	  12.50	   1.25	   9.10	  15.85
+	  230.000	  70.90	  12.50	   1.25	   9.10	  15.85
 0 0 0.000000 0.000000

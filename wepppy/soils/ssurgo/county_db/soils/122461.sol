@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.046492
+#   Build Date: 2021-04-05 10:36:25.369845
 #   Source Data: Surgo
 # 
 # Mukey: 122461
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Chickahominy-Urban land complex, 0 to 2 percent slopes'		'VFSL'	1	0.3600	0.7500	4591370.00	0.0088	3.2449	5.8793
-	  210.000	  17.50	  17.50	   1.25	   8.90	   0.00
+	  210.000	  30.00	  17.50	   1.25	   8.90	   0.00
 0 0 0.000000 0.000000

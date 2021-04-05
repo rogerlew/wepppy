@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.230720
+#   Build Date: 2021-04-05 10:37:48.968868
 #   Source Data: StatsGo
 # 
 # Mukey: 674737
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Uvada-Manselo-Antelope Springs (s8212)'		'L'	1	0.3293	0.7500	4994780.00	0.0080	3.4481	7.4674
-	  210.000	  22.50	  22.50	   1.50	  20.00	   5.00
+	  210.000	  39.80	  22.50	   1.50	  20.00	   5.00
 0 0 0.000000 0.000000

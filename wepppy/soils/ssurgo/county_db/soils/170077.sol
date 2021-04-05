@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.056532
+#   Build Date: 2021-04-05 10:36:23.388999
 #   Source Data: Surgo
 # 
 # Mukey: 170077
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Brushcreek-Lawshe complex, 12 to 25 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	5034095.00	0.0102	3.5000	4.5420
-	  210.000	  18.50	  18.50	   2.25	  14.50	  12.70
+	  210.000	  27.10	  18.50	   2.25	  14.50	  12.70
 0 0 0.000000 0.000000
