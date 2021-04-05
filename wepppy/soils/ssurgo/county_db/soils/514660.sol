@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.260603
+#   Build Date: 2021-04-05 10:36:25.582883
 #   Source Data: Surgo
 # 
 # Mukey: 514660
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Peabody-Gilpin silt loams, 35 to 70 percent slopes, severely eroded'		'SPM'	1	0.3000	0.7500	4649000.00	0.0050	2.5450	3.6574
-	  210.000	  23.00	  23.00	   1.90	  11.30	   0.00
+	  210.000	  21.00	  23.00	   1.90	  11.30	   0.00
 0 0 0.000000 0.000000

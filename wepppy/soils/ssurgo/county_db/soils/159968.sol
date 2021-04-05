@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.870137
+#   Build Date: 2021-04-05 10:36:24.199430
 #   Source Data: Surgo
 # 
 # Mukey: 159968
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Orthents, 8 to 25 percent slopes'		'SIL'	1	0.3000	0.7500	4896270.00	0.0089	3.5000	2.7287
-	  210.000	  21.00	  21.00	   1.25	  14.00	   5.95
+	  210.000	  17.00	  21.00	   1.25	  14.00	   5.95
 0 0 0.000000 0.000000

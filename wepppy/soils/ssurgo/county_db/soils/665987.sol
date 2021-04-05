@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.210042
+#   Build Date: 2021-04-05 10:37:48.947780
 #   Source Data: StatsGo
 # 
 # Mukey: 665987
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Rock outcrop-Muzzler-Luzena (s5325)'		'GR-L'	1	0.3293	0.7500	4841100.00	0.0077	3.8195	7.3684
-	  210.000	  27.50	  27.50	   1.50	  11.30	  31.00
+	  210.000	  37.20	  27.50	   1.50	  11.30	  31.00
 0 0 0.000000 0.000000

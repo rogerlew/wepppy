@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.188979
+#   Build Date: 2021-04-05 10:37:48.926722
 #   Source Data: StatsGo
 # 
 # Mukey: 665912
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Rock outcrop-Mion-Atarque (s5250)'		'GR-CL'	1	0.1807	0.7500	4725840.00	0.0052	4.1793	5.8023
-	  210.000	  32.50	  32.50	   3.00	  26.80	  37.50
+	  210.000	  34.70	  32.50	   3.00	  26.80	  37.50
 0 0 0.000000 0.000000

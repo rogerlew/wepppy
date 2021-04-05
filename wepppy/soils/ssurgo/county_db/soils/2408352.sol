@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.714829
+#   Build Date: 2021-04-05 10:36:24.043913
 #   Source Data: Surgo
 # 
 # Mukey: 2408352
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Dasher-Dorovan-Croatan association, ponded, 0 to 1 percent slopes'		'MPT'	2	0.1700	0.7500	0.00	0.0000	0.0000	21.9934
-	 1520.000	  18.00	  18.00	  13.00	  11.30	   0.00
-	 2030.000	  30.00	  30.00	   2.75	  11.30	   0.00
+	 1520.000	  75.00	  18.00	  13.00	  11.30	   0.00
+	 2030.000	  55.00	  30.00	   2.75	  11.30	   0.00
 0 0 0.000000 0.000000

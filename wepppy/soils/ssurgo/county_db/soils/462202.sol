@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.968808
+#   Build Date: 2021-04-05 10:36:22.305264
 #   Source Data: Surgo
 # 
 # Mukey: 462202
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Auburn very rocky silt loam, 2 to 30 percent slopes'		'SIL'	1	0.1600	0.7500	5034095.00	0.0102	3.5000	4.2114
-	  360.000	  18.50	  18.50	   1.50	  20.00	  19.25
+	  360.000	  27.10	  18.50	   1.50	  20.00	  19.25
 0 0 0.000000 0.000000

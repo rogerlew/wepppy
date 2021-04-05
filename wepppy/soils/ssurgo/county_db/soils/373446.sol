@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.489044
+#   Build Date: 2021-04-05 10:36:24.816138
 #   Source Data: Surgo
 # 
 # Mukey: 373446
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Tillman clay loam, 1 to 3 percent slopes'		'CL'	1	0.1600	0.7500	4510360.00	0.0074	3.5000	3.0658
-	  210.000	  28.00	  28.00	   2.00	  23.10	   0.00
+	  210.000	  22.00	  28.00	   2.00	  23.10	   0.00
 0 0 0.000000 0.000000

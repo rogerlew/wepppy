@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.687861
+#   Build Date: 2021-04-05 10:36:22.026519
 #   Source Data: Surgo
 # 
 # Mukey: 295157
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Wellsboro and Wurtsboro soils, strongly sloping, extremely stony'		'GR-L'	2	0.3400	0.7500	5148460.00	0.0067	2.7192	9.7280
-	  180.000	  12.00	  12.00	   2.00	  11.30	  41.50
-	  580.000	  12.00	  12.00	   1.50	  11.30	  26.50
+	  180.000	  45.00	  12.00	   2.00	  11.30	  41.50
+	  580.000	  45.00	  12.00	   1.50	  11.30	  26.50
 0 0 0.000000 0.000000

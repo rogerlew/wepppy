@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.707809
+#   Build Date: 2021-04-05 10:36:24.036815
 #   Source Data: Surgo
 # 
 # Mukey: 2231394
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Bonnie silt loam, sodic, 0 to 2 percent slopes, frequently flooded'		'SIL'	2	0.3000	0.7500	4951400.00	0.0094	3.5000	2.1075
-	  300.000	  20.00	  20.00	   1.50	  10.80	   0.00
-	  590.000	  19.00	  19.00	   0.50	  10.10	   0.00
+	  300.000	   9.00	  20.00	   1.50	  10.80	   0.00
+	  590.000	  12.00	  19.00	   0.50	  10.10	   0.00
 0 0 0.000000 0.000000

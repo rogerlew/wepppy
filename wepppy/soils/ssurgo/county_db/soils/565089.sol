@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.511339
+#   Build Date: 2021-04-05 10:36:21.850539
 #   Source Data: Surgo
 # 
 # Mukey: 565089
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Calloway silt loam, 1 to 3 percent slopes'		'SIL'	1	0.2300	0.7500	5034095.00	0.0102	3.5000	2.4927
-	  640.000	  18.50	  18.50	   1.25	  10.00	   0.00
+	  640.000	  11.70	  18.50	   1.25	  10.00	   0.00
 0 0 0.000000 0.000000

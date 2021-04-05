@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.685111
+#   Build Date: 2021-04-05 10:36:22.023743
 #   Source Data: Surgo
 # 
 # Mukey: 412764
@@ -57,6 +57,6 @@
 Any comments:
 1 1
 'Munterville silt loam, 14 to 18 percent slopes, moderately eroded'		'SIL'	2	0.2300	0.7500	4730880.00	0.0080	3.5000	2.5347
-	  200.000	  24.00	  24.00	   2.00	  13.00	   0.00
-	  330.000	  30.00	  30.00	   1.00	  16.00	   0.00
+	  200.000	  15.00	  24.00	   2.00	  13.00	   0.00
+	  330.000	  20.00	  30.00	   1.00	  16.00	   0.00
 0 0 0.000000 0.000000

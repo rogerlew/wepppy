@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.216740
+#   Build Date: 2021-04-05 10:37:48.954555
 #   Source Data: StatsGo
 # 
 # Mukey: 673692
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Wilson-Mabank-Burleson-Axtell (s7731)'		'CL'	1	0.3639	0.7500	4764260.00	0.0090	4.0702	6.1402
-	  210.000	  31.00	  31.00	   1.25	  22.10	   7.50
+	  210.000	  35.40	  31.00	   1.25	  22.10	   7.50
 0 0 0.000000 0.000000

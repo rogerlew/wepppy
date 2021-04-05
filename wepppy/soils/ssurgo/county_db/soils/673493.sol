@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.128212
+#   Build Date: 2021-04-05 10:37:48.866447
 #   Source Data: StatsGo
 # 
 # Mukey: 673493
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Throck-Palopinto-Owens-Lueders (s7532)'		'CL'	1	0.3639	0.7500	4649000.00	0.0088	4.3650	5.7398
-	  210.000	  35.00	  35.00	   1.25	  18.70	  38.40
+	  210.000	  33.30	  35.00	   1.25	  18.70	  38.40
 0 0 0.000000 0.000000

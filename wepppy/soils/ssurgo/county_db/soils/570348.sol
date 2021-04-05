@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.221407
+#   Build Date: 2021-04-05 10:36:21.559033
 #   Source Data: Surgo
 # 
 # Mukey: 570348
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Guyton-Ouachita silt loams, frequently flooded'		'SIL'	1	0.2300	0.7500	5171920.00	0.0124	3.5000	2.5760
-	  580.000	  16.00	  16.00	   2.25	  11.30	   0.00
+	  580.000	  13.90	  16.00	   2.25	  11.30	   0.00
 0 0 0.000000 0.000000

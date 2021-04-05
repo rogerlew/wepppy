@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.217574
+#   Build Date: 2021-04-05 10:36:23.549865
 #   Source Data: Surgo
 # 
 # Mukey: 425980
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Kewaunee silt loam, 2 to 6 percent slopes'		'SIL'	1	0.3000	0.7500	4951400.00	0.0094	3.5000	5.0273
-	  250.000	  20.00	  20.00	   2.00	   8.70	   0.00
+	  250.000	  26.00	  20.00	   2.00	   8.70	   0.00
 0 0 0.000000 0.000000

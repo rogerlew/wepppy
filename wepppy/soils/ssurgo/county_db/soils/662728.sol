@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.122081
+#   Build Date: 2021-04-05 10:37:48.860379
 #   Source Data: StatsGo
 # 
 # Mukey: 662728
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Woodson-Labette-Kenoma-Eram (s2428)'		'SIL'	1	0.1807	0.7500	4813575.00	0.0084	3.5000	3.3915
-	  210.000	  22.50	  22.50	   3.00	  17.50	   7.50
+	  210.000	  22.40	  22.50	   3.00	  17.50	   7.50
 0 0 0.000000 0.000000

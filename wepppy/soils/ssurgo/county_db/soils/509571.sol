@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.082642
+#   Build Date: 2021-04-05 10:36:21.420655
 #   Source Data: Surgo
 # 
 # Mukey: 509571
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Wetopa-Wesdy complex, 5 to 65 percent slopes'		'CL'	1	0.1211	0.7500	4706630.00	0.0051	4.2501	5.7230
-	  250.000	  33.50	  33.50	   4.00	  25.00	   0.00
+	  250.000	  34.20	  33.50	   4.00	  25.00	   0.00
 0 0 0.000000 0.000000

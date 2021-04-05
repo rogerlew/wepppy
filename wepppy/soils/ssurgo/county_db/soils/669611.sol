@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.226971
+#   Build Date: 2021-04-05 10:37:48.964960
 #   Source Data: StatsGo
 # 
 # Mukey: 669611
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Sharkey-Forestdale-Dundee-Alligator (s3815)'		'SICL'	1	0.0365	0.7500	4317405.00	0.0071	3.5000	3.1575
-	  210.000	  31.50	  31.50	   7.00	  11.30	   0.00
+	  210.000	  18.00	  31.50	   7.00	  11.30	   0.00
 0 0 0.000000 0.000000

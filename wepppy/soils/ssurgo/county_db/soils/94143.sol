@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.696392
+#   Build Date: 2021-04-05 10:36:26.019231
 #   Source Data: Surgo
 # 
 # Mukey: 94143
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Nunn-Bresser-Ascalon complex, 0 to 3 percent slopes'		'L'	1	0.2300	0.7500	4956360.00	0.0056	3.5247	7.1890
-	  210.000	  23.50	  23.50	   3.00	  22.50	   0.00
+	  210.000	  39.20	  23.50	   3.00	  22.50	   0.00
 0 0 0.000000 0.000000
