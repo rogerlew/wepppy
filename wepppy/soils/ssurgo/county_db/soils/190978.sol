@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.088371
+#   Build Date: 2021-04-05 10:36:23.420609
 #   Source Data: Surgo
 # 
 # Mukey: 190978
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Tawas and Lupton mucks, 0 to 1 percent slopes'		'MUCK'	1	0.0200	0.7500	4649000.00	0.0050	2.5450	41.2397
-	 2030.000	   2.00	   2.00	   0.30	   0.50	   3.00
+	 2030.000	  93.00	   2.00	   0.30	   0.50	   3.00
 0 0 0.000000 0.000000

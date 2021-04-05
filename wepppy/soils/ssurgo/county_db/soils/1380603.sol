@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.391489
+#   Build Date: 2021-04-05 10:36:23.720280
 #   Source Data: Surgo
 # 
 # Mukey: 1380603
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Spearville silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.2300	0.7500	4289840.00	0.0071	3.5000	1.1968
-	  210.000	  32.00	  32.00	   2.00	  25.40	   0.00
+	  210.000	   9.00	  32.00	   2.00	  25.40	   0.00
 0 0 0.000000 0.000000

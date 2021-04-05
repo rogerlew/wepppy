@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.327945
+#   Build Date: 2021-04-05 10:36:24.652864
 #   Source Data: Surgo
 # 
 # Mukey: 1948429
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Sherm silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.1600	0.7500	4179580.00	0.0070	3.5000	1.9538
-	  210.000	  34.00	  34.00	   2.00	  27.50	   0.00
+	  210.000	  16.00	  34.00	   2.00	  27.50	   0.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.926181
+#   Build Date: 2021-04-05 10:36:25.251493
 #   Source Data: Surgo
 # 
 # Mukey: 695972
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Pullman clay loam, 0 to 1 percent slopes'		'CL'	1	0.0900	0.7500	4278814.00	0.0071	3.5000	3.2643
-	  210.000	  32.20	  32.20	   2.50	  26.40	   0.00
+	  210.000	  23.60	  32.20	   2.50	  26.40	   0.00
 0 0 0.000000 0.000000

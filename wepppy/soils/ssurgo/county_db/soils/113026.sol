@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.384754
+#   Build Date: 2021-04-05 10:36:25.708328
 #   Source Data: Surgo
 # 
 # Mukey: 113026
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Chastain and Bibb soils, 0 to 1 percent slopes, frequently flooded'		'CL'	1	0.3000	0.7500	4649000.00	0.0050	4.0400	6.3518
-	  210.000	  30.00	  30.00	   3.50	  11.50	   4.00
+	  210.000	  33.50	  30.00	   3.50	  11.50	   4.00
 0 0 0.000000 0.000000

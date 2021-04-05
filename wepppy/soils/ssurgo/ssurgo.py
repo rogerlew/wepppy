@@ -1113,7 +1113,7 @@ Any comments:
             # make the layers easier to read by making cols fixed width
             # aligning to the right.
             s2 = '{0:>9}\t' \
-                 '{2:>7}\t{2:>7}\t{3:>7}\t' \
+                 '{1:>7}\t{2:>7}\t{3:>7}\t' \
                  '{4:>7}\t{5:>7}'.format(*s2.split())
 
 

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.306845
+#   Build Date: 2021-04-05 10:36:22.641211
 #   Source Data: Surgo
 # 
 # Mukey: 149556
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Windyridge-Como-Hiore families, complex, low relief mountain slopes and ridges'		'COSL'	2	0.3000	0.7500	4226380.00	0.0045	2.8676	19.0474
-	  130.000	  10.00	  10.00	   3.00	   8.50	  12.70
-	  300.000	   7.50	   7.50	   1.50	   6.20	  21.62
+	  130.000	  67.80	  10.00	   3.00	   8.50	  12.70
+	  300.000	  81.90	   7.50	   1.50	   6.20	  21.62
 0 0 0.000000 0.000000

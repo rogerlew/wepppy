@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.383992
+#   Build Date: 2021-04-05 10:36:23.712687
 #   Source Data: Surgo
 # 
 # Mukey: 370137
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Wilson clay loam, 0 to 2 percent slopes'		'CL'	1	0.3000	0.7500	6973410.00	0.0125	3.4032	6.4125
-	  210.000	  31.00	  31.00	   1.25	  15.00	  13.00
+	  210.000	  35.00	  31.00	   1.25	  15.00	  13.00
 0 0 0.000000 0.000000

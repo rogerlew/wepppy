@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.269577
+#   Build Date: 2021-04-05 10:36:22.603663
 #   Source Data: Surgo
 # 
 # Mukey: 552940
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Eden-Culleoka association, 25 to 50 percent slopes, eroded, stony'		'FL-SICL'	1	0.3000	0.7500	3903930.00	0.0070	3.5000	2.8577
-	  210.000	  39.00	  39.00	   1.75	  16.50	  22.65
+	  210.000	  19.00	  39.00	   1.75	  16.50	  22.65
 0 0 0.000000 0.000000

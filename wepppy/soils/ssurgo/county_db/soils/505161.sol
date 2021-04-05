@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.083402
+#   Build Date: 2021-04-05 10:36:21.421404
 #   Source Data: Surgo
 # 
 # Mukey: 505161
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Cryorthents-Rock outcrop complex, 50 to 120 percent slopes, extremely stony'		'STX-SIL'	2	0.3000	0.7500	4813575.00	0.0084	3.5000	4.0846
-	  100.000	  22.50	  22.50	   0.25	  14.20	  97.75
-	  300.000	  22.50	  22.50	   0.25	  14.20	  90.10
+	  100.000	  24.80	  22.50	   0.25	  14.20	  97.75
+	  300.000	  39.80	  22.50	   0.25	  14.20	  90.10
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.070070
+#   Build Date: 2021-04-05 10:36:23.402446
 #   Source Data: Surgo
 # 
 # Mukey: 2531372
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Lamoni loam, 5 to 9 percent slopes'		'L'	1	0.2300	0.7500	4380060.00	0.0046	3.5882	6.5587
-	  210.000	  21.80	  21.80	   3.90	  19.90	   8.00
+	  210.000	  36.60	  21.80	   3.90	  19.90	   8.00
 0 0 0.000000 0.000000

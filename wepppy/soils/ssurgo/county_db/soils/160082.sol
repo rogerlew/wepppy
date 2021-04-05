@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.400054
+#   Build Date: 2021-04-05 10:36:25.723540
 #   Source Data: Surgo
 # 
 # Mukey: 160082
@@ -57,6 +57,6 @@
 Any comments:
 1 1
 'Apalona-Zanesville silt loams, 6 to 12 percent slopes, severely eroded'		'SIL'	2	0.3700	0.7500	5061660.00	0.0106	3.5000	1.9598
-	  100.000	  18.00	  18.00	   2.00	   9.80	   0.00
-	  550.000	  24.00	  24.00	   0.25	  11.30	   0.00
+	  100.000	   5.00	  18.00	   2.00	   9.80	   0.00
+	  550.000	   4.00	  24.00	   0.25	  11.30	   0.00
 0 0 0.000000 0.000000

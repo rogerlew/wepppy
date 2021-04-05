@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.813487
+#   Build Date: 2021-04-05 10:36:24.143088
 #   Source Data: Surgo
 # 
 # Mukey: 116202
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Cape Fear loam, 0 to 2 percent slopes, rarely flooded'		'SL'	1	0.0400	0.7500	5225300.00	0.0059	2.5660	9.9743
-	  250.000	  10.00	  10.00	  10.00	  12.00	   0.00
+	  250.000	  46.00	  10.00	  10.00	  12.00	   0.00
 0 0 0.000000 0.000000

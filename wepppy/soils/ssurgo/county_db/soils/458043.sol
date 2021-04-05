@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.405858
+#   Build Date: 2021-04-05 10:36:25.729372
 #   Source Data: Surgo
 # 
 # Mukey: 458043
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Cieneba sandy loam, 30 to 75 percent slopes, eroded'		'SL'	1	0.3000	0.7500	4783470.00	0.0149	2.8619	18.9599
-	  210.000	  12.50	  12.50	   0.75	   9.20	  16.00
+	  210.000	  67.90	  12.50	   0.75	   9.20	  16.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.932811
+#   Build Date: 2021-04-05 10:36:25.258050
 #   Source Data: Surgo
 # 
 # Mukey: 368398
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Coy clay loam, 1 to 3 percent slopes'		'CL'	1	0.1600	0.7500	4533740.00	0.0058	4.4648	4.8326
-	  210.000	  36.00	  36.00	   2.00	  28.10	   0.00
+	  210.000	  31.00	  36.00	   2.00	  28.10	   0.00
 0 0 0.000000 0.000000

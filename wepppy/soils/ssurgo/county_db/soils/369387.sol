@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.755733
+#   Build Date: 2021-04-05 10:36:25.082277
 #   Source Data: Surgo
 # 
 # Mukey: 369387
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Crockett loam, 1 to 3 percent slopes'		'L'	1	0.2900	0.7500	5878440.00	0.0108	2.6288	7.8981
-	  210.000	  14.00	  14.00	   1.25	  14.00	   3.00
+	  210.000	  40.00	  14.00	   1.25	  14.00	   3.00
 0 0 0.000000 0.000000

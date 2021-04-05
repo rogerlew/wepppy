@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.392567
+#   Build Date: 2021-04-05 10:36:21.731841
 #   Source Data: Surgo
 # 
 # Mukey: 576134
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Woodtell fine sandy loam, 5 to 20 percent slopes'		'FSL'	1	0.0900	0.7500	6070540.00	0.0096	2.4733	20.0302
-	  210.000	  12.50	  12.50	   1.50	  11.30	   9.91
+	  210.000	  70.90	  12.50	   1.50	  11.30	   9.91
 0 0 0.000000 0.000000
