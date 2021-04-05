@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.209461
+#   Build Date: 2021-04-05 10:37:48.947193
 #   Source Data: StatsGo
 # 
 # Mukey: 660865
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Walong-Rock outcrop-Edmundston-Anaverde (s762)'		'UWB'	1	0.0365	0.7500	4649000.00	0.0050	2.5450	18.1558
-	 1520.000	   7.00	   7.00	   7.00	  11.30	  55.50
+	 1520.000	  66.80	   7.00	   7.00	  11.30	  55.50
 0 0 0.000000 0.000000

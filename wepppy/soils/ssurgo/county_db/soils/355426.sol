@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.373943
+#   Build Date: 2021-04-05 10:36:21.713027
 #   Source Data: Surgo
 # 
 # Mukey: 355426
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Bullock-Parchin fine sandy loams, 0 to 4 percent slopes'		'FSL'	1	0.2300	0.7500	6108960.00	0.0097	2.1367	18.1178
-	  210.000	   7.50	   7.50	   1.50	   7.50	   0.00
+	  210.000	  65.20	   7.50	   1.50	   7.50	   0.00
 0 0 0.000000 0.000000

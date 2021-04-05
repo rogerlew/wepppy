@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.936905
+#   Build Date: 2021-04-05 10:36:25.262019
 #   Source Data: Surgo
 # 
 # Mukey: 2605984
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Ladysmith silty clay loam, 0 to 1 percent slopes'		'SICL'	1	0.1600	0.7500	4234710.00	0.0071	3.5000	1.0045
-	  210.000	  33.00	  33.00	   3.00	  26.40	   0.00
+	  210.000	   7.00	  33.00	   3.00	  26.40	   0.00
 0 0 0.000000 0.000000

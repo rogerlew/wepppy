@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.196115
+#   Build Date: 2021-04-05 10:37:48.933827
 #   Source Data: StatsGo
 # 
 # Mukey: 660832
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Slidecreek-Lacks-Coppercreek-Atwell (s729)'		'CL'	1	0.2207	0.7500	4764260.00	0.0055	4.0702	6.3969
-	  430.000	  31.00	  31.00	   2.50	  16.80	  15.00
+	  430.000	  35.40	  31.00	   2.50	  16.80	  15.00
 0 0 0.000000 0.000000

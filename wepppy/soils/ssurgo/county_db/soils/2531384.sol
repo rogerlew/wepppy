@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.148164
+#   Build Date: 2021-04-05 10:36:22.482748
 #   Source Data: Surgo
 # 
 # Mukey: 2531384
@@ -56,6 +56,6 @@
 Any comments:
 1 1
 'Lamoni silty clay loam, 5 to 9 percent slopes, moderately eroded'		'CL'	2	0.1600	0.7500	4234710.00	0.0071	3.5000	1.8476
-	  200.000	  33.00	  33.00	   2.50	  26.30	   8.00
-	  330.000	  34.00	  34.00	   1.50	  26.50	   7.00
+	  200.000	  15.00	  33.00	   2.50	  26.30	   8.00
+	  330.000	  30.00	  34.00	   1.50	  26.50	   7.00
 0 0 0.000000 0.000000

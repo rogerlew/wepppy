@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.693878
+#   Build Date: 2021-04-05 10:36:22.032574
 #   Source Data: Surgo
 # 
 # Mukey: 546865
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Hayesville loam, 7 to 15 percent slopes'		'L'	1	0.3000	0.7500	5052410.00	0.0066	3.1057	9.0889
-	  210.000	  17.50	  17.50	   2.00	  11.30	  13.00
+	  210.000	  43.00	  17.50	   2.00	  11.30	  13.00
 0 0 0.000000 0.000000

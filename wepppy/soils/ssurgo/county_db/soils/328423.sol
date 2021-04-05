@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.901479
+#   Build Date: 2021-04-05 10:36:25.227389
 #   Source Data: Surgo
 # 
 # Mukey: 328423
@@ -53,6 +53,6 @@
 Any comments:
 1 1
 'Mantachie, Iuka, and Bibb soils, 0 to 1 percent slopes, frequently flooded'		'CL'	2	0.3000	0.7500	4400100.00	0.0072	3.5000	5.1689
-	   80.000	  30.00	  30.00	   1.50	  11.30	   0.00
-	 1570.000	  26.00	  26.00	   1.00	  11.30	   7.85
+	   80.000	  28.50	  30.00	   1.50	  11.30	   0.00
+	 1570.000	  38.00	  26.00	   1.00	  11.30	   7.85
 0 0 0.000000 0.000000

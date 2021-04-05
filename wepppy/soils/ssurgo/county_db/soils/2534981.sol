@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.239039
+#   Build Date: 2021-04-05 10:36:21.576511
 #   Source Data: Surgo
 # 
 # Mukey: 2534981
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Goss very cobbly silt loam, 15 to 50 percent slopes, extremely stony'		'CBV-SIL'	2	0.3000	0.7500	5282180.00	0.0150	3.5000	2.7202
-	   80.000	  14.00	  14.00	   2.50	  11.30	  58.39
-	  230.000	  12.00	  12.00	   0.60	  11.30	  60.00
+	   80.000	  15.00	  14.00	   2.50	  11.30	  58.39
+	  230.000	  16.00	  12.00	   0.60	  11.30	  60.00
 0 0 0.000000 0.000000

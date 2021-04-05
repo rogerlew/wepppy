@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.222892
+#   Build Date: 2021-04-05 10:37:48.960802
 #   Source Data: StatsGo
 # 
 # Mukey: 673188
@@ -57,5 +57,5 @@
 Any comments:
 1 1
 'Imogene-Cochina-Brundage (s7227)'		'FSL'	1	0.4445	0.7500	5974490.00	0.0168	2.6648	20.0147
-	  210.000	  15.00	  15.00	   0.75	   6.50	   2.50
+	  210.000	  68.80	  15.00	   0.75	   6.50	   2.50
 0 0 0.000000 0.000000

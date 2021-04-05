@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.215993
+#   Build Date: 2021-04-05 10:36:23.548255
 #   Source Data: Surgo
 # 
 # Mukey: 426083
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Houghton mucky peat, 0 to 2 percent slopes'		'MPT'	1	0.0900	0.7500	0.00	0.0000	0.0000	2.9458
-	 2000.000	  10.00	  10.00	   2.00	   9.70	   0.00
+	 2000.000	  15.00	  10.00	   2.00	   9.70	   0.00
 0 0 0.000000 0.000000

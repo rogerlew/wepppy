@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.191410
+#   Build Date: 2021-04-05 10:36:24.516064
 #   Source Data: Surgo
 # 
 # Mukey: 778035
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Carbo-Rock outcrop complex, 25 to 65 percent slopes, eroded'		'SICL'	1	0.3600	0.7500	4124450.00	0.0070	3.5000	2.6229
-	  210.000	  35.00	  35.00	   1.50	  16.00	   0.00
+	  210.000	  17.30	  35.00	   1.50	  16.00	   0.00
 0 0 0.000000 0.000000

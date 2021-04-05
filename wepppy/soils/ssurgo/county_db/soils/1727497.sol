@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.537281
+#   Build Date: 2021-04-05 10:36:21.876420
 #   Source Data: Surgo
 # 
 # Mukey: 1727497
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Cynthiana-Faywood complex, rocky, 20 to 40 percent slopes, eroded'		'FL-SICL'	1	0.3000	0.7500	4179580.00	0.0070	3.5000	1.5676
-	  210.000	  34.00	  34.00	   2.50	  18.40	  32.85
+	  210.000	  10.00	  34.00	   2.50	  18.40	  32.85
 0 0 0.000000 0.000000

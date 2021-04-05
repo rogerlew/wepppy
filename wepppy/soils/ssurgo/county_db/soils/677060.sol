@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.119794
+#   Build Date: 2021-04-05 10:37:48.858121
 #   Source Data: StatsGo
 # 
 # Mukey: 677060
@@ -58,5 +58,5 @@
 Any comments:
 1 1
 'Tisworth-Gerdrum family-Elkol-Delphill-Chaperton-Blazon (s9118)'		'FSL'	1	0.3293	0.7500	6012910.00	0.0095	2.5882	20.0954
-	  210.000	  14.00	  14.00	   1.50	   7.50	  12.50
+	  210.000	  69.60	  14.00	   1.50	   7.50	  12.50
 0 0 0.000000 0.000000

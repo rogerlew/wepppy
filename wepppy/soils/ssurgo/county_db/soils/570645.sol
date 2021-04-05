@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.907700
+#   Build Date: 2021-04-05 10:36:23.244374
 #   Source Data: Surgo
 # 
 # Mukey: 570645
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Purchase-Loring complex, 6 to 12 percent slopes, severely eroded'		'SIL'	1	0.3700	0.7500	5254615.00	0.0143	3.5000	1.8200
-	  210.000	  14.50	  14.50	   1.75	  11.50	   0.00
+	  210.000	   6.50	  14.50	   1.75	  11.50	   0.00
 0 0 0.000000 0.000000

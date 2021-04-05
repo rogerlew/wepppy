@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.082585
+#   Build Date: 2021-04-05 10:36:23.414866
 #   Source Data: Surgo
 # 
 # Mukey: 613551
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Bennington silt loam, 2 to 6 percent slopes'		'SIL'	1	0.2900	0.7500	4841140.00	0.0085	3.5000	2.9359
-	  230.000	  22.00	  22.00	   2.50	  18.00	   8.00
+	  230.000	  20.00	  22.00	   2.50	  18.00	   8.00
 0 0 0.000000 0.000000

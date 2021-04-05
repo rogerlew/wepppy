@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.902026
+#   Build Date: 2021-04-05 10:36:25.227944
 #   Source Data: Surgo
 # 
 # Mukey: 330150
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Muskingum (Gorgas) stony fine sandy loam, 20 to 45 percent slopes, very stony'		'ST-FSL'	2	0.3000	0.7500	4783470.00	0.0091	2.8294	18.6951
-	  150.000	  12.00	  12.00	   1.25	  11.30	  23.74
-	  410.000	  18.00	  18.00	   0.25	  11.30	  17.55
+	  150.000	  68.00	  12.00	   1.25	  11.30	  23.74
+	  410.000	  67.00	  18.00	   0.25	  11.30	  17.55
 0 0 0.000000 0.000000

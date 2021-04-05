@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.093664
+#   Build Date: 2021-04-05 10:37:48.832347
 #   Source Data: StatsGo
 # 
 # Mukey: 677007
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Turnerville-Tongue River-Tetonia-Rock outcrop-Midfork-Buffork-Adel (s9065)'		'L'	2	0.2207	0.7500	5052410.00	0.0060	3.2682	8.3064
-	  250.000	  20.00	  20.00	   2.50	  17.20	  60.12
-	 1520.000	  22.50	  22.50	   7.00	  11.30	  69.75
+	  250.000	  42.10	  20.00	   2.50	  17.20	  60.12
+	 1520.000	  39.80	  22.50	   7.00	  11.30	  69.75
 0 0 0.000000 0.000000
