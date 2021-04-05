@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.249723
+#   Build Date: 2021-04-05 10:36:25.572034
 #   Source Data: Surgo
 # 
 # Mukey: 372696
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Lueders-Throck complex, 1 to 8 percent slopes, extremely stony'		'STX-CL'	2	0.1600	0.7500	4706630.00	0.0051	3.8601	6.1688
-	  130.000	  27.50	  27.50	   3.50	  17.50	  50.40
-	  360.000	  27.50	  27.50	   3.50	  17.50	  67.97
+	  130.000	  34.70	  27.50	   3.50	  17.50	  50.40
+	  360.000	  37.20	  27.50	   3.50	  17.50	  67.97
 0 0 0.000000 0.000000

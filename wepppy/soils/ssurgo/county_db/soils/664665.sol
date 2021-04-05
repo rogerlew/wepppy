@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:03:09.035532
+#   Build Date: 2021-04-05 10:37:48.774629
 #   Source Data: StatsGo
 # 
 # Mukey: 664665
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Warsing-Vastine family-Gerrard-Fluvaquentic Haplaquolls (s4628)'		'L'	2	0.1807	0.7500	4994780.00	0.0057	3.4481	7.5002
-	  460.000	  22.50	  22.50	   3.00	  19.30	   5.00
-	 1520.000	   2.50	   2.50	   7.00	  11.30	  68.47
+	  460.000	  39.80	  22.50	   3.00	  19.30	   5.00
+	 1520.000	  66.80	   2.50	   7.00	  11.30	  68.47
 0 0 0.000000 0.000000

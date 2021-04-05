@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.851987
+#   Build Date: 2021-04-05 10:36:24.181548
 #   Source Data: Surgo
 # 
 # Mukey: 2451039
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Latham-Wharton silt loams, 15 to 25 percent slopes, eroded'		'SIL'	1	0.3000	0.7500	4758445.00	0.0081	3.5000	3.7828
-	  210.000	  23.50	  23.50	   2.00	  11.30	  15.12
+	  210.000	  21.70	  23.50	   2.00	  11.30	  15.12
 0 0 0.000000 0.000000

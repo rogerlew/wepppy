@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.980596
+#   Build Date: 2021-04-05 10:36:24.306719
 #   Source Data: Surgo
 # 
 # Mukey: 404767
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Gara clay loam, 14 to 18 percent slopes, moderately eroded'		'CL'	1	0.2300	0.7500	4706630.00	0.0075	4.0876	5.9339
-	  210.000	  31.00	  31.00	   1.50	  25.00	  13.00
+	  210.000	  35.00	  31.00	   1.50	  25.00	  13.00
 0 0 0.000000 0.000000

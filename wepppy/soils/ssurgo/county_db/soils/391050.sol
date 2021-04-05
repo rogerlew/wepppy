@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.245538
+#   Build Date: 2021-04-05 10:36:23.577950
 #   Source Data: Surgo
 # 
 # Mukey: 391050
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Speck-Tarrant complex, 1 to 5 percent slopes'		'ST-CL'	1	0.1600	0.7500	4668210.00	0.0060	4.0017	5.6517
-	  210.000	  29.50	  29.50	   2.00	  22.50	  23.00
+	  210.000	  33.60	  29.50	   2.00	  22.50	  23.00
 0 0 0.000000 0.000000

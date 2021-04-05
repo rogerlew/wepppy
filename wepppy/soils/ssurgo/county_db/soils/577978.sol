@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.663070
+#   Build Date: 2021-04-05 10:36:23.992026
 #   Source Data: Surgo
 # 
 # Mukey: 577978
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Jackport silty clay loam, 0 to 2 percent slopes'		'SICL'	1	0.2300	0.7500	4207145.00	0.0071	3.5000	2.3301
-	  210.000	  33.50	  33.50	   2.00	  22.50	   0.00
+	  210.000	  17.50	  33.50	   2.00	  22.50	   0.00
 0 0 0.000000 0.000000

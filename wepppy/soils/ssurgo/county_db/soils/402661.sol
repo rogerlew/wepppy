@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.742409
+#   Build Date: 2021-04-05 10:36:23.078876
 #   Source Data: Surgo
 # 
 # Mukey: 402661
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Clarinda silty clay loam, 5 to 9 percent slopes, moderately eroded'		'SICL'	1	0.1600	0.7500	4234710.00	0.0071	3.5000	0.8776
-	  210.000	  33.00	  33.00	   2.50	  26.30	   4.00
+	  210.000	   5.00	  33.00	   2.50	  26.30	   4.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.004975
+#   Build Date: 2021-04-05 10:36:22.341073
 #   Source Data: Surgo
 # 
 # Mukey: 372159
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Bluegrove loam, 1 to 3 percent slopes'		'L'	1	0.1600	0.7500	8606260.00	0.0152	2.1952	10.1204
-	  210.000	  20.00	  20.00	   1.23	  10.80	   4.00
+	  210.000	  46.00	  20.00	   1.23	  10.80	   4.00
 0 0 0.000000 0.000000

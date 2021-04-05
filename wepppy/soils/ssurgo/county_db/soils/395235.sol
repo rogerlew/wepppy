@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.227198
+#   Build Date: 2021-04-05 10:36:21.564779
 #   Source Data: Surgo
 # 
 # Mukey: 395235
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Carbondale and Tawas soils'		'MUCK'	1	0.0900	0.7500	5502700.00	0.0250	3.5000	40.4508
-	 2030.000	   0.20	   0.20	   2.00	   1.40	   0.00
+	 2030.000	  96.00	   0.20	   2.00	   1.40	   0.00
 0 0 0.000000 0.000000

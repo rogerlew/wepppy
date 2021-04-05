@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:44.023916
+#   Build Date: 2021-04-05 10:36:24.349658
 #   Source Data: Surgo
 # 
 # Mukey: 571335
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Carnasaw-Clebit association, 8 to 25 percent slopes'		'ST-L'	1	0.2300	0.7500	5052410.00	0.0095	3.3007	8.6425
-	  210.000	  20.50	  20.50	   1.25	  12.50	  39.70
+	  210.000	  42.00	  20.50	   1.25	  12.50	  39.70
 0 0 0.000000 0.000000

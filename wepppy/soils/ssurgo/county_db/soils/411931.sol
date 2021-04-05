@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.718600
+#   Build Date: 2021-04-05 10:36:24.047685
 #   Source Data: Surgo
 # 
 # Mukey: 411931
@@ -56,5 +56,5 @@
 Any comments:
 1 1
 'Sharpsburg silty clay loam, 5 to 9 percent slopes, eroded'		'SICL'	1	0.1700	0.7500	4179580.00	0.0070	3.5000	0.7271
-	  210.000	  34.00	  34.00	   3.10	  27.20	   0.00
+	  210.000	   2.00	  34.00	   3.10	  27.20	   0.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.218051
+#   Build Date: 2021-04-05 10:36:23.550345
 #   Source Data: Surgo
 # 
 # Mukey: 383295
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Kiti-Rock outcrop complex, 1 to 25 percent slopes'		'FLV-SIL'	1	0.0900	0.7500	4758445.00	0.0081	3.5000	3.9999
-	  360.000	  23.50	  23.50	   2.00	  14.50	  54.50
+	  360.000	  24.50	  23.50	   2.00	  14.50	  54.50
 0 0 0.000000 0.000000

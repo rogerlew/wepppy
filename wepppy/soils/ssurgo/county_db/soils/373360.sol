@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:43.207285
+#   Build Date: 2021-04-05 10:36:23.539532
 #   Source Data: Surgo
 # 
 # Mukey: 373360
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Kamay silt loam, 1 to 3 percent slopes'		'SIL'	1	0.1600	0.7500	4951400.00	0.0094	3.5000	4.4979
-	  250.000	  20.00	  20.00	   2.00	  13.50	   0.00
+	  250.000	  26.50	  20.00	   2.00	  13.50	   0.00
 0 0 0.000000 0.000000

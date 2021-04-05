@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.984052
+#   Build Date: 2021-04-05 10:36:22.320255
 #   Source Data: Surgo
 # 
 # Mukey: 525079
@@ -53,5 +53,5 @@
 Any comments:
 1 1
 'Dandridge shaly silt loam, eroded steep phase'		'CN-SIL'	1	0.3600	0.7500	4593055.00	0.0076	3.5000	1.9756
-	  250.000	  26.50	  26.50	   1.25	  16.40	  48.25
+	  250.000	  12.70	  26.50	   1.25	  16.40	  48.25
 0 0 0.000000 0.000000

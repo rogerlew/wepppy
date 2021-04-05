@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.127692
+#   Build Date: 2021-04-05 10:36:21.465576
 #   Source Data: Surgo
 # 
 # Mukey: 2795805
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Eastwood very fine sandy loam, 5 to 20 percent slopes'		'FSL'	1	0.2300	0.7500	6262640.00	0.0172	2.2853	18.7404
-	  210.000	  10.50	  10.50	   0.75	  11.30	   4.00
+	  210.000	  68.10	  10.50	   0.75	  11.30	   4.00
 0 0 0.000000 0.000000

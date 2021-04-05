@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.518360
+#   Build Date: 2021-04-05 10:36:25.841776
 #   Source Data: Surgo
 # 
 # Mukey: 122447
@@ -53,6 +53,6 @@
 Any comments:
 1 1
 'Axis very fine sandy loam, 0 to 2 percent slopes, very frequently flooded'		'VFSL'	2	0.2500	0.7500	9682020.00	0.0128	1.4804	15.8806
-	  360.000	  14.00	  14.00	   6.00	  17.00	   0.00
-	 1780.000	  11.50	  11.50	   0.00	   3.00	   0.00
+	  360.000	  62.70	  14.00	   6.00	  17.00	   0.00
+	 1780.000	  67.50	  11.50	   0.00	   3.00	   0.00
 0 0 0.000000 0.000000

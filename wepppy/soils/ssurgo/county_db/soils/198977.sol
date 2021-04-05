@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:45.230490
+#   Build Date: 2021-04-05 10:36:25.552959
 #   Source Data: Surgo
 # 
 # Mukey: 198977
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Virden-Fosterburg silt loams, 0 to 2 percent slopes'		'SIL'	1	0.0900	0.7500	4730880.00	0.0080	3.5000	0.8492
-	  380.000	  24.00	  24.00	   4.50	  25.50	   0.00
+	  380.000	   4.00	  24.00	   4.50	  25.50	   0.00
 0 0 0.000000 0.000000

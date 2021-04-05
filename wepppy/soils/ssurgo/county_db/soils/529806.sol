@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.379952
+#   Build Date: 2021-04-05 10:36:21.719100
 #   Source Data: Surgo
 # 
 # Mukey: 529806
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Ashwood-Mimosa-Rock outcrop complex, 15 to 45 percent slopes'		'SICL'	1	0.1600	0.7500	4278814.00	0.0071	3.5000	0.8888
-	  210.000	  32.20	  32.20	   3.50	  38.00	   0.00
+	  210.000	   8.50	  32.20	   3.50	  38.00	   0.00
 0 0 0.000000 0.000000

@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.714161
+#   Build Date: 2021-04-05 10:36:22.053063
 #   Source Data: Surgo
 # 
 # Mukey: 571887
@@ -54,6 +54,6 @@
 Any comments:
 1 1
 'Hector-Linker-Enders complex, 5 to 40 percent slopes, extremely stony'		'ST-FSL'	2	0.2300	0.7500	4802680.00	0.0062	2.5636	21.8540
-	  150.000	   8.00	   8.00	   2.00	   1.60	  41.07
-	  380.000	  10.00	  10.00	   1.10	  11.30	  40.78
+	  150.000	  61.00	   8.00	   2.00	   1.60	  41.07
+	  380.000	  63.00	  10.00	   1.10	  11.30	  40.78
 0 0 0.000000 0.000000

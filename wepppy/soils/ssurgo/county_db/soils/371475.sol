@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.004228
+#   Build Date: 2021-04-05 10:36:22.340327
 #   Source Data: Surgo
 # 
 # Mukey: 371475
@@ -54,5 +54,5 @@
 Any comments:
 1 1
 'Wrightsville-Rodessa complex'		'SIL'	1	0.0900	0.7500	5089225.00	0.0109	3.5000	5.3055
-	  280.000	  17.50	  17.50	   1.75	  11.30	   2.50
+	  280.000	  29.10	  17.50	   1.75	  11.30	   2.50
 0 0 0.000000 0.000000

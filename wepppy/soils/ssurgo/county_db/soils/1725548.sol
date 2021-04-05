@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:42.113213
+#   Build Date: 2021-04-05 10:36:22.448134
 #   Source Data: Surgo
 # 
 # Mukey: 1725548
@@ -55,6 +55,6 @@
 Any comments:
 1 1
 'Guyton-Iulus complex, 0 to 1 percent slopes, frequently flooded'		'SIL'	2	0.2300	0.7500	5171920.00	0.0124	3.5000	2.5760
-	  200.000	  16.00	  16.00	   2.25	  11.30	   0.00
-	  740.000	  16.00	  16.00	   0.50	  11.30	   0.00
+	  200.000	  13.90	  16.00	   2.25	  11.30	   0.00
+	  740.000	  13.90	  16.00	   0.50	  11.30	   0.00
 0 0 0.000000 0.000000

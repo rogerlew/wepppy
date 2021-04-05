@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.251978
+#   Build Date: 2021-04-05 10:36:21.589282
 #   Source Data: Surgo
 # 
 # Mukey: 507746
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'Fuera-Dargol-Vamer association, steep'		'CB-L'	1	0.1600	0.7500	5013990.00	0.0080	3.3773	8.0744
-	  380.000	  21.50	  21.50	   1.50	  17.50	  38.80
+	  380.000	  41.40	  21.50	   1.50	  17.50	  38.80
 0 0 0.000000 0.000000

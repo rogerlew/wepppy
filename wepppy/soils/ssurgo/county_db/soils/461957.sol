@@ -2,7 +2,7 @@
 # 
 #             WEPPcloud v.0.1.0 (c) University of Idaho
 # 
-#   Build Date: 2021-04-01 15:01:41.080095
+#   Build Date: 2021-04-05 10:36:21.418073
 #   Source Data: Surgo
 # 
 # Mukey: 461957
@@ -55,5 +55,5 @@
 Any comments:
 1 1
 'San Joaquin silt loam, leveled, 0 to 1 percent slopes'		'SIL'	1	0.2500	0.7500	4951400.00	0.0094	3.5000	4.3743
-	  580.000	  20.00	  20.00	   0.75	  15.00	   2.50
+	  580.000	  26.50	  20.00	   0.75	  15.00	   2.50
 0 0 0.000000 0.000000
