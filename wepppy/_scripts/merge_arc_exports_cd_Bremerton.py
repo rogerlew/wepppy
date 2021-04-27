@@ -11,9 +11,6 @@ import subprocess
 from wepppy.export import arc_export
 
 #from wepppy.all_your_base import ogrmerge
-'''
-Created to generate summary files for Tatiana (Erin's student)
-'''
 
 os.chdir('/geodata/weppcloud_runs/')
 
