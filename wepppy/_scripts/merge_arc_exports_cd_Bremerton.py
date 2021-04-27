@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     os.mkdir(outdir)
 
-     scenarios = [
+    scenarios = [
                  'Bremerton*Low_fire',
                  'Bremerton*low_Fire_2010_2040',
                  'Bremerton*low_Fire_2040_2070',
