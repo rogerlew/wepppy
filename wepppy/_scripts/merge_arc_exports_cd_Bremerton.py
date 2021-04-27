@@ -17,7 +17,7 @@ os.chdir('/geodata/weppcloud_runs/')
 if __name__ == "__main__":
     import sys
 
-    outdir = '/home/chinmay/Palouse202103'
+    outdir = '/home/chinmay/Bremerton'
 
     if _exists(outdir):
         res = input('Outdir exixsts, Delete outdir?')
