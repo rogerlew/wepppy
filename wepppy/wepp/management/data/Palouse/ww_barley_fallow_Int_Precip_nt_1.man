@@ -250,8 +250,6 @@ description 2
 description 3
 1   # number of OFE's
     1   # initial condition index
-    1   # initial condition index
-    1   # initial condition index
 10  # rotation repeats
 3  # years in rotation
 
