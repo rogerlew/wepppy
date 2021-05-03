@@ -1314,7 +1314,7 @@ class ManagementLoopManLoop(object):
             i = int(lines.pop(0))
             scn = _scenario_reference_factory(i, SectionType.Year, root, self)
             self.manindx.append(scn)
-        
+    
     def setroot(self, root):
         self.root = root
         self.manindx.root = root
@@ -1329,10 +1329,9 @@ class ManagementLoopManLoop(object):
 
 
 class ManagementLoopMan(object):
-    def __init__(self, lines, parent, root):
+    def __init__(self, lines, parent, root, nyears):
         self.root = root
         self.parent = parent
-        nyears = int(lines.pop(0))
         
         self.years = Loops()
         
@@ -1377,9 +1376,11 @@ class ManagementLoop(object):
             self.ofeindx.append(scen)
             
         nrots = int(lines.pop(0))
+        nyears = int(lines.pop(0))
         self.loops = Loops()
         for i in range(nrots):
-            self.loops.append(ManagementLoopMan(lines, self, root))
+            print('nrot', i)
+            self.loops.append(ManagementLoopMan(lines, self, root, nyears))
         
     @property
     def nofes(self):
