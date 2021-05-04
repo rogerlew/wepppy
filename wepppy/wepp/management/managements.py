@@ -1635,7 +1635,8 @@ class Management(object):
         
         # first we build the ManagementLoop
         _man = deepcopy(self.man)
-       
+      
+        print('nrots', _man.nrots) 
         if sim_years == _man.nrots * len(_man.loops[-1].years):
             return self
  
@@ -1648,7 +1649,7 @@ class Management(object):
         #    - simulation years
         #    - ofes or channels
         # from slowest to fastest
-        for i in range(_man.nrots):
+        for i in range(self.man.nrots):
 
             # copy the appropriate ManagementLoopMan
             _man.loops.append(deepcopy(self.man.loops[i]))
