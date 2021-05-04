@@ -1379,7 +1379,6 @@ class ManagementLoop(object):
         nyears = int(lines.pop(0))
         self.loops = Loops()
         for i in range(nrots):
-            print('nrot', i)
             self.loops.append(ManagementLoopMan(lines, self, root, nyears))
         
     @property
@@ -1636,7 +1635,10 @@ class Management(object):
         
         # first we build the ManagementLoop
         _man = deepcopy(self.man)
-        
+       
+        if sim_years == _man.nrots * len(_man.loops[-1].years):
+            return self
+ 
         # clear the existing loops
         _man.loops = Loops()
         
@@ -1646,7 +1648,7 @@ class Management(object):
         #    - simulation years
         #    - ofes or channels
         # from slowest to fastest
-        for i in range(self.man.nrots):
+        for i in range(_man.nrots):
 
             # copy the appropriate ManagementLoopMan
             _man.loops.append(deepcopy(self.man.loops[i]))
@@ -1666,7 +1668,7 @@ class Management(object):
                     assert len(_man.loops) > 0
                     assert len(_man.loops[-1].years) > 0
                     assert len(self.man.loops) > i
-                    assert len(self.man.loops[i].years) == yrs
+                    assert len(self.man.loops[i].years) == yrs, (len(self.man.loops[i].years), yrs)
 
                     if len(self.man.loops[i].years[j % yrs]) > k:
                         man_loop_man_loop = deepcopy(self.man.loops[i].years[j % yrs][k])
