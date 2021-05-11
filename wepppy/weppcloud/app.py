@@ -475,6 +475,11 @@ def isfloat_processor():
     return dict(isfloat=isfloat)
 
 
+@app.context_processor
+def startswith_processor():
+    return dict(startswith=lambda x, y: str(x).startswith(str(y)))
+
+
 def _get_run_name(runid):
     try:
         wd = get_wd(runid)
@@ -652,7 +657,7 @@ def seattle_results(file):
     recursive list the file structure of the working directory
     """
     import wepppy
-    fn = _join(wepppy.nodb.mods.locations.wepppy_locations_seattle.seattle._thisdir, 'results', file)
+    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', file)
 
     if _exists(fn):
         return send_file(fn, as_attachment=True)
@@ -3785,8 +3790,8 @@ def run_ash(runid, config):
     ini_white_ash_depth_mm = request.form.get('ini_white_depth', None)
     ini_black_ash_load_kgm2 = request.form.get('ini_black_load', None)
     ini_white_ash_load_kgm2 = request.form.get('ini_white_load', None)
-    ini_black_ash_bulkdensity = request.form.get('ini_black_bulkdensity', None)
-    ini_white_ash_bulkdensity = request.form.get('ini_white_bulkdensity', None)
+    field_black_ash_bulkdensity = request.form.get('field_black_bulkdensity', None)
+    field_white_ash_bulkdensity = request.form.get('field_white_bulkdensity', None)
 
     try:
         assert isint(ash_depth_mode), ash_depth_mode
@@ -3797,11 +3802,11 @@ def run_ash(runid, config):
         else:
             assert isfloat(ini_black_ash_load_kgm2), ini_black_ash_load_kgm2
             assert isfloat(ini_white_ash_load_kgm2), ini_white_ash_load_kgm2
-            assert isfloat(ini_black_ash_bulkdensity), ini_black_ash_bulkdensity
-            assert isfloat(ini_white_ash_bulkdensity), ini_white_ash_bulkdensity
+            assert isfloat(field_black_ash_bulkdensity), field_black_ash_bulkdensity
+            assert isfloat(field_white_ash_bulkdensity), field_white_ash_bulkdensity
 
-            ini_black_ash_depth_mm = float(ini_black_ash_load_kgm2) / float(ini_black_ash_bulkdensity)
-            ini_white_ash_depth_mm = float(ini_white_ash_load_kgm2) / float(ini_white_ash_bulkdensity)
+            ini_black_ash_depth_mm = float(ini_black_ash_load_kgm2) / float(field_black_ash_bulkdensity)
+            ini_white_ash_depth_mm = float(ini_white_ash_load_kgm2) / float(field_white_ash_bulkdensity)
 
         ash = Ash.getInstance(wd)
 
@@ -3814,7 +3819,7 @@ def run_ash(runid, config):
             try:
                 ash._spatial_mode = AshSpatialMode.Gridded
                 ash._ash_load_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_load')
-                ash._ash_bulk_density_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_bd')
+                ash._ash_type_map_fn = _task_upload_ash_map(wd, request, 'input_upload_ash_type_map')
                 ash.dump_and_unlock()
             except Exception:
                 ash.unlock('-f')
