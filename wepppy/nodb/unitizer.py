@@ -385,7 +385,7 @@ class Unitizer(NoDbBase):
 
         def tostring(v, p):
             if p <= 0:
-                p = 3
+                p = 4
 
             try:
                 fmt = '%.' + str(int(p)) + 'g'
