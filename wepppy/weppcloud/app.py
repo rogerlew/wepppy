@@ -591,6 +591,17 @@ def stats():
         return exception_factory()
 
 
+@app.route('/joh')
+@app.route('/joh/')
+def joh_index():
+    return render_template('locations/joh/index.htm', user=current_user)
+
+
+@app.route('/joh/joh-map.htm')
+def joh_map():
+    return render_template('locations/joh/joh-map.htm', user=current_user)
+
+
 @app.route('/portland-municipal')
 @app.route('/portland-municipal/')
 @app.route('/locations/portland-municipal')
@@ -1286,6 +1297,28 @@ def resources_subcatchments_geojson(runid, config):
         wd = get_wd(runid)
         watershed = Watershed.getInstance(wd)
         fn = watershed.subwta_shp
+
+        js = json.load(open(fn))
+        ron = Ron.getInstance(wd)
+        name = ron.name
+
+        if name.strip() == '':
+            js['name'] = runid
+        else:
+            js['name'] = name
+
+        return jsonify(js)
+    except Exception:
+        return exception_factory()
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/resources/bound.json')
+def resources_bounds_geojson(runid, config):
+    try:
+        wd = get_wd(runid)
+        watershed = Watershed.getInstance(wd)
+        fn = watershed.bound_shp
 
         js = json.load(open(fn))
         ron = Ron.getInstance(wd)
@@ -4076,6 +4109,11 @@ def report_contaminant(runid, config):
 def combined_ws_viewer():
     return render_template('combined_ws_viewer.htm')
 
+@app.route('/bounds_ws_viewer')
+@app.route('/bounds_ws_viewer/')
+def bounds_ws_viewer():
+    return render_template('bounds_ws_viewer.htm')
+
 
 @app.route('/combined_ws_viewer/url_generator', methods=['GET', 'POST'])
 @app.route('/combined_ws_viewer/url_generator/', methods=['GET', 'POST'])
@@ -4095,7 +4133,7 @@ def combined_ws_viewer_url_gen():
         return render_template('combined_ws_viewer_url_gen.htm',
             url=url, user=current_user, title=title, runids=', '.join(runids))
     except:
-        return error_factory('Error processing request')
+        return exception_factory('Error processing request')
 
 
 def get_project_name(wd):
