@@ -216,6 +216,13 @@ class Watershed(NoDbBase):
             return _join(self.taudem_wd, 'bound.tif')
 
     @property
+    def bound_shp(self):
+        if self.delineation_backend_is_topaz:
+            return _join(self.topaz_wd, 'BOUND.WGS.JSON')
+        else:
+            return _join(self.taudem_wd, 'bound.WGS.geojson')
+
+    @property
     def netful(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'NETFUL.ARC')
