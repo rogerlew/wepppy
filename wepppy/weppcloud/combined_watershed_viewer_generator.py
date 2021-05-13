@@ -85,7 +85,7 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
 
     _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
            'ws={ws}&varopts={{"runoff":{runoff},"subrunoff":{subrunoff},"baseflow":{baseflow},' \
-           '{phos_opts}"loss":{loss}}}&varname={varname}&title={title}&units={units}'
+           '{phos_opts}",loss":{loss}}}&varname={varname}&title={title}&units={units}'.replace(',,', ',')
 
     url = None
     if center_lng is not None and \
