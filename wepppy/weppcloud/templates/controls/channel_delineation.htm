@@ -12,10 +12,12 @@
             {% if watershed.delineation_backend_is_topaz %}
             <div class="form-group row">
                 <div class="col-sm-5">
-                    <label for="input_mcl">Minimum Channel Length (m)</label>
+                    <label for="input_mcl">Minimum Channel Length (m)
+                        <a data-toggle="tooltip" data-placement="top" title="The shortest length that any channel is allowed to be. A value of 60 m, means that at least two 30-m DEM pixel is needed to initiate the headwater channel. As a rule of thumb it should be 10x of the CSA. e.g. if the CSA is 10 ha the MCL should be 100 m."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                    </label>
                 </div>
                 <div class="col-sm-3">
-                    <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.mcl }}" aria-label="Lon, Lat">
+                    <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.mcl | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
             {% else %}
@@ -24,10 +26,12 @@
 
             <div class="form-group row">
                 <div class="col-sm-5">
-                    <label for="input_csa">Critical Source Area (ha)</label>
+                    <label for="input_csa">Critical Source Area (ha)
+                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                    </label>
                 </div>
                 <div class="col-sm-3">
-                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.csa }}" aria-label="Lon, Lat">
+                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.csa | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
             <div class="form-group hide-readonly">
@@ -39,10 +43,12 @@
             {% if watershed.delineation_backend_is_topaz %}
             <div class="form-group row">
                 <div class="col-sm-5">
-                    <label for="input_mcl_en">Minimum Channel Length (ft)</label>
+                    <label for="input_mcl_en">Minimum Channel Length (ft)
+                        <a data-toggle="tooltip" data-placement="top" title="The shortest length that any channel is allowed to be. A value of 60 m, means that at least two 30-m DEM pixel is needed to initiate the headwater channel. As a rule of thumb it should be 13x of the CSA. e.g. if the CSA is 25 acres the MCL should be 330 ft."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                    </label>
                 </div>
                 <div class="col-sm-3">
-                    <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.mcl * 3.28084 }}" aria-label="Lon, Lat">
+                    <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ (watershed.mcl * 3.28084) | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
             {% else %}
@@ -50,10 +56,12 @@
             {% endif %}
             <div class="form-group row">
                 <div class="col-sm-5">
-                    <label for="input_csa_en">Critical Source Area (acre)</label>
+                    <label for="input_csa_en">Critical Source Area (acre)
+                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                    </label>
                 </div>
                 <div class="col-sm-3">
-                    <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.csa * 2.47105 }}" aria-label="Lon, Lat">
+                    <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ (watershed.csa * 2.47105) | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
 
