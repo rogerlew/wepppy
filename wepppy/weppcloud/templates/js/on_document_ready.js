@@ -8,6 +8,8 @@ var WEPP_channel_critical_shear = null;
 
 var error = null;
 
+var cellsize = {{ron.cellsize}};
+
 jQuery.readyException = function( e ) {
   console.error( e );
   error = e;

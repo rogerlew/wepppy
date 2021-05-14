@@ -56,7 +56,7 @@
 		name="hillslope_clip_length" 
 		class="form-control mr-sm-3 disable-readonly" 
 		type="text" 
-		value="{{ watershed.clip_hillslope_length }}" aria-label="Hillslope Clip Length">
+		value="{{ watershed.clip_hillslope_length | round | int }}" aria-label="Hillslope Clip Length">
 	</div>
     </div>
     </div>
