@@ -1295,8 +1295,12 @@ def resources_netful_geojson(runid, config):
 def resources_subcatchments_geojson(runid, config):
     try:
         wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        fn = watershed.subwta_shp
+#        watershed = Watershed.getInstance(wd)
+#        fn = watershed.subwta_shp
+
+        fn = _join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON')
+        if not _exists(fn):
+            fn = _join(wd, 'dem/taudem/subcatchments.WGS.geojson')
 
         js = json.load(open(fn))
         ron = Ron.getInstance(wd)
@@ -1317,17 +1321,35 @@ def resources_subcatchments_geojson(runid, config):
 def resources_bounds_geojson(runid, config):
     try:
         wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        fn = watershed.bound_shp
+#        watershed = Watershed.getInstance(wd)
+        fn = _join(wd, 'dem/topaz/BOUND.WGS.JSON')
+        if not _exists(fn):
+            fn = _join(wd, 'dem/taudem/bound.WGS.geojson')
 
-        js = json.load(open(fn))
+        fn2 = fn.split('.')
+        fn2.insert(-1, 'opt')
+        fn2 = '.'.join(fn2)
+        if _exists(fn2):
+            return send_file(fn2)
+        
+        cmd = ['ogr2ogr', fn2, fn, '-simplify', '0.002']
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        p.wait()
+
+        js = json.load(open(fn2))
         ron = Ron.getInstance(wd)
         name = ron.name
+
+        js['features'] = [js['features'][0]]
 
         if name.strip() == '':
             js['name'] = runid
         else:
             js['name'] = name
+
+        with open(fn2, 'w') as fp:
+            json.dump(js, fp)
 
         return jsonify(js)
     except Exception:
@@ -4181,7 +4203,6 @@ def dev_access():
             p = Popen(cmd, stdout=PIPE, stderr=PIPE)
             p.wait()
             output = p.stdout.read().decode('UTF-8')
-            print(output)
             return Response(output)
         except:
             return exception_factory()
