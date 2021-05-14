@@ -20,7 +20,7 @@
             <select class="form-control disable-readonly" id="landuse_selection_{{ row.key }}"
                 onchange="Landuse.getInstance().modify_mapping({{ row.key }}, this.value)">
                 {% for opt in landuseoptions %}
-                <option value="{{ opt["Key"] }}" {% if row.key == opt["Key"] %}selected{% endif %}>{{ opt["Description"] }} ({{ opt["ManagementFile"] }})</option>
+                <option value="{{ opt["Key"] }}" {% if startswith(row.key, opt["Key"]) %}selected{% endif %}>{{ opt["Description"] }} ({{ opt["ManagementFile"] }})</option>
                 {% endfor %}
             </select>
         </td>
@@ -33,21 +33,21 @@
           Canopy Vegetation (Tree/Shrub) Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'cancov', this.value)">
             <option value="" {% if row.cancov_override is none %}selected{% endif %}>{{ (row.cancov * 100) | round | int }}% default</option>
-            {% for pct in range(0, 103, 5) %}
+            {% for pct in range(0, 103, 1) %}
             <option value="{{ pct / 100.0 }}" {% if row.cancov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
             {% endfor %}
           </select>
           Interrill Ground Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'inrcov', this.value)">
             <option value="" {% if row.inrcov_override is none %}selected{% endif %}>{{ (row.inrcov * 100) | round | int }}% default</option>
-            {% for pct in range(0, 103, 5) %}
+            {% for pct in range(0, 103, 1) %}
             <option value="{{ pct / 100.0 }}" {% if row.inrcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
             {% endfor %}
           </select>
           Rill Ground Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'rilcov', this.value)">
             <option value="" {% if row.rilcov_override is none %}selected{% endif %}>{{ (row.rilcov * 100) | round | int }}% default</option>
-            {% for pct in range(0, 103, 5) %}
+            {% for pct in range(0, 103, 1) %}
             <option value="{{ pct / 100.0 }}" {% if row.rilcov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
             {% endfor %}
           </select>

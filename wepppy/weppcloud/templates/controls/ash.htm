@@ -58,6 +58,8 @@
             </div>
             <div class="col-sm-1">mm</div>
         </div>
+
+
     </div>
 
     <div id="ash_depth_mode0_controls">
@@ -93,33 +95,32 @@
         </div>
       </div>
 
-      <h5>Bulk Density Map (Optional)</h5>
-      <p>Upload a raster load map (.img or .tif). The map should contain ash bulk densities in g/m<sup>3</sup>.
-         When provided it is used to classify the ash as black (&gt; 0.2515) or white (&lte; 0.2515).</p>
+      <h5>Ash Type Thematic Map (Optional)</h5>
+      <p>Upload a raster load map (.img or .tif). The map should have assign no ash to 0, black ash as 1, and white ash as 2.</p>
       <div class="form-group row hide-readonly">
         <div class="col-md-6">
-          <input id="input_upload_ash_bd" name="input_upload_ash_bd" type="file" class="file">
+          <input id="input_upload_ash_type_map" name="input_upload_ash_type_map" type="file" class="file">
         </div>
       </div>
     </div>
 
     <div class="form-group row">
         <div class="col-sm-5">
-            <label for="ini_black_bulkdensity">Default Initial Ash Bulk Density for low and moderate severity</label>
+            <label for="field_black_bulkdensity">Field Measured Ash Bulk Density for low and moderate severity</label>
         </div>
         <div class="col-sm-3">
-            <input input id="ini_black_bulkdensity" name="ini_black_bulkdensity"
-                   class="form-control mr-sm-3" type="text" value="{{ ash.ini_black_ash_bulkdensity }}" readonly/>
+            <input input id="field_black_bulkdensity" name="field_black_bulkdensity"
+                   class="form-control mr-sm-3" type="text" value="{{ ash.field_black_ash_bulkdensity }}" />
         </div>
         <div class="col-sm-1">g/cm<sup>3</sup></div>
     </div>
     <div class="form-group row">
         <div class="col-sm-5">
-            <label for="ini_white_bulkdensity">Default Initial Ash Bulk Density for high severity</label>
+            <label for="field_white_bulkdensity">Field Measured Ash Bulk Density for high severity</label>
         </div>
         <div class="col-sm-3">
-            <input input id="ini_white_bulkdensity" name="ini_white_bulkdensity"
-                   class="form-control mr-sm-3" type="text" value="{{ ash.ini_white_ash_bulkdensity }}" readonly/>
+            <input input id="field_white_bulkdensity" name="field_white_bulkdensity"
+                   class="form-control mr-sm-3" type="text" value="{{ ash.field_white_ash_bulkdensity }}"/>
         </div>
         <div class="col-sm-1">g/cm<sup>3</sup></div>
     </div>
