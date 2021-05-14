@@ -32,6 +32,10 @@ function controlBase() {
 
             if (response.StackTrace !== undefined) {
                 self.stacktrace.append("<pre><small class=\"text-muted\">" + response.StackTrace + "</small></pre>");
+
+                if (response.StackTrace.includes('lock() called on an already locked nodb')) {
+                    self.stacktrace.append('<a href="https://doc.wepp.cloud/AdvancedTopics.html#Clearing-Locks">Clearing Locks</a>')
+                }
             }
 
             if (response.Error === undefined && response.StackTrace === undefined) {
@@ -948,11 +952,11 @@ var ChannelDelineation = function () {
                 $("#btn_build_channels_en").prop("disabled", false);
                 $("#hint_build_channels_en").text("");
             } else {
-                $("#btn_build_channels_en").prop("disabled", true);
-                $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
+                $("#btn_build_channels").prop("disabled", true);
+                $("#hint_build_channels").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
 
                 $("#btn_build_channels_en").prop("disabled", true);
-                $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString());
+                $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
             }
         };
 
@@ -1192,7 +1196,9 @@ var Outlet = function () {
                 success: function success(response) {
                     var map = Map.getInstance();
 
-                    self.outletMarker.setLatLng([response.lat, response.lng]).addTo(map);
+                    var offset = cellsize * 5e-6;
+
+                    self.outletMarker.setLatLng([response.lat-offset, response.lng+offset]).addTo(map);
                     map.ctrls.addOverlay(self.outletMarker, "Outlet");
                     self.status.html(task_msg + "... Success");
                 },
