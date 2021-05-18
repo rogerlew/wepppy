@@ -258,6 +258,20 @@ class Watershed(NoDbBase):
         return sum(sub.length > 300 for sub in self._subs_summary.values())
 
     @property
+    def area_gt30(self):
+        if self.delineation_backend_is_topaz:
+            return Topaz.getInstance(self.wd).area_gt30 
+        else:
+            return self._area_gt30
+
+    @property
+    def ruggedness(self):
+        if self.delineation_backend_is_topaz:
+            return Topaz.getInstance(self.wd).ruggedness
+        else:
+            return self._ruggedness
+
+    @property
     def impoundment_n(self) -> int:
         return self._impoundment_n
 
