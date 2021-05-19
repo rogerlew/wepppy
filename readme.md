@@ -4,6 +4,9 @@ wepppy
 Wepppy is Python package for running WEPP (Water Erosion Prediction Project) and processing WEPP input and outputs.
 
 
+### Latest Release
+[![DOI](https://zenodo.org/badge/125935882.svg)](https://zenodo.org/badge/latestdoi/125935882)
+
 ### Linux Installation
 The wepppy repo is using Git LFS for some sqlite3 databases that are in the project. Pulling probably didn't download those correctly. So from the wepppy dir run the following to sync the database files:
 
