@@ -6,11 +6,9 @@
   <table class="table" id="{{ key | replace(' ', '') }}_tbl" style="min-width: 400px; max-width: 600px;">
     <thead>
       <tr>
-        <th style="width: 20%">Recurrence Interval</th>
-        <th style="width: 20%">Year</th>
-        <th style="width: 20%">Month</th>
-        <th style="width: 20%">Day</th>
-        <th style="width: 20%">
+        <th style="width: 30%">Recurrence Interval</th>
+        <th style="width: 40%">Date</th>
+        <th style="width: 30%">
             {% if key == 'Precipitation Depth' %}
                 Precipitation
             {% else %}
@@ -21,19 +19,17 @@
     </thead>
     <tbody>
       <tr>
-        <td style="width: 20%">years</td>
-        <td style="width: 20%"></td>
-        <td style="width: 20%"></td>
-        <td style="width: 20%"></td>
-        <td style="width: 20%">{{ unitizer_units(report.units_d[key]) | safe }}</td>
+        <td style="width: 30%">years</td>
+        <td style="width: 40%">mm/dd/yyyy</td>
+        <td style="width: 30%">{{ unitizer_units(report.units_d[key]) | safe }}</td>
       </tr>
     {% for rec_interval in report.intervals %}
       <tr>
-        <td style="width: 20%">{{ rec_interval }}</td>
-        <td style="width: 20%">{{ report.return_periods[key][rec_interval]['year'] | int }}</td>
-        <td style="width: 20%">{{ report.return_periods[key][rec_interval]['mo'] | int }}</td>
-        <td style="width: 20%">{{ report.return_periods[key][rec_interval]['da'] | int }}</td>
-        <td style="width: 20%">{{
+        <td style="width: 30%">{{ rec_interval }}</td>
+        <td style="width: 40%">{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
+                                  '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
+                                  '%04d' % (report.return_periods[key][rec_interval]['year'] | int) }}</td>
+        <td style="width: 30%">{{
                 unitizer(report.return_periods[key][rec_interval][key],
                          report.units_d[key]) | safe }}</td>
       </tr>
