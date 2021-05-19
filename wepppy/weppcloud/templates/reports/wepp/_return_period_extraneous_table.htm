@@ -7,9 +7,7 @@
     <thead>
       <tr>
         <th>Recurrence Interval</th>
-        <th>Year</th>
-        <th>Month</th>
-        <th>Day</th>
+        <th>Date</th>
         <th class="{{ 'table-active' if key == 'Precipitation Depth' }}">Precipitation</th>
         <th class="{{ 'table-active' if key == 'Discharge' }}">Discharge</th>
         <th class="{{ 'table-active' if key == 'Peak Discharge' }}">Peak Discharge</th>
@@ -26,9 +24,7 @@
     <tbody>
       <tr>
         <td>years</td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>mm/dd/yyyy</td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer_units(report.units_d['Precipitation Depth']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Discharge' }}">{{ unitizer_units(report.units_d['Discharge']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer_units(report.units_d['Peak Discharge']) | safe }}</td>
@@ -44,9 +40,9 @@
     {% for rec_interval in report.intervals %}
       <tr>
         <td>{{ rec_interval }}</td>
-        <td>{{ report.return_periods[key][rec_interval]['year'] | int }}</td>
-        <td>{{ report.return_periods[key][rec_interval]['mo'] | int }}</td>
-        <td>{{ report.return_periods[key][rec_interval]['da'] | int }}</td>
+        <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
+                                  '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
+                                  '%04d' % (report.return_periods[key][rec_interval]['year'] | int) }}</td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer(report.return_periods[key][rec_interval]['Precipitation Depth'],
                         report.units_d['Precipitation Depth']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Discharge' }}">{{ unitizer(report.return_periods[key][rec_interval]['Discharge'],
