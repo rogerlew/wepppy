@@ -2555,10 +2555,13 @@ def view_closest_stations(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
-    try:
-        results = climate.find_closest_stations()
-    except Exception:
-        return exception_factory('Error finding closest stations')
+    if climate.readonly:
+        results = climate.closest_stations
+    else:
+        try:
+            results = climate.find_closest_stations()
+        except Exception:
+            return exception_factory('Error finding closest stations')
 
     if results is None:
         return Response('<!-- closest_stations is None -->', mimetype='text/html')
@@ -2579,10 +2582,13 @@ def view_heuristic_stations(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
 
-    try:
-        results = climate.find_heuristic_stations()
-    except Exception:
-        return exception_factory('Error finding heuristic stations')
+    if climate.readonly:
+        results = climate.heuristic_stations
+    else:
+        try:
+            results = climate.find_heuristic_stations()
+        except Exception:
+            return exception_factory('Error finding heuristic stations')
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
