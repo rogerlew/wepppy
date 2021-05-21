@@ -3302,6 +3302,7 @@ def report_wepp_avg_annual_watbal(runid, config):
     except:
         return exception_factory('Error running watbal')
 
+
 @app.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
 def resources_wepp_streamflow(runid, config):
     try:
@@ -3439,8 +3440,8 @@ def report_wepp_frq_flood(runid, config):
                            user=current_user)
 
 
-@app.route('/runs/<string:runid>/<config>/report/wepp/sediment_delivery')
-@app.route('/runs/<string:runid>/<config>/report/wepp/sediment_delivery/')
+@app.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics')
+@app.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics/')
 def report_wepp_sediment_delivery(runid, config):
     try:
         wd = get_wd(runid)
@@ -3450,7 +3451,7 @@ def report_wepp_sediment_delivery(runid, config):
 
         unitizer = Unitizer.getInstance(wd)
 
-        return render_template('reports/wepp/sediment_delivery.htm',
+        return render_template('reports/wepp/sediment_characteristics.htm',
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                sed_del=sed_del,
