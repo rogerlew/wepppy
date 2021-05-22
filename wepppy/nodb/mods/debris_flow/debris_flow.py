@@ -209,7 +209,7 @@ class DebrisFlow(NoDbBase):
             try:
                 sbs_coverage = baer.sbs_coverage
             except:
-                sbs_coverage = soils.sbs_coverage
+                sbs_coverage = disturbed.sbs_coverage
 
             B = sbs_coverage['moderate'] * watershed.wsarea + \
                 sbs_coverage['high'] * watershed.wsarea
