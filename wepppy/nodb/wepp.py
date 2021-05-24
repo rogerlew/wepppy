@@ -1306,7 +1306,7 @@ class Wepp(NoDbBase, LogMixin):
         for fn in [_join(self.output_dir, 'pass_pw0.txt'),
                    _join(self.output_dir, 'soil_pw0.txt')]:
             if _exists(fn):
-                 p = call('gzip %s' % fn, shell=True)
+                 p = call('gzip %s -f' % fn, shell=True)
                  assert _exists(fn + '.gz')
 
     def _build_totalsedwat(self):
