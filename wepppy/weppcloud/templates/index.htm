@@ -49,52 +49,10 @@
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
         <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/0.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div class="col-lg-8">
-          <h1>WEPPcloud</h1>
-            <p>Run WEPP anywhere in the continental U.S.</p>
-            <p>Elevation data is from the USGS National Elevation Set.
-             This interface uses TOPAZ for watershed delineation. The soils are built using SURGO/STATSGO. Landcover is
-             selected based on the USGS National Landcover dataset. Climates are generated from the CLIGEN database.
-          </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/0" role="button">Start WEPPcloud Run</a>
-            <a class="btn btn-primary" href="create/13" role="button">10m (Experimental)</a>
-            <p>{{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since January 1, 2021</p>
-          </p>
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/baer.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-PEP w/ WATAR</h1>
-          <p>The WEPPcloud Post-Fire Erosion Prediction (PEP) allows users to upload a burn severity map and predict erosion
-             based on fire severity. Soil textures are identified from SSURGO. Unburned conditions are assigned 2006.2
-             forest soils and managements based on soil texture. Burned areas are assigned burned soils and managements
-             based on soil texture.<br>
-             The PeP interface incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).<br>
-              <a href="https://youtu.be/g8_ClR96tFU">View 15 May 2019 USDA Forest Service Webinar:
-                  <i>An Introduction to WEPPcloud-PEP</i></a>
-          </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/baer" role="button">Start WEPPcloud Run</a>
-            <p>{{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{ commafy(runs_counter['baer_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2021</p>
-            <!--a class="btn btn-primary" href="create/baer-ssurgo" role="button">SURGO Modified Soils (Experimental)</a-->
-            <p><a href="{{  url_for('static', filename='resources/baer/Rattlesnake.tif') }}">Download Example 4 Class SBS Map (Rattlesnake Fire)</a></p>
-          </p>
-        </div>
-      </div>
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row">
-        <div class="col-lg-3">
             <img src="{{  url_for('static', filename='images/interfaces/disturbed.png') }}" height="200" width="200" style="width: 200px; height: 200px;" />
         </div>
         <div id="pep" class="col-lg-8">
-          <h1>WEPPcloud-Disturbed (Experimental)</h1>
+          <h1>WEPPcloud-(Un)Disturbed for United States</h1>
           <p>The WEPPcloud-Disturbed allows users to upload a burn severity map and predict erosion
              based on fire severity. Optionally, the user can forgo uploading a burn severity map to model unburned
              conditions. It uses SSURGO to create 7778 soils and NLCD to parameterize landuse for unburned
@@ -111,6 +69,9 @@
           </p>
         </div>
       </div>
+      <div style="height: 2em;"></div>
+
+
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
         <div class="col-lg-3">
@@ -193,20 +154,7 @@
           </p>
         </div>
       </div>
-      <div style="height: 2em;"></div>
-      <div class="jumbotron row" style="padding: 2rem 2rem;">
-        <div class="col-lg-3">
-            <img src="{{  url_for('static', filename='images/interfaces/cda.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
-        </div>
-        <div class="col-lg-8">
-          <h3>Coeur d'Alene Lake Interface</h3>
-          <p>Provides access to running WEPP in the Coeur d'Alene Lake Basin.
-          </p>
-          <p>
-            <a class="btn btn-primary" href="create/cda" role="button">Run WEPP</a>
-          </p>
-        </div>
-      </div>
+
       <div class="jumbotron row" style="padding: 2rem 2rem;">
         <div class="col-lg-3">
             <img src="{{  url_for('static', filename='images/interfaces/widlfire_credit_NOAA_DanBorsum.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
@@ -225,6 +173,65 @@
         </div>
       </div>
       <div style="height: 2em;"></div>
+
+
+      <h1>Legacy Interfaces</h1>
+      <div class="jumbotron row">
+        <div class="col-lg-3">
+            <img src="{{  url_for('static', filename='images/interfaces/0.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
+        </div>
+        <div class="col-lg-8">
+          <h3>WEPPcloud</h3>
+            <p>Run WEPP anywhere in the continental U.S.</p>
+            <p>
+             Legacy interface. From 2021 we recommend users to switch to WEPPcloud-US instead of WEPP-PEP. WEPP-PEP is 
+             limited to four general soils based on textures. WEPPcloud-Disturbed incorporates spatial variability in soils 
+             from SSURGO/STATSGO data bases. A full comparison between the two interfaces has not been made, however, 
+             WEPPcloud-US for undisturbed conditions has been successfully validated in multiple watersheds in Western US.
+             Elevation data is from the USGS National Elevation Set.
+             This interface uses TOPAZ for watershed delineation. The soils are built using SURGO/STATSGO. Landcover is
+             selected based on the USGS National Landcover dataset. Climates are generated from the CLIGEN database.
+          </p>
+          <p><b>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</b></p>
+          <p>
+            <a class="btn btn-primary btn-lg" href="create/0" role="button">Start WEPPcloud Run</a>
+            <a class="btn btn-primary" href="create/13" role="button">10m (Experimental)</a>
+            <p>{{ runs_counter['0_projects'] }} projects and {{ commafy(runs_counter['0_hillruns']) }} hillslopes ran since January 1, 2021</p>
+          </p>
+        </div>
+      </div>
+      <div style="height: 2em;"></div>
+      <div class="jumbotron row">
+        <div class="col-lg-3">
+            <img src="{{  url_for('static', filename='images/interfaces/baer.jpg') }}" height="200" width="200" style="width: 200px; height: 200px;" />
+        </div>
+        <div id="pep" class="col-lg-8">
+          <h3>WEPPcloud-PEP w/ WATAR</h3>
+          <p>The WEPPcloud Post-Fire Erosion Prediction (PEP) allows users to upload a burn severity map and predict erosion
+             based on fire severity. 
+             Legacy interface. From 2021 we recommend users to switch to WEPPcloud-US instead of WEPP-PEP. WEPP-PEP is 
+             limited to four general soils based on textures. WEPPcloud-Disturbed incorporates spatial variability in soils 
+             from SSURGO/STATSGO data bases. A full comparison between the two interfaces has not been made, however, 
+             WEPPcloud-US for undisturbed conditions has been successfully validated in multiple watersheds in Western US.
+             Soil textures are identified from SSURGO. Unburned conditions are assigned 2006.2
+             forest soils and managements based on soil texture. Burned areas are assigned burned soils and managements
+             based on soil texture.<br>
+             The PeP interface incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).<br>
+              <a href="https://youtu.be/g8_ClR96tFU">View 15 May 2019 USDA Forest Service Webinar:
+                  <i>An Introduction to WEPPcloud-PEP</i></a>
+          </p>
+          <p><b>This interface has been deprecated. For new projects run (Un)Disturbed without a burn severity map.</b></p>
+          <p>
+            <a class="btn btn-primary btn-lg" href="create/baer" role="button">Start WEPPcloud Run</a>
+            <p>{{ runs_counter['baer_projects'] }} projects and {{ commafy(runs_counter['baer_hillruns']) }} hillslopes ({{ commafy(runs_counter['baer_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2021</p>
+            <!--a class="btn btn-primary" href="create/baer-ssurgo" role="button">SURGO Modified Soils (Experimental)</a-->
+            <p><a href="{{  url_for('static', filename='resources/baer/Rattlesnake.tif') }}">Download Example 4 Class SBS Map (Rattlesnake Fire)</a></p>
+          </p>
+        </div>
+      </div>
+
+
+
       <div>
         <h3>WEPPcloud Utilities</h3>
           <a href="combined_ws_viewer/url_generator/">Combined Watershed Viewer URL Generator</a>
