@@ -120,12 +120,18 @@ class SnowOpts(object):
     def parse_inputs(self, kwds):
         if 'rst' in kwds:
             self.rst = float(kwds['rst'])
+        elif 'snow_opts_rst' in kwds:
+            self.rst = float(kwds['snow_opts_rst'])
 
         if 'newsnw' in kwds:
             self.newsnw = float(kwds['newsnw'])
+        elif 'snow_opts_newsnw' in kwds:
+            self.newsnw = float(kwds['snow_opts_newsnw'])
 
         if 'ssd' in kwds:
             self.ssd = float(kwds['ssd'])
+        elif 'snow_opts_ssd' in kwds:
+            self.ssd = float(kwds['snow_opts_ssd'])
 
     @property
     def contents(self):
@@ -1414,6 +1420,20 @@ class Wepp(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self._run_frost = state
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_run_snow(self, state):
+        assert state in [True, False]
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._run_snow = state
             self.dump_and_unlock()
 
         except Exception:
