@@ -2735,8 +2735,8 @@ def task_set_hourly_seepage(runid, config):
     if routine is None:
         return error_factory('routine is None')
 
-    if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr']:
-        return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr']")
+    if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow']:
+        return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow']")
 
     try:
         state = request.json.get('state', None)
@@ -2758,6 +2758,8 @@ def task_set_hourly_seepage(runid, config):
             wepp.set_run_frost(state)
         elif routine == 'tcr':
             wepp.set_run_tcr(state)
+        elif routine == 'snow':
+            wepp.set_run_snow(state)
 
     except Exception:
         return exception_factory('Error setting state')
