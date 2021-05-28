@@ -6,7 +6,7 @@ from .ash_transport import Ash, AshPost, AshSpatialMode
 from .shrubland import Shrubland, nlcd_shrubland_layers
 from .rangeland_cover import RangelandCover, RangelandCoverMode
 from .rhem import Rhem, RhemPost
-
+from .treecanopy import Treecanopy
 from .locations import *
 
 import os
