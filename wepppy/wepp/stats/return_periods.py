@@ -44,6 +44,9 @@ class ReturnPeriods:
         df['10-min Peak Rainfall Intensity'] = Series(_pk10, index=df.index)
         df['30-min Peak Rainfall Intensity'] = Series(_pk30, index=df.index)
 
+        df['Sediment Yield (tonne)'] = df['Sediment Yield (kg)'] / 1000.0
+        del df['Sediment Yield (kg)']
+
         header = list(df.keys())
         header.remove('da')
         header.remove('mo')
@@ -89,6 +92,7 @@ class ReturnPeriods:
         self.intervals = sorted(rec.keys())
         self.units_d = ebe.units_d
         self.units_d['Peak Discharge'] = 'm^3/s'
+        self.units_d['Sediment Yield'] = 'tonne'
         self.units_d['10-min Peak Rainfall Intensity'] = 'mm/hour'
         self.units_d['30-min Peak Rainfall Intensity'] = 'mm/hour'
 
