@@ -26,8 +26,8 @@ class AshNoDbLockedException(Exception):
     pass
 
 
-WHITE_ASH_BD = 0.14
-BLACK_ASH_BD = 0.31
+WHITE_ASH_BD = 0.31
+BLACK_ASH_BD = 0.22
 
 class AshModel(object):
     """
@@ -37,7 +37,6 @@ class AshModel(object):
     def __init__(self,
                  ash_type: AshType,
                  proportion,
-                 ini_ash_depth_mm,
                  decomposition_rate,
                  bulk_density,
                  density_at_fc,
@@ -48,7 +47,8 @@ class AshModel(object):
                  wind_threshold):
         self.ash_type = ash_type
         self.proportion = proportion
-        self.ini_ash_depth_mm = ini_ash_depth_mm
+        self.ini_ash_depth_mm = None
+        self.ini_ash_load_tonneha = None
         self.decomposition_rate = decomposition_rate
         self.bulk_density = bulk_density
         self.density_at_fc = density_at_fc
@@ -64,7 +64,10 @@ class AshModel(object):
 
     @property
     def ini_material_available_tonneperha(self):
-        return 10.0 * self.ini_material_available_mm * self.bulk_density
+        if self.ini_ash_load_tonneha is not None:
+            return self.ini_ash_load_tonneha
+        else:
+            return 10.0 * self.ini_material_available_mm * self.bulk_density
 
     @property
     def water_retention_capacity_at_sat(self):
@@ -80,7 +83,7 @@ class AshModel(object):
             return lookup_wind_threshold_white_ash_proportion(w)
 
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 25, 20, 10, 5, 2], area_ha=None, ini_ash_depth=None, run_wind_transport=True):
+                  recurrence=[100, 50, 25, 20, 10, 5, 2], area_ha=None, ini_ash_depth=None, ini_ash_load=None, run_wind_transport=True):
         """
         Runs the ash model for a hillslope
 
@@ -101,8 +104,8 @@ class AshModel(object):
             returns the output file name, return period results dictionary
         """
 
-        if ini_ash_depth is not None:
-            self.ini_ash_depth_mm = float(ini_ash_depth)
+        self.ini_ash_depth_mm = ini_ash_depth
+        self.ini_ash_load_tonneha = ini_ash_load
 
         # copy the DataFrame
         df = deepcopy(cli_df)
@@ -448,13 +451,12 @@ class AshModel(object):
 class WhiteAshModel(AshModel):
     __name__ = 'WhiteAshModel'
 
-    def __init__(self, ini_ash_depth=None):
+    def __init__(self, bulk_density=WHITE_ASH_BD):
         super(WhiteAshModel, self).__init__(
             ash_type=AshType.WHITE,
             proportion=1.0,
-            ini_ash_depth_mm=5.0,
             decomposition_rate=1.8E-4,
-            bulk_density=WHITE_ASH_BD,
+            bulk_density=bulk_density,
             density_at_fc=0.68,
             fraction_water_retention_capacity_at_sat=0.87,
             runoff_threshold=0.0,
@@ -462,20 +464,15 @@ class WhiteAshModel(AshModel):
             water_transport_rate_k=-0.126,
             wind_threshold=6)
 
-        if ini_ash_depth is not None:
-            self.ini_ash_depth_mm = ini_ash_depth
-
-
 class BlackAshModel(AshModel):
     __name__ = 'BlackAshModel'
 
-    def __init__(self, ini_ash_depth=None):
+    def __init__(self, bulk_density=BLACK_ASH_BD):
         super(BlackAshModel, self).__init__(
             ash_type=AshType.BLACK,
             proportion=1.0,
-            ini_ash_depth_mm=5.0,
             decomposition_rate=1.8E-4,
-            bulk_density=BLACK_ASH_BD,
+            bulk_density=bulk_density,
             density_at_fc=0.54,
             fraction_water_retention_capacity_at_sat=0.87,
             runoff_threshold=3.45,
@@ -483,5 +480,3 @@ class BlackAshModel(AshModel):
             water_transport_rate_k=None,
             wind_threshold=6)
 
-        if ini_ash_depth is not None:
-            self.ini_ash_depth_mm = ini_ash_depth
