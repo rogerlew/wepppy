@@ -16,6 +16,7 @@ from datetime import datetime
 from subprocess import Popen, PIPE
 from os.path import join as _join
 from os.path import exists as _exists
+from copy import deepcopy
 
 import numpy as np
 from osgeo import gdal
@@ -32,7 +33,6 @@ from ...ron import Ron
 from ...topaz import Topaz
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
-from ....wepp.management import get_management_summary
 
 gdal.UseExceptions()
 
@@ -500,9 +500,9 @@ class Disturbed(NoDbBase):
             is256 = len(classes) > 6 or max(classes) >= 255
 
             if is256:
-                breaks = [75, 109, 187, 65535]
+                breaks = [75, 109, 187, max(counts)]
             else:
-                breaks = [1, 2, 3, 65535]
+                breaks = [1, 2, 3, max(counts)]
 
             self._is256 = is256
             self._classes = classes
@@ -521,9 +521,44 @@ class Disturbed(NoDbBase):
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.remap_landuse()
+            self.spatialize_treecanopy()
 
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.modify_soils()
+
+    def spatialize_treecanopy(self):
+        wd = self.wd
+
+        if 'treecanopy' in self.mods:
+            import wepppy
+            treecanopy = wepppy.nodb.mods.Treecanopy.getInstance(wd)
+            treecanopy.acquire_raster()
+            treecanopy.analyze()
+        else:
+            return
+
+        landuse = Landuse.getInstance(wd)
+
+        try:
+            landuse.lock()
+
+            for topaz_id, treecanopy_pointdata in treecanopy:
+                dom = landuse.domlc_d[topaz_id]
+                man = landuse.managements[dom]
+
+                if man.disturbed_class in ['forest', 'young forest'] and treecanopy:
+                    _dom = '{}-{}'.format(dom, topaz_id)
+                    _man = deepcopy(man)
+                    _man.key = _dom
+                    _man.cancov_override = round(treecanopy.data[topaz_id]) / 100.0
+                    landuse.domlc_d[topaz_id] = _dom
+                    landuse.managements[_dom] = _man
+
+            landuse.dump_and_unlock()
+
+        except Exception:
+            landuse.unlock('-f')
+            raise
 
     def remap_landuse(self):
         wd = self.wd
@@ -566,10 +601,10 @@ class Disturbed(NoDbBase):
             sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
 
             for topaz_id, burn_class in sbs_lc_d.items():
-                if burn_class in ['131', '132', '133']:
-                    dom = landuse.domlc_d[topaz_id]
-                    man = get_management_summary(dom, _map=landuse.mapping)
+                dom = landuse.domlc_d[topaz_id]
+                man = landuse.managements[dom]
 
+                if burn_class in ['131', '132', '133']:
                     if man.disturbed_class in ['forest', 'young forest']:
                         landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
 
@@ -603,7 +638,7 @@ class Disturbed(NoDbBase):
 
             for topaz_id, mukey in soils.domsoil_d.items():
                 dom = landuse.domlc_d[topaz_id]
-                man = get_management_summary(dom, _map=landuse.mapping)
+                man = landuse.managements[dom] 
 
                 _soil = soils.soils[mukey]
                 clay = _soil.clay
