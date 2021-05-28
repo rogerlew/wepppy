@@ -7,6 +7,7 @@ from .chnwb import Chnwb
 from .chanwb import Chanwb
 from .totalwatsed import TotalWatSed
 from .element import *
+from .hill_pass import *
 
 import os
 
