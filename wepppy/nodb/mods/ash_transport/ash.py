@@ -1,20 +1,15 @@
 import shutil
 from glob import glob
-
 import os
 from os.path import join as _join
 from os.path import exists as _exists
-
 from time import sleep
-
 import jsonpickle
 import multiprocessing
-
 from subprocess import Popen, PIPE
-
 from enum import IntEnum
-
 from collections import namedtuple
+from deprecated import deprecated
 
 # wepppy
 from wepppy.landcover import LandcoverMap
@@ -57,17 +52,16 @@ def run_ash_model(kwds):
     :return:
     """
     ash_type = kwds['ash_type']
+    ini_ash_load = kwds['ini_ash_load']
+    ash_bulkdensity = kwds['ash_bulkdensity']
 
     if ash_type == AshType.BLACK:
-        ini_ash_depth = kwds['ini_black_ash_depth_mm']
-        ash_model = WhiteAshModel(ini_ash_depth)
+        ash_model = WhiteAshModel(bulk_density=ash_bulkdensity)
     else:
-        ini_ash_depth = kwds['ini_white_ash_depth_mm']
-        ash_model = BlackAshModel(ini_ash_depth)
+        ash_model = BlackAshModel(bulk_density=ash_bulkdensity)
 
     del kwds['ash_type']
-    del kwds['ini_black_ash_depth_mm']
-    del kwds['ini_white_ash_depth_mm']
+    del kwds['ash_bulkdensity']
     out_fn, return_periods, annuals = \
         ash_model.run_model(**kwds)
 
@@ -130,9 +124,16 @@ class Ash(NoDbBase, LogMixin):
 
             self._ash_load_fn = self.config_get_path('ash', 'ash_load_fn')
             self._ash_bulk_density_fn = self.config_get_path('ash', 'ash_bulk_density_fn')
+            self._ash_type_map_fn = self.config_get_path('ash', 'ash_type_map_fn')
 
             self._ash_load_d = None
-            self._ash_bulk_density_d = None
+            self._ash_type_d = None
+            
+            self._field_black_ash_bulkdensity = self.config_get_float('ash', 'field_black_ash_bulkdensity')
+            self._field_white_ash_bulkdensity = self.config_get_float('ash', 'field_white_ash_bulkdensity')
+
+            self._black_ash_bulkdensity = self.config_get_float('ash', 'black_ash_bulkdensity')
+            self._white_ash_bulkdensity = self.config_get_float('ash', 'white_ash_bulkdensity')
 
             self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
 
@@ -387,6 +388,28 @@ class Ash(NoDbBase, LogMixin):
             raise
 
     @property
+    def ash_type_map_fn(self):
+        fn = getattr(self, '_ash_type_map_fn', None) 
+        if fn is None:
+            return None
+
+        return _join(self.ash_dir, fn)
+
+    @ash_type_map_fn.setter
+    def ash_type_map_fn(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ash_type_map_fn = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    @deprecated
     def ash_bulk_density_fn(self):
         fn = getattr(self, '_ash_bulk_density_fn', None) 
         if fn is None:
@@ -395,6 +418,7 @@ class Ash(NoDbBase, LogMixin):
         return _join(self.ash_dir, fn)
 
     @ash_bulk_density_fn.setter
+    @deprecated
     def ash_bulk_density_fn(self, value):
         self.lock()
 
@@ -474,6 +498,7 @@ class Ash(NoDbBase, LogMixin):
             raise
 
     @property
+    @deprecated
     def ash_bulk_density_cropped_fn(self):
         return _join(self.ash_dir, 'ash_bulk_density_cropped.tif')
 
@@ -481,7 +506,9 @@ class Ash(NoDbBase, LogMixin):
     def ash_load_cropped_fn(self):
         return _join(self.ash_dir, 'ash_load_cropped.tif')
 
-
+    @property
+    def ash_type_map_cropped_fn(self):
+        return _join(self.ash_dir, 'ash_type_map_cropped.tif')
 
     def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
         run_wind_transport = self.run_wind_transport
@@ -540,15 +567,13 @@ class Ash(NoDbBase, LogMixin):
             else:
                 load_d = None
 
-
-            if self.ash_bulk_density_fn is not None:
-                reproject_map(wd, self.ash_bulk_density_fn, self.ash_bulk_density_cropped_fn)
-                bd_map = ParameterMap(self.ash_bulk_density_cropped_fn)
-                bd_d = bd_map.build_ave_grid(watershed.subwta)
+            if self.ash_type_map_fn is not None:
+                reproject_map(wd, self.ash_type_map_fn, self.ash_type_map_cropped_fn)
+                ash_type_map = ParameterMap(self.ash_type_map_cropped_fn)
+                ash_type_d = bd_map.build_ave_grid(watershed.subwta)
             else:
-                bd_d = None
+                ash_type_d = None
 
-                
             translator = watershed.translator_factory()
 
             self.log_done()
@@ -557,35 +582,22 @@ class Ash(NoDbBase, LogMixin):
             meta = {}
             args = []
             for topaz_id, sub in watershed.sub_iter():
-                area_ha = sub.area / 10000
-
                 meta[topaz_id] = {}
-
                 wepp_id = translator.wepp(top=topaz_id)
-
+                area_ha = sub.area / 10000
                 burn_class = int(sbs_d[topaz_id])
-                meta[topaz_id]['burn_class'] = burn_class
-                meta[topaz_id]['area_ha'] = area_ha
-                meta[topaz_id]['ini_ash_depth'] = None
 
-                if bd_d is None:
-                    if burn_class in [2, 3]:
-                        ash_type = AshType.BLACK
-                    elif burn_class in [4]:
-                        ash_type = AshType.WHITE
-                    else:
-                        continue
+                if ash_type_d is None:
+                    ash_type = (None, None, AshType.BLACK, AshType.BLACK, AshType.WHITE)[burn_class]
                 else:
-                    bulk_density = bd_d[topaz_id]
-                    if bulk_density == 0.0:
-                        continue
-                    
-                    if bulk_density > (WHITE_ASH_BD + BLACK_ASH_BD) / 2.0:
-                        ash_type = (AshType.WHITE, AshType.BLACK)[BLACK_ASH_BD > WHITE_ASH_BD]
-                    else:
-                        ash_type = (AshType.BLACK, AshType.WHITE)[BLACK_ASH_BD > WHITE_ASH_BD]
+                    ash_type = (None, AshType.BLACK, AshType.WHITE)[int(ash_type_d[topaz_id])]
 
                 meta[topaz_id]['ash_type'] = ash_type
+                meta[topaz_id]['burn_class'] = burn_class
+                meta[topaz_id]['area_ha'] = area_ha
+
+                if ash_type is None:
+                    continue
 
                 element_fn = _join(wepp.output_dir,
                                    'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
@@ -599,20 +611,34 @@ class Ash(NoDbBase, LogMixin):
                     white_ash_depth = ini_white_ash_depth_mm
                     black_ash_depth = ini_black_ash_depth_mm
 
+                    white_ash_load = ini_white_ash_depth_mm * self.field_white_ash_bulkdensity * 10
+                    black_ash_load = ini_black_ash_depth_mm * self.field_black_ash_bulkdensity * 10
                 else:
                     _load_kg_m2 = load_d[topaz_id] * 0.1
-                    white_ash_depth = _load_kg_m2 / WHITE_ASH_BD
-                    black_ash_depth = _load_kg_m2 / BLACK_ASH_BD
+                    white_ash_depth = _load_kg_m2 / self.field_white_ash_bulkdensity
+                    black_ash_depth = _load_kg_m2 / self.field_black_ash_bulkdensity
+
+                    white_ash_load = black_ash_load = load_d[topaz_id]
 
                 if ash_type == AshType.WHITE:
                     ini_ash_depth = white_ash_depth
+                    field_ash_bulkdensity = self.field_white_ash_bulkdensity
+                    ini_ash_load = white_ash_load
+                    ash_bulkdensity = self.white_ash_bulkdensity
                 else:
                     ini_ash_depth = black_ash_depth
+                    field_ash_bulkdensity = self.field_black_ash_bulkdensity
+                    ini_ash_load = black_ash_load
+                    ash_bulkdensity = self.black_ash_bulkdensity
+
                 meta[topaz_id]['ini_ash_depth'] = ini_ash_depth
+                meta[topaz_id]['field_ash_bulkdensity'] = field_ash_bulkdensity
+                meta[topaz_id]['ini_ash_load'] = ini_ash_load
+                meta[topaz_id]['ash_bulkdensity'] = ash_bulkdensity
 
                 kwds = dict(ash_type=ash_type,
-                            ini_white_ash_depth_mm=white_ash_depth,
-                            ini_black_ash_depth_mm=black_ash_depth,
+                            ini_ash_load=ini_ash_load,
+                            ash_bulkdensity=ash_bulkdensity,
                             fire_date=fire_date,
                             element_d=element.d,
                             cli_df=cli_df,
@@ -631,7 +657,7 @@ class Ash(NoDbBase, LogMixin):
 
               
             self._ash_load_d = load_d
-            self._ash_bulk_density_d = bd_d
+            self._ash_type_d = ash_type_d
 
             self.meta = meta
             try:
@@ -667,8 +693,8 @@ class Ash(NoDbBase, LogMixin):
             return _meta['ini_ash_depth']
 
         load_d = self.ash_load_d
-        black_bd = self.ini_black_ash_bulkdensity
-        white_bd = self.ini_white_ash_bulkdensity
+        black_bd = self.field_black_ash_bulkdensity
+        white_bd = self.field_white_ash_bulkdensity
 
         ash_type = _meta.get('ash_type', None)
 
@@ -687,20 +713,28 @@ class Ash(NoDbBase, LogMixin):
                 return load_d[str(topaz_id)] * 0.1 / white_bd
 
     @property
-    def ini_black_ash_bulkdensity(self):
-        return BlackAshModel(self.ini_black_ash_depth_mm).bulk_density
+    def black_ash_bulkdensity(self):
+        return getattr(self, '_black_ash_bulkdensity', self.config_get_float('ash', 'black_ash_bulkdensity'))
 
     @property
-    def ini_white_ash_bulkdensity(self):
-        return WhiteAshModel(self.ini_white_ash_depth_mm).bulk_density
+    def white_ash_bulkdensity(self):
+        return getattr(self, '_white_ash_bulkdensity', self.config_get_float('ash', 'white_ash_bulkdensity'))
+
+    @property
+    def field_black_ash_bulkdensity(self):
+        return getattr(self, '_field_black_ash_bulkdensity', self.config_get_float('ash', 'field_black_ash_bulkdensity'))
+
+    @property
+    def field_white_ash_bulkdensity(self):
+        return getattr(self, '_field_white_ash_bulkdensity', self.config_get_float('ash', 'field_white_ash_bulkdensity'))
 
     @property
     def ini_black_ash_load(self):
-        return BlackAshModel(self.ini_black_ash_depth_mm).ini_material_available_tonneperha * 0.1  # to kg/m^2
+        return self.ini_black_ash_depth_mm * self.field_black_ash_bulkdensity
 
     @property
     def ini_white_ash_load(self):
-        return WhiteAshModel(self.ini_white_ash_depth_mm).ini_material_available_tonneperha * 0.1  # to kg/m^2
+        return self.ini_white_ash_depth_mm * self.field_white_ash_bulkdensity
 
     @property
     def has_watershed_summaries(self):
