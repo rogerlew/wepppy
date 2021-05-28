@@ -43,7 +43,7 @@ converters = {
         ('mm/hour', 'in/hour'): lambda v: v * 0.0393701,
         ('in/hour', 'mm/hour'): lambda v: v * 25.4
     },
-    'xs-annual': {
+    'xs-distance-annual': {
         ('mm/yr', 'in/yr'): lambda v: v * 0.0393701,
         ('in/yr', 'mm/yr'): lambda v: v * 25.4
     },
@@ -100,6 +100,10 @@ converters = {
     'volume-annual': {
         ('m^3/yr', 'ft^3/yr'): lambda v: v * 35.3146667,
         ('ft^3/yr', 'm^3/yr'): lambda v: v * 0.0283168,
+    },
+    'area-xs-distance-annual': {
+        ('ha-m/yr', 'acre-ft/yr'): lambda v: v * 8.11,
+        ('acre-ft/yr', 'ha-m/yr'): lambda v: v * 0.12,
     },
     'flow': {
         ('m^3/s', 'ft^3/min'): lambda v: v * 2118.88,
@@ -181,7 +185,7 @@ precisions = OrderedDict([
         ('mm/hour', 2),
         ('in/hour', 2)])
      ),
-    ('xs-annual', OrderedDict([
+    ('xs-distance-annual', OrderedDict([
         ('mm/yr', 2),
         ('in/yr', 2)])
      ),
@@ -235,6 +239,14 @@ precisions = OrderedDict([
         ('m^3/s', 2),
         ('ft^3/s', 2)])
      ),
+    ('xs-distance-annual', OrderedDict([
+        ('mm/yr', 0),
+        ('in/yr', 3)])
+    ),
+    ('area-xs-distance-annual', OrderedDict([
+        ('ha-m/yr', 3),
+        ('acre-ft/yr', 3)]),
+    ),
     ('xs-surface-density', OrderedDict([
         ('kg/ha,3', 2),
         ('lb/acre,3', 2)])
@@ -269,10 +281,10 @@ precisions = OrderedDict([
 
 
 for _k in converters:
-    assert _k in precisions
+    assert _k in precisions, _k
 
 for _k in precisions:
-    assert _k in converters
+    assert _k in converters, _k
 
 
 class UnitizerNoDbLockedException(Exception):
