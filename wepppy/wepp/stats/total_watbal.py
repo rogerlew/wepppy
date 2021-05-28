@@ -25,9 +25,15 @@ class TotalWatbal(ReportBase):
         self.totalwatsed = totalwatsed
         self.exclude_yr_indxs = exclude_yr_indxs
 
-        header = ['Water Year', 'Precipitation (mm)', 'Rain + Melt (mm)',
-                  'Streamflow (mm)', 'ET (mm)', 'Percolation (mm)',
-                  'Storage (mm)', 'Sed. Del (tonne)']
+        header = ['Water Year', 
+                  'Precipitation (mm)', 
+                  'Rain + Melt (mm)',
+                  'Lateral Flow (mm)',
+#                  'Streamflow (mm)', 
+                  'ET (mm)', 
+                  'Percolation (mm)',
+#                  'Storage (mm)', 
+                  'Sed. Del (tonne)']
 
         d = self.totalwatsed.d
 
@@ -87,7 +93,7 @@ class TotalWatbal(ReportBase):
             stdevs[k] = np.std(yearlies[k])
 
             if k in ['Rain + Melt (mm)', 'Streamflow (mm)',
-                     'ET (mm)', 'Percolation (mm)']:
+                     'ET (mm)', 'Percolation (mm)', 'Lateral Flow (mm)']:
                 pratios[k.replace('(mm)', '(%)')] = np.sum(yearlies[k]) / psum * 100.0
             elif k in ['Storage (mm)']:
                 pratios[k.replace('(mm)', '(%)')] = (store_wat_yrend - store_wat_yr0) / psum * 100.0
