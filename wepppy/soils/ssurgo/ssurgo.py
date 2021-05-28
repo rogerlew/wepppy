@@ -647,16 +647,12 @@ POSSIBILITY OF SUCH DAMAGE."""
             L['texture'] = ssurgo_c.get_texture(chkey)
             L['reskind'] = ssurgo_c.get_reskind(L['cokey'])
             h = Horizon(cokey, L, defaults)
+            h._computeErodibility()
             horizons.append(h)
         
         # create mask of valid layers
         horizons_mask = [h.valid() for h in horizons]
         self.log.append('horizons mask: {}'.format(horizons_mask))
-
-        # compute erodibility for top layer
-        if len(horizons) > 0:
-            horizons[0]._computeErodibility()
-            self.log.append('computing erodibility for h0')
 
         return horizons, horizons_mask
         
