@@ -287,7 +287,7 @@ class OutletSummary(ReportBase):
         self.fraction_under = fraction_under
         self.loss = loss
 
-    def __iter__(self):
+    def iter(self, extraneous=False):
         key = 'Total contributing area to outlet'
         area = self.data[key]['v']
         units = self.data[key]['units']
@@ -299,6 +299,9 @@ class OutletSummary(ReportBase):
         v_norm = 1000.0 * v / (area * 10000.0)
         units_norm = 'mm/yr'
         yield 'Precipitation', v, units, v_norm, units_norm
+
+        if extraneous:
+            yield ' ', v * 0.0001, 'ha-m/yr', None, None
 
 #        key = 'Avg. Ann. irrigation volume in contributing area'
 #        v = self.data[key]['v']
@@ -314,11 +317,17 @@ class OutletSummary(ReportBase):
         units_norm = 'mm/yr'
         yield 'Stream discharge', v, units, v_norm, units_norm
 
+        if extraneous:
+            yield ' ', v * 0.0001, 'ha-m/yr', None, None
+
         key = 'Avg. Ann. total hillslope soil loss'
         v = self.data[key]['v']
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
+        if v_norm > 1000:
+            v_norm /= 1000
+            units_norm = 'tonne/ha/yr'
         yield 'Total hillslope soil loss', v, units, v_norm, units_norm
 
         key = 'Avg. Ann. total channel soil loss'
@@ -326,6 +335,9 @@ class OutletSummary(ReportBase):
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
+        if v_norm > 1000:
+            v_norm /= 1000
+            units_norm = 'tonne/ha/yr'
         yield 'Total channel soil loss', v, units, v_norm, units_norm
 
         key = 'Avg. Ann. sediment discharge from outlet'
@@ -333,6 +345,9 @@ class OutletSummary(ReportBase):
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
+        if v_norm > 1000:
+            v_norm /= 1000
+            units_norm = 'tonne/ha/yr'
         yield 'Sediment discharge', v, units, v_norm, units_norm
 
         key = 'Sediment Delivery Ratio for Watershed'
