@@ -14,7 +14,8 @@ from .topaz import (
 from wepppy.nodb.watershed import Outlet
 from .watershed import (
     Watershed, 
-    WatershedNoDbLockedException
+    WatershedNoDbLockedException,
+    DelineationBackend
 )
 from .landuse import (
     Landuse, 
