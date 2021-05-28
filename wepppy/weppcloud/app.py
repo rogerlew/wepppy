@@ -3201,6 +3201,8 @@ def report_rhem_avg_annuals(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/wepp/summary')
 @app.route('/runs/<string:runid>/<config>/report/wepp/summary/')
 def report_wepp_loss(runid, config):
+    extraneous = request.args.get('extraneous', None) == 'true'
+
     try:
         res = request.args.get('exclude_yr_indxs')
         exclude_yr_indxs = []
@@ -3235,6 +3237,7 @@ def report_wepp_loss(runid, config):
 
 
         return render_template('reports/wepp/summary.htm',
+                               extraneous=extraneous,
                                out_rpt=out_rpt,
                                hill_rpt=hill_rpt,
                                chn_rpt=chn_rpt,
@@ -3404,8 +3407,6 @@ def report_wepp_return_periods(runid, config):
 
     climate = Climate.getInstance(wd)
     rec_intervals = _parse_rec_intervals(request, climate.years)
-
-    print('return_periods', runid, config, rec_intervals)
 
     ron = Ron.getInstance(wd)
     report = Wepp.getInstance(wd).report_return_periods(rec_intervals=rec_intervals)
