@@ -20,7 +20,13 @@ class PassEventType(IntEnum):
     SUBEVENT = 2
 
 
-class Pass:
+def _float(x):
+    try:
+        return float(x)
+    except:
+        return float(x.replace('-', 'E-'))
+
+class HillPass:
     def __init__(self, fn):
         assert _exists(fn)
 
@@ -45,8 +51,8 @@ class Pass:
                 year, day, gwbfv, gwdsv = line.split()[-4:]
                 year = int(year)
                 day = int(day)
-                gwbfv = float(gwbfv)
-                gwdsv = float(gwdsv)
+                gwbfv = _float(gwbfv)
+                gwdsv = _float(gwdsv)
 
                 events.append(dict(event=event, year=year, day=day, gwbfv=gwbfv, gwdsv=gwdsv))
 
@@ -71,8 +77,8 @@ class Pass:
                 sedcon = [float(_line[15]), float(_line[16]), float(_line[17]), float(_line[18]), float(_line[19])]
 
                 frcflw = float(_line[20])
-                gwbfv = float(_line[21])
-                gwdsv = float(_line[22])
+                gwbfv = _float(_line[21])
+                gwdsv = _float(_line[22])
 
                 events.append(dict(event=event, year=year, day=day, dur=dur, tcs=tcs, oalpha=oalpha, runoff=runoff,
                                    runvol=runvol, sbrunf=sbrunf, sbrunv=sbrunv, drainq=drainq, drrunv=drrunv,
@@ -87,8 +93,8 @@ class Pass:
                 sbrunv = float(sbrunf)
                 drainq = float(drainq)
                 drrunv = float(drrunv)
-                gwbfv = float(gwbfv)
-                gwdsv = float(gwdsv)
+                gwbfv = _float(gwbfv)
+                gwdsv = _float(gwdsv)
 
                 events.append(dict(event=event, year=year, day=day, sbrunf=sbrunf, sbrunv=sbrunv, drainq=drainq, drrunv=drrunv, gwbfv=gwbfv, gwdsv=gwdsv))
 
@@ -104,7 +110,21 @@ class Pass:
         self.scp = scp
         self.events = events
 
+    def write(self, fn):
+        fp = open(fn, mode='w')
+
+        fp.write("""\
+{_.wshcli}
+{_.nyr} {_.byr}
+{_.harea}
+{_.npart} {diams}
+{_.srp} {_.slfp} {_.bfp} {_.scp}
+""".format(_=self, diams=' '.join(self.dia)))
+
+        fp.close()
+
 
 if __name__ == "__main__":
-    fn = '/geodata/weppcloud_runs/undefeated-clue/wepp/output/H1.pass.dat'
-    Pass(fn)
+    fn = '/geodata/weppcloud_runs/antsy-basilica/wepp/output/H1.pass.dat'
+    hill_pass = HillPass(fn)
+    hill_pass.write('_H1.pass.dat')
