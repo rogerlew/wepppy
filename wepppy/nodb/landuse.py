@@ -474,7 +474,13 @@ class Landuse(NoDbBase):
     
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
-            managements = {}
+            if self.managements:
+                managements = self.managements
+            else:
+                managements = {}
+
+            for dom in managements:
+                managements[dom].area = 0.0
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -510,7 +516,7 @@ class Landuse(NoDbBase):
         descending order
         """
         used_mans = set(self.domlc_d.values())
-        report = [s for s in list(self.managements.values()) if str(s.key) in used_mans]
+        report = [self.managements[str(dom)] for dom in used_mans]
         report.sort(key=lambda x: x.pct_coverage, reverse=True)
         return [man.as_dict() for man in report]
 
