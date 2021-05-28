@@ -6,6 +6,14 @@
     <!-- (excluding years {{ excluded_years }}) -->
     <a onclick="javascript:copytable('out_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
+
+{% if extraneous %}
+<a href="./?extraneous=false">Hide extraneous parameters in tables.</a>
+{% else %}
+<a href="./?extraneous=true">Show extraneous parameters in tables.</a>
+{% endif %}
+
+
 <table class="table table-condensed" style="width: auto !important;" id="out_tbl">
   <thead>
     <tr>
@@ -17,11 +25,11 @@
     </tr>
   </thead>
   <tbody>
-    {% for name, value, units, v_normed, units_normed in out_rpt %}
+    {% for name, value, units, v_normed, units_normed in out_rpt.iter(extraneous) %}
       <tr>
-        <td>{{ name }}</td>
+        <td>{{ name }}&nbsp;</td>
         <td class="text-right">{{ unitizer(value, units) | safe }}</td>
-        <td>{{ unitizer_units(units) | safe }}</td>
+        <td>{{ unitizer_units(units) | safe }}&nbsp;</td>
         <td class="text-right">{{ unitizer(v_normed, units_normed) | safe }}</td>
         <td>{{ unitizer_units(units_normed) | safe }}</td>
       </tr>
@@ -30,6 +38,7 @@
 </table>
 
 <br/>
+
 <h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
     <!-- (excluding years {{ excluded_years }}) -->
     <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
@@ -38,7 +47,20 @@
   <thead>
     <tr>
     {% for name in hill_rpt.hdr %}
-      <th>{{ name }}</th>
+      <th>{{ name }}
+      {% if name == "WeppID" %}
+      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      {% if name == "TopazID" %}
+      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      {% if name == "Landuse" %}
+      <a data-toggle="tooltip" data-placement="top" title="Landuse key from landuse map"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      {% if name == "Soil" %}
+      <a data-toggle="tooltip" data-placement="top" title="Soil file name"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      </th>
     {% endfor %}
     </tr>
   </thead>
@@ -69,7 +91,17 @@
   <thead>
     <tr>
     {% for name in chn_rpt.hdr %}
-      <th>{{ name }}</th>
+      <th>{{ name }}
+      {% if name == "WeppID" %}
+      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      {% if name == "WeppChnID" %}
+      <a data-toggle="tooltip" data-placement="top" title="Channel ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      {% if name == "TopazID" %}
+      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
+      {% endif %}
+      </th>
     {% endfor %}
     </tr>
   </thead>
