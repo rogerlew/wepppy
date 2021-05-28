@@ -476,6 +476,8 @@ class ClimateFile(object):
 #  id     day  month  year  Rain   Dur    Tp     Ip
 #                           (mm)   (h)
 """
+        y0 = self.years[0]
+
         storms = []
         df = self.as_dataframe()
         for i, row in df.iterrows():
@@ -486,6 +488,7 @@ class ClimateFile(object):
             fp.write(header_template.format(num_rain_events=len(storms)))
 
             for i, (da, mo, year, prcp, dur, tp, ip) in enumerate(storms):
+                year = year - y0 + 1
                 fp.write('{0:<8}{1:<6}{2:<6}{3:<6}{4:<7}{5:<7}{6:<7}{7:<7}\n'
                          .format(i+1, da, mo, year, prcp, dur, tp, ip))
 
