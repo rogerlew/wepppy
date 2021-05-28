@@ -9,7 +9,6 @@
         <th>Recurrence Interval</th>
         <th>Date</th>
         <th class="{{ 'table-active' if key == 'Precipitation Depth' }}">Precipitation</th>
-        <th class="{{ 'table-active' if key == 'Discharge' }}">Discharge</th>
         <th class="{{ 'table-active' if key == 'Peak Discharge' }}">Peak Discharge</th>
         <th class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">10-min Peak Rainfall Intensity</th>
         <th class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">30-min Peak Rainfall Intensity</th>
@@ -26,7 +25,6 @@
         <td>years</td>
         <td>mm/dd/yyyy</td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer_units(report.units_d['Precipitation Depth']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Discharge' }}">{{ unitizer_units(report.units_d['Discharge']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer_units(report.units_d['Peak Discharge']) | safe }}</td>
         <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
         <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
@@ -45,8 +43,6 @@
                                   '%04d' % (report.return_periods[key][rec_interval]['year'] | int) }}</td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer(report.return_periods[key][rec_interval]['Precipitation Depth'],
                         report.units_d['Precipitation Depth']) | safe }}</td>
-        <td class="{{ 'table-active' if key == 'Discharge' }}">{{ unitizer(report.return_periods[key][rec_interval]['Discharge'],
-                        report.units_d['Discharge']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer(report.return_periods[key][rec_interval]['Peak Discharge'],
                         report.units_d['Peak Discharge']) | safe }}</td>
         <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['10-min Peak Rainfall Intensity'],
