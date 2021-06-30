@@ -285,7 +285,10 @@ class Baer(NoDbBase):
         pcts = {}
         tot_px = counts.get('Low Severity Burn', 0) + counts.get('Moderate Severity Burn', 0) + counts.get('High Severity Burn', 0)
         for k in counts:
-            pcts[k] = 100.0 * counts[k] / tot_px
+            if tot_px == 0:
+                pcts[k] = 0.0
+            else:
+                pcts[k] = 100.0 * counts[k] / tot_px
 
         return pcts
 
@@ -414,7 +417,7 @@ class Baer(NoDbBase):
 
             counts = Counter(data.flatten())
 
-            is256 = len(classes) > 6 or max(classes) >= 255
+            is256 = len(classes) > 7 or max(classes) >= 255
 
             if is256:
                 breaks = [75, 109, 187, max(counts)]
