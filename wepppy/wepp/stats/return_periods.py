@@ -79,6 +79,9 @@ class ReturnPeriods:
                 for k, v in _row.items():
                     cname = k.split('(')[0].strip()
 
+                    if cname == 'Runoff Volume':
+                        cname = 'Runoff'
+
                     if cname == 'Peak Runoff':
                         cname = 'Peak Discharge'
 
