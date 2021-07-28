@@ -287,6 +287,9 @@ class OutletSummary(ReportBase):
         self.fraction_under = fraction_under
         self.loss = loss
 
+    def __iter__(self):
+        return self.iter(extraneous=False)
+
     def iter(self, extraneous=False):
         key = 'Total contributing area to outlet'
         area = self.data[key]['v']
