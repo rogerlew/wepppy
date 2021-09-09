@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -586,6 +586,22 @@ def stats():
 
     try:
         return jsonify(runs_counter)
+
+    except Exception:
+        return exception_factory()
+
+@app.route('/stats/<key>')
+@app.route('/stats/<key>/')
+def stats_key(key):
+    try:
+        if _exists('/geodata/weppcloud_runs/runs_counter.json'):
+            with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
+                runs_counter = json.load(fp)
+    except:
+        runs_counter = {}
+
+    try:
+        return jsonify(runs_counter.get(key))
 
     except Exception:
         return exception_factory()
