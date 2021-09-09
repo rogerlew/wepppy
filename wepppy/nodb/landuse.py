@@ -356,6 +356,8 @@ class Landuse(NoDbBase):
             self.dump_and_unlock()
             self.build_managements()
 
+            self.build_managements()
+
             self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
