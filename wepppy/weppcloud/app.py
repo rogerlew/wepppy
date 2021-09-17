@@ -58,6 +58,8 @@ from wepppy.all_your_base import isfloat, isint
 from wepppy.all_your_base.geo import crop_geojson, read_raster
 from wepppy.all_your_base.dateutils import parse_datetime, YearlessDate
 
+from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup
+
 from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
     WatershedBoundaryTouchesEdgeError,
@@ -698,7 +700,7 @@ def create_index():
     configs = get_configs()
     x = ['<tr><td><a href="{0}">{0}</a></td>'
          '<td><a href="{0}?watershed:delineation_backend=taudem">{0} TauDEM</a></td></tr>'
-         .format(cfg) for cfg in configs if cfg != '_defaults']
+         .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
     return '<html><body>'\
            '<link rel="stylesheet" '\
            'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
@@ -931,6 +933,55 @@ def fork(runid, config):
         yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
 
     return Response(stream_with_context(generate()))
+
+
+@app.route('/runs/<string:runid>/<config>/modify_disturbed')
+@app.route('/runs/<string:runid>/<config>/modify_disturbed/')
+def modify_disturbed(runid, config):
+    assert config is not None
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    try:
+        return render_template('controls/edit_csv.htm', 
+            csv_url='../browse/disturbed/disturbed_land_soil_lookup.csv?raw')
+    except:
+        return exception_factory('Error Clearing Locks')
+
+
+@app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed/', methods=['POST'])
+def task_modify_disturbed(runid, config):
+    wd = get_wd(runid)
+
+    try:
+        data = json.loads(request.data.decode('utf-8'))
+        lookup_fn = Disturbed.getInstance(wd).lookup_fn
+        write_disturbed_land_soil_lookup(lookup_fn, data)
+        return success_factory()
+    except:
+        return exception_factory('Error Clearing Locks')
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
@@ -2105,22 +2156,21 @@ def query_rangeland_cover_current(runid, config):
 def set_rangeland_cover_mode(runid, config):
 
     mode = None
-    single_selection = None
+    rap_year = None
     try:
         mode = int(request.form.get('mode', None))
-        single_selection = \
-            int(request.form.get('rangeland_cover_single_selection', None))
+        rap_year = int(request.form.get('rap_year', None))
     except Exception:
-        exception_factory('mode and rangeland_cover_single_selection must be provided')
+        exception_factory('mode and rap_year must be provided')
 
     wd = get_wd(runid)
     rangeland_cover = RangelandCover.getInstance(wd)
 
     try:
         rangeland_cover.mode = RangelandCoverMode(mode)
-        rangeland_cover.single_selection = single_selection
+        rangeland_cover.rap_year = rap_yearsingle_selection
     except Exception:
-        exception_factory('error setting rangeland_cover mode')
+        exception_factory('error setting mode or rap_year')
 
     return success_factory()
 
@@ -2295,13 +2345,10 @@ def query_rangeland_cover_subcatchments(runid, config):
 def report_rangeland_cover(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-
-    shrubland = Shrubland.getInstance(wd)
     rangeland_cover = RangelandCover.getInstance(wd)
 
     return render_template('reports/rangeland_cover.htm',
-                           report=shrubland.report,
-                           covers=rangeland_cover.covers)
+                           rangeland_cover=rangeland_cover)
 
 
 @app.route('/runs/<string:runid>/<config>/view/channel_def/<chn_key>')
@@ -2339,9 +2386,23 @@ def task_build_rangeland_cover(runid, config):
     wd = get_wd(runid)
     rangeland_cover = RangelandCover.getInstance(wd)
 
+    rap_year = request.form.get('rap_year')
+
+    default_covers = dict(
+        bunchgrass=request.form.get('bunchgrass_cover'),
+        forbs=request.form.get('forbs_cover'),
+        sodgrass=request.form.get('sodgrass_cover'),
+        shrub=request.form.get('shrub_cover'),
+        basal=request.form.get('basal_cover'),
+        rock=request.form.get('rock_cover'),
+        litter=request.form.get('litter_cover'),
+        cryptogams=request.form.get('cryptogams_cover'))
+
+    print(f'rap_year = {rap_year}')
+    print(default_covers)
+
     try:
-        from pprint import pprint
-        rangeland_cover.build()
+        rangeland_cover.build(rap_year=rap_year, default_covers=default_covers)
     except Exception:
         return exception_factory('Building RangelandCover Failed')
 
@@ -2452,8 +2513,10 @@ def task_build_soil(runid, config):
     wd = get_wd(runid)
     soils = Soils.getInstance(wd)
 
+
     try:
-        soils.build()
+        initial_ksat = float(request.form.get('initial_ksat'))
+        soils.build(initial_ksat=initial_ksat)
     except Exception as e:
         if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
             return exception_factory(e.__name__, e.__doc__)
