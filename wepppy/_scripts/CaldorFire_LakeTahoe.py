@@ -70,7 +70,7 @@ if __name__ == '__main__':
                dict(scenario='SBS',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-snow-Caldor',
+                    cfg='lt-fire-snow-caldor',
                     climate='copyCurCond')
     ]
 
