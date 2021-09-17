@@ -654,7 +654,7 @@ class Disturbed(NoDbBase):
         soils = Soils.getInstance(wd)
 
         _lookup_fn = self.lookup_fn
-        if not _exists(_look_up):
+        if not _exists(_lookup_fn):
             shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'), _lookup_fn)
 
         _land_soil_replacements_d = read_disturbed_land_soil_lookup(_lookup_fn)
