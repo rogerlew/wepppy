@@ -17,6 +17,8 @@ from copy import deepcopy
 
 from enum import IntEnum
 
+import time
+
 from glob import glob
 from datetime import datetime
 
@@ -70,6 +72,7 @@ class RangelandCoverMode(IntEnum):
     Undefined = -1
     Gridded = 0
     Single = 1
+    GriddedRAP = 2
 
 
 class RangelandCover(NoDbBase):
@@ -82,7 +85,8 @@ class RangelandCover(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            self._mode = RangelandCoverMode.Gridded
+            self._mode = RangelandCoverMode(self.config_get_int('rhem', 'mode'))
+            self._rap_year = self.config_get_int('rhem', 'rap_year')
 
             self._bunchgrass_cover_default = 15.0
             self._forbs_cover_default = 5.0
@@ -134,6 +138,23 @@ class RangelandCover(NoDbBase):
 
     def on(self, evt):
         pass
+
+    @property
+    def rap_year(self):
+        return getattr(self, '_rap_year', self.config_get_int('rhem', 'rap_year'))
+
+    @rap_year.setter
+    def rap_year(self, value: int):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._rap_year = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def mode(self):
@@ -296,44 +317,55 @@ class RangelandCover(NoDbBase):
             self.unlock('-f')
             raise
 
-    def parse_inputs(self, kwds):
+    def set_default_covers(self, default_covers):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
-            v = kwds['bunchgrass_cover']
+            v = default_covers['bunchgrass']
             self._bunchgrass_cover_default = float(v)
 
-            v = kwds['forbs_cover']
+            v = default_covers['forbs']
             self._forbs_cover_default = float(v)
 
-            v = kwds['sodgrass_cover']
+            v = default_covers['sodgrass']
             self._sodgrass_cover_default = float(v)
 
-            v = kwds['shrub_cover']
+            v = default_covers['shrub']
             self._shrub_cover_default = float(v)
 
-            v = kwds['basal_cover']
+            v = default_covers['basal']
             self._basal_cover_default = float(v)
 
-            v = kwds['rock_cover']
+            v = default_covers['rock']
             self._rock_cover_default = float(v)
 
-            v = kwds['litter_cover']
+            v = default_covers['litter']
             self._litter_cover_default = float(v)
 
-            v = kwds['cryptogams_cover']
+            v = default_covers['cryptogams']
             self._cryptogams_cover_default = float(v)
+
+            self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
             raise
 
-    def build(self):
-        if self.mode == RangelandCoverMode.Gridded:
-            self._build_gridded()
-        else:
+    def build(self, rap_year=None, default_covers=None):
+        if default_covers is not None:
+            self.set_default_covers(default_covers)
+            time.sleep(2)
+
+        mode = self.mode
+        if mode == RangelandCoverMode.Gridded:
+            self._build_gridded_usgs_shrubland()
+        elif mode == RangelandCoverMode.GriddedRAP:
+            self._build_gridded_rap(rap_year)
+        elif mode == RangelandCoverMode.Single:
             self._build_single()
+        else:
+            raise NotImplementedError() 
 
     def _build_single(self):
         wd = self.wd
@@ -360,7 +392,100 @@ class RangelandCover(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_gridded(self):
+    @property
+    def rap_report(self):
+        from wepppy.nodb.mods import RAP
+        return RAP.getInstance(self.wd).report
+
+    def _build_gridded_rap(self, rap_year=None):
+        wd = self.wd
+        from wepppy.nodb.mods import RAP
+
+        self.lock()
+        try:
+            if rap_year is not None:
+                rap_year = int(rap_year)
+                self._rap_year = rap_year
+
+            rap = RAP.getInstance(wd)
+            rap.acquire_rasters(year=self.rap_year)
+            rap.analyze()
+
+            covers = {}
+
+            for topaz_id, rap_data in rap:
+                if not rap_data.isvalid:
+                    cover = dict(bunchgrass=self._bunchgrass_cover_default,
+                                 forbs=self._forbs_cover_default,
+                                 sodgrass=self._sodgrass_cover_default,
+                                 shrub=self._shrub_cover_default,
+                                 basal=self._basal_cover_default,
+                                 rock=self._rock_cover_default,
+                                 litter=self._litter_cover_default,
+                                 cryptogams=self._cryptogams_cover_default)
+                else:
+                    annual_forb_and_grass_normalized = rap_data.annual_forb_and_grass_normalized
+                    bare_ground_normalized = rap_data.bare_ground_normalized
+                    litter_normalized = rap_data.litter_normalized
+                    perennial_forb_and_grass_normalized = rap_data.perennial_forb_and_grass_normalized
+                    shrub_normalized = rap_data.shrub_normalized
+                    tree_normalized = rap_data.tree_normalized
+
+                    annual_fraction = annual_forb_and_grass_normalized / (annual_forb_and_grass_normalized + perennial_forb_and_grass_normalized)
+                    perennial_fraction = 1.0 - annual_fraction
+
+                    # assuming forb / (annual_grass + perenial_grass) = annual_forb / annual_grass = perennial_forb / perennial_grass
+                    est_forb_fraction = self._forbs_cover_default / (self._forbs_cover_default + self._bunchgrass_cover_default + self._sodgrass_cover_default)
+
+                    bunchgrass = perennial_forb_and_grass_normalized * (1.0 - est_forb_fraction)
+                    sodgrass = annual_forb_and_grass_normalized *  (1.0 - est_forb_fraction)   
+                    shrub_cover = shrub_normalized
+                    basal = shrub_cover + perennial_forb_and_grass_normalized + annual_forb_and_grass_normalized
+                    forbs = perennial_forb_and_grass_normalized * est_forb_fraction + annual_forb_and_grass_normalized * est_forb_fraction
+
+                    assert basal + \
+                           bare_ground_normalized + \
+                           litter_normalized <= 100.01, shrubland_data
+
+                    cryptogams = self._cryptogams_cover_default
+                    if basal + \
+                       bare_ground_normalized + \
+                       litter_normalized + \
+                       self._cryptogams_cover_default > 100.0:
+                        cryptogams = 100.0 - basal - bare_ground_normalized - litter_normalized
+
+                    rock = 100.0 - \
+                           basal - \
+                           bare_ground_normalized - \
+                           litter_normalized - \
+                           cryptogams
+
+                    
+
+                    cover = dict(bunchgrass=bunchgrass,
+                                 forbs=forbs,
+                                 sodgrass=sodgrass,
+                                 shrub=shrub_cover,
+                                 basal=basal,
+                                 rock=rock,
+                                 litter=litter_normalized,
+                                 cryptogams=self._cryptogams_cover_default)
+
+                covers[topaz_id] = cover
+
+            self.covers = covers
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def usgs_shrubland_report(self):
+        from wepppy.nodb.mods import Shrubland
+        return Shrubland.getInstance(self.wd).report
+
+    def _build_gridded_usgs_shrubland(self):
         wd = self.wd
         from wepppy.nodb.mods import Shrubland, nlcd_shrubland_layers
 

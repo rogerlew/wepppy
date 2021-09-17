@@ -1,0 +1,18 @@
+{
+  "project": {
+    "name": "shrubland 001",
+    "cellsize": 30, 
+    "config": "rhem"
+  },
+  "watershed": {
+    "extent": [-114.28947563177098, 44.440770815543736, -114.204507585173, 44.501404349346764],
+    "map_center": [-114.247, 44.4711],
+    "map_zoom": 13.5,
+    "outlet": [-114.21568446154409, 44.47397045260589],
+    "delineation_backend": "topaz"},
+  "topaz": {
+    "mcl": 60,
+    "csa": 5
+  }
+}
+

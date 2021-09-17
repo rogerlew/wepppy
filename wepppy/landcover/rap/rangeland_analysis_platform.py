@@ -6,9 +6,12 @@ import subprocess
 import os
 from enum import IntEnum
 from glob import glob
+import math
 
+import numpy as np
 import rasterio
 
+from wepppy.all_your_base.geo import read_raster
 
 IS_WINDOWS = os.name == 'nt'
 
@@ -30,6 +33,7 @@ class RangelandAnalysisPlatformV2(object):
 
     def retrieve(self, years):
         cellsize = self.cellsize
+        bbox = self.bbox
 
         ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
         lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], 
@@ -79,6 +83,7 @@ class RangelandAnalysisPlatformV2(object):
             os.copyfile(_join(_thisdir, 'rap_readme.txt', readme_txt))
 
 
+
 class RAP_Band(IntEnum):
     ANNUAL_FORB_AND_GRASS = 1
     BARE_GROUND = 2
@@ -100,7 +105,49 @@ class RangelandAnalysisPlatformV2Dataset(object):
 
 
     def get_band(self, band: RAP_Band):
-        return self.ds.read(band)
+        data =  self.ds.read(band)
+        return np.ma.masked_values(data, 65535)
+
+    def _get_median(self, band: RAP_Band, indices):
+        data = self.get_band(band)
+        x = data[indices]
+
+        retval = float(np.ma.median(x))
+        if math.isnan(retval):
+            return None
+
+        return retval
+
+    def spatial_aggregation(self, band: RAP_Band, subwta_fn):
+        assert _exists(subwta_fn)
+        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
+        _ids = sorted(list(set(subwta.flatten())))
+
+        domlc_d = {}
+        for _id in _ids:
+            if _id == 0:
+                continue
+
+            _id = int(_id)
+            indices = np.where(subwta == _id)
+            dom = self._get_median(band, indices)
+
+            domlc_d[str(_id)] = dom
+        return domlc_d
+
+    def spatial_stats(self, band: RAP_Band, bound_fn):
+        assert _exists(bound_fn)
+        bounds, transform, proj = read_raster(bound_fn, dtype=np.int32)
+        indices = np.where(bounds == 1)
+
+        data = self.get_band(band)
+        x = data[indices]
+
+        return dict(num_pixels=len(indices[0]),
+                    valid_pixels=len(indices[0]) - np.sum(x.mask),
+                    mean=np.mean(x),
+                    std=np.std(x),
+                    units='%')
 
 
 if __name__ == "__main__":
