@@ -397,6 +397,9 @@ class Ron(NoDbBase):
                 wepppy.nodb.mods.Ash(wd, cfg_fn)
                 wepppy.nodb.mods.AshPost(wd, cfg_fn)
 
+            if 'rap' in self.mods:
+                wepppy.nodb.mods.RAP(wd, cfg_fn)
+
             if 'shrubland' in self.mods:
                 wepppy.nodb.mods.Shrubland(wd, cfg_fn)
 
