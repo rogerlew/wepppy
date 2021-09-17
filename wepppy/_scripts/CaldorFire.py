@@ -88,7 +88,7 @@ if __name__ == '__main__':
               ]
 
     scenarios = [
-         dict(wd='CurCond', 
+         dict(wd='CurCond.gridmet', 
               landuse=None, 
               cli_mode='observed', 
               cfg='disturbed',
@@ -96,7 +96,7 @@ if __name__ == '__main__':
               build_soils=True, 
               build_landuse=True, 
               build_climates=True),
-        dict(wd='SBS',
+        dict(wd='SBS.gridmet',
              landuse=None,
              cfg='disturbed-caldor',
              cli_mode='observed', 
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.GridMetPRISM
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.set_observed_pars(start_year=2016, end_year=2017)
+                climate.set_observed_pars(start_year=1990, end_year=2021)
 
                 climate.build(verbose=1)
 
