@@ -132,13 +132,13 @@ if __name__ == '__main__':
             ron.fetch_dem()
 
             log_print('building channels')
-            topaz = Topaz.getInstance(wd)
-            topaz.build_channels(csa=5, mcl=60)
-            topaz.set_outlet(*outlet)
+            wat = Watershed.getInstance(wd)
+            wat.build_channels(csa=5, mcl=60)
+            wat.set_outlet(*outlet)
             sleep(0.5)
 
             log_print('building subcatchments')
-            topaz.build_subcatchments()
+            wat.build_subcatchments()
 
             log_print('abstracting watershed')
             wat = Watershed.getInstance(wd)
