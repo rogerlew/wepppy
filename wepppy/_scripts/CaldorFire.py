@@ -169,6 +169,7 @@ if __name__ == '__main__':
              clean=True, 
              build_soils=True, 
              build_landuse=True, 
+             build_climates=True,
              climate='copyCurCond.gridmet'),
     ]
 
