@@ -921,8 +921,8 @@ class TopazRunner:
         """
         csa, mcl = self.csa, self.mcl
 
-        assert isfloat(csa), 'csa cannot be cast as float'
-        assert isfloat(mcl), 'mcl cannot be cast as float'
+        assert isfloat(csa), f'csa cannot be cast as float ({csa})'
+        assert isfloat(mcl), f'mcl cannot be cast as float ({mcl})'
 
         self._clean_dir()
         self._prep_dir()

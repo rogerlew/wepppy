@@ -43,8 +43,8 @@ _data_dir = _join(_thisdir, 'data')
 def read_disturbed_land_soil_lookup(fname):
     d = {}
 
-    with open(fname) as csvfile:
-        reader = csv.DictReader(csvfile)
+    with open(fname) as fp:
+        reader = csv.DictReader(fp)
         for row in reader:
             disturbed_class = row['disturbed_class']
             texid = row['texid']
@@ -58,6 +58,17 @@ def read_disturbed_land_soil_lookup(fname):
             d[(texid, disturbed_class)] = row
 
     return d
+
+
+def write_disturbed_land_soil_lookup(fname, data):
+    fieldnames = 'disturbed_class,texid,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk'.split(',')
+
+    with open(fname, 'w') as fp:
+        wtr = csv.DictWriter(fp, fieldnames)
+        wtr.writeheader()
+
+        for row in data:
+            wtr.writerow({k: v for k, v in zip(fieldnames, row)})
 
 
 def _replace_parameter(original, replacement):
@@ -151,6 +162,9 @@ class Disturbed(NoDbBase):
             self._counts = None
             self._nodata_vals = None
             self._is256 = None
+
+            shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'),
+                            self.lookup_fn)
 
             self.sbs_coverage = None
             self._h0_max_om = self.config_get_float('disturbed', 'h0_max_om')
@@ -427,6 +441,7 @@ class Disturbed(NoDbBase):
             if disturbed_fn is not None and  _exists(disturbed_fn):
                 os.remove(disturbed_fn)
 
+
             self._disturbed_fn = None
             self._nodata_vals = None
             self._bounds = None
@@ -626,6 +641,10 @@ class Disturbed(NoDbBase):
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
 
+    @property
+    def lookup_fn(self):
+        return _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
+
     def modify_soils(self):
 
         wd = self.wd
@@ -634,7 +653,11 @@ class Disturbed(NoDbBase):
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
 
-        _land_soil_replacements_d = read_disturbed_land_soil_lookup(_join(_data_dir, 'disturbed_land_soil_lookup.csv'))
+        _lookup_fn = self.lookup_fn
+        if not _exists(_look_up):
+            shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'), _lookup_fn)
+
+        _land_soil_replacements_d = read_disturbed_land_soil_lookup(_lookup_fn)
 
         try:
             soils.lock()
