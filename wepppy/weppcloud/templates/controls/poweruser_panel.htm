@@ -84,6 +84,12 @@
             <div class="list-group">
               <a class="list-group-item list-group-item-action" onclick="Project.getInstance().clear_locks()" href="#">Clear Locks</a>
             </div>
+            {% if 'disturbed' in ron.mods %}
+            <h5>Commands</h5>
+            <div class="list-group">
+              <a class="list-group-item list-group-item-action" href="modify_disturbed" target="_blank">Modify Disturbed Parameters</a>
+            </div>
+            {% endif %}
           </div>
         </div>
     </div>

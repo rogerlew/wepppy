@@ -357,9 +357,7 @@ class Watershed(NoDbBase):
     # build channels
     #
     def build_channels(self, csa=None, mcl=None):
-        if self.delineation_backend_is_topaz:
-            Topaz.getInstance(self.wd).build_channels(csa=csa, mcl=mcl)
-        else:
+        if csa or mcl:
             self.lock()
             try:
                 if csa is not None:
@@ -373,6 +371,9 @@ class Watershed(NoDbBase):
                 self.unlock('-f')
                 raise
 
+        if self.delineation_backend_is_topaz:      
+            Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
+        else:
             TauDEMTopazEmulator(self.taudem_wd, self.dem_fn).build_channels(csa=self.csa)
 
         if _exists(self.subwta):
