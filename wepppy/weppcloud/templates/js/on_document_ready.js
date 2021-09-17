@@ -487,6 +487,7 @@ function onReady() {
         $("[name='rangeland_cover_mode']").change(function () {
             rangeland_cover.setMode();
         });
+        $("[name='rangeland_cover_mode']").trigger("change");
 
         $("#rangeland_cover_single_selection").on("change", function () {
             rangeland_cover.setMode();
@@ -507,7 +508,6 @@ function onReady() {
             rangeland_cover.report();
             sub_ctrl.enableColorMap("rangeland_cover");
         }
-
 
         /*
          * Modify RangelandCover Initialization
