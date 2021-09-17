@@ -103,7 +103,7 @@ if __name__ == '__main__':
              clean=True, 
              build_soils=True, 
              build_landuse=True, 
-             climate='copyCurCond'),
+             climate='copyCurCond.gridmet'),
     ]
 
     wc = sys.argv[-1]
@@ -255,6 +255,15 @@ if __name__ == '__main__':
             climate.input_years = 100
 
             climate.build(verbose=1)
+        elif 'copy' in climate_mode:
+            src_wd = 'Caldor_%s_%s' % (watershed, climate_mode[4:])
+            shutil.rmtree(_join(wd, 'climate'))
+            shutil.copytree(_join(src_wd, 'climate'), _join(wd, 'climate'))
+            with open(_join(src_wd, 'climate.nodb')) as fp:
+                contents = fp.read()
+
+            with open(_join(wd, 'climate.nodb'), 'w') as fp:
+                fp.write(contents.replace(src_wd, wd))
 
         log_print('running wepp')
         wepp = Wepp.getInstance(wd)
