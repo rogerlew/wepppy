@@ -165,12 +165,11 @@ if __name__ == '__main__':
         dict(wd='SBS.gridmet',
              landuse=None,
              cfg='disturbed-caldor',
-             cli_mode='observed', 
+             cli_mode='copyCurCond.gridmet', 
              clean=True, 
              build_soils=True, 
              build_landuse=True, 
-             build_climates=True,
-             climate='copyCurCond.gridmet'),
+             build_climates=True),
     ]
 
     wc = sys.argv[-1]
