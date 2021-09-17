@@ -321,7 +321,7 @@ if __name__ == '__main__':
             climate.input_years = 100
 
             climate.build(verbose=1)
-        elif 'copy' in climate_mode:
+        elif 'copy' in cli_mode:
             src_wd = 'Caldor_%s_%s' % (watershed, climate_mode[4:])
             shutil.rmtree(_join(wd, 'climate'))
             shutil.copytree(_join(src_wd, 'climate'), _join(wd, 'climate'))
