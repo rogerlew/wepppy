@@ -1636,7 +1636,6 @@ class Management(object):
         # first we build the ManagementLoop
         _man = deepcopy(self.man)
       
-        print('nrots', _man.nrots) 
         if sim_years == _man.nrots * len(_man.loops[-1].years):
             return self
  
