@@ -741,8 +741,6 @@ class Wepp(NoDbBase, LogMixin):
 
         for _dir in (self.runs_dir, self.output_dir, self.plot_dir,
                      self.stats_dir, self.fp_runs_dir, self.fp_output_dir):
-
-            self.log('cleaning' + _dir)
             if _exists(_dir):
                 try:
                     shutil.rmtree(_dir)
@@ -755,8 +753,6 @@ class Wepp(NoDbBase, LogMixin):
 
             if not _exists(_dir):
                 os.makedirs(_dir)
-
-            self.log_done()
 
     def _prep_slopes(self, translator):
         watershed = Watershed.getInstance(self.wd)

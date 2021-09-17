@@ -29,6 +29,13 @@
         {% endif %}
     </div>
     <div id="soil_mode0_controls" class="form-group row">
+        <div class="col-sm-5">
+            <label for="initial_ksat">Initial ksat (for single storm climates): </label>
+        </div>
+        <div class="col-sm-3">
+            <input id="initial_ksat" name="initial_ksat" class="form-control mr-sm-3" type="text"
+             value="{{ soils.initial_ksat }}" aria-label="Soils Initial ksat">
+        </div>
     </div>
     <div id="soil_mode1_controls" class="form-group row">
         <div class="col-sm-5">
@@ -50,7 +57,7 @@
     </div>
     <div id="soil_mode4_controls" class="form-group row">
     </div>
-    {% if "lt" in ron.mods or "baer" in ron.mods %}
+    {% if "lt" in ron.mods or "baer" in ron.mods or "disturbed" in ron.mods %}
     <div>
     <p><i>Hillslopes with burn severity landuses will have soils altered to model burn severity.</i></p>
     </div>

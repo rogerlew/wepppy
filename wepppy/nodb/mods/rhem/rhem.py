@@ -35,6 +35,7 @@ from glob import glob
 
 import shutil
 from time import sleep
+from enum import IntEnum
 
 # non-standard
 import jsonpickle
@@ -129,6 +130,7 @@ class Rhem(NoDbBase, LogMixin):
     #
     def prep_hillslopes(self):
         self.log('Prepping Hillslopes... ')
+
         wd = self.wd
 
         watershed = Watershed.getInstance(wd)
@@ -229,7 +231,7 @@ class Rhem(NoDbBase, LogMixin):
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
 
-
+        self.run_wepp_hillslopes()
         self.log_done()
 
     def report_loss(self):
@@ -246,3 +248,4 @@ class Rhem(NoDbBase, LogMixin):
         wepp = Wepp.getInstance(self.wd)
         wepp.prep_hillslopes()
         wepp.run_hillslopes()
+
