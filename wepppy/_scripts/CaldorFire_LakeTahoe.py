@@ -85,7 +85,7 @@ if __name__ == '__main__':
     for scenario in scenarios:
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
-            projects[-1]['cfg'] = scenario.get('cfg', 'disturbed')
+            projects[-1]['cfg'] = scenario.get('cfg', 'lt-wepp_bd16b69-snow')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
