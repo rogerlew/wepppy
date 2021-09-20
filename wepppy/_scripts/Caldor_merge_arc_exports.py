@@ -27,7 +27,9 @@ if __name__ == "__main__":
 
     scenarios = [
                  'Caldor*CurCond.gridmet',
-                 'Caldor*SBS.gridmet'
+                 'Caldor*SBS.gridmet',
+                 'lt_Caldor*CurCond',
+                 'lt_Caldor*SBS'
                 ]
 
     for prefix in scenarios:
