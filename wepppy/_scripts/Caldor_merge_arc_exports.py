@@ -26,10 +26,10 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 'Caldor_*CurCond',
-                 'Caldor_*SBS',
-                 'lt_Caldor_*Caldor_CurCond',
-                 'lt_Caldor_*Caldor_SBS'
+                 'Caldor*CurCond.gridmet',
+                 'Caldor*SBS.gridmet',
+                 'lt_Caldor*CurCond',
+                 'lt_Caldor*SBS'
                 ]
 
     for prefix in scenarios:
