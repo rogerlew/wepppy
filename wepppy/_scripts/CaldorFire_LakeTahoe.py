@@ -70,8 +70,7 @@ if __name__ == '__main__':
                dict(scenario='SBS',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-snow-caldor',
-                    climate='copyCurCond')
+                    cfg='lt-fire-snow-caldor')
     ]
 
     skip_completed = True
@@ -85,7 +84,7 @@ if __name__ == '__main__':
     for scenario in scenarios:
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
-            projects[-1]['cfg'] = scenario.get('cfg', 'disturbed')
+            projects[-1]['cfg'] = scenario.get('cfg', 'lt-wepp_bd16b69-snow')
             projects[-1]['landuse'] = scenario['landuse']
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
