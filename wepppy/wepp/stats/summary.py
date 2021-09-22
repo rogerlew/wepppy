@@ -290,7 +290,7 @@ class OutletSummary(ReportBase):
     def __iter__(self):
         return self.iter(extraneous=False)
 
-    def iter(self, extraneous=False):
+    def iter(self, extraneous=False, auto_select_units=True):
         key = 'Total contributing area to outlet'
         area = self.data[key]['v']
         units = self.data[key]['units']
@@ -328,7 +328,7 @@ class OutletSummary(ReportBase):
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
-        if v_norm > 1000:
+        if v_norm > 1000 and auto_select_units:
             v_norm /= 1000
             units_norm = 'tonne/ha/yr'
         yield 'Total hillslope soil loss', v, units, v_norm, units_norm
@@ -338,7 +338,7 @@ class OutletSummary(ReportBase):
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
-        if v_norm > 1000:
+        if v_norm > 1000 and auto_select_units:
             v_norm /= 1000
             units_norm = 'tonne/ha/yr'
         yield 'Total channel soil loss', v, units, v_norm, units_norm
@@ -348,7 +348,7 @@ class OutletSummary(ReportBase):
         units = self.data[key]['units']
         v_norm = 1000.0 * v / area
         units_norm = 'kg/ha/yr'
-        if v_norm > 1000:
+        if v_norm > 1000 and auto_select_units:
             v_norm /= 1000
             units_norm = 'tonne/ha/yr'
         yield 'Sediment discharge', v, units, v_norm, units_norm
