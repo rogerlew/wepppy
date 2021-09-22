@@ -2515,8 +2515,8 @@ def task_build_soil(runid, config):
 
 
     try:
-        initial_ksat = float(request.form.get('initial_ksat'))
-        soils.build(initial_ksat=initial_ksat)
+        initial_sat = float(request.form.get('initial_sat'))
+        soils.build(initial_sat=initial_sat)
     except Exception as e:
         if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
             return exception_factory(e.__name__, e.__doc__)

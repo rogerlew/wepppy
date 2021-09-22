@@ -512,7 +512,7 @@ class SoilSummary(object):
 
 # noinspection PyPep8Naming,PyProtectedMember
 class WeppSoil:
-    def __init__(self, ssurgo_c, mukey, initial_ksat=0.75, 
+    def __init__(self, ssurgo_c, mukey, initial_sat=0.75, 
                  horizon_defaults=None,
                  res_lyr_ksat_threshold=2.0):
                       
@@ -520,7 +520,7 @@ class WeppSoil:
         
         self.ssurgo_c = ssurgo_c
         self.mukey = mukey
-        self.initial_ksat = initial_ksat
+        self.initial_sat = initial_sat
         self.horizons = None
         self.horizons_mask = None
         self.majorComponent = None
@@ -780,7 +780,7 @@ POSSIBILITY OF SUCH DAMAGE."""
         s.append('')
         
         s.append('Build Notes:')
-        s.append('  initial assumed ksat = %0.03f' % self.initial_ksat)
+        s.append('  initial assumed ksat = %0.03f' % self.initial_sat)
         if self.albedo_estimated:
             s.append('  albedo estimated from om_r')
             s.append('')
@@ -985,7 +985,7 @@ Any comments:
         s = "7778\n{0.description}\nAny comments:\n{0.num_ofes} 1\n"\
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t"\
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t"\
-            "{0.initial_ksat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t"\
+            "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t"\
             "{horizon0.shear:0.4f}\t0.0000"
 
         s = [s.format(self, majorComponent=self.majorComponent,
@@ -1063,7 +1063,7 @@ Any comments:
         s = "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} 1\n" \
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t" \
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t" \
-            "{0.initial_ksat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t" \
+            "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t" \
             "{horizon0.shear:0.4f}\t{ksat:0.4f}"
 
         s = [s.format(self, majorComponent=self.majorComponent,
@@ -1289,7 +1289,7 @@ class SurgoSoilCollection(object):
             writer.writerow(c)
         csvfile.close()
 
-    def makeWeppSoils(self, initial_ksat=0.75, verbose=False,
+    def makeWeppSoils(self, initial_sat=0.75, verbose=False,
                       horizon_defaults=OrderedDict([('sandtotal_r', 66.8),
                                                ('claytotal_r', 7.0),
                                                ('om_r', 7.0),
@@ -1303,7 +1303,7 @@ class SurgoSoilCollection(object):
         weppSoils = {}
         invalidSoils = {}
         for mukey in self.mukeys:
-            weppSoil = WeppSoil(self, mukey, initial_ksat, horizon_defaults=horizon_defaults)
+            weppSoil = WeppSoil(self, mukey, initial_sat, horizon_defaults=horizon_defaults)
 
             if weppSoil.valid():
                 weppSoils[mukey] = weppSoil
