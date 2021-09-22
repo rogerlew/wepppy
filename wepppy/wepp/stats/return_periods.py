@@ -87,7 +87,7 @@ class ReturnPeriods:
 
                     row[cname] = v
 
-                row['Runoff'] = round(row['Runoff Volume'] / (wsarea * 10000.0) * 1000.0, 2)
+                row['Runoff'] = round(row['Runoff'] / (wsarea * 10000.0) * 1000.0, 2)
                 results[colname][retperiod] = row
 
         self.return_periods = results
