@@ -82,7 +82,7 @@ class Soils(NoDbBase):
             self._subs_summary = None
             self._chns_summary = None
             
-            self._initial_ksat = 0.75
+            self._initial_sat = 0.75
 
             soils_dir = self.soils_dir
             if not _exists(soils_dir):
@@ -137,16 +137,16 @@ class Soils(NoDbBase):
         return _join(self.wd, 'soils.nodb.lock')
 
     @property
-    def initial_ksat(self):
-        return getattr(self, '_initial_ksat', 0.75)
+    def initial_sat(self):
+        return getattr(self, '_initial_sat', 0.75)
 
-    @initial_ksat.setter
-    def initial_ksat(self, value):
+    @initial_sat.setter
+    def initial_sat(self, value):
         self.lock()
 
         # noinspection PyBroadException
         try:
-            self._initial_ksat = value
+            self._initial_sat = value
             self.dump_and_unlock()
         except Exception:
             self.unlock('-f')
@@ -262,7 +262,7 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    def build_statsgo(self, initial_ksat=None):
+    def build_statsgo(self, initial_sat=None):
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -274,8 +274,8 @@ class Soils(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            if initial_ksat is not None:
-                self._initial_ksat = initial_ksat
+            if initial_sat is not None:
+                self._initial_sat = initial_sat
 
             statsgoSpatial = StatsgoSpatial()
             watershed = Watershed.getInstance(wd)
@@ -293,7 +293,7 @@ class Soils(NoDbBase):
 
             mukeys = set(domsoil_d.values())
             surgo_c = SurgoSoilCollection(mukeys, use_statsgo=True)
-            surgo_c.makeWeppSoils(initial_ksat=self.initial_ksat)
+            surgo_c.makeWeppSoils(initial_sat=self.initial_sat)
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
@@ -392,7 +392,7 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    def build(self, initial_ksat=None):
+    def build(self, initial_sat=None):
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -410,9 +410,9 @@ class Soils(NoDbBase):
                 from wepppy.au.soils import build_asris_soils
                 self._build_by_identify(build_asris_soils)
             else:
-                self._build_gridded(initial_ksat=initial_ksat)
+                self._build_gridded(initial_sat=initial_sat)
         elif self.mode == SoilsMode.Single:
-            self._build_single(initial_ksat=initial_ksat)
+            self._build_single(initial_sat=initial_sat)
         elif self.mode == SoilsMode.SingleDb:
             self._build_singledb()
         elif self._mode in [SoilsMode.RRED_Burned, SoilsMode.RRED_Unburned]:
@@ -563,7 +563,7 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_single(self, initial_ksat=None):
+    def _build_single(self, initial_sat=None):
 
         soils_dir = self.soils_dir
 
@@ -571,12 +571,12 @@ class Soils(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            if initial_ksat is not None:
-                self._initial_ksat = initial_ksat
+            if initial_sat is not None:
+                self._initial_sat = initial_sat
             watershed = Watershed.getInstance(self.wd)
             mukey = self.single_selection
             surgo_c = SurgoSoilCollection([mukey])
-            surgo_c.makeWeppSoils(initial_ksat=self.initial_ksat)
+            surgo_c.makeWeppSoils(initial_sat=self.initial_sat)
             surgo_c.logInvalidSoils(wd=soils_dir)
 
             assert surgo_c.weppSoils[mukey].valid()
@@ -689,14 +689,14 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_gridded(self, initial_ksat=None):
+    def _build_gridded(self, initial_sat=None):
         soils_dir = self.soils_dir
         self.lock()
 
         # noinspection PyBroadException
         try:
-            if initial_ksat is not None:
-                self._initial_ksat = initial_ksat
+            if initial_sat is not None:
+                self._initial_sat = initial_sat
 
             _map = Ron.getInstance(self.wd).map
             watershed = Watershed.getInstance(self.wd)
@@ -710,7 +710,7 @@ class Soils(NoDbBase):
             sm = SurgoMap(ssurgo_fn)
             mukeys = set(sm.mukeys)
             surgo_c = SurgoSoilCollection(mukeys)
-            surgo_c.makeWeppSoils(initial_ksat=self.initial_ksat)
+            surgo_c.makeWeppSoils(initial_sat=self.initial_sat)
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
@@ -725,7 +725,7 @@ class Soils(NoDbBase):
                 )
             except NoValidSoilsException:
                 self.dump_and_unlock()
-                self.build_statsgo(initial_ksat=initial_ksat)
+                self.build_statsgo(initial_sat=initial_sat)
                 return
 
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
