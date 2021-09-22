@@ -377,11 +377,11 @@ class OutletSummary(ReportBase):
             units_norm = 'kg/ha/yr'
             yield key, v, units, v_norm, units_norm
 
-    def write(self, fp, write_header=True, run_descriptors=None):
+    def write(self, fp, write_header=True, run_descriptors=None, 
+              extraneous=False, auto_select_units=False):
 
         wtr = csv.writer(fp)
-
-        _data = list(self.__iter__())
+        _data = list(self.iter(extraneous=extraneous, auto_select_units=auto_select_units))
 
         hdr = []
         row = []
@@ -411,6 +411,7 @@ class OutletSummary(ReportBase):
         wtr.writerow(row)
 
 
+
 if __name__ == "__main__":
 
     loss = Loss('/geodata/weppcloud_runs/2aa3e70e-769b-4e1b-959c-54c8c7c4f2e6/wepp/output/loss_pw0.txt',
@@ -418,3 +419,4 @@ if __name__ == "__main__":
                 wd='/geodata/weppcloud_runs/2aa3e70e-769b-4e1b-959c-54c8c7c4f2e6/')
 
     hill_rpt = HillSummary(loss)
+
