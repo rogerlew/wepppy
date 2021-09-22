@@ -668,6 +668,11 @@ def ltf_index():
 def lt_steep_slope_index():
     return render_template('lt/SteepSlopes.html', user=current_user)
 
+@app.route('/locations/caldor')
+@app.route('/locations/caldor/')
+def calsor_index():
+    return render_template('locations/caldor/Caldor.html', user=current_user)
+
 @app.route('/seattle-municipal')
 @app.route('/seattle-municipal/')
 @app.route('/locations/seattle-municipal')
