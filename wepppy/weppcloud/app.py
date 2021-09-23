@@ -673,6 +673,19 @@ def lt_steep_slope_index():
 def calsor_index():
     return render_template('locations/caldor/Caldor.html', user=current_user)
 
+@app.route('/locations/caldor/results/<file>')
+@app.route('/locations//results/<file>/')
+def caldor_results(file):
+    """
+    recursive list the file structure of the working directory
+    """
+    fn = _join('/workdir/wepppy/wepppy/weppcloud/templates/locations/caldor/results', file)
+    
+    if _exists(fn):
+        return send_file(fn, as_attachment=True)
+    else:
+        return error_factory('File does not exist')
+    
 @app.route('/seattle-municipal')
 @app.route('/seattle-municipal/')
 @app.route('/locations/seattle-municipal')
