@@ -26,9 +26,12 @@ if __name__ == "__main__":
     os.mkdir(outdir)
 
     scenarios = [
-                 '*Caldor*CurCond*',
-                 '*Caldor*SBS',
-                 '*Caldor*Trtmt'
+                 'Caldor*CurCond.gridmet',
+                 'Caldor*SBS.gridmet',
+                 'lt_Caldor*CurCond',
+                 'lt_Caldor*SBS',
+                 'lt_Caldor*Trtmt'
+
                 ]
 
     wds = []
