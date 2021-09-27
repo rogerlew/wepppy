@@ -13,8 +13,44 @@
  
 <script>
 var mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
-    csv:'{{ csv_url }}',
-    csvHeaders:true,
+    csv: '{{ csv_url }}',
+    csvHeaders: true,
+    columns: [
+        { type: 'text', width: 210, 
+          source: ['bare', 
+                   'forest',
+                   'forest high sev fire', 
+                   'forest low sev fire', 
+                   'forest prescribed fire', 
+                   'short grass',
+                   'grass high sev fire',
+                   'grass low sev fire',
+                   'grass prescribed fire',
+                   'short grass',
+                   'shrub',
+                   'shrub high sev fire',
+                   'shrub low sev fire',
+                   'shrub prescribed fire',
+                   'skid',
+                   'tall grass',
+                   'young forest',
+                   'thinning' 
+                  ] },
+        { type: 'text', width: 110,
+          source: ['clay loam', 'loam', 'sand loam', 'silt loam'] },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 100 },
+        { type: 'text', width: 100 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 },
+        { type: 'text', width: 60 }
+    ]
 });
  
 document.getElementById('save').onclick = function () {
