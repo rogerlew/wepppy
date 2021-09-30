@@ -30,7 +30,7 @@
                 <p>Computes evaporation and transpiration (ET) based on Penman-Monteith’s equation. The default is
                     Penman’s equation.</p>
             <label class="form-check-label">
-                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+                <input id="checkbox_wepp_pmet" type="checkbox" class="form-check-input disable-readonly"
                        onchange="Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"
                        {% if wepp.run_pmet %}checked{% endif %}>
                 Run PMET (pmetpara.txt)
@@ -39,16 +39,17 @@
             <h5>Frost</h5>
                 <p>Adjustment of effective hydraulic and thermal conductivity for snow, frozen-residue, and frozen-soil.</p>
             <label class="form-check-label">
-                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+                <input id="checkbox_wepp_frost" type="checkbox" class="form-check-input disable-readonly"
                        onchange="Wepp.getInstance().set_run_wepp_routine('frost', this.checked);"
                        {% if wepp.run_frost %}checked{% endif %}>
                 Run Frost (frost.txt)
             </label>
             <br/><br/>
+
             <h5>Snow</h5>
                 <p>Adjustments for snow.</p>
             <label class="form-check-label">
-                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
+                <input id="checkbox_wepp_snow" type="checkbox" class="form-check-input disable-readonly"
                        onchange="Wepp.getInstance().set_run_wepp_routine('snow', this.checked);"
                        {% if wepp.run_snow %}checked{% endif %}>
                 Run Snow (snow.txt)
@@ -56,7 +57,7 @@
 
             <div class="form-group row" id="snow_opts_rst_container">
                 <div class="col-sm-4">
-                    <label for="gwstorage">Rain Snow Threshold Temperature (C): </label>
+                    <label for="snow_opts_rst">Rain Snow Threshold Temperature (C): </label>
                 </div>
                 <div class="col-sm-4">
                     <input id="snow_opts_rst" name="snow_opts_rst" class="form-control mr-sm-3" type="text"
@@ -66,7 +67,7 @@
 
             <div class="form-group row" id="snow_opts_newsnw_container">
                 <div class="col-sm-4">
-                    <label for="gwstorage">Density of new snow (g/cm<sup>3</sup>): </label>
+                    <label for="snow_opts_newsnw">Density of new snow (g/cm<sup>3</sup>): </label>
                 </div>
                 <div class="col-sm-4">
                     <input id="snow_opts_newsnw" name="snow_opts_newsnw" class="form-control mr-sm-3" type="text"
@@ -76,13 +77,61 @@
 
             <div class="form-group row" id="snow_opts_ssd_container">
                 <div class="col-sm-4">
-                    <label for="gwstorage">Snow Settling Density (g/cm<sup>3</sup>): </label>
+                    <label for="snow_opts_ssd">Snow Settling Density (g/cm<sup>3</sup>): </label>
                 </div>
                 <div class="col-sm-4">
                     <input id="snow_opts_ssd" name="snow_opts_ssd" class="form-control mr-sm-3" type="text"
                     value="{{ wepp.snow_opts.ssd }}" aria-label="Snow Settling Density">
                 </div>
             </div>
+            <br/>
+
+            <h5>Channel Critical Shear</h5>
+                <p>Adjustments for tcr.</p>
+            <label class="form-check-label">
+                <input id="checkbox_wepp_tcr" type="checkbox" class="form-check-input disable-readonly"
+                       onchange="Wepp.getInstance().set_run_wepp_routine('tcr', this.checked);"
+                       {% if wepp.run_tcr %}checked{% endif %}>
+                Run TCR (tcr.txt)
+            </label>
+
+            <div class="form-group row" id="tcr_opts_taumin_container">
+                <div class="col-sm-4">
+                    <label for="tcr_opts_taumin">Minimum value of channel critical shear (taumin) limit, N/m2: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="tcr_opts_taumax" name="tcr_opts_taumin" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.tcr_opts.taumin }}" aria-label="TCR taumin">
+                </div>
+            </div>
+            <div class="form-group row" id="tcr_opts_taumax_container">
+                <div class="col-sm-4">
+                    <label for="tcr_opts_taumax">Maximum value of channel critical shear (taumax) limit, N/m2: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="tcr_opts_taumax" name="tcr_opts_taumax" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.tcr_opts.taumax }}" aria-label="TCR taumax">
+                </div>
+            </div>
+            <div class="form-group row" id="tcr_opts_kch_container">
+                <div class="col-sm-4">
+                    <label for="tcr_opts_kch">Curve parameter k: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="tcr_opts_kch" name="tcr_opts_kch" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.tcr_opts.kch }}" aria-label="TCR kch">
+                </div>
+            </div>
+            <div class="form-group row" id="tcr_opts_nch_container">
+                <div class="col-sm-4">
+                    <label for="tcr_opts_nch">Curve parameter n: </label>
+                </div>
+                <div class="col-sm-4">
+                    <input id="tcr_opts_nch" name="tcr_opts_nch" class="form-control mr-sm-3" type="text"
+                    value="{{ wepp.tcr_opts.nch }}" aria-label="TCR nch">
+                </div>
+            </div>
+
 
             <br/>
             <h5>Baseflow Processing</h5>
