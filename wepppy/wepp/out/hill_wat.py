@@ -14,6 +14,7 @@ from collections import OrderedDict
 import numpy as np
 import os
 
+from wepppy.all_your_base import try_parse_float
 
 uint_types = ['OFE (#)', 'J', 'Y', 'M', 'D']
 vars_collapse_ofe = ['Y', 'J', 'M', 'D', 'Date', 'P (mm)', 'RM (mm)', 'Q (mm)',
@@ -23,11 +24,7 @@ vars_collapse_ofe = ['Y', 'J', 'M', 'D', 'Date', 'P (mm)', 'RM (mm)', 'Q (mm)',
 vars_collapse_time = ['Area (m^2)']
 
 
-def parse_float(x):
-    try:
-        return float(x)
-    except:
-        return float('nan')
+_nan = float('nan')
 
 
 class HillWat:
@@ -72,7 +69,7 @@ class HillWat:
                 if k in uint_types:
                     data[k].append(int(v))
                 else:
-                    data[k].append(parse_float(v))
+                    data[k].append(try_parse_float(v, _nan))
 
             assert 'Y' in data, (data, lines)
             year = data['Y'][-1]
