@@ -1,5 +1,7 @@
+from typing import Optional
 import math
 import enum
+import json
 
 from os.path import join as _join
 
@@ -62,6 +64,8 @@ class AshModel(object):
 
     @property
     def ini_material_available_mm(self):
+        print('proportion', self.proportion, type(self.proportion))
+        print('ini_ash_depth_mm', self.ini_ash_depth_mm, type(self.ini_ash_depth_mm))
         return self.proportion * self.ini_ash_depth_mm
 
     @property
@@ -85,7 +89,10 @@ class AshModel(object):
             return lookup_wind_threshold_white_ash_proportion(w)
 
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 25, 20, 10, 5, 2], area_ha=None, ini_ash_depth=None, ini_ash_load=None, run_wind_transport=True):
+                  recurrence=[100, 50, 25, 20, 10, 5, 2], 
+                  area_ha: Optional[float]=None, 
+                  ini_ash_depth: Optional[float]=None, 
+                  ini_ash_load: Optional[float]=None, run_wind_transport=True):
         """
         Runs the ash model for a hillslope
 
@@ -446,6 +453,12 @@ class AshModel(object):
                             _row[_m] = int(_row[_m])
 
                         return_periods[measure][retperiod] = _row
+
+        with open(_join(out_dir, '%s_ash_return_periods.json' % prefix), 'w') as fp:
+            json.dump(return_periods, fp)
+
+        with open(_join(out_dir, '%s_ash_annuals.json' % prefix), 'w') as fp:
+            json.dump(annuals, fp)
 
         return out_fn, return_periods, annuals
 
