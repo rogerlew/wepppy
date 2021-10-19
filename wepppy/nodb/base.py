@@ -136,6 +136,27 @@ class NoDbBase(object):
 
         return val
 
+    def set_attrs(self, attrs):
+        if attrs is None:
+            return
+
+        if len(attrs) == 0:
+            return
+
+        if self.islocked():
+            for k, v in attrs.items():
+                setattr(self, k, v)
+        else:
+            self.lock()
+            try:
+                for k, v in attrs.items():
+                    setattr(self, k, v)
+                self.dump_and_unlock()
+            except Exception:
+                self.unlock('-f')
+                raise
+            
+
     def dump_and_unlock(self, validate=True):
         self.dump()
         self.unlock()
