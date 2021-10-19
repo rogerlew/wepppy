@@ -1,0 +1,79 @@
+<h5>Channel Parameters</h5>
+
+<label class="form-check-label">
+    <input id="checkbox_wepp_tcr" type="checkbox" class="form-check-input disable-readonly"
+     onchange="Wepp.getInstance().set_run_wepp_routine('tcr', this.checked);"
+     {% if wepp.run_tcr %}checked{% endif %}>
+    Use variable channel critical shear as a function of channel slope (tcr.txt)
+</label>
+<br/><br/>
+
+<h6><b>Constant CS parameters</b></h6>
+<div class="form-group row" id="channel_critical_shear_container">
+    <div class="col-sm-4">
+        <label for="channel_critical_shear">Critical Shear (N/m<sup>2</sup>) based on Median Channel Bed Particle Size (mm): </label>
+    </div>
+    <div class="col-sm-4">
+        <select class="form-control disable-readonly" id="channel_critical_shear" name="channel_critical_shear" >
+	    <option value="{{ wepp.channel_critical_shear }}" selected>CS = {{ wepp.channel_critical_shear }}</option>
+	    {% for opt in critical_shear_options %}
+	        <option value="{{ opt["cs"] }}">
+	        {{ opt["particle_class"] }} ({{ opt["particle_diameter_range"] }} mm) CS = {{ opt["cs"] }}
+	        </option>
+	    {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="form-group row" id="channel_erodibility_container">
+    <div class="col-sm-4">
+        <label for="channel_erodibility">Channel Erodibility (s/m; 1e-6 default): </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="channel_erodibility" name="channel_erodibility" class="form-control mr-sm-3" type="text"
+         value="{{ wepp.channel_erodibility }}" aria-label="Channel erodibility">
+    </div>
+</div>
+
+<h6><b>Variable CS Parameters</b></h6>
+<a href="https://github.com/rogerlew/wepppy/raw/master/wepppy/wepp/soils/resources/ChannelCriticalShear_Vs_ChannelSlope.xlsx">Download the Channel Critical Shear Calculation Spreadsheet</a>
+<div class="form-group row" id="tcr_opts_taumin_container">
+    <div class="col-sm-4">
+        <label for="tcr_opts_taumin">Minimum value of channel critical shear (taumin) limit, N/m2: </label>
+     </div>
+     <div class="col-sm-4">
+        <input id="tcr_opts_taumax" name="tcr_opts_taumin" class="form-control mr-sm-3" type="text"
+         value="{{ wepp.tcr_opts.taumin }}" aria-label="TCR taumin">
+     </div>
+</div>
+
+<div class="form-group row" id="tcr_opts_taumax_container">
+    <div class="col-sm-4">
+        <label for="tcr_opts_taumax">Maximum value of channel critical shear (taumax) limit, N/m2: </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="tcr_opts_taumax" name="tcr_opts_taumax" class="form-control mr-sm-3" type="text"
+        value="{{ wepp.tcr_opts.taumax }}" aria-label="TCR taumax">
+    </div>
+</div>
+
+<div class="form-group row" id="tcr_opts_kch_container">
+    <div class="col-sm-4">
+        <label for="tcr_opts_kch">Curve parameter k: </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="tcr_opts_kch" name="tcr_opts_kch" class="form-control mr-sm-3" type="text"
+        value="{{ wepp.tcr_opts.kch }}" aria-label="TCR kch">
+    </div>
+</div>
+
+<div class="form-group row" id="tcr_opts_nch_container">
+    <div class="col-sm-4">
+        <label for="tcr_opts_nch">Curve parameter n: </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="tcr_opts_nch" name="tcr_opts_nch" class="form-control mr-sm-3" type="text"
+        value="{{ wepp.tcr_opts.nch }}" aria-label="TCR nch">
+    </div>
+</div>
+
