@@ -1215,6 +1215,7 @@ def hillslope0_ash(runid, config, topaz_id):
         ini_ash_depth = request.args.get('ini_ash_depth', None)
         if ini_ash_depth is None:
             ini_ash_depth = 5.0
+        ini_ash_depth = float(ini_ash_depth)
 
         ash_type = request.args.get('ash_type', None)
         if ash_type is None:
