@@ -6,262 +6,24 @@
     <div><a href="#advanced_opts_con" data-toggle="collapse">Advanced Options</a>
         <div id="advanced_opts_con" style="padding-left: 2em;" class="collapse">
             For more information on the advanced processing options see the <a href="https://doc.wepp.cloud/QuickStart.htm#wepp-advanced-options">documentation</a>
-
-            <h5>Flowpath Processing</h5>
-            <p>Running flowpaths produces a gridded soil deposition/loss map, but runtime is considerably longer.</p>
-            <label class="form-check-label">
-                <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_flowpaths(this.checked);"
-                       {% if wepp.run_flowpaths %}checked{% endif %}>
-                Run Flowpaths
-            </label>
+            {% include("controls/wepp_advanced_options/flowpaths.htm") %}
             <br/><br/>
-            <h5>Hourly Seepage</h5>
-            <p>Computes hourly instead of daily seepage calculations.
-               Only applies to projects with 7778 soils (Not WEPP-PEP).</p>
-            <label class="form-check-label">
-                <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_run_wepp_routine('wepp_ui', this.checked);"
-                       {% if wepp.run_wepp_ui %}checked{% endif %}>
-                Run hourly seepage (wepp_ui.txt)
-            </label>
+            {% include("controls/wepp_advanced_options/wepp_ui.htm") %}
             <br/><br/>
-            <h5>PMET</h5>
-                <p>Computes evaporation and transpiration (ET) based on Penman-Monteith’s equation. The default is
-                    Penman’s equation.</p>
-            <label class="form-check-label">
-                <input id="checkbox_wepp_pmet" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"
-                       {% if wepp.run_pmet %}checked{% endif %}>
-                Run PMET (pmetpara.txt)
-            </label>
+            {% include("controls/wepp_advanced_options/pmet.htm") %}
             <br/><br/>
-            <h5>Frost</h5>
-                <p>Adjustment of effective hydraulic and thermal conductivity for snow, frozen-residue, and frozen-soil.</p>
-            <label class="form-check-label">
-                <input id="checkbox_wepp_frost" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_run_wepp_routine('frost', this.checked);"
-                       {% if wepp.run_frost %}checked{% endif %}>
-                Run Frost (frost.txt)
-            </label>
+            {% include("controls/wepp_advanced_options/frost.htm") %}
             <br/><br/>
-
-            <h5>Snow</h5>
-                <p>Adjustments for snow.</p>
-            <label class="form-check-label">
-                <input id="checkbox_wepp_snow" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_run_wepp_routine('snow', this.checked);"
-                       {% if wepp.run_snow %}checked{% endif %}>
-                Run Snow (snow.txt)
-            </label>
-
-            <div class="form-group row" id="snow_opts_rst_container">
-                <div class="col-sm-4">
-                    <label for="snow_opts_rst">Rain Snow Threshold Temperature (C): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="snow_opts_rst" name="snow_opts_rst" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.snow_opts.rst }}" aria-label="Rain Snow Threshold">
-                </div>
-            </div>
-
-            <div class="form-group row" id="snow_opts_newsnw_container">
-                <div class="col-sm-4">
-                    <label for="snow_opts_newsnw">Density of new snow (g/cm<sup>3</sup>): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="snow_opts_newsnw" name="snow_opts_newsnw" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.snow_opts.newsnw }}" aria-label="Density of New Snow">
-                </div>
-            </div>
-
-            <div class="form-group row" id="snow_opts_ssd_container">
-                <div class="col-sm-4">
-                    <label for="snow_opts_ssd">Snow Settling Density (g/cm<sup>3</sup>): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="snow_opts_ssd" name="snow_opts_ssd" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.snow_opts.ssd }}" aria-label="Snow Settling Density">
-                </div>
-            </div>
-            <br/>
-
-            <h5>Channel Critical Shear</h5>
-                <p>Adjustments for tcr.</p>
-            <label class="form-check-label">
-                <input id="checkbox_wepp_tcr" type="checkbox" class="form-check-input disable-readonly"
-                       onchange="Wepp.getInstance().set_run_wepp_routine('tcr', this.checked);"
-                       {% if wepp.run_tcr %}checked{% endif %}>
-                Run TCR (tcr.txt)
-            </label>
-
-            <div class="form-group row" id="tcr_opts_taumin_container">
-                <div class="col-sm-4">
-                    <label for="tcr_opts_taumin">Minimum value of channel critical shear (taumin) limit, N/m2: </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="tcr_opts_taumax" name="tcr_opts_taumin" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.tcr_opts.taumin }}" aria-label="TCR taumin">
-                </div>
-            </div>
-            <div class="form-group row" id="tcr_opts_taumax_container">
-                <div class="col-sm-4">
-                    <label for="tcr_opts_taumax">Maximum value of channel critical shear (taumax) limit, N/m2: </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="tcr_opts_taumax" name="tcr_opts_taumax" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.tcr_opts.taumax }}" aria-label="TCR taumax">
-                </div>
-            </div>
-            <div class="form-group row" id="tcr_opts_kch_container">
-                <div class="col-sm-4">
-                    <label for="tcr_opts_kch">Curve parameter k: </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="tcr_opts_kch" name="tcr_opts_kch" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.tcr_opts.kch }}" aria-label="TCR kch">
-                </div>
-            </div>
-            <div class="form-group row" id="tcr_opts_nch_container">
-                <div class="col-sm-4">
-                    <label for="tcr_opts_nch">Curve parameter n: </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="tcr_opts_nch" name="tcr_opts_nch" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.tcr_opts.nch }}" aria-label="TCR nch">
-                </div>
-            </div>
-
-
-            <br/>
-            <h5>Baseflow Processing</h5>
-            <div class="form-group row" id="gwstorage_container">
-                <div class="col-sm-4">
-                    <label for="gwstorage">Initial groundwater storage (mm): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="gwstorage" name="gwstorage" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.baseflow_opts.gwstorage }}" aria-label="Initial groundwater storage">
-                </div>
-            </div>
-            <div class="form-group row" id="bfcoeff_container">
-                <div class="col-sm-4">
-                    <label for="bfcoeff">Baseflow coefficient (per day): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="bfcoeff" name="bfcoeff" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.baseflow_opts.bfcoeff }}" aria-label="Baseflow coefficient">
-                </div>
-            </div>
-            <div class="form-group row" id="dscoeff_container">
-                <div class="col-sm-4">
-                    <label for="dscoeff">Deep seepage coefficient (per day): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="dscoeff" name="dscoeff" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.baseflow_opts.dscoeff }}" aria-label="Deep seepage coefficient">
-                </div>
-            </div>
-            <div class="form-group row" id="bfthreshold_container">
-                <div class="col-sm-4">
-                    <label for="bfthreshold">Watershed groundwater baseflow threshold area (ha): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="bfthreshold" name="bfthreshold" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.baseflow_opts.bfthreshold }}" aria-label="Watershed groundwater baseflow threshold area">
-                </div>
-            </div>
-            <br/>
-        
-            <h5>Channel Parameters</h5>
-            <div class="form-group row" id="channel_critical_shear_container">
-                <div class="col-sm-4">
-                    <label for="channel_critical_shear">Critical Shear (N/m<sup>2</sup>) based on Median Channel Bed Particle Size (mm): </label>
-                </div>
-                <div class="col-sm-4">
-                    <select class="form-control disable-readonly" id="channel_critical_shear" name="channel_critical_shear" >
-                        <option value="{{ wepp.channel_critical_shear }}" selected>CS = {{ wepp.channel_critical_shear }}</option>
-                        {% for opt in critical_shear_options %}
-                        <option value="{{ opt["cs"] }}">
-                            {{ opt["particle_class"] }} ({{ opt["particle_diameter_range"] }} mm) CS = {{ opt["cs"] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group row" id="channel_erodibility_container">
-                <div class="col-sm-4">
-                    <label for="channel_erodibility">Channel Erodibility (s/m; 1e-6 default): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="channel_erodibility" name="channel_erodibility" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.channel_erodibility }}" aria-label="Channel erodibility">
-                </div>
-            </div>
-            <br/>
-
-            <h5>Bedrock</h5>
-            <div class="form-group row" id="kslast_container">
-                <div class="col-sm-4">
-                    <label for="kslast">ksat for restrictive layer: </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="kslast" name="kslast" class="form-control mr-sm-3" type="text"
-                    value="{{ wepp.kslast }}" aria-label="ksat for restrictive layer">
-                </div>
-            </div>
-            <br/>
-        
-            {% if "lt" in ron.mods %}
-            <h5>Phosphorus Processing</h5>
-            <p><i>Phosphorus coefficients determined by lt mod</i></p>
-            {% else %}
-            <h5>Pollutant Processing (Optional)</h5>
-            {%- endif -%}
-            <div class="form-group row" id="surf_runoff_container">
-                <div class="col-sm-4">
-                    <label for="surf_runoff">Surface runoff concentration (mg/l): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="surf_runoff" name="surf_runoff" class="form-control mr-sm-3" type="text"
-                    value="{% if isfloat(wepp.phosphorus_opts.surf_runoff) %}{{ "%.4f" | format(wepp.phosphorus_opts.surf_runoff) }}{% endif %}"
-                    placeholder="e.g. 0.004"
-                    aria-label="Surface runoff concentration">
-                </div>
-            </div>
-            <div class="form-group row" id="lateral_flow_container">
-                <div class="col-sm-4">
-                    <label for="lateral_flow">Subsurface lateral flow concentration (mg/l): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="lateral_flow" name="lateral_flow" class="form-control mr-sm-3" type="text"
-                    value="{% if isfloat(wepp.phosphorus_opts.lateral_flow) %}{{ "%.4f" | format(wepp.phosphorus_opts.lateral_flow) }}{% endif %}"
-                    placeholder="e.g. 0.005"
-                    aria-label="Subsurface lateral flow concentration">
-                </div>
-            </div>
-            <div class="form-group row" id="baseflow_container">
-                <div class="col-sm-4">
-                    <label for="baseflow">Baseflow concentration (mg/l): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="baseflow" name="baseflow" class="form-control mr-sm-3" type="text"
-                    value="{% if isfloat(wepp.phosphorus_opts.baseflow) %}{{ "%.4f" | format(wepp.phosphorus_opts.baseflow) }}{% endif %}"
-                    placeholder="e.g. 0.006"
-                    aria-label="Baseflow concentration">
-                </div>
-            </div>
-            <div class="form-group row" id="sediment_container">
-                <div class="col-sm-4">
-                    <label for="sediment">Sediment concentration (mg/kg): </label>
-                </div>
-                <div class="col-sm-4">
-                    <input id="sediment" name="sediment" class="form-control mr-sm-3" type="text"
-                    value="{% if isfloat(wepp.phosphorus_opts.sediment) %}{{ wepp.phosphorus_opts.sediment | round }}{% endif %}"
-                    placeholder="e.g. 800"
-                    aria-label="Sediment concentration">
-                </div>
-            </div>
+            {% include("controls/wepp_advanced_options/snow.htm") %}
+            <br/><br/>
+            {% include("controls/wepp_advanced_options/baseflow.htm") %}
+            <br/><br/>
+            {% include("controls/wepp_advanced_options/channels.htm") %}
+            <br/><br/>
+            {% include("controls/wepp_advanced_options/bedrock.htm") %}
+            <br/><br/>
+            {% include("controls/wepp_advanced_options/phosphorus.htm") %}
+            <br/><br/>
         </div>
     </div>
 
@@ -273,7 +35,7 @@
               class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
               type="button">Run WEPP</button>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <small id="hint_run_wepp"></small>
         </div>
     </div>
