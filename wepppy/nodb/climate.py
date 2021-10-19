@@ -112,11 +112,49 @@ class ClimateMode(IntEnum):
     AGDC = 10       # Single or multiple
     GridMetPRISM = 11    # Daymet, single or multiple
 
+    @staticmethod
+    def parse(x):
+        if x == None:
+            return ClimateMode.Undefined
+        elif x == 'vanilla':
+            return ClimateMode.Vanilla
+        elif x == 'observed':
+            return ClimateMode.Observed
+        elif x == 'observed_prism':
+            return ClimateMode.ObservedPRISM
+        elif x == 'future':
+            return ClimateMode.Future
+        elif x == 'single_storm':
+            return ClimateMode.SingleStorm
+        elif x == 'prism':
+            return ClimateMode.PRISM
+        elif x == 'observed_db':
+            return ClimateMode.ObservedDb
+        elif x == 'future_db':
+            return ClimateMode.FutureDb
+        elif x == 'eobs':
+            return ClimateMode.EOBS
+        elif x == 'agdc':
+            return ClimateMode.AGDC
+        elif x == 'gridmet_prism':
+            return ClimateMode.GridMetPRISM
+        raise KeyError
+
 
 class ClimateSpatialMode(IntEnum):
     Undefined = -1
     Single = 0
     Multiple = 1
+
+    @staticmethod
+    def parse(x):
+        if x == None:
+            return ClimateSpatialMode.Undefined
+        elif x == 'single':
+            return ClimateSpatialMode.Single
+        elif x == 'multiple':
+            return ClimateSpatialMode.Multiple
+        raise KeyError
 
 
 def build_observed(kwds):
@@ -415,12 +453,10 @@ class Climate(NoDbBase, LogMixin):
         try:
             if isinstance(value, ClimateMode):
                 self._climate_mode = value
-
-            elif isinstance(value, int):
-                self._climate_mode = ClimateMode(value)
-
+            elif isint(value):
+                self._climate_mode = ClimateMode(int(value))
             else:
-                raise ValueError('most be ClimateMode or int')
+                self._climate_mode = ClimateMode.parse(value)
 
             self.dump_and_unlock()
 
@@ -452,7 +488,7 @@ class Climate(NoDbBase, LogMixin):
                 self._climate_spatialmode = ClimateSpatialMode(value)
 
             else:
-                raise ValueError('most be ClimateSpatialMode or int')
+                self._climate_spatialmode = ClimateSpatialMode.parse(value)
 
             self.dump_and_unlock()
 
@@ -579,7 +615,17 @@ class Climate(NoDbBase, LogMixin):
 
     @input_years.setter
     def input_years(self, value):
-        self._input_years = value
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self._input_years = int(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     #
     # has_climate
@@ -835,7 +881,7 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def build(self, verbose=False):
+    def build(self, verbose=False, attrs=None):
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -861,49 +907,51 @@ class Climate(NoDbBase, LogMixin):
 
         # vanilla Cligen
         elif climate_mode == ClimateMode.Vanilla:
-            self._build_climate_vanilla()
+            self._build_climate_vanilla(verbose=verbose, attrs=attrs)
 
         # observed
         elif climate_mode == ClimateMode.Observed:
-            self._build_climate_observed()
+            self._build_climate_observed(verbose=verbose, attrs=attrs)
 
         # observed
         elif climate_mode == ClimateMode.ObservedPRISM:
-            self._build_climate_observed_prism_revised()
+            self._build_climate_observed_prism_revised(verbose=verbose, attrs=attrs)
 
         # future
         elif climate_mode == ClimateMode.Future:
-            self._build_climate_future()
+            self._build_climate_future(verbose=verbose, attrs=attrs)
 
         # single storm
         elif climate_mode == ClimateMode.SingleStorm:
-            self._build_climate_single_storm()
+            self._build_climate_single_storm(verbose=verbose, attrs=attrs)
 
         # PRISM
         elif climate_mode == ClimateMode.PRISM:
-            self._build_climate_mod(mod_function=prism_mod, verbose=verbose)
+            self._build_climate_mod(mod_function=prism_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
             assert self.orig_cli_fn is not None
-            self._build_climate_observed_cli_PRISM(verbose=verbose)
+            self._build_climate_observed_cli_PRISM(verbose=verbose, attrs=attrs)
 
         # EOBS
         elif climate_mode == ClimateMode.EOBS:
-            self._build_climate_mod(mod_function=eobs_mod, verbose=verbose)
+            self._build_climate_mod(mod_function=eobs_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.AGDC:
-            self._build_climate_mod(mod_function=agdc_mod, verbose=verbose)
+            self._build_climate_mod(mod_function=agdc_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.GridMetPRISM:
-            self._build_climate_observed_gridmet_prism_revised()
+            self._build_climate_observed_gridmet_prism_revised(verbose=verbose, attrs=attrs)
 
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
 
-    def _build_climate_observed_cli_PRISM(self, verbose):
+    def _build_climate_observed_cli_PRISM(self, verbose=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             self.log('Copying original climate file...')
             orig_cli_fn = self.orig_cli_fn
             cli_dir = self.cli_dir
@@ -921,7 +969,6 @@ class Climate(NoDbBase, LogMixin):
 
             # build a climate for the channels.
             ws_lng, ws_lat = watershed.centroid
-
 
             distance = 1e38
             closest_hill = None
@@ -969,13 +1016,15 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_mod(self, mod_function, verbose):
+    def _build_climate_mod(self, mod_function, verbose=False, attrs=None):
         self.log('  running _build_climate_mod{}... \n'.format(mod_function.__name__))
 
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             # cligen can accept a 5 digit random number seed
             # we want to specify this to ensure that the precipitation
             # events are synchronized across the subcatchments
@@ -1048,11 +1097,13 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_vanilla(self):
+    def _build_climate_vanilla(self, verbose=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             self.log('  running _build_climate_vanilla... ')
             climatestation = self.climatestation
             years = self._input_years
@@ -1071,12 +1122,14 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_observed(self, verbose=False):
+    def _build_climate_observed(self, verbose=False, attrs=None):
 
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             self.log('  running _build_climate_observed (watershed)...')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
@@ -1169,14 +1222,14 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_observed_prism_revised(self, verbose=False):
-
-        assert self.climate_spatialmode == ClimateSpatialMode.Multiple
-
+    def _build_climate_observed_prism_revised(self, verbose=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
+            assert self.climate_spatialmode == ClimateSpatialMode.Multiple
             self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
@@ -1279,12 +1332,14 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_observed_gridmet_prism_revised(self, verbose=False):
+    def _build_climate_observed_gridmet_prism_revised(self, verbose=False, attrs=None):
 
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
@@ -1391,11 +1446,13 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_future(self):
+    def _build_climate_future(self, verboase=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             cli_dir = self.cli_dir
 
             self.log('  running _build_climate_future... \n')
@@ -1465,7 +1522,7 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_single_storm(self):
+    def _build_climate_single_storm(self, verbose=False, attrs=None):
         """
         single storm
         """
@@ -1473,6 +1530,8 @@ class Climate(NoDbBase, LogMixin):
 
         # noinspection PyBroadInspection
         try:
+            self.set_attrs(attrs)
+
             self.log('  running _build_climate_single_storm... ')
             climatestation = self.climatestation
 
