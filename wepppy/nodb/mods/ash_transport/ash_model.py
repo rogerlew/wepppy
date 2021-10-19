@@ -462,8 +462,8 @@ class WhiteAshModel(AshModel):
             density_at_fc=0.68,
             fraction_water_retention_capacity_at_sat=0.87,
             runoff_threshold=0.0,
-            water_transport_rate=0.88989,
-            water_transport_rate_k=-0.126,
+            water_transport_rate=3.816,
+            water_transport_rate_k=-0.0421,
             wind_threshold=6,
             porosity=0.8)
 
