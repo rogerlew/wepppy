@@ -63,6 +63,7 @@ from wepppy.all_your_base import (
     NCPU,
     IS_WINDOWS
 )
+from wepppy.all_your_base import try_parse_float
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator
 
 from wepppy.wepp.out import (
@@ -118,20 +119,12 @@ class SnowOpts(object):
             self.ssd = ssd
 
     def parse_inputs(self, kwds):
-        if 'rst' in kwds:
-            self.rst = float(kwds['rst'])
-        elif 'snow_opts_rst' in kwds:
-            self.rst = float(kwds['snow_opts_rst'])
-
-        if 'newsnw' in kwds:
-            self.newsnw = float(kwds['newsnw'])
-        elif 'snow_opts_newsnw' in kwds:
-            self.newsnw = float(kwds['snow_opts_newsnw'])
-
-        if 'ssd' in kwds:
-            self.ssd = float(kwds['ssd'])
-        elif 'snow_opts_ssd' in kwds:
-            self.ssd = float(kwds['snow_opts_ssd'])
+        for var in ('rst', 'newsnw', 'ssd'):
+            _var = f'snow_opts_{var}'
+            if var in kwds:
+                setattr(self, var, try_parse_float(kwds[var], None))
+            elif _var in kwds:
+                setattr(self, _var, try_parse_float(kwds[_var], None))
 
     @property
     def contents(self):
@@ -173,10 +166,13 @@ class BaseflowOpts(object):
             self.bfthreshold = bfthreshold
 
     def parse_inputs(self, kwds):
-        self.gwstorage = float(kwds['gwstorage'])
-        self.bfcoeff = float(kwds['bfcoeff'])
-        self.dscoeff = float(kwds['dscoeff'])
-        self.bfthreshold = float(kwds['bfthreshold'])
+        for var in ('gwstorage', 'bfcoeff', 'dscoeff', 'bfthreshold'):
+            _var = f'baseflow_opts_{var}'
+
+            if var in kwds:
+                setattr(self, var, try_parse_float(kwds[var], None))
+            elif _var in kwds:
+                setattr(self, _var, try_parse_float(kwds[_var], None))
 
     @property
     def contents(self):
@@ -222,14 +218,13 @@ class PhosphorusOpts(object):
         self.sediment = sediment
 
     def parse_inputs(self, kwds):
-        # noinspection PyBroadException
-        try:
-            self.surf_runoff = float(kwds['surf_runoff'])
-            self.lateral_flow = float(kwds['lateral_flow'])
-            self.baseflow = float(kwds['baseflow'])
-            self.sediment = float(kwds['sediment'])
-        except Exception:
-            pass
+        for var in ('surf_runoff', 'lateral_flow', 'baseflow', 'sediment'):
+            _var = f'phosphorus_opts_{var}'
+
+            if var in kwds:
+                setattr(self, var, try_parse_float(kwds[var], None))
+            elif _var in kwds:
+                setattr(self, _var, try_parse_float(kwds[_var], None))
 
     @property
     def isvalid(self):
@@ -256,6 +251,42 @@ class PhosphorusOpts(object):
                     sediment=self.sediment)
 
 
+class TCROpts(object):
+    def __init__(self, taumin=None, taumax=None, kch=None, nch=None):
+        """
+        Stores the coeffs that go into tcr.txt
+        """
+        self.taumin = taumin
+        self.taumax = taumax
+        self.kch = kch
+        self.nch = nch
+
+    def parse_inputs(self, kwds):
+        for var in ('taumin', 'taumax', 'kch', 'nch'):
+            _var = f'tcr_opts_{var}'
+
+            if var in kwds:
+                setattr(self, var, try_parse_float(kwds[var], None))
+            elif _var in kwds:
+                setattr(self, _var, try_parse_float(kwds[_var], None))
+
+    @property
+    def contents(self):
+        if isfloat(self.taumax) and \
+           isfloat(self.taumin) and \
+           isfloat(self.kch) and \
+           isfloat(self.nch):
+            return (
+                '{0.taumin}\ttaumin\n'
+                '{0.taumax}\ttaumax\n'
+                '{0.kch}\tkch\n'
+                '{0.nch}\tnch\n'
+                .format(self)
+            )
+        else:
+            return '\n'
+
+
 class WeppNoDbLockedException(Exception):
     pass
 
@@ -274,73 +305,52 @@ class Wepp(NoDbBase, LogMixin):
             if not _exists(wepp_dir):
                 os.mkdir(wepp_dir)
 
-            surf_runoff = self.config_get_float('phosphorus_opts', 'surf_runoff')
-            lateral_flow = self.config_get_float('phosphorus_opts', 'lateral_flow')
-            baseflow = self.config_get_float('phosphorus_opts', 'baseflow')
-            sediment = self.config_get_float('phosphorus_opts', 'sediment')
-
             self.phosphorus_opts = PhosphorusOpts(
-                surf_runoff=surf_runoff,
-                lateral_flow=lateral_flow,
-                baseflow=baseflow,
-                sediment=sediment)
+                surf_runoff=self.config_get_float('phosphorus_opts', 'surf_runoff'),
+                lateral_flow=self.config_get_float('phosphorus_opts', 'lateral_flow'),
+                baseflow=self.config_get_float('phosphorus_opts', 'baseflow'),
+                sediment=self.config_get_float('phosphorus_opts', 'sediment'))
 
             self.p_surf_runoff_map = self.config_get_path('phosphorus_opts', 'surf_runoff_map')
             self.p_lateral_flow_map = self.config_get_path('phosphorus_opts', 'lateral_flow_map')
             self.p_baseflow_map = self.config_get_path('phosphorus_opts', 'baseflow_map')
             self.p_sediment_map = self.config_get_path('phosphorus_opts', 'sediment_map')
 
-            snow_rst = self.config_get_float('snow_opts', 'rst')
-            snow_newsnw = self.config_get_float('snow_opts', 'newsnw')
-            snow_ssd = self.config_get_float('snow_opts', 'ssd')
+            self.snow_opts = SnowOpts(
+                rst=self.config_get_float('snow_opts', 'rst'),
+                newsnw=self.config_get_float('snow_opts', 'newsnw'),
+                ssd=self.config_get_float('snow_opts', 'ssd'))
 
-            _wepp_ui = self.config_get_bool('wepp', 'wepp_ui')
-            _pmet = self.config_get_bool('wepp', 'pmet')
-            _frost = self.config_get_bool('wepp', 'frost')
-            _tcr = self.config_get_bool('wepp', 'tcr')
-
-            baseflow_gwstorage = self.config_get_float('baseflow_opts', 'gwstorage')
-            baseflow_bfcoeff = self.config_get_float('baseflow_opts', 'bfcoeff')
-            baseflow_dscoeff = self.config_get_float('baseflow_opts', 'dscoeff')
-            baseflow_bfthreshold = self.config_get_float('baseflows_opts', 'bfthreshold')
+            self.tcr_opts = TCROpts(
+                taumin=self.config_get_float('tcr_opts', 'taumin'),
+                taumax=self.config_get_float('tcr_opts', 'taumax'),
+                kch=self.config_get_float('tcr_opts', 'kch'),
+                nch=self.config_get_float('tcr_opts', 'nch'))
+           
+            self.channel_critical_shear_map = self.config_get_path('wepp', 'channel_critical_shear_map')
 
             self.baseflow_opts = BaseflowOpts(
-                gwstorage=baseflow_gwstorage,
-                bfcoeff=baseflow_bfcoeff,
-                dscoeff=baseflow_dscoeff,
-                bfthreshold=baseflow_bfthreshold)
+                gwstorage=self.config_get_float('baseflow_opts', 'gwstorage'),
+                bfcoeff = self.config_get_float('baseflow_opts', 'bfcoeff'),
+                dscoeff = self.config_get_float('baseflow_opts', 'dscoeff'),
+                bfthreshold = self.config_get_float('baseflows_opts', 'bfthreshold'))
 
             self.baseflow_gwstorage_map = self.config_get_path('baseflow_opts', 'gwstorage_map')
             self.baseflow_bfcoeff_map = self.config_get_path('baseflow_opts', 'bfcoeff_map')
             self.baseflow_dscoeff_map = self.config_get_path('baseflow_opts', 'dscoeff_map')
             self.baseflow_bfthreshold_map = self.config_get_path('baseflow_opts', 'bfthreshold_map')
 
-            _baseflow = self.config_get_bool('wepp', 'baseflow')
-            _snow = self.config_get_bool('wepp', 'snow')
+            self._run_wepp_ui = self.config_get_bool('wepp', 'wepp_ui')
+            self._run_pmet = self.config_get_bool('wepp', 'pmet')
+            self._run_frost = self.config_get_bool('wepp', 'frost')
+            self._run_tcr = self.config_get_bool('wepp', 'tcr')
+            self._run_baseflow = self.config_get_bool('wepp', 'baseflow')
+            self._run_snow = self.config_get_bool('wepp', 'snow')
+            self._wepp_bin = self.config_get_str('wepp', 'bin')
+            self._channel_erodibility =  self.config_get_float('wepp', 'channel_erodibility')
+            self._channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
+            self._kslast = self.config_get_float('wepp', 'kslast')
 
-            _channel_erodibility = self.config_get_float('wepp', 'channel_erodibility')
-            _channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
-
-            self.channel_critical_shear_map = self.config_get_path('wepp', 'channel_critical_shear_map')
-
-            _kslast = self.config_get_float('wepp', 'kslast')
-
-            _wepp_bin = self.config_get_str('wepp', 'bin')
-
-            self._run_wepp_ui = _wepp_ui
-            self._run_pmet = _pmet
-            self._run_frost = _frost
-            self._run_tcr = _tcr
-            self._run_baseflow = _baseflow
-            self._run_snow = _snow
-            self._wepp_bin = _wepp_bin
-            self._channel_erodibility = _channel_erodibility
-            self._channel_critical_shear = _channel_critical_shear
-            self._kslast = _kslast
-
-            self.snow_opts = SnowOpts(rst=snow_rst,
-                                      newsnw=snow_newsnw,
-                                      ssd=snow_ssd)
             self.run_flowpaths = False
             self.loss_grid_d_path = None
 
@@ -480,6 +490,8 @@ class Wepp(NoDbBase, LogMixin):
         try:
             self.baseflow_opts.parse_inputs(kwds)
             self.phosphorus_opts.parse_inputs(kwds)
+            if hasattr(self, 'tcr_opts'):
+                self.tcr_opts.parse_inputs(kwds)
 
             if hasattr(self, 'snow_opts'):
                 self.snow_opts.parse_inputs(kwds)
@@ -593,7 +605,10 @@ class Wepp(NoDbBase, LogMixin):
     def _prep_tcr(self):
         fn = _join(self.runs_dir, 'tcr.txt')
         with open(fn, 'w') as fp:
-            fp.write('\n')
+            if hasattr(self, 'tcr_opts'):
+                fp.write(self.tcr_opts.contents)
+            else:
+                fp.write('\n')
 
     def _prep_pmet(self, mid_season_crop_coeff=0.95, p_coeff=0.80):
         self.log('nodb.Wepp._prep_pmet::mid_season_crop_coeff = {}, p_coeff = {} '

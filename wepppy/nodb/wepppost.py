@@ -300,8 +300,9 @@ class WeppPost(NoDbBase):
         sed_yield, solub_reactive_p, particulate_p, total_p = [], [], [], []
         with open(ebe_fn) as fp:
             for line in fp.readlines()[9:]:
-                day, mo, year, p, _runoff, peak_runoff, _sed_yield, _solub_reactive_p, _particulate_p, _total_p \
-                    = line.split()
+                line = line.split()
+                day, mo, year, p, _runoff, peak_runoff, _sed_yield, _solub_reactive_p, _particulate_p, _total_p = \
+                    line[:10]
 
                 sed_yield.append(float(_sed_yield) / 1000.0 / ws_ha)
                 solub_reactive_p.append(float(_solub_reactive_p))
