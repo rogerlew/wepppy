@@ -89,7 +89,7 @@ Year 1
 
 1  # landuse <cropland>
 1  # plant growth scenario
-1  # surface effect scenario
+0  # surface effect scenario
 0  # contour scenario
 0  # drainage scenario
 2 # management <perennial>
