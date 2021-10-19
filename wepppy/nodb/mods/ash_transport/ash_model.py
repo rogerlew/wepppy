@@ -258,7 +258,7 @@ class AshModel(object):
 
             # calculate cumulative runoff
             if dff > 0:
-                cum_runoff[i] = cum_runoff[i-1] + effective_runoff[i]
+                cum_runoff[i] = cum_runoff[i-1] + effective_runoff[i-1]
 
             # water transport is empirically modeled
             # black and white ash have their own models
