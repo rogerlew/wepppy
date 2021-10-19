@@ -9,7 +9,8 @@ from datetime import datetime
 
 import awesome_codename
 
-from wepppy.nodb import Ron, Watershed, Landuse, Soils
+from wepppy.nodb import Ron, Watershed, Landuse, Soils, Climate
+from wepppy.nodb.climate import ClimateSpatialMode
 from wepppy.nodb.mods import RangelandCover
 from wepppy.weppcloud.app import get_wd
 
@@ -56,9 +57,9 @@ class BatchProcessor(object):
             self._build_rangeland_cover()
 
         self._build_landuse()
-
         self._build_soils()
-
+        self._set_climate_station()
+        self._build_climate()
 
     @property
     def mods(self):
@@ -135,6 +136,11 @@ class BatchProcessor(object):
     def outlet(self):
         return self.pars.get('watershed').get('outlet')
 
+    @property
+    def climate_mode(self):
+        return self.pars.get('climate').get('climate_mode')
+
+
     def get_par(self, section, key):
         return self.pars.get(section).get(key)
 
@@ -163,9 +169,72 @@ class BatchProcessor(object):
         soils = Soils.getInstance(self.wd)
         soils.build()
 
+    def _set_climate_station(self):
+        climate = Climate.getInstance(self.wd)
+
+        try:
+            station_id = self.pars['climate']['climate_station']['station_id']
+        except KeyError:
+            selection_mode = self.pars['climate']['climate_station']['selection_mode']
+            if selection_mode == 'closest':
+                station_id = climate.find_closest_stations()[0]['id'] 
+            elif selection_mode == 'multi-factor' or selection_mode == 'heuristic':
+                station_id = climate.find_heuristic_stations()[0]['id'] 
+
+        climate.climatestation = station_id 
+
+    def _build_climate(self):
+        climate_mode = self.climate_mode
+        climate = Climate.getInstance(self.wd)
+
+        assert climate_mode in (
+            None, 'vanilla', 'observed', 'observed_prism', 'future', 'single_storm', 
+            'prism', 'observed_db', 'future_db', 'eobs', 'agdc', 'gridmet_prism'), climate_mode
+
+        if climate_mode is not None:
+            climate.climate_mode = climate_mode
+
+        attrs = {}
+        input_years = self.pars.get('climate').get('input_years')
+        if input_years is not None:
+            attrs['_input_years'] = input_years
+
+        if 'prism' in climate_mode:
+            attrs['_climate_spatialmode'] = ClimateSpatialMode.Multiple
+        else:
+            try:
+                climate_spatialmode = self.pars['climate']['spatial_mode']
+                attrs['_climate_spatialmode'] = ClimateSpatialMode.parse(climate_spatialmode)
+            except KeyError:
+                pass
+
+        if climate_mode == 'observed' or \
+             climate_mode == 'observed_prism' or \
+             climate_mode == 'gridmet_prism': 
+            attrs['_observed_start_year'] = self.get_par('climate', 'start_year')
+            attrs['_observed_end_year'] = self.get_par('climate', 'end_year')
+
+        elif climate_mode == 'future':
+            attrs['_future_start_year'] = self.get_par('climate', 'start_year')
+            attrs['_future_end_year'] = self.get_par('climate', 'end_year')
+
+
+        self.log(f'attrs = {attrs}')
+        climate.build(attrs=attrs)
+
+    def _run_wepp(self):
+        wepp = Wepp.getInstance()
 
 if __name__ == "__main__":
-    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap.json'
+    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm.json'
+    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_heuristic.json'
+    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_specified_station_id.json'
+    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_observed.json'
+    #script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_observed_prism.json'
+    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_gridmet_prism.json'
+    #script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_observed_multiple.json'
+    script_fn = '/workdir/wepppy/wepppy/rhem/tests/rap_sm_prism.json'
 
     batch_processor = BatchProcessor()
     batch_processor.run_script(script_fn)
+

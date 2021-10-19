@@ -1,0 +1,25 @@
+{
+  "project": {
+    "name": "shrubland 001",
+    "cellsize": 30, 
+    "config": "rhem"
+  },
+  "watershed": {
+    "extent": [-113.32766532897949, 44.3211155556217, -113.29762458801271, 44.342603825384295],
+    "map_center": [-113.3126449584961, 44.33186067465129],
+    "map_zoom": 15,
+    "outlet": [-113.31636173068611, 44.332568589331416],
+    "delineation_backend": "topaz"},
+  "topaz": {
+    "mcl": 60,
+    "csa": 5
+  },
+  "climate": {
+    "climate_mode": "vanilla",
+    "input_years": 30,
+    "climate_station": {
+      "selection_mode": "closest"
+    }
+  }
+}
+
