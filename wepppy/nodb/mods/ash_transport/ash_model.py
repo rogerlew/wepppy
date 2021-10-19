@@ -44,7 +44,8 @@ class AshModel(object):
                  runoff_threshold,
                  water_transport_rate,
                  water_transport_rate_k,
-                 wind_threshold):
+                 wind_threshold,
+                 porosity):
         self.ash_type = ash_type
         self.proportion = proportion
         self.ini_ash_depth_mm = None
@@ -57,6 +58,7 @@ class AshModel(object):
         self.water_transport_rate = water_transport_rate
         self.water_transport_rate_k = water_transport_rate_k
         self.wind_threshold = wind_threshold
+        self.porosity = porosity
 
     @property
     def ini_material_available_mm(self):
@@ -234,7 +236,7 @@ class AshModel(object):
             assert not math.isnan(water_excess[i])
 
             # calculate real runoff accounting for available ash
-            real_runoff[i] = water_excess[i] - available_ash[i] / (10 * self.bulk_density)
+            real_runoff[i] = water_excess[i] - (available_ash[i] / (10 * self.bulk_density)) * self.porosity
             if real_runoff[i] < 0:
                 real_runoff[i] = 0.0
 
@@ -462,7 +464,8 @@ class WhiteAshModel(AshModel):
             runoff_threshold=0.0,
             water_transport_rate=0.88989,
             water_transport_rate_k=-0.126,
-            wind_threshold=6)
+            wind_threshold=6,
+            porosity=0.8)
 
 class BlackAshModel(AshModel):
     __name__ = 'BlackAshModel'
@@ -478,5 +481,6 @@ class BlackAshModel(AshModel):
             runoff_threshold=3.45,
             water_transport_rate=0.098509,
             water_transport_rate_k=None,
-            wind_threshold=6)
+            wind_threshold=6,
+            porosity=0.8)
 
