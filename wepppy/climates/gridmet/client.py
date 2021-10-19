@@ -74,7 +74,7 @@ def _retrieve(gridvariable: GridMetVariable, bbox, year):
           'timeStride=1&accept=netcdf' \
         .format(year=year, east=east, west=west, south=south, north=north,
                 abbrv=abbrv, variable_name=variable_name)
-    print(url)
+
     referer = 'https://rangesat.nkn.uidaho.edu'
     s = requests.Session()
     response = s.get(url, headers={'referer': referer}, stream=True)
