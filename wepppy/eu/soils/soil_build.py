@@ -17,10 +17,18 @@ from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 
 from wepppy.wepp.soils.soilsdb import read_disturbed_wepp_soil_fire_pars
 
-_texture_defaults = {'clay loam': {'shcrit': 0.5, 'sand': 25.0, 'clay': 30.0, 'orgmat': 5.0, 'cec': 25.0, 'rfg': 15.0},
-                     'silt loam': {'shcrit': 1.5, 'sand': 25.0, 'clay': 15.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 15.0},
-                     'loam': {'shcrit': 1.0, 'sand': 45.0, 'clay': 20.0, 'orgmat': 5.0, 'cec': 20.0, 'rfg': 20.0},
-                     'sand loam': {'shcrit': 2.0, 'sand': 65.0, 'clay': 10.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 25.0},
+_texture_defaults = {'clay loam': {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 0.5,
+                                   'field_cap': 0.001, 'wilt_pt': 0.001,
+                                   'sand': 25.0, 'clay': 30.0, 'orgmat': 5.0, 'cec': 25.0, 'rfg': 15.0},
+                     'silt loam': {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 1.5, 
+                                   'field_cap': 0.001, 'wilt_pt': 0.001,
+                                   'sand': 25.0, 'clay': 15.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 15.0},
+                     'loam':      {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 1.0, 
+                                   'field_cap': 0.001, 'wilt_pt': 0.001,
+                                   'sand': 45.0, 'clay': 20.0, 'orgmat': 5.0, 'cec': 20.0, 'rfg': 20.0},
+                     'sand loam': {'dbthridbar': 1.4, 'ksat': 28.0, 'shcrit': 2.0, 
+                                   'field_cap': 0.001, 'wilt_pt': 0.001,
+                                   'sand': 65.0, 'clay': 10.0, 'orgmat': 5.0, 'cec': 15.0, 'rfg': 25.0},
                      None: None}
 
 
@@ -79,7 +87,7 @@ _disclaimer = '''\
 # '''
 
 
-def build_esdac_soils(orders, soil_dir):
+def build_esdac_soils(orders, soil_dir, res_lyr_ksat_threshold=2.0):
     '''
     0   No information  -->  None
     9   No mineral texture (Peat soils)  --> ?
@@ -108,7 +116,7 @@ def build_esdac_soils(orders, soil_dir):
         key = '_'.join(['{}'.format(res[v][1]) for v in _vars])
         desc = ', '.join(['{}:{}'.format(v, res[v][1]) for v in _vars])
 
-        s = ['2006.2',
+        s = ['7778',
              '#',
              '#            WEPPcloud (c) University of Idaho',
              '#',
@@ -148,11 +156,24 @@ def build_esdac_soils(orders, soil_dir):
 
         soil_hydro = SoilHydroGrids()
         ks = soil_hydro.query(lng, lat, 'KS')
+        ksat_min = 1e38
+        ksat_last = None 
+        res_lyr_i = None
+        res_lyr_ksat = None
         s.append('#')
         s.append('# EU Soil Hydro Grids')
         s.append('# Code\tDepth\tksat')
-        for code, (_depth, _ks) in ks.items():
-            s.append('# {}  \t{}  \t{}'.format(code, _depth, _ks * 0.004166667))
+        for i, (code, (_depth, _ks)) in enumerate(ks.items()):
+            _ksat = _ks * 0.004166667
+            s.append('# {}  \t{}  \t{}'.format(code, _depth, _ksat))
+            if _ksat < ksat_min:
+                ksat_min = _ksat    
+
+            if _ksat < res_lyr_ksat_threshold: 
+                res_lyr_i = i
+                res_lyr_ksat = ksat_min
+    
+            ksat_last = _ksat
 
         s.append('#')
 
@@ -196,9 +217,9 @@ def build_esdac_soils(orders, soil_dir):
         avke = ks['sl1'][1] * 0.004166667
 
         ofe_indx = len(s)
-        s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
+        s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t0.0000".format(
             slid=fao90lev1, texid=srf_simple_texture,
-            nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=srf_defaults['shcrit'], avke=avke))
+            nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=srf_defaults['shcrit']))
 
         horizon0 = deepcopy(srf_defaults)
         horizon1 = deepcopy(sub_defaults)
@@ -221,8 +242,15 @@ def build_esdac_soils(orders, soil_dir):
 
         octop_short = res['octop'][1]
         horizon0['orgmat'] = _octop_short_to_pct[octop_short]
+        horizon0['ksat'] = avke
 
-        s.append('    {solthk} \t{sand} \t{clay} \t{orgmat} \t{cec} \t{rfg}'.format(**horizon0))
+        if solthk > 50:
+            horizon0['anisotropy'] = 1.0
+        else:
+            horizon0['anisotropy'] = 10.0
+
+        s.append('    {solthk} \t{dbthridbar} \t{ksat} \t{anisotropy} \t{field_cap} \t{wilt_pt}'
+                 ' \t{sand} \t{clay} \t{orgmat} \t{cec} \t{rfg}'.format(**horizon0))
 
         if horizon1 is not None:
             il = res['il'][1]
@@ -237,10 +265,30 @@ def build_esdac_soils(orders, soil_dir):
             elif cecsub == 'L':
                 horizon1['cec'] = 10.0
 
-            s.append('    {solthk} \t{sand} \t{clay} \t{orgmat} \t{cec} \t{rfg}'.format(**horizon1))
+            ksat = None
+            for code, (_depth, _ks) in ks.items():
+                if _depth * 100 >= solthk:
+                    ksat = _ks * 0.004166667
+                    break
 
-        s.append('1 \t25.0 \t0.00036')
+            if ksat is None:
+                ksat = ksast_last
 
+            horizon1['ksat'] = ksat
+
+            if solthk > 50:
+                horizon1['anisotropy'] = 1.0
+            else:
+                horizon1['anisotropy'] = 10.0
+
+            s.append('    {solthk} \t{dbthridbar} \t{ksat} \t{anisotropy} \t{field_cap} \t{wilt_pt}'
+                     ' \t{sand} \t{clay} \t{orgmat} \t{cec} \t{rfg}'.format(**horizon1))
+
+        if res_lyr_i is None:
+            s.append('1 10000.0 %0.5f' % ksat_last)
+        else:
+            s.append('1 10000.0 %0.5f' % (res_lyr_ksat * 3.6))
+            
         if key not in soils:
 
             fname = key + '.sol'
