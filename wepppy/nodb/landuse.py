@@ -228,6 +228,9 @@ class Landuse(NoDbBase):
         os.mkdir(lc_dir)
 
     def _build_ESDAC(self):
+        print('_build_ESDAC')
+
+
         from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
         # _map = Ron.getInstance(self.wd).map
@@ -241,6 +244,7 @@ class Landuse(NoDbBase):
             assert 'usedom' in d, d
             dom = d['usedom'][1]
             domlc_d[topaz_id] = str(dom)
+            print(topaz_id, dom)
 
         for topaz_id, _ in watershed.chn_iter():
             lng, lat = summary.centroid.lnglat
@@ -342,7 +346,7 @@ class Landuse(NoDbBase):
             if self._mode == LanduseMode.Gridded:
                 if 'eu' in ron.locales:
                     self._build_ESDAC()
-                if 'au' in ron.locales:
+                elif 'au' in ron.locales:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD()
@@ -354,7 +358,6 @@ class Landuse(NoDbBase):
                 raise Exception('LanduseMode is not set')
 
             self.dump_and_unlock()
-            self.build_managements()
 
             self.build_managements()
 
