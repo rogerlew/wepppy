@@ -14,20 +14,21 @@ from osgeo import gdal
 
 from subprocess import Popen, check_output
 
-wds = glob('*directory/*/w001001.adf')
+#wds = glob('*directory/*/w001001.adf')
+wds = glob('/geodata/eu/ESDAC_STU_EU_Layers/*.rst')
 
-for wd in wds:
-    wd0 = wd.split('/')[0]
-    ds = wd.split('/')[1]
+for src in wds:
+    
+    dst = src[:-4] + '.tif'
 
-    cmd = ['gdal_translate', _split(wd)[0], ds + '.tif', '-a_srs', 'epsg:3035']
+    cmd = ['gdal_translate', src, dst, '-a_srs', 'epsg:3035']
     print(cmd)
     p = Popen(cmd)
     p.wait()
 
-    js = check_output('gdalinfo -json ' + _split(wd)[0], shell=True)
+    js = check_output('gdalinfo -json ' + src, shell=True)
     info = json.loads(js.decode())
-    with open(ds + '.json', 'w') as fp:
+    with open(src[:-4] + '.json', 'w') as fp:
         json.dump(info, fp, indent=4, sort_keys=True, allow_nan=False)
 
 

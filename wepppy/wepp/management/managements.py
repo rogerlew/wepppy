@@ -40,6 +40,7 @@ _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _disturbed_map_fn = _join(_management_dir, "disturbed.json")
+_eu_disturbed_map_fn = _join(_management_dir, "eu-disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
@@ -1869,6 +1870,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'turkey' in _map.lower():
         with open(_turkey_map_fn) as fp:
+            d = json.load(fp)
+    elif 'eu-disturbed' in _map.lower():
+        with open(_eu_disturbed_map_fn) as fp:
             d = json.load(fp)
     elif 'disturbed' in _map.lower():
         with open(_disturbed_map_fn) as fp:
