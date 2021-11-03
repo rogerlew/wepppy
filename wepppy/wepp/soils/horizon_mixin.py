@@ -1,12 +1,13 @@
 from math import exp
 
-from rosetta import Rosetta3, Rosetta3
 
 from wepppy.all_your_base import isfloat
 
 
 class HorizonMixin(object):
     def _rosettaPredict(self):
+        from rosetta import Rosetta3, Rosetta3
+
         clay = self.clay
         sand = self.sand
         vfs = self.vfs
