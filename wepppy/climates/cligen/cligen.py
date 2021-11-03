@@ -646,7 +646,8 @@ class Station:
                  tmax='prism',
                  tmin='prism',
                  dewpoint='prism',
-                 solrad='daymet'):
+                 solrad='daymet',
+                 interp_method='near'):
 
         """
         This could is deprecated and the localization provided by
@@ -655,12 +656,12 @@ class Station:
         new = deepcopy(self)
 
         if p_mean == 'prism':
-            prism_ppts = get_prism_monthly_ppt(lng, lat, units='daily inch')
+            prism_ppts = get_prism_monthly_ppt(lng, lat, units='daily inch', method=interp_method)
             ppts = prism_ppts / self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
         elif p_mean == 'daymet':
-            prism_ppts = get_daymet_prcp_mean(lng, lat, units='daily inch')
+            prism_ppts = get_daymet_prcp_mean(lng, lat, units='daily inch', method=interp_method)
             ppts = prism_ppt = self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
@@ -668,27 +669,27 @@ class Station:
             prism_ppts = None
 
         if p_std == 'daymet':
-            p_stds = get_daymet_prcp_std(lng, lat, units='inch')
+            p_stds = get_daymet_prcp_std(lng, lat, units='inch', method=interp_method)
             new.lines[4] = ' S DEV P ' + _row_formatter(p_stds) + '\r\n'
 
         if p_skew == 'daymet':
-            p_skew = get_daymet_prcp_skew(lng, lat, units='inch')
+            p_skew = get_daymet_prcp_skew(lng, lat, units='inch', method=interp_method)
             new.lines[5] = ' SKEW P  ' + _row_formatter(p_skew) + '\r\n'
 
         if tmax == 'prism':
-            tmaxs = get_prism_monthly_tmax(lng, lat, units='f')
+            tmaxs = get_prism_monthly_tmax(lng, lat, units='f', method=interp_method)
             new.lines[8] = ' TMAX AV ' + _row_formatter(tmaxs) + '\r\n'
 
         if tmin == 'prism':
-            tmins = get_prism_monthly_tmin(lng, lat, units='f')
+            tmins = get_prism_monthly_tmin(lng, lat, units='f', method=interp_method)
             new.lines[9] = ' TMIN AV ' + _row_formatter(tmins) + '\r\n'
 
         if solrad == 'daymet':
-            slrds = get_daymet_srld_mean(lng, lat)
+            slrds = get_daymet_srld_mean(lng, lat, method=interp_method)
             new.lines[12] = ' SOL.RAD ' + _row_formatter(slrds) + '\r\n'
 
         if dewpoint == 'prism':
-            tdmeans = get_prism_monthly_tdmean(lng, lat, units='f')
+            tdmeans = get_prism_monthly_tdmean(lng, lat, units='f', methoed=interp_method)
             new.lines[15] = ' DEW PT  ' + _row_formatter(tdmeans) + '\r\n'
 
         if prism_ppts is not None:
