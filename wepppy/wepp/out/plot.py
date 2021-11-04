@@ -12,23 +12,34 @@ from scipy import interpolate
 from osgeo import gdal
 from osgeo.gdalconst import *
 
+nan = np.nan
+
 class PlotFile(object):
     def __init__(self, fn):
-
         # read the loss report
         with open(fn) as fp:
             lines = fp.readlines()
 
+        self.nodata = False
         lines = ' '.join(lines[4:])
         data = np.fromstring(lines, sep=' ')
-        data = data.reshape((100, 3)).T
+        try:
+            data = data.reshape((100, 3)).T
+        except ValueError:
+            self.nodata = True
 
-        self.distance_downslope = data[0, :]
-        self.distance_p = data[0, :] / data[0, -1]
-        self.elevation = data[1, :]
-        self.soil_loss = data[2, :]
+        if not self.nodata:
+            self.distance_downslope = data[0, :]
+            self.distance_p = data[0, :] / data[0, -1]
+            self.elevation = data[1, :]
+            self.soil_loss = data[2, :]
 
     def interpolate(self, d):
+        global nan
+
+        if self.nodata:
+            return np.array([nan for x in d])
+
         f = interpolate.interp1d([0.0] + self.distance_p.tolist(),
                                  [0.0] + self.soil_loss.tolist())
         return f(d)
