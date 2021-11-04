@@ -482,6 +482,11 @@ def startswith_processor():
     return dict(startswith=lambda x, y: str(x).startswith(str(y)))
 
 
+@app.context_processor
+def hasattr_processor():
+    return dict(hasattr=lambda item, attr: hasattr(item, attr))
+
+
 def _get_run_name(runid):
     try:
         wd = get_wd(runid)
