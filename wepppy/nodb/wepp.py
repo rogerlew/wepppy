@@ -13,6 +13,8 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+import math
+
 from subprocess import Popen, PIPE, call
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 
@@ -44,6 +46,7 @@ from wepppy.wepp.runner import (
     make_ss_hillslope_run,
     run_hillslope,
     make_flowpath_run,
+    make_ss_flowpath_run,
     run_flowpath,
     make_watershed_run,
     make_ss_watershed_run,
@@ -891,7 +894,7 @@ class Wepp(NoDbBase, LogMixin):
 
                 if getattr(self, 'run_flowpaths', False):
                     for fp in watershed.fps_summary(topaz_id):
-                        make_ss_hillslope_run(fp, fp_runs_dir)
+                        make_ss_flowpath_run(fp, fp_runs_dir)
         else:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
@@ -968,7 +971,7 @@ class Wepp(NoDbBase, LogMixin):
 
                     # store non-zero values in loss_grid_d
                     for L, coord in zip(loss, fps_summary[fp].coords):
-                        if L != 0.0:
+                        if L != 0.0 and not math.isnan(L):
                             if coord in loss_grid_d:
                                 loss_grid_d[coord].append(L)
                             else:

@@ -1,0 +1,18 @@
+m                               # metric units
+Yes                             # not watershed option
+2                               # storm option, 1=abbreviated annual soil loss output option for continuous simulation
+1                               # hillslope version
+No                              # pass file output
+../output/{fp}.single_event.dat
+Yes                             # distance and sediment loss
+../output/{fp}.plot.dat         #
+No                              # event by event output
+No                              # element output
+No                              # final summary output
+No                              # daily winter output
+{fp}.man                        # management file
+{fp}.slp                        # slope file
+{fp}.cli                        # climate file
+{fp}.sol                        # soil file
+0                               # irrigation option, 0=no irrigation
+
