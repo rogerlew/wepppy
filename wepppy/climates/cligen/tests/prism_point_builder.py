@@ -3,7 +3,7 @@ from wepppy.climates.cligen import CligenStationsManager
 
 station_manager = CligenStationsManager()
 
-offsets = (('',   (   0,    0)),
+offsets = (('o',   (   0,    0)),
            ('N',  (   0,  800)),
            ('NE', ( 800,  800)),
            ('E',  ( 800,    0)),
@@ -49,5 +49,5 @@ def prism_surrounding(name, lng, lat):
         localized.write(f'{name}_{direction}.par')
 
 if __name__ == "__main__":
-    prism_surrounding('neverland', -117, 46)
+    prism_surrounding('1_Steuben Co NY', -77.33, 42.33)
 

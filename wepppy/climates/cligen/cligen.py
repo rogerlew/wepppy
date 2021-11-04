@@ -656,12 +656,12 @@ class Station:
         new = deepcopy(self)
 
         if p_mean == 'prism':
-            prism_ppts = get_prism_monthly_ppt(lng, lat, units='daily inch', method=interp_method)
+            prism_ppts = get_prism_monthly_ppt(lng, lat, units='inch', method=interp_method)
             ppts = prism_ppts / self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
         elif p_mean == 'daymet':
-            prism_ppts = get_daymet_prcp_mean(lng, lat, units='daily inch', method=interp_method)
+            prism_ppts = get_daymet_prcp_mean(lng, lat, units='inch', method=interp_method)
             ppts = prism_ppt = self.nwds
             new.lines[3] = ' MEAN P  ' + _row_formatter(ppts) + '\r\n'
 
