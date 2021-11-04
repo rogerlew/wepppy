@@ -48,6 +48,10 @@ def hill_template_loader():
     return _template_loader("hillslope.template")
 
 
+def ss_flowpath_template_loader():
+    return _template_loader("ss_flowpath.template")
+
+
 def flowpath_template_loader():
     return _template_loader("flowpath.template")
 
@@ -72,6 +76,16 @@ def make_flowpath_run(fp, sim_years, runs_dir):
 
     s = _fp_template.format(fp=fp,
                             sim_years=sim_years)
+
+    fn = _join(runs_dir, '%s.run' % fp)
+    with open(fn, 'w') as fp:
+        fp.write(s)
+
+
+def make_ss_flowpath_run(fp, runs_dir):
+    _fp_template = ss_flowpath_template_loader()
+
+    s = _fp_template.format(fp=fp)
 
     fn = _join(runs_dir, '%s.run' % fp)
     with open(fn, 'w') as fp:
