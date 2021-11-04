@@ -35,6 +35,7 @@
     </div>
 </div>
 
+{% if hasattr(wepp, "tcr_opts")%}
 <h6><b>Variable CS Parameters</b></h6>
 <a href="https://github.com/rogerlew/wepppy/raw/master/wepppy/wepp/soils/resources/ChannelCriticalShear_Vs_ChannelSlope.xlsx">Download the Channel Critical Shear Calculation Spreadsheet</a>
 <div class="form-group row" id="tcr_opts_taumin_container">
@@ -76,4 +77,4 @@
         value="{{ wepp.tcr_opts.nch }}" aria-label="TCR nch">
     </div>
 </div>
-
+{% endif %}
