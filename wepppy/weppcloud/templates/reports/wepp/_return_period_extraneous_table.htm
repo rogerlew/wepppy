@@ -42,7 +42,7 @@
         <td>{{ rec_interval }}</td>
         <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
                                   '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
-                                  '%04d' % (report.return_periods[key][rec_interval]['year'] | int) }}</td>
+                                  '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
         <td class="{{ 'table-active' if key == 'Precipitation Depth' }}">{{ unitizer(report.return_periods[key][rec_interval]['Precipitation Depth'],
                         report.units_d['Precipitation Depth']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Runoff' }}">{{ unitizer(report.return_periods[key][rec_interval]['Runoff'],
