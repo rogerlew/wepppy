@@ -894,7 +894,7 @@ Any comments:
         with open(fname, 'w') as fp:
             fp.write(txt)
 
-    def build_file_contents(self):
+    def build_file_contents(self, ksflag=0):
         assert self.valid()
                 
         if self.is_urban:
@@ -903,14 +903,15 @@ Any comments:
         if self.is_water:
             return self._build_water()
 
-        s = "7778\n{0.description}\nAny comments:\n{0.num_ofes} 1\n"\
+        s = "7778\n{0.description}\nAny comments:\n{0.num_ofes} {ksflag}\n"\
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t"\
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t"\
             "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t"\
             "{horizon0.shear:0.4f}\t0.0000"
 
         s = [s.format(self, majorComponent=self.majorComponent,
-                      horizon0=self.getFirstHorizon())]
+                      horizon0=self.getFirstHorizon(), 
+                      ksflag=ksflag)]
 
         ksat_last = 0.0
         
@@ -966,7 +967,7 @@ Any comments:
             
         return '\n'.join(s)
 
-    def build_file_contents_v2006_2(self, ag=False):
+    def build_file_contents_v2006_2(self, ag=False, ksflag=0):
         assert self.valid()
 
         if self.is_urban:
@@ -981,7 +982,7 @@ Any comments:
         else:
             ksat = h0.ksat_r * 3.6
 
-        s = "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} 1\n" \
+        s = "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} {ksflag}\n" \
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t" \
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t" \
             "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t" \
@@ -989,7 +990,7 @@ Any comments:
 
         s = [s.format(self, majorComponent=self.majorComponent,
                       horizon0=self.horizons[0],
-                      ksat=ksat)]
+                      ksat=ksat, ksflag=ksflag)]
 
         ksat_last = 0.0
 
