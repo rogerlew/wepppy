@@ -227,7 +227,14 @@ class ESDAC:
 
         return d
 
-    def build_wepp_soil(self, lng, lat, soils_dir, res_lyr_ksat_threshold=2.0):
+    def build_wepp_soil(self, lng, lat, soils_dir, res_lyr_ksat_threshold=2.0, ksflag=0):
+        """
+        Build wepp soil from ESDAC data
+
+        ksflag
+           0 - do not use adjustments (conductivity will be held constant)
+           1 - use internal adjustments
+        """
         d_esdb = self.query(lng, lat, ('fao90lev1', 'usedom', 'textdepchg', 'il', 'cec_top', 'cec_sub', 'dgh', 'dimp', 'dr'))
         cec_top_class = d_esdb['cectop'][1]
         cec_sub_class = d_esdb['cecsub'][1]
@@ -353,7 +360,7 @@ class ESDAC:
 
         s.append('#')
         s.append('Any comments:')
-        s.append('1 1')
+        s.append(f'1 {ksflag}')
 
         description = d_esdb['fao90lev1'][2]
         num_layers = 2
