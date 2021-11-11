@@ -28,7 +28,7 @@
         <td style="width: 30%">{{ rec_interval }}</td>
         <td style="width: 40%">{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
                                   '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
-                                  '%04d' % (report.return_periods[key][rec_interval]['year'] | int) }}</td>
+                                  '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
         <td style="width: 30%">{{
                 unitizer(report.return_periods[key][rec_interval][key],
                          report.units_d[key]) | safe }}</td>
