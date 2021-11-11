@@ -29,6 +29,8 @@ from wepppy.all_your_base import (
     isfloat,
     isint
 )
+
+from wepppy.wepp.soils import HorizonMixin
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 __version__ = 'v.0.1.0'
@@ -178,7 +180,7 @@ class MajorComponent:
 
 
 # noinspection PyPep8Naming
-class Horizon:
+class Horizon(HorizonMixin):
     def __init__(self, cokey, layer, defaults=None):
         self.cokey = cokey
         
@@ -217,100 +219,30 @@ class Horizon:
                           defaults.get('wilt_pt', None))
         self._computeConductivity()
         
-    def _computeConductivity(self):
-        
-        clay = try_parse_float(self.claytotal_r)
-        sand = try_parse_float(self.sandtotal_r)
-        cec = try_parse_float(self.cec7_r)
+    @property
+    def clay(self):
+        return try_parse_float(self.claytotal_r)
+       
+    @property
+    def sand(self):
+        return try_parse_float(self.sandtotal_r)
 
-        conductivity = 0 
+    @property
+    def cec(self):
+        return try_parse_float(self.cec7_r)
+
+    @property
+    def vfs(self):
+        return try_parse_float(self.sandvf_r)
+
+    @property
+    def om(self):
+        return try_parse_float(self.om_r)
         
-        # conductivity
-        if sand == 0.0 or clay == 0.0 or cec == 0.0:
-            self.conductivity = None
-            return
-            
-        if clay <= 40.0:
-            if cec > 1.0:
-                # apply equation 1 from usersum.pdf
-                conductivity = -0.265 + 0.0086 * pow(sand, 1.8) + \
-                               11.46 * pow(cec, -0.75) 
-            else:
-                # this isn't documented in the usersum.pdf
-                # this is what is being applied in the watershed
-                # interface
-                conductivity = 11.195 + 0.0086 * pow(sand, 1.8)  
-        else:
-            # apply equation 2 from usersum.pdf
-            conductivity = 0.0066 * exp(244.0 / clay) 
-            
-        self.conductivity = conductivity
-        
-    def _computeErodibility(self):
-        """
-        Computes erodibility estimates according to:
-        
-        https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/usersum.pdf
-        """
-        clay = try_parse_float(self.claytotal_r)
-        sand = try_parse_float(self.sandtotal_r)
-#        cec = try_parse_float(self.cec7_r)
-        vfs = try_parse_float(self.sandvf_r)
-        om = try_parse_float(self.om_r)
-        
-        # interrill, rill, shear
-        if sand == 0.0 or vfs == 0.0 or om == 0.0 or clay == 0.0:
-            self.interrill = 0.0
-            self.rill = 0.0
-            self.shear = 0.0
-            return 
-        
-        if sand >= 30.0:
-            if vfs > 40.0:
-                vfs = 40.0
-            if om < 0.35:
-                om = 0.35
-            if clay > 40.0:
-                clay = 40.0
-                
-            # apply equation 6 from usersum.pdf
-            interrill = 2728000.0 + 192100.0 * vfs
-            
-            # apply equation 7 from usersum.pdf
-            rill = 0.00197 + 0.00030 * vfs + 0.03863 * exp(-1.84 * om) 
-            
-            # apply equation 8 from usersum.pdf
-            shear = 2.67 + 0.065 * clay - 0.058 * vfs
-        else:
-            if clay < 10.0:
-                clay = 10.0
-                
-            # apply equation 9 from usersum.pdf
-            interrill = 6054000.0 - 55130.0 * clay
-            
-            # apply equation 10 from usersum.pdf
-            rill = 0.0069 + 0.134 * exp(-0.20 * clay)
-            
-            # apply equation 11 from usersum.pdf
-            shear = 3.5
-      
-        self.interrill = interrill
-        self.rill = rill
-        self.shear = shear
-        
-    def _computeAnisotropy(self):
-        
-        hzdepb_r = self.hzdepb_r
-        
-        anisotropy = None
-        if isfloat(hzdepb_r):
-            if hzdepb_r > 50:
-                anisotropy = 1.0
-            else:
-                anisotropy = 10.0
-                
-        self.anisotropy = anisotropy
-  
+    @property
+    def depth(self):
+        return try_parse_float(self.hzdepb_r)
+ 
     def _computeRock(self, rock_default, 
                      field_cap_default, wilt_pt_default):
 
@@ -412,17 +344,6 @@ class Horizon:
                isfloat(self.sandvf_r) and \
                isfloat(self.ksat_r) and \
                isfloat(self.dbthirdbar_r)
-
-    @property
-    def simple_texture(self):
-        """
-        Classifies horizon texture into silt loam, loam, sand loam, and clay loam
-
-        Courtesy of Mary Ellen Miller
-        :return:
-        """
-        return simple_texture(self.claytotal_r, self.sandtotal_r)
-
 
 
 colors = [
