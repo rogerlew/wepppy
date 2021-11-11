@@ -53,6 +53,7 @@ class ReturnPeriods:
         header.remove('year')
 
         self.header = header
+        self.y0 = y0
         self.years = years = ebe.years
         self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
