@@ -2056,7 +2056,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
             var v = parseFloat(self.rangeGriddedLoss.val());
             if (self.grid !== null) {
-                self.grid.setDisplayRange(-1.0 * v * 0.001, v * 0.001);
+                self.grid.setDisplayRange(-1.0 * v, v);
             }
 
             $.get({
