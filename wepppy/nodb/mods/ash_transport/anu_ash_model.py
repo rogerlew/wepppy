@@ -17,6 +17,11 @@ Assumptions:
 3)
 
 """
+
+from os.path import join as _joni
+
+from wepppy.all_your_base import YearlessDate
+
 import math
 import os
 import sys
@@ -28,9 +33,28 @@ import matplotlib.pyplot as plt
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-def ash_model(df, fname):
+def ash_model(fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat=HillWat, outdir, prefix):
 
-    print('running ash model on wat file: ', os.path.basename(wat).split('.')[0])
+    watr = pd.read_table(wat_fn, skiprows=skipped_rows, sep='\s+', header=None, names=col_names)
+
+    # make starting/ending date for stochastic climate
+    if watr['Y_#'].iloc[0] == 1:
+        starting = '1/1/' + str(watr['Y_#'].iloc[0] + 1900)
+        ending = '12/31/' + str(watr['Y_#'].iloc[-1] + 1900)
+    # make starting/ending date for observed climate
+    else:
+        starting = '1/1/' + str(watr['Y_#'].iloc[0])
+        ending = '12/31/' + str(watr['Y_#'].iloc[-1])
+
+    # create ash df
+    df = pd.DataFrame()
+
+    # get selected variables from watr df to ash df
+    df = watr[['J_#', 'Y_#', 'P_mm', 'RM_mm', 'Q_mm']]
+
+    # insert date column to ash df
+    df.insert(0, 'Date', pd.date_range(start=starting, end=ending))
+    # print('running ash model on wat file: ', os.path.basename(wat).split('.')[0])
 
     # define fire day in julian
     fireDay = 217
@@ -139,9 +163,9 @@ def ash_model(df, fname):
 
 
 def get_wat_input(wat):
-    t0 = time()
-    print(' ')
-    print('read wepp water file: ', os.path.basename(wat).split('.')[0])
+    # t0 = time()
+    # print(' ')
+    # print('read wepp water file: ', os.path.basename(wat).split('.')[0])
     watr = pd.read_table(wat, skiprows=skipped_rows, sep='\s+', header=None, names=col_names)
 
     # make starting/ending date for stochastic climate
