@@ -136,6 +136,7 @@ class Ash(NoDbBase, LogMixin):
             self._white_ash_bulkdensity = self.config_get_float('ash', 'white_ash_bulkdensity')
 
             self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
+            self._model = self.config_get_str('ash', 'model')
 
             self.high_contaminant_concentrations = ContaminantConcentrations(
                 PO4=3950,  # mg*Kg-1
@@ -318,6 +319,25 @@ class Ash(NoDbBase, LogMixin):
     def has_ash_results(self):
         return _exists(self.status_log) and len(glob(_join(self.ash_dir, '*.csv'))) > 0
 
+    @property
+    def model(self):
+        if not getattr(self, '_model'):
+            self.model = 'neris'
+        return self._model
+
+
+    @model.setter
+    def model(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._model = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            
     @property
     def reservoir_storage(self):
         if not getattr(self, '_reservoir_storage'):
@@ -524,6 +544,7 @@ class Ash(NoDbBase, LogMixin):
 
             wd = self.wd
             ash_dir = self.ash_dir
+            model = self.model
 
             if _exists(ash_dir):
                 try:
@@ -646,7 +667,8 @@ class Ash(NoDbBase, LogMixin):
                             out_dir=ash_dir,
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha,
-                            run_wind_transport=run_wind_transport)
+                            run_wind_transport=run_wind_transport,
+                            model=model)
             #    run_ash_model(kwds)
                 args.append(kwds)
                 
