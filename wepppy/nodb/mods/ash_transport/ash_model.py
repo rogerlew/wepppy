@@ -486,7 +486,26 @@ class AshModel(object):
                   ini_ash_depth: Optional[float]=None, 
                   ini_ash_load: Optional[float]=None, run_wind_transport=True):
 
-        watr = pd.read_table(hill_wat.fn, skiprows=skipped_rows, sep='\s+', header=None, names=col_names)
+        self.ini_ash_depth_mm = ini_ash_depth
+        # self.ini_ash_load_tonneha = ini_ash_load
+        
+        # define fire day in julian
+        fireDay = fire_date.julian
+
+        # define parameters
+        iniBulkDen = 0.31  # Initial bulk density, gm/cm3
+        finBulkDen = 0.62  # Final bulk density, gm/cm3
+        bulkDenFac = 0.005  # Bulk density factor
+        parDen = 1.2  # Ash particle density, gm/cm3
+        decompFac = self.decomposition_rate  # 0.00018  # Ash decomposition factor, per day
+        iniErod = 1  # Initial erodibility, t/ha
+        finErod = 0.01  # Final erodibility, t/ha
+        roughnessLimit = 1  # Roughness limit, mm
+        self.ini_ash_depth_mm = iniAshDepth = ini_ash_depth
+        self.ini_ash_load_tonneha = iniAshLoad = 10 * iniAshDepth * iniBulkDen   # Initial ash load, t/ha
+        
+        
+        watr = pd.read_table(hill_wat.fname, skiprows=skipped_rows, sep='\s+', header=None, names=col_names)
 
         # make starting/ending date for stochastic climate
         if watr['Y_#'].iloc[0] == 1:
@@ -507,20 +526,6 @@ class AshModel(object):
         df.insert(0, 'Date', pd.date_range(start=starting, end=ending))
         # print('running ash model on wat file: ', os.path.basename(wat).split('.')[0])
 
-        # define fire day in julian
-        fireDay = 217
-
-        # define parameters
-        iniBulkDen = 0.31  # Initial bulk density, gm/cm3
-        finBulkDen = 0.62  # Final bulk density, gm/cm3
-        bulkDenFac = 0.005  # Bulk density factor
-        parDen = 1.2  # Ash particle density, gm/cm3
-        decompFac = 0.00018  # Ash decomposition factor, per day
-        iniErod = 1  # Initial erodibility, t/ha
-        finErod = 0.01  # Final erodibility, t/ha
-        roughnessLimit = 1  # Roughness limit, mm
-        iniAshDepth = 14  # Initial ash depth, mm
-        iniAshLoad = 10 * iniAshDepth * iniBulkDen   # Initial ash load, t/ha
 
         # update year
         df.insert(1, 'Year', df.apply(lambda x: x['Y_#'] if x['J_#'] >= fireDay else x['Y_#'] - 1, axis=1))
