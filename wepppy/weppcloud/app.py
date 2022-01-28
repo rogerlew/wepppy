@@ -1083,6 +1083,29 @@ def archive(runid, config):
     return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
 
 
+
+@app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
+@app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json/')
+def meta_subcatchmets_wgs(runid, config):
+    from wepppy.export import arc_export, archive_project
+
+    # get working dir of original directory
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    try:
+        arc_export(wd)
+
+        if not request.args.get('no_retrieve', None) is not None:
+            sub_fn = _join(wd, ron.export_dir, 'arcmap', 'subcatchments.WGS.json')
+            return send_file(sub_fn)
+        else:
+            return success_factory()
+
+    except Exception:
+        return exception_factory('Error running arc_export')
+
+
 def log_access(wd, current_user, ip):
     assert _exists(wd)
 
@@ -4361,6 +4384,69 @@ def submit_task_run_rhem(runid, config):
 
     return success_factory()
 
+import io
+VIZ_RSCRIPT_DIR = '/workdir/viz-weppcloud/scripts/R/'
+VIZ_RMARKDOWN_DIR = '/workdir/viz-weppcloud/scripts/Rmd'
+
+@app.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>')
+@app.route('/runs/<string:runid>/<config>/viz/<r_format>/<routine>/')
+def viz_r(runid, config, r_format, routine):
+    assert config is not None
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    viz_export_dir = _join(wd, 'export/viz')
+    if not _exists(viz_export_dir):
+        os.mkdir(viz_export_dir)
+        
+    try:
+        rpt_fn = _join(viz_export_dir, f'{routine}.htm')
+
+        if r_format.lower() == 'r':
+            rscript = _join(VIZ_RSCRIPT_DIR, f'{routine}.R')
+            assert _exists(rscript)
+            cmd = ['Rscript', rscript, runid]
+        elif r_format.lower() == "rmd":
+            rscript = _join(VIZ_RMARKDOWN_DIR, f'{routine}.Rmd')
+            assert _exists(rscript)
+            cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{routine}.htm", output_dir="{viz_export_dir}")']
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        output, errors = p.communicate()
+        with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
+            fp.write(output.decode('utf-8'))
+        with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
+            fp.write(errors.decode('utf-8'))
+
+        assert _exists(rpt_fn)
+        with io.open(rpt_fn, encoding='utf8') as fp:
+            return fp.read()
+
+    except:
+        return exception_factory('Error running script')
+
+#  R -e 'library("rmarkdown"); rmarkdown::render("03_Rmarkdown_to_generate_reports.Rmd", params=list(proj_runid="lt_202012_26_Bliss_Creek_CurCond"), output_file="rmd_rpt.htm")'
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
