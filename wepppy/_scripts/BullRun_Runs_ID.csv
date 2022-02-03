@@ -26,10 +26,10 @@ NorthFork,portland_NorthFork_ModSevS.202009.chn_cs140,ModSevS
 NorthFork,portland_NorthFork_PrescFireS.202009.chn_cs140,PrescFireS
 NorthFork,portland_NorthFork_SimFire_Eagle.202009.cl532.chn_cs140,SimFire_Eagle
 NorthFork,portland_NorthFork_SimFire_Norse.202009.cl532.chn_cs140,SimFire_Norse
-SouthFork,portland_SouthFork_CurCond.202009.cl532.chn_cs160         ,CurCond
-SouthFork,portland_SouthFork_CurCond.202009.cl532_future.chn_cs160   ,CurCond
-SouthFork,portland_SouthFork_CurCond.202009.cl532_gridmet.chn_cs160  ,CurCond
-SouthFork,portland_SouthFork_HighSevS.202009.chn_cs160               ,HighSevS
+SouthFork,portland_SouthFork_CurCond.202009.cl532.chn_cs160,CurCond
+SouthFork,portland_SouthFork_CurCond.202009.cl532_future.chn_cs160,CurCond
+SouthFork,portland_SouthFork_CurCond.202009.cl532_gridmet.chn_cs160,CurCond
+SouthFork,portland_SouthFork_HighSevS.202009.chn_cs160,HighSevS
 SouthFork,portland_SouthFork_LowSevS.202009.chn_cs160,LowSevS
 SouthFork,portland_SouthFork_ModSevS.202009.chn_cs160,ModSevS
 SouthFork,portland_SouthFork_PrescFireS.202009.chn_cs160,PrescFireS
@@ -62,10 +62,10 @@ CedarCreek,portland_CedarCreek_ModSevS.202009.chn_cs150,ModSevS
 CedarCreek,portland_CedarCreek_PrescFireS.202009.chn_cs150,PrescFireS
 CedarCreek,portland_CedarCreek_SimFire_Eagle.202009.cl532.chn_cs150,SimFire_Eagle
 CedarCreek,portland_CedarCreek_SimFire_Norse.202009.cl532.chn_cs150,SimFire_Norse
-DeerCreek,portland_DeerCreek_CurCond.202010.cl532.chn_cs140          ,CurCond
-DeerCreek,portland_DeerCreek_CurCond.202010.cl532_future.chn_cs140   ,CurCond
-DeerCreek,portland_DeerCreek_CurCond.202010.cl532_gridmet.chn_cs140  ,CurCond
-DeerCreek,portland_DeerCreek_HighSevS.202010.chn_cs140               ,HighSevS
+DeerCreek,portland_DeerCreek_CurCond.202010.cl532.chn_cs140,CurCond
+DeerCreek,portland_DeerCreek_CurCond.202010.cl532_future.chn_cs140,CurCond
+DeerCreek,portland_DeerCreek_CurCond.202010.cl532_gridmet.chn_cs140,CurCond
+DeerCreek,portland_DeerCreek_HighSevS.202010.chn_cs140,HighSevS
 DeerCreek,portland_DeerCreek_LowSevS.202010.chn_cs140,LowSevS
 DeerCreek,portland_DeerCreek_ModSevS.202010.chn_cs140,ModSevS
 DeerCreek,portland_DeerCreek_PrescFireS.202010.chn_cs140,PrescFireS
@@ -80,19 +80,19 @@ CougarCreek,portland_CougarCreek_ModSevS.202010.chn_cs140,ModSevS
 CougarCreek,portland_CougarCreek_PrescFireS.202010.chn_cs140,PrescFireS
 CougarCreek,portland_CougarCreek_SimFire_Eagle.202010.cl532.chn_cs140,SimFire_Eagle
 CougarCreek,portland_CougarCreek_SimFire_Norse.202010.cl532.chn_cs140,SimFire_Norse
-BearCreek,portland_BearCreek_CurCond.202010.cl532.chn_cs140          ,CurCond
-BearCreek,portland_BearCreek_CurCond.202010.cl532_future.chn_cs140   ,CurCond
-BearCreek,portland_BearCreek_CurCond.202010.cl532_gridmet.chn_cs140  ,CurCond
-BearCreek,portland_BearCreek_HighSevS.202010.chn_cs140               ,HighSevS
+BearCreek,portland_BearCreek_CurCond.202010.cl532.chn_cs140,CurCond
+BearCreek,portland_BearCreek_CurCond.202010.cl532_future.chn_cs140,CurCond
+BearCreek,portland_BearCreek_CurCond.202010.cl532_gridmet.chn_cs140,CurCond
+BearCreek,portland_BearCreek_HighSevS.202010.chn_cs140,HighSevS
 BearCreek,portland_BearCreek_LowSevS.202010.chn_cs140,LowSevS
 BearCreek,portland_BearCreek_ModSevS.202010.chn_cs140,ModSevS
 BearCreek,portland_BearCreek_PrescFireS.202010.chn_cs140,PrescFireS
 BearCreek,portland_BearCreek_SimFire_Eagle.202010.cl532.chn_cs140,SimFire_Eagle
 BearCreek,portland_BearCreek_SimFire_Norse.202010.cl532.chn_cs140,SimFire_Norse
-CampCreek,portland_CampCreek_CurCond.202010.cl532.chn_cs140          ,CurCond
-CampCreek,portland_CampCreek_CurCond.202010.cl532_future.chn_cs140   ,CurCond
-CampCreek,portland_CampCreek_CurCond.202010.cl532_gridmet.chn_cs140  ,CurCond
-CampCreek,portland_CampCreek_HighSevS.202010.chn_cs140               ,HighSevS
+CampCreek,portland_CampCreek_CurCond.202010.cl532.chn_cs140,CurCond
+CampCreek,portland_CampCreek_CurCond.202010.cl532_future.chn_cs140,CurCond
+CampCreek,portland_CampCreek_CurCond.202010.cl532_gridmet.chn_cs140,CurCond
+CampCreek,portland_CampCreek_HighSevS.202010.chn_cs140,HighSevS
 CampCreek,portland_CampCreek_LowSevS.202010.chn_cs140,LowSevS
 CampCreek,portland_CampCreek_ModSevS.202010.chn_cs140,ModSevS
 CampCreek,portland_CampCreek_PrescFireS.202010.chn_cs140,PrescFireS
