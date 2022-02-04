@@ -204,7 +204,7 @@ if __name__ == '__main__':
             watershed.set_outlet(*outlet)
 
             log_print('building subcatchments')
-            topaz.build_subcatchments()
+            watershed.build_subcatchments()
 
             log_print('abstracting watershed')
             watershed.abstract_watershed()
