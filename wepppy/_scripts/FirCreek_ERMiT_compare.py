@@ -318,8 +318,6 @@ if __name__ == '__main__':
 
             climate.build(verbose=1)
 
-            climate.dump_and_unlock()
-
         elif cli_mode == 'PRISMadj':
             stations = climate.find_closest_stations()
             climate.climatestation = stations[0]['id']
