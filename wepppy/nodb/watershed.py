@@ -292,16 +292,21 @@ class Watershed(NoDbBase):
 
     @property
     def csa(self):
+        if hasattr(self, '_csa'):
+            return self._csa
+        
         if self.delineation_backend_is_topaz:
             return Topaz.getInstance(self.wd).csa
 
-        if hasattr(self, '_csa'):
-            return self._csa
-
     @property
     def mcl(self):
+        
         if self.delineation_backend_is_topaz:
-            return Topaz.getInstance(self.wd).mcl
+
+            if hasattr(self, '_mcl'):
+                return self._mcl
+            else:
+                return Topaz.getInstance(self.wd).mcl
 
         return None
 
