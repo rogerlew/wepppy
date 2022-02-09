@@ -520,7 +520,10 @@ class Disturbed(NoDbBase):
             if is256:
                 breaks = [75, 109, 187, max(counts)]
             else:
-                breaks = [1, 2, 3, max(counts)]
+                if max(counts) == 3:
+                    breaks = [0, 1, 2, max(counts)]
+                else:
+                    breaks = [1, 2, 3, max(counts)]
 
             self._is256 = is256
             self._classes = classes
