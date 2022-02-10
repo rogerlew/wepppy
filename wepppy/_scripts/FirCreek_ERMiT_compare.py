@@ -204,8 +204,8 @@ if __name__ == '__main__':
             watershed.set_outlet(*outlet)
 
             log_print('building subcatchments')
-            watershed.clip_hillslopes = True
-            watershed.clip_hillslope_length = 300
+//            watershed.clip_hillslopes = True
+//            watershed.clip_hillslope_length = 300
             watershed.build_subcatchments()
 
             log_print('abstracting watershed')
