@@ -717,6 +717,27 @@ def seattle_results(file):
         return error_factory('File does not exist')
     
 
+
+
+@app.route('/seattle-municipal/static/<file>')
+@app.route('/seattle-municipal/static/<file>/')
+@app.route('/locations/seattle-municipal/static/<file>')
+@app.route('/locations/seattle-municipal/static/<file>/')
+# roles_required('SeattleGroup')
+def seattle_static(file):
+    """
+    recursive list the file structure of the working directory
+    """
+    import wepppy
+    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'static', file)
+
+    if _exists(fn):
+        with open(fn) as fp:
+            return fp.read()
+    else:
+        return error_factory('File does not exist')
+    
+
 @app.route('/create')
 @app.route('/create/')
 def create_index():
