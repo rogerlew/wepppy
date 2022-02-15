@@ -18,6 +18,7 @@ from os.path import split as _split
 
 from collections import Counter
 
+import io
 from io import BytesIO
 import json
 import shutil
@@ -717,8 +718,6 @@ def seattle_results(file):
         return error_factory('File does not exist')
     
 
-
-
 @app.route('/seattle-municipal/static/<file>')
 @app.route('/seattle-municipal/static/<file>/')
 @app.route('/locations/seattle-municipal/static/<file>')
@@ -732,7 +731,8 @@ def seattle_static(file):
     fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'static', file)
 
     if _exists(fn):
-        with open(fn) as fp:
+        
+        with io.open(fn, "r", encoding="utf-8") as fp:
             return fp.read()
     else:
         return error_factory('File does not exist')
