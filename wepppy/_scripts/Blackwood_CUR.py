@@ -127,7 +127,7 @@ if __name__ == '__main__':
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
             projects[-1]['scenario'] = scenario['scenario']
-            projects[-1]['wd'] = 'lt_202012_%s_%s' % (watershed['watershed'], scenario['scenario'])
+            projects[-1]['wd'] = 'lt_202203_%s_%s' % (watershed['watershed'], scenario['scenario'])
 
     failed = open('failed', 'w')
     for proj in projects:
