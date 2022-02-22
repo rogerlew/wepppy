@@ -141,7 +141,7 @@ if __name__ == '__main__':
             climate_mode = proj['climate']
             lc_lookup_fn = proj['lc_lookup_fn']
 
-            watershed = proj['watershed']
+            _watershed = proj['watershed']
             scenario = proj['scenario']
 
             if wc is not None:
