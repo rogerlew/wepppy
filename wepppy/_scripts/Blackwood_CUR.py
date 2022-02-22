@@ -142,7 +142,7 @@ if __name__ == '__main__':
             climate_mode = proj['climate']
             lc_lookup_fn = proj['lc_lookup_fn']
 
-            watershed = proj['watershed']
+            _watershed = proj['watershed']
             scenario = proj['scenario']
 
             if wc is not None:
@@ -246,7 +246,7 @@ if __name__ == '__main__':
                 climate.climate_spatialmode = ClimateSpatialMode.Single
                 # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             elif 'copy' in climate_mode:
-                src_wd = 'lt_202203_%s_%s' % (watershed, climate_mode[4:])
+                src_wd = 'lt_202203_%s_%s' % (_watershed, climate_mode[4:])
                 shutil.rmtree(_join(wd, 'climate'))
                 shutil.copytree(_join(src_wd, 'climate'), _join(wd, 'climate'))
                 with open(_join(src_wd, 'climate.nodb')) as fp:
