@@ -146,15 +146,6 @@ def readSlopeFile(fname):
                 LowerBottomSlope=lower_bottom * 100.0)
 
 
-landml2burnclass = {130: 'Unburned',
-                    131: 'Low',
-                    132: 'Moderate',
-                    133: 'High',
-                    105: 'High',
-                    106: 'Low'
-                    }
-
-
 def create_ermit_input(wd):
 
     watershed = Watershed.getInstance(wd)
@@ -187,7 +178,7 @@ def create_ermit_input(wd):
         wepp_id = translator.wepp(top=int(topaz_id))
         dom = landuse.domlc_d[str(topaz_id)]
         man = landuse.managements[dom]
-        burnclass = landml2burnclass.get(int(dom), 'N/A')
+        burnclass = landuse.identify_burnclass(topaz_id)
         mukey = soils.domsoil_d[topaz_id]
         soil_type = soils.soils[mukey].simple_texture
 
