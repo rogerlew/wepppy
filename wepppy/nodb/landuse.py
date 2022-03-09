@@ -384,7 +384,7 @@ class Landuse(NoDbBase):
         if 'sev' not in desc or 'fire' not in desc:
             return 'N/A'
         
-        if 'low' in desc 'prescribed' in desc:
+        if 'low' in desc or 'prescribed' in desc:
             return 'Low'
         
         elif 'mod' in desc:
