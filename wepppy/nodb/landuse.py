@@ -373,6 +373,28 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
+    def identify_burnclass(self, topaz_id):
+        dom = self.domlc_d[str(topaz_id)]
+        man = self.managements[dom]
+        desc = man.desc.lower()
+        
+        if 'unburned' in desc:
+            return 'Unburned'
+        
+        if 'sev' not in desc or 'fire' not in desc:
+            return 'N/A'
+        
+        if 'low' in desc 'prescribed' in desc:
+            return 'Low'
+        
+        elif 'mod' in desc:
+            return 'Moderate'
+        
+        elif 'high' in desc:
+            return 'High'
+        
+        return 'N/A'    
+        
     def set_cover_defaults(self):
 
         defaults = self.cover_defaults_d
