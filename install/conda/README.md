@@ -36,10 +36,39 @@ Run the installer
 
 After it completes close Ubuntu shell and then reopen it
 
+
+### Step 4. Build conda-wepppy-env
+
+
 Download conda-wepppy-env.yaml file
 
 ```
 > wget https://raw.githubusercontent.com/rogerlew/wepppy/master/install/conda/conda-wepppy-env.yaml
 ```
 
+Run
+
+```
+> conda env create -f conda-wepppy-env.yaml
+```
+
+Activate the weppy-env
+
+```
+> conda activate wepppy-env
+```
+
+### Step 5. Install wepppy
+
+Install git-lfs
+
+```
+> sudo apt-get install git-lfs
+```
+
+Then clone wepppy repository
+
+```
+> git lfs clone https://github.com/rogerlew/wepppy 
+```
 
