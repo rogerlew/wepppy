@@ -1,15 +1,13 @@
-# Conda
+# Conda on Ubuntu GNU/Linux
 
-## Install on Windows Subsystem for Linux
+### (Optional) Step 1. Install on Windows Subsystem for Linux
 
-### Step 1. Install Ubuntu 18.04 WSL
+Ubuntu 18.04 WSL
 
 https://docs.microsoft.com/en-us/windows/wsl/install
 
 
-
-### Step 2. Launch Ubuntu Shell
-
+### Step 2. Launch Ubuntu Shell 
 
 
 ### Step 3. Install conda
