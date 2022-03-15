@@ -60,6 +60,8 @@ Activate the weppy-env
 
 ### Step 5. Install wepppy
 
+#### Step 5.1 Clone git repo
+
 Install git-lfs
 
 ```
@@ -70,5 +72,42 @@ Then clone wepppy repository
 
 ```
 > git lfs clone https://github.com/rogerlew/wepppy 
+```
+
+Need to manually clone all_your_base submodule
+```
+> cd wepppy/wepppy
+> rm -R all_your_base
+> git clone https://github.com/rogerlew/all_your_base
+```
+
+(Verify contents exist in all_your_base folder)
+
+#### Step 5.2 add to wepppy-env path
+```
+> nano ~/miniconda3/envs/wepppy-env/lib/python3.9/site-packages/wepppy.pth
+```
+
+add the path to your wepppy git repository and save file
+
+e.g.
+
+```
+/home/roger/wepppy/
+```
+
+### Step 6. Update Ubuntu and install gfortran
+
+```
+> sudo apt update
+> sudo apt upgrade
+> sudo apt install libgfortran3
+```
+
+### Step 7. Test scripted run
+
+```
+> cd ~/wepppy/wepppy/_scripts
+> python3 scripted_run.py
 ```
 
