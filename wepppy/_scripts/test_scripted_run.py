@@ -46,17 +46,16 @@ if __name__ == '__main__':
         ron.fetch_dem()
 
         print('building channels')
-        topaz = Topaz.getInstance(wd)
-        topaz.build_channels(csa=5, mcl=60)
+        wat = Watershed.getInstance(wd)
+        wat.build_channels(csa=5, mcl=60)
         
         print('setting outlet')
-        topaz.set_outlet(*outlet)
+        wat.set_outlet(*outlet)
         
         print('building subcatchments')
-        topaz.build_subcatchments()
+        wat.build_subcatchments()
 
         print('abstracting watershed')
-        wat = Watershed.getInstance(wd)
         wat.abstract_watershed()
         translator = wat.translator_factory()
         topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
