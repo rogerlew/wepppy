@@ -84,6 +84,28 @@ var Project = function () {
             });
         };
 
+        that.setScenario = function (scenario) {
+            var self = instance;
+            $.post({
+                url: "tasks/setscenario/",
+                data: $("#setscenario_form").serialize(),
+                success: function success(response) {
+                    if (response.Success === true) {
+                        $("#input_scenario").val(scenario);
+                        document.title = document.title.split(" - ")[0] + ' - ' + scenario;
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    console.log(error);
+                }
+            });
+        };
+
         that.clear_locks = function() {
 
             $.get({
