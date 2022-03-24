@@ -13,7 +13,7 @@ from time import sleep
 
 from wepppy.all_your_base import isnan, isinf
 from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash, AshPost
-
+from wepppy.watershed_abstraction.support import json_to_wgs
 
 def has_arc_export(wd):
     ron = Ron.getInstance(wd)
@@ -177,6 +177,8 @@ def arc_export(wd, verbose=False):
     geojson_fn = _join(export_dir, 'subcatchments.json')
     with open(geojson_fn, 'w') as fp:
         json.dump(js, fp, allow_nan=False)
+
+    json_to_wgs(geojson_fn)
 
     if verbose:
         print('done.')
