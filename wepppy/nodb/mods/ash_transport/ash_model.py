@@ -92,7 +92,8 @@ class AshModel(object):
                   recurrence=[100, 50, 25, 20, 10, 5, 2], 
                   area_ha: Optional[float]=None, 
                   ini_ash_depth: Optional[float]=None, 
-                  ini_ash_load: Optional[float]=None, run_wind_transport=True, model='neris'):
+                  ini_ash_load: Optional[float]=None, run_wind_transport=True,
+                  model='neris'):
         """
         Runs the ash model for a hillslope
 
@@ -112,24 +113,6 @@ class AshModel(object):
         :return:
             returns the output file name, return period results dictionary
         """
-        
-        if model == 'anu':
-            return self._anu_run_model(self, fire_date=fire_date, element_d=element_d, cli_df=cli_df, hill_wat=hill_wat, 
-                                         out_dir=out_dir, prefix=prefix, recurrence=recurrence, 
-                                         area_ha=area_ha, ini_ash_depth=ini_ash_depth, ini_ash_load=ini_ash_load, 
-                                         run_wind_transport=run_wind_transport)
-        
-        else:
-            return self._neris_run_model(self, fire_date=fire_date, element_d=element_d, cli_df=cli_df, hill_wat=hill_wat, 
-                                         out_dir=out_dir, prefix=prefix, recurrence=recurrence, 
-                                         area_ha=area_ha, ini_ash_depth=ini_ash_depth, ini_ash_load=ini_ash_load, 
-                                         run_wind_transport=run_wind_transport)
-        
-    def _neris_run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 25, 20, 10, 5, 2], 
-                  area_ha: Optional[float]=None, 
-                  ini_ash_depth: Optional[float]=None, 
-                  ini_ash_load: Optional[float]=None, run_wind_transport=True):
 
         self.ini_ash_depth_mm = ini_ash_depth
         self.ini_ash_load_tonneha = ini_ash_load
@@ -480,142 +463,6 @@ class AshModel(object):
 
         return out_fn, return_periods, annuals
 
-    def _anu_ash_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
-                  recurrence=[100, 50, 25, 20, 10, 5, 2], 
-                  area_ha: Optional[float]=None, 
-                  ini_ash_depth: Optional[float]=None, 
-                  ini_ash_load: Optional[float]=None, run_wind_transport=True):
-
-        self.ini_ash_depth_mm = ini_ash_depth
-        # self.ini_ash_load_tonneha = ini_ash_load
-        
-        # define fire day in julian
-        fireDay = fire_date.julian
-
-        # define parameters
-        iniBulkDen = 0.31  # Initial bulk density, gm/cm3
-        finBulkDen = 0.62  # Final bulk density, gm/cm3
-        bulkDenFac = 0.005  # Bulk density factor
-        parDen = 1.2  # Ash particle density, gm/cm3
-        decompFac = self.decomposition_rate  # 0.00018  # Ash decomposition factor, per day
-        iniErod = 1  # Initial erodibility, t/ha
-        finErod = 0.01  # Final erodibility, t/ha
-        roughnessLimit = 1  # Roughness limit, mm
-        self.ini_ash_depth_mm = iniAshDepth = ini_ash_depth
-        self.ini_ash_load_tonneha = iniAshLoad = 10 * iniAshDepth * iniBulkDen   # Initial ash load, t/ha
-        
-        
-        watr = pd.read_table(hill_wat.fname, skiprows=skipped_rows, sep='\s+', header=None, names=col_names)
-
-        # make starting/ending date for stochastic climate
-        if watr['Y_#'].iloc[0] == 1:
-            starting = '1/1/' + str(watr['Y_#'].iloc[0] + 1900)
-            ending = '12/31/' + str(watr['Y_#'].iloc[-1] + 1900)
-        # make starting/ending date for observed climate
-        else:
-            starting = '1/1/' + str(watr['Y_#'].iloc[0])
-            ending = '12/31/' + str(watr['Y_#'].iloc[-1])
-
-        # create ash df
-        df = pd.DataFrame()
-
-        # get selected variables from watr df to ash df
-        df = watr[['J_#', 'Y_#', 'P_mm', 'RM_mm', 'Q_mm']]
-
-        # insert date column to ash df
-        df.insert(0, 'Date', pd.date_range(start=starting, end=ending))
-        # print('running ash model on wat file: ', os.path.basename(wat).split('.')[0])
-
-
-        # update year
-        df.insert(1, 'Year', df.apply(lambda x: x['Y_#'] if x['J_#'] >= fireDay else x['Y_#'] - 1, axis=1))
-
-        # update julian
-        df.insert(2, 'Julian', df.groupby(['Year']).cumcount() + 1)
-
-        # calulate infiltration
-        df['Infil_mm'] = df.apply(lambda x: x['RM_mm'] - x['Q_mm'], axis=1)
-
-        # cumulative infiltration
-        df['Cum_Infil_mm'] = df.groupby(['Year'])['Infil_mm'].cumsum(axis=0)
-
-        # cumulative surface runoff
-        df['Cum_Q_mm'] = df.groupby(['Year'])['Q_mm'].cumsum(axis=0)
-
-        # calculate bulk density as a function of cumulative infiltration
-        df['Bulk_density_gmpcm3'] = df.apply(lambda x: finBulkDen + (iniBulkDen - finBulkDen) * math.exp(-bulkDenFac * x['Cum_Infil_mm']), axis=1)
-
-        # calculate porosity for water holding capacity of ash layer
-        df['Porosity'] = df.apply(lambda x: 1 - (x['Bulk_density_gmpcm3']/parDen), axis=1)
-
-        # compute daily values
-        df.loc[0, 'Available_ash_tonspha'] = iniAshLoad
-        df.loc[0, 'Ash_depth_mm'] = df.loc[0, 'Available_ash_tonspha'] * df.loc[0, 'Bulk_density_gmpcm3']
-
-        for t in range(1, len(df)):
-
-            # runoff from ash layer
-            if df.loc[t-1, 'Q_mm'] > ((df.loc[t-1, 'Available_ash_tonspha']/(10 * df.loc[t-1, 'Bulk_density_gmpcm3'])) * df.loc[t-1, 'Porosity']):
-                df.loc[t-1, 'Ash_runoff_mm'] = max(0, df.loc[t-1, 'Q_mm'] - ((df.loc[t-1, 'Available_ash_tonspha']/(10 * df.loc[t-1, 'Bulk_density_gmpcm3'])) * df.loc[t-1, 'Porosity']))
-            else:
-                df.loc[t-1, 'Ash_runoff_mm'] = 0
-
-            # ash transport and ash delivery from hillslope
-            if df.loc[t-1, 'Ash_runoff_mm'] > 0:
-                df.loc[t-1, 'Ash_transport_tonspha'] = (iniErod - finErod) * ((df.loc[t-1, 'Bulk_density_gmpcm3'] - finBulkDen)/(iniBulkDen - finBulkDen)) + finErod
-                df.loc[t-1, 'Ash_out_tonspha'] = max(0, min(df.loc[t-1, 'Available_ash_tonspha'], df.loc[t-1, 'Ash_runoff_mm'] * df.loc[t-1, 'Ash_transport_tonspha']))
-            else:
-                df.loc[t-1, 'Ash_transport_tonspha'] = 0
-                df.loc[t-1, 'Ash_out_tonspha'] = 0
-
-            # available ash
-            if df.loc[t, 'Julian'] > 1:
-                if df.loc[t-1, 'Ash_depth_mm'] < roughnessLimit:
-                    df.loc[t, 'Available_ash_tonspha'] = 0
-                else:
-                    df.loc[t, 'Available_ash_tonspha'] = df.loc[t-1, 'Available_ash_tonspha'] * math.exp(-decompFac * df.loc[t, 'Infil_mm']) - df.loc[t-1, 'Ash_out_tonspha']
-            else:
-                df.loc[t, 'Available_ash_tonspha'] = iniAshLoad
-
-            # ash depth
-            df.loc[t, 'Ash_depth_mm'] = df.loc[t, 'Available_ash_tonspha']/(10 * df.loc[t, 'Bulk_density_gmpcm3'])
-
-        # cumulative runoff from ash layer
-        df['Cum_ash_runoff_mm'] = df.groupby(['Year'])['Ash_runoff_mm'].cumsum(axis=0)
-
-        # cumulative ash delive from hillslope
-        df['Cum_ash_out_tonspha'] = df.groupby(['Year'])['Ash_out_tonspha'].cumsum(axis=0)
-
-        # remove the first and the last year
-        df = df[(df['Year'] > df['Year'].iloc[0]) & (df['Year'] < df['Year'].iloc[-1])]
-
-        # reset and rename index
-        df.reset_index(drop=True, inplace=True)
-        df.index.rename("SNo.", inplace=True)
-
-        # drop columns
-        df = df.drop(['Y_#', 'J_#', 'Date'], axis=1)
-
-        # Update date
-        df.insert(0, 'Date', pd.date_range("01-01-" + str(df['Year'].iloc[0]), periods=len(df), freq='D'))
-
-        # write ash output file
-        df.to_csv(fname + '_ash.csv')
-
-        # graphing
-
-        # line plot
-        fig = plt.figure()
-        ax = plt.gca()
-        df.plot(kind='line', x='Date', y='Cum_ash_runoff_mm', color='blue', ax=ax)
-        df.plot(secondary_y=True, kind='line', x='Date', y='Cum_ash_out_tonspha', color='red', ax=ax)
-        fig.savefig(fname + '_ash.png')
-
-        # scatter plot
-        fig2 = plt.figure()
-        ax = plt.gca()
-        df.plot(kind='scatter', x='Cum_ash_runoff_mm', y='Cum_ash_out_tonspha', color='blue', ax=ax)
-        fig2.savefig(fname + '_ash_scatter.png')
 
 class WhiteAshModel(AshModel):
     __name__ = 'WhiteAshModel'
@@ -650,4 +497,5 @@ class BlackAshModel(AshModel):
             water_transport_rate_k=None,
             wind_threshold=6,
             porosity=0.8)
+
 
