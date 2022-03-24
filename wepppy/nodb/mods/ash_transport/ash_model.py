@@ -92,8 +92,7 @@ class AshModel(object):
                   recurrence=[100, 50, 25, 20, 10, 5, 2], 
                   area_ha: Optional[float]=None, 
                   ini_ash_depth: Optional[float]=None, 
-                  ini_ash_load: Optional[float]=None, run_wind_transport=True,
-                  model='neris'):
+                  ini_ash_load: Optional[float]=None, run_wind_transport=True):
         """
         Runs the ash model for a hillslope
 
@@ -497,5 +496,4 @@ class BlackAshModel(AshModel):
             water_transport_rate_k=None,
             wind_threshold=6,
             porosity=0.8)
-
 
