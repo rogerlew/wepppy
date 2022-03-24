@@ -96,10 +96,25 @@ e.g.
 
 ### Step 6. Update Ubuntu and install gfortran
 
+#### Ubuntu 18.04
 ```
 > sudo apt update
 > sudo apt upgrade
 > sudo apt install libgfortran3
+```
+
+#### Ubuntu 20.04
+libfortran3 is not provided by canonical
+
+It can be installed through the following steps:
+
+```
+> sudo apt update
+> sudo apt upgrade
+> sudo apt install libquadmath0
+> wget https://gist.githubusercontent.com/sakethramanujam/faf5b677b6505437dbdd82170ac55322/raw/c306b71253ec50fb55d59f935885773d533b565c/install-libgfortran3.sh
+> sudo chmod +x install-libgfortran3.sh
+> sudo ./install-libgfortran3.sh
 ```
 
 ### Step 7. Test scripted run
