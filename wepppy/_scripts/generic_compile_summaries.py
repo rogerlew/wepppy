@@ -18,8 +18,8 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--prefix', type=str, default='prefix', help='prefix for output files')
-    parser.add_argument('--outdir', type=str, default='/home/mariana/BLKWD_UTR_300m', help='outdir for files')
-    parser.add_argument('--input_csv', type=str, default='Blackwood_UTR_300m.csv', help='input file with RunID, WatershedName, Scenario colmans')
+    parser.add_argument('--outdir', type=str, default='/home/mariana/BullRun_march', help='outdir for files')
+    parser.add_argument('--input_csv', type=str, default='BullRun_Runs_ID.csv', help='input file with RunID, WatershedName, Scenario colmans')
 
     args = parser.parse_args()
 
