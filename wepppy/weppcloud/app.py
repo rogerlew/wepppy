@@ -114,7 +114,9 @@ from wepppy.nodb import (
     get_configs
 )
 
-from wepppy.nodb.mods.ash_transport import BlackAshModel, WhiteAshModel, AshType
+from wepppy.nodb.mods.ash_transport import ( 
+    AshType, 
+)
 
 
 # load app configuration based on deployment
@@ -1287,7 +1289,8 @@ def hillslope0_ash(runid, config, topaz_id):
         sub = watershed.sub_summary(topaz_id)
         climate = Climate.getInstance(wd)
         wepp = Wepp.getInstance(wd)
-
+        ash = Ash.getInstance(wd)
+    
         cli_path = climate.cli_path
         cli_df = ClimateFile(cli_path).as_dataframe()
 
@@ -1299,6 +1302,12 @@ def hillslope0_ash(runid, config, topaz_id):
 
         prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
         recurrence = [100, 50, 20, 10, 2.5, 1]
+
+        if ash.model == 'neris':
+            from wepppy.nodb.mods.ash_transport.ash_model import WhiteAshModel, BlackAshModel
+        else:
+            from wepppy.nodb.mods.ash_transport.anu_ash_model import WhiteAshModel, BlackAshModel
+
         if _ash_type == AshType.BLACK:
             _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
                                                             ash_dir, prefix=prefix, recurrence=recurrence,
@@ -1518,6 +1527,14 @@ def task_setname(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     ron.name = request.form.get('name', 'Untitled')
+    return success_factory()
+
+
+@app.route('/runs/<string:runid>/<config>/tasks/setscenario/', methods=['POST'])
+def task_setscenario(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    ron.scenario = request.form.get('scenario', '')
     return success_factory()
 
 
@@ -4022,8 +4039,6 @@ def run_ash(runid, config):
 
         ash = Ash.getInstance(wd)
 
-        print('ash_depth_mode', ash_depth_mode)
-
         if int(ash_depth_mode) == 2:
           
             ash.lock()
@@ -4575,12 +4590,8 @@ def weppcloudr_proxy(routine):
 
             name = ron.name
             scenario = ron.scenario
-            w3w = ron.w3w
-            sub_n = watershed.sub_n
-            is_topaz = int(watershed.delineation_backend_is_topaz)
-            location_hash = f'{w3w}_{is_topaz}_{sub_n}'
 
-            ws.append(dict(runid=runid, cfg=ron.config_stem, name=name, scenario=scenario, location_hash=location_hash))
+            ws.append(dict(runid=runid, cfg=ron.config_stem, name=name, scenario=scenario, location_hash=ron.location_hash))
 
         
         js = json.dumps(ws)
