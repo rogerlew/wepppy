@@ -8,23 +8,21 @@ Wepppy is Python package for running WEPP (Water Erosion Prediction Project) and
 [![DOI](https://zenodo.org/badge/125935882.svg)](https://zenodo.org/badge/latestdoi/125935882)
 
 ### Linux Installation
-The wepppy repo is using Git LFS for some sqlite3 databases that are in the project. Pulling probably didn't download those correctly. So from the wepppy dir run the following to sync the database files:
 
-```
-> rm wepppy/climates/cligen/stations.db
-> rm wepppy/climates/cligen/2015_stations.db
-> rm wepppy/soils/ssurgo/data/statsgo/statsgo_spatial.db
-> rm wepppy/soils/ssurgo/data/statsgo/statsgo_tabular.db
-> rm wepppy/soils/ssurgo/data/surgo/surgo_tabular.db
-> git lfs pull
-```
+See [wepppy install with conda](https://github.com/rogerlew/wepppy/tree/master/install/conda)
+
 
 ### Docker
+
+(has not been recently tested)
+
 A docker base image is provided though wepppy, though wepppy works better on a bare metal linux install
 https://github.com/rogerlew/wepppy-docker-base
 
 
 ### Windows
+
+(has not been recently tested)
 
 Clone repository using Github Client
 
