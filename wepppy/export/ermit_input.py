@@ -162,7 +162,7 @@ def create_ermit_input(wd):
 
     # write ermit input file
     header = 'HS_ID TOPAZ_ID UNIT_ID SOIL_TYPE AREA UTREAT USLP_LNG LTREAT UGRD_TP UGRD_BTM LGRD_TP LGRD_BTM LSLP_LNG '\
-             'ERM_TSLP ERM_MSLP ERM_BSLP BURNCLASS'.split()
+             'ERM_TSLP ERM_MSLP ERM_BSLP BURNCLASS ROCK_PCT'.split()
 
     export_dir = watershed.export_dir
 
@@ -181,6 +181,7 @@ def create_ermit_input(wd):
         burnclass = landuse.identify_burnclass(topaz_id)
         mukey = soils.domsoil_d[topaz_id]
         soil_type = soils.soils[mukey].simple_texture
+        rock_pct = soils.soils[mukey].smr
 
         if soil_type is None:
             try:
@@ -208,7 +209,8 @@ def create_ermit_input(wd):
                              'UGRD_BTM': v['UpperBottomSlope'],
                              'LGRD_TP': v['LowerTopSlope'],
                              'LGRD_BTM': v['LowerBottomSlope'],
-                             'BURNCLASS': burnclass
+                             'BURNCLASS': burnclass,
+                             'ROCK_PCT': rock_pct
                              })
 
     fp.close()
@@ -310,6 +312,8 @@ ERM_BSLP
 BURNCLASS
     - Burn class as Unburned, Low, Moderate, High
 
+ROCK_PCT
+    - Calcuated percent rock from soil file
 '''.format(date=datetime.now(),
            name=name,
            num_hills=watershed.sub_n,

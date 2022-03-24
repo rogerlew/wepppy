@@ -81,6 +81,17 @@ function onReady() {
         project.setName(name);
     });
 
+    $("#input_scenario").keyup(function (event) {
+        if (event.keyCode === 13) {
+            $("#btn_setscenario").click();
+        }
+    });
+
+    $("#btn_setscenario").click(function () {
+        var scenario = $("#input_scenario").val();
+        project.setScenario(scenario);
+    });
+
     //
     // Units
     //
