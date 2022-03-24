@@ -20,6 +20,7 @@ from wepppy.all_your_base import (
 )
 
 from wepppy.wepp import Element
+from wepppy.wepp.out import HillWat
 from wepppy.climates.cligen import ClimateFile
 
 # wepppy submodules
@@ -33,11 +34,13 @@ from wepppy.nodb.mods import Baer, Disturbed
 from wepppy.nodb.wepp import Wepp
 from wepppy.nodb.ron import Ron
 
-from .ash_model import *
+from wepppy.all_your_base.dateutils import YearlessDate
+
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
+MULTIPROCESSING = False
 
 ContaminantConcentrations = namedtuple('ContaminantConcentrations',
                                        ['PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
@@ -54,6 +57,12 @@ def run_ash_model(kwds):
     ash_type = kwds['ash_type']
     ini_ash_load = kwds['ini_ash_load']
     ash_bulkdensity = kwds['ash_bulkdensity']
+    model = kwds['model']
+
+    if model == 'neris':
+        from .ash_model import AshType, WhiteAshModel, BlackAshModel
+    else:
+        from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
 
     if ash_type == AshType.BLACK:
         ash_model = WhiteAshModel(bulk_density=ash_bulkdensity)
@@ -62,6 +71,8 @@ def run_ash_model(kwds):
 
     del kwds['ash_type']
     del kwds['ash_bulkdensity']
+    print(kwds)
+
     out_fn, return_periods, annuals = \
         ash_model.run_model(**kwds)
 
@@ -322,7 +333,10 @@ class Ash(NoDbBase, LogMixin):
     @property
     def model(self):
         if not getattr(self, '_model'):
-            self.model = 'neris'
+            if self.islocked():
+                self._model = 'neris'
+            else:
+                self.model = 'neris'
         return self._model
 
 
@@ -546,6 +560,11 @@ class Ash(NoDbBase, LogMixin):
             ash_dir = self.ash_dir
             model = self.model
 
+            if model == 'neris':
+                from .ash_model import AshType, WhiteAshModel, BlackAshModel
+            else:
+                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+
             if _exists(ash_dir):
                 try:
                     for fn in glob(_join(ash_dir, '*.csv')):
@@ -669,14 +688,19 @@ class Ash(NoDbBase, LogMixin):
                             area_ha=area_ha,
                             run_wind_transport=run_wind_transport,
                             model=model)
-            #    run_ash_model(kwds)
-                args.append(kwds)
-                
-            pool = multiprocessing.Pool(NCPU)
-            for out_fn in pool.imap_unordered(run_ash_model, args):
-                self.log('  completed running {}\n'.format(out_fn))
-                self.log_done()
 
+                args.append(kwds)
+ 
+            if MULTIPROCESSING:
+                pool = multiprocessing.Pool(NCPU)
+                for out_fn in pool.imap_unordered(run_ash_model, args):
+                    self.log('  completed running {}\n'.format(out_fn))
+                    self.log_done()
+            else:
+                for kwds in args:
+                    self.log('  running {}\n'.format(kwds['prefix']))
+                    run_ash_model(kwds)
+                    self.log_done()
               
             self._ash_load_d = load_d
             self._ash_type_d = ash_type_d
@@ -699,9 +723,15 @@ class Ash(NoDbBase, LogMixin):
             ashpost = AshPost(wd, '{}.cfg'.format(self.config_stem))
         else:
             ashpost = AshPost.getInstance(wd)
+
         ashpost.run_post()
 
     def get_ash_type(self, topaz_id):
+        if self.model == 'neris':
+            from wepppy.nodb.mods.ash_transport.ash_model import AshType
+        else:
+            from wepppy.nodb.mods.ash_transport.anu_ash_model import AshType
+
         ash_type = self.meta[str(topaz_id)].get('ash_type', None)
         if ash_type == AshType.BLACK:
             return 'black'
@@ -709,6 +739,11 @@ class Ash(NoDbBase, LogMixin):
             return 'white'
 
     def get_ini_ash_depth(self, topaz_id):
+        if self.model == 'neris':
+            from wepppy.nodb.mods.ash_transport.ash_model import AshType
+        else:
+            from wepppy.nodb.mods.ash_transport.anu_ash_model import AshType
+
         _meta = self.meta[str(topaz_id)]
 
         if 'ini_ash_depth' in _meta:
