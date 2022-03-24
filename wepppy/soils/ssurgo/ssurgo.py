@@ -412,6 +412,20 @@ class SoilSummary(object):
 
         return soil_texture(self.clay, self.sand)
 
+    @property
+    def smr(self):
+        path = self.path
+
+        if not _exists(path):
+            path = _join('/geodata/weppcloud_runs', path)
+
+        with open(path) as fp:
+            lines = fp.readlines()
+        lines = [L for L in lines if not L.startswith('#')]
+        lines = [L for L in lines if not L.strip() == '']
+        smr = float(lines[4].split()[-1])
+        return smr
+
     def as_dict(self):
         avke = getattr(self, 'avke', None)
         ll = getattr(self, 'll', None)
