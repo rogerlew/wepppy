@@ -396,6 +396,9 @@ class Loss(object):
                 topaz_id = translator.top(wepp=wepp_id)
                 sub_summary = watershed.sub_summary(str(topaz_id))
                 area = row['Hillslope Area']
+                if area == 0.0:
+                    area = subs_summary['area'] * 1e-4
+
                 hill_tbl[i]['WeppID'] = wepp_id
                 hill_tbl[i]['TopazID'] = topaz_id
                 hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
