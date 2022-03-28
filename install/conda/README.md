@@ -121,6 +121,6 @@ It can be installed through the following steps:
 
 ```
 > cd ~/wepppy/wepppy/_scripts
-> python3 scripted_run.py
+> python3 test_scripted_run.py
 ```
 
