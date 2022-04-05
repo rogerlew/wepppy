@@ -99,8 +99,7 @@ def _extract_table(xml):
     table = []
     root = ElementTree.fromstring(xml)
     for i, row in enumerate(root.iter('Table')):
-        children = row.getchildren()
-        children = tuple(try_parse(c.text) for c in children)
+        children = tuple(try_parse(c.text) for c in row)
         key = (children[0], children[1])
         if key not in two_keys:
             two_keys.add(key)
@@ -119,8 +118,7 @@ def _extract_unique(xml):
     table = []
     root = ElementTree.fromstring(xml)
     for i, row in enumerate(root.iter('Table')):
-        children = row.getchildren()
-        children = tuple(try_parse(c.text) for c in children)
+        children = tuple(try_parse(c.text) for c in row)
         key = children[0]
         if key not in elements:
             elements.add(key)
