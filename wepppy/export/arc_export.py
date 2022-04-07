@@ -160,13 +160,14 @@ def arc_export(wd, verbose=False):
 
         if ash is not None:
             if ash_out is not None:
-                f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
-                f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
-                f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
-                f['properties']['Awat(tonne)'] = ash_out[topaz_id]['water_transport (kg/ha)'] * area_ha / 1000.0
-                f['properties']['Awnd(tonne)'] = ash_out[topaz_id]['wind_transport (kg/ha)'] * area_ha / 1000.0
-                f['properties']['AshT(tonne)'] = ash_out[topaz_id]['ash_transport (kg/ha)'] * area_ha / 1000.0
-                f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
+                if topaz_id in ash_out:
+                    f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
+                    f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
+                    f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
+                    f['properties']['Awat(tonne)'] = ash_out[topaz_id]['water_transport (kg/ha)'] * area_ha / 1000.0
+                    f['properties']['Awnd(tonne)'] = ash_out[topaz_id]['wind_transport (kg/ha)'] * area_ha / 1000.0
+                    f['properties']['AshT(tonne)'] = ash_out[topaz_id]['ash_transport (kg/ha)'] * area_ha / 1000.0
+                    f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
 
         for k, v in f['properties'].items():
             if isnan(v) or isinf(v):
