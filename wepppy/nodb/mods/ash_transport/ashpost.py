@@ -15,6 +15,7 @@ from glob import glob
 from copy import deepcopy
 
 import shutil
+import math
 
 # non-standard
 import jsonpickle
@@ -544,6 +545,8 @@ class AshPost(NoDbBase):
                         df = pd.read_csv(fp)
                         series = df['cum_ash_delivery{src} (tonne)'.format(src=src)]
                         v = float(np.mean(series))
+                        if math.isnan(v):
+                            v = None
 
                 pw0_stats[key][str(burnclass)] = v
 
