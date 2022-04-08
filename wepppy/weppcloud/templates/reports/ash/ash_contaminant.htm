@@ -78,7 +78,9 @@
     <td>{{ unitizer(burnclass_summary[4], 'ha') | safe }}</td>
     <td>{{ unitizer(high_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        {% if high_ash is not none%}
         <td style="width:100px; text-align: right;" >{{ unitizer(1000 * high_ash * high / 1000000, 'kg') | safe }}</td>
+        {% endif %}
     {% endfor %}
 </tr>
 
@@ -87,7 +89,9 @@
     <td>{{ unitizer(burnclass_summary[3], 'ha') | safe }}</td>
     <td>{{ unitizer(mod_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        {% if mod_ash is not none%}
         <td style="width:100px; text-align: right;" >{{ unitizer(1000 * mod_ash * mod / 1000000, 'kg') | safe }}</td>
+        {% endif %}
     {% endfor %}
 </tr>
 
@@ -96,7 +100,9 @@
     <td>{{ unitizer(burnclass_summary[2], 'ha') | safe }}</td>
     <td>{{ unitizer(low_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+        {% if low_ash is not none%}
         <td style="width:100px; text-align: right;"  >{{ unitizer(1000 * low_ash * low / 1000000, 'kg') | safe }}</td>
+        {% endif %}
     {% endfor %}
 </tr>
 </tbody>
