@@ -26,7 +26,7 @@
     {% for rec_interval in recurrence_intervals %}
         {% if results[measure][rec_interval] is not none %}
         {% set _rec_interval = rec_interval | string %}
-        {% if rec_interval in results %}
+        {% if rec_interval in results[measure] %}
         <tr>
         <td>{{ unitizer(results[measure][_rec_interval][measure], units) | safe }}</td>
         <td>{{ unitizer(results[measure][_rec_interval]['probability'], '%') | safe  }}</td>
