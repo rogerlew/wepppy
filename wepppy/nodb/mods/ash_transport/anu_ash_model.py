@@ -94,7 +94,7 @@ class AshModel(object):
                   recurrence=[100, 50, 25, 20, 10, 5, 2],
                   area_ha: Optional[float] = None,
                   ini_ash_depth: Optional[float] = None,
-                  ini_ash_load: Optional[float] = None, run_wind_transport=True, model='neris'):
+                  ini_ash_load: Optional[float] = None, run_wind_transport=True):
         """
         Runs the ash model for a hillslope
 
@@ -155,11 +155,9 @@ class AshModel(object):
         # make starting/ending date for stochastic climate
         if is_gregorian:
             starting = '1/1/' + str(watr['Y_#'].iloc[0])
-            ending = '12/31/' + str(watr['Y_#'].iloc[-1])
         # make starting/ending date for observed climate
         else:
-            starting = '1/1/' + str(watr['Y_#'].iloc[0] + 1900)
-            ending = '12/31/' + str(watr['Y_#'].iloc[-1] + 1900)
+            starting = '1/1/' + str(watr['Y_#'].iloc[0] + 1901)
 
 #        # create ash df
 #        df = pd.DataFrame()
@@ -171,12 +169,14 @@ class AshModel(object):
         ]]
 
         # Insert date column to ash df
-        ash_df.insert(0, 'Date', pd.date_range(start=starting, end=ending))
+        ash_df.insert(0, 'Date', pd.period_range(start=starting, 
+                      periods=len(watr), freq="D"))
 
         # Define simulation length
-        start_date = pd.to_datetime(starting)
-        end_date = pd.to_datetime(ending)
-        N = (end_date - start_date).days + 1
+        start_date = ash_df['Date'].iloc[0]
+        end_date = ash_df['Date'].iloc[-1]
+
+        N = (end_date - start_date).n + 1
         idx_sim = (ash_df['Date'] >= start_date) & (ash_df['Date'] <= end_date)
 
         # Pre-compute some variables
@@ -188,9 +188,9 @@ class AshModel(object):
         q = ash_df.loc[idx_sim, 'Q_mm'].values
         tsw = ash_df.loc[idx_sim, 'Total-Soil-Water_mm'].values
         swe = ash_df.loc[idx_sim, 'Snow-Water_mm'].values
-        da = np.array([pd.Timestamp(date).day for date in dates])
-        mo = np.array([pd.Timestamp(date).month for date in dates])
-        yr = np.array([pd.Timestamp(date).year for date in dates])
+        da = np.array([date.day for date in dates])
+        mo = np.array([date.month for date in dates])
+        yr = np.array([date.year for date in dates])
 
         if not is_gregorian:
             yr = yr - 1900
@@ -355,7 +355,7 @@ class AshModel(object):
         df.index.rename("sno", inplace=True)
 
         # Update date
-        df.insert(0, 'date', pd.date_range("01-01-" + str(int(df['year'].iloc[0])), periods=len(df), freq='D'))
+        df.insert(0, 'date', pd.period_range("01-01-" + str(int(df['year'].iloc[0])), periods=len(df), freq='D'))
 
         breaks = []  # list of indices of new fire years
         for i, _row in df.iterrows():
