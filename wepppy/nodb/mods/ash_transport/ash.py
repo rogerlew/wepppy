@@ -71,7 +71,7 @@ def run_ash_model(kwds):
 
     del kwds['ash_type']
     del kwds['ash_bulkdensity']
-    print(kwds)
+    del kwds['model']
 
     out_fn, return_periods, annuals = \
         ash_model.run_model(**kwds)
