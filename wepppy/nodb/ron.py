@@ -518,6 +518,16 @@ class Ron(NoDbBase):
         return ''
 
     @property
+    def location_hash(self):
+        wd = self.wd
+        import wepppy.nodb
+        watershed = wepppy.nodb.Watershed.getInstance(wd)
+        w3w = self.w3w
+        sub_n = watershed.sub_n
+        is_topaz = int(watershed.delineation_backend_is_topaz)
+        return f'{w3w}_{is_topaz}_{sub_n}'
+       
+    @property
     def extent(self):
         if self.map is None:
             return None
@@ -538,6 +548,26 @@ class Ron(NoDbBase):
         # noinspection PyBroadException
         try:
             self._name = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    #
+    # scenario
+    #
+    @property
+    def scenario(self):
+        return getattr(self, '_scenario', None)
+
+    @scenario.setter
+    def scenario(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._scenario = value
             self.dump_and_unlock()
 
         except Exception:
