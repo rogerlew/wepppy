@@ -516,6 +516,10 @@ class TauDEMRunner:
                     os.remove(product)
 
         cmd = [str(v) for v in cmd]
+
+#        if not _exists('/usr/lib/libgdal.so.20'):
+#            cmd.extend(['-env', 'LD_LIBRARY_PATH', os.path.abspath(_join(_thisdir, 'bin/linux/lib'))])
+
         caller = inspect.stack()[1].function
         log = _join(self.wd, caller + '.log')
         _log = open(log, 'w')
@@ -523,7 +527,8 @@ class TauDEMRunner:
         if verbose:
             print(caller, cmd)
 
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log,
+                             env={'LD_LIBRARY_PATH': os.path.abspath(_join(_thisdir, 'bin/linux/lib'))})
         p.wait()
         _log.close()
 
