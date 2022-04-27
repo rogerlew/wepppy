@@ -124,3 +124,22 @@ It can be installed through the following steps:
 > python3 test_scripted_run.py
 ```
 
+### Running WEPPcloud Flask App
+
+#### Setup directories
+```
+> sudo mkdir /geodata
+> sudo mkdir /geodata/weppcloud_runs
+> sudo chown <username>:<username> /geodata/weppcloud_runs
+```
+
+### start Flask App
+```
+> cd ~/wepppy/wepppy/weppcloud
+> flask run
+```
+
+You should get a messaging stating that the flask app is running and should be able to load WEPPcloud on
+http://localhost:5000/
+
+This will still query wepp.cloud webservices for DEMs, etc.
