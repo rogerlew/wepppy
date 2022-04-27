@@ -124,7 +124,7 @@ It can be installed through the following steps:
 > python3 test_scripted_run.py
 ```
 
-### Running WEPPcloud Flask App
+### Optional. Running WEPPcloud Flask App
 
 #### Setup directories
 ```
@@ -133,7 +133,7 @@ It can be installed through the following steps:
 > sudo chown <username>:<username> /geodata/weppcloud_runs
 ```
 
-### start Flask App
+### Start Flask App
 ```
 > cd ~/wepppy/wepppy/weppcloud
 > flask run
