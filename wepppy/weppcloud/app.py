@@ -2098,17 +2098,24 @@ def task_build_channels(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    # determine whether we need to fetch dem
-    if ''.join(['%.7f' % v for v in ron.map.extent]) != \
-       ''.join(['%.7f' % v for v in extent]):
+    set_and_fetch = False
+    if ron.map is None:
+        set_and_fetch = True
 
+    # determine whether we need to fetch dem
+    elif ''.join(['%.7f' % v for v in ron.map.extent]) != \
+       ''.join(['%.7f' % v for v in extent]):
+        set_and_fetch = True
+
+    if set_and_fetch:
         ron.set_map(extent, center, zoom)
 
-        # Acquire DEM from WMesque server
-        try:
-            ron.fetch_dem()
-        except Exception:
-            return exception_factory('Fetching DEM Failed')
+        if not ron.dem_map:
+            # Acquire DEM from WMesque server
+            try:
+                ron.fetch_dem()
+            except Exception:
+                return exception_factory('Fetching DEM Failed')
 
     # Delineate channels
     watershed = Watershed.getInstance(wd)
@@ -4263,6 +4270,12 @@ def report_contaminant(runid, config):
 
         climate = Climate.getInstance(wd)
         rec_intervals = _parse_rec_intervals(request, climate.years)
+        contaminants = request.args.get('contaminants', 'Ca,Pb,P,Hg')
+        if contaminants is None:
+            cotaminants = ['Ca','Pb','P','Hg']
+        else:
+            contaminants = contaminants.split(',')
+
 
         ron = Ron.getInstance(wd)
         ash = Ash.getInstance(wd)
@@ -4287,6 +4300,7 @@ def report_contaminant(runid, config):
         return render_template('reports/ash/ash_contaminant.htm',
                                rec_intervals=recurrence_intervals,
                                rec_results=results,
+                               contaminants=contaminants,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                pw0_stats=pw0_stats,
