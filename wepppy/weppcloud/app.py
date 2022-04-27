@@ -25,7 +25,6 @@ import shutil
 import traceback
 from glob import glob
 from subprocess import check_output, Popen, PIPE
-import matplotlib.pyplot as plt
 
 import markdown
 
@@ -1631,6 +1630,7 @@ def task_setoutlet(runid, config):
 
 
 def matplotlib_vis(path):
+    import matplotlib.pyplot as plt
 
     data, transform, proj = read_raster(path)
 
