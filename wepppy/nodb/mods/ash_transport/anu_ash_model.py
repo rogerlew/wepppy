@@ -45,7 +45,7 @@ class AshModel(object):
     def __init__(self,
                  ash_type: AshType,
                  ini_bulk_den=None,
-                 fin_bulk_de=None,
+                 fin_bulk_den=None,
                  bulk_den_fac=None,
                  par_den=None,
                  decomp_fac=None,
@@ -56,7 +56,7 @@ class AshModel(object):
         self.ini_ash_depth_mm = None
         self.ini_ash_load_tonneha = None
         self.ini_bulk_den = WHITE_ASH_BD,  # Initial bulk density, gm/cm3
-        self.fin_bulk_de = 0.62,  # Final bulk density, gm/cm3
+        self.fin_bulk_den = 0.62,  # Final bulk density, gm/cm3
         self.bulk_den_fac = 0.005,  # Bulk density factor
         self.par_den = 1.2,  # Ash particle density, gm/cm3
         self.decomp_fac = 0.00018  # Ash decomposition factor, per day
@@ -124,7 +124,7 @@ class AshModel(object):
 
         # define parameters
         ini_bulk_den = 0.31  # Initial bulk density, gm/cm3
-        fin_bulk_de = 0.62  # Final bulk density, gm/cm3
+        fin_bulk_den = 0.62  # Final bulk density, gm/cm3
         bulk_den_fac = 0.005  # Bulk density factor
         par_den = 1.2  # Ash particle density, gm/cm3
         decomp_fac = self.decomp_fac  # 0.00018  # Ash decomposition factor, per day
@@ -251,8 +251,8 @@ class AshModel(object):
             else:
                 cum_infil_mm[t] = cum_infil_mm[t - 1] + infil_mm[t]
                 cum_q_mm[t] = cum_q_mm[t - 1] + q[t]
-                bulk_density_gmpcm3[t] = fin_bulk_de + \
-                                         (ini_bulk_den - fin_bulk_de) * \
+                bulk_density_gmpcm3[t] = fin_bulk_den + \
+                                         (ini_bulk_den - fin_bulk_den) * \
                                          np.exp(-bulk_den_fac * cum_infil_mm[t])
                 porosity[t] = 1 - (bulk_density_gmpcm3[t] / par_den)
 
@@ -268,7 +268,7 @@ class AshModel(object):
             if ash_runoff_mm[t - 1] > 0:
                 transport_tonspha[t - 1] = (ini_erod - fin_erod) * (
                         bulk_density_gmpcm3[t - 1] -
-                        fin_bulk_de) / (ini_bulk_den - fin_bulk_de) + fin_erod
+                        fin_bulk_den) / (ini_bulk_den - fin_bulk_den) + fin_erod
 
                 water_transport_tonspha[t - 1] = np.maximum(
                     0,
@@ -477,7 +477,7 @@ class WhiteAshModel(AshModel):
         super(WhiteAshModel, self).__init__(
             ash_type=AshType.WHITE,
             ini_bulk_den=WHITE_ASH_BD,  # Initial bulk density, gm/cm3
-            fin_bulk_de=0.62,  # Final bulk density, gm/cm3
+            fin_bulk_den=0.62,  # Final bulk density, gm/cm3
             bulk_den_fac=0.005,  # Bulk density factor
             par_den=1.2,  # Ash particle density, gm/cm3
             decomp_fac=0.00018,  # Ash decomposition factor, per day
@@ -493,12 +493,10 @@ class BlackAshModel(AshModel):
         super(BlackAshModel, self).__init__(
             ash_type=AshType.BLACK,
             ini_bulk_den=BLACK_ASH_BD,  # Initial bulk density, gm/cm3
-            fin_bulk_de=0.62,  # Final bulk density, gm/cm3
+            fin_bulk_den=0.62,  # Final bulk density, gm/cm3
             bulk_den_fac=0.005,  # Bulk density factor
             par_den=1.2,  # Ash particle density, gm/cm3
             decomp_fac=0.00018,  # Ash decomposition factor, per day
             ini_erod=0.098509,  # Initial erodibility, t/ha
             fin_erod=0.01,  # Final erodibility, t/ha
             roughness_limit=1)   # Roughness limit, mm
-
-
