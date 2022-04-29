@@ -2,28 +2,22 @@
 <table class="table">
     <thead>
     <tr>
-        <th>Year</th>
+        <th>Recurrence Interval</th>
         <th>{{ measure_name }} </th>
         <th>Probability</th>
-        <th>Event Rank</th>
-        <th>Recurrence Interval</th>
     </tr>
     <tr>
-        <th> </th>
-        <th>&nbsp;</th>
+        <th>years</th>
         <th>{{ unitizer_units(units) | safe }}&nbsp;</th>
         <th>{{ unitizer_units('%') | safe }}&nbsp;</th>
-        <th>years</th>
     </tr>
     </thead>
     <tbody>
     {% for res in annuals[measure] %}
         <tr>
         <td>{{ res['return_interval'] | round(1) }}</td>
-        <td>{{ res['year'] }}</td>
         <td>{{ unitizer(res[measure], units) | safe }}</td>
         <td>{{ unitizer(res['probability'], '%') | safe  }}</td>
-        <td>{{ res['rank'] }}</td>
         </tr>
     {% endfor %}
     </tbody>

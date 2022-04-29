@@ -1,9 +1,11 @@
 <h5>PMET</h5>
 <p>Computes evaporation and transpiration (ET) based on Penman-Monteith’s equation. The default is
   Penman’s equation.</p>
+<div style="padding-left:3em;">
 <label class="form-check-label">
     <input id="checkbox_wepp_pmet" type="checkbox" class="form-check-input disable-readonly"
      onchange="Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"
      {% if wepp.run_pmet %}checked{% endif %}>
     Run PMET (pmetpara.txt)
 </label>
+</div>

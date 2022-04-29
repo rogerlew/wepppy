@@ -71,7 +71,7 @@
             <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (DAYMET) [1980 - {{ climate.daymet_last_available_year}}]
                 <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
-            <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed (DAYMET) with PRISM Revisioni [1980 - {{ climate.daymet_last_available_year }}]
+            <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed (DAYMET) with PRISM Revision [1980 - {{ climate.daymet_last_available_year }}]
                 <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed (GRIDMET) with PRISM Revision [1980 - Present]
