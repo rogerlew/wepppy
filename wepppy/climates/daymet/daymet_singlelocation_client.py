@@ -79,12 +79,15 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
         raise
     df.columns = [c.replace(' ', '') for c in df.columns]
 
-
     # return dataframe
     return df
 
 
 if __name__ == "__main__":
-    df2 = retrieve_historical_timeseries(-75.78, 37.59, 1980, 2017)
-    print(len(df2.index))
-    print(df2.keys())
+    from wepppy.climates.cligen import df_to_prn
+    
+    df = retrieve_historical_timeseries(-121.829585, 36.272184, 1980, 2021)
+    print(len(df.index))
+    print(df.keys())
+    df_to_prn(df, '/home/roger/input.prn', 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
+

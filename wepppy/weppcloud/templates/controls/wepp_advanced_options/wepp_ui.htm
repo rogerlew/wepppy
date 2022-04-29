@@ -1,9 +1,11 @@
 <h5>Hourly Seepage</h5>
 <p>Computes hourly instead of daily seepage calculations.
   Only applies to projects with 7778 soils (Not WEPP-PEP).</p>
+<div style="padding-left:3em;">
 <label class="form-check-label">
     <input id="checkbox_hourly_seepage" type="checkbox" class="form-check-input disable-readonly"
      onchange="Wepp.getInstance().set_run_wepp_routine('wepp_ui', this.checked);"
      {% if wepp.run_wepp_ui %}checked{% endif %}>
     Run hourly seepage (wepp_ui.txt)
 </label>
+</div>

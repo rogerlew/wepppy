@@ -179,7 +179,7 @@ def _make_clinp(wd, cliver, years, cli_fname, par, clinp_fn='clinp.txt'):
     return clinp
 
 
-def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
+def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key, julian_key='julian'):
     """
     creates a prn file containing daily timeseries data for input to
     cligen
@@ -200,8 +200,12 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     mo, da, yr = 0, 0, 0
     p, tmax, tmin = '', '', ''
     for index, row in df.iterrows():
-
-        mo, da, yr = int(row.month), int(row.day), int(row.year)
+        try:
+            mo, da, yr = int(row.month), int(row.day), int(row.year)
+        except AttributeError:
+            _date = datetime.date(int(row.year), 1, 1) + datetime.timedelta(days=int(row[julian_key]) - 1)
+            mo, da, yr = _date.month, _date.day, _date.year
+             
         p, tmax, tmin = row[p_key], row[tmax_key], row[tmin_key]
 
         if math.isnan(p) or math.isnan(tmax) or math.isnan(tmin):

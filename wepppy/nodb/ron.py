@@ -337,7 +337,7 @@ class Ron(NoDbBase):
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
             watershed = wepppy.nodb.Watershed(wd, cfg_fn)
-            if watershed.delineation_backend == wepppy.nodb.DelineationBackend.TOPAZ:
+            if watershed.delineation_backend == wepppy.nodb.watershed.DelineationBackend.TOPAZ:
                 wepppy.nodb.Topaz(wd, cfg_fn)
 
             wepppy.nodb.Landuse(wd, cfg_fn)
