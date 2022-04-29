@@ -56,6 +56,7 @@ class AshModel(object):
         self.ash_type = ash_type
         self.ini_ash_depth_mm = None
         self.ini_ash_load_tonneha = None
+<<<<<<< HEAD
         self.ini_bulk_den = ini_bulk_den  # Initial bulk density, gm/cm3
         self.fin_bulk_den = fin_bulk_den  # Final bulk density, gm/cm3
         self.bulk_den_fac = bulk_den_fac  # Bulk density factor
@@ -64,6 +65,16 @@ class AshModel(object):
         self.ini_erod = ini_erod  # Initial erodibility, t/ha
         self.fin_erod = fin_erod  # Final erodibility, t/ha
         self.roughness_limit = roughness_limit  # Roughness limit, mm
+=======
+        self.ini_bulk_den = WHITE_ASH_BD,  # Initial bulk density, gm/cm3
+        self.fin_bulk_den = 0.62,  # Final bulk density, gm/cm3
+        self.bulk_den_fac = 0.005,  # Bulk density factor
+        self.par_den = 1.2,  # Ash particle density, gm/cm3
+        self.decomp_fac = 0.00018  # Ash decomposition factor, per day
+        self.ini_erod = 1  # Initial erodibility, t/ha
+        self.fin_erod = 0.01  # Final erodibility, t/ha
+        self.roughness_limit = 1  # Roughness limit, mm
+>>>>>>> 36b88596a1559b71ab78b58dd7128402bb12e86f
 
     @property
     def ini_material_available_mm(self):
@@ -124,10 +135,17 @@ class AshModel(object):
         fire_day = fire_date.julian
 
         # define parameters
+<<<<<<< HEAD
         ini_bulk_den = self.ini_bulk_den  # Initial bulk density, gm/cm3
         fin_bulk_den = self.fin_bulk_den  # Final bulk density, gm/cm3
         bulk_den_fac = self.bulk_den_fac  # Bulk density factor
         par_den = self.par_den  # Ash particle density, gm/cm3
+=======
+        ini_bulk_den = 0.31  # Initial bulk density, gm/cm3
+        fin_bulk_den = 0.62  # Final bulk density, gm/cm3
+        bulk_den_fac = 0.005  # Bulk density factor
+        par_den = 1.2  # Ash particle density, gm/cm3
+>>>>>>> 36b88596a1559b71ab78b58dd7128402bb12e86f
         decomp_fac = self.decomp_fac  # 0.00018  # Ash decomposition factor, per day
         ini_erod = self.ini_erod  # Initial erodibility, t/ha
         fin_erod = self.fin_erod  # Final erodibility, t/ha
@@ -501,5 +519,3 @@ class BlackAshModel(AshModel):
             ini_erod=0.098509,  # Initial erodibility, t/ha
             fin_erod=0.01,  # Final erodibility, t/ha
             roughness_limit=1)   # Roughness limit, mm
-
-
