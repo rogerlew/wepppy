@@ -4046,6 +4046,10 @@ def run_ash(runid, config):
 
         ash = Ash.getInstance(wd)
 
+        if request.method == 'POST':
+            ash.parse_inputs(dict(request.form))
+            ash = Ash.getInstance(wd)
+
         if int(ash_depth_mode) == 2:
           
             ash.lock()
@@ -4282,7 +4286,7 @@ def report_contaminant(runid, config):
         ashpost = AshPost.getInstance(wd)
 
         if request.method == 'POST':
-            ash.parse_inputs(dict(request.form))
+            ash.parse_cc_inputs(dict(request.form))
             ash = Ash.getInstance(wd)
 
         unitizer = Unitizer.getInstance(wd)

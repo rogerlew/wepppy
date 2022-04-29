@@ -31,6 +31,7 @@ from wepppy.climates import cligen_client as cc
 from wepppy.climates.metquery_client import get_daily
 from wepppy.climates.gridmet import client as gridmet_client
 from wepppy.climates.prism import prism_mod, prism_revision
+from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import (
@@ -39,7 +40,8 @@ from wepppy.climates.cligen import (
     Cligen,
     extract_gridmet_var, 
     build_daymet_prn, 
-    build_gridmet_prn
+    build_gridmet_prn,
+    df_to_prn
 )
 from wepppy.all_your_base import isint, isfloat, NCPU
 from wepppy.all_your_base.geo import RasterDatasetInterpolator, haversine
@@ -168,11 +170,13 @@ def build_observed(kwds):
     cli_fn = kwds['cli_fn']
     climatestation = kwds['climatestation']
     version = kwds.get('version', '2015')
+    df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
 
-    build_daymet_prn(lng=lng, lat=lat,
-                     observed_data=observed_data,
-                     start_year=start_year, end_year=end_year,
-                     prn_fn=_join(cli_dir, prn_fn))
+#    build_daymet_prn(lng=lng, lat=lat,
+#                     observed_data=observed_data,
+#                     start_year=start_year, end_year=end_year,
+#                     prn_fn=_join(cli_dir, prn_fn))
 
     stationManager = CligenStationsManager(version=version)
     stationMeta = stationManager.get_station_fromid(climatestation)
@@ -1148,34 +1152,36 @@ class Climate(NoDbBase, LogMixin):
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             ron = Ron.getInstance(self.wd)
-            # daymet is 1000m resolution. So each pixel is 0.06 degrees
-            # 1 / ((6378.1 * 1000) / 1000 / 360) = 0.056 ~ 0.06
-            # for cubic interpolation we need at least 5 pixels
-            # so we pad 3 pixels in each direction to be on the safe side
-            pad = 0.06 * 4
-            bbox = ron.map.extent
-            bbox = [bbox[0] - pad, bbox[1] - pad,
-                    bbox[2] + pad, bbox[3] + pad]
-            bbox = ','.join(str(v) for v in bbox)
-
-            observed_data = {}
-            daymet_base = self.config_get_path('climate', 'daymet_observed')
-            for varname in ['prcp', 'tmin', 'tmax']:
-                for year in range(start_year, end_year + 1):
-                    dataset = _join(daymet_base, varname)
-                    self.log('  fetching {} for year {}... '.format(dataset, year))
-                    dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
-                    get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
-                    observed_data[(varname, year)] = dst
-                    self.log_done()
+#            # daymet is 1000m resolution. So each pixel is 0.06 degrees
+#            # 1 / ((6378.1 * 1000) / 1000 / 360) = 0.056 ~ 0.06
+#            # for cubic interpolation we need at least 5 pixels
+#            # so we pad 3 pixels in each direction to be on the safe side
+#            pad = 0.06 * 4
+#            bbox = ron.map.extent
+#            bbox = [bbox[0] - pad, bbox[1] - pad,
+#                    bbox[2] + pad, bbox[3] + pad]
+#            bbox = ','.join(str(v) for v in bbox)
+#
+#            observed_data = {}
+#            daymet_base = self.config_get_path('climate', 'daymet_observed')
+#            for varname in ['prcp', 'tmin', 'tmax']:
+#                for year in range(start_year, end_year + 1):
+#                    dataset = _join(daymet_base, varname)
+#                    self.log('  fetching {} for year {}... '.format(dataset, year))
+#                    dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
+#                    get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
+#                    observed_data[(varname, year)] = dst
+#                    self.log_done()
 
             cli_fn = 'wepp.cli'
             self.log('  building {}... '.format(cli_fn))
             prn_fn = 'ws.prn'
-            build_daymet_prn(lng=ws_lng, lat=ws_lat,
-                             observed_data=observed_data,
-                             start_year=start_year, end_year=end_year,
-                             prn_fn=_join(cli_dir, prn_fn))
+            df = daymet_retrieve_historical_timeseries(ws_lng, ws_lat, start_year, end_year)
+            df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
+#            build_daymet_prn(lng=ws_lng, lat=ws_lat,
+#                             observed_data=observed_data,
+#                             start_year=start_year, end_year=end_year,
+#                             prn_fn=_join(cli_dir, prn_fn))
 
             cligen.run_observed(prn_fn, cli_fn=cli_fn)
 
@@ -1199,7 +1205,7 @@ class Climate(NoDbBase, LogMixin):
                     prn_fn = '{}.prn'.format(fn_base)
 
                     kwds = dict(lng=lng, lat=lat,
-                                observed_data=observed_data,
+#                                observed_data=observed_data,
                                 start_year=start_year, end_year=end_year,
                                 prn_fn=prn_fn, cli_dir=cli_dir,
                                 cli_fn=cli_fn,

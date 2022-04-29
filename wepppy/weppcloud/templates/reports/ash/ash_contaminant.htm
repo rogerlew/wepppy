@@ -4,7 +4,18 @@
 <script>
 </script>
 
-<h2>Ash Contaminant Analysis Results</h2>
+{% if contaminants | length == 4 %}
+<a href="./?contaminants=PO4,Al,Si,Ca,Pb,Na,Mg,P,Mn,Fe,Ni,Cu,Zn,As,Cd,Hg">Show extended contaminant tables (PO4,Al,Si,Ca,Pb,Na,Mg,P,Mn,Fe,Ni,Cu,Zn,As,Cd,Hg)</a>
+{% else %}
+<a href="./?">Show simple contaminant tables (Ca,Pb,P,Hg)</a>
+<br/>
+<br/>
+
+{% endif %}<h2>Ash Contaminant Analysis Results</h2>
+
+
+
+
 <form action="" method="post">
 <h3>Contaminant Concentrations</h3>
 <table class="table table-nonfluid">
@@ -12,32 +23,42 @@
 <tr>
     <th>Contaminant</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+      {% endif %}
     {% endfor %}
 </tr>
 
 <tr>
     <th>Units</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td>{{ units }}</td>
+      {% endif %}
     {% endfor %}
 </tr>
 <tr>
     <th>High</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td><input style="width:100px;" type="text" name="high_{{ contaminant }}" value="{{ high }}"></td>
+      {% endif %}
     {% endfor %}
 </tr>
 <tr>
     <th>Moderate</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td><input style="width:100px;" type="text" name="mod_{{ contaminant }}" value="{{ mod }}"></td>
+      {% endif %}
     {% endfor %}
 </tr>
 <tr>
     <th>Low</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td><input style="width:100px;" type="text" name="low_{{ contaminant }}" value="{{ low }}"></td>
+      {% endif %}
     {% endfor %}
 </tr>
 </tbody>
@@ -54,7 +75,9 @@
     <th>Area</th>
     <th>Ash Delivery by Water</th>
 {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+  {% if contaminant in contaminants %}
     <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+  {% endif %}
 {% endfor %}
 </tr>
 
@@ -64,7 +87,9 @@
     <td>{{ unitizer_units('ha') | safe }} </td>
     <td>{{ unitizer_units('tonne') | safe }} </td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td style="width:100px; text-align: right;" >{{ unitizer_units('kg') | safe }} </td>
+      {% endif %}
     {% endfor %}
 </tr>
 
@@ -78,9 +103,11 @@
     <td>{{ unitizer(burnclass_summary[4], 'ha') | safe }}</td>
     <td>{{ unitizer(high_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         {% if high_ash is not none%}
         <td style="width:100px; text-align: right;" >{{ unitizer(1000 * high_ash * high / 1000000, 'kg') | safe }}</td>
         {% endif %}
+      {% endif %}
     {% endfor %}
 </tr>
 
@@ -89,9 +116,11 @@
     <td>{{ unitizer(burnclass_summary[3], 'ha') | safe }}</td>
     <td>{{ unitizer(mod_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         {% if mod_ash is not none%}
         <td style="width:100px; text-align: right;" >{{ unitizer(1000 * mod_ash * mod / 1000000, 'kg') | safe }}</td>
         {% endif %}
+      {% endif %}
     {% endfor %}
 </tr>
 
@@ -100,9 +129,11 @@
     <td>{{ unitizer(burnclass_summary[2], 'ha') | safe }}</td>
     <td>{{ unitizer(low_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         {% if low_ash is not none%}
         <td style="width:100px; text-align: right;"  >{{ unitizer(1000 * low_ash * low / 1000000, 'kg') | safe }}</td>
         {% endif %}
+      {% endif %}
     {% endfor %}
 </tr>
 </tbody>
@@ -116,13 +147,16 @@
     <th>Recurrence Interval</th>
     <th>Ash Delivery by Water</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+      {% endif %}
     {% endfor %}
 </tr>
 <tr>
     <td>years</td>
     <td style="width:100px; text-align: right;" >{{ unitizer_units('tonne') | safe }} </td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td style="width:100px; text-align: right;" >
             {% if units == 'mg/kg' %}
                 {{ unitizer_units('kg') | safe }}
@@ -130,6 +164,7 @@
                 {{ unitizer_units('g') | safe }}
             {% endif %}
         </td>
+      {% endif %}
     {% endfor %}
 </tr>
 {% for rec in rec_intervals %}
@@ -143,6 +178,7 @@
         <td>{{ rec }}</td>
         <td style="width:100px; text-align: right;" >{{ unitizer(_delivery, 'tonne') | safe }} </td>
         {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+          {% if contaminant in contaminants %}
             <td style="width:100px; text-align: right;" >
                 {% set cont_delivery = _delivery_low * low * 0.001 +
                                        _delivery_mod + mod * 0.001 +
@@ -153,6 +189,7 @@
                     {{ unitizer(cont_delivery, 'g') | safe }}
                 {% endif %}
             </td>
+          {% endif %}
         {% endfor %}
     </tr>
     {% endif %}
@@ -196,14 +233,18 @@
     <th>Recurrence Interval</th>
     <th>Ash Delivery by Water</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>
+      {% endif %}
     {% endfor %}
 </tr>
 <tr>
     <td>years</td>
     <td style="width:100px; text-align: right;" >{{ unitizer_units('g/L') | safe }} </td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+      {% if contaminant in contaminants %}
         <td style="width:100px; text-align: right;" >{{ unitizer_units(units | replace('kg','L')) | safe }} </td>
+      {% endif %}
     {% endfor %}
 </tr>
 {% for rec in rec_intervals %}
@@ -217,6 +258,7 @@
         <td>{{ rec }}</td>
         <td style="width:100px; text-align: right;" >{{ unitizer(_delivery / reservoir_current_volume, 'tonne') | safe }} </td>
         {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
+          {% if contaminant in contaminants %}
             <td style="width:100px; text-align: right;" >
                 {% set concentration = _delivery_low * low * 0.001 +
                                        _delivery_mod + mod * 0.001 +
@@ -228,6 +270,7 @@
                     {{ unitizer(concentration, 'µg/L') | safe }}
                 {% endif %}
             </td>
+          {% endif %}
         {% endfor %}
     </tr>
     {% endif %}
