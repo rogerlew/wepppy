@@ -1,12 +1,13 @@
 <h5>Channel Parameters</h5>
-
+<div style="padding-left:3em;">
 <label class="form-check-label">
     <input id="checkbox_wepp_tcr" type="checkbox" class="form-check-input disable-readonly"
      onchange="Wepp.getInstance().set_run_wepp_routine('tcr', this.checked);"
      {% if wepp.run_tcr %}checked{% endif %}>
     Use variable channel critical shear as a function of channel slope (tcr.txt)
 </label>
-<br/><br/>
+</div>
+<br/>
 
 <h6><b>Constant CS parameters</b></h6>
 <div class="form-group row" id="channel_critical_shear_container">

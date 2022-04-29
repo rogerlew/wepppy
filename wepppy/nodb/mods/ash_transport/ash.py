@@ -149,6 +149,11 @@ class Ash(NoDbBase, LogMixin):
             self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
             self._model = self.config_get_str('ash', 'model')
 
+            if self._model == 'anu':
+                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+                self._anu_white_ash_model_pars = WhiteAshModel()
+                self._anu_black_ash_model_pars = BlackAshModel()
+
             self.high_contaminant_concentrations = ContaminantConcentrations(
                 PO4=3950,  # mg*Kg-1
                 Al=7500,
@@ -214,7 +219,46 @@ class Ash(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+
     def parse_inputs(self, kwds):
+        if self.model != 'anu':
+            return
+
+        for k in kwds:
+            try:
+                kwds[k] = float(kwds[k])
+            except ValueError:
+                pass
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den')
+            self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den')
+            self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac')
+            self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den')
+            self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac')
+            self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod')
+            self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod')
+            self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit')
+            
+            self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den')
+            self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den')
+            self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac')
+            self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den')
+            self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac')
+            self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod')
+            self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod')
+            self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit')
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def parse_cc_inputs(self, kwds):
 
         for k in kwds:
             try:
@@ -329,6 +373,40 @@ class Ash(NoDbBase, LogMixin):
     @property
     def has_ash_results(self):
         return _exists(self.status_log) and len(glob(_join(self.ash_dir, '*.csv'))) > 0
+
+    @property
+    def anu_white_ash_model_pars(self):
+        pars = getattr(self, '_anu_white_ash_model_pars', None)
+        if pars is None:
+            try:
+                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+                 
+                self.lock()
+                pars = self._anu_white_ash_model_pars = WhiteAshModel()
+                
+                self.dump_and_unlock()
+    
+            except Exception:
+                self.unlock('-f')
+                raise
+        return pars
+
+    @property
+    def anu_black_ash_model_pars(self):
+        pars = getattr(self, '_anu_black_ash_model_pars', None)
+        if pars is None:
+            try:
+                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+                 
+                self.lock()
+                pars = self._anu_black_ash_model_pars = BlackAshModel()
+                
+                self.dump_and_unlock()
+    
+            except Exception:
+                self.unlock('-f')
+                raise
+        return pars
 
     @property
     def model(self):

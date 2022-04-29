@@ -209,6 +209,13 @@ class Watershed(NoDbBase):
             return _join(self.taudem_wd, 'subcatchments.WGS.geojson')
 
     @property
+    def subwta_utm_shp(self):
+        if self.delineation_backend_is_topaz:
+            return _join(self.topaz_wd, 'SUBCATCHMENTS.JSON')
+        else:
+            return _join(self.taudem_wd, 'subcatchments.geojson')
+
+    @property
     def bound(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'BOUND.ARC')
@@ -221,6 +228,13 @@ class Watershed(NoDbBase):
             return _join(self.topaz_wd, 'BOUND.WGS.JSON')
         else:
             return _join(self.taudem_wd, 'bound.WGS.geojson')
+
+    @property
+    def bound_utm_shp(self):
+        if self.delineation_backend_is_topaz:
+            return _join(self.topaz_wd, 'BOUND.JSON')
+        else:
+            return _join(self.taudem_wd, 'bound.geojson')
 
     @property
     def netful(self):
@@ -237,11 +251,25 @@ class Watershed(NoDbBase):
             return _join(self.taudem_wd, 'netful.WGS.geojson')
 
     @property
+    def netful_utm_shp(self):
+        if self.delineation_backend_is_topaz:
+            return _join(self.topaz_wd, 'NETFUL.JSON')
+        else:
+            return _join(self.taudem_wd, 'netful.geojson')
+
+    @property
     def channels_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'CHANNELS.WGS.JSON')
         else:
             return _join(self.taudem_wd, 'net.WGS.geojson')
+
+    @property
+    def channels_utm_shp(self):
+        if self.delineation_backend_is_topaz:
+            return _join(self.topaz_wd, 'CHANNELS.JSON')
+        else:
+            return _join(self.taudem_wd, 'net.geojson')
 
     @property
     def sub_n(self) -> int:
