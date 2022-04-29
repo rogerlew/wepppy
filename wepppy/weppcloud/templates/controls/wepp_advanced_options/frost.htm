@@ -1,8 +1,10 @@
 <h5>Frost</h5>
 <p>Adjustment of effective hydraulic and thermal conductivity for snow, frozen-residue, and frozen-soil.</p>
+<div style="padding-left:3em;"
 <label class="form-check-label">
     <input id="checkbox_wepp_frost" type="checkbox" class="form-check-input disable-readonly"
      onchange="Wepp.getInstance().set_run_wepp_routine('frost', this.checked);"
      {% if wepp.run_frost %}checked{% endif %}>
     Run Frost (frost.txt)
 </label>
+</div>
