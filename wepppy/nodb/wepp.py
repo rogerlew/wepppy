@@ -354,6 +354,8 @@ class Wepp(NoDbBase, LogMixin):
             self._channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
             self._kslast = self.config_get_float('wepp', 'kslast')
 
+            self._multi_ofe = self.config_get_bool('wepp', 'multi_ofe')
+
             self.run_flowpaths = False
             self.loss_grid_d_path = None
 
@@ -385,6 +387,26 @@ class Wepp(NoDbBase, LogMixin):
                 db.dump_and_unlock()
 
             return db
+
+    @property
+    def multi_ofe(self):
+        if not hasattr(self, "_multi_ofe"):
+            return False
+
+        return self._multi_ofe
+
+    @multi_ofe.setter
+    def multi_ofe(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._multi_ofe = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def wepp_bin(self):

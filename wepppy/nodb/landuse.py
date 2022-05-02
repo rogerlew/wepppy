@@ -373,6 +373,9 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
+    def _build_multiple_ofe(self):
+        pass
+
     def identify_burnclass(self, topaz_id):
         dom = self.domlc_d[str(topaz_id)]
         man = self.managements[dom]
