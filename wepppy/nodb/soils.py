@@ -28,6 +28,7 @@ from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
+from wepppy.wepp.soils.utils import SoilMultipleOfeSynth 
 
 # wepppy submodules
 from .base import (
@@ -420,6 +421,27 @@ class Soils(NoDbBase):
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
             rred.build_soils(self._mode)
             return
+
+        self._build_multiple_ofe()
+
+    def _build_multiple_ofe(self):
+        soils_dir = self.soils_dir
+        soils = self.soils
+        domsoil_d = self.domsoil_d
+
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, ss in watershed.sub_iter():
+            nsegments = watershed.mofe_nsegments[str(topaz_id)]
+            mofe_soil_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
+
+            dom = domsoil_d[topaz_id]
+            soil_fn = _join(soils_dir, soils[dom].fname)
+
+            mofe_synth = SoilMultipleOfeSynth()
+
+            # just replicate the dom
+            mofe_synth.stack = [soil_fn for i in range(nsegments)]
+            mofe_synth.write(mofe_soil_fn)        
 
     def _clay_d(self, surgo_c):
         fp = open(_join(self.soils_dir, 'clay_rpt.log'), 'w')

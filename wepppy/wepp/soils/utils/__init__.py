@@ -1,4 +1,5 @@
 from .yamlizer import YamlSoil
+from .multi_ofe import SoilMultipleOfeSynth
 
 import csv
 import shutil
