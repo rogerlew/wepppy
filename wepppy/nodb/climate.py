@@ -56,7 +56,7 @@ from wepppy.nodb.mixins.log_mixin import LogMixin
 CLIMATE_MAX_YEARS = 1000
 
 if NCPU > 8:
-    NPCU = 8
+    NCPU = 8
 
 class ClimateSummary(object):
     def __init__(self):
@@ -278,7 +278,7 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def daymet_last_available_year(self):
-        return 2019
+        return 2021
 
     @property
     def _nodb(self):

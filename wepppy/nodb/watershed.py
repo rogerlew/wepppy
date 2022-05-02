@@ -24,6 +24,7 @@ from wepppy.watershed_abstraction import (
     WeppTopTranslator
 )
 from wepppy.taudem import TauDEMTopazEmulator
+from wepppy.watershed_abstraction import SlopeFile
 from wepppy.watershed_abstraction.support import HillSummary, ChannelSummary
 from wepppy.all_your_base.geo import read_raster, haversine
 
@@ -93,6 +94,8 @@ class Watershed(NoDbBase):
             wat_dir = self.wat_dir
             if not _exists(wat_dir):
                 os.mkdir(wat_dir)
+
+            self._mofe_nsegments = None
 
             self.dump_and_unlock()
 
@@ -494,6 +497,28 @@ class Watershed(NoDbBase):
             self._topaz_abstract_watershed()
         else:
             self._taudem_abstract_watershed()
+
+        self._build_multiple_ofe()
+
+    @property
+    def mofe_nsegments(self):
+        return getattr(self, '_mofe_nsegments', None)
+
+    def _build_multiple_ofe(self):
+        _mofe_nsegments = {}
+        for topaz_id, sub in self.sub_iter():
+            slp = SlopeFile(_join(self.wat_dir, sub.fname))
+            _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe()
+            
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mofe_nsegments = _mofe_nsegments
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
 
     def _taudem_abstract_watershed(self):
         self.lock()
