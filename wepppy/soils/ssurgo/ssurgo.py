@@ -10,6 +10,7 @@ from typing import List, Set, Union, Dict
 import csv
 import os
 import requests
+import math
 from os.path import join as _join
 from os.path import exists as _exists
 import warnings
@@ -954,6 +955,8 @@ Any comments:
                 # make sure the total depth is at least 200 mm
                 if hzdepb_r10 < 210.0:
                     hzdepb_r10 = 210.0
+
+                hzdepb_r10 = math.ceil(hzdepb_r10 / 200.0) * 200.0   
 
             s2 = '{hzdepb_r10:0.03f}\t{0.dbthirdbar_r:0.02f}\t{ksat:0.04f}\t'\
                  '{0.anisotropy:0.01f}\t{0.field_cap:0.04f}\t{0.wilt_pt:0.04f}\t'\
