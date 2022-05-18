@@ -17,23 +17,28 @@ IS_WINDOWS = os.name == 'nt'
 
 _thisdir = os.path.dirname(__file__)
 
-class RangelandAnalysisPlatformV2(object):
-    def __init__(self, wd='.', bbox=None, cellsize=30):
+DEFAULT_VERSION = 'v3'
+
+
+class RangelandAnalysisPlatform(object):
+    def __init__(self, wd='.', bbox=None, cellsize=30, version=DEFAULT_VERSION):
         self.wd = wd
         self.bbox = bbox
         self.ds = {}
         self.cellsize = cellsize
         self.proj4 = None
+        self.version = version
 
-        rap_fns = glob(_join(wd, '_rap_v2*.tif'))
+        rap_fns = glob(_join(wd, f'_rap_{version}*.tif'))
         for rap_fn in rap_fns:
             head, tail = _split(rap_fn)
-            year = int(tail.replace('_rap_v2_', '').replace('.tif', ''))
+            year = int(tail.replace(f'_rap_{version}_', '').replace('.tif', ''))
             self.ds[year] = rap_fn
 
     def retrieve(self, years):
         cellsize = self.cellsize
         bbox = self.bbox
+        version = self.version
 
         ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
         lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], 
@@ -42,7 +47,7 @@ class RangelandAnalysisPlatformV2(object):
             .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
 
         for year in years:
-            dst_fn = _join(self.wd, f'_rap_v2_{year}.tif')
+            dst_fn = _join(self.wd, f'_rap_{version}_{year}.tif')
 
             cmd = ['gdalwarp', 
                    '-co', 'compress=lzw', 
@@ -52,7 +57,7 @@ class RangelandAnalysisPlatformV2(object):
                    '-te', str(ul_x), str(lr_y), str(lr_x), str(ul_y),
                    '-r', 'near',
                    '-tr', str(cellsize), str(cellsize),
-                   f'/vsicurl/http://rangeland.ntsg.umt.edu/data/rap/rap-vegetation-cover/v2/vegetation-cover-v2-{year}.tif',
+                   f'/vsicurl/http://rangeland.ntsg.umt.edu/data/rap/rap-vegetation-cover/{version}/vegetation-cover-{version}-{year}.tif',
                    dst_fn]
 
             if _exists(dst_fn):
@@ -75,13 +80,22 @@ class RangelandAnalysisPlatformV2(object):
         if year not in self.ds:
             self.retrieve([year])
 
-        return RangelandAnalysisPlatformV2Dataset(self.ds[year])
+        return RangelandAnalysisPlatformDataset(self.ds[year])
 
     def _attribution(self):
         readme_txt = _join(self.wd, 'rap_readme.txt')
         if not _exists(readme_txt):
             os.copyfile(_join(_thisdir, 'rap_readme.txt', readme_txt))
 
+
+class RangelandAnalysisPlatformV2(RangelandAnalysisPlatform):
+    def __init__(self, wd='.', bbox=None, cellsize=30):
+        super(RangelandAnalysisPlatformV2, self).__init__(wd=wd, bbox=bbox, cellsize=cellsize, version='v2')
+
+
+class RangelandAnalysisPlatformV3(RangelandAnalysisPlatform):
+    def __init__(self, wd='.', bbox=None, cellsize=30):
+        super(RangelandAnalysisPlatformV3, self).__init__(wd=wd, bbox=bbox, cellsize=cellsize, version='v3')
 
 
 class RAP_Band(IntEnum):
@@ -99,10 +113,9 @@ class RAP_Band(IntEnum):
     TREE_UNCERTAINTY = 12
 
 
-class RangelandAnalysisPlatformV2Dataset(object):
+class RangelandAnalysisPlatformDataset(object):
     def __init__(self, fn):
         self.ds = rasterio.open(fn)    
-
 
     def get_band(self, band: RAP_Band):
         data =  self.ds.read(band)
@@ -150,6 +163,10 @@ class RangelandAnalysisPlatformV2Dataset(object):
                     units='%')
 
 
+RangelandAnalysisPlatformV2Dataset = RangelandAnalysisPlatformDataset
+RangelandAnalysisPlatformV3Dataset = RangelandAnalysisPlatformDataset
+
+
 if __name__ == "__main__":
     bbox = [-114.63661319270066,45.41139471986449,-114.60663682475024,45.43207316134328]
     rap = RangelandAnalysisPlatformV2(wd='test', bbox=bbox)
@@ -158,4 +175,9 @@ if __name__ == "__main__":
     print(litter)
      
 
+    rap = RangelandAnalysisPlatformV3(wd='test', bbox=bbox)
+    rap_ds = rap.get_dataset(2020)
+    litter = rap_ds.get_band(RAP_Band.LITTER)
+    print(litter)
+     
 
