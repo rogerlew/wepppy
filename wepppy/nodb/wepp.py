@@ -55,7 +55,8 @@ from wepppy.wepp.runner import (
 from wepppy.wepp.management import (
     get_channel,
     pmetpara_prep,
-    get_channel_management
+    get_channel_management,
+    Management
 )
 
 
@@ -127,7 +128,7 @@ class SnowOpts(object):
             if var in kwds:
                 setattr(self, var, try_parse_float(kwds[var], None))
             elif _var in kwds:
-                setattr(self, _var, try_parse_float(kwds[_var], None))
+                setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
     def contents(self):
@@ -559,13 +560,18 @@ class Wepp(NoDbBase, LogMixin):
     def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None):
         self.log('Prepping Hillslopes... ')
 
+        # get translator
         translator = Watershed.getInstance(self.wd).translator_factory()
 
-        # get translator
-        self._prep_slopes(translator)
-        self._prep_managements(translator)
-        self._modify_soils_kslast()
-        self._prep_soils(translator)
+        if self.multi_ofe:
+            self._prep_multi_ofe(translator)
+            # TODO: modify kslast for multi ofe
+        else:
+            self._prep_slopes(translator)
+            self._prep_managements(translator)
+            self._modify_soils_kslast()
+            self._prep_soils(translator)
+
         self._prep_climates(translator)
         self._make_hillslope_runs(translator)
 
@@ -821,6 +827,50 @@ class Wepp(NoDbBase, LogMixin):
                         shutil.copyfile(src_fn, dst_fn)
                     else:
                         os.link(src_fn, dst_fn)
+
+    def _prep_multi_ofe(self, translator):
+        years = Climate.getInstance(self.wd).input_years
+
+        watershed = Watershed.getInstance(self.wd)
+        wat_dir = self.wat_dir
+        soils_dir = self.soils_dir
+        lc_dir = self.lc_dir
+        runs_dir = self.runs_dir
+        fp_runs_dir = self.fp_runs_dir
+
+        for topaz_id, _ in watershed.sub_iter():
+            wepp_id = translator.wepp(top=int(topaz_id))
+
+            # slope files
+            src_fn = _join(wat_dir, f'hill_{topaz_id}.mofe.slp')
+            dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
+            
+            if IS_WINDOWS:
+                shutil.copyfile(src_fn, dst_fn)
+            else:
+                os.link(src_fn, dst_fn)
+
+            # soils
+            src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
+            dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
+            
+            if IS_WINDOWS:
+                shutil.copyfile(src_fn, dst_fn)
+            else:
+                os.link(src_fn, dst_fn)
+
+            # managements
+            man_fn = f'hill_{topaz_id}.mofe.man'
+            man = Management(Key=f'hill_{topaz_id}', 
+                             ManagementFile=man_fn, 
+                             ManagementDir=lc_dir, 
+                             Description=f"hill_{topaz_id} Multiple OFE", 
+                             Color=(0,0,0))
+            man = man.build_multiple_year_man(years)    
+            dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
+            with open(dst_fn, 'w') as pf:
+                pf.write(str(man))
+
 
     def _prep_managements(self, translator):
         landuse = Landuse.getInstance(self.wd)
