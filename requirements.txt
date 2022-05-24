@@ -206,7 +206,7 @@ ssh-import-id==5.5
 systemd-python==234
 tables==3.6.1
 tensorboard==1.15.0
-tensorflow==1.15.0
+tensorflow==2.6.4
 tensorflow-estimator==1.15.1
 tensorflow-gpu==1.15.0
 termcolor==1.1.0
