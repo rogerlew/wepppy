@@ -72,12 +72,18 @@ Then clone wepppy repository
 > git lfs clone https://github.com/rogerlew/wepppy 
 ```
 
+#### Step 5.2 Install all_your_base submodule
+
 Need to manually clone all_your_base submodule
 ```
 > cd wepppy/wepppy
 > rm -R all_your_base
 > git clone https://github.com/rogerlew/all_your_base
 ```
+
+(Verify contents exist in all_your_base folder)
+
+#### Step 5.3 Setup scratch drive
 
 The all_your_base submodule specifies a SCRATCH variable to be used for temporary files.
 
@@ -90,10 +96,7 @@ The easiest solution is:
 > sudo chown <username> /workdir/scratch
 ```
 
-
-(Verify contents exist in all_your_base folder)
-
-#### Step 5.2 add to wepppy-env path
+#### Step 5.3 add to wepppy-env path
 ```
 > nano ~/miniconda3/envs/wepppy-env/lib/python3.9/site-packages/wepppy.pth
 ```
