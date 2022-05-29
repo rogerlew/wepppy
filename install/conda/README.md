@@ -96,7 +96,7 @@ The easiest solution is:
 > sudo chown <username> /workdir/scratch
 ```
 
-#### Step 5.3 add to wepppy-env path
+#### Step 5.4 add to wepppy-env path
 ```
 > nano ~/miniconda3/envs/wepppy-env/lib/python3.9/site-packages/wepppy.pth
 ```
