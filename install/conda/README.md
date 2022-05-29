@@ -79,6 +79,18 @@ Need to manually clone all_your_base submodule
 > git clone https://github.com/rogerlew/all_your_base
 ```
 
+The all_your_base submodule specifies a SCRATCH variable to be used for temporary files.
+
+This can be setup as a ramdisk mounted to /media/ramdisk or a folder named /workdir/scratch.
+
+The easiest solution is:
+```
+> sudo mkdir /workdir
+> sudo mkdir /workdir/scratch
+> sudo chown <username> /workdir/scratch
+```
+
+
 (Verify contents exist in all_your_base folder)
 
 #### Step 5.2 add to wepppy-env path
@@ -91,7 +103,7 @@ add the path to your wepppy git repository and save file
 e.g.
 
 ```
-/home/roger/wepppy/
+/home/<username>/wepppy/
 ```
 
 ### Step 6. Update Ubuntu and install gfortran
