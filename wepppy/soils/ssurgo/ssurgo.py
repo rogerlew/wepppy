@@ -15,6 +15,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 import warnings
 import numpy as np
+import hashlib
 
 from datetime import datetime
 
@@ -367,7 +368,8 @@ class SoilSummary(object):
         if isint(self.mukey):
             self.color = colors[self.mukey % len(colors)]
         else:
-            self.color = colors[sum(str.encode(self.mukey)) % len(colors)]
+            k = int(hashlib.sha1(str.encode(self.mukey)).hexdigest(), 16)
+            self.color = colors[k % len(colors)]
 
         assert 'FileName' in kwargs or 'fname' in kwargs
         if 'FileName' in kwargs:
