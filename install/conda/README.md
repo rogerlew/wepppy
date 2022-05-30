@@ -72,6 +72,8 @@ Then clone wepppy repository
 > git lfs clone https://github.com/rogerlew/wepppy 
 ```
 
+#### Step 5.2 Install all_your_base submodule
+
 Need to manually clone all_your_base submodule
 ```
 > cd wepppy/wepppy
@@ -81,7 +83,20 @@ Need to manually clone all_your_base submodule
 
 (Verify contents exist in all_your_base folder)
 
-#### Step 5.2 add to wepppy-env path
+#### Step 5.3 Setup scratch drive
+
+The all_your_base submodule specifies a SCRATCH variable to be used for temporary files.
+
+This can be setup as a ramdisk mounted to /media/ramdisk or a folder named /workdir/scratch.
+
+The easiest solution is:
+```
+> sudo mkdir /workdir
+> sudo mkdir /workdir/scratch
+> sudo chown <username> /workdir/scratch
+```
+
+#### Step 5.4 add to wepppy-env path
 ```
 > nano ~/miniconda3/envs/wepppy-env/lib/python3.9/site-packages/wepppy.pth
 ```
@@ -91,7 +106,7 @@ add the path to your wepppy git repository and save file
 e.g.
 
 ```
-/home/roger/wepppy/
+/home/<username>/wepppy/
 ```
 
 ### Step 6. Update Ubuntu and install gfortran
