@@ -400,6 +400,9 @@ class Ron(NoDbBase):
             if 'rap' in self.mods:
                 wepppy.nodb.mods.RAP(wd, cfg_fn)
 
+            if 'rap_ts' in self.mods:
+                wepppy.nodb.mods.RAP_TS(wd, cfg_fn)
+
             if 'shrubland' in self.mods:
                 wepppy.nodb.mods.Shrubland(wd, cfg_fn)
 
