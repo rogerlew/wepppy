@@ -74,7 +74,8 @@ from wepppy.wepp.out import (
     Loss,
     Ebe,
     PlotFile,
-    correct_daily_hillslopes_pl_path
+    correct_daily_hillslopes_pl_path,
+    TotalWatSed
 )
 
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
@@ -1417,6 +1418,13 @@ class Wepp(NoDbBase, LogMixin):
         totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
         assert _exists(totalwatsed_fn), 'Failed running correct_daily_hillslopes.pl'
         assert os.stat(totalwatsed_fn).st_size > 0, 'totalwatsed.txt is empty'
+        
+        # export csv
+        totwatsed = TotalWatSed(totalwatsed_fn,
+                                self.baseflow_opts, 
+                                self.phosphorus_opts)
+        fn = _join(self.export_dir, 'totalwatsed.csv')
+        totwatsed.export(fn)
 
     def report_loss(self, exclude_yr_indxs=None):
         output_dir = self.output_dir

@@ -373,9 +373,33 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
-    def _build_multiple_ofe(self):
-        pass
+#        self._build_multiple_ofe()
 
+    def _build_multiple_ofe(self):
+        from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
+
+        lc_dir = self.lc_dir
+        managements = self.managements
+        domlc_d = self.domlc_d
+
+        watershed = Watershed.getInstance(self.wd)
+        for topaz_id, ss in watershed.sub_iter():
+            nsegments = watershed.mofe_nsegments[str(topaz_id)]
+            mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
+
+            dom = domlc_d[topaz_id]
+            man = managements[dom].get_management()
+
+            if nsegments == 1:
+                with open(mofe_lc_fn, 'w') as pf:
+                    pf.write(str(man))
+            else:
+                mofe_synth = ManagementMultipleOfeSynth()
+
+                # just replicate the dom
+                mofe_synth.stack = [man for i in range(nsegments)]
+                merged = mofe_synth.write(mofe_lc_fn)
+                    
     def identify_burnclass(self, topaz_id):
         dom = self.domlc_d[str(topaz_id)]
         man = self.managements[dom]

@@ -422,7 +422,7 @@ class Soils(NoDbBase):
             rred.build_soils(self._mode)
             return
 
-        self._build_multiple_ofe()
+#        self._build_multiple_ofe()
 
     def _build_multiple_ofe(self):
         soils_dir = self.soils_dir
@@ -437,11 +437,14 @@ class Soils(NoDbBase):
             dom = domsoil_d[topaz_id]
             soil_fn = _join(soils_dir, soils[dom].fname)
 
-            mofe_synth = SoilMultipleOfeSynth()
+            if nsegments == 1:
+                shutil.copyfile(soil_fn, mofe_soil_fn)
+            else:
+                mofe_synth = SoilMultipleOfeSynth()
 
-            # just replicate the dom
-            mofe_synth.stack = [soil_fn for i in range(nsegments)]
-            mofe_synth.write(mofe_soil_fn)        
+                # just replicate the dom
+                mofe_synth.stack = [soil_fn for i in range(nsegments)]
+                mofe_synth.write(mofe_soil_fn)        
 
     def _clay_d(self, surgo_c):
         fp = open(_join(self.soils_dir, 'clay_rpt.log'), 'w')

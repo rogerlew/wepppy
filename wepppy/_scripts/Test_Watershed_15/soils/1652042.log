@@ -1,0 +1,15 @@
+mukey: 1652042
+found 8 components
+looping over components
+analyzing cokey 14518332
+found 4 layers
+analyzing chkey 41809652
+analyzing chkey 41809650
+analyzing chkey 41809651
+analyzing chkey 41809653
+horizons mask: [False, True, True, True]
+building major component
+identified 2 layers, ksat_min=1.0
+done
+Validity: all checks passed
+Validity: all checks passed

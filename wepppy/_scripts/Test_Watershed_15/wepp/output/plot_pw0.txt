@@ -1,0 +1,11 @@
+ Dist. Downslope Elevation Soil Loss
+
+   (meters)   (meters)  (kg/m**2)
+
+
+
+*******************************************************
+*                                                     *
+* WATERSHED PROFILE OUTPUT NOT AVAILABLE AT THIS TIME *
+*                                                     *
+*******************************************************
