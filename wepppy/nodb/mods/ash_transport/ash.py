@@ -57,21 +57,11 @@ def run_ash_model(kwds):
     ash_type = kwds['ash_type']
     ini_ash_load = kwds['ini_ash_load']
     ash_bulkdensity = kwds['ash_bulkdensity']
-    model = kwds['model']
-
-    if model == 'neris':
-        from .ash_model import AshType, WhiteAshModel, BlackAshModel
-    else:
-        from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
-
-    if ash_type == AshType.BLACK:
-        ash_model = WhiteAshModel(bulk_density=ash_bulkdensity)
-    else:
-        ash_model = BlackAshModel(bulk_density=ash_bulkdensity)
+    ash_model = kwds['ash_model']
 
     del kwds['ash_type']
     del kwds['ash_bulkdensity']
-    del kwds['model']
+    del kwds['ash_model']
 
     out_fn, return_periods, annuals = \
         ash_model.run_model(**kwds)
@@ -749,6 +739,17 @@ class Ash(NoDbBase, LogMixin):
                     ini_ash_load = black_ash_load
                     ash_bulkdensity = self.black_ash_bulkdensity
 
+                if model == 'neris':
+                    if ash_type == AshType.BLACK:
+                        ash_model = WhiteAshModel(bulk_density=ash_bulkdensity)
+                    else:
+                        ash_model = BlackAshModel(bulk_density=ash_bulkdensity)
+                else:
+                    if ash_type == AshType.BLACK:
+                        ash_model = self._anu_black_ash_model_pars
+                    else:
+                        ash_model = self._anu_white_ash_model_pars
+
                 meta[topaz_id]['ini_ash_depth'] = ini_ash_depth
                 meta[topaz_id]['field_ash_bulkdensity'] = field_ash_bulkdensity
                 meta[topaz_id]['ini_ash_load'] = ini_ash_load
@@ -765,15 +766,21 @@ class Ash(NoDbBase, LogMixin):
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha,
                             run_wind_transport=run_wind_transport,
-                            model=model)
+                            ash_model=ash_model)
 
                 args.append(kwds)
  
             if MULTIPROCESSING:
-                pool = multiprocessing.Pool(NCPU)
-                for out_fn in pool.imap_unordered(run_ash_model, args):
-                    self.log('  completed running {}\n'.format(out_fn))
+                def callback(res):
                     self.log_done()
+
+                pool = multiprocessing.Pool(NCPU)
+                jobs = []
+                for kwds in args:
+                    self.log('  running {}\n'.format(kwds['prefix']))
+                    jobs.append(pool.apply_async(run_ash_model, kwds=kwds, callback=callback))
+                [j.wait() for j in jobs]
+
             else:
                 for kwds in args:
                     self.log('  running {}\n'.format(kwds['prefix']))

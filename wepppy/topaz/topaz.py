@@ -691,6 +691,7 @@ class TopazRunner:
 
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
+                abort_count += 1
                 try:
                     p.stdin.write(b'1')
                     p.stdin.close()

@@ -118,11 +118,17 @@ class RangelandAnalysisPlatformDataset(object):
         self.ds = rasterio.open(fn)    
 
     def get_band(self, band: RAP_Band):
-        data =  self.ds.read(band)
+        try:
+            data =  self.ds.read(band)
+        except IndexError:
+            return None
         return np.ma.masked_values(data, 65535)
 
     def _get_median(self, band: RAP_Band, indices):
         data = self.get_band(band)
+        if data is None:
+            return
+
         x = data[indices]
 
         retval = float(np.ma.median(x))
@@ -154,6 +160,9 @@ class RangelandAnalysisPlatformDataset(object):
         indices = np.where(bounds == 1)
 
         data = self.get_band(band)
+        if data is None:
+            return  
+
         x = data[indices]
 
         return dict(num_pixels=len(indices[0]),
@@ -162,10 +171,8 @@ class RangelandAnalysisPlatformDataset(object):
                     std=np.std(x),
                     units='%')
 
-
 RangelandAnalysisPlatformV2Dataset = RangelandAnalysisPlatformDataset
 RangelandAnalysisPlatformV3Dataset = RangelandAnalysisPlatformDataset
-
 
 if __name__ == "__main__":
     bbox = [-114.63661319270066,45.41139471986449,-114.60663682475024,45.43207316134328]
