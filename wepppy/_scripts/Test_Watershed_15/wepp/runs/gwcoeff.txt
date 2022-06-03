@@ -1,5 +1,0 @@
-200	Initial groundwater storage (mm)
-0.04	Baseflow coefficient (per day)
-0	Deep seepage coefficient (per day)
-1	Watershed groundwater baseflow threshold area (ha)
-

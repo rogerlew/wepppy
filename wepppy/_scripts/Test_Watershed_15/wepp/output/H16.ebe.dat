@@ -1,5 +1,0 @@
- EVENT OUTPUT
-day mo  year Precp  Runoff  IR-det Av-det Mx-det  Point  Av-dep Max-dep  Point Sed.Del    ER
---- --  ----  (mm)    (mm)  kg/m^2 kg/m^2 kg/m^2    (m)  kg/m^2  kg/m^2    (m)  (kg/m)  ----
-   16   12    39  54.9     7.3   0.000   0.00   0.00    0.0    0.00    0.00    0.0     0.0  0.99
-    8   12    85  52.2     0.6   0.000   0.00   0.00    0.0    0.00    0.00    0.0     0.0  0.99
