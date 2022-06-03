@@ -35,8 +35,11 @@ class SlopeFile(object):
     def __init__(self, fname):
         fid = open(fname)
         lines = fid.readlines()
+        lines = [L for L in lines if not L.startswith('#')]
 
-        assert int(lines[1]), 'expecting 1 ofe'
+        assert int(lines[1]) == 1, 'expecting 1 ofe'
+
+        azm, fwidth = [float(x) for x in lines[2].split()]
 
         nSegments, length = lines[3].split()
         nSegments = int(nSegments)
@@ -53,11 +56,14 @@ class SlopeFile(object):
 
         fid.close()
 
+        self.fname = fname
         self.hillslope_model = polycurve(distances, slopes)
         self.length = length
         self.nSegments = nSegments
         self.distances = distances
         self.slopes = slopes
+        self.azm = azm
+        self.fwidth = fwidth
 
     @property
     def slope_scalar(self):
@@ -87,6 +93,32 @@ class SlopeFile(object):
         slopes = self.hillslope_model(distances)
 
         return distances, slopes
+
+    def segmented_multiple_ofe(self, dst_fn=None):
+        nSegments = self.nSegments
+        distances = self.distances
+        slopes = self.slopes
+        length = self.length
+        azm = self.azm
+        fwidth = self.fwidth
+        
+        s = ['97.5',
+             str(nSegments - 1), 
+             f'{azm} {fwidth}']
+
+        for i in range(nSegments-1):
+            slplen = length * (distances[i+1] - distances[i])
+            s.append(f'2 {slplen}')
+            s.append(f'0.0, {slopes[i]}  1.0, {slopes[i+1]}')
+
+        s = '\n'.join(s)
+        if dst_fn is None:
+            dst_fn = self.fname.replace('.slp', '.mofe.slp')
+
+        with open(dst_fn, 'w') as pf:
+            pf.write(s)
+
+        return nSegments - 1
 
     def make_multiple_ofe(self, breaks, normalized=True):
         if not normalized:

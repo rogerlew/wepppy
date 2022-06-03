@@ -18,6 +18,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from copy import deepcopy
 
+import math
 import numpy as np
 from osgeo import gdal
 
@@ -115,7 +116,28 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_
         shutil.copyfile(src, dst)
         return
 
-    line5 = ' '.join(line5) + '\n'
+#    line5 = ' '.join(line5) + '\n'
+
+    # make the layers easier to read by making cols fixed width
+    # aligning to the right.
+    line5 = '{0:>9}\t{1:>8}\t{2:>9}\t'\
+            '{3:>5}\t{4:>9}\t{5:>9}\t'\
+            '{6:>7}\t{7:>7}\t{8:>7}\t'\
+            '{9:>7}\t{10:>7}'.format(*line5)
+         
+    line5 = '\t' + line5 + '\n'
+
+    # for all horizons < 200 m replace avke
+    for i in range(5, len(lines)):
+        _line = lines[i].split()
+        if len(_line) == 11:
+            if float(_line[0]) <= 200:
+                _line[2] = _replace_parameter(_line[2], replacements['avke'])
+                _line = '{0:>9}\t{1:>8}\t{2:>9}\t'\
+                        '{3:>5}\t{4:>9}\t{5:>9}\t'\
+                        '{6:>7}\t{7:>7}\t{8:>7}\t'\
+                        '{9:>7}\t{10:>7}'.format(*_line)         
+                lines[i] = '\t' + _line + '\n'
 
     if 'kslast' in replacements:
         if len(lines) > 5 and len(lines[-1]) == 3:
