@@ -1858,7 +1858,6 @@ class Management(object):
 #            
 #        return mf
 
-
 def merge_managements(mans):
     assert len(mans) > 1
     assert all([isinstance(man, Management) for man in mans])
