@@ -746,10 +746,10 @@ class YearLoopCroplandAnnualFallow(ScenarioBase):
             
     def __str__(self):
         return """\
-   {0.jdharv}
-   {0.jdplt}
-   {0.rw:0.5f}
-   {0.resmgt}
+   {0.jdharv} \t# Harvesting date or end of fallow period (jdharv)
+   {0.jdplt} \t# Planting date or start of fallow period (jdplt)
+   {0.rw:0.5f} \t# Row width (rw)
+   {0.resmgt} \t# Residue management option (resmgt)
    {0.data}
 """.format(self)
 
@@ -821,11 +821,11 @@ class YearLoopCroplandPerennial(ScenarioBase):
             
     def __str__(self):
         return """\
-   {0.jdharv} # jdharv
-   {0.jdplt} # jdplt
-   {0.jdstop} # jdstop
-   {0.rw:0.5f} # rw
-   {0.mgtopt} # mgtopt
+   {0.jdharv} \t# Harvesting date or end of fallow period (jdharv)
+   {0.jdplt} \t# Planting date or start of fallow period (jdplt)
+   {0.jdstop} \t# Planting date or start of fallow period (jdstop)
+   {0.rw:0.5f} \t# Row width (rw)
+   {0.mgtopt} \t# Crop management option (mgtopt)
    {0.ncut}{0.ncycle}
    {0.cut}{0.graze}
 """.format(self)
@@ -860,11 +860,11 @@ class YearLoopCropland(ScenarioBase):
             
     def __str__(self):
         return """\
-{0.itype}
-{0.tilseq}
-{0.conset}
-{0.drset}
-{0.imngmt}
+{0.itype} \t# Plant Growth Scenario index (itype)
+{0.tilseq} \t# Surface Effect Scenario index (itype) 
+{0.conset} \t# Contour Scenario index (conset)
+{0.drset} \t# Drainage Scenario index (drset)
+{0.imngmt} \t# Cropping system (imngmt)
 {0.annualfallow}{0.perennial}
 """.format(self)
         
@@ -1170,23 +1170,25 @@ class Loop(ScenarioBase):
         self.data.setroot(root)
         
     def __str__(self):
+        landuse_desc = (None, 'Cropland', 'Rangeland', 'Forest', 'Roads')[self.landuse]
+
         if self.ntill is None:
             return """\
 {0.name}
 {0.description[0]}
 {0.description[1]}
 {0.description[2]}
-{0.landuse} # landuse
-{0.data}""".format(self)
+{0.landuse} # Landuse - <{landuse_desc}>
+{0.data}""".format(self, landuse_desc=landuse_desc)
         else:
             return """\
 {0.name}
 {0.description[0]}
 {0.description[1]}
 {0.description[2]}
-{0.landuse} # landuse
+{0.landuse} # Landuse - <{landuse_desc}>
 {0.ntill} # ntill
-{0.data}""".format(self)
+{0.data}""".format(self, landuse_desc=landuse_desc)
 
 
 class PlantLoop(Loop):
@@ -1305,10 +1307,12 @@ class YearLoop(Loop):
 
 
 class ManagementLoopManLoop(object):
-    def __init__(self, lines, parent, root):
+    def __init__(self, lines, parent, root, year=None, ofe=None):
         self.root = root
         self.parent = parent
         self.nycrop = int(lines.pop(0))
+        self._year = year
+        self._ofe = ofe
 
         self.manindx = []
         for j in range(self.nycrop):
@@ -1321,10 +1325,10 @@ class ManagementLoopManLoop(object):
         self.manindx.root = root
             
     def __str__(self):
-        s = ["   {0.nycrop} # number of crops per year".format(self)]
+        s = ["   {0.nycrop} \t# plants/year; <Year: {0._year} - OFE: {0._ofe}>  (nycrop)".format(self)]
 
         for scn in self.manindx:
-            s.append("      {} # yearly index".format(scn))
+            s.append("      {} \t# yearly index <{}>".format(scn, scn.loop_name))
 
         return '\n'.join(s)
 
@@ -1339,7 +1343,7 @@ class ManagementLoopMan(object):
         for i in range(nyears):
             self.years.append(Loops())
             for j in range(parent.nofes):
-                self.years[-1].append(ManagementLoopManLoop(lines, self, root))
+                self.years[-1].append(ManagementLoopManLoop(lines, self, root, year=i+1, ofe=j+1))
     
     def setroot(self, root):
         self.root = root
@@ -1368,7 +1372,7 @@ class ManagementLoop(object):
         self.root = root
         self.name = lines.pop(0)
         self.description = _parse_desc(lines, root)
-        nofes = int(lines.pop(0))
+        self.nofes = nofes = int(lines.pop(0))
         self.ofeindx = Loops()
         
         for i in range(nofes):
@@ -1382,9 +1386,9 @@ class ManagementLoop(object):
         for i in range(nrots):
             self.loops.append(ManagementLoopMan(lines, self, root, nyears))
         
-    @property
-    def nofes(self):
-        return len(self.ofeindx)
+#    @property
+#    def nofes(self):
+#        return len(self.ofeindx)
         
     @property
     def nrots(self):
@@ -1404,10 +1408,10 @@ class ManagementLoop(object):
 {0.description[0]}
 {0.description[1]}
 {0.description[2]}
-{0.nofes} # number of ofes in the rotation
+{0.nofes} # number of ofes in the rotation (nofe)
 # Initial Condition Scenario indices used for each OFE
 {ofeindx}
-{0.nrots} # number of times the rotation is repeated
+{0.nrots} # number of times the rotation is repeated (nrots)
 {0.loops}
 """.format(self, ofeindx=pad(self.ofeindx, 2))
 
@@ -1617,6 +1621,7 @@ class Management(object):
         assert self.nofe == 1
         assert nofe >= 2
         self.nofe = nofe
+        self.man.nofes = nofe
 
         scen = self.man.ofeindx[0]
         for i in range(nofe-1):
@@ -1676,6 +1681,9 @@ class Management(object):
                     else:
                         man_loop_man_loop = deepcopy(self.man.loops[i].years[j % yrs][0])
 
+                    man_loop_man_loop._year = j+1
+                    man_loop_man_loop._ofe = k+1
+
                     _man.loops[-1].years[-1].append(man_loop_man_loop)
     
         # now we just need to create a copy of self
@@ -1731,114 +1739,124 @@ class Management(object):
 #############################
 {0.man}
 """.format(self)
+
     
-    def merge_loops(self, other):
-        """
-        """
-        # 1) plant, operations, and intital condition scenarios
-        #    if they don't already exist. 
-        #        if Year.loop.landuse.iscen is 1 (crop)
-        #            op scenario index in Year.loop.loop.cropland.op
-        #            plant scenario index in Year.loop.cropland.itype
-        #            surface effects index in Year.loop.cropland.tilseq
-        #            contour effect index in Year.loop.cropland.tilseq
-        #            drainage scenario index in Year.loop.cropland.drset
-        #        if Year.loop.landuse.iscen is 2 (range)
-        #            plant scenario index in Year.loop.Year.rangeland.itype
-        #            surface effects scenario index in Surf.loop.loop.rangeland.tilseq
-        #            drainage scenario index in Surf.Year.loop.rangeland.drset
-        #        
-        # 2) the Surface effects section has indexes to op scenario
-        #        if Surf.loop.landuse.iseq is 1 (crop)
-        #            op scearnio index in Surf.loop.loop.cropland.op
-        #
-        # 3) Ini also has index references
-        #        if Ini.loop.landuse.lanuse is 1 (crop)
-        #            plant scenario indes in Ini.loop.landuse.cropland.inrcov
-        # 
-        # 4) Management has references for each ofe (channel) to the ini index
-        
-        assert isinstance(other, Management)
-        
-        mf = deepcopy(self)
-        other = deepcopy(other)
-        mf.nofe += 1
-        
-        # Read Plant Growth Section
-        if len(other.plants) > 0:
-            for loop in other.plants:
-                if mf.plants.find(loop) == -1:
-                    mf.plants.append(loop)
-                    
-        # Read Operation Section
-        if len(other.ops) > 0:
-            for loop in other.ops:
-                if mf.ops.find(loop) == -1:
-                    mf.ops.append(loop)
-                
-        # Read Initial Condition Section
-        if len(other.inis) > 0:
-            for loop in other.inis:
-                if mf.inis.find(loop) == -1:
-                    mf.inis.append(loop)
-                
-        # Read Surface Effects Section
-        if len(other.surfs) > 0:
-            for loop in other.surfs:
-                if mf.surfs.find(loop) == -1:
-                    mf.surfs.append(loop)
-    
-        # Read Contour Section
-        if len(other.contours) > 0:
-            for loop in other.contours:
-                if mf.contours.find(loop) == -1:
-                    mf.contours.append(loop)
-        
-        # Read Drainage Section
-        if len(other.drains) > 0:
-            for loop in other.drains:
-                if mf.drains.find(loop) == -1:
-                    mf.drains.append(loop)
-           
-        # Read Yearly Section
-        other_year_map = {}
-        for loop in other.years:
-            i = mf.years.find(loop)
-            if i == -1:
-                last = mf.years[-1].name
-                last = int(''.join([v for v in last if v in '0123456789']))
-                _next = 'Year {}'.format(last + 1)
-                other_year_map[loop.name] = _next
-                loop.name = _next
-                mf.years.append(loop)
-           
-        # update the ofeindx
-        # has ScenarioReferences to Ini, so they should update fine
-        mf.man.ofeindx.append(other.man.ofeindx) 
-        
-        # need to merge the loops. The loops point to yearly indexes,
-        # the indexes of other have changed, so we need to set the 
-        # name attribute for the ScenarioReferences based on the
-        # other_year_map        
-     
-        for i in range(len(other.man.loops)):   # ManagementLoopMan
-            for j in range(len(other.man.loops[i].years)):  # Loops
-                for k in range(len(other.man.loops[i].years[j])):  # ManagementLoopManLoop
-                    loop_name = other.man.loops[i].years[j][k].manindx.loop_name
-                    new_name = other_year_map.get(loop_name, loop_name)
-                    other.man.loops[i].years[j][k].manindx.loop_name = new_name
-                    
-                    mf.man.loops[-1].years[-1].append(other.man.loops[i].years[j][k])
-                    
-        mf.setroot()
-        
-        _id = id(mf)
-        for loops in mf.plants, mf.inis, mf.ops, mf.surfs, mf.drains, mf.years:
-            for loop in loops:
-                assert _id == id(loop.root)
-                assert _id == id(loop.data.root)
-            
-        return mf
+#    def merge_loops(self, other):
+#        """
+#        """
+#        # 1) plant, operations, and intital condition scenarios
+#        #    if they don't already exist. 
+#        #        if Year.loop.landuse.iscen is 1 (crop)
+#        #            op scenario index in Year.loop.loop.cropland.op
+#        #            plant scenario index in Year.loop.cropland.itype
+#        #            surface effects index in Year.loop.cropland.tilseq
+#        #            contour effect index in Year.loop.cropland.tilseq
+#        #            drainage scenario index in Year.loop.cropland.drset
+#        #        if Year.loop.landuse.iscen is 2 (range)
+#        #            plant scenario index in Year.loop.Year.rangeland.itype
+#        #            surface effects scenario index in Surf.loop.loop.rangeland.tilseq
+#        #            drainage scenario index in Surf.Year.loop.rangeland.drset
+#        #        
+#        # 2) the Surface effects section has indexes to op scenario
+#        #        if Surf.loop.landuse.iseq is 1 (crop)
+#        #            op scearnio index in Surf.loop.loop.cropland.op
+#        #
+#        # 3) Ini also has index references
+#        #        if Ini.loop.landuse.lanuse is 1 (crop)
+#        #            plant scenario indes in Ini.loop.landuse.cropland.inrcov
+#        # 
+#        # 4) Management has references for each ofe (channel) to the ini index
+#        
+#        assert isinstance(other, Management)
+#        
+#        mf = deepcopy(self)
+#        other = deepcopy(other)
+#        mf.nofe += 1
+#        
+#        # Read Plant Growth Section
+#        if len(other.plants) > 0:
+#            for loop in other.plants:
+#                if mf.plants.find(loop) == -1:
+#                    mf.plants.append(loop)
+#                    
+#        # Read Operation Section
+#        if len(other.ops) > 0:
+#            for loop in other.ops:
+#                if mf.ops.find(loop) == -1:
+#                    mf.ops.append(loop)
+#                
+#        # Read Initial Condition Section
+#        if len(other.inis) > 0:
+#            for loop in other.inis:
+#                if mf.inis.find(loop) == -1:
+#                    mf.inis.append(loop)
+#                
+#        # Read Surface Effects Section
+#        if len(other.surfs) > 0:
+#            for loop in other.surfs:
+#                if mf.surfs.find(loop) == -1:
+#                    mf.surfs.append(loop)
+#    
+#        # Read Contour Section
+#        if len(other.contours) > 0:
+#            for loop in other.contours:
+#                if mf.contours.find(loop) == -1:
+#                    mf.contours.append(loop)
+#        
+#        # Read Drainage Section
+#        if len(other.drains) > 0:
+#            for loop in other.drains:
+#                if mf.drains.find(loop) == -1:
+#                    mf.drains.append(loop)
+#           
+#        # Read Yearly Section
+#        other_year_map = {}
+#        for loop in other.years:
+#            i = mf.years.find(loop)
+#            if i == -1:
+#                last = mf.years[-1].name
+#                last = int(''.join([v for v in last if v in '0123456789']))
+#                _next = 'YR_INDX_{}'.format(last + 1)
+#                other_year_map[loop.name] = _next
+#                loop.name = _next
+#                mf.years.append(loop)
+#       
+#        print('other_year_map')
+#        print(other_year_map)
+#        print()
+#    
+#        # update the ofeindx
+#        # has ScenarioReferences to Ini, so they should update fine
+#        mf.man.ofeindx.append(other.man.ofeindx) 
+#        
+#        # need to merge the loops. The loops point to yearly indexes,
+#        # the indexes of other have changed, so we need to set the 
+#        # name attribute for the ScenarioReferences based on the
+#        # other_year_map        
+#    
+#        print(self.man.loops)
+#        print()
+# 
+#        for i in range(len(other.man.loops)):   # ManagementLoopMan
+#            for j in range(len(other.man.loops[i].years)):  # Loops
+#                for k in range(len(other.man.loops[i].years[j])):  # ManagementLoopManLoop
+#                    print(other.man.loops[i].years[j][k].manindx)
+#                    for scn_ref in other.man.loops[i].years[j][k].manindx:
+#                        loop_name = scn_ref.loop_name
+#                        new_name = other_year_map.get(loop_name, loop_name)
+#                        scn_ref.loop_name = new_name
+#                        print(scn_ref) 
+#                        #mf.man.loops[-1].years[-1].append()
+#                    
+#        #mf.setroot()
+#        
+#        #_id = id(mf)
+#        #for loops in mf.plants, mf.inis, mf.ops, mf.surfs, mf.drains, mf.years:
+#        #    for loop in loops:
+#        #        assert _id == id(loop.root)
+#        #        assert _id == id(loop.data.root)
+#            
+#        return mf
 
 
 def merge_managements(mans):

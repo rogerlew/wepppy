@@ -52,6 +52,8 @@ class TriggerEvents(Enum):
 
 
 class NoDbBase(object):
+    DEBUG = 0
+
     def __init__(self, wd, cfg_fn):
         assert _exists(wd)
         self.wd = wd
@@ -202,15 +204,15 @@ class NoDbBase(object):
         return _exists(self._lock)
 
     @property
-    def readonly(self):
-        return _exists(_join(self.wd, 'READONLY'))
-
-    @property
     def runid(self):
         wd = self.wd
         if wd.endswith('/'):
             wd = wd[:-1]
         return _split(wd)[-1]
+
+    @property
+    def readonly(self):
+        return _exists(_join(self.wd, 'READONLY'))
 
     @readonly.setter
     def readonly(self, value):
@@ -249,6 +251,48 @@ class NoDbBase(object):
                 os.remove(path)
 
             assert not self.public
+
+    @property
+    def DEBUG(self):
+        return _exists(_join(self.wd, 'DEBUG'))
+
+    @DEBUG.setter
+    def DEBUG(self, value):
+        assert value in [False, True]
+
+        path = _join(self.wd, 'DEBUG')
+        if value:
+            with open(path, 'w') as fp:
+                fp.write('')
+
+            assert self.DEBUG
+
+        else:
+            if self.readonly:
+                os.remove(path)
+
+            assert not self.DEBUG
+
+    @property
+    def VERBOSE(self):
+        return _exists(_join(self.wd, 'VERBOSE'))
+
+    @VERBOSE.setter
+    def VERBOSE(self, value):
+        assert value in [False, True]
+
+        path = _join(self.wd, 'VERBOSE')
+        if value:
+            with open(path, 'w') as fp:
+                fp.write('')
+
+            assert self.VERBOSE
+
+        else:
+            if self.VERBOSE:
+                os.remove(path)
+
+            assert not self.VERBOSE
 
     @property
     def _configparser(self):
