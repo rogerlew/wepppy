@@ -22,7 +22,7 @@ class SoilMultipleOfeSynth(object):
         return len(self.stack)
 
     def write(self, dst_fn, ksflag=0):
-        assert len(self.stack) > 1
+        assert len(self.stack) > 0
 
         for fn in self.stack:
             assert exists(fn)

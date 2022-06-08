@@ -179,12 +179,18 @@ def arc_export(wd, verbose=False):
     with open(geojson_fn, 'w') as fp:
         json.dump(js, fp, allow_nan=False)
 
-    json_to_wgs(geojson_fn)
+    utm_epsg = f'epsg:{map.srid}'
+
+    if 'crs' not in js:
+        s_srs = utm_epsg
+    else:
+        s_srs = None
+    json_to_wgs(geojson_fn, s_srs=s_srs)
 
     if verbose:
         print('done.')
 
-    cmd = ['ogr2ogr', '-s_srs', 'epsg:%s' %  map.srid, '-t_srs', 'epsg:%s' %  map.srid,
+    cmd = ['ogr2ogr', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
            'subcatchments.shp', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -192,7 +198,7 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
            'subcatchments.kml', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -207,7 +213,7 @@ def arc_export(wd, verbose=False):
     if verbose:
         print('done.')
 
-    cmd = ['ogr2ogr', '-s_srs', 'epsg:%s' %  map.srid, '-t_srs', 'epsg:%s' %  map.srid,
+    cmd = ['ogr2ogr', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
            'subcatchments.shp', 'subcatchments.json']
     if verbose:
         print(cmd)
@@ -215,7 +221,7 @@ def arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
+    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
            'subcatchments.kml', 'subcatchments.json']
     if verbose:
         print(cmd)

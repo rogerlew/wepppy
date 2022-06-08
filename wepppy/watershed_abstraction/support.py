@@ -322,7 +322,7 @@ def rect_to_polar(d):
     return angle
 
 
-def json_to_wgs(src_fn):
+def json_to_wgs(src_fn, s_srs=None):
 
     assert _exists(src_fn)
 
@@ -333,7 +333,10 @@ def json_to_wgs(src_fn):
     if _exists(dst_wgs_fn):
         os.remove(dst_wgs_fn)
 
-    cmd = ['ogr2ogr', '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', dst_wgs_fn, src_fn]
+    cmd = ['ogr2ogr', '-f', 'GeoJSON', '-t_srs', 'EPSG:4326']
+    if s_srs is not None:
+        cmd.extend(['-s_srs', s_srs])
+    cmd.extend([dst_wgs_fn, src_fn])
 
     # run command, check_output returns standard output
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

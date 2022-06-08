@@ -2938,6 +2938,28 @@ def task_set_hourly_seepage(runid, config):
     return success_factory()
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_soils_ksflag/', methods=['POST'])
+def task_set_soils_ksflag(runid, config):
+
+    try:
+        state = request.json.get('ksflag', None)
+    except Exception:
+        return exception_factory('Error parsing state')
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        soils = Soils.getInstance(wd)
+        soils.ksflag = state
+    except Exception:
+        return exception_factory('Error setting state')
+
+    return success_factory()
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths/', methods=['POST'])
 def task_set_run_flowpaths(runid, config):

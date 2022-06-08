@@ -373,7 +373,9 @@ class Landuse(NoDbBase):
             self.unlock('-f')
             raise
 
-#        self._build_multiple_ofe()
+        from wepppy.nodb import Wepp
+        if Wepp.getInstance(self.wd).multi_ofe:
+            self._build_multiple_ofe()
 
     def _build_multiple_ofe(self):
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth

@@ -450,13 +450,17 @@ class SoilSummary(object):
 class WeppSoil:
     def __init__(self, ssurgo_c, mukey, initial_sat=0.75, 
                  horizon_defaults=None,
-                 res_lyr_ksat_threshold=2.0):
+                 res_lyr_ksat_threshold=2.0,
+                 ksflag=True):
                       
         assert mukey in ssurgo_c.mukeys        
         
         self.ssurgo_c = ssurgo_c
         self.mukey = mukey
         self.initial_sat = initial_sat
+        self.ksflag = int(ksflag)
+        assert self.ksflag in (0, 1)
+
         self.horizons = None
         self.horizons_mask = None
         self.majorComponent = None
@@ -909,9 +913,11 @@ Any comments:
         with open(fname, 'w') as fp:
             fp.write(txt)
 
-    def build_file_contents(self, ksflag=0):
+    def build_file_contents(self):
         assert self.valid()
-                
+               
+        ksflag = self.ksflag
+ 
         if self.is_urban:
             return self._build_urban()
             
@@ -984,8 +990,10 @@ Any comments:
             
         return '\n'.join(s)
 
-    def build_file_contents_v2006_2(self, ag=False, ksflag=0):
+    def build_file_contents_v2006_2(self, ag=False):
         assert self.valid()
+
+        ksflag = self.ksflag
 
         if self.is_urban:
             return self._build_urban_v2006_2()
@@ -1238,11 +1246,16 @@ class SurgoSoilCollection(object):
                                                ('dbthirdbar_r', 1.4),
                                                ('smr', 55.5),
                                                ('field_cap', 0.242),
-                                               ('wilt_pt', 0.1145)])):
+                                               ('wilt_pt', 0.1145)]),
+                      ksflag=True):
+
+        ksflag = int(ksflag)
+        assert ksflag in (0, 1)
+
         weppSoils = {}
         invalidSoils = {}
         for mukey in self.mukeys:
-            weppSoil = WeppSoil(self, mukey, initial_sat, horizon_defaults=horizon_defaults)
+            weppSoil = WeppSoil(self, mukey, initial_sat, horizon_defaults=horizon_defaults, ksflag=ksflag)
 
             if weppSoil.valid():
                 weppSoils[mukey] = weppSoil

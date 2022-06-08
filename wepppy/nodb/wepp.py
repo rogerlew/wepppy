@@ -874,9 +874,12 @@ class Wepp(NoDbBase, LogMixin):
 
 
     def _prep_managements(self, translator):
-        landuse = Landuse.getInstance(self.wd)
-        years = Climate.getInstance(self.wd).input_years
-        watershed = Watershed.getInstance(self.wd)
+        wd = self.wd
+
+        landuse = Landuse.getInstance(wd)
+        climate = Climate.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+        years = climate.input_years
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
@@ -897,6 +900,17 @@ class Wepp(NoDbBase, LogMixin):
 
                     with open(dst_fn, 'w') as fp:
                         fp.write(fn_contents)
+
+
+        if 'rap_ts' in self.mods:
+            from wepppy.nodb.mods import RAP_TS
+            assert climate.observed_start_year is not None
+            assert climate.observed_end_year is not None
+
+            rap_ts = RAP_TS.getInstance(wd)
+            rap_ts.acquire_rasters(start_year=climate.observed_start_year,
+                                   end_year=climate.observed_end_year)
+            rap_ts.analyze()
 
     def _prep_soils(self, translator):
         soils = Soils.getInstance(self.wd)
