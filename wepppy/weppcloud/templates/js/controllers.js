@@ -3827,6 +3827,35 @@ var Soil = function () {
             self.showHideControls(soil_mode);
         };
 
+        that.set_ksflag = function (state) {
+            var self = instance;
+            var task_msg = "Setting ksflag (" + state + ")";
+
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/set_soils_ksflag/",
+                data: JSON.stringify({ ksflag: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
+        };
+
         that.setMode = function (mode) {
             var self = instance;
             // mode is an optional parameter

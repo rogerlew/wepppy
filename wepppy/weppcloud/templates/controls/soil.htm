@@ -62,6 +62,24 @@
     <p><i>Hillslopes with burn severity landuses will have soils altered to model burn severity.</i></p>
     </div>
     {% endif %}
+
+    <h4></h4>
+    <div><a href="#sol_advanced_opts_con" data-toggle="collapse">Advanced Options</a>
+        <div id="sol_advanced_opts_con" style="padding-left: 2em;" class="collapse">
+
+<h5>Use internal hydraulic conductivity adjustments (ksflag)</h5>
+<div style="padding-left:3em;">
+<label class="form-check-label">
+    <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
+      onchange="Soil.getInstance().set_ksflag(this.checked);"
+      {% if soils.ksflag %}checked{% endif %}>
+    ksflag
+</label>
+</div>
+            <br/><br/>
+        </div>
+    </div>
+
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_build_soil"
