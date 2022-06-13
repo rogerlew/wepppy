@@ -119,7 +119,7 @@ class RangelandAnalysisPlatformDataset(object):
 
     @property
     def shape(self):
-        return self.ds.read(RAP_Band.TREE).shape
+        return self.ds.read(RAP_Band.TREE).T.shape
 
     def get_band(self, band: RAP_Band):
         try:
@@ -134,10 +134,6 @@ class RangelandAnalysisPlatformDataset(object):
             return
 
         x = data[indices]
-        if band == 6:
-            print(x)
-            print('data.shape', data.shape)
-            print(np.ma.mean(x))
 
         retval = float(np.ma.median(x))
         if math.isnan(retval):
@@ -156,9 +152,6 @@ class RangelandAnalysisPlatformDataset(object):
         for _id in _ids:
             if _id == 0:
                 continue
-            if band == 6:
-                print('subwta.shape', subwta.shape)
-                print('topaz_id', _id)
             _id = int(_id)
             indices = np.where(subwta == _id)
             dom = self._get_median(band, indices)
