@@ -96,6 +96,7 @@ class SurgoMap:
         assert _exists(subwta_fn)
 
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
+        assert self.data.shape == subwta.shape
         top_ids = sorted(list(set(subwta.flatten())))
 
         # assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 0, 'subwta does not contain channels: %s' % str(top_ids)

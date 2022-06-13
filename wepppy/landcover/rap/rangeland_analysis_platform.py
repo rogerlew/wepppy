@@ -117,9 +117,13 @@ class RangelandAnalysisPlatformDataset(object):
     def __init__(self, fn):
         self.ds = rasterio.open(fn)    
 
+    @property
+    def shape(self):
+        return self.ds.read(RAP_Band.TREE).shape
+
     def get_band(self, band: RAP_Band):
         try:
-            data =  self.ds.read(band)
+            data =  self.ds.read(band).T
         except IndexError:
             return None
         return np.ma.masked_values(data, 65535)
@@ -130,6 +134,10 @@ class RangelandAnalysisPlatformDataset(object):
             return
 
         x = data[indices]
+        if band == 6:
+            print(x)
+            print('data.shape', data.shape)
+            print(np.ma.mean(x))
 
         retval = float(np.ma.median(x))
         if math.isnan(retval):
@@ -140,13 +148,17 @@ class RangelandAnalysisPlatformDataset(object):
     def spatial_aggregation(self, band: RAP_Band, subwta_fn):
         assert _exists(subwta_fn)
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
+        assert self.shape == subwta.shape
+
         _ids = sorted(list(set(subwta.flatten())))
 
         domlc_d = {}
         for _id in _ids:
             if _id == 0:
                 continue
-
+            if band == 6:
+                print('subwta.shape', subwta.shape)
+                print('topaz_id', _id)
             _id = int(_id)
             indices = np.where(subwta == _id)
             dom = self._get_median(band, indices)
