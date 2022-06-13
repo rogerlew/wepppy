@@ -49,6 +49,7 @@ class ShrublandMap:
     def spatial_aggregation(self, subwta_fn):
         assert _exists(subwta_fn)
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
+        assert self.data.shape == subwta.shape
         _ids = sorted(list(set(subwta.flatten())))
 
         domlc_d = {}
@@ -66,6 +67,7 @@ class ShrublandMap:
     def spatial_stats(self, bounds_fn):
         assert _exists(bounds_fn)
         bounds, transform, proj = read_raster(bounds_fn, dtype=np.int32)
+        assert self.data.shape == bounds.shape
         indices = np.where(bounds == 1)
 
         x = self.data[indices]
