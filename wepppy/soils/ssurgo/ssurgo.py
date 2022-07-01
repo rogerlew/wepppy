@@ -165,6 +165,9 @@ def query_mukeys_in_extent(extent: List[float]) -> Union[Set[int], None]:
     if root.text == '':
         return None
 
+    if root.text is None:
+        return None
+
     mukeys = root.text.split(',')
     mukeys = set(int(v) for v in mukeys)
 
