@@ -192,6 +192,10 @@ class TotalWatSed2(object):
 
     def export(self, fn):
         d = self.d
+        for k in d.keys():
+            if '(m^3)' in k:
+                del d[k]
+
         with open(fn, 'w') as fp:
             fp.write('DAILY TOTAL WATER BALANCE AND SEDIMENT\n\n')
             fp.write(f'Total Area (m^2): {self.wsarea}\n\n')
