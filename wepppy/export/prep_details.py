@@ -10,7 +10,7 @@ def export_hillslopes_prep_details(wd):
     subcatchments_summary = ron.subs_summary()
     
     fieldnames = ('topaz_id', 'wepp_id', 'width', 'length', 'area', 'slope', 'aspect',
-                  'dom_landuse', 'dom_soil', 'cli_fn', 'longest_fp', 'longest_fp_length', 'longest_fp_slope')
+                  'dom_landuse', 'landuse_description', 'dom_soil', 'soil_description', 'cli_fn', 'longest_fp', 'longest_fp_length', 'longest_fp_slope')
 
     out_dir = _join(ron.export_dir, 'prep_details')
     
@@ -23,7 +23,7 @@ def export_hillslopes_prep_details(wd):
     wtr = csv.DictWriter(fp, fieldnames)
     wtr.writeheader()
     wtr.writerow(dict(topaz_id='', wepp_id='', width='m', length='m', area='ha', slope='decimal', aspect='degree',
-                      dom_landuse='', dom_soil='', cli_fn='',
+                      dom_landuse='', landuse_description='', dom_soil='', soil_description='', cli_fn='',
                       longest_fp='', longest_fp_length='m', longest_fp_slope='decimal'))
 
     for d in subcatchments_summary:
@@ -69,9 +69,19 @@ def export_hillslopes_prep_details(wd):
             dom_landuse = None
 
         try:
+            landuse_description = d['landuse']['desc']
+        except KeyError:
+            landuse_description = None
+
+        try:
             dom_soil = d['soil']['mukey']
         except KeyError:
             dom_soil = None
+
+        try:
+            soil_description = d['soil']['desc']
+        except KeyError:
+            soil_description = None
 
         try:
             cli_fn = d['climate']['cli_fn']
@@ -96,7 +106,9 @@ def export_hillslopes_prep_details(wd):
         wtr.writerow(dict(topaz_id=topaz_id, wepp_id=wepp_id,
                           width=width, length=length,
                           area=area, slope=slope, aspect=aspect,
-                          dom_landuse=dom_landuse, dom_soil=dom_soil, cli_fn=cli_fn,
+                          dom_landuse=dom_landuse, landuse_description=landuse_description,
+                          dom_soil=dom_soil, soil_description=soil_description,
+                          cli_fn=cli_fn,
                           longest_fp=longest_fp,
                           longest_fp_length=longest_fp_length,
                           longest_fp_slope=longest_fp_slope))
@@ -109,7 +121,7 @@ def export_channels_prep_details(wd):
     ron = Ron.getInstance(wd)
     chns_summary = ron.chns_summary()
     fieldnames = ('topaz_id', 'wepp_id', 'chn_enum', 'chn_wepp_width', 'order', 'length', 'area', 'slope', 'aspect',
-                  'channel_type', 'dom_soil', 'cli_fn')
+                  'channel_type', 'dom_soil', 'soil_description', 'cli_fn')
 
     out_dir = _join(ron.export_dir, 'prep_details')
 
@@ -123,7 +135,7 @@ def export_channels_prep_details(wd):
     wtr.writeheader()
     wtr.writerow(dict(topaz_id='', wepp_id='', chn_enum='', chn_wepp_width='m', order='', length='m', area='ha',
                       slope='decimal', aspect='degree',
-                      channel_type='', dom_soil='', cli_fn=''))
+                      channel_type='', dom_soil='', soil_description='', cli_fn=''))
 
     for d in chns_summary:
         try:
@@ -181,6 +193,11 @@ def export_channels_prep_details(wd):
             dom_soil = d['soil']['mukey']
         except KeyError:
             dom_soil = None
+
+        try:
+            soil_description = d['soil']['desc']
+        except KeyError:
+            soil_description = None
 
         try:
             cli_fn = d['climate']['cli_fn']
