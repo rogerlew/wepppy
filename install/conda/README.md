@@ -158,3 +158,29 @@ You should get a messaging stating that the flask app is running and should be a
 http://localhost:5000/
 
 This will still query wepp.cloud webservices for DEMs, etc.
+
+### Troubleshooting
+
+
+#### forrtl: too many files open
+
+linux has a limit on the number of files that can be open. Linux, the default is 1024 file descriptors per process. The limit is per user on a per session basis. The limit can be checked with:
+
+~~~
+ulimit -n
+~~~
+
+and set as:
+
+~~~
+ulimit -n 4096
+~~~
+
+A more persistent solution is to set the default limits via /etc/security/limits.conf
+~
+<username>       soft    nofile          4096
+<username>       hard    nofile          4096
+~
+
+more info:
+https://www.tecmint.com/increase-set-open-file-limits-in-linux/
