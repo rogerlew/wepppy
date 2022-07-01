@@ -108,7 +108,6 @@
       <th>Slope File</th>
       <th>Channel Type</th>
       <th>Dominant Soil</th>
-      <th>Channel Type</th>
       <th>Climate File</th>
     </tr>
   </thead>
@@ -121,7 +120,6 @@
       <td>&nbsp;</td>
       <td>{{ unitizer_units("m") | safe }}</td>
       <td>{{ unitizer_units("ha") | safe }}</td>
-      <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td>&nbsp;</td>
@@ -144,14 +142,13 @@
       {% if d.watershed.channel_type is not defined %}
       <td>&mdash;</td>
       {% else %}
-      <td>{{ d.watershed.channel_type }}</td>
+      <td><a href="../../../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></td>
       {% endif %}
       {% if d.soil.desc is not defined %}
       <td>&mdash;</td>
       {% else %}
       <td>{{ d.soil.desc }} (<a href="../../../browse/soils/{{ d.soil.fname }}" target="_blank">{{ d.soil.mukey }}</a>)</td>
       {% endif %}
-      <td><a href="../../../view/channel_def/{{ d.watershed.channel_type }}/" target="_blank">{{ d.watershed.channel_type }}</a></td>
       {% if d.climate.cli_fn is not defined %}
       <td>&mdash;</td>
       {% else %}

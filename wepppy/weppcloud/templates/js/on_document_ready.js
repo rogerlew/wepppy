@@ -203,17 +203,14 @@ function onReady() {
     });
 
     baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
-        console.log("SBS_UPLOAD_TASK_COMPLETE");
         setTimeout(baer.show_sbs, 4000);
         setTimeout(baer.load_modify_class, 4000);
     });
 
     baer.form.on("SBS_REMOVE_TASK_COMPLETE", function () {
-        console.log("SBS_REMOVE_TASK_COMPLETE");
     });
 
     baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
-        console.log("MODIFY_BURN_CLASS_TASK_COMPLETE");
         setTimeout(baer.show_sbs, 2000);
         setTimeout(baer.load_modify_class, 4000);
     });
@@ -239,22 +236,18 @@ function onReady() {
     var input_csa_en = $("#input_csa_en");
 
     input_mcl.on("input", function () {
-        console.log('on input_mcl change.');
         input_mcl_en.val(parseFloat(input_mcl.val()) * 3.28084 );
     });
 
     input_mcl_en.on("input", function () {
-        console.log('on input_mcl_en change.');
         input_mcl.val(parseFloat(input_mcl_en.val()) / 3.28084 );
     });
 
     input_csa.on("input", function () {
-        console.log('on input_csa change.');
         input_csa_en.val(parseFloat(input_csa.val()) * 2.47105 );
     });
 
     input_csa_en.on("input", function () {
-        console.log('on input_csa_en change.');
         input_csa.val(parseFloat(input_csa_en.val()) / 2.47105 );
     });
 
@@ -342,7 +335,6 @@ function onReady() {
     var input_pkcsa_en = $("#input_pkcsa_en");
 
     input_pkcsa.on("input", function () {
-        console.log('on input_pkcsa change.');
         var v = input_pkcsa.val();
         if (v !== 'auto') {
             input_pkcsa_en.val(parseFloat(v) * 2.47105);
@@ -857,6 +849,24 @@ function onReady() {
         window.scrollTo(0, 0);
     });
 
+
+  $(function () {
+    var navSelector = "#toc";
+    var $myNav = $(navSelector);
+    Toc.init($myNav);
+    $("body").scrollspy({
+      target: navSelector,
+      offset: 60
+    });
+  });
+
+  var offset = 80;
+
+  $('.nav li a').click(function(event) {
+    event.preventDefault();
+    $($(this).attr('href'))[0].scrollIntoView();
+    scrollBy(0, -offset);
+  });
 }
 
 $(document).ready(onReady);
