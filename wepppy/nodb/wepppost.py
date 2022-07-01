@@ -18,7 +18,7 @@ import jsonpickle
 import numpy as np
 
 # wepppy
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed2
 
 # wepppy submodules
 from .base import NoDbBase
@@ -249,33 +249,30 @@ class WeppPost(NoDbBase):
             return i0 + j0 + a
 
     def calc_hill_streamflow(self):
-        from wepppy.nodb import Wepp
-        wepp = Wepp.getInstance(self.wd)
-        phos_opts = wepp.phosphorus_opts
-        baseflow_opts = wepp.baseflow_opts
-        output_dir = self.output_dir
-        totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
-
-        watsed = TotalWatSed(totalwatsed_fn, baseflow_opts, phos_opts=phos_opts)
+        watsed = TotalWatSed2(self.wd)
+        watsed_d = watsed.d
 
         # noinspection PyDictCreation
         self._hill_streamflow = {}
-        self._hill_streamflow['Daily Runoff (mm)'] = watsed.d['Runoff (mm)']
-        self._hill_streamflow['Daily Sediment (tonne/ha)'] = watsed.d['Sed. Del Density (tonne/ha)']
-        self._hill_streamflow['Daily Lateral Flow (mm)'] = watsed.d['Lateral Flow (mm)']
-        self._hill_streamflow['Daily Baseflow (mm)'] = watsed.d['Baseflow (mm)']
+        self._hill_streamflow['Daily Runoff (mm)'] = watsed_d['Runoff (mm)']
+        self._hill_streamflow['Daily Sediment (tonne/ha)'] = watsed_d['Sed Del Density (tonne/ha)']
+        self._hill_streamflow['Daily Lateral Flow (mm)'] = watsed_d['Lateral Flow (mm)']
+        self._hill_streamflow['Daily Baseflow (mm)'] = watsed_d['Baseflow (mm)']
 
-        if 'Total P (kg)' in watsed.d:
-            self._hill_streamflow['Daily Total P (kg)'] = watsed.d['Total P (kg)']
+        if 'Total P (kg)' in watsed_d:
+            self._hill_streamflow['Daily Total P (kg)'] = watsed_d['Total P (kg)']
 
-        if 'Particulate P (kg)' in watsed.d:
-            self._hill_streamflow['Daily Particulate P (kg)'] = watsed.d['Particulate P (kg)']
+        if 'Particulate P (kg)' in watsed_d:
+            self._hill_streamflow['Daily Particulate P (kg)'] = watsed_d['Particulate P (kg)']
 
-        if 'Soluble Reactive P (kg)' in watsed.d:
-            self._hill_streamflow['Daily Soluble Reactive P (kg)'] = watsed.d['Soluble Reactive P (kg)']
+        if 'Soluble Reactive P (kg)' in watsed_d:
+            self._hill_streamflow['Daily Soluble Reactive P (kg)'] = watsed_d['Soluble Reactive P (kg)']
 
-        if 'Sed. Del (tonne)' in watsed.d:
-            self._hill_streamflow['Daily Sed. Del (tonne/day)'] = watsed.d['Sed. Del (tonne)']
+        if 'Sed Del (tonne)' in watsed_d:
+            self._hill_streamflow['Daily Sed Del (tonne/day)'] = watsed_d['Sed Del (tonne)']
+
+        for k in self._hill_streamflow:
+            self._hill_streamflow[k] = [float(v) for v in self._hill_streamflow[k]]
 
     def calc_channel_streamflow(self):
         output_dir = self.output_dir

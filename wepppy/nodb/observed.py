@@ -25,10 +25,9 @@ import numpy as np
 import pandas as pd
 
 # wepppy submodules
-from wepppy.wepp.out import TotalWatSed, Chanwb, Ebe
+from wepppy.wepp.out import TotalWatSed2, Chanwb, Ebe
 
 from .base import NoDbBase
-from .wepp import Wepp
 
 
 def validate(Qm, Qo):
@@ -189,10 +188,7 @@ class Observed(NoDbBase):
         #
 
         # load hilslope simulation results
-        wepp = Wepp.getInstance(self.wd)
-        totwatsed_fn = _join(self.output_dir, 'totalwatsed.txt')
-        totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                                phos_opts=wepp.phosphorus_opts)
+        totwatsed = TotalWatSed2(self.wd)
         sim = totwatsed.d
         year0 = sorted(set(sim['Year']))[0]
         results['Hillslopes'] = self.run_measures(df, sim, 'Hillslopes')
