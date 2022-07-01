@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 from os.path import exists as _exists
 
 from enum import IntEnum
@@ -44,6 +47,14 @@ class HillPass:
 
         srp, slfp, bfp, scp = [float(v) for v in lines[4].split()]
 
+        _year = []
+        _julian = []
+        _lateral_m3 = []
+        _runoff_m3 = []
+        _sed_dep_kg = []
+        _sed_det_kg = []
+        _sed_del_kg = []
+
         events = []
         for i, line in enumerate(lines[5:]):
             if line.startswith('NO EVENT'):
@@ -54,6 +65,13 @@ class HillPass:
                 gwbfv = _float(gwbfv)
                 gwdsv = _float(gwdsv)
 
+                runoff_m3 = 0.0
+                lateral_m3 = 0.0
+                sed_dep_kg = 0.0
+                sed_det_kg = 0.0
+                sed_del_kg = [0.0, 0.0, 0.0, 0.0, 0.0]
+                sed_flag = True
+
                 events.append(dict(event=event, year=year, day=day, gwbfv=gwbfv, gwdsv=gwdsv))
 
             elif line.startswith('EVENT   '):
@@ -63,22 +81,23 @@ class HillPass:
                 year = int(_line[1])
                 day = int(_line[2])
                 dur = float(_line[3])      # (s)
-                tcs = float(_line[4])      #  overland flow time of concentration (hr)
+                tcs = float(_line[4])      # overland flow time of concentration (hr)
                 oalpha = float(_line[5])   # overland flow alpha parameter (unitless)
                 runoff = float(_line[6])   # (m)
-                runvol = float(_line[7])   # (m^3)
+                runoff_m3 = runvol = float(_line[7])   # (m^3)
                 sbrunf = float(_line[8])
-                sbrunv = float(_line[9])   # lateral flow (m^3)
+                lateral_m3 = sbrunv = float(_line[9])   # lateral flow (m^3)
                 drainq = float(_line[10])  # drainage flux (m/day)
                 drrunv = float(_line[11])
                 peakro_vol = float(_line[12])  # (m^3/s)
-                tdet = float(_line[13])    # total detachment (kg)
-                tdep = float(_line[14])    # total deposition (kg)
-                sedcon = [float(_line[15]), float(_line[16]), float(_line[17]), float(_line[18]), float(_line[19])]
+                sed_det_kg = tdet = float(_line[13])    # total detachment (kg)
+                sed_dep_kg = tdep = float(_line[14])    # total deposition (kg)
+                sed_del_kg = sedcon = [float(_line[15]), float(_line[16]), float(_line[17]), float(_line[18]), float(_line[19])]
 
                 frcflw = float(_line[20])
                 gwbfv = _float(_line[21])
                 gwdsv = _float(_line[22])
+                sed_flag = True
 
                 events.append(dict(event=event, year=year, day=day, dur=dur, tcs=tcs, oalpha=oalpha, runoff=runoff,
                                    runvol=runvol, sbrunf=sbrunf, sbrunv=sbrunv, drainq=drainq, drrunv=drrunv,
@@ -90,13 +109,30 @@ class HillPass:
                 year = int(year)
                 day = int(day)
                 sbrunf = float(sbrunf)
-                sbrunv = float(sbrunf)
+                lateral_m3 = sbrunv = float(sbrunf)
+                runoff_m3 = 0.0
                 drainq = float(drainq)
                 drrunv = float(drrunv)
                 gwbfv = _float(gwbfv)
                 gwdsv = _float(gwdsv)
 
+                sed_det_kg = 0.0
+                sed_dep_kg = 0.0
+                sed_del_kg = [0.0, 0.0, 0.0, 0.0, 0.0]
+                sed_flag = True
+
                 events.append(dict(event=event, year=year, day=day, sbrunf=sbrunf, sbrunv=sbrunv, drainq=drainq, drrunv=drrunv, gwbfv=gwbfv, gwdsv=gwdsv))
+            else:
+                sed_flag = False
+
+            if sed_flag:
+                _year.append(year)
+                _julian.append(day)
+                _runoff_m3.append(runoff_m3)
+                _lateral_m3.append(lateral_m3)
+                _sed_det_kg.append(sed_det_kg)
+                _sed_dep_kg.append(sed_dep_kg)
+                _sed_del_kg.append(sed_del_kg)
 
         self.wshcli = wshcli
         self.nyr = nyr
@@ -109,6 +145,31 @@ class HillPass:
         self.bfp = bfp
         self.scp = scp
         self.events = events
+
+        df = pd.DataFrame()
+        df['Julian'] = np.array(_julian)
+        df['Year'] = np.array(_year)
+#        df['Area (ha)'] = np.ones(df.shape[0]) * harea
+        _runoff_m3 = np.array(_runoff_m3)
+        df['Runoff (m^3)'] = _runoff_m3
+        df['Lateral (m^3)'] = np.array(_lateral_m3)
+
+        _sed_del_kg = np.array(_sed_del_kg) * np.reshape(_runoff_m3, (-1, 1))
+        df['Sed Del (kg)'] = np.sum(_sed_del_kg, axis=1)
+        df['Sed Del c1 (kg)'] = _sed_del_kg[:, 0]
+        df['Sed Del c2 (kg)'] = _sed_del_kg[:, 1]
+        df['Sed Del c3 (kg)'] = _sed_del_kg[:, 2]
+        df['Sed Del c4 (kg)'] = _sed_del_kg[:, 3]
+        df['Sed Del c5 (kg)'] = _sed_del_kg[:, 4]
+        self.sed_df = df
+
+    def dump_sed(self, fn):
+        if fn.endswith('.csv'):
+            self.sed_df.to_csv(fn, index=False)
+        elif fn.endswith('.pkl'):
+            self.sed_df.to_pickle(fn)
+        else:
+            raise NotImplementedError()
 
     def write(self, fn):
         fp = open(fn, mode='w')

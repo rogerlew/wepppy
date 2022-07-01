@@ -75,7 +75,8 @@ from wepppy.wepp.out import (
     Ebe,
     PlotFile,
     correct_daily_hillslopes_pl_path,
-    TotalWatSed
+    TotalWatSed, TotalWatSed2,
+    HillPass
 )
 
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
@@ -1393,22 +1394,30 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(wd)
 
         if climate.climate_mode != ClimateMode.SingleStorm:
-            self.log('Building totalsedwat.txt... ')
-            self._build_totalsedwat()
+            self.log('Building totalwatsed2.pkl... ')
+            self._build_totalwatsed2()
             self.log_done()
+
+#            self.log('Building totalwatsed.txt... ')
+#            self._build_totalwatsed()
+#            self.log_done()
 
             self.log('Running WeppPost... ')
             wepppost = WeppPost.getInstance(wd)
             wepppost.run_post()
             self.log_done()
 
-            self.log('Calculating hill streamflow measures... ')
-            wepppost.calc_hill_streamflow()
+            self.log('Calculating Hillslope Water Balance...')
+            HillslopeWatbal(wd)
             self.log_done()
 
-            self.log('Calculating channel streamflow measures... ')
-            wepppost.calc_channel_streamflow()
-            self.log_done()
+#            self.log('Calculating hill streamflow measures... ')
+#            wepppost.calc_hill_streamflow()
+#            self.log_done()
+
+#            self.log('Calculating channel streamflow measures... ')
+#            wepppost.calc_channel_streamflow()
+#            self.log_done()
 
         for fn in [_join(self.output_dir, 'pass_pw0.txt'),
                    _join(self.output_dir, 'soil_pw0.txt')]:
@@ -1416,8 +1425,14 @@ class Wepp(NoDbBase, LogMixin):
                  p = call('gzip %s -f' % fn, shell=True)
                  assert _exists(fn + '.gz')
 
-    def _build_totalsedwat(self):
+    def _build_totalwatsed2(self):
+        totwatsed2 = TotalWatSed2(self.wd)
+        fn = _join(self.export_dir, 'totalwatsed2.csv')
+        totwatsed2.export(fn)
+
+    def _build_totalwatsed(self):
         output_dir = self.output_dir
+
         erin_pl = _join(output_dir, 'correct_daily_hillslopes.pl')
         if not _exists(erin_pl):
             shutil.copyfile(correct_daily_hillslopes_pl_path, erin_pl)

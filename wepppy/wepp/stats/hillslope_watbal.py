@@ -10,14 +10,29 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 from collections import OrderedDict
-
+import math
 from glob import glob
+from multiprocessing import Pool
 
 import numpy as np
+import pandas as pd
 
+from wepppy.wepp.out import HillWat
+from wepppy.all_your_base import NCPU
 from wepppy.all_your_base.hydro import determine_wateryear
 from .row_data import RowData, parse_units
 from .report_base import ReportBase
+
+NCPU = math.ceil(NCPU * 0.6)
+
+def _pickle_hill_wat_annual_watbal(wat_fn):
+    wat = HillWat(wat_fn)
+    wat_df = wat.calculate_annual_watbal(
+        watbal_measures=('P', 'QOFE', 'latqcc', 'Ep+Es+Er', 'Dp'), 
+        units='mm')
+    wat_df.attrs['area'] = wat.total_area
+    stats_fn = wat_fn.replace('/output/H', '/stats/H').replace('.wat.dat', '.annual_wat.pkl')
+    wat_df.to_pickle(stats_fn)
 
 
 class HillslopeWatbal(ReportBase):
@@ -28,6 +43,7 @@ class HillslopeWatbal(ReportBase):
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         output_dir = _join(wd, 'wepp/output')
+        stats_dir = _join(wd, 'wepp/stats')
 
         # find all the water output files
         wat_fns = glob(_join(output_dir, 'H*.wat.dat'))
@@ -35,65 +51,38 @@ class HillslopeWatbal(ReportBase):
         assert n > 0
 
         # make sure we have all of them
+        repickle = False
         for wepp_id in range(1, n+1):
-            assert _exists(_join(output_dir, 'H{}.wat.dat'.format(wepp_id)))
+            if not _exists(_join(stats_dir, 'H{}.annual_wat.pkl'.format(wepp_id))):
+                repickle = True
+                break
 
+        if repickle:
+            pool = Pool(processes=NCPU)
+            results = pool.map(_pickle_hill_wat_annual_watbal, wat_fns)
+            pool.close()
+        
         # create dictionaries for the waterbalance
         d = {}
         areas = {}
-        years = set()
+        years = None
 
-        # loop over the hillslopes
         for wepp_id in range(1, n + 1):
             # find the topaz_id
             topaz_id = translator.top(wepp=wepp_id)
 
+            stats_fn = _join(stats_dir, 'H{}.annual_wat.pkl'.format(wepp_id))
+            wat_df = pd.read_pickle(stats_fn)
+                
+            area = wat_df.attrs['area']
+            wat_df.columns = ['Precipitation (mm)', 'Surface Runoff (mm)', 'Lateral Flow (mm)',
+                              'Transpiration + Evaporation (mm)', 'Percolation (mm)']
+                
             # initialize the water
-            d[topaz_id] = {'Precipitation (mm)': {},
-                           'Surface Runoff (mm)': {},
-                           'Lateral Flow (mm)': {},
-                           'Transpiration + Evaporation (mm)': {},
-                           'Percolation (mm)': {},
-                           # 'Total Soil Water Storage (mm)': {}
-                           }
+            d[topaz_id] = wat_df
+            areas[topaz_id] = area
 
-            wat_fn = _join(output_dir, 'H{}.wat.dat'.format(wepp_id))
-
-            with open(wat_fn) as wat_fp:
-                wat_data = wat_fp.readlines()[23:]
-
-            for i, wl in enumerate(wat_data):
-                OFE, J, Y, P, RM, Q, Ep, Es, Er, Dp, UpStrmQ, \
-                SubRIn, latqcc, TSW, frozwt, SnowWater, QOFE, Tile, Irr, Area = wl.split()
-
-                water_year = determine_wateryear(Y, J)
-
-                J, Y, P, Q, Ep, Es, Er, Dp, latqcc, TSW, Area = \
-                    int(J), int(Y), float(P), float(Q), float(Ep), float(Es), float(Er), float(Dp), float(latqcc), \
-                    float(TSW), float(Area)
-
-                if i == 0:
-                    areas[topaz_id] = Area
-
-                if wepp_id == 1:
-                    years.add(water_year)
-
-                if water_year not in d[topaz_id]['Precipitation (mm)']:
-                    d[topaz_id]['Precipitation (mm)'][water_year] = P
-                    d[topaz_id]['Surface Runoff (mm)'][water_year] = Q
-                    d[topaz_id]['Lateral Flow (mm)'][water_year] = latqcc
-                    d[topaz_id]['Transpiration + Evaporation (mm)'][water_year] = Ep + Es + Er
-                    d[topaz_id]['Percolation (mm)'][water_year] = Dp
-                    # d[topaz_id]['Total Soil Water Storage (mm)'][water_year] = TSW
-                else:
-                    d[topaz_id]['Precipitation (mm)'][water_year] += P
-                    d[topaz_id]['Surface Runoff (mm)'][water_year] += Q
-                    d[topaz_id]['Lateral Flow (mm)'][water_year] += latqcc
-                    d[topaz_id]['Transpiration + Evaporation (mm)'][water_year] += Ep + Es + Er
-                    d[topaz_id]['Percolation (mm)'][water_year] += Dp
-                    # d[topaz_id]['Total Soil Water Storage (mm)'][water_year] += TSW
-
-        self.years = sorted(years)
+        self.years = sorted([int(wy) for wy in wat_df.index])
         self.data = d
         self.areas = areas
         self.wsarea = float(np.sum(list(areas.values())))
@@ -151,7 +140,7 @@ class HillslopeWatbal(ReportBase):
         for topaz_id in data:
             row = OrderedDict([('TopazID', topaz_id)])
             for k in header:
-                row[k] = np.sum(list(data[topaz_id][k].values())) / (num_water_years - 1)
+                row[k] = np.sum(data[topaz_id][k]) / (num_water_years - 1)
 
             yield RowData(row)
 
@@ -169,4 +158,5 @@ if __name__ == "__main__":
 #    for row in watbal.avg_annual_iter():
 #    for row in watbal.daily_iter():
         print([(k, v) for k, v in row])
+
 

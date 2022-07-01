@@ -3,7 +3,7 @@ from os.path import join as _join
 
 from collections import OrderedDict
 
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed2
 from wepppy.wepp.out.loss import _parse_tbl
 
 from wepppy.all_your_base import try_parse
@@ -70,8 +70,7 @@ class SedimentDelivery(object):
         particle_distribution['organic matter'] = try_parse(lines[23].split()[-1])
 
         totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
-        totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                                phos_opts=wepp.phosphorus_opts)
+        totwatsed = TotalWatSed2(self.wd)
 
         hill_class_fractions = totwatsed.class_fractions
 
