@@ -1128,7 +1128,6 @@ var ChannelDelineation = function () {
             if ($.inArray(topId, self.topIds) === -1) {
                 var center = feature.geometry.coordinates[feature.geometry.coordinates.length - 1];
                 center = [center[0][1], center[0][0]];
-                console.log(center);
                 var label = L.marker(center, {
                     icon: L.divIcon({
                         iconSize: null,
