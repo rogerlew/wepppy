@@ -88,6 +88,10 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_
     Creates a new soil file based on soil_in_fname and makes replacements
     from the provided replacements dictionary
     """
+
+    # TODO: Implement 7777/7778 YamlSoil and use YamlSoil to 
+    # specialize soils instead of all this text processing nonsense.
+
     # read the soil_in_fname file
     with open(src) as f:
         lines = f.readlines()
@@ -97,6 +101,7 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_
 
     lines = [L for L in lines if not L.startswith('#')]
 
+    pre7777 = lines[0].startswith('9') or lines[0].startswith('2006')
     line4 = lines[3]
     line4 = line4.split()
     line4[-4] = _replace_parameter(line4[-4], replacements['ki'])
@@ -110,22 +115,26 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_
         if float(line5[0]) < h0_min_depth:
             line5[0] = str(h0_min_depth)
     line5[2] = _replace_parameter(line5[2], replacements['avke'])
-    h0_om = float(line5[8])
+    h0_om = None
+    if not pre7777:
+        h0_om = float(line5[8])
  
     if len(line5) < 5:  # no horizons (e.g. rock)
         shutil.copyfile(src, dst)
         return
 
-#    line5 = ' '.join(line5) + '\n'
-
-    # make the layers easier to read by making cols fixed width
-    # aligning to the right.
-    line5 = '{0:>9}\t{1:>8}\t{2:>9}\t'\
-            '{3:>5}\t{4:>9}\t{5:>9}\t'\
-            '{6:>7}\t{7:>7}\t{8:>7}\t'\
-            '{9:>7}\t{10:>7}'.format(*line5)
+    # Don't really like this. This is getting messy
+    if not pre7777:
+        # make the layers easier to read by making cols fixed width
+        # aligning to the right.
+        line5 = '{0:>9}\t{1:>8}\t{2:>9}\t'\
+                '{3:>5}\t{4:>9}\t{5:>9}\t'\
+                '{6:>7}\t{7:>7}\t{8:>7}\t'\
+                '{9:>7}\t{10:>7}'.format(*line5)
          
-    line5 = '\t' + line5 + '\n'
+        line5 = '\t' + line5 + '\n'
+    else:
+        line5 = '\t' + '\t'.join(line5) + '\n'
 
     # for all horizons < 200 m replace avke
     for i in range(5, len(lines)):
@@ -133,11 +142,16 @@ def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_
         if len(_line) == 11:
             if float(_line[0]) <= 200:
                 _line[2] = _replace_parameter(_line[2], replacements['avke'])
-                _line = '{0:>9}\t{1:>8}\t{2:>9}\t'\
-                        '{3:>5}\t{4:>9}\t{5:>9}\t'\
-                        '{6:>7}\t{7:>7}\t{8:>7}\t'\
-                        '{9:>7}\t{10:>7}'.format(*_line)         
-                lines[i] = '\t' + _line + '\n'
+
+                # messy
+                if not pre7777:
+                    _line = '{0:>9}\t{1:>8}\t{2:>9}\t'\
+                            '{3:>5}\t{4:>9}\t{5:>9}\t'\
+                            '{6:>7}\t{7:>7}\t{8:>7}\t'\
+                            '{9:>7}\t{10:>7}'.format(*_line)         
+                    lines[i] = '\t' + _line + '\n'
+                else:
+                    lines[i] + '\t' + '\t'.join(_line) + '\n'
 
     if 'kslast' in replacements:
         if len(lines) > 5 and len(lines[-1]) == 3:
