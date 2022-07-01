@@ -28,7 +28,7 @@ from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
-from wepppy.wepp.soils.utils import SoilMultipleOfeSynth 
+from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, YamlSoil
 
 # wepppy submodules
 from .base import (
@@ -699,37 +699,42 @@ class Soils(NoDbBase):
 
             sol = get_soil(key)
             fn = _split(sol)[-1]
+            yaml_soil = YamlSoil(sol)
 
-            soils = {key: SoilSummary(
-                mukey=key,
+            mukey = key.replace('/', '-').replace('.sol', '')
+            soils = {mukey: SoilSummary(
+                mukey=mukey,
                 fname=fn,
                 soils_dir=soils_dir,
                 build_date=str(datetime.now()),
-                desc=key
+                desc=key,
+                clay=yaml_soil.clay,
+                sand=yaml_soil.sand,
+                avke=yaml_soil.avke
             )}
 
             shutil.copyfile(sol, _join(soils_dir, fn))
 
             domsoil_d = {}
             for topaz_id, sub in watershed.sub_iter():
-                domsoil_d[str(topaz_id)] = key
+                domsoil_d[str(topaz_id)] = mukey
 
             for topaz_id, chn in watershed.chn_iter():
-                domsoil_d[str(topaz_id)] = key
+                domsoil_d[str(topaz_id)] = mukey
 
-            soils[key].pct_coverage = 100.0
+            soils[mukey].pct_coverage = 100.0
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+            for topaz_id, sub in watershed.sub_iter():
+                soils[mukey].area += watershed.area_of(topaz_id)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
 
             self.soils = soils
-            self.clay_pct = None
+            self.clay_pct = yaml_soil.clay
             self.liquid_limit = None
 
             self.dump_and_unlock()
