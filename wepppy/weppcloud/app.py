@@ -26,6 +26,9 @@ import traceback
 from glob import glob
 from subprocess import check_output, Popen, PIPE
 
+import numpy as np
+import pandas as pd
+
 import markdown
 
 import awesome_codename
@@ -74,7 +77,7 @@ from wepppy.watershed_abstraction import (
 from wepppy.wepp import management
 from wepppy.wepp.soils import soilsdb
 
-from wepppy.wepp.out import TotalWatSed, Element, HillWat
+from wepppy.wepp.out import TotalWatSed, TotalWatSed2, Element, HillWat
 
 from wepppy.wepp.stats import (
     OutletSummary,
@@ -1682,7 +1685,7 @@ def browse_response(path, args=None, show_up=True, headers=None):
 
     else:
         if path_lower.endswith('.gz'):
-            with gzip.open('loss_pw0.txt.gz', 'rt') as fp:
+            with gzip.open(path, 'rt') as fp:
                 contents = fp.read()
             path_lower = path_lower[:-3]
         else:
@@ -1690,28 +1693,39 @@ def browse_response(path, args=None, show_up=True, headers=None):
                 try:
                     contents = fp.read()
                 except UnicodeDecodeError:
-                    return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
+                    contents = None
 
         if 'raw' in args or 'Raw' in headers:
-            r = Response(response=contents, status=200, mimetype="text/plain")
-            r.headers["Content-Type"] = "text/plain; charset=utf-8"
-            return r
+            if contents is not None:
+                r = Response(response=contents, status=200, mimetype="text/plain")
+                r.headers["Content-Type"] = "text/plain; charset=utf-8"
+                return r
 
         if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
+            assert contents is not None
             jsobj = json.loads(contents)
             return jsonify(jsobj)
 
         if path_lower.endswith('.xml'):
+            assert contents is not None
             r = Response(response=contents, status=200, mimetype="text/xml")
             r.headers["Content-Type"] = "text/xml; charset=utf-8"
             return r
 
         if path_lower.endswith('.arc'):
+            assert contents is not None
             c = '<pre style="font-size:xx-small;">\n{}</pre>'.format(contents)
             return Response(c, mimetype='text/html')
 
+        html = None
+        if path_lower.endswith('.pkl'):
+            df = pd.read_pickle(path)
+            html = df.to_html(classes=['table table-nonfluid'], border=0, justify='left')
+
         if path_lower.endswith('.csv'):
             html = csv_to_html(path)
+
+        if html is not None:
             c = ['<html>',
                  '<head>',
                  '<link rel="stylesheet" '
@@ -1726,6 +1740,12 @@ def browse_response(path, args=None, show_up=True, headers=None):
                  '</html>']
 
             return Response('\n'.join(c), mimetype='text/html')
+ 
+        with open(path) as fp:
+            try:
+                contents = fp.read()
+            except UnicodeDecodeError:
+                return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
 
         r = Response(response=contents, status=200, mimetype="text/plain")
         r.headers["Content-Type"] = "text/plain; charset=utf-8"
@@ -3460,11 +3480,8 @@ def report_wepp_yearly_watbal(runid, config):
 
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
 
-    totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
-    totwatsed = TotalWatSed(totwatsed_fn, wepp.baseflow_opts,
-                            phos_opts=wepp.phosphorus_opts)
+    totwatsed = TotalWatSed2(wd)
     totwatbal = TotalWatbal(totwatsed,
                             exclude_yr_indxs=exclude_yr_indxs)
 
@@ -3534,16 +3551,33 @@ def resources_wepp_streamflow(runid, config):
 def resources_wepp_totalwatsed(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
-    wepp = Wepp.getInstance(wd)
     fn = _join(ron.export_dir, 'totalwatsed.csv')
+    if not _exists(fn):
+        totwatsed_txt = _join(ron.output_dir, 'totalwatsed.txt')
+        if not _exists(totwatsed_txt):
+           return error_factory('totalwatsed.csv is not available for this project. Please use totalwatsed2.csv')
+        wepp = Wepp.getInstance(wd)
+        totwatsed = TotalWatSed(totwatsed_txt,
+                                wepp.baseflow_opts, wepp.phosphorus_opts)
+        totwatsed.export(fn)
 
-    totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                            wepp.baseflow_opts, wepp.phosphorus_opts)
-    totwatsed.export(fn)
     assert _exists(fn)
 
     return send_file(fn, mimetype='text/csv', attachment_filename='totalwatsed.csv')
 
+
+@app.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed2.csv')
+def resources_wepp_totalwatsed2(runid, config):
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+    fn = _join(ron.export_dir, 'totalwatsed2.csv')
+
+    if not _exists(fn):
+        totwatsed = TotalWatSed2(wd)
+        totwatsed.export(fn)
+    assert _exists(fn)
+
+    return send_file(fn, mimetype='text/csv', attachment_filename='totalwatsed2.csv')
 
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
