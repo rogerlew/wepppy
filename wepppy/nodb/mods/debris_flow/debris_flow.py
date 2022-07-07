@@ -29,6 +29,7 @@ from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.soils import Soils
 from wepppy.nodb.topaz import Topaz
 from wepppy.nodb.mods import Baer, Disturbed
+from wepppy.nodb.prep import Prep
 
 
 def _duration_in_hours(duration):
@@ -295,3 +296,10 @@ class DebrisFlow(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('run_debris')
+        except FileNotFoundError:
+            pass
+

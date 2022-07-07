@@ -71,6 +71,11 @@ def preflight_check(wd):
                     _safe_gt(prep['run_observed'], prep['build_climate']) and \
                     _safe_gt(prep['run_observed'], prep['run_wepp'])
 
+    d['debris'] = _safe_gt(prep['run_debris'], prep['build_landuse']) and \
+                  _safe_gt(prep['run_debris'], prep['build_soils']) and \
+                  _safe_gt(prep['run_debris'], prep['build_climate']) and \
+                  _safe_gt(prep['run_debris'], prep['run_wepp'])
+
     d['watar'] = _safe_gt(prep['run_watar'], prep['build_landuse']) and \
                  _safe_gt(prep['run_watar'], prep['build_soils']) and \
                  _safe_gt(prep['run_watar'], prep['build_climate']) and \
