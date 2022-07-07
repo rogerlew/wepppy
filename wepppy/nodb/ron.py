@@ -321,6 +321,7 @@ class Ron(NoDbBase):
 
             # Project
             self._name = ''
+            self._scenario = ''
             self._map = None
             self._w3w = None
 
@@ -347,6 +348,7 @@ class Ron(NoDbBase):
             wepppy.nodb.Unitizer(wd, cfg_fn)
             wepppy.nodb.WeppPost(wd, cfg_fn)
             wepppy.nodb.Observed(wd, cfg_fn)
+            prep = wepppy.nodb.Prep(wd, cfg_fn)
 
             if 'lt' in self.mods:
                 wepppy.nodb.mods.locations.LakeTahoe(wd, cfg_fn)
@@ -365,9 +367,11 @@ class Ron(NoDbBase):
 
             if 'baer' in self.mods or 'disturbed' in self.mods:
                 assert not ('baer' in self.mods and 'disturbed' in self.mods)
+            
 
                 if 'baer' in self.mods:
                     Mod = wepppy.nodb.mods.Baer
+                    prep.sbs_required = True
                 else:
                     Mod = wepppy.nodb.mods.Disturbed
 
@@ -402,6 +406,9 @@ class Ron(NoDbBase):
 
             if 'rap_ts' in self.mods:
                 wepppy.nodb.mods.RAP_TS(wd, cfg_fn)
+
+            if 'emapr_ts' in self.mods:
+                wepppy.nodb.mods.OSUeMapR_TS(wd, cfg_fn)
 
             if 'shrubland' in self.mods:
                 wepppy.nodb.mods.Shrubland(wd, cfg_fn)
@@ -562,7 +569,7 @@ class Ron(NoDbBase):
     #
     @property
     def scenario(self):
-        return getattr(self, '_scenario', None)
+        return getattr(self, '_scenario', '')
 
     @scenario.setter
     def scenario(self, value):

@@ -28,6 +28,7 @@ import pandas as pd
 from wepppy.wepp.out import TotalWatSed2, Chanwb, Ebe
 
 from .base import NoDbBase
+from .prep import Prep
 
 
 def validate(Qm, Qo):
@@ -219,6 +220,12 @@ class Observed(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('run_observed')
+        except FileNotFoundError:
+            pass
 
     def run_measures(self, obs, sim, hillorChannel):
 

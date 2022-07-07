@@ -32,6 +32,7 @@ from ...soils import Soils
 from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
+from ...prep import Prep
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 
@@ -365,7 +366,8 @@ class Disturbed(NoDbBase):
         if _exists(disturbed_rgb):
             os.remove(disturbed_rgb)
 
-        cmd = ['gdaldem', 'color-relief', '-of', 'VRT',  self.disturbed_wgs, self.color_tbl_path, disturbed_rgb]
+        cmd = ['gdaldem', 'color-relief', '-of', 'VRT',  
+               self.disturbed_wgs, self.color_tbl_path, disturbed_rgb]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         p.wait()
 
@@ -414,7 +416,10 @@ class Disturbed(NoDbBase):
         """
         counts = self.sbs_class_counts
         pcts = {}
-        tot_px = counts.get('Low Severity Burn', 0) + counts.get('Moderate Severity Burn', 0) + counts.get('High Severity Burn', 0)
+        tot_px = counts.get('Low Severity Burn', 0) + \
+                 counts.get('Moderate Severity Burn', 0) + \
+                 counts.get('High Severity Burn', 0)
+
         for k in counts:
             if tot_px == 0:
                 pcts[k] = 0.0
@@ -467,6 +472,13 @@ class Disturbed(NoDbBase):
             self.unlock('-f')
             raise
 
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = True
+         except FileNotFoundError:
+            pass
+
     def remove_sbs(self):
         self.lock()
 
@@ -491,6 +503,13 @@ class Disturbed(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = False
+        except FileNotFoundError:
+            pass
 
     def validate(self, fn):
         self.lock()
@@ -574,6 +593,13 @@ class Disturbed(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = False
+        except:
+            pass
 
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
@@ -661,6 +687,7 @@ class Disturbed(NoDbBase):
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
 
+                # TODO: probably a better way to do this based on the disturbed_class
                 if burn_class in ['131', '132', '133']:
                     if man.disturbed_class in ['forest', 'young forest']:
                         landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]

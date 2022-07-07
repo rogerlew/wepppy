@@ -23,7 +23,13 @@ from collections import Counter
 import jsonpickle
 
 # wepppy
-from wepppy.soils.ssurgo import SurgoMap, StatsgoSpatial, SurgoSoilCollection, NoValidSoilsException, SoilSummary
+from wepppy.soils.ssurgo import (
+    SurgoMap, 
+    StatsgoSpatial, 
+    SurgoSoilCollection, 
+    NoValidSoilsException, 
+    SoilSummary
+)
 from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
@@ -38,6 +44,7 @@ from .base import (
 
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
+from .prep import Prep
 
 
 class SoilsNoDbLockedException(Exception):
@@ -451,6 +458,12 @@ class Soils(NoDbBase):
         from wepppy.nodb import Wepp
         if Wepp.getInstance(self.wd).multi_ofe:
             self._build_multiple_ofe()
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('build_soils')
+        except FileNotFoundError:
+            pass
 
     def _build_multiple_ofe(self):
         soils_dir = self.soils_dir

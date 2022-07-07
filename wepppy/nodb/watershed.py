@@ -31,6 +31,7 @@ from wepppy.all_your_base.geo import read_raster, haversine
 from .ron import Ron
 from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
+from .prep import Prep
 
 class DelineationBackend(IntEnum):
     TOPAZ = 1
@@ -413,6 +414,12 @@ class Watershed(NoDbBase):
         if _exists(self.subwta):
             os.remove(self.subwta)
 
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('build_channels')
+        except FileNotFoundError:
+            pass
+
     #
     # set outlet
     #
@@ -434,6 +441,11 @@ class Watershed(NoDbBase):
             self.outlet = Outlet(requested_loc=(lng, lat), actual_loc=taudem.outlet,
                                   distance_from_requested=distance, pixel_coords=(o_x, o_y))
 
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('set_outlet')
+        except FileNotFoundError:
+            pass
     #
     # build subcatchments
     #
@@ -499,6 +511,12 @@ class Watershed(NoDbBase):
             self._taudem_abstract_watershed()
 
         self._build_multiple_ofe()
+       
+        try: 
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('abstract_watershed')
+        except FileNotFoundError:
+            pass
 
     @property
     def mofe_nsegments(self):

@@ -32,6 +32,7 @@ from ...ron import Ron
 from ...topaz import Topaz
 from ...mods.rred import Rred
 from ...base import NoDbBase, TriggerEvents
+from ...prep import Prep
 
 from .sbs_map import SoilBurnSeverityMap
 
@@ -283,7 +284,10 @@ class Baer(NoDbBase):
         """
         counts = self.sbs_class_counts
         pcts = {}
-        tot_px = counts.get('Low Severity Burn', 0) + counts.get('Moderate Severity Burn', 0) + counts.get('High Severity Burn', 0)
+        tot_px = counts.get('Low Severity Burn', 0) + \
+                 counts.get('Moderate Severity Burn', 0) + \
+                 counts.get('High Severity Burn', 0)
+
         for k in counts:
             if tot_px == 0:
                 pcts[k] = 0.0
@@ -336,6 +340,13 @@ class Baer(NoDbBase):
             self.unlock('-f')
             raise
 
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = True
+         except FileNotFoundError:
+            pass
+
     def remove_sbs(self):
         self.lock()
 
@@ -358,6 +369,12 @@ class Baer(NoDbBase):
             self.unlock('-f')
             raise
 
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = False
+        except FileNotFoundError:
+            pass
     def validate(self, fn):
         self.lock()
 
@@ -440,6 +457,13 @@ class Baer(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = True
+        except FileNotFoundError:
+            pass
 
     def on(self, evt):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:

@@ -62,6 +62,7 @@ from wepppy.all_your_base.geo import crop_geojson, read_raster
 from wepppy.all_your_base.dateutils import parse_datetime, YearlessDate
 
 from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup
+from wepppy.nodb.preflight import preflight_check
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 from wepppy.topaz import (
@@ -177,7 +178,7 @@ class Run(db.Model):
 
     @property
     def valid(self):
-        wd = get_wd(self.runid)
+        wd = self.wd
         if not _exists(wd):
             return False
 
@@ -196,6 +197,47 @@ class Run(db.Model):
     def __hash__(self):
         return self.runid
 
+    @property
+    def wd(self):
+        return get_wd(self.runid)
+
+    @property
+    def last_modified(self):
+        return _get_last_modified(self.wd)       
+
+    @property
+    def _owner(self):
+        if self.owner_id is None:
+            return None
+
+        return User.query.filter(User.id == self.owner_id).first()
+
+    @property
+    def owner(self):
+        _owner = self._owner
+        if _owner:
+            return _owner.email
+        else:
+            return '<anonymous>'
+
+    @property
+    def meta(self):
+        wd = self.wd
+        try:
+            ron = Ron.getInstance(wd)
+        except:
+            return None
+
+        return dict(owner=self.owner,
+                    runid=self.runid,
+                    date_created=self.date_created,
+                    last_modified=self.last_modified,
+                    owner_id=self.owner_id,
+                    config=self.config,
+                    name=ron.name,
+                    scenario=ron.scenario,
+                    w3w=ron.w3w)
+                    
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
@@ -246,6 +288,10 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
             self.add_run_to_user(user, run)
 
         return run0
+
+    def delete_run(self, run: Run):
+        self.delete(run)
+        self.commit()
 
     def add_run_to_user(self, user: User, run: Run):
         """Adds a run to a user.
@@ -315,11 +361,14 @@ def profile():
 @login_required
 def runs():
     try:
-        user_runs = [(_get_last_modified(run.runid), run) for run in current_user.runs if _run_exists(run.runid)]
-        user_runs.sort(key=lambda tup: tup[0], reverse=True)
-        user_runs = [tup[1] for tup in user_runs]
+        user_runs = [run.meta for run in current_user.runs]
+        user_runs = [meta for meta in user_runs if meta is not None]
+        user_runs.sort(key=lambda meta: meta['last_modified'], reverse=True)
 
-        return render_template('user/runs.html', user=current_user, user_runs=user_runs)
+        return render_template('user/runs.html', 
+                               user=current_user, 
+                               user_runs=user_runs, 
+                               show_owner=False)
     except:
         return exception_factory()
 
@@ -329,7 +378,14 @@ def runs():
 @roles_required('Admin')
 def allruns():
     try:
-        return render_template('user/allruns.html', user=current_user)
+        user_runs = [run.meta for run in _get_all_runs()]
+        user_runs = [meta for meta in user_runs if meta is not None]
+        user_runs.sort(key=lambda meta: meta['last_modified'], reverse=True)
+
+        return render_template('user/runs.html', 
+                               user=current_user, 
+                               user_runs=user_runs, 
+                               show_owner=True)
     except:
         return exception_factory()
 
@@ -507,7 +563,7 @@ def _run_exists(runid):
         return False
 
     try:
-        ron = Ron.getInstance(wd)
+#        ron = Ron.getInstance(wd)
         return True
     except:
         return False
@@ -539,7 +595,7 @@ def _get_last_modified(runid):
 
 
 def _get_all_runs():
-    return [run for run in Run.query.order_by(Run.date_created).all() if run.valid]
+    return [run for run in Run.query.order_by(Run.date_created).all()]
 
 
 def _get_all_users():
@@ -1018,6 +1074,13 @@ def modify_disturbed(runid, config):
         return exception_factory('Error Clearing Locks')
 
 
+@app.route('/runs/<string:runid>/<config>/tasks/preflight/', methods=['POST'])
+def task_preflight(runid, config):
+    wd = get_wd(runid)
+    res = preflight_check(wd)
+    return jsonify(res)
+
+
 @app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/modify_disturbed/', methods=['POST'])
 def task_modify_disturbed(runid, config):
@@ -1052,9 +1115,16 @@ def delete_run(runid, config):
 
     try:
         shutil.rmtree(wd)
-        return success_factory()
+    except:
+        return exception_factory('Error removing project folder')
+
+    try:
+        run = Run.query.filter(Run.runid == runid).first()
+        user_datastore.delete_run(run)
     except:
         return exception_factory('Error Clearing Locks')
+
+    return success_factory()
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/clear_locks')
@@ -1752,17 +1822,17 @@ def browse_response(path, args=None, show_up=True, headers=None):
         return r
 
 
-@app.route('/docs')
-@app.route('/docs//')
-def docs_index():
-    """
-    recursive list the file structure of the working directory
-    """
-    with open(_join(_thisdir, 'docs', 'index.md')) as fp:
-        md = fp.read()
-
-    html = markdown.markdown(md)
-    return Response(html, mimetype='text/html')
+#@app.route('/docs')
+#@app.route('/docs//')
+#def docs_index():
+#    """
+#    recursive list the file structure of the working directory
+#    """
+#    with open(_join(_thisdir, 'docs', 'index.md')) as fp:
+#        md = fp.read()
+#
+#    html = markdown.markdown(md)
+#    return Response(html, mimetype='text/html')
 
 
 @app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/')
