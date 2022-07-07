@@ -13,8 +13,12 @@ Runs
 $(document).ready(function(){
 });
 
-function delete_run(runid) {
-  var res = confirm("Are you sure you want to delete '" + runid + "'?");
+function delete_run(runid, res) {
+
+  if (res !== true) {
+      var res = confirm("Are you sure you want to delete '" + runid + "'?");
+  }
+
   if (res === true)
   {
       $.post({
@@ -31,33 +35,60 @@ function delete_run(runid) {
   }
   console.log(res);
 }
+
+function delete_runs() {
+  var checks = $('input[type=checkbox]:checked');
+  var runids = new Array();
+  for (var i=0; i < checks.length; i++ ) {
+    runids.push(checks[i].value);
+  }
+
+  var res = confirm("Are you sure you want to delete " + runids.join(", ") + "?");
+  if (res === true) {
+    for (var i=0; i < runids.length; i++) {
+      delete_run(runids[i], true);
+    }
+  }
+}
+
 </script>
 
 <table class="table">
   <thead>
     <tr>
+      {% if show_owner %} <th>Owner</th> {% endif %}
       <th>Project Name</th>
+      <th>Scenario</th>
+      <th>Run ID</th>
+      <th>Config</th>
       <th>Location (What3Words)</th>
       <th>Link</th>
       <th>Creation Date</th>
       <th>Last Modified</th>
-      <th>Delete</th>
+      <th><button type="button" class="btn btn-danger"  
+           onclick="delete_runs()">Delete</button>
+      </th>
     </tr>
   </thead>
   <tbody>
-    {% for run in user_runs %}
-        <tr id="{{ run.runid }}">
-          <td style="width:250px;">{{ get_run_name(run.runid) }}</td>
-          <td>{{ w3w_center(run.runid) }}</td>
+    {% for meta in user_runs %}
+        <tr id="{{ meta.runid }}">
+          {% if show_owner %} <td> {{ meta.owner }} </td> {% endif %}
+          <td>{{ meta.name }}</td>
+          <td>{{ meta.scenario }}</td>
+          <td>{{ meta.runid }}</td>
+          <td>{{ meta.config }}</td>
+          <td>{{ meta.w3w }}</td>
           <td>
-              <a href="{{ site_prefix }}/runs/{{ run.runid }}/{{ run.config }}/">
-              /runs/{{ run.runid }}/{{ run.config }}/
-              </a>
+              <a class="btn btn-primary" 
+                 href="{{ site_prefix }}/runs/{{ meta.runid }}/{{ meta.config }}/"
+                 role="button" target="_blank">Open</a>
           </td>
-          <td>{{ run.date_created }}</td>
-          <td>{{ get_last_modified(run.runid) }}</td>
+          <td>{{ meta.date_created }}</td>
+          <td>{{ meta.last_modified }}</td>
           <td>
-              <button type="button" class="btn btn-danger"  onclick="delete_run('{{ run.runid }}')">Delete</button>
+              <input type="checkbox" value="{{ meta.runid }}" >
+              <!--button type="button" class="btn btn-danger"  onclick="delete_run('{{ meta.runid }}')">Delete</button-->
         </tr>
     {% endfor %}
   </tbody>

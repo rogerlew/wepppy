@@ -51,7 +51,9 @@ from wepppy.watershed_abstraction.support import is_channel
 from .base import NoDbBase, TriggerEvents
 from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
+from .prep import Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
+
 
 CLIMATE_MAX_YEARS = 1000
 
@@ -946,6 +948,12 @@ class Climate(NoDbBase, LogMixin):
 
         elif climate_mode == ClimateMode.GridMetPRISM:
             self._build_climate_observed_gridmet_prism_revised(verbose=verbose, attrs=attrs)
+      
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('build_climate')
+        except FileNotFoundError:
+            pass
 
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
 

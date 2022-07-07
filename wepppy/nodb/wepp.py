@@ -93,6 +93,7 @@ from .soils import Soils
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
 from .wepppost import WeppPost
+from .prep import Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
 
 
@@ -913,6 +914,16 @@ class Wepp(NoDbBase, LogMixin):
                                    end_year=climate.observed_end_year)
             rap_ts.analyze()
 
+        if 'emapr_ts' in self.mods:
+            from wepppy.nodb.mods import OSUeMapR_TS
+            assert climate.observed_start_year is not None
+            assert climate.observed_end_year is not None
+
+            emapr_ts = OSUeMapR_TS.getInstance(wd)
+            emapr_ts.acquire_rasters(start_year=climate.observed_start_year,
+                                     end_year=climate.observed_end_year)
+            emapr_ts.analyze()
+
     def _prep_soils(self, translator):
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
@@ -1422,8 +1433,16 @@ class Wepp(NoDbBase, LogMixin):
         for fn in [_join(self.output_dir, 'pass_pw0.txt'),
                    _join(self.output_dir, 'soil_pw0.txt')]:
             if _exists(fn):
+                 self.log(f'Compressing {fn}...')
                  p = call('gzip %s -f' % fn, shell=True)
                  assert _exists(fn + '.gz')
+                 self.log_done()
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('run_wepp')
+        except FileNotFoundError:
+            pass
 
     def _build_totalwatsed2(self):
         totwatsed2 = TotalWatSed2(self.wd)
