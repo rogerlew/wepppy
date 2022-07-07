@@ -154,13 +154,13 @@ class TotalWatSed2(object):
             _wy[i] = determine_wateryear(y, j=j)
         d['Water Year'] = _wy
 
-        d.columns = d.columns.str.replace('P (m^3)', 'Precipitation (m^3)')
-        d.columns = d.columns.str.replace('RM (m^3)', 'Rain + Melt (m^3)')
-        d.columns = d.columns.str.replace('ES+EP (m^3)', 'Evaporation (m^3)')
-        d.columns = d.columns.str.replace('Ep (m^3)', 'Percolation (m^3)')
-        d.columns = d.columns.str.replace('QOFE (m^3)', 'Runoff (m^3)')
-        d.columns = d.columns.str.replace('latqcc (m^3)', 'Lateral Flow (m^3)')
-        d.columns = d.columns.str.replace('Total-Soil Water (m^3)', 'Storage (m^3)')
+#        d.columns = d.columns.str.replace('P (m^3)', 'Precipitation (m^3)')
+#        d.columns = d.columns.str.replace('RM (m^3)', 'Rain + Melt (m^3)')
+#        d.columns = d.columns.str.replace('ES+EP (m^3)', 'Evaporation (m^3)')
+#        d.columns = d.columns.str.replace('Ep (m^3)', 'Percolation (m^3)')
+#        d.columns = d.columns.str.replace('QOFE (m^3)', 'Runoff (m^3)')
+#        d.columns = d.columns.str.replace('latqcc (m^3)', 'Lateral Flow (m^3)')
+#        d.columns = d.columns.str.replace('Total-Soil Water (m^3)', 'Storage (m^3)')
         d.attrs['wsarea'] = totarea_m2
         d.to_pickle(pkl_fn)
 
