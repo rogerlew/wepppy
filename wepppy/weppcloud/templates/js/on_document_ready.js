@@ -879,6 +879,7 @@ function heartbeat(){
     var climate_li = $('a[href="#climate-options"]');
     var wepp_li = $('a[href="#wepp"]');
     var observed_li = $('a[href="#observed-data-model-fit"]');
+    var debris_li = $('a[href="#debris-flow-analysis"]');
     var watar_li = $('a[href="#wildfire-ash-transport-and-risk-watar"]');
 
     $.post({
@@ -962,6 +963,16 @@ function heartbeat(){
               } else {
                   wepp_li.removeClass('checked');
                   wepp_li.addClass('unchecked');
+              }
+          }
+
+          if (!!debris_li) {
+              if (response.debris) {
+                  debris_li.removeClass('unchecked');
+                  debris_li.addClass('checked');
+              } else {
+                  debris_li.removeClass('checked');
+                  debris_li.addClass('unchecked');
               }
           }
 

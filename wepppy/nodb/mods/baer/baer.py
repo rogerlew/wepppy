@@ -344,7 +344,7 @@ class Baer(NoDbBase):
             prep = Prep.getInstance(self.wd)
             prep.timestamp('landuse_map')
             prep.has_sbs = True
-         except FileNotFoundError:
+        except FileNotFoundError:
             pass
 
     def remove_sbs(self):

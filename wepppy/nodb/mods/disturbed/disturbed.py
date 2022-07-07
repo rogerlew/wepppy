@@ -476,7 +476,7 @@ class Disturbed(NoDbBase):
             prep = Prep.getInstance(self.wd)
             prep.timestamp('landuse_map')
             prep.has_sbs = True
-         except FileNotFoundError:
+        except FileNotFoundError:
             pass
 
     def remove_sbs(self):
@@ -597,7 +597,7 @@ class Disturbed(NoDbBase):
         try:
             prep = Prep.getInstance(self.wd)
             prep.timestamp('landuse_map')
-            prep.has_sbs = False
+            prep.has_sbs = True
         except:
             pass
 

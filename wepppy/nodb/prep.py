@@ -80,7 +80,7 @@ class Prep(NoDbBase):
 
     @property
     def has_sbs(self):
-        return getattr(self, '_sbs_required', False)
+        return getattr(self, '_has_sbs', False)
 
     @has_sbs.setter
     def has_sbs(self, v: bool):
