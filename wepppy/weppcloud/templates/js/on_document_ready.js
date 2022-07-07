@@ -869,4 +869,125 @@ function onReady() {
   });
 }
 
+function heartbeat(){
+    var sbs_li = $('a[href^="#upload-soil-burn-severity"]');
+    var channels_li = $('a[href="#channel-delineation"]');
+    var outlet_li = $('a[href="#outlet"]');
+    var subcatchments_li = $('a[href="#subcatchments-delineation"]');
+    var landuse_li = $('a[href="#landuse-options"]');
+    var soil_li = $('a[href="#soil-options"]');
+    var climate_li = $('a[href="#climate-options"]');
+    var wepp_li = $('a[href="#wepp"]');
+    var observed_li = $('a[href="#observed-data-model-fit"]');
+    var watar_li = $('a[href="#wildfire-ash-transport-and-risk-watar"]');
+
+    $.post({
+        url: "tasks/preflight/",
+        contentType: "application/json; charset=utf-8",
+        success: function(response){
+
+          if (!!sbs_li) {
+              if (response.sbs_map === null) {
+                  sbs_li.removeClass('unchecked');
+                  sbs_li.removeClass('burned');
+                  sbs_li.addClass('unburned');
+              } else {
+                  if (response.sbs_map) {
+                     sbs_li.removeClass('unchecked');
+                     sbs_li.addClass('burned');
+                     sbs_li.removeClass('unburned');
+                  } else {
+                     sbs_li.addClass('unchecked');
+                     sbs_li.removeClass('burned');
+                     sbs_li.removeClass('unburned');
+                  }
+              }
+          }
+
+          if (response.channels) {
+              channels_li.removeClass('unchecked');
+              channels_li.addClass('checked');
+          } else {
+              channels_li.removeClass('checked');
+              channels_li.addClass('unchecked');
+          }
+
+          if (response.outlet) {
+              outlet_li.removeClass('unchecked');
+              outlet_li.addClass('checked');
+          } else {
+              outlet_li.removeClass('checked');
+              outlet_li.addClass('unchecked');
+          }
+
+          if (response.subcatchments) {
+              subcatchments_li.removeClass('unchecked');
+              subcatchments_li.addClass('checked');
+          } else {
+              subcatchments_li.removeClass('checked');
+              subcatchments_li.addClass('unchecked');
+          }
+
+          if (response.landuse) {
+              landuse_li.removeClass('unchecked');
+              landuse_li.addClass('checked');
+          } else {
+              landuse_li.removeClass('checked');
+              landuse_li.addClass('unchecked');
+          }
+
+          if (response.soils) {
+              soil_li.removeClass('unchecked');
+              soil_li.addClass('checked');
+          } else {
+              soil_li.removeClass('checked');
+              soil_li.addClass('unchecked');
+          }
+
+          if (response.climate) {
+              climate_li.removeClass('unchecked');
+              climate_li.addClass('checked');
+          } else {
+              climate_li.removeClass('checked');
+              climate_li.addClass('unchecked');
+          }
+
+          if (!!wepp_li) {
+              if (response.wepp) {
+                  wepp_li.removeClass('unchecked');
+                  wepp_li.addClass('checked');
+              } else {
+                  wepp_li.removeClass('checked');
+                  wepp_li.addClass('unchecked');
+              }
+          }
+
+          if (!!observed_li) {
+              if (response.observed) {
+                  observed_li.removeClass('unchecked');
+                  observed_li.addClass('checked');
+              } else {
+                  observed_li.removeClass('checked');
+                  observed_li.addClass('unchecked');
+              }
+          }
+
+          if (!!watar_li) {
+              if (response.watar) {
+                  watar_li.removeClass('unchecked');
+                  watar_li.addClass('checked');
+              } else {
+                  watar_li.removeClass('checked');
+                  watar_li.addClass('unchecked');
+              }
+          }
+
+
+
+        }
+    });
+    setTimeout(heartbeat, 2000);
+}
+heartbeat();
+
 $(document).ready(onReady);

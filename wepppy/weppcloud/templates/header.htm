@@ -7,12 +7,14 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
     <form class="form-inline my-2 my-lg-0" id="setname_form" action="javascript:void(0);" >
-      <input class="form-control mr-sm-1 disable-readonly" id="input_name" name="name" type="text" placeholder="Untitled"
+      <input class="form-control mr-sm-1 disable-readonly" id="input_name" name="name" type="text" placeholder="Name"
        value="{{ ron.name }}" aria-label="Name">
       <button class="btn btn-outline-success my-2 my-sm-0 hide-readonly" id="btn_setname" name="setname" type="button">
         Set Name
       </button>&nbsp;
-      <input class="form-control mr-sm-1 disable-readonly" id="input_scenario" name="scenario" type="text" placeholder=""
+    </form>
+    <form class="form-inline my-2 my-lg-0" id="setscenario_form" action="javascript:void(0);" >
+      <input class="form-control mr-sm-1 disable-readonly" id="input_scenario" name="scenario" type="text" placeholder="Scenario"
        value="{{ ron.scenario }}" aria-label="Scenario">
       <button class="btn btn-outline-success my-2 my-sm-0 hide-readonly" id="btn_setscenario" name="setscenario" type="button">
         Set Scenario
@@ -20,6 +22,9 @@
     </form>
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
+      </li>
+      <li class="nav-item">
+        <a href='./' class="nav-link" data-toggle="tooltip" title="Reload Page"><img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
         <a href='fork-console' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>

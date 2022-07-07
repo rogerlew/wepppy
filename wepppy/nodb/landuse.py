@@ -32,6 +32,7 @@ from .base import (
 )
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
+from .prep import Prep
 
 
 class LanduseNoDbLockedException(Exception):
@@ -228,9 +229,6 @@ class Landuse(NoDbBase):
         os.mkdir(lc_dir)
 
     def _build_ESDAC(self):
-        print('_build_ESDAC')
-
-
         from wepppy.eu.soils.esdac import ESDAC
         esd = ESDAC()
         # _map = Ron.getInstance(self.wd).map
@@ -376,6 +374,12 @@ class Landuse(NoDbBase):
         from wepppy.nodb import Wepp
         if Wepp.getInstance(self.wd).multi_ofe:
             self._build_multiple_ofe()
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('build_landuse')
+        except FileNotFoundError:
+            pass
 
     def _build_multiple_ofe(self):
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
