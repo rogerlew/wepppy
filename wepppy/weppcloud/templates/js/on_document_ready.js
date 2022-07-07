@@ -885,6 +885,9 @@ function heartbeat(){
         url: "tasks/preflight/",
         contentType: "application/json; charset=utf-8",
         success: function(response){
+          if (response === null) {
+              return;
+          }
 
           if (!!sbs_li) {
               if (response.sbs_map === null) {
