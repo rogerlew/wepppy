@@ -23,7 +23,11 @@ DEFAULT_VERSION = 'v3'
 class RangelandAnalysisPlatform(object):
     def __init__(self, wd='.', bbox=None, cellsize=30, version=DEFAULT_VERSION):
         self.wd = wd
+        if bbox is not None:
+            bbox = [float(v) for v in  bbox]
+        
         self.bbox = bbox
+
         self.ds = {}
         self.cellsize = cellsize
         self.proj4 = None
