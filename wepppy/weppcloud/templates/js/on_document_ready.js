@@ -10,6 +10,18 @@ var error = null;
 
 var cellsize = {{ron.cellsize}};
 
+function window_resize() {
+    console.log('window_resize');
+    var _map = $('#mapid');
+    var w = _map.parent().width();
+    _map.css('min-height', w);
+    _map.css('height', w);
+    _map.css('width', w);
+
+    Map.getInstance().invalidateSize();
+};
+
+
 jQuery.readyException = function( e ) {
   console.error( e );
   error = e;
@@ -838,7 +850,6 @@ function onReady() {
         map.loadUSGSGageLocations();
     });
 
-    project.set_readonly_controls({{ ron.readonly | tojson }});
 
     // konami code!
     Mousetrap.bind('up up down down left right left right b a', function() {
@@ -995,13 +1006,16 @@ function heartbeat(){
                   watar_li.addClass('unchecked');
               }
           }
-
-
-
         }
     });
     setTimeout(heartbeat, 2000);
-}
-heartbeat();
 
-$(document).ready(onReady);
+}$(document).ready(onReady);
+
+$(window).on('load', function() {
+    $(window).on('resize', window_resize);
+    heartbeat();
+    setTimeout(function(){
+        window_resize();
+    }, 2000);
+});

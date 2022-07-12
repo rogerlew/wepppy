@@ -44,9 +44,9 @@ code {
   background-color: #f5f5f5;
 }
 #mapid {
-    min-height: 700px;
-    height: 700px;
-    width: 700px;
+    min-height: 360;
+    height: 360;
+    width: 360;
     padding-bottom: 20px;
 }
 .text-muted {
