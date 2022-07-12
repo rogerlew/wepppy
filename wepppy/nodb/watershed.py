@@ -616,6 +616,8 @@ class Watershed(NoDbBase):
             self._outlet_top_id = str(_abs.outlet_top_id)
             self._structure = _abs.structure
 
+            _abs.write_channels_geojson(_join(topaz_wd, 'channel_paths.json'))
+
             del _abs
 
             self.dump_and_unlock()
