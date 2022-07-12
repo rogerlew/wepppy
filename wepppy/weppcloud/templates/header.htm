@@ -2,7 +2,8 @@
   <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <a class="navbar-brand" href="{% if site_prefix == '' %}{{ '/' }}{% else %}{{ site_prefix }}{% endif %}">WEPPcloud  {{ ('&mdash;' if ron.configname != '') | safe }} {{ ron.configname }} </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" 
+      aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -24,25 +25,28 @@
       <li class="nav-item">
       </li>
       <li class="nav-item">
-        <a href='./' class="nav-link" data-toggle="tooltip" title="Reload Page"><img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
+        <a href='./' class="nav-link" data-toggle="tooltip" title="Reload Page">
+          <img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
-        <a href='fork-console' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
+        <a href='fork-console' class="nav-link" target="_blank" data-toggle="tooltip" title="Fork Project">
+          <img src="{{ url_for('static', filename='open-iconic/png/fork-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
-        <a href='archive' class="nav-link" target="_blank"><img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
+        <a href='archive' class="nav-link" target="_blank" data-toggle="tooltip" title="Download Archive">
+          <img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
       <div width="2em;"></div</li>
       <li class="nav-item">
       <button class="btn btn-link" type="button" id="btnPuModal"
             data-toggle="modal" data-target="#puModal"
-            title="up up down down left right left right b a">
+            title="Poweruser Panel  (up up down down left right left right b a)">
           <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}" />
       </button>
       </li>
       <li class="nav-item">
-      <button class="btn btn-link" type="button"
+      <button class="btn btn-link" type="button" 
             data-toggle="modal" data-target="#unitizerModal">
           <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
       </button>
