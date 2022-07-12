@@ -569,7 +569,10 @@ class Watershed(NoDbBase):
             self.dump_and_unlock()
 
             ron = wepppy.Ron.getInstance(self.wd)
-            if any(['lt' in ron.mods, 'portland' in ron.mods, 'seattle' in ron.mods, 'general' in ron.mods]):
+            if any(['lt' in ron.mods, 
+                    'portland' in ron.mods, 
+                    'seattle' in ron.mods, 
+                    'general' in ron.mods]):
                 wepp = wepppy.nodb.Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 
@@ -616,14 +619,17 @@ class Watershed(NoDbBase):
             self._outlet_top_id = str(_abs.outlet_top_id)
             self._structure = _abs.structure
 
-            _abs.write_channels_geojson(_join(topaz_wd, 'channel_paths.json'))
+            _abs.write_channels_geojson(_join(topaz_wd, 'channel_paths.wgs.json'))
 
             del _abs
 
             self.dump_and_unlock()
 
             ron = wepppy.nodb.Ron.getInstance(self.wd)
-            if any(['lt' in ron.mods, 'portland' in ron.mods, 'seattle' in ron.mods, 'general' in ron.mods]):
+            if any(['lt' in ron.mods, 
+                    'portland' in ron.mods, 
+                    'seattle' in ron.mods, 
+                    'general' in ron.mods]):
                 wepp = wepppy.nodb.Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 
