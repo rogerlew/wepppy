@@ -166,7 +166,7 @@ class WatershedAbstraction:
 
         # initialize datastructure containing json representation
         # of the abstracted watershed
-        self.watershed = dict(hillslopes={}, channels={}, flowpaths={})
+        self.watershed = dict(hillslopes={}, channels={}, flowpaths={}, channel_paths={})
         self.hillslope_n = 0
         self.channel_n = 0
         self.impoundment_n = 0
@@ -593,6 +593,27 @@ class WatershedAbstraction:
 
         # save channel abstraction to instance
         watershed['channels']['chn_%i' % chn_id] = chn_summary
+        watershed['channel_paths']['chn_%i' % chn_id] = (indx, indy)
+
+    def write_channels_geojson(self, fn):
+        watershed = self.watershed
+
+        features = []
+        for chn_id, summary in watershed['channels'].items():
+            indx, indy = watershed['channel_paths'][chn_id]
+            coordinates = [self.px_to_lnglat(x, y) for x, y in zip(indx, indy)]
+            features.append(dict(properties=dict(TopazID=summary.topaz_id, WeppID=summary.wepp_id),
+                                 geometry=dict(type='LineString', coordinates=coordinates),
+                                 type='Feature'))
+
+        fc = dict(features=features,
+                  crs=dict(name=f'urn:ogc:def:crs:EPSG::4326', type='name'),
+                  name='ChannelPaths',
+                  type='FeatureCollection'
+                 )
+
+        with open(fn, 'w') as fp:
+            json.dump(fc, fp)
 
     def abstract_subcatchments(self, verbose=False, warn=False,
                                clip_hillslopes=False, clip_hillslope_length=300.0):
