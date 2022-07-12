@@ -174,7 +174,8 @@ class WeppPost(NoDbBase):
             self._years = _years
             self._julians = _julians
             self._ndays = len(self._julians)
-
+            self._hill_streamflow = None
+            self._chn_streamflow = None
             self.dump_and_unlock()
 
         except Exception:
@@ -184,12 +185,9 @@ class WeppPost(NoDbBase):
     def export_streamflow(self, fn, source='Hillslopes', exclude_yr_indxs=(0, 1), stacked=False):
         ndays = self._ndays
         if source == 'Channel':
-            assert self._chn_streamflow is not None
-            data = self._chn_streamflow
-
+            data = self.chn_streamflow
         else:
-            assert self._hill_streamflow is not None
-            data = self._hill_streamflow
+            data = self.hill_streamflow
 
         fp = open(fn, 'w')
         fp.write('date,Runoff,Baseflow,Lateral Flow\n')
@@ -248,7 +246,13 @@ class WeppPost(NoDbBase):
 
             return i0 + j0 + a
 
-    def calc_hill_streamflow(self):
+    @property
+    def hill_streamflow(self):
+        if self._hill_streamflow is None:
+            self._calc_hill_streamflow()
+        return self._hill_streamflow
+
+    def _calc_hill_streamflow(self):
         watsed = TotalWatSed2(self.wd)
         watsed_d = watsed.d
 
@@ -274,7 +278,13 @@ class WeppPost(NoDbBase):
         for k in self._hill_streamflow:
             self._hill_streamflow[k] = [float(v) for v in self._hill_streamflow[k]]
 
-    def calc_channel_streamflow(self):
+    @property
+    def chn_streamflow(self):
+        if self._chn_streamflow is None:
+            self._calc_channel_streamflow()
+        return self._chn_streamflow
+
+    def _calc_channel_streamflow(self):
         output_dir = self.output_dir
         ndays = self._ndays
         wsarea = self._wsarea
