@@ -500,14 +500,5 @@ if __name__ == '__main__':
         wepp.prep_watershed(erodibility=erod, critical_shear=cs)
         wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
         wepp.run_watershed()
-        loss_report = wepp.report_loss()
-
-        log_print('running wepppost')
-        fn = _join(ron.export_dir, 'totalwatsed.csv')
-
-        totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                wepp.baseflow_opts, wepp.phosphorus_opts)
-        totwatsed.export(fn)
-        assert _exists(fn)
 
         arc_export(wd)
