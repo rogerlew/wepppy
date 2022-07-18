@@ -87,7 +87,7 @@ function delete_runs() {
           <td>{{ meta.date_created }}</td>
           <td>{{ meta.last_modified }}</td>
           <td>
-              <input type="checkbox" value="{{ meta.runid }}" >
+              <input type="checkbox" value="{{ meta.runid }}" {%if meta.readonly %} disabled {% endif %}>
               <!--button type="button" class="btn btn-danger"  onclick="delete_run('{{ meta.runid }}')">Delete</button-->
         </tr>
     {% endfor %}
