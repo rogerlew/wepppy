@@ -437,7 +437,8 @@ var Map = function () {
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
-        that.nlcd = L.tileLayer.wms("https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
+        that.nlcd = L.tileLayer.wms(
+            "https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
             layers: "NLCD_2016_Land_Cover_L48",
             format: "image/png",
             transparent: true
@@ -451,7 +452,12 @@ var Map = function () {
              }),
              pointToLayer: (function (feature, latlng) {
                  return L.circleMarker(latlng,
-                     {radius: 8, fillColor: "#ff7800", color: "#000", weight: 1, opacity: 1, fillOpacity: 0.8});
+                     { radius: 8, 
+                       fillColor: "#ff7800", 
+                       color: "#000", 
+                       weight: 1, 
+                       opacity: 1, 
+                       fillOpacity: 0.8});
              })
         });
 
@@ -475,7 +481,11 @@ var Map = function () {
             var zoom = self.getZoom();
             var lng = coordRound(center.lng);
             var lat = coordRound(center.lat);
-            $("#mapstatus").text("Center: " + lng + ", " + lat + " | Zoom: " + zoom);
+            var map_w = $('#mapid').width()
+            $("#mapstatus").text("Center: " + lng + 
+                                 ", " + lat + 
+                                 " | Zoom: " + zoom +
+                                 " ( Map Width:" + map_w  + "px )");
 
         };
 

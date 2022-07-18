@@ -236,7 +236,8 @@ class Run(db.Model):
                     config=self.config,
                     name=ron.name,
                     scenario=ron.scenario,
-                    w3w=ron.w3w)
+                    w3w=ron.w3w,
+                    readonly=ron.readonly)
                     
 
 class Role(db.Model, RoleMixin):
@@ -1112,6 +1113,10 @@ def delete_run(runid, config):
 
     # get working dir of original directory
     wd = get_wd(runid)
+
+    ron = Ron.getInstance(wd)
+    if ron.readonly:
+        return error_factory('cannot delete readonly project')
 
     try:
         shutil.rmtree(wd)
