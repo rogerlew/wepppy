@@ -1460,7 +1460,7 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_future(self, verboase=False, attrs=None):
+    def _build_climate_future(self, verbose=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection

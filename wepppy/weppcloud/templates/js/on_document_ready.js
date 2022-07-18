@@ -861,7 +861,7 @@ function onReady() {
     });
 
 
-  $(function () {
+$(function () {
     var navSelector = "#toc";
     var $myNav = $(navSelector);
     Toc.init($myNav);
@@ -869,16 +869,25 @@ function onReady() {
       target: navSelector,
       offset: 60
     });
-  });
+});
 
   var offset = 80;
 
-  $('.nav li a').click(function(event) {
+$('.nav li a').click(function(event) {
     event.preventDefault();
     $($(this).attr('href'))[0].scrollIntoView();
     scrollBy(0, -offset);
-  });
-}
+});
+
+}$(document).ready(onReady);
+
+$(window).on('load', function() {
+    $(window).on('resize', window_resize);
+    heartbeat();
+    setTimeout(function(){
+        window_resize();
+    }, 2000);
+});
 
 function heartbeat(){
     var sbs_li = $('a[href^="#upload-soil-burn-severity"]');
@@ -892,6 +901,59 @@ function heartbeat(){
     var observed_li = $('a[href="#observed-data-model-fit"]');
     var debris_li = $('a[href="#debris-flow-analysis"]');
     var watar_li = $('a[href="#wildfire-ash-transport-and-risk-watar"]');
+
+    if (run_heartbeat > 10000 || !$("#toc").is(":visible")) {
+        
+        if (!!sbs_li) {
+            sbs_li.removeClass('unchecked');
+            sbs_li.removeClass('burned');
+            sbs_li.removeClass('unburned');
+        }
+        channels_li.removeClass('unchecked');
+        channels_li.removeClass('checked');
+        
+        outlet_li.removeClass('unchecked');
+        outlet_li.removeClass('checked');
+
+        subcatchments_li.removeClass('unchecked');
+        subcatchments_li.removeClass('checked');
+
+        landuse_li.removeClass('unchecked');
+        landuse_li.removeClass('checked');
+
+        soil_li.removeClass('unchecked');
+        soil_li.removeClass('checked');
+
+        landuse_li.removeClass('unchecked');
+        landuse_li.removeClass('checked');
+
+        climate_li.removeClass('unchecked');
+        climate_li.removeClass('checked');
+
+        if (!!wepp_li) {
+            wepp_li.removeClass('unchecked');
+            wepp_li.removeClass('checked');
+        }
+
+        if (!!watar_li) {
+            watar_li.removeClass('unchecked');
+            watar_li.removeClass('checked');
+        }
+
+        if (!!debris_li) {
+            debris_li.removeClass('unchecked');
+            debris_li.removeClass('checked');
+        }
+
+        if (!!observed_li) {
+            observed_li.removeClass('unchecked');
+            observed_li.removeClass('checked');
+        }
+        return null;
+
+    } 
+
+    run_heartbeat = run_heartbeat + 1;
 
     $.post({
         url: "tasks/preflight/",
@@ -1008,14 +1070,12 @@ function heartbeat(){
           }
         }
     });
-    setTimeout(heartbeat, 2000);
+}
 
-}$(document).ready(onReady);
+var run_heartbeat = 0;
+var heartbeat_interval = setInterval(heartbeat, 2000);
 
-$(window).on('load', function() {
-    $(window).on('resize', window_resize);
-    heartbeat();
-    setTimeout(function(){
-        window_resize();
-    }, 2000);
+$( window ).scroll(function() {
+    run_heartbeat = 0;
 });
+
