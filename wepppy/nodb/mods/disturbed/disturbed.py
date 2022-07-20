@@ -25,7 +25,7 @@ from osgeo import gdal
 from wepppy.all_your_base import isint, isfloat
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import simple_texture
+from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils
@@ -48,8 +48,8 @@ def read_disturbed_land_soil_lookup(fname):
     with open(fname) as fp:
         reader = csv.DictReader(fp)
         for row in reader:
-            disturbed_class = row['disturbed_class']
-            texid = row['texid']
+            disturbed_class = row['luse']
+            texid = row['stext']
 
             for k in row:
                 v = row[k]
@@ -755,10 +755,11 @@ class Disturbed(NoDbBase):
                         _h0_max_om = self.h0_max_om
                     else:
                         _h0_max_om = None
+ 
+                    soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
+                    soil_u_9001 = soil_u.to9001(replacements, h0_max_om=_h0_max_om)
+                    soil_u_9001.write(_join(soils.soils_dir, disturbed_fn))
 
-                    disturbed_soil_specialization(_join(soils.soils_dir, _soil.fname),
-                                                  _join(soils.soils_dir, disturbed_fn),
-                                                  replacements, h0_max_om=_h0_max_om)
                     desc = '{} - {}'.format(_soil.desc, man.disturbed_class)
                     soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
                                                                fname=disturbed_fn,

@@ -1,4 +1,4 @@
-from .yamlizer import YamlSoil
+from .yamlizer import YamlSoil, WeppSoilUtil
 from .multi_ofe import SoilMultipleOfeSynth
 
 import csv

@@ -931,7 +931,7 @@ Any comments:
             "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t"\
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t"\
             "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t"\
-            "{horizon0.shear:0.4f}\t0.0000"
+            "{horizon0.shear:0.4f}"
 
         s = [s.format(self, majorComponent=self.majorComponent,
                       horizon0=self.getFirstHorizon(), 
