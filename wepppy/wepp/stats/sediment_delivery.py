@@ -12,6 +12,8 @@ from .row_data import RowData
 
 class SedimentDelivery(object):
     def __init__(self, wd):
+        self.wd = wd
+
         from wepppy.nodb import Wepp
         wepp = Wepp.getInstance(wd)
 
@@ -70,7 +72,7 @@ class SedimentDelivery(object):
         particle_distribution['organic matter'] = try_parse(lines[23].split()[-1])
 
         totwatsed_fn = _join(wepp.output_dir, 'totalwatsed.txt')
-        totwatsed = TotalWatSed2(self.wd)
+        totwatsed = TotalWatSed2(wd)
 
         hill_class_fractions = totwatsed.class_fractions
 

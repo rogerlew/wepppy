@@ -242,7 +242,6 @@ class Landuse(NoDbBase):
             assert 'usedom' in d, d
             dom = d['usedom'][1]
             domlc_d[topaz_id] = str(dom)
-            print(topaz_id, dom)
 
         for topaz_id, _ in watershed.chn_iter():
             lng, lat = summary.centroid.lnglat
