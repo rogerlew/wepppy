@@ -93,7 +93,7 @@ class WeppSoilUtil(object):
 
             if solwpv < 941 or solwpv >= 7777:       
                 # 1   2      3    4     5    6   7   8
-                slid, texid, nsl, salb, sat, ki, kr, shcrit = line
+                slid, texid, nsl, salb, sat, ki, kr, shcrit = line[:8]
                 avke = None
             else:
                 # 1   2      3    4     5    6   7   8       9
