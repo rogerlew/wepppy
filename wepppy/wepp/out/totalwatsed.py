@@ -150,7 +150,7 @@ class TotalWatSed2(object):
 
         # Determine Water Year Column
         _wy = np.zeros(d.shape[0], dtype=np.int)
-        for j, y in zip(d['Julian'], d['Year']):
+        for i, (j, y) in enumerate(zip(d['Julian'], d['Year'])):
             _wy[i] = determine_wateryear(y, j=j)
         d['Water Year'] = _wy
 
