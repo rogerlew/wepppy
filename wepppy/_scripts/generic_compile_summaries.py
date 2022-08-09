@@ -18,17 +18,32 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--prefix', type=str, default='prefix', help='prefix for output files')
-    parser.add_argument('--outdir', type=str, default='/home/mariana/BullRun_march', help='outdir for files')
-    parser.add_argument('--input_csv', type=str, default='BullRun_Runs_ID.csv', help='input file with RunID, WatershedName, Scenario colmans')
+    parser.add_argument('--outdir', type=str, default='/home/mariana/BullRun_march', 
+                        help='outdir for files')
+    parser.add_argument('--input_csv', type=str, default='BullRun_Runs_ID.csv', 
+                        help='input file with RunID, WatershedName, Scenario colmans')
+    parser.add_argument('--test', default=False, action="store_true", 
+                        help='test whether projects exist without running')
 
     args = parser.parse_args()
 
     prefix = args.prefix
     outdir = args.outdir
     input_csv = args.input_csv
+    test = args.test
 
     with open(input_csv) as fp:
         projects = [row for row in csv.DictReader(fp)]
+
+    if test:
+        for i, project in enumerate(projects):
+            run_id = project['RunID']
+    
+            nodb_fn = _join('/geodata/weppcloud_runs/', run_id, 'ron.nodb')
+            if not _exists(nodb_fn):
+                print(f'project "{run_id}" is not valid or doesn\'t exist')
+        sys.exit()
+
 
     if _exists(outdir):
         res = input(f'Outdir exists, Delete outdir: {outdir}?')
@@ -38,7 +53,6 @@ if __name__ == "__main__":
         shutil.rmtree(outdir)
 
     os.mkdir(outdir)
-
 
     fp_hill = open(_join(outdir, '%s_hill_summary.csv' % prefix), 'w')
     fp_chn = open(_join(outdir, '%s_chn_summary.csv' % prefix), 'w')

@@ -115,6 +115,7 @@ class ClimateMode(IntEnum):
     EOBS = 8       # Single or multiple
     AGDC = 10       # Single or multiple
     GridMetPRISM = 11    # Daymet, single or multiple
+    UserDefined = 12
 
     @staticmethod
     def parse(x):
@@ -142,6 +143,8 @@ class ClimateMode(IntEnum):
             return ClimateMode.AGDC
         elif x == 'gridmet_prism':
             return ClimateMode.GridMetPRISM
+        elif x == 'user_defined':
+            return ClimateMode.UserDefined
         raise KeyError
 
 
@@ -1102,6 +1105,25 @@ class Climate(NoDbBase, LogMixin):
                 self.sub_cli_fns = sub_cli_fns
 
             self.log('  finalizing climate build... ')
+            self.dump_and_unlock()
+            self.log_done()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def set_user_defined_cli(self, cli_fn, verbose=False):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+
+            self.log('  running set_userdefined_cli... ')
+            self.cli_fn = cli_fn
+            cli_path = self.cli_path
+            cli = ClimateFile(cli_path)
+            self._input_years = cli.input_years
+            self.monthlies = cli.calc_monthlies()
             self.dump_and_unlock()
             self.log_done()
 

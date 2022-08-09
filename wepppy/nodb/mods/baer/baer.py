@@ -23,7 +23,7 @@ from osgeo import gdal
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, YamlSoil
+from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, WeppSoilUtil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
@@ -685,7 +685,7 @@ class Baer(NoDbBase):
 
         _soils = {}
         for k, fn in soils_dict.items():
-            yaml_soil = YamlSoil(_join(baer_soils_dir, fn))
+            yaml_soil = WeppSoilUtil(_join(baer_soils_dir, fn))
 
             _soils[k] = SoilSummary(
                 mukey=k,

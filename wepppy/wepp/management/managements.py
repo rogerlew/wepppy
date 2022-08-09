@@ -1617,6 +1617,10 @@ class Management(object):
         self.years.setroot(self)
         self.man.setroot(self)
 
+    def set_bdtill(self, value):
+        for i in range(len(self.inis)):
+            self.inis[i].data.bdtill = value
+
     def make_multiple_ofe(self, nofe):
         assert self.nofe == 1
         assert nofe >= 2

@@ -3989,6 +3989,20 @@ var Climate = function () {
 
         that.stationselection = $("#climate_station_selection");
 
+        that.setBuildMode = function (mode) {
+            var self = instance;
+            self.mode = parseInt(mode, 10);
+            if (self.mode === 0) {
+                $("#climate_cligen").show();
+                $("#climate_userdefined").hide();
+                self.setStationMode(-1);
+            } else {
+                $("#climate_cligen").hide();
+                $("#climate_userdefined").show();
+                self.setStationMode(4);
+            }
+        };
+
         that.setStationMode = function (mode) {
             var self = instance;
             // mode is an optional parameter
@@ -4011,6 +4025,40 @@ var Climate = function () {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATIONMODE_TASK_COMPLETED");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.upload_cli = function () {
+            var self = instance;
+
+            var task_msg = "Uploading cli";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            var formData = new FormData($('#climate_form')[0]);
+
+            $.post({
+                url: "tasks/upload_cli/",
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4111,6 +4159,8 @@ var Climate = function () {
                         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                     }
                 });
+            } else if (mode === 4) {
+                pass();
             } else if (mode === -1) {
                 pass();
             } else {
@@ -4282,6 +4332,9 @@ var Climate = function () {
         };
 
         that.showHideControls = function (mode) {
+            if (mode === undefined) {
+                mode = -1;
+            }
 
             // show the appropriate controls
             if (mode === -1) {
@@ -4438,9 +4491,10 @@ var Climate = function () {
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").show();
                 $("#btn_build_climate_container").show();
-            } else {
-                throw "ValueError: unknown mode";
-            }
+            } 
+//              else {
+//                throw "ValueError: unknown mode";
+//            }
         };
 
         that.setSpatialMode = function (mode) {

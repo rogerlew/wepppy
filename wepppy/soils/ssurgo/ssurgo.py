@@ -22,6 +22,7 @@ from datetime import datetime
 from xml.etree import ElementTree
 from math import exp
 from collections import OrderedDict
+import jsonpickle
 
 import sqlite3
 
@@ -397,10 +398,8 @@ class SoilSummary(object):
         self.area = 0.0
         self.pct_coverage = kwargs.get('pct_coverage', None)
 
-        self.clay = kwargs.get('clay', None)
-        self.sand = kwargs.get('sand', None)
-        self.ll = kwargs.get('ll', None)
-        self.avke = kwargs.get('avke', None)
+        self._meta_fn = kwargs.get('meta_fn', None)
+
 
     @property
     def simple_texture(self):
@@ -431,22 +430,67 @@ class SoilSummary(object):
         return smr
 
     def as_dict(self):
-        avke = getattr(self, 'avke', None)
         ll = getattr(self, 'll', None)
-        sand = getattr(self, 'sand', None)
-        clay = getattr(self, 'clay', None)
 
+        weppsoilutil = self.get_weppsoilutil()
+        
         return dict(mukey=self.mukey, fname=self.fname,
                     soils_dir=self.soils_dir,
                     build_date=self.build_date, desc=self.desc,
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage,
-                    clay=clay, sand=sand, ll=ll, avke=avke,
+                    clay=weppsoilutil.clay, 
+                    sand=weppsoilutil.sand,  
+                    avke=weppsoilutil.avke,
+                    ll=ll, bd=weppsoilutil.bd,
                     simple_texture=self.simple_texture)
 
     @property
     def path(self):
         return _join(self.soils_dir, self.fname)
+
+    @property
+    def meta_fn(self):
+        fn = getattr(self, '_meta_fn', None)
+        if fn is None:
+            return fn
+        return fn
+
+    @property
+    def meta(self):
+        meta_fn = self.meta_fn
+        if meta_fn is None:
+            return None
+        with open(meta_fn) as fp:
+            return jsonpickle.decode(fp.read())
+
+    def get_weppsoilutil(self):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+        return WeppSoilUtil(self.path)
+    
+    @property
+    def avke(self):
+        return self.get_weppsoilutil().avke
+
+    @property
+    def clay(self):
+        return self.get_weppsoilutil().clay
+
+    @property
+    def sand(self):
+        return self.get_weppsoilutil().sand
+
+    @property
+    def bd(self):
+        return self.get_weppsoilutil().bd
+
+    @property
+    def ll(self):
+        meta = self.meta
+        if meta is None:
+            return None
+       
+        return meta.getFirstHorizon().ll_r
 
 
 # noinspection PyPep8Naming,PyProtectedMember
@@ -474,6 +518,7 @@ class WeppSoil:
         self.albedo_estimated = False
         self.is_urban = False
         self.is_water = False
+        self._pickle_fn = None
         
         self._disclaimer = """\
 THIS FILE AND THE CONTAINED DATA IS PROVIDED BY THE UNIVERSITY OF IDAHO 
@@ -812,6 +857,20 @@ Any comments:
 'Water_1'\t'Water'\t0 0.000000\t0.750000\t0.000000\t0.000000\t0.000000\t0.000000
 0\t0\t0'''
 
+    @property
+    def pickle_fn(self):
+        return getattr(self, '_pickle_fn', None)
+
+    def pickle(self, wd='./', overwrite=True, fname=None):
+        mukey = str(self.mukey)
+
+        if fname is None:
+            fname = '%s.json' % mukey
+
+        self._pickle_fn = _join(wd, fname)
+        with open(self.pickle_fn, 'w') as fp:
+            fp.write(jsonpickle.encode(self))
+
     def write(self, wd='./', overwrite=True, fname=None, db_build=False, version='7778') -> SoilSummary:
         assert version in ['7778', '2006.2', '2006.2ag']
         assert _exists(wd), wd
@@ -852,7 +911,8 @@ Any comments:
             fname=fname,
             soils_dir=wd,
             build_date=str(datetime.now()),
-            desc=self.short_description
+            desc=self.short_description,
+            meta_fn=self.pickle_fn
         )
 
     def _write2006_2(self, wd, overwrite, fname, db_build, ag=False):
@@ -1279,14 +1339,18 @@ class SurgoSoilCollection(object):
 
     def writeWeppSoils(self, wd='./', overwrite=True,
                        write_logs=False, db_build=False,
-                       version='7778') -> Dict[int, SoilSummary]:
+                       version='7778', pickle=True) -> Dict[int, SoilSummary]:
         assert self.weppSoils is not None
         soils = {}
         for weppSoil in self.weppSoils.values():
+            if pickle:
+                weppSoil.pickle(wd, overwrite)
+
             soil = weppSoil.write(wd, overwrite, db_build=db_build, version=version)
             soils[soil.mukey] = soil
             if write_logs:
                 weppSoil.write_log(wd, overwrite, db_build=db_build)
+
         return soils
 
     def logInvalidSoils(self, wd='./', overwrite=True, db_build=False):

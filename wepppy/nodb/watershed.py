@@ -316,7 +316,7 @@ class Watershed(NoDbBase):
 
     @property
     def wsarea(self) -> float:
-        return self._wsarea
+        return getattr(self, '_wsarea', 1)
 
     @property
     def structure(self):

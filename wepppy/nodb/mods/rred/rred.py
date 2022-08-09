@@ -23,7 +23,7 @@ from wepppy.all_your_base.geo import wgs84_proj4, translate_asc_to_tif, read_ras
 from wepppy.landcover import LandcoverMap
 from wepppy.nodb.mods.rred import rred_api
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import YamlSoil
+from wepppy.wepp.soils.utils import WeppSoilUtil
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils, SoilsMode
@@ -200,7 +200,7 @@ class Rred(NoDbBase):
                 soil_fn = '%s.sol' % sol
                 soil_path = _join(self.soils_dir, soil_fn)
 
-                yaml_soil = YamlSoil(soil_path)
+                yaml_soil = WeppSoilUtil(soil_path)
                 desc = '{slid} - {texid}'.format(**yaml_soil.obj['ofes'][0])
 
                 _soils[sol] = SoilSummary(

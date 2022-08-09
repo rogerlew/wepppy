@@ -22,10 +22,10 @@ function window_resize() {
 };
 
 
-jQuery.readyException = function( e ) {
-  console.error( e );
-  error = e;
-};
+//jQuery.readyException = function( e ) {
+//  console.error( e );
+//  error = e;
+//};
 
 function onReady() {
     "use strict";
@@ -334,6 +334,8 @@ function onReady() {
     if ({{ watershed.has_outlet | tojson }}) {
         outlet.form.trigger("SETOUTLET_TASK_COMPLETED");
     }
+
+    outlet.setMode(parseInt($("input[name='setoutlet_mode']:checked").val(), 10));
 
     /*
      * Subcatchment Initialization
@@ -659,6 +661,12 @@ function onReady() {
     //
     // Bindings
     //
+    // Bind radio to the set outlet mode on change
+    $("[name='climate_build_mode']").change(function () {
+        var mode = parseInt($("input[name='climate_build_mode']:checked").val(), 10);
+        climate.setBuildMode(mode);
+    });
+
     $("[name='climate_mode']").change(function () {
         climate.setMode();
     });
@@ -723,6 +731,8 @@ function onReady() {
          {{ observed.results is not none | tojson }}) {
         observed.showControl();
     }
+
+    climate.setBuildMode(parseInt($("input[name='climate_build_mode']:checked").val(), 10));
 
     /*
     * Wepp Initialization
