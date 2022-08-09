@@ -473,6 +473,12 @@ class ClimateFile(object):
         years = [int(v) for v in sorted(set(df['year']))]
         return years
 
+    @property
+    def input_years(self):
+        df = self.as_dataframe()
+        years = [int(v) for v in sorted(set(df['year']))]
+        return max(years) -  min(years)
+
     def make_storm_file(self, dst_fn):
         header_template = """\
 {num_rain_events} # The number of rain events

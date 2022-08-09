@@ -87,8 +87,6 @@ def build_asris_soils(orders, soil_dir):
 
     domsoil_d = {}
     soils = {}
-    clay_d = {}
-    sand_d = {}
 
     for topaz_id, (lng, lat) in orders:
         d = query_asris(lng, lat)
@@ -174,9 +172,9 @@ def build_asris_soils(orders, soil_dir):
         shcrit = erod_d['shear']
 
         ofe_indx = len(s)
-        s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit} \t{avke}".format(
+        s.append("'{slid}' \t'{texid}' \t{nsl} \t{salb} \t{sat} \t{ki} \t{kr} \t{shcrit}".format(
             slid=soil_type, texid=tex_top,
-            nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=shcrit, avke=ks_top))
+            nsl=1, salb=salb, sat=ini_sat, ki=ki, kr=kr, shcrit=shcrit))
 
         s.append('    {solthk} \t{sand} \t{clay} \t{orgmat} \t{cec} \t{rfg}'.format(
             solthk=thickness_top, sand=sand_top, clay=clay_top, orgmat= om_top, cec=cec_top, rfg=rfg_top
@@ -244,14 +242,8 @@ def build_asris_soils(orders, soil_dir):
                 desc=soil_type)
 
         domsoil_d[topaz_id] = key
-        clay_d[key] = clay_top
-        clay_d[lowmod_key] = clay_top
-        clay_d[high_key] = clay_top
-        sand_d[key] = sand_top
-        sand_d[lowmod_key] = sand_top
-        sand_d[high_key] = sand_top
 
-    return soils, domsoil_d, clay_d, sand_d
+    return soils, domsoil_d
 
 
 if __name__ == "__main__":

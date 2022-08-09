@@ -9,7 +9,6 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
-from rosetta import Rosetta2, Rosetta3
 
 from wepppy.all_your_base import try_parse
 
@@ -113,7 +112,7 @@ class WeppSoilUtil(object):
                     anisotropy = None
                 elif solwpv >= 7778:
                     # 1     2   3     4           5   6   7     8     9       10   11
-                    solthk, bd, ksat, anisotropy, fc, wp, sand, clay, orgmat, cec, rfg = line
+                    solthk, bd, ksat, anisotropy, fc, wp, sand, clay, orgmat, cec, rfg = line[:11]
                 else:
                     solthk, sand, clay, orgmat, cec, rfg = line
                     bd = ksat = fc = wp = anisotropy = None
@@ -188,6 +187,8 @@ class WeppSoilUtil(object):
         self.obj = yaml.safe_load(yaml_txt)
 
     def to7778(self, hostname=''):
+        from rosetta import Rosetta2, Rosetta3
+
         r2 = Rosetta2()
         r3 = Rosetta3()
         new = deepcopy(self)
@@ -263,6 +264,9 @@ class WeppSoilUtil(object):
         return new
 
     def write(self, fn):
+        from rosetta import Rosetta3
+        r3 = Rosetta3()
+
         header = self.obj['header'] 
         header = [f'# {L}' for L in header]
 
@@ -272,7 +276,7 @@ class WeppSoilUtil(object):
         ksflag = self.obj['ksflag']
         ofes = self.obj['ofes']
 
-        assert datver in (7778.0, 9001.0), datver
+        assert datver in (7778.0, 9001.0, 9002.0), datver
 
         s = [str(int(datver))] 
         s += header
@@ -299,6 +303,15 @@ class WeppSoilUtil(object):
                 pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
                 s.append('\t' + '\t '.join([str(horizon[p]) for p in pars]))
 
+                if datver == 9002.0:
+                    clay = horizon['clay']
+                    sand = horizon['sand']
+                    silt = 100.0 - clay - sand
+                    bd = horizon['bd']
+                    res = r3.predict_kwargs(clay=clay, sand=sand, silt=silt, bd=bd)
+                    vg_pars = 'theta_r theta_s alpha npar ks wp fc'.split()
+                    s[-1] += '\t ' + '\t '.join([f'{res[p]:.4}' for p in vg_pars])
+
             res_lyr = ofe['res_lyr']
             if res_lyr is not None:
                 s.append(f'{res_lyr["slflag"]} {res_lyr["ui_bdrkth"]} {res_lyr["kslast"]}')
@@ -310,6 +323,18 @@ class WeppSoilUtil(object):
             fp.write(s)
 
     def to9001(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        return self.to_over9000(replacements, 
+                                h0_min_depth=h0_min_depth, 
+                                h0_max_om=h0_max_om, hostname=hostname,
+                                version=9001)
+   
+    def to9002(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        return self.to_over9000(replacements, 
+                                h0_min_depth=h0_min_depth, 
+                                h0_max_om=h0_max_om, hostname=hostname, 
+                                version=9002)
+   
+    def to_over9000(self, replacements, h0_min_depth=None, h0_max_om=None, hostname='', version=9002):
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
             new = self.to7778()
@@ -378,7 +403,7 @@ class WeppSoilUtil(object):
             ofes.append(ofe)
 
         new.obj['ofes'] = ofes
-        new.obj['datver'] = 9001.0
+        new.obj['datver'] = version
 
         return new
          
@@ -407,165 +432,9 @@ class WeppSoilUtil(object):
     def avke(self):
         return self.obj['ofes'][0]['avke']
 
-
-
-class YamlSoil(object):
-    def __init__(self, fn):
-        if fn.endswith('.sol'):
-            self._parse_sol(fn)
-        elif fn.endswith('.yaml'):
-            self._load_yaml(fn)
-
-    def _parse_sol(self, fn):
-        with open(fn) as fp:
-            lines = fp.readlines()
-
-        header = [L.replace('#', '').strip() for L in lines if L.startswith('#')]
-        header = [L for L in header if L != '']
-        lines = [L.strip() for L in lines if not L.startswith('#')]
-
-        datver = lines[0]  # data version
-
-        if '2006' in datver or '97.3' in datver or '98.4' in datver:
-
-            solcom = lines[1]  # user comment line
-
-            line2 = lines[2].split()
-            ntemp = int(line2[0])   # number of ofes
-            ksflag = int(line2[1])  # use internal hydraulic conductivity adjustments
-
-            ofes = []
-            i = 3
-            for ofe_counter in range(ntemp):
-                line = shlex.split(lines[i])
-                slid, texid, nsl, salb, sat, ki, kr, shcrit, avke = line
-
-                nsl = int(nsl)
-
-                i += 1
-                horizons = []
-                for j in range(nsl):
-                    line = lines[i].split()
-                    solthk, sand, clay, orgmat, cec, rfg = line
-                    horizons.append(
-                        dict(solthk=try_parse(solthk), sand=try_parse(sand), clay=try_parse(clay),
-                             orgmat=try_parse(orgmat), cec=try_parse(cec), rfg=try_parse(rfg)))
-
-                    i += 1
-
-                ofes.append(
-                    dict(slid=slid.replace("'", '').replace('"', ''),
-                         texid=texid.replace("'", '').replace('"', ''),
-                         nsl=try_parse(nsl),
-                         salb=try_parse(salb),
-                         sat=try_parse(sat),
-                         ki=try_parse(ki),
-                         kr=try_parse(kr),
-                         shcrit=try_parse(shcrit),
-                         avke=try_parse(avke),
-                         horizons=horizons))
-
-            try:
-                res_lyr = lines[i].split()
-
-                if len(res_lyr) == 4:
-                    res_lyr = [res_lyr[0], res_lyr[2], res_lyr[3]]
-                res_lyr = [try_parse(res_lyr[0]), try_parse(res_lyr[1]), try_parse(res_lyr[2])]
-            except:
-                res_lyr = None
-
-        elif dataver.startswith('777'):
-
-            solcom = lines[1]  # user comment line
-
-            line2 = lines[2].split()
-            ntemp = int(line2[0])   # number of ofes
-            ksflag = int(line2[1])  # use internal hydraulic conductivity adjustments
-
-            ofes = []
-            i = 3
-            for ofe_counter in range(ntemp):
-                line = shlex.split(lines[i])
-                slid, texid, nsl, salb, sat, ki, kr, shcrit, avke = line
-
-                nsl = int(nsl)
-
-                i += 1
-                horizons = []
-                for j in range(nsl):
-                    line = lines[i].split()
-                    solthk, dbthirdbar, ksat, anisotropy, fc, wp, sand, clay, orgmat, cec, rfg = line
-                    horizons.append(
-                        dict(solthk=try_parse(solthk),
-                             dbthridbar=try_parse(dbthridbar),
-                             ksat=try_parse(ksat), 
-                             anisotropy=try_parse(anisotropy),
-                             fc=try_parse(fc),
-                             wp=try_parse(wp),
-                             sand=try_parse(sand), 
-                             clay=try_parse(clay),
-                             orgmat=try_parse(orgmat), 
-                             cec=try_parse(cec), 
-                             rfg=try_parse(rfg)))
-
-                    i += 1
-
-                ofes.append(
-                    dict(slid=slid.replace("'", '').replace('"', ''),
-                         texid=texid.replace("'", '').replace('"', ''),
-                         nsl=try_parse(nsl),
-                         salb=try_parse(salb),
-                         sat=try_parse(sat),
-                         ki=try_parse(ki),
-                         kr=try_parse(kr),
-                         shcrit=try_parse(shcrit),
-                         avke=try_parse(avke),
-                         horizons=horizons))
-
-            try:
-                res_lyr = lines[i].split()
-
-                if len(res_lyr) == 4:
-                    res_lyr = [res_lyr[0], res_lyr[2], res_lyr[3]]
-                res_lyr = [try_parse(res_lyr[0]), try_parse(res_lyr[1]), try_parse(res_lyr[2])]
-            except:
-                res_lyr = None
-
-        else:
-            raise NotImplementedError('Can only read 97.3 and 2006 soils: %s' % datver)
-
-        soil = dict(header=header,
-                    datver=datver,
-                    solcom=solcom,
-                    ntemp=ntemp,
-                    ksflag=ksflag,
-                    ofes=ofes,
-                    res_lyr=res_lyr)
-
-        yaml_txt = yaml.dump(soil)
-
-        self.obj = yaml.safe_load(yaml_txt)
-
-    def _load_yaml(self, fn):
-        with open(fn) as fp:
-            yaml_txt = fp.read()
-            self.obj = yaml.safe_load(yaml_txt)
-
-    def dump_yaml(self, dst):
-        with open(dst, 'w') as fp:
-            fp.write(yaml.dump(self.obj))
-
     @property
-    def sand(self):
-        return self.obj['ofes'][0]['horizons'][0]['sand']
-
-    @property
-    def clay(self):
-        return self.obj['ofes'][0]['horizons'][0]['clay']
-
-    @property
-    def avke(self):
-        return self.obj['ofes'][0]['avke']
+    def bd(self):
+        return self.obj['ofes'][0]['horizons'][0]['bd']
 
 
 if __name__ == "__main__":
@@ -582,7 +451,7 @@ if __name__ == "__main__":
     fp.write('slid,texid,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
     for sol_fn in sol_fns:
         print(sol_fn)
-        sol = YamlSoil(sol_fn)
+        sol = WeppSoilUtil(sol_fn)
         sol.dump_yaml(sol_fn.replace('.sol', '.sol.yaml'))
 
         ofe = sol.obj['ofes'][0]

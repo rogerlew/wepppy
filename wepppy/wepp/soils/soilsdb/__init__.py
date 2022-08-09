@@ -3,7 +3,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from glob import glob
 
-from wepppy.wepp.soils.utils import YamlSoil
+from wepppy.wepp.soils.utils import WeppSoilUtil
 
 
 _thisdir = os.path.dirname(__file__)
@@ -49,9 +49,9 @@ def read_disturbed_wepp_soil_fire_pars(simple_texture, fire_severity):
     assert fn is not None
     assert _exists(fn)
 
-    yaml_soil = YamlSoil(fn)
+    soil = WeppSoilUtil(fn)
 
-    return yaml_soil.obj['ofes'][0]
+    return soil.obj['ofes'][0]
 
 
 if __name__ == "__main__":

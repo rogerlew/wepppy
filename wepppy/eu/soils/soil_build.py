@@ -19,25 +19,18 @@ def build_esdac_soils(orders, soils_dir, res_lyr_ksat_threshold=2.0):
 
     soils = {}
     domsoil_d = {}
-    clay_d = {}
-    sand_d = {}
 
     for topaz_id, (lng, lat) in orders:
         key, h0, desc = esd.build_wepp_soil(lng, lat, soils_dir, res_lyr_ksat_threshold)
             
         if key not in soils:
-
             fname = key + '.sol'
-
             soils[key] = SoilSummary(
                 mukey=key,
                 fname=fname,
                 soils_dir=soils_dir,
                 build_date=str(datetime.now),
                 desc=desc)
-
         domsoil_d[topaz_id] = key
-        clay_d[key] = h0.clay
-        sand_d[key] = h0.sand
 
-    return soils, domsoil_d, clay_d, sand_d
+    return soils, domsoil_d

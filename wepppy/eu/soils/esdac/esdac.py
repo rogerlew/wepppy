@@ -368,7 +368,7 @@ class ESDAC:
         s.append(f"'{description}'\t\t'{h0.simple_texture}'\t"\
                  f"{num_layers}\t{salb:0.4f}\t"\
                  f"{ini_sat:0.4f}\t{h0.interrill:0.2f}\t{h0.rill:0.4f}\t"\
-                 f"{h0.shear:0.4f}\t0.0000")
+                 f"{h0.shear:0.4f}")
 
         s2 = f'{h0.depth:0.03f}\t{h0.bd:0.02f}\t{h0.ks:0.04f}\t'\
              f'{h0.anisotropy:0.01f}\t{h0.field_cap:0.04f}\t{h0.wilt_pt:0.04f}\t'\

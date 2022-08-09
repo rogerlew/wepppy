@@ -344,9 +344,11 @@ class NoDbBase(object):
             portland.on(evt)
 
         if 'seattle' in self.mods:
-            seattle = wepppy.nodb.mods.locations.SeattleMod.getInstance(self.wd)
-            seattle.on(evt)
-
+            try:
+                seattle = wepppy.nodb.mods.locations.SeattleMod.getInstance(self.wd)
+                seattle.on(evt)
+            except:
+                pass
         if 'general' in self.mods:
             general = wepppy.nodb.mods.locations.GeneralMod.getInstance(self.wd)
             general.on(evt)

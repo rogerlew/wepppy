@@ -881,16 +881,22 @@ class Wepp(NoDbBase, LogMixin):
         landuse = Landuse.getInstance(wd)
         climate = Climate.getInstance(wd)
         watershed = Watershed.getInstance(wd)
+        soils = Soils.getInstance(wd)
         years = climate.input_years
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
+        bd_d = soils.bd_d
 
         for topaz_id, man_summary in landuse.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
 
             management = man_summary.get_management()
+            sol_key = soils.domsoil_d[topaz_id]
+            management.set_bdtill(bd_d[sol_key])
+
             multi = management.build_multiple_year_man(years)
+
             fn_contents = str(multi)
 
             with open(dst_fn, 'w') as fp:
