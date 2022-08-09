@@ -2698,10 +2698,9 @@ def report_soils(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/build_soil/', methods=['POST'])
 def task_build_soil(runid, config):
     wd = get_wd(runid)
-    soils = Soils.getInstance(wd)
-
 
     try:
+        soils = Soils.getInstance(wd)
         initial_sat = float(request.form.get('initial_sat'))
         soils.build(initial_sat=initial_sat)
     except Exception as e:
@@ -2753,6 +2752,40 @@ def set_climatestation(runid, config):
     return success_factory()
 
 
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/upload_cli/', methods=['POST'])
+def task_upload_cli(runid, config):
+    wd = get_wd(runid)
+
+    ron = Ron.getInstance(wd)
+    climate = Climate.getInstance(wd)
+
+    try:
+        file = request.files['input_upload_cli']
+    except Exception:
+        return exception_factory('Could not find file')
+
+    try:
+        if file.filename == '':
+            return error_factory('no filename specified')
+
+        filename = secure_filename(file.filename)
+    except Exception:
+        return exception_factory('Could not obtain filename')
+
+    try:
+        file.save(_join(climate.cli_dir, filename))
+    except Exception:
+        return exception_factory('Could not save file')
+
+    try:
+        res = climate.set_user_defined_cli(filename)
+    except Exception:
+        return exception_factory('Failed validating file')
+
+    return success_factory()
+
+
 @app.route('/runs/<string:runid>/<config>/query/climatestation')
 @app.route('/runs/<string:runid>/<config>/query/climatestation/')
 def query_climatestation(runid, config):
@@ -2770,7 +2803,7 @@ def query_climate_has_observed(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/climate/')
 def report_climate(runid, config):
     wd = get_wd(runid)
-
+ 
     climate = Climate.getInstance(wd)
     return render_template('reports/climate.htm',
                            station_meta=climate.climatestation_meta,

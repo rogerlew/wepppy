@@ -34,7 +34,7 @@ from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
-from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, YamlSoil
+from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, WeppSoilUtil
 
 # wepppy submodules
 from .base import (
@@ -85,8 +85,6 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = None
 
             self.soils = None
-            self.clay_pct = None
-            self.liquid_limit = None
             self._subs_summary = None
             self._chns_summary = None
             
@@ -124,7 +122,13 @@ class Soils(NoDbBase):
     def getInstance(wd):
         with open(_join(wd, 'soils.nodb')) as fp:
             db = jsonpickle.decode(fp.read().replace('"simple_texture"', '"_simple_texture"')
-                                            .replace('"texture"', '"_texture"'))
+                                            .replace('"texture"', '"_texture"')
+                                            .replace('"clay_pct"', '"_deprecated_clay_pct"')
+                                            .replace('"sand"', '"_deprecated_sand"')
+                                            .replace('"avke"', '"_deprecated_avke"')
+                                            .replace('"ll"', '"_deprecated_ll"')
+                                            .replace('"liquid_limit"', '"_deprecated_liquid_limit"')
+                                            .replace('"clay"', '"_deprecated_clay"'))
             assert isinstance(db, Soils)
 
             if _exists(_join(wd, 'READONLY')):
@@ -332,10 +336,6 @@ class Soils(NoDbBase):
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
 
-            sand_d = self._sand_d(surgo_c)
-            clay_d = self._clay_d(surgo_c)
-            ll_d = self._ll_d(surgo_c)
-
             # all the mukeys might not be valid. Need to identify the most common so we can use this instead
             valid_k_counts = Counter() 
             for topaz_id, k in domsoil_d.items():
@@ -356,18 +356,12 @@ class Soils(NoDbBase):
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.wsarea
                 soils[k].pct_coverage = coverage
-                clay = clay_d[k]
-                sand = sand_d[k]
-
-                soils[k].sand = sand
-                soils[k].clay = clay
-                soils[k].ll = ll_d[k]
 
             # store the soils dict
             self.domsoil_d = domsoil_d
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = soils
-            self.clay_pct = self._calc_clay_pct(clay_d)
+#            self.clay_pct = self._calc_clay_pct(clay_d)
 
             self.dump_and_unlock()
 
@@ -396,19 +390,13 @@ class Soils(NoDbBase):
             for topaz_id, chn in watershed.chn_iter():
                 orders.append([topaz_id, chn.centroid.lnglat])
 
-            soils, domsoil_d, clay_d, sand_d = build_func(orders, soils_dir)
+            soils, domsoil_d = build_func(orders, soils_dir)
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.wsarea
                 soils[k].pct_coverage = coverage
-                clay = clay_d[k]
-                sand = sand_d[k]
-
-                soils[k].sand = sand
-                soils[k].clay = clay
-                # soils[k].ll = ll_d[k]
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -484,67 +472,37 @@ class Soils(NoDbBase):
             mofe_synth.stack = [soil_fn for i in range(nsegments)]
             mofe_synth.write(mofe_soil_fn)        
 
-    def _clay_d(self, surgo_c):
-        fp = open(_join(self.soils_dir, 'clay_rpt.log'), 'w')
-        fp.write('determining clay content for run {}\n'.format(self.wd))
-        fp.write(str(datetime.now()) + '\n\n')
+    @property
+    def bd_d(self):
+        d = {}
+        for mukey, sol_summary in self.soils.items():
+            d[mukey] = sol_summary.bd
+        return d 
 
-        clay_d = {}
-        for mukey, soil in surgo_c.weppSoils.items():
-            horizon0 = soil.getFirstHorizon()
-            if horizon0 is None:
-                clay_d[str(mukey)] = 7.0
-                cokey = None
-            else:
-                clay_d[str(mukey)] = float(horizon0.claytotal_r)
-                cokey = horizon0.cokey
+    @property
+    def clay_d(self):
+        d = {}
+        for mukey, sol_summary in self.soils.items():
+            d[mukey] = sol_summary.clay
+        return d 
 
-            fp.write('mukey={}, cokey={}, clay={}\n'.format(mukey, cokey, clay_d[str(mukey)]))
+    @property
+    def sand_d(self):
+        d = {}
+        for mukey, sol_summary in self.soils.items():
+            d[mukey] = sol_summary.clay
+        return d 
 
-        return clay_d
+    @property
+    def ll_d(self):
+        d = {}
+        for mukey, sol_summary in self.soils.items():
+            d[mukey] = sol_summary.liquid_limit
+        return d 
 
-    def _sand_d(self, surgo_c):
-        fp = open(_join(self.soils_dir, 'sand_rpt.log'), 'w')
-        fp.write('determining sand content for run {}\n'.format(self.wd))
-        fp.write(str(datetime.now()) + '\n\n')
-
-        sand_d = {}
-        for mukey, soil in surgo_c.weppSoils.items():
-            horizon0 = soil.getFirstHorizon()
-            if horizon0 is None:
-                sand_d[str(mukey)] = 66.8
-                cokey = None
-            else:
-                sand_d[str(mukey)] = float(horizon0.sandtotal_r)
-                cokey = horizon0.cokey
-
-            fp.write('mukey={}, cokey={}, clay={}\n'.format(mukey, cokey, sand_d[str(mukey)]))
-
-        return sand_d
-
-    def _ll_d(self, surgo_c):
-        fp = open(_join(self.soils_dir, 'll_rpt.log'), 'w')
-        fp.write('determining clay content for run {}\n'.format(self.wd))
-        fp.write(str(datetime.now()) + '\n\n')
-
-        ll_d = {}
-        for mukey, soil in surgo_c.weppSoils.items():
-            horizon0 = soil.getFirstHorizon()
-            if horizon0 is None:
-                ll_d[str(mukey)] = 13.2499999
-                cokey = None
-            elif isfloat(horizon0.ll_r):
-                ll_d[str(mukey)] = float(horizon0.ll_r)
-                cokey = horizon0.cokey
-            else:
-                ll_d[str(mukey)] = 13.2499999
-                cokey = None
-
-            fp.write('mukey={}, cokey={}, ll={}\n'.format(mukey, cokey, ll_d[str(mukey)]))
-
-        return ll_d
-
-    def _calc_clay_pct(self, clay_d):
+    @property
+    def clay_pct(self):
+        clay_d = self.clay_d
         domsoil_d = self.ssurgo_domsoil_d
 
         assert domsoil_d is not None
@@ -563,7 +521,9 @@ class Soils(NoDbBase):
 
         return clay_pct
 
-    def _calc_liquid_limit(self, ll_d):
+    @property
+    def liquid_limit(self):
+        ll_d = self.ll_d
 
         domsoil_d = self.domsoil_d
         assert domsoil_d is not None
@@ -574,6 +534,9 @@ class Soils(NoDbBase):
         for topaz_id, ss in watershed.sub_iter():
             mukey = domsoil_d[str(topaz_id)]
             ll = ll_d[str(mukey)]
+            if ll is None:
+                continue
+
             area = ss.area
             wsum += area * ll
             totalarea += area
@@ -649,9 +612,6 @@ class Soils(NoDbBase):
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
             soils = {str(k): v for k, v in soils.items()}
 
-            clay_d = self._clay_d(surgo_c)
-            sand_d = self._sand_d(surgo_c)
-            ll_d = self._ll_d(surgo_c)
 
             domsoil_d = {}
             for topaz_id, sub in watershed.sub_iter():
@@ -666,14 +626,6 @@ class Soils(NoDbBase):
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.area_of(topaz_id)
-
-            for k in soils:
-                clay = clay_d[k]
-                sand = sand_d[k]
-
-                soils[k].clay = clay
-                soils[k].sand = sand
-                soils[k].ll = ll_d[k]
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -712,7 +664,6 @@ class Soils(NoDbBase):
 
             sol = get_soil(key)
             fn = _split(sol)[-1]
-            yaml_soil = YamlSoil(sol)
 
             mukey = key.replace('/', '-').replace('.sol', '')
             soils = {mukey: SoilSummary(
@@ -720,10 +671,7 @@ class Soils(NoDbBase):
                 fname=fn,
                 soils_dir=soils_dir,
                 build_date=str(datetime.now()),
-                desc=key,
-                clay=yaml_soil.clay,
-                sand=yaml_soil.sand,
-                avke=yaml_soil.avke
+                desc=key
             )}
 
             shutil.copyfile(sol, _join(soils_dir, fn))
@@ -747,8 +695,7 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
 
             self.soils = soils
-            self.clay_pct = yaml_soil.clay
-            self.liquid_limit = None
+            self.clay_pct = soils[mukey].clay
 
             self.dump_and_unlock()
 
@@ -805,9 +752,6 @@ class Soils(NoDbBase):
 
             domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
 
-            sand_d = self._sand_d(surgo_c)
-            clay_d = self._clay_d(surgo_c)
-            ll_d = self._ll_d(surgo_c)
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -822,18 +766,11 @@ class Soils(NoDbBase):
                 coverage = 100.0 * soils[k].area / total_area
                 soils[k].pct_coverage = coverage
 
-                clay = clay_d[k]
-                sand = sand_d[k]
-                soils[k].clay = clay
-                soils[k].sand = sand
-                soils[k].ll = ll_d[k]
 
             # store the soils dict
             self.domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = {str(k): v for k, v in soils.items()}
-            self.clay_pct = self._calc_clay_pct(clay_d)
-            self.liquid_limit = self._calc_liquid_limit(ll_d)
 
             self.dump_and_unlock()
 

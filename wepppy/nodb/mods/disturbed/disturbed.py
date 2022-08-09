@@ -757,7 +757,7 @@ class Disturbed(NoDbBase):
                         _h0_max_om = None
  
                     soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
-                    soil_u_9001 = soil_u.to9001(replacements, h0_max_om=_h0_max_om)
+                    soil_u_9001 = soil_u.to9002(replacements, h0_max_om=_h0_max_om)
                     soil_u_9001.write(_join(soils.soils_dir, disturbed_fn))
 
                     desc = '{} - {}'.format(_soil.desc, man.disturbed_class)
@@ -765,6 +765,7 @@ class Disturbed(NoDbBase):
                                                                fname=disturbed_fn,
                                                                soils_dir=soils.soils_dir,
                                                                desc=desc,
+                                                               meta_fn=_soil.meta_fn,
                                                                build_date=str(datetime.now()))
 
                 soils.domsoil_d[topaz_id] = disturbed_mukey

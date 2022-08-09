@@ -82,7 +82,6 @@ class SlopeFile(object):
     def _determine_segments(self, d0, dend):
         i = 0
         for d in self.distances:
-            print(d0, d, dend)
             if d0 < d < dend:
                 i += 1
 

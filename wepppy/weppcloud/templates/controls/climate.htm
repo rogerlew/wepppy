@@ -2,6 +2,39 @@
 {% block form_id %}climate_form{% endblock %}
 {% block form_title %}Climate Options{% endblock %}
 {% block inputs %}
+
+<div class="hide-readonly">
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <label class="radio-inline">
+                <input type="radio" value="0" name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode != 4] }}> 
+                  Use CLIGEN</label>
+        </div>
+        <div class="col-sm-6">
+            <label class="radio-inline">
+                <input type="radio" value="1"  name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode == 4] }}> 
+                  User Defined Climate</label>
+        </div>
+    </div>
+</div>
+<div id="climate_userdefined">
+    <h4 data-toc-skip>User Defined</h4>
+    <div class="form-group row hide-readonly">
+        <div class="col-md-6">
+            <input id="input_upload_cli" name="input_upload_cli" type="file" class="file">
+        </div>
+    </div>
+    <div class="form-group row hide-readonly">
+        <div class="col-sm-4">
+            <button id="btn_upload_cli" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" 
+             onclick="Climate.getInstance().upload_cli()">Upload .cli</button>
+        </div>
+        <div class="col-sm-5">
+            <small id="hint_upload_cli"></small>
+        </div>
+    </div>
+</div>
+<div id="climate_cligen">
     <h4 data-toc-skip>Select Station</h4>
     <div class="form-group row">
         <div class="col-sm-1">
@@ -276,4 +309,5 @@
             <small id="hint_build_climate"></small>
         </div>
     </div>
+</div>
 {% endblock %}
