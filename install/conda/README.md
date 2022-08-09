@@ -109,6 +109,15 @@ e.g.
 /home/<username>/wepppy/
 ```
 
+
+#### Step 5.5 install rosetta python package
+
+Rosetta predicts van Genuchten soil water retention curve parameters utilizing a weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics. 
+
+> cd ~/miniconda3/envs/wepppy-env/lib/python3.9/site-packages/
+> git clone https://github.com/rogerlew/rosetta
+
+
 ### Step 6. Update Ubuntu and install gfortran
 
 #### Ubuntu 18.04
