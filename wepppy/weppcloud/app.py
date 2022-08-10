@@ -61,7 +61,7 @@ from wepppy.all_your_base import isfloat, isint
 from wepppy.all_your_base.geo import crop_geojson, read_raster
 from wepppy.all_your_base.dateutils import parse_datetime, YearlessDate
 
-from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup
+from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup, Disturbed
 from wepppy.nodb.preflight import preflight_check
 
 from wepppy.soils.ssurgo import NoValidSoilsException
@@ -1279,6 +1279,11 @@ def runs0(runid, config):
             rhem = None
 
         try:
+            disturbed = Disturbed.getInstance(wd)
+        except:
+            disturbed = None
+
+        try:
             ash = Ash.getInstance(wd)
         except:
             ash = None
@@ -1296,6 +1301,7 @@ def runs0(runid, config):
                                ron=ron, landuse=landuse, climate=climate,
                                wepp=wepp,
                                rhem=rhem,
+                               disturbed=disturbed,
                                ash=ash,
                                watershed=watershed,
                                unitizer_nodb=unitizer,
@@ -2706,6 +2712,11 @@ def task_build_soil(runid, config):
     try:
         soils = Soils.getInstance(wd)
         initial_sat = float(request.form.get('initial_sat'))
+
+        if 'disturbed' in soils.mods:
+            disturbed = Disturbed.getInstance(wd)
+            disturbed.sol_ver = float(request.form.get('sol_ver'))
+
         soils.build(initial_sat=initial_sat)
     except Exception as e:
         if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
@@ -3090,6 +3101,30 @@ def task_set_soils_ksflag(runid, config):
         return exception_factory('Error setting state')
 
     return success_factory()
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_disturbed_sol_ver/', methods=['POST'])
+def task_set_disturbed_sol_ver(runid, config):
+
+    try:
+        state = request.json.get('sol_ver', None)
+    except Exception:
+        return exception_factory('Error parsing state')
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        disturbed = Disturbed.getInstance(wd)
+        disturbed.sol_ver = state
+    except Exception:
+        return exception_factory('Error setting state')
+
+    return success_factory()
+
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_flowpaths', methods=['POST'])

@@ -76,6 +76,23 @@
 </label>
 </div>
             <br/><br/>
+{% if 'disturbed' in ron.mods%}
+<h5>Specify un/disturbed soil version (sol_ver)</h5>
+<div style="padding-left:3em;">
+        <div class="col-sm-5">
+            <label for="sol_ver">sol_ver</label>
+        </div>
+        <div class="col-sm-3">
+           <select class="form-control disable-readonly" 
+             id="sol_ver" name="sol_ver">
+             <option value="7778.0" {% if disturbed.sol_ver == 7778.0 %} selected {% endif %}>7778.0</option>
+             <option value="9001.0" {% if disturbed.sol_ver == 9001.0 %} selected {% endif %}>9001.0</option>
+             <option value="9002.0" {% if disturbed.sol_ver == 9002.0 %} selected {% endif %}>9002.0</option>
+           </select>     
+        </div>
+</div>
+            <br/><br/>
+{% endif %}
         </div>
     </div>
 
