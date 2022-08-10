@@ -295,6 +295,18 @@ class Disturbed(NoDbBase):
     def sol_ver(self):
         return getattr(self, '_sol_ver', 7778.0)
 
+    @sol_ver.setter
+    def sol_ver(self, value):
+        self.lock()
+  
+        try:
+            self._sol_ver = float(value)            
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     @property
     def nodata_vals(self):
         if self._nodata_vals is None:
