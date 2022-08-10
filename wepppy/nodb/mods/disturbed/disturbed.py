@@ -48,8 +48,15 @@ def read_disturbed_land_soil_lookup(fname):
     with open(fname) as fp:
         reader = csv.DictReader(fp)
         for row in reader:
-            disturbed_class = row['luse']
-            texid = row['stext']
+            try:
+                disturbed_class = row['luse']
+            except KeyError:
+                disturbed_class = row['disturbed_class']
+
+            try:
+                texid = row['stext']
+            except KeyError:
+                texid = row['texid']
 
             for k in row:
                 v = row[k]
