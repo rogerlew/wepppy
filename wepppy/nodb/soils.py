@@ -695,8 +695,6 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
 
             self.soils = soils
-            self.clay_pct = soils[mukey].clay
-
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
