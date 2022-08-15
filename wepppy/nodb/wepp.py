@@ -96,6 +96,10 @@ from .wepppost import WeppPost
 from .prep import Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
 
+from wepppy.export.prep_details import ( 
+    export_channels_prep_details, 
+    export_hillslopes_prep_details
+)
 
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
@@ -1398,6 +1402,9 @@ class Wepp(NoDbBase, LogMixin):
 
         runs_dir = self.runs_dir
         assert run_watershed(runs_dir, self.wepp_bin)
+
+        export_channels_prep_details(wd)
+        export_hillslopes_prep_details(wd)
 
         for fn in glob(_join(self.runs_dir, '*.out')):
             dst_path = _join(self.output_dir, _split(fn)[1])
