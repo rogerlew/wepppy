@@ -203,6 +203,8 @@ class Observed(NoDbBase):
 
         sim = ebe.df
         sim['Year'] = sim['year'] + year0 - 1
+        sim['Month'] = sim['mo']
+        sim['Day'] = sim['da']
         sim['Streamflow (mm)'] = chanwb.calc_streamflow(totwatsed.wsarea)
 
         # TODO: Use chan.out for daily dischange
@@ -242,7 +244,7 @@ class Observed(NoDbBase):
 
     def run_measure(self, obs, sim, measure, hillorChannel):
         sim_dates = dict([((int(yr), int(mo), int(da)), i) for i, (yr, mo, da) in
-                          enumerate(zip(sim['Year'], sim['mo'], sim['da']))])
+                              enumerate(zip(sim['Year'], sim['Month'], sim['Day']))])
 
         years = sorted(set(int(yr) for yr in obs['Year']))
         wtr_yr_d = dict((yr, i) for i, yr in enumerate(years))
