@@ -96,10 +96,6 @@ from .wepppost import WeppPost
 from .prep import Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
 
-from wepppy.export.prep_details import ( 
-    export_channels_prep_details, 
-    export_hillslopes_prep_details
-)
 
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
@@ -1395,6 +1391,10 @@ class Wepp(NoDbBase, LogMixin):
             make_watershed_run(years, wepp_ids, runs_dir)
 
     def run_watershed(self):
+        from wepppy.export.prep_details import ( 
+            export_channels_prep_details, 
+            export_hillslopes_prep_details
+        )
         wd = self.wd
         self.log('Running Watershed... ')
 
