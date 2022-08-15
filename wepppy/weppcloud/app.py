@@ -3437,10 +3437,12 @@ def report_observed(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
     ron = Ron.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/wepp/observed.htm',
                            results=observed.results,
                            ron=ron,
+                           unitizer_nodb=unitizer,
                            user=current_user)
 
 @app.route('/runs/<string:runid>/<config>/plot/observed/<selected>/')
@@ -3450,6 +3452,7 @@ def plot_observed(runid, config, selected):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     graph_series = glob(_join(wepp.observed_dir, '*.csv'))
     graph_series = [_split(fn)[-1].replace('.csv', '') for fn in graph_series]
@@ -3467,6 +3470,7 @@ def plot_observed(runid, config, selected):
                            selected=selected,
                            parseDate_fmt=parseDate_fmt,
                            ron=ron,
+                           unitizer_nodb=unitizer,
                            user=current_user)
 
 
