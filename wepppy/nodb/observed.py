@@ -35,34 +35,6 @@ def validate(Qm, Qo):
     assert len(Qo.shape) == 1
 
 
-def nse(Qm, Qo):
-    validate(Qm, Qo)
-
-    return float(1.0 - np.sum((Qm - Qo) ** 2.0) / \
-                       np.sum((Qo - np.mean(Qo)) ** 2.0))
-
-
-def r_square(Qm, Qo):
-    from scipy import stats
-    validate(Qm, Qo)
-
-    slope, intercept, r_value, p_value, std_err = stats.linregress(Qm, Qo)
-    return float(r_value ** 2.0)
-
-
-def dv(Qm, Qo):
-    validate(Qm, Qo)
-
-    return float(np.mean((Qo - Qm) / Qo * 100.0))
-
-
-def mse(Qm, Qo):
-    validate(Qm, Qo)
-
-    n = len(Qo)
-    return float(np.mean((Qo - Qm) ** 2.0))
-
-
 class ObservedNoDbLockedException(Exception):
     pass
 
@@ -291,19 +263,12 @@ class Observed(NoDbBase):
         Qm = np.array(Qm)
         Qo = np.array(Qo)
 
+        validate(Qo, Qm)
+        validate(Qo_yearly, Qm_yearly)
+
         return dict([
-            ('Daily', dict([
-                ('NSE', nse(Qm, Qo)),
-                ('R^2', r_square(Qm, Qo)),
-                ('DV', dv(Qm, Qo)),
-                ('MSE', mse(Qm, Qo))
-               ] + calculate_all_functions(Qo, Qm))),
-            ('Yearly', dict([
-                ('NSE', nse(Qm_yearly, Qo_yearly)),
-                ('R^2', r_square(Qm_yearly, Qo_yearly)),
-                ('DV', dv(Qm_yearly, Qo_yearly)),
-                ('MSE', mse(Qm_yearly, Qo_yearly))
-               ] + calculate_all_functions(Qo_yearly, Qm_yearly)))
+            ('Daily', dict(calculate_all_functions(Qo, Qm))),
+            ('Yearly', dict(calculate_all_functions(Qo_yearly, Qm_yearly)))
         ])
 
     def _write_measure(self, Qm, Qo, dates, measure, hillorChannel, dailyorYearly):
