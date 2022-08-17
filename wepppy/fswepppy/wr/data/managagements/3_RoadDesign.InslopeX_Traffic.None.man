@@ -1,0 +1,251 @@
+97.3
+#
+#	Created on 05Nov2001 by David Hall and Darrell Anderson
+#       3inslopen.man (no traffic) based on 3inslope.man 4/27/2000 from whitepine
+#	for WEPP:Road http://forest.moscowfsl.wsu.edu/fswepp/
+#       Author: W. Elliot & H. Rhee USDA Forest Service
+#
+
+3	# number of OFEs
+200	# (total) years in simulation
+
+#################
+# Plant Section #
+#################
+
+3       # looper; number of Plant scenarios
+
+#
+#       Plant scenario 1 of 3
+#
+ROAD
+Forest road covered with vegetation
+using Cropland input format
+W. Elliot 11/2001  USDA Forest Service
+1	# `landuse' - <Cropland>
+WeppWillSet
+14      23      15      2       5       10      0       0.15    0.5     0.006
+0.85    0.25    0.5     0.99    5       0       0.42    0.6
+2	# `mfo' - <Non-fragile>
+0.0074  0.0074  12      0.1     0.3     0.2     0.33    0.15    14      32
+-40     2       0
+
+#
+#       Plant scenario 2 of 3
+#
+FILL
+Forested fill slope
+using Cropland input format
+W. Elliot 11/99  USDA Forest Service
+1	# `landuse' - <Cropland>
+WeppWillSet
+14      23      150     2       5       10      0       20      0.8     0.25
+0.85    0.7     0.9     0.99    6       0       0.42    6
+2	# `mfo' - <Non-fragile>
+0.0074  0.0074  20      0.1     1       2       0.33    0.5     60      32
+-40	5	0
+
+#
+#       Plant scenario 3 of 3
+#
+FOREST
+Forest Conditions, 20-yr old forest condition is used
+using Cropland input format
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+1	# `landuse' - <Cropland>
+WeppWillSet
+14      23      150     2       5       10      0       20      0.8     0.25
+0.85    0.7     0.9     0.99    6       0       0.42    6
+2	# `mfo' - <Non-fragile>
+0.0074  0.0074  20      0.1     1       2       0.33    0.5     60      32
+-40	5	0
+
+#####################
+# Operation Section #
+#####################
+
+1	# looper; number of Operation scenarios
+
+#
+#	Operation scenario 1 of 1
+#
+ROAD 
+Blade Road Operation
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+1	1	0
+4	# `pcode' - <Other>
+0.2     4       1       1       0.02    1       0.1
+
+##############################
+# Initial Conditions Section #
+##############################
+
+3	# looper; number of Initial Conditions scenarios
+
+#
+#	Initial Conditions scenario 1 of 3
+#
+ROAD
+Initial Conditions for a vegetated forest road in Cropland Format
+W. Elliot 11/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+1.4     0.2     500     500     0       0.5
+2       # `iresd' - <FILL>
+2	# `mgmt' - <Perennial>
+1000    0.1     0.5     0.05    0
+1	# `rtyp' - <Temporary>
+0	0	0.1	0.2	0
+0.001	0.003
+
+#
+#	Initial Conditions scenario 2 of 3
+#
+FILL
+Initial conditions on a forested fill slope
+W. Elliot 11/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+1.2     0.8     500     500     0       1
+1       # `iresd' - <FOREST>
+2	# `mgmt' - <Perennial>
+1000	0.1	1	0.1	0
+1	# `rtyp' - <Temporary>
+0	0	0.1	0.2	0
+0.5	0.5
+
+#
+#	Initial Conditions scenario 3 of 3
+#
+FOREST
+Initial Forest Conditions in Cropland Format
+W. Elliot 11/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+1.2     0.8     500     500     0       1
+1       # `iresd' - <FOREST>
+2	# `mgmt' - <Perennial>
+1000	0.1	1	0.1	0
+1	# `rtyp' - <Temporary>
+0	0	0.1	0.2	0
+0.5	0.5
+
+###########################
+# Surface Effects Section #
+###########################
+
+1	# looper; number of Surface Effects scenarios
+
+#
+#	Surface Effects scenario 1 of 1
+#
+ROAD
+Bladed Road on Jun 1
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+1	# `ntill' - <number of operations>
+	152	# `mdate' - <6 /1 >
+        1       # `op' - <ROAD>
+	0.1
+	1	# `typtil' - <Primary>
+
+######################
+# Contouring Section #
+######################
+
+0	# looper; number of Contouring scenarios
+
+####################
+# Drainage Section #
+####################
+
+0	# looper; number of Drainage scenarios
+
+##################
+# Yearly Section #
+##################
+
+3	# looper; number of Yearly scenarios
+
+#
+#	Yearly scenario 1 of 3
+#
+ROAD
+Forest Road Bladed Annually
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+1       # `itype' - <ROAD>
+1       # `tilseq' - <ROAD>
+0	# `conset' - <NotUsed>
+0	# `drset' - <NotUsed>
+3	# `mgmt' - <Fallow>
+	151	# `jdharv' - <5 /31>
+	153	# `jdplt' - <6 /2 >
+	0
+	6	# `resmgmt' - <None>
+
+#
+#	Yearly scenario 2 of 3
+#
+FILL
+Limited Growth on a fill slope
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+2       # `itype' - <FILL>
+0	# `tilseq' - <NotUsed>
+0	# `conset' - <NotUsed>
+0	# `drset' - <NotUsed>
+2	# `mgmt' - <Perennial>
+        258     # `jdharv' - <9 /15>
+        121     # `jdplt' - <5 /1 >
+	0	# `jdstop' - <>
+	0
+	3	# `presmgmt' - <Not Harvested/Grazed>
+
+#
+#	Yearly scenario 3 of 3
+#
+FOREST
+Forest Conditions, 20-yr old forest condistion is used
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+
+1	# `landuse' - <Cropland>
+3       # `itype' - <FOREST>
+0	# `tilseq' - <NotUsed>
+0	# `conset' - <NotUsed>
+0	# `drset' - <NotUsed>
+2	# `mgmt' - <Perennial>
+        258     # `jdharv' - <9 /15>
+	121	# `jdplt' - <5 /1 >
+	0	# `jdstop' - <>
+	0
+	3	# `presmgmt' - <Not Harvested/Grazed>
+
+
+######################
+# Management Section #
+######################
+INSLOPE3
+Road Section to collect water and then release through
+ditch and culvert to a fill and forest for deposition
+W. Elliot & H. Rhee 1/99  USDA Forest Service
+3	# `nofe' - <number of Overland Flow Elements>
+	1	# `Initial Conditions indx' - <ROAD>
+        2       # `Initial Conditions indx' - <FILL>
+	3	# `Initial Conditions indx' - <FOREST>
+200	# `nrots' - <rotation repeats..>
+1	# `nyears' - <years in rotation>
+#
+#	Rotation 1 : year 1 to 1
+#
+	1	# `nycrop' - <plants/yr; Year of Rotation :  1 - OFE : 1>
+                1       # `YEAR indx' - <ROAD>
+	1	# `nycrop' - <plants/yr; Year of Rotation :  1 - OFE : 2>
+                2       # `YEAR indx' - <FILL>
+	1	# `nycrop' - <plants/yr; Year of Rotation :  1 - OFE : 3>
+                3       # `YEAR indx' - <FOREST>
