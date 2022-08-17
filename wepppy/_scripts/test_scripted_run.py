@@ -8,7 +8,7 @@ from time import sleep
 import wepppy
 from wepppy.nodb import *
 from os.path import join as _join
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed2
 
 from osgeo import gdal, osr
 gdal.UseExceptions()
@@ -95,8 +95,7 @@ if __name__ == '__main__':
 
         fn = _join(ron.export_dir, 'totalwatsed.csv')
 
-        totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                wepp.baseflow_opts, wepp.phosphorus_opts)
+        totwatsed = TotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
         totwatsed.export(fn)
         assert _exists(fn)
 
