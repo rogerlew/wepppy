@@ -11,8 +11,6 @@ from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
 
-from collections import OrderedDict
-
 from datetime import datetime, timedelta
 import io
 import math
@@ -26,6 +24,7 @@ import pandas as pd
 
 # wepppy submodules
 from wepppy.wepp.out import TotalWatSed2, Chanwb, Ebe
+from wepppy.all_your_base.hydro.objective_functions import calculate_all_functions
 
 from .base import NoDbBase
 from .prep import Prep
@@ -76,7 +75,7 @@ class Observed(NoDbBase):
     __name__ = 'Observed'
 
     measures = ['Streamflow (mm)',
-                'Sed. Del (kg)',
+                'Sed Del (kg)',
                 'Total P (kg)',
                 'Soluble Reactive P (kg)',
                 'Particulate P (kg)']
@@ -181,7 +180,7 @@ class Observed(NoDbBase):
     def calc_model_fit(self):
         assert self.has_observed
 
-        results = OrderedDict()
+        results = {}
         df = pd.read_csv(self.observed_fn)
 
         #
@@ -229,9 +228,14 @@ class Observed(NoDbBase):
         except FileNotFoundError:
             pass
 
+    @property
+    def stat_names(self):
+        measure0 = list(self.results['Hillslopes'].keys())[0]
+        return list(self.results['Hillslopes'][measure0]['Daily'].keys())
+
     def run_measures(self, obs, sim, hillorChannel):
 
-        results = OrderedDict()
+        results = {}
         for m in self.measures:
             if m not in obs:
                 continue
@@ -287,18 +291,19 @@ class Observed(NoDbBase):
         Qm = np.array(Qm)
         Qo = np.array(Qo)
 
-        return OrderedDict([
-            ('Daily', OrderedDict([
+        return dict([
+            ('Daily', dict([
                 ('NSE', nse(Qm, Qo)),
                 ('R^2', r_square(Qm, Qo)),
                 ('DV', dv(Qm, Qo)),
-                ('MSE', mse(Qm, Qo))])),
-            ('Yearly', OrderedDict([
+                ('MSE', mse(Qm, Qo))
+               ] + calculate_all_functions(Qo, Qm))),
+            ('Yearly', dict([
                 ('NSE', nse(Qm_yearly, Qo_yearly)),
                 ('R^2', r_square(Qm_yearly, Qo_yearly)),
                 ('DV', dv(Qm_yearly, Qo_yearly)),
                 ('MSE', mse(Qm_yearly, Qo_yearly))
-            ]))
+               ] + calculate_all_functions(Qo_yearly, Qm_yearly)))
         ])
 
     def _write_measure(self, Qm, Qo, dates, measure, hillorChannel, dailyorYearly):

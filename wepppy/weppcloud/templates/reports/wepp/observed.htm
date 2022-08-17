@@ -7,14 +7,11 @@
 <table class="table table-nonfluid">
 <thead>
   <tr>
-    <th> </th>
-    <th>Measure</th>
-    <th>NSE</th>
-    <th>R<sup>2</sup></th>
-    <th>DV</th>
-    <th>MSE</th>
-    <th> </th>
-    <th> </th>
+    <th></th>
+    <th></th>
+    {% for stat_name in stat_names %}
+    <th>{{stat_name}}</th>
+    {% endfor %}
   </tr>
 </thead>
 <tbody>

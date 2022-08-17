@@ -3441,6 +3441,7 @@ def report_observed(runid, config):
 
     return render_template('reports/wepp/observed.htm',
                            results=observed.results,
+                           stat_names=observed.stat_names,
                            ron=ron,
                            unitizer_nodb=unitizer,
                            user=current_user)
