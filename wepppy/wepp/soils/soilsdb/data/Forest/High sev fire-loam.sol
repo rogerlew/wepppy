@@ -6,8 +6,8 @@
 # 
 # 
 # wepppy.wepp.soils.utils.WeppSoilUtil 7778 migration
-#   Build Date: 2022-07-19 16:41:42.255220
-#   Source File: wepp.cloud:/workdir/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/High sev fire-loam.sol
+#   Build Date: 2022-08-17 15:47:37.561359
+#   Source File: :/workdir/wepppy/wepppy/wepp/soils/soilsdb/data/Forest2006/High sev fire-loam.sol
 # 
 # ofe=0,horizon0 bd default value of 1.4
 # ofe=0,horizon0 fc estimated using Rosetta(clay=20.0, sand=45.0, bd=None, silt=35.0)
