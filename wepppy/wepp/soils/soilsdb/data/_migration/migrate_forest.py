@@ -5,7 +5,7 @@ import os
 from wepppy.wepp.soils.utils import WeppSoilUtil
 
 if __name__ == "__main__":
-    fns = glob('../Forest/*.sol')
+    fns = glob('../Forest2006/*.sol')
     for fn in fns:
         fn = os.path.abspath(fn)
         print(fn)
@@ -13,4 +13,4 @@ if __name__ == "__main__":
 
         soil = WeppSoilUtil(fn)
         new = soil.to7778()
-        new.write7778(f'../Forest7778/{tail}')
+        new.write(f'../Forest/{tail}')

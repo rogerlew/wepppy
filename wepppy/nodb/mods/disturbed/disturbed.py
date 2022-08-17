@@ -22,6 +22,8 @@ import math
 import numpy as np
 from osgeo import gdal
 
+from deprecated import deprecated
+
 from wepppy.all_your_base import isint, isfloat
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
 from wepppy.soils.ssurgo import SoilSummary
@@ -90,7 +92,7 @@ def _replace_parameter(original, replacement):
     else:
         return replacement
 
-
+@deprecated
 def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_max_om=None):
     """
     Creates a new soil file based on soil_in_fname and makes replacements
@@ -736,89 +738,8 @@ class Disturbed(NoDbBase):
         return _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
 
     def modify_soils(self):
+        wd = self.wd
         sol_ver = self.sol_ver
-        if sol_ver == 7778.0:
-            self._modify_soils_7778()
-        else:
-            assert sol_ver > 9000.0
-            self._modify_soils_over9000()
-
-    def _modify_soils_7778(self):
-        wd = self.wd
-
-        ron = Ron.getInstance(wd)
-        landuse = Landuse.getInstance(wd)
-        soils = Soils.getInstance(wd)
-
-        _lookup_fn = self.lookup_fn
-        if not _exists(_lookup_fn):
-            shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'), _lookup_fn)
-
-        _land_soil_replacements_d = read_disturbed_land_soil_lookup(_lookup_fn)
-
-        try:
-            soils.lock()
-
-            for topaz_id, mukey in soils.domsoil_d.items():
-                dom = landuse.domlc_d[topaz_id]
-                man = landuse.managements[dom] 
-
-                _soil = soils.soils[mukey]
-                clay = _soil.clay
-                sand = _soil.sand
-
-                assert isfloat(clay), clay
-                assert isfloat(sand), sand
-
-                texid = simple_texture(clay=clay, sand=sand)
-
-                key = (texid, man.disturbed_class)
-                if key not in _land_soil_replacements_d:
-                    continue
-
-                disturbed_mukey = '{}-{}-{}'.format(mukey, texid, man.disturbed_class)
-
-                if disturbed_mukey not in soils.soils:
-                    disturbed_fn = disturbed_mukey + '.sol'
-                    replacements = _land_soil_replacements_d[key]
- 
-                    if 'fire' in man.disturbed_class:
-                        _h0_max_om = self.h0_max_om
-                    else:
-                        _h0_max_om = None
-
-                    disturbed_soil_specialization(_join(soils.soils_dir, _soil.fname),
-                                                  _join(soils.soils_dir, disturbed_fn),
-                                                  replacements, h0_max_om=_h0_max_om)
-                    desc = '{} - {}'.format(_soil.desc, man.disturbed_class)
-                    soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
-                                                               fname=disturbed_fn,
-                                                               soils_dir=soils.soils_dir,
-                                                               desc=desc,
-                                                               build_date=str(datetime.now()))
-
-                soils.domsoil_d[topaz_id] = disturbed_mukey
-
-            # need to recalculate the pct_coverages
-            watershed = Watershed.getInstance(self.wd)
-            for topaz_id, k in soils.domsoil_d.items():
-                if soils.soils[k].area is None:
-                    soils.soils[k].area = 0.0
-                soils.soils[k].area += watershed.area_of(topaz_id)
-
-            for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / watershed.wsarea
-                soils.soils[k].pct_coverage = coverage
-
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
-
-    def _modify_soils_over9000(self):
-
-        wd = self.wd
 
         ron = Ron.getInstance(wd)
         landuse = Landuse.getInstance(wd)
@@ -862,9 +783,13 @@ class Disturbed(NoDbBase):
                         _h0_max_om = None
  
                     soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
-                    soil_gt9000 = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om, 
-                                                     version=self.sol_ver)
-                    soil_gt9000.write(_join(soils.soils_dir, disturbed_fn))
+                    if sol_ver == 7778.0:
+                        new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+                    else:
+                        new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om, 
+                                                     version=sol_ver)
+    
+                    new.write(_join(soils.soils_dir, disturbed_fn))
 
                     desc = '{} - {}'.format(_soil.desc, man.disturbed_class)
                     soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
