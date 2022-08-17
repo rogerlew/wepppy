@@ -322,6 +322,73 @@ class WeppSoilUtil(object):
         with open(fn, 'w') as fp:
             fp.write(s)
 
+    def to_7778disturbed(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        new = deepcopy(self)
+        if new.obj['datver'] != 7778.0:
+            new = self.to7778()
+
+        del replacements['ksflag']
+        del replacements['ksatadj']
+        del replacements['ksatfac']
+        del replacements['ksatrec']
+
+        header = new.obj['header']
+        header.append('')
+        header.append('wepppy.wepp.soils.utils.WeppSoilUtil 7778disturbed migration')
+        header.append('  Build Date: ' + str(datetime.now()))
+        header.append(f'  Source File: {hostname}:{self.fn}' )
+        header.append('')
+        header.append('  Replacements')
+        header.append('  --------------------------')
+        for k, v in replacements.items():
+            header.append(f'  {k} -> {v}')
+        header.append('')
+        header.append(f'  h0_min_depth = {h0_min_depth}')
+        header.append(f'  h0_max_om = {h0_max_om}')
+        header.append('')
+
+        _ki = replacements.get('ki', None)
+        _kr = replacements.get('kr', None)
+        _ksat = replacements.get('avke', None)
+        if not _ksat:
+            _ksat = replacements.get('ksat', None)
+        _shcrit = replacements.get('shcrit', None)
+        _kslast = replacements.get('kslast', None)
+        _luse = replacements.get('luse', None)
+        _stext = replacements.get('stext', None)
+       
+        ofes = []
+        for i, ofe in enumerate(new.obj['ofes']):
+            ofe['ki'] = _replace_parameter(ofe['ki'], _ki)
+            ofe['kr'] = _replace_parameter(ofe['kr'], _kr)
+            ofe['shcrit'] = _replace_parameter(ofe['shcrit'], _shcrit)
+            ofe['luse'] = _replace_parameter(ofe['luse'], _luse)
+            ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
+
+            horizons = []
+            for j, horizon in enumerate(ofe['horizons']):
+                solthk = horizon['solthk']
+                if j == 0 and h0_min_depth is not None:
+                    solthk = horizon['solthk'] = _replace_parameter(solthk, max(solthk, h0_min_depth))
+                   
+                if j == 0 or solthk < 200:
+                    horizon['ksat'] = _replace_parameter(horizon['ksat'], _ksat)
+
+                if j == 0 and h0_max_om is not None:
+                    if horizon['om'] < h0_max_om:
+                        horizons.append(horizon)
+                else:
+                    horizons.append(horizon)
+
+            ofe['horizons'] = horizons
+
+            ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
+            ofes.append(ofe)
+
+        new.obj['ofes'] = ofes
+
+        return new
+
     def to9001(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
         return self.to_over9000(replacements, 
                                 h0_min_depth=h0_min_depth, 
