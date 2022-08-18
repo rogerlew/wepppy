@@ -72,7 +72,9 @@ def read_disturbed_land_soil_lookup(fname):
 
 
 def write_disturbed_land_soil_lookup(fname, data):
-    fieldnames = 'disturbed_class,texid,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk'.split(',')
+    with open(fname) as fp:
+        rdr = csv.DictReader(fp)
+        fieldnames = rdr.fieldnames
 
     with open(fname, 'w') as fp:
         wtr = csv.DictWriter(fp, fieldnames)
