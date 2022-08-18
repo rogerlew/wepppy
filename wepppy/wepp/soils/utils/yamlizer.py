@@ -327,10 +327,17 @@ class WeppSoilUtil(object):
         if new.obj['datver'] != 7778.0:
             new = self.to7778()
 
-        del replacements['ksflag']
-        del replacements['ksatadj']
-        del replacements['ksatfac']
-        del replacements['ksatrec']
+        if 'ksflag' in replacements:
+            del replacements['ksflag']
+
+        if 'ksatadj' in replacements:
+            del replacements['ksatadj']
+
+        if 'ksatfac' in replacements:
+            del replacements['ksatfac']
+
+        if 'ksatrec' in replacements:
+            del replacements['ksatrec']
 
         header = new.obj['header']
         header.append('')
