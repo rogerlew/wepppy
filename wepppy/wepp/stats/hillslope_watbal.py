@@ -75,9 +75,14 @@ class HillslopeWatbal(ReportBase):
             wat_df = pd.read_pickle(stats_fn)
                 
             area = wat_df.attrs['area']
-            wat_df.columns = ['Precipitation (mm)', 'Surface Runoff (mm)', 'Lateral Flow (mm)',
-                              'Transpiration + Evaporation (mm)', 'Percolation (mm)']
-                
+
+            wat_df.columns = wat_df.columns.str.replace('Dp', 'Percolation')
+            # TODO: this replacement doesn't work
+            wat_df.columns = wat_df.columns.str.replace('Ep\+Es\+Er', 'Transpiration + Evaporation')
+            wat_df.columns = wat_df.columns.str.replace('P', 'Precipitation')
+            wat_df.columns = wat_df.columns.str.replace('QOFE', 'Surface Runoff')
+            wat_df.columns = wat_df.columns.str.replace('latqcc', 'Lateral Flow')
+
             # initialize the water
             d[topaz_id] = wat_df
             areas[topaz_id] = area
