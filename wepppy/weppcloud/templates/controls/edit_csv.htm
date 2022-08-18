@@ -57,9 +57,11 @@ document.getElementById('save').onclick = function () {
                 contentType: "application/text",
                 dataType: "json",
                 success: function success(response) {
+                    alert('Save Successful');
                 },
                 error: function error(jqXHR)  {
                     console.log(jqXHR.responseJSON);
+                    alert('Save Error, see log');
                 },
                 fail: function fail(error) {
                 }
