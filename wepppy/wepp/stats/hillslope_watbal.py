@@ -76,6 +76,10 @@ class HillslopeWatbal(ReportBase):
                 
             area = wat_df.attrs['area']
 
+            # reorder columns
+            wat_df = wat_df[['P (mm)', 'Dp (mm)', 'QOFE (mm)', 'latqcc (mm)', 'Ep+Es+Er (mm)']]
+
+            # rename columns
             wat_df.columns = wat_df.columns.str.replace('Ep\+Es\+Er', 'Transpiration + Evaporation')
             wat_df.columns = wat_df.columns.str.replace('P', 'Precipitation')
             wat_df.columns = wat_df.columns.str.replace('QOFE', 'Surface Runoff')
