@@ -201,10 +201,10 @@ ulimit -n 4096
 ~~~
 
 A more persistent solution is to set the default limits via /etc/security/limits.conf
-~
+```
 <username>       soft    nofile          4096
 <username>       hard    nofile          4096
-~
+```
 
 more info:
 https://www.tecmint.com/increase-set-open-file-limits-in-linux/
