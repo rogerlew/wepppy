@@ -176,7 +176,7 @@ python3-memcached==1.51
 pytz==2018.3
 PyWavelets==1.1.1
 pyxdg==0.25
-PyYAML==3.12
+PyYAML==5.4
 pyzmq==20.0.0
 qrcode==6.1
 rasterio==1.2.10
