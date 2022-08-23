@@ -2,7 +2,7 @@
 
 ### (Optional) Step 1. Install on Windows Subsystem for Linux
 
-Ubuntu 18.04 WSL
+Ubuntu 20.04 WSL
 
 https://docs.microsoft.com/en-us/windows/wsl/install
 
