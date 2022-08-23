@@ -38,7 +38,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     while txt is None and attempts < 10:
         r = requests.get(url)
 
-        if r.status_code is not 200:
+        if r.status_code != 200:
             attempts += 1
             continue
 
