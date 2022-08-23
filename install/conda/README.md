@@ -74,6 +74,9 @@ Install git-lfs
 sudo apt-get install git-lfs
 ```
 
+If that command files need to add the repository first:
+https://askubuntu.com/a/799451
+
 Then clone wepppy repository
 
 ```
