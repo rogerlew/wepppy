@@ -37,6 +37,19 @@ After it completes close Ubuntu shell and then reopen it
 
 ### Step 4. Build conda-wepppy-env
 
+```
+> conda create --name wepppy-env
+```
+
+```
+> conda update -n base -c defaults conda
+```
+
+Activate the weppy-env
+
+```
+> conda activate wepppy-env
+```
 
 Download conda-wepppy-env.yaml file
 
@@ -50,11 +63,6 @@ Run
 > conda install --file requirements.txt
 ```
 
-Activate the weppy-env
-
-```
-> conda activate wepppy-env
-```
 
 ### Step 5. Install wepppy
 
