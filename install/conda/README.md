@@ -17,19 +17,19 @@ Go to https://docs.conda.io/en/latest/miniconda.html#linux-installers and get ur
 In Ubuntu shell wget the installer
 
 ```
-> wget https://repo.anaconda.com/miniconda/Miniconda3-py37_4.11.0-Linux-x86_64.sh
+> wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 ```
 
 Set the script as executable
 
 ```
-> sudo chmod +x Miniconda3-py37_4.11.0-Linux-x86_64.sh
+> sudo chmod +x Miniconda3-latest-Linux-x86_64.sh
 ```
 
 Run the installer
 
 ```
-> ./Miniconda3-py37_4.11.0-Linux-x86_64.sh
+> ./Miniconda3-latest-Linux-x86_64.sh
 ```
 
 After it completes close Ubuntu shell and then reopen it
