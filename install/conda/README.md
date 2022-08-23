@@ -41,13 +41,13 @@ After it completes close Ubuntu shell and then reopen it
 Download conda-wepppy-env.yaml file
 
 ```
-> wget https://raw.githubusercontent.com/rogerlew/wepppy/master/install/conda/conda-wepppy-env.yaml
+> wget https://raw.githubusercontent.com/rogerlew/wepppy/master/install/conda/requirements.txt
 ```
 
 Run
 
 ```
-> conda env create -f conda-wepppy-env.yaml
+> conda install --file requirements.txt
 ```
 
 Activate the weppy-env
