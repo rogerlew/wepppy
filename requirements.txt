@@ -222,7 +222,7 @@ transforms3d==0.3.1
 ubuntu-advantage-tools==27.2
 ufw==0.36
 unattended-upgrades==0.1
-urllib3==1.24.2
+urllib3==1.26.5
 usgs==0.3.0
 utm==0.6.0
 wadllib==1.3.2
