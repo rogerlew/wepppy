@@ -330,6 +330,7 @@ class ClimateFile(object):
         self.cli_fn = cli_fn
         with open(cli_fn) as fp:
             lines = fp.readlines()
+        lines = [L for L in lines if L.strip() != '']
 
         _ = lines[4].split()
         self.lat = float(_[0])
@@ -338,17 +339,39 @@ class ClimateFile(object):
 
         i = 0
         for i, L in enumerate(lines):
-            if 'da mo year' in L:
+            if L.strip().lower().startswith('da'):
                 break
 
         header = lines[:i]
+
+        # attempt to standardize column labels
+        lines[i] = lines[i].lower() \
+                           .replace('day', ' da') \
+                           .replace('month', 'mo') \
+                           .replace('mon', ' mo') \
+                           .replace(' dew', 'tdew') \
+                           .replace('w-vel', ' w-vl') \
+                           .replace('t-max', ' tmax') \
+                           .replace('t-min', ' tmin') \
+                           .replace('breaks', 'nbrkpt')
+
         colnames = [v.strip() for v in lines[i].split()]
 
-        assert ' '.join(colnames) == \
-               'da mo year prcp dur tp ip tmax tmin rad w-vl w-dir tdew', colnames
+        if len(colnames) == 10:
+            assert 'nbrkpt' in colnames, lines[:15]
+            self.breakpoint = True
 
-        self.dtypes = [int, int, int, float, float, float, float,
-                       float, float, float, float, float, float]
+            #              day  month year nbrkpt tmax   tmin   rad
+            self.dtypes = [int, int,  int, int,   float, float, float,
+            #              w-vel  w-dir  dew
+                           float, float, float]
+        else:
+            assert ' '.join(colnames) == \
+                   'da mo year prcp dur tp ip tmax tmin rad w-vl w-dir tdew', colnames
+            self.breakpoint = False
+            self.dtypes = [int, int, int, float, float, float, float,
+                           float, float, float, float, float, float]
+
         self.data0line = i + 2
         self.lines = lines
         self.header = header
@@ -407,6 +430,9 @@ class ClimateFile(object):
         :param scale:
         :return:
         """
+        if self.breakpoint:
+            raise NotImplementedError()
+
         df = self.as_dataframe()
         _dates = [(int(row.year), int(row.mo), int(row.da)) for i, row in df.iterrows()]
 
@@ -423,22 +449,31 @@ class ClimateFile(object):
         supports the post processing of wepp files generated from
         daily observed or future data
         """
-#        if colname in ['da', 'mo', 'year', 'prcp', 'tmax', 'tmin']:
-#            raise ValueError('Cannot replace column "%s"' % colname)
+        breakpoint = self.breakpoint
 
-        assert colname in self.colnames
-        col_index = self.colnames.index(colname)
+        colnames = self.colnames
+        data0line = self.data0line
+
+        assert colname in colnames or colname == 'prcp'
+        if colname in colnames:
+            col_index = colnames.index(colname)
+        else:
+            col_index = None
 
         d = dict(zip(dates, values))
 
         is_datetime = isinstance(dates[0], datetime.datetime)
 
-        for i, L in enumerate(self.lines[self.data0line:]):
+        for i, L in enumerate(self.lines[data0line:]):
             row = [v.strip() for v in L.split()]
             if L.strip() == '':
                 break
 
-            assert len(row) == len(self.colnames), (len(row), row, len(self.colnames), self.colnames)
+            if breakpoint:
+                if len(row) == 2 and len(row) != len(colnames):
+                    continue
+
+            assert len(row) == len(colnames), (row, colnames)
 
             day, month, year = [int(v) for v in row[:3]]
 
@@ -451,21 +486,41 @@ class ClimateFile(object):
             if value is None:
                 continue
 
-            row[col_index] = str(value)
+            if breakpoint and colname == 'prcp':
+                nbrkpt = int(row[3])
+                if nbrkpt > 0:
+                    x = self.lines[data0line + i + nbrkpt].split()
+                    timem, pptcum = x
+                    pptcum = float(pptcum)
+                    ratio = value / pptcum
 
-            for j, (c, v) in enumerate(zip(self.colnames, row)):
-                if c in ['da', 'mo', 'year']:
-                    row[j] = '%i' % int(v)
-                elif c in ['rad', 'w-dir']:
-                    row[j] = '%.f' % float(v)
+                    for j in range(nbrkpt):
+                        index = data0line + i + j + 1
+                        x = self.lines[index].split()
+                        _timem, _pptcum = x
+                        _pptcum = float(_pptcum) * ratio
+                        self.lines[index] = '{timem} {pptcum:>9}\n'.format(timem=_timem, pptcum=f'{_pptcum:.3f}')
+            else:
+                row[col_index] = str(value)
+
+                for j, (c, v) in enumerate(zip(colnames, row)):
+                    if c in ['da', 'mo', 'year', 'nbrkpt']:
+                        row[j] = '%i' % int(v)
+                    elif c in ['rad', 'w-dir']:
+                        row[j] = '%.f' % float(v)
+                    else:
+                        row[j] = '%.1f' % float(v)
+
+                if breakpoint:
+                    row = '{0:>5}{1:>4}{2:>6}{3:>4}{4:>9}{5:>8}{6:>6}'\
+                          '{7:>8}{8:>7}{9:>6}\n'\
+                          .format(*row)
                 else:
-                    row[j] = '%.1f' % float(v)
+                    row = '{0:>3}{1:>3}{2:>5}{3:>6}{4:>6}{5:>5}{6:>7}'\
+                          '{7:>6}{8:>6}{9:>5}{10:>5}{11:>6}{12:>6}\n'\
+                          .format(*row)
 
-            row = '{0:>3}{1:>3}{2:>5}{3:>6}{4:>6}{5:>5}{6:>7}'\
-                  '{7:>6}{8:>6}{9:>5}{10:>5}{11:>6}{12:>6}\n'\
-                  .format(*row)
-
-            self.lines[self.data0line + i] = row
+                self.lines[data0line + i] = row
 
     @property
     def years(self):
@@ -503,30 +558,57 @@ class ClimateFile(object):
                          .format(i+1, da, mo, year, prcp, dur, tp, ip))
 
     def as_dataframe(self, calc_peak_intensities=False):
+        breakpoint = self.breakpoint
         colnames = self.colnames
+        data0line = self.data0line
+
         dtypes = self.dtypes
         d = {}
         for name in colnames:
             d[name] = []
+
+        if breakpoint:
+            d['prcp'] = []
 
         if calc_peak_intensities:
             d['10-min Peak Rainfall Intensity (mm/hour)'] = []
             d['30-min Peak Rainfall Intensity (mm/hour)'] = []
             d['60-min Peak Rainfall Intensity (mm/hour)'] = []
 
-        for i, L in enumerate(self.lines[self.data0line:]):
+        for i, L in enumerate(self.lines[data0line:]):
             row = [v.strip() for v in L.split()]
             if L.strip() == '':
                 break
 
-            assert len(row) == len(self.colnames), (len(row), len(self.colnames))
+            if breakpoint:
+                if len(row) == 2 and len(row) != len(colnames):
+                    continue
+
+            assert len(row) == len(colnames), (len(row), len(colnames))
 
             for dtype, name, v in zip(dtypes, colnames, row):
                 d[name].append(dtype(v))
 
+            if breakpoint:
+                nbrkpt = d['nbrkpt'][-1]
+                if nbrkpt > 0:
+                    x = self.lines[data0line + i + nbrkpt].split()
+                    assert len(x) == 2, (data0line, i, nbrkpt)
+                    timem, pptcum = x
+                    timem = float(timem)
+                    pptcum = float(pptcum)
+                    d['prcp'].append(pptcum)
+                else:
+                    d['prcp'].append(0.0)
+
             if calc_peak_intensities:
                 max_time = [10, 30, 60]
-                intensities = cli2pat(prcp=d['prcp'][-1], dur=d['dur'][-1], tp=d['tp'][-1], ip=d['ip'][-1], max_time=max_time)
+                intensities = cli2pat(prcp=d['prcp'][-1], 
+                                      dur=d['dur'][-1], 
+                                      tp=d['tp'][-1], 
+                                      ip=d['ip'][-1], 
+                                      max_time=max_time)
+
                 d['10-min Peak Rainfall Intensity (mm/hour)'].append(intensities[0])
                 d['30-min Peak Rainfall Intensity (mm/hour)'].append(intensities[1])
                 d['60-min Peak Rainfall Intensity (mm/hour)'].append(intensities[2])
