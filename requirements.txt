@@ -73,7 +73,7 @@ itsdangerous==2.0.1
 jedi==0.11.1
 jenkspy==0.2.0
 Jinja2==3.0.2
-joblib==1.0.1
+joblib==1.2.0
 json5==0.9.5
 jsonpickle==1.4.1
 jsonschema==3.2.0
