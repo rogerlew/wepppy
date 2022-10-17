@@ -24,6 +24,19 @@
             <input id="input_upload_cli" name="input_upload_cli" type="file" class="file">
         </div>
     </div>
+    <div id="climate_spatialmode_controls">
+        <h5>Spatial Mode</h5>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}> Single Climate
+                    <a data-toggle="tooltip" data-placement="top" title="One per watershed."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates (this is slow)
+                    <a data-toggle="tooltip" data-placement="top" title="One for each hillslope."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+            </div>
+        </div>
+    </div>
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_upload_cli" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" 

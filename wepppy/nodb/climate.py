@@ -230,6 +230,8 @@ class Climate(NoDbBase, LogMixin):
             self._ss_time_to_peak_intensity_pct = 0.4
             self._ss_max_intensity_inches_per_hour = 3.0
 
+            self._orig_cli_fn = None
+
             self.monthlies = None
             self.par_fn = None
             self.cli_fn = None
@@ -267,7 +269,7 @@ class Climate(NoDbBase, LogMixin):
     @staticmethod
     def getInstance(wd):
         with open(_join(wd, 'climate.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
+            db = jsonpickle.decode(fp.read().replace('"orig_cli_fn"', '"_orig_cli_fn"'))
             assert isinstance(db, Climate)
 
             if _exists(_join(wd, 'READONLY')):
@@ -619,6 +621,24 @@ class Climate(NoDbBase, LogMixin):
         return [s.as_dict() for s in self._heuristic_stations]
 
     @property
+    def orig_cli_fn(self):
+        return self._orig_cli_fn
+
+    @orig_cli_fn.setter
+    def orig_cli(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self._orig_cli_fn = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
     def input_years(self):
         return self._input_years
 
@@ -679,7 +699,7 @@ class Climate(NoDbBase, LogMixin):
                 else:
                     cli_path = kwds['climate_future_selection']
                 assert _exists(cli_path)
-                self.orig_cli_fn = cli_path
+                self._orig_cli_fn = cli_path
 
             self._climate_mode = climate_mode
             self._climate_spatialmode = climate_spatialmode
@@ -703,41 +723,6 @@ class Climate(NoDbBase, LogMixin):
 
         # mode 4: single storm
         self.set_single_storm_pars(**kwds)
-    """
-    def set_original_climate_fn(self, **kwds):
-        set the localized pars.
-        must provide named keyword args to avoid mucking this up
-
-        The kwds are coded such that:
-            0 for station data
-            1 for Daymet
-            2 for prism
-        
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            self.orig_cli_fn = kwds['climate_fn']
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-    """
-
-    def set_orig_cli_fn(self, cli_fn):
-
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            self.orig_cli_fn = cli_fn
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def set_observed_pars(self, **kwds):
         self.lock()
@@ -896,7 +881,7 @@ class Climate(NoDbBase, LogMixin):
         if not watershed.is_abstracted:
             raise WatershedNotAbstractedError()
 
-        if self.climatestation is None:
+        if self.climatestation is None and self.orig_cli_fn is None:
             raise NoClimateStationSelectedError()
 
         cli_dir = self.cli_dir
@@ -978,7 +963,12 @@ class Climate(NoDbBase, LogMixin):
 
             cli_fn = _split(orig_cli_fn)[1]
             cli_path = _join(cli_dir, cli_fn)
-            copyfile(orig_cli_fn, cli_path)
+            try:
+                copyfile(orig_cli_fn, cli_path)
+            except shutil.SameFileError:
+                pass
+
+            self.cli_fn = cli_fn
             assert _exists(cli_path)
             self.log_done()
 
@@ -1119,9 +1109,9 @@ class Climate(NoDbBase, LogMixin):
         try:
 
             self.log('  running set_userdefined_cli... ')
-            self.cli_fn = cli_fn
-            cli_path = self.cli_path
-            cli = ClimateFile(cli_path)
+            self._orig_cli_fn = _join(self.cli_dir, cli_fn)
+#            cli_path = self.cli_path
+            cli = ClimateFile(self.orig_cli_fn)
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
             self.dump_and_unlock()
@@ -1130,6 +1120,8 @@ class Climate(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
+        self._build_climate_observed_cli_PRISM(verbose=verbose)
 
     def _build_climate_vanilla(self, verbose=False, attrs=None):
         self.lock()
