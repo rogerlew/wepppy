@@ -71,8 +71,8 @@ WeppWillSet
 #
 ROAD 
 Blade Road Operation
-W. Elliot & H. Rhee 1/99  USDA Forest Service
-
+W. Elliot & H. Rhee 1/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 1	1	0
 4	# `pcode' - <Other>
@@ -89,8 +89,8 @@ W. Elliot & H. Rhee 1/99  USDA Forest Service
 #
 ROAD
 Initial Conditions for a vegetated forest road in Cropland Format
-W. Elliot 11/99  USDA Forest Service
-
+W. Elliot 11/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 1.4     0.2     500     500     0       0.5
 2       # `iresd' - <FILL>
@@ -105,8 +105,8 @@ W. Elliot 11/99  USDA Forest Service
 #
 FILL
 Initial conditions on a forested fill slope
-W. Elliot 11/99  USDA Forest Service
-
+W. Elliot 11/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 1.2     0.8     500     500     0       1
 1       # `iresd' - <FOREST>
@@ -121,8 +121,8 @@ W. Elliot 11/99  USDA Forest Service
 #
 FOREST
 Initial Forest Conditions in Cropland Format
-W. Elliot 11/99  USDA Forest Service
-
+W. Elliot 11/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 1.2     0.8     500     500     0       1
 1       # `iresd' - <FOREST>
@@ -143,8 +143,8 @@ W. Elliot 11/99  USDA Forest Service
 #
 ROAD
 Bladed Road on Jun 1
-W. Elliot & H. Rhee 1/99  USDA Forest Service
-
+W. Elliot & H. Rhee 1/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 1	# `ntill' - <number of operations>
 	152	# `mdate' - <6 /1 >
@@ -175,8 +175,8 @@ W. Elliot & H. Rhee 1/99  USDA Forest Service
 #
 ROAD
 Forest Road Bladed Annually
-W. Elliot & H. Rhee 1/99  USDA Forest Service
-
+W. Elliot & H. Rhee 1/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 1       # `itype' - <ROAD>
 1       # `tilseq' - <ROAD>
@@ -193,8 +193,8 @@ W. Elliot & H. Rhee 1/99  USDA Forest Service
 #
 FILL
 Limited Growth on a fill slope
-W. Elliot & H. Rhee 1/99  USDA Forest Service
-
+W. Elliot & H. Rhee 1/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 2       # `itype' - <FILL>
 0	# `tilseq' - <NotUsed>
@@ -212,8 +212,8 @@ W. Elliot & H. Rhee 1/99  USDA Forest Service
 #
 FOREST
 Forest Conditions, 20-yr old forest condistion is used
-W. Elliot & H. Rhee 1/99  USDA Forest Service
-
+W. Elliot & H. Rhee 1/99  
+USDA Forest Service
 1	# `landuse' - <Cropland>
 3       # `itype' - <FOREST>
 0	# `tilseq' - <NotUsed>
@@ -230,15 +230,15 @@ W. Elliot & H. Rhee 1/99  USDA Forest Service
 ######################
 # Management Section #
 ######################
-OUTSLOPE3
-Road Section to collect water and then release over fill-
-slope to a forest for deposition
-W. Elliot & H. Rhee 1/99  USDA Forest Service
+RUTTED3
+Road Section for water to follow ruts, and release over fill-slope to a forest for deposition
+W. Elliot & H. Rhee 1/99  
+USDA Forest Service
 3	# `nofe' - <number of Overland Flow Elements>
 	1	# `Initial Conditions indx' - <ROAD>
         2       # `Initial Conditions indx' - <FILL>
 	3	# `Initial Conditions indx' - <FOREST>
-200	# `nrots' - <rotation repeats..>
+1	# `nrots' - <rotation repeats..>
 1	# `nyears' - <years in rotation>
 #
 #	Rotation 1 : year 1 to 1

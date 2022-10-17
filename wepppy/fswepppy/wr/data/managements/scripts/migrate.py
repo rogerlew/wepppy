@@ -9,10 +9,10 @@ _lookup = {
     '3outunr.man': '3_RoadDesign.OutslopeUnrutted_Traffic.LowOrHigh.man',
     '3outrut.man': '3_RoadDesign.OutslopeRutted_Traffic.LowOrHigh.man',
     '3outrut.man': '3_RoadDesign.OutslopeRutted_Traffic.LowOrHigh.man',
-    '3inslopen.man': '3_RoadDesign.InslopeX_Traffic.None.man',
-    '3outunrn.man': '3_RoadDesign.OutslopeUnrutted_Traffic.None.man',
-    '3outrutn.man': '3_RoadDesign.OutslopeRutted_Traffic.None.man',
-    '3outrutn.man': '3_RoadDesign.OutslopeRutted_Traffic.None.man',
+    '3inslopen.man': '3_RoadDesign.InslopeX_Traffic.NONE.man',
+    '3outunrn.man': '3_RoadDesign.OutslopeUnrutted_Traffic.NONE.man',
+    '3outrutn.man': '3_RoadDesign.OutslopeRutted_Traffic.NONE.man',
+    '3outrutn.man': '3_RoadDesign.OutslopeRutted_Traffic.NONE.man',
 }
 
 _symlinks = {
@@ -30,9 +30,9 @@ _symlinks = {
     '3_RoadDesign.OutslopeRutted_Traffic.Low.man',
     '3_RoadDesign.OutslopeRutted_Traffic.High.man',
    ),
-  '3_RoadDesign.InslopeX_Traffic.None.man': (
-    '3_RoadDesign.InslopeBare_Traffic.None.man',
-    '3_RoadDesign.InslopeVegetated_Traffic.None.man',
+  '3_RoadDesign.InslopeX_Traffic.NONE.man': (
+    '3_RoadDesign.InslopeBare_Traffic.NONE.man',
+    '3_RoadDesign.InslopeVegetated_Traffic.NONE.man',
    )
 }
 

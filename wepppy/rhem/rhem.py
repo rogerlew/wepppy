@@ -256,7 +256,7 @@ def run_hillslope(topaz_id, runs_dir):
     _log = open(_join(runs_dir, 'hill_{}.err'.format(topaz_id)), 'w')
 
     p = subprocess.Popen(cmd, stdout=_log, stderr=_log, cwd=runs_dir)
-    p.wait()
+    p.wait(timeout=90)
     _log.close()
 
     return True, topaz_id, time() - t0

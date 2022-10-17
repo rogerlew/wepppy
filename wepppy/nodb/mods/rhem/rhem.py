@@ -214,18 +214,22 @@ class Rhem(NoDbBase, LogMixin):
         pool = ThreadPoolExecutor(NCPU)
         futures = []
 
-        def oncomplete(rhemrun):
-            status, _id, elapsed_time = rhemrun.result()
-            assert status
-            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
+#        def oncomplete(rhemrun):
+#            status, _id, elapsed_time = rhemrun.result()
+#            assert status
+#            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
         for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
             self.log('  submitting topaz={} (hill {} of {})\n'.format(topaz_id, i + 1, sub_n))
-            futures.append(pool.submit(lambda p: run_hillslope(*p), (topaz_id, runs_dir)))
-            futures[-1].add_done_callback(oncomplete)
 
-        wait(futures, return_when=FIRST_EXCEPTION)
+            run_hillslope(topaz_id, runs_dir)
+            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
+
+#            futures.append(pool.submit(lambda p: run_hillslope(*p), (topaz_id, runs_dir)))
+#            futures[-1].add_done_callback(oncomplete)
+
+#        wait(futures, return_when=FIRST_EXCEPTION)
 
         self.log('Running RhemPost... ')
         rhempost = RhemPost.getInstance(self.wd)

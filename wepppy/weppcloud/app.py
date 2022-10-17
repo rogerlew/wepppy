@@ -1850,32 +1850,36 @@ def browse_response(path, args=None, show_up=True, headers=None):
 #    return Response(html, mimetype='text/html')
 
 
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>')
 @app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/')
 def wp_dev_tree1(runid, config, wepp, dir):
     return dev_tree1(runid, config, dir)
 
 
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>')
 @app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/')
 def wp_dev_tree2(runid, config, wepp, dir, dir2):
     return dev_tree2(runid, config, dir, dir2)
 
 
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>')
 @app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/')
 def wp_dev_tree32(runid, config, wepp, dir, dir2, dir3):
     return dev_tree32(runid, config, dir, dir2, dir3)
 
 
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>')
 @app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
 def wp_dev_tree432(runid, config, wepp, dir, dir2, dir3, dir4):
     return dev_tree32(runid, config, dir, dir2, dir3, dir4)
 
 
+@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>')
 @app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
 def wp_dev_tree5432(runid, config, wepp, dir, dir2, dir3, dir4, dir5):
     return dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5)
 
 
-@app.route('/runs/<string:runid>/<config>/browse')
 @app.route('/runs/<string:runid>/<config>/browse/')
 def dev_tree(runid, config):
     """
@@ -1895,7 +1899,17 @@ def dev_tree1(runid, config, dir):
     assert dir.startswith(wd)
     return browse_response(dir, args=request.args, headers=request.headers)
 
+@app.route('/runs/<string:runid>/<config>/browse/<dir>')
+def _dev_tree1(runid, config, dir):
+    """
+    recursive list the file structure of the working directory
+    """
+    wd = os.path.abspath(get_wd(runid))
+    dir = os.path.abspath(_join(wd, dir))
+    assert dir.startswith(wd)
+    return browse_response(dir, args=request.args, headers=request.headers)
 
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>')
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/')
 def dev_tree2(runid, config, dir, dir2):
     """
@@ -1907,6 +1921,7 @@ def dev_tree2(runid, config, dir, dir2):
     return browse_response(dir, args=request.args, headers=request.headers)
 
 
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>')
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/')
 def dev_tree32(runid, config, dir, dir2, dir3):
     """
@@ -1918,6 +1933,7 @@ def dev_tree32(runid, config, dir, dir2, dir3):
     return browse_response(dir, args=request.args, headers=request.headers)
 
 
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>')
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
 def dev_tree432(runid, config, dir, dir2, dir3, dir4):
     """
@@ -1929,6 +1945,7 @@ def dev_tree432(runid, config, dir, dir2, dir3, dir4):
     return browse_response(dir, args=request.args, headers=request.headers)
 
 
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>')
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
 def dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5):
     """
@@ -1940,6 +1957,7 @@ def dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5):
     return browse_response(dir, args=request.args, headers=request.headers)
 
 
+@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>')
 @app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
 def dev_tree65432(runid, config, dir, dir2, dir3, dir4, dir5, dir6):
     """
@@ -2391,6 +2409,28 @@ def set_landuse_mode(runid, config):
     try:
         landuse.mode = LanduseMode(mode)
         landuse.single_selection = single_selection
+    except Exception:
+        exception_factory('error setting landuse mode')
+
+    return success_factory()
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_landuse_db/', methods=['POST'])
+def set_landuse_db(runid, config):
+
+    mode = None
+    single_selection = None
+    try:
+        db = request.form.get('landuse_db', None)
+    except Exception:
+        exception_factory('landuse_db must be provided')
+
+    wd = get_wd(runid)
+    landuse = Landuse.getInstance(wd)
+
+    try:
+        landuse.nlcd_db = db
     except Exception:
         exception_factory('error setting landuse mode')
 

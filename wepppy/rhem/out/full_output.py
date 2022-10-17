@@ -32,8 +32,13 @@ class RhemOutput(object):
         df = pd.DataFrame(data, columns=cnames)
         df.sort_values(by=['Year', 'Month', 'Day'])
 
-        self.df = df
 
+        self.df = df
+        self.cnames = cnames
+        self.units = units
+
+    def __getitem__(self, key):
+        return self.df[key]
 
 class RhemSummary(object):
     def __init__(self, fn, area_ha=None):
