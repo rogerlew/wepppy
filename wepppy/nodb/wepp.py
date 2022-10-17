@@ -97,6 +97,16 @@ from .prep import Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
 
 
+def _copyfile(src_fn, dst_fn):
+    if _exists(dst_fn):
+        os.remove(dst_fn)
+
+    if IS_WINDOWS:
+        shutil.copyfile(src_fn, dst_fn)
+    else:
+        os.link(src_fn, dst_fn)
+
+
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
     MuskingumCunge = 4
@@ -814,11 +824,7 @@ class Wepp(NoDbBase, LogMixin):
 
             src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            
-            if IS_WINDOWS:
-                shutil.copyfile(src_fn, dst_fn)
-            else:
-                os.link(src_fn, dst_fn)
+            _copyfile(src_fn, dst_fn) 
 
             # use getattr for old runs that don't have a run_flowpaths attribute
             if getattr(self, 'run_flowpaths', False):
@@ -826,10 +832,7 @@ class Wepp(NoDbBase, LogMixin):
                     fn = '{}.slp'.format(fp)
                     src_fn = _join(wat_dir, fn)
                     dst_fn = _join(fp_runs_dir, fn)
-                    if IS_WINDOWS:
-                        shutil.copyfile(src_fn, dst_fn)
-                    else:
-                        os.link(src_fn, dst_fn)
+                    _copyfile(src_fn, dst_fn) 
 
     def _prep_multi_ofe(self, translator):
         years = Climate.getInstance(self.wd).input_years
@@ -847,20 +850,12 @@ class Wepp(NoDbBase, LogMixin):
             # slope files
             src_fn = _join(wat_dir, f'hill_{topaz_id}.mofe.slp')
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            
-            if IS_WINDOWS:
-                shutil.copyfile(src_fn, dst_fn)
-            else:
-                os.link(src_fn, dst_fn)
+            _copyfile(src_fn, dst_fn) 
 
             # soils
             src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-            
-            if IS_WINDOWS:
-                shutil.copyfile(src_fn, dst_fn)
-            else:
-                os.link(src_fn, dst_fn)
+            _copyfile(src_fn, dst_fn) 
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
@@ -941,20 +936,12 @@ class Wepp(NoDbBase, LogMixin):
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = _join(soils_dir, soil.fname)
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-
-            if IS_WINDOWS:
-                shutil.copyfile(src_fn, dst_fn)
-            else:
-                os.link(src_fn, dst_fn)
+            _copyfile(src_fn, dst_fn) 
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
-
-                    if IS_WINDOWS:
-                        shutil.copyfile(src_fn, dst_fn)
-                    else:
-                        os.link(src_fn, dst_fn)
+                    _copyfile(src_fn, dst_fn) 
 
     def _prep_climates(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -969,20 +956,12 @@ class Wepp(NoDbBase, LogMixin):
 
             cli_summary = climate.sub_summary(topaz_id)
             src_fn = _join(cli_dir, cli_summary['cli_fn'])
-
-            if IS_WINDOWS:
-                shutil.copyfile(src_fn, dst_fn)
-            else:
-                os.link(src_fn, dst_fn)
+            _copyfile(src_fn, dst_fn) 
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
-
-                    if IS_WINDOWS:
-                        shutil.copyfile(src_fn, dst_fn)
-                    else:
-                        os.link(src_fn, dst_fn)
+                    _copyfile(src_fn, dst_fn) 
 
     def _make_hillslope_runs(self, translator):
         watershed = Watershed.getInstance(self.wd)
@@ -1184,11 +1163,7 @@ class Wepp(NoDbBase, LogMixin):
 
         src_fn = _join(wat_dir, 'channels.slp')
         dst_fn = _join(runs_dir, 'pw0.slp')
-
-        if IS_WINDOWS:
-            shutil.copyfile(src_fn, dst_fn)
-        else:
-            os.link(src_fn, dst_fn)
+        _copyfile(src_fn, dst_fn)
 
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
                           channel_routing_method=ChannelRoutingMethod.MuskingumCunge):
@@ -1371,11 +1346,7 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         dst_fn = _join(runs_dir, 'pw0.cli')
         src_fn = _join(self.cli_dir, climate.cli_fn)
-
-        if IS_WINDOWS:
-            shutil.copyfile(src_fn, dst_fn)
-        else:
-            os.link(src_fn, dst_fn)
+        _copyfile(src_fn, dst_fn) 
 
     def _make_watershed_run(self, translator):
         runs_dir = self.runs_dir

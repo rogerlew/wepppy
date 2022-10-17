@@ -129,7 +129,7 @@ function onSelectionChange(caller) {
     window.location = "../" + target;
 }
 
-d3.csv("../../../resources/observed/{{ selected }}.csv", function(error, data) {
+d3.csv("../../../resources/observed/{{ selected }}.csv?" + Math.floor(Math.random() * 1000), function(error, data) {
   if (error) throw error;
 
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));

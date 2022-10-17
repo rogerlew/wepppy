@@ -437,15 +437,15 @@ var Map = function () {
             subdomains: ["mt0", "mt1", "mt2", "mt3"]
         });
 
-        that.nlcd = L.tileLayer.wms(
-            "https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
-            layers: "NLCD_2016_Land_Cover_L48",
-            format: "image/png",
-            transparent: true
-        });
+//        that.nlcd = L.tileLayer.wms(
+//            "https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/wms?", {
+//            layers: "NLCD_2016_Land_Cover_L48",
+//            format: "image/png",
+//            transparent: true
+//        });
 
         that.usgs_gage = L.geoJson.ajax(null,
-    {onEachFeature: (function (feature, layer) {
+            {onEachFeature: (function (feature, layer) {
                 if (feature.properties && feature.properties.Description) {
                     layer.bindPopup(feature.properties.Description);
                 }
@@ -464,7 +464,7 @@ var Map = function () {
         that.baseMaps = {
             "Satellite": that.googleSat,
             "Terrain": that.googleTerrain,
-            "2016 NLCD": that.nlcd
+//            "2016 NLCD": that.nlcd
         };
         that.overlayMaps = {'USGS Gage Locations': that.usgs_gage };
 
@@ -3060,6 +3060,41 @@ var Landuse = function () {
             self.showHideControls(mode);
         };
 
+        that.setLanduseDb = function (db) {
+            var self = instance;
+            // mode is an optional parameter
+            // if it isn't provided then we get the checked value
+            if (db === undefined) {
+                db = $("input[name='landuse_db']:checked").val();
+            }
+
+            var task_msg = "Setting Landuse Db to " + db;
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            // sync landuse with nodb
+            $.post({
+                url: "tasks/set_landuse_db/",
+                data: { "landuse_db": db },
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+            self.showHideControls(mode);
+        };
+
         that.showHideControls = function (mode) {
             // show the appropriate controls
             if (mode === -1) {
@@ -3995,7 +4030,7 @@ var Climate = function () {
             if (self.mode === 0) {
                 $("#climate_cligen").show();
                 $("#climate_userdefined").hide();
-                self.setStationMode(-1);
+                //self.setStationMode(-1);
             } else {
                 $("#climate_cligen").hide();
                 $("#climate_userdefined").show();

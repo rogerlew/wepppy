@@ -31,6 +31,7 @@ import json
 from copy import deepcopy
 from enum import Enum
 import inspect
+import random
 
 from wepppy.all_your_base import RGBA
 from wepppy.all_your_base.dateutils import Julian
@@ -41,6 +42,7 @@ _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _disturbed_map_fn = _join(_management_dir, "disturbed.json")
 _eu_disturbed_map_fn = _join(_management_dir, "eu-disturbed.json")
+_ca_disturbed_map_fn = _join(_management_dir, "ca-disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
@@ -1157,7 +1159,6 @@ class YearLoops(Loops):
 class Loop(ScenarioBase):
     def __init__(self, lines, root):
         super().__init__()
-
         self.root = root
         self.name = lines.pop(0)
         self.description = _parse_desc(lines, root)
@@ -1436,7 +1437,7 @@ class ManagementSummary(object):
         self._map = kwargs.get("_map", None)
         self.man_fn = kwargs["ManagementFile"]
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
-        self.desc = kwargs["Description"]
+        self.desc = kwargs.get("Description", '')
         self.color = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
 
         if "DisturbedClass" in kwargs:
@@ -1516,16 +1517,20 @@ class Management(object):
     Landcover types are mapped to 
     """
     def __init__(self, **kwargs):
+     
         self.key = kwargs["Key"]
         self.man_fn = kwargs["ManagementFile"]
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
-        self.desc = kwargs["Description"]
-        self.color = tuple(kwargs["Color"])
+        self.desc = kwargs.get("Description")
+        self.color = tuple(kwargs.get("Color", 
+            [random.randint(0,255),
+             random.randint(0,255),
+             random.randint(0,255), 255]))
         self.nofe = None
         
         if not _exists(_join(self.man_dir, self.man_fn)):
             raise Exception("management file '%s' does not exist"
-                            % self.man_fn)
+                            % _join(self.man_dir, self.man_fn))
                             
         self._parse()
     
@@ -1894,6 +1899,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'eu-disturbed' in _map.lower():
         with open(_eu_disturbed_map_fn) as fp:
+            d = json.load(fp)
+    elif 'ca-disturbed' in _map.lower():
+        with open(_ca_disturbed_map_fn) as fp:
             d = json.load(fp)
     elif 'disturbed' in _map.lower():
         with open(_disturbed_map_fn) as fp:
