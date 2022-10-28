@@ -532,7 +532,7 @@ class ClimateFile(object):
     def input_years(self):
         df = self.as_dataframe()
         years = [int(v) for v in sorted(set(df['year']))]
-        return max(years) -  min(years)
+        return max(years) -  min(years) + 1
 
     def make_storm_file(self, dst_fn):
         header_template = """\
