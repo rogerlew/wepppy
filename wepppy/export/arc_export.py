@@ -15,6 +15,7 @@ from wepppy.all_your_base import isnan, isinf
 from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash, AshPost
 from wepppy.watershed_abstraction.support import json_to_wgs
 
+
 def has_arc_export(wd):
     ron = Ron.getInstance(wd)
     name = ron.name
@@ -33,14 +34,12 @@ def has_arc_export(wd):
 
 
 def arc_export(wd, verbose=False):
-
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     #topaz = Topaz.getInstance(wd)
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
     map = ron.map
-
 
     ash_out = None
     try:
