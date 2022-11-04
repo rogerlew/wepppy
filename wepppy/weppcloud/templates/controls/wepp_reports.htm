@@ -29,3 +29,14 @@
 </div>
 {% endif %}
 <hr/>
+{% if prep.has_sbs %}
+  {% if 'disturbed' in prep.mods %}
+<div class="form-group row">
+    <h3>Fork Project and Run Undisturbed</h3>
+</div>
+<div>
+    <p><a href="fork-console/?undisturbify=true" target="_blank">Fork Project, Remove SBS, Rebuild Landuse and Soils, and Run WEPP Undisturbed.</a></p>
+</div>
+  {% endif %}
+{% endif %}
+<hr/>
