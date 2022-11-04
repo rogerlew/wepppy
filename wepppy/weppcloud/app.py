@@ -868,6 +868,8 @@ def create(config):
 @app.route('/runs/<string:runid>/<config>/fork-console')
 @app.route('/runs/<string:runid>/<config>/fork-console/')
 def fork_console(runid, config):
+    undisturbify = ('false', 'true')[bool(request.args.get('undisturbify', False))]
+
     # get working dir of original directory
     wd = get_wd(runid)
     owners = get_run_owners(runid)
@@ -904,7 +906,7 @@ window.onload = function(e){
     // set headers
     var xhr = new XMLHttpRequest();
 
-    xhr.open("GET", "../fork", true);
+    xhr.open("GET", "../fork?undisturbify=__undisturbify__", true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
     xhr.onprogress = function (event) {
@@ -926,12 +928,14 @@ window.onload = function(e){
     <div id="bottom"></div>
   </body>
 </html>  
-''')
+'''.replace('__undisturbify__', undisturbify))
 
 
 @app.route('/runs/<string:runid>/<config>/fork')
 @app.route('/runs/<string:runid>/<config>/fork/')
 def fork(runid, config):
+
+    undisturbify = bool(request.args.get('undisturbify', False))
 
     # get working dir of original directory
     wd = get_wd(runid)
@@ -1020,7 +1024,7 @@ def fork(runid, config):
 
             yield ' done.\n'
 
-        yield ' done setting wds.\n\nCleanup locks, READONLY, PUBLIC...'
+        yield ' done setting wds.\n\nCleanup locks, READONLY, PUBLIC...\n'
 
         # delete any active locks
         locks = glob(_join(new_wd, '*.lock'))
@@ -1036,6 +1040,47 @@ def fork(runid, config):
             os.remove(fn)
 
         yield ' done.\n'
+
+        if undisturbify:
+            yield '\nUndisturbifying Project...\n'
+
+            yield '  removing sbs...'
+            disturbed = Disturbed.getInstance(new_wd)
+            disturbed.remove_sbs()
+            yield ' done.\n\n'
+
+            yield '  rebuilding landuse...'
+            landuse = Landuse.getInstance(new_wd)
+            landuse.build()
+            yield ' done.\n\n'
+
+            yield '  rebuilding soils...'
+            soils = Soils.getInstance(new_wd)
+            soils.build()
+            yield ' done.\n\n'
+
+
+            yield '  cleaning wepp runs and outputs...'
+            wepp = Wepp.getInstance(new_wd)
+            wepp.clean()
+            yield ' done.\n\n'
+
+            yield '  prepping wepp hillslopes...'
+            wepp.prep_hillslopes()
+            yield ' done.\n\n'
+
+            yield '  running wepp hillslopes...'
+            wepp.run_hillslopes()
+            yield ' done.\n\n'
+
+ 
+            yield '  prepping wepp watershed...'
+            wepp.prep_watershed()
+            yield ' done.\n\n'
+
+            yield '  running wepp watershed...'
+            wepp.run_watershed()
+            yield ' done.\n\n'
 
         url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
 
@@ -1159,6 +1204,7 @@ def clear_locks(runid, config):
 @app.route('/runs/<string:runid>/<config>/archive')
 @app.route('/runs/<string:runid>/<config>/archive/')
 def archive(runid, config):
+
     # get working dir of original directory
     wd = get_wd(runid)
 
@@ -3311,10 +3357,12 @@ def report_rhem_results(runid, config):
 def report_wepp_results(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
+    prep = wepppy.nodb.Prep.getInstance(wd)
 
     try:
         return render_template('controls/wepp_reports.htm',
                                climate=climate,
+                               prep=prep,
                                user=current_user)
     except:
         return exception_factory('Error building reports template')
