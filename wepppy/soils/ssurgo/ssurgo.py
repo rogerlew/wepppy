@@ -1223,6 +1223,7 @@ class SurgoSoilCollection(object):
         Builds a collection of soil components and layers from a list of mukeys.
         SSurgo is queried when the collection is initialized.
         """
+        mukeys = [v for v in mukeys if isint(v)]
         mukeys = [int(v) for v in mukeys]
         if use_statsgo:
             self.conn = sqlite3.connect(_statsgo_cache_db)

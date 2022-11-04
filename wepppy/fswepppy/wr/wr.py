@@ -34,6 +34,8 @@ _thisdir = os.path.dirname(__file__)
 _datadir = _join(_thisdir, 'data')
 
 
+# delineate upslope area from road and run hillslope run of wepp road
+
 class RoadDesign(Enum):
     InslopeBare = 1
     InslopeVegetated = 2
