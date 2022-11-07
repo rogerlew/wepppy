@@ -33,7 +33,7 @@ from enum import Enum
 import inspect
 import random
 
-from wepppy.all_your_base import RGBA
+from wepppy.all_your_base import RGBA, isfloat
 from wepppy.all_your_base.dateutils import Julian
 
 _thisdir = os.path.dirname(__file__)
@@ -1171,7 +1171,11 @@ class Loop(ScenarioBase):
         self.data.setroot(root)
         
     def __str__(self):
-        landuse_desc = (None, 'Cropland', 'Rangeland', 'Forest', 'Roads')[self.landuse]
+        landuse_desc = ('N/A', 'Cropland', 'Rangeland', 'Forest', 'Roads')[self.landuse]
+ 
+        assert self.data is not None, self.name
+        assert self.landuse is not None, self.name
+        assert len(self.description) == 3, self.description      
 
         if self.ntill is None:
             return """\
@@ -1623,6 +1627,7 @@ class Management(object):
         self.man.setroot(self)
 
     def set_bdtill(self, value):
+        assert isfloat(value), value
         for i in range(len(self.inis)):
             self.inis[i].data.bdtill = value
 
