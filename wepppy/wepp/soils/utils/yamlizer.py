@@ -496,19 +496,40 @@ class WeppSoilUtil(object):
 
     @property
     def sand(self):
-        return self.obj['ofes'][0]['horizons'][0]['sand']
+        sand = self.obj['ofes'][0]['horizons'][0]['sand']
+        if sand is None:
+            s7778 = self.to7778()
+            sand = s7778.obj['ofes'][0]['horizons'][0]['sand']
+        assert sand is not None
+        return sand
 
     @property
     def clay(self):
-        return self.obj['ofes'][0]['horizons'][0]['clay']
+        clay = self.obj['ofes'][0]['horizons'][0]['clay']
+        if clay is None:
+            s7778 = self.to7778()
+            clay = s7778.obj['ofes'][0]['horizons'][0]['clay']
+        assert clay is not None
+        return clay
+
 
     @property
     def avke(self):
-        return self.obj['ofes'][0]['avke']
+        avke = self.obj['ofes'][0]['avke']
+        if avke is None:
+            s7778 = self.to7778()
+            avke = s7778.obj['ofes'][0]['avke']
+        assert avke is not None
+        return avke
 
     @property
     def bd(self):
-        return self.obj['ofes'][0]['horizons'][0]['bd']
+        bd = self.obj['ofes'][0]['horizons'][0]['bd']
+        if bd is None:
+            s7778 = self.to7778()
+            bd = s7778.obj['ofes'][0]['horizons'][0]['bd']
+        assert bd is not None
+        return bd
 
 
 if __name__ == "__main__":
