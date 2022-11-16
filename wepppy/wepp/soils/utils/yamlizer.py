@@ -519,7 +519,7 @@ class WeppSoilUtil(object):
         if avke is None:
             s7778 = self.to7778()
             avke = s7778.obj['ofes'][0]['avke']
-        assert avke is not None
+#        assert avke is not None
         return avke
 
     @property
@@ -528,7 +528,7 @@ class WeppSoilUtil(object):
         if bd is None:
             s7778 = self.to7778()
             bd = s7778.obj['ofes'][0]['horizons'][0]['bd']
-        assert bd is not None
+#        assert bd is not None
         return bd
 
 
