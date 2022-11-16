@@ -286,6 +286,12 @@ class Ron(NoDbBase):
     """
     __name__ = 'Ron'
 
+    __exclude__ = ('_w3w', 
+                   '_locales', 
+                   '_enable_landuse_change',
+                   '_dem_db',
+                   '_boundary')
+
     def __init__(self, wd, cfg_fn='0.cfg'):
         super(Ron, self).__init__(wd, cfg_fn)
 

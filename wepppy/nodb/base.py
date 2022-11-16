@@ -18,6 +18,8 @@ from time import time
 from enum import Enum, IntEnum
 from glob import glob
 
+import json
+
 # non-standard
 import jsonpickle
 
@@ -179,6 +181,25 @@ class NoDbBase(object):
             fp.write(js)
 
         # validate
+
+    @property
+    def stub(self):
+
+        js = jsonpickle.encode(self)
+        obj = json.loads(js) 
+        del js
+
+        exclude = getattr(self, '__exclude__', None)
+
+        if exclude is not None:
+            for attr in exclude:
+                if attr in obj:
+                    del obj[attr]
+        return obj
+
+        # noinspection PyUnresolvedReferences
+        with open(self._nodb, 'w') as fp:
+            fp.write(js)
 
     def lock(self):
         if self.islocked():

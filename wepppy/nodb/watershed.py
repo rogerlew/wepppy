@@ -662,8 +662,8 @@ class Watershed(NoDbBase):
         if self._fps_summary is None:
             return None
 
-        if topaz_id in self._fps_summary:
-            return self._fps_summary[topaz_id]
+        if str(topaz_id) in self._fps_summary:
+            return self._fps_summary[str(topaz_id)]
         else:
             return None
 
