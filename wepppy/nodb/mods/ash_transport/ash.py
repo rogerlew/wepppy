@@ -918,7 +918,7 @@ class Ash(NoDbBase, LogMixin):
 
         for topaz_id, d in self.meta.items():
             burnclass = d['burn_class']
-            if burnclass == 255:
+            if burnclass in (0, 255):
                 burnclass = 1
             assert burnclass in burnclass_sum, burnclass
             burnclass_sum[burnclass] += d['area_ha']
