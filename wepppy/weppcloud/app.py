@@ -3357,7 +3357,11 @@ def report_rhem_results(runid, config):
 def report_wepp_results(runid, config):
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
-    prep = wepppy.nodb.Prep.getInstance(wd)
+    
+    try:
+        prep = wepppy.nodb.Prep.getInstance(wd)
+    except FileNotFoundError:
+        prep = None
 
     try:
         return render_template('controls/wepp_reports.htm',
