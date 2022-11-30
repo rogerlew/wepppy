@@ -94,6 +94,9 @@ daily_catalog = {
     'daymet/prcp': {'Description': 'Precipitation daily values from Daymet', 'Units': 'mm'},
     'daymet/tmin': {'Description': 'Temperature Minimum daily values from Daymet', 'Units': 'C'},
     'daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'},
+    'daymet/v4/prcp': {'Description': 'Precipitation daily values from Daymet', 'Units': 'mm'},
+    'daymet/v4/tmin': {'Description': 'Temperature Minimum daily values from Daymet', 'Units': 'C'},
+    'daymet/v4/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'},
     'lt/daymet/prcp': {'Description': 'Precipitation daily values from Daymet', 'Units': 'mm'},
     'lt/daymet/tmin': {'Description': 'Temperature Minimum daily values from Daymet', 'Units': 'C'},
     'lt/daymet/tmax': {'Description': 'Temperature Maximum daily values from Daymet', 'Units': 'C'}
@@ -227,7 +230,8 @@ def query_daily():
     if not isint(year):
         return jsonify({'Error': 'year must be int'})
 
-    fname = glob(_join(geodata_dir, dataset, '*{}*.nc4'.format(year)))
+    fname = glob(_join(geodata_dir, dataset, '*{}*.nc'.format(year)))
+    fname.extend(glob(_join(geodata_dir, dataset, '*{}*.nc4'.format(year))))
 
     if len(fname) == 0:
         return jsonify({'Error': 'Cannot find dataset'})
