@@ -33,7 +33,7 @@ class TotalWatbal(ReportBase):
                   'ET (mm)', 
                   'Percolation (mm)',
 #                  'Storage (mm)', 
-                  'Sed. Del (tonne)']
+                  'Sed Del (kg)']
 
         d = self.totalwatsed.d
 
