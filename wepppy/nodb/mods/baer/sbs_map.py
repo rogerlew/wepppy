@@ -176,7 +176,12 @@ class SoilBurnSeverityMap:
             
         return domlc_d
 
-    def export_4class_map(self, fn):
+    def export_4class_map(self, fn, cellsize=None):
+
+        if cellsize is None:
+            transform = self.transform
+            assert transform[1] == abs(transform[5])
+            cellsize = transform[1]
 
         fname = self.fname
         assert _exists(fname)
@@ -225,6 +230,11 @@ class SoilBurnSeverityMap:
 
 
 if __name__ == "__main__":
-    sbs_fn = '/workdir/wepppy/wepppy/nodb/mods/baer/test/Rattlesnake.tif'
-    sbs = SoilBurnSeverityMap(sbs_fn, [0, 75, 109, 187])
-    sbs.export_4class_map(sbs_fn.replace('.tif', '.4class.tif'))
+    import sys
+    print(sys.argv)
+    assert len(sys.argv) >= 3
+    sbs_fn = sys.argv[-2]
+    dst_fn = sys.argv[-1]
+
+    sbs = SoilBurnSeverityMap(sbs_fn)
+    sbs.export_4class_map(dst_fn)
