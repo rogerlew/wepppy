@@ -240,7 +240,7 @@ class Loss(object):
                 avg_indx = i
 
         num_years = len(yr_indxs)
-        assert avg_indx is not None
+        assert avg_indx is not None, fn
 
         #if num_years == 0:
         #    raise NumYearsIsZeroException
