@@ -49,6 +49,7 @@ rasterized = features.rasterize(geom_value,
 with rasterio.open(
         "/geodata/ssurgo/statsgo/rasterized_mukeys.tif", "w",
         driver = "GTiff",
+        crs = raster.crs,
         transform = raster.transform,
         dtype = rasterio.uint8,
         count = 1,
