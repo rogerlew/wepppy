@@ -935,7 +935,7 @@ window.onload = function(e){
 @app.route('/runs/<string:runid>/<config>/fork/')
 def fork(runid, config):
 
-    undisturbify = bool(request.args.get('undisturbify', False))
+    undisturbify = request.args.get('undisturbify', 'false').lower().startswith('true')
 
     # get working dir of original directory
     wd = get_wd(runid)
@@ -960,8 +960,10 @@ def fork(runid, config):
     if should_abort:
         abort(404)
 
-    def generate():
 
+    def generate(undisturbify=False):
+        yield f'undisturbify = {undisturbify}\n'
+ 
         yield 'generating new runid...'
 
         dir_created = False
@@ -1086,7 +1088,7 @@ def fork(runid, config):
 
         yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
 
-    return Response(stream_with_context(generate()))
+    return Response(stream_with_context(generate(undisturbify=undisturbify)))
 
 
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')
@@ -3722,21 +3724,25 @@ def report_wepp_yearly_watbal(runid, config):
     except:
         exclude_yr_indxs = [0, 1]
 
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
 
-    totwatsed = TotalWatSed2(wd)
-    totwatbal = TotalWatbal(totwatsed,
-                            exclude_yr_indxs=exclude_yr_indxs)
+        totwatsed = TotalWatSed2(wd)
+        totwatbal = TotalWatbal(totwatsed,
+                                exclude_yr_indxs=exclude_yr_indxs)
 
-    unitizer = Unitizer.getInstance(wd)
+        unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/wepp/yearly_watbal.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           rpt=totwatbal,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/wepp/yearly_watbal.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               rpt=totwatbal,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory()
+
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
