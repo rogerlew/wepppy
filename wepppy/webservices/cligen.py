@@ -34,8 +34,8 @@ from wepppy.climates.cligen import (
     make_clinp,
     df_to_prn
 )
-                                    
-from wepppy.climates.daymet_singlelocation_client \
+
+from wepppy.climates.daymet.daymet_singlelocation_client \
     import retrieve_historical_timeseries
                                     
 from wepppy.climates.downscaled_nmme_client \
