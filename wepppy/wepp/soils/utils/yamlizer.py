@@ -415,7 +415,7 @@ class WeppSoilUtil(object):
 
         header = new.obj['header']
         header.append('')
-        header.append('wepppy.wepp.soils.utils.WeppSoilUtil 9001 migration')
+        header.append(f'wepppy.wepp.soils.utils.WeppSoilUtil {version} migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
