@@ -419,9 +419,6 @@ class SoilSummary(object):
     def smr(self):
         path = self.path
 
-        if not _exists(path):
-            path = _join('/geodata/weppcloud_runs', path)
-
         with open(path) as fp:
             lines = fp.readlines()
         lines = [L for L in lines if not L.startswith('#')]
@@ -447,7 +444,10 @@ class SoilSummary(object):
 
     @property
     def path(self):
-        return _join(self.soils_dir, self.fname)
+        path = _join(self.soils_dir, self.fname)
+        if not _exists(path):
+            path = _join('/geodata/weppcloud_runs', path)
+        return path
 
     @property
     def meta_fn(self):
