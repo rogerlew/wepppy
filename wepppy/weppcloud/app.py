@@ -2972,7 +2972,7 @@ def view_closest_stations(runid, config):
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
         options.append('<option value="{id}" {selected}>'
-                       '{desc} ({distance_to_query_location:0.1f} km)</option>'
+                       '{desc} ({distance_to_query_location:0.1f} km | {years} years)</option>'
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')
@@ -2995,12 +2995,18 @@ def view_heuristic_stations(runid, config):
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
 
+#    return jsonify(results)
+
     options = []
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
+
+        if r['distance_to_query_location'] is None:
+            r['distance_to_query_location'] == -1
+
         options.append('<option value="{id}" {selected}>'
                        '{desc} ({rank_based_on_query_location} | '
-                       '{distance_to_query_location:0.1f} km)</option>'
+                       '{distance_to_query_location:0.1f} km | {years} years)</option>'
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')
@@ -3024,7 +3030,7 @@ def view_eu_heuristic_stations(runid, config):
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
         options.append('<option value="{id}" {selected}>'
-                       '{desc} ({rank_based_on_query_location})</option>'
+                       '{desc} ({rank_based_on_query_location} | {years} years)</option>'
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')
@@ -3047,7 +3053,7 @@ def view_au_heuristic_stations(runid, config):
     for r in results:
         r['selected'] = ('', 'selected')[r['id'] == climate.climatestation]
         options.append('<option value="{id}" {selected}>'
-                       '{desc} ({rank_based_on_query_location})</option>'
+                       '{desc} ({rank_based_on_query_location} | {years} years)</option>'
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')
