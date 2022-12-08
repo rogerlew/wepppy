@@ -858,7 +858,7 @@ class StationMeta:
         else:
             self.parpath = par
 
-        assert _exists(self.parpath)
+        assert _exists(self.parpath), self.parpath
 
     def get_station(self):
         return Station(self.parpath)
@@ -921,7 +921,7 @@ class CligenStationsManager:
 
         if 'ghcn' in str(version):
             _db = _join(_thisdir, 'ghcn_stations.db')
-            _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations/30-year')
+            _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations', 'all_years')
 
         conn = sqlite3.connect(_db)
         c = conn.cursor()
@@ -1010,6 +1010,8 @@ class CligenStationsManager:
         _stations = []
         for i, rank in s_ranks:
             _stations.append(stations[i])
+            _stations[-1].calculate_distance(location)
+            _stations[-1].calculate_lat_distance(location[1])
             _stations[-1].rank = rank
 
         return _stations
@@ -1061,6 +1063,8 @@ class CligenStationsManager:
         _stations = []
         for i, rank in s_ranks:
             _stations.append(stations[i])
+            _stations[-1].calculate_distance(location)
+            _stations[-1].calculate_lat_distance(location[1])
             _stations[-1].rank = rank
 
         return _stations
