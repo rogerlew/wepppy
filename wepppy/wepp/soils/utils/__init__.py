@@ -111,7 +111,7 @@ def read_lc_file(fname):
                     if v.lower().startswith('none'):
                         row[k] = None
 
-            d[(str(row['LndcvrID']), row['WEPP_Type'])] = SoilReplacements(**row)
+            d[(str(row['LndcvrID']), row['WEPP_Type'])] = row  # SoilReplacements(**row)
 
     return d
 
