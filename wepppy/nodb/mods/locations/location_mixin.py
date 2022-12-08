@@ -24,6 +24,8 @@ from ...soils import Soils
 from ...watershed import Watershed
 from ...wepp import Wepp
 from wepppy.wepp.soils.utils import read_lc_file, soil_specialization, soil_is_water
+from wepppy.wepp.soils.utils import WeppSoilUtil
+
 from ...base import NoDbBase, TriggerEvents
 
 _thisdir = os.path.dirname(__file__)
@@ -37,7 +39,7 @@ class LocationMixin(object):
         data_dir = self.data_dir
 
         lc_dict = read_lc_file(_join(data_dir, self.lc_lookup_fn))
-        return set([lc_dict[k].LndcvrID for k in lc_dict])
+        return set([lc_dict[k]['LndcvrID'] for k in lc_dict])
 
     def remap_landuse(self):
         data_dir = self.data_dir
@@ -105,7 +107,11 @@ class LocationMixin(object):
                 else:
                     if k not in _soils:
                         caller = ':'.join(_split(self._nodb)[-1].split('.')[::-1])
-                        soil_specialization(src_fn, dst_fn, replacements, caller=caller)
+                        soil_u = WeppSoilUtil(src_fn)
+                        mod_soil = soil_u.to_7778disturbed(replacements, hostname='dev.wepp.cloud')
+                        mod_soil.write(dst_fn)
+                        
+#                        soil_specialization(src_fn, dst_fn, replacements, caller=caller)
                         _soils[k] = deepcopy(soils.soils[mukey])
                         _soils[k].mukey = k
                         _soils[k].fname = '%s.sol' % k
