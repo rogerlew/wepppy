@@ -1,0 +1,104 @@
+[2022-08-18T15:32:08.880991] Prepping Hillslopes... [2022-08-18T15:32:14.271980] nodb.Wepp._prep_pmet::mid_season_crop_coeff = 0.95, p_coeff = 0.8 done. (5.39s | 5.39s)
+done. (5.46s | 5.46s)
+[2022-08-18T15:32:14.337921] Running Hillslopes
+[2022-08-18T15:32:14.739062]     wepp_bin:latest[2022-08-18T15:32:14.740633]   submitting topaz=22 (hill 1 of 46)
+[2022-08-18T15:32:14.742261]   submitting topaz=23 (hill 2 of 46)
+[2022-08-18T15:32:14.754812]   submitting topaz=32 (hill 3 of 46)
+[2022-08-18T15:32:14.767387]   submitting topaz=33 (hill 4 of 46)
+[2022-08-18T15:32:14.779332]   submitting topaz=42 (hill 5 of 46)
+[2022-08-18T15:32:14.791610]   submitting topaz=52 (hill 6 of 46)
+[2022-08-18T15:32:14.799649]   submitting topaz=53 (hill 7 of 46)
+[2022-08-18T15:32:14.812083]   submitting topaz=62 (hill 8 of 46)
+[2022-08-18T15:32:14.824653]   submitting topaz=71 (hill 9 of 46)
+[2022-08-18T15:32:14.836930]   submitting topaz=72 (hill 10 of 46)
+[2022-08-18T15:32:14.850155]   submitting topaz=73 (hill 11 of 46)
+[2022-08-18T15:32:14.862461]   submitting topaz=81 (hill 12 of 46)
+[2022-08-18T15:32:14.875059]   submitting topaz=82 (hill 13 of 46)
+[2022-08-18T15:32:14.886839]   submitting topaz=83 (hill 14 of 46)
+[2022-08-18T15:32:14.894662]   submitting topaz=91 (hill 15 of 46)
+[2022-08-18T15:32:14.905120]   submitting topaz=92 (hill 16 of 46)
+[2022-08-18T15:32:14.913867]   submitting topaz=93 (hill 17 of 46)
+[2022-08-18T15:32:14.925465]   submitting topaz=101 (hill 18 of 46)
+[2022-08-18T15:32:14.928131]   submitting topaz=103 (hill 19 of 46)
+[2022-08-18T15:32:14.929244]   submitting topaz=112 (hill 20 of 46)
+[2022-08-18T15:32:14.930332]   submitting topaz=113 (hill 21 of 46)
+[2022-08-18T15:32:14.931005]   submitting topaz=122 (hill 22 of 46)
+[2022-08-18T15:32:14.931609]   submitting topaz=133 (hill 23 of 46)
+[2022-08-18T15:32:14.933101]   submitting topaz=141 (hill 24 of 46)
+[2022-08-18T15:32:14.934020]   submitting topaz=142 (hill 25 of 46)
+[2022-08-18T15:32:14.934902]   submitting topaz=143 (hill 26 of 46)
+[2022-08-18T15:32:14.935953]   submitting topaz=152 (hill 27 of 46)
+[2022-08-18T15:32:14.936661]   submitting topaz=153 (hill 28 of 46)
+[2022-08-18T15:32:14.937440]   submitting topaz=161 (hill 29 of 46)
+[2022-08-18T15:32:14.938047]   submitting topaz=162 (hill 30 of 46)
+[2022-08-18T15:32:14.938593]   submitting topaz=163 (hill 31 of 46)
+[2022-08-18T15:32:14.939647]   submitting topaz=172 (hill 32 of 46)
+[2022-08-18T15:32:14.940692]   submitting topaz=173 (hill 33 of 46)
+[2022-08-18T15:32:14.941486]   submitting topaz=181 (hill 34 of 46)
+[2022-08-18T15:32:14.942204]   submitting topaz=182 (hill 35 of 46)
+[2022-08-18T15:32:14.943048]   submitting topaz=191 (hill 36 of 46)
+[2022-08-18T15:32:14.943735]   submitting topaz=193 (hill 37 of 46)
+[2022-08-18T15:32:14.944464]   submitting topaz=201 (hill 38 of 46)
+[2022-08-18T15:32:14.945266]   submitting topaz=202 (hill 39 of 46)
+[2022-08-18T15:32:14.945954]   submitting topaz=203 (hill 40 of 46)
+[2022-08-18T15:32:14.946558]   submitting topaz=211 (hill 41 of 46)
+[2022-08-18T15:32:14.948744]   submitting topaz=212 (hill 42 of 46)
+[2022-08-18T15:32:14.949771]   submitting topaz=213 (hill 43 of 46)
+[2022-08-18T15:32:14.950644]   submitting topaz=221 (hill 44 of 46)
+[2022-08-18T15:32:14.951510]   submitting topaz=222 (hill 45 of 46)
+[2022-08-18T15:32:14.953127]   submitting topaz=223 (hill 46 of 46)
+[2022-08-18T15:32:17.060347]   1 completed run in 2.3179826736450195s
+[2022-08-18T15:32:17.172187]   12 completed run in 2.297182559967041s
+[2022-08-18T15:32:17.239884]   8 completed run in 2.415173292160034s
+[2022-08-18T15:32:17.246306]   3 completed run in 2.479123830795288s
+[2022-08-18T15:32:17.258605]   6 completed run in 2.45906400680542s
+[2022-08-18T15:32:17.321579]   10 completed run in 2.4716248512268066s
+[2022-08-18T15:32:17.322456]   2 completed run in 2.567777156829834s
+[2022-08-18T15:32:17.380368]   13 completed run in 2.4943337440490723s
+[2022-08-18T15:32:17.380928]   15 completed run in 2.476069450378418s
+[2022-08-18T15:32:17.391638]   11 completed run in 2.528856039047241s
+[2022-08-18T15:32:17.413533]   4 completed run in 2.633571147918701s
+[2022-08-18T15:32:17.414185]   16 completed run in 2.500495433807373s
+[2022-08-18T15:32:17.435845]   5 completed run in 2.644843578338623s
+[2022-08-18T15:32:17.471533]   14 completed run in 2.5770411491394043s
+[2022-08-18T15:32:17.473359]   9 completed run in 2.6365597248077393s
+[2022-08-18T15:32:17.534998]   7 completed run in 2.7230424880981445s
+[2022-08-18T15:32:19.103052]   17 completed run in 2.0234124660491943s
+[2022-08-18T15:32:19.460088]   18 completed run in 2.2798619270324707s
+[2022-08-18T15:32:19.567963]   23 completed run in 2.2341346740722656s
+[2022-08-18T15:32:19.673613]   20 completed run in 2.4158318042755127s
+[2022-08-18T15:32:19.702665]   21 completed run in 2.4369359016418457s
+[2022-08-18T15:32:19.721052]   29 completed run in 2.2836689949035645s
+[2022-08-18T15:32:19.739172]   26 completed run in 2.3360729217529297s
+[2022-08-18T15:32:19.782144]   22 completed run in 2.45674991607666s
+[2022-08-18T15:32:19.782565]   28 completed run in 2.3669378757476807s
+[2022-08-18T15:32:19.802986]   31 completed run in 2.3193697929382324s
+[2022-08-18T15:32:19.813362]   25 completed run in 2.4309308528900146s
+[2022-08-18T15:32:19.834934]   32 completed run in 2.2973787784576416s
+[2022-08-18T15:32:19.835581]   27 completed run in 2.4201481342315674s
+[2022-08-18T15:32:19.884355]   24 completed run in 2.5024471282958984s
+[2022-08-18T15:32:19.895081]   30 completed run in 2.421966552734375s
+[2022-08-18T15:32:19.905900]   19 completed run in 2.6574277877807617s
+[2022-08-18T15:32:21.343616]   33 completed run in 2.2393405437469482s
+[2022-08-18T15:32:21.584647]   34 completed run in 2.109675645828247s
+[2022-08-18T15:32:21.752776]   35 completed run in 2.18027400970459s
+[2022-08-18T15:32:21.793040]   37 completed run in 2.08941388130188s
+[2022-08-18T15:32:21.861489]   36 completed run in 2.1734745502471924s
+[2022-08-18T15:32:21.873542]   41 completed run in 2.0898308753967285s
+[2022-08-18T15:32:21.893630]   39 completed run in 2.1534228324890137s
+[2022-08-18T15:32:21.931798]   40 completed run in 2.1481387615203857s
+[2022-08-18T15:32:21.932189]   38 completed run in 2.2098336219787598s
+[2022-08-18T15:32:21.942143]   42 completed run in 2.1381053924560547s
+[2022-08-18T15:32:21.948874]   43 completed run in 2.130561113357544s
+[2022-08-18T15:32:21.952612]   45 completed run in 2.0924570560455322s
+[2022-08-18T15:32:21.961270]   44 completed run in 2.1252059936523438s
+[2022-08-18T15:32:21.981801]   46 completed run in 2.09629487991333s
+[2022-08-18T15:32:21.987438] Prepping Watershed... [2022-08-18T15:32:22.328256] nodb.Wepp._prep_channel_chn::erodibility = 1e-06, critical_shear = 50 done. (0.34s | 13.45s)
+[2022-08-18T15:32:22.505774] nodb.Wepp._prep_channel_soils::erodibility = 1e-06, critical_shear = 50 done. (0.00s | 13.63s)
+done. (1.70s | 15.32s)
+[2022-08-18T15:32:24.291123] Running Watershed... [2022-08-18T15:32:24.292066]     wepp_bin:latestdone. (121.50s | 136.91s)
+[2022-08-18T15:34:25.797400] Building totalwatsed2.pkl... done. (15.04s | 151.96s)
+[2022-08-18T15:34:40.840533] Running WeppPost... done. (1.30s | 153.26s)
+[2022-08-18T15:34:42.145252] Calculating Hillslope Water Balance...done. (5.68s | 158.95s)
+[2022-08-18T15:34:47.830544] Compressing Test_Watershed_15/wepp/output/pass_pw0.txt...done. (1.41s | 160.35s)
+[2022-08-18T15:34:49.236705] Compressing Test_Watershed_15/wepp/output/soil_pw0.txt...done. (1.90s | 162.25s)

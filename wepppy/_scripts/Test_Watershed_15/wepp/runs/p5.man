@@ -1,0 +1,294 @@
+98.4
+1 # number of ofes or channels
+100 # sim_years
+
+#############################
+#   Plant Growth Section    #
+#############################
+1 # ncrop
+Tah_4899
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 20.00000 1.00000 1.00000
+0.50000 1.00000 0.90000 0.99000 17.00000 0.00000 0.42000 20.00000
+2
+0.00000 0.00000 20.00000 0.10000 4.00000 2.00000 0.33000 0.50000 90 40.00000
+-40.00000 14.00000 0.00000
+
+#############################
+#     Operation Section     #
+#############################
+0 # nop
+
+#############################
+# Initial Condition Section
+#############################
+1 # nini
+Tah_4089
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.90000 330 1000 0.00000 1.00000 
+1 
+2 
+400.00000 0.10000 1.00000 0.10000 0.00000 
+1 
+0.00000 0.00000 0.00000 0.00000 0.00000 
+0.50000 0.50000
+
+#############################
+#  Surface Effects Section  #
+#############################
+0 # nseq
+
+#############################
+#      Contour Section      #
+#############################
+0 # ncnt
+
+#############################
+#      Drainage Section     #
+#############################
+0 # ndrain
+
+#############################
+#       Yearly Section      #
+#############################
+1 # nscen
+Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+1 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype) 
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+#############################
+#     Management Section    #
+#############################
+Manage
+description 1
+description 2
+description 3
+1 # number of ofes in the rotation (nofe)
+# Initial Condition Scenario indices used for each OFE
+  1
+1 # number of times the rotation is repeated (nrots)
+100 # number of years in a single rotation
+   1 	# plants/year; <Year: 1 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 4 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 5 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 6 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 7 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 8 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 9 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 10 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 11 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 12 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 13 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 14 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 15 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 16 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 17 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 18 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 19 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 20 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 21 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 22 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 23 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 24 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 25 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 26 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 27 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 28 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 29 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 30 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 31 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 32 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 33 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 34 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 35 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 36 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 37 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 38 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 39 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 40 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 41 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 42 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 43 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 44 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 45 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 46 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 47 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 48 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 49 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 50 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 51 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 52 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 53 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 54 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 55 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 56 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 57 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 58 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 59 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 60 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 61 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 62 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 63 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 64 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 65 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 66 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 67 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 68 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 69 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 70 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 71 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 72 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 73 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 74 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 75 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 76 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 77 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 78 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 79 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 80 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 81 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 82 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 83 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 84 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 85 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 86 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 87 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 88 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 89 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 90 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 91 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 92 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 93 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 94 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 95 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 96 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 97 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 98 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 99 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 100 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+
+

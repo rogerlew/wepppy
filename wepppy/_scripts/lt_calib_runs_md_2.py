@@ -18,7 +18,7 @@ from wepppy.nodb.mods.locations import LakeTahoe
 
 from os.path import join as _join
 from wepppy.nodb.mods.locations.lt.selectors import *
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed2
 from wepppy.export import arc_export
 
 from osgeo import gdal, osr
@@ -253,52 +253,52 @@ if __name__ == '__main__':
     ]
 
     scenarios = [
-               dict(scenario='SimFire.fccsFuels_obs_cli',
-                    landuse=None,
-                    lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-snow',
-                    climate='copyCurCond'),
-               dict(scenario='SimFire.landisFuels_obs_cli',
-                    landuse=None,
-                    lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-future-snow',
-                    climate='copyCurCond'),
-               dict(scenario='SimFire.landisFuels_fut_cli_A2',
-                    landuse=None,
-                    lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-future-snow',
-                    climate='future'),
+#               dict(scenario='SimFire.fccsFuels_obs_cli',
+#                    landuse=None,
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    cfg='lt-fire-snow',
+#                    climate='copyCurCond'),
+#               dict(scenario='SimFire.landisFuels_obs_cli',
+#                    landuse=None,
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    cfg='lt-fire-future-snow',
+#                    climate='copyCurCond'),
+#               dict(scenario='SimFire.landisFuels_fut_cli_A2',
+#                    landuse=None,
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    cfg='lt-fire-future-snow',
+#                    climate='future'),
                dict(scenario='CurCond',
                     landuse=None,
                     lc_lookup_fn='ki5krcs.csv'),
-               dict(scenario='PrescFire',
-                    landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),
-               dict(scenario='LowSev',
-                    landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),
-               dict(scenario='ModSev',
-                    landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),
-               dict(scenario='HighSev',
-                    landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),
-               dict(scenario='Thinn96',
-                    landuse=[(not_shrub_selector, 123)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),
-               dict(scenario='Thinn93',
-                    landuse=[(not_shrub_selector, 115)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),
-               dict(scenario='Thinn85',
-                    landuse=[(not_shrub_selector, 117)],
-                    lc_lookup_fn='ki5krcs.csv',
-                    climate='copyCurCond'),  # <- EXAMPLE FOR COPYING CLIMATE
+#               dict(scenario='PrescFire',
+#                    landuse=[(not_shrub_selector, 110), (shrub_selector, 122)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),
+#               dict(scenario='LowSev',
+#                    landuse=[(not_shrub_selector, 106), (shrub_selector, 121)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),
+#               dict(scenario='ModSev',
+#                    landuse=[(not_shrub_selector, 118), (shrub_selector, 120)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),
+#               dict(scenario='HighSev',
+#                    landuse=[(not_shrub_selector, 105), (shrub_selector, 119)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),
+#               dict(scenario='Thinn96',
+#                    landuse=[(not_shrub_selector, 123)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),
+#               dict(scenario='Thinn93',
+#                    landuse=[(not_shrub_selector, 115)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),
+#               dict(scenario='Thinn85',
+#                    landuse=[(not_shrub_selector, 117)],
+#                    lc_lookup_fn='ki5krcs.csv',
+#                    climate='copyCurCond'),  # <- EXAMPLE FOR COPYING CLIMATE
     ]
 
     skip_completed = True
@@ -359,16 +359,16 @@ if __name__ == '__main__':
             ron.fetch_dem()
 
             log_print('building channels')
-            topaz = Topaz.getInstance(wd)
-            topaz.build_channels(csa=5, mcl=60)
-            topaz.set_outlet(*outlet)
+            wat = Watershed.getInstance(wd)
+            wat.clip_hillslopes = True
+            wat.build_channels(csa=5, mcl=60)
+            wat.set_outlet(*outlet)
             sleep(0.5)
 
             log_print('building subcatchments')
-            topaz.build_subcatchments()
+            wat.build_subcatchments()
 
             log_print('abstracting watershed')
-            wat = Watershed.getInstance(wd)
             wat.abstract_watershed()
             translator = wat.translator_factory()
             topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
@@ -413,7 +413,7 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Observed
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.set_observed_pars(start_year=1990, end_year=2019)
+                climate.set_observed_pars(start_year=1990, end_year=2021)
             elif climate_mode == 'future':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -470,10 +470,9 @@ if __name__ == '__main__':
             loss_report = wepp.report_loss()
 
             log_print('generating totalwatsed report')
-            fn = _join(ron.export_dir, 'totalwatsed.csv')
+            fn = _join(ron.export_dir, 'totalwatsed2.csv')
 
-            totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                    wepp.baseflow_opts, wepp.phosphorus_opts)
+            totwatsed = TotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
             totwatsed.export(fn)
             assert _exists(fn)
 

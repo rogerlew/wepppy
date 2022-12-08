@@ -1,0 +1,1323 @@
+
+
+->WEPP hourly water seepage update set (UI code)
+
+
+
+
+
+
+  ********************************************************************
+  *                                                                  *
+  *                                                                  *
+  *              USDA - WATER EROSION PREDICTION PROJECT             *
+  *                                                                  *
+  *                    HILLSLOPE PROFILE - WATERSHED                 *
+  *                           EROSION MODEL                          *
+  *                                                                  *
+  *                    CONTINUOUS SIMULATION AND                     *
+  *                       SINGLE STORM OPTIONS                       *
+  *                 MAXIMUM WATERSHED CHANNELS: 3000                 *
+  *              PHOSPHORUS AND BASEFLOW - JULY 19, 2018             *
+  *                                                                  *
+  *                          VERSION 2020.500                        *
+  *                                                                  *
+  *                        May 1,         2020                       *
+  *                                                                  *
+  *                                                                  *
+  *                                                                  *
+  ********************************************************************
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+ Metric units selected
+
+
+ Do you wish to drop out of the model upon invalid input and
+ write over identical output file names? (batch mode)
+
+ Enter N to run watershed option (not a SHELL option).
+
+ Enter Y or N --> [Y]
+
+ Continuous or single event option
+ ---------------------------------
+ 1 - continuous simulation
+ 2 - single storm
+
+ Enter option (1 or 2) --> [1]
+
+
+ Model version option
+ --------------------
+ 1 - hillslope version (single hillslope only)
+ 2 - hillslope/watershed version
+     (multiple hillslopes, channels, and impoundments)
+ 3 - watershed version (channels and impoundments)
+     (option 2 or 3 must be previously selected)
+
+ Enter option (1,2 or 3) --> [1] 
+
+  Enter name of master watershed pass file -->                     
+
+ file name read in: ../output/pass_pw0.txt                             
+
+ Multiple hillslopes or hillslope/watershed version
+ --------------------------------------------------
+ Enter the number of hillslopes --> 
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H1.pass.dat                              
+
+ Hillslope    1 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H2.pass.dat                              
+
+ Hillslope    2 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H3.pass.dat                              
+
+ Hillslope    3 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H4.pass.dat                              
+
+ Hillslope    4 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H5.pass.dat                              
+
+ Hillslope    5 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H6.pass.dat                              
+
+ Hillslope    6 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H7.pass.dat                              
+
+ Hillslope    7 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H8.pass.dat                              
+
+ Hillslope    8 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H9.pass.dat                              
+
+ Hillslope    9 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H10.pass.dat                             
+
+ Hillslope   10 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H11.pass.dat                             
+
+ Hillslope   11 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H12.pass.dat                             
+
+ Hillslope   12 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H13.pass.dat                             
+
+ Hillslope   13 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H14.pass.dat                             
+
+ Hillslope   14 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H15.pass.dat                             
+
+ Hillslope   15 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H16.pass.dat                             
+
+ Hillslope   16 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H17.pass.dat                             
+
+ Hillslope   17 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H18.pass.dat                             
+
+ Hillslope   18 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H19.pass.dat                             
+
+ Hillslope   19 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H20.pass.dat                             
+
+ Hillslope   20 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H21.pass.dat                             
+
+ Hillslope   21 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H22.pass.dat                             
+
+ Hillslope   22 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H23.pass.dat                             
+
+ Hillslope   23 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H24.pass.dat                             
+
+ Hillslope   24 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H25.pass.dat                             
+
+ Hillslope   25 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H26.pass.dat                             
+
+ Hillslope   26 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H27.pass.dat                             
+
+ Hillslope   27 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H28.pass.dat                             
+
+ Hillslope   28 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H29.pass.dat                             
+
+ Hillslope   29 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H30.pass.dat                             
+
+ Hillslope   30 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H31.pass.dat                             
+
+ Hillslope   31 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H32.pass.dat                             
+
+ Hillslope   32 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H33.pass.dat                             
+
+ Hillslope   33 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H34.pass.dat                             
+
+ Hillslope   34 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H35.pass.dat                             
+
+ Hillslope   35 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H36.pass.dat                             
+
+ Hillslope   36 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H37.pass.dat                             
+
+ Hillslope   37 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H38.pass.dat                             
+
+ Hillslope   38 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H39.pass.dat                             
+
+ Hillslope   39 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H40.pass.dat                             
+
+ Hillslope   40 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H41.pass.dat                             
+
+ Hillslope   41 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H42.pass.dat                             
+
+ Hillslope   42 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H43.pass.dat                             
+
+ Hillslope   43 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H44.pass.dat                             
+
+ Hillslope   44 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H45.pass.dat                             
+
+ Hillslope   45 SUCCESSFUL simulation
+
+
+
+ Do you wish to output [e]nglish or [m]etric units for
+ the average annual summary output file?
+
+ Enter [e] or [m] --> [m]etric default  
+
+
+ Do you wish to use an existing hillslope pass file?
+
+ Enter Y or N --> [N]
+ *** NOTE ***
+
+
+  Enter name of existing hillslope pass file -->                   
+
+ file name read in: ../output/H46.pass.dat                             
+
+ WRITING HILLSLOPE --> WATERSHED PASS FILE INFORMATION
+
+
+ WEPP COMPLETED HILLSLOPE/WATERSHED SIMULATION SUCCESSFULLY
+
+
+
+ Do you wish to model impoundments on the watershed?
+
+ Enter Y or N --> [N]
+
+ Do you want initial condition scenario output (Y/N)? [N] --> 
+
+ Soil loss output options for watershed simulation
+ ---- ---- ------ ------- --- ---------- ----------
+ [0] - Abbreviated annual  average for watershed
+  1  - Abbreviated yearly  average for watershed
+  2  - Abbreviated monthly average for watershed
+  3  - Abbreviated annual  average for SUB-watersheds
+  4  - Abbreviated yearly  average for SUB-watersheds
+  5  - Abbreviated monthly average for SUB-watersheds
+ --------------------------------------------------
+ Enter watershed soil loss output option [0]
+
+
+  Enter file name for watershed erosion output -->                 
+
+ file name read in: ../output/loss_pw0.txt                             
+
+ Do you want water balance output (Y/N)? [N] --> 
+
+  Enter file name for water balance output -->                     
+
+ file name read in: ../output/chnwb.txt                                
+
+ Do you want crop output (Y/N)? [N] --> 
+
+ Do you want soil output (Y/N)? [N] --> 
+
+  Enter file name for soil output -->                              
+
+ file name read in: ../output/soil_pw0.txt                             
+
+ Do you want channel erosion plotting output (Y/N)? [N] --> 
+
+  Enter file name for channel plotting output -->                  
+
+ file name read in: ../output/plot_pw0.txt                             
+                     *** NOTE ***
+ Channel erosion plotting disabled at this time
+
+ Do you want watershed large graphics output (Y/N)? [N] --> 
+
+ Do you want event by event output (Y/N)? [N] --> 
+
+  Enter file name for event by event summary -->                   
+
+ file name read in: ../output/ebe_pw0.txt                              
+
+ Do you want final summary output (Y/N)? [N] --> 
+
+ Do you want daily winter output (Y/N)? [N] --> 
+
+ Do you want plant yield output (Y/N)? [N] --> 
+
+ Do you want impoundment output (Y/N)? [N] --> 
+
+  Enter name of file containing watershed structure data -->       
+
+ file name read in: pw0.str                                            
+
+  Enter name of file containing watershed channel data -->         
+
+ file name read in: pw0.chn                                            
+
+  Enter name of file containing impoundment data -->               
+
+ file name read in: pw0.imp                                            
+
+  Enter name of file containing management data -->                
+
+ file name read in: pw0.man                                            
+*************** Notice *****************
+ No Penman-Monteith ET parameters in defaut data for
+ Fallow m
+ Using parameters of the crop
+ -                   
+ if you are not satified with the selected crop,
+ Please add in corresponding parameters for your crop
+ in the file pmetpara.txt
+ FAO Penman-Monteith ET Method Implemented
+  1.000000000000000E-005  1.000000000000000E-005  0.500000000000000     
+
+  Enter name of file containing slope data -->                     
+
+ file name read in: pw0.slp                                            
+
+  Enter name of file containing storm data -->                     
+
+ file name read in: pw0.cli                                            
+
+  Enter name of file containing soil data -->                      
+
+ file name read in: pw0.sol                                            
+ Please enter the irrigation option
+ ----------------------------------
+ [0] no irrigation
+  1  sprinkler, fixed date
+  2  sprinkler, depletion level
+  3  sprinkler, combination
+  4  furrow,    fixed date
+  5  furrow,    depletion
+  6  furrow,    combination
+ -----------------------------------
+ Enter irrigation option [0]
+
+
+ NO IRRIGATION SELECTED.
+
+
+  Enter number of years to simulate --> 
+     
+ SIMULATION YEAR =           1
+     
+ SIMULATION YEAR =           2
+     
+ SIMULATION YEAR =           3
+     
+ SIMULATION YEAR =           4
+     
+ SIMULATION YEAR =           5
+     
+ SIMULATION YEAR =           6
+     
+ SIMULATION YEAR =           7
+     
+ SIMULATION YEAR =           8
+     
+ SIMULATION YEAR =           9
+     
+ SIMULATION YEAR =          10
+     
+ SIMULATION YEAR =          11
+     
+ SIMULATION YEAR =          12
+     
+ SIMULATION YEAR =          13
+     
+ SIMULATION YEAR =          14
+     
+ SIMULATION YEAR =          15
+     
+ SIMULATION YEAR =          16
+     
+ SIMULATION YEAR =          17
+     
+ SIMULATION YEAR =          18
+     
+ SIMULATION YEAR =          19
+     
+ SIMULATION YEAR =          20
+     
+ SIMULATION YEAR =          21
+     
+ SIMULATION YEAR =          22
+     
+ SIMULATION YEAR =          23
+     
+ SIMULATION YEAR =          24
+     
+ SIMULATION YEAR =          25
+     
+ SIMULATION YEAR =          26
+     
+ SIMULATION YEAR =          27
+     
+ SIMULATION YEAR =          28
+     
+ SIMULATION YEAR =          29
+     
+ SIMULATION YEAR =          30
+     
+ SIMULATION YEAR =          31
+     
+ SIMULATION YEAR =          32
+     
+ SIMULATION YEAR =          33
+     
+ SIMULATION YEAR =          34
+     
+ SIMULATION YEAR =          35
+     
+ SIMULATION YEAR =          36
+     
+ SIMULATION YEAR =          37
+     
+ SIMULATION YEAR =          38
+     
+ SIMULATION YEAR =          39
+     
+ SIMULATION YEAR =          40
+     
+ SIMULATION YEAR =          41
+     
+ SIMULATION YEAR =          42
+     
+ SIMULATION YEAR =          43
+     
+ SIMULATION YEAR =          44
+     
+ SIMULATION YEAR =          45
+     
+ SIMULATION YEAR =          46
+     
+ SIMULATION YEAR =          47
+     
+ SIMULATION YEAR =          48
+     
+ SIMULATION YEAR =          49
+     
+ SIMULATION YEAR =          50
+     
+ SIMULATION YEAR =          51
+     
+ SIMULATION YEAR =          52
+     
+ SIMULATION YEAR =          53
+     
+ SIMULATION YEAR =          54
+     
+ SIMULATION YEAR =          55
+     
+ SIMULATION YEAR =          56
+     
+ SIMULATION YEAR =          57
+     
+ SIMULATION YEAR =          58
+     
+ SIMULATION YEAR =          59
+     
+ SIMULATION YEAR =          60
+     
+ SIMULATION YEAR =          61
+     
+ SIMULATION YEAR =          62
+     
+ SIMULATION YEAR =          63
+     
+ SIMULATION YEAR =          64
+     
+ SIMULATION YEAR =          65
+     
+ SIMULATION YEAR =          66
+     
+ SIMULATION YEAR =          67
+     
+ SIMULATION YEAR =          68
+     
+ SIMULATION YEAR =          69
+     
+ SIMULATION YEAR =          70
+     
+ SIMULATION YEAR =          71
+     
+ SIMULATION YEAR =          72
+     
+ SIMULATION YEAR =          73
+     
+ SIMULATION YEAR =          74
+     
+ SIMULATION YEAR =          75
+     
+ SIMULATION YEAR =          76
+     
+ SIMULATION YEAR =          77
+     
+ SIMULATION YEAR =          78
+     
+ SIMULATION YEAR =          79
+     
+ SIMULATION YEAR =          80
+     
+ SIMULATION YEAR =          81
+     
+ SIMULATION YEAR =          82
+     
+ SIMULATION YEAR =          83
+     
+ SIMULATION YEAR =          84
+     
+ SIMULATION YEAR =          85
+     
+ SIMULATION YEAR =          86
+     
+ SIMULATION YEAR =          87
+     
+ SIMULATION YEAR =          88
+     
+ SIMULATION YEAR =          89
+     
+ SIMULATION YEAR =          90
+     
+ SIMULATION YEAR =          91
+     
+ SIMULATION YEAR =          92
+     
+ SIMULATION YEAR =          93
+     
+ SIMULATION YEAR =          94
+     
+ SIMULATION YEAR =          95
+     
+ SIMULATION YEAR =          96
+     
+ SIMULATION YEAR =          97
+     
+ SIMULATION YEAR =          98
+     
+ SIMULATION YEAR =          99
+     
+ SIMULATION YEAR =         100
+
+********************************************************
+ *** WARNING ***
+*Leap year detected with 28 days in February           *
+*please modify your climate file by adding 1 day       *
+*to February in year  100.  Leap year annual values    *
+*will not be output.                                   *
+ *** WARNING ***
+*                                                      *
+********************************************************
+
+ WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY

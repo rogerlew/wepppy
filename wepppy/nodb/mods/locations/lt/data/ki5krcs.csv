@@ -1,4 +1,4 @@
-Code,LndcvrID,WEPP_Type,New_WEPPman,ManName,Albedo,iniSatLev,interErod,rillErod,critSh,effHC,soilDepth,Sand,Clay,OM,CEC,Comment
+Code,LndcvrID,WEPP_Type,New_WEPPman,ManName,Albedo,iniSatLev,ki,kr,shcrit,ksat,soilDepth,Sand,Clay,OM,CEC,Comment
 1100,100,Granitic,Tahoe_Bare_Slope.rot,Bare,None,None,300000,0.005,4,None,None,None,None,None,None,
 1101,101,Granitic,Tahoe_Sod_Grass.rot,Sod_G,None,None,196700,0.0004446,4,None,None,None,None,None,None,
 1101,101,Granitic,Tahoe_Sod_Grass.rot,Sod_G,None,None,196700,0.0004446,4,None,None,None,None,None,None,
