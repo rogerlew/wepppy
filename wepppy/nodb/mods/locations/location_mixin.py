@@ -103,6 +103,7 @@ class LocationMixin(object):
                 if is_water:
                     _soils[mukey] = deepcopy(soils.soils[mukey])
                     _soils[mukey].area = 0.0
+                    domsoil_d[topaz_id] = mukey
 
                 else:
                     if k not in _soils:
@@ -117,7 +118,6 @@ class LocationMixin(object):
                         _soils[k].fname = '%s.sol' % k
                         _soils[k].area = 0.0
 
-                if not is_water:
                     domsoil_d[topaz_id] = k
 
             # need to recalculate the pct_coverages
