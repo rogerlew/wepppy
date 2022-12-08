@@ -77,6 +77,12 @@ c.execute('''CREATE TABLE stations
 
 pars = glob.glob("../GHCN_Intl_Stations/30-year/*.PAR")
 pars.extend(glob.glob("../GHCN_Intl_Stations/30-year/*.par"))
+pars.extend(glob.glob("../GHCN_Intl_Stations/20-year/*.PAR"))
+pars.extend(glob.glob("../GHCN_Intl_Stations/20-year/*.par"))
+pars.extend(glob.glob("../GHCN_Intl_Stations/10-year/*.PAR"))
+pars.extend(glob.glob("../GHCN_Intl_Stations/10-year/*.par"))
+
+
 for par in pars:
     print(par)
     line = ','.join(readpar(par))
