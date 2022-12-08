@@ -542,6 +542,12 @@ class Climate(NoDbBase, LogMixin):
         return [s.as_dict() for s in self._closest_stations]
 
     def find_heuristic_stations(self, num_stations=10):
+        ron = Ron.getInstance(self.wd)
+        if 'eu' in ron.locales:
+            return self.find_eu_heuristic_stations(num_stations=num_stations)
+        if 'au' in ron.locales:
+            return self.find_au_heuristic_stations(num_stations=num_stations)
+  
         self.lock()
 
         # noinspection PyBroadInspection
@@ -1215,7 +1221,6 @@ class Climate(NoDbBase, LogMixin):
             self.log_done()
 
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                pool = multiprocessing.Pool(NCPU)
                 sub_par_fns = {}
                 sub_cli_fns = {}
                 args = []
@@ -1225,21 +1230,14 @@ class Climate(NoDbBase, LogMixin):
 
                     lng, lat = ss.centroid.lnglat
                     prn_fn = '{}.prn'.format(fn_base)
+                    self.log('  building {}... '.format(cli_fn))
+                    df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+                    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
+                    cligen.run_observed(prn_fn, cli_fn=cli_fn)
 
-                    kwds = dict(lng=lng, lat=lat,
-#                                observed_data=observed_data,
-                                start_year=start_year, end_year=end_year,
-                                prn_fn=prn_fn, cli_dir=cli_dir,
-                                cli_fn=cli_fn,
-                                climatestation=climatestation,
-                                version=self.cligen_db)
-
-                    args.append(kwds)
                     sub_par_fns[topaz_id] = par_fn
                     sub_cli_fns[topaz_id] = cli_fn
 
-                for cli_fn in pool.imap_unordered(build_observed, args):
-                    self.log('  done running {}\n'.format(cli_fn))
 
                 self.sub_cli_fns = sub_cli_fns
                 self.sub_par_fns = sub_par_fns
