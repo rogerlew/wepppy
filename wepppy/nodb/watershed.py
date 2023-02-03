@@ -423,13 +423,14 @@ class Watershed(NoDbBase):
     #
     # set outlet
     #
-    def set_outlet(self, lng=None, lat=None):
+    def set_outlet(self, lng=None, lat=None, da=0.0):
         assert float(lng), lng
         assert float(lat), lat
+        assert float(da), da
 
         if self.delineation_backend_is_topaz:
             topaz = Topaz.getInstance(self.wd)
-            topaz.set_outlet(lng=lng, lat=lat)
+            topaz.set_outlet(lng=lng, lat=lat, da=da)
             self.outlet = topaz.outlet
         else:
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
@@ -446,6 +447,7 @@ class Watershed(NoDbBase):
             prep.timestamp('set_outlet')
         except FileNotFoundError:
             pass
+        
     #
     # build subcatchments
     #

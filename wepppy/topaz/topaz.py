@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import math
+from operator import index
 import os
 from os.path import exists as _exists
 import json
@@ -18,6 +19,7 @@ import time
 from glob import glob
 import shutil
 import warnings
+import copy
 
 from imageio import imread
 
@@ -279,6 +281,12 @@ class TopazRunner:
 
         return exists(_join(self.topaz_wd, 'DNMCNT.INP'))
 
+    def _load_flow_accum(self):
+        # open raster of upstream drainage area
+        uparea_arc = _join(self.topaz_wd, 'UPAREA.ARC')
+        data, _transform, _proj = read_arc(uparea_arc, dtype=np.float)
+        self.flow_accum = data
+
     def _load_channel_masks(self):
         """
         Reads the channel map into memory and identifies the junctions
@@ -362,6 +370,7 @@ class TopazRunner:
         assert 0 <= _y < num_rows, str(y)
 
         return _x, _y
+    
 
     def pixel_to_utm(self, x, y):
         """
@@ -389,6 +398,126 @@ class TopazRunner:
                              zone_number=self.utm_zone, northern=self.hemisphere == 'N')
         lng, lat = float(lng), float(lat)
         return lng, lat
+
+    def find_closest_da_match(self, lng, lat, da, pixelcoords=False):
+        """
+        find the coordinates with the closest match to the given drainage area 
+
+        returns (x, y), distance
+           where (x, y) are pixel coords and distance is the distance from the
+           specified lng, lat in pixels
+        """
+        # print('lng, lat, da=', lng, lat, da)
+        self._load_flow_accum()
+        flow_acc = self.flow_accum.T #transpose to get correct orientation
+        # print('shape flow ac', np.shape(flow_acc))
+
+        # unpack variables for instance
+        if self.junction_mask is None:
+            self._load_channel_masks()
+
+        # The orientation of the map is wonky in this algorithm.
+        # we transpose the mask for the algorithm
+        mask = self.junction_mask.T
+        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
+
+        if pixelcoords:
+            x, y = lng, lat
+        else:
+            x, y = self.lnglat_to_pixel(lng, lat)
+        
+        #pull drainage area for radius around the given outlet
+        r = 200
+        num_cells = round(r/cellsize)
+
+        miny = y-num_cells
+        if miny<0:
+            miny=0
+        maxy = y+num_cells
+        if maxy>num_rows:
+            maxy=num_rows
+        minx = x-num_cells
+        if minx<0:
+            minx=0
+        maxx = x+num_cells
+        if maxx>num_cols:
+            maxx=num_cols
+        
+
+        rows = np.arange(miny,maxy)
+        cols = np.arange(minx,maxx)
+
+        it=0
+        areas = np.zeros(len(rows)*len(cols))
+        newrows = np.zeros(len(rows)*len(cols),dtype=int)
+        newcols = np.zeros(len(rows)*len(cols),dtype=int)
+        # print('np.shape(areas)', np.shape(areas))
+        for r in rows:
+            for c in cols:
+                areas[it] = flow_acc[r,c]*(cellsize*cellsize)/1e6
+                newrows[it] = r
+                newcols[it] = c
+                it=it+1
+
+        
+        areaslist = areas.tolist()
+        rowsl = newrows.tolist()
+        colsl = newcols.tolist()
+
+
+        # # find the index of the closest drainage area
+        # all_areas = flow_acc*(cellsize*cellsize)/1e6
+        # idx = np.abs(all_areas - da).argmin()
+        # # print('idx=', idx)
+        # # print('flow_acc[idx]',flow_acc[idx])
+        # rowcol = np.unravel_index(idx,np.shape(flow_acc))
+        # print('rowcol=', rowcol)
+        # print('best matching drainage area chosen from entire FA = ',flow_acc[rowcol]*(cellsize*cellsize)/1e6)
+
+        # unpack variables for instance
+        if self.junction_mask is None:
+            self._load_channel_masks()
+
+        # The orientation of the map is a wonky in this algorithm.
+        # we transpose the mask for the algorithm
+        mask = self.junction_mask.T
+
+
+        index_min = np.argmin(abs(areaslist-da))
+        _x = colsl[index_min]
+        _y = rowsl[index_min]
+        # print('_x', _x)
+        
+        print('len(areas)', len(areaslist))
+        # print('areas=', areaslist)
+        print('first area match = ', areaslist[index_min])
+        
+        
+        toobig=0
+        while mask[_y,_x] > 2 or toobig == 1: #if chosen outlet has more than two neighbors, find the next closest
+            print('more than two neighbors, finding next closest drainage area that is smaller')
+            areaold = areaslist[index_min] 
+            areaslist.pop(index_min)
+            rowsl.pop(index_min)
+            colsl.pop(index_min)
+            
+            index_min = np.argmin(abs(areaslist-da))
+            _x = colsl[index_min]
+            _y = rowsl[index_min]
+            if areaslist[index_min] > areaold:
+                toobig=1
+            else:
+                toobig=0
+            print('mask[_y,_x]=', mask[_y,_x])
+            print('drainage area = ', areaslist[index_min] )
+
+        _x = colsl[index_min]
+        _y = rowsl[index_min]
+        distance = math.sqrt((_x - x)**2 + (_y - y)**2)
+        print('closest area match, distance in pixels = ', areaslist[index_min], distance)
+
+        return (_x, _y), distance
+
 
     def find_closest_channel(self, lng, lat, pixelcoords=False):
         """
