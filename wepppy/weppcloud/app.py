@@ -762,7 +762,21 @@ def caldor_results(file):
 @app.route('/locations/seattle-municipal')
 @app.route('/locations/seattle-municipal/')
 def seattle_index():
-    return render_template('locations/seattle/index.htm', user=current_user)
+    return render_template('locations/spu/index.htm', user=current_user)
+
+@app.route('/seattle-municipal/results')
+@app.route('/seattle-municipal/results/')
+@app.route('/locations/seattle-municipal/results')
+@app.route('/locations/seattle-municipal/results/')
+def seattle_results_index():
+
+    import io
+    import wepppy
+    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', 'index.htm')
+
+    if _exists(fn):
+        with io.open(fn, mode="r", encoding="utf-8") as fp:
+            return fp.read()
 
 
 @app.route('/seattle-municipal/results/<file>')
@@ -774,10 +788,45 @@ def seattle_results(file):
     """
     recursive list the file structure of the working directory
     """
+    import io
     import wepppy
     fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', file)
 
     if _exists(fn):
+
+        if '.htm' in fn:
+            with io.open(fn, mode="r", encoding="utf-8") as fp:
+                return fp.read()
+        elif '.jpeg' in fn or '.jpg' in fn:
+            return send_file(fn, mimetype='image/jpg')
+
+        return send_file(fn, as_attachment=True)
+    else:
+        return error_factory('File does not exist')
+    
+
+@app.route('/seattle-municipal/results/<foo>/<bar>')
+@app.route('/seattle-municipal/results/<foo>/<bar>/')
+@app.route('/locations/seattle-municipal/results/<foo>/<bar>')
+@app.route('/locations/seattle-municipal/results/<foo>/<bar>/')
+# roles_required('SeattleGroup')
+def seattle_results2(foo, bar):
+    """
+    recursive list the file structure of the working directory
+    """
+    import io
+    import wepppy
+    fn = _join(wepppy.nodb.mods.locations.seattle.seattle._thisdir, 'results', foo, bar)
+
+    if _exists(fn):
+
+        if '.htm' in fn:
+            with io.open(fn, mode="r", encoding="utf-8") as fp:
+                return fp.read()
+
+        elif '.jpeg' in fn or '.jpg' in fn:
+            return send_file(fn, mimetype='image/jpg')
+
         return send_file(fn, as_attachment=True)
     else:
         return error_factory('File does not exist')
@@ -4474,7 +4523,17 @@ def report_ash(runid, config):
         ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
         unitizer = Unitizer.getInstance(wd)
 
-        burnclass_summary = ash.burnclass_summary()
+        disturbed = None
+        try:
+            disturbed = Disturbed.getInstance(wd)
+        except:
+            pass
+
+        if disturbed:
+            burnclass_summary = disturbed.burnclass_summary()
+        else:
+            burnclass_summary = ash.burnclass_summary()
+
         summary_stats = ashpost.summary_stats
         recurrence_intervals = [str(v) for v in summary_stats['recurrence']]
         results = summary_stats['return_periods']
