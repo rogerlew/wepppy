@@ -125,6 +125,10 @@ class Topaz(NoDbBase):
         return _join(self.topaz_wd, 'NETFUL.ARC')
 
     @property
+    def uparea_out(self):
+        return _join(self.topaz_wd, 'UPAREA.ARC')
+        
+    @property
     def fvslop_arc(self):
         return _join(self.topaz_wd, 'FVSLOP.ARC')
 
@@ -198,7 +202,7 @@ class Topaz(NoDbBase):
     def has_outlet(self):
         return self._outlet is not None
 
-    def set_outlet(self, lng, lat, pixelcoords=False):
+    def set_outlet(self, lng, lat, pixelcoords=False, da=0.0):
         from wepppy.nodb.watershed import Outlet
 
         self.lock()
@@ -208,8 +212,11 @@ class Topaz(NoDbBase):
             top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
-            (x, y), distance = top_runner.find_closest_channel(lng, lat, pixelcoords=pixelcoords)
-
+            if da>0:
+                (x, y), distance = top_runner.find_closest_da_match(lng, lat, da, pixelcoords=pixelcoords)
+            else:
+                (x, y), distance = top_runner.find_closest_channel(lng, lat, pixelcoords=pixelcoords)
+            
             _lng, _lat = top_runner.pixel_to_lnglat(x, y)
 
             self._outlet = Outlet(requested_loc=(lng, lat), actual_loc=(_lng, _lat),
