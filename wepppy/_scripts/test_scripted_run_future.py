@@ -4,27 +4,25 @@ from os.path import exists as _exists
 from pprint import pprint
 from time import time
 from time import sleep
-import utm
 
 import wepppy
 from wepppy.nodb import *
 from os.path import join as _join
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed2
 
 from osgeo import gdal, osr
 gdal.UseExceptions()
 
 if __name__ == '__main__':
     projects = [
-                dict(wd='test_waddell',
-                     extent=[-122.33786715251414, 37.09779268417881, -122.1679310593182, 37.23321363425946],
-                     map_center=[-122.25289910591619, 37.16553348987432],
-                     map_zoom=12.5,
-                     outlet=[-122.25289910591619, 37.16553348987432],
+                dict(wd='Test_Watershed_15',
+                     extent=[-120.15652656555177, 38.98636711600028, -120.09644508361818, 39.033052785617535],
+                     map_center=[-120.12648582458498, 39.00971380270266],
+                     map_zoom=14,
+                     outlet=[-120.10916060023823, 39.004865203316534],
                      landuse=None,
-                     cs=10, erod=0.000001, chn_chn_wepp_width=1.0),
+                     cs=50, erod=0.000001, chn_chn_wepp_width=1.0),
                  ]
-
     for proj in projects:
         wd = proj['wd']
         extent = proj['extent']
@@ -35,14 +33,12 @@ if __name__ == '__main__':
 
         if _exists(wd):
             shutil.rmtree(wd)
-
-        os.chdir('geodata/wepppy_runs')
             
         print('making directory')
         os.mkdir(wd)
 
         print('initializing project')
-        ron = Ron(wd, "czu_region.cfg")
+        ron = Ron(wd, "disturbed.cfg")
         ron.name = wd
         ron.set_map(extent, map_center, zoom=map_zoom)
         
@@ -70,20 +66,19 @@ if __name__ == '__main__':
         landuse.build()
         landuse = Landuse.getInstance(wd)
 
-        print('building soils')
-        soils = Soils.getInstance(wd)
-        soils.mode = SoilsMode.Gridded
-        soils.build()
+#        print('building soils')
+#        soils = Soils.getInstance(wd)
+#        soils.mode = SoilsMode.Gridded
+#        soils.build()
 
         print('building climate')
         climate = Climate.getInstance(wd)
         stations = climate.find_closest_stations()
-        climate.input_years = 2
         climate.climatestation = stations[0]['id']
 
-        climate.climate_mode = ClimateMode.Observed
+        climate.climate_mode = ClimateMode.Future
+        climate.set_future_pars(start_year=2006, end_year=2050)
         climate.climate_spatialmode = ClimateSpatialMode.Multiple
-        climate.set_observed_pars(start_year=2017, end_year=2019)
 
         climate.build(verbose=1)
 
@@ -101,8 +96,7 @@ if __name__ == '__main__':
 
         fn = _join(ron.export_dir, 'totalwatsed.csv')
 
-        totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                wepp.baseflow_opts, wepp.phosphorus_opts)
+        totwatsed = TotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
         totwatsed.export(fn)
         assert _exists(fn)
 
