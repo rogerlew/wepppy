@@ -426,7 +426,6 @@ class Watershed(NoDbBase):
     def set_outlet(self, lng=None, lat=None, da=0.0):
         assert float(lng), lng
         assert float(lat), lat
-        assert float(da), da
 
         if self.delineation_backend_is_topaz:
             topaz = Topaz.getInstance(self.wd)
