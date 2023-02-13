@@ -44,8 +44,10 @@ _data_dir = _join(_thisdir, 'data')
 MULTIPROCESSING = False
 
 ContaminantConcentrations = namedtuple('ContaminantConcentrations',
-                                       ['PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
-                                        'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg'])
+                                       ['C', 'N', 'K',
+                                        'PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
+                                        'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg',
+                                        'Cr', 'Co'])
 
 
 def run_ash_model(kwds):
@@ -144,8 +146,29 @@ class Ash(NoDbBase, LogMixin):
                 from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
                 self._anu_white_ash_model_pars = WhiteAshModel()
                 self._anu_black_ash_model_pars = BlackAshModel()
+            
+            self.dump_and_unlock()
 
+            ash_dir = self.ash_dir
+            if _exists(ash_dir):
+                shutil.rmtree(ash_dir)
+            os.mkdir(ash_dir)
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+        self._load_default_contaminants()
+
+    def _load_default_contaminants(self):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
             self.high_contaminant_concentrations = ContaminantConcentrations(
+                C=248.4,
+                N=5.4,
+                K=1.5,
                 PO4=3950,  # mg*Kg-1
                 Al=7500,
                 Si=880,
@@ -161,9 +184,14 @@ class Ash(NoDbBase, LogMixin):
                 Zn=35.0,
                 As=2441,  # µg*Kg-1
                 Cd=413,
-                Hg=7.71)
+                Hg=7.71,
+                Cr=49.0,
+                Co=7.2)
 
             self.moderate_contaminant_concentrations = ContaminantConcentrations(
+                C=273.5,
+                N=5.42,
+                K=1.1,
                 PO4=9270,
                 Al=1936,
                 Si=2090,
@@ -179,9 +207,14 @@ class Ash(NoDbBase, LogMixin):
                 Zn=150,
                 As=713,
                 Cd=802,
-                Hg=42.9)
+                Hg=42.9,
+                Cr=36.1,
+                Co=5.0)
 
             self.low_contaminant_concentrations = ContaminantConcentrations(
+                C=273.5,
+                N=5.42,
+                K=1.1,
                 PO4=9270,
                 Al=1936,
                 Si=2090,
@@ -195,21 +228,17 @@ class Ash(NoDbBase, LogMixin):
                 Ni=26.0,
                 Cu=59.0,
                 Zn=150,
-                As=713,
-                Cd=802,
-                Hg=42.9)
+                As=714,
+                Cd=803,
+                Hg=42.9,
+                Cr=36.1,
+                Co=5.0)
 
             self.dump_and_unlock()
-
-            ash_dir = self.ash_dir
-            if _exists(ash_dir):
-                shutil.rmtree(ash_dir)
-            os.mkdir(ash_dir)
 
         except Exception:
             self.unlock('-f')
             raise
-
 
     def parse_inputs(self, kwds):
         if self.model != 'anu':
@@ -265,6 +294,9 @@ class Ash(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self.high_contaminant_concentrations = ContaminantConcentrations(
+                C=kwds.get('high_C'),
+                N=kwds.get('high_N'),
+                K=kwds.get('high_K'),
                 PO4=kwds.get('high_PO4'),
                 Al=kwds.get('high_Al'),
                 Si=kwds.get('high_Si'),
@@ -280,9 +312,14 @@ class Ash(NoDbBase, LogMixin):
                 Zn=kwds.get('high_Zn'),
                 As=kwds.get('high_As'),
                 Cd=kwds.get('high_Cd'),
-                Hg=kwds.get('high_Hg'))
+                Hg=kwds.get('high_Hg'),
+                Cr=kwds.get('high_Cr'),
+                Co=kwds.get('high_Co'))
 
             self.moderate_contaminant_concentrations = ContaminantConcentrations(
+                C=kwds.get('mod_C'),
+                N=kwds.get('mod_N'),
+                K=kwds.get('mod_K'),
                 PO4=kwds.get('mod_PO4'),
                 Al=kwds.get('mod_Al'),
                 Si=kwds.get('mod_Si'),
@@ -298,9 +335,14 @@ class Ash(NoDbBase, LogMixin):
                 Zn=kwds.get('mod_Zn'),
                 As=kwds.get('mod_As'),
                 Cd=kwds.get('mod_Cd'),
-                Hg=kwds.get('mod_Hg'))
+                Hg=kwds.get('mod_Hg'),
+                Cr=kwds.get('mod_Cr'),
+                Co=kwds.get('mod_Co'))
             
             self.low_contaminant_concentrations = ContaminantConcentrations(
+                C=kwds.get('low_C'),
+                N=kwds.get('low_N'),
+                K=kwds.get('low_K'),
                 PO4=kwds.get('low_PO4'),
                 Al=kwds.get('low_Al'),
                 Si=kwds.get('low_Si'),
@@ -316,7 +358,9 @@ class Ash(NoDbBase, LogMixin):
                 Zn=kwds.get('low_Zn'),
                 As=kwds.get('low_As'),
                 Cd=kwds.get('low_Cd'),
-                Hg=kwds.get('low_Hg'))
+                Hg=kwds.get('low_Hg'),
+                Cr=kwds.get('low_Cr'),
+                Co=kwds.get('low_Co'))
 
             self._reservoir_capacity_m3 = kwds.get('reservoir_capacity')
             self._reservoir_storage = kwds.get('reservoir_storage')
@@ -863,19 +907,23 @@ class Ash(NoDbBase, LogMixin):
 
     @property
     def black_ash_bulkdensity(self):
-        return getattr(self, '_black_ash_bulkdensity', self.config_get_float('ash', 'black_ash_bulkdensity'))
+        return getattr(self, '_black_ash_bulkdensity', 
+                       self.config_get_float('ash', 'black_ash_bulkdensity'))
 
     @property
     def white_ash_bulkdensity(self):
-        return getattr(self, '_white_ash_bulkdensity', self.config_get_float('ash', 'white_ash_bulkdensity'))
+        return getattr(self, '_white_ash_bulkdensity', 
+                       self.config_get_float('ash', 'white_ash_bulkdensity'))
 
     @property
     def field_black_ash_bulkdensity(self):
-        return getattr(self, '_field_black_ash_bulkdensity', self.config_get_float('ash', 'field_black_ash_bulkdensity'))
+        return getattr(self, '_field_black_ash_bulkdensity', 
+                       self.config_get_float('ash', 'field_black_ash_bulkdensity'))
 
     @property
     def field_white_ash_bulkdensity(self):
-        return getattr(self, '_field_white_ash_bulkdensity', self.config_get_float('ash', 'field_white_ash_bulkdensity'))
+        return getattr(self, '_field_white_ash_bulkdensity', 
+                       self.config_get_float('ash', 'field_white_ash_bulkdensity'))
 
     @property
     def ini_black_ash_load(self):
@@ -904,7 +952,9 @@ class Ash(NoDbBase, LogMixin):
             mod = getattr(moderate_contaminant_concentrations, contaminant)
             low = getattr(low_contaminant_concentrations, contaminant)
 
-            if contaminant in ['As', 'Cd', 'Hg']:
+            if contaminant in ['C', 'N', 'K']:
+                units = 'g/kg'
+            elif contaminant in ['As', 'Cd', 'Hg']:
                 units = 'μg/kg'
             else:
                 units = 'mg/kg'
