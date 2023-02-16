@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import math
+# from msilib.schema import Error #suddenly stopped working???
 from operator import index
 import os
 from os.path import exists as _exists
@@ -421,14 +422,19 @@ class TopazRunner:
         mask = self.junction_mask.T
         cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
 
+
         if pixelcoords:
             x, y = lng, lat
         else:
             x, y = self.lnglat_to_pixel(lng, lat)
         
         #pull drainage area for radius around the given outlet
-        r = 200
+        r = 150 #150 seems to work really well
         num_cells = round(r/cellsize)
+        # print('numcells=', num_cells)
+
+        # print('y=',y)
+        # print('x=',x)
 
         miny = y-num_cells
         if miny<0:
@@ -447,74 +453,115 @@ class TopazRunner:
         rows = np.arange(miny,maxy)
         cols = np.arange(minx,maxx)
 
-        it=0
-        areas = np.zeros(len(rows)*len(cols))
-        newrows = np.zeros(len(rows)*len(cols),dtype=int)
-        newcols = np.zeros(len(rows)*len(cols),dtype=int)
-        # print('np.shape(areas)', np.shape(areas))
+        areas = []
+        newrows = []
+        newcols = []
+        distances = []
+        masks = []
+
+        countp = 0 #count the number of pixels looked at
         for r in rows:
             for c in cols:
-                areas[it] = flow_acc[r,c]*(cellsize*cellsize)/1e6
-                newrows[it] = r
-                newcols[it] = c
-                it=it+1
+                checkda = flow_acc[r,c]*(cellsize*cellsize)/1e6
+                countp = countp+1
+                if checkda > 0.8*da: #get rid of all annoying tiny drainage areas
+                    areas.append(checkda)
+                    newrows.append(r)
+                    newcols.append(c)
+                    dist = math.sqrt((c - x)**2 + (r - y)**2)
+                    distances.append(dist)
+                    masks.append(mask[r,c])
 
+        if bool(areas) == False:
+            raise ValueError("no reasonable drainage area matches within radius")
+
+        # index_min = np.argmin(abs(areas-da))
+        # _x = newcols[index_min]
+        # _y = newrows[index_min]
+
+        areas = list(areas)
+        newrows = list(newrows)
+        newcols = list(newcols)
+        distances = list(distances)
+        masks = list(masks)
+
+
+        print('number of pixels within radius = ', countp)
+        print('number of pixels with drainage areas > 80 percent of input = ', len(areas))
+        # print('areas=', areas)
+        # print('distances=', distances)
+        # print('masks=', masks)
+        # print('first area match = ', areas[index_min])
+        count2 = sum(map(lambda x : x == 2, masks)) #count the number of pixels that only have two neighbors (no tribs)
         
-        areaslist = areas.tolist()
-        rowsl = newrows.tolist()
-        colsl = newcols.tolist()
 
+        index_min = np.argmin(distances)
 
-        # # find the index of the closest drainage area
-        # all_areas = flow_acc*(cellsize*cellsize)/1e6
-        # idx = np.abs(all_areas - da).argmin()
-        # # print('idx=', idx)
-        # # print('flow_acc[idx]',flow_acc[idx])
-        # rowcol = np.unravel_index(idx,np.shape(flow_acc))
-        # print('rowcol=', rowcol)
-        # print('best matching drainage area chosen from entire FA = ',flow_acc[rowcol]*(cellsize*cellsize)/1e6)
+        searching = 0
+        if count2 > 0: #if there are pixels with only two neighbors 
+            if masks[index_min] > 2: #if current chosen pixel has more than two neighbors keep looking
+                searching = 1
+        else: #if there aren't see if there are at least some with three neighbors
+            count3 = sum(map(lambda x : x == 3, masks)) #count the number of pixels that only have 3 neighbors (one trib)
+            if count3 > 0:
+                if masks[index_min] > 3:
+                    searching = 1
 
-        # unpack variables for instance
-        if self.junction_mask is None:
-            self._load_channel_masks()
-
-        # The orientation of the map is a wonky in this algorithm.
-        # we transpose the mask for the algorithm
-        mask = self.junction_mask.T
-
-
-        index_min = np.argmin(abs(areaslist-da))
-        _x = colsl[index_min]
-        _y = rowsl[index_min]
-        # print('_x', _x)
-        
-        print('len(areas)', len(areaslist))
-        # print('areas=', areaslist)
-        print('first area match = ', areaslist[index_min])
-        
-        
         toobig=0
-        while mask[_y,_x] > 2 or toobig == 1: #if chosen outlet has more than two neighbors, find the next closest
-            print('more than two neighbors, finding next closest drainage area that is smaller')
-            areaold = areaslist[index_min] 
-            areaslist.pop(index_min)
-            rowsl.pop(index_min)
-            colsl.pop(index_min)
-            
-            index_min = np.argmin(abs(areaslist-da))
-            _x = colsl[index_min]
-            _y = rowsl[index_min]
-            if areaslist[index_min] > areaold:
+        while searching==1 or toobig==1:
+            print('closest pixel of reasonable drainage area has too many neighbors, find next closest')
+            areaold = areas[index_min] 
+            areas.pop(index_min)
+            newrows.pop(index_min)
+            newcols.pop(index_min)
+            masks.pop(index_min)
+            distances.pop(index_min)
+
+            index_min = np.argmin(distances)
+
+            if areas[index_min] > areaold+1:
                 toobig=1
             else:
                 toobig=0
-            print('mask[_y,_x]=', mask[_y,_x])
-            print('drainage area = ', areaslist[index_min] )
+            
+            if count2 > 0: #if there are pixels with only two neighbors 
+                if masks[index_min] == 2: 
+                    searching = 0
+            else: #if there aren't see if there are at least some with three neighbors
+                count3 = sum(map(lambda x : x == 3, masks)) #count the number of pixels that only have 3 neighbors (one trib)
+                if count3 > 0:
+                    if masks[index_min] == 3:
+                        searching = 0
+                else: #if there aren't any pixels with fewer than 4 neighbors, just try it
+                    searching=0
 
-        _x = colsl[index_min]
-        _y = rowsl[index_min]
+            
+
+        # while mask[_y,_x] > 2 or toobig == 1: #if chosen outlet has more than two neighbors, find the next closest
+        #     print('more than two neighbors, finding next closest drainage area that is smaller')
+        #     areaold = areas[index_min] 
+        #     areas.pop(index_min)
+        #     newrows.pop(index_min)
+        #     newcols.pop(index_min)
+            
+        #     index_min = np.argmin(abs(areas-da))
+        #     _x = newcols[index_min]
+        #     _y = newrows[index_min]
+        #     if areas[index_min] > areaold+1:
+        #         toobig=1
+        #     # elif areaslist[index_min] > da:
+        #     #     toobig=1
+        #     else:
+        #         toobig=0
+            
+
+        _x = newcols[index_min]
+        _y = newrows[index_min]
+
+        print('number of channel neighbors = ', mask[_y,_x])
+        # print('drainage area = ', areas[index_min] )
         distance = math.sqrt((_x - x)**2 + (_y - y)**2)
-        print('closest area match, distance in pixels = ', areaslist[index_min], distance)
+        print('closest area match, distance in pixels = ', areas[index_min], distance)
 
         return (_x, _y), distance
 

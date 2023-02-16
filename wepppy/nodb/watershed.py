@@ -423,7 +423,7 @@ class Watershed(NoDbBase):
     #
     # set outlet
     #
-    def set_outlet(self, lng=None, lat=None, da=0.0):
+    def set_outlet(self, lng=None, lat=None, da=1e-5):
         assert float(lng), lng
         assert float(lat), lat
         assert float(da), da
