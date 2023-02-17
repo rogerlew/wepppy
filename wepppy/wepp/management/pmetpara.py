@@ -18,6 +18,7 @@ def pmetpara_prep(runs_dir, mid_season_crop_coeff, p_coeff):
     if not isinstance(p_coeff, dict):
         _p_coeff = p_coeff
 
+    description = '-'
     with open(_join(runs_dir, 'pmetpara.txt'), 'w') as fp:
         fp.write('{n}\n'.format(n=n))
 
@@ -28,12 +29,7 @@ def pmetpara_prep(runs_dir, mid_season_crop_coeff, p_coeff):
             if isinstance(p_coeff, dict):
                 _p_coeff = p_coeff[plant]
 
-            fp.write('{plant},{mid_season_crop_coeff},{p_coeff},{i},{description}\n'.
-                     format(plant=plant,
-                            mid_season_crop_coeff=mid_season_crop_coeff,
-                            p_coeff=p_coeff,
-                            i=i,
-                            description='-'))
+            fp.write(f'{plant},{mid_season_crop_coeff},{p_coeff},{i+1},{description}\n')
 
 
 if __name__ == "__main__":
