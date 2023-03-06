@@ -13,7 +13,8 @@ class SoilMultipleOfeSynth(object):
 
     @property
     def description(self):
-        s = ["<wepppy.wepp.soils.utils.SoilMultipleOfe>", "Current Working Directory", os.getcwd(), "Stack:"] + self.stack
+        s = ["<wepppy.wepp.soils.utils.SoilMultipleOfe>", 
+             "Current Working Directory", os.getcwd(), "Stack:"] + self.stack
         s = [f"# {L}" for L in s]
         return '\n'.join(s)
 
@@ -37,8 +38,9 @@ class SoilMultipleOfeSynth(object):
                         break
 
         assert len(versions) == 1, f"Soils must be of the same version ({versions})"
+        version = versions.pop() 
 
-        s = [f"7778\n{self.description}\nAny comments:\n{self.num_ofes} {ksflag}\n"]
+        s = [f"{version}\n{self.description}\nAny comments:\n{self.num_ofes} {ksflag}\n"]
 
         for fn in self.stack:
             with open(fn) as fp:

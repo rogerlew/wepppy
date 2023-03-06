@@ -340,11 +340,12 @@ class Ron(NoDbBase):
             # initialize the other controllers here
             # this will create the other .nodb files
             import wepppy
+            from wepppy.nodb.watershed import DelineationBackend
 
             # gotcha: need to import the nodb submodules
             # through wepppy to avoid circular references
             watershed = wepppy.nodb.Watershed(wd, cfg_fn)
-            if watershed.delineation_backend == wepppy.nodb.watershed.DelineationBackend.TOPAZ:
+            if watershed.delineation_backend == DelineationBackend.TOPAZ:
                 wepppy.nodb.Topaz(wd, cfg_fn)
 
             wepppy.nodb.Landuse(wd, cfg_fn)

@@ -647,6 +647,52 @@ def index():
         return exception_factory()
 
 
+@app.route('/access-by-year')
+@app.route('/access-by-year/')
+def access_by_year():
+    try:
+        project_loads = Counter()
+
+        if _exists('/geodata/weppcloud_runs/access.csv'):
+            with open('/geodata/weppcloud_runs/access.csv') as fp:
+                rdr = csv.DictReader(fp)
+                for d in rdr:
+                    project_loads[int(d['year'])] += 1
+                    
+    except Exception:
+        return exception_factory()
+
+    try:
+        return jsonify(project_loads)
+
+    except Exception:
+        return exception_factory()
+
+
+@app.route('/access-by-month')
+@app.route('/access-by-month/')
+def access_by_month():
+    try:
+        project_loads = Counter()
+
+        if _exists('/geodata/weppcloud_runs/access.csv'):
+            with open('/geodata/weppcloud_runs/access.csv') as fp:
+                rdr = csv.DictReader(fp)
+                for d in rdr:
+                    year = int(d['year'])
+                    month = int(d['date'].strip().split('-')[1])
+                    project_loads[f'{year}-{month}'] += 1
+
+    except Exception:
+        return exception_factory()
+
+    try:
+        return jsonify(project_loads)
+
+    except Exception:
+        return exception_factory()
+
+
 @app.route('/stats')
 @app.route('/stats/')
 def stats():
@@ -662,6 +708,7 @@ def stats():
 
     except Exception:
         return exception_factory()
+
 
 @app.route('/stats/<key>')
 @app.route('/stats/<key>/')

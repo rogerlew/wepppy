@@ -1,7 +1,35 @@
 <h5>PMET</h5>
-<p>Computes evaporation and transpiration (ET) based on Penman-Monteith’s equation. The default is
-  Penman’s equation.</p>
+<p>Computes evaporation and transpiration (ET) based on Penman-Monteith’s equation. 
+   The default is Penman’s equation.</p>
+<p>For guidance on the parameters please see:<br/>
+   <a href="https://www.fao.org/3/x0490e/x0490e00.htm">https://www.fao.org/3/x0490e/x0490e00.htm</a></p>
 <div style="padding-left:3em;">
+
+{% if 'disturbed' not in ron.mods %}
+<div class="form-group row" id="pmet_kcb_container">
+    <div class="col-sm-4">
+        <label for="pmet_kcb">Basal Crop Coefficient Ratio (kcb): </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="pmet_kcb" name="pmet_kcb" class="form-control mr-sm-3" type="text"
+        value="{% if isfloat(wepp.pmet_kcb) %}{{ "%.4f" | format(wepp.pmet_kcb) }}{% endif %}"
+        placeholder="e.g. 0.95"
+        aria-label="Basal Crop Coefficient">
+    </div>
+</div>
+<div class="form-group row" id="pmet_rawp_container">
+    <div class="col-sm-4">
+        <label for="pmet_rawp">Readily Avaiable Water Fraction (rawp): </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="pmet_rawp" name="pmet_rawp" class="form-control mr-sm-3" type="text"
+        value="{% if isfloat(wepp.pmet_rawp) %}{{ "%.4f" | format(wepp.pmet_rawp) }}{% endif %}"
+        placeholder="e.g. 0.80"
+        aria-label="Readily Avaiable Water">
+    </div>
+</div>
+{% endif %}
+
 <label class="form-check-label">
     <input id="checkbox_wepp_pmet" type="checkbox" class="form-check-input disable-readonly"
      onchange="Wepp.getInstance().set_run_wepp_routine('pmet', this.checked);"

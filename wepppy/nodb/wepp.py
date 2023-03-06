@@ -37,8 +37,6 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
-from wepppy.wepp.soils.utils import modify_kslast
-
 # wepppy
 from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.runner import (
@@ -70,6 +68,8 @@ from wepppy.all_your_base import (
 from wepppy.all_your_base import try_parse_float
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator
 
+from wepppy.wepp.soils.utils import WeppSoilUtil
+
 from wepppy.wepp.out import (
     Loss,
     Ebe,
@@ -94,7 +94,11 @@ from .climate import Climate, ClimateMode
 from .watershed import Watershed
 from .wepppost import WeppPost
 from .prep import Prep
+
+from wepppy.wepp.soils.utils import simple_texture
+
 from wepppy.nodb.mixins.log_mixin import LogMixin
+from wepppy.nodb.mods.disturbed import Disturbed
 
 
 def _copyfile(src_fn, dst_fn):
@@ -368,6 +372,9 @@ class Wepp(NoDbBase, LogMixin):
             self._channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
             self._kslast = self.config_get_float('wepp', 'kslast')
 
+            self._pmet_kcb = self.config_get_float('wepp', 'pmet_kcb')
+            self._pmet_rawp = self.config_get_float('wepp', 'pmet_rawp')
+
             self._multi_ofe = self.config_get_bool('wepp', 'multi_ofe')
 
             self.run_flowpaths = False
@@ -543,6 +550,14 @@ class Wepp(NoDbBase, LogMixin):
             if isfloat(_channel_erodibility):
                 self._channel_erodibility = float(_channel_erodibility)
 
+            _pmet_kcb = kwds.get('pmet_kcb', None)
+            if isfloat(_pmet_kcb):
+                self._pmet_kcb = float(_pmet_kcb)
+
+            _pmet_rawp = kwds.get('pmet_rawp', None)
+            if isfloat(_pmet_rawp):
+                self._pmet_rawp = float(_pmet_rawp)
+
             _kslast = kwds.get('kslast', '')
             if isfloat(_kslast):
                 self._kslast = float(_kslast)
@@ -578,11 +593,9 @@ class Wepp(NoDbBase, LogMixin):
 
         if self.multi_ofe:
             self._prep_multi_ofe(translator)
-            # TODO: modify kslast for multi ofe
         else:
             self._prep_slopes(translator)
             self._prep_managements(translator)
-            self._modify_soils_kslast()
             self._prep_soils(translator)
 
         self._prep_climates(translator)
@@ -654,14 +667,62 @@ class Wepp(NoDbBase, LogMixin):
             else:
                 fp.write('\n')
 
-    def _prep_pmet(self, mid_season_crop_coeff=0.95, p_coeff=0.80):
-        self.log('nodb.Wepp._prep_pmet::mid_season_crop_coeff = {}, p_coeff = {} '
-                 .format(mid_season_crop_coeff, p_coeff))
-        self.log_done()
+    @property
+    def pmet_kcb(self):
+        return getattr(self, '_pmet_kcb', self.config_get_float('wepp', 'pmet_kcb'))
 
-        pmetpara_prep(self.runs_dir,
-                      mid_season_crop_coeff=mid_season_crop_coeff,
-                      p_coeff=p_coeff)
+    @pmet_kcb.setter
+    def pmet_kcb(self, value):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self._pmet_kcb = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def pmet_rawp(self):
+        return getattr(self, '_pmet_rawp', self.config_get_float('wepp', 'pmet_rawp'))
+
+    @pmet_rawp.setter
+    def pmet_rawp(self, value):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self._pmet_ramp = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _prep_pmet(self, kcb=None, rawp=None):
+
+
+        if 'disturbed' not in self.mods:
+            if kcb is None:
+                kcb = self.pmet_kcb
+            else:
+                self.pmet_kcb = kcb
+
+            if rawp is None:
+                rawp = self.pmet_rawp
+            else:
+                self.pmet_rawp = rawp
+
+            self.log(f'nodb.Wepp._prep_pmet::kcb = {kcb}, rawp = {rawp} ')
+            self.log_done()
+            pmetpara_prep(self.runs_dir, kcb=kcb, rawp=rawp)
+        else:
+            from wepppy.nodb.mods import Disturbed
+            disturbed = Disturbed.getInstance(self.wd)
+            disturbed.pmetpara_prep()
+
 
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
 
@@ -844,6 +905,8 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
+        kslast = self.kslast
+
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
 
@@ -855,7 +918,13 @@ class Wepp(NoDbBase, LogMixin):
             # soils
             src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-            _copyfile(src_fn, dst_fn) 
+            
+            if kslast is not None:
+                soilu = WeppSoilUtil(src_fn)
+                soilu.modify_kslast(kslast)
+                soilu.write(dst_fn)
+            else:    
+                _copyfile(src_fn, dst_fn) 
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
@@ -877,18 +946,40 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(wd)
         watershed = Watershed.getInstance(wd)
         soils = Soils.getInstance(wd)
+        try:
+            disturbed = Disturbed.getInstance(wd)
+            _land_soil_replacements_d = disturbed.land_soil_replacements_d 
+        except:
+            disturbed = None
+            _land_soil_replacements_d = None
+
         years = climate.input_years
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
         bd_d = soils.bd_d
 
-        for topaz_id, man_summary in landuse.sub_iter():
+        for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
+            dom = landuse.domlc_d[topaz_id]
+            man_summary = landuse.managements[dom]
+            man = man_summary.get_management()
+
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
 
             management = man_summary.get_management()
             sol_key = soils.domsoil_d[topaz_id]
             management.set_bdtill(bd_d[sol_key])
+
+            if disturbed is not None:
+                disturbed_class = man_summary.disturbed_class
+                
+                _soil = soils.soils[mukey]
+                clay = _soil.clay
+                sand = _soil.sand
+                texid = simple_texture(clay=clay, sand=sand)
+                rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                if rdmax is not None:
+                    management.set_rdmax(float(rdmax))
 
             multi = management.build_multiple_year_man(years)
 
@@ -931,12 +1022,19 @@ class Wepp(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
+        kslast = self.kslast
 
         for topaz_id, soil in soils.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = _join(soils_dir, soil.fname)
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-            _copyfile(src_fn, dst_fn) 
+
+            if kslast is not None:
+                soilu = WeppSoilUtil(src_fn)
+                soilu.modify_kslast(kslast)
+                soilu.write(dst_fn)
+            else:    
+                _copyfile(src_fn, dst_fn) 
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
@@ -1715,44 +1813,3 @@ class Wepp(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _modify_soils_kslast(self):
-        wd = self.wd
-        watershed = Watershed.getInstance(wd)
-
-        kslast = self.kslast
-
-        if kslast is None:
-            return
-
-        soils = Soils.getInstance(wd)
-
-        ksat_mod = 'f'
-
-        _domsoil_d = soils.domsoil_d
-        _soils = soils.soils
-        for topaz_id, ss in watershed._subs_summary.items():
-            # lng, lat = ss.centroid.lnglat
-
-            dom = _domsoil_d[str(topaz_id)]
-            _soil = deepcopy(_soils[dom])
-
-            _dom = '{dom}-{ksat_mod}' \
-                .format(dom=dom, ksat_mod=ksat_mod)
-
-            _soil.mukey = _dom
-
-            if _dom not in _soils:
-                _soil_fn = '{dom}.sol'.format(dom=_dom)
-                src_soil_fn = _join(_soil.soils_dir, _soil.fname)
-                dst_soil_fn = _join(_soil.soils_dir, _soil_fn)
-                modify_kslast(src_soil_fn, dst_soil_fn, kslast, caller='nodb.wepp')
-
-                _soil.fname = _soil_fn
-                _soils[_dom] = _soil
-
-            _domsoil_d[str(topaz_id)] = _dom
-
-        soils.lock()
-        soils.domsoil_d = _domsoil_d
-        soils.soils = _soils
-        soils.dump_and_unlock()

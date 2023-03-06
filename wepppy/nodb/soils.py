@@ -443,8 +443,9 @@ class Soils(NoDbBase):
             rred.build_soils(self._mode)
             return
 
-        from wepppy.nodb import Wepp
+        from wepppy.nodb import Wepp, Soils
         if Wepp.getInstance(self.wd).multi_ofe:
+            self = Soils.getInstance(self.wd)
             self._build_multiple_ofe()
 
         try:

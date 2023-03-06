@@ -7,7 +7,7 @@ d = load_map(db)
 fp = open('%s_weppcloud_managements.csv' % str(db), 'w')
 wtr = csv.writer(fp)
 
-hdr = ['key', 'desc', 'man',
+hdr = ['key', 'desc', 'man', 'disturbed_class',
        'ini.data.bdtill', 'ini.data.cancov', 'ini.data.daydis', 'ini.data.dsharv', 'ini.data.frdp', 
        'ini.data.inrcov', 'ini.data.iresd', 'ini.data.imngmt', 'ini.data.rfcum', 'ini.data.rhinit',
        'ini.data.rilcov', 'ini.data.rrinit', 'ini.data.rspace', 'ini.data.rtyp', 'ini.data.snodpy',
@@ -34,8 +34,10 @@ for k in d:
     assert isinstance(m.inis[0].data, IniLoopCropland)
     cancov, inrcov, rilcov = m.inis[0].data.cancov, m.inis[0].data.inrcov, m.inis[0].data.rilcov
     man_fn = d[k]['ManagementFile']
+    disturbed_class = d[k].get('DisturbedClass', '-')
 
     row = [('{%s}' % v).format(key=k, desc=m.desc, man=man_fn, 
+                               disturbed_class=disturbed_class,
                                ini=m.inis[0],
                                plant=m.plants[0]) for v in hdr]
     print(row)
