@@ -1631,6 +1631,11 @@ class Management(object):
         for i in range(len(self.inis)):
             self.inis[i].data.bdtill = value
 
+    def set_rdmax(self, value):
+        assert isfloat(value), value
+        for i in range(len(self.plants)):
+            self.plants[i].data.rdmax = value
+
     def make_multiple_ofe(self, nofe):
         assert self.nofe == 1
         assert nofe >= 2

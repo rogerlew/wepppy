@@ -44,6 +44,7 @@ class WeppSoilUtil(object):
         header = [L.replace('#', '').strip() for L in lines if L.startswith('#')]
 #        header = [L for L in header if L != '']
         lines = [L.strip() for L in lines if not L.startswith('#')]
+        lines = [L for L in lines if L != '']
         i = 0
 
         datver = lines[i]  # data version
@@ -186,6 +187,13 @@ class WeppSoilUtil(object):
 
         self.obj = yaml.safe_load(yaml_txt)
 
+    def modify_kslast(self, kslast):
+        self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
+        for i in range(len(self.obj['ofes'])):
+            self.obj['ofes'][i]['res_lyr']['kslast'] = kslast
+
+        self.obj['res_lyr']['kslast'] = kslast
+
     def to7778(self, hostname=''):
         from rosetta import Rosetta2, Rosetta3
 
@@ -197,7 +205,7 @@ class WeppSoilUtil(object):
 
         header = new.obj['header']
         header.append('')
-        header.append('wepppy.wepp.soils.utils.WeppSoilUtil 7778 migration')
+        header.append('wepppy.wepp.soils.utils.WeppSoilUtil::7778migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
@@ -341,7 +349,7 @@ class WeppSoilUtil(object):
 
         header = new.obj['header']
         header.append('')
-        header.append('wepppy.wepp.soils.utils.WeppSoilUtil 7778disturbed migration')
+        header.append('wepppy.wepp.soils.utils.WeppSoilUtil::7778disturbed_migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
@@ -415,7 +423,7 @@ class WeppSoilUtil(object):
 
         header = new.obj['header']
         header.append('')
-        header.append(f'wepppy.wepp.soils.utils.WeppSoilUtil {version} migration')
+        header.append(f'wepppy.wepp.soils.utils.WeppSoilUtil::{version}migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
