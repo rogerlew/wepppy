@@ -71,6 +71,28 @@ def read_disturbed_land_soil_lookup(fname):
     return d
 
 
+def migrate_land_soil_lookup(src_fn, target_fn, pars, defaults):
+    src = read_disturbed_land_soil_lookup(src_fn)
+    target = read_disturbed_land_soil_lookup(target_fn)
+
+    for par in pars:
+        for k in target:
+            if k in src:
+                v = src[k][par]
+            else:
+                v = defaults[par]
+            target[k][par] = v
+
+    fieldnames = list(target[k].keys())
+
+    with open(target_fn, 'w') as fp:
+        wtr = csv.DictWriter(fp, fieldnames)
+        wtr.writeheader()
+
+        for k, row in target.items():
+            wtr.writerow(row)
+
+
 def write_disturbed_land_soil_lookup(fname, data):
     with open(fname) as fp:
         rdr = csv.DictReader(fp)
@@ -93,6 +115,7 @@ def _replace_parameter(original, replacement):
 
     else:
         return replacement
+
 
 @deprecated
 def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_max_om=None):
@@ -340,6 +363,10 @@ class Disturbed(NoDbBase):
             return None
 
         return _join(self.disturbed_dir, self._disturbed_fn)
+
+    @property
+    def sbs_4class_path(self):
+        return _join(self.disturbed_dir, 'sbs_4class.tif')
 
     @property
     def disturbed_wgs(self):
@@ -671,7 +698,8 @@ class Disturbed(NoDbBase):
             landuse.unlock('-f')
             raise
 
-    def remap_landuse(self):
+    def get_sbs(self):
+
         wd = self.wd
 
         if not self.has_map:
@@ -697,17 +725,31 @@ class Disturbed(NoDbBase):
 
         assert _exists(disturbed_cropped), ' '.join(cmd)
 
+        return SoilBurnSeverityMap(disturbed_cropped, self.breaks, self._nodata_vals)
+     
+    def get_sbs_4class(self):
+        sbs = self.get_sbs()
+        sbs.export_4class_map(self.sbs_4class_path)
+        return SoilBurnSeverityMap(self.sbs_4class_path)
+
+    def remap_landuse(self):
+        wd = self.wd
+
         landuse = Landuse.getInstance(wd)
         assert landuse.mode != LanduseMode.Single
 
         watershed = Watershed.getInstance(wd)
 
+        sbs = self.get_sbs()
+
+        if sbs is None:
+            return
+
         # noinspection PyBroadException
         try:
             landuse.lock()
 
-            sbs = SoilBurnSeverityMap(disturbed_cropped, self.breaks, self._nodata_vals)
-            self._calc_sbs_coverage(sbs.data)
+            self._calc_sbs_coverage(sbs)
 
             sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
 
@@ -739,6 +781,69 @@ class Disturbed(NoDbBase):
     def lookup_fn(self):
         return _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
 
+    @property
+    def land_soil_replacements_d(self):
+        default_fn = _join(_data_dir, 'disturbed_land_soil_lookup.csv')
+
+        _lookup_fn = self.lookup_fn
+        if not _exists(_lookup_fn):
+            shutil.copyfile(default_fn, _lookup_fn)
+
+        lookup = read_disturbed_land_soil_lookup(_lookup_fn)
+        for k in lookup:
+            if 'pmet_kcb' not in lookup[k]:
+                migrate_land_soil_lookup(
+                    default_fn, _lookup_fn, ['pmet_kcb', 'pmet_rawp', 'rdmax'], {})
+
+                return read_disturbed_land_soil_lookup(_lookup_fn)
+                
+            elif 'rdmax' not in lookup[k]:
+                migrate_land_soil_lookup(
+                    default_fn, _lookup_fn, ['rdmax'], {})
+
+                return read_disturbed_land_soil_lookup(_lookup_fn)
+
+        return lookup
+
+    def pmetpara_prep(self):
+        from wepppy.nodb import Wepp
+        _land_soil_replacements_d = self.land_soil_replacements_d
+
+        wd = self.wd
+        landuse = Landuse.getInstance(wd)
+        soils = Soils.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
+
+        n = len(landuse.domlc_d)
+
+        with open(_join(wepp.runs_dir, 'pmetpara.txt'), 'w') as fp:
+            fp.write('{n}\n'.format(n=n))
+
+            for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
+                dom = landuse.domlc_d[topaz_id]
+                man_summary = landuse.managements[dom]
+                man = man_summary.get_management() 
+
+                _soil = soils.soils[mukey]
+                clay = _soil.clay
+                sand = _soil.sand
+
+                assert isfloat(clay), clay
+                assert isfloat(sand), sand
+
+                texid = simple_texture(clay=clay, sand=sand)
+                disturbed_class = man_summary.disturbed_class
+                if disturbed_class is None:
+                    kcb = 0.95
+                    rawb = 0.80
+                else:
+                    kcb = _land_soil_replacements_d[(texid, disturbed_class)]['pmet_kcb']        
+                    rawb = _land_soil_replacements_d[(texid, disturbed_class)]['pmet_rawp']        
+
+                description = f'{texid}-{disturbed_class}'.replace(' ', '_')
+                plant_name = man.plants[0].name
+                fp.write(f'{plant_name},{kcb},{rawb},{i+1},{description}\n')
+
     def modify_soils(self):
         wd = self.wd
         sol_ver = self.sol_ver
@@ -747,11 +852,7 @@ class Disturbed(NoDbBase):
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
 
-        _lookup_fn = self.lookup_fn
-        if not _exists(_lookup_fn):
-            shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'), _lookup_fn)
-
-        _land_soil_replacements_d = read_disturbed_land_soil_lookup(_lookup_fn)
+        _land_soil_replacements_d = self.land_soil_replacements_d
 
         try:
             soils.lock()
@@ -825,24 +926,30 @@ class Disturbed(NoDbBase):
         self.lock()
 
         try:
+            if sbs is None:
+                self.sbs_coverage = {
+                    'noburn': 100.0,
+                    'low': 0.0,
+                    'moderate': 0.0,
+                    'high': 0.0
+                }
+            else:
+                watershed = Watershed.getInstance(self.wd)
+                bounds, transform, proj = read_raster(watershed.bound)
 
-            watershed = Watershed.getInstance(self.wd)
-            bounds, transform, proj = read_raster(watershed.bound)
+                assert bounds.shape == sbs.data.shape
 
-            assert bounds.shape == sbs.shape
+                c = Counter(sbs.data[np.where(bounds == 1.0)])
 
-            c = Counter(sbs[np.where(bounds == 1.0)])
+                total_px = float(sum(c.values()))
 
-            total_px = float(sum(c.values()))
-
-            # todo: calcuate based on disturbed burn classes
-            self.sbs_coverage = {
-                                 'noburn': c[130] / total_px,
-                                 'low': c[131] / total_px,
-                                 'moderate': c[132] / total_px,
-                                 'high': c[133] / total_px,
-                                 }
-
+                # todo: calcuate based on disturbed burn classes
+                self.sbs_coverage = {
+                                     'noburn': c[130] / total_px,
+                                     'low': c[131] / total_px,
+                                     'moderate': c[132] / total_px,
+                                     'high': c[133] / total_px
+                                     }
             self.dump_and_unlock()
 
         except:
