@@ -166,12 +166,16 @@ class RAP_TS(NoDbBase):
 
 
     def analyze(self):
+        from wepppy.nodb import Ron
+        from wepppy.nodb.mods import Disturbed
+
         start_year = self.rap_start_year
         end_year = self.rap_end_year
 
         wd = self.wd
 
         subwta_fn = Watershed.getInstance(wd).subwta
+        ron = Ron.getInstance(wd)
 
         assert _exists(subwta_fn)
 
@@ -180,7 +184,15 @@ class RAP_TS(NoDbBase):
         self.lock()
         try:
 
+            if ron.has_sbs:
+                disturbed = Disturbed.getInstance(wd)
+                sbs = disturbed.get_sbs_4class()
+                disturbed_fn = disturbed.sbs_4class_path
+            else:
+                disturbed_fn = None
+
             data_ds = {}
+            px_counts = None
 
             for year in range(start_year, end_year+1):
                 rap_ds = rap_mgr.get_dataset(year=year)
@@ -189,14 +201,16 @@ class RAP_TS(NoDbBase):
                     if band not in data_ds:
                         data_ds[band] = {}
 
-                    data_ds[band][year] = rap_ds.spatial_aggregation(band=band, subwta_fn=subwta_fn)
+                    data_ds[band][year], px_counts = \
+                        rap_ds.spatial_aggregation(band=band, subwta_fn=subwta_fn, lcmap_fn=disturbed_fn)
 
-            data = {topaz_id: {} for topaz_id in data_ds[RAP_Band.LITTER][start_year]}
-            for topaz_id in data_ds[RAP_Band.LITTER][start_year]:
-                for year in range(start_year, end_year+1):
-                    data[topaz_id][year] = {band: data_ds[band][year][topaz_id] for band in RAP_Band}
+#            data = {topaz_id: {} for topaz_id in data_ds[RAP_Band.LITTER][start_year]}
+#            for topaz_id in data_ds[RAP_Band.LITTER][start_year]:
+#                for year in range(start_year, end_year+1):
+#                    data[topaz_id][year] = {band: data_ds[band][year][topaz_id] for band in RAP_Band}
 
-            self.data = data
+            self.data = data_ds
+
             self.dump_and_unlock()
 
         except Exception:
