@@ -202,7 +202,7 @@ class Topaz(NoDbBase):
     def has_outlet(self):
         return self._outlet is not None
 
-    def set_outlet(self, lng, lat, pixelcoords=False, da=0.0):
+    def set_outlet(self, lng, lat, pixelcoords=False, da=1e-5):
         from wepppy.nodb.watershed import Outlet
 
         self.lock()
@@ -212,7 +212,7 @@ class Topaz(NoDbBase):
             top_runner = TopazRunner(self.topaz_wd, self.dem_fn,
                                      csa=self.csa, mcl=self.mcl)
 
-            if da>0:
+            if da>1e-5:
                 (x, y), distance = top_runner.find_closest_da_match(lng, lat, da, pixelcoords=pixelcoords)
             else:
                 (x, y), distance = top_runner.find_closest_channel(lng, lat, pixelcoords=pixelcoords)

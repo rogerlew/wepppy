@@ -22,14 +22,21 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
-# base_name = '/home/helen/geodata/wepppy_runs/'
-main_folder = '/media/helen/HelenData/wepppy_runs/WHIS/Burnedv2/'
+############# THESE ARE THE ONLY INPUTS TO CHANGE
+filepath = 'geodata/small_basin_input_data/red_salmon_fire_perim_basins_10T.csv'
+firename = 'red_salmon_fire'
+fire_year = 2020
+water_year = 2021
+utmzn = 10
+utmzs = 'T'
+#############
 
-firename = 'whis_burned_v2'
-# base_name = main_folder + firename + '/'
 
-fire_year = 2018
-water_year = 2019
+# config_filepath = firename + '.cfg'
+config_filepath = '/home/helen/wepppy/wepppy/nodb/configs/' + firename + '.cfg'
+# base_name = '/home/helen/geodata/wepppy_runs/' + firename + '/'
+main_folder = '/media/helen/HelenData/wepppy_runs/2020_fires/'
+base_name = main_folder + firename + '/'
 precip_threshold_exceeded = []
 new_outlet_x = []
 new_outlet_y = []
@@ -39,62 +46,87 @@ hs_sed_yield = []
 basin_ids_keep = []
 
 
+df = pd.read_csv(filepath)
 # df['postfire_sed_yield']  = zeros(len(df))
 # df['precip_threshold_exceeded'] = zeros(len(df))
 
 output_name = firename + '_wepp_output.csv'
 
+# os.chdir('geodata/wepppy_runs')
+os.chdir('/media/helen/HelenData/wepppy_runs/2020_fires')
+os.mkdir(firename)
+os.chdir(firename)
 
-if __name__ == '__main__':
+bigtic=time.perf_counter()
+
+for i in range(len(df)):
+    try:
+        if __name__ == '__main__':
             projects = [
-                        dict(wd='brandy_creek',
-                            extent=[-122.72563935723157, 40.47289496432364, -122.48531342949718, 40.655465095849934], 
-                            map_center=[-122.60547639336438, 40.564242278932966],
+                        dict(wd= firename + '_' + str(df.basin_id[i]),
+                            extent=[df.xmin[i], df.ymin[i], df.xmax[i], df.ymax[i]], 
+                            map_center=[df.center_x[i], df.center_y[i]],
                             map_zoom=12,
-                            outlet=[-122.57321813700284, 40.61518587365536],
+                            outlet=[df.outlet_x[i], df.outlet_y[i]],
                             landuse=None,
-                            cs=19, erod=0.000001, chn_chn_wepp_width=1.0),
-
-                        dict(wd='boulder_creek',
-                            extent=[-122.685330164953, 40.55728107528918, -122.51539407175706, 40.68626657133447], 
-                            map_center=[-122.60036211835504, 40.621804957447615],
-                            map_zoom=12,
-                            outlet=[-122.59187910192986, 40.641378801781244],
-                            landuse=None,
-                            cs=19, erod=0.000001, chn_chn_wepp_width=1.0),
-
-                        dict(wd='whiskey_creek',
-                            extent=[-122.64551656597567, 40.611731040593284, -122.47558047277975, 40.74061143626555], 
-                            map_center=[-122.56054851937769, 40.67620238161505],
-                            map_zoom=12,
-                            outlet=[-122.5588998559944, 40.655022909367034],
-                            landuse=None,
-                            cs=19, erod=0.000001, chn_chn_wepp_width=1.0),
+                            cs=19, erod=0.000001, chn_chn_wepp_width=1.0,
+                            da=df.DA_km2[i]),
                         ]
 
             for proj in projects:
+                tic=time.perf_counter()
+
+
                 wd = proj['wd']
                 extent = proj['extent']
                 map_center = proj['map_center']
                 map_zoom = proj['map_zoom']
                 outlet = proj['outlet']
                 default_landuse = proj['landuse']
+                drainage_area = proj['da']
+
+
+                temp = utm.to_latlon(extent[0],extent[1],utmzn,utmzs)
+                extent[0] = temp[1]
+                extent[1] = temp[0]
+                temp = utm.to_latlon(extent[2],extent[3],utmzn,utmzs)
+                extent[2] = temp[1]
+                extent[3] = temp[0]
+
+                temp = utm.to_latlon(map_center[0],map_center[1],utmzn,utmzs)
+                map_center[0] = temp[1]
+                map_center[1] = temp[0]
+
+                temp = utm.to_latlon(outlet[0],outlet[1],utmzn,utmzs)
+                outlet[0] = temp[1]
+                outlet[1] = temp[0]
+
+                print('type(extent)=', type(extent))
 
 
 
                 if _exists(wd):
                     shutil.rmtree(wd)
 
-                # os.chdir('geodata/wepppy_runs')
-                os.chdir(main_folder)
+                print('outlet=', outlet)
+                print('basin_id=', df.basin_id[i])
+                print('drainage area =', drainage_area)
+
+                # cwd = os.getcwd()
+                # print("Current working directory: {0}".format(cwd))
+
+                
                     
                 print('making directory')
                 os.mkdir(wd)
 
-                tic=time.perf_counter()
+                
 
                 print('initializing project')
-                ron = Ron(wd, 'whis_carr_fire.cfg')
+                
+
+                print('config filepath = ', config_filepath)
+                ron = Ron(wd, config_filepath)
                 ron.name = wd
                 ron.set_map(extent, map_center, zoom=map_zoom)
                 
@@ -103,10 +135,17 @@ if __name__ == '__main__':
 
                 print('building channels')
                 wat = Watershed.getInstance(wd)
-                wat.build_channels(csa=10, mcl=100)
+                wat.build_channels()
                 
                 print('setting outlet')
-                wat.set_outlet(*outlet)
+                wat.set_outlet(*outlet, drainage_area)
+                # print(dir(wat))
+                no = utm.from_latlon(wat.outlet.actual_loc[1], wat.outlet.actual_loc[0])
+                # print(df.outlet_x[i], df.outlet_y[i])
+                # print(no)
+                distance = math.sqrt((no[0] - df.outlet_x[i])**2 + (no[1] - df.outlet_y[i])**2)
+                print('distance in meters from original outlet =', distance)
+                
                 
                 print('building subcatchments')
                 wat.build_subcatchments()
@@ -115,6 +154,8 @@ if __name__ == '__main__':
                 wat.abstract_watershed()
                 translator = wat.translator_factory()
                 topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
+                # print('watershed area=', wat.wsarea/1e6)
+                
 
                 print('building landuse')
                 landuse = Landuse.getInstance(wd)
@@ -127,10 +168,6 @@ if __name__ == '__main__':
                 soils.mode = SoilsMode.Gridded
                 soils.build()
 
-                from wepppy.nodb.mods.disturbed import Disturbed
-                disturbed = Disturbed.getInstance(wd)
-                print(disturbed.sbs_coverage)
-
                 print('building climate')
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -139,7 +176,7 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.GridMetPRISM
                 climate.climate_spatialmode = ClimateSpatialMode.Single
-                climate.set_observed_pars(start_year=2018, end_year=2019)
+                climate.set_observed_pars(start_year=fire_year, end_year=water_year)
 
                 climate.build(verbose=1)
 
@@ -157,13 +194,16 @@ if __name__ == '__main__':
 
                 fn = _join(ron.export_dir, 'totalwatsed.csv')
 
+                # totalwatsed = TotalWatSed2(wd,_join(ron.output_dir, 'totalwatsed.txt'),
+                #                         wepp.baseflow_opts, wepp.phosphorus_opts)
                 totalwatsed = TotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
                 totalwatsed.export(fn)
                 assert _exists(fn)
 
-                print(loss_report.out_tbl)
+                # print(loss_report.out_tbl)
 
-                folder_name = main_folder + wd + '/wepp/output'
+
+                folder_name = base_name + wd + '/wepp/output'
                 os.chdir(folder_name)
                 wepp_output = pd.read_csv('ebe_pw0.txt', delim_whitespace=True, names=['day','month','year','precip','runoff_vol','runoff_peak','sed_kg'], skiprows=9, usecols=[0,1,2,3,4,5,6])
                 yr = fire_year
@@ -175,14 +215,14 @@ if __name__ == '__main__':
                 print('annual_sed_data.iloc[1]=',annual_sed_data.iloc[1])
                 outlet_sed_yield.append(annual_sed_data.iloc[1])
 
-                folder_name = main_folder + wd + '/export'
+                folder_name = base_name + wd + '/export'
                 os.chdir(folder_name)
                 hillslopes_output = pd.read_csv('totalwatsed.csv', names=['wy','sed_kg'], skiprows=5, usecols=[4,5])
-                # print('hillslopes_output=', hillslopes_output)
+                print('hillslopes_output=', hillslopes_output)
                 hs_annual_sed_data = hillslopes_output.groupby(["wy"])["sed_kg"].sum()
                 hs_sed_yield.append(hs_annual_sed_data.iloc[1])
 
-                folder_name = main_folder + wd + '/climate'
+                folder_name = base_name + wd + '/climate'
                 os.chdir(folder_name)
                 climate_data = pd.read_csv('wepp.cli',delim_whitespace=True, names=['day','month','year','prcp','dur','tp','ip'], skiprows=15, usecols=[0,1,2,3,4,5,6])
                 climate_data['avg_intensity'] = climate_data['prcp'].divide(climate_data['dur'])
@@ -191,21 +231,52 @@ if __name__ == '__main__':
                 climate_data.loc[(climate_data['peak_intensity'] > 24) & (wepp_output['wy'] == water_year),'thresh_intensity'] = 1
                 precip_threshold_exceeded.append(climate_data['thresh_intensity'].sum())
                 climate_data.to_csv('climate_data.csv')  
-                os.chdir('..')
 
+                basin_ids_keep.append(df.basin_id[i])
+                new_outlet_x.append(no[0])
+                new_outlet_y.append(no[1])
                 new_da.append(wat.wsarea/1e6)
+
+                os.chdir('..')
+                ## remove a bunch of directories that take up too much space
+                shutil.rmtree('climate')
+                shutil.rmtree('dem')
+                shutil.rmtree('disturbed')
+                shutil.rmtree('landuse')
+                shutil.rmtree('soils')
+                shutil.rmtree('watershed')
+                shutil.rmtree('observed')
+
+                cwd = os.getcwd()
+                dir_list = os.listdir(cwd)
+                for item in dir_list:
+                    if item.endswith('.nodb'):
+                        os.remove(os.path.join(cwd, item))
+                os.chdir('..')
+                # cwd = os.getcwd()
+                # print("Current working directory: {0}".format(cwd))
+
                 toc=time.perf_counter()
                 print('minutes elapsed for wepppy basin calcs = ', (toc-tic)/60)
                 print('----------------------------------------------------------------')
+    except:
+        shutil.rmtree(wd)
+        pass
+
 newdf = pd.DataFrame()
-# newdf['basinid'] = basin_ids_keep
+newdf['basinid'] = basin_ids_keep
 newdf['outlet_sed_yield'] = outlet_sed_yield
 newdf['hillslope_sed_yield'] = hs_sed_yield
-# newdf['precip_threshold_exceeded'] = precip_threshold_exceeded
-
+newdf['precip_threshold_exceeded'] = precip_threshold_exceeded
+newdf['new_outlet_x'] = new_outlet_x
+newdf['new_outlet_y'] = new_outlet_y
+newdf['new_da'] = new_da
 
 
 print(newdf)
 newdf.to_csv(output_name)
+
+bigtoc=time.perf_counter()
+print('minutes elapsed for entire basin, one year = ', (bigtoc-bigtic)/60)
 print('----------------------------------------------------------------')
 print('----------------------------------------------------------------')
