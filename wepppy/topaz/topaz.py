@@ -534,25 +534,6 @@ class TopazRunner:
                         searching = 0
                 else: #if there aren't any pixels with fewer than 4 neighbors, just try it
                     searching=0
-
-            
-
-        # while mask[_y,_x] > 2 or toobig == 1: #if chosen outlet has more than two neighbors, find the next closest
-        #     print('more than two neighbors, finding next closest drainage area that is smaller')
-        #     areaold = areas[index_min] 
-        #     areas.pop(index_min)
-        #     newrows.pop(index_min)
-        #     newcols.pop(index_min)
-            
-        #     index_min = np.argmin(abs(areas-da))
-        #     _x = newcols[index_min]
-        #     _y = newrows[index_min]
-        #     if areas[index_min] > areaold+1:
-        #         toobig=1
-        #     # elif areaslist[index_min] > da:
-        #     #     toobig=1
-        #     else:
-        #         toobig=0
             
 
         _x = newcols[index_min]
