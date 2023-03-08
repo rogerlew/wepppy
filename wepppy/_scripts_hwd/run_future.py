@@ -23,12 +23,12 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 ############# THESE ARE THE ONLY INPUTS TO CHANGE
-filepath = 'geodata/small_basins_forecasting/santaynez_utm10half_outlets_to_polygons_zb1_d150.csv'
-areaname = 'santaynez_utm10half_2023_to_2050'
-utmzn = 10
+filepath = 'geodata/small_basins_forecasting/santa_clara_30m_utm11_subbasins.csv'
+areaname = 'santa_clara_30m_utm11_subbasins'
+utmzn = 11
 utmzs = 'S'
-main_folder = '/media/helen/HelenData/wepppy_runs/SantaYnez/'
-sy = 2022
+main_folder = '/media/helen/HelenData/wepppy_runs/SantaClara/'
+sy = 2025
 ey = 2050
 #############
 
@@ -58,10 +58,10 @@ os.chdir(areaname)
 
 bigtic=time.perf_counter()
 
-for i in range(len(df)):
+for i in range(290,len(df)):
     print(areaname)
-    try:
-        if __name__ == '__main__':
+    # try:
+    if __name__ == '__main__':
             projects = [
                         dict(wd= areaname + '_' + str(df.basin_id[i]),
                             extent=[df.xmin[i], df.ymin[i], df.xmax[i], df.ymax[i]], 
@@ -175,7 +175,7 @@ for i in range(len(df)):
                 print('building climate')
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
-                climate.input_years = 10
+                climate.set_observed_pars(start_year=sy, end_year=ey)
                 climate.climatestation = stations[0]['id']
 
                 climate.climate_mode = ClimateMode.Future
@@ -240,14 +240,14 @@ for i in range(len(df)):
                 # new_outlet_y.append(no[1])
                 # new_da.append(wat.wsarea/1e6)
 
-                # os.chdir('..')
+                os.chdir('..')
                 # ## remove a bunch of directories that take up too much space
                 # shutil.rmtree('climate')
-                # shutil.rmtree('dem')
-                # shutil.rmtree('disturbed')
-                # shutil.rmtree('landuse')
-                # shutil.rmtree('soils')
-                # shutil.rmtree('watershed')
+                shutil.rmtree('dem')
+                shutil.rmtree('disturbed')
+                shutil.rmtree('landuse')
+                shutil.rmtree('soils')
+                shutil.rmtree('watershed')
                 # shutil.rmtree('observed')
 
                 # cwd = os.getcwd()
@@ -262,9 +262,9 @@ for i in range(len(df)):
                 toc=time.perf_counter()
                 print('minutes elapsed for wepppy basin calcs = ', (toc-tic)/60)
                 print('----------------------------------------------------------------')
-    except:
-        shutil.rmtree(wd)
-        pass
+    # except:
+    #     shutil.rmtree(wd)
+    #     pass
 
 # newdf = pd.DataFrame()
 # newdf['basinid'] = basin_ids_keep
