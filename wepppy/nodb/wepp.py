@@ -977,7 +977,12 @@ class Wepp(NoDbBase, LogMixin):
                 clay = _soil.clay
                 sand = _soil.sand
                 texid = simple_texture(clay=clay, sand=sand)
-                rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                
+                if disturbed_class is None:
+                    rdmax = None
+                else:
+                    rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+
                 if rdmax is not None:
                     management.set_rdmax(float(rdmax))
 
