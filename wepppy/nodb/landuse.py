@@ -8,6 +8,7 @@
 
 # standard library
 import csv
+import json
 
 import os
 from os.path import join as _join
@@ -100,6 +101,9 @@ class Landuse(NoDbBase):
                     shutil.copyfile(_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj')
 
             self._landuse_map = _landuse_map
+
+            self._fractionals = self.config_get_list('landuse', 'fractionals')
+
             self.dump_and_unlock()
 
         except Exception:
@@ -272,6 +276,25 @@ class Landuse(NoDbBase):
         self.domlc_d = domlc_d
 
     @property
+    def fractionals(self):
+        return getattr(self, '_fractionals', self.config_get_list('landuse', 'fractionals'))
+
+    @fractionals.setter
+    def fractionals(self, value):
+        assert isintance(value, Iterable), value
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._fractionals = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
     def nlcd_db(self):
         return getattr(self, '_nlcd_db', self.config_get_str('landuse', 'nlcd_db'))
 
@@ -355,14 +378,11 @@ class Landuse(NoDbBase):
                 raise Exception('LanduseMode is not set')
 
             self.dump_and_unlock()
-
             self.build_managements()
-
             self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
             self = Landuse.getInstance(wd)
-
             self.build_managements()
             self.set_cover_defaults()
 
@@ -380,31 +400,81 @@ class Landuse(NoDbBase):
         except FileNotFoundError:
             pass
 
+        self._build_fractionals()
+
+    def _build_fractionals(self):
+        fractionals = self.fractionals
+        frac_dir = _join(self.lc_dir, 'fractionals')
+
+        if len(fractionals) == 0:
+            return
+
+        os.makedirs(frac_dir, exist_ok=True)
+
+        _map = Ron.getInstance(self.wd).map
+        subwta_fn = Watershed.getInstance(self.wd).subwta
+
+        frac_d = {}
+        dom_d = {}
+        for frac in fractionals:
+            lc_fn = _join(frac_dir, frac.replace('/', '_') + '.tif')
+            wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize)
+            
+            lc = LandcoverMap(lc_fn)
+
+            dom_d[frac] = lc.build_lcgrid(subwta_fn)
+            frac_d[frac] = lc.calc_fractionals(subwta_fn)
+
+        with open(_join(frac_dir, 'dom.json'), 'w') as fp:
+            json.dump(dom_d, fp, indent=2)
+
+        with open(_join(frac_dir, 'fractionals.json'), 'w') as fp:
+            json.dump(frac_d, fp, indent=2)
+
     def _build_multiple_ofe(self):
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
+        watershed = Watershed.getInstance(self.wd)
+
+        lc = LandcoverMap(self.lc_fn)
+        domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
 
         lc_dir = self.lc_dir
         managements = self.managements
-        domlc_d = self.domlc_d
 
         watershed = Watershed.getInstance(self.wd)
         for topaz_id, ss in watershed.sub_iter():
             nsegments = watershed.mofe_nsegments[str(topaz_id)]
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
 
-            dom = domlc_d[topaz_id]
-            man = managements[dom].get_management()
+            mofe_ids = sorted([_id for _id in domlc_d[topaz_id]])
+            doms = [domlc_d[topaz_id][_id] for _id in mofe_ids]
+
+            stack = []
+            for dom in doms:
+                if dom not in managements:
+                    managements[dom] = get_management_summary(dom, self.mapping)
+                stack.append(managements[dom].get_management())
 
             if nsegments == 1:
                 with open(mofe_lc_fn, 'w') as pf:
-                    pf.write(str(man))
+                    pf.write(str(stack[0]))
             else:
                 mofe_synth = ManagementMultipleOfeSynth()
 
                 # just replicate the dom
-                mofe_synth.stack = [man for i in range(nsegments)]
+                mofe_synth.stack = stack
                 merged = mofe_synth.write(mofe_lc_fn)
                     
+        self.lock()
+        try:
+            self.domlc_mofe_d = domlc_d
+            self.managements = managements
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
     def identify_burnclass(self, topaz_id):
         dom = self.domlc_d[str(topaz_id)]
         man = self.managements[dom]

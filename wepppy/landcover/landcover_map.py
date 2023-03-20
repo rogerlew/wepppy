@@ -34,9 +34,13 @@ class LandcoverMap:
         x = self.data[indices]
         return int(Counter(x).most_common()[0][0])
         
-    def build_lcgrid(self, subwta_fn, lcgrid_fn=None):
+    def _get_fractionals(self, indices):
+        x = self.data[indices]
+        return {str(k): v for k,v in Counter(x).most_common()}
+        
+    def calc_fractionals(self, subwta_fn):
         """
-        Generates a dominant lc map based on the subcatchment
+        calc fractionals based on the subcatchment
         ids identified in the subwta_fn map
         """
         assert _exists(subwta_fn)
@@ -45,7 +49,34 @@ class LandcoverMap:
 
         _ids = sorted(list(set(subwta.flatten())))
         
-        lcgrid = np.zeros(subwta.shape, np.int32)
+        frac_d = {}
+        for _id in _ids:
+            if _id == 0:
+                continue
+                
+            _id = int(_id)
+            indices = np.where(subwta == _id)
+            frac = self._get_fractionals(indices)
+            frac_d[str(_id)] = frac
+
+        return frac_d
+            
+    def build_lcgrid(self, subwta_fn, mofe_fn=None):
+        """
+        Generates a dominant lc map based on the subcatchment
+        ids identified in the subwta_fn map
+        """
+        assert _exists(subwta_fn)
+        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
+        assert self.data.shape == subwta.shape
+
+        if mofe_fn is None:
+            mofe_map = None
+        else:
+            mofe_map, transform_m, proj_m = read_raster(mofe_fn, dtype=np.int32)
+
+        _ids = sorted(list(set(subwta.flatten())))
+        
         domlc_d = {}
         for _id in _ids:
             if _id == 0:
@@ -53,29 +84,19 @@ class LandcoverMap:
                 
             _id = int(_id)
             indices = np.where(subwta == _id)
-            dom = self._get_dominant(indices)
-            lcgrid[indices] = dom
-                
-            domlc_d[str(_id)] = str(dom)
-            
-        if lcgrid_fn is not None:
-            # initialize raster
-            num_cols, num_rows = lcgrid.shape
-            driver = gdal.GetDriverByName("GTiff")
-            dst = driver.Create(lcgrid_fn, num_cols, num_rows,
-                                1, GDT_Byte)
 
-            srs = osr.SpatialReference()
-            srs.ImportFromProj4(proj)
-            wkt = srs.ExportToWkt()
+            if mofe_map is None:
+                dom = self._get_dominant(indices)
+                domlc_d[str(_id)] = str(dom)
+            else:
+                mofes = sorted(list(set(mofe_map[indices].flatten())))
+                mofes = [mofe for mofe in mofes if mofe != 0]
 
-            dst.SetProjection(wkt)
-            dst.SetGeoTransform(transform)
-            band = dst.GetRasterBand(1)
-            band.WriteArray(lcgrid)
-            del dst  # Writes and closes file
-            
-            assert _exists(lcgrid_fn)
+                domlc_d[str(_id)] = {}
+                for mofe in mofes:
+                    indices = np.where((subwta == _id) & (mofe_map == mofe))
+                    dom = self._get_dominant(indices)
+                    domlc_d[f'{_id}'][f'{mofe}'] = str(dom)
             
         return domlc_d
 
