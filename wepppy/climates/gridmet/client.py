@@ -55,7 +55,7 @@ def nc_extract(fn, locations):
     return d
 
 
-def _retrieve(gridvariable: GridMetVariable, bbox, year):
+def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=None):
     global _var_meta
 
     abbrv, variable_name = _var_meta[gridvariable]
@@ -78,12 +78,16 @@ def _retrieve(gridvariable: GridMetVariable, bbox, year):
     referer = 'https://rangesat.nkn.uidaho.edu'
     s = requests.Session()
     response = s.get(url, headers={'referer': referer}, stream=True)
-    id = str(uuid.uuid4())+abbrv+str(year)
-    with open(_join(SCRATCH, '%s.nc' % id), 'wb') as out_file:
+    if _id is None:
+        _id = str(uuid.uuid4())+abbrv+str(year)
+    if met_dir is None:
+        met_dir = SCRATCH
+
+    with open(_join(met_dir, '%s.nc' % _id), 'wb') as out_file:
         shutil.copyfileobj(response.raw, out_file)
     del response
 
-    return id
+    return _id
 
 
 def dump(abbrv, year, key, ts, desc, units, met_dir):
@@ -118,7 +122,7 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
 
     for gridvariable in variables:
         for year in range(start_year, end_year + 1):
-            id = _retrieve(gridvariable, bbox, year)
+            id = retrieve_nc(gridvariable, bbox, year)
             fn = _join(SCRATCH, '%s.nc' % id)
 
             try:
