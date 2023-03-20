@@ -37,9 +37,10 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='201
     data['lon'] = '-116.0000'
 
     response = requests.post(
-        'http://www.prism.oregonstate.edu/explorer/dataexplorer/rpc.php',
+        'https://www.prism.oregonstate.edu/explorer/dataexplorer/rpc.php',
         headers=headers, data=data, verify=False)
 
+    print(response.text)
     my_data = json.loads(response.text)
     ppt = my_data['result']['data']['ppt']
     tmin = my_data['result']['data']['tmin']
@@ -56,6 +57,8 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='201
     # View the first ten rows
     prism.to_csv("prism.csv", index=False)
 
+    return prism
 
 if __name__ == "__main__":
-    retrieve_daily()
+    d = retrieve_daily(start_date='19810101')
+    print(d)
