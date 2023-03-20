@@ -17,6 +17,10 @@ from os.path import exists as _exists
 
 import jsonpickle
 import utm
+import numpy as np
+
+from osgeo import gdal, osr
+from osgeo.gdalconst import *
 
 import wepppy
 from wepppy.watershed_abstraction import (
@@ -97,6 +101,7 @@ class Watershed(NoDbBase):
                 os.mkdir(wat_dir)
 
             self._mofe_nsegments = None
+            self._mofe_target_length = self.config_get_float('watershed', 'mofe_target_length')
 
             self.dump_and_unlock()
 
@@ -141,7 +146,7 @@ class Watershed(NoDbBase):
 
     @property
     def clip_hillslopes(self):
-        return getattr(self, '_clip_hillslopes', False)
+        return getattr(self, '_clip_hillslopes', False) and not self.multi_ofe
 
     @clip_hillslopes.setter
     def clip_hillslopes(self, value):
@@ -204,6 +209,14 @@ class Watershed(NoDbBase):
             return _join(self.topaz_wd, 'SUBWTA.ARC')
         else:
             return _join(self.taudem_wd, 'subwta.tif')
+
+    @property
+    def discha(self):
+        if self.delineation_backend_is_topaz:
+            return _join(self.topaz_wd, 'DISCHA.ARC')
+        else:
+            raise NotImplementedError('taudem distance to channel map not specified')
+            return None # _join(self.taudem_wd, 'subwta.tif')
 
     @property
     def subwta_shp(self):
@@ -506,12 +519,15 @@ class Watershed(NoDbBase):
     # abstract watershed
     #
     def abstract_watershed(self):
+
         if self.delineation_backend_is_topaz:
             self._topaz_abstract_watershed()
         else:
             self._taudem_abstract_watershed()
 
-        self._build_multiple_ofe()
+        
+        if self.multi_ofe:
+            self._build_multiple_ofe()
        
         try: 
             prep = Prep.getInstance(self.wd)
@@ -523,11 +539,29 @@ class Watershed(NoDbBase):
     def mofe_nsegments(self):
         return getattr(self, '_mofe_nsegments', None)
 
+    @property
+    def mofe_target_length(self):
+        return getattr(self, '_mofe_target_length', 50)
+
+    @mofe_target_length.setter
+    def mofe_target_length(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mofe_target_length = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def _build_multiple_ofe(self):
         _mofe_nsegments = {}
         for topaz_id, sub in self.sub_iter():
             slp = SlopeFile(_join(self.wat_dir, sub.fname))
-            _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe()
+            _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(self.mofe_target_length)
             
         self.lock()
 
@@ -538,6 +572,58 @@ class Watershed(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+        self._build_mofe_map()
+
+    @property
+    def mofe_map(self):
+        return _join(self.wat_dir, 'mofe.tif')
+
+
+    def _build_mofe_map(self):
+        subwta, transform_s, proj_s = read_raster(self.subwta, dtype=np.int32)
+        discha, transform_d, proj_d = read_raster(self.discha, dtype=np.int32)
+        mofe_nsegments = self.mofe_nsegments
+
+        mofe_map = np.zeros(subwta.shape, np.int32)
+        for topaz_id, sub in self.sub_iter():
+            n_mofe = mofe_nsegments[topaz_id]
+
+            indices = np.where(subwta == int(topaz_id))
+            _discha_vals = discha[indices]
+            max_discha = np.max(_discha_vals)
+            interval = max_discha / n_mofe
+
+            j = n_mofe
+            for i in range(n_mofe):
+                _max = max_discha - (i * interval)
+                _min = max_discha - ((i + 1) * interval)
+                mofe_indices = np.where((subwta == int(topaz_id)) & (discha >= _min) & (discha <= _max) ) 
+                mofe_map[mofe_indices] = j
+ 
+                j -= 1             
+
+        num_cols, num_rows = mofe_map.shape
+
+        driver = gdal.GetDriverByName("GTiff")
+        dst = driver.Create(self.mofe_map, num_cols, num_rows,
+                            1, GDT_Byte)
+
+        srs = osr.SpatialReference()
+        srs.ImportFromProj4(proj_s)
+        wkt = srs.ExportToWkt()
+
+        dst.SetProjection(wkt)
+        dst.SetGeoTransform(transform_s)
+        band = dst.GetRasterBand(1)
+        band.WriteArray(mofe_map.T)
+        del dst  # Writes and closes file
+        
+        assert _exists(self.mofe_map)
+
+#        mofe_map2, transform_m, proj_m = read_raster(self.mofe_map)
+#        assert subwta.shape == mofe_map2.shape
+
 
     def _taudem_abstract_watershed(self):
         self.lock()
