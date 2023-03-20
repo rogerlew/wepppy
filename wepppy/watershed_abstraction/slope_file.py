@@ -93,22 +93,39 @@ class SlopeFile(object):
 
         return distances, slopes
 
-    def segmented_multiple_ofe(self, dst_fn=None):
+    def segmented_multiple_ofe(self, dst_fn=None, target_length=50):
         nSegments = self.nSegments
         distances = self.distances
         slopes = self.slopes
         length = self.length
         azm = self.azm
         fwidth = self.fwidth
+
+        n_mofes = int(round(length / target_length))
+        if n_mofes == 0:
+            n_mofes = 1
+
+        brks = np.array(np.round(np.linspace(0, nSegments-1, n_mofes+1)), dtype=int) 
         
         s = ['97.5',
-             str(nSegments - 1), 
+             str(n_mofes), 
              f'{azm} {fwidth}']
 
-        for i in range(nSegments-1):
-            slplen = length * (distances[i+1] - distances[i])
-            s.append(f'2 {slplen}')
-            s.append(f'0.0, {slopes[i]}  1.0, {slopes[i+1]}')
+        for i in range(n_mofes):
+            i0 = brks[i]
+            iend = brks[i+1]
+
+            d0 = distances[i0]
+            dend = distances[iend]
+            drange = dend - d0
+
+            slplen = length * drange
+            points = iend - i0
+            s.append(f'{points} {slplen}')
+
+            _distance_p = (np.array(distances[i0:iend]) - d0) / drange
+            _slopes = np.array( slopes[i0:iend])
+            s.append(' '.join(f'{_d}, {_s}' for _d, _s in zip(_distance_p, slopes)))
 
         s = '\n'.join(s)
         if dst_fn is None:
@@ -117,7 +134,7 @@ class SlopeFile(object):
         with open(dst_fn, 'w') as pf:
             pf.write(s)
 
-        return nSegments - 1
+        return n_mofes
 
     def make_multiple_ofe(self, breaks, normalized=True):
         if not normalized:
