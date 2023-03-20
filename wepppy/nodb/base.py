@@ -232,6 +232,11 @@ class NoDbBase(object):
         return _split(wd)[-1]
 
     @property
+    def multi_ofe(self):
+        import wepppy
+        return getattr(wepppy.nodb.Wepp.getInstance(self.wd), '_multi_ofe', False)
+    
+    @property
     def readonly(self):
         return _exists(_join(self.wd, 'READONLY'))
 
