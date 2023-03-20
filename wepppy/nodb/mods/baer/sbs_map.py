@@ -18,6 +18,8 @@ from collections import Counter
 
 from wepppy.all_your_base.geo import read_raster
 
+from wepppy.landcover import LandcoverMap
+
 
 def get_sbs_color_table(fn):
     ds = gdal.Open(fn)
@@ -73,7 +75,8 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
     return i + offset
 
 
-class SoilBurnSeverityMap:
+
+class SoilBurnSeverityMap(LandcoverMap):
     def __init__(self, fname, breaks=None, nodata_vals=None):
         
         if nodata_vals is None:
@@ -126,55 +129,6 @@ class SoilBurnSeverityMap:
         self.mukeys = list(set(self.data.flatten()))
         self.fname = fname
         self.nodata_vals = nodata_vals
-
-    def _get_dominant(self, indices):
-        x = self.data[indices]
-        return int(Counter(x).most_common()[0][0])
-        
-    def build_lcgrid(self, subwta_fn, lcgrid_fn=None):
-        """
-        Generates a dominant lc map based on the subcatchment
-        ids identified in the subwta_fn map
-        """
-        assert _exists(subwta_fn)
-        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
-        assert self.data.shape == subwta.shape
-
-        _ids = sorted(list(set(subwta.flatten())))
-        
-        lcgrid = np.zeros(subwta.shape, np.int32)
-        domlc_d = {}
-        for _id in _ids:
-            if _id == 0:
-                continue
-                
-            _id = int(_id)
-            indices = np.where(subwta == _id)
-            dom = self._get_dominant(indices)
-            lcgrid[indices] = dom
-                
-            domlc_d[str(_id)] = str(dom)
-            
-        if lcgrid_fn is not None:
-            # initialize raster
-            num_cols, num_rows = lcgrid.shape
-            driver = gdal.GetDriverByName("GTiff")
-            dst = driver.Create(lcgrid_fn, num_cols, num_rows,
-                                1, GDT_Byte)
-
-            srs = osr.SpatialReference()
-            srs.ImportFromProj4(proj)
-            wkt = srs.ExportToWkt()
-
-            dst.SetProjection(wkt)
-            dst.SetGeoTransform(transform)
-            band = dst.GetRasterBand(1)
-            band.WriteArray(lcgrid)
-            del dst
-            
-            assert _exists(lcgrid_fn)
-            
-        return domlc_d
 
     def export_4class_map(self, fn, cellsize=None):
 
