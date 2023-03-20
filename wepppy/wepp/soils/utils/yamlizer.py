@@ -15,7 +15,7 @@ from wepppy.all_your_base import try_parse
 
 
 def _replace_parameter(original, replacement):
-    if replacement is None:
+    if replacement is None or replacement.strip() == '':
         return original
 
     try:
