@@ -112,7 +112,7 @@ def interpolate_slp(distances, slopes, max_points):
     return _d, _s
 
 
-def write_slp(aspect, width, cellsize, length, slope, distance_p, fp, version=97.3, max_points=19):
+def write_slp(aspect, width, cellsize, length, slope, distance_p, fp, version=97.3, max_points=99):
     """
     writes a slope file in the 97.3 format for WEPP
     """
