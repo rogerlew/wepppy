@@ -47,7 +47,7 @@ _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
 
 
-def weighted_slope_average_from_fps(flowpaths, slopes, distances, max_points=19):
+def weighted_slope_average_from_fps(flowpaths, slopes, distances, max_points=99):
     """
     calculates weighted slopes based on the flowpaths contained on the hillslope
     """
