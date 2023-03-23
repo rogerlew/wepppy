@@ -65,6 +65,24 @@ class SlopeFile(object):
         self.azm = azm
         self.fwidth = fwidth
 
+    @staticmethod
+    def mofe_distance_fractions(fn):
+        with open(fn) as fp:
+            lines = fp.readlines()
+
+        mofes = int(lines[1])
+       
+        distances = [0]
+        tot_d = 0
+        for i, L in enumerate(lines[3:]):
+            if i % 2 == 0:
+                n, d = L.split()
+                d = float(d)
+                tot_d += d
+                distances.append(tot_d)
+
+        return np.array(distances) / tot_d
+
     @property
     def slope_scalar(self):
         x = np.array(self.distances)
@@ -93,7 +111,13 @@ class SlopeFile(object):
 
         return distances, slopes
 
-    def segmented_multiple_ofe(self, dst_fn=None, target_length=50):
+    def segmented_multiple_ofe(self, 
+        dst_fn=None, 
+        target_length=50,
+        apply_buffer=False,
+        buffer_length=15,
+        min_length=10):
+
         nSegments = self.nSegments
         distances = self.distances
         slopes = self.slopes
@@ -101,16 +125,33 @@ class SlopeFile(object):
         azm = self.azm
         fwidth = self.fwidth
 
-        n_mofes = int(round(length / target_length))
-        if n_mofes == 0:
-            n_mofes = 1
+        if apply_buffer:
+            r_distances = length * (distances[-1] - np.array(distances[::-1]))
+            buffer_nsegments = np.argmin(np.abs(r_distances - 
+                                                buffer_length)) + 1
+            actual_buffer_length = r_distances[buffer_nsegments-1]
 
-        brks = np.array(np.round(np.linspace(0, nSegments-1, n_mofes+1)), dtype=int) 
-        
-        s = ['97.5',
-             str(n_mofes), 
-             f'{azm} {fwidth}']
+            n_mofes = int(round((length - actual_buffer_length) / target_length))
+            if n_mofes == 0:
+                brks = [0, nSegments-1]
 
+            else:
+                brks = [v for v in np.round(
+                       np.linspace(0, nSegments-buffer_nsegments, n_mofes+1))]
+                brks.append(nSegments-1) 
+                brks = np.array(brks, dtype=int)
+
+        else:
+            n_mofes = int(round(length / target_length))
+            if n_mofes == 0:
+                n_mofes = 1
+
+            brks = np.array(np.round(np.linspace(0, nSegments-1, n_mofes+1)), dtype=int) 
+       
+
+        n_mofes = len(brks) - 1
+ 
+        s = []
         for i in range(n_mofes):
             i0 = brks[i]
             iend = brks[i+1]
@@ -120,12 +161,26 @@ class SlopeFile(object):
             drange = dend - d0
 
             slplen = length * drange
+
+            if min_length is not None:
+                if slplen < min_length:
+                    slplen = min_length
+
             points = iend - i0
+            if points == 0:
+                continue
+
             s.append(f'{points} {slplen}')
 
             _distance_p = (np.array(distances[i0:iend]) - d0) / drange
             _slopes = np.array( slopes[i0:iend])
             s.append(' '.join(f'{_d}, {_s}' for _d, _s in zip(_distance_p, slopes)))
+
+        n_mofes = int(len(s) / 2)
+
+        s = ['97.5',
+             str(n_mofes), 
+             f'{azm} {fwidth}'] + s
 
         s = '\n'.join(s)
         if dst_fn is None:

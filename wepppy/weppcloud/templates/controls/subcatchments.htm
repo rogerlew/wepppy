@@ -4,61 +4,106 @@
 {% block inputs %}
     <a href="#sub_advanced_opts_con" data-toggle="collapse" class="" aria-expanded="true">Advanced Options</a>
     <div id="sub_advanced_opts_con" class="collapse">
-    {% if watershed.delineation_backend_is_topaz %}
-    <input type="hidden" id="input_pkcsa" value="-1" name="pkcsa" />
-    <input type="hidden" id="input_pkcsa_en" value="-1" name="pkcsa_en" />
-    {% else %}
-    <h5>TauDEM</h5>
-    <div style="height:75px" class="unitizer-wrapper">
-	<div class="unitizer units-ha">
-	    <div class="form-group row">
-		<div class="col-sm-5">
-		    <label for="input_pkcsa">Peuker Douglas CSA (ha)</label>
-		</div>
-		<div class="col-sm-3">
-		    <input id="input_pkcsa" name="pkcsa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="pkcsa">
-		</div>
-	    </div>
-	</div>
-	<div class="unitizer units-acre">
-	    <div class="form-group row">
-		<div class="col-sm-5">
-		    <label for="input_pkcsa_en">Peuker Douglas CSA (acre)</label>
-		</div>
-		<div class="col-sm-3">
-		    <input id="input_pkcsa_en" name="pkcsa_en" class="form-control mr-sm-3 disable-readonly" type="text"
-			   value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}" aria-label="pkcsa"t>
-		</div>
-	    </div>
-	</div>
-    </div>
-    {% endif %}
+        {% if watershed.delineation_backend_is_topaz %}
+        <input type="hidden" id="input_pkcsa" value="-1" name="pkcsa" />
+        <input type="hidden" id="input_pkcsa_en" value="-1" name="pkcsa_en" />
+        {% else %}
+        <h5>TauDEM</h5>
+        <div style="height:75px" class="unitizer-wrapper">
+        <div class="unitizer units-ha">
+            <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_pkcsa">Peuker Douglas CSA (ha)</label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_pkcsa" name="pkcsa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="pkcsa">
+            </div>
+            </div>
+        </div>
+        <div class="unitizer units-acre">
+            <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_pkcsa_en">Peuker Douglas CSA (acre)</label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_pkcsa_en" name="pkcsa_en" class="form-control mr-sm-3 disable-readonly" type="text"
+                   value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}" aria-label="pkcsa"t>
+            </div>
+            </div>
+        </div>
+        </div>
+        {% endif %}
 
-    <h5>Clip Hillslopes</h5>
-    <p>WEPP can overpredict erosion with long hillslopes. 
-       Clipping will restrict the length and maintain area by increasing the width of the hillslope.</p>
-    <div class="form-group row">
-	<div class="col-sm-5">
-	<div style="margin-left:2em;"><input id="checkbox_clip_hillslopes" name="clip_hillslopes" type="checkbox" class="form-check-input disable-readonly"
-	       {% if watershed.clip_hillslopes %}checked{% endif %}>
-	</div>
-	<label for="checkbox_clip_hillslopes" style="margin-left:3em;">Clip Hillslopes</label>
-	</div>
-    </div>
+        {% if wepp.multi_ofe %}
+        <h5>Multiple OFE Parameters</h5>
+        <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_mofe_target_length">OFE Target Length (m)</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_mofe_target_length" 
+            name="mofe_target_length" 
+            class="form-control mr-sm-3 disable-readonly" 
+            type="text" 
+            value="{{ watershed.mofe_target_length }}" aria-label="OFE Target Length">
+        </div>
+        </div>
 
-    <div class="form-group row">
-	<div class="col-sm-5">
-	    <label for="input_hillslope_clip_length">Hillslope Clip Length (m)</label>
-	</div>
-	<div class="col-sm-3">
-	    <input id="input_hillslope_clip_length" 
-		name="hillslope_clip_length" 
-		class="form-control mr-sm-3 disable-readonly" 
-		type="text" 
-		value="{{ watershed.clip_hillslope_length | round | int }}" aria-label="Hillslope Clip Length">
-	</div>
+        
+        <h5>Buffers</h5>
+        <p></p>
+        <div class="form-group row">
+        <div class="col-sm-5">
+        <div style="margin-left:2em;"><input id="checkbox_mofe_buffer" name="mofe_buffer" type="checkbox" class="form-check-input disable-readonly"
+               {% if watershed.mofe_buffer %}checked{% endif %}>
+        </div>
+        <label for="checkbox_mofe_buffer" style="margin-left:3em;">Apply Buffers</label>
+        </div>
+        </div>
+
+        <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_mofe_buffer_length">Target Buffer Length (m)</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_mofe_buffer_length" 
+            name="mofe_buffer_length" 
+            class="form-control mr-sm-3 disable-readonly" 
+            type="text" 
+            value="{{ watershed.mofe_buffer_length }}" aria-label="Target Buffer Length">
+        </div>
+        </div>
+
+        {% else %}
+
+        <h5>Clip Hillslopes</h5>
+        <p>WEPP can overpredict erosion with long hillslopes. 
+           Clipping will restrict the length and maintain area by increasing the width of the hillslope.</p>
+        <div class="form-group row">
+        <div class="col-sm-5">
+        <div style="margin-left:2em;"><input id="checkbox_clip_hillslopes" name="clip_hillslopes" type="checkbox" class="form-check-input disable-readonly"
+               {% if watershed.clip_hillslopes %}checked{% endif %}>
+        </div>
+        <label for="checkbox_clip_hillslopes" style="margin-left:3em;">Clip Hillslopes</label>
+        </div>
+        </div>
+
+        <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_hillslope_clip_length">Hillslope Clip Length (m)</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_hillslope_clip_length" 
+            name="hillslope_clip_length" 
+            class="form-control mr-sm-3 disable-readonly" 
+            type="text" 
+            value="{{ watershed.clip_hillslope_length | round | int }}" aria-label="Hillslope Clip Length">
+        </div>
+        </div>
+        {% endif %}
+        
     </div>
-    </div>
+    
     <div style="height:1em;"> </div>
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
@@ -71,3 +116,4 @@
         </div>
     </div>
 {% endblock %}
+

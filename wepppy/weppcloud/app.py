@@ -2419,14 +2419,42 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
+    mofe_target_length = request.form.get('mofe_target_length', None)
+    try:
+        mofe_target_length = float(mofe_target_length)
+    except:
+        pass
+
+    mofe_buffer = request.form.get('mofe_buffer', None)
+    try:
+        mofe_buffer = bool(mofe_buffer)
+    except:
+        pass
+
+    mofe_buffer_length = request.form.get('mofe_buffer_length', None)
+    try:
+        mofe_buffer_length = float(mofe_buffer_length)
+    except:
+        pass
+
     wd = get_wd(runid)
     watershed = Watershed.getInstance(wd)
+    wepp = Watershed.getInstance(wd)
 
     if clip_hillslopes is not None:
         watershed.clip_hillslopes = clip_hillslopes
 
     if clip_hillslope_length is not None:
         watershed.clip_hillslope_length = clip_hillslope_length
+
+    if mofe_target_length is not None:
+        watershed.mofe_target_length = mofe_target_length
+
+    if mofe_buffer is not None:
+        watershed.mofe_buffer = mofe_buffer
+
+    if mofe_buffer_length is not None:
+        watershed.mofe_buffer_length = mofe_buffer_length
 
     try:
         watershed.build_subcatchments(pkcsa=pkcsa)
@@ -2748,8 +2776,17 @@ def view_channel_def(runid, config, chn_key):
 
 @app.route('/runs/<string:runid>/<config>/tasks/build_landuse/', methods=['POST'])
 def task_build_landuse(runid, config):
+    mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
+    try:
+        mofe_buffer_selection = int(mofe_buffer_selection)
+    except:
+        pass
+
     wd = get_wd(runid)
     landuse = Landuse.getInstance(wd)
+
+    if mofe_buffer_selection is not None:
+        landuse.mofe_buffer_selection = mofe_buffer_selection
 
     try:
         landuse.build()

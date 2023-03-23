@@ -2933,6 +2933,7 @@ var Landuse = function () {
 
             $.post({
                 url: "tasks/build_landuse/",
+                data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");

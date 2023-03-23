@@ -27,7 +27,7 @@ from deprecated import deprecated
 from wepppy.all_your_base import isint, isfloat
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil
+from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils
@@ -657,12 +657,20 @@ class Disturbed(NoDbBase):
             pass
 
     def on(self, evt):
+        multi_ofe = self.multi_ofe
+
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
-            self.remap_landuse()
-            self.spatialize_treecanopy()
+            if multi_ofe:
+                self.remap_mofe_landuse()
+            else:
+                self.remap_landuse()
+                self.spatialize_treecanopy()
 
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
-            self.modify_soils()
+            if self.multi_ofe:
+                self.modify_mofe_soils()
+            else:
+                self.modify_soils()
 
     def spatialize_treecanopy(self):
         wd = self.wd
@@ -777,6 +785,55 @@ class Disturbed(NoDbBase):
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
 
+    def remap_mofe_landuse(self):
+        wd = self.wd
+
+        landuse = Landuse.getInstance(wd)
+        assert landuse.mode != LanduseMode.Single
+
+        watershed = Watershed.getInstance(wd)
+
+        sbs = self.get_sbs()
+
+        if sbs is None:
+            return
+
+        # noinspection PyBroadException
+        try:
+            landuse.lock()
+
+            self._calc_sbs_coverage(sbs)
+
+            sbs_lc_d = sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)
+
+            for topaz_id in landuse.domlc_mofe_d:
+                for _id in landuse.domlc_mofe_d[topaz_id]:
+                    burn_class = str(sbs_lc_d[topaz_id][_id])
+                    dom = landuse.domlc_mofe_d[topaz_id][_id]
+                    man = landuse.managements[dom]
+
+                    print(f'mofe:: {dom} {burn_class}')
+
+                    # TODO: probably a better way to do this based on the disturbed_class
+                    if burn_class in ['131', '132', '133']:
+                        if man.disturbed_class in ['forest', 'young forest']:
+                            landuse.domlc_mofe_d[topaz_id][_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
+
+                        elif man.disturbed_class == 'shrub':
+                            landuse.domlc_mofe_d[topaz_id][_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+
+                        elif man.disturbed_class in ['short grass', 'tall grass']:
+                            landuse.domlc_mofe_d[topaz_id][_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+
+            landuse.dump_and_unlock()
+
+        except Exception:
+            landuse.unlock('-f')
+            raise
+
+        landuse = landuse.getInstance(wd)
+        landuse.build_managements()
+
     @property
     def lookup_fn(self):
         return _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
@@ -844,6 +901,111 @@ class Disturbed(NoDbBase):
                 plant_name = man.plants[0].name
                 fp.write(f'{plant_name},{kcb},{rawb},{i+1},{description}\n')
 
+    def modify_mofe_soils(self):
+        wd = self.wd
+        sol_ver = self.sol_ver
+
+        ron = Ron.getInstance(wd)
+        landuse = Landuse.getInstance(wd)
+        soils = Soils.getInstance(wd)
+
+        _land_soil_replacements_d = self.land_soil_replacements_d
+
+        try:
+            soils.lock()
+
+            for topaz_id, mukey in soils.domsoil_d.items():
+                if str(topaz_id).endswith('4'):
+                    continue
+
+                stack = []
+                desc = []
+
+                _soil = soils.soils[mukey]
+                clay = _soil.clay
+                sand = _soil.sand
+
+                assert isfloat(clay), clay
+                assert isfloat(sand), sand
+
+                texid = simple_texture(clay=clay, sand=sand)
+
+                assert len(landuse.domlc_mofe_d[topaz_id]) > 0, topaz_id
+
+                for _id in landuse.domlc_mofe_d[topaz_id]:
+                    dom = landuse.domlc_mofe_d[topaz_id][_id]
+                    man = landuse.managements[dom]
+
+                    assert man is not None, dom
+
+                    key = (texid, man.disturbed_class)
+                    replacements = _land_soil_replacements_d.get(key, None)
+
+                    if replacements is None:
+                        disturbed_mukey = f'{mukey}-{texid}'
+                    else:
+                        disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
+
+                    disturbed_fn = f'{disturbed_mukey}.sol'
+
+                    if disturbed_mukey not in soils.soils:
+                        _h0_max_om = None
+                        if man.disturbed_class is not None:
+                            if 'fire' in man.disturbed_class:
+                                _h0_max_om = self.h0_max_om
+     
+                        soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
+                        if sol_ver == 7778.0:
+                            new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+                        else:
+                            new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om, 
+                                                     version=sol_ver)
+
+                        new.write(_join(soils.soils_dir, disturbed_fn))
+
+                        _desc = f'{_soil.desc} - {man.disturbed_class}'
+                        soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
+                                                               fname=disturbed_fn,
+                                                               soils_dir=soils.soils_dir,
+                                                               desc=_desc,
+                                                               meta_fn=_soil.meta_fn,
+                                                               build_date=str(datetime.now()))
+
+                    desc.append(f'{man.disturbed_class}')
+                    stack.append(_join(soils.soils_dir, disturbed_fn))
+
+                key = f'hill_{topaz_id}.mofe'
+                sol_fn = f'{key}.sol'
+                mofe_synth = SoilMultipleOfeSynth()
+                mofe_synth.stack = stack
+                mofe_synth.write(_join(soils.soils_dir, sol_fn))
+               
+                soils.domsoil_d[topaz_id] = key
+                soils.soils[key] = SoilSummary(mukey=key,
+                                               fname=sol_fn,
+                                               soils_dir=soils.soils_dir,
+                                               desc='|'.join(desc),
+                                               meta_fn=None,
+                                               build_date=str(datetime.now()))
+           
+
+            # need to recalculate the pct_coverages
+            watershed = Watershed.getInstance(self.wd)
+            for topaz_id, k in soils.domsoil_d.items():
+                if soils.soils[k].area is None:
+                    soils.soils[k].area = 0.0
+                soils.soils[k].area += watershed.area_of(topaz_id)
+
+            for k in soils.soils:
+                coverage = 100.0 * soils.soils[k].area / watershed.wsarea
+                soils.soils[k].pct_coverage = coverage
+
+            soils.dump_and_unlock()
+
+        except Exception:
+            soils.unlock('-f')
+            raise
+
     def modify_soils(self):
         wd = self.wd
         sol_ver = self.sol_ver
@@ -874,7 +1036,7 @@ class Disturbed(NoDbBase):
                 if key not in _land_soil_replacements_d:
                     continue
 
-                disturbed_mukey = '{}-{}-{}'.format(mukey, texid, man.disturbed_class)
+                disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
 
                 if disturbed_mukey not in soils.soils:
                     disturbed_fn = disturbed_mukey + '.sol'
@@ -890,11 +1052,11 @@ class Disturbed(NoDbBase):
                         new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
                     else:
                         new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om, 
-                                                     version=sol_ver)
+                                                 version=sol_ver)
     
                     new.write(_join(soils.soils_dir, disturbed_fn))
 
-                    desc = '{} - {}'.format(_soil.desc, man.disturbed_class)
+                    desc = f'{_soil.desc} - {man.disturbed_class}'
                     soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
                                                                fname=disturbed_fn,
                                                                soils_dir=soils.soils_dir,
