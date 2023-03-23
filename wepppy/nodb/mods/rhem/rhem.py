@@ -129,6 +129,10 @@ class Rhem(NoDbBase, LogMixin):
     # hillslopes
     #
     def prep_hillslopes(self):
+        self.log('Ceaning runs and output dir... ')
+        self.clean()
+        self.log_done()
+
         self.log('Prepping Hillslopes... ')
 
         wd = self.wd
@@ -207,6 +211,7 @@ class Rhem(NoDbBase, LogMixin):
         os.makedirs(output_dir)
 
     def run_hillslopes(self):
+
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
@@ -214,28 +219,29 @@ class Rhem(NoDbBase, LogMixin):
         pool = ThreadPoolExecutor(NCPU)
         futures = []
 
-#        def oncomplete(rhemrun):
-#            status, _id, elapsed_time = rhemrun.result()
-#            assert status
-#            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
+        def oncomplete(rhemrun):
+            status, _id, elapsed_time = rhemrun.result()
+            assert status
+            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
         for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-            self.log('  submitting topaz={} (hill {} of {})\n'.format(topaz_id, i + 1, sub_n))
+            self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})\n')
+            self.log(f'      runs_dir: {runs_dir}\n')
 
-            run_hillslope(topaz_id, runs_dir)
-            self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
+#            run_hillslope(topaz_id, runs_dir)
+#            self.log(f'  {topaz_id} completed run\n')
 
-#            futures.append(pool.submit(lambda p: run_hillslope(*p), (topaz_id, runs_dir)))
-#            futures[-1].add_done_callback(oncomplete)
+            futures.append(pool.submit(lambda p: run_hillslope(*p), (topaz_id, runs_dir)))
+            futures[-1].add_done_callback(oncomplete)
 
-#        wait(futures, return_when=FIRST_EXCEPTION)
+        wait(futures, return_when=FIRST_EXCEPTION)
 
         self.log('Running RhemPost... ')
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
 
-        self.run_wepp_hillslopes()
+#        self.run_wepp_hillslopes()
         self.log_done()
 
     def report_loss(self):
