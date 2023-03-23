@@ -192,6 +192,26 @@
         </div>
     </div>
     {% endif %}
+
+
+    <a href="#landuse_advanced_opts_con" data-toggle="collapse" class="" aria-expanded="true">Advanced Options</a>
+    <div id="landuse_advanced_opts_con" class="collapse">
+        <h5>Buffers</h5>
+        <p></p>
+        <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="mofe_buffer_selection">Select landuse for buffer:</label>
+            <select class="form-control disable-readonly" id="mofe_buffer_selection" name="mofe_buffer_selection">
+                {% for opt in landuseoptions %}
+                <option value="{{ opt["Key"] }}" 
+                  {%if opt["key"] == (landuse.mofe_buffer_selection | int) %}selected{% endif %}>
+                  {{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        </div>
+    </div>
+
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_build_landuse" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Build Landuse</button>

@@ -15,7 +15,7 @@ from wepppy.all_your_base import try_parse
 
 
 def _replace_parameter(original, replacement):
-    if replacement is None or replacement.strip() == '':
+    if replacement is None or replacement.lower().replace('none', '').strip() == '':
         return original
 
     try:
@@ -31,7 +31,11 @@ def _replace_parameter(original, replacement):
 class WeppSoilUtil(object):
     def __init__(self, fn):
         if fn.endswith('.sol'):
-            self._parse_sol(fn)
+            try:
+                self._parse_sol(fn)
+            except:
+                print(fn)
+                raise
         elif fn.endswith('.yaml'):
             self._load_yaml(fn)
 
@@ -271,7 +275,7 @@ class WeppSoilUtil(object):
         new.obj['datver'] = 7778.0
         return new
 
-    def write(self, fn):
+    def __str__(self):
         from rosetta import Rosetta3
         r3 = Rosetta3()
 
@@ -326,11 +330,18 @@ class WeppSoilUtil(object):
             else:
                 s.append('0 0.0 0.0')
 
-        s = '\n'.join(s)
+        return '\n'.join(s) + '\n'
+        
+    def write(self, fn):
+        s = self.__str__()
+
         with open(fn, 'w') as fp:
             fp.write(s)
 
     def to_7778disturbed(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        if replacements is None:
+            replacements = {}
+
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
             new = self.to7778()
@@ -417,6 +428,9 @@ class WeppSoilUtil(object):
                                 version=9002)
    
     def to_over9000(self, replacements, h0_min_depth=None, h0_max_om=None, hostname='', version=9002):
+        if replacements is None:
+            replacements = {}
+
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
             new = self.to7778()
@@ -553,7 +567,6 @@ if __name__ == "__main__":
     fp = open('/home/roger/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/summary.csv', 'w')
     fp.write('slid,texid,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
     for sol_fn in sol_fns:
-        print(sol_fn)
         sol = WeppSoilUtil(sol_fn)
         sol.dump_yaml(sol_fn.replace('.sol', '.sol.yaml'))
 

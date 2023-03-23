@@ -37,6 +37,7 @@ from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
 from .prep import Prep
 
+
 class DelineationBackend(IntEnum):
     TOPAZ = 1
     TauDEM = 2
@@ -102,6 +103,8 @@ class Watershed(NoDbBase):
 
             self._mofe_nsegments = None
             self._mofe_target_length = self.config_get_float('watershed', 'mofe_target_length')
+            self._mofe_buffer = self.config_get_bool('watershed', 'mofe_buffer')
+            self._mofe_buffer_length = self.config_get_float('watershed', 'mofe_buffer_length')
 
             self.dump_and_unlock()
 
@@ -557,11 +560,52 @@ class Watershed(NoDbBase):
             self.unlock('-f')
             raise
 
+    @property
+    def mofe_buffer(self):
+        return getattr(self, '_mofe_target_length', False)
+
+    @mofe_buffer.setter
+    def mofe_buffer(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mofe_buffer = bool(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def mofe_buffer_length(self):
+        return getattr(self, '_mofe_buffer_length', 15)
+
+    @mofe_buffer_length.setter
+    def mofe_buffer_length(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mofe_buffer_length = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def _build_multiple_ofe(self):
         _mofe_nsegments = {}
         for topaz_id, sub in self.sub_iter():
+            not_top = not str(topaz_id).endswith('1')
+
             slp = SlopeFile(_join(self.wat_dir, sub.fname))
-            _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(self.mofe_target_length)
+            _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(
+                target_length=self.mofe_target_length,
+                apply_buffer=self.mofe_buffer and not_top,
+                buffer_length=self.mofe_buffer_length)
             
         self.lock()
 
@@ -579,7 +623,6 @@ class Watershed(NoDbBase):
     def mofe_map(self):
         return _join(self.wat_dir, 'mofe.tif')
 
-
     def _build_mofe_map(self):
         subwta, transform_s, proj_s = read_raster(self.subwta, dtype=np.int32)
         discha, transform_d, proj_d = read_raster(self.discha, dtype=np.int32)
@@ -587,21 +630,32 @@ class Watershed(NoDbBase):
 
         mofe_map = np.zeros(subwta.shape, np.int32)
         for topaz_id, sub in self.sub_iter():
-            n_mofe = mofe_nsegments[topaz_id]
-
             indices = np.where(subwta == int(topaz_id))
             _discha_vals = discha[indices]
             max_discha = np.max(_discha_vals)
-            interval = max_discha / n_mofe
 
-            j = n_mofe
-            for i in range(n_mofe):
-                _max = max_discha - (i * interval)
-                _min = max_discha - ((i + 1) * interval)
-                mofe_indices = np.where((subwta == int(topaz_id)) & (discha >= _min) & (discha <= _max) ) 
-                mofe_map[mofe_indices] = j
- 
-                j -= 1             
+            mofe_slp_fn = _join(self.wat_dir, f'hill_{topaz_id}.mofe.slp')
+            d_fractions = SlopeFile.mofe_distance_fractions(mofe_slp_fn)
+
+            n_ofe = len(d_fractions) - 1
+            if n_ofe == 1:
+                mofe_indices = np.where(subwta == int(topaz_id))
+                mofe_map[mofe_indices] = 1
+            else:
+                j = 1
+                for i in range(n_ofe):
+                    _max_pct = (1.0 - d_fractions[i]) * 100
+                    _min_pct = (1.0 - d_fractions[i+1]) * 100
+                    _min = np.percentile(_discha_vals, _min_pct)
+                    _max = np.percentile(_discha_vals, _max_pct)
+
+                    mofe_indices = np.where((subwta == int(topaz_id)) & 
+                                            (discha >= _min) & (discha <= _max)) 
+                    mofe_map[mofe_indices] = j
+                    j += 1             
+
+            mofe_ids = set(mofe_map[indices])
+            assert len(mofe_ids) == n_ofe, (topaz_id, mofe_ids)
 
         num_cols, num_rows = mofe_map.shape
 

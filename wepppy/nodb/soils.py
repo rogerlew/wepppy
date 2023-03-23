@@ -443,35 +443,11 @@ class Soils(NoDbBase):
             rred.build_soils(self._mode)
             return
 
-        from wepppy.nodb import Wepp, Soils
-        if Wepp.getInstance(self.wd).multi_ofe:
-            self = Soils.getInstance(self.wd)
-            self._build_multiple_ofe()
-
         try:
             prep = Prep.getInstance(self.wd)
             prep.timestamp('build_soils')
         except FileNotFoundError:
             pass
-
-    def _build_multiple_ofe(self):
-        soils_dir = self.soils_dir
-        soils = self.soils
-        domsoil_d = self.domsoil_d
-
-        watershed = Watershed.getInstance(self.wd)
-        for topaz_id, ss in watershed.sub_iter():
-            nsegments = watershed.mofe_nsegments[str(topaz_id)]
-            mofe_soil_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
-
-            dom = domsoil_d[topaz_id]
-            soil_fn = _join(soils_dir, soils[dom].fname)
-
-            mofe_synth = SoilMultipleOfeSynth()
-
-            # just replicate the dom
-            mofe_synth.stack = [soil_fn for i in range(nsegments)]
-            mofe_synth.write(mofe_soil_fn)        
 
     @property
     def bd_d(self):

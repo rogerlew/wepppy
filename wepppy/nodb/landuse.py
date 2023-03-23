@@ -19,12 +19,14 @@ import time
 
 # non-standard
 import jsonpickle
+import numpy as np
 
 # wepppy
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
 from wepppy.watershed_abstraction.support import is_channel
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
+from wepppy.all_your_base.geo import read_raster
 
 # wepppy submodules
 from .base import (
@@ -101,6 +103,10 @@ class Landuse(NoDbBase):
                     shutil.copyfile(_landuse_map[:-4] + '.prj', self.lc_fn[:-4] + '.prj')
 
             self._landuse_map = _landuse_map
+
+            self.domlc_mofe_d = None
+            self._mofe_buffer_selection = self.config_get_int('landuse', 'mofe_buffer_selection')
+            self._buffer_man = None
 
             self._fractionals = self.config_get_list('landuse', 'fractionals')
 
@@ -210,6 +216,35 @@ class Landuse(NoDbBase):
         management summary object
         """
         return self._single_man
+
+    @property
+    def mofe_buffer_selection(self):
+        """
+        id of the selected management
+        """
+        return getattr(self, '_mofe_buffer_selection', None)
+
+    @mofe_buffer_selection.setter
+    def mofe_buffer_selection(self, k):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mofe_buffer_selection = str(k)
+            self._buffer_man = get_management_summary(k)
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def buffer_man(self):
+        """
+        management summary object
+        """
+        return getattr(self, '_buffer_man', None)
 
     @property
     def has_landuse(self):
@@ -379,20 +414,19 @@ class Landuse(NoDbBase):
 
             self.dump_and_unlock()
             self.build_managements()
-            self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
-
-            # noinspection PyMethodFirstArgAssignment
-            self = Landuse.getInstance(wd)
-            self.build_managements()
-            self.set_cover_defaults()
 
         except Exception:
             self.unlock('-f')
             raise
 
-        from wepppy.nodb import Wepp
-        if Wepp.getInstance(self.wd).multi_ofe:
+        if self.multi_ofe:
             self._build_multiple_ofe()
+
+        self = Landuse.getInstance(wd)
+        self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
+        self = Landuse.getInstance(wd)
+        self.build_managements()
+        self.set_cover_defaults()
 
         try:
             prep = Prep.getInstance(self.wd)
@@ -401,6 +435,7 @@ class Landuse(NoDbBase):
             pass
 
         self._build_fractionals()
+
 
     def _build_fractionals(self):
         fractionals = self.fractionals
@@ -447,15 +482,25 @@ class Landuse(NoDbBase):
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
 
             mofe_ids = sorted([_id for _id in domlc_d[topaz_id]])
+            assert len(mofe_ids) == nsegments, (topaz_id, mofe_ids, nsegments)
+
+            apply_buffer = watershed.mofe_buffer and not str(topaz_id).endswith('1')
+            if apply_buffer:
+                domlc_d[topaz_id][mofe_ids[-1]] = self.mofe_buffer_selection
+
             doms = [domlc_d[topaz_id][_id] for _id in mofe_ids]
 
             stack = []
             for dom in doms:
                 if dom not in managements:
                     managements[dom] = get_management_summary(dom, self.mapping)
+
                 stack.append(managements[dom].get_management())
 
-            if nsegments == 1:
+            assert len(stack) > 0, topaz_id
+            assert len(stack) == len(nsegments)
+
+            if len(stack) == 1:
                 with open(mofe_lc_fn, 'w') as pf:
                     pf.write(str(stack[0]))
             else:
@@ -589,6 +634,12 @@ class Landuse(NoDbBase):
         if "lt" in self.mods or "portland" in self.mods or "seattle" in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
 
+        if 'disturbed' in self.mods:
+            import wepppy
+            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
+            _lookup = disturbed.land_soil_replacements_d
+            landuseoptions = [opt for opt in landuseoptions if opt.get('DisturbedClass') != ''] 
+
         return landuseoptions
 
     def build_managements(self, _map=None):
@@ -600,8 +651,15 @@ class Landuse(NoDbBase):
         # noinspection PyBroadException
         try:
             watershed = Watershed.getInstance(self.wd)
+            ron = Ron.getInstance(self.wd)
+            cell2 = ron.cellsize ** 2
             domlc_d = self.domlc_d
-    
+
+            subwta, transform, proj = read_raster(watershed.subwta, dtype=np.int32)
+            if self.multi_ofe:
+                mofe_map, transform_m, proj_m = \
+                    read_raster(watershed.mofe_map, dtype=np.int32)
+
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
             if self.managements:
@@ -614,10 +672,11 @@ class Landuse(NoDbBase):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            total_area = watershed.wsarea
+            total_area = 0.0
             for topaz_id, k in domlc_d.items():
-                area = watershed.area_of(topaz_id)
-                
+                area = len(np.where(subwta == int(topaz_id))[0])
+                area *= cell2 / 10000
+                    
                 if k not in managements:
                     man = get_management_summary(k, _map)
                     man.area = area
@@ -625,6 +684,27 @@ class Landuse(NoDbBase):
                 else:
                     managements[k].area += area
 
+                if self.multi_ofe:
+                    managements[k].area = 0
+
+                total_area += area
+
+            if self.multi_ofe and self.domlc_mofe_d is not None:
+                total_area = 0.0
+                for topaz_id in self.domlc_mofe_d:
+                    for _id, k in self.domlc_mofe_d[topaz_id].items():
+                        area = len(np.where((subwta == int(topaz_id)) &
+                                            (mofe_map == int(_id)))[0])
+                        area *= cell2 / 10000
+                        
+                        if k not in managements:
+                            man = get_management_summary(k, _map)
+                            man.area = area
+                            managements[k] = man
+                        else:
+                            managements[k].area += area
+                        total_area += area
+     
             for k in managements:
                 coverage = 100.0 * managements[k].area / total_area
                 managements[k].pct_coverage = coverage
@@ -645,7 +725,7 @@ class Landuse(NoDbBase):
         returns a list of managements sorted by coverage in
         descending order
         """
-        used_mans = set(self.domlc_d.values())
+        used_mans = [dom for dom, man in self.managements.items() if man.area > 0]
         report = [self.managements[str(dom)] for dom in used_mans]
         report.sort(key=lambda x: x.pct_coverage, reverse=True)
         return [man.as_dict() for man in report]
