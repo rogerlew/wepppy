@@ -196,6 +196,8 @@
 
     <a href="#landuse_advanced_opts_con" data-toggle="collapse" class="" aria-expanded="true">Advanced Options</a>
     <div id="landuse_advanced_opts_con" class="collapse">
+
+        {% if wepp.multi_ofe %}
         <h5>Buffers</h5>
         <p></p>
         <div class="form-group row">
@@ -210,6 +212,7 @@
             </select>
         </div>
         </div>
+        {% endif %}
     </div>
 
     <div class="form-group row hide-readonly">
