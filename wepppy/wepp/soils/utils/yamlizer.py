@@ -84,9 +84,15 @@ class WeppSoilUtil(object):
             line = shlex.split(lines[i])
             i += 1
      
-            if solwpv > 9000:
+            if solwpv > 9000 and solwpv < 9003:
                 # 1      2     3      4        5
                 ksatadj, luse, stext, ksatfac, ksatrec = line
+                line = shlex.split(lines[i])
+                i += 1
+            elif solwpv == 9003:
+                ksatadj, luse, burn_code, stext = line
+                ksatfac = None
+                ksatrec = None
                 line = shlex.split(lines[i])
                 i += 1
             else:
@@ -288,7 +294,7 @@ class WeppSoilUtil(object):
         ksflag = self.obj['ksflag']
         ofes = self.obj['ofes']
 
-        assert datver in (7778.0, 9001.0, 9002.0), datver
+        assert datver in (7778.0, 9001.0, 9002.0, 9003.0), datver
 
         s = [str(int(datver))] 
         s += header
@@ -297,14 +303,26 @@ class WeppSoilUtil(object):
 
         for i in range(ntemp):
             ofe = ofes[i]
-            if datver > 9000.0:
+            if datver > 9000.0 and datver < 9003.0:
                 _ksatadj = ofe['ksatadj']
                 _ksatfac = ofe['ksatfac']
                 _ksatrec = ofe['ksatrec']
                 _luse = ofe['luse']
                 _stext = ofe['stext']
-                s.append(f"{_ksatadj} '{_luse}'\t '{_stext}' \t {_ksatfac} \t {_ksatrec}")
-       
+                s.append(f"{_ksatadj}\t '{_luse}'\t '{_stext}'\t {_ksatfac} \t {_ksatrec}")
+            elif datver == 9003.0:
+                _ksatadj = ofe['ksatadj']
+                _luse = ofe['luse']
+                _stext = ofe['stext']
+                _burn_code = 0
+                if 'low sev' in _luse:
+                    _burn_code = 1
+                elif 'moderate sev' in _luse:
+                    _burn_code = 2
+                elif 'high sev' in _luse:
+                    _burn_code = 4
+                    
+                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'")
 
             L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])
             pars = 'nsl salb sat ki kr shcrit'.split()
@@ -315,7 +333,7 @@ class WeppSoilUtil(object):
                 pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
                 s.append('\t' + '\t '.join([str(horizon[p]) for p in pars]))
 
-                if datver == 9002.0:
+                if datver >= 9002.0:
                     clay = horizon['clay']
                     sand = horizon['sand']
                     silt = 100.0 - clay - sand
@@ -427,6 +445,13 @@ class WeppSoilUtil(object):
                                 h0_max_om=h0_max_om, hostname=hostname, 
                                 version=9002)
    
+   
+    def to9003(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        return self.to_over9000(replacements, 
+                                h0_min_depth=h0_min_depth, 
+                                h0_max_om=h0_max_om, hostname=hostname, 
+                                version=9003)
+   
     def to_over9000(self, replacements, h0_min_depth=None, h0_max_om=None, hostname='', version=9002):
         if replacements is None:
             replacements = {}
@@ -473,8 +498,10 @@ class WeppSoilUtil(object):
             ofe['shcrit'] = _replace_parameter(ofe['shcrit'], _shcrit)
 
             ofe['ksatadj'] = _replace_parameter(ofe['ksatadj'], _ksatadj)
-            ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
-            ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
+            
+            if version < 9003:
+                ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
+                ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
             ofe['luse'] = _replace_parameter(ofe['luse'], _luse)
             ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
 
@@ -533,8 +560,7 @@ class WeppSoilUtil(object):
             clay = s7778.obj['ofes'][0]['horizons'][0]['clay']
         assert clay is not None
         return clay
-
-
+            
     @property
     def avke(self):
         avke = self.obj['ofes'][0]['avke']
