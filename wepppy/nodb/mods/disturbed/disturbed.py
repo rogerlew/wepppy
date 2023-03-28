@@ -66,7 +66,8 @@ def read_disturbed_land_soil_lookup(fname):
                     if v.lower().startswith('none'):
                         row[k] = None
 
-            d[(texid, disturbed_class)] = row
+            if texid != '' and disturbed_class != '':
+                d[(texid, disturbed_class)] = row
 
     return d
 
@@ -75,9 +76,13 @@ def migrate_land_soil_lookup(src_fn, target_fn, pars, defaults):
     src = read_disturbed_land_soil_lookup(src_fn)
     target = read_disturbed_land_soil_lookup(target_fn)
 
+    for k in src:
+        if k not in target:
+            target[k] = src[k]
+
     for par in pars:
         for k in target:
-            if k in src:
+            if par in src[k]:
                 v = src[k][par]
             else:
                 v = defaults[par]
@@ -850,15 +855,23 @@ class Disturbed(NoDbBase):
         for k in lookup:
             if 'pmet_kcb' not in lookup[k]:
                 migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['pmet_kcb', 'pmet_rawp', 'rdmax'], {})
-
+                    default_fn, _lookup_fn, ['pmet_kcb', 'pmet_rawp', 'rdmax', 'xmxlai'], {})
                 return read_disturbed_land_soil_lookup(_lookup_fn)
                 
             elif 'rdmax' not in lookup[k]:
                 migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['rdmax'], {})
-
+                    default_fn, _lookup_fn, ['rdmax', 'xmxlai'], {})
                 return read_disturbed_land_soil_lookup(_lookup_fn)
+
+            elif 'xmxlai' not in lookup[k]:
+                migrate_land_soil_lookup(
+                    default_fn, _lookup_fn, ['xmxlai'], {})
+                return read_disturbed_land_soil_lookup(_lookup_fn)
+
+        if ('loam', 'forest moderate sev fire') not in lookup:
+            migrate_land_soil_lookup(
+                    default_fn, _lookup_fn, [], {})
+            return read_disturbed_land_soil_lookup(_lookup_fn)
 
         return lookup
 
