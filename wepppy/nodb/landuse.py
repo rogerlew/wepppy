@@ -468,7 +468,18 @@ class Landuse(NoDbBase):
 
     def _build_multiple_ofe(self):
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
-        watershed = Watershed.getInstance(self.wd)
+        from wepppy.nodb.mods.disturbed import Disturbed
+
+        wd = self.wd
+
+        watershed = Watershed.getInstance(wd)
+
+        try:
+            disturbed = Disturbed.getInstance(wd)
+            _land_soil_replacements_d = disturbed.land_soil_replacements_d 
+        except:
+            disturbed = None
+            _land_soil_replacements_d = None
 
         lc = LandcoverMap(self.lc_fn)
         domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
@@ -495,10 +506,27 @@ class Landuse(NoDbBase):
                 if dom not in managements:
                     managements[dom] = get_management_summary(dom, self.mapping)
 
-                stack.append(managements[dom].get_management())
+                management = managements[dom].get_management()
+                disturbed_class = managements[dom].disturbed_class
+                texid = 'sand loam'
+               
+                if disturbed_class is None:
+                    rdmax = None
+                    xmxlai = None
+                else:
+                    rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                    xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+
+                if rdmax is not None:
+                    management.set_rdmax(float(rdmax))
+
+                if xmxlai is not None:
+                    management.set_xmxlai(float(xmxlai))
+
+                stack.append(management)
 
             assert len(stack) > 0, topaz_id
-            assert len(stack) == len(nsegments)
+            assert len(stack) == nsegments
 
             if len(stack) == 1:
                 with open(mofe_lc_fn, 'w') as pf:
@@ -662,13 +690,7 @@ class Landuse(NoDbBase):
 
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
-            if self.managements:
-                managements = self.managements
-            else:
-                managements = {}
-
-            for dom in managements:
-                managements[dom].area = 0.0
+            managements = {}
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed

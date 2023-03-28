@@ -4613,10 +4613,8 @@ def report_ash(runid, config):
         except:
             pass
 
-        if disturbed:
-            burnclass_summary = disturbed.burnclass_summary()
-        else:
-            burnclass_summary = ash.burnclass_summary()
+
+        burnclass_summary = ash.burnclass_summary()
 
         summary_stats = ashpost.summary_stats
         recurrence_intervals = [str(v) for v in summary_stats['recurrence']]

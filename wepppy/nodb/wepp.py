@@ -896,9 +896,23 @@ class Wepp(NoDbBase, LogMixin):
                     _copyfile(src_fn, dst_fn) 
 
     def _prep_multi_ofe(self, translator):
-        years = Climate.getInstance(self.wd).input_years
+        wd = self.wd
 
-        watershed = Watershed.getInstance(self.wd)
+        landuse = Landuse.getInstance(wd)
+        climate = Climate.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+        soils = Soils.getInstance(wd)
+        try:
+            disturbed = Disturbed.getInstance(wd)
+            _land_soil_replacements_d = disturbed.land_soil_replacements_d 
+        except:
+            disturbed = None
+            _land_soil_replacements_d = None
+
+
+
+        years = climate.input_years
+
         wat_dir = self.wat_dir
         soils_dir = self.soils_dir
         lc_dir = self.lc_dir
@@ -933,6 +947,7 @@ class Wepp(NoDbBase, LogMixin):
                              ManagementDir=lc_dir, 
                              Description=f"hill_{topaz_id} Multiple OFE", 
                              Color=(0,0,0))
+
             man = man.build_multiple_year_man(years)    
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
             with open(dst_fn, 'w') as pf:
@@ -980,11 +995,16 @@ class Wepp(NoDbBase, LogMixin):
                 
                 if disturbed_class is None:
                     rdmax = None
+                    xmxlai = None
                 else:
                     rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                    xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
 
-                if rdmax is not None:
+                if isfloat(rdmax):
                     management.set_rdmax(float(rdmax))
+
+                if isfloat(xmxlai):
+                    management.set_xmxlai(float(xmxlai))
 
             multi = management.build_multiple_year_man(years)
 

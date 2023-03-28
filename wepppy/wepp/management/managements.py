@@ -1636,6 +1636,11 @@ class Management(object):
         for i in range(len(self.plants)):
             self.plants[i].data.rdmax = value
 
+    def set_xmxlai(self, value):
+        assert isfloat(value), value
+        for i in range(len(self.plants)):
+            self.plants[i].data.xmxlai = value
+
     def make_multiple_ofe(self, nofe):
         assert self.nofe == 1
         assert nofe >= 2
