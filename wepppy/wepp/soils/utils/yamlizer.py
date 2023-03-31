@@ -314,13 +314,24 @@ class WeppSoilUtil(object):
                 _ksatadj = ofe['ksatadj']
                 _luse = ofe['luse']
                 _stext = ofe['stext']
-                _burn_code = 0
+                
+                _burn_code = 0                
+                if 'agriculture' in _luse:
+                    _burn_code = 100
+                elif 'shrub' in _luse:
+                    _burn_code = 200
+                elif 'forest' in _luse:
+                    _burn_code = 300
+                    if 'young' in _luse:
+                        _burn_code += 6
+
                 if 'low sev' in _luse:
-                    _burn_code = 1
+                    _burn_code += 1
                 elif 'moderate sev' in _luse:
-                    _burn_code = 2
+                    _burn_code += 2
                 elif 'high sev' in _luse:
-                    _burn_code = 4
+                    _burn_code += 3
+
                     
                 s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'")
 
