@@ -66,8 +66,7 @@ def run_ash_model(kwds):
     del kwds['ash_bulkdensity']
     del kwds['ash_model']
 
-    out_fn, return_periods, annuals = \
-        ash_model.run_model(**kwds)
+    out_fn = ash_model.run_model(**kwds)
 
     return out_fn
 
@@ -140,12 +139,11 @@ class Ash(NoDbBase, LogMixin):
             self._white_ash_bulkdensity = self.config_get_float('ash', 'white_ash_bulkdensity')
 
             self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
-            self._model = self.config_get_str('ash', 'model')
+            self._model = 'multi' #: self.config_get_str('ash', 'model')
 
-            if self._model == 'anu':
-                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
-                self._anu_white_ash_model_pars = WhiteAshModel()
-                self._anu_black_ash_model_pars = BlackAshModel()
+            from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
+            self._anu_white_ash_model_pars = WhiteAshModel()
+            self._anu_black_ash_model_pars = BlackAshModel()
             
             self.dump_and_unlock()
 
@@ -241,8 +239,6 @@ class Ash(NoDbBase, LogMixin):
             raise
 
     def parse_inputs(self, kwds):
-        if self.model != 'anu':
-            return
 
         for k in kwds:
             try:
@@ -414,7 +410,7 @@ class Ash(NoDbBase, LogMixin):
         pars = getattr(self, '_anu_white_ash_model_pars', None)
         if pars is None:
             try:
-                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+                from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
                  
                 self.lock()
                 pars = self._anu_white_ash_model_pars = WhiteAshModel()
@@ -431,7 +427,7 @@ class Ash(NoDbBase, LogMixin):
         pars = getattr(self, '_anu_black_ash_model_pars', None)
         if pars is None:
             try:
-                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+                from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
                  
                 self.lock()
                 pars = self._anu_black_ash_model_pars = BlackAshModel()
@@ -445,13 +441,7 @@ class Ash(NoDbBase, LogMixin):
 
     @property
     def model(self):
-        if not getattr(self, '_model'):
-            if self.islocked():
-                self._model = 'neris'
-            else:
-                self.model = 'neris'
-        return self._model
-
+        return 'multi'
 
     @model.setter
     def model(self, value):
@@ -673,10 +663,10 @@ class Ash(NoDbBase, LogMixin):
             ash_dir = self.ash_dir
             model = self.model
 
-            if model == 'neris':
-                from .ash_model import AshType, WhiteAshModel, BlackAshModel
+            if 'multi' in model:
+                from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
             else:
-                from .anu_ash_model import AshType, WhiteAshModel, BlackAshModel
+                raise NotImplementedError
 
             if _exists(ash_dir):
                 try:
@@ -722,7 +712,7 @@ class Ash(NoDbBase, LogMixin):
 
             if self.ash_type_map_fn is not None:
                 reproject_map(wd, self.ash_type_map_fn, self.ash_type_map_cropped_fn)
-                ash_type_map = ParameterMap(self.ash_type_map_cropped_fn)
+                bd_map = ParameterMap(self.ash_type_map_cropped_fn)
                 ash_type_d = bd_map.build_ave_grid(watershed.subwta)
             else:
                 ash_type_d = None
@@ -739,6 +729,9 @@ class Ash(NoDbBase, LogMixin):
                 wepp_id = translator.wepp(top=topaz_id)
                 area_ha = sub.area / 10000
                 burn_class = int(sbs_d[topaz_id])
+
+                if burn_class == 255:
+                    burn_class = 0
 
                 if ash_type_d is None:
                     ash_type = (None, None, AshType.BLACK, AshType.BLACK, AshType.WHITE)[burn_class]
@@ -784,21 +777,16 @@ class Ash(NoDbBase, LogMixin):
                     ini_ash_load = black_ash_load
                     ash_bulkdensity = self.black_ash_bulkdensity
 
-                if model == 'neris':
-                    if ash_type == AshType.BLACK:
-                        ash_model = WhiteAshModel(bulk_density=ash_bulkdensity)
-                    else:
-                        ash_model = BlackAshModel(bulk_density=ash_bulkdensity)
+                if ash_type == AshType.BLACK:
+                    ash_model = self._anu_black_ash_model_pars
                 else:
-                    if ash_type == AshType.BLACK:
-                        ash_model = self._anu_black_ash_model_pars
-                    else:
-                        ash_model = self._anu_white_ash_model_pars
+                    ash_model = self._anu_white_ash_model_pars
 
                 meta[topaz_id]['ini_ash_depth'] = ini_ash_depth
                 meta[topaz_id]['field_ash_bulkdensity'] = field_ash_bulkdensity
                 meta[topaz_id]['ini_ash_load'] = ini_ash_load
                 meta[topaz_id]['ash_bulkdensity'] = ash_bulkdensity
+
 
                 kwds = dict(ash_type=ash_type,
                             ini_ash_load=ini_ash_load,
@@ -831,7 +819,7 @@ class Ash(NoDbBase, LogMixin):
                     self.log('  running {}\n'.format(kwds['prefix']))
                     run_ash_model(kwds)
                     self.log_done()
-              
+
             self._ash_load_d = load_d
             self._ash_type_d = ash_type_d
 
@@ -863,10 +851,10 @@ class Ash(NoDbBase, LogMixin):
             pass
 
     def get_ash_type(self, topaz_id):
-        if self.model == 'neris':
-            from wepppy.nodb.mods.ash_transport.ash_model import AshType
+        if 'multi' not in self.model:
+            raise DeprecationWarning
         else:
-            from wepppy.nodb.mods.ash_transport.anu_ash_model import AshType
+            from wepppy.nodb.mods.ash_transport.ash_multi_year_model import AshType
 
         ash_type = self.meta[str(topaz_id)].get('ash_type', None)
         if ash_type == AshType.BLACK:
@@ -875,10 +863,10 @@ class Ash(NoDbBase, LogMixin):
             return 'white'
 
     def get_ini_ash_depth(self, topaz_id):
-        if self.model == 'neris':
-            from wepppy.nodb.mods.ash_transport.ash_model import AshType
+        if 'multi' not in self.model:
+            raise DeprecationWarning
         else:
-            from wepppy.nodb.mods.ash_transport.anu_ash_model import AshType
+            from wepppy.nodb.mods.ash_transport.ash_multi_year_model import AshType
 
         _meta = self.meta[str(topaz_id)]
 
