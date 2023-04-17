@@ -803,13 +803,15 @@ class TopazRunner:
         # on pass 2 we need to write '1' to standard input
         if stdin is not None:
             p.stdin.write(stdin.encode("utf-8"))
-            p.stdin.close()
+            p.stdin.flush()
 
         abort_count = 0
 
         while p.poll() is None:
             output = p.stdout.readline().decode("utf-8")
             output = output.strip()
+
+            print(output)
 
             if output != '':
                 lines.append(output)
@@ -820,18 +822,9 @@ class TopazRunner:
 
             # If the input dem is large it give a warning and prompts whether or not it should continue
             if 'OR  0 TO STOP PROGRAM EXECUTION.' in output:
-                abort_count += 1
-                try:
-                    p.stdin.write(b'1')
-                    p.stdin.close()
-                except:
-                    try:
-                        p.kill()
-                    except:
-                        pass
+                p.stdin.write(b'1\n')
+                p.stdin.flush()
 
-                    lines.append('UNEXPECTED TERMINATION')
-                    return [line for line in lines if line != '']
 
             # This comes up if the outlet isn't a channel and we are trying to build
             # subcatchments. The build_subcatchments method preprocesses the outlet
@@ -840,16 +833,19 @@ class TopazRunner:
             # It comes up once even if the outlet is a hillslope that is why we write '1'
             # to the stdin if we are on pass 2.
             if 'ENTER 1 IF YOU WANT TO PROCEED WITH THESE VALUES' in output:
-                abort_count += 1
+                p.stdin.write(b'1\n')
+                p.stdin.flush()
 
             # This occurs if the watershed extends beyond the dem. There isn't a way
             # of checking that, and novice users have a hard time recognizing this
             # condition from the channel map
             if 'ENTER   1   TO PROCEED WITH POTENTIALLY INCOMPLETE WATERSHED.' in output:
+                p.stdin.write(b'1\n')
+                p.stdin.flush()
                 abort_count += 1
 
             # if the abort count is greater than 2, then abort
-            if abort_count > 2:
+            if abort_count > 10:
                 p.kill()
 
         p.stdin.close()
