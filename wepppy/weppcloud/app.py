@@ -2413,7 +2413,7 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
-    clip_hillslopes = request.form.get('clip_hillslopes', None)
+    clip_hillslopes = request.form.get('clip_hillslopes', 'off')
     try:
         clip_hillslopes = clip_hillslopes.lower().startswith('on')
     except:
@@ -2425,7 +2425,7 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
-    mofe_buffer = request.form.get('mofe_buffer', None)
+    mofe_buffer = request.form.get('mofe_buffer', 'off')
     try:
         mofe_buffer = bool(mofe_buffer)
     except:
