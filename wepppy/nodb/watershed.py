@@ -709,12 +709,12 @@ class Watershed(NoDbBase):
 
             self.dump_and_unlock()
 
-            ron = wepppy.Ron.getInstance(self.wd)
+            ron = Ron.getInstance(self.wd)
             if any(['lt' in ron.mods, 
                     'portland' in ron.mods, 
                     'seattle' in ron.mods, 
                     'general' in ron.mods]):
-                wepp = wepppy.nodb.Wepp.getInstance(self.wd)
+                wepp = Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 
             self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
@@ -766,12 +766,12 @@ class Watershed(NoDbBase):
 
             self.dump_and_unlock()
 
-            ron = wepppy.nodb.Ron.getInstance(self.wd)
+            ron = Ron.getInstance(self.wd)
             if any(['lt' in ron.mods, 
                     'portland' in ron.mods, 
                     'seattle' in ron.mods, 
                     'general' in ron.mods]):
-                wepp = wepppy.nodb.Wepp.getInstance(self.wd)
+                wepp = Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 
             self.trigger(TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE)
