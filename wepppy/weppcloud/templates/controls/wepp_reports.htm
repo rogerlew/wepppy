@@ -17,7 +17,9 @@
     <p><a href="report/wepp/return_periods/" target="_blank">Return Periods Report</a></p>
     <!-- <p><a href="report/wepp/frq_flood/" target="_blank">Flooding Frequency Report</a></p> -->
     <p><a href="report/wepp/sediment_characteristics/" target="_blank">Sediment Characteristics Report</a></p>
-    <p><a href="browse/wepp/runs/status.log/" target="_blank">Run Log</a></p>
+    {% if climate.has_observed %}
+      <p><a href="report/deval_details/" target="_blank">The Deval in the Details Report</a></p>
+    {% endif %}
 </div>
 <div>
     <h4>Water Balance Reports</h4>
