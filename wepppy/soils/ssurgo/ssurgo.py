@@ -1045,11 +1045,13 @@ Any comments:
                  
             s.append('\t' + s2)
             depth = 0.0
-
-        if self.res_lyr_i is None:
-            s.append('1 10000.0 %0.5f' % ksat_last)
+		
+        if ag:
+            s.append('0 0 0.000000 0.000000')
+        elif self.res_lyr_i is None:
+            s.append('1 10000.0 %0.5f' % 0.01)
         else:
-            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))
+            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6) / 1000.0)
             
         return '\n'.join(s)
 
@@ -1130,9 +1132,9 @@ Any comments:
         if ag:
             s.append('0 0 0.000000 0.000000')
         elif self.res_lyr_i is None:
-            s.append('1 10000.0 %0.5f' % ksat_last)
+            s.append('1 10000.0 %0.5f' % 0.01)
         else:
-            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6))
+            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6) / 1000.0)
 
         return '\n'.join(s)
 
