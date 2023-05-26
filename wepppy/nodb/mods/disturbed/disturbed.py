@@ -25,7 +25,7 @@ from osgeo import gdal
 from deprecated import deprecated
 
 from wepppy.all_your_base import isint, isfloat
-from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
+from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 
@@ -368,6 +368,30 @@ class Disturbed(NoDbBase):
             return None
 
         return _join(self.disturbed_dir, self._disturbed_fn)
+
+    def build_uniform_sbs(self, value=4):
+        import rasterio
+        sbs_fn = _join(self.disturbed_dir, 'uniform_sbs.tif')
+
+        # Open the input raster file
+        with rasterio.open(self.dem_fn) as src:
+            # Read the input raster data as a numpy array
+            dem = src.read(1)
+
+            # Define the output raster metadata based on the input raster metadata
+            out_meta = src.meta.copy()
+            out_meta.update(dtype=rasterio.uint8, count=1, nodata=255)
+
+            print(out_meta)
+
+            # Create the output raster data as a numpy array
+            out_arr = np.full_like(dem, fill_value=value, dtype=rasterio.uint8)
+
+            # Write the output raster data to a new geotiff file
+            with rasterio.open(sbs_fn, 'w', **out_meta) as dst:
+                dst.write(out_arr, 1)
+
+        return sbs_fn
 
     @property
     def sbs_4class_path(self):
@@ -1112,7 +1136,13 @@ class Disturbed(NoDbBase):
                 watershed = Watershed.getInstance(self.wd)
                 bounds, transform, proj = read_raster(watershed.bound)
 
-                assert bounds.shape == sbs.data.shape
+                if not sbs.data.shape == bounds.shape:
+                    dst_fn = watershed.bound.replace('.ARC', '.fixed.tif')
+                    raster_stacker(watershed.bound, sbs.fname, dst_fn)
+                    bounds, transform, proj = read_raster(dst_fn, dtype=np.int32)
+
+                assert sbs.data.shape == bounds.shape, [sbs.data.shape, bounds.shape]
+
 
                 c = Counter(sbs.data[np.where(bounds == 1.0)])
 
