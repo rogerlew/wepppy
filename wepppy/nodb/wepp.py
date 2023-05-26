@@ -57,7 +57,6 @@ from wepppy.wepp.management import (
     Management
 )
 
-
 from wepppy.all_your_base import (
     isfloat,
     isnan,
@@ -1512,6 +1511,12 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(wd)
 
         if climate.climate_mode != ClimateMode.SingleStorm:
+
+            self.log('Building Arc Exports... ')
+            from wepppy.export import arc_export
+            arc_export(wd)
+            self.log_done()
+
             self.log('Building totalwatsed2.pkl... ')
             self._build_totalwatsed2()
             self.log_done()
