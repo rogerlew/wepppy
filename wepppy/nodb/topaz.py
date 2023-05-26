@@ -22,6 +22,9 @@ from wepppy.all_your_base.geo import read_arc, utm_srid
 
 from .base import NoDbBase
 
+import rasterio
+import rasterio.warp
+
 
 # this needs to be here to unpickle old projects
 # todo: migrate all the topaz.nodb
@@ -127,7 +130,15 @@ class Topaz(NoDbBase):
     @property
     def uparea_out(self):
         return _join(self.topaz_wd, 'UPAREA.ARC')
-        
+
+    @property
+    def discha_out(self):
+        return _join(self.topaz_wd, 'DISCHA.ARC')
+
+    @property
+    def eldcha_out(self):
+        return _join(self.topaz_wd, 'ELDCHA.ARC')
+
     @property
     def fvslop_arc(self):
         return _join(self.topaz_wd, 'FVSLOP.ARC')
