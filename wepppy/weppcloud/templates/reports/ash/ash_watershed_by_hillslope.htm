@@ -58,23 +58,23 @@
           <td>{{ unitizer_units(units) | safe }}</td>
         {% endif %}
       {% endfor %}
-      <td>{{ unitizer_units('kg/ha') | safe }}</td>
-      <td>{{ unitizer_units('kg/ha') | safe }}</td>
-      <td>{{ unitizer_units('kg/ha') | safe }}</td>
+      <td>{{ unitizer_units('tonne/ha') | safe }}</td>
+      <td>{{ unitizer_units('tonne/ha') | safe }}</td>
+      <td>{{ unitizer_units('tonne/ha') | safe }}</td>
       <td>{{ unitizer_units('mm') | safe }}</td>
       <td>&nbsp;</td>
     </tr>
     {% for row in hill_rpt %}
     {% set _topaz_id =  row['TopazID'] | string %}
-    {% set _ash_row = ash_out[_topaz_id]  %}
-    {% if _ash_row['is_burned'] %}
+    {% set _ash_row = ash_out.get(_topaz_id)  %}
+    {% if _ash_row is not none %}
     <tr>
       {% for value, units in row %}
         <td>{{ unitizer(value, units) | safe }}</td>
       {% endfor %}
-      <td class="text-right">{{ unitizer(_ash_row['wind_transport (kg/ha)'], 'kg/ha') | safe }}</td>
-      <td class="text-right">{{ unitizer(_ash_row['water_transport (kg/ha)'], 'kg/ha') | safe }}</td>
-      <td class="text-right">{{ unitizer(_ash_row['ash_transport (kg/ha)'], 'kg/ha') | safe }}</td>
+      <td class="text-right">{{ unitizer(_ash_row['wind_transport (tonne/ha)'], 'tonne/ha') | safe }}</td>
+      <td class="text-right">{{ unitizer(_ash_row['water_transport (tonne/ha)'], 'tonne/ha') | safe }}</td>
+      <td class="text-right">{{ unitizer(_ash_row['ash_transport (tonne/ha)'], 'tonne/ha') | safe }}</td>
       <td class="text-right">{{ unitizer(_ash_row['ash_ini_depth (mm)'], 'mm') | safe }}</td>
       <td><a href="{{ site_prefix }} }}/runs/{{ ron.runid }}/{{ ron.config_stem }}/hillslope/{{ _topaz_id }}/ash/
 ?fire_date={{ fire_date.month }}.{{ fire_date.day }}&ash_type={{ _ash_row['ash_type'] }}
