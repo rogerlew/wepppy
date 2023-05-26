@@ -136,6 +136,29 @@ elif 'wepp3' in _hostname:
 else:
     from wepppy.weppcloud.standalone_config import config_app
 
+import hashlib
+
+from jinja2 import Environment, FileSystemLoader
+
+def sort_numeric_keys(value, reverse=False):
+    return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
+
+
+def get_file_sha1(file_path):
+    """
+    Compute the SHA-1 hash of a file.
+
+    :param file_path: the path to the file
+    :return: the SHA-1 hash of the file as a hexadecimal string
+    """
+    with open(file_path, "rb") as f:
+        sha1 = hashlib.sha1()
+        while True:
+            data = f.read(65536) # read the file in chunks of 64KB
+            if not data:
+                break
+            sha1.update(data)
+    return sha1.hexdigest()
 
 #
 # IE 11 "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko"
@@ -146,6 +169,8 @@ else:
 
 app = Flask(__name__)
 app.jinja_env.filters['zip'] = zip
+app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
+
 app = config_app(app)
 
 mail = Mail(app)
@@ -1534,10 +1559,7 @@ def hillslope0_ash(runid, config, topaz_id):
         prefix = 'H{wepp_id}'.format(wepp_id=wepp_id)
         recurrence = [100, 50, 20, 10, 2.5, 1]
 
-        if ash.model == 'neris':
-            from wepppy.nodb.mods.ash_transport.ash_model import WhiteAshModel, BlackAshModel
-        else:
-            from wepppy.nodb.mods.ash_transport.anu_ash_model import WhiteAshModel, BlackAshModel
+        from wepppy.nodb.mods.ash_transport.ash_multi_year_model import WhiteAshModel, BlackAshModel
 
         if _ash_type == AshType.BLACK:
             _, results, annuals = BlackAshModel().run_model(_fire_date, element.d, cli_df, hill_wat,
@@ -1949,6 +1971,10 @@ def browse_response(path, args=None, show_up=True, headers=None):
         html = None
         if path_lower.endswith('.pkl'):
             df = pd.read_pickle(path)
+            html = df.to_html(classes=['table table-nonfluid'], border=0, justify='left')
+
+        if path_lower.endswith('.parquet'):
+            df = pd.read_parquet(path)
             html = df.to_html(classes=['table table-nonfluid'], border=0, justify='left')
 
         if path_lower.endswith('.csv'):
@@ -2419,6 +2445,12 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
+    walk_flowpaths = request.form.get('walk_flowpaths', 'off')
+    try:
+        walk_flowpaths = walk_flowpaths.lower().startswith('on')
+    except:
+        pass
+
     mofe_target_length = request.form.get('mofe_target_length', None)
     try:
         mofe_target_length = float(mofe_target_length)
@@ -2443,6 +2475,9 @@ def task_build_subcatchments(runid, config):
 
     if clip_hillslopes is not None:
         watershed.clip_hillslopes = clip_hillslopes
+
+    if walk_flowpaths is not None:
+        watershed.walk_flowpaths = walk_flowpaths
 
     if clip_hillslope_length is not None:
         watershed.clip_hillslope_length = clip_hillslope_length
@@ -4465,6 +4500,21 @@ def run_ash(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
 
+    #return jsonify(request.form)
+    '''
+    {
+      "ash_depth_mode": "1", 
+      "field_black_bulkdensity": "0.31", 
+      "field_white_bulkdensity": "0.14", 
+      "fire_date": "8/13", 
+      "ini_black_depth": "15", 
+      "ini_black_load": "1.55", 
+      "ini_white_depth": "15", 
+      "ini_white_load": "0.7000000000000001"
+    }
+    
+    '''
+
     fire_date = request.form.get('fire_date', None)
     ash_depth_mode = request.form.get('ash_depth_mode', None)
     ini_black_ash_depth_mm = request.form.get('ini_black_depth', None)
@@ -4616,10 +4666,11 @@ def report_ash(runid, config):
 
         burnclass_summary = ash.burnclass_summary()
 
-        summary_stats = ashpost.summary_stats
-        recurrence_intervals = [str(v) for v in summary_stats['recurrence']]
-        results = summary_stats['return_periods']
-        annuals = summary_stats['annuals']
+        recurrence_intervals = ashpost.reccurence_intervals
+        return_periods = ashpost.return_periods
+        cum_return_periods = ashpost.cum_return_periods
+
+        #return jsonify(dict(return_periods=return_periods, cum_return_period=cum_return_periods))
 
         return render_template('reports/ash/ash_watershed.htm',
                                unitizer_nodb=unitizer,
@@ -4629,8 +4680,9 @@ def report_ash(runid, config):
                                ini_black_ash_depth_mm=ini_black_ash_depth_mm,
                                ini_white_ash_depth_mm=ini_white_ash_depth_mm,
                                recurrence_intervals=recurrence_intervals,
-                               results=results,
-                               annuals=annuals,
+                               return_periods=return_periods,
+                               cum_return_periods=cum_return_periods,
+                               ash=ash,
                                ron=ron,
                                user=current_user)
 
@@ -4695,7 +4747,7 @@ def report_ash_by_hillslope(runid, config):
         ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
 
         burnclass_summary = ash.burnclass_summary()
-        ash_out = ashpost.ash_out
+        ash_out = ashpost.hillslope_annuals
 
         return render_template('reports/ash/ash_watershed_by_hillslope.htm',
                                out_rpt=out_rpt,
@@ -4747,9 +4799,8 @@ def report_contaminant(runid, config):
         # if not ash.has_watershed_summaries:
         #     ash.report()
 
-        reservoir_stats = ashpost.reservoir_stats
-        recurrence_intervals = reservoir_stats['reccurence']
-        results = reservoir_stats['return_periods']
+        recurrence_intervals = ashpost.recurrence_intervals
+        results = ashpost.burn_class_return_periods
         pw0_stats = ashpost.pw0_stats
 
         # return jsonify(dict(rec_intervals=[str(v) for v in actual_reccurence],
@@ -4997,40 +5048,80 @@ def weppcloudr(runid, config, routine):
         abort(404)
 
     user = request.args.get('user', None)
+    
+    return weppcloudr_runner(runid, config, routine, user)
+
+
+def weppcloudr_runner(runid, config, routine, user):
+    wd = get_wd(runid)
 
     viz_export_dir = _join(wd, 'export/WEPPcloudR')
     if not _exists(viz_export_dir):
         os.mkdir(viz_export_dir)
         
+    sub_fn = _join(wd, 'export', 'arcmap', 'subcatchments.WGS.json')
+    sub_sha = get_file_sha1(sub_fn)
+
     try:
         assert routine.endswith('.R') or routine.endswith('.Rmd'), routine
 
         # routine_stem = '.'.join(routine.split('.')[:-1]) 
         r_format = routine.split('.')[-1] 
-        rpt_fn = _join(viz_export_dir, f'{routine}.htm')
+        rpt_fn = _join(viz_export_dir, f'{routine}.{sub_sha}.htm')
 
-        rscript = _weppcloudr_script_locator(routine, user=user)
-        assert _exists(rscript)
+        if not _exists(rpt_fn):
+            rscript = _weppcloudr_script_locator(routine, user=user)
+            assert _exists(rscript)
 
-        if r_format.lower() == 'r':
-            cmd = ['Rscript', rscript, runid]
-        elif r_format.lower() == "rmd":
-            cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
+            if r_format.lower() == 'r':
+                cmd = ['Rscript', rscript, runid]
+            elif r_format.lower() == "rmd":
+                cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, errors = p.communicate()
-        with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
-            fp.write(output.decode('utf-8'))
-        with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
-            fp.write(errors.decode('utf-8'))
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            output, errors = p.communicate()
+            output = output.decode('utf-8')
+            errors = errors.decode('utf-8')
+            with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
+                fp.write(output)
+            with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
+                fp.write(errors)
 
-        assert _exists(rpt_fn)
+            if not _exists(rpt_fn):
+                return f'''
+<html>
+<h3>Error running script</h3>
+
+<h5>stdout</h5>
+<pre>
+{output}
+</pre>
+
+<h5>stderr</h5>
+<pre>
+{errors}
+</pre>
+</html>'''
+
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
     except:
         return exception_factory('Error running script')
 
+
+@app.route('/runs/<string:runid>/<config>/report/deval_details')
+@app.route('/runs/<string:runid>/<config>/report/deval_details/')
+def deval_details(runid, config):
+    try:
+        wd = get_wd(runid)
+        if not _exists(_join(wd, 'export', 'arcmap', 'subcatchments.WGS.json')):
+            from wepppy.export import arc_export
+            arc_export(wd)
+    except:
+        return exception_factory('Error running script')
+
+    return weppcloudr_runner(runid, config, routine='new_report.Rmd', user='chinmay')
 
 
 @app.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])

@@ -15,17 +15,14 @@
     </tr>
     </thead>
     <tbody>
-    {% for rec_interval in recurrence_intervals %}
-        {% if results[measure][rec_interval] is not none %}
-        {% set _rec_interval = rec_interval | string %}
-        {% if rec_interval in results[measure] %}
+    {% for rec_interval, row in return_periods[measure] | sort_numeric_keys(reverse=True) %}
+        {% if row is not none %}
         <tr>
-        <td>{{ unitizer(results[measure][_rec_interval][measure], units) | safe }}</td>
-        <td>{{ unitizer(results[measure][_rec_interval]['probability'], '%') | safe  }}</td>
+        <td>{{ unitizer(row[measure], units) | safe }}</td>
+        <td>{{ unitizer(row['probability'], '%') | safe  }}</td>
         <td>{{ rec_interval }}</td>
-        <td>{{ results[measure][_rec_interval]['days_from_fire'] }}</td>
+        <td>{{ row['days_from_fire (days)'] }}</td>
         </tr>
-        {% endif %}
         {% endif %}
     {% endfor %}
     </tbody>

@@ -1,4 +1,4 @@
-<h5>{{ measure_name }} cumulative annual results</h5>
+<h5>{{ measure_name }} cumulative results</h5>
 <table class="table">
     <thead>
     <tr>
@@ -13,12 +13,14 @@
     </tr>
     </thead>
     <tbody>
-    {% for res in annuals[measure] %}
+    {% for rec_interval, row in cum_return_periods[measure] | sort_numeric_keys(reverse=True) %}
+        {% if row is not none %}
         <tr>
-        <td>{{ res['return_interval'] | round(1) }}</td>
-        <td>{{ unitizer(res[measure], units) | safe }}</td>
-        <td>{{ unitizer(res['probability'], '%') | safe  }}</td>
+        <td>{{ rec_interval }}</td>
+        <td>{{ unitizer(row[measure], units) | safe }}</td>
+        <td>{{ unitizer(row['probability'], '%') | safe  }}</td>
         </tr>
+        {% endif %}
     {% endfor %}
     </tbody>
 </table>
