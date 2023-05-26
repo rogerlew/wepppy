@@ -9,7 +9,13 @@
 from collections import OrderedDict
 from copy import deepcopy
 
+from os.path import join as _join
+from os.path import split as _split
+from os.path import exists as _exists
+
 from wepppy.all_your_base import find_ranges, isfloat
+
+import pandas as pd
 
 unit_consistency_map = {
     'T/ha/yr': 'tonne/ha/yr',
@@ -211,7 +217,7 @@ class Loss(object):
         None, None, 'm^3', 'tonne', 'kg', 'm^3', 'm^3', 'kg', 'ha', 'kg', 'kg', 'kg'
     )
 
-    def __init__(self, fn, has_phosphorus=False, wd=None, exclude_yr_indxs=None):
+    def _parse(self, fn, has_phosphorus=False, wd=None, exclude_yr_indxs=None):
         hill_hdr = self.hill_hdr
         hill_avg_hdr = self.hill_avg_hdr
         chn_hdr = self.chn_hdr
@@ -241,9 +247,6 @@ class Loss(object):
 
         num_years = len(yr_indxs)
         assert avg_indx is not None, fn
-
-        #if num_years == 0:
-        #    raise NumYearsIsZeroException
 
         years = [yr for i, yr in yr_indxs]
 
@@ -287,99 +290,6 @@ class Loss(object):
 
         # remove the years from average
         assert exclude_yr_indxs is None
-
-        # if exclude_yr_indxs is not None and num_years > len(exclude_yr_indxs):
-        #
-        #     # average out years for outlet table
-        #     _out_tbl = deepcopy(out_tbl)
-        #     for j, d in enumerate(_out_tbl):
-        #         if _out_tbl[j]['key'] == 'Total contributing area to outlet':
-        #             continue
-        #
-        #         _out_tbl[j]['v'] = 0
-        #
-        #     avg_years = []
-        #     for i, yr in enumerate(years):
-        #         if i in exclude_yr_indxs:
-        #             continue
-        #
-        #         for j, d in enumerate(yearlies[yr]['out_tbl']):
-        #             if _out_tbl[j]['key'] == 'Total contributing area to outlet':
-        #                 continue
-        #
-        #             v = yearlies[yr]['out_tbl'][j]['v']
-        #             if set(str(v).strip()) != set('*'):
-        #                 _out_tbl[j]['v'] += v
-        #
-        #         avg_years.append(yr)
-        #
-        #     for j, d in enumerate(_out_tbl):
-        #         if _out_tbl[j]['key'] == 'Total contributing area to outlet':
-        #             continue
-        #
-        #         _out_tbl[j]['v'] /= float(len(avg_years))
-        #
-        #     out_tbl = _out_tbl
-        #
-        #     # average out years for hill table
-        #     _hill_tbl = deepcopy(hill_tbl)
-        #     for j, d in enumerate(hill_tbl):
-        #         for var in hill_hdr[2:]:
-        #             _hill_tbl[j][var] = 0
-        #
-        #     avg_years = []
-        #     _avg_years = {}
-        #     for i, yr in enumerate(years):
-        #         if i in exclude_yr_indxs:
-        #             continue
-        #
-        #         for j, d in enumerate(hill_tbl):
-        #             for var in hill_hdr[2:]:
-        #
-        #                 v = yearlies[yr]['hill_tbl'][j][var]
-        #                 if set(str(v).strip()) != set('*'):
-        #                     _hill_tbl[j][var] += v
-        #
-        #                     if var not in _avg_years:
-        #                         _avg_years[var] = 0.0
-        #                     _avg_years[var] += 1.0
-        #
-        #         avg_years.append(yr)
-        #
-        #     for var in hill_hdr[2:]:
-        #         _hill_tbl[j][var] /= _avg_years[var]
-        #
-        #     hill_tbl = _hill_tbl
-        #
-        #     # average out years for chn table
-        #     _chn_tbl = deepcopy(chn_tbl)
-        #     for j, d in enumerate(chn_tbl):
-        #         for var in chn_hdr[2:]:
-        #             _chn_tbl[j][var] = 0
-        #
-        #     avg_years = []
-        #     _avg_years = {}
-        #     for i, yr in enumerate(years):
-        #         if i in exclude_yr_indxs:
-        #             continue
-        #
-        #         for j, d in enumerate(chn_tbl):
-        #             for var in chn_hdr[2:]:
-        #
-        #                 v = yearlies[yr]['chn_tbl'][j][var]
-        #                 if set(str(v).strip()) != set('*'):
-        #                     _chn_tbl[j][var] += v
-        #
-        #                     if var not in _avg_years:
-        #                         _avg_years[var] = 0.0
-        #                     _avg_years[var] += 1.0
-        #
-        #         avg_years.append(yr)
-        #
-        #     for var in chn_hdr[2:]:
-        #         _chn_tbl[j][var] /= _avg_years[var]
-        #
-        #     chn_tbl = _chn_tbl
 
         if wd is not None:
             import wepppy
@@ -502,21 +412,76 @@ class Loss(object):
                     else:
                         chn_tbl[i]['Total P Density'] = float('nan')
 
+        hill_tbl = pd.DataFrame(hill_tbl)
+        chn_tbl = pd.DataFrame(chn_tbl)
+        out_tbl = pd.DataFrame(out_tbl)
+        class_data = pd.DataFrame(class_data)
+
+        return hill_tbl, chn_tbl, out_tbl, class_data, yearlies, avg_years
+
+    def __init__(self, fn, has_phosphorus=False, wd=None, exclude_yr_indxs=None):
+
+        hill_tbl = chn_tbl = out_tbl = class_data = yearlies = avg_years = None
+
+        parquet_fn = fn.replace('.txt', '.hill.parquet')
+        if _exists(parquet_fn):
+            hill_tbl = pd.read_parquet(parquet_fn)
+
+        parquet_fn = fn.replace('.txt', '.chn.parquet')
+        if _exists(parquet_fn):
+            chn_tbl = pd.read_parquet(parquet_fn)
+
+        parquet_fn = fn.replace('.txt', '.out.parquet')
+        if _exists(parquet_fn):
+            out_tbl = pd.read_parquet(parquet_fn)
+
+        parquet_fn = fn.replace('.txt', '.class_data.parquet')
+        if _exists(parquet_fn):
+            class_data = pd.read_parquet(parquet_fn)
+
+        if hill_tbl is None or chn_tbl is None or out_tbl is None or class_data is None:
+            hill_tbl, chn_tbl, out_tbl, class_data, yearlies, avg_years = \
+                self._parse(fn, has_phosphorus, wd=wd, exclude_yr_indxs=exclude_yr_indxs)
+            hill_tbl.to_parquet(fn.replace('.txt', '.hill.parquet'))
+            chn_tbl.to_parquet(fn.replace('.txt', '.chn.parquet'))
+            out_tbl.to_parquet(fn.replace('.txt', '.out.parquet'))
+            class_data.to_parquet(fn.replace('.txt', '.class_data.parquet'))
+
+
         self.fn = fn
-        self.hill_tbl = hill_tbl
-        self.chn_tbl = chn_tbl
-        self.out_tbl = out_tbl
+        self._hill_tbl = hill_tbl
+        self._chn_tbl = chn_tbl
+        self._out_tbl = out_tbl
         self.class_data = class_data
-        self.wsarea = [d['v'] for d in out_tbl if d['key'] == 'Total contributing area to outlet'][0]
+        self.wsarea = [d['v'] for d in self.out_tbl if d['key'] == 'Total contributing area to outlet'][0]
         self.yearlies = yearlies
-        self.years = years
-        self.num_years = num_years
+
+        if yearlies is not None:
+            self.years = list(yearlies.keys())
+            self.num_years = len(yearlies)
+
+        else:
+            self.years = []
+            self.num_years = len(self.years)
+
         if avg_years is None:
-            self.avg_years = years
+            self.avg_years = self.years
         else:
             self.avg_years = avg_years
 
         self.has_phosphorus = has_phosphorus
+
+    @property
+    def hill_tbl(self):
+        return self._hill_tbl.to_dict('records')
+
+    @property
+    def chn_tbl(self):
+        return self._chn_tbl.to_dict('records')
+
+    @property
+    def out_tbl(self):
+        return self._out_tbl.to_dict('records')
 
     def outlet_fraction_under(self, particle_size=0.016):
         """
