@@ -35,10 +35,10 @@ class WeppTopTranslator:
     """
     def __init__(self, top_sub_ids, top_chn_ids):
         # need the sub_ids as integers sorted in ascending order
-        top_sub_ids = sorted(top_sub_ids)
+        self._sub_ids = top_sub_ids = sorted(top_sub_ids)
 
         # need the chn_ids as integers sorted in descending order
-        top_chn_ids = sorted(top_chn_ids, reverse=True)
+        self._chn_ids = top_chn_ids = sorted(top_chn_ids, reverse=True)
 
         # now we are going to assign wepp ids and build
         # lookup dictionaries from translating between
