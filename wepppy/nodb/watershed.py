@@ -19,6 +19,8 @@ import jsonpickle
 import utm
 import numpy as np
 
+import multiprocessing
+
 from osgeo import gdal, osr
 from osgeo.gdalconst import *
 
@@ -37,6 +39,12 @@ from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
 from .prep import Prep
 
+from wepppy.all_your_base import (
+    isfloat,
+    NCPU
+)
+
+NCPU = multiprocessing.cpu_count() - 2
 
 class DelineationBackend(IntEnum):
     TOPAZ = 1
@@ -57,6 +65,18 @@ class WatershedNotAbstractedError(Exception):
 
 class WatershedNoDbLockedException(Exception):
     pass
+
+
+def process_channel(args):
+    wat_abs, chn_id = args
+    chn_summary, chn_paths = wat_abs.abstract_channel(chn_id)
+    return chn_id, chn_summary, chn_paths
+
+
+def process_subcatchment(args):
+    wat_abs, sub_id, clip_hillslopes, clip_hillslope_length  = args
+    sub_summary, fp_d = wat_abs.abstract_subcatchment(sub_id, clip_hillslopes=clip_hillslopes, clip_hillslope_length=clip_hillslope_length)
+    return sub_id, sub_summary, fp_d
 
 
 class Watershed(NoDbBase):
@@ -83,6 +103,7 @@ class Watershed(NoDbBase):
 
             self._clip_hillslope_length = self.config_get_float('watershed', 'clip_hillslope_length')
             self._clip_hillslopes = self.config_get_bool('watershed', 'clip_hillslopes')
+            self._walk_flowpaths = self.config_get_bool('watershed', 'walk_flowpaths')
 
             delineation_backend = self.config_get_str('watershed', 'delineation_backend')
             if delineation_backend.lower().startswith('taudem'):
@@ -183,6 +204,24 @@ class Watershed(NoDbBase):
             self.unlock('-f')
             raise
 
+    @property
+    def walk_flowpaths(self):
+        return getattr(self, '_walk_flowpaths', True)
+
+    @walk_flowpaths.setter
+    def walk_flowpaths(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._walk_flowpaths = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+        
     @property
     def delineation_backend_is_taudem(self):
         delineation_backend = getattr(self, '_delineation_backend', None)
@@ -680,6 +719,8 @@ class Watershed(NoDbBase):
 
 
     def _taudem_abstract_watershed(self):
+        from wepppy.nodb import Wepp
+
         self.lock()
 
         # noinspection PyBroadException
@@ -734,23 +775,51 @@ class Watershed(NoDbBase):
             topaz_wd = self.topaz_wd
             assert _exists(topaz_wd)
 
-            _abs = WatershedAbstraction(topaz_wd, wat_dir)
-            _abs.abstract(wepp_chn_type=self.wepp_chn_type,
-                          clip_hillslopes=self.clip_hillslopes,
-                          clip_hillslope_length=self.clip_hillslope_length)
-            _abs.write_slps()
+            # Create a list of WatershedAbstraction instances
+            wat_abs_engines = [WatershedAbstraction(topaz_wd, wat_dir) for i in range(NCPU)]
+            pool = multiprocessing.Pool(NCPU)
 
+            _abs = wat_abs_engines[0]
+
+            # abstract channels
+            chn_ids = wat_abs_engines[0].chn_ids
+            args_list = [(wat_abs_engines[i % NCPU], chn_id) for i, chn_id in enumerate(chn_ids)]
+            results = pool.map(process_channel, args_list)
+
+            # collect results
             chns_summary = {}
-            for k, v in _abs.watershed['channels'].items():
-                topaz_id = int(k.replace('chn_', ''))
-                chns_summary[topaz_id] = v
+            chns_paths = {}
+            for chn_id, chn_summary, chn_paths in results:
+                chns_summary[chn_id] = chn_summary
+                chns_paths[chn_id] = chn_paths
 
+            # sync watershed abstraction instances with the updated channel summaries
+            for i in range(NCPU):
+                wat_abs_engines[i].watershed['channels'] = chns_summary
+                wat_abs_engines[i].watershed['channel_paths'] = chns_paths
+
+            # abstract subcatchments
+            sub_ids = wat_abs_engines[0].sub_ids
+            args_list = [(wat_abs_engines[i % NCPU], sub_id, self.clip_hillslopes, self.clip_hillslope_length)
+                         for i, sub_id in enumerate(sub_ids)]
+            results = pool.map(process_subcatchment, args_list)
+
+            # collect results
             subs_summary = {}
             fps_summary = {}
-            for k, v in _abs.watershed['hillslopes'].items():
-                topaz_id = int(k.replace('hill_', ''))
-                subs_summary[topaz_id] = v
-                fps_summary[topaz_id] = _abs.watershed['flowpaths'][k]
+            for topaz_id, sub_summary, fp_d in results:
+                subs_summary[topaz_id] = sub_summary
+                fps_summary[topaz_id] = fp_d
+
+            # sync watershed abstraction instances with the updated channel summaries
+            for i in range(NCPU):
+                _abs.watershed['hillslopes'] = subs_summary
+                _abs.watershed['flowpaths'] = fps_summary
+
+            # write slopes
+            _abs.abstract_structure()
+            _abs._make_channel_slps(self.wat_dir)
+            _abs.write_channels_geojson(_join(topaz_wd, 'channel_paths.wgs.json'))
 
             self._subs_summary = subs_summary
             self._chns_summary = chns_summary
@@ -760,9 +829,8 @@ class Watershed(NoDbBase):
             self._outlet_top_id = str(_abs.outlet_top_id)
             self._structure = _abs.structure
 
-            _abs.write_channels_geojson(_join(topaz_wd, 'channel_paths.wgs.json'))
-
             del _abs
+            pool.close()
 
             self.dump_and_unlock()
 
@@ -771,6 +839,7 @@ class Watershed(NoDbBase):
                     'portland' in ron.mods, 
                     'seattle' in ron.mods, 
                     'general' in ron.mods]):
+                from wepppy.nodb import Wepp
                 wepp = Wepp.getInstance(self.wd)
                 wepp.trigger(TriggerEvents.PREPPING_PHOSPHORUS)
 

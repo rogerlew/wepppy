@@ -6,6 +6,8 @@ from os.path import exists as _exists
 
 import subprocess
 
+from numba import njit
+
 import numpy as np
 import utm
 from osgeo import gdal, osr, ogr
@@ -21,7 +23,7 @@ gdal.UseExceptions()
 def is_channel(topaz_id: Union[int, str]) -> bool:
     return str(topaz_id).endswith('4')
 
-
+@njit
 def garbrecht_length(distances: List[List[float]]) -> float:
     """
     calculates the length of a subcatchment from the flowpaths
@@ -38,23 +40,26 @@ def garbrecht_length(distances: List[List[float]]) -> float:
     return float(np.sum(x * a) / np.sum(a))
 
 
+@njit
 def cummnorm_distance(distance: List[float]) -> np.array:
     """
     builds and returns cumulative normalized distance array from an array
     of cell-to-cell distances
     """
-    assert len(distance) > 0
+    if len(distance) == 0:
+        raise ValueError("Expecting length of distance to be greater than 0")
 
     if len(distance) == 1:
-        assert distance[0] > 0.0
-        return np.array([0, 1])
+        if distance[0] <= 0.0:
+            raise ValueError("Expecting distance[0] to equal 0.0")
+        return np.array([0.0, 1.0])
 
-    distance_p = np.cumsum(np.array(distance, np.float64))
+    distance_p = np.cumsum(distance)
     distance_p -= distance_p[0]
     distance_p /= distance_p[-1]
     return distance_p
 
-
+@njit
 def representative_normalized_elevations(x: List[float], dy: List[float]) -> List[float]:
     """
     x should be a normed distance array between 0 and 1
@@ -62,9 +67,14 @@ def representative_normalized_elevations(x: List[float], dy: List[float]) -> Lis
 
     returns normalized elevations (relative to the length of x)
     """
-    assert len(x) == len(dy), (x, dy)
-    assert x[0] == 0.0
-    assert x[-1] == 1.0
+    if  len(x) != len(dy):
+        raise ValueError('length of x does not equal length of dy')
+
+    if x[0] != 0.0:
+        raise ValueError('x[0] should be 0')
+
+    if x[-1] != 1.0:
+        raise ValueError('x[-1] should be 1')
 
     # calculate the positions, assume top of hillslope is 0 y
     y = [0.0]
@@ -75,6 +85,7 @@ def representative_normalized_elevations(x: List[float], dy: List[float]) -> Lis
     return y
 
 
+@njit
 def read_geojson(fname):
     data = json.loads(open(fname).read())
 
@@ -86,6 +97,7 @@ def read_geojson(fname):
     return d
 
 
+@njit
 def interpolate_slp(distances, slopes, max_points):
     _s = np.array(slopes)
     _d = np.array(distances)
@@ -93,13 +105,15 @@ def interpolate_slp(distances, slopes, max_points):
     if _s.shape == (1,) and _d.shape == (2,):  # slope is a single cell
         _s = np.array([slopes[0], slopes[0]])
 
-    assert _s.shape == _d.shape, str([_s.shape, _d.shape])
-
     for i in range(len(_d)-1):
         assert _d[i] < _d[i+1], distances
 
-    assert _d[0] == 0.0
-    assert _d[-1] == 1.0
+
+    if _d[0] != 0.0:
+        raise ValueError('distances[0] should be 0')
+
+    if _d[-1] != 1.0:
+        raise ValueError('distances[-1] should be 1')
 
     npts = len(_d)
 
@@ -110,7 +124,6 @@ def interpolate_slp(distances, slopes, max_points):
         _d, _s = _d2, _s2
 
     return _d, _s
-
 
 def write_slp(aspect, width, cellsize, length, slope, distance_p, fp, version=97.3, max_points=99):
     """
@@ -207,7 +220,7 @@ def weighted_slope_average(areas, slopes, lengths, max_points=19):
     """
 
     # determine longest flowpath
-    i = int(np.argmax(lengths))
+    i = np.argmax(lengths)
     longest = float(lengths[i])
 
     # determine number of points to define slope
