@@ -3,9 +3,11 @@ import os
 import sys
 
 from copy import deepcopy
-
+from subprocess import Popen, PIPE
+from glob import glob
 import shutil
 from os.path import exists as _exists
+from os.path import split as _split
 from pprint import pprint
 from time import time
 from time import sleep
@@ -19,7 +21,7 @@ from wepppy.nodb.mods.locations import LakeTahoe
 
 from os.path import join as _join
 from wepppy.nodb.mods.locations.lt.selectors import *
-from wepppy.wepp.out import TotalWatSed
+from wepppy.wepp.out import TotalWatSed2
 from wepppy.export import arc_export
 
 from osgeo import gdal, osr
@@ -35,11 +37,88 @@ def log_print(msg):
     print('[{now}] {wd}: {msg}'.format(now=now, wd=wd, msg=msg))
 
 
+xxx = 80 ## TODO: Define this
+
+
+def fork(runid, new_runid):
+
+    wd = _join('/geodata/weppcloud_runs/', runid)
+    new_wd = _join('/geodata/weppcloud_runs/', new_runid)
+
+    log_print(' done.\n\nCopying files...'.format(new_wd))
+
+    run_left = wd
+    if not run_left.endswith('/'):
+        run_left += '/'
+
+    run_right = new_wd
+    if not run_right.endswith('/'):
+        run_right += '/'
+
+    cmd = ['rsync', '-av', '--progress', run_left, run_right]
+
+    log_print( '\n   cmd: {}\n'.format(' '.join(cmd)))
+
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+
+    while p.poll() is None:
+        output = p.stdout.readline()
+        log_print(output.decode('UTF-8'))
+
+    p.wait()
+
+    log_print( 'done copying files.\n\nSetting wd in .nodbs...\n')
+
+    # replace the runid in the nodb files
+    nodbs = glob(_join(new_wd, '*.nodb'))
+    for fn in nodbs:
+        log_print( '  {fn}...'.format(fn=fn))
+        with open(fn) as fp:
+            s = fp.read()
+
+        s = s.replace(runid, new_runid)
+        with open(fn, 'w') as fp:
+            fp.write(s)
+
+        log_print( ' done.\n')
+
+    log_print( ' done setting wds.\n\nCleanup locks, READONLY, PUBLIC...\n')
+
+    # delete any active locks
+    locks = glob(_join(new_wd, '*.lock'))
+    for fn in locks:
+        os.remove(fn)
+
+    fn = _join(new_wd, 'READONLY')
+    if _exists(fn):
+        os.remove(fn)
+
+    fn = _join(new_wd, 'PUBLIC')
+    if _exists(fn):
+        os.remove(fn)
+
+    log_print( ' done.\n')
+
+
 if __name__ == '__main__':
 
     os.chdir('/geodata/weppcloud_runs/')
 
     watersheds = [
+        dict(watershed='AllCedar',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-inferential-extinction/seattle-snow-9002/
+#             base_project='mdobre-inferential-extinction',
+             extent=[-121.99356079101564, 47.2256304876291, -121.40510559082033, 47.623752267682875],
+             map_center=[-121.69933319091798, 47.42506775601176],
+             map_zoom=11,
+             outlet=[-121.95094509772274, 47.39363218598862],
+             landuse=None,
+             csa=5.0001, mcl = 60,
+             cs=80, erod=0.000001,
+             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.8,
+             ksub=0.01),
+
         dict(watershed='1_UpperCedar_xtr',  # https://wepp.cloud/weppcloud/runs/mdobre-fantastic-mold/seattle-snow/
              extent=[-121.63453841993181, 47.35650394734622, -121.59114402470502, 47.38589262290145],
              map_center=[-121.61284122231841, 47.37120033220608],
@@ -85,7 +164,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='SteeleCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-dun-colored-thumbnail/seattle-snow/ 
+        dict(watershed='5_SteeleCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-dun-colored-thumbnail/seattle-snow/ 
              extent=[-121.85527326670098, 47.39702726773113, -121.76848447624735, 47.455743079989006],
              map_center=[-121.81187887147415, 47.42639336086452],
              map_zoom=13,
@@ -96,7 +175,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='TaylorCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-incidental-exhibitor/seattle-snow/
+        dict(watershed='6_TaylorCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-incidental-exhibitor/seattle-snow/
              extent=[-121.93038940429689, 47.27946192115735, -121.68491363525392, 47.44573629035491],
              map_center=[-121.80765151977539, 47.3626646139612],
              map_zoom=12,
@@ -107,7 +186,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='RackCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-macroscopic-mule/seattle-snow/
+        dict(watershed='7_RackCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-macroscopic-mule/seattle-snow/
              extent=[-121.81873700666384, 47.319323353341154, -121.64515942575657, 47.43686262163456],
              map_center=[-121.73194821621021, 47.378125740135424],
              map_zoom=12,
@@ -118,7 +197,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='ShotgunCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-allopathic-laird/seattle-snow/
+        dict(watershed='8_ShotgunCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-allopathic-laird/seattle-snow/
              extent=[-121.81024020200407, 47.3125753955728, -121.63666262109679, 47.43012968899888],
              map_center=[-121.72345141155041, 47.37138529557367],
              map_zoom=12,
@@ -129,7 +208,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='BoulderCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-nuclear-monument/seattle-snow/
+        dict(watershed='9_BoulderCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-nuclear-monument/seattle-snow/
              extent=[-121.78887680743084, 47.28870375392173, -121.61529922652359, 47.406311187359705],
              map_center=[-121.70208801697721, 47.34754022617904],
              map_zoom=12,
@@ -140,7 +219,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='Rex',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-idealized-boredom/seattle-snow/
+        dict(watershed='10_Rex',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-idealized-boredom/seattle-snow/
              extent=[-121.77658081054689, 47.25430078914495, -121.53110504150392, 47.42065432071321],
              map_center=[-121.6538429260254, 47.33754306785725],
              map_zoom=12,
@@ -151,7 +230,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='WalshLake',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-circumpolar-thunderclap/seattle-snow/
+        dict(watershed='11_WalshLake',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-circumpolar-thunderclap/seattle-snow/
              extent=[-121.96925183206595, 47.35222786660658, -121.79567425115869, 47.469693845801274],
              map_center=[-121.88246304161231, 47.410993605703396],
              map_zoom=12,
@@ -162,7 +241,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='RockCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-deafened-tantalum/seattle-snow/
+        dict(watershed='12_RockCreek',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-deafened-tantalum/seattle-snow/
              extent=[-121.95133209228517, 47.37649961666246, -121.82859420776367, 47.45954949060109],
              map_center=[-121.88996315002443, 47.418040928043936],
              map_zoom=13,
@@ -173,7 +252,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='UpperCedar',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-inattentive-iconography/seattle-snow/
+        dict(watershed='13_UpperCedar',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-inattentive-iconography/seattle-snow/
              extent=[-121.66568756103517, 47.24730946320093, -121.4202117919922, 47.413684985326825],
              map_center=[-121.54294967651369, 47.3305627384955],
              map_zoom=12,
@@ -184,7 +263,7 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
                           
-        dict(watershed='LowerCedarEast',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-kiln-dried-exponential/seattle-snow/
+        dict(watershed='14_LowerCedarEast',  # https://dev.wepp.cloud/weppcloud/runs/mdobre-kiln-dried-exponential/seattle-snow/
              extent=[-121.88913910241645, 47.33725885529981, -121.71556152150916, 47.45475818016082],
              map_center=[-121.8023503119628, 47.396041268667254],
              map_zoom=12,
@@ -195,7 +274,18 @@ if __name__ == '__main__':
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
              
-        dict(watershed='Name',  #
+        dict(watershed='15_Watershed',  #
+             extent=[-121.88913910241645, 47.33725885529981, -121.71556152150916, 47.45475818016082],
+             map_center=[-121.8023503119628, 47.396041268667254],
+             map_zoom=12,
+             outlet=[-121.84627671566402, 4739467807072394],
+             landuse=None,
+             cs=xxx, erod=0.000001,
+             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
+             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
+             mid_season_crop_coeff=0.95, p_coeff=0.8),
+
+        dict(watershed='16_Watershed',  #
              extent=[-121.88913910241645, 47.33725885529981, -121.71556152150916, 47.45475818016082],
              map_center=[-121.8023503119628, 47.396041268667254],
              map_zoom=12,
@@ -205,7 +295,8 @@ if __name__ == '__main__':
              surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(watershed='Name',  #
+
+        dict(watershed='17_Watershed',  #
              extent=[-121.88913910241645, 47.33725885529981, -121.71556152150916, 47.45475818016082],
              map_center=[-121.8023503119628, 47.396041268667254],
              map_zoom=12,
@@ -215,17 +306,8 @@ if __name__ == '__main__':
              surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
              gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
              mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(watershed='Name',  #
-             extent=[-121.88913910241645, 47.33725885529981, -121.71556152150916, 47.45475818016082],
-             map_center=[-121.8023503119628, 47.396041268667254],
-             map_zoom=12,
-             outlet=[-121.84627671566402, 47.39467807072394],
-             landuse=None,
-             cs=xxx, erod=0.000001,
-             surf_runoff=0.004, lateral_flow=0.005, baseflow=0.006, sediment=1200.0,
-             gwstorage=100, bfcoeff=0.04, dscoeff=0.00, bfthreshold=1.001,
-             mid_season_crop_coeff=0.95, p_coeff=0.8),
-        dict(watershed='Name',  # 
+
+        dict(watershed='18_Watershed',  #
              extent=[-121.88913910241645, 47.33725885529981, -121.71556152150916, 47.45475818016082],
              map_center=[-121.8023503119628, 47.396041268667254],
              map_zoom=12,
@@ -239,19 +321,23 @@ if __name__ == '__main__':
     ]
 
     scenarios = [
-               dict(scenario='CurCond',
-                    landuse=None,
-                    lc_lookup_fn='ki5krcs.csv'),
-               dict(scenario='SBS',
-                    landuse=None,
-                    lc_lookup_fn='ki5krcs.csv',
-                    cfg='lt-fire-snow-caldor')
+        dict(scenario='CurCond',
+            landuse=None,
+            cfg='seattle-snow-9002'),
+        dict(scenario='HighSev',
+            base_project='Cedar23_AllCedar_CurCond',
+            landuse='high_severity',
+            cfg='seattle-snow-9002'),
+        dict(scenario='SimFire',
+            base_project='Cedar23_AllCedar_CurCond',
+            landuse=None,
+            sbs_map='/workdir/wepppy/wepppy/nodb/mods/locations/seattle/simfire/SBS_pred_Norse_CedarRiver_all.tif',
+            cfg='seattle-snow-9002')
     ]
 
     skip_completed = True
-
     projects = []
-
+    prefix = 'Cedar23'
     wc = sys.argv[-1]
     if '.py' in wc:
         wc = None
@@ -259,12 +345,19 @@ if __name__ == '__main__':
     for scenario in scenarios:
         for watershed in watersheds:
             projects.append(deepcopy(watershed))
-            projects[-1]['cfg'] = scenario.get('cfg', 'lt-wepp_bd16b69-snow')
-            projects[-1]['landuse'] = scenario['landuse']
+            projects[-1]['landuse'] =scenario['landuse']
             projects[-1]['lc_lookup_fn'] = scenario.get('lc_lookup_fn', 'landSoilLookup.csv')
             projects[-1]['climate'] = scenario.get('climate', 'observed')
+            projects[-1]['base_project'] = watershed.get('base_project')
+            base_project = scenario.get('base_project')
+            if base_project is not None:
+                projects[-1]['base_project'] = base_project
             projects[-1]['scenario'] = scenario['scenario']
-            projects[-1]['wd'] = 'lt_Caldor_%s_%s' % (watershed['watershed'], scenario['scenario'])
+            projects[-1]['cfg'] = scenario['cfg']
+            projects[-1]['sbs_map'] = scenario.get('sbs_map')
+            _watershed = watershed['watershed']
+            _scenario = scenario['scenario']
+            projects[-1]['wd'] = f"{prefix}_{_watershed}_{_scenario}"
 
     failed = open('failed', 'w')
     for proj in projects:
@@ -281,44 +374,77 @@ if __name__ == '__main__':
 
             watershed = proj['watershed']
             scenario = proj['scenario']
+            base_project = proj['base_project']
+            sbs_map = proj['sbs_map']
 
             if wc is not None:
                 if not wc in wd:
                     continue
 
-            if skip_completed:
+            if skip_completed and base_project is None:
                 if _exists(_join(wd, 'export', 'arcmap', 'channels.shp')):
                     log_print('has channels.shp... skipping.')
                     continue
 
             log_print('cleaning dir')
-            if _exists(wd):
+            if _exists(wd) and base_project is None:
                 print()
                 shutil.rmtree(wd)
-            os.mkdir(wd)
 
-            log_print('initializing project')
-            ron = Ron(wd, "%s.cfg" % cfg)
-            ron.name = wd
-            ron.set_map(extent, map_center, zoom=map_zoom)
+            if not base_project:
+                os.mkdir(wd)
 
-            log_print('fetching dem')
-            ron.fetch_dem()
+                log_print('initializing project')
+                ron = Ron(wd, "%s.cfg" % cfg)
+                ron.name = wd
+                ron.set_map(extent, map_center, zoom=map_zoom)
 
-            log_print('building channels')
-            wat = Watershed.getInstance(wd)
-            wat.build_channels(csa=5, mcl=60)
-            wat.set_outlet(*outlet)
-            sleep(0.5)
+                log_print('fetching dem')
+                ron.fetch_dem()
 
-            log_print('building subcatchments')
-            wat.build_subcatchments()
+                log_print('building channels')
+                wat = Watershed.getInstance(wd)
+                wat.build_channels(csa=5, mcl=60)
+                wat.set_outlet(*outlet)
+                sleep(0.5)
 
-            log_print('abstracting watershed')
-            wat = Watershed.getInstance(wd)
-            wat.abstract_watershed()
-            translator = wat.translator_factory()
-            topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
+                log_print('building subcatchments')
+                wat.build_subcatchments()
+
+                log_print('abstracting watershed')
+                wat = Watershed.getInstance(wd)
+                wat.abstract_watershed()
+                translator = wat.translator_factory()
+                topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
+            else:
+                log_print(f'forking {base_project}')
+                fork(base_project, wd)
+                ron = Ron.getInstance(wd)
+                wat = Watershed.getInstance(wd)
+                translator = wat.translator_factory()
+                topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
+
+            if default_landuse is not None:
+                log_print(f'setting default landuse: {default_landuse}')
+
+                if default_landuse == 'high_severity':
+                    from wepppy.nodb.mods import Disturbed
+                    disturbed = Disturbed.getInstance(wd)
+                    sbs_fn = disturbed.build_uniform_sbs()
+                    disturbed.validate(sbs_fn)
+
+                else:
+                    raise NotImplementedError
+
+            if sbs_map is not None:
+
+                sbs_dir, sbs_fn = _split(sbs_map)
+
+                from wepppy.nodb.mods import Disturbed
+                disturbed = Disturbed.getInstance(wd)
+
+                shutil.copyfile(sbs_map,  _join(disturbed.disturbed_dir, sbs_fn))
+                disturbed.validate(_join(disturbed.disturbed_dir, sbs_fn))
 
             log_print('building landuse')
             landuse = Landuse.getInstance(wd)
@@ -326,41 +452,24 @@ if __name__ == '__main__':
             landuse.build()
             landuse = Landuse.getInstance(wd)
 
-            # 105 - Tahoe High severity fire
-            # topaz_ids is a list of string ids e.g. ['22', '23']
-            if default_landuse is not None:
-                log_print('setting default landuse')
-
-                tops = []
-
-                for selector, dom in default_landuse:
-                    _topaz_ids = selector(landuse, None)
-                    bare_tops = bare_or_sodgrass_or_bunchgrass_selector(landuse, None)
-                    _topaz_ids = [top for top in _topaz_ids if top not in bare_tops]
-
-                    landuse.modify(_topaz_ids, dom)
-                    tops.extend(_topaz_ids)
-
-            log_print('building soils')
-            if _exists(_join(wd, 'lt.nodb')):
-                lt = LakeTahoe.getInstance(wd)
-                lt.lc_lookup_fn = lc_lookup_fn
-
             soils = Soils.getInstance(wd)
             soils.mode = SoilsMode.Gridded
             soils.build()
 
             log_print('building climate')
 
-            if climate_mode == 'observed':
+            if base_project is not None:
+                pass
+            elif climate_mode == 'observed':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
-                climate.input_years = 30
+                climate.input_years = 43
                 climate.climatestation = stations[0]['id']
 
-                climate.climate_mode = ClimateMode.Observed
+                climate.climate_mode = ClimateMode.GridMetPRISM
                 climate.climate_spatialmode = ClimateSpatialMode.Multiple
-                climate.set_observed_pars(start_year=1990, end_year=2019)
+                climate.set_observed_pars(start_year=1980, end_year=2022)
+                climate.build(verbose=1)
             elif climate_mode == 'future':
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -370,6 +479,7 @@ if __name__ == '__main__':
                 climate.climate_mode = ClimateMode.Future
                 climate.climate_spatialmode = ClimateSpatialMode.Single
                 climate.set_future_pars(start_year=2018, end_year=2018 + 30)
+                climate.build(verbose=1)
                 # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
             elif climate_mode == 'vanilla':
                 climate = Climate.getInstance(wd)
@@ -379,22 +489,10 @@ if __name__ == '__main__':
 
                 climate.climate_mode = ClimateMode.Vanilla
                 climate.climate_spatialmode = ClimateSpatialMode.Single
+                climate.build(verbose=1)
                 # climate.set_orig_cli_fn(_join(climate._future_clis_wc, 'Ward_Creek_A2.cli'))
-            elif 'copy' in climate_mode:
-                src_wd = 'lt_Caldor_%s_%s' % (watershed, climate_mode[4:])
-                shutil.rmtree(_join(wd, 'climate'))
-                shutil.copytree(_join(src_wd, 'climate'), _join(wd, 'climate'))
-                with open(_join(src_wd, 'climate.nodb')) as fp:
-                    contents = fp.read()
-
-                with open(_join(wd, 'climate.nodb'), 'w') as fp:
-                    fp.write(contents.replace(src_wd, wd))
-
             else:
                 raise Exception("Unknown climate_mode")
-                
-            if 'copy' not in climate_mode:
-                climate.build(verbose=1)
 
             log_print('prepping wepp')
             wepp = Wepp.getInstance(wd)
@@ -408,24 +506,12 @@ if __name__ == '__main__':
             log_print('prepping watershed')
             wepp = Wepp.getInstance(wd)
             wepp.prep_watershed(erodibility=proj['erod'], critical_shear=proj['cs'])
-            wepp._prep_pmet(mid_season_crop_coeff=proj['mid_season_crop_coeff'], p_coeff=proj['p_coeff'])
+            wepp._prep_pmet(kcb=proj['mid_season_crop_coeff'], rawp=proj['p_coeff'])
 
             log_print('running watershed')
             wepp.run_watershed()
 
-            log_print('generating loss report')
-            loss_report = wepp.report_loss()
 
-            log_print('generating totalwatsed report')
-            fn = _join(ron.export_dir, 'totalwatsed.csv')
-
-            totwatsed = TotalWatSed(_join(ron.output_dir, 'totalwatsed.txt'),
-                                    wepp.baseflow_opts, wepp.phosphorus_opts)
-            totwatsed.export(fn)
-            assert _exists(fn)
-
-            log_print('exporting arcmap resources')
-            arc_export(wd)
         except:
             failed.write('%s\n' % wd)
             raise
