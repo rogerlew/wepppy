@@ -2,6 +2,7 @@ from typing import Optional
 import enum
 from os.path import join as _join
 
+import json
 import math
 
 import numpy as np
@@ -30,9 +31,6 @@ class AshType(enum.IntEnum):
 class AshNoDbLockedException(Exception):
     pass
 
-
-WHITE_ASH_BD = 0.31
-BLACK_ASH_BD = 0.22
 
 
 class AshModel(object):
@@ -70,8 +68,6 @@ class AshModel(object):
 
     @property
     def ini_material_available_mm(self):
-        print('proportion', self.proportion, type(self.proportion))
-        print('ini_ash_depth_mm', self.ini_ash_depth_mm, type(self.ini_ash_depth_mm))
         return self.proportion * self.ini_ash_depth_mm
 
     @property
@@ -118,10 +114,11 @@ class AshModel(object):
             returns the output file name, return period results dictionary
         """
 
-        print(prefix)
-
         self.ini_ash_depth_mm = None
         self.ini_ash_load_tonneha = ini_ash_load
+
+#        ini_ash_load = 46.5  # TODO delete this line
+#        fire_date = YearlessDate(5, 1)  # TODO delete this line
 
         assert isfloat(self.par_den), (prefix, self.par_den)
         assert isfloat(self.ini_bulk_den), (prefix, self.ini_bulk_den)
@@ -137,31 +134,26 @@ class AshModel(object):
         fig2 = plt.figure()
         ax2 = plt.gca()
 
-        out_fns = []
+        # Create an empty list to store DataFrames
+        dfs = []
 
         # use np.unique to get the unique years in the climate file
-        for year in np.unique(hill_wat.data['Y']):
-            start_index = np.where((hill_wat.data['Y'] == year) &
+        for year0 in np.unique(hill_wat.data['Y']):
+            start_index = np.where((hill_wat.data['Y'] == year0) &
                                    (hill_wat.data['M'] == fire_date.month) &
                                    (hill_wat.data['D'] == fire_date.day))[0][0]
 
             df = self._run_ash_model_until_gone(fire_date, hill_wat, cli_df,
-                                                ini_ash_load, start_index)
+                                                ini_ash_load, start_index, year0)
+            dfs.append(df)
 
             dates = np.linspace(start_index, start_index + len(df), len(df))
-
             ax1.plot(dates, df['cum_ash_transport (tonne/ha)'], color='red')
-            ax1.set_ylabel('cumulative ash transport (tonne/ha)')
-
             ax2.scatter(df['cum_ash_runoff (mm)'], df['cum_ash_transport (tonne/ha)'], color='blue')
-            ax2.set_xlabel('cumulative ash runoff (mm)')
-            ax2.set_ylabel('cumulative ash transport (tonne/ha)')
 
-            out_fn = _join(out_dir, f'{prefix}_{year}_ash.csv')
-            # write ash output file
-            df.to_csv(out_fn)
-
-            out_fns.append(out_fn)
+        ax1.set_ylabel('cumulative ash transport (tonne/ha)')
+        ax2.set_xlabel('cumulative ash runoff (mm)')
+        ax2.set_ylabel('cumulative ash transport (tonne/ha)')
 
         fig.savefig(_join(out_dir, f'{prefix}_ash.png'))
         plt.close()
@@ -171,7 +163,13 @@ class AshModel(object):
         plt.close()
         del fig2
 
-        return out_fns
+        # Concatenate all DataFrames and save as a Parquet file
+        all_dfs = pd.concat(dfs)
+
+        out_fn = _join(out_dir, f'{prefix}_ash.parquet')
+        all_dfs.to_parquet(out_fn)
+
+        return out_fn
 
     def _calc_transportable_ash(self, remaining_ash_tonspha, bulk_density_gmpcm3):
         """
@@ -200,7 +198,7 @@ class AshModel(object):
 
         >>> remaining_mm, transportable_tonspha = _calc_transportable_ash(30, 0.8)
         """
-        roughness_limit = self.roughness_limit
+        roughness_limit = self.roughness_limit  # mm
         remaining_mm = remaining_ash_tonspha / (10.0 * bulk_density_gmpcm3)
         transportable_mm = np.clip(remaining_mm - roughness_limit, 0, None)
         transportable_tonspha = transportable_mm * (10.0 * bulk_density_gmpcm3)
@@ -208,7 +206,7 @@ class AshModel(object):
 
 
     def _run_ash_model_until_gone(self, fire_date, hill_wat, cli_df, ini_ash_load,
-                                  start_index):
+                                  start_index, year0):
 
         assert self.roughness_limit >= 0.0, self.roughness_limit
 
@@ -220,6 +218,8 @@ class AshModel(object):
         mo = np.roll(hill_wat.data['M'], -start_index)
         da = np.roll(hill_wat.data['D'], -start_index)
         julian = np.roll(hill_wat.data['J'], -start_index)
+
+        assert year0 == yr[0], (year0, yr[0])
 
         precip = np.roll(hill_wat.data['P (mm)'], -start_index)
         rm = np.roll(hill_wat.data['RM (mm)'], -start_index)
@@ -297,14 +297,14 @@ class AshModel(object):
 
                 if ash_runoff_mm[i] > 0.0:
                     transport_tonspha[i] = (self.ini_erod - self.fin_erod) * \
-                                           (bulk_density_gmpcm3[i] - self.fin_bulk_den) / \
-                                           (self.ini_bulk_den - self.fin_bulk_den) + \
+                                           np.clip((bulk_density_gmpcm3[i] - self.fin_bulk_den) / \
+                                                   (self.ini_bulk_den - self.fin_bulk_den) , 0, 1) + \
                                             self.fin_erod
 
                     water_transport_tonspha[i] = np.clip(ash_runoff_mm[i] * transport_tonspha[i],
                                                          0, remaining_ash_tonspha[i-1])
 
-            elif q[i] > 0:
+            elif q[i] == 0:
                 if self.run_wind_transport:
                     # identify peak wind values within the fire year
                     if  wind_vel[i] > _w_vl_if:
@@ -314,6 +314,9 @@ class AshModel(object):
                         # identify the fraction removed by wind from the wind_transport_thresholds.csv
                         wind_transport_tonspha[i] = remaining_ash_tonspha[i-1] * \
                                                     self.lookup_wind_threshold_proportion(w_vl_ifgt[i])
+
+            assert not (wind_transport_tonspha[i] > 0 and water_transport_tonspha[i] > 0), \
+                f'wind and water transport cannot occur on the same day'
 
             # calculate available_ash_tonspha, and ash_depth_mm
             ash_transport_tonspha[i] = wind_transport_tonspha[i] + water_transport_tonspha[i]
@@ -359,17 +362,19 @@ class AshModel(object):
                 f'day {i} ash not balancing, { ini_ash_load - remaining_ash_tonspha[i] } ' \
                 f'{cum_ash_transport_tonspha[i]} {cum_ash_decomp_tonspha[i]}'
 
+
             # increment day
             i += 1
 
-        i -= 1  # decrement i to get the last day
-
-        assert transportable_ash_tonspha[i] == 0, \
+        assert transportable_ash_tonspha[i-1] == 0, \
             f'ash transportable {transportable_ash_tonspha[i]} not zero'
+
+#        print(f'{i}\t{np.max(water_transport_tonspha[:i]):.2f}\t{remaining_ash_tonspha[i]:.2f}\t{cum_ash_transport_tonspha[i]:.2f}')
 
         # convert numpy arrays to pandas dataframe
         df = pd.DataFrame({
             'fire_year (yr)': fire_year[:i].flatten(),
+            'year0': (np.ones(i) * year0).flatten(),
             'year': yr[:i].flatten(),
             'da': da[:i].flatten(),
             'mo': mo[:i].flatten(),
@@ -377,18 +382,18 @@ class AshModel(object):
             'days_from_fire (days)': days_from_fire[:i].flatten(),
             'precip (mm)': precip[:i].flatten(),
             'rainmelt (mm)': rm[:i].flatten(),
-            'snow water equivalent (mm)': swe[:i].flatten(),
+            'snow_water_equivalent (mm)': swe[:i].flatten(),
             'runoff (mm)': q[:i].flatten(),
-            'tot soil water (mm)': tsw[:i].flatten(),
+            'tot_soil_water (mm)': tsw[:i].flatten(),
             'infiltration (mm)': infil_mm[:i].flatten(),
             'cum_infiltration (mm)': cum_infil_mm[:i].flatten(),
             'cum_runoff (mm)': cum_q_mm[:i].flatten(),
-            'bulk density (gm/cm3)': bulk_density_gmpcm3[:i].flatten(),
+            'bulk_density (gm/cm3)': bulk_density_gmpcm3[:i].flatten(),
             'porosity': porosity[:i].flatten(),
-            'remaining ash (tonne/ha)': remaining_ash_tonspha[:i].flatten(),
-            'transportable ash (tonne/ha)': transportable_ash_tonspha[:i].flatten(),
-            'ash depth (mm)': ash_depth_mm[:i].flatten(),
-            'ash runoff (mm)': ash_runoff_mm[:i].flatten(),
+            'remaining_ash (tonne/ha)': remaining_ash_tonspha[:i].flatten(),
+            'transportable_ash (tonne/ha)': transportable_ash_tonspha[:i].flatten(),
+            'ash_depth (mm)': ash_depth_mm[:i].flatten(),
+            'ash_runoff (mm)': ash_runoff_mm[:i].flatten(),
             'transport (tonne/ha)': transport_tonspha[:i].flatten(),
             'cum_ash_runoff (mm)': cum_ash_runoff_mm[:i].flatten(),
             'water_transport (tonne/ha)': water_transport_tonspha[:i].flatten(),
@@ -401,7 +406,17 @@ class AshModel(object):
             'cum_ash_decomp (tonne/ha)': cum_ash_decomp_tonspha[:i].flatten(),
         }, index=np.arange(i))
 
+        # convert the data type of specific columns as multiple statements
+        df['fire_year (yr)'] = df['fire_year (yr)'].astype(np.uint16)
+        df['year0'] = df['year0'].astype(np.uint16)
+        df['year'] = df['year'].astype(np.uint16)
+        df['da'] = df['da'].astype(np.uint16)
+        df['mo'] = df['mo'].astype(np.uint16)
+
         return df
+
+WHITE_ASH_BD = 0.31
+BLACK_ASH_BD = 0.22
 
 
 class WhiteAshModel(AshModel):
@@ -415,9 +430,9 @@ class WhiteAshModel(AshModel):
             bulk_den_fac=0.005,  # Bulk density factor
             par_den=1.2,  # Ash particle density, gm/cm3
             decomp_fac=0.00018,  # Ash decomposition factor, per day
-            ini_erod=1,  # Initial erodibility, t/ha
-            fin_erod=0.01,  # Final erodibility, t/ha
-            roughness_limit=1)  # Roughness limit, mm
+            ini_erod=10,  # Initial erodibility, t/ha
+            fin_erod=0.1,  # Final erodibility, t/ha
+            roughness_limit=1)  # TODO: Verify Roughness limit, mm
 
 
 class BlackAshModel(AshModel):
@@ -431,6 +446,11 @@ class BlackAshModel(AshModel):
             bulk_den_fac=0.005,  # Bulk density factor
             par_den=1.2,  # Ash particle density, gm/cm3
             decomp_fac=0.00018,  # Ash decomposition factor, per day
-            ini_erod=0.098509,  # Initial erodibility, t/ha
-            fin_erod=0.01,  # Final erodibility, t/ha
-            roughness_limit=1)   # Roughness limit, mm
+            ini_erod=1.0,  # Initial erodibility, t/ha
+            fin_erod=0.1,  # Final erodibility, t/ha
+            roughness_limit=1)   # TODO: Verify Roughness limit, mm
+
+# per Sarah
+# 40 mm of Rain over 3 months 2 to 3 storms (13-20 mm per storm).
+# Removed 10 to 20 mm of ash. 15 mm of ash 46.5 tonne/ha
+# Removed all the Ash
