@@ -429,7 +429,7 @@ class NoDbBase(object):
 
     @property
     def lc_fn(self):
-        return _join(self.wd, 'landuse', 'nlcd.asc')
+        return _join(self.wd, 'landuse', 'nlcd.tif')
 
     @property
     def domlc_fn(self):
@@ -441,7 +441,7 @@ class NoDbBase(object):
 
     @property
     def ssurgo_fn(self):
-        return _join(self.wd, 'soils', 'ssurgo.asc')
+        return _join(self.wd, 'soils', 'ssurgo.tif')
 
     @property
     def domsoil_fn(self):
