@@ -14,7 +14,7 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
-from wepppy.all_your_base.geo import read_raster
+from wepppy.all_your_base.geo import read_raster, raster_stacker
 
 
 class LandcoverMap:
@@ -68,7 +68,13 @@ class LandcoverMap:
         """
         assert _exists(subwta_fn)
         subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
-        assert self.data.shape == subwta.shape
+
+        if not self.data.shape == subwta.shape:
+            dst_fn = subwta_fn.replace('.ARC', '.fixed.tif')
+            raster_stacker(subwta_fn, self.fname, dst_fn)
+            subwta, transform, proj = read_raster(dst_fn, dtype=np.int32)
+
+        assert self.data.shape == subwta.shape, [self.data.shape, subwta.shape]
 
         if mofe_fn is None:
             mofe_map = None
