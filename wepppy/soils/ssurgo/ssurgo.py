@@ -976,7 +976,7 @@ Any comments:
         with open(fname, 'w') as fp:
             fp.write(txt)
 
-    def build_file_contents(self):
+    def build_file_contents(self, ag=False):
         assert self.valid()
                
         ksflag = self.ksflag
@@ -1051,7 +1051,7 @@ Any comments:
         elif self.res_lyr_i is None:
             s.append('1 10000.0 %0.5f' % 0.01)
         else:
-            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6) / 1000.0)
+            s.append('1 10000.0 %0.5f' % ((self.res_lyr_ksat * 3.6) / 1000.0))
             
         return '\n'.join(s)
 
@@ -1134,7 +1134,7 @@ Any comments:
         elif self.res_lyr_i is None:
             s.append('1 10000.0 %0.5f' % 0.01)
         else:
-            s.append('1 10000.0 %0.5f' % (self.res_lyr_ksat * 3.6) / 1000.0)
+            s.append('1 10000.0 %0.5f' % ((self.res_lyr_ksat * 3.6) / 1000.0))
 
         return '\n'.join(s)
 
