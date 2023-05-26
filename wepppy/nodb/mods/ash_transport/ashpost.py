@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2023, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -6,11 +6,12 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+
 import os
-from os.path import exists as _exists
+from glob import glob
 from os.path import join as _join
 from os.path import split as _split
-
+from os.path import exists as _exists
 from glob import glob
 from copy import deepcopy
 
@@ -21,11 +22,433 @@ import math
 import jsonpickle
 import numpy as np
 import pandas as pd
+import dask.dataframe as dd
 
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.stats import probability_of_occurrence, weibull_series
 
 from wepppy.nodb.base import NoDbBase
+
+from pprint import pprint
+
+common_cols =  ['area (ha)', 'topaz_id', 'year', 'mo', 'da', 'julian', 'year0', 'days_from_fire (days)', 'burn_class']
+
+out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
+            'wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)',
+            'ash_depth (mm)', 'transportable_ash (tonne/ha)']
+
+
+def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_extract):
+
+    measure_rank = measure.replace(' (tonne)', '_rank')\
+                          .replace(' (days)', '_rank')
+    measure_ri = measure.replace(' (tonne)', '_ri')\
+                        .replace(' (days)', '_ri')
+    measure_poo = measure.replace(' (tonne)', '_probability')\
+                         .replace(' (days)', '_probability')
+
+    cols_to_extract = [measure, measure_rank, measure_ri, measure_poo] + cols_to_extract
+
+    df.sort_values(by=measure, ascending=False, inplace=True)
+
+    df[measure_rank] = df[measure].rank(ascending=False)
+    df[measure_ri] = (num_fire_years + 1) / df[measure_rank]
+    df[measure_poo] = df[measure_ri].apply(lambda ri: probability_of_occurrence(ri, 1.0))
+
+    rec = weibull_series(recurrence, num_fire_years)
+
+    num_events = (df[measure] > 0).sum()
+    return_periods= {}
+    for retperiod in recurrence:
+        if retperiod not in rec:
+            return_periods[retperiod] = { measure: 0,
+                                          'probability': 0,
+                                          'rank': 0,
+                                          'ri': 0 }
+        else:
+            indx = rec[retperiod]
+            if indx >= num_events:
+                return_periods[retperiod] = { measure: 0,
+                                              'probability': 0,
+                                              'rank': 0,
+                                              'ri': 0 }
+            else:
+                _row = df.iloc[indx][cols_to_extract].to_dict()
+                for _m in _row:
+                    if _m in ('year0', 'year', 'mo', 'da', 'days_from_fire (days)', measure_rank):
+                        _row[_m] = int(_row[_m])
+                    elif isfloat(_row[_m]):
+                        _row[_m] = float(_row[_m])
+                    else:
+                        _row[_m] = str(_row[_m])
+
+                _row['probability'] = _row[measure_poo]
+                _row['rank'] = _row[measure_rank]
+                _row['ri'] = _row[measure_ri]
+
+                del _row[measure_poo]
+                del _row[measure_rank]
+                del _row[measure_ri]
+
+                return_periods[retperiod] = _row
+
+    return return_periods
+
+
+def calculate_cumulative_transport(df, recurrence, ash_post_dir):
+
+    # group the filtered rows by year0 and aggregate the cum_ columns and weighted average of days_from_fire
+    agg_d = {'days_from_fire (days)': 'first'}
+
+    for col_name in df.columns:
+        if col_name.startswith('cum_'):
+            agg_d[col_name] = 'sum'
+
+    df_agg = df.groupby('year0').agg(agg_d)
+
+    # create a new dataframe with one row per unique year
+    cum_df = pd.DataFrame({'year0': df['year0'].unique()})
+
+    # merge the aggregated data with the new dataframe
+    cum_df = pd.merge(cum_df, df_agg, on='year0')
+    df.to_pickle(_join(ash_post_dir, 'watershed_cumulatives.pkl'))
+
+    # calculate return intervals and probabilities for cumulative results
+    num_fire_years = len(cum_df)
+    cum_return_periods = {}
+    cols_to_extract = ['year0']
+
+    for measure in ['cum_wind_transport (tonne)', 'cum_water_transport (tonne)',
+                    'cum_ash_transport (tonne)', 'days_from_fire (days)']:
+        cum_return_periods[measure] = calculate_return_periods(cum_df, measure, recurrence, num_fire_years,
+                                                               cols_to_extract)
+
+    return cum_return_periods
+
+
+def calculate_hillslope_statistics(df, ash, ash_post_dir):
+    agg_d = { 'wind_transport (tonne/ha)': 'sum',
+              'water_transport (tonne/ha)': 'sum',
+              'ash_transport (tonne/ha)': 'sum' }
+
+    # group the dataframe by topaz_id and year, and calculate the sum of x within each group
+    df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
+    df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean().reset_index()
+    df_hillslope_average_annuals['ash_ini_depth (mm)'] = \
+        df['topaz_id'].apply(lambda topaz_id: ash.get_ini_ash_depth(topaz_id))
+    df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
+    df_hillslope_average_annuals.to_pickle(_join(ash_post_dir, 'hillslope_annuals.pkl'))
+
+
+def calculate_watershed_statisics(df, ash_post_dir, recurrence):
+    global common_cols
+
+    measures = ['wind_transport (tonne)', 'water_transport (tonne)', 'ash_transport (tonne)']
+
+    ws_cols_to_drop = ['date_int', 'topaz_id']
+    for col in ['year0', 'da', 'mo', 'julian', 'year']:
+        if col in out_cols:
+            ws_cols_to_drop.append(col)
+
+    agg_d = {}
+    for col in df.columns:
+        if 'm^3' in col or 'tonne':
+            agg_d[col] = 'sum'
+        if col in common_cols:
+            agg_d[col] = 'first'
+
+        if 'mm' in col or 'tonne/ha' in col or col.startswith('cum_'):
+            ws_cols_to_drop.append(col)
+
+    df_annuals = df.groupby('year').agg(agg_d)
+    df_annuals.drop(ws_cols_to_drop, axis=1, inplace=True)
+    df_annuals.to_pickle(_join(ash_post_dir, 'watershed_annuals.pkl'))
+
+    del df_annuals
+
+    df_daily = df.groupby('date_int').agg(agg_d)
+    df_daily.to_pickle(_join(ash_post_dir, 'watershed_daily.pkl'))
+
+    num_days = len(df_daily.julian)
+    num_fire_years = num_days / 365.25
+    return_periods = {}
+    cols_to_extract = ['days_from_fire (days)']
+
+    for measure in measures:
+        return_periods[measure] = calculate_return_periods(df_daily, measure, recurrence, num_fire_years,
+                                                           cols_to_extract)
+
+    # Group the DataFrame by 'date_int' and 'burn_class' columns
+    grouped_df = df.groupby(['date_int', 'burn_class']).agg(agg_d)
+
+    # Pivot the multi-level index to have burn_class as columns
+    df_daily = grouped_df.unstack(level='burn_class')
+
+    # Compute the number of days and fire years
+    num_days = len(df_daily.index)
+    num_fire_years = num_days / 365.25
+
+    # Initialize the return_periods dictionary
+    burn_class_return_periods = {burn_class: {} for burn_class in [1, 2, 3, 4]}
+
+    # Iterate through burn classes and calculate return_periods for each one
+    burn_classes_present = df['burn_class'].unique()
+    for burn_class in [1, 2, 3, 4]:
+        cols_to_extract = ['days_from_fire (days)']
+        for measure in measures:
+            # Calculate return_periods using the values for the current burn_class
+            if burn_class in  burn_classes_present:
+                burn_class_return_periods[burn_class][measure] = calculate_return_periods(
+                    df_daily.xs(burn_class, axis=1, level='burn_class'),
+                    measure,
+                    recurrence,
+                    num_fire_years,
+                    cols_to_extract
+                )
+            else:
+                burn_class_return_periods[burn_class][measure] = {rec: {measure: 0} for rec in recurrence}
+
+    return return_periods, burn_class_return_periods
+
+
+def read_hillslope_out_fn(out_fn, meta_data=None, meta_data_types=None, cumulative=False):
+    global common_cols, out_cols
+
+    if cumulative:
+        df = pd.read_parquet(out_fn)
+    else:
+        df = pd.read_parquet(out_fn, columns=out_cols)
+
+    if meta_data is not None:
+        for key, value in meta_data.items():
+            if meta_data_types and key in meta_data_types and meta_data_types[key] == 'category':
+                df[key] = pd.Categorical([value] * len(df))
+            else:
+                df[key] = pd.Series([value] * len(df)).astype(meta_data_types.get(key) if meta_data_types else None)
+
+    # Create a unique index from year and julian columns
+    df['date_int'] = df['year'] * 1000 + df['julian']
+    df.set_index('date_int', inplace=True)
+
+    # Select columns to aggregate
+    agg_d = {}
+    for col in df.columns:
+        if '(mm)' in col or '(tonne/ha)' in col or '(gm/cm3)' in col:
+            agg_d[col] = 'sum'
+        if col in common_cols:
+            agg_d[col] = 'first'
+
+    # Pivot and aggregate the data
+    df_agg =  df.groupby('date_int').agg(agg_d)
+
+    # Reset the index to get a dataframe with one row per unique combination of year, julian, and topaz_id
+    df_agg.reset_index(inplace=True)
+
+    area_ha = float(df_agg['area (ha)'].iloc[0])
+
+    # Convert columns in tonne/ha to tonne by multiplying by area_ha
+    for col in df_agg.columns:
+        if 'tonne/ha' in col:
+            df_agg[col.replace('tonne/ha', 'tonne')] = df_agg[col] * area_ha
+
+    # Convert columns in mm to m^3 using area_ha
+    for col in df_agg.columns:
+        if 'mm' in col:
+            df_agg[col.replace('mm', 'm^3')] = ( df_agg[col] * 0.001) *  (area_ha * 10000)
+
+    if cumulative:
+        df_agg = df_agg[df_agg['transportable_ash (tonne/ha)'] == 0.0]
+    return df_agg
+
+def calculate_cum_watershed_stats_by_burnclass(cum_df):
+    """
+    cum_df cols
+    Data columns (total 55 columns):
+ #   Column                          Non-Null Count  Dtype
+---  ------                          --------------  -----
+ 0   date_int                        295 non-null    int64
+ 1   year0                           295 non-null    uint16
+ 2   year                            295 non-null    uint16
+ 3   da                              295 non-null    uint16
+ 4   mo                              295 non-null    uint16
+ 5   julian                          295 non-null    int16
+ 6   days_from_fire (days)           295 non-null    int64
+ 7   precip (mm)                     295 non-null    float32
+ 8   rainmelt (mm)                   295 non-null    float32
+ 9   snow_water_equivalent (mm)      295 non-null    float32
+ 10  runoff (mm)                     295 non-null    float32
+ 11  tot_soil_water (mm)             295 non-null    float32
+ 12  infiltration (mm)               295 non-null    float32
+ 13  cum_infiltration (mm)           295 non-null    float32
+ 14  cum_runoff (mm)                 295 non-null    float32
+ 15  bulk_density (gm/cm3)           295 non-null    float64
+ 16  remaining_ash (tonne/ha)        295 non-null    float64
+ 17  transportable_ash (tonne/ha)    295 non-null    float64
+ 18  ash_depth (mm)                  295 non-null    float64
+ 19  ash_runoff (mm)                 295 non-null    float64
+ 20  transport (tonne/ha)            295 non-null    float64
+ 21  cum_ash_runoff (mm)             295 non-null    float64
+ 22  water_transport (tonne/ha)      295 non-null    float64
+ 23  wind_transport (tonne/ha)       295 non-null    float64
+ 24  ash_transport (tonne/ha)        295 non-null    float64
+ 25  ash_decomp (tonne/ha)           295 non-null    float64
+ 26  cum_water_transport (tonne/ha)  295 non-null    float64
+ 27  cum_wind_transport (tonne/ha)   295 non-null    float64
+ 28  cum_ash_transport (tonne/ha)    295 non-null    float64
+ 29  cum_ash_decomp (tonne/ha)       295 non-null    float64
+ 30  topaz_id                        295 non-null    uint16
+ 31  area (ha)                       295 non-null    float32
+ 32  burn_class                      295 non-null    uint8
+ 33  remaining_ash (tonne)           295 non-null    float64
+ 34  transportable_ash (tonne)       295 non-null    float64
+ 35  transport (tonne)               295 non-null    float64
+ 36  water_transport (tonne)         295 non-null    float64
+ 37  wind_transport (tonne)          295 non-null    float64
+ 38  ash_transport (tonne)           295 non-null    float64
+ 39  ash_decomp (tonne)              295 non-null    float64
+ 40  cum_water_transport (tonne)     295 non-null    float64
+ 41  cum_wind_transport (tonne)      295 non-null    float64
+ 42  cum_ash_transport (tonne)       295 non-null    float64
+ 43  cum_ash_decomp (tonne)          295 non-null    float64
+ 44  precip (m^3)                    295 non-null    float32
+ 45  rainmelt (m^3)                  295 non-null    float32
+ 46  snow_water_equivalent (m^3)     295 non-null    float32
+ 47  runoff (m^3)                    295 non-null    float32
+ 48  tot_soil_water (m^3)            295 non-null    float32
+ 49  infiltration (m^3)              295 non-null    float32
+ 50  cum_infiltration (m^3)          295 non-null    float32
+ 51  cum_runoff (m^3)                295 non-null    float32
+ 52  ash_depth (m^3)                 295 non-null    float64
+ 53  ash_runoff (m^3)                295 non-null    float64
+    """
+
+    # Group the DataFrame by 'burn_class' column
+    grouped_df = cum_df.groupby('burn_class')
+
+    # Compute the count and mean for the specified columns
+    result = grouped_df.agg(
+        {
+            'cum_water_transport (tonne)': ['count', 'mean'],
+            'cum_wind_transport (tonne)': ['mean'],
+            'cum_ash_transport (tonne)': ['mean'],
+        }
+    )
+
+    # Initialize the dictionary with default values
+    pw0_stats = {
+        burn_class: {
+            'count': 0,
+            'cum_water_transport (tonne)': 0,
+            'cum_wind_transport (tonne)': 0,
+            'cum_ash_transport (tonne)': 0,
+        }
+        for burn_class in [1, 2, 3, 4]
+    }
+
+    # Iterate through the result DataFrame and update the values in the dictionary
+    for index, row in result.iterrows():
+        pw0_stats[index] = {
+            'count': int( row[('cum_water_transport (tonne)', 'count') ] ),
+            'cum_water_transport (tonne)': float( row[('cum_water_transport (tonne)', 'mean') ] ),
+            'cum_wind_transport (tonne)': float( row[('cum_wind_transport (tonne)', 'mean') ] ),
+            'cum_ash_transport (tonne)': float( row[('cum_ash_transport (tonne)', 'mean') ] ),
+        }
+
+    return pw0_stats
+
+
+def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
+    #
+    # Setup stuff
+    #
+
+    from wepppy.nodb import Watershed
+    from wepppy.nodb import Ash
+
+    # Get NoDB instances
+    watershed = Watershed.getInstance(wd)
+    translator = watershed.translator_factory()
+    ash = Ash.getInstance(wd)
+
+    ash_post_dir = _join(ash.ash_dir, 'post')
+    os.makedirs(ash_post_dir, exist_ok=True)
+
+    #
+    # Read all hillslope output files to a single df
+    #
+
+    # loop over the hillslopes and read their ash output files.
+    hill_data_frames = []
+    for topaz_id, summary in watershed.subs_summary.items():
+        # get the wepp_id
+        wepp_id = translator.wepp(top=topaz_id)
+
+        # get the burn class
+        burn_class = ash.meta[topaz_id]['burn_class']
+
+        # get the area in hectares
+        area_m2 = summary['area']
+        area_ha = area_m2 / 10000
+
+
+        # get the list of output files
+        out_fn = _join(ash.ash_dir, f'H{wepp_id}_ash.parquet')
+
+        if _exists(out_fn):
+            # read the output files into dataframes and append them to hill_data_frames
+            meta = {"topaz_id": topaz_id, "area (ha)": area_ha, "burn_class": burn_class}
+            meta_dtypes = {"topaz_id": "uint16", "area (ha)": "float32", "burn_class": "uint8"}
+            hill_data_frames.append(read_hillslope_out_fn(out_fn,
+                meta_data=meta,
+                meta_data_types=meta_dtypes))
+
+    # Combine all data into a single DataFrame
+    df = pd.concat(hill_data_frames, ignore_index=True)
+
+    calculate_hillslope_statistics(df, ash, ash_post_dir)
+
+    return_periods, burn_class_return_periods = calculate_watershed_statisics(df, ash_post_dir, recurrence)
+
+    del df
+    del hill_data_frames
+
+    # Calculate cumulative return periods
+    # read the last day of each fire run
+    hill_data_frames = []
+    for topaz_id, summary in watershed.subs_summary.items():
+        # get the wepp_id
+        wepp_id = translator.wepp(top=topaz_id)
+
+        # get the burn class
+        burn_class = ash.meta[topaz_id]['burn_class']
+
+        # get the area in hectares
+        area_m2 = summary['area']
+        area_ha = area_m2 / 10000
+
+
+        # get the list of output files
+        out_fn = _join(ash.ash_dir, f'H{wepp_id}_ash.parquet')
+
+        if _exists(out_fn):
+            # read the output files into dataframes and append them to hill_data_frames
+            meta = {"topaz_id": topaz_id, "area (ha)": area_ha, "burn_class": burn_class}
+            meta_dtypes = {"topaz_id": "uint16", "area (ha)": "float32", "burn_class": "uint8"}
+            hill_data_frames.append(read_hillslope_out_fn(out_fn,
+                meta_data=meta, meta_data_types=meta_dtypes, cumulative=True))
+
+    # combine to single dataframe
+    df = pd.concat(hill_data_frames, ignore_index=True)
+
+    cum_return_periods = calculate_cumulative_transport(df, recurrence, ash_post_dir)
+    pw0_stats = calculate_cum_watershed_stats_by_burnclass(df)
+
+    del df
+    del hill_data_frames
+
+    # return all the results
+    return return_periods, cum_return_periods, burn_class_return_periods, pw0_stats
+
 
 
 class AshPostNoDbLockedException(Exception):
@@ -46,11 +469,9 @@ class AshPost(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            self.summary_stats = None
-            self.reservoir_stats = None
-            self.pw0_stats = None
-            self._ash_out = None
-
+            self._return_periods = None
+            self._cum_return_periods = None
+            self._pw0_stats = None
             self.dump_and_unlock()
 
         except Exception:
@@ -65,7 +486,7 @@ class AshPost(NoDbBase):
     @staticmethod
     def getInstance(wd):
         with open(_join(wd, 'ashpost.nodb')) as fp:
-            db = jsonpickle.decode(fp.read())
+            db = jsonpickle.decode(fp.read().replace('"pw0_stats"', '"_pw0_stats"'))
             assert isinstance(db, AshPost), db
 
             if _exists(_join(wd, 'READONLY')):
@@ -88,25 +509,34 @@ class AshPost(NoDbBase):
         return _join(self.wd, 'ashpost.nodb.lock')
 
     @property
-    def ash_out(self):
-        return self._ash_out
+    def return_periods(self):
+        return self._return_periods
+
+    @property
+    def burn_class_return_periods(self):
+        return self._burn_class_return_periods
+
+    @property
+    def cum_return_periods(self):
+        return self._cum_return_periods
+
+    @property
+    def pw0_stats(self):
+        return self._pw0_stats
+
+    @property
+    def reccurence_intervals(self):
+        return sorted([k for k in self._return_periods])
 
     def run_post(self, recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
-        ash_fns = glob(_join(self.ash_dir, '*_ash.csv'))
-        if len(ash_fns) == 0:
-            return
-
         self.lock()
 
         # noinspection PyBroadException
         try:
+            self._return_periods, self._cum_return_periods, self._burn_class_return_periods, self._pw0_stats = \
+                watershed_daily_aggregated(self.wd, recurrence=recurrence)
 
-            self._run_recurrence(recurrence=recurrence)
-            self._run_reservoir_report(recurrence=recurrence)
-            self._run_ash_out()
-            self._run_pw0()
             self.dump_and_unlock()
-
         except Exception:
             self.unlock('-f')
             raise
@@ -124,430 +554,26 @@ class AshPost(NoDbBase):
         return ash.fire_date
 
     @property
-    def ash_load_d(self):
-        from wepppy.nodb import Ash
-        ash = Ash.getInstance(self.wd)
-        return ash.ash_load_d
+    def ash_post_dir(self):
+        return _join(self.ash_dir, 'post')
+
 
     @property
-    def ash_bulk_density_d(self):
-        from wepppy.nodb import Ash
-        ash = Ash.getInstance(self.wd)
-        return ash.ash_bulk_density_d
-
-    def _run_ash_out(self):
-        from wepppy.nodb import Watershed, Ash
-
-        watershed = Watershed.getInstance(self.wd)
-        translator = watershed.translator_factory()
-
-        ash = Ash.getInstance(self.wd)
-        meta = ash.meta
-        load_d = ash.ash_load_d
-
-        ash_out = {}
-        for topaz_id, ss in watershed._subs_summary.items():
-            wepp_id = translator.wepp(top=topaz_id)
-            burnclass = meta[str(topaz_id)]['burn_class']
-
-            ash_out[topaz_id] = {}
-            ash_out[topaz_id]['burnclass'] = burnclass
-
-            # determine if slope has ash
-            no_ash = False
-            if load_d is not None:
-                if load_d[str(topaz_id)] <= 0:
-                    no_ash = True
-            
-            if burnclass <= 1 or burnclass == 255:
-                no_ash = True
-
-            ash_out[topaz_id]['is_burned'] = not no_ash
-
-            if no_ash:
-                ash_out[topaz_id]['water_transport (kg/ha)'] = 0.0
-                ash_out[topaz_id]['wind_transport (kg/ha)'] = 0.0
-                ash_out[topaz_id]['ash_transport (kg/ha)'] = 0.0
-                ash_out[topaz_id]['ash_ini_depth (mm)'] = 0.0
-                ash_out[topaz_id]['ash_type'] = None
-                continue
-
-            # if ash is present
-            fn = _join(self.ash_dir,  'H{}_ash_stats_per_year_water.csv'.format(wepp_id))
-            with open(fn) as fp:
-                df = pd.read_csv(fp)
-                series = df['cum_water_transport (tonne/ha)']
-                ash_out[topaz_id]['water_transport (kg/ha)'] = 1000 * float(np.mean(series))
-
-            fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_wind.csv'.format(wepp_id))
-            with open(fn) as fp:
-                df = pd.read_csv(fp)
-                series = df['cum_wind_transport (tonne/ha)']
-                ash_out[topaz_id]['wind_transport (kg/ha)'] = 1000 * float(np.mean(series))
-
-            fn = _join(self.ash_dir, 'H{}_ash_stats_per_year_ash.csv'.format(wepp_id))
-            with open(fn) as fp:
-                df = pd.read_csv(fp)
-                series = df['cum_ash_transport (tonne/ha)']
-                ash_out[topaz_id]['ash_transport (kg/ha)'] = 1000 * float(np.mean(series))
-
-            ash_out[topaz_id]['ash_type'] = ash.get_ash_type(topaz_id)
-            ash_out[topaz_id]['ash_ini_depth (mm)'] = ash.get_ini_ash_depth(topaz_id)
-
-        self._ash_out = ash_out
-
-    def _run_recurrence(self, recurrence):
-        """
-        builds recurrence interval and annuals report for the watershed
-
-        :param recurrence:
-        :return:
-        """
-        from wepppy.nodb import Watershed
-
-        wd = self.wd
-        ash_dir = self.ash_dir
-        fire_date = self.fire_date
-        watershed = Watershed.getInstance(wd)
-        translator = watershed.translator_factory()
-        meta = self.meta
-
-        # compile all the hillslope ash outputs to a single dataframe
-        water = []
-        wind = []
-        ash = []
-        cum_water = []
-        cum_wind = []
-        cum_ash = []
-        precip = []
-
-        for topaz_id, sub in watershed.sub_iter():
-            wepp_id = translator.wepp(top=topaz_id)
-            ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
-
-            # unburned landuses won't have ash outputs
-            if _exists(ash_fn):
-                df = pd.read_csv(ash_fn)
-                water.append(df['ash_delivery_by_water (tonne)'].to_numpy())
-                wind.append(df['ash_delivery_by_wind (tonne)'].to_numpy())
-                ash.append(df['ash_delivery (tonne)'].to_numpy())
-                cum_water.append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
-                cum_wind.append(df['cum_ash_delivery_by_wind (tonne)'].to_numpy())
-                cum_ash.append(df['cum_ash_delivery (tonne)'].to_numpy())
-                precip.append(df['precip (mm)'].to_numpy())
-
-        with open(_join(ash_dir, 'wind_agg.csv'), 'w') as fp:
-            print()
-
-        water = np.array(water)
-        water = np.sum(water, axis=0)
-        wind = np.array(wind)
-        wind = np.sum(wind, axis=0)
-        ash = np.array(ash)
-        ash = np.sum(ash, axis=0)
-        precip = np.array(precip)
-        precip = np.sum(precip, axis=0)
-
-        cum_water = np.array(cum_water)
-        cum_water = np.sum(cum_water, axis=0)
-        cum_wind = np.array(cum_wind)
-        cum_wind = np.sum(cum_wind, axis=0)
-        cum_ash = np.array(cum_ash)
-        cum_ash = np.sum(cum_ash, axis=0)
-
-        df = deepcopy(df)
-        df['ash_delivery_by_water (tonne)'] = pd.Series(water, index=df.index)
-        df['ash_delivery_by_wind (tonne)'] = pd.Series(wind, index=df.index)
-        df['ash_delivery (tonne)'] = pd.Series(ash, index=df.index)
-        df['precip (mm)'] = pd.Series(precip, index=df.index)
-
-        df['cum_ash_delivery_by_water (tonne)'] = pd.Series(cum_water, index=df.index)
-        df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(cum_wind, index=df.index)
-        df['cum_ash_delivery (tonne)'] = pd.Series(cum_ash, index=df.index)
-
-        # identify the fire year breaks
-        breaks = []    # list of indices of new fire years
-        last_day = fire_date.yesterday
-        for i, _row in df.iterrows():
-            if _row.mo == last_day.month and _row.da == last_day.day:
-                breaks.append(i)  # record the index for the new year
-
-        yr_df = df.loc[[brk for brk in breaks],
-                       ['year',
-                        'cum_ash_delivery_by_water (tonne)',
-                        'cum_ash_delivery_by_wind (tonne)',
-                        'cum_ash_delivery (tonne)']]
-
-        num_fire_years = len(breaks)
-
-        annuals = {}
-        for measure in ['cum_ash_delivery_by_water (tonne)',
-                        'cum_ash_delivery_by_wind (tonne)',
-                        'cum_ash_delivery (tonne)']:
-
-            annuals[measure] = []
-            yr_df.sort_values(by=measure, ascending=False, inplace=True)
-
-            data = []
-            colnames = ['year', measure, 'probability', 'rank', 'return_interval']
-            for j, (i, _row) in enumerate(yr_df.iterrows()):
-                val = _row[measure]
-
-                if val == 0.0:
-                    break
-
-                rank = j + 1
-                ri = (num_fire_years + 1) / rank
-                prob = probability_of_occurrence(ri, 1.0)
-                data.append([int(_row.year), float(val), float(prob), int(rank), float(ri)])
-                annuals[measure].append(dict(zip(colnames, data[-1])))
-
-            _df = pd.DataFrame(data, columns=colnames)
-            _df.to_csv(_join(ash_dir, '%s_ash_stats_per_year_%s.csv' % ('pw0', measure.replace(' (tonne)', ''))),
-                       index=False)
-
-        num_days = len(df.da)
-        return_periods = {}
-        for measure in ['ash_delivery_by_wind (tonne)', 'ash_delivery_by_water (tonne)', 'ash_delivery (tonne)']:
-            return_periods[measure] = {}
-            df.sort_values(by=measure, ascending=False, inplace=True)
-
-            data = []
-            for j, (i, _row) in enumerate(df.iterrows()):
-                val = _row[measure]
-
-                if val == 0.0:
-                    break
-
-                dff = _row['days_from_fire (days)']
-                rank = j + 1
-                ri = (num_days + 1) / rank
-                ri /= 365.25
-                prob = probability_of_occurrence(ri, 1.0)
-                data.append([int(_row.year), int(_row.mo), int(_row.da), dff, val, prob, rank, ri, _row['precip (mm)']])
-
-            _df = pd.DataFrame(data,
-                               columns=['year', 'mo', 'da', 'days_from_fire',
-                                        measure, 'probability', 'rank', 'return_interval', 'precip'])
-            _df.to_csv(_join(ash_dir, '%s_ash_stats_per_event_%s.csv' % ('pw0', measure.replace(' (tonne)', ''))),
-                       index=False)
-
-            rec = weibull_series(recurrence, num_fire_years)
-
-            num_events = len(_df.da)
-            for retperiod in recurrence:
-                if retperiod not in rec:
-                    return_periods[measure][retperiod] = None
-                else:
-                    indx = rec[retperiod]
-                    if indx >= num_events:
-                        return_periods[measure][retperiod] = None
-                    else:
-                        _row = dict(_df.loc[indx, :])
-                        for _m in _row:
-                            if _m in ('year', 'mo', 'da', 'days_from_fire', 'rank'):
-                                _row[_m] = int(_row[_m])
-                            elif isfloat(_row[_m]):
-                                _row[_m] = float(_row[_m])
-                            else:
-                                _row[_m] = str(_row[_m])
-
-                        return_periods[measure][retperiod] = _row
-
-        sev_water = {burn_class: [] for burn_class in range(1, 5)}
-        sev_wind = {burn_class: [] for burn_class in range(1, 5)}
-        sev_ash = {burn_class: [] for burn_class in range(1, 5)}
-        sev_cum_water = {burn_class: [] for burn_class in range(1, 5)}
-        sev_cum_wind = {burn_class: [] for burn_class in range(1, 5)}
-        sev_cum_ash = {burn_class: [] for burn_class in range(1, 5)}
-
-        for topaz_id, sub in watershed.sub_iter():
-            wepp_id = translator.wepp(top=topaz_id)
-            ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
-            burn_class = meta[topaz_id]['burn_class']
-
-            # unburned landuses won't have ash outputs
-            if _exists(ash_fn):
-                df = pd.read_csv(ash_fn)
-                sev_water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
-                sev_wind[burn_class].append(df['ash_delivery_by_wind (tonne)'].to_numpy())
-                sev_ash[burn_class].append(df['ash_delivery (tonne)'].to_numpy())
-                sev_cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
-                sev_cum_wind[burn_class].append(df['cum_ash_delivery_by_wind (tonne)'].to_numpy())
-                sev_cum_ash[burn_class].append(df['cum_ash_delivery (tonne)'].to_numpy())
-
-        # burn_class report
-        sev_annuals = {burn_class: {} for burn_class in range(1, 5)}
-        for burn_class in range(1, 5):
-            sev_water[burn_class] = np.array(sev_water[burn_class])
-            sev_water[burn_class] = np.sum(sev_water[burn_class], axis=0)
-            sev_wind[burn_class] = np.array(sev_wind[burn_class])
-            sev_wind[burn_class] = np.sum(sev_wind[burn_class], axis=0)
-            sev_ash[burn_class] = np.array(sev_ash[burn_class])
-            sev_ash[burn_class] = np.sum(sev_ash[burn_class], axis=0)
-
-            sev_cum_water[burn_class] = np.array(sev_cum_water[burn_class])
-            sev_cum_water[burn_class] = np.sum(sev_cum_water[burn_class], axis=0)
-            sev_cum_wind[burn_class] = np.array(sev_cum_wind[burn_class])
-            sev_cum_wind[burn_class] = np.sum(sev_cum_wind[burn_class], axis=0)
-            sev_cum_ash[burn_class] = np.array(sev_cum_ash[burn_class])
-            sev_cum_ash[burn_class] = np.sum(sev_cum_ash[burn_class], axis=0)
-
-            df = deepcopy(df)
-            df['ash_delivery_by_water (tonne)'] = pd.Series(sev_water[burn_class], index=df.index)
-            df['ash_delivery_by_wind (tonne)'] = pd.Series(sev_wind[burn_class], index=df.index)
-            df['ash_delivery (tonne)'] = pd.Series(sev_ash[burn_class], index=df.index)
-
-            df['cum_ash_delivery_by_water (tonne)'] = pd.Series(sev_cum_water[burn_class], index=df.index)
-            df['cum_ash_delivery_by_wind (tonne)'] = pd.Series(sev_cum_wind[burn_class], index=df.index)
-            df['cum_ash_delivery (tonne)'] = pd.Series(sev_cum_ash[burn_class], index=df.index)
-
-            breaks = []  # list of indices of new fire years
-            last_day = fire_date.yesterday
-            for i, _row in df.iterrows():
-                if _row.mo == last_day.month and _row.da == last_day.day:
-                    breaks.append(i)  # record the index for the new year
-
-            yr_df = df.loc[[brk for brk in breaks],
-                           ['year',
-                            'cum_ash_delivery_by_water (tonne)',
-                            'cum_ash_delivery_by_wind (tonne)',
-                            'cum_ash_delivery (tonne)']]
-
-            num_fire_years = len(breaks)
-
-            for measure in ['cum_ash_delivery_by_water (tonne)',
-                            'cum_ash_delivery_by_wind (tonne)',
-                            'cum_ash_delivery (tonne)']:
-
-                sev_annuals[burn_class][measure] = []
-                yr_df.sort_values(by=measure, ascending=False, inplace=True)
-
-                data = []
-                colnames =['year', measure, 'probability', 'rank', 'return_interval']
-                for j, (i, _row) in enumerate(yr_df.iterrows()):
-                    val = _row[measure]
-
-                    if val == 0.0:
-                        break
-
-                    rank = j + 1
-                    ri = (num_fire_years + 1) / rank
-                    prob = probability_of_occurrence(ri, 1.0)
-                    data.append([int(_row.year), float(val), float(prob), int(rank), float(ri)])
-                    sev_annuals[burn_class][measure].append(dict(zip(colnames, data[-1])))
-
-                _df = pd.DataFrame(data, columns=colnames)
-                _df.to_csv(_join(ash_dir, '%s_burn_class=%i,ash_stats_per_year_%s.csv' %
-                                 ('pw0', burn_class, measure.replace(' (tonne)', ''))),
-                           index=False)
-
-        self.summary_stats = dict(recurrence=recurrence,
-                                  return_periods=return_periods,
-                                  annuals=annuals,
-                                  sev_annuals=sev_annuals)
-
-    def _run_reservoir_report(self, recurrence=(100, 50, 20, 10, 5, 2.5, 1)):
-        """
-        builds recurrence interval and annuals report for the watershed
-
-        :param recurrence:
-        :return:
-        """
-        from wepppy.nodb import Watershed
-
-        wd = self.wd
-        ash_dir = self.ash_dir
-        fire_date = self.fire_date
-        watershed = Watershed.getInstance(wd)
-        translator = watershed.translator_factory()
-        meta = self.meta
-
-        # need to use the dates of the recurrence intervals identified across all the burnclasses
-        water_ret_periods = self.summary_stats['return_periods']['ash_delivery_by_water (tonne)']
-
-        water = {2: [], 3: [], 4: []}
-        cum_water = {2: [], 3: [], 4: []}
-
-        df = None
-        for topaz_id, sub in watershed.sub_iter():
-            wepp_id = translator.wepp(top=topaz_id)
-            ash_fn = _join(ash_dir, 'H{wepp_id}_ash.csv'.format(wepp_id=wepp_id))
-
-            # unburned landuses won't have ash outputs
-            if _exists(ash_fn):
-                burn_class = meta[topaz_id]['burn_class']
-                if burn_class == 1:
-                    continue
-
-                df = pd.read_csv(ash_fn)
-                water[burn_class].append(df['ash_delivery_by_water (tonne)'].to_numpy())
-                cum_water[burn_class].append(df['cum_ash_delivery_by_water (tonne)'].to_numpy())
-
-        assert df is not None
-        _df = deepcopy(df)
-
-        for burn_class in [2, 3, 4]:
-            water[burn_class] = np.array(water[burn_class])
-            water[burn_class] = np.sum(water[burn_class], axis=0)
-
-            cum_water[burn_class] = np.array(cum_water[burn_class])
-            cum_water[burn_class] = np.sum(cum_water[burn_class], axis=0)
-
-            _df['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)] = \
-                pd.Series(water[burn_class], index=df.index)
-            _df['burn_class={},cum_ash_delivery_by_water (tonne)'.format(burn_class)] = \
-                pd.Series(cum_water[burn_class], index=df.index)
-
-        return_periods = {2: {}, 3: {}, 4: {}}
-        for burn_class in [2, 3, 4]:
-            measure = 'burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)
-            num_events = len(_df.da)
-            actual_reccurence = []
-            for retperiod in recurrence:
-                wat_row = water_ret_periods[retperiod]
-                if wat_row is None:
-                    return_periods[burn_class][retperiod] = {'value': 0.0}
-                else:
-                    _row = dict(_df.loc[ (_df['year'] == wat_row['year']) & (_df['mo'] == wat_row['mo']) & (_df['da'] == wat_row['da']) ])
-                    print(retperiod, _row, wat_row)
-
-                    for _m in _row:
-                        if _m in ('year', 'mo', 'da', 'days_from_fire', 'rank'):
-                            _row[_m] = int(_row[_m])
-                        elif isfloat(_row[_m]):
-                            _row[_m] = float(_row[_m])
-                        else:
-                            _row[_m] = str(_row[_m])
-
-                    _row['value'] = _row['burn_class={},ash_delivery_by_water (tonne)'.format(burn_class)]
-
-                    return_periods[burn_class][retperiod] = _row
-
-                actual_reccurence.append(retperiod)
-
-        self.reservoir_stats = dict(reccurence=actual_reccurence,
-                                    return_periods=return_periods)
-
-    def _run_pw0(self):
-        pw0_stats = {}
-        for key, src in zip(['total', 'water', 'wind'],  ['', '_by_water', '_by_wind']):
-            pw0_stats[key] = {}
-            for burnclass in [1, 2, 3, 4]:
-                fn = _join(self.ash_dir,
-                           'pw0_burn_class={burnclass},ash_stats_per_year_cum_ash_delivery{src}.csv'
-                           .format(burnclass=burnclass, src=src))
-
-                if not _exists(fn):
-                    v = 0.0
-                else:
-                    with open(fn) as fp:
-                        df = pd.read_csv(fp)
-                        series = df['cum_ash_delivery{src} (tonne)'.format(src=src)]
-                        v = float(np.mean(series))
-                        if math.isnan(v):
-                            v = None
-
-                pw0_stats[key][str(burnclass)] = v
-
-        self.pw0_stats = pw0_stats
+    def hillslope_annuals(self):
+        df = pd.read_pickle(_join(self.ash_post_dir, 'hillslope_annuals.pkl'))
+        d = {}
+        for index, row in df.iterrows():
+            row_dict = row.to_dict()
+            topaz_id = row_dict['topaz_id']
+            d[str(int(topaz_id))] = row_dict
+        return d
+
+    @property
+    def watershed_annuals(self):
+        df = pd.read_pickle(_join(self.ash_post_dir, 'watershed_annuals.pkl'))
+        d = {}
+        for index, row in df.iterrows():
+            row_dict = row.to_dict()
+            topaz_id = row_dict['topaz_id']
+            d[str(int(topaz_id))] = row_dict
+        return d

@@ -41,14 +41,13 @@ from wepppy.all_your_base.dateutils import YearlessDate
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
-MULTIPROCESSING = False
+MULTIPROCESSING = True
 
 ContaminantConcentrations = namedtuple('ContaminantConcentrations',
                                        ['C', 'N', 'K',
                                         'PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
                                         'Mn', 'Fe', 'Ni', 'Cu', 'Zn', 'As', 'Cd', 'Hg',
                                         'Cr', 'Co'])
-
 
 def run_ash_model(kwds):
     """
@@ -66,7 +65,14 @@ def run_ash_model(kwds):
     del kwds['ash_bulkdensity']
     del kwds['ash_model']
 
+    logger = kwds['logger']
+    prefix = kwds['prefix']
+
+    del kwds['logger']
+
+    logger.log(f'  starting ash model for {prefix}...')
     out_fn = ash_model.run_model(**kwds)
+    logger.log_done()
 
     return out_fn
 
@@ -250,23 +256,55 @@ class Ash(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
-            self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den')
-            self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den')
-            self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac')
-            self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den')
-            self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac')
-            self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod')
-            self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod')
-            self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit')
+
+            if kwds.get('white_ini_bulk_den') is not None:
+                self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den')
+                
+            if kwds.get('white_fin_bulk_den') is not None:
+                self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den')
             
-            self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den')
-            self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den')
-            self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac')
-            self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den')
-            self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac')
-            self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod')
-            self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod')
-            self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit')
+            if kwds.get('white_bulk_den_fac') is not None:
+                self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac')
+                
+            if kwds.get('white_par_den') is not None:
+                self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den')
+            
+            if kwds.get('white_decomp_fac') is not None:
+                self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac')
+                
+            if kwds.get('white_ini_erod') is not None:
+                self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod')
+                
+            if kwds.get('white_fin_erod') is not None:
+                self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod')
+                
+            if kwds.get('white_roughness_limit') is not None:
+                self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit')
+
+
+            if kwds.get('black_ini_bulk_den') is not None:
+                self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den')
+
+            if kwds.get('black_fin_bulk_den') is not None:
+                self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den')
+
+            if kwds.get('black_bulk_den_fac') is not None:
+                self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac')
+
+            if kwds.get('black_par_den') is not None:
+                self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den')
+
+            if kwds.get('black_decomp_fac') is not None:
+                self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac')
+
+            if kwds.get('black_ini_erod') is not None:
+                self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod')
+
+            if kwds.get('black_fin_erod') is not None:
+                self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod')
+
+            if kwds.get('black_roughness_limit') is not None:
+                self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit')
 
             self.dump_and_unlock()
 
@@ -403,7 +441,7 @@ class Ash(NoDbBase, LogMixin):
 
     @property
     def has_ash_results(self):
-        return _exists(self.status_log) and len(glob(_join(self.ash_dir, '*.csv'))) > 0
+        return _exists(self.status_log) and len(glob(_join(self.ash_dir, 'post', '*.pkl'))) > 0
 
     @property
     def anu_white_ash_model_pars(self):
@@ -670,11 +708,11 @@ class Ash(NoDbBase, LogMixin):
 
             if _exists(ash_dir):
                 try:
-                    for fn in glob(_join(ash_dir, '*.csv')):
+                    for fn in glob(_join(ash_dir, '*.pkl')):
                         os.remove(fn)
                 except:
                     sleep(10.0)
-                    for fn in glob(_join(ash_dir, '*.csv')):
+                    for fn in glob(_join(ash_dir, '*.pkl')):
                         os.remove(fn)
 
             if not _exists(ash_dir):
@@ -685,7 +723,7 @@ class Ash(NoDbBase, LogMixin):
             wepp = Wepp.getInstance(wd)
 
             cli_path = climate.cli_path
-            cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=True)
+            cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=False)
 
             # make a 4class raster SBS
             if 'baer' in self.mods:
@@ -799,20 +837,17 @@ class Ash(NoDbBase, LogMixin):
                             prefix='H{wepp_id}'.format(wepp_id=wepp_id),
                             area_ha=area_ha,
                             run_wind_transport=run_wind_transport,
-                            ash_model=ash_model)
+                            ash_model=ash_model,
+                            logger=self)
 
                 args.append(kwds)
  
             if MULTIPROCESSING:
-                def callback(res):
-                    self.log_done()
+                # Use a 'with' statement to create the pool and automatically close and join it
+                with multiprocessing.Pool(NCPU) as pool:
+                    # Use 'pool.map()' to apply the function to the arguments and wait for all the jobs to finish
+                    pool.map(run_ash_model, args)
 
-                pool = multiprocessing.Pool(NCPU)
-                jobs = []
-                for kwds in args:
-                    self.log('  running {}\n'.format(kwds['prefix']))
-                    jobs.append(pool.apply_async(run_ash_model, kwds=kwds, callback=callback))
-                [j.wait() for j in jobs]
 
             else:
                 for kwds in args:
