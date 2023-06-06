@@ -83,9 +83,9 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
         if len(leap_years) > 0:
             for yr in leap_years:
                 index = df[(df['year'] == yr) & (df['yday'] == 365)].index[0]
-                new_row = df.loc[index].copy()
-                new_row.yday = 366
-                df.append(new_row)
+                new_row = df.loc[index].to_dict()
+                new_row['yday'] = 366
+                df = df.append(new_row, ignore_index=True)
 
             # Sort the DataFrame by multiple columns
             df = df.sort_values(by=['year', 'yday'], ascending=True).reset_index(drop=True)
@@ -114,5 +114,4 @@ if __name__ == "__main__":
     df = retrieve_historical_timeseries(-121.829585, 36.272184, 1980, 2021)
     print(len(df.index))
     print(df.keys())
-    df_to_prn(df, '/home/roger/input.prn', 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
 
