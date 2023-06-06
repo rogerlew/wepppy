@@ -81,6 +81,7 @@ class TotalWatSed2(object):
         pool = Pool(processes=NCPU)
         results = pool.map(_read_hill_wat_sed, pass_fns)
         pool.close()
+        pool.join()
 
         d = None
         totarea_m2 = 0.0

@@ -179,7 +179,7 @@ def _make_clinp(wd, cliver, years, cli_fname, par, clinp_fn='clinp.txt'):
     return clinp
 
 
-def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key, julian_key='julian'):
+def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     """
     creates a prn file containing daily timeseries data for input to
     cligen
@@ -200,12 +200,8 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key, julian_key='julian'):
     mo, da, yr = 0, 0, 0
     p, tmax, tmin = '', '', ''
     for index, row in df.iterrows():
-        try:
-            mo, da, yr = int(row.month), int(row.day), int(row.year)
-        except AttributeError:
-            _date = datetime.date(int(row.year), 1, 1) + datetime.timedelta(days=int(row[julian_key]) - 1)
-            mo, da, yr = _date.month, _date.day, _date.year
-             
+
+        mo, da, yr = index.month, index.day, index.year
         p, tmax, tmin = row[p_key], row[tmax_key], row[tmin_key]
 
         if math.isnan(p) or math.isnan(tmax) or math.isnan(tmin):
@@ -216,10 +212,6 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key, julian_key='julian'):
 
         fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                  .format(mo, da, yr, p, tmax, tmin))
-
-        if mo == 12 and da == 30 and yr % 4 == 0:
-            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
-                     .format(mo, da, yr, p, tmax, tmin))
 
     fp.close()
 
@@ -288,15 +280,58 @@ def build_gridmet_prn(gridmet_dir, start_year, end_year, prn_fn, verbose=False):
 def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verbose=False,
                      discontinuous_temperature_adjustment_pars=None):
 
+    # Initialize variables to track the key types
+    has_tuple_keys = False
+
+    # Iterate over the dictionary keys
+    for key in observed_data.keys():
+        if isinstance(key, tuple):
+            has_tuple_keys = True
+
     fp = open(prn_fn, 'w')
-    for year in range(start_year, end_year + 1):
+
+    year, prcp, tmin, tmax = None, None, None, None
+
+    if has_tuple_keys:
+        for year in range(start_year, end_year + 1):
+
+            d = {}
+            for varname in ['prcp', 'tmin', 'tmax']:
+                if verbose:
+                    print(year, varname)
+
+                fn = observed_data[(varname, year)]
+                rdi = RasterDatasetInterpolator(fn)
+                d[varname] = rdi.get_location_info(lng=lng, lat=lat, method='cubic')
+
+            d['prcp'] = np.array(d['prcp'])
+            d['prcp'] /= 25.4
+            d['prcp'] *= 100.0
+            d['prcp'] = np.round(d['prcp'])
+
+            d['tmax'] = np.array(d['tmax'])
+            d['tmax'] = np.round(c_to_f(d['tmax']))
+
+            d['tmin'] = np.array(d['tmin'])
+            d['tmin'] = np.round(c_to_f(d['tmin']))
+
+            for i, (prcp, tmin, tmax) in enumerate(zip(d['prcp'], d['tmin'], d['tmax'])):
+                _date = datetime.datetime(year, 1, 1) + datetime.timedelta(i)
+
+                fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                         .format(_date.month, _date.day, _date.year, int(prcp), int(tmax), int(tmin)))
+
+            if year % 4 == 0:
+                fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                         .format(_date.month, _date.day, _date.year, int(prcp), int(tmax), int(tmin)))
+    else:
 
         d = {}
         for varname in ['prcp', 'tmin', 'tmax']:
             if verbose:
-                print(year, varname)
+                print(varname)
 
-            fn = observed_data[(varname, year)]
+            fn = observed_data[varname]
             rdi = RasterDatasetInterpolator(fn)
             d[varname] = rdi.get_location_info(lng=lng, lat=lat, method='cubic')
 
@@ -312,7 +347,8 @@ def build_daymet_prn(lat, lng, observed_data, start_year, end_year, prn_fn, verb
         d['tmin'] = np.round(c_to_f(d['tmin']))
 
         for i, (prcp, tmin, tmax) in enumerate(zip(d['prcp'], d['tmin'], d['tmax'])):
-            _date = datetime.datetime(year, 1, 1) + datetime.timedelta(i)
+            year = (start_year + i + 1 ) // 365
+            _date = datetime.datetime(year, 1, 1) + datetime.timedelta(i % 365)
 
             fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                      .format(_date.month, _date.day, _date.year, int(prcp), int(tmax), int(tmin)))
@@ -361,7 +397,7 @@ class ClimateFile(object):
             assert 'nbrkpt' in colnames, lines[:15]
             self.breakpoint = True
 
-            #              day  month year nbrkpt tmax   tmin   rad
+            #              da  mo year nbrkpt tmax   tmin   rad
             self.dtypes = [int, int,  int, int,   float, float, float,
             #              w-vel  w-dir  dew
                            float, float, float]
@@ -454,7 +490,7 @@ class ClimateFile(object):
         colnames = self.colnames
         data0line = self.data0line
 
-        assert colname in colnames or colname == 'prcp'
+        assert colname in colnames or colname == 'prcp', colnames
         if colname in colnames:
             col_index = colnames.index(colname)
         else:
@@ -463,6 +499,7 @@ class ClimateFile(object):
         d = dict(zip(dates, values))
 
         is_datetime = isinstance(dates[0], datetime.datetime)
+        is_timestamp = isinstance(dates[0], pd.Timestamp)
 
         for i, L in enumerate(self.lines[data0line:]):
             row = [v.strip() for v in L.split()]
@@ -473,12 +510,14 @@ class ClimateFile(object):
                 if len(row) == 2 and len(row) != len(colnames):
                     continue
 
-            assert len(row) == len(colnames), (row, colnames)
+            assert len(row) == len(colnames), (row, colnames, L)
 
             day, month, year = [int(v) for v in row[:3]]
 
             if is_datetime:
                 date = datetime.datetime(year, month, day)
+            elif is_timestamp:
+                date = pd.TimeStamp(year=year, month=month, day=day)
             else:
                 date = int(year), int(month), int(day)
 

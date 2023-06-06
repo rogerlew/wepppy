@@ -61,6 +61,7 @@ class HillslopeWatbal(ReportBase):
             pool = Pool(processes=NCPU)
             results = pool.map(_pickle_hill_wat_annual_watbal, wat_fns)
             pool.close()
+            pool.join()
         
         # create dictionaries for the waterbalance
         d = {}

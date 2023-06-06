@@ -138,7 +138,8 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
     return df
 
 
-def _retrieve_timeseries(lng, lat, start_date, end_date, model, scenario, verbose=False):
+def retrieve_timeseries(lng, lat, start_date, end_date,
+                        model='GFDL-ESM2G', scenario='rcp85_2006_2099', verbose=False):
     result = None
     for variable_name in variables_d:
         df = _retrieve(lng, lat, start_date, end_date, 
@@ -165,22 +166,22 @@ def _retrieve_timeseries(lng, lat, start_date, end_date, model, scenario, verbos
 def retrieve_rcp85_timeseries(lng, lat, start_date, end_date, 
                               model='GFDL-ESM2G', verbose=False):
     scenario = "rcp85_2006_2099"
-    return _retrieve_timeseries(lng, lat, start_date, end_date, 
-                                model, scenario, verbose=verbose)
+    return retrieve_timeseries(lng, lat, start_date, end_date,
+                               model, scenario, verbose=verbose)
 
 
 def retrieve_rcp45_timeseries(lng, lat, start_date, end_date, 
                               model='GFDL-ESM2G', verbose=False):
     scenario = "rcp45_2006_2099"
-    return _retrieve_timeseries(lng, lat, start_date, end_date, 
-                                model, scenario, verbose=verbose)
+    return retrieve_timeseries(lng, lat, start_date, end_date,
+                               model, scenario, verbose=verbose)
 
 
 def retrieve_historical_timeseries(lng, lat, start_date, end_date, 
                                    model='GFDL-ESM2G', verbose=False):
     scenario = "historical_1950_2005"
-    return _retrieve_timeseries(lng, lat, start_date, end_date, 
-                                model, scenario, verbose=verbose)
+    return retrieve_timeseries(lng, lat, start_date, end_date,
+                               model, scenario, verbose=verbose)
 
 
 if __name__ == "__main__":

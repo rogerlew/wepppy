@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2023, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -11,10 +11,15 @@ import io
 import pandas as pd
 import requests
 
+from calendar import isleap
+
 from wepppy.all_your_base import isint
 
 
-def retrieve_historical_timeseries(lon, lat, start_year, end_year):
+from metpy.calc import dewpoint
+from metpy.units import units
+
+def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_years=True):
     assert isint(start_year)
     assert isint(end_year)
     
@@ -71,13 +76,33 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     # create dataframe
     df = pd.read_csv(fp, header=skip)
 
+    if fill_leap_years:
+        years = sorted(list(set(df.year)))
+        leap_years = [yr for yr in years if isleap(yr)]
+
+        if len(leap_years) > 0:
+            for yr in leap_years:
+                index = df[(df['year'] == yr) & (df['yday'] == 365)].index[0]
+                new_row = df.loc[index].copy()
+                new_row.yday = 366
+                df.append(new_row)
+
+            # Sort the DataFrame by multiple columns
+            df = df.sort_values(by=['year', 'yday'], ascending=True).reset_index(drop=True)
+
     try:
         df.index = pd.to_datetime(df.year.astype(int).astype(str) + '-' +
                                   df.yday.astype(int).astype(str), format="%Y-%j")
     except ValueError:
         print(txt)
         raise
+
     df.columns = [c.replace(' ', '') for c in df.columns]
+
+    df['srad(l/day)'] = df['srad(W/m^2)'] * 2.06362996638
+
+    vp = df['vp(Pa)'].values
+    df['tdew(degc)'] = dewpoint(vp * units.Pa).magnitude
 
     # return dataframe
     return df

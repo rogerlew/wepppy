@@ -127,6 +127,7 @@ class SnowOpts(object):
             self.rst = rst
 
         # density of new snow
+
         if newsnw is None:
             self.newsnw = 100.0
         else:
@@ -192,7 +193,7 @@ class BaseflowOpts(object):
             if var in kwds:
                 setattr(self, var, try_parse_float(kwds[var], None))
             elif _var in kwds:
-                setattr(self, _var, try_parse_float(kwds[_var], None))
+                setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
     def contents(self):
@@ -244,7 +245,7 @@ class PhosphorusOpts(object):
             if var in kwds:
                 setattr(self, var, try_parse_float(kwds[var], None))
             elif _var in kwds:
-                setattr(self, _var, try_parse_float(kwds[_var], None))
+                setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
     def isvalid(self):
@@ -284,11 +285,13 @@ class TCROpts(object):
     def parse_inputs(self, kwds):
         for var in ('taumin', 'taumax', 'kch', 'nch'):
             _var = f'tcr_opts_{var}'
+            print('_var', _var)
+
 
             if var in kwds:
                 setattr(self, var, try_parse_float(kwds[var], None))
             elif _var in kwds:
-                setattr(self, _var, try_parse_float(kwds[_var], None))
+                setattr(self, var, try_parse_float(kwds[_var], None))
 
     @property
     def contents(self):
@@ -538,6 +541,8 @@ class Wepp(NoDbBase, LogMixin):
             if hasattr(self, 'tcr_opts'):
                 self.tcr_opts.parse_inputs(kwds)
 
+            print(self.tcr_opts.contents)
+
             if hasattr(self, 'snow_opts'):
                 self.snow_opts.parse_inputs(kwds)
 
@@ -701,8 +706,6 @@ class Wepp(NoDbBase, LogMixin):
             raise
 
     def _prep_pmet(self, kcb=None, rawp=None):
-
-
         if 'disturbed' not in self.mods:
             if kcb is None:
                 kcb = self.pmet_kcb

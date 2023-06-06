@@ -292,12 +292,19 @@ def get_agdc_monthly_ppt(lng, lat, method='cubic', units=None):
     return vals
 
 
-def get_daily(dataset, bbox, year, dst):
+def get_daily(dataset, bbox, year=None, dst=None, start_year=None, end_year=None):
     global _metquery_url
 
     query = urljoin(_metquery_url, 'daily') + \
-                    '?bbox={bbox}&dataset={dataset}&year={year}'\
-                    .format(bbox=bbox, dataset=dataset, year=year)
+                    '?bbox={bbox}&dataset={dataset}'\
+                    .format(bbox=bbox, dataset=dataset)
+    if year is not None:
+        query += '&year={year}'.format(year=year)
+    if start_year is not None:
+        query += '&start_year={start_year}'.format(start_year=start_year)
+    if end_year is not None:
+        query += '&end_year={end_year}'.format(end_year=end_year)
+
     r = requests.get(query)
 
     if r.status_code == 418:

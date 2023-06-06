@@ -4761,6 +4761,43 @@ var Wepp = function () {
             });
         };
 
+
+        that.run_watershed = function () {
+            var self = instance;
+            var task_msg = "Submitting wepp watershed run";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            self.attempts = 0;
+            setTimeout(self.status_loop, 5000);
+
+            var data = self.form.serialize();
+
+            $.post({
+                url: "tasks/run_wepp_watershed/",
+                data: data,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("WEPP_RUN_TASK_COMPLETED");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            }).always(function () {
+                    self.attempts = 9999999;
+            });
+        };
+
+
         that.report = function () {
             var self = instance;
             var project = Project.getInstance();
