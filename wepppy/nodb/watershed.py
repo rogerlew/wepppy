@@ -831,6 +831,7 @@ class Watershed(NoDbBase):
 
             del _abs
             pool.close()
+            pool.join()
 
             self.dump_and_unlock()
 

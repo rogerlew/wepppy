@@ -25,6 +25,10 @@ from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
 
 # non-standard
 import jsonpickle
+import pandas as pd
+
+from metpy.units import units
+from metpy.calc.thermo import dewpoint
 
 # wepppy
 from wepppy.climates import cligen_client as cc
@@ -32,6 +36,8 @@ from wepppy.climates.metquery_client import get_daily
 from wepppy.climates.gridmet import client as gridmet_client
 from wepppy.climates.prism import prism_mod, prism_revision
 from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
+from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
+#from wepppy.climates.daymet import single_point_extraction as daymet_single_point_extraction
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import (
@@ -45,7 +51,11 @@ from wepppy.climates.cligen import (
 )
 from wepppy.all_your_base import isint, isfloat, NCPU
 from wepppy.all_your_base.geo import RasterDatasetInterpolator, haversine
+from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.watershed_abstraction.support import is_channel
+import numpy as np
+
+from copy import deepcopy
 
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
@@ -53,6 +63,29 @@ from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
 from .prep import Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
+
+
+import requests
+
+
+def download_file(url, dst):
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(dst, 'wb') as file:
+            file.write(response.content)
+    else:
+        raise Exception(f'Error retrieving file from {url}')
+
+
+def breakpoint_file_fix(fn):
+    with open(fn) as fp:
+        lines = fp.readlines()
+
+    lines[13] = 'da mo year nbrkpt tmax  tmin    rad   w-vel  w-dir   tdew\n'
+    lines[14] = '                (mm)    (C)   (C) (l/day) (m/sec)(deg)    (C)\n'
+
+    with open(fn, 'w') as fp:
+        fp.writelines(lines)
 
 
 CLIMATE_MAX_YEARS = 1000
@@ -116,6 +149,7 @@ class ClimateMode(IntEnum):
     AGDC = 10       # Single or multiple
     GridMetPRISM = 11    # Daymet, single or multiple
     UserDefined = 12
+    DepNexrad = 13
 
     @staticmethod
     def parse(x):
@@ -145,6 +179,8 @@ class ClimateMode(IntEnum):
             return ClimateMode.GridMetPRISM
         elif x == 'user_defined':
             return ClimateMode.UserDefined
+        elif x == 'dep_nexrad':
+            return ClimateMode.DepNexrad
         raise KeyError
 
 
@@ -164,31 +200,38 @@ class ClimateSpatialMode(IntEnum):
         raise KeyError
 
 
-def build_observed(kwds):
-    lng = kwds['lng']
-    lat = kwds['lat']
-    observed_data = kwds['observed_data']
-    start_year = kwds['start_year']
-    end_year = kwds['end_year']
-    prn_fn = kwds['prn_fn']
-    cli_dir = kwds['cli_dir']
-    cli_fn = kwds['cli_fn']
-    climatestation = kwds['climatestation']
-    version = kwds.get('version', '2015')
+def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
-    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
-
-#    build_daymet_prn(lng=lng, lat=lat,
-#                     observed_data=observed_data,
-#                     start_year=start_year, end_year=end_year,
-#                     prn_fn=_join(cli_dir, prn_fn))
-
-    stationManager = CligenStationsManager(version=version)
-    stationMeta = stationManager.get_station_fromid(climatestation)
-    cligen = Cligen(stationMeta, wd=cli_dir)
+    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
 
-    return cli_fn
+    dates = df.index
+
+    cli_path = _join(cli_dir, cli_fn)
+    climate = ClimateFile(cli_path)
+
+    climate.replace_var('rad', dates, df['srad(l/day)'])
+    climate.replace_var('tdew', dates, df['tdew(degc)'])
+
+    climate.write(cli_path)
+
+
+def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
+    df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df_to_prn(df, _join(cli_dir, prn_fn), 'pr(mm/day)', 'tmmx(degc)', 'tmmn(degc)')
+    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+
+    dates = df.index
+
+    cli_path = _join(cli_dir, cli_fn)
+    climate = ClimateFile(cli_path)
+
+    climate.replace_var('rad', dates, df['srad(l/day)'])
+    climate.replace_var('tdew', dates, df['tdew(degc)'])
+    climate.replace_var('w-vl', dates, df['vs(m/s)'])
+    climate.replace_var('w-dir', dates, df['th(DegreesClockwisefromnorth)'])
+
+    climate.write(cli_path)
 
 
 def mod_func_wrapper_factory(mod_func):
@@ -196,6 +239,40 @@ def mod_func_wrapper_factory(mod_func):
         mod_func(**kwds)
 
     return mod_func_wrapper
+
+
+def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmins: np.array,
+                 ppt_fn: str, tmin_fn: str, tmax_fn: str, hill_lng: float, hill_lat: float, new_cli_path: str):
+    ppt_rdi = RasterDatasetInterpolator(ppt_fn)
+    tmin_rdi = RasterDatasetInterpolator(tmin_fn)
+    tmax_rdi = RasterDatasetInterpolator(tmax_fn)
+
+    hill_ppts = ppt_rdi.get_location_info(hill_lng, hill_lat)
+    hill_tmaxs = tmax_rdi.get_location_info(hill_lng, hill_lat)
+    hill_tmins = tmin_rdi.get_location_info(hill_lng, hill_lat)
+
+    cli2 = deepcopy(cli)
+
+    df = cli2.as_dataframe()
+    rev_ppt = np.zeros(df.prcp.shape)
+    rev_tmax = np.zeros(df.prcp.shape)
+    rev_tmin = np.zeros(df.prcp.shape)
+    dates = []
+
+    for index, row in df.iterrows():
+        mo = int(row.mo) - 1
+        rev_ppt[index] = row.prcp * hill_ppts[mo] / ws_ppts[mo]
+        rev_tmax[index] = row.tmax - ws_tmaxs[mo] + hill_tmaxs[mo]
+        rev_tmin[index] = row.tmin - ws_tmins[mo] + hill_tmins[mo]
+        dates.append((int(row.year), int(row.mo), int(row.da)))
+
+    cli2.replace_var('prcp', dates, rev_ppt)
+    cli2.replace_var('tmax', dates, rev_tmax)
+    cli2.replace_var('tmin', dates, rev_tmin)
+
+    cli2.write(new_cli_path)
+    del cli2
+
 
 # noinspection PyUnusedLocal
 class Climate(NoDbBase, LogMixin):
@@ -285,7 +362,7 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def daymet_last_available_year(self):
-        return 2021
+        return 2022
 
     @property
     def _nodb(self):
@@ -685,8 +762,7 @@ class Climate(NoDbBase, LogMixin):
             climate_spatialmode = kwds['climate_spatialmode']
             climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
 
-            if climate_mode == ClimateMode.Vanilla or \
-               climate_mode == ClimateMode.SingleStorm or \
+            if climate_mode == ClimateMode.SingleStorm or \
                climate_mode == ClimateMode.Future:
                 climate_spatialmode = ClimateSpatialMode.Single
 
@@ -908,14 +984,20 @@ class Climate(NoDbBase, LogMixin):
         # vanilla Cligen
         elif climate_mode == ClimateMode.Vanilla:
             self._build_climate_vanilla(verbose=verbose, attrs=attrs)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self._prism_revision(verbose=verbose)
 
         # observed
         elif climate_mode == ClimateMode.Observed:
-            self._build_climate_observed(verbose=verbose, attrs=attrs)
+            self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self._build_climate_daymet_observed_hillslopes(verbose=verbose, attrs=attrs)
 
         # observed
         elif climate_mode == ClimateMode.ObservedPRISM:
-            self._build_climate_observed_prism_revised(verbose=verbose, attrs=attrs)
+            self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self._prism_revision(verbose=verbose)
 
         # future
         elif climate_mode == ClimateMode.Future:
@@ -927,11 +1009,19 @@ class Climate(NoDbBase, LogMixin):
 
         # PRISM
         elif climate_mode == ClimateMode.PRISM:
-            self._build_climate_mod(mod_function=prism_mod, verbose=verbose, attrs=attrs)
+            self._build_climate_prism(verbose=verbose, attrs=attrs)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self._prism_revision(verbose=verbose)
+
+        # PRISM
+        elif climate_mode == ClimateMode.DepNexrad:
+            self._build_climate_depnexrad(verbose=verbose, attrs=attrs)
 
         elif climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
             assert self.orig_cli_fn is not None
-            self._build_climate_observed_cli_PRISM(verbose=verbose, attrs=attrs)
+            self._post_defined_climate(verbose=verbose, attrs=attrs)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self._prism_revision(verbose=verbose)
 
         # EOBS
         elif climate_mode == ClimateMode.EOBS:
@@ -941,7 +1031,9 @@ class Climate(NoDbBase, LogMixin):
             self._build_climate_mod(mod_function=agdc_mod, verbose=verbose, attrs=attrs)
 
         elif climate_mode == ClimateMode.GridMetPRISM:
-            self._build_climate_observed_gridmet_prism_revised(verbose=verbose, attrs=attrs)
+            self._build_climate_observed_gridmet(verbose=verbose, attrs=attrs)
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self._prism_revision(verbose=verbose)
       
         try:
             prep = Prep.getInstance(self.wd)
@@ -951,7 +1043,200 @@ class Climate(NoDbBase, LogMixin):
 
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
 
-    def _build_climate_observed_cli_PRISM(self, verbose=False, attrs=None):
+    def _build_climate_depnexrad(self, verbose=False, attrs=None):
+        self.log('  running _build_climate_depnexrad... \n')
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.set_attrs(attrs)
+
+            cli_dir = os.path.abspath(self.cli_dir)
+            watershed = Watershed.getInstance(self.wd)
+
+            # build a climate for the channels.
+            lng, lat = watershed.centroid
+
+
+            self.par_fn = '.par'
+            self.cli_fn = cli_fn = f'{lng:.02f}x{lat:.02f}.cli'
+            url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}'
+
+            download_file(url, _join(cli_dir, cli_fn))
+#            breakpoint_file_fix(_join(cli_dir, cli_fn))
+
+            self.log('Calculating monthlies...')
+            cli = ClimateFile(_join(cli_dir, cli_fn))
+            self._input_years = cli.input_years
+            self.monthlies = cli.calc_monthlies()
+            self.log_done()
+
+            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                self.log('  building climates for hillslopes... \n')
+
+                # build a climate for each subcatchment
+                sub_par_fns = {}
+                sub_cli_fns = {}
+                for topaz_id, ss in watershed._subs_summary.items():
+                    self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
+
+                    lng, lat = ss.centroid.lnglat
+
+                    cli_fn = f'{lng:.02f}x{lat:.02f}.cli'
+                    url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}'
+
+                    if not _exists(_join(cli_dir, cli_fn)):
+                        download_file(url, _join(cli_dir, cli_fn))
+ #                       breakpoint_file_fix(_join(cli_dir, cli_fn))
+
+                    sub_par_fns[topaz_id] = '.par'
+                    sub_cli_fns[topaz_id] = cli_fn
+
+                    self.log_done()
+
+                self.log_done()
+
+                self.sub_par_fns = sub_par_fns
+                self.sub_cli_fns = sub_cli_fns
+
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_climate_prism(self, verbose=False, attrs=None):
+        self.log('  running _build_climate_prism... \n')
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.set_attrs(attrs)
+
+            # cligen can accept a 5 digit random number seed
+            # we want to specify this to ensure that the precipitation
+            # events are synchronized across the subcatchments
+            if self._cligen_seed is None:
+                self._cligen_seed = random.randint(0, 99999)
+                self.dump()
+
+            randseed = self._cligen_seed
+
+            cli_dir = os.path.abspath(self.cli_dir)
+            watershed = Watershed.getInstance(self.wd)
+
+            climatestation = self.climatestation
+            years = self._input_years
+
+            # build a climate for the channels.
+            lng, lat = watershed.centroid
+
+            self.par_fn = '{}.par'.format(climatestation)
+            self.cli_fn = '{}.cli'.format(climatestation)
+
+            self.monthlies = prism_mod(par=climatestation,
+                                     years=years, lng=lng, lat=lat, wd=cli_dir,
+                                     logger=self, nwds_method='')
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
+    def _prism_revision(self, verbose=False):
+
+        wd = self.wd
+        cli_dir = self.cli_dir
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.log('  running _prism_revision... ')
+            wd = self.wd
+            climatestation = self.climatestation
+            years = self._input_years
+
+            monthlies = self.monthlies
+            par_fn = self.par_fn
+            cli_fn = self.cli_fn
+            cli_dir = self.cli_dir
+            cli_path = self.cli_path
+
+            _map = Ron.getInstance(self.wd).map
+
+            # Get NLCD 2011 from wmesque webservice
+            wmesque_retrieve('prism/ppt', _map.extent, _join(cli_dir, 'ppt.tif'), 800)
+            wmesque_retrieve('prism/tmin', _map.extent, _join(cli_dir, 'tmin.tif'), 800)
+            wmesque_retrieve('prism/tmax', _map.extent, _join(cli_dir, 'tmax.tif'), 800)
+
+            ppt_rdi = RasterDatasetInterpolator(_join(cli_dir, 'ppt.tif'))
+            tmin_rdi = RasterDatasetInterpolator(_join(cli_dir, 'tmin.tif'))
+            tmax_rdi = RasterDatasetInterpolator(_join(cli_dir, 'tmax.tif'))
+
+            watershed = Watershed.getInstance(wd)
+
+            ws_lng, ws_lat = watershed.centroid
+            ws_ppts = ppt_rdi.get_location_info(ws_lng, ws_lat)
+            ws_tmaxs = tmax_rdi.get_location_info(ws_lng, ws_lat)
+            ws_tmins = tmin_rdi.get_location_info(ws_lng, ws_lat)
+
+            self.log('  building climates for hillslopes... \n')
+
+
+            cli = ClimateFile(cli_path)
+
+            pool = multiprocessing.Pool(NCPU)
+            jobs = []
+
+            def callback(res):
+                self.log('job completed.')
+                self.log_done()
+
+            # build a climate for each subcatchment
+            sub_par_fns = {}
+            sub_cli_fns = {}
+            for topaz_id, ss in watershed._subs_summary.items():
+                self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
+
+                hill_lng, hill_lat = ss.centroid.lnglat
+                suffix = f'_{topaz_id}'
+                new_cli_fn = cli_path.replace('.cli',  f'{suffix}.cli')
+                args = (cli, ws_ppts, ws_tmaxs, ws_tmins,
+                        _join(cli_dir, 'ppt.tif'),
+                        _join(cli_dir, 'tmin.tif'),
+                        _join(cli_dir, 'tmax.tif'),
+                        hill_lng, hill_lat, _join(cli_dir, new_cli_fn))
+
+                result = pool.apply_async(cli_revision, args=args, callback=callback)
+                jobs.append(result)
+
+                sub_par_fns[topaz_id] = '.par'
+                sub_cli_fns[topaz_id] = new_cli_fn
+
+                self.log_done()
+
+            pool.close()
+            pool.join()
+
+            self.log_done()
+
+            self.sub_par_fns = sub_par_fns
+            self.sub_cli_fns = sub_cli_fns
+
+            self.dump_and_unlock()
+            self.log_done()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
+    def _post_defined_climate(self, verbose=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection
@@ -978,43 +1263,8 @@ class Climate(NoDbBase, LogMixin):
             assert _exists(cli_path)
             self.log_done()
 
-            # build a climate for the channels.
-            ws_lng, ws_lat = watershed.centroid
-
-            distance = 1e38
-            closest_hill = None
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self.par_fn = '.par'
-            
-                # build a climate for each subcatchment
-                sub_par_fns = {}
-                sub_cli_fns = {}
-                for topaz_id, ss in watershed._subs_summary.items():
-                    self.log('    Using prism to spatialize {}...'.format(topaz_id))
-
-                    hill_lng, hill_lat = ss.centroid.lnglat
-                    suffix = '_{}'.format(topaz_id)
-                    new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
-
-                    prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
-
-                    sub_par_fns[topaz_id] = '.par'
-                    sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
-
-                    _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
-                    if _d < distance:
-                        closest_hill = topaz_id
-                        distance = _d
-
-                    # set the watershed climate file to be the one closest to the centroid
-                    assert closest_hill is not None
-                    self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
-
-                    self.log_done()
-
-
-                self.sub_par_fns = sub_par_fns
-                self.sub_cli_fns = sub_cli_fns
+            self.sub_par_fns = None
+            self.sub_cli_fns = None
 
             self.log('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))
@@ -1026,6 +1276,8 @@ class Climate(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
+
 
     def _build_climate_mod(self, mod_function, verbose=False, attrs=None):
         self.log('  running _build_climate_mod{}... \n'.format(mod_function.__name__))
@@ -1127,7 +1379,10 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-        self._build_climate_observed_cli_PRISM(verbose=verbose)
+        self._post_defined_climate(verbose=verbose)
+
+        if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+            self._prism_revision(verbose=verbose)
 
     def _build_climate_vanilla(self, verbose=False, attrs=None):
         self.lock()
@@ -1154,15 +1409,72 @@ class Climate(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_climate_observed(self, verbose=False, attrs=None):
+    def _build_climate_daymet_observed_hillslopes(self, verbose=False, attrs=None):
 
         self.lock()
 
         # noinspection PyBroadInspection
         try:
-            self.set_attrs(attrs)
+            watershed = Watershed.getInstance(self.wd)
+            ws_lng, ws_lat = watershed.centroid
 
-            self.log('  running _build_climate_observed (watershed)...')
+            cli_dir = self.cli_dir
+            start_year, end_year = self._observed_start_year, self._observed_end_year
+            assert end_year <= self.daymet_last_available_year, end_year
+
+            self._input_years = end_year - start_year + 1
+
+            stationManager = CligenStationsManager(version=self.cligen_db)
+            climatestation = self.climatestation
+            stationMeta = stationManager.get_station_fromid(climatestation)
+
+            par_fn = stationMeta.par
+            cligen = Cligen(stationMeta, wd=cli_dir)
+
+            pool = multiprocessing.Pool(NCPU)
+            jobs = []
+
+            def callback(res):
+                self.log('job completed.')
+                self.log_done()
+
+            # build a climate for each subcatchment
+            sub_par_fns = {}
+            sub_cli_fns = {}
+            for topaz_id, ss in watershed._subs_summary.items():
+                self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
+
+                hill_lng, hill_lat = ss.centroid.lnglat
+                fn_base = f'{topaz_id}_{climatestation}'
+                prn_fn = f'{fn_base}.prn'
+                cli_fn = f'{fn_base}.cli'
+
+                args = (cligen, hill_lng, hill_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
+                result = pool.apply_async(build_observed_daymet, args=args, callback=callback)
+                jobs.append(result)
+
+                sub_par_fns[topaz_id] = '.par'
+                sub_cli_fns[topaz_id] = cli_fn
+
+                self.log_done()
+
+            pool.close()
+            pool.join()
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_climate_observed_daymet(self, verbose=False, attrs=None):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.set_attrs(attrs)
+            self.log('  running _build_climate_observed_daymet')
+
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
 
@@ -1180,38 +1492,11 @@ class Climate(NoDbBase, LogMixin):
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             ron = Ron.getInstance(self.wd)
-#            # daymet is 1000m resolution. So each pixel is 0.06 degrees
-#            # 1 / ((6378.1 * 1000) / 1000 / 360) = 0.056 ~ 0.06
-#            # for cubic interpolation we need at least 5 pixels
-#            # so we pad 3 pixels in each direction to be on the safe side
-#            pad = 0.06 * 4
-#            bbox = ron.map.extent
-#            bbox = [bbox[0] - pad, bbox[1] - pad,
-#                    bbox[2] + pad, bbox[3] + pad]
-#            bbox = ','.join(str(v) for v in bbox)
-#
-#            observed_data = {}
-#            daymet_base = self.config_get_path('climate', 'daymet_observed')
-#            for varname in ['prcp', 'tmin', 'tmax']:
-#                for year in range(start_year, end_year + 1):
-#                    dataset = _join(daymet_base, varname)
-#                    self.log('  fetching {} for year {}... '.format(dataset, year))
-#                    dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
-#                    get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
-#                    observed_data[(varname, year)] = dst
-#                    self.log_done()
-
             cli_fn = 'wepp.cli'
-            self.log('  building {}... '.format(cli_fn))
             prn_fn = 'ws.prn'
-            df = daymet_retrieve_historical_timeseries(ws_lng, ws_lat, start_year, end_year)
-            df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
-#            build_daymet_prn(lng=ws_lng, lat=ws_lat,
-#                             observed_data=observed_data,
-#                             start_year=start_year, end_year=end_year,
-#                             prn_fn=_join(cli_dir, prn_fn))
+            self.log('  building {}... '.format(cli_fn))
 
-            cligen.run_observed(prn_fn, cli_fn=cli_fn)
+            build_observed_daymet(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
 
             climate = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = climate.calc_monthlies()
@@ -1220,49 +1505,24 @@ class Climate(NoDbBase, LogMixin):
 
             self.log_done()
 
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                sub_par_fns = {}
-                sub_cli_fns = {}
-                args = []
-                for (topaz_id, ss) in watershed._subs_summary.items():
-                    fn_base = '{}_{}'.format(topaz_id, climatestation)
-                    cli_fn = '{}.cli'.format(fn_base)
-
-                    lng, lat = ss.centroid.lnglat
-                    prn_fn = '{}.prn'.format(fn_base)
-                    self.log('  building {}... '.format(cli_fn))
-                    df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
-                    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)', julian_key='yday')
-                    cligen.run_observed(prn_fn, cli_fn=cli_fn)
-
-                    sub_par_fns[topaz_id] = par_fn
-                    sub_cli_fns[topaz_id] = cli_fn
-
-
-                self.sub_cli_fns = sub_cli_fns
-                self.sub_par_fns = sub_par_fns
-
             self.dump_and_unlock()
-
         except Exception:
             self.unlock('-f')
             raise
 
-    def _build_climate_observed_prism_revised(self, verbose=False, attrs=None):
+    def _build_climate_observed_gridmet(self, verbose=False, attrs=None):
         self.lock()
 
         # noinspection PyBroadInspection
         try:
             self.set_attrs(attrs)
+            self.log('  running _build_climate_observed_gridmet')
 
-            assert self.climate_spatialmode == ClimateSpatialMode.Multiple
-            self.log('  running _build_climate_observed (watershed)... ')
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
 
             cli_dir = self.cli_dir
             start_year, end_year = self._observed_start_year, self._observed_end_year
-            assert end_year <= self.daymet_last_available_year, end_year
 
             self._input_years = end_year - start_year + 1
 
@@ -1274,203 +1534,24 @@ class Climate(NoDbBase, LogMixin):
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             ron = Ron.getInstance(self.wd)
-            # daymet is 1000m resolution. So each pixel is 0.06 degrees
-            # 1 / ((6378.1 * 1000) / 1000 / 360) = 0.056 ~ 0.06
-            # for cubic interpolation we need at least 5 pixels
-            # so we pad 3 pixels in each direction to be on the safe side
-            pad = 0.06 * 4
-            bbox = ron.map.extent
-            bbox = [bbox[0] - pad, bbox[1] - pad,
-                    bbox[2] + pad, bbox[3] + pad]
-            bbox = ','.join(str(v) for v in bbox)
-
-            observed_data = {}
-            daymet_base = self.config_get_path('climate', 'daymet_observed')
-            for varname in ['prcp', 'tmin', 'tmax']:
-                for year in range(start_year, end_year + 1):
-                    dataset = _join(daymet_base, varname)
-                    self.log('  fetching {}... '.format(dict(dataset=dataset, bbox=bbox, year=year)))
-                    dst = _join(cli_dir, 'daymet_observed_{}_{}.nc4'.format(varname, year))
-                    get_daily(dataset=dataset, bbox=bbox, year=year, dst=dst)
-                    observed_data[(varname, year)] = dst
-                    self.log_done()
-
             cli_fn = 'wepp.cli'
-            self.log('  building {}... '.format(cli_fn))
             prn_fn = 'ws.prn'
-            build_daymet_prn(lng=ws_lng, lat=ws_lat,
-                             observed_data=observed_data,
-                             start_year=start_year, end_year=end_year,
-                             prn_fn=_join(cli_dir, prn_fn))
+            self.log('  building {}... '.format(cli_fn))
 
-            cligen.run_observed(prn_fn, cli_fn=cli_fn)
+            build_observed_gridmet(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
 
-            cli_path = _join(cli_dir, cli_fn)
-            climate = ClimateFile(cli_path)
+            climate = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = climate.calc_monthlies()
             self.cli_fn = cli_fn
             self.par_fn = par_fn
 
             self.log_done()
 
-            # build a climate for the channels.
-            ws_lng, ws_lat = watershed.centroid
-
-            distance = 1e38
-            closest_hill = None
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                self.log('    Using prism to spatialize {}...'.format(topaz_id))
-
-                hill_lng, hill_lat = ss.centroid.lnglat
-                suffix = '_{}'.format(topaz_id)
-                new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
-
-                prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
-
-                sub_par_fns[topaz_id] = '.par'
-                sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
-
-                _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
-                if _d < distance:
-                    closest_hill = topaz_id
-                    distance = _d
-
-                self.log_done()
-
-                self.sub_par_fns = sub_par_fns
-                self.sub_cli_fns = sub_cli_fns
-
-            # set the watershed climate file to be the one closest to the centroid
-            assert closest_hill is not None
-            self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
-
-            self.log('Calculating monthlies...')
-            cli = ClimateFile(_join(cli_dir, cli_fn))
-            self.monthlies = cli.calc_monthlies()
-            self.log_done()
-
             self.dump_and_unlock()
         except Exception:
             self.unlock('-f')
             raise
 
-    def _build_climate_observed_gridmet_prism_revised(self, verbose=False, attrs=None):
-
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            self.set_attrs(attrs)
-
-            self.log('  running _build_climate_observed (watershed)... ')
-            watershed = Watershed.getInstance(self.wd)
-            ws_lng, ws_lat = watershed.centroid
-
-            cli_dir = self.cli_dir
-            start_year, end_year = self._observed_start_year, self._observed_end_year
-            self._input_years = end_year - start_year + 1
-
-            stationManager = CligenStationsManager(version=self.cligen_db)
-            climatestation = self.climatestation
-            stationMeta = stationManager.get_station_fromid(climatestation)
-
-            par_fn = stationMeta.par
-            cligen = Cligen(stationMeta, wd=cli_dir)
-
-            ron = Ron.getInstance(self.wd)
-
-            variables = [gridmet_client.GridMetVariable.Precipitation,
-                         gridmet_client.GridMetVariable.MinimumTemperature,
-                         gridmet_client.GridMetVariable.MaximumTemperature,
-                         gridmet_client.GridMetVariable.WindSpeed,
-                         gridmet_client.GridMetVariable.WindDirection]
-
-            met_dir = _join(cli_dir, 'gridmet')
-
-            self.log('  fetching gridmet timeseries...')
-            gridmet_client.retrieve_timeseries(variables, {'pw0': watershed.centroid}, start_year, end_year, met_dir)
-            self.log_done()
-
-            cli_fn = 'wepp.cli'
-            self.log('  building {}... '.format(cli_fn))
-            prn_fn = 'ws.prn'
-            build_gridmet_prn(_join(met_dir, 'pw0'),
-                              start_year=start_year, end_year=end_year,
-                              prn_fn=_join(cli_dir, prn_fn))
-
-            cligen.run_observed(prn_fn, cli_fn=cli_fn)
-            cli_path = _join(cli_dir, cli_fn)
-            climate = ClimateFile(cli_path)
-
-            # replace wind and velocity from gridmet
-            wvl_dates, wvl = extract_gridmet_var(_join(met_dir, 'pw0'),
-                              start_year=start_year, end_year=end_year,
-                              var='vs')
-            wdir_dates, wdir = extract_gridmet_var(_join(met_dir, 'pw0'),
-                              start_year=start_year, end_year=end_year,
-                              var='th')
-            climate.replace_var('w-vl', wvl_dates,  wvl)
-            climate.replace_var('w-dir', wdir_dates,  wdir)
-            climate.write(cli_path)
-
-            self.cli_fn = cli_fn
-            self.par_fn = par_fn
-
-            self.log_done()
-
-            # build a climate for the channels.
-            ws_lng, ws_lat = watershed.centroid
-
-            distance = 1e38
-            closest_hill = None
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                    self.log('    Using prism to spatialize {}...'.format(topaz_id))
-
-                    hill_lng, hill_lat = ss.centroid.lnglat
-                    suffix = '_{}'.format(topaz_id)
-                    new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
-
-                    prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
-
-                    sub_par_fns[topaz_id] = '.par'
-                    sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
-
-                    _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
-                    if _d < distance:
-                        closest_hill = topaz_id
-                        distance = _d
-
-                    self.log_done()
-
-                    # set the watershed climate file to be the one closest to the centroid
-                    assert closest_hill is not None
-                    self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
-
-                else:
-                    sub_par_fns[topaz_id] = '.par'
-                    sub_cli_fns[topaz_id] = cli_fn
-
-                self.sub_par_fns = sub_par_fns
-                self.sub_cli_fns = sub_cli_fns
-
-            self.log('Calculating monthlies...')
-            cli = ClimateFile(_join(cli_dir, cli_fn))
-            self.monthlies = cli.calc_monthlies()
-            self.log_done()
-
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
 
     def _build_climate_future(self, verbose=False, attrs=None):
         self.lock()

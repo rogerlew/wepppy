@@ -52,7 +52,7 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='201
          'Tmin (degC)': tmin,
          })
     prism['Date'] = pd.date_range(start=data['start'], end=data['end'])
-    prism = prism[['Date', 'Prepitation (mm)', 'Tmax (degC)', 'Tmin (degC)']]
+    prism = prism[['Date', 'Precipitation (mm)', 'Tmax (degC)', 'Tmin (degC)']]
 
     # View the first ten rows
     prism.to_csv("prism.csv", index=False)

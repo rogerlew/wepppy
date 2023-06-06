@@ -43,6 +43,7 @@ def build_esdac_soils(orders, soils_dir, res_lyr_ksat_threshold=2.0):
     pool = Pool(processes=NCPU)
     results = pool.map(_build_esdac_soil, args)
     pool.close()
+    pool.join()
 
     soils = {}
     domsoil_d = {}

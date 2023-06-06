@@ -25,6 +25,8 @@ class GridMetVariable(Enum):
     BurningIndex = 7
     WindDirection = 8
     WindSpeed = 9
+    MinimumRelativeHumidity = 10
+    MaximumRelativeHumidity = 11
 
 # http://www.climatologylab.org/gridmet.html
 # The variable names can be obtained by downloading the dataset for a year and looking at the attributes using HDFView
@@ -33,6 +35,8 @@ _var_meta = {
     GridMetVariable.Precipitation: ('pr', 'precipitation_amount'),
     GridMetVariable.MinimumTemperature: ('tmmn', 'air_temperature'),
     GridMetVariable.MaximumTemperature: ('tmmx', 'air_temperature'),
+    GridMetVariable.MinimumRelativeHumidity: ('rmin', 'air_temperature'),
+    GridMetVariable.MaximumRelativeHumidity: ('rmax', 'air_temperature'),
     GridMetVariable.SurfaceRadiation: ('srad', 'surface_downwelling_shortwave_flux_in_air'),
     GridMetVariable.PalmarDroughtSeverityIndex: ('pdsi', 'palmer_drought_severity_index'),
     GridMetVariable.PotentialEvapotranspiration: ('pet', 'potential_evapotranspiration'),
