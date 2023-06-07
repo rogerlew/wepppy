@@ -1028,13 +1028,18 @@ class Disturbed(NoDbBase):
 
             # need to recalculate the pct_coverages
             watershed = Watershed.getInstance(self.wd)
-            for topaz_id, k in soils.domsoil_d.items():
-                if soils.soils[k].area is None:
-                    soils.soils[k].area = 0.0
-                soils.soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / watershed.wsarea
+                soils.soils[k].area = 0.0
+
+            total_area = 0.0
+            for topaz_id, k in soils.domsoil_d.items():
+                sub_area = watershed.area_of(topaz_id)
+                soils.soils[k].area += sub_area
+                total_area += sub_area
+
+            for k in soils.soils:
+                coverage = 100.0 * soils.soils[k].area / total_area
                 soils.soils[k].pct_coverage = coverage
 
             soils.dump_and_unlock()
@@ -1105,13 +1110,18 @@ class Disturbed(NoDbBase):
 
             # need to recalculate the pct_coverages
             watershed = Watershed.getInstance(self.wd)
-            for topaz_id, k in soils.domsoil_d.items():
-                if soils.soils[k].area is None:
-                    soils.soils[k].area = 0.0
-                soils.soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / watershed.wsarea
+                soils.soils[k].area = 0.0
+
+            total_area = 0.0
+            for topaz_id, k in soils.domsoil_d.items():
+                sub_area = watershed.area_of(topaz_id)
+                soils.soils[k].area += sub_area
+                total_area += sub_area
+
+            for k in soils.soils:
+                coverage = 100.0 * soils.soils[k].area / total_area
                 soils.soils[k].pct_coverage = coverage
 
             soils.dump_and_unlock()

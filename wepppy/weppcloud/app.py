@@ -3678,6 +3678,38 @@ def submit_task_run_wepp(runid, config):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/run_wepp_watershed', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/run_wepp_watershed/', methods=['POST'])
+def submit_task_run_wepp_watershed(runid, config):
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+
+    try:
+        wepp.parse_inputs(request.form)
+    except Exception:
+        return exception_factory('Error parsing climate inputs')
+
+    try:
+
+        watershed = Watershed.getInstance(wd)
+        translator = Watershed.getInstance(wd).translator_factory()
+        runs_dir = os.path.abspath(wepp.runs_dir)
+
+        #
+        # Prep Watershed
+        wepp.prep_watershed()
+
+        #
+        # Run Watershed
+        wepp.run_watershed()
+
+    except Exception:
+        return exception_factory('Error running wepp')
+
+    return success_factory()
+
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_model_fit', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_model_fit/', methods=['POST'])
 def submit_task_run_model_fit(runid, config):

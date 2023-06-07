@@ -567,7 +567,6 @@ class Watershed(NoDbBase):
         else:
             self._taudem_abstract_watershed()
 
-        
         if self.multi_ofe:
             self._build_multiple_ofe()
        
@@ -576,6 +575,24 @@ class Watershed(NoDbBase):
             prep.timestamp('abstract_watershed')
         except FileNotFoundError:
             pass
+
+    @property
+    def sub_area(self):
+        sub_area = getattr(self, '_sub_area', None)
+
+        if sub_area is None:
+            sub_area = sum(summary.area for summary in self._subs_summary.values())
+
+        return sub_area
+
+    @property
+    def chn_area(self):
+        chn_area = getattr(self, '_chn_area')
+
+        if chn_area is None:
+            chn_area = sum(summary.area for summary in self._chns_summary.values())
+
+        return chn_area
 
     @property
     def mofe_nsegments(self):
@@ -737,6 +754,8 @@ class Watershed(NoDbBase):
 
             self._fps_summary = None
             self._wsarea = ws_stats['wsarea']
+            self._sub_area = sum(summary.area for summary in self._subs_summary.values())
+            self._chn_area = sum(summary.area for summary in self._chns_summary.values())
             self._minz = ws_stats['minz']
             self._maxz = ws_stats['maxz']
             self._ruggedness = ws_stats['ruggedness']
@@ -825,6 +844,8 @@ class Watershed(NoDbBase):
             self._chns_summary = chns_summary
             self._fps_summary = fps_summary
             self._wsarea = _abs.totalarea
+            self._sub_area = sum(summary.area for summary in self._subs_summary.values())
+            self._chn_area = sum(summary.area for summary in self._chns_summary.values())
             self._centroid = _abs.centroid.lnglat
             self._outlet_top_id = str(_abs.outlet_top_id)
             self._structure = _abs.structure
