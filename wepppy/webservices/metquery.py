@@ -16,14 +16,26 @@ from uuid import uuid4
 from glob import glob
 from subprocess import Popen, PIPE
 
+from calendar import isleap
+
 import traceback
 
 import netCDF4
 
 from osgeo import osr
 
+from multiprocessing import Pool
+
 from subprocess import Popen, PIPE
-from flask import Flask, jsonify, request, make_response, send_file
+from flask import Flask, jsonify, request, make_response, send_file, after_this_request
+
+from wepppy.climates.daymet import daymet_proj4
+from wepppy.all_your_base import SCRATCH
+from wepppy.all_your_base.geo import wgs84_proj4
+
+import numpy as np
+import xarray as xr
+
 from .locationinfo import  RasterDatasetInterpolator
 from .geo_transformer import GeoTransformer
 
@@ -31,9 +43,6 @@ from glob import glob
 
 from osgeo import ogr, osr, gdal
 gdal.UseExceptions()
-
-wgs84_proj4 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-
 
 def isint(x):
     # noinspection PyBroadException
@@ -144,6 +153,21 @@ def crop_nc(nc, bbox, dst):
     assert _exists(dst), ' '.join(cmd)
 
 
+def merge_nc(fn_list, dst):
+
+    cmd = ['ncecat'] + fn_list + ['-O', dst]
+
+    p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.wait()
+
+    # Copy global attributes (including projection) from first file to merged file
+    cmd2 = ['ncks', '-A', '-G', '.', fn_list[0], dst]
+    p = Popen(cmd2, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    p.wait()
+
+    assert _exists(dst), ' '.join(cmd) + ' '.join(cmd2)
+
+
 def exception_factory(msg='Error Handling Request',
                       stacktrace=None):
     if stacktrace is None:
@@ -195,6 +219,88 @@ def query_daily_catalog():
     return jsonify(daily_catalog)
 
 
+
+
+@app.route('/daily_singlepoint', methods=['GET', 'POST'])
+@app.route('/daily_singlepoint/', methods=['GET', 'POST'])
+def query_daily():
+    """
+    https://wepp.cloud/webservices/metquery/daily_singlepoint/?dataset=daymet/prcp&lon=-116&lat=47
+    """
+    if request.method not in ['GET', 'POST']:
+        return jsonify({'Error': 'Expecting GET or POST'})
+
+    if request.method == 'GET':
+        d = request.args
+    else:  # POST
+        d = request.get_json(force=True)
+
+    lon = float(d.get('lon', None))
+    lat = float(d.get('lat', None))
+    dataset = d.get('dataset', None)
+    start_year = int(d.get('start_year', None))
+    end_year = int(d.get('end_year', None))
+    _wgs_2_lcc = GeoTransformer(wgs84_proj4, daymet_proj4)
+
+    x, y = _wgs_2_lcc.transform(lon, lat)
+
+    if dataset is None:
+        return jsonify({'Error': 'dataset not supplied'})
+
+    if dataset not in daily_catalog.keys():
+        return jsonify({'Error': 'unknown dataset "{}"'.format(dataset)})
+
+    variable = _split(dataset)[-1]
+
+    all_ts = []
+    for yr in range(start_year, end_year + 1):
+        fname = glob(_join(geodata_dir, dataset, '*{}*.nc'.format(yr)))
+        fname.extend(glob(_join(geodata_dir, dataset, '*{}*.nc4'.format(yr))))
+
+        if len(fname) == 0:
+            return 'Error', 'Cannot find dataset'
+        if len(fname) > 1:
+            return 'Error', 'Cannot determine dataset'
+
+        fname = fname[0]
+
+        ds = xr.open_dataset(fname)
+        data = ds.sel(x=x, y=y, method='nearest')
+
+        ts = data[variable].values
+        if isleap(yr):
+            ts = np.append(ts, ts[-1])
+
+        all_ts.append(ts)
+
+    return np.concatenate(all_ts)
+
+
+def daily_worker(args):
+    yr, dataset, bbox = args
+
+    fname = glob(_join(geodata_dir, dataset, '*{}*.nc'.format(yr)))
+    fname.extend(glob(_join(geodata_dir, dataset, '*{}*.nc4'.format(yr))))
+
+    if len(fname) == 0:
+        return 'Error', 'Cannot find dataset'
+    if len(fname) > 1:
+        return 'Error', 'Cannot determine dataset'
+
+    fname = fname[0]
+
+    fn_uuid = str(uuid4().hex) + '.nc4'
+    dst = os.path.join(SCRATCH, fn_uuid)
+
+    # noinspection PyBroadException
+    try:
+        crop_nc(fname, bbox, dst)
+    except Exception as e:
+        return 'Exception', str(e)
+
+    return 'Success', dst
+
+
 @app.route('/daily', methods=['GET', 'POST'])
 @app.route('/daily/', methods=['GET', 'POST'])
 def query_daily():
@@ -213,41 +319,70 @@ def query_daily():
     bbox = d.get('bbox', None)
     dataset = d.get('dataset', None)
     year = d.get('year', None)
+    start_year = d.get('start_year', None)
+    end_year = d.get('end_year', None)
+
+    if start_year is None and end_year is None:
+        start_year = int(year)
+        end_year = int(year)
+    else:
+        start_year = int(start_year)
+        end_year = int(end_year)
 
     bbox = parse_bbox(bbox)
+
+#    return jsonify(dict(bbox=bbox, start_year=start_year, end_year=end_year, dataset=dataset, daily_catalog=daily_catalog))
 
     if any([x is None for x in bbox]):
         return jsonify({'Error': 'bbox contains non float values'})
 
     if bbox[1] > bbox[3] or bbox[0] > bbox[2]:
         return jsonify({'Error': 'Expecting bbox defined as: left, bottom, right, top' + str(bbox)})
+
     if dataset is None:
         return jsonify({'Error': 'dataset not supplied'})
 
     if dataset not in daily_catalog.keys():
         return jsonify({'Error': 'unknown dataset "{}"'.format(dataset)})
 
-    if not isint(year):
-        return jsonify({'Error': 'year must be int'})
+    if not (isint(start_year) and isint(end_year)):
+        return jsonify({'Error': 'start_year and end_year must be integers'})
 
-    fname = glob(_join(geodata_dir, dataset, '*{}*.nc'.format(year)))
-    fname.extend(glob(_join(geodata_dir, dataset, '*{}*.nc4'.format(year))))
+    fn_list = []
+    with Pool() as p:
+        results = p.map(daily_worker, [(yr, dataset, bbox) for yr in range(start_year, end_year + 1)])
 
-    if len(fname) == 0:
-        return jsonify({'Error': 'Cannot find dataset'})
-    if len(fname) > 1:
-        return jsonify({'Error': 'Cannot determine dataset'})
+    for result in results:
+        status, msg = result
+        if status == 'Error':
+            return jsonify({'Error': msg})
+        elif status == 'Exception':
+            return exception_factory('Error cropping dataset.'), 418
+        else:
+            fn_list.append(msg)
 
-    fname = fname[0]
+    if len(fn_list) == 1:
+        dst = fn_list[0]
+    else:
+        fn_uuid = str(uuid4().hex) + '.nc4'
+        dst = os.path.join(SCRATCH, fn_uuid)
+        # noinspection PyBroadException
+        try:
+            merge_nc(fn_list, dst)
+        except Exception:
+            return exception_factory('Error cropping dataset.'), 418
 
-    fn_uuid = str(uuid4().hex) + '.nc4'
-    dst = os.path.join('/var/www/metquery/FlaskApp/static', fn_uuid)
+    # Define a function to delete the files
+    def delete_files(response):
+        for file in fn_list:
+            try:
+                os.remove(file)
+            except OSError:
+                pass
+        return response
 
-    # noinspection PyBroadException
-    try:
-        crop_nc(fname, bbox, dst)
-    except Exception:
-        return exception_factory('Error cropping dataset.'), 418
+    # Register the delete_files function to be executed after the request is completed
+    after_this_request(delete_files)
 
     response = make_response(send_file(dst))
     response.headers['Content-Type'] = 'application/octet-stream'
@@ -258,6 +393,8 @@ def query_daily():
                                 'cache': dst,
                                 'dataset': dataset,
                                 'year': year,
+                                'start_year': start_year,
+                                'end_year': end_year,
                                 'url': request.url
                                 }
 

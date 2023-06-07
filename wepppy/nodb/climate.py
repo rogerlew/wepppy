@@ -1461,6 +1461,9 @@ class Climate(NoDbBase, LogMixin):
             pool.close()
             pool.join()
 
+            self.sub_par_fns = sub_par_fns
+            self.sub_cli_fns = sub_cli_fns
+
             self.dump_and_unlock()
 
         except Exception:

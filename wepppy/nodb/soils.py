@@ -354,7 +354,7 @@ class Soils(NoDbBase):
                 soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
-                coverage = 100.0 * soils[k].area / watershed.wsarea
+                coverage = 100.0 * soils[k].area / watershed.sub_area
                 soils[k].pct_coverage = coverage
 
             # store the soils dict
@@ -395,7 +395,7 @@ class Soils(NoDbBase):
                 soils[k].area += watershed.area_of(topaz_id)
 
             for k in soils:
-                coverage = 100.0 * soils[k].area / watershed.wsarea
+                coverage = 100.0 * soils[k].area / watershed.sub_area
                 soils[k].pct_coverage = coverage
 
             # store the soils dict
@@ -609,7 +609,7 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
 
             self.soils = soils
-            self.clay_pct = self._calc_clay_pct(clay_d)
+            #self.clay_pct = self._calc_clay_pct(clay_d)
 
             self.dump_and_unlock()
 
