@@ -788,7 +788,7 @@ class Ash(NoDbBase, LogMixin):
                     burn_class = 0
 
                 if ash_type_d is None:
-                    ash_type = (None, None, AshType.BLACK, AshType.BLACK, AshType.WHITE)[burn_class]
+                    ash_type = (None, AshType.BLACK, AshType.BLACK, AshType.WHITE)[burn_class]
                 else:
                     ash_type = (None, AshType.BLACK, AshType.WHITE)[int(ash_type_d[topaz_id])]
 
