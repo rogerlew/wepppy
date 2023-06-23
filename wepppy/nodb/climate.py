@@ -11,6 +11,9 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
+
+from subprocess import Popen, PIPE
+
 import json
 from enum import IntEnum
 import random
@@ -133,6 +136,7 @@ class ClimateStationMode(IntEnum):
     EUHeuristic = 2
     AUHeuristic = 3
     UserDefined = 4
+    MesonetIA = 5
 
 
 class ClimateMode(IntEnum):
@@ -241,15 +245,24 @@ def mod_func_wrapper_factory(mod_func):
     return mod_func_wrapper
 
 
+def get_monthlies(fn, lng, lat):
+    cmd = ['gdallocationinfo', '-wgs84', '-valonly', fn, str(lng), str(lat)]
+    #    print cmd
+
+    p = Popen(cmd, stdout=PIPE)
+    p.wait()
+
+    out = p.stdout.read()
+
+    return [float(v) for v in out.decode('utf-8').strip().split('\n')]
+
+
 def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmins: np.array,
                  ppt_fn: str, tmin_fn: str, tmax_fn: str, hill_lng: float, hill_lat: float, new_cli_path: str):
-    ppt_rdi = RasterDatasetInterpolator(ppt_fn)
-    tmin_rdi = RasterDatasetInterpolator(tmin_fn)
-    tmax_rdi = RasterDatasetInterpolator(tmax_fn)
 
-    hill_ppts = ppt_rdi.get_location_info(hill_lng, hill_lat)
-    hill_tmaxs = tmax_rdi.get_location_info(hill_lng, hill_lat)
-    hill_tmins = tmin_rdi.get_location_info(hill_lng, hill_lat)
+    hill_ppts = get_monthlies(ppt_fn, hill_lng, hill_lat)
+    hill_tmins = get_monthlies(tmin_fn, hill_lng, hill_lat)
+    hill_tmaxs = get_monthlies(tmax_fn, hill_lng, hill_lat)
 
     cli2 = deepcopy(cli)
 
@@ -1064,7 +1077,9 @@ class Climate(NoDbBase, LogMixin):
             url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}'
 
             download_file(url, _join(cli_dir, cli_fn))
-#            breakpoint_file_fix(_join(cli_dir, cli_fn))
+
+            url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}&intensity=10,30,60'
+            download_file(url, _join(cli_dir, f'{lng:.02f}x{lat:.02f}.intensities.csv'))
 
             self.log('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))
@@ -1169,21 +1184,23 @@ class Climate(NoDbBase, LogMixin):
 
             _map = Ron.getInstance(self.wd).map
 
-            # Get NLCD 2011 from wmesque webservice
-            wmesque_retrieve('prism/ppt', _map.extent, _join(cli_dir, 'ppt.tif'), 800)
-            wmesque_retrieve('prism/tmin', _map.extent, _join(cli_dir, 'tmin.tif'), 800)
-            wmesque_retrieve('prism/tmax', _map.extent, _join(cli_dir, 'tmax.tif'), 800)
+            ppt_fn = _join(cli_dir, 'ppt.tif')
+            tmin_fn = _join(cli_dir, 'tmin.tif')
+            tmax_fn = _join(cli_dir, 'tmax.tif')
 
-            ppt_rdi = RasterDatasetInterpolator(_join(cli_dir, 'ppt.tif'))
-            tmin_rdi = RasterDatasetInterpolator(_join(cli_dir, 'tmin.tif'))
-            tmax_rdi = RasterDatasetInterpolator(_join(cli_dir, 'tmax.tif'))
+            # Get NLCD 2011 from wmesque webservice
+            wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='cubic')
+            wmesque_retrieve('prism/tmin', _map.extent, _join(cli_dir, 'tmin.tif'), _map.cellsize, resample='cubic')
+            wmesque_retrieve('prism/tmax', _map.extent, _join(cli_dir, 'tmax.tif'), _map.cellsize, resample='cubic')
 
             watershed = Watershed.getInstance(wd)
 
             ws_lng, ws_lat = watershed.centroid
-            ws_ppts = ppt_rdi.get_location_info(ws_lng, ws_lat)
-            ws_tmaxs = tmax_rdi.get_location_info(ws_lng, ws_lat)
-            ws_tmins = tmin_rdi.get_location_info(ws_lng, ws_lat)
+
+            ws_ppts = get_monthlies(ppt_fn, ws_lng, ws_lat)
+            ws_tmins = get_monthlies(tmin_fn, ws_lng, ws_lat)
+            ws_tmaxs = get_monthlies(tmax_fn, ws_lng, ws_lat)
+
 
             self.log('  building climates for hillslopes... \n')
 

@@ -1,0 +1,15 @@
+<!-- templates/controls/climate/locales/us/_station_modes.htm -->
+<div class="hide-readonly">
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <label class="radio-inline">
+                <input type="radio" value="0" name="climate_build_mode" {{ ('', 'checked')[(climate.climatestation_mode != 4) and (climate.climatestation_mode != 5) ] }}>
+                  Use CLIGEN</label>
+        </div>
+        <div class="col-sm-6">
+            <label class="radio-inline">
+                <input type="radio" value="1"  name="climate_build_mode" {{ ('', 'checked')[climate.climatestation_mode == 4] }}>
+                  User Defined Climate</label>
+        </div>
+    </div>
+</div>

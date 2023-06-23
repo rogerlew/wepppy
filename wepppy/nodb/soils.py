@@ -89,7 +89,7 @@ class Soils(NoDbBase):
             self._chns_summary = None
             
             self._initial_sat = 0.75
-            self._ksflag = True
+            self._ksflag = self.config_get_bool('soils', 'ksflag')
 
             soils_dir = self.soils_dir
             if not _exists(soils_dir):
@@ -769,7 +769,7 @@ class Soils(NoDbBase):
 
         return [soil.as_dict() for soil in report]
 
-    def _x_summary(self, topaz_id):
+    def _x_summary(self, topaz_id, abbreviated=False):
         domsoil_d = self.domsoil_d
         
         if domsoil_d is None:
@@ -777,15 +777,15 @@ class Soils(NoDbBase):
             
         if str(topaz_id) in domsoil_d:
             mukey = str(domsoil_d[str(topaz_id)])
-            return self.soils[mukey].as_dict()
+            return self.soils[mukey].as_dict(abbreviated=abbreviated)
         else:
             return None
             
-    def sub_summary(self, topaz_id):
-        return self._x_summary(topaz_id)
+    def sub_summary(self, topaz_id, abbreviated=False):
+        return self._x_summary(topaz_id, abbreviated=abbreviated)
         
-    def chn_summary(self, topaz_id):
-        return self._x_summary(topaz_id)
+    def chn_summary(self, topaz_id, abbreviated=False):
+        return self._x_summary(topaz_id, abbreviated=abbreviated)
         
     @property
     def subs_summary(self):

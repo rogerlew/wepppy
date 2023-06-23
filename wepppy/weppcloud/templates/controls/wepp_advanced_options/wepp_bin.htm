@@ -1,0 +1,14 @@
+<h6><b>Select WEPP Version</b></h6>
+<div class="form-group row" id="wepp_bin_ctrl">
+    <div class="col-sm-4">
+        <label for="wepp_bin">WEPP Binary Version: </label>
+    </div>
+    <div class="col-sm-4">
+        <select class="form-control disable-readonly" id="wepp_bin" name="wepp_bin" >
+	    {% for opt in wepp_bin_opts %}
+	        <option value="{{ opt }}" {% if wepp.wepp_bin == opt %}selected{% endif %}>{{ opt }}
+	        </option>
+	    {% endfor %}
+        </select>
+    </div>
+</div>

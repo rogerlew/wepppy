@@ -251,6 +251,10 @@ class Disturbed(NoDbBase):
             self.unlock('-f')
             raise
 
+    def reset_land_soil_lookup(self):
+        shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'),
+                        self.lookup_fn)
+
     #
     # Required for NoDbBase Subclass
     #
@@ -890,6 +894,11 @@ class Disturbed(NoDbBase):
             elif 'xmxlai' not in lookup[k]:
                 migrate_land_soil_lookup(
                     default_fn, _lookup_fn, ['xmxlai'], {})
+                return read_disturbed_land_soil_lookup(_lookup_fn)
+
+            elif 'keffflag' not in lookup[k]:
+                migrate_land_soil_lookup(
+                    default_fn, _lookup_fn, ['keffflag', 'lkeff'], {})
                 return read_disturbed_land_soil_lookup(_lookup_fn)
 
         if ('loam', 'forest moderate sev fire') not in lookup:

@@ -8,7 +8,9 @@
 
 import time
 import io
+import numpy as np
 import pandas as pd
+
 import requests
 
 from calendar import isleap
@@ -103,6 +105,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
 
     vp = df['vp(Pa)'].values
     df['tdew(degc)'] = dewpoint(vp * units.Pa).magnitude
+    df['tdew(degc)'] = np.clip(df['tdew(degc)'], df['tmin(degc)'], None)
 
     # return dataframe
     return df

@@ -85,9 +85,11 @@
               <a class="list-group-item list-group-item-action" onclick="Project.getInstance().clear_locks()" href="#">Clear Locks</a>
             </div>
             {% if 'disturbed' in ron.mods %}
+            <br/>
             <h5>Disturbed</h5>
             <div class="list-group">
               <a class="list-group-item list-group-item-action" href="modify_disturbed" target="_blank">Modify Disturbed Parameters</a>
+              <a class="list-group-item list-group-item-action" onclick="Disturbed.getInstance().reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
             </div>
             {% endif %}
           </div>

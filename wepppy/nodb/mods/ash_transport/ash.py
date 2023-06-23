@@ -127,7 +127,7 @@ class Ash(NoDbBase, LogMixin):
             self.meta = None
             self.fire_years = None
             self._reservoir_capacity_m3 = 1000000
-            self._reservoir_storage = 0.8
+            self._reservoir_storage = 80
             self._ash_depth_mode = 1
             self._spatial_mode = AshSpatialMode.Single           
 
@@ -164,12 +164,9 @@ class Ash(NoDbBase, LogMixin):
 
         self._load_default_contaminants()
 
-    def _load_default_contaminants(self):
-        self.lock()
-
-        # noinspection PyBroadException
-        try:
-            self.high_contaminant_concentrations = ContaminantConcentrations(
+    @property
+    def cc_high_default(self):
+        return ContaminantConcentrations(
                 C=248.4,
                 N=5.4,
                 K=1.5,
@@ -192,30 +189,59 @@ class Ash(NoDbBase, LogMixin):
                 Cr=49.0,
                 Co=7.2)
 
-            self.moderate_contaminant_concentrations = ContaminantConcentrations(
-                C=273.5,
-                N=5.42,
-                K=1.1,
-                PO4=9270,
-                Al=1936,
-                Si=2090,
-                Ca=18100,
-                Pb=70.0,
-                Na=1213,
-                Mg=4100,
-                P=3025,
-                Mn=910,
-                Fe=2890,
-                Ni=26.0,
-                Cu=59.0,
-                Zn=150,
-                As=713,
-                Cd=802,
-                Hg=42.9,
-                Cr=36.1,
-                Co=5.0)
+    @property
+    def cc_moderate_default(self):
+        return ContaminantConcentrations(
+            C=273.5,
+            N=5.42,
+            K=1.1,
+            PO4=9270,
+            Al=1936,
+            Si=2090,
+            Ca=18100,
+            Pb=70.0,
+            Na=1213,
+            Mg=4100,
+            P=3025,
+            Mn=910,
+            Fe=2890,
+            Ni=26.0,
+            Cu=59.0,
+            Zn=150,
+            As=713,
+            Cd=802,
+            Hg=42.9,
+            Cr=36.1,
+            Co=5.0)
 
-            self.low_contaminant_concentrations = ContaminantConcentrations(
+    @property
+    def cc_moderate_default(self):
+        return ContaminantConcentrations(
+            C=273.5,
+            N=5.42,
+            K=1.1,
+            PO4=9270,
+            Al=1936,
+            Si=2090,
+            Ca=18100,
+            Pb=70.0,
+            Na=1213,
+            Mg=4100,
+            P=3025,
+            Mn=910,
+            Fe=2890,
+            Ni=26.0,
+            Cu=59.0,
+            Zn=150,
+            As=713,
+            Cd=802,
+            Hg=42.9,
+            Cr=36.1,
+            Co=5.0)
+
+    @property
+    def cc_low_default(self):
+        return ContaminantConcentrations(
                 C=273.5,
                 N=5.42,
                 K=1.1,
@@ -238,6 +264,15 @@ class Ash(NoDbBase, LogMixin):
                 Cr=36.1,
                 Co=5.0)
 
+    def _load_default_contaminants(self):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self.high_contaminant_concentrations = self.cc_high_default
+            self.moderate_contaminant_concentrations = self.cc_moderate_default
+            self.low_contaminant_concentrations = self.cc_low_default
+
             self.dump_and_unlock()
 
         except Exception:
@@ -256,55 +291,25 @@ class Ash(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
+            self._field_black_ash_bulkdensity = kwds.get('field_black_bulkdensity', self._field_black_ash_bulkdensity)
+            self._field_white_ash_bulkdensity = kwds.get('field_white_bulkdensity', self._field_white_ash_bulkdensity)
 
-            if kwds.get('white_ini_bulk_den') is not None:
-                self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den')
-                
-            if kwds.get('white_fin_bulk_den') is not None:
-                self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den')
-            
-            if kwds.get('white_bulk_den_fac') is not None:
-                self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac')
-                
-            if kwds.get('white_par_den') is not None:
-                self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den')
-            
-            if kwds.get('white_decomp_fac') is not None:
-                self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac')
-                
-            if kwds.get('white_ini_erod') is not None:
-                self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod')
-                
-            if kwds.get('white_fin_erod') is not None:
-                self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod')
-                
-            if kwds.get('white_roughness_limit') is not None:
-                self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit')
-
-
-            if kwds.get('black_ini_bulk_den') is not None:
-                self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den')
-
-            if kwds.get('black_fin_bulk_den') is not None:
-                self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den')
-
-            if kwds.get('black_bulk_den_fac') is not None:
-                self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac')
-
-            if kwds.get('black_par_den') is not None:
-                self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den')
-
-            if kwds.get('black_decomp_fac') is not None:
-                self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac')
-
-            if kwds.get('black_ini_erod') is not None:
-                self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod')
-
-            if kwds.get('black_fin_erod') is not None:
-                self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod')
-
-            if kwds.get('black_roughness_limit') is not None:
-                self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit')
+            self._anu_white_ash_model_pars.ini_bulk_den = kwds.get('white_ini_bulk_den', self._anu_white_ash_model_pars.ini_bulk_den)
+            self._anu_white_ash_model_pars.fin_bulk_den = kwds.get('white_fin_bulk_den', self._anu_white_ash_model_pars.fin_bulk_den)
+            self._anu_white_ash_model_pars.bulk_den_fac = kwds.get('white_bulk_den_fac', self._anu_white_ash_model_pars.bulk_den_fac)
+            self._anu_white_ash_model_pars.par_den = kwds.get('white_par_den', self._anu_white_ash_model_pars.par_den)
+            self._anu_white_ash_model_pars.decomp_fac = kwds.get('white_decomp_fac', self._anu_white_ash_model_pars.decomp_fac)
+            self._anu_white_ash_model_pars.ini_erod = kwds.get('white_ini_erod', self._anu_white_ash_model_pars.ini_erod)
+            self._anu_white_ash_model_pars.fin_erod = kwds.get('white_fin_erod', self._anu_white_ash_model_pars.fin_erod)
+            self._anu_white_ash_model_pars.roughness_limit = kwds.get('white_roughness_limit', self._anu_white_ash_model_pars.roughness_limit)
+            self._anu_black_ash_model_pars.ini_bulk_den = kwds.get('black_ini_bulk_den', self._anu_black_ash_model_pars.ini_bulk_den)
+            self._anu_black_ash_model_pars.fin_bulk_den = kwds.get('black_fin_bulk_den', self._anu_black_ash_model_pars.fin_bulk_den)
+            self._anu_black_ash_model_pars.bulk_den_fac = kwds.get('black_bulk_den_fac', self._anu_black_ash_model_pars.bulk_den_fac)
+            self._anu_black_ash_model_pars.par_den = kwds.get('black_par_den', self._anu_black_ash_model_pars.par_den)
+            self._anu_black_ash_model_pars.decomp_fac = kwds.get('black_decomp_fac', self._anu_black_ash_model_pars.decomp_fac)
+            self._anu_black_ash_model_pars.ini_erod = kwds.get('black_ini_erod', self._anu_black_ash_model_pars.ini_erod)
+            self._anu_black_ash_model_pars.fin_erod = kwds.get('black_fin_erod', self._anu_black_ash_model_pars.fin_erod)
+            self._anu_black_ash_model_pars.roughness_limit = kwds.get('black_roughness_limit', self._anu_black_ash_model_pars.roughness_limit )
 
             self.dump_and_unlock()
 
@@ -325,76 +330,81 @@ class Ash(NoDbBase, LogMixin):
 
         self.lock()
 
+        cc_high_default = self.cc_high_default
+        cc_moderate_default = self.cc_moderate_default
+        cc_low_default = self.cc_low_default
+
         # noinspection PyBroadException
         try:
+
             self.high_contaminant_concentrations = ContaminantConcentrations(
-                C=kwds.get('high_C'),
-                N=kwds.get('high_N'),
-                K=kwds.get('high_K'),
-                PO4=kwds.get('high_PO4'),
-                Al=kwds.get('high_Al'),
-                Si=kwds.get('high_Si'),
-                Ca=kwds.get('high_Ca'),
-                Pb=kwds.get('high_Pb'),
-                Na=kwds.get('high_Na'),
-                Mg=kwds.get('high_Mg'),
-                P=kwds.get('high_P'),
-                Mn=kwds.get('high_Mn'),
-                Fe=kwds.get('high_Fe'),
-                Ni=kwds.get('high_Ni'),
-                Cu=kwds.get('high_Cu'),
-                Zn=kwds.get('high_Zn'),
-                As=kwds.get('high_As'),
-                Cd=kwds.get('high_Cd'),
-                Hg=kwds.get('high_Hg'),
-                Cr=kwds.get('high_Cr'),
-                Co=kwds.get('high_Co'))
+                C=kwds.get('high_C', cc_high_default.C),
+                N=kwds.get('high_N', cc_high_default.N),
+                K=kwds.get('high_K', cc_high_default.K),
+                PO4=kwds.get('high_PO4', cc_high_default.K),
+                Al=kwds.get('high_Al', cc_high_default.Al),
+                Si=kwds.get('high_Si', cc_high_default.Si),
+                Ca=kwds.get('high_Ca', cc_high_default.Ca),
+                Pb=kwds.get('high_Pb', cc_high_default.Pb),
+                Na=kwds.get('high_Na', cc_high_default.Na),
+                Mg=kwds.get('high_Mg', cc_high_default.Mg),
+                P=kwds.get('high_P', cc_high_default.P),
+                Mn=kwds.get('high_Mn', cc_high_default.Mn),
+                Fe=kwds.get('high_Fe', cc_high_default.Fe),
+                Ni=kwds.get('high_Ni', cc_high_default.Ni),
+                Cu=kwds.get('high_Cu', cc_high_default.Cu),
+                Zn=kwds.get('high_Zn', cc_high_default.Zn),
+                As=kwds.get('high_As', cc_high_default.As),
+                Cd=kwds.get('high_Cd', cc_high_default.Cd),
+                Hg=kwds.get('high_Hg', cc_high_default.Hg),
+                Cr=kwds.get('high_Cr', cc_high_default.Cr),
+                Co=kwds.get('high_Co', cc_high_default.Co))
 
             self.moderate_contaminant_concentrations = ContaminantConcentrations(
-                C=kwds.get('mod_C'),
-                N=kwds.get('mod_N'),
-                K=kwds.get('mod_K'),
-                PO4=kwds.get('mod_PO4'),
-                Al=kwds.get('mod_Al'),
-                Si=kwds.get('mod_Si'),
-                Ca=kwds.get('mod_Ca'),
-                Pb=kwds.get('mod_Pb'),
-                Na=kwds.get('mod_Na'),
-                Mg=kwds.get('mod_Mg'),
-                P=kwds.get('mod_P'),
-                Mn=kwds.get('mod_Mn'),
-                Fe=kwds.get('mod_Fe'),
-                Ni=kwds.get('mod_Ni'),
-                Cu=kwds.get('mod_Cu'),
-                Zn=kwds.get('mod_Zn'),
-                As=kwds.get('mod_As'),
-                Cd=kwds.get('mod_Cd'),
-                Hg=kwds.get('mod_Hg'),
-                Cr=kwds.get('mod_Cr'),
-                Co=kwds.get('mod_Co'))
+                C=kwds.get('mod_C', cc_moderate_default.C),
+                N=kwds.get('mod_N', cc_moderate_default.N),
+                K=kwds.get('mod_K', cc_moderate_default.K),
+                PO4=kwds.get('mod_PO4', cc_moderate_default.K),
+                Al=kwds.get('mod_Al', cc_moderate_default.Al),
+                Si=kwds.get('mod_Si', cc_moderate_default.Si),
+                Ca=kwds.get('mod_Ca', cc_moderate_default.Ca),
+                Pb=kwds.get('mod_Pb', cc_moderate_default.Pb),
+                Na=kwds.get('mod_Na', cc_moderate_default.Na),
+                Mg=kwds.get('mod_Mg', cc_moderate_default.Mg),
+                P=kwds.get('mod_P', cc_moderate_default.P),
+                Mn=kwds.get('mod_Mn', cc_moderate_default.Mn),
+                Fe=kwds.get('mod_Fe', cc_moderate_default.Fe),
+                Ni=kwds.get('mod_Ni', cc_moderate_default.Ni),
+                Cu=kwds.get('mod_Cu', cc_moderate_default.Cu),
+                Zn=kwds.get('mod_Zn', cc_moderate_default.Zn),
+                As=kwds.get('mod_As', cc_moderate_default.As),
+                Cd=kwds.get('mod_Cd', cc_moderate_default.Cd),
+                Hg=kwds.get('mod_Hg', cc_moderate_default.Hg),
+                Cr=kwds.get('mod_Cr', cc_moderate_default.Cr),
+                Co=kwds.get('mod_Co', cc_moderate_default.Co))
             
             self.low_contaminant_concentrations = ContaminantConcentrations(
-                C=kwds.get('low_C'),
-                N=kwds.get('low_N'),
-                K=kwds.get('low_K'),
-                PO4=kwds.get('low_PO4'),
-                Al=kwds.get('low_Al'),
-                Si=kwds.get('low_Si'),
-                Ca=kwds.get('low_Ca'),
-                Pb=kwds.get('low_Pb'),
-                Na=kwds.get('low_Na'),
-                Mg=kwds.get('low_Mg'),
-                P=kwds.get('low_P'),
-                Mn=kwds.get('low_Mn'),
-                Fe=kwds.get('low_Fe'),
-                Ni=kwds.get('low_Ni'),
-                Cu=kwds.get('low_Cu'),
-                Zn=kwds.get('low_Zn'),
-                As=kwds.get('low_As'),
-                Cd=kwds.get('low_Cd'),
-                Hg=kwds.get('low_Hg'),
-                Cr=kwds.get('low_Cr'),
-                Co=kwds.get('low_Co'))
+                C=kwds.get('low_C', cc_low_default.C),
+                N=kwds.get('low_N', cc_low_default.N),
+                K=kwds.get('low_K', cc_low_default.K),
+                PO4=kwds.get('low_PO4', cc_low_default.K),
+                Al=kwds.get('low_Al', cc_low_default.Al),
+                Si=kwds.get('low_Si', cc_low_default.Si),
+                Ca=kwds.get('low_Ca', cc_low_default.Ca),
+                Pb=kwds.get('low_Pb', cc_low_default.Pb),
+                Na=kwds.get('low_Na', cc_low_default.Na),
+                Mg=kwds.get('low_Mg', cc_low_default.Mg),
+                P=kwds.get('low_P', cc_low_default.P),
+                Mn=kwds.get('low_Mn', cc_low_default.Mn),
+                Fe=kwds.get('low_Fe', cc_low_default.Fe),
+                Ni=kwds.get('low_Ni', cc_low_default.Ni),
+                Cu=kwds.get('low_Cu', cc_low_default.Cu),
+                Zn=kwds.get('low_Zn', cc_low_default.Zn),
+                As=kwds.get('low_As', cc_low_default.As),
+                Cd=kwds.get('low_Cd', cc_low_default.Cd),
+                Hg=kwds.get('low_Hg', cc_low_default.Hg),
+                Cr=kwds.get('low_Cr', cc_low_default.Cr),
+                Co=kwds.get('low_Co', cc_low_default.Co))
 
             self._reservoir_capacity_m3 = kwds.get('reservoir_capacity')
             self._reservoir_storage = kwds.get('reservoir_storage')
@@ -657,6 +667,10 @@ class Ash(NoDbBase, LogMixin):
 
         return self._reservoir_capacity_m3
 
+    @property
+    def reservoir_capacity_ft3(self):
+        return self.reservoir_capacity_m3 * 35.3147
+
     @reservoir_capacity_m3.setter
     def reservoir_capacity_m3(self, value):
         assert isfloat(value), value
@@ -686,7 +700,7 @@ class Ash(NoDbBase, LogMixin):
         return _join(self.ash_dir, 'ash_type_map_cropped.tif')
 
     def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
-        run_wind_transport = self.run_wind_transport
+        run_wind_transport=self.run_wind_transport
 
         self.lock()
 
@@ -696,6 +710,9 @@ class Ash(NoDbBase, LogMixin):
             self.fire_date = fire_date = YearlessDate.from_string(fire_date)
             self.ini_white_ash_depth_mm = ini_white_ash_depth_mm
             self.ini_black_ash_depth_mm = ini_black_ash_depth_mm
+
+            assert ini_white_ash_depth_mm > 0.0, ini_white_ash_depth_mm
+            assert ini_black_ash_depth_mm > 0.0, ini_black_ash_depth_mm
 
             wd = self.wd
             ash_dir = self.ash_dir
@@ -740,7 +757,6 @@ class Ash(NoDbBase, LogMixin):
             lc = LandcoverMap(baer_4class)
             sbs_d = lc.build_lcgrid(watershed.subwta)
 
-
             if self.ash_load_fn is not None:
                 reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
                 load_map = ParameterMap(self.ash_load_cropped_fn)
@@ -783,6 +799,10 @@ class Ash(NoDbBase, LogMixin):
                 if ash_type is None:
                     continue
 
+                if load_d is not None:
+                    if load_d[topaz_id] <= 0.0:
+                        continue
+
                 element_fn = _join(wepp.output_dir,
                                    'H{wepp_id}.element.dat'.format(wepp_id=wepp_id))
                 element = Element(element_fn)
@@ -791,29 +811,38 @@ class Ash(NoDbBase, LogMixin):
                                    'H{wepp_id}.wat.dat'.format(wepp_id=wepp_id))
                 hill_wat = HillWat(hill_wat_fn)
 
+                field_white_ash_bulkdensity = self.field_white_ash_bulkdensity
+                field_black_ash_bulkdensity = self.field_black_ash_bulkdensity
+
+                assert field_white_ash_bulkdensity > 0.0, field_white_ash_bulkdensity
+                assert field_black_ash_bulkdensity > 0.0, field_black_ash_bulkdensity
+
                 if load_d is None:
                     white_ash_depth = ini_white_ash_depth_mm
                     black_ash_depth = ini_black_ash_depth_mm
 
-                    white_ash_load = ini_white_ash_depth_mm * self.field_white_ash_bulkdensity * 10
-                    black_ash_load = ini_black_ash_depth_mm * self.field_black_ash_bulkdensity * 10
+                    white_ash_load = ini_white_ash_depth_mm * field_white_ash_bulkdensity * 10
+                    black_ash_load = ini_black_ash_depth_mm * field_black_ash_bulkdensity * 10
+
                 else:
                     _load_kg_m2 = load_d[topaz_id] * 0.1
-                    white_ash_depth = _load_kg_m2 / self.field_white_ash_bulkdensity
-                    black_ash_depth = _load_kg_m2 / self.field_black_ash_bulkdensity
+                    white_ash_depth = _load_kg_m2 / field_white_ash_bulkdensity
+                    black_ash_depth = _load_kg_m2 / field_black_ash_bulkdensity
 
                     white_ash_load = black_ash_load = load_d[topaz_id]
 
                 if ash_type == AshType.WHITE:
                     ini_ash_depth = white_ash_depth
-                    field_ash_bulkdensity = self.field_white_ash_bulkdensity
+                    field_ash_bulkdensity = field_white_ash_bulkdensity
                     ini_ash_load = white_ash_load
                     ash_bulkdensity = self.white_ash_bulkdensity
                 else:
                     ini_ash_depth = black_ash_depth
-                    field_ash_bulkdensity = self.field_black_ash_bulkdensity
+                    field_ash_bulkdensity = field_black_ash_bulkdensity
                     ini_ash_load = black_ash_load
                     ash_bulkdensity = self.black_ash_bulkdensity
+
+                assert ini_ash_load > 0.0, (ini_ash_load, ini_white_ash_depth_mm, ini_black_ash_depth_mm, field_white_ash_bulkdensity, field_black_ash_bulkdensity)
 
                 if ash_type == AshType.BLACK:
                     ash_model = self._anu_black_ash_model_pars
@@ -824,7 +853,6 @@ class Ash(NoDbBase, LogMixin):
                 meta[topaz_id]['field_ash_bulkdensity'] = field_ash_bulkdensity
                 meta[topaz_id]['ini_ash_load'] = ini_ash_load
                 meta[topaz_id]['ash_bulkdensity'] = ash_bulkdensity
-
 
                 kwds = dict(ash_type=ash_type,
                             ini_ash_load=ini_ash_load,

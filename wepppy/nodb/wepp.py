@@ -100,6 +100,12 @@ from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.mods.disturbed import Disturbed
 
 
+def compress_fn(fn):
+    if _exists(fn):
+        p = call('gzip %s -f' % fn, shell=True)
+        assert _exists(fn + '.gz')
+
+
 def _copyfile(src_fn, dst_fn):
     if _exists(dst_fn):
         os.remove(dst_fn)
@@ -568,6 +574,10 @@ class Wepp(NoDbBase, LogMixin):
             elif _kslast.lower().startswith('none') or _kslast == '':
                 self._kslast = None
 
+            _wepp_bin = kwds.get('wepp_bin', None)
+            if _wepp_bin is not None:
+                self._wepp_bin = _wepp_bin
+
             self.dump_and_unlock()
 
         except Exception:
@@ -877,6 +887,7 @@ class Wepp(NoDbBase, LogMixin):
                 os.makedirs(_dir)
 
     def _prep_slopes(self, translator):
+        self.log('    Prepping _prep_slopes... ')
         watershed = Watershed.getInstance(self.wd)
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
@@ -897,7 +908,10 @@ class Wepp(NoDbBase, LogMixin):
                     dst_fn = _join(fp_runs_dir, fn)
                     _copyfile(src_fn, dst_fn) 
 
+        self.log_done()
+
     def _prep_multi_ofe(self, translator):
+        self.log('    Prepping _prep_multi_ofe... ')
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
@@ -957,6 +971,8 @@ class Wepp(NoDbBase, LogMixin):
 
 
     def _prep_managements(self, translator):
+        self.log('    _prep_managements... ')
+
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
@@ -1043,7 +1059,10 @@ class Wepp(NoDbBase, LogMixin):
                                      end_year=climate.observed_end_year)
             emapr_ts.analyze()
 
+
+
     def _prep_soils(self, translator):
+        self.log('    _prep_soils... ')
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         watershed = Watershed.getInstance(self.wd)
@@ -1068,7 +1087,11 @@ class Wepp(NoDbBase, LogMixin):
                     dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
                     _copyfile(src_fn, dst_fn) 
 
+        self.log_done()
+
     def _prep_climates(self, translator):
+
+        self.log('    _prep_climates... ')
         watershed = Watershed.getInstance(self.wd)
         climate = Climate.getInstance(self.wd)
         cli_dir = self.cli_dir
@@ -1086,9 +1109,12 @@ class Wepp(NoDbBase, LogMixin):
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
-                    _copyfile(src_fn, dst_fn) 
+                    _copyfile(src_fn, dst_fn)
+
+        self.log_done()
 
     def _make_hillslope_runs(self, translator):
+        self.log('    Prepping _make_hillslope_runs... ')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
@@ -1113,6 +1139,7 @@ class Wepp(NoDbBase, LogMixin):
                 if getattr(self, 'run_flowpaths', False):
                     for fp in watershed.fps_summary(topaz_id):
                         make_flowpath_run(fp, years, fp_runs_dir)
+        self.log_done()
 
     def run_hillslopes(self):
         self.log('Running Hillslopes\n')
@@ -1264,6 +1291,8 @@ class Wepp(NoDbBase, LogMixin):
         self.trigger(TriggerEvents.WEPP_PREP_WATERSHED_COMPLETE)
 
     def _prep_structure(self, translator):
+        self.log('    Prepping _prep_structure... ')
+
         watershed = Watershed.getInstance(self.wd)
         structure = watershed.structure
         runs_dir = self.runs_dir
@@ -1281,6 +1310,8 @@ class Wepp(NoDbBase, LogMixin):
 
         with open(_join(runs_dir, 'pw0.str'), 'w') as fp:
             fp.write('\n'.join(s) + '\n')
+
+        self.log_done()
 
     def _prep_channel_slopes(self):
         wat_dir = self.wat_dir
@@ -1514,44 +1545,22 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(wd)
 
         if climate.climate_mode != ClimateMode.SingleStorm:
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                self.log('Running Post Wepp Run Activities... ')
 
-            self.log('Building Arc Exports... ')
-            from wepppy.export import arc_export
-            arc_export(wd)
-            self.log_done()
+                futures = []
+                futures.append(executor.submit(self._run_arcexport))
+                futures.append(executor.submit(self._run_wepppost))
+                futures.append(executor.submit(self._build_totalwatsed2))
+                futures.append(executor.submit(self._run_hillslope_watbal))
+                futures.append(executor.submit(compress_fn, _join(self.output_dir, 'pass_pw0.txt')))
+                futures.append(executor.submit(compress_fn, _join(self.output_dir, 'soil_pw0.txt')))
 
-            self.log('Building totalwatsed2.pkl... ')
-            self._build_totalwatsed2()
-            self.log_done()
+                # Wait for all tasks to complete before proceeding
+                for future in futures:
+                    future.result()
 
-#            self.log('Building totalwatsed.txt... ')
-#            self._build_totalwatsed()
-#            self.log_done()
-
-            self.log('Running WeppPost... ')
-            wepppost = WeppPost.getInstance(wd)
-            wepppost.run_post()
-            self.log_done()
-
-            self.log('Calculating Hillslope Water Balance...')
-            HillslopeWatbal(wd)
-            self.log_done()
-
-#            self.log('Calculating hill streamflow measures... ')
-#            wepppost.calc_hill_streamflow()
-#            self.log_done()
-
-#            self.log('Calculating channel streamflow measures... ')
-#            wepppost.calc_channel_streamflow()
-#            self.log_done()
-
-        for fn in [_join(self.output_dir, 'pass_pw0.txt'),
-                   _join(self.output_dir, 'soil_pw0.txt')]:
-            if _exists(fn):
-                 self.log(f'Compressing {fn}...')
-                 p = call('gzip %s -f' % fn, shell=True)
-                 assert _exists(fn + '.gz')
-                 self.log_done()
+        self.log_done()
 
         try:
             prep = Prep.getInstance(self.wd)
@@ -1559,10 +1568,29 @@ class Wepp(NoDbBase, LogMixin):
         except FileNotFoundError:
             pass
 
+    def _run_hillslope_watbal(self):
+        self.log('Calculating Hillslope Water Balance...')
+        HillslopeWatbal(self.wd)
+        self.log_done()
+
+    def _run_arcexport(self):
+        self.log('Running ArcExport... ')
+        from wepppy.export import arc_export
+        arc_export(self.wd)
+        self.log_done()
+
+    def _run_wepppost(self):
+        self.log('Running WeppPost... ')
+        wepppost = WeppPost.getInstance(self.wd)
+        wepppost.run_post()
+        self.log_done()
+
     def _build_totalwatsed2(self):
+        self.log('Building totalwatsed2.pkl... ')
         totwatsed2 = TotalWatSed2(self.wd)
         fn = _join(self.export_dir, 'totalwatsed2.csv')
         totwatsed2.export(fn)
+        self.log_done()
 
     def _build_totalwatsed(self):
         output_dir = self.output_dir
@@ -1735,13 +1763,16 @@ class Wepp(NoDbBase, LogMixin):
         if not _exists(loss_pw0):
             return None
 
-        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+        if not hasattr(self, '_loss_report'):
+            self._loss_report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+
+        report = self._loss_report
 
         d = {}
         for row in report.hill_tbl:
             topaz_id = translator.top(wepp=row['Hillslopes'])
 
-            v = row[measure]
+            v = row.get(measure, None)
             if isnan(v) or isinf(v):
                 v = None
 
@@ -1762,13 +1793,16 @@ class Wepp(NoDbBase, LogMixin):
         if not _exists(loss_pw0):
             return None
 
-        report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+        if not hasattr(self, '_loss_report'):
+            self._loss_report = Loss(loss_pw0, self.has_phosphorus, self.wd)
+
+        report = self._loss_report
 
         d = {}
         for row in report.chn_tbl:
             topaz_id = translator.top(chn_enum=row['Channels and Impoundments'])
 
-            v = row[measure]
+            v = row.get(measure, None)
             if isnan(v) or isinf(v):
                 v = None
 

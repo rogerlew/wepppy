@@ -31,11 +31,15 @@ row, we would observe the 5 m3/s peak discharge only once.</p>
 <br/>
 <br/>
 {% for key in ['Precipitation Depth', 'Runoff', 'Peak Discharge',
-               '10-min Peak Rainfall Intensity', '30-min Peak Rainfall Intensity', 'Sediment Yield'] %}
-    {% if extraneous %}
-        {% include("reports/wepp/_return_period_extraneous_table.htm") %}
-    {% else %}
-        {% include("reports/wepp/_return_period_simple_table.htm") %}
+               '10-min Peak Rainfall Intensity',
+               '30-min Peak Rainfall Intensity',
+               'Sediment Yield'] %}
+    {% if key in report.return_periods %}
+        {% if extraneous %}
+            {% include("reports/wepp/_return_period_extraneous_table.htm") %}
+        {% else %}
+            {% include("reports/wepp/_return_period_simple_table.htm") %}
+        {% endif %}
     {% endif %}
 {% endfor %}
 

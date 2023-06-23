@@ -52,6 +52,52 @@ function controlBase() {
     };
 }
 
+
+/* ----------------------------------------------------------------------------
+ * Disturbed
+ * ----------------------------------------------------------------------------
+ */
+var Disturbed = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+
+        that.reset_land_soil_lookup =  function() {
+            $.get({
+                url: "reset_disturbed/",
+                cache: false,
+                success: function success(response) {
+                    if (response.Success == true) {
+                        alert("Land Soil Lookup has been reset");
+                    } else {
+                        alert("Error resetting Land Soil Lookup");
+                    }
+                },
+                error: function error(jqXHR)  {
+                    console.log(jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    alert("Error clearing locks");
+                }
+            });
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+
+
+
 /* ----------------------------------------------------------------------------
  * Project
  * ----------------------------------------------------------------------------
@@ -602,6 +648,24 @@ var Baer = function () {
         };
         that.baer_map = null;
 
+
+        that.showHideControls = function (mode) {
+            // show the appropriate controls
+            if (mode === -1) {
+                $("#sbs_mode0_controls").hide();
+                $("#sbs_mode1_controls").hide();
+            } else if (mode === 0) {
+                $("#sbs_mode0_controls").show();
+                $("#sbs_mode1_controls").hide();
+            } else if (mode === 1) {
+                $("#sbs_mode0_controls").hide();
+                $("#sbs_mode1_controls").show();
+            } else {
+                throw "ValueError: Landuse unknown mode";
+            }
+        };
+
+
         that.upload_sbs = function () {
             var self = instance;
 
@@ -669,6 +733,38 @@ var Baer = function () {
 
             self.info.html('');
         };
+
+        that.build_uniform_sbs = function (value) {
+            var self = instance;
+
+            var task_msg = "Setting Uniform SBS";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/build_uniform_sbs/" + value.toString(),
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("SBS_UPLOAD_TASK_COMPLETE");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
 
         that.load_modify_class = function () {
             var self = instance;

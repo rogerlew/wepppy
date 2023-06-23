@@ -1,30 +1,84 @@
 {% extends "controls/_base.htm" %}
 {% block form_id %}sbs_upload_form{% endblock %}
-{% block form_title %}Upload Soil Burn Severity Map {% if 'disturbed' in ron.mods %}(Optional){% endif %}{% endblock %}
+{% block form_title %}Soil Burn Severity {% if 'disturbed' in ron.mods %}(Optional){% endif %}{% endblock %}
 {% block inputs %}
-    <p>Upload a raster SBS map (.img or .tif). The map can be a 4 class SBS map or a 256 dNBR map.</p>
-    <div class="form-group row hide-readonly">
-        <div class="col-md-6">
-            <input id="input_upload_sbs" name="input_upload_sbs" type="file" class="file">
+
+    <div class="form-group row">
+        <div class="col-sm-12">
+            <label class="radio-inline">
+            <input type="radio" value="0" class="disable-readonly" id="sbs_mode0" name="sbs_mode" onclick="Baer.getInstance().showHideControls(0)"> Upload SBS Map</label>
+        </div>
+        <div class="col-sm-12">
+            <label class="radio-inline">
+            <input type="radio" value="1" class="disable-readonly" id="sbs_mode1" name="sbs_mode" onclick="Baer.getInstance().showHideControls(1)"> Specify Uniform SBS (Must Delineate Channels First)</label>
         </div>
     </div>
-    <div class="form-group row hide-readonly">
-        <div class="col-sm-4">
-            <button id="btn_upload_sbs" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Upload SBS</button>
+
+    <div id="sbs_mode0_controls">
+        <p>Upload a raster SBS map (.img or .tif). The map can be a 4 class SBS map or a 256 dNBR map.</p>
+        <div class="form-group row hide-readonly">
+            <div class="col-md-6">
+                <input id="input_upload_sbs" name="input_upload_sbs" type="file" class="file">
+            </div>
         </div>
-        <div class="col-sm-5">
-            <small id="hint_upload_sbs"></small>
+        <div class="form-group row hide-readonly">
+            <div class="col-sm-4">
+                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().upload_sbs()">Upload SBS</button>
+            </div>
+            <div class="col-sm-5">
+                <small id="hint_upload_sbs"></small>
+            </div>
         </div>
+        {% if 'disturbed' in ron.mods %}
+
+        <div class="form-group row hide-readonly">
+            <div class="col-sm-4">
+                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
+            </div>
+            <div class="col-sm-5">
+                <small id="hint_remove_sbs"></small>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% if 'disturbed' in ron.mods %}
-    
-    <div class="form-group row hide-readonly">
-        <div class="col-sm-4">
-            <button id="btn_remove_sbs" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">Remove SBS</button>
+
+    <div id="sbs_mode1_controls">
+        <div class="form-group row hide-readonly">
+            <div class="col-sm-4">
+                <button  class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().build_uniform_sbs(2)">Use Uniform Low SBS</button>
+            </div>
+            <div class="col-sm-5">
+                <small id="hint_low_sbs"></small>
+            </div>
         </div>
-        <div class="col-sm-5">
-            <small id="hint_remove_sbs"></small>
+
+        <div class="form-group row hide-readonly">
+            <div class="col-sm-4">
+                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().build_uniform_sbs(3)">Use Uniform Moderate SBS</button>
+            </div>
+            <div class="col-sm-5">
+                <small id="hint_moderate_sbs"></small>
+            </div>
         </div>
+
+        <div class="form-group row hide-readonly">
+            <div class="col-sm-4">
+                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().build_uniform_sbs(4)">Use Uniform High SBS</button>
+            </div>
+            <div class="col-sm-5">
+                <small id="hint_high_sbs"></small>
+            </div>
+        </div>
+
+        <div class="form-group row hide-readonly">
+            <div class="col-sm-4">
+                <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().remove_sbs()">Remove SBS</button>
+            </div>
+            <div class="col-sm-5">
+                <small id="hint_remove_sbs"></small>
+            </div>
+        </div>
+
     </div>
-    {% endif %}
+
 {% endblock %}

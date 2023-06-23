@@ -10,7 +10,7 @@ from .wepp_runner import (
     run_flowpath,
     make_watershed_run,
     make_ss_watershed_run,
-    run_watershed
-)
+    run_watershed,
+    linux_wepp_bin_opts)
 
 _thisdir = os.path.dirname(__file__)

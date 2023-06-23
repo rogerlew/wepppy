@@ -41,8 +41,13 @@ class ReturnPeriods:
             _pk10.append(pk_intensity_dict[key]['10-min Peak Rainfall Intensity (mm/hour)'])
             _pk30.append(pk_intensity_dict[key]['30-min Peak Rainfall Intensity (mm/hour)'])
 
-        df['10-min Peak Rainfall Intensity'] = Series(_pk10, index=df.index)
-        df['30-min Peak Rainfall Intensity'] = Series(_pk30, index=df.index)
+        # Breakpoint climates don't have peak intensities
+
+        if _pk10[0] >= 0:
+            df['10-min Peak Rainfall Intensity'] = Series(_pk10, index=df.index)
+
+        if _pk30[0] >= 0:
+            df['30-min Peak Rainfall Intensity'] = Series(_pk30, index=df.index)
 
         df['Sediment Yield (tonne)'] = df['Sediment Yield (kg)'] / 1000.0
         del df['Sediment Yield (kg)']
@@ -95,10 +100,10 @@ class ReturnPeriods:
         self.num_events = df.shape[0]
         self.intervals = sorted(rec.keys())
         self.units_d = ebe.units_d
-        self.units_d['Peak Discharge'] = 'm^3/s'
-        self.units_d['Sediment Yield'] = 'tonne'
         self.units_d['10-min Peak Rainfall Intensity'] = 'mm/hour'
         self.units_d['30-min Peak Rainfall Intensity'] = 'mm/hour'
+        self.units_d['Peak Discharge'] = 'm^3/s'
+        self.units_d['Sediment Yield'] = 'tonne'
 
 
 if __name__ == "__main__":

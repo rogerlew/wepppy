@@ -691,7 +691,7 @@ class Ron(NoDbBase):
     #
     # summary
     #
-    def subs_summary(self):
+    def subs_summary(self, abbreviated=False):
         wd = self.wd
         import wepppy.nodb
         watershed = wepppy.nodb.Watershed.getInstance(wd)
@@ -709,7 +709,7 @@ class Ron(NoDbBase):
                                topaz_id=topaz_id,
                                wepp_id=wepp_id),
                      watershed=watershed.sub_summary(topaz_id),
-                     soil=soils.sub_summary(topaz_id),
+                     soil=soils.sub_summary(topaz_id, abbreviated=abbreviated),
                      climate=climate.sub_summary(topaz_id),
                      landuse=landuse.sub_summary(topaz_id)))
 
@@ -739,7 +739,7 @@ class Ron(NoDbBase):
             landuse=landuse.sub_summary(topaz_id)
         )
 
-    def chns_summary(self):
+    def chns_summary(self, abbreviated=False):
         wd = self.wd
         import wepppy.nodb
         watershed = wepppy.nodb.Watershed.getInstance(wd)
@@ -759,7 +759,7 @@ class Ron(NoDbBase):
                                wepp_id=wepp_id,
                                chn_enum=chn_enum),
                      watershed=watershed.chn_summary(topaz_id),
-                     soil=soils.chn_summary(topaz_id),
+                     soil=soils.chn_summary(topaz_id, abbreviated=abbreviated),
                      climate=climate.chn_summary(topaz_id),
                      landuse=landuse.chn_summary(topaz_id)))
 
