@@ -83,24 +83,23 @@ class WeppSoilUtil(object):
         for ofe_counter in range(ntemp):
             line = shlex.split(lines[i])
             i += 1
-     
+
+            ksatadj = 0
+            luse = None  # Disturbed Class
+            stext = None
+            lkeff = None
+            ksatfac = None
+            ksatrec = None
+
             if solwpv > 9000 and solwpv < 9003:
                 # 1      2     3      4        5
                 ksatadj, luse, stext, ksatfac, ksatrec = line
                 line = shlex.split(lines[i])
                 i += 1
             elif solwpv == 9003:
-                ksatadj, luse, burn_code, stext = line
-                ksatfac = None
-                ksatrec = None
+                ksatadj, luse, burn_code, stext, lkeff = line
                 line = shlex.split(lines[i])
                 i += 1
-            else:
-                ksatadj = 0
-                luse = None  # Disturbed Class
-                stext = None
-                ksatfac = None
-                ksatrec = None
 
             if solwpv < 941 or solwpv >= 7777:       
                 # 1   2      3    4     5    6   7   8
@@ -181,6 +180,7 @@ class WeppSoilUtil(object):
                      ksatadj=ksatadj,
                      luse=luse,
                      stext=stext,
+                     lkeff=lkeff,
                      ksatfac=ksatfac,
                      ksatrec=ksatrec,
                      res_lyr=res_lyr))
@@ -314,6 +314,7 @@ class WeppSoilUtil(object):
                 _ksatadj = ofe['ksatadj']
                 _luse = ofe['luse']
                 _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
                 
                 _burn_code = 0                
                 if 'agriculture' in _luse:
@@ -333,7 +334,7 @@ class WeppSoilUtil(object):
                     _burn_code += 3
 
                     
-                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'")
+                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_lkeff}")
 
             L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])
             pars = 'nsl salb sat ki kr shcrit'.split()
@@ -499,6 +500,7 @@ class WeppSoilUtil(object):
         _kslast = replacements.get('kslast', None)
         _luse = replacements.get('luse', None)
         _stext = replacements.get('stext', None)
+        _lkeff = replacements.get('lkeff', '-9999')
        
         new.obj['ksflag'] = _replace_parameter(new.obj['ksflag'], _ksflag)
  
@@ -513,6 +515,9 @@ class WeppSoilUtil(object):
             if version < 9003:
                 ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
                 ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
+            if version == 9003:
+                ofe['lkeff'] = _replace_parameter(ofe['lkeff'], _lkeff)
+
             ofe['luse'] = _replace_parameter(ofe['luse'], _luse)
             ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
 

@@ -9,6 +9,7 @@
 from datetime import datetime, timedelta
 import time
 import io
+import numpy as np
 import pandas as pd
 import requests
 
@@ -65,6 +66,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     df['ravg(%)'] = (df['rmax(%)'] + df['rmin(%)']) / 2
     df['tdew(degc)'] = dewpoint_from_relative_humidity(df['tavg(degc)'].values * units.degC,
                                                     df['ravg(%)'].values * units.percent).magnitude
+    df['tdew(degc)'] = np.clip(df['tdew(degc)'], df['tmmn(degc)'], None)
 
     df.index = pd.to_datetime(data['yyyy-mm-dd'], format='%Y-%m-%d')
 

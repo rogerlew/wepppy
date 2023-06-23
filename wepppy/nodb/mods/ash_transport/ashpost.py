@@ -260,6 +260,7 @@ def read_hillslope_out_fn(out_fn, meta_data=None, meta_data_types=None, cumulati
         df_agg = df_agg[df_agg['transportable_ash (tonne/ha)'] == 0.0]
     return df_agg
 
+
 def calculate_cum_watershed_stats_by_burnclass(cum_df):
     """
     cum_df cols
@@ -357,7 +358,7 @@ def calculate_cum_watershed_stats_by_burnclass(cum_df):
     return pw0_stats
 
 
-def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
+def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2), verbose=True):
     #
     # Setup stuff
     #
@@ -401,6 +402,10 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
             hill_data_frames.append(read_hillslope_out_fn(out_fn,
                 meta_data=meta,
                 meta_data_types=meta_dtypes))
+
+    if hill_data_frames == []:
+        return None
+
 
     # Combine all data into a single DataFrame
     df = pd.concat(hill_data_frames, ignore_index=True)
@@ -522,19 +527,43 @@ class AshPost(NoDbBase):
 
     @property
     def pw0_stats(self):
-        return self._pw0_stats
+
+        meta = self.meta
+
+        # Initialize the dictionary with default values
+        pw0_stats = {
+            burn_class: {
+                'count': 0,
+                'cum_water_transport (tonne)': 0,
+                'cum_wind_transport (tonne)': 0,
+                'cum_ash_transport (tonne)': 0,
+            }
+            for burn_class in ['1', '2', '3', '4']
+        }
+
+        for topaz_id, hill_annuals in self.hillslope_annuals.items():
+            burn_class = str(meta[topaz_id]['burn_class'])
+            area_ha = meta[topaz_id]['area_ha']
+
+            pw0_stats[burn_class]['cum_water_transport (tonne)'] += hill_annuals['water_transport (tonne/ha)'] * area_ha
+            pw0_stats[burn_class]['cum_wind_transport (tonne)'] += hill_annuals['wind_transport (tonne/ha)'] * area_ha
+            pw0_stats[burn_class]['cum_ash_transport (tonne)'] += hill_annuals['ash_transport (tonne/ha)'] * area_ha
+
+        return pw0_stats
 
     @property
-    def reccurence_intervals(self):
-        return sorted([k for k in self._return_periods])
+    def recurrence_intervals(self):
+        rec_int = sorted([int(k) for k in self._return_periods['ash_transport (tonne)']])
+        return [str(k) for k in rec_int]
 
     def run_post(self, recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2)):
         self.lock()
 
         # noinspection PyBroadException
         try:
-            self._return_periods, self._cum_return_periods, self._burn_class_return_periods, self._pw0_stats = \
-                watershed_daily_aggregated(self.wd, recurrence=recurrence)
+            res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
+            if res != None:
+                self._return_periods, self._cum_return_periods, self._burn_class_return_periods, self._pw0_stats = res
 
             self.dump_and_unlock()
         except Exception:

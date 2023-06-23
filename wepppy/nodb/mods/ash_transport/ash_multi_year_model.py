@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import warnings
+
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.dateutils import YearlessDate
 from wepppy.all_your_base.stats import weibull_series, probability_of_occurrence
@@ -274,7 +276,7 @@ class AshModel(object):
         i += 1
 
         # No transport on the day of the fire!
-        while transportable_ash_tonspha[i-1] > 0 and i < s_len:
+        while transportable_ash_tonspha[i-1] > 0 and i < 366:
             # determine fire year
             if (mo[i] == fire_date.month and da[i] == fire_date.day):
                 _fire_year += 1
@@ -366,8 +368,8 @@ class AshModel(object):
             # increment day
             i += 1
 
-        assert transportable_ash_tonspha[i-1] == 0, \
-            f'ash transportable {transportable_ash_tonspha[i]} not zero'
+        if transportable_ash_tonspha[i-1] > 0:
+            warnings.warn(f'ash transportable {transportable_ash_tonspha[i-1]} not zero, ({hill_wat.fname}, {i}, {s_len})')
 
 #        print(f'{i}\t{np.max(water_transport_tonspha[:i]):.2f}\t{remaining_ash_tonspha[i]:.2f}\t{cum_ash_transport_tonspha[i]:.2f}')
 

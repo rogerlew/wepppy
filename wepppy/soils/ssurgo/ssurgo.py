@@ -426,20 +426,28 @@ class SoilSummary(object):
         smr = float(lines[4].split()[-1])
         return smr
 
-    def as_dict(self):
+    def as_dict(self, abbreviated=False):
+        if abbreviated:
+            return  dict(mukey=self.mukey, fname=self.fname,
+                    soils_dir=self.soils_dir,
+                    build_date=self.build_date, desc=self.desc,
+                    color=self.color, area=self.area,
+                    pct_coverage=self.pct_coverage)
+
         ll = getattr(self, 'll', None)
 
         weppsoilutil = self.get_weppsoilutil()
+        wsu7778 = weppsoilutil.to7778()
         
         return dict(mukey=self.mukey, fname=self.fname,
                     soils_dir=self.soils_dir,
                     build_date=self.build_date, desc=self.desc,
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage,
-                    clay=weppsoilutil.clay, 
-                    sand=weppsoilutil.sand,  
-                    avke=weppsoilutil.avke,
-                    ll=ll, bd=weppsoilutil.bd,
+                    clay=wsu7778.clay,
+                    sand=wsu7778.sand,
+                    avke=wsu7778.avke,
+                    ll=ll, bd=wsu7778.bd,
                     simple_texture=self.simple_texture)
 
     @property

@@ -441,11 +441,18 @@ def usermod():
 def task_usermod():
     try:
         user_id = request.json.get('user_id')
+        user_email = request.json.get('user_email')
         role = request.json.get('role')
         role_state = request.json.get('role_state')
 
-        user = User.query.filter(User.id == user_id).first()
-        assert user is not None
+        user = None
+        if user_id is not None:
+            user = User.query.filter(User.id == user_id).first()
+        else:
+            user = User.query.filter(User.email == user_email).first()
+
+        if user is None:
+            return error_factory("user not found")
 
         if user.has_role(role) == role_state:
             return error_factory('{} role {} already is {}'
@@ -929,6 +936,7 @@ def seattle_static(file):
 def create_index():
     configs = get_configs()
     x = ['<tr><td><a href="{0}">{0}</a></td>'
+         '<td><a href="{0}?general:dem_db=ned1/2016">{0} ned1/2016</a></td>'
          '<td><a href="{0}?watershed:delineation_backend=taudem">{0} TauDEM</a></td></tr>'
          .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
     return '<html><body>'\
@@ -937,18 +945,7 @@ def create_index():
            'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
            '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
 
-
-@app.route('/create/<config>')
-@app.route('/create/<config>/')
-def create(config):
-
-    cfg = "%s.cfg" % config
-
-    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
-
-    if len(overrides) > 0:
-        cfg += '?%s' % overrides
-
+def create_run_dir(current_user):
     wd = None
     dir_created = False
     while not dir_created:
@@ -970,6 +967,22 @@ def create(config):
 
         os.mkdir(wd)
         dir_created = True
+
+    return runid, wd
+
+
+@app.route('/create/<config>')
+@app.route('/create/<config>/')
+def create(config):
+
+    cfg = "%s.cfg" % config
+
+    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
+
+    if len(overrides) > 0:
+        cfg += '?%s' % overrides
+
+    runid, wd = create_run_dir(current_user)
 
     try:
         Ron(wd, cfg)
@@ -1055,7 +1068,6 @@ window.onload = function(e){
 @app.route('/runs/<string:runid>/<config>/fork')
 @app.route('/runs/<string:runid>/<config>/fork/')
 def fork(runid, config):
-
     undisturbify = request.args.get('undisturbify', 'false').lower().startswith('true')
 
     # get working dir of original directory
@@ -1081,10 +1093,9 @@ def fork(runid, config):
     if should_abort:
         abort(404)
 
-
     def generate(undisturbify=False):
         yield f'undisturbify = {undisturbify}\n'
- 
+
         yield 'generating new runid...'
 
         dir_created = False
@@ -1096,6 +1107,8 @@ def fork(runid, config):
                 new_runid = 'rlew-' + new_runid
             elif email.startswith('mdobre@'):
                 new_runid = 'mdobre-' + new_runid
+            elif email.startswith('srivas42@'):
+                new_runid = 'srivas42-' + new_runid
             elif request.remote_addr == '127.0.0.1':
                 new_runid = 'devvm-' + new_runid
 
@@ -1136,7 +1149,6 @@ def fork(runid, config):
         # replace the runid in the nodb files
         nodbs = glob(_join(new_wd, '*.nodb'))
         for fn in nodbs:
-
             yield '  {fn}...'.format(fn=fn)
             with open(fn) as fp:
                 s = fp.read()
@@ -1182,7 +1194,6 @@ def fork(runid, config):
             soils.build()
             yield ' done.\n\n'
 
-
             yield '  cleaning wepp runs and outputs...'
             wepp = Wepp.getInstance(new_wd)
             wepp.clean()
@@ -1196,7 +1207,6 @@ def fork(runid, config):
             wepp.run_hillslopes()
             yield ' done.\n\n'
 
- 
             yield '  prepping wepp watershed...'
             wepp.prep_watershed()
             yield ' done.\n\n'
@@ -1245,6 +1255,44 @@ def modify_disturbed(runid, config):
             csv_url='../browse/disturbed/disturbed_land_soil_lookup.csv?raw')
     except:
         return exception_factory('Error Clearing Locks')
+
+
+@app.route('/runs/<string:runid>/<config>/reset_disturbed')
+@app.route('/runs/<string:runid>/<config>/reset_disturbed/')
+def reset_disturbed(runid, config):
+    assert config is not None
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    try:
+        disturbed = Disturbed.getInstance(wd)
+        disturbed.reset_land_soil_lookup()
+
+        return success_factory()
+    except:
+        return exception_factory('Error Clearing Locks')
+
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/preflight/', methods=['POST'])
@@ -1317,7 +1365,6 @@ def clear_locks(runid, config):
         for fn in locks:
             os.remove(fn)
 
-        # redirect to fork
         return success_factory()
 
     except:
@@ -1462,6 +1509,8 @@ def runs0(runid, config):
 
         critical_shear_options = management.load_channel_d50_cs()
 
+        from wepppy.wepp.runner import linux_wepp_bin_opts
+
         log_access(wd, current_user, request.remote_addr)
         return render_template('0.html',
                                user=current_user,
@@ -1469,6 +1518,7 @@ def runs0(runid, config):
                                topaz=topaz, soils=soils,
                                ron=ron, landuse=landuse, climate=climate,
                                wepp=wepp,
+                               wepp_bin_opts=linux_wepp_bin_opts,
                                rhem=rhem,
                                disturbed=disturbed,
                                ash=ash,
@@ -2469,37 +2519,40 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
-    wd = get_wd(runid)
-    watershed = Watershed.getInstance(wd)
-    wepp = Watershed.getInstance(wd)
-
-    if clip_hillslopes is not None:
-        watershed.clip_hillslopes = clip_hillslopes
-
-    if walk_flowpaths is not None:
-        watershed.walk_flowpaths = walk_flowpaths
-
-    if clip_hillslope_length is not None:
-        watershed.clip_hillslope_length = clip_hillslope_length
-
-    if mofe_target_length is not None:
-        watershed.mofe_target_length = mofe_target_length
-
-    if mofe_buffer is not None:
-        watershed.mofe_buffer = mofe_buffer
-
-    if mofe_buffer_length is not None:
-        watershed.mofe_buffer_length = mofe_buffer_length
-
     try:
-        watershed.build_subcatchments(pkcsa=pkcsa)
-    except Exception as e:
-        if isinstance(e, WatershedBoundaryTouchesEdgeError):
-            return exception_factory(e.__name__, e.__doc__)
-        else:
-            return exception_factory('Building Subcatchments Failed')
+        wd = get_wd(runid)
+        watershed = Watershed.getInstance(wd)
+        wepp = Watershed.getInstance(wd)
 
-    return success_factory()
+        if clip_hillslopes is not None:
+            watershed.clip_hillslopes = clip_hillslopes
+
+        if walk_flowpaths is not None:
+            watershed.walk_flowpaths = walk_flowpaths
+
+        if clip_hillslope_length is not None:
+            watershed.clip_hillslope_length = clip_hillslope_length
+
+        if mofe_target_length is not None:
+            watershed.mofe_target_length = mofe_target_length
+
+        if mofe_buffer is not None:
+            watershed.mofe_buffer = mofe_buffer
+
+        if mofe_buffer_length is not None:
+            watershed.mofe_buffer_length = mofe_buffer_length
+
+        try:
+            watershed.build_subcatchments(pkcsa=pkcsa)
+        except Exception as e:
+            if isinstance(e, WatershedBoundaryTouchesEdgeError):
+                return exception_factory(e.__name__, e.__doc__)
+            else:
+                return exception_factory('Building Subcatchments Failed')
+
+        return success_factory()
+    except:
+        return exception_factory('Building Subcatchments Failed')
 
 
 @app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
@@ -3609,12 +3662,13 @@ def query_channels_summary(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/wepp/prep_details')
 @app.route('/runs/<string:runid>/<config>/report/wepp/prep_details/')
 def get_wepp_prep_details(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
 
     try:
-        subcatchments_summary = ron.subs_summary()
-        channels_summary = ron.chns_summary()
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+
+        subcatchments_summary = ron.subs_summary(abbreviated=True)
+        channels_summary = ron.chns_summary(abbreviated=True)
 
         unitizer = Unitizer.getInstance(wd)
 
@@ -3628,10 +3682,13 @@ def get_wepp_prep_details(runid, config):
     except:
         return exception_factory('Error building summary')
 
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
 def submit_task_run_wepp(runid, config):
+    from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
+
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
@@ -3670,6 +3727,9 @@ def submit_task_run_wepp(runid, config):
         #
         # Run Watershed
         wepp.run_watershed()
+
+        export_hillslopes_prep_details(wd)
+        export_channels_prep_details(wd)
 
     except Exception:
         return exception_factory('Error running wepp')
@@ -4048,82 +4108,96 @@ def plot_wepp_streamflow(runid, config):
     except:
         exclude_yr_indxs = [0, 1]
 
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
 
-    unitizer = Unitizer.getInstance(wd)
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
 
-    # stack basefow, lateral flow, runoff
-    return render_template('reports/wepp/daily_streamflow_graph.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
-                           ron=ron,
-                           user=current_user)
+        unitizer = Unitizer.getInstance(wd)
+
+        # stack basefow, lateral flow, runoff
+        return render_template('reports/wepp/daily_streamflow_graph.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               exclude_yr_indxs=','.join(str(yr) for yr in exclude_yr_indxs),
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error running plot_wepp_streamflow')
 
 
 @app.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
 @app.route('/runs/<string:runid>/<config>/report/rhem/return_periods/')
 def report_rhem_return_periods(runid, config):
 
-    extraneous = request.args.get('extraneous', None) == 'true'
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    rhempost = RhemPost.getInstance(wd)
+    try:
+        extraneous = request.args.get('extraneous', None) == 'true'
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        rhempost = RhemPost.getInstance(wd)
 
-    unitizer = Unitizer.getInstance(wd)
+        unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/rhem/return_periods.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           rhempost=rhempost,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/rhem/return_periods.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               rhempost=rhempost,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error running report_rhem_return_periods')
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
 def report_wepp_return_periods(runid, config):
 
-    wd = get_wd(runid)
-    extraneous = request.args.get('extraneous', None) == 'true'
+    try:
+        wd = get_wd(runid)
+        extraneous = request.args.get('extraneous', None) == 'true'
 
-    climate = Climate.getInstance(wd)
-    rec_intervals = _parse_rec_intervals(request, climate.years)
+        climate = Climate.getInstance(wd)
+        rec_intervals = _parse_rec_intervals(request, climate.years)
 
-    ron = Ron.getInstance(wd)
-    report = Wepp.getInstance(wd).report_return_periods(rec_intervals=rec_intervals)
-    translator = Watershed.getInstance(wd).translator_factory()
+        ron = Ron.getInstance(wd)
+        report = Wepp.getInstance(wd).report_return_periods(rec_intervals=rec_intervals)
+        translator = Watershed.getInstance(wd).translator_factory()
 
-    unitizer = Unitizer.getInstance(wd)
+        unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/wepp/return_periods.htm',
-                           extraneous=extraneous,
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           report=report,
-                           translator=translator,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/wepp/return_periods.htm',
+                               extraneous=extraneous,
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               report=report,
+                               translator=translator,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error generating return periods report')
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')
 @app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood/')
 def report_wepp_frq_flood(runid, config):
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    report = Wepp.getInstance(wd).report_frq_flood()
-    translator = Watershed.getInstance(wd).translator_factory()
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        report = Wepp.getInstance(wd).report_frq_flood()
+        translator = Watershed.getInstance(wd).translator_factory()
 
-    unitizer = Unitizer.getInstance(wd)
+        unitizer = Unitizer.getInstance(wd)
 
-    return render_template('reports/wepp/frq_flood.htm',
-                           unitizer_nodb=unitizer,
-                           precisions=wepppy.nodb.unitizer.precisions,
-                           report=report,
-                           translator=translator,
-                           ron=ron,
-                           user=current_user)
+        return render_template('reports/wepp/frq_flood.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               report=report,
+                               translator=translator,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error running report_wepp_frq_flood')
+
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/sediment_characteristics')
@@ -4491,6 +4565,26 @@ def task_remove_sbs(runid, config):
     except:
         return exception_factory()
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/build_uniform_sbs/<value>', methods=['POST'])
+def task_build_uniform_sbs(runid, config, value):
+    try:
+        wd = get_wd(runid)
+
+        disturbed = Disturbed.getInstance(wd)
+        sbs_fn = disturbed.build_uniform_sbs(int(value))
+    except:
+        return exception_factory()
+
+    try:
+        res = disturbed.validate(sbs_fn)
+    except Exception:
+        return exception_factory('Failed validating file')
+
+    return success_factory()
+
+
 @app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow/', methods=['POST'])
 def run_debris_flow(runid, config):
@@ -4698,7 +4792,7 @@ def report_ash(runid, config):
 
         burnclass_summary = ash.burnclass_summary()
 
-        recurrence_intervals = ashpost.reccurence_intervals
+        recurrence_intervals = ashpost.recurrence_intervals
         return_periods = ashpost.return_periods
         cum_return_periods = ashpost.cum_return_periods
 
@@ -4812,10 +4906,7 @@ def report_contaminant(runid, config):
         climate = Climate.getInstance(wd)
         rec_intervals = _parse_rec_intervals(request, climate.years)
         contaminants = request.args.get('contaminants', 'Ca,Pb,P,Hg')
-        if contaminants is None:
-            cotaminants = ['Ca','Pb','P','Hg']
-        else:
-            contaminants = contaminants.split(',')
+        contaminants = contaminants.split(',')
 
 
         ron = Ron.getInstance(wd)
@@ -4835,8 +4926,6 @@ def report_contaminant(runid, config):
         results = ashpost.burn_class_return_periods
         pw0_stats = ashpost.pw0_stats
 
-        # return jsonify(dict(rec_intervals=[str(v) for v in actual_reccurence],
-        #                     rec_results=results))
         return render_template('reports/ash/ash_contaminant.htm',
                                rec_intervals=recurrence_intervals,
                                rec_results=results,

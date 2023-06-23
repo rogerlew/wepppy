@@ -75,7 +75,6 @@ def arc_export(wd, verbose=False):
         if verbose:
             print(cmd)
         subprocess.check_call(cmd)
-        sleep(1)
 
     #
     # subcatchments

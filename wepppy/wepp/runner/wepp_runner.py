@@ -9,6 +9,9 @@
 import os
 from os.path import join as _join
 from os.path import exists as _exists
+from os.path import split as _split
+
+from glob import glob
 
 IS_WINDOWS = os.name == 'nt'
 
@@ -19,10 +22,18 @@ import subprocess
 _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
 
+wepp_bin_dir = os.path.abspath(_join(_thisdir, "../", "bin"))
+
+linux_wepp_bin_opts = glob(_join(wepp_bin_dir, "wepp_*"))
+linux_wepp_bin_opts = [_split(p)[1] for p in linux_wepp_bin_opts]
+linux_wepp_bin_opts = [p for p in linux_wepp_bin_opts if '.' not in p]
+linux_wepp_bin_opts.append('latest')
+
+
 if IS_WINDOWS:
-    _wepp = _join(_thisdir, "../", "bin", "wepp2014.exe")
+    _wepp = _join(wepp_bin_dir, "wepp2014.exe")
 else:
-    _wepp = _join(_thisdir, "../", "bin", "wepp")
+    _wepp = _join(wepp_bin_dir, "wepp")
 
 
 def _template_loader(fn):
@@ -117,7 +128,7 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None):
     t0 = time()
 
     if wepp_bin is not None:
-        cmd = [os.path.abspath(_join(_thisdir, "../", "bin", wepp_bin))]
+        cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
     else:
         cmd = [os.path.abspath(_wepp)]
 
@@ -149,7 +160,7 @@ def run_flowpath(flowpath, runs_dir, wepp_bin=None):
     t0 = time()
 
     if wepp_bin is not None:
-        cmd = [os.path.abspath(_join(_thisdir, "../", "bin", wepp_bin))]
+        cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
     else:
         cmd = [os.path.abspath(_wepp)]
 
@@ -215,7 +226,7 @@ def run_watershed(runs_dir, wepp_bin=None):
     t0 = time()
 
     if wepp_bin is not None:
-        cmd = [os.path.abspath(_join(_thisdir, "../", "bin", wepp_bin))]
+        cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
     else:
         cmd = [os.path.abspath(_wepp)]
 

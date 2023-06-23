@@ -17,12 +17,14 @@
     <tbody>
     {% for rec_interval, row in return_periods[measure] | sort_numeric_keys(reverse=True) %}
         {% if row is not none %}
-        <tr>
-        <td>{{ unitizer(row[measure], units) | safe }}</td>
-        <td>{{ unitizer(row['probability'], '%') | safe  }}</td>
-        <td>{{ rec_interval }}</td>
-        <td>{{ row['days_from_fire (days)'] }}</td>
-        </tr>
+            {% if row[measure] > 0.0 %}
+                <tr>
+                <td>{{ unitizer(row[measure], units) | safe }}</td>
+                <td>{{ unitizer(row['probability'], '%') | safe  }}</td>
+                <td>{{ rec_interval }}</td>
+                <td>{{ row['days_from_fire (days)'] }}</td>
+                </tr>
+            {% endif %}
         {% endif %}
     {% endfor %}
     </tbody>
