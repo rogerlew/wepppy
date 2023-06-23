@@ -606,3 +606,28 @@ class AshPost(NoDbBase):
             topaz_id = row_dict['topaz_id']
             d[str(int(topaz_id))] = row_dict
         return d
+
+    @property
+    def ash_out(self):
+        ash_out = self.meta
+        hillslope_annuals = self.hillslope_annuals
+
+        for topaz_id in ash_out:
+            if ash_out[topaz_id]['ash_type'] is None or topaz_id not in hillslope_annuals:
+                ash_out[topaz_id]['water_transport (kg/ha)'] = 0.0
+                ash_out[topaz_id]['wind_transport (kg/ha)'] = 0.0
+                ash_out[topaz_id]['ash_transport (kg/ha)'] = 0.0
+                ash_out[topaz_id]['ash_ini_depth (mm)'] = 0.0
+            else:
+                ash_out[topaz_id]['water_transport (kg/ha)'] = hillslope_annuals[topaz_id]['water_transport (tonne/ha)'] * 1000.0
+                ash_out[topaz_id]['wind_transport (kg/ha)'] = hillslope_annuals[topaz_id]['wind_transport (tonne/ha)'] * 1000.0
+                ash_out[topaz_id]['ash_transport (kg/ha)'] = hillslope_annuals[topaz_id]['ash_transport (tonne/ha)'] * 1000.0
+                ash_out[topaz_id]['ash_ini_depth (mm)'] = ash_out[topaz_id]['ini_ash_depth']
+                ash_out[topaz_id]['area (ha)'] = ash_out[topaz_id]['area_ha']
+
+            if 'ini_ash_depth' in ash_out[topaz_id]:
+                del ash_out[topaz_id]['ini_ash_depth']
+
+            del ash_out[topaz_id]['area_ha']
+
+        return ash_out

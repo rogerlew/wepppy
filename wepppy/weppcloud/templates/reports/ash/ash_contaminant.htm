@@ -155,12 +155,13 @@
 </table>
 
 <h2>Recurrence Intervals</h2>
+<p>Ash delivery is the sum of low, moderate, and high RI (differ from RI calculated from daily events). This is necessary to treat contaminant concentrations separately for each burn severity.</p>
 <p><a onclick="javascript:copytable('rec_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a></p>
 <table class="table table-nonfluid" id="rec_tbl">
 <tbody>
 <tr>
     <th>Recurrence Interval</th>
-    <th>Ash Delivery by Water</th>
+    <th>Ash Delivery</th>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
         <th>{{ contaminant.replace('PO4', 'PO<sub>4</sub>') | safe }}</th>

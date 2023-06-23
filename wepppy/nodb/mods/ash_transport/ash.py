@@ -724,13 +724,15 @@ class Ash(NoDbBase, LogMixin):
                 raise NotImplementedError
 
             if _exists(ash_dir):
-                try:
-                    for fn in glob(_join(ash_dir, '*.pkl')):
-                        os.remove(fn)
-                except:
-                    sleep(10.0)
-                    for fn in glob(_join(ash_dir, '*.pkl')):
-                        os.remove(fn)
+
+                for fn in glob(_join(ash_dir, '*.parquet')):
+                    os.remove(fn)
+
+                for fn in glob(_join(ash_dir, '*.png')):
+                    os.remove(fn)
+
+                for fn in glob(_join(ash_dir, 'post', '*.pkl')):
+                    os.remove(fn)
 
             if not _exists(ash_dir):
                 os.makedirs(ash_dir)
