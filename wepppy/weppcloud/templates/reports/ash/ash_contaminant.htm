@@ -173,11 +173,7 @@
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
         <td style="width:100px; text-align: right;" >
-            {% if units == 'mg/kg' %}
                 {{ unitizer_units('kg') | safe }}
-            {% else %}
-                {{ unitizer_units('g') | safe }}
-            {% endif %}
         </td>
       {% endif %}
     {% endfor %}
@@ -200,10 +196,12 @@
                 {% set contaminant_load_high = _delivery_high * 1000 * high %}
                 {% set contaminant_load = contaminant_load_low + contaminant_load_mod + contaminant_load_high %}
 
-                {% if units == 'mg/kg' %}
-                    {{ unitizer(contaminant_load * 0.000001, 'kg') | safe }}
+                {% if units == 'g/kg' %}
+                    {{ unitizer(contaminant_load / 1E3, 'kg') | safe }}
+                {% elif units == 'mg/kg' %}
+                    {{ unitizer(contaminant_load / 1E6, 'kg') | safe }}
                 {% else %}
-                    {{ unitizer(contaminant_load * 0.000001, 'g') | safe }}
+                    {{ unitizer(contaminant_load / 1E9, 'kg') | safe }}
                 {% endif %}
             </td>
           {% endif %}
@@ -316,7 +314,9 @@
 
                 {% set concentration = contaminant_load / reservoir_current_volume_l %}
 
-                {% if units == 'mg/kg' %}
+                {% if units == 'g/kg' %}
+                    {{ unitizer(concentration, 'g/L') | safe }}
+                {% elif units == 'mg/kg' %}
                     {{ unitizer(concentration, 'mg/L') | safe }}
                 {% else %}
                     {{ unitizer(concentration, 'µg/L') | safe }}
