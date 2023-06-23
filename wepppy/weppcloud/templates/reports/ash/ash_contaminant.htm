@@ -196,8 +196,8 @@
           {% if contaminant in contaminants %}
             <td style="width:100px; text-align: right;" >
                 {% set contaminant_load_low = _delivery_low * 1000 * low %}
-                {% set contaminant_load_mod = _delivery_mod * 1000 * low %}
-                {% set contaminant_load_high = _delivery_high * 1000 * low %}
+                {% set contaminant_load_mod = _delivery_mod * 1000 * mod %}
+                {% set contaminant_load_high = _delivery_high * 1000 * high %}
                 {% set contaminant_load = contaminant_load_low + contaminant_load_mod + contaminant_load_high %}
 
                 {% if units == 'mg/kg' %}
@@ -310,8 +310,8 @@
             <td style="width:100px; text-align: right;" >
                 {% set reservoir_current_volume_l = reservoir_current_volume_m3 * 1000.0 %}
                 {% set contaminant_load_low = _delivery_low * 1000 * low %}
-                {% set contaminant_load_mod = _delivery_mod * 1000 * low %}
-                {% set contaminant_load_high = _delivery_high * 1000 * low %}
+                {% set contaminant_load_mod = _delivery_mod * 1000 * mod %}
+                {% set contaminant_load_high = _delivery_high * 1000 * high %}
                 {% set contaminant_load = contaminant_load_low + contaminant_load_mod + contaminant_load_high %}
 
                 {% set concentration = contaminant_load / reservoir_current_volume_l %}
