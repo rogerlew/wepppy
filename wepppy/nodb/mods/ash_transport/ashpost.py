@@ -31,7 +31,7 @@ from wepppy.nodb.base import NoDbBase
 
 from pprint import pprint
 
-common_cols =  ['area (ha)', 'topaz_id', 'year', 'mo', 'da', 'julian', 'year0', 'days_from_fire (days)', 'burn_class']
+common_cols =  ['area (ha)', 'topaz_id', 'year', 'mo', 'da', 'julian', 'days_from_fire (days)', 'year0', 'burn_class']
 
 out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
             'wind_transport (tonne/ha)', 'water_transport (tonne/ha)', 'ash_transport (tonne/ha)',
@@ -75,7 +75,7 @@ def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_ex
             else:
                 _row = df.iloc[indx][cols_to_extract].to_dict()
                 for _m in _row:
-                    if _m in ('year0', 'year', 'mo', 'da', 'days_from_fire (days)', measure_rank):
+                    if _m in ('date_int', 'year0', 'year', 'mo', 'da', 'days_from_fire (days)', measure_rank):
                         _row[_m] = int(_row[_m])
                     elif isfloat(_row[_m]):
                         _row[_m] = float(_row[_m])
@@ -140,13 +140,15 @@ def calculate_hillslope_statistics(df, ash, ash_post_dir):
     df_hillslope_average_annuals.to_pickle(_join(ash_post_dir, 'hillslope_annuals.pkl'))
 
 
-def calculate_watershed_statisics(df, ash_post_dir, recurrence):
+def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1, 2, 3]):
     global common_cols
+
+    df.to_pickle(_join(ash_post_dir, 'full.pkl'))
 
     measures = ['wind_transport (tonne)', 'water_transport (tonne)', 'ash_transport (tonne)']
 
     ws_cols_to_drop = ['date_int', 'topaz_id']
-    for col in ['year0', 'da', 'mo', 'julian', 'year']:
+    for col in ['da', 'mo', 'julian']:
         if col in out_cols:
             ws_cols_to_drop.append(col)
 
@@ -166,47 +168,65 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence):
 
     del df_annuals
 
-    df_daily = df.groupby('date_int').agg(agg_d)
+    print(df.info())
+
+    df_daily = df.groupby(['year0', 'year', 'julian']).agg(agg_d)
     df_daily.to_pickle(_join(ash_post_dir, 'watershed_daily.pkl'))
 
     num_days = len(df_daily.julian)
     num_fire_years = num_days / 365.25
     return_periods = {}
-    cols_to_extract = ['days_from_fire (days)']
+    cols_to_extract = ['days_from_fire (days)', 'year0', 'year', 'julian']
+
+    # Group the DataFrame by 'date_int' and 'burn_class' columns
+    grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class']).agg(agg_d)
+    grouped_df.to_pickle(_join(ash_post_dir, 'watershed_daily_by_burnclass.pkl'))
+
+    # Initialize the return_periods dictionary
+    burn_class_return_periods = {}
+    for burn_class in burn_classes:
+        burn_class_return_periods[burn_class] = {}
+        for measure in measures:
+            burn_class_return_periods[burn_class][measure] = {}
+            for rec in recurrence:
+                burn_class_return_periods[burn_class][measure][rec] = {}
 
     for measure in measures:
         return_periods[measure] = calculate_return_periods(df_daily, measure, recurrence, num_fire_years,
                                                            cols_to_extract)
 
-    # Group the DataFrame by 'date_int' and 'burn_class' columns
-    grouped_df = df.groupby(['date_int', 'burn_class']).agg(agg_d)
+        for rec in return_periods[measure]:
+            v = return_periods[measure][rec][measure]
 
-    # Pivot the multi-level index to have burn_class as columns
-    df_daily = grouped_df.unstack(level='burn_class')
+            year0 = return_periods[measure][rec].get('year0', None)
+            year = return_periods[measure][rec].get('year', None)
+            julian = return_periods[measure][rec].get('julian', None)
 
-    # Compute the number of days and fire years
-    num_days = len(df_daily.index)
-    num_fire_years = num_days / 365.25
+            for burn_class in burn_classes:
+                burn_class_return_periods[burn_class][measure][rec] = deepcopy(return_periods[measure][rec])
+                burn_class_return_periods[burn_class][measure][rec][measure] = 0.0
 
-    # Initialize the return_periods dictionary
-    burn_class_return_periods = {burn_class: {} for burn_class in [1, 2, 3, 4]}
+                if v == 0:
+                    continue
 
-    # Iterate through burn classes and calculate return_periods for each one
-    burn_classes_present = df['burn_class'].unique()
-    for burn_class in [1, 2, 3, 4]:
-        cols_to_extract = ['days_from_fire (days)']
-        for measure in measures:
-            # Calculate return_periods using the values for the current burn_class
-            if burn_class in  burn_classes_present:
-                burn_class_return_periods[burn_class][measure] = calculate_return_periods(
-                    df_daily.xs(burn_class, axis=1, level='burn_class'),
-                    measure,
-                    recurrence,
-                    num_fire_years,
-                    cols_to_extract
-                )
-            else:
-                burn_class_return_periods[burn_class][measure] = {rec: {measure: 0} for rec in recurrence}
+                # Calculate return_periods using the values for the current burn_class
+                # Boolean indexing to filter rows
+
+                print(year0, year, burn_class)
+                filtered_df = grouped_df[(grouped_df['year0'] == np.uint16(year0)) &
+                                         (grouped_df['year'] == np.uint16(year)) &
+                                         (grouped_df['julian'] == np.uint16(julian)) &
+                                         (grouped_df['burn_class'] == np.uint8(burn_class))]
+
+                num_rows = len(filtered_df)
+
+                if num_rows == 0:
+                    continue
+                elif num_rows == 1:
+                    burn_class_return_periods[burn_class][measure][rec][measure] = float(filtered_df.iloc[0][measure])
+                    print(filtered_df, burn_class_return_periods[burn_class][measure][rec][measure])
+                else:
+                    raise Exception('Unexpected number of rows: {}'.format(num_rows))
 
     return return_periods, burn_class_return_periods
 
@@ -260,102 +280,6 @@ def read_hillslope_out_fn(out_fn, meta_data=None, meta_data_types=None, cumulati
         df_agg = df_agg[df_agg['transportable_ash (tonne/ha)'] == 0.0]
     return df_agg
 
-
-def calculate_cum_watershed_stats_by_burnclass(cum_df):
-    """
-    cum_df cols
-    Data columns (total 55 columns):
- #   Column                          Non-Null Count  Dtype
----  ------                          --------------  -----
- 0   date_int                        295 non-null    int64
- 1   year0                           295 non-null    uint16
- 2   year                            295 non-null    uint16
- 3   da                              295 non-null    uint16
- 4   mo                              295 non-null    uint16
- 5   julian                          295 non-null    int16
- 6   days_from_fire (days)           295 non-null    int64
- 7   precip (mm)                     295 non-null    float32
- 8   rainmelt (mm)                   295 non-null    float32
- 9   snow_water_equivalent (mm)      295 non-null    float32
- 10  runoff (mm)                     295 non-null    float32
- 11  tot_soil_water (mm)             295 non-null    float32
- 12  infiltration (mm)               295 non-null    float32
- 13  cum_infiltration (mm)           295 non-null    float32
- 14  cum_runoff (mm)                 295 non-null    float32
- 15  bulk_density (gm/cm3)           295 non-null    float64
- 16  remaining_ash (tonne/ha)        295 non-null    float64
- 17  transportable_ash (tonne/ha)    295 non-null    float64
- 18  ash_depth (mm)                  295 non-null    float64
- 19  ash_runoff (mm)                 295 non-null    float64
- 20  transport (tonne/ha)            295 non-null    float64
- 21  cum_ash_runoff (mm)             295 non-null    float64
- 22  water_transport (tonne/ha)      295 non-null    float64
- 23  wind_transport (tonne/ha)       295 non-null    float64
- 24  ash_transport (tonne/ha)        295 non-null    float64
- 25  ash_decomp (tonne/ha)           295 non-null    float64
- 26  cum_water_transport (tonne/ha)  295 non-null    float64
- 27  cum_wind_transport (tonne/ha)   295 non-null    float64
- 28  cum_ash_transport (tonne/ha)    295 non-null    float64
- 29  cum_ash_decomp (tonne/ha)       295 non-null    float64
- 30  topaz_id                        295 non-null    uint16
- 31  area (ha)                       295 non-null    float32
- 32  burn_class                      295 non-null    uint8
- 33  remaining_ash (tonne)           295 non-null    float64
- 34  transportable_ash (tonne)       295 non-null    float64
- 35  transport (tonne)               295 non-null    float64
- 36  water_transport (tonne)         295 non-null    float64
- 37  wind_transport (tonne)          295 non-null    float64
- 38  ash_transport (tonne)           295 non-null    float64
- 39  ash_decomp (tonne)              295 non-null    float64
- 40  cum_water_transport (tonne)     295 non-null    float64
- 41  cum_wind_transport (tonne)      295 non-null    float64
- 42  cum_ash_transport (tonne)       295 non-null    float64
- 43  cum_ash_decomp (tonne)          295 non-null    float64
- 44  precip (m^3)                    295 non-null    float32
- 45  rainmelt (m^3)                  295 non-null    float32
- 46  snow_water_equivalent (m^3)     295 non-null    float32
- 47  runoff (m^3)                    295 non-null    float32
- 48  tot_soil_water (m^3)            295 non-null    float32
- 49  infiltration (m^3)              295 non-null    float32
- 50  cum_infiltration (m^3)          295 non-null    float32
- 51  cum_runoff (m^3)                295 non-null    float32
- 52  ash_depth (m^3)                 295 non-null    float64
- 53  ash_runoff (m^3)                295 non-null    float64
-    """
-
-    # Group the DataFrame by 'burn_class' column
-    grouped_df = cum_df.groupby('burn_class')
-
-    # Compute the count and mean for the specified columns
-    result = grouped_df.agg(
-        {
-            'cum_water_transport (tonne)': ['count', 'mean'],
-            'cum_wind_transport (tonne)': ['mean'],
-            'cum_ash_transport (tonne)': ['mean'],
-        }
-    )
-
-    # Initialize the dictionary with default values
-    pw0_stats = {
-        burn_class: {
-            'count': 0,
-            'cum_water_transport (tonne)': 0,
-            'cum_wind_transport (tonne)': 0,
-            'cum_ash_transport (tonne)': 0,
-        }
-        for burn_class in [1, 2, 3, 4]
-    }
-
-    # Iterate through the result DataFrame and update the values in the dictionary
-    for index, row in result.iterrows():
-        pw0_stats[index] = {
-            'count': int( row[('cum_water_transport (tonne)', 'count') ] ),
-            'cum_water_transport (tonne)': float( row[('cum_water_transport (tonne)', 'mean') ] ),
-            'cum_wind_transport (tonne)': float( row[('cum_wind_transport (tonne)', 'mean') ] ),
-            'cum_ash_transport (tonne)': float( row[('cum_ash_transport (tonne)', 'mean') ] ),
-        }
-
-    return pw0_stats
 
 
 def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20, 10, 5, 2), verbose=True):
@@ -431,7 +355,6 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
         area_m2 = summary['area']
         area_ha = area_m2 / 10000
 
-
         # get the list of output files
         out_fn = _join(ash.ash_dir, f'H{wepp_id}_ash.parquet')
 
@@ -446,13 +369,12 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
     df = pd.concat(hill_data_frames, ignore_index=True)
 
     cum_return_periods = calculate_cumulative_transport(df, recurrence, ash_post_dir)
-    pw0_stats = calculate_cum_watershed_stats_by_burnclass(df)
 
     del df
     del hill_data_frames
 
     # return all the results
-    return return_periods, cum_return_periods, burn_class_return_periods, pw0_stats
+    return return_periods, cum_return_periods, burn_class_return_periods
 
 
 
@@ -476,7 +398,6 @@ class AshPost(NoDbBase):
         try:
             self._return_periods = None
             self._cum_return_periods = None
-            self._pw0_stats = None
             self.dump_and_unlock()
 
         except Exception:
@@ -563,7 +484,7 @@ class AshPost(NoDbBase):
         try:
             res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
             if res != None:
-                self._return_periods, self._cum_return_periods, self._burn_class_return_periods, self._pw0_stats = res
+                self._return_periods, self._cum_return_periods, self._burn_class_return_periods = res
 
             self.dump_and_unlock()
         except Exception:
