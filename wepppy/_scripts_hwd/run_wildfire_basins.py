@@ -23,23 +23,24 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 ############# THESE ARE THE ONLY INPUTS TO CHANGE
-filepath = 'geodata/small_basin_input_data/august_complex_basins_from_fire_perimeter_0p1_to_45km2_extent500m.csv'
-firename = 'august_complex'
-fire_year = 2020
-water_year = 2021
+filepath = 'geodata/small_basin_input_data/2018_basins/ranch_fire_perim_basins_utm10S.csv'
+firename = 'ranch_fire_v2'
+fire_year = 2018
+water_year = 2019
+utmzn = 10
+utmzs = 'S'
+main_folder = '/media/helen/HelenData/wepppy_runs/2018_fires/'
+config_filepath = '/home/helen/wepppy/wepppy/nodb/configs/run_fire_basins.cfg'
 #############
 
-
-config_filepath = firename + '.cfg'
-base_name = '/home/helen/geodata/wepppy_runs/' + firename + '/'
-# base_name = '/media/helen/HelenData/wepppy_runs/' + firename + '/'
-# precip_threshold_exceeded = []
-# new_outlet_x = []
-# new_outlet_y = []
-# new_da = []
-# outlet_sed_yield = []
-# hs_sed_yield = []
-# basin_ids_keep = []
+base_name = main_folder + firename + '/'
+precip_threshold_exceeded = []
+new_outlet_x = []
+new_outlet_y = []
+new_da = []
+outlet_sed_yield = []
+hs_sed_yield = []
+basin_ids_keep = []
 
 
 df = pd.read_csv(filepath)
@@ -48,15 +49,15 @@ df = pd.read_csv(filepath)
 
 output_name = firename + '_wepp_output.csv'
 
-os.chdir('geodata/wepppy_runs')
-# os.chdir('/media/helen/HelenData/wepppy_runs')
-# os.mkdir(firename)
+os.chdir(main_folder)
+os.mkdir(firename)
 os.chdir(firename)
 
 bigtic=time.perf_counter()
 
-for i in range(33,34):
-    # try:
+for i in range(len(df)):
+    print(firename)
+    try:
         if __name__ == '__main__':
             projects = [
                         dict(wd= firename + '_' + str(df.basin_id[i]),
@@ -66,7 +67,7 @@ for i in range(33,34):
                             outlet=[df.outlet_x[i], df.outlet_y[i]],
                             landuse=None,
                             cs=19, erod=0.000001, chn_chn_wepp_width=1.0,
-                            da=df.DA_km2[i]),
+                            da=df.da_km2[i]),
                         ]
 
             for proj in projects:
@@ -82,20 +83,24 @@ for i in range(33,34):
                 drainage_area = proj['da']
 
 
-                temp = utm.to_latlon(extent[0],extent[1],10,'S')
+                temp = utm.to_latlon(extent[0],extent[1],utmzn,utmzs)
                 extent[0] = temp[1]
                 extent[1] = temp[0]
-                temp = utm.to_latlon(extent[2],extent[3],10,'S')
+                temp = utm.to_latlon(extent[2],extent[3],utmzn,utmzs)
                 extent[2] = temp[1]
                 extent[3] = temp[0]
 
-                temp = utm.to_latlon(map_center[0],map_center[1],10,'S')
+                temp = utm.to_latlon(map_center[0],map_center[1],utmzn,utmzs)
                 map_center[0] = temp[1]
                 map_center[1] = temp[0]
 
-                temp = utm.to_latlon(outlet[0],outlet[1],10,'S')
+                temp = utm.to_latlon(outlet[0],outlet[1],utmzn,utmzs)
                 outlet[0] = temp[1]
                 outlet[1] = temp[0]
+
+                print('type(extent)=', type(extent))
+
+
 
                 if _exists(wd):
                     shutil.rmtree(wd)
@@ -160,6 +165,10 @@ for i in range(33,34):
                 soils.mode = SoilsMode.Gridded
                 soils.build()
 
+                from wepppy.nodb.mods.disturbed import Disturbed
+                disturbed = Disturbed.getInstance(wd)
+                print(disturbed.sbs_coverage)
+
                 print('building climate')
                 climate = Climate.getInstance(wd)
                 stations = climate.find_closest_stations()
@@ -195,64 +204,78 @@ for i in range(33,34):
                 # print(loss_report.out_tbl)
 
 
-                # folder_name = base_name + wd + '/wepp/output'
-                # os.chdir(folder_name)
-                # wepp_output = pd.read_csv('ebe_pw0.txt', delim_whitespace=True, names=['day','month','year','precip','runoff_vol','runoff_peak','sed_kg'], skiprows=9, usecols=[0,1,2,3,4,5,6])
-                # yr = fire_year
-                # for j in range(2):
-                #     wepp_output.loc[(wepp_output['month'] <10) & (wepp_output['year'] == j+1), 'wy'] = yr
-                #     wepp_output.loc[(wepp_output['month'] >9) & (wepp_output['year'] == j+1), 'wy'] = yr+1
-                #     yr = yr+1
-                # annual_sed_data = wepp_output.groupby(["wy"])["sed_kg"].sum()
-                # print('annual_sed_data.iloc[1]=',annual_sed_data.iloc[1])
-                # outlet_sed_yield.append(annual_sed_data.iloc[1])
+                folder_name = base_name + wd + '/wepp/output'
+                os.chdir(folder_name)
+                wepp_output = pd.read_csv('ebe_pw0.txt', delim_whitespace=True, names=['day','month','year','precip','runoff_vol','runoff_peak','sed_kg'], skiprows=9, usecols=[0,1,2,3,4,5,6])
+                yr = fire_year
+                for j in range(2):
+                    wepp_output.loc[(wepp_output['month'] <10) & (wepp_output['year'] == j+1), 'wy'] = yr
+                    wepp_output.loc[(wepp_output['month'] >9) & (wepp_output['year'] == j+1), 'wy'] = yr+1
+                    yr = yr+1
+                annual_sed_data = wepp_output.groupby(["wy"])["sed_kg"].sum()
+                print('annual_sed_data.iloc[1]=',annual_sed_data.iloc[1])
+                outlet_sed_yield.append(annual_sed_data.iloc[1])
 
-                # folder_name = base_name + wd + '/export'
-                # os.chdir(folder_name)
-                # hillslopes_output = pd.read_csv('totalwatsed.csv', names=['wy','sed_kg'], skiprows=5, usecols=[4,5])
-                # print('hillslopes_output=', hillslopes_output)
-                # hs_annual_sed_data = hillslopes_output.groupby(["wy"])["sed_kg"].sum()
-                # hs_sed_yield.append(hs_annual_sed_data.iloc[1])
+                folder_name = base_name + wd + '/export'
+                os.chdir(folder_name)
+                hillslopes_output = pd.read_csv('totalwatsed.csv', names=['wy','sed_kg'], skiprows=5, usecols=[4,5])
+                print('hillslopes_output=', hillslopes_output)
+                hs_annual_sed_data = hillslopes_output.groupby(["wy"])["sed_kg"].sum()
+                hs_sed_yield.append(hs_annual_sed_data.iloc[1])
 
-                # folder_name = base_name + wd + '/climate'
-                # os.chdir(folder_name)
-                # climate_data = pd.read_csv('wepp.cli',delim_whitespace=True, names=['day','month','year','prcp','dur','tp','ip'], skiprows=15, usecols=[0,1,2,3,4,5,6])
-                # climate_data['avg_intensity'] = climate_data['prcp'].divide(climate_data['dur'])
-                # climate_data['peak_intensity'] = climate_data['ip'].multiply(climate_data['avg_intensity'])
-                # # climate_data['wy'] = wepp_output['wy']
-                # climate_data.loc[(climate_data['peak_intensity'] > 24) & (wepp_output['wy'] == water_year),'thresh_intensity'] = 1
-                # precip_threshold_exceeded.append(climate_data['thresh_intensity'].sum())
-                # climate_data.to_csv('climate_data.csv')  
+                folder_name = base_name + wd + '/climate'
+                os.chdir(folder_name)
+                climate_data = pd.read_csv('wepp.cli',delim_whitespace=True, names=['day','month','year','prcp','dur','tp','ip'], skiprows=15, usecols=[0,1,2,3,4,5,6])
+                climate_data['avg_intensity'] = climate_data['prcp'].divide(climate_data['dur'])
+                climate_data['peak_intensity'] = climate_data['ip'].multiply(climate_data['avg_intensity'])
+                # climate_data['wy'] = wepp_output['wy']
+                climate_data.loc[(climate_data['peak_intensity'] > 24) & (wepp_output['wy'] == water_year),'thresh_intensity'] = 1
+                precip_threshold_exceeded.append(climate_data['thresh_intensity'].sum())
+                climate_data.to_csv('climate_data.csv')  
 
-                # basin_ids_keep.append(df.basin_id[i])
-                # new_outlet_x.append(no[0])
-                # new_outlet_y.append(no[1])
-                # new_da.append(wat.wsarea/1e6)
+                basin_ids_keep.append(df.basin_id[i])
+                new_outlet_x.append(no[0])
+                new_outlet_y.append(no[1])
+                new_da.append(wat.wsarea/1e6)
 
-                # os.chdir('..')
-                # os.chdir('..')
+                os.chdir('..')
+                ## remove a bunch of directories that take up too much space
+                # shutil.rmtree('climate')
+                # shutil.rmtree('dem')
+                # shutil.rmtree('disturbed')
+                # shutil.rmtree('landuse')
+                # shutil.rmtree('soils')
+                # shutil.rmtree('watershed')
+                # shutil.rmtree('observed')
+
+                cwd = os.getcwd()
+                dir_list = os.listdir(cwd)
+                for item in dir_list:
+                    if item.endswith('.nodb'):
+                        os.remove(os.path.join(cwd, item))
+                os.chdir('..')
                 # cwd = os.getcwd()
                 # print("Current working directory: {0}".format(cwd))
 
                 toc=time.perf_counter()
                 print('minutes elapsed for wepppy basin calcs = ', (toc-tic)/60)
                 print('----------------------------------------------------------------')
-    # except:
-    #     shutil.rmtree(wd)
-    #     pass
+    except:
+        shutil.rmtree(wd)
+        pass
 
-# newdf = pd.DataFrame()
-# newdf['basinid'] = basin_ids_keep
-# newdf['outlet_sed_yield'] = outlet_sed_yield
-# newdf['hillslope_sed_yield'] = hs_sed_yield
-# newdf['precip_threshold_exceeded'] = precip_threshold_exceeded
-# newdf['new_outlet_x'] = new_outlet_x
-# newdf['new_outlet_y'] = new_outlet_y
-# newdf['new_da'] = new_da
+newdf = pd.DataFrame()
+newdf['basinid'] = basin_ids_keep
+newdf['outlet_sed_yield'] = outlet_sed_yield
+newdf['hillslope_sed_yield'] = hs_sed_yield
+newdf['precip_threshold_exceeded'] = precip_threshold_exceeded
+newdf['new_outlet_x'] = new_outlet_x
+newdf['new_outlet_y'] = new_outlet_y
+newdf['new_da'] = new_da
 
 
-# print(newdf)
-# newdf.to_csv(output_name)
+print(newdf)
+newdf.to_csv(output_name)
 
 bigtoc=time.perf_counter()
 print('minutes elapsed for entire basin, one year = ', (bigtoc-bigtic)/60)
