@@ -1,7 +1,10 @@
 from subprocess import Popen, PIPE
 from osgeo import gdal, osr
 from os.path import exists as _exists
-from wepppy.all_your_base.geo import get_utm_zone, utm_srid
+
+import numpy as np
+
+from wepppy.all_your_base.geo import get_utm_zone, utm_srid, read_raster
 import cv2
 
 class RoadDEM(object):

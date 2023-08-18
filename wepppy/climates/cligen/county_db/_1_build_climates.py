@@ -26,7 +26,7 @@ import shutil
 from wepppy.climates.metquery_client import get_daily
 from wepppy.climates.daymet_singlelocation_client import retrieve_historical_timeseries
 
-from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, build_daymet_prn, df_to_prn
+from wepppy.climates.cligen import CligenStationsManager, ClimateFile, Cligen, df_to_prn
 
 if __name__ == "__main__":
 
