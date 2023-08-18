@@ -101,7 +101,7 @@ class WeppSoilUtil(object):
                 line = shlex.split(lines[i])
                 i += 1
 
-            if solwpv < 941 or solwpv >= 7777:       
+            if solwpv < 941 or solwpv >= 7777 or datver == 2006.2:
                 # 1   2      3    4     5    6   7   8
                 slid, texid, nsl, salb, sat, ki, kr, shcrit = line[:8]
                 avke = None
@@ -193,9 +193,11 @@ class WeppSoilUtil(object):
                     ofes=ofes,
                     res_lyr=res_lyr)
 
-        yaml_txt = yaml.dump(soil)
+        self.obj = soil
 
-        self.obj = yaml.safe_load(yaml_txt)
+#        yaml_txt = yaml.dump(soil)
+
+#        self.obj = yaml.safe_load(yaml_txt)
 
     def modify_kslast(self, kslast):
         self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
@@ -500,7 +502,10 @@ class WeppSoilUtil(object):
         _kslast = replacements.get('kslast', None)
         _luse = replacements.get('luse', None)
         _stext = replacements.get('stext', None)
-        _lkeff = replacements.get('lkeff', '-9999')
+        _lkeff = replacements.get('lkeff', '')
+
+        if _lkeff == '':
+            _lkeff = '-9999'
        
         new.obj['ksflag'] = _replace_parameter(new.obj['ksflag'], _ksflag)
  
@@ -607,7 +612,7 @@ if __name__ == "__main__":
 
     #fp = open('/home/weppdev/PycharmProjects/wepppy/wepppy/nodb/mods/baer/data/soils/summary.csv', 'w')
     fp = open('/home/roger/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/summary.csv', 'w')
-    fp.write('slid,texid,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
+    fp.write('slid,texid,burn_class,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
     for sol_fn in sol_fns:
         sol = WeppSoilUtil(sol_fn)
         sol.dump_yaml(sol_fn.replace('.sol', '.sol.yaml'))
@@ -615,15 +620,15 @@ if __name__ == "__main__":
         ofe = sol.obj['ofes'][0]
         hor = ofe['horizons'][0]
 
-        burnclass = ''
+        burn_class = ''
         if 'high' in ofe['slid'].lower():
-            burnclass = 'high'
+            burn_class = 'high'
 
         if 'low' in ofe['slid'].lower():
-            burnclass = 'low'
+            burn_class = 'low'
 
         fp.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'
-                 .format(ofe['slid'], ofe['texid'], burnclass, ofe['salb'], ofe['sat'], ofe['ki'], ofe['kr'], ofe['shcrit'], ofe['avke'],
+                 .format(ofe['slid'], ofe['texid'], burn_class, ofe['salb'], ofe['sat'], ofe['ki'], ofe['kr'], ofe['shcrit'], ofe['avke'],
                          hor['sand'], hor['clay'], hor['orgmat'], hor['cec'], hor['rfg'], hor['solthk']))
 
     fp.close()
