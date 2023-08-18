@@ -13,12 +13,17 @@ from .row_data import parse_name, parse_units, RowData
 
 from wepppy.wepp.out import Loss, Ebe
 
+from copy import deepcopy
 
 class ReturnPeriods:
-    def __init__(self, ebe: Ebe, loss: Loss, cli_df: DataFrame, recurrence=(2, 5, 10, 20, 25)):
+    def __init__(self, ebe: Ebe = None, loss: Loss = None, cli_df: DataFrame = None, recurrence=(2, 5, 10, 20, 25)):
+        if ebe is None or loss is None or cli_df is None:
+            return
+
         self.has_phosphorus = loss.has_phosphorus
 
-        df = ebe.df
+        df = deepcopy(ebe.df)
+        print(df.info())
 
         pk_intensity_dict = {}
 
@@ -105,6 +110,42 @@ class ReturnPeriods:
         self.units_d['Peak Discharge'] = 'm^3/s'
         self.units_d['Sediment Yield'] = 'tonne'
 
+    def to_dict(self):
+        return {
+            'has_phosphorus': self.has_phosphorus,
+            'header': self.header,
+            'y0': self.y0,
+            'years': self.years,
+            'wsarea': self.wsarea,
+            'recurrence': self.recurrence,
+            'return_periods': self.return_periods,
+            'num_events': self.num_events,
+            'intervals': self.intervals,
+            'units_d': self.units_d
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        rp = cls()
+
+        rp.has_phosphorus = data['has_phosphorus']
+        rp.header = data['header']
+        rp.y0 = data['y0']
+        rp.years = data['years']
+        rp.wsarea = data['wsarea']
+        rp.recurrence = data['recurrence']
+        rp.num_events = data['num_events']
+        rp.intervals = data['intervals']
+        rp.units_d = data['units_d']
+
+        ret_periods = data['return_periods']
+        rp.return_periods = {}
+        for measure in ret_periods:
+            rp.return_periods[measure] = {}
+            for rec, row in ret_periods[measure].items():
+                rp.return_periods[measure][int(rec)] = row
+
+        return rp
 
 if __name__ == "__main__":
     from pprint import  pprint
