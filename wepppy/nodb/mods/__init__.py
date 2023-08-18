@@ -9,6 +9,7 @@ from .shrubland import Shrubland, nlcd_shrubland_layers
 from .rangeland_cover import RangelandCover, RangelandCoverMode
 from .rhem import Rhem, RhemPost
 from .treecanopy import Treecanopy
+from .skid_trails import SkidTrails
 from .locations import *
 
 import os
