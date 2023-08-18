@@ -46,6 +46,7 @@ from wepppy.climates.metquery_client import get_prism_monthly_tmin, get_prism_mo
 static_dir = None
 app = Flask(__name__)
 
+from deprecated import deprecated
 
 def safe_float_parse(x):
     """
@@ -586,6 +587,7 @@ def observed_daymet(par):
         return r
 """
 
+@deprecated
 # noinspection PyPep8Naming
 @app.route('/future_rcp85/<par>', methods=['GET', 'POST'])
 @app.route('/future_rcp85/<par>/', methods=['GET', 'POST'])
