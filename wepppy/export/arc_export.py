@@ -165,7 +165,7 @@ def arc_export(wd, verbose=False):
                     f['properties']['Awat(tonne)'] = ash_out[topaz_id]['water_transport (kg/ha)'] * area_ha / 1000.0
                     f['properties']['Awnd(tonne)'] = ash_out[topaz_id]['wind_transport (kg/ha)'] * area_ha / 1000.0
                     f['properties']['AshT(tonne)'] = ash_out[topaz_id]['ash_transport (kg/ha)'] * area_ha / 1000.0
-                    f['properties']['Burnclass'] = ash_out[topaz_id]['burnclass']
+                    f['properties']['Burnclass'] = ash_out[topaz_id]['burn_class']
 
         for k, v in f['properties'].items():
             if isnan(v) or isinf(v):
