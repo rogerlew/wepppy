@@ -5,7 +5,7 @@ from .hill_loss import HillLoss
 from .hill_wat import HillWat, watershed_swe
 from .chnwb import Chnwb
 from .chanwb import Chanwb
-from .totalwatsed import TotalWatSed, TotalWatSed2
+from .totalwatsed import TotalWatSed2, DisturbedTotalWatSed2
 from .element import *
 from .hill_pass import *
 
