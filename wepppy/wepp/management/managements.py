@@ -42,6 +42,7 @@ _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _disturbed_map_fn = _join(_management_dir, "disturbed.json")
 _eu_disturbed_map_fn = _join(_management_dir, "eu-disturbed.json")
+_au_disturbed_map_fn = _join(_management_dir, "au-disturbed.json")
 _ca_disturbed_map_fn = _join(_management_dir, "ca-disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
 _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
@@ -1915,6 +1916,9 @@ def load_map(_map=None):
     elif 'eu-disturbed' in _map.lower():
         with open(_eu_disturbed_map_fn) as fp:
             d = json.load(fp)
+    elif 'au-disturbed' in _map.lower():
+        with open(_au_disturbed_map_fn) as fp:
+            d = json.load(fp)
     elif 'ca-disturbed' in _map.lower():
         with open(_ca_disturbed_map_fn) as fp:
             d = json.load(fp)
@@ -1930,19 +1934,22 @@ def load_map(_map=None):
 
     return d
 
-    
+
 class InvalidManagementKey(Exception):
     """
     This Key is Unknown and should be defined in the
     wepppy/wepp/management/data/map.json file
     """
-    
-    __name__ = 'InvalidManagementKey'
-    
-    def __init__(self):
-        pass
 
-        
+    __name__ = 'InvalidManagementKey'
+
+    def __init__(self, key):
+        self.key = key
+
+    def __str__(self):
+        return f"{self.key} is an invalid key"
+
+
 def get_management_summary(dom, _map=None) -> ManagementSummary:
     """
     Parameters
@@ -1962,7 +1969,7 @@ def get_management_summary(dom, _map=None) -> ManagementSummary:
     d = load_map(_map=_map)
     k = str(dom)
     if k not in d:
-        raise InvalidManagementKey
+        raise InvalidManagementKey(k)
 
     return ManagementSummary(**d[k], _map=_map)
 
