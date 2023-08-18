@@ -1,0 +1,40 @@
+{% extends "reports/_page_container.htm" %}
+{% block report_title %}Average Annuals by Landuse{% endblock %}
+{% block report_content %}
+<h2>Average Annuals by Landuse (averaged by water year)</h2>
+<h5>
+  <a onclick="javascript:copytable('landuse_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
+</h5>
+ <table class="table table-condensed" id="landuse_tbl">
+    <thead>
+      <tr>
+        {% for colname in report.hdr %}
+        <th>{{ colname }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      {% for units in report.units %}
+        {% if units is none%}
+        <td>&nbsp;</td>
+        {% else %}
+        <td>{{ unitizer_units(units) | safe }}</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% for row in report %}
+    <tr>
+    {% for value, units in row %}
+        {% if loop.first %}
+        <td>{{ value | round | int}}</td>
+        {% else %}
+        <td>{{ unitizer(value, units) | safe }}</td>
+        {% endif %}
+    {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+ <p>Landuse water balance measures are calculated for each landuse from the .wat.dat file by summing values within each water year and then dividing by the number of water years - 1.</p>
+{% endblock %}
