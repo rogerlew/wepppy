@@ -15,7 +15,7 @@
     </tr>
     <tr>
       <th>&nbsp;</th>
-      {% for ret_period in rhempost.ret_freq_periods %}
+      {% for ret_period in rhempost.ret_freq_periods | sort_numeric(reverse=True) %}
         <th>{{ ret_period }}</th>
       {% endfor %}
       <th>&nbsp;</th>

@@ -21,7 +21,163 @@
         {% endif %}
     </div>
     <div id="landuse_mode0_controls" class="form-group row hide-readonly">
+        {% if 'us' in ron.locales%}
+
+            <div class="col-sm-5">
+                <label for="nlcd_db">Select Landcover DB: </label>
+            </div>
+            <div class="col-sm-8">
+                <select class="form-control disable-readonly" id="landuse_db" name="landuse_db" onchange="Landuse.getInstance().setLanduseDb(this.value)">
+                  <option value="nlcd/2019" {% if landuse.nlcd_db == "nlcd/2019" %}selected{% endif %}>nlcd/2019</option>
+                  <option value="nlcd/2016" {% if landuse.nlcd_db == "nlcd/2016" %}selected{% endif %}>nlcd/2016</option>
+                  <option value="nlcd/2013" {% if landuse.nlcd_db == "nlcd/2013" %}selected{% endif %}>nlcd/2013</option>
+                  <option value="nlcd/2011" {% if landuse.nlcd_db == "nlcd/2011" %}selected{% endif %}>nlcd/2011</option>
+                  <option value="nlcd/2008" {% if landuse.nlcd_db == "nlcd/2008" %}selected{% endif %}>nlcd/2008</option>
+                  <option value="nlcd/2006" {% if landuse.nlcd_db == "nlcd/2006" %}selected{% endif %}>nlcd/2006</option>
+                  <option value="nlcd/2004" {% if landuse.nlcd_db == "nlcd/2004" %}selected{% endif %}>nlcd/2004</option>
+                  <option value="nlcd/2001" {% if landuse.nlcd_db == "nlcd/2001" %}selected{% endif %}>nlcd/2001</option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2017"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2017" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2017
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2016"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2016" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2016
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2015"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2015" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2015
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2014"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2014" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2014
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2013"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2013" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2013
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2012"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2012" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2012
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2011"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2011" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2011
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2010"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2010" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2010
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2009"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2009" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2009
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2008"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2008" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2008
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2007"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2007" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2007
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2006"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2006" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2006
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2005"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2005" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2005
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2004"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2004" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2004
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2003"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2003" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2003
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2002"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2002" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2002
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2001"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2001" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2001
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2000"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2000" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/2000
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1999"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1999" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1999
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1998"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1998" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1998
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1997"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1997" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1997
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1996"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1996" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1996
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1995"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1995" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1995
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1994"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1994" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1994
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1993"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1993" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1993
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1992"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1992" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1992
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1991"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1991" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1991
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1990"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1990" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1990
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1989"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1989" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1989
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1988"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1988" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1988
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1987"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1987" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1987
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1986"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1986" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1986
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1985"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1985" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1985
+                  </option>
+                  <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1984"
+                    {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1984" %}selected{% endif %}>
+                    emapr/v1/landcover/vote/1984
+                  </option>
+                </select>
+            </div>
+        {% endif %}
+
     </div>
+
     <div id="landuse_mode1_controls" class="form-group row">
         <div class="col-sm-5">
             <label for="landuse_single_selection">Select landuse:</label>
@@ -36,163 +192,6 @@
     </div>
     <div id="landuse_mode3_controls" class="form-group row hide-readonly">
     </div>
-    {% if 'us' in ron.locales %}
-    <h6><b>Select Landcover Map</b></h6>
-    <div class="form-group row" id="nlcd_db_container">
-        <div class="col-sm-4">
-            <label for="nlcd_db">Select Landcover DB: </label>
-        </div>
-        <div class="col-sm-4">
-            <select class="form-control disable-readonly" id="landuse_db" name="landuse_db" onchange="Landuse.getInstance().setLanduseDb(this.value)">
-              <option value="nlcd/2019" {% if landuse.nlcd_db == "nlcd/2019" %}selected{% endif %}>nlcd/2019</option>
-              <option value="nlcd/2016" {% if landuse.nlcd_db == "nlcd/2016" %}selected{% endif %}>nlcd/2016</option>
-              <option value="nlcd/2013" {% if landuse.nlcd_db == "nlcd/2013" %}selected{% endif %}>nlcd/2013</option>
-              <option value="nlcd/2011" {% if landuse.nlcd_db == "nlcd/2011" %}selected{% endif %}>nlcd/2011</option>
-              <option value="nlcd/2008" {% if landuse.nlcd_db == "nlcd/2008" %}selected{% endif %}>nlcd/2008</option>
-              <option value="nlcd/2006" {% if landuse.nlcd_db == "nlcd/2006" %}selected{% endif %}>nlcd/2006</option>
-              <option value="nlcd/2004" {% if landuse.nlcd_db == "nlcd/2004" %}selected{% endif %}>nlcd/2004</option>
-              <option value="nlcd/2001" {% if landuse.nlcd_db == "nlcd/2001" %}selected{% endif %}>nlcd/2001</option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2017" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2017" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2017
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2016" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2016" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2016
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2015" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2015" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2015
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2014" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2014" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2014
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2013" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2013" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2013
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2012" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2012" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2012
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2011" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2011" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2011
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2010" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2010" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2010
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2009" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2009" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2009
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2008" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2008" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2008
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2007" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2007" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2007
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2006" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2006" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2006
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2005" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2005" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2005
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2004" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2004" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2004
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2003" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2003" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2003
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2002" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2002" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2002
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2001" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2001" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2001
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/2000" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/2000" %}selected{% endif %}>
-                emapr/v1/landcover/vote/2000
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1999" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1999" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1999
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1998" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1998" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1998
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1997" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1997" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1997
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1996" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1996" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1996
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1995" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1995" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1995
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1994" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1994" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1994
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1993" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1993" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1993
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1992" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1992" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1992
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1991" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1991" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1991
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1990" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1990" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1990
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1989" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1989" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1989
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1988" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1988" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1988
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1987" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1987" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1987
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1986" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1986" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1986
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1985" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1985" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1985
-              </option>
-              <option value="islay.ceoas.oregonstate.edu/v1/landcover/vote/1984" 
-                {% if landuse.nlcd_db == "islay.ceoas.oregonstate.edu/v1/landcover/vote/1984" %}selected{% endif %}>
-                emapr/v1/landcover/vote/1984
-              </option>
-            </select>
-        </div>
-    </div>
-    {% endif %}
-
 
     <a href="#landuse_advanced_opts_con" data-toggle="collapse" class="" aria-expanded="true">Advanced Options</a>
     <div id="landuse_advanced_opts_con" class="collapse">

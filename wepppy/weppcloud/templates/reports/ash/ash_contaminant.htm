@@ -90,14 +90,14 @@
     {% endfor %}
 </tr>
 
-{% set burnclass_summary = ash.burnclass_summary() %}
+{% set burn_class_summary = ash.burn_class_summary() %}
 {% set high_ash = pw0_stats['3']['cum_water_transport (tonne)'] %}
 {% set mod_ash = pw0_stats['2']['cum_water_transport (tonne)'] %}
 {% set low_ash = pw0_stats['1']['cum_water_transport (tonne)']  %}
 
 <tr>
     <td>High</td>
-    <td>{{ unitizer(burnclass_summary[3], 'ha') | safe }}</td>
+    <td>{{ unitizer(burn_class_summary[3], 'ha') | safe }}</td>
     <td>{{ unitizer(high_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
@@ -116,7 +116,7 @@
 
 <tr>
     <td>Moderate</td>
-    <td>{{ unitizer(burnclass_summary[2], 'ha') | safe }}</td>
+    <td>{{ unitizer(burn_class_summary[2], 'ha') | safe }}</td>
     <td>{{ unitizer(mod_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
@@ -135,7 +135,7 @@
 
 <tr>
     <td>Low</td>
-    <td>{{ unitizer(burnclass_summary[1], 'ha') | safe }}</td>
+    <td>{{ unitizer(burn_class_summary[1], 'ha') | safe }}</td>
     <td>{{ unitizer(low_ash, 'tonne') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
@@ -179,7 +179,7 @@
       {% endif %}
     {% endfor %}
 </tr>
-{% for rec in rec_intervals %}
+{% for rec in rec_intervals | sort_numeric(reverse=True) %}
     {% set _rec = rec | string %}
     {% set _delivery_low = rec_results['1']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
     {% set _delivery_mod = rec_results['2']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
@@ -294,7 +294,7 @@
       {% endif %}
     {% endfor %}
 </tr>
-{% for rec in rec_intervals %}
+{% for rec in rec_intervals | sort_numeric(reverse=True) %}
     {% set _rec = rec | string %}
     {% set _delivery_low = rec_results['1']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}
     {% set _delivery_mod = rec_results['2']['water_transport (tonne)'][_rec]['water_transport (tonne)'] %}

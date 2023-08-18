@@ -78,14 +78,14 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
     if zoom is not None:
         zoom -= 1
 
-    phos_opts = ('{phosphorus}', ',"phosphorus":{phosphorus}')[has_phos]
+    phosphorus = varopts.get('phosphorus', (0.1, 10)[units == 'SI'])  # in, mm
 
-    if not has_phos:
-        phosphorus = ''
+    phos_opts = ('', ',"phosphorus":{phosphorus}')[has_phos]
 
     _url = '/weppcloud/combined_ws_viewer/?zoom={zoom}&center=[{center_lat},{center_lng}]&' \
-           'ws={ws}&varopts={{"runoff":{runoff},"subrunoff":{subrunoff},"baseflow":{baseflow},' \
-           '{phos_opts}",loss":{loss}}}&varname={varname}&title={title}&units={units}'.replace(',,', ',')
+           'ws={ws}&varopts={{"runoff":{runoff},"subrunoff":{subrunoff},"baseflow":{baseflow}' \
+           '{phos_opts},"loss":{loss}}}&varname={varname}&title={title}&units={units}'
+
 
     url = None
     if center_lng is not None and \

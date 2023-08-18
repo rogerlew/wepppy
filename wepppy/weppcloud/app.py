@@ -78,7 +78,7 @@ from wepppy.watershed_abstraction import (
 from wepppy.wepp import management
 from wepppy.wepp.soils import soilsdb
 
-from wepppy.wepp.out import TotalWatSed, TotalWatSed2, Element, HillWat
+from wepppy.wepp.out import TotalWatSed2, DisturbedTotalWatSed2, Element, HillWat
 
 from wepppy.wepp.stats import (
     OutletSummary,
@@ -143,6 +143,8 @@ from jinja2 import Environment, FileSystemLoader
 def sort_numeric_keys(value, reverse=False):
     return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
 
+def sort_numeric(value, reverse=False):
+    return sorted([int(x) for x in value], reverse=reverse)
 
 def get_file_sha1(file_path):
     """
@@ -169,6 +171,7 @@ def get_file_sha1(file_path):
 
 app = Flask(__name__)
 app.jinja_env.filters['zip'] = zip
+app.jinja_env.filters['sort_numeric'] = sort_numeric
 app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
 
 app = config_app(app)
@@ -471,6 +474,7 @@ def task_usermod():
 
 _thisdir = os.path.dirname(__file__)
 
+static_dir = _join(_thisdir, 'static')
 
 def htmltree(_dir='.', padding='', print_files=True, recurse=False):
     def _gdalinfo(__dir, _padding, _print_files, recurse=False):
@@ -532,7 +536,7 @@ def error_factory(msg='Error Handling Request'):
 def exception_factory(msg='Error Handling Request',
                       stacktrace=None):
     if stacktrace is None:
-        stacktrace = traceback.format_exc()
+        stacktrace = traceback.format_exc().split('\n')
 
     return make_response(jsonify({'Success': False,
                          'Error': msg,
@@ -677,6 +681,12 @@ def index():
 
     except Exception:
         return exception_factory()
+
+
+@app.route('/getloadavg')
+@app.route('/getloadavg/')
+def getloadavg():
+    return jsonify(os.getloadavg())
 
 
 @app.route('/access-by-year')
@@ -1504,6 +1514,11 @@ def runs0(runid, config):
         except:
             ash = None
 
+        try:
+            skid_trails = wepppy.nodb.mods.SkidTrails.getInstance(wd)
+        except:
+            skid_trails = None
+
         landuseoptions = landuse.landuseoptions
         soildboptions = soilsdb.load_db()
 
@@ -1522,6 +1537,7 @@ def runs0(runid, config):
                                rhem=rhem,
                                disturbed=disturbed,
                                ash=ash,
+                               skid_trails=skid_trails,
                                watershed=watershed,
                                unitizer_nodb=unitizer,
                                observed=observed,
@@ -2002,6 +2018,9 @@ def browse_response(path, args=None, show_up=True, headers=None):
                 r.headers["Content-Type"] = "text/plain; charset=utf-8"
                 return r
 
+        if 'download' in args or 'Download' in headers:
+            return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
+
         if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
             assert contents is not None
             jsobj = json.loads(contents)
@@ -2040,7 +2059,7 @@ def browse_response(path, args=None, show_up=True, headers=None):
                  '<style>.table-nonfluid {width: auto !important;}</style>'
                  '</head>'
                  '<body>',
-                 '<a href="?raw">View Raw</a><hr>' + html,
+                 '<a href="?download">Download File</a><hr>' + html,
                  '</body>',
                  '</html>']
 
@@ -2822,13 +2841,17 @@ def report_landuse(runid, config):
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    landuse = Landuse.getInstance(wd)
-    landuseoptions = landuse.landuseoptions
+    try:
 
-    return render_template('reports/landuse.htm',
-                           landuseoptions=landuseoptions,
-                           report=landuse.report)
+        landuse = Landuse.getInstance(wd)
+        landuseoptions = landuse.landuseoptions
 
+        return render_template('reports/landuse.htm',
+                               landuseoptions=landuseoptions,
+                               report=landuse.report)
+
+    except Exception:
+        return exception_factory('Reporting landuse failed')
 
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')
@@ -4010,6 +4033,28 @@ def report_wepp_yearly_watbal(runid, config):
         return exception_factory()
 
 
+@app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse')
+@app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse/')
+def report_wepp_avg_annual_by_landuse(runid, config):
+
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+
+        wepp = Wepp.getInstance(wd)
+        dwat = DisturbedTotalWatSed2(wd, wepp.baseflow_opts, wepp.phosphorus_opts)
+        unitizer = Unitizer.getInstance(wd)
+
+        return render_template('reports/wepp/avg_annuals_by_landuse.htm',
+                               unitizer_nodb=unitizer,
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               report=dwat.annual_averages_report,
+                               ron=ron,
+                               user=current_user)
+    except:
+        return exception_factory('Error running wepp_avg_annual_by_landuse')
+
+
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal/')
 def report_wepp_avg_annual_watbal(runid, config):
@@ -4073,7 +4118,7 @@ def resources_wepp_totalwatsed(runid, config):
         if not _exists(totwatsed_txt):
            return error_factory('totalwatsed.csv is not available for this project. Please use totalwatsed2.csv')
         wepp = Wepp.getInstance(wd)
-        totwatsed = TotalWatSed(totwatsed_txt,
+        totwatsed = TotalWatSed2(totwatsed_txt,
                                 wepp.baseflow_opts, wepp.phosphorus_opts)
         totwatsed.export(fn)
 
@@ -4790,7 +4835,7 @@ def report_ash(runid, config):
             pass
 
 
-        burnclass_summary = ash.burnclass_summary()
+        burn_class_summary = ash.burn_class_summary()
 
         recurrence_intervals = ashpost.recurrence_intervals
         return_periods = ashpost.return_periods
@@ -4802,7 +4847,7 @@ def report_ash(runid, config):
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                fire_date=fire_date,
-                               burnclass_summary=burnclass_summary,
+                               burn_class_summary=burn_class_summary,
                                ini_black_ash_depth_mm=ini_black_ash_depth_mm,
                                ini_white_ash_depth_mm=ini_white_ash_depth_mm,
                                recurrence_intervals=recurrence_intervals,
@@ -4872,7 +4917,7 @@ def report_ash_by_hillslope(runid, config):
         ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
         ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
 
-        burnclass_summary = ash.burnclass_summary()
+        burn_class_summary = ash.burn_class_summary()
         ash_out = ashpost.hillslope_annuals
 
         return render_template('reports/ash/ash_watershed_by_hillslope.htm',
@@ -4885,7 +4930,7 @@ def report_ash_by_hillslope(runid, config):
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                fire_date=fire_date,
-                               burnclass_summary=burnclass_summary,
+                               burn_class_summary=burn_class_summary,
                                ini_black_ash_depth_mm=ini_black_ash_depth_mm,
                                ini_white_ash_depth_mm=ini_white_ash_depth_mm,
                                ash_out=ash_out,
@@ -4924,11 +4969,14 @@ def report_contaminant(runid, config):
 
         recurrence_intervals = ashpost.recurrence_intervals
         results = ashpost.burn_class_return_periods
+        return_periods = ashpost.return_periods
+
         pw0_stats = ashpost.pw0_stats
 
         return render_template('reports/ash/ash_contaminant.htm',
                                rec_intervals=recurrence_intervals,
                                rec_results=results,
+                               return_periods=return_periods,
                                contaminants=contaminants,
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,

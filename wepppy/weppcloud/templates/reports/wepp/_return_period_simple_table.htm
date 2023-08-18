@@ -23,7 +23,7 @@
         <td style="width: 40%">mm/dd/yyyy</td>
         <td style="width: 30%">{{ unitizer_units(report.units_d[key]) | safe }}</td>
       </tr>
-    {% for rec_interval in report.intervals %}
+    {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
       <tr>
         <td style="width: 30%">{{ rec_interval }}</td>
         <td style="width: 40%">{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 

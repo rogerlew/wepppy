@@ -27,7 +27,7 @@
     <tr>
     {% for value, units in row %}
         {% if loop.first %}
-        <td>{{ value | round | int}}</td>
+        <td>{{ value }}</td>
         {% else %}
         <td>{{ unitizer(value, units) | safe }}</td>
         {% endif %}
