@@ -97,7 +97,6 @@ def read_geojson(fname):
     return d
 
 
-@njit
 def interpolate_slp(distances, slopes, max_points):
     _s = np.array(slopes)
     _d = np.array(distances)
@@ -107,7 +106,6 @@ def interpolate_slp(distances, slopes, max_points):
 
     for i in range(len(_d)-1):
         assert _d[i] < _d[i+1], distances
-
 
     if _d[0] != 0.0:
         raise ValueError('distances[0] should be 0')
