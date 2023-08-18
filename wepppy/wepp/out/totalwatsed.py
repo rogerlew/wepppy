@@ -13,6 +13,7 @@ WEPP outputs and performs streamflow and water balance calculations.
 The calculations were provided by Mariana Dobre.
 """
 
+from abc import ABC, abstractmethod
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -21,11 +22,14 @@ from copy import deepcopy
 from collections import OrderedDict
 import csv
 import math
+import json
 from datetime import datetime, timedelta
 from glob import glob
 from multiprocessing import Pool
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from deprecated import deprecated
 
@@ -33,12 +37,15 @@ from wepppy.all_your_base.hydro import determine_wateryear
 from wepppy.wepp.out import watershed_swe
 from wepppy.all_your_base import NCPU
 
+
 NCPU = math.ceil(NCPU * 0.6)
 
 
 def _read_hill_wat_sed(pass_fn):
     from .hill_pass import HillPass
     from .hill_wat import HillWat
+
+    wepp_id = _split(pass_fn)[-1].split('.')[0].replace('H', '')
 
     wat_fn = pass_fn.replace('.pass.dat', '.wat.dat')
     hill_wat = HillWat(wat_fn)
@@ -52,121 +59,139 @@ def _read_hill_wat_sed(pass_fn):
             continue
         watbal[col] = sed_df[col]
 
-    return watbal, hill_wat.total_area
+    return watbal, hill_wat.total_area, wepp_id
 
 
-class TotalWatSed2(object):
+def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
+    from wepppy.nodb import PhosphorusOpts
+
+    totarea_ha = totarea_m2 / 10000.0
+
+    d['Cumulative Sed Del (tonnes)'] = np.cumsum(d['Sed Del (kg)'] / 1000.0)
+    d['Sed Del Density (tonne/ha)'] = (d['Sed Del (kg)'] / 1000.0) / totarea_ha
+    d['Precipitation (mm)'] = d['P (m^3)'] / totarea_m2 * 1000.0
+    d['Rain + Melt (mm)'] = d['RM (m^3)'] / totarea_m2 * 1000.0
+    d['Transpiration (mm)'] = d['Ep (m^3)'] / totarea_m2 * 1000.0
+    d['Evaporation (mm)'] = d['Es+Er (m^3)'] / totarea_m2 * 1000.0
+    d['ET (mm)'] = d['Evaporation (mm)'] + d['Transpiration (mm)']
+    d['Percolation (mm)'] = d['Dp (m^3)'] / totarea_m2 * 1000.0
+    d['Runoff (mm)'] = d['QOFE (m^3)'] / totarea_m2 * 1000.0
+    d['Lateral Flow (mm)'] = d['latqcc (m^3)'] / totarea_m2 * 1000.0
+    d['Storage (mm)'] = d['Total-Soil Water (m^3)'] / totarea_m2 * 1000.0
+
+    # calculate Res volume, baseflow, and aquifer losses
+    _res_vol = np.zeros(d.shape[0])
+    _res_vol[0] = baseflow_opts.gwstorage
+    _baseflow = np.zeros(d.shape[0])
+    _aq_losses = np.zeros(d.shape[0])
+
+    for i, perc in enumerate(d['Percolation (mm)']):
+        if i == 0:
+            continue
+
+        _aq_losses[i - 1] = _res_vol[i - 1] * baseflow_opts.dscoeff
+        _res_vol[i] = _res_vol[i - 1] - _baseflow[i - 1] + perc - _aq_losses[i - 1]
+        _baseflow[i] = _res_vol[i] * baseflow_opts.bfcoeff
+
+    d['Reservoir Volume (mm)'] = _res_vol
+    d['Baseflow (mm)'] = _baseflow
+    d['Aquifer Losses (mm)'] = _aq_losses
+
+    d['Streamflow (mm)'] = d['Runoff (mm)'] + d['Lateral Flow (mm)'] + d['Baseflow (mm)']
+
+    if phos_opts is not None:
+        assert isinstance(phos_opts, PhosphorusOpts)
+        if phos_opts.isvalid:
+            d['P Load (mg)'] = d['Sed. Del (kg)'] * phos_opts.sediment
+            d['P Runoff (mg)'] = d['Runoff (mm)'] * phos_opts.surf_runoff * totarea_ha
+            d['P Lateral (mg)'] = d['Lateral Flow (mm)'] * phos_opts.lateral_flow * totarea_ha
+            d['P Baseflow (mg)'] = d['Baseflow (mm)'] * phos_opts.baseflow * totarea_ha
+            d['Total P (kg)'] = (d['P Load (mg)'] +
+                                 d['P Runoff (mg)'] +
+                                 d['P Lateral (mg)'] +
+                                 d['P Baseflow (mg)']) / 1000.0 / 1000.0
+            d['Particulate P (kg)'] = d['P Load (mg)'] / 1000000.0
+            d['Soluble Reactive P (kg)'] = d['Total P (kg)'] - d['Particulate P (kg)']
+
+            d['P Total (kg/ha)'] = d['Total P (kg)'] / totarea_ha
+            d['Particulate P (kg/ha)'] = d['Particulate P (kg)'] / totarea_ha
+            d['Soluble Reactive P (kg/ha)'] = d['Soluble Reactive P (kg)'] / totarea_ha
+
+    # Determine Water Year Column
+    _wy = np.zeros(d.shape[0], dtype=np.int)
+    for i, (j, y) in enumerate(zip(d['Julian'], d['Year'])):
+        _wy[i] = determine_wateryear(y, j=j)
+    d['Water Year'] = _wy
+
+    return d
+
+
+class AbstractTotalWatSed2(ABC):
     def __init__(self, wd, baseflow_opts=None, phos_opts=None):
+        self.wd = wd
+        self.baseflow_opts = baseflow_opts
+        self.phos_opts = phos_opts
+        self.load_data()
 
-        if baseflow_opts is None:
-            from wepppy.nodb import Ron, Wepp
-            wepp = Wepp.getInstance(wd)
-            baseflow_opts = wepp.baseflow_opts
+    @property
+    @abstractmethod
+    def parquet_fn(self):
+        pass
 
-        if baseflow_opts is None:
-            from wepppy.nodb import Ron, Wepp
-            wepp = Wepp.getInstance(wd)
-            if wepp.has_phosphorus:
-                phos_opts = wepp.phosphorus_opts
+    @property
+    @abstractmethod
+    def pickle_fn(self):
+        pass
 
-        output_dir = _join(wd, 'wepp/output')
-        pkl_fn = _join(output_dir, 'totwatsed2.pkl')
+    def load_data(self):
+        output_dir = _join(self.wd, 'wepp/output')
+        parquet_fn = self.parquet_fn
+        pkl_fn = self.pickle_fn
+
+        # deserialize if possible
+        if _exists(parquet_fn):
+            # Read the table from the Parquet file
+            table = pq.read_table(parquet_fn)
+
+            # Convert the table to a pandas DataFrame
+            self.d = table.to_pandas()
+
+            # Extract and set the metadata
+            for k, v in table.schema.metadata.items():
+                setattr(self, k.decode('utf-8'), json.loads(v.decode('utf-8')))
+            return
+
+        # old projects have pickle files
         if _exists(pkl_fn):
             self.d = pd.read_pickle(pkl_fn)
             self.wsarea = self.d.attrs['wsarea']
             return
 
+        # determine baseflow and phosphorus options
+        if self.baseflow_opts is None or self.phos_opts is None:
+            from wepppy.nodb import Wepp
+            wepp = Wepp.getInstance(self.wd)
+
+        if self.baseflow_opts is None:
+            self.baseflow_opts = wepp.baseflow_opts
+
+        if self.baseflow_opts is None:
+            if wepp.has_phosphorus:
+                self.phos_opts = wepp.phosphorus_opts
+
+        # load the data
         pass_fns = glob(_join(output_dir, 'H*.pass.dat'))
-        
+
         pool = Pool(processes=NCPU)
         results = pool.map(_read_hill_wat_sed, pass_fns)
         pool.close()
         pool.join()
 
-        d = None
-        totarea_m2 = 0.0
-        for watsed, area in results:
-            totarea_m2 += area
+        self.compile_data(results)
 
-            if d is None:
-                d = deepcopy(watsed)
-            else:
-                for col in watsed.columns:
-                    if col in ['Year', 'Month', 'Day', 'Julian']:
-                        continue
-                    d[col] += watsed[col]
-
-        totarea_ha = totarea_m2 / 10000.0
-
-
-        d['Cumulative Sed Del (tonnes)'] = np.cumsum(d['Sed Del (kg)'] / 1000.0)
-        d['Sed Del Density (tonne/ha)'] = (d['Sed Del (kg)'] / 1000.0) / totarea_ha
-        d['Precipitation (mm)'] = d['P (m^3)'] / totarea_m2 * 1000.0
-        d['Rain + Melt (mm)'] = d['RM (m^3)'] / totarea_m2 * 1000.0
-        d['Transpiration (mm)'] = d['Ep (m^3)'] / totarea_m2 * 1000.0
-        d['Evaporation (mm)'] = d['Es+Er (m^3)'] / totarea_m2 * 1000.0
-        d['ET (mm)'] = d['Evaporation (mm)'] + d['Transpiration (mm)']
-        d['Percolation (mm)'] = d['Dp (m^3)'] / totarea_m2 * 1000.0
-        d['Runoff (mm)'] = d['QOFE (m^3)'] / totarea_m2 * 1000.0
-        d['Lateral Flow (mm)'] = d['latqcc (m^3)'] / totarea_m2 * 1000.0
-        d['Storage (mm)'] = d['Total-Soil Water (m^3)'] / totarea_m2 * 1000.0
-
-        # calculate Res volume, baseflow, and aquifer losses
-        _res_vol = np.zeros(d.shape[0])
-        _res_vol[0] = baseflow_opts.gwstorage
-        _baseflow = np.zeros(d.shape[0])
-        _aq_losses = np.zeros(d.shape[0])
-
-        for i, perc in enumerate(d['Percolation (mm)']):
-            if i == 0:
-                continue
-
-            _aq_losses[i-1] = _res_vol[i-1] * baseflow_opts.dscoeff
-            _res_vol[i] = _res_vol[i-1] - _baseflow[i-1] + perc - _aq_losses[i-1]
-            _baseflow[i] = _res_vol[i] * baseflow_opts.bfcoeff
-
-        d['Reservoir Volume (mm)'] = _res_vol
-        d['Baseflow (mm)'] = _baseflow
-        d['Aquifer Losses (mm)'] = _aq_losses
-
-        d['Streamflow (mm)'] = d['Runoff (mm)'] + d['Lateral Flow (mm)'] + d['Baseflow (mm)']
-
-        if phos_opts is not None:
-            assert isinstance(phos_opts, PhosphorusOpts)
-            if phos_opts.isvalid:
-                d['P Load (mg)'] = d['Sed. Del (kg)'] * phos_opts.sediment
-                d['P Runoff (mg)'] = d['Runoff (mm)'] * phos_opts.surf_runoff * totarea_ha 
-                d['P Lateral (mg)'] = d['Lateral Flow (mm)'] * phos_opts.lateral_flow * totarea_ha
-                d['P Baseflow (mg)'] = d['Baseflow (mm)'] * phos_opts.baseflow * totarea_ha
-                d['Total P (kg)'] = (d['P Load (mg)'] +
-                                     d['P Runoff (mg)'] +
-                                     d['P Lateral (mg)'] +
-                                     d['P Baseflow (mg)']) / 1000.0 / 1000.0
-                d['Particulate P (kg)'] = d['P Load (mg)'] / 1000000.0
-                d['Soluble Reactive P (kg)'] = d['Total P (kg)'] - d['Particulate P (kg)']
-
-                d['P Total (kg/ha)'] = d['Total P (kg)'] / totarea_ha
-                d['Particulate P (kg/ha)'] = d['Particulate P (kg)'] / totarea_ha
-                d['Soluble Reactive P (kg/ha)'] = d['Soluble Reactive P (kg)'] / totarea_ha
-
-        # Determine Water Year Column
-        _wy = np.zeros(d.shape[0], dtype=np.int)
-        for i, (j, y) in enumerate(zip(d['Julian'], d['Year'])):
-            _wy[i] = determine_wateryear(y, j=j)
-        d['Water Year'] = _wy
-
-#        d.columns = d.columns.str.replace('P (m^3)', 'Precipitation (m^3)')
-#        d.columns = d.columns.str.replace('RM (m^3)', 'Rain + Melt (m^3)')
-#        d.columns = d.columns.str.replace('ES+EP (m^3)', 'Evaporation (m^3)')
-#        d.columns = d.columns.str.replace('Ep (m^3)', 'Percolation (m^3)')
-#        d.columns = d.columns.str.replace('QOFE (m^3)', 'Runoff (m^3)')
-#        d.columns = d.columns.str.replace('latqcc (m^3)', 'Lateral Flow (m^3)')
-#        d.columns = d.columns.str.replace('Total-Soil Water (m^3)', 'Storage (m^3)')
-        d.attrs['wsarea'] = totarea_m2
-        d.to_pickle(pkl_fn)
-
-        self.wsarea = totarea_m2
-        self.d = d
+    @abstractmethod
+    def compile_data(self, results, parquet_fn):
+        pass
 
     @property
     def num_years(self):
@@ -207,6 +232,190 @@ class TotalWatSed2(object):
             wtr.writeheader()
             for i, yr in enumerate(d['Year']):
                 wtr.writerow(OrderedDict([(k, d[k][i]) for k in d]))
+
+    def to_parquet(self, df, metadata=None):
+
+        # Convert the pandas DataFrame to an arrow Table
+        table = pa.Table.from_pandas(df)
+
+        if metadata is not None:
+            # Add the metadata to the table
+            metadata_bytes = {bytes(k, 'utf-8'): bytes(json.dumps(v), 'utf-8') for k, v in metadata.items()}
+            table = table.replace_schema_metadata(metadata_bytes)
+
+        # Write the table to a Parquet file
+        pq.write_table(table, self.parquet_fn)
+
+
+class TotalWatSed2(AbstractTotalWatSed2):
+
+    @property
+    def parquet_fn(self):
+        return _join(self.wd, 'wepp/output/totwatsed2.parquet')
+
+    @property
+    def pickle_fn(self):
+        return _join(self.wd, 'wepp/output/totwatsed2.pkl')
+
+    def compile_data(self, results):
+        # compile the data
+        d = None
+        totarea_m2 = 0.0
+        for watsed, area, wepp_id in results:
+            totarea_m2 += area
+
+            if d is None:
+                d = deepcopy(watsed)
+            else:
+                for col in watsed.columns:
+                    if col in ['Year', 'Month', 'Day', 'Julian']:
+                        continue
+                    d[col] += watsed[col]
+
+        # process the single data frame
+        d = process_measures_df(d, totarea_m2, self.baseflow_opts, self.phos_opts)
+
+        self.to_parquet(d, metadata={'wsarea': totarea_m2})
+
+        # save attributes
+        self.wsarea = totarea_m2
+        self.d = d
+
+
+"""
+Summary by landuse
+
+Measures
+
+
+Precipitation (mm)
+Rain + Melt (mm)     ANU
+ET (mm)              ANU
+Percolation (mm)     ANU
+Lateral Flow (mm)    ANU
+Baseflow (mm)        ANU
+Runoff (mm)
+Sed Del (kg)
+phosphorus if available
+
+
+Average Annuals by Landuse
+
+Measures as columns
+Landuse as rows
+
+"""
+
+class DisturbedTotalWatSed2(AbstractTotalWatSed2):
+    @property
+    def parquet_fn(self):
+        return _join(self.wd, 'wepp/output/disturbedtotwatsed2.parquet')
+
+    @property
+    def pickle_fn(self):
+        return _join(self.wd, 'wepp/output/disturbedtotwatsed2.pkl')
+
+    def compile_data(self, results):
+        # need to translator to identify topaz_ids from wepp_ids
+        from wepppy.nodb import Watershed
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+
+        from wepppy.nodb import Landuse
+        landuse = Landuse.getInstance(self.wd)
+
+        # compile the data
+        keys = list(landuse.domlc_d.values())
+        d = {k: None for k in keys}
+        d_m2 = {k: 0 for k in keys}
+
+        totarea_m2 = 0.0
+        for watsed, area, wepp_id in results:
+            topaz_id = translator.top(wepp=wepp_id)
+            dom = landuse.domlc_d[str(topaz_id)]
+
+            d_m2[dom] += area
+            totarea_m2 += area
+
+            if d[dom] is None:
+                d[dom] = deepcopy(watsed)
+            else:
+                for col in watsed.columns:
+                    if col in ['Year', 'Month', 'Day', 'Julian']:
+                        continue
+                    d[dom][col] += watsed[col]
+
+        for dom in d:
+            print(dom)
+            if d[dom] is None:
+                continue
+
+            d[dom] = process_measures_df(d[dom], d_m2[dom], self.baseflow_opts, self.phos_opts)
+            d[dom]['dom'] = dom
+
+        # Concatenate all the DataFrames together
+        d = pd.concat(d.values())
+        self.to_parquet(d, metadata={'d_m2': d_m2, 'wsarea': totarea_m2})
+
+        self.wsarea = totarea_m2
+        self.d_m2 = d_m2
+        self.d = d
+
+    @property
+    def annual_averages_parquet_fn(self):
+        return _join(self.wd, 'wepp/output/disturbedtotwatsed2_annual_averages.parquet')
+
+    @property
+    def annual_averages(self):
+        if _exists(self.annual_averages_parquet_fn):
+            return pd.read_parquet(self.annual_averages_parquet_fn)
+        else:
+            return self._calculate_annuals()
+
+    @property
+    def annual_averages_report(self):
+        from wepppy.wepp.stats.average_annuals_by_landuse import AverageAnnualsByLanduse
+        return AverageAnnualsByLanduse(self.annual_averages)
+
+
+    def _calculate_annuals(self):
+        from wepppy.nodb import Landuse
+        landuse = Landuse.getInstance(self.wd)
+
+        measures = ['Precipitation (mm)', 'Rain + Melt (mm)', 'ET (mm)', 'Percolation (mm)',
+                    'Lateral Flow (mm)', 'Baseflow (mm)', 'Runoff (mm)', 'Sed Del (kg)']
+
+        # Sum the values for each water year for each dom
+        yearly_totals = self.d.groupby(['Water Year', 'dom'])[measures].sum().reset_index()
+
+        # Calculate the number of water years for bias correction
+        number_of_years = yearly_totals['Water Year'].nunique() - 1
+
+        # Calculate the average of the yearly totals for each dom with bias correction
+        annual_averages = yearly_totals.groupby('dom')[measures].sum().div(number_of_years).reset_index()
+
+        # Add area
+        annual_averages['Area (ha)'] = annual_averages['dom'].apply(lambda x: self.d_m2[x] / 10000.0)
+
+        # Add management description to each row
+        annual_averages['man_description'] = annual_averages['dom'].apply(lambda x: landuse.managements[x].desc)
+
+        # Reorder the columns so that 'dom' and 'man_description' are the first two columns
+        cols = annual_averages.columns.tolist()
+        cols = cols[:1] + ['man_description'] + cols[1:-1]
+        annual_averages = annual_averages[cols]
+
+        # Sort by 'Area (ha)' in descending order
+        annual_averages.sort_values('Area (ha)', ascending=False, inplace=True)
+
+        # Serialize DataFrame to parquet
+        annual_averages.to_parquet(self.annual_averages_parquet_fn)
+
+        # Set the header after re-ordering the columns
+        self.header = annual_averages.columns.tolist()
+
+        return annual_averages
+
 
 @deprecated
 class TotalWatSed(object):
