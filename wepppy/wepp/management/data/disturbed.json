@@ -17,7 +17,7 @@
  "72": {"Key": 72,  "Color": [201,201,119,255], "DisturbedClass": "tall grass", "Description": "Sedge/Herbaceous", "ManagementFile": "Forest/DisturbedWEPPManagement/Tall grass prarie.man"},
  "73": {"Key": 73,  "Color": [153,193,71,255],  "DisturbedClass": "short grass", "Description": "Lichens", "ManagementFile": "GIS/Poor grass.man"},
  "74": {"Key": 74,  "Color": [119,173,147,255], "DisturbedClass": "short grass", "Description": "Moss", "ManagementFile": "GIS/Poor grass.man"},
- "81": {"Key": 81,  "Color": [219,216,61,255],  "DisturbedClass": "agriculture crops", "Description": "Pasture/Hay", "ManagementFile": "GeoWEPP/alfalfa with cuttings.man"},
+ "81": {"Key": 81,  "Color": [219,216,61,255],  "DisturbedClass": "agriculture crops", "Description": "Pasture/Hay", "ManagementFile": "GeoWEPP/grass.man"},
  "82": {"Key": 82,  "Color": [170,112,40,255],  "DisturbedClass": "agriculture crops", "Description": "Row Crops", "ManagementFile": "GeoWEPP/corn,soybean-fall mulch till.man"},
  "90": {"Key": 90,  "Color": [186,216,234,255], "DisturbedClass": "short grass", "Description": "Woody Wetlands", "ManagementFile": "GeoWEPP/Mountain Big Sagebrush.man"},
  "95": {"Key": 95,  "Color": [112,163,186,255], "DisturbedClass": "short grass", "Description": "Emergent Herbaceous Wetlands", "ManagementFile": "GeoWEPP/grass.man"},
