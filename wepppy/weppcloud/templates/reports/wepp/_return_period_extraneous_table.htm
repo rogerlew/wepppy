@@ -45,7 +45,7 @@
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
         {% endif %}
       </tr>
-    {% for rec_interval in report.intervals %}
+    {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
       <tr>
         <td>{{ rec_interval }}</td>
         <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 

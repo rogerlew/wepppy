@@ -31,7 +31,7 @@ function controlBase() {
             }
 
             if (response.StackTrace !== undefined) {
-                self.stacktrace.append("<pre><small class=\"text-muted\">" + response.StackTrace + "</small></pre>");
+                self.stacktrace.append("<pre><small class=\"text-muted\">" + response.StackTrace.join('\n') + "</small></pre>");
 
                 if (response.StackTrace.includes('lock() called on an already locked nodb')) {
                     self.stacktrace.append('<a href="https://doc.wepp.cloud/AdvancedTopics.html#Clearing-Locks">Clearing Locks</a>')
@@ -808,7 +808,7 @@ var Baer = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... Success");
-                        self.form.trigger("MODIFY_BURN_CLASS_TASK_COMPLETE");
+                        self.form.trigger("MODIFY_burn_class_TASK_COMPLETE");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4411,7 +4411,7 @@ var Climate = function () {
                 success: function success(response) {
 
                     if (response.Success === true && self.attempts < 14400) {
-                        self.status.html(response.Content);
+                        self.status.html(response.Content + "*".repeat(self.attempts % 4));
                         self.attempts += 1;
                     } else {
                         self.attempts += 1000;
@@ -4468,6 +4468,9 @@ var Climate = function () {
                 mode = -1;
             }
 
+            console.log("mode:");
+            console.log(mode);
+
             // show the appropriate controls
             if (mode === -1) {
                 // none selected
@@ -4513,7 +4516,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 3) {
                 // future
-                $("#climate_spatialmode_controls").hide();
+                $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
@@ -4943,7 +4946,7 @@ var Wepp = function () {
                 success: function success(response) {
 
                     if (response.Success === true && self.attempts < 14400) {
-                        self.status.html(response.Content);
+                        self.status.html(response.Content + "*".repeat(self.attempts % 4));
                         self.attempts += 1;
                     } else {
                         self.attempts += 1000;

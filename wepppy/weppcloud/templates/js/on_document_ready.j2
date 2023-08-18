@@ -198,6 +198,31 @@ function onReady() {
         });
     }
 
+
+    {% if 'skid_trails' in ron.mods %}
+        if ({{ (skid_trails.skid_trails_map != None) | tojson }}) {
+        var skid_trails_map = null;
+        $.get({
+            url: "https://dev.wepp.cloud/weppcloud/static/mods/north_star_fire/Skid_segments.geojson",
+            dataType: "json",  // Add this line
+            cache: false,
+            success: function success(response) {
+                skid_trails_map = L.geoJSON(response, {
+                    style: {
+                        color: "#FF0000",
+                        opacity: 1,
+                        weight: 2,
+                        fillColor: "#FFFFFF",
+                        fillOpacity: 0.0
+                    }
+                });
+                skid_trails_map.addTo(map);
+            }
+        });
+    }
+
+    {% endif %}
+
     {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
     /*
      * Baer mod
