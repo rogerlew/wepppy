@@ -160,6 +160,9 @@ def retrieve_timeseries(lng, lat, start_date, end_date,
         if key in result:
             del result[key]
 
+    # Convert the 'date' column to datetime format and set as index
+    result['date'] = pd.to_datetime(df['date'])
+    result.set_index('date', inplace=True)
     return result
 
 
