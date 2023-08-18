@@ -30,7 +30,7 @@ import shlex
 from uuid import uuid4
 
 import utm
-from flask import Flask, jsonify, url_for, request, make_response, send_file
+from flask import Flask, jsonify, url_for, request, make_response, send_file, after_this_request
 from osgeo import gdal
 import xml.etree.ElementTree as ET
 
@@ -53,6 +53,8 @@ gdaldem_modes = tuple(gdaldem_modes)
 _this_dir = os.path.dirname(__file__)
 _catalog = os.path.join(_this_dir, 'catalog')
 
+
+SCRATCH = '/media/ramdisk'
 
 def raster_stats(src):
     cmd = 'gdalinfo %s -stats' % src
@@ -162,7 +164,7 @@ def parse_bbox(bbox):
 
     n = len(coords)
     if n < 4:
-        coords.extend([None for i in xrange(4-n)])
+        coords.extend([None for i in range(4-n)])
     if n > 4:
         coords = coords[:4]
 
@@ -198,6 +200,7 @@ def api_dataset(dataset):
         return 'error: cannot find dataset: %s' % dataset
 
 
+
 @app.route('/<dataset>/<year>')
 @app.route('/<dataset>/<year>/')
 @app.route('/<dataset>/<year>/<layer>')
@@ -211,6 +214,9 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
     Process and serve the map
     """
     # determine src vrt and dst filename
+    
+    fn_list = set()
+    
     if layer == '':
         src = os.path.join(geodata_dir, dataset, year,'.vrt')
     else:
@@ -223,7 +229,7 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
                 src = os.path.join(geodata_dir, dataset, year, layer, foo, bar, '.vrt')
 
     fn_uuid = str(uuid4().hex) + '.tif'
-    dst = os.path.join('/var/www/WMesque/FlaskApp/static', fn_uuid)
+    dst = os.path.join(SCRATCH, fn_uuid)
 
     # if the src file doesn't exist we can abort
     if not os.path.exists(src):
@@ -303,8 +309,8 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
     if os.path.exists(dst):
         os.remove(dst)
 
-    with open(dst + '.cmd', 'w') as fp:
-        fp.write(cmd)
+#    with open(dst + '.cmd', 'w') as fp:
+#        fp.write(cmd)
 
     # run command, check_output returns standard output
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -319,6 +325,8 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
                         'cmd': cmd,
                         'stdout': output})
 
+    fn_list.add(dst)
+
     # gdaldem processing
     dst2 = None
     gdaldem = None
@@ -331,18 +339,20 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
             return jsonify({'Error': 'Invalid gdaldem mode: %s' % gdaldem})
 
         fn_uuid2 = str(uuid4().hex) + '.tif'
-        dst2 = os.path.join('/var/www/WMesque/FlaskApp/static', fn_uuid)
+        dst2 = os.path.join(SCRATCH, fn_uuid)
 
         cmd2 = 'gdaldem %s %s %s' % (gdaldem, dst, dst2)
 
         output2 = subprocess.Popen(cmd2, shell=True, stdout=subprocess.PIPE).stdout.read()
-        output2 = output.replace('\n','|')
+        output2 = output2.replace('\n','|')
 
         # check to see if file was created
         if not os.path.exists(dst2):
             return jsonify({'Error': 'gdaldem failed unexpectedly',
                             'cmd2': cmd2,
                             'stdout2': output2})
+
+        fn_list.add(dst2)
 
     # build response
     dst_final = (dst, dst2)[dst2 != None]
@@ -357,6 +367,7 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
             return jsonify({'Error': 'failed to convert to output format'})
         else:
             dst_final = dst3
+            fn_list.add(dst3)
 
     response = make_response(send_file(dst_final))
 
@@ -390,6 +401,18 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
                                             'stdout': output2,
                                             'cache': dst2}
 
+    # Define a function to delete the files
+    def delete_files(response):
+        for file in fn_list:
+            try:
+                os.remove(file)
+            except OSError:
+                pass
+        return response
+
+    # Register the delete_files function to be executed after the request is completed
+    after_this_request(delete_files)
+    
     # return response
     return response
 
@@ -402,3 +425,4 @@ if __name__ == '__main__':
 
     else:
         app.run()
+
