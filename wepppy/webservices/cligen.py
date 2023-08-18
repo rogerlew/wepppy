@@ -215,7 +215,7 @@ def multiple_year_route(par):
     https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet
     https://wepp.cloud/webservices/cligen/multiple_year/106152/?years=1&lng=-116&lat=47&p_mean=prism&p_std=daymet&p_wd=daymet&p_ww=daymet&tmax=prism&tmin=prism&dewpoint=prism&solrad=daymet&returnjson=True
     """
-    
+
     return _multiple_year(par, request)
 
 

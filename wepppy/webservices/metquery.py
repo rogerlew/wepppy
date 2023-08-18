@@ -223,7 +223,7 @@ def query_daily_catalog():
 
 @app.route('/daily_singlepoint', methods=['GET', 'POST'])
 @app.route('/daily_singlepoint/', methods=['GET', 'POST'])
-def query_daily():
+def query_daily_singlepoint():
     """
     https://wepp.cloud/webservices/metquery/daily_singlepoint/?dataset=daymet/prcp&lon=-116&lat=47
     """
