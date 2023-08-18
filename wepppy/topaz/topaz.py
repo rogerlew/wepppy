@@ -488,9 +488,9 @@ class TopazRunner:
         _y = rowsl[index_min]
         # print('_x', _x)
         
-        print('len(areas)', len(areaslist))
+        # print('len(areas)', len(areaslist))
         # print('areas=', areaslist)
-        print('first area match = ', areaslist[index_min])
+        # print('first area match = ', areaslist[index_min])
         
         
         toobig=0
@@ -810,8 +810,6 @@ class TopazRunner:
         while p.poll() is None:
             output = p.stdout.readline().decode("utf-8")
             output = output.strip()
-
-            print(output)
 
             if output != '':
                 lines.append(output)
