@@ -386,8 +386,6 @@ class Disturbed(NoDbBase):
             out_meta = src.meta.copy()
             out_meta.update(dtype=rasterio.uint8, count=1, nodata=255)
 
-            print(out_meta)
-
             # Create the output raster data as a numpy array
             out_arr = np.full_like(dem, fill_value=value, dtype=rasterio.uint8)
 
@@ -777,11 +775,12 @@ class Disturbed(NoDbBase):
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
-        assert landuse.mode != LanduseMode.Single
+        #assert landuse.mode != LanduseMode.Single
 
         watershed = Watershed.getInstance(wd)
 
         sbs = self.get_sbs()
+        meta = {}
 
         if sbs is None:
             return
@@ -809,20 +808,39 @@ class Disturbed(NoDbBase):
                     elif man.disturbed_class in ['short grass', 'tall grass']:
                         landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
 
+                meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+
             landuse.dump_and_unlock()
 
         except Exception:
             landuse.unlock('-f')
             raise
 
+
+        # noinspection PyBroadException
+        try:
+            self.lock()
+            self._meta = meta
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
+
+    @property
+    def meta(self):
+        if not hasattr(self, '_meta'):
+            self.remap_landuse()
+
+        return self._meta
 
     def remap_mofe_landuse(self):
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
-        assert landuse.mode != LanduseMode.Single
+        #assert landuse.mode != LanduseMode.Single
 
         watershed = Watershed.getInstance(wd)
 
@@ -844,8 +862,6 @@ class Disturbed(NoDbBase):
                     burn_class = str(sbs_lc_d[topaz_id][_id])
                     dom = landuse.domlc_mofe_d[topaz_id][_id]
                     man = landuse.managements[dom]
-
-                    print(f'mofe:: {dom} {burn_class}')
 
                     # TODO: probably a better way to do this based on the disturbed_class
                     if burn_class in ['131', '132', '133']:

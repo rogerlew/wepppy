@@ -12,6 +12,8 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+from datetime import datetime
+
 from subprocess import Popen, PIPE
 
 import json
@@ -32,6 +34,7 @@ import pandas as pd
 
 from metpy.units import units
 from metpy.calc.thermo import dewpoint
+from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 
 # wepppy
 from wepppy.climates import cligen_client as cc
@@ -47,9 +50,6 @@ from wepppy.climates.cligen import (
     CligenStationsManager, 
     ClimateFile, 
     Cligen,
-    extract_gridmet_var, 
-    build_daymet_prn, 
-    build_gridmet_prn,
     df_to_prn
 )
 from wepppy.all_your_base import isint, isfloat, NCPU
@@ -236,6 +236,22 @@ def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_
     climate.replace_var('w-dir', dates, df['th(DegreesClockwisefromnorth)'])
 
     climate.write(cli_path)
+
+
+def build_future(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
+    df = retrieve_rcp85_timeseries(lng, lat,
+                                   datetime(start_year, 1, 1),
+                                   datetime(end_year, 12, 31))
+    df_to_prn(df, _join(cli_dir, prn_fn), u'pr(mm)', u'tasmax(degc)', u'tasmin(degc)')
+    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+
+    dates = df.index
+
+    cli_path = _join(cli_dir, cli_fn)
+    climate = ClimateFile(cli_path)
+
+    climate.write(cli_path)
+
 
 
 def mod_func_wrapper_factory(mod_func):
@@ -775,8 +791,7 @@ class Climate(NoDbBase, LogMixin):
             climate_spatialmode = kwds['climate_spatialmode']
             climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
 
-            if climate_mode == ClimateMode.SingleStorm or \
-               climate_mode == ClimateMode.Future:
+            if climate_mode == ClimateMode.SingleStorm:
                 climate_spatialmode = ClimateSpatialMode.Single
 
             input_years = kwds['input_years']
@@ -1409,12 +1424,20 @@ class Climate(NoDbBase, LogMixin):
             self.set_attrs(attrs)
 
             self.log('  running _build_climate_vanilla... ')
-            climatestation = self.climatestation
             years = self._input_years
 
-            result = cc.fetch_multiple_year(climatestation, years, version=self.cligen_db)
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(result, climatestation,
-                                                   self.cli_dir)
+            stationManager = CligenStationsManager(version=self.cligen_db)
+            climatestation = self.climatestation
+            stationMeta = stationManager.get_station_fromid(climatestation)
+
+            cli_dir = self.cli_dir
+
+            par_fn = stationMeta.par
+            cligen = Cligen(stationMeta, wd=cli_dir)
+            cli_fn = cligen.run_multiple_year(years)
+
+            climate = ClimateFile(_join(cli_dir, cli_fn))
+            monthlies = climate.calc_monthlies()
 
             self.monthlies = monthlies
             self.par_fn = par_fn
@@ -1579,71 +1602,38 @@ class Climate(NoDbBase, LogMixin):
         # noinspection PyBroadInspection
         try:
             self.set_attrs(attrs)
+            self.log('  running _build_climate_future')
 
-            cli_dir = self.cli_dir
-
-            self.log('  running _build_climate_future... \n')
-            assert self._input_years == (self._future_end_year - self._future_start_year) + 1
             watershed = Watershed.getInstance(self.wd)
             ws_lng, ws_lat = watershed.centroid
+
+            cli_dir = self.cli_dir
+            start_year, end_year = self._future_start_year, self._future_end_year
+
+            self._input_years = end_year - start_year + 1
+
+            stationManager = CligenStationsManager(version=self.cligen_db)
             climatestation = self.climatestation
+            stationMeta = stationManager.get_station_fromid(climatestation)
 
-            self.log('  fetching future climate data... ')
-            result = cc.future_rcp85(
-                climatestation,
-                self._future_start_year,
-                self._future_end_year,
-                lng=ws_lng, lat=ws_lat
-            )
-            self.log_done()
-                    
-            self.log('  running cligen... ')
-            par_fn, cli_fn, monthlies = cc.unpack_json_result(
-                result,
-                climatestation,
-                cli_dir
-            )
-            
-            cli_path = _join(cli_dir, cli_fn)
+            par_fn = stationMeta.par
+            cligen = Cligen(stationMeta, wd=cli_dir)
 
-            distance = 1e38
-            closest_hill = None
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                # build a climate for each subcatchment
-                sub_par_fns = {}
-                sub_cli_fns = {}
-                for topaz_id, ss in watershed._subs_summary.items():
-                    self.log('    Using prism to spatialize {}...'.format(topaz_id))
+            ron = Ron.getInstance(self.wd)
+            cli_fn = 'wepp.cli'
+            prn_fn = 'ws.prn'
+            self.log('  building {}... '.format(cli_fn))
 
-                    hill_lng, hill_lat = ss.centroid.lnglat
-                    suffix = '_{}'.format(topaz_id)
-                    new_cli_fn = cli_path.replace('.cli', suffix + '.cli')
+            build_future(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
 
-                    prism_revision(cli_path, ws_lng, ws_lat, hill_lng, hill_lat, new_cli_fn)
-
-                    sub_par_fns[topaz_id] = '.par'
-                    sub_cli_fns[topaz_id] = _split(new_cli_fn)[-1]
-
-                    _d = haversine((ws_lng, ws_lat), (hill_lng, hill_lat))
-                    if _d < distance:
-                        closest_hill = topaz_id
-                        distance = _d
-                    
-
-                    self.log_done()
-                    
-                # set the watershed climate file to be the one closest to the centroid
-                assert closest_hill is not None
-                self.cli_fn = cli_fn = sub_cli_fns[closest_hill]
-                
-                self.sub_par_fns = sub_par_fns
-                self.sub_cli_fns = sub_cli_fns
-
-            self.monthlies = self.monthlies
-            self.par_fn = par_fn
+            climate = ClimateFile(_join(cli_dir, cli_fn))
+            self.monthlies = climate.calc_monthlies()
             self.cli_fn = cli_fn
-            self.dump_and_unlock()
+            self.par_fn = par_fn
+
             self.log_done()
+
+            self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')

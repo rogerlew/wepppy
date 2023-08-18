@@ -767,7 +767,7 @@ class Soils(NoDbBase):
         used_soils = set([str(x) for x in self.domsoil_d.values()])
         report = [s for s in list(self.soils.values()) if str(s.mukey) in used_soils]
 
-        return [soil.as_dict() for soil in report]
+        return [soil.as_dict(abbreviated=True) for soil in report]
 
     def _x_summary(self, topaz_id, abbreviated=False):
         domsoil_d = self.domsoil_d

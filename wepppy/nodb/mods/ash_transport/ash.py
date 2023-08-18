@@ -992,8 +992,8 @@ class Ash(NoDbBase, LogMixin):
 
     def hillslope_is_burned(self, topaz_id):
         watershed = Watershed.getInstance(self.wd)
-        burnclass = self.meta[str(topaz_id)]['burn_class']
-        return burnclass in [2, 3, 4]
+        burn_class = self.meta[str(topaz_id)]['burn_class']
+        return burn_class in [2, 3, 4]
 
     def contaminants_iter(self):
         high_contaminant_concentrations = self.high_contaminant_concentrations
@@ -1014,16 +1014,16 @@ class Ash(NoDbBase, LogMixin):
 
             yield contaminant, high, mod, low, units
 
-    def burnclass_summary(self):
+    def burn_class_summary(self):
         assert self.meta is not None
 
-        burnclass_sum = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
+        burn_class_sum = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
 
         for topaz_id, d in self.meta.items():
-            burnclass = d['burn_class']
-            if burnclass in (0, 255):
-                burnclass = 1
-            assert burnclass in burnclass_sum, burnclass
-            burnclass_sum[burnclass] += d['area_ha']
+            burn_class = d['burn_class']
+            if burn_class in (0, 255):
+                burn_class = 1
+            assert burn_class in burn_class_sum, burn_class
+            burn_class_sum[burn_class] += d['area_ha']
 
-        return {k: burnclass_sum[k] for k in sorted(burnclass_sum)}
+        return {k: burn_class_sum[k] for k in sorted(burn_class_sum)}
