@@ -835,6 +835,8 @@ class Watershed(NoDbBase):
                 _abs.watershed['hillslopes'] = subs_summary
                 _abs.watershed['flowpaths'] = fps_summary
 
+            _abs._write_flowpath_slps(self.wat_dir)
+
             # write slopes
             _abs.abstract_structure()
             _abs._make_channel_slps(self.wat_dir)

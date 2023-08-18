@@ -430,6 +430,9 @@ class Ron(NoDbBase):
             if 'treecanopy' in self.mods:
                 wepppy.nodb.mods.Treecanopy(wd, cfg_fn)
 
+            if 'skid_trails' in self.mods:
+                wepppy.nodb.mods.SkidTrails(wd, cfg_fn)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.ON_INIT_FINISH)

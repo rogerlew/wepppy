@@ -40,6 +40,7 @@ out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
 
 def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_extract):
 
+
     measure_rank = measure.replace(' (tonne)', '_rank')\
                           .replace(' (days)', '_rank')
     measure_ri = measure.replace(' (tonne)', '_ri')\
@@ -57,6 +58,7 @@ def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_ex
 
     rec = weibull_series(recurrence, num_fire_years)
 
+
     num_events = (df[measure] > 0).sum()
     return_periods= {}
     for retperiod in recurrence:
@@ -67,30 +69,27 @@ def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_ex
                                           'ri': 0 }
         else:
             indx = rec[retperiod]
-            if indx >= num_events:
-                return_periods[retperiod] = { measure: 0,
-                                              'probability': 0,
-                                              'rank': 0,
-                                              'ri': 0 }
-            else:
-                _row = df.iloc[indx][cols_to_extract].to_dict()
-                for _m in _row:
-                    if _m in ('date_int', 'year0', 'year', 'mo', 'da', 'days_from_fire (days)', measure_rank):
-                        _row[_m] = int(_row[_m])
-                    elif isfloat(_row[_m]):
-                        _row[_m] = float(_row[_m])
-                    else:
-                        _row[_m] = str(_row[_m])
+            if indx > num_events - 1:
+                indx = num_events - 1
 
-                _row['probability'] = _row[measure_poo]
-                _row['rank'] = _row[measure_rank]
-                _row['ri'] = _row[measure_ri]
+            _row = df.iloc[indx][cols_to_extract].to_dict()
+            for _m in _row:
+                if _m in ('date_int', 'year0', 'year', 'mo', 'da', 'days_from_fire (days)', measure_rank):
+                    _row[_m] = int(_row[_m])
+                elif isfloat(_row[_m]):
+                    _row[_m] = float(_row[_m])
+                else:
+                    _row[_m] = str(_row[_m])
 
-                del _row[measure_poo]
-                del _row[measure_rank]
-                del _row[measure_ri]
+            _row['probability'] = _row[measure_poo]
+            _row['rank'] = _row[measure_rank]
+            _row['ri'] = _row[measure_ri]
 
-                return_periods[retperiod] = _row
+            del _row[measure_poo]
+            del _row[measure_rank]
+            del _row[measure_ri]
+
+            return_periods[retperiod] = _row
 
     return return_periods
 
@@ -143,7 +142,7 @@ def calculate_hillslope_statistics(df, ash, ash_post_dir):
 def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1, 2, 3]):
     global common_cols
 
-    df.to_pickle(_join(ash_post_dir, 'full.pkl'))
+    #df.to_pickle(_join(ash_post_dir, 'full.pkl'))
 
     measures = ['wind_transport (tonne)', 'water_transport (tonne)', 'ash_transport (tonne)']
 
@@ -168,8 +167,6 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
 
     del df_annuals
 
-    print(df.info())
-
     df_daily = df.groupby(['year0', 'year', 'julian']).agg(agg_d)
     df_daily.to_pickle(_join(ash_post_dir, 'watershed_daily.pkl'))
 
@@ -180,7 +177,7 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
 
     # Group the DataFrame by 'date_int' and 'burn_class' columns
     grouped_df = df.groupby(['year0', 'year', 'julian', 'burn_class']).agg(agg_d)
-    grouped_df.to_pickle(_join(ash_post_dir, 'watershed_daily_by_burnclass.pkl'))
+    grouped_df.to_pickle(_join(ash_post_dir, 'watershed_daily_by_burn_class.pkl'))
 
     # Initialize the return_periods dictionary
     burn_class_return_periods = {}
@@ -212,7 +209,6 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
                 # Calculate return_periods using the values for the current burn_class
                 # Boolean indexing to filter rows
 
-                print(year0, year, burn_class)
                 filtered_df = grouped_df[(grouped_df['year0'] == np.uint16(year0)) &
                                          (grouped_df['year'] == np.uint16(year)) &
                                          (grouped_df['julian'] == np.uint16(julian)) &
@@ -224,7 +220,6 @@ def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1,
                     continue
                 elif num_rows == 1:
                     burn_class_return_periods[burn_class][measure][rec][measure] = float(filtered_df.iloc[0][measure])
-                    print(filtered_df, burn_class_return_periods[burn_class][measure][rec][measure])
                 else:
                     raise Exception('Unexpected number of rows: {}'.format(num_rows))
 

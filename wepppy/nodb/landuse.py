@@ -25,6 +25,7 @@ import numpy as np
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
 from wepppy.watershed_abstraction.support import is_channel
+from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import read_raster
 
@@ -489,6 +490,7 @@ class Landuse(NoDbBase):
 
         watershed = Watershed.getInstance(self.wd)
         for topaz_id, ss in watershed.sub_iter():
+
             nsegments = watershed.mofe_nsegments[str(topaz_id)]
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
 
@@ -518,10 +520,12 @@ class Landuse(NoDbBase):
                     xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
 
                 if rdmax is not None:
-                    management.set_rdmax(float(rdmax))
+                    if isfloat(rdmax):
+                        management.set_rdmax(float(rdmax))
 
                 if xmxlai is not None:
-                    management.set_xmxlai(float(xmxlai))
+                    if isfloat(xmxlai):
+                        management.set_xmxlai(float(xmxlai))
 
                 stack.append(management)
 
@@ -548,7 +552,7 @@ class Landuse(NoDbBase):
             raise
 
 
-    def identify_burnclass(self, topaz_id):
+    def identify_burn_class(self, topaz_id):
         dom = self.domlc_d[str(topaz_id)]
         man = self.managements[dom]
         desc = man.desc.lower()
@@ -557,7 +561,7 @@ class Landuse(NoDbBase):
             return 'Unburned'
         
         if 'sev' not in desc or 'fire' not in desc:
-            return 'N/A'
+            return 'Unburned'
         
         if 'low' in desc or 'prescribed' in desc:
             return 'Low'
@@ -568,7 +572,7 @@ class Landuse(NoDbBase):
         elif 'high' in desc:
             return 'High'
         
-        return 'N/A'    
+        return 'Unburned'
         
     def set_cover_defaults(self):
 
@@ -653,7 +657,12 @@ class Landuse(NoDbBase):
         from wepppy.wepp import management
 
         landuseoptions = management.load_map(self.mapping).values()
-        landuseoptions = sorted(landuseoptions, key=lambda d: d['Key'])
+
+        if all(isinstance(d['Key'], int) for d in landuseoptions):
+            landuseoptions = sorted(landuseoptions, key=lambda d: int(d['Key']))
+        else:
+            landuseoptions = sorted(landuseoptions, key=lambda d: str(d['Key']))
+
         # landuseoptions = [opt for opt in landuseoptions if 'DisturbedWEPPManagement' not in opt['ManagementFile']]
 
         if 'baer' in self.mods:
@@ -710,6 +719,9 @@ class Landuse(NoDbBase):
                     managements[k].area = 0
 
                 total_area += area
+
+            if not hasattr(self, 'domlc_mofe_d'):
+                self.domlc_mofe_d = None
 
             if self.multi_ofe and self.domlc_mofe_d is not None:
                 total_area = 0.0

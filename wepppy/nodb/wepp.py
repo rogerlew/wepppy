@@ -32,6 +32,7 @@ from time import sleep
 import jsonpickle
 
 import numpy as np
+import json
 
 from osgeo import osr
 from osgeo import gdal
@@ -62,7 +63,8 @@ from wepppy.all_your_base import (
     isnan,
     isinf,
     NCPU,
-    IS_WINDOWS
+    IS_WINDOWS,
+    NumpyEncoder
 )
 from wepppy.all_your_base import try_parse_float
 from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator
@@ -73,8 +75,7 @@ from wepppy.wepp.out import (
     Loss,
     Ebe,
     PlotFile,
-    correct_daily_hillslopes_pl_path,
-    TotalWatSed, TotalWatSed2,
+    correct_daily_hillslopes_pl_path, TotalWatSed2,
     HillPass
 )
 
@@ -617,20 +618,30 @@ class Wepp(NoDbBase, LogMixin):
 
         if (frost is None and self.run_frost) or frost:
             self._prep_frost()
+        else:
+            self._remove_frost()
 
         self._prep_phosphorus()
 
         if (baseflow is None and self.run_baseflow) or baseflow:
             self._prep_baseflow()
+        else:
+            self._remove_baseflow()
 
         if (wepp_ui is None and self.run_wepp_ui) or wepp_ui:
             self._prep_wepp_ui()
+        else:
+            self._remove_wepp_ui()
             
         if (pmet is None and self.run_pmet) or pmet:
             self._prep_pmet()
+        else:
+            self._remove_pmet()
 
         if (snow is None and self.run_snow) or snow:
             self._prep_snow()
+        else:
+            self._remove_snow()
 
         self.log_done()
 
@@ -658,7 +669,6 @@ class Wepp(NoDbBase, LogMixin):
         return sol_versions
 
     def _prep_wepp_ui(self):
-
         for sol_version in self.sol_versions:
             if '2006' in sol_version:
                 return
@@ -667,11 +677,21 @@ class Wepp(NoDbBase, LogMixin):
         with open(fn, 'w') as fp:
             fp.write('')
 
+    def _remove_wepp_ui(self):
+        fn = _join(self.runs_dir, 'wepp_ui.txt')
+        if _exists(fn):
+            os.remove(fn)
+
     def _prep_frost(self):
         fn = _join(self.runs_dir, 'frost.txt')
         with open(fn, 'w') as fp:
             fp.write('1  1  1\n')
             fp.write('1.0   1.0  1.0   0.5\n\n')
+
+    def _remove_frost(self):
+        fn = _join(self.runs_dir, 'frost.txt')
+        if _exists(fn):
+            os.remove(fn)
 
     def _prep_tcr(self):
         fn = _join(self.runs_dir, 'tcr.txt')
@@ -680,6 +700,11 @@ class Wepp(NoDbBase, LogMixin):
                 fp.write(self.tcr_opts.contents)
             else:
                 fp.write('\n')
+
+    def _remove_tcr(self):
+        fn = _join(self.runs_dir, 'tcr.txt')
+        if _exists(fn):
+            os.remove(fn)
 
     @property
     def pmet_kcb(self):
@@ -737,6 +762,11 @@ class Wepp(NoDbBase, LogMixin):
 
 
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
+
+    def _remove_pmet(self):
+        fn = _join(self.runs_dir, 'pmet.txt')
+        if _exists(fn):
+            os.remove(fn)
 
     def _prep_phosphorus(self):
 
@@ -807,10 +837,20 @@ class Wepp(NoDbBase, LogMixin):
             if not validate_phosphorus_txt(fn):
                 os.remove(fn)
 
+    def _remove_phosphorus(self):
+        fn = _join(self.runs_dir, 'phosphorus.txt')
+        if _exists(fn):
+            os.remove(fn)
+
     def _prep_snow(self):
         fn = _join(self.runs_dir, 'snow.txt')
         with open(fn, 'w') as fp:
             fp.write(self.snow_opts.contents)
+
+    def _remove_snow(self):
+        fn = _join(self.runs_dir, 'snow.txt')
+        if _exists(fn):
+            os.remove(fn)
 
     def _prep_baseflow(self):
         baseflow_opts = self.baseflow_opts
@@ -867,6 +907,11 @@ class Wepp(NoDbBase, LogMixin):
         with open(fn, 'w') as fp:
             fp.write(baseflow_opts.contents)
 
+    def _remove_baseflow(self):
+        fn = _join(self.runs_dir, 'gwcoeff.txt')
+        if _exists(fn):
+            os.remove(fn)
+
     def clean(self):
         if _exists(self.status_log):
             os.remove(self.status_log)
@@ -877,7 +922,7 @@ class Wepp(NoDbBase, LogMixin):
                 try:
                     shutil.rmtree(_dir)
                 except:
-                    sleep(10.0)
+                    sleep(1.0)
                     try:
                         shutil.rmtree(_dir, ignore_errors=True)
                     except:
@@ -924,8 +969,6 @@ class Wepp(NoDbBase, LogMixin):
         except:
             disturbed = None
             _land_soil_replacements_d = None
-
-
 
         years = climate.input_years
 
@@ -1070,15 +1113,21 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
         kslast = self.kslast
 
+        build_d = {} # mukey: fn
         for topaz_id, soil in soils.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = _join(soils_dir, soil.fname)
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
 
             if kslast is not None:
-                soilu = WeppSoilUtil(src_fn)
-                soilu.modify_kslast(kslast)
-                soilu.write(dst_fn)
+                mukey = soil.mukey
+                if mukey in build_d:
+                    _copyfile(build_d[mukey], dst_fn)
+                else:
+                    soilu = WeppSoilUtil(src_fn)
+                    soilu.modify_kslast(kslast)
+                    soilu.write(dst_fn)
+                    build_d[mukey] = dst_fn
             else:    
                 _copyfile(src_fn, dst_fn) 
 
@@ -1545,6 +1594,33 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(wd)
 
         if climate.climate_mode != ClimateMode.SingleStorm:
+            self.log(' running arcexport... ')
+            self._run_arcexport()
+            self.log_done()
+
+            self.log(' running wepppost... ')
+            self._run_wepppost()
+            self.log_done()
+
+            self.log(' running totalwatsed2... ')
+            self._build_totalwatsed2()
+            self.log_done()
+
+            self.log(' running hillslope_watbal... ')
+            self._run_hillslope_watbal()
+            self.log_done()
+
+
+            self.log(' compressing pass_pw0.txt... ')
+            compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
+            self.log_done()
+
+            self.log(' compressing soil_pw0.txt... ')
+            compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
+            self.log_done()
+
+
+            """
             with ThreadPoolExecutor(max_workers=4) as executor:
                 self.log('Running Post Wepp Run Activities... ')
 
@@ -1559,6 +1635,7 @@ class Wepp(NoDbBase, LogMixin):
                 # Wait for all tasks to complete before proceeding
                 for future in futures:
                     future.result()
+            """
 
         self.log_done()
 
@@ -1592,38 +1669,21 @@ class Wepp(NoDbBase, LogMixin):
         totwatsed2.export(fn)
         self.log_done()
 
-    def _build_totalwatsed(self):
-        output_dir = self.output_dir
-
-        erin_pl = _join(output_dir, 'correct_daily_hillslopes.pl')
-        if not _exists(erin_pl):
-            shutil.copyfile(correct_daily_hillslopes_pl_path, erin_pl)
-
-        cmd = ['perl', 'correct_daily_hillslopes.pl']
-        _log = open(_join(output_dir, 'correct_daily_hillslopes.log'), 'w')
-
-        p = Popen(cmd, stdout=_log, stderr=_log, cwd=output_dir)
-        p.wait()
-        _log.close()
-
-        totalwatsed_fn = _join(output_dir, 'totalwatsed.txt')
-        assert _exists(totalwatsed_fn), 'Failed running correct_daily_hillslopes.pl'
-        assert os.stat(totalwatsed_fn).st_size > 0, 'totalwatsed.txt is empty'
-        
-        # export csv
-        totwatsed = TotalWatSed(totalwatsed_fn,
-                                self.baseflow_opts, 
-                                self.phosphorus_opts)
-        fn = _join(self.export_dir, 'totalwatsed.csv')
-        totwatsed.export(fn)
-
     def report_loss(self, exclude_yr_indxs=None):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd, exclude_yr_indxs=exclude_yr_indxs)
 
     def report_return_periods(self, rec_intervals=(25, 20, 10, 5, 2)):
+
         output_dir = self.output_dir
+
+        return_periods_fn = _join(output_dir, 'return_periods.json')
+
+        if _exists(return_periods_fn):
+            with open(return_periods_fn) as fp:
+                return ReturnPeriods.from_dict(json.load(fp))
+
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
@@ -1634,7 +1694,12 @@ class Wepp(NoDbBase, LogMixin):
         cli = ClimateFile(_join(climate.cli_dir, climate.cli_fn))
         cli_df = cli.as_dataframe(calc_peak_intensities=True)
 
-        return ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals)
+        return_periods = ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals)
+
+        with open(return_periods_fn, 'w') as fp:
+            json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
+
+        return return_periods
 
     def report_frq_flood(self):
         output_dir = self.output_dir
