@@ -1,4 +1,4 @@
-slid,texid,landcover,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk
+slid,texid,landcover,burn_class,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk
 High sev fire-sandy loam,sandy loam,high sev,high,0.1,0.75,400000,0.00014,2,15,65,10,5,15,25,400
 Low sev fire-loam,loam,low sev,low,0.15,0.75,1000000,8E-05,1,20,45,20,5,20,20,400
 Skid-clay loam,clay loam,skid,,0.2,0.75,1500000,5E-05,0.5,6,25,30,5,25,15,300
