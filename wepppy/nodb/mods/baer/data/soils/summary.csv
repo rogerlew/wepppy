@@ -1,4 +1,4 @@
-slid,texid,burnclass,ki,kr,shcrit,avke,solthk
+slid,texid,burn_class,ki,kr,shcrit,avke,solthk
 Forest sandy loam,sandy loam,,400000.0,8e-05,2.0,60.0,800.0
 Forest clay loam,clay loam,,400000.0,2e-05,0.5,35.0,800.0
 Low sev fire-sandy loam,sandy loam,low,400000.0,0.00012,2.0,20.0,400.0
