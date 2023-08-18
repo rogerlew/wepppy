@@ -178,7 +178,7 @@ def create_ermit_input(wd):
         wepp_id = translator.wepp(top=int(topaz_id))
         dom = landuse.domlc_d[str(topaz_id)]
         man = landuse.managements[dom]
-        burnclass = landuse.identify_burnclass(topaz_id)
+        burn_class = landuse.identify_burn_class(topaz_id)
         mukey = soils.domsoil_d[topaz_id]
         soil_type = soils.soils[mukey].simple_texture
         rock_pct = soils.soils[mukey].smr
@@ -209,7 +209,7 @@ def create_ermit_input(wd):
                              'UGRD_BTM': v['UpperBottomSlope'],
                              'LGRD_TP': v['LowerTopSlope'],
                              'LGRD_BTM': v['LowerBottomSlope'],
-                             'BURNCLASS': burnclass,
+                             'BURNCLASS': burn_class,
                              'ROCK_PCT': rock_pct
                              })
 
