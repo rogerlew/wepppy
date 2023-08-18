@@ -18,7 +18,7 @@ def _eval(line):
 
 
 def fetch_pf(lat, lng):
-    r = requests.get(url.format(lat=lat, lon=lng))
+    r = requests.get(url.format(lat=lat, lon=lng), verify=False)
 
     assert r.status_code == 200
 
