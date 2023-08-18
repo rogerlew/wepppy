@@ -142,7 +142,7 @@ class HillSummary(ReportBase):
             if ash_out:
                 _data.append(('Wind Transport (kg/ha)', ash_out[str(topaz_id)]['wind_transport (kg/ha)']))
                 _data.append(('Water Transport (kg/ha)', ash_out[str(topaz_id)]['water_transport (kg/ha)']))
-                _data.append(('Burnclass', ash_out[str(topaz_id)]['burnclass']))
+                _data.append(('Burnclass', ash_out[str(topaz_id)]['burn_class']))
 
             yield RowData(OrderedDict(_data))
 
