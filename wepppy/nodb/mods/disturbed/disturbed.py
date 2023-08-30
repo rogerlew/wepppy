@@ -16,6 +16,7 @@ from datetime import datetime
 from subprocess import Popen, PIPE
 from os.path import join as _join
 from os.path import exists as _exists
+from os.path import split as _split
 from copy import deepcopy
 
 import math
@@ -120,99 +121,6 @@ def _replace_parameter(original, replacement):
 
     else:
         return replacement
-
-
-@deprecated
-def disturbed_soil_specialization(src, dst, replacements, h0_min_depth=None, h0_max_om=None):
-    """
-    Creates a new soil file based on soil_in_fname and makes replacements
-    from the provided replacements dictionary
-    """
-
-    # TODO: Implement 7777/7778 YamlSoil and use YamlSoil to 
-    # specialize soils instead of all this text processing nonsense.
-
-    # read the soil_in_fname file
-    with open(src) as f:
-        lines = f.readlines()
-
-    header = [L for L in lines if L.startswith('#')]
-    header.append('# nodb.disturbed:disturbed_soil_specialization({})\n'.format(repr(replacements)))
-
-    lines = [L for L in lines if not L.startswith('#')]
-
-    pre7777 = lines[0].startswith('9') or lines[0].startswith('2006')
-    line4 = lines[3]
-    line4 = line4.split()
-    line4[-4] = _replace_parameter(line4[-4], replacements['ki'])
-    line4[-3] = _replace_parameter(line4[-3], replacements['kr'])
-    line4[-2] = _replace_parameter(line4[-2], replacements['shcrit'])
-    line4 = ' '.join(line4) + '\n'
-
-    line5 = lines[4]
-    line5 = line5.split()
-    if h0_min_depth is not None:
-        if float(line5[0]) < h0_min_depth:
-            line5[0] = str(h0_min_depth)
-    line5[2] = _replace_parameter(line5[2], replacements['avke'])
-    h0_om = None
-    if not pre7777:
-        h0_om = float(line5[8])
- 
-    if len(line5) < 5:  # no horizons (e.g. rock)
-        shutil.copyfile(src, dst)
-        return
-
-    # Don't really like this. This is getting messy
-    if not pre7777:
-        # make the layers easier to read by making cols fixed width
-        # aligning to the right.
-        line5 = '{0:>9}\t{1:>8}\t{2:>9}\t'\
-                '{3:>5}\t{4:>9}\t{5:>9}\t'\
-                '{6:>7}\t{7:>7}\t{8:>7}\t'\
-                '{9:>7}\t{10:>7}'.format(*line5)
-         
-        line5 = '\t' + line5 + '\n'
-    else:
-        line5 = '\t' + '\t'.join(line5) + '\n'
-
-    # for all horizons < 200 m replace avke
-    for i in range(5, len(lines)):
-        _line = lines[i].split()
-        if len(_line) == 11:
-            if float(_line[0]) <= 200:
-                _line[2] = _replace_parameter(_line[2], replacements['avke'])
-
-                # messy
-                if not pre7777:
-                    _line = '{0:>9}\t{1:>8}\t{2:>9}\t'\
-                            '{3:>5}\t{4:>9}\t{5:>9}\t'\
-                            '{6:>7}\t{7:>7}\t{8:>7}\t'\
-                            '{9:>7}\t{10:>7}'.format(*_line)         
-                    lines[i] = '\t' + _line + '\n'
-                else:
-                    lines[i] + '\t' + '\t'.join(_line) + '\n'
-
-    if 'kslast' in replacements:
-        if len(lines) > 5 and len(lines[-1]) == 3:
-            lastline = lines[-1].split()
-            lastline[-1] = '{}'.format(replacements['kslast'])
-            lines[-1] = ' '.join(lastline)
-
-    # Create new soil files
-    with open(dst, 'w') as f:
-        f.writelines(header)
-        f.writelines(lines[:3])
-        f.writelines(line4)
-
-        if h0_max_om is not None:
-            if h0_om < h0_max_om:
-                f.writelines(line5)
-        else:
-            f.writelines(line5)
-
-        if len(lines) > 5:
-            f.writelines(lines[5:])
 
 
 class DisturbedNoDbLockedException(Exception):
@@ -952,7 +860,8 @@ class Disturbed(NoDbBase):
 
                 texid = simple_texture(clay=clay, sand=sand)
                 disturbed_class = man_summary.disturbed_class
-                if disturbed_class is None:
+
+                if disturbed_class is None or 'developed' in disturbed_class:
                     kcb = 0.95
                     rawb = 0.80
                 else:
@@ -1088,48 +997,64 @@ class Disturbed(NoDbBase):
 
             for topaz_id, mukey in soils.domsoil_d.items():
                 dom = landuse.domlc_d[topaz_id]
-                man = landuse.managements[dom] 
+                man = landuse.managements[dom]
 
-                _soil = soils.soils[mukey]
-                clay = _soil.clay
-                sand = _soil.sand
+                if man.sol_path:
+                    disturbed_mukey = _split(man.sol_fn)[-1].replace('.sol', '')
+                    sol_fn =  f'{disturbed_mukey}.sol'
+                    new_sol_path = _join(soils.soils_dir, sol_fn)
 
-                assert isfloat(clay), clay
-                assert isfloat(sand), sand
+                    if not _exists(new_sol_path):
+                        shutil.copyfile(man.sol_path, new_sol_path)
 
-                texid = simple_texture(clay=clay, sand=sand)
+                    if disturbed_mukey not in soils.soils:
+                        soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
+                                                                   fname=sol_fn,
+                                                                   soils_dir=soils.soils_dir,
+                                                                   desc=disturbed_mukey,
+                                                                   meta_fn=None,
+                                                                   build_date=str(datetime.now()))
+                else:
+                    _soil = soils.soils[mukey]
+                    clay = _soil.clay
+                    sand = _soil.sand
 
-                key = (texid, man.disturbed_class)
-                if key not in _land_soil_replacements_d:
-                    continue
+                    assert isfloat(clay), clay
+                    assert isfloat(sand), sand
 
-                disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
+                    texid = simple_texture(clay=clay, sand=sand)
 
-                if disturbed_mukey not in soils.soils:
-                    disturbed_fn = disturbed_mukey + '.sol'
-                    replacements = _land_soil_replacements_d[key]
- 
-                    if 'fire' in man.disturbed_class:
-                        _h0_max_om = self.h0_max_om
-                    else:
-                        _h0_max_om = None
- 
-                    soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
-                    if sol_ver == 7778.0:
-                        new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
-                    else:
-                        new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om, 
-                                                 version=sol_ver)
-    
-                    new.write(_join(soils.soils_dir, disturbed_fn))
+                    key = (texid, man.disturbed_class)
+                    if key not in _land_soil_replacements_d:
+                        continue
 
-                    desc = f'{_soil.desc} - {man.disturbed_class}'
-                    soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
-                                                               fname=disturbed_fn,
-                                                               soils_dir=soils.soils_dir,
-                                                               desc=desc,
-                                                               meta_fn=_soil.meta_fn,
-                                                               build_date=str(datetime.now()))
+                    disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
+
+                    if disturbed_mukey not in soils.soils:
+                        disturbed_fn = disturbed_mukey + '.sol'
+                        replacements = _land_soil_replacements_d[key]
+
+                        if 'fire' in man.disturbed_class:
+                            _h0_max_om = self.h0_max_om
+                        else:
+                            _h0_max_om = None
+
+                        soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
+                        if sol_ver == 7778.0:
+                            new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+                        else:
+                            new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om,
+                                                     version=sol_ver)
+
+                        new.write(_join(soils.soils_dir, disturbed_fn))
+
+                        desc = f'{_soil.desc} - {man.disturbed_class}'
+                        soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
+                                                                   fname=disturbed_fn,
+                                                                   soils_dir=soils.soils_dir,
+                                                                   desc=desc,
+                                                                   meta_fn=_soil.meta_fn,
+                                                                   build_date=str(datetime.now()))
 
                 soils.domsoil_d[topaz_id] = disturbed_mukey
 

@@ -200,6 +200,9 @@ class WeppSoilUtil(object):
 #        self.obj = yaml.safe_load(yaml_txt)
 
     def modify_kslast(self, kslast):
+        if 'developed' in self.obj['ofes']['luse'].lower():
+            return
+
         self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
         for i in range(len(self.obj['ofes'])):
             self.obj['ofes'][i]['res_lyr']['kslast'] = kslast

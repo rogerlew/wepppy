@@ -1034,55 +1034,75 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
         bd_d = soils.bd_d
 
+        build_d = {}
+
         for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
+            self.log(f'    _prep_managements:{topaz_id}:{mukey}... ')
+
             dom = landuse.domlc_d[topaz_id]
             man_summary = landuse.managements[dom]
-            man = man_summary.get_management()
 
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
 
-            management = man_summary.get_management()
-            sol_key = soils.domsoil_d[topaz_id]
-            management.set_bdtill(bd_d[sol_key])
-
-            if disturbed is not None:
+            meoization_key = (mukey,)
+            if disturbed:
                 disturbed_class = man_summary.disturbed_class
+                meoization_key = (mukey, disturbed_class)
+
+            if meoization_key in build_d:
+                shutil.copyfile(build_d[meoization_key], dst_fn)
+                self.log_done()
                 
-                _soil = soils.soils[mukey]
-                clay = _soil.clay
-                sand = _soil.sand
-                texid = simple_texture(clay=clay, sand=sand)
-                
-                if disturbed_class is None:
-                    rdmax = None
-                    xmxlai = None
-                else:
-                    rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
-                    xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+            else:
+                management = man_summary.get_management()
+                sol_key = soils.domsoil_d[topaz_id]
+                management.set_bdtill(bd_d[sol_key])
+    
+                # probably isn't the right location for this code. should be in nodb.disturbed
+                if disturbed is not None:
+                    disturbed_class = man_summary.disturbed_class
+                    
+                    _soil = soils.soils[mukey]
+                    clay = _soil.clay
+                    sand = _soil.sand
+                    texid = simple_texture(clay=clay, sand=sand)
+                    
+                    if disturbed_class is None or 'developed' in disturbed_class:
+                        rdmax = None
+                        xmxlai = None
+                    else:
+                        rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                        xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+    
+                    if isfloat(rdmax):
+                        management.set_rdmax(float(rdmax))
+    
+                    if isfloat(xmxlai):
+                        management.set_xmxlai(float(xmxlai))
+    
+                    meoization_key = (mukey, disturbed_class)
+    
+                multi = management.build_multiple_year_man(years)
+    
+                fn_contents = str(multi)
+    
+                with open(dst_fn, 'w') as fp:
+                    fp.write(fn_contents)
 
-                if isfloat(rdmax):
-                    management.set_rdmax(float(rdmax))
+                build_d[meoization_key] = dst_fn
 
-                if isfloat(xmxlai):
-                    management.set_xmxlai(float(xmxlai))
+                if getattr(self, 'run_flowpaths', False):
+                    for flowpath in watershed.fps_summary(topaz_id):
+                        dst_fn = _join(fp_runs_dir, '{}.man'.format(flowpath))
+    
+                        with open(dst_fn, 'w') as fp:
+                            fp.write(fn_contents)
 
-            multi = management.build_multiple_year_man(years)
-
-            fn_contents = str(multi)
-
-            with open(dst_fn, 'w') as fp:
-                fp.write(fn_contents)
-
-            if getattr(self, 'run_flowpaths', False):
-                for flowpath in watershed.fps_summary(topaz_id):
-                    dst_fn = _join(fp_runs_dir, '{}.man'.format(flowpath))
-
-                    with open(dst_fn, 'w') as fp:
-                        fp.write(fn_contents)
-
+                self.log_done()
 
         if 'rap_ts' in self.mods:
+            self.log('    _prep_managements:rap_ts.analyze... ')
             from wepppy.nodb.mods import RAP_TS
             assert climate.observed_start_year is not None
             assert climate.observed_end_year is not None
@@ -1091,8 +1111,10 @@ class Wepp(NoDbBase, LogMixin):
             rap_ts.acquire_rasters(start_year=climate.observed_start_year,
                                    end_year=climate.observed_end_year)
             rap_ts.analyze()
+            self.log_done()
 
         if 'emapr_ts' in self.mods:
+            self.log('    _prep_managements:emapr_ts.analyze... ')
             from wepppy.nodb.mods import OSUeMapR_TS
             assert climate.observed_start_year is not None
             assert climate.observed_end_year is not None
@@ -1101,8 +1123,7 @@ class Wepp(NoDbBase, LogMixin):
             emapr_ts.acquire_rasters(start_year=climate.observed_start_year,
                                      end_year=climate.observed_end_year)
             emapr_ts.analyze()
-
-
+            self.log_done()
 
     def _prep_soils(self, translator):
         self.log('    _prep_soils... ')
@@ -1115,6 +1136,7 @@ class Wepp(NoDbBase, LogMixin):
 
         build_d = {} # mukey: fn
         for topaz_id, soil in soils.sub_iter():
+            self.log(f'    _prep_soils:{topaz_id}:{soil}... ')
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = _join(soils_dir, soil.fname)
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
@@ -1134,7 +1156,9 @@ class Wepp(NoDbBase, LogMixin):
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
-                    _copyfile(src_fn, dst_fn) 
+                    _copyfile(src_fn, dst_fn)
+
+            self.log_done()
 
         self.log_done()
 
@@ -1148,6 +1172,8 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
 
         for topaz_id, _ in watershed.sub_iter():
+            self.log(f'    _prep_climates:{topaz_id}... ')
+
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.cli' % wepp_id)
 
@@ -1159,6 +1185,8 @@ class Wepp(NoDbBase, LogMixin):
                 for fp in watershed.fps_summary(topaz_id):
                     dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
                     _copyfile(src_fn, dst_fn)
+
+            self.log_done()
 
         self.log_done()
 

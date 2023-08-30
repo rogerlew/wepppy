@@ -82,6 +82,10 @@ class RhemPost(NoDbBase):
     def _lock(self):
         return _join(self.wd, 'rhempost.nodb.lock')
 
+    @property
+    def missing_summaries_count(self):
+        return getattr(self, '_missing_summaries_count', 0)
+
     def run_post(self):
         from wepppy.nodb import Rhem
 
@@ -109,11 +113,17 @@ class RhemPost(NoDbBase):
             ret_yield = None
             ret_loss = None
 
+            missing_sum = 0
+
             for topaz_id, summary in watershed.sub_iter():
                 area_ha = summary.area / 10000
                 total_area += area_ha
                 summary_fn = _join(out_dir, 'hill_{}.sum'.format(topaz_id))
                 hill_summaries[topaz_id] = RhemSummary(summary_fn, area_ha)
+
+                if hill_summaries[topaz_id].annuals == None:
+                    missing_sum += 1
+                    continue
 
                 runoff += hill_summaries[topaz_id].annuals['Avg-Runoff (m^3/yr)']
                 soil_yield += hill_summaries[topaz_id].annuals['Avg-SY (tonne/yr)']
@@ -142,6 +152,9 @@ class RhemPost(NoDbBase):
 
                 if periods is None:
                     periods = [v for v in hill_summaries[topaz_id].ret_freq_periods]
+
+
+            self._missing_summaries_count = missing_sum
 
             self.hill_summaries = hill_summaries
             self.watershed_annuals = {'Avg-Runoff (m^3/yr)': runoff,

@@ -206,7 +206,7 @@ class RAP(NoDbBase):
 
             data_ds = {}
             for band in RAP_Band:
-                data_ds[band] = rap_ds.spatial_aggregation(band=band, subwta_fn=subwta_fn)
+                data_ds[band], px_counts = rap_ds.spatial_aggregation(band=band, subwta_fn=subwta_fn)
 
             data = {}
             for topaz_id in data_ds[RAP_Band.LITTER]:

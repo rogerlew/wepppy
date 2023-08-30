@@ -49,6 +49,8 @@ from flask_security import (
     login_required, current_user, roles_required
 )
 
+import re
+
 from flask_security.forms import Required
 
 from flask_mail import Mail
@@ -143,8 +145,12 @@ from jinja2 import Environment, FileSystemLoader
 def sort_numeric_keys(value, reverse=False):
     return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
 
+def extract_leading_digits(s):
+    match = re.match(r'(\d+)', s)
+    return int(match.group(1)) if match else 0
+
 def sort_numeric(value, reverse=False):
-    return sorted([int(x) for x in value], reverse=reverse)
+    return sorted(value, key=extract_leading_digits, reverse=reverse)
 
 def get_file_sha1(file_path):
     """

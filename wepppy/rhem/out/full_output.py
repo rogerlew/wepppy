@@ -45,6 +45,14 @@ class RhemSummary(object):
         with open(fn) as fp:
             lines = fp.readlines()
 
+        if len(lines) <= 1:
+            self.area = 0
+            self.annuals = None
+            self.ret_freq_periods = None
+            self.return_freques = None
+            return
+
+
         annuals = {}
         for i in range(2, 6):
             k, v = lines[i].split('=')
