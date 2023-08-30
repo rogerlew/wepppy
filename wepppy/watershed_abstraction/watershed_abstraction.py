@@ -864,7 +864,8 @@ class WatershedAbstraction:
         return fp_d, subflows
 
     def abstract_subcatchment(self, sub_id, verbose=False, warn=False,
-                              clip_hillslopes=False, clip_hillslope_length=300.0):
+                              clip_hillslopes=False, clip_hillslope_length=300.0,
+                              max_points=99):
         """
         define subcatchment abstraction for the purposes of running WEPP
         """
@@ -967,7 +968,7 @@ class WatershedAbstraction:
         slp_fn = _join(self.wat_dir, f'hill_{sub_id}.slp')
         fp = open(slp_fn, 'w')
         write_slp(d.aspect, d.width, cellsize, d.length,
-                  d.w_slopes, d.distance_p, fp, 97.3)
+                  d.w_slopes, d.distance_p, fp, 97.3, max_points=max_points)
         fp.close()
 
         return d, fp_d

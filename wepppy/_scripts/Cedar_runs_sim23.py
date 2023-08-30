@@ -101,6 +101,15 @@ def fork(runid, new_runid):
     log_print( ' done.\n')
 
 
+#  s1_wic_und
+#  s1_nft_und
+#  s1_sec_und
+#  s1_sfc_*
+#  s1_roc_* 
+#  s2_nft_*
+#  s2_mft_*
+
+
 watersheds = [
     dict(watershed='s1_wic',  # https://wepp.cloud/weppcloud/runs/mdobre-cacophonous-quietness/disturbed9002/
          extent=[-121.92146301269533, 47.35882737383059, -121.7743492126465, 47.45838885710576],
@@ -127,27 +136,32 @@ watersheds = [
          map_center=[-121.87663666127418, 47.40146403519697],
          map_zoom=13,
          outlet=[-121.91726398079759, 47.39862796686496]),
-#    dict(watershed='s2_lndsbrg_taylor_nfcedar',
-#         # https://dev.wepp.cloud/weppcloud/runs/mdobre-inferential-extinction/seattle-snow-9002/
-#         extent=[-121.99356079101564, 47.2256304876291, -121.40510559082033, 47.623752267682875],
-#         map_center=[-121.69933319091798, 47.42506775601176],
-#         map_zoom=11,
-#         outlet=[-121.95094509772274, 47.39363218598862]),
+    dict(watershed='s2_lndsbrg_taylor_nfcedar',
+         # https://dev.wepp.cloud/weppcloud/runs/mdobre-inferential-extinction/seattle-snow-9002/
+         extent=[-121.99356079101564, 47.2256304876291, -121.40510559082033, 47.623752267682875],
+         map_center=[-121.69933319091798, 47.42506775601176],
+         map_zoom=11,
+         outlet=[-121.95094509772274, 47.39363218598862]),
     dict(watershed='s2_nft',  # https://wepp.cloud/weppcloud/runs/mdobre-archetypal-fanatic/disturbed9002/
          extent=[-121.83997901831334, 47.34161840105769, -121.73595385269267, 47.412061467380916],
          map_center=[-121.78796643550302, 47.37685169774973],
          map_zoom=13.5,
          outlet=[-121.81245648245134, 47.36291951809481]),
-    dict(watershed = 's2_mft',  # https://wepp.cloud/weppcloud/runs/mdobre-side-to-side-jeep/disturbed9002/
-         extent = [-121.82309318170107, 47.31286874576608, -121.67597938165224, 47.412516989668774],
-         map_center = [-121.74953628167665, 47.362716395737955],
-         map_zoom = 13,
-         outlet = [-121.81628353988306, 47.36115943845854]),
-    dict(watershed = 's2_nfc',  # https://wepp.cloud/weppcloud/runs/mdobre-stuck-stillness/disturbed9002/
+    dict(watershed='s2_mft',
+         extent=[-121.83854505803623, 47.30717443230415, -121.70379087712803, 47.39846791321002],
+         map_center=[-121.77116796758213, 47.35284091404245],
+         map_zoom=13,
+         outlet=[-121.80333539859427, 47.35572494449633]),
+    dict(watershed='s2_uppercedar',
+         extent=[-121.69795989990236, 47.2442796020127, -121.4037322998047, 47.44364658280913],
+         map_center=[-121.55084609985353, 47.344057209471984],
+         map_zoom=12,
+         outlet=[-121.62090267923683, 47.36230433347998]),
+    dict(watershed='s2_nfc',  # https://wepp.cloud/weppcloud/runs/mdobre-stuck-stillness/disturbed9002/
          extent = [-121.7003718233316, 47.159136372259844, -121.28427116084903, 47.441316895540446],
          map_center = [-121.49232149209031, 47.300414891137216],
          map_zoom = 14,
-         outlet = [-121.51813244535413, 47.31358160555894])
+         outlet = [-121.51813244535413, 47.31358160555894]),
 ]
 
 scenarios = [
@@ -180,6 +194,7 @@ scenarios = [
 general = dict(
     climate_mode='daymet_prism',
     cfg='cedar23',
+    kslast=0.01,
     default_landuse=None,
     sbs_map=None,
     base_project=None
@@ -347,7 +362,7 @@ if __name__ == '__main__':
             stations = climate.find_closest_stations()
             climate.climatestation = stations[0]['id']
 
-            climate.climate_mode = ClimateMode.Observed
+            climate.climate_mode = ClimateMode.ObservedPRISM
             climate.climate_spatialmode = ClimateSpatialMode.Multiple
             climate.set_observed_pars(start_year=1980, end_year=2022)
             climate.build(verbose=1)

@@ -1441,6 +1441,7 @@ class ManagementSummary(object):
         self.key = kwargs["Key"]
         self._map = kwargs.get("_map", None)
         self.man_fn = kwargs["ManagementFile"]
+        self.sol_fn = kwargs.get("SoilFile", None)
         self.man_dir = kwargs.get("ManagementDir", _management_dir)
         self.desc = kwargs.get("Description", '')
         self.color = RGBA(*(kwargs["Color"])).tohex().lower()[:-2]
@@ -1473,6 +1474,12 @@ class ManagementSummary(object):
     @property
     def man_path(self):
         return _join(self.man_dir, self.man_fn)
+
+    @property
+    def sol_path(self):
+        if self.sol_fn is None:
+            return None
+        return _join(self.man_dir, self.sol_fn)
 
     def get_management(self):
         _map = None

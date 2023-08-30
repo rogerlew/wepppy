@@ -74,8 +74,14 @@ def process_channel(args):
 
 
 def process_subcatchment(args):
-    wat_abs, sub_id, clip_hillslopes, clip_hillslope_length  = args
-    sub_summary, fp_d = wat_abs.abstract_subcatchment(sub_id, clip_hillslopes=clip_hillslopes, clip_hillslope_length=clip_hillslope_length)
+    wat_abs, sub_id, clip_hillslopes, clip_hillslope_length, max_points  = args
+
+    sub_summary, fp_d = wat_abs.abstract_subcatchment(
+        sub_id, 
+        clip_hillslopes=clip_hillslopes, 
+        clip_hillslope_length=clip_hillslope_length,
+        max_points=max_points)
+
     return sub_id, sub_summary, fp_d
 
 
@@ -104,6 +110,7 @@ class Watershed(NoDbBase):
             self._clip_hillslope_length = self.config_get_float('watershed', 'clip_hillslope_length')
             self._clip_hillslopes = self.config_get_bool('watershed', 'clip_hillslopes')
             self._walk_flowpaths = self.config_get_bool('watershed', 'walk_flowpaths')
+            self._max_points = self.config_get_int('watershed', 'max_points', None)
 
             delineation_backend = self.config_get_str('watershed', 'delineation_backend')
             if delineation_backend.lower().startswith('taudem'):
@@ -167,6 +174,13 @@ class Watershed(NoDbBase):
         if delineation_backend is None:
             return True
         return delineation_backend == DelineationBackend.TOPAZ
+
+    @property
+    def max_points(self):
+        pts = getattr(self, '_max_points', None)
+        if pts is None:
+            return 99
+        return pts
 
     @property
     def clip_hillslopes(self):
@@ -818,8 +832,9 @@ class Watershed(NoDbBase):
                 wat_abs_engines[i].watershed['channel_paths'] = chns_paths
 
             # abstract subcatchments
+            max_points = self.max_points
             sub_ids = wat_abs_engines[0].sub_ids
-            args_list = [(wat_abs_engines[i % NCPU], sub_id, self.clip_hillslopes, self.clip_hillslope_length)
+            args_list = [(wat_abs_engines[i % NCPU], sub_id, self.clip_hillslopes, self.clip_hillslope_length, max_points)
                          for i, sub_id in enumerate(sub_ids)]
             results = pool.map(process_subcatchment, args_list)
 
