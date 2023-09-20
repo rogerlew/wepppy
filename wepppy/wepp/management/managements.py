@@ -41,7 +41,8 @@ _management_dir = _join(_thisdir, "data")
 _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _disturbed_map_fn = _join(_management_dir, "disturbed.json")
-_eu_disturbed_map_fn = _join(_management_dir, "eu-disturbed.json")
+_revegetation_map_fn = _join(_management_dir, "revegetation.json")
+_eu_disturbed_map_fn = _join(_management_dir, "eu-corine-disturbed.json")
 _au_disturbed_map_fn = _join(_management_dir, "au-disturbed.json")
 _ca_disturbed_map_fn = _join(_management_dir, "ca-disturbed.json")
 _esdac_map_fn = _join(_management_dir, "esdac_map.json")
@@ -216,7 +217,7 @@ class PlantLoopCropland(ScenarioBase):
         self.diam = float(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 8
+        assert len(line) == 8, line
         self.dlai = float(line.pop(0))
         self.dropfc = float(line.pop(0))
         self.extnct = float(line.pop(0))
@@ -230,7 +231,7 @@ class PlantLoopCropland(ScenarioBase):
         assert self.mfocod in [1, 2]
         
         line = lines.pop(0).split()
-        assert len(line) == 10
+        assert len(line) == 10, line
         self.oratea = float(line.pop(0))
         self.orater = float(line.pop(0))
         self.otemp = float(line.pop(0))
@@ -243,10 +244,14 @@ class PlantLoopCropland(ScenarioBase):
         self.tmpmax = float(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 3
+        assert len(line) in [3, 4], line
         self.tmpmin = float(line.pop(0))
         self.xmxlai = float(line.pop(0))
         self.yld = float(line.pop(0))
+        if len(line) == 4:
+            self.reveg2 = float(line.pop(0))
+        else:
+            self.reveg2 = ''
         
     def __str__(self):
         return """\
@@ -258,7 +263,7 @@ class PlantLoopCropland(ScenarioBase):
 {0.mfocod}
 {0.oratea:0.5f} {0.orater:0.5f} {0.otemp:0.5f} {0.pltol:0.5f} {0.pltsp:0.5f} \
 {0.rdmax:0.5f} {0.rsr:0.5f} {0.rtmmax:0.5f} {0.spriod} {0.tmpmax:0.5f}
-{0.tmpmin:0.5f} {0.xmxlai:0.5f} {0.yld:0.5f}
+{0.tmpmin:0.5f} {0.xmxlai:0.5f} {0.yld:0.5f} {0.reveg2}
 """.format(self)
 
 
@@ -268,7 +273,7 @@ class PlantLoopRangeland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 10
+        assert len(line) == 10, line
         self.aca = float(line.pop(0))
         self.aleaf = float(line.pop(0))
         self.ar = float(line.pop(0))
@@ -281,7 +286,7 @@ class PlantLoopRangeland(ScenarioBase):
         self.ffp = int(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 10
+        assert len(line) == 10, line
         self.gcoeff = float(line.pop(0))
         self.gdiam = float(line.pop(0))
         self.ghgt = float(line.pop(0))
@@ -294,7 +299,7 @@ class PlantLoopRangeland(ScenarioBase):
         self.rgcmin = float(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 10
+        assert len(line) == 10, line
         self.root10 = float(line.pop(0))
         self.rootf = float(line.pop(0))
         self.scday2 = _parse_julian(line.pop(0))
@@ -307,7 +312,7 @@ class PlantLoopRangeland(ScenarioBase):
         self.tempmn = float(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 3
+        assert len(line) == 3, line
         self.thgt = float(line.pop(0))
         self.tpop = float(line.pop(0))
         self.wood = float(line.pop(0))
@@ -348,7 +353,7 @@ class OpLoopCropland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 3
+        assert len(line) == 3, line
         self.mfo1 = float(line.pop(0))
         self.mfo2 = float(line.pop(0))
         self.numof = int(line.pop(0))
@@ -367,7 +372,7 @@ class OpLoopCropland(ScenarioBase):
             assert self.cltpos in [1, 2]
         
         line = lines.pop(0).split()
-        assert len(line) == 7
+        assert len(line) == 7, line
         self.rho = float(line.pop(0))
         self.rint = float(line.pop(0))
         self.rmfo1 = float(line.pop(0))
@@ -436,7 +441,7 @@ class IniLoopCropland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 6
+        assert len(line) == 6, line
         self.bdtill = float(line.pop(0))
         self.cancov = float(line.pop(0))  # canopy cover
         self.daydis = int(line.pop(0))
@@ -448,10 +453,10 @@ class IniLoopCropland(ScenarioBase):
         self.iresd = _scenario_reference_factory(i, SectionType.Plant, root, self)
         
         self.imngmt = int(lines.pop(0))
-        assert self.imngmt in [1, 2, 3]
+        assert self.imngmt in [1, 2, 3], self.imngmt
         
         line = lines.pop(0).split()
-        assert len(line) == 5
+        assert len(line) == 5, line
         self.rfcum = float(line.pop(0))
         self.rhinit = float(line.pop(0))
         self.rilcov = float(line.pop(0))  # rill cover
@@ -461,7 +466,7 @@ class IniLoopCropland(ScenarioBase):
         self.rtyp = int(lines.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 5
+        assert len(line) == 5, line
         self.snodpy = float(line.pop(0))
         self.thdp = float(line.pop(0))
         self.tillay1 = float(line.pop(0))
@@ -469,9 +474,15 @@ class IniLoopCropland(ScenarioBase):
         self.width = float(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 2
+        assert len(line) in (2, 4), line
         self.sumrtm = float(line.pop(0))
         self.sumsrm = float(line.pop(0))
+        if len(line) == 4:
+            self.reveg3 = float(line.pop(0))
+            self.reveg4 = float(line.pop(0))
+        else:
+            self.reveg3 = ''
+            self.reveg4 = ''
 
     def __str__(self):
         return """\
@@ -481,7 +492,7 @@ class IniLoopCropland(ScenarioBase):
 {0.rfcum:0.5f} {0.rhinit:0.5f} {0.rilcov:0.5f} {0.rrinit:0.5f} {0.rspace:0.5f} 
 {0.rtyp} 
 {0.snodpy:0.5f} {0.thdp:0.5f} {0.tillay1:0.5f} {0.tillay2:0.5f} {0.width:0.5f} 
-{0.sumrtm:0.5f} {0.sumsrm:0.5f}
+{0.sumrtm:0.5f} {0.sumsrm:0.5f} {0.reveg3} {0.reveg4}
 """.format(self)
 
 
@@ -491,7 +502,7 @@ class IniLoopRangeland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 9
+        assert len(line) == 9, line
         self.frdp = float(line.pop(0))
         self.pptg = float(line.pop(0))
         self.rmagt = float(line.pop(0))
@@ -503,7 +514,7 @@ class IniLoopRangeland(ScenarioBase):
         self.tillay2 = float(line.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 9
+        assert len(line) == 9, line
         self.resi = float(line.pop(0))
         self.roki = float(line.pop(0))
         self.basi = float(line.pop(0))
@@ -595,7 +606,7 @@ class ContourLoopCropland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 4
+        assert len(line) == 4, line
         self.cntslp = float(line.pop(0))
         self.rdghgt = float(line.pop(0))
         self.rowlen = float(line.pop(0))
@@ -613,7 +624,7 @@ class DrainLoopCropland(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 4
+        assert len(line) == 4, line
         self.ddrain = float(line.pop(0))
         self.drainc = float(line.pop(0))
         self.drdiam = float(line.pop(0))
@@ -729,7 +740,7 @@ class YearLoopCroplandAnnualFallow(ScenarioBase):
         self.jdplt = _parse_julian(lines.pop(0))
         self.rw = float(lines.pop(0))
         self.resmgt = resmgt = int(lines.pop(0))
-        assert resmgt in [1, 2, 3, 4, 5, 6]
+        assert resmgt in [1, 2, 3, 4, 5, 6], resmgt
 
         if self.root.datver == '98.4':
             assert resmgt != 5
@@ -776,7 +787,7 @@ class YearLoopCroplandPerennialGraze(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 4
+        assert len(line) == 4, line
         self.animal = float(line.pop(0))
         self.area = float(line.pop(0))
         self.bodywt = float(line.pop(0))
@@ -878,7 +889,7 @@ class YearLoopRangelandGrazeLoop(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 2
+        assert len(line) == 2, line
         self.animal = float(line.pop(0))
         self.bodywt = float(line.pop(0))
 
@@ -903,7 +914,7 @@ class YearLoopRangelandGraze(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 5
+        assert len(line) == 5, line
         
         self.area = float(line.pop(0))
         
@@ -944,7 +955,7 @@ class YearLoopRangelandHerb(ScenarioBase):
         self.active = int(lines.pop(0))
         
         line = lines.pop(0).split()
-        assert len(line) == 4
+        assert len(line) == 4, line
         self.dleaf = float(line.pop(0))
         self.herb = float(line.pop(0))
         self.regrow = float(line.pop(0))
@@ -969,7 +980,7 @@ class YearLoopRangelandBurn(ScenarioBase):
 
         self.root = root
         line = lines.pop(0).split()
-        assert len(line) == 5
+        assert len(line) == 5, line
         self.alter = float(line.pop(0))
         self.burned = float(line.pop(0))
         self.change = float(line.pop(0))
@@ -1460,9 +1471,10 @@ class ManagementSummary(object):
         self.pct_coverage = None
 
         m = get_management(self.key, _map=self._map)
-        assert len(m.inis) == 1
+        assert len(m.inis) >= 1, m.inis
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
+
         self.cancov = m.inis[0].data.cancov
         self.inrcov = m.inis[0].data.inrcov
         self.rilcov = m.inis[0].data.rilcov
@@ -1487,18 +1499,22 @@ class ManagementSummary(object):
             _map = self._map
 
         m = get_management(self.key, _map=_map)
-        assert len(m.inis) == 1
-        assert m.inis[0].landuse == 1
-        assert isinstance(m.inis[0].data, IniLoopCropland)
+        assert len(m.inis) >= 1
 
-        if self.cancov_override is not None:
-            m.inis[0].data.cancov = self.cancov_override
+        for i in range(len(m.inis)):
+            if m.inis[i].landuse != 1:
+                continue
+            if not isinstance(m.inis[i].data, IniLoopCropland):
+                continue
 
-        if self.inrcov_override is not None:
-            m.inis[0].data.inrcov = self.inrcov_override
+            if self.cancov_override is not None:
+                m.inis[0].data.cancov = self.cancov_override
 
-        if self.rilcov_override is not None:
-            m.inis[0].data.rilcov = self.rilcov_override
+            if self.inrcov_override is not None:
+                m.inis[0].data.inrcov = self.inrcov_override
+
+            if self.rilcov_override is not None:
+                m.inis[0].data.rilcov = self.rilcov_override
 
         return m
      
@@ -1931,6 +1947,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'disturbed' in _map.lower():
         with open(_disturbed_map_fn) as fp:
+            d = json.load(fp)
+    elif 'revegetation' in _map.lower():
+        with open(_revegetation_map_fn) as fp:
             d = json.load(fp)
     else:
         with open(_map_fn) as fp:
