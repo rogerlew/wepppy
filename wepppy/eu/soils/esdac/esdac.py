@@ -363,7 +363,12 @@ class ESDAC:
         s.append(f'1 {ksflag}')
 
         description = d_esdb['fao90lev1'][2]
-        num_layers = 2
+
+
+        if h1.depth <= 0:
+            num_layers = 1
+        else:
+            num_layers = 2
 
         s.append(f"'{description}'\t\t'{h0.simple_texture}'\t"\
                  f"{num_layers}\t{salb:0.4f}\t"\
@@ -384,19 +389,21 @@ class ESDAC:
                  
         s.append('\t' + s2)
 
-        s2 = f'{h1.depth:0.03f}\t{h1.bd:0.02f}\t{h1.ks:0.04f}\t'\
-             f'{h1.anisotropy:0.01f}\t{h1.field_cap:0.04f}\t{h1.wilt_pt:0.04f}\t'\
-             f'{h1.sand:0.2f}\t{h1.clay:0.2f}\t{h1.om:0.2f}\t'\
-             f'{h1.cec:0.2f}\t{h1.smr:0.2f}'
-                
-        # make the layers easier to read by making cols fixed width
-        # aligning to the right.
-        s2 = '{0:>9}\t{1:>8}\t{2:>9}\t'\
-             '{3:>5}\t{4:>9}\t{5:>9}\t'\
-             '{6:>7}\t{7:>7}\t{8:>7}\t'\
-             '{9:>7}\t{10:>7}'.format(*s2.split())
-                 
-        s.append('\t' + s2)
+
+        if num_layers == 2:
+            s2 = f'{h1.depth:0.03f}\t{h1.bd:0.02f}\t{h1.ks:0.04f}\t'\
+                 f'{h1.anisotropy:0.01f}\t{h1.field_cap:0.04f}\t{h1.wilt_pt:0.04f}\t'\
+                 f'{h1.sand:0.2f}\t{h1.clay:0.2f}\t{h1.om:0.2f}\t'\
+                 f'{h1.cec:0.2f}\t{h1.smr:0.2f}'
+
+            # make the layers easier to read by making cols fixed width
+            # aligning to the right.
+            s2 = '{0:>9}\t{1:>8}\t{2:>9}\t'\
+                 '{3:>5}\t{4:>9}\t{5:>9}\t'\
+                 '{6:>7}\t{7:>7}\t{8:>7}\t'\
+                 '{9:>7}\t{10:>7}'.format(*s2.split())
+
+            s.append('\t' + s2)
 
 
         if res_lyr_i is None:
