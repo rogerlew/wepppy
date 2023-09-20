@@ -136,6 +136,11 @@ watersheds = [
          map_center=[-121.87663666127418, 47.40146403519697],
          map_zoom=13,
          outlet=[-121.91726398079759, 47.39862796686496]),
+    dict(watershed='s1_taylor',  #
+         extent=[-121.92867279052736, 47.26268916206698, -121.6344451904297, 47.46198673754627],
+         map_center=[-121.7817, 47.3625],
+         map_zoom=13,
+         outlet=[-121.84634382339041, 47.386139361862476]),
     dict(watershed='s2_lndsbrg_taylor_nfcedar',
          # https://dev.wepp.cloud/weppcloud/runs/mdobre-inferential-extinction/seattle-snow-9002/
          extent=[-121.99356079101564, 47.2256304876291, -121.40510559082033, 47.623752267682875],
@@ -245,7 +250,6 @@ if __name__ == '__main__':
 
     os.chdir('/geodata/weppcloud_runs/')
 
-
     failed = open('failed', 'w')
     for proj in projects:
 
@@ -269,7 +273,6 @@ if __name__ == '__main__':
                 continue
 
         wd = abspath(wd)
-
 
         if base_project is None:
             if condition != 'und':
@@ -351,7 +354,13 @@ if __name__ == '__main__':
 
         soils = Soils.getInstance(wd)
         soils.mode = SoilsMode.Gridded
+
         soils.build()
+
+        climate = Climate.getInstance(wd)
+        climate.cli_fn = 'user_defined.cli'
+
+        assert _exists(_join())
 
         if base_project is not None and False:
             pass
@@ -361,7 +370,6 @@ if __name__ == '__main__':
             climate = Climate.getInstance(wd)
             stations = climate.find_closest_stations()
             climate.climatestation = stations[0]['id']
-
             climate.climate_mode = ClimateMode.ObservedPRISM
             climate.climate_spatialmode = ClimateSpatialMode.Multiple
             climate.set_observed_pars(start_year=1980, end_year=2022)
@@ -396,8 +404,6 @@ if __name__ == '__main__':
         log_print('prepping wepp')
         wepp = Wepp.getInstance(wd)
         wepp.clean()
-
-        wepp.parse_inputs(proj)
 
         wepp.prep_hillslopes()
 

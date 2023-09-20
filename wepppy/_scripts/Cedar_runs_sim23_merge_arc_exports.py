@@ -18,7 +18,7 @@ from Cedar_runs_sim23 import projects, scenarios
 os.chdir('/geodata/weppcloud_runs/')
 
 if __name__ == "__main__":
-    prefix = 's1'
+    prefix = 's2'
 
     outdir = '/home/roger/%s_arcs' % prefix
 
@@ -57,6 +57,9 @@ if __name__ == "__main__":
             wds.append(proj['wd'])
 
             wd = _join('/geodata/weppcloud_runs', proj['wd'])
+
+            if 's2_lndsbrg_taylor_nfcedar' in wd:
+                continue
 
             chn = _join(wd, 'export', 'arcmap', 'channels.shp')
             assert _exists(chn), chn
