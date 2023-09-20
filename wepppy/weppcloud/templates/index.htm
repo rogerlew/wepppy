@@ -11,6 +11,34 @@
           integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
+    <style type="text/css">
+
+/* Banner styles */
+.youtube-banner {
+    background-color: #FFFFFF; /* White background */
+    color: #FF0000; /* YouTube's primary red color for text */
+    padding: 15px 25px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; /* Auto margins for centering */
+    font-size: 1.2em;
+    border: 1px solid #FF0000; /* YouTube's primary red color for border */
+    max-width: 500; /* Adjust this to your preferred maximum width */
+}
+
+
+.youtube-banner a {
+    color: #FF0000; /* YouTube's primary red color for link */
+    text-decoration: underline; /* Underlined link */
+    font-weight: bold;
+}
+
+.youtube-banner a:hover {
+    text-decoration: none; /* Remove underline on hover */
+}
+    </style>
   </head>
   <body>
   <header>
@@ -46,6 +74,14 @@
 </header>
     <div role="main" class="container">
       <div style="height: 60px;"></div>
+
+        <!-- The banner -->
+        <div class="youtube-banner">
+            Check out our <a href="https://www.youtube.com/@fswepp4700" target="_blank">YouTube tutorials</a> and learn more!
+            <br/>
+            Documentation and a QuickStart Guide can be found <a href="https://doc.wepp.cloud">here</a>
+        </div>
+
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
         <div class="col-lg-3">
@@ -64,7 +100,10 @@
              This interface also incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).
           </p>
           <p>
-            <a class="btn btn-primary btn-lg" href="create/disturbed9002" role="button">Start Disturbed Run</a>
+            <a class="btn btn-primary btn-lg" href="create/disturbed9002" role="button" >Start Disturbed Run (CONUS)</a>
+            <br/>
+            <br/>
+            <a class="btn btn-primary" href="create/disturbed-hi" role="button" >Start Disturbed-Hawaii Run (Experimental)</a>
             <p>{{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2022</p>
           </p>
         </div>

@@ -1,10 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Leaflet Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+        }
+        #uploadForm {
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-$END$
+<form id="uploadForm" enctype="multipart/form-data">
+    <label for="input_upload_sbs">Upload SBS Map:</label>
+    <input type="file" id="input_upload_sbs" name="input_upload_sbs">
+    <input type="button" value="Upload" onclick="uploadFile()">
+</form>
+<div id="map"></div>
+
+<script>
+    const map = L.map('map');
+    var geojsonLayer;
+
+    L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 18
+    }).addTo(map);
+
+function uploadFile() {
+    let formData = new FormData();
+    let fileField = document.querySelector("#input_upload_sbs");
+
+    formData.append('input_upload_sbs', fileField.files[0]);
+
+    fetch('/weppcloud/huc-fire/tasks/upload_sbs/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Extract runid from the returned JSON object
+        let runid = data.runid;
+
+        // Construct the URL for fetching the GeoJSON
+        let geojsonUrl = `/weppcloud/runs/${runid}/cfg/resources/huc.json`;
+
+        // Fetch the GeoJSON
+        return fetch(geojsonUrl);
+    })
+    .then(response => response.json())
+    .then(geojsonData => {
+        let geojsonLayer = L.geoJSON(geojsonData, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(feature.properties.name);
+            }
+        }).addTo(map);
+        map.fitBounds(geojsonLayer.getBounds());
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
 </body>
 </html>

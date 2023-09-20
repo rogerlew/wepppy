@@ -212,7 +212,6 @@ var Project = function () {
         that.set_readonly_controls = function (readonly) {
 
             if (readonly === true) {
-                console.log('hide');
                 $('.hide-readonly').each( function( index, element ){
                     $(this).hide();
                 });
@@ -300,6 +299,90 @@ var Project = function () {
 }();
 
 /* ----------------------------------------------------------------------------
+ * RAP_TS
+ * ----------------------------------------------------------------------------
+ */
+var RAP_TS = function () {
+    var instance;
+
+    function createInstance() {
+        var that = controlBase();
+        that.form = $("#rap_ts_form");
+        that.info = $("#rap_ts_form #info");
+        that.status = $("#rap_ts_form  #status");
+        that.stacktrace = $("#rap_ts_form #stacktrace");
+
+        that.hideStacktrace = function () {
+            var self = instance;
+            self.stacktrace.hide();
+        };
+
+        that.acquire = function () {
+            var self = instance;
+            var task_msg = "Acquiring RAP TS maps";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            self.attempts = 0;
+            setTimeout(self.status_loop, 5000);
+
+            $.post({
+                url: "tasks/acquire_rap_ts/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response.Content);
+                    self.status.html("");
+                    self.stacktrace.html("");
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            }).always(function () {
+                    self.attempts = 9999999;
+            });
+        };
+
+        that.status_loop = function () {
+            var self = instance;
+
+            $.post({
+                url: 'query/status/rap_ts/',
+                success: function success(response) {
+
+                    if (response.Success === true && self.attempts < 14400) {
+                        self.status.html(response.Content + "*".repeat(self.attempts % 4));
+                        self.attempts += 1;
+                    } else {
+                        self.attempts += 1000;
+                    }
+                }
+            }).done(function () {
+                if (self.attempts < 32000) {
+                    setTimeout(self.status_loop, 1000);
+                }
+
+            });
+        };
+
+        return that;
+    }
+
+    return {
+        getInstance: function getInstance() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+}();
+
+/* ----------------------------------------------------------------------------
  * Team
  * ----------------------------------------------------------------------------
  */
@@ -317,11 +400,19 @@ var Team = function () {
             self.stacktrace.hide();
         };
 
-        that.adduser = function () {
+        that.adduser_click = function () {
             var self = instance;
+            var email = $('#adduser-email').val()
+            self.adduser(email)
+        };
+
+        that.adduser = function (email) {
+            var self = instance;
+            var data ={"adduser-email": email};
+
             $.post({
                 url: "tasks/adduser/",
-                data: $("#team_form").serialize(),
+                data: data,
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("TEAM_ADDUSER_TASK_COMPLETED");
@@ -665,6 +756,30 @@ var Baer = function () {
             }
         };
 
+        that.set_firedate = function (fire_date) {
+            var self = instance;
+
+            var task_msg = "Setting Fire Date";
+
+            $.post({
+                url: "tasks/set_firedate/",
+                data: JSON.stringify({ fire_date: fire_date}),
+                contentType: "application/json; charset=utf-8",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
 
         that.upload_sbs = function () {
             var self = instance;
@@ -808,7 +923,7 @@ var Baer = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(task_msg + "... Success");
-                        self.form.trigger("MODIFY_burn_class_TASK_COMPLETE");
+                        self.form.trigger("MODIFY_BURN_CLASS_TASK_COMPLETE");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -821,6 +936,49 @@ var Baer = function () {
                 }
             });
         };
+
+
+        that.modify_color_map = function () {
+
+            var self = instance;
+
+            var data = {};
+            // Use jQuery to find all select fields that start with "baer_color_"
+            $("select[id^='baer_color_']").each(function() {
+                var id = $(this).attr('id'); // Get the id of the select element
+                var rgb = id.replace('baer_color_', ''); // Extract the <R>_<G>_<B> part
+                var value = $(this).val(); // Get the selected value of the dropdown
+                data[rgb] = value; // Add to the data object
+            });
+
+            var task_msg = "Modifying Class Breaks";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/modify_color_map/",
+                data: JSON.stringify({ color_map: data }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                        self.form.trigger("MODIFY_BURN_CLASS_TASK_COMPLETE");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
 
         that.show_sbs = function () {
             var self = instance;
@@ -1030,6 +1188,8 @@ var ChannelDelineation = function () {
             var self = instance;
 
             self.remove();
+            Outlet.getInstance().remove();
+
             var task_msg = "Delineating channels";
 
             self.info.text("");
@@ -1301,9 +1461,13 @@ var Outlet = function () {
         that.remove = function () {
             var self = instance;
             var map = Map.getInstance();
+            self.info.html("");
+            self.stacktrace.text("");
 
             map.ctrls.removeLayer(self.outletMarker);
             map.removeLayer(self.outletMarker);
+            self.status.html("");
+
         };
 
         that.show = function () {
