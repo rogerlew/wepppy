@@ -101,7 +101,12 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
 
     df.columns = [c.replace(' ', '') for c in df.columns]
 
-    df['srad(l/day)'] = df['srad(W/m^2)'] * 2.06362996638
+
+    # swat uses W/m^2
+    # daymet uses J/m^2
+    # wepp uses langley/day
+    df['srad(J/m^2)'] = df['srad(W/m^2)'] * df['dayl(s)']
+    df['srad(l/day)'] = df['srad(J/m^2)']/(3600*24) # langley is Wh/m^2
 
     vp = df['vp(Pa)'].values
     df['tdew(degc)'] = dewpoint(vp * units.Pa).magnitude

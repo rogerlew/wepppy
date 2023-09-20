@@ -20,6 +20,36 @@ from calendar import isleap
 
 from wepppy.all_your_base import isint
 
+
+def retrieve_historical_wind(lon, lat, start_year, end_year):
+    yesterday = datetime.now() - timedelta(2)
+    if end_year == yesterday.year:
+        end_date = datetime.strftime(yesterday, '%Y-%m-%d')
+    else:
+        end_date = f'{end_year}-12-31'
+
+    url = f"https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&"\
+          f"lat={lat}&lon={lon}&positive-east-longitude=False&"\
+          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_vs_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_speed&variable-name=vs&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_th_1979_CurrentYear_CONUS.nc&variable=daily_mean_wind_direction&variable-name=th&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"filename=gridmet_ts.shaw"
+
+    headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
+    response = requests.get(url, headers=headers)
+
+    response_data = response.json()
+
+    data = response_data['data'][0]
+
+    df = pd.DataFrame()
+    df['vs(m/s)'] = pd.Series(data['vs(m/s)']).astype(float)
+    df['th(DegreesClockwisefromnorth)'] = pd.Series(data['th(DegreesClockwisefromnorth)']).astype(float)
+
+    df.index = pd.to_datetime(data['yyyy-mm-dd'], format='%Y-%m-%d')
+
+    return df
+
+
 def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     yesterday = datetime.now() - timedelta(2)
     if end_year == yesterday.year:
