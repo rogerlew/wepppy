@@ -4,7 +4,9 @@ from .multi_ofe import SoilMultipleOfeSynth
 import csv
 import shutil
 
+from deprecated import deprecated
 
+@deprecated
 class SoilReplacements(object):
     def __init__(self, Code=None, LndcvrID=None, WEPP_Type=None, New_WEPPman=None, ManName=None, Albedo=None,
                  iniSatLev=None, interErod=None, rillErod=None, critSh=None, effHC=None, soilDepth=None,
@@ -88,7 +90,7 @@ class SoilReplacements(object):
 
         return 'SoilReplacements(' + ' '.join(s) + ')'
 
-
+@deprecated
 def read_lc_file(fname):
     """
     Reads a file containing landcover parameters and returns a dictionary
@@ -166,6 +168,11 @@ def simple_texture(clay, sand):
     
     return None
 
+def simple_texture_enum(clay, sand):
+    return {'clay loam': 1,
+            'loam': 2,
+            'sand loam': 3,
+            'silt loam': 4}[simple_texture(clay, sand)]
 
 def _soil_texture(clay, sand):
     assert sand + clay <= 100
@@ -208,7 +215,7 @@ def soil_texture(clay, sand):
     assert res is not None
     return res
 
-
+@deprecated
 def soil_specialization(src, dst, replacements: SoilReplacements, caller=''):
     """
     Creates a new soil file based on soil_in_fname and makes replacements

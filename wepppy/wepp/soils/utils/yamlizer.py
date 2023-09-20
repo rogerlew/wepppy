@@ -101,6 +101,11 @@ class WeppSoilUtil(object):
                 line = shlex.split(lines[i])
                 i += 1
 
+            elif solwpv == 9005:
+                ksatadj, luse, burn_code, stext, texid_enum, uksat, lkeff = line
+                line = shlex.split(lines[i])
+                i += 1
+
             if solwpv < 941 or solwpv >= 7777 or datver == 2006.2:
                 # 1   2      3    4     5    6   7   8
                 slid, texid, nsl, salb, sat, ki, kr, shcrit = line[:8]
@@ -200,8 +205,11 @@ class WeppSoilUtil(object):
 #        self.obj = yaml.safe_load(yaml_txt)
 
     def modify_kslast(self, kslast):
-        if 'developed' in self.obj['ofes']['luse'].lower():
-            return
+        luse = self.obj['ofes'][0]['luse']
+
+        if luse is not None:
+            if 'developed' in luse.lower():
+                return
 
         self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
         for i in range(len(self.obj['ofes'])):
@@ -299,7 +307,7 @@ class WeppSoilUtil(object):
         ksflag = self.obj['ksflag']
         ofes = self.obj['ofes']
 
-        assert datver in (7778.0, 9001.0, 9002.0, 9003.0), datver
+        assert datver in (7778.0, 9001.0, 9002.0, 9003.0, 9005.0), datver
 
         s = [str(int(datver))] 
         s += header
@@ -308,20 +316,11 @@ class WeppSoilUtil(object):
 
         for i in range(ntemp):
             ofe = ofes[i]
-            if datver > 9000.0 and datver < 9003.0:
-                _ksatadj = ofe['ksatadj']
-                _ksatfac = ofe['ksatfac']
-                _ksatrec = ofe['ksatrec']
+
+            # build its over 9000 header
+            if datver > 9000:
                 _luse = ofe['luse']
-                _stext = ofe['stext']
-                s.append(f"{_ksatadj}\t '{_luse}'\t '{_stext}'\t {_ksatfac} \t {_ksatrec}")
-            elif datver == 9003.0:
-                _ksatadj = ofe['ksatadj']
-                _luse = ofe['luse']
-                _stext = ofe['stext']
-                _lkeff = ofe['lkeff']
-                
-                _burn_code = 0                
+                _burn_code = 0
                 if 'agriculture' in _luse:
                     _burn_code = 100
                 elif 'shrub' in _luse:
@@ -338,8 +337,26 @@ class WeppSoilUtil(object):
                 elif 'high sev' in _luse:
                     _burn_code += 3
 
-                    
+            if datver > 9000.0 and datver < 9003.0:
+                _ksatadj = ofe['ksatadj']
+                _ksatfac = ofe['ksatfac']
+                _ksatrec = ofe['ksatrec']
+                _stext = ofe['stext']
+                s.append(f"{_ksatadj}\t '{_luse}'\t '{_stext}'\t {_ksatfac} \t {_ksatrec}")
+
+            elif datver == 9003.0:
+                _ksatadj = ofe['ksatadj']
+                _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
                 s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_lkeff}")
+
+            elif datver == 9005.0:
+                _ksatadj = ofe['ksatadj']
+                _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
+                _uksat = ofe['uksat']
+                _texid_enum = self.simple_texture_enum
+                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_texid_enum}\t {_uksat}\t {_lkeff}")
 
             L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])
             pars = 'nsl salb sat ki kr shcrit'.split()
@@ -468,7 +485,13 @@ class WeppSoilUtil(object):
                                 h0_min_depth=h0_min_depth, 
                                 h0_max_om=h0_max_om, hostname=hostname, 
                                 version=9003)
-   
+
+    def to9005(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        return self.to_over9000(replacements,
+                                h0_min_depth=h0_min_depth,
+                                h0_max_om=h0_max_om, hostname=hostname,
+                                version=9005)
+
     def to_over9000(self, replacements, h0_min_depth=None, h0_max_om=None, hostname='', version=9002):
         if replacements is None:
             replacements = {}
@@ -506,10 +529,14 @@ class WeppSoilUtil(object):
         _luse = replacements.get('luse', None)
         _stext = replacements.get('stext', None)
         _lkeff = replacements.get('lkeff', '')
+        _uksat = replacements.get('uksat', '')
 
         if _lkeff == '':
             _lkeff = '-9999'
-       
+
+        if _uksat == '':
+            _uksat = '-9999'
+
         new.obj['ksflag'] = _replace_parameter(new.obj['ksflag'], _ksflag)
  
         ofes = []
@@ -523,8 +550,11 @@ class WeppSoilUtil(object):
             if version < 9003:
                 ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
                 ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
-            if version == 9003:
+            elif version == 9003:
                 ofe['lkeff'] = _replace_parameter(ofe['lkeff'], _lkeff)
+            elif version == 9005:
+                ofe['lkeff'] = _replace_parameter(ofe['lkeff'], _lkeff)
+                ofe['uksat'] = _uksat
 
             ofe['luse'] = _replace_parameter(ofe['luse'], _luse)
             ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
@@ -602,6 +632,16 @@ class WeppSoilUtil(object):
             bd = s7778.obj['ofes'][0]['horizons'][0]['bd']
 #        assert bd is not None
         return bd
+
+    @property
+    def simple_texture(self):
+        from wepppy.wepp.soils.utils import simple_texture
+        return simple_texture(clay=self.clay, sand=self.sand)
+
+    @property
+    def simple_texture_enum(self):
+        from wepppy.wepp.soils.utils import simple_texture_enum
+        return simple_texture_enum(clay=self.clay, sand=self.sand)
 
 
 if __name__ == "__main__":
