@@ -6,7 +6,10 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+import os
 from os.path import exists as _exists
+from os.path import join as _join
+from os.path import split as _split
 from collections import Counter
 
 import numpy as np
@@ -14,43 +17,50 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import GDT_Byte
 
-from collections import Counter
+from subprocess import Popen, PIPE
 
-from wepppy.all_your_base.geo import read_raster
+from wepppy.all_your_base import isint
+from wepppy.all_your_base.geo import read_raster, wgs84_proj4
 
 from wepppy.landcover import LandcoverMap
 
 
-def get_sbs_color_table(fn):
+def get_sbs_color_table(fn, color_to_severity_map=None):
     ds = gdal.Open(fn)
     band = ds.GetRasterBand(1)
     data = band.ReadAsArray(0, 0, ds.RasterXSize, ds.RasterYSize)
     counts = Counter(list(data.flatten())).most_common()
 
+    if color_to_severity_map is None:
+        color_to_severity_map = dict([((0, 100, 0), 'unburned'),
+                                      ((0, 115, 74), 'unburned'),
+                                      ((0, 175, 166), 'unburned'),
+                                      ((127, 255, 212), 'low'),
+                                      ((0, 255, 255), 'low'),
+                                      ((102, 205, 205), 'low'),
+                                      ((77, 230, 0), 'low'),
+                                      ((255, 255, 0), 'mod'),
+                                      ((255, 232, 32), 'mod'),
+                                      ((255, 0, 0), 'high')])
+
     ct = band.GetRasterColorTable()
     if ct is None:
-        return None, counts
+        return None, counts, None
 
+    color_map = {}
     d = dict(unburned=[], low=[], mod=[], high=[])
     for i in range(ct.GetCount()):
         entry = [int(v) for v in ct.GetColorEntry(i)]
+        entry = tuple(entry[:3])
 
-        if entry[:3] == [0, 100, 0]:
-            d['unburned'].append(i)
-        elif entry[:3] == [0, 115, 74]:
-            d['unburned'].append(i)
-        elif entry[:3] == [127, 255, 212]:
-            d['low'].append(i)
-        elif entry[:3] == [77, 230, 0]:
-            d['low'].append(i)
-        elif entry[:3] == [255, 255, 0]:
-            d['mod'].append(i)
-        elif entry[:3] == [255, 0, 0]:
-            d['high'].append(i)
-    
+        color_map[entry] = sev = color_to_severity_map.get(entry, None)
+
+        if sev is not None and sev != "":
+            d[sev].append(i)
+
     ds = None
 
-    return d, counts
+    return d, counts, color_map
 
 
 def _ct_classify(v, ct, offset=0, nodata_val=255):
@@ -77,7 +87,7 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
 
 
 class SoilBurnSeverityMap(LandcoverMap):
-    def __init__(self, fname, breaks=None, nodata_vals=None):
+    def __init__(self, fname, breaks=None, nodata_vals=None, color_map=None, ignore_ct=False):
         
         if nodata_vals is None:
             nodata_vals = []
@@ -91,47 +101,224 @@ class SoilBurnSeverityMap(LandcoverMap):
                 nodata_vals.append(_nodata)
 
         assert _exists(fname)
+
+        ct, counts, color_map = get_sbs_color_table(fname, color_to_severity_map=color_map)
+        if ignore_ct:
+            ct = None
+
+        classes = set(v for v, c in counts)
+        is256 = None
+
+        if ct is None:
+
+            if breaks is None:
+                for k in [15, 255]:
+                    if k in classes:
+                        nodata_vals.append(k)
+                        classes.remove(k)
+
+                _max_clases = int(max(classes))
+                if _max_clases == 3:
+                    breaks = [0, 1, 2, _max_clases]
+                else:
+                    breaks = [1, 2, 3, _max_clases]
+
+                is256 = len(classes) > 7 or _max_clases >= 255
+                if is256:
+                    breaks = [75, 109, 187, _max_clases]
+
+        else:
+            breaks = None
+
+        self.ct = ct
+        self.is256 = bool(is256)
+        self.classes = classes
+        self.counts = counts
+        self.color_map = color_map
+        self.breaks = breaks
+        self._data = None
         self.fname = fname
+        self.nodata_vals = nodata_vals
 
-        self.ct, self.counts = get_sbs_color_table(fname)
+    @property
+    def transform(self):
+        data, transform, proj = read_raster(self.fname, dtype=np.uint8)
+        return transform
+
+    @property
+    def proj(self):
+        data, transform, proj = read_raster(self.fname, dtype=np.uint8)
+        return proj
+
+    @property
+    def burn_class_counts(self):
+        # Using a Counter to sum the counts based on severity
+        counter = Counter()
+        for _, severity, count in self.class_map:
+            counter[severity] += count
+        return dict(counter)
+
+    @property
+    def data(self):
+        if self._data is not None:
+            return self._data
+
+        fname = self.fname
         ct = self.ct
+        breaks = self.breaks
+        nodata_vals = self.nodata_vals
 
-        if breaks is None:
-            vals = set(v for v, c in self.counts)
-            for k in [15, 255]:
-                if k in vals:
-                    nodata_vals.append(k)
-                    vals.remove(k)
-            if max(vals) == 3:
-                breaks = [0, 1, 2, max(vals)]
-            else:
-                breaks = [1, 2, 3, max(vals)]  
-        
         data, transform, proj = read_raster(fname, dtype=np.uint8)
         n, m = data.shape
 
         if ct is None:
+            for brk in breaks:
+                assert isint(brk), breaks
+
+            assert breaks is not None, breaks
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = _classify(data[i, j], breaks, 
-                                           nodata_vals, offset=130, 
+                    data[i, j] = _classify(data[i, j], breaks,
+                                           nodata_vals, offset=130,
                                            nodata_val=130)
         else:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = _ct_classify(data[i, j], ct, 
-                                              offset=130, nodata_val=130)
-        
-        self.breaks = breaks
-        self.data = data
-        self.transform = transform
-        self.proj = proj
-        self.mukeys = list(set(self.data.flatten()))
-        self.fname = fname
-        self.nodata_vals = nodata_vals
+                    data[i, j] = _ct_classify(data[i, j], ct,
+                                              offset=130,
+                                              nodata_val=130)
+
+        self._data = data
+        return data
+
+    def export_wgs_map(self, fn):
+        ds = gdal.Open(self.fname)
+        assert ds is not None
+        del ds
+
+        # transform to WGS1984 to display on map
+        if _exists(fn):
+            os.remove(fn)
+
+        cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+               '-r', 'near', self.fname, fn]
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p.wait()
+
+        assert _exists(fn), ' '.join(cmd)
+
+        ds = gdal.Open(fn)
+        assert ds is not None
+
+        transform = ds.GetGeoTransform()
+        band = ds.GetRasterBand(1)
+        data = np.array(band.ReadAsArray(), dtype=np.int)
+
+        nodata = band.GetNoDataValue()
+        if nodata is not None:
+            self._nodata_vals = [np.int(nodata)]
+
+        del ds
+
+        # need the bounds for Leaflet
+        sw_x = transform[0]
+        sw_y = transform[3] + transform[5] * data.shape[0]
+
+        ne_x = transform[0] + transform[1] * data.shape[1]
+        ne_y = transform[3]
+
+        return [[sw_y, sw_x], [ne_y, ne_x]]
+
+    @property
+    def class_map(self):
+        ct = self.ct
+        breaks = self.breaks
+        nodata_vals = self.nodata_vals
+
+        _map = dict([('255', 'No Data'),
+                     ('130', 'No Burn'),
+                     ('131', 'Low Severity Burn'),
+                     ('132', 'Moderate Severity Burn'),
+                     ('133', 'High Severity Burn')])
+
+        class_map = []
+        for v, cnt in self.counts:
+            if ct is None:
+                k = _classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
+            else:
+                k = _ct_classify(v, ct, offset=130, nodata_val=255)
+
+            sev = _map[str(k)]
+            class_map.append((int(v), sev, cnt))
+
+        return sorted(class_map, key=lambda x: x[0])
+
+    def _write_color_table(self, color_tbl_path):
+        ct = self.ct
+
+        if ct is None:
+            breaks = self.breaks
+            nodata_vals = self.nodata_vals
+
+            _map = dict([('255', '0 0 0 0'),
+                         ('130', '0 115 74 255'),
+                         ('131', '77 230 0 255'),
+                         ('132', '255 255 0 255'),
+                         ('133', '255 0 0 255')])
+
+            with open(color_tbl_path, 'w') as fp:
+                for v, cnt in self.counts:
+                    k = _classify(v, breaks, nodata_vals, offset=130,  nodata_val=255)
+                    fp.write('{} {}\n'.format(v, _map[str(k)]))
+                fp.write("nv 0 0 0 0\n")
+        else:
+            _map = dict([('nv', '0 0 0 0'),
+                         ('unburned', '0 115 74 255'),
+                         ('low', '77 230 0 255'),
+                         ('mod', '255 255 0 255'),
+                         ('high', '255 0 0 255')])
+
+            d = {}
+            for burn_class in ct:
+                color = _map[burn_class]
+                for px in ct[burn_class]:
+                    d[int(px)] = color
+
+            with open(color_tbl_path, 'w') as fp:
+                for v, color in sorted(d.items()):
+                    fp.write(f'{v} {color}\n')
+                fp.write("nv 0 0 0 0\n")
+
+
+    def export_rgb_map(self, wgs_fn, fn, rgb_png):
+        head, tail = _split(fn)
+
+        color_tbl_path = _join(head, 'color_table.txt')
+        self._write_color_table(color_tbl_path)
+
+        disturbed_rgb = fn
+        if _exists(disturbed_rgb):
+            os.remove(disturbed_rgb)
+
+        cmd = ['gdaldem', 'color-relief', '-of', 'VRT', '-alpha',
+               wgs_fn, color_tbl_path, disturbed_rgb]
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p.wait()
+
+        assert _exists(disturbed_rgb), ' '.join(cmd)
+
+        disturbed_rgb_png = rgb_png
+        if _exists(disturbed_rgb_png):
+            os.remove(disturbed_rgb_png)
+
+        cmd = ['gdal_translate', '-of', 'PNG', disturbed_rgb, disturbed_rgb_png]
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p.wait()
+
+        assert _exists(disturbed_rgb_png), ' '.join(cmd)
+
 
     def export_4class_map(self, fn, cellsize=None):
-
         if cellsize is None:
             transform = self.transform
             assert transform[1] == abs(transform[5])

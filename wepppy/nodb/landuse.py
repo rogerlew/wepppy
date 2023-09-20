@@ -38,6 +38,10 @@ from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
 from .prep import Prep
 
+try:
+    import rustpy_geo
+except:
+    rustpy_geo = None
 
 class LanduseNoDbLockedException(Exception):
     pass
@@ -122,21 +126,29 @@ class Landuse(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'landuse.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'landuse.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Landuse)
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
+
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
 
     @property
     def _nodb(self):
@@ -317,7 +329,6 @@ class Landuse(NoDbBase):
 
     @fractionals.setter
     def fractionals(self, value):
-        assert isintance(value, Iterable), value
 
         self.lock()
 
@@ -348,20 +359,27 @@ class Landuse(NoDbBase):
             raise
 
     def _build_NLCD(self):
+        global rustpy_geo
+
         _map = Ron.getInstance(self.wd).map
 
         # Get NLCD 2011 from wmesque webservice
         lc_fn = self.lc_fn
         wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
 
-        # create LandcoverMap instance
-        lc = LandcoverMap(lc_fn)
-
-        # build the grid
-        # domlc_fn map is a property of NoDbBase
-        # domlc_d is a dictionary with topaz_id keys
         subwta_fn = Watershed.getInstance(self.wd).subwta
-        self.domlc_d = lc.build_lcgrid(subwta_fn, None)
+
+        if rustpy_geo is None:
+            # create LandcoverMap instance
+            lc = LandcoverMap(lc_fn)
+
+            # build the grid
+            # domlc_fn map is a property of NoDbBase
+            # domlc_d is a dictionary with topaz_id keys
+            self.domlc_d = lc.build_lcgrid(subwta_fn, None)
+        else:
+            domlc_d = rustpy_geo.mode_identify(subwta_fn, lc_fn)
+            self.domlc_d = {k: str(v) for k, v in domlc_d.items()}
 
     def _build_single_selection(self):
         assert self.single_selection is not None
@@ -400,9 +418,7 @@ class Landuse(NoDbBase):
             self.clean()
 
             if self._mode == LanduseMode.Gridded:
-                if 'eu' in ron.locales:
-                    self._build_ESDAC()
-                elif 'au' in ron.locales:
+                if 'au' in ron.locales:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD()
@@ -439,6 +455,8 @@ class Landuse(NoDbBase):
 
 
     def _build_fractionals(self):
+        global rustpy_geo
+
         fractionals = self.fractionals
         frac_dir = _join(self.lc_dir, 'fractionals')
 
@@ -455,11 +473,18 @@ class Landuse(NoDbBase):
         for frac in fractionals:
             lc_fn = _join(frac_dir, frac.replace('/', '_') + '.tif')
             wmesque_retrieve(frac, _map.extent, lc_fn, _map.cellsize)
-            
-            lc = LandcoverMap(lc_fn)
 
-            dom_d[frac] = lc.build_lcgrid(subwta_fn)
-            frac_d[frac] = lc.calc_fractionals(subwta_fn)
+            if rustpy_geo is None:
+                lc = LandcoverMap(lc_fn)
+
+                dom_d[frac] = lc.build_lcgrid(subwta_fn)
+                frac_d[frac] = lc.calc_fractionals(subwta_fn)
+            else:
+                dom_d[frac] = rustpy_geo.mode_identify(subwta_fn, lc_fn)
+                dom_d[frac] = {k: str(v) for k, v in dom_d[frac].items()}
+
+                frac_d[frac] = rustpy_geo.fractionals_identify(subwta_fn, lc_fn)
+                frac_d[frac] = {k: str(v) for k, v in frac_d[frac].items()}
 
         with open(_join(frac_dir, 'dom.json'), 'w') as fp:
             json.dump(dom_d, fp, indent=2)
@@ -468,6 +493,8 @@ class Landuse(NoDbBase):
             json.dump(frac_d, fp, indent=2)
 
     def _build_multiple_ofe(self):
+        global rustpy_geo
+
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
         from wepppy.nodb.mods.disturbed import Disturbed
 
@@ -482,8 +509,15 @@ class Landuse(NoDbBase):
             disturbed = None
             _land_soil_replacements_d = None
 
-        lc = LandcoverMap(self.lc_fn)
-        domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
+        if rustpy_geo is None:
+            lc = LandcoverMap(self.lc_fn)
+            domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
+        else:
+            domlc_d = rustpy_geo.mode_identify(subwta_fn=watershed.subwta,
+                                                parameter_fn=self.lc_fn,
+                                                band_indx=1,
+                                                lcmap_fn=watershed.mofe_map)
+            domlc_d = {k: str(v) for k, v in domlc_d.items()}
 
         lc_dir = self.lc_dir
         managements = self.managements

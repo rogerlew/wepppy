@@ -43,6 +43,7 @@ from wepppy.climates.gridmet import client as gridmet_client
 from wepppy.climates.prism import prism_mod, prism_revision
 from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
+from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
 #from wepppy.climates.daymet import single_point_extraction as daymet_single_point_extraction
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
@@ -204,7 +205,7 @@ class ClimateSpatialMode(IntEnum):
         raise KeyError
 
 
-def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
+def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
     df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
@@ -217,11 +218,27 @@ def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_f
     climate.replace_var('rad', dates, df['srad(l/day)'])
     climate.replace_var('tdew', dates, df['tdew(degc)'])
 
+    if gridmet_wind:
+        wind_df = gridmet_retrieve_historical_wind(lng, lat, start_year, end_year)
+
+        wind_dates = wind_df.index
+
+        climate.replace_var('w-vl', wind_dates, wind_df['vs(m/s)'])
+        climate.replace_var('w-dir', wind_dates, wind_df['th(DegreesClockwisefromnorth)'])
+
+        df['vs(m/s)'] = wind_df['vs(m/s)']
+        df['vs(m/s)'] = wind_df['th(DegreesClockwisefromnorth)']
+
+        df.to_parquet(_join(cli_dir, f'daymet_gridmetwind_{start_year}-{end_year}.parquet'))
+    else:
+        df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
+
     climate.write(cli_path)
 
 
 def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
     df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df.to_parquet(_join(cli_dir, f'gridmet_{start_year}-{end_year}.parquet'))
     df_to_prn(df, _join(cli_dir, prn_fn), 'pr(mm/day)', 'tmmx(degc)', 'tmmn(degc)')
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
 
@@ -293,6 +310,8 @@ def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmi
         rev_ppt[index] = row.prcp * hill_ppts[mo] / ws_ppts[mo]
         rev_tmax[index] = row.tmax - ws_tmaxs[mo] + hill_tmaxs[mo]
         rev_tmin[index] = row.tmin - ws_tmins[mo] + hill_tmins[mo]
+
+        # todo check that tdew is >= tmin
         dates.append((int(row.year), int(row.mo), int(row.da)))
 
     cli2.replace_var('prcp', dates, rev_ppt)
@@ -336,6 +355,13 @@ class Climate(NoDbBase, LogMixin):
             self._ss_time_to_peak_intensity_pct = 0.4
             self._ss_max_intensity_inches_per_hour = 3.0
 
+            self._precip_scale_factor =  self.config_get_float('climate', 'precip_scale_factor', None)
+            self._precip_scale_factor_map =  self.config_get_path('climate', 'precip_scale_factor_map', None)
+            self._gridmet_precip_scale_factor =  self.config_get_float('climate', 'gridmet_precip_scale_factor', None)
+            self._gridmet_precip_scale_factor_map =  self.config_get_path('climate', 'gridmet_precip_scale_factor_map', None)
+            self._daymet_precip_scale_factor =  self.config_get_float('climate', 'daymet_precip_scale_factor', None)
+            self._daymet_precip_scale_factor_map =  self.config_get_path('climate', 'daymet_precip_scale_factor_map', None)
+
             self._orig_cli_fn = None
 
             self.monthlies = None
@@ -373,25 +399,58 @@ class Climate(NoDbBase, LogMixin):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'climate.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'climate.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read().replace('"orig_cli_fn"', '"_orig_cli_fn"'))
             assert isinstance(db, Climate)
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
+
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
 
     @property
     def daymet_last_available_year(self):
         return 2022
+
+
+    @property
+    def precip_scale_factor(self):
+        return getattr(self, '_precip_scale_factor', None)
+
+    @property
+    def precip_scale_factor_map(self):
+        return getattr(self, '_precip_scale_factor_map', None)
+
+    @property
+    def gridmet_precip_scale_factor(self):
+        return getattr(self, '_gridmet_precip_scale_factor', None)
+
+    @property
+    def gridmet_precip_scale_factor_map(self):
+        return getattr(self, '_gridmet_precip_scale_factor_map', None)
+
+    @property
+    def daymet_precip_scale_factor(self):
+        return getattr(self, '_daymet_precip_scale_factor', None)
+
+    @property
+    def daymet_precip_scale_factor_map(self):
+        return getattr(self, '_daymet_precip_scale_factor_map', None)
 
     @property
     def _nodb(self):
@@ -1016,16 +1075,16 @@ class Climate(NoDbBase, LogMixin):
                 self._prism_revision(verbose=verbose)
 
         # observed
-        elif climate_mode == ClimateMode.Observed:
-            self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self._build_climate_daymet_observed_hillslopes(verbose=verbose, attrs=attrs)
-
-        # observed
         elif climate_mode == ClimateMode.ObservedPRISM:
             self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
                 self._prism_revision(verbose=verbose)
+
+            if self.daymet_precip_scale_factor is not None:
+                self._scale_precip(self.daymet_precip_scale_factor)
+
+            if self.daymet_precip_scale_factor_map is not None:
+                self._spatial_scale_precip(self.daymet_precip_scale_factor_map)
 
         # future
         elif climate_mode == ClimateMode.Future:
@@ -1062,7 +1121,19 @@ class Climate(NoDbBase, LogMixin):
             self._build_climate_observed_gridmet(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
                 self._prism_revision(verbose=verbose)
-      
+
+            if self.gridmet_precip_scale_factor is not None:
+                self._scale_precip(self.gridmet_precip_scale_factor)
+
+            if self.gridmet_precip_scale_factor_map is not None:
+                self._spatial_scale_precip(self.gridmet_precip_scale_factor_map)
+
+        if self.precip_scale_factor is not None:
+            self._scale_precip(self.precip_scale_factor)
+
+        if self.precip_scale_factor_map is not None:
+            self._spatial_scale_precip(self.precip_scale_factor_map)
+
         try:
             prep = Prep.getInstance(self.wd)
             prep.timestamp('build_climate')
@@ -1070,6 +1141,75 @@ class Climate(NoDbBase, LogMixin):
             pass
 
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
+
+    def _scale_precip(self, scale_factor):
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            self.log('  running _scale_precip... \n')
+
+            cli_dir = os.path.abspath(self.cli_dir)
+
+            cli = ClimateFile(_join(cli_dir, self.cli_fn))
+            cli.transform_precip(offset=0.0, scale=scale_factor)
+            cli.write(_join(cli_dir, self.cli_fn))
+            self.monthlies = cli.calc_monthlies()
+
+            if self.sub_cli_fns is not None:
+                for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
+                    cli = ClimateFile(_join(cli_dir, sub_cli_fn))
+                    cli.transform_precip(offset=0.0, scale=scale_factor)
+                    cli.write(_join(cli_dir, sub_cli_fn))
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _spatial_scale_precip(self, scale_factor_map):
+
+        self.lock()
+
+        # noinspection PyBroadInspection
+        try:
+            cli_dir = os.path.abspath(self.cli_dir)
+
+            assert _exists(scale_factor_map), scale_factor_map
+            rdi = RasterDatasetInterpolator(scale_factor_map)
+            wd = self.wd
+
+            watershed = Watershed.getInstance(wd)
+            ws_lng, ws_lat = watershed.centroid
+            scale_factor = rdi.get_location_info(ws_lng, ws_lat)
+            if scale_factor is not None:
+                if scale_factor > 0:
+                    cli = ClimateFile(_join(cli_dir, self.cli_fn))
+                    cli.transform_precip(offset=0.0, scale=scale_factor)
+                    cli.write(_join(cli_dir, 'adj_' + self.cli_fn))
+                    self.monthlies = cli.calc_monthlies()
+                    self.cli_fn = 'adj_' + self.cli_fn
+
+            if self.sub_cli_fns is not None:
+                sub_cli_fns = deepcopy(self.sub_cli_fns)
+                for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
+                    lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
+
+                    scale_factor = rdi.get_location_info(ws_lng, ws_lat)
+                    if scale_factor is not None:
+                        if scale_factor > 0:
+                            cli = ClimateFile(_join(cli_dir, sub_cli_fn))
+                            cli.transform_precip(offset=0.0, scale=scale_factor)
+                            cli.write(_join(cli_dir, 'adj_' + sub_cli_fn))
+                            sub_cli_fns[topaz_id] = 'adj_' + sub_cli_fn
+                self.sub_cli_fns = sub_cli_fns
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     def _build_climate_depnexrad(self, verbose=False, attrs=None):
         self.log('  running _build_climate_depnexrad... \n')
@@ -1237,7 +1377,7 @@ class Climate(NoDbBase, LogMixin):
 
                 hill_lng, hill_lat = ss.centroid.lnglat
                 suffix = f'_{topaz_id}'
-                new_cli_fn = cli_path.replace('.cli',  f'{suffix}.cli')
+                new_cli_fn = f'{suffix}.cli'
                 args = (cli, ws_ppts, ws_tmaxs, ws_tmins,
                         _join(cli_dir, 'ppt.tif'),
                         _join(cli_dir, 'tmin.tif'),
@@ -1364,7 +1504,7 @@ class Climate(NoDbBase, LogMixin):
                     self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
 
                     lng, lat = ss.centroid.lnglat
-                    suffix = '_{}'.format(topaz_id)
+                    suffix = f'_{topaz_id}'
 
                     kwds = dict(par=climatestation,
                                  years=years, lng=lng, lat=lat, wd=cli_dir,
@@ -1444,67 +1584,6 @@ class Climate(NoDbBase, LogMixin):
             self.cli_fn = cli_fn
             self.dump_and_unlock()
             self.log_done()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    def _build_climate_daymet_observed_hillslopes(self, verbose=False, attrs=None):
-
-        self.lock()
-
-        # noinspection PyBroadInspection
-        try:
-            watershed = Watershed.getInstance(self.wd)
-            ws_lng, ws_lat = watershed.centroid
-
-            cli_dir = self.cli_dir
-            start_year, end_year = self._observed_start_year, self._observed_end_year
-            assert end_year <= self.daymet_last_available_year, end_year
-
-            self._input_years = end_year - start_year + 1
-
-            stationManager = CligenStationsManager(version=self.cligen_db)
-            climatestation = self.climatestation
-            stationMeta = stationManager.get_station_fromid(climatestation)
-
-            par_fn = stationMeta.par
-            cligen = Cligen(stationMeta, wd=cli_dir)
-
-            pool = multiprocessing.Pool(NCPU)
-            jobs = []
-
-            def callback(res):
-                self.log('job completed.')
-                self.log_done()
-
-            # build a climate for each subcatchment
-            sub_par_fns = {}
-            sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
-                self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
-
-                hill_lng, hill_lat = ss.centroid.lnglat
-                fn_base = f'{topaz_id}_{climatestation}'
-                prn_fn = f'{fn_base}.prn'
-                cli_fn = f'{fn_base}.cli'
-
-                args = (cligen, hill_lng, hill_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
-                result = pool.apply_async(build_observed_daymet, args=args, callback=callback)
-                jobs.append(result)
-
-                sub_par_fns[topaz_id] = '.par'
-                sub_cli_fns[topaz_id] = cli_fn
-
-                self.log_done()
-
-            pool.close()
-            pool.join()
-
-            self.sub_par_fns = sub_par_fns
-            self.sub_cli_fns = sub_cli_fns
-
-            self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')

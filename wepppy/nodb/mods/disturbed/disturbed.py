@@ -18,6 +18,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 from copy import deepcopy
+from collections import Counter
 
 import math
 import numpy as np
@@ -26,7 +27,7 @@ from osgeo import gdal
 from deprecated import deprecated
 
 from wepppy.all_your_base import isint, isfloat
-from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker
+from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker, validate_srs
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 
@@ -38,6 +39,12 @@ from ...topaz import Topaz
 from ...prep import Prep
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
+
+try:
+    import rustpy_geo
+
+except:
+    rustpy_geo = None
 
 gdal.UseExceptions()
 
@@ -127,6 +134,14 @@ class DisturbedNoDbLockedException(Exception):
     pass
 
 
+class InvalidProjection(Exception):
+    """
+    Map contains an invalid projection. Try reprojecting to UTM.
+    """
+
+    __name__ = 'Invalid Projection'
+
+
 class Disturbed(NoDbBase):
     __name__ = 'Disturbed'
 
@@ -147,21 +162,51 @@ class Disturbed(NoDbBase):
             self._nodata_vals = None
             self._is256 = None
 
-            shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'),
-                            self.lookup_fn)
+            self.reset_land_soil_lookup()
 
             self.sbs_coverage = None
             self._h0_max_om = self.config_get_float('disturbed', 'h0_max_om')
             self._sol_ver = self.config_get_float('disturbed', 'sol_ver')
+
+            self._fire_date = self.config_get_str('disturbed', 'fire_date')
+
             self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
             raise
 
+    @property
+    def fire_date(self):
+        return getattr(self, "_fire_date", None)
+
+    @fire_date.setter
+    def fire_date(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._fire_date = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def default_land_soil_lookup_fn(self):
+        _lookup_path = self.config_get_path('disturbed', 'land_soil_lookup', None)
+        if _lookup_path is None:
+            _lookup_path = _join(_data_dir, 'disturbed_land_soil_lookup.csv')
+        return _lookup_path
+
     def reset_land_soil_lookup(self):
-        shutil.copyfile(_join(_data_dir, 'disturbed_land_soil_lookup.csv'),
-                        self.lookup_fn)
+        _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
+
+        if _exists(_lookup):
+            os.remove(_lookup)
+
+        shutil.copyfile(self.default_land_soil_lookup_fn, _lookup)
 
     #
     # Required for NoDbBase Subclass
@@ -169,21 +214,29 @@ class Disturbed(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'disturbed.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'disturbed.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Disturbed), db
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
+
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
 
     @property
     def _nodb(self):
@@ -216,8 +269,8 @@ class Disturbed(NoDbBase):
         return self._is256 is not None
 
     @property
-    def color_tbl_path(self):
-        return _join(self.disturbed_dir, 'color_table.txt')
+    def ct(self):
+        return getattr(self, '_ct', None)
 
     @property
     def bounds(self):
@@ -258,22 +311,6 @@ class Disturbed(NoDbBase):
 
         return ', '.join(str(v) for v in self._nodata_vals)
 
-    def classify(self, v):
-
-        if self._nodata_vals is not None:
-            if v in self._nodata_vals:
-                return 'No Data'
-
-        i = 0
-        for i, brk in enumerate(self.breaks):
-            if v <= brk:
-                break
-
-        return ('No Burn',
-                'Low Severity Burn',
-                'Moderate Severity Burn',
-                'High Severity Burn')[i]
-
     @property
     def disturbed_path(self):
         if self._disturbed_fn is None:
@@ -310,7 +347,7 @@ class Disturbed(NoDbBase):
     @property
     def disturbed_wgs(self):
         disturbed_path = self.disturbed_path
-        return disturbed_path[:-4] + '.wgs' + disturbed_path[-4:]
+        return disturbed_path[:-4] + '.wgs.tif'
 
     @property
     def disturbed_rgb(self):
@@ -339,40 +376,6 @@ class Disturbed(NoDbBase):
 
         return list(zip(keys, descs, colors))
 
-    def write_color_table(self):
-        breaks = self.breaks
-        assert len(breaks) == 4
-
-        _map = dict([('No Data', '0 0 0'),
-                     ('No Burn', '0 115 74'),
-                     ('Low Severity Burn', '77 230 0'),
-                     ('Moderate Severity Burn', '255 255 0'),
-                     ('High Severity Burn', '255 0 0')])
-
-        with open(self.color_tbl_path, 'w') as fp:
-            for v, k, c in self.class_map:
-                fp.write('{} {}\n'.format(v, _map[k]))
-
-            fp.write("nv 0 0 0\n")
-
-    def build_color_map(self):
-        disturbed_rgb = self.disturbed_rgb
-        if _exists(disturbed_rgb):
-            os.remove(disturbed_rgb)
-
-        cmd = ['gdaldem', 'color-relief', '-of', 'VRT',  
-               self.disturbed_wgs, self.color_tbl_path, disturbed_rgb]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
-
-        disturbed_rgb_png = self.disturbed_rgb_png
-        if _exists(disturbed_rgb_png):
-            os.remove(disturbed_rgb_png)
-
-        cmd = ['gdal_translate', '-of', 'PNG', disturbed_rgb, disturbed_rgb_png]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        p.wait()
-
     @property
     def sbs_wgs_n(self):
         """
@@ -393,22 +396,11 @@ class Disturbed(NoDbBase):
         return width * height * 0.0001
 
     @property
-    def sbs_class_counts(self):
-        """
-        dictionary with burn class keys and pixel counts of the WGS projected SBS
-        """
-        counts = Counter()
-        for v in self.classes:
-            counts[self.classify(v)] += self._counts[str(v)]
-        
-        return counts
-
-    @property
     def sbs_class_pcts(self):
         """
         dictionary with burn class keys percentages of cover of the WGS projected SBS
         """
-        counts = self.sbs_class_counts
+        counts = self._counts
         pcts = {}
         tot_px = counts.get('Low Severity Burn', 0) + \
                  counts.get('Moderate Severity Burn', 0) + \
@@ -428,9 +420,9 @@ class Disturbed(NoDbBase):
         dictionary with burn class keys and areas (ha) of the WGS projected SBS
         """
         ha__px = self.sbs_wgs_area_ha / self.sbs_wgs_n
-        counts = self.sbs_class_counts
+        counts = self._counts
         areas = {}
-        tot_px = sum(counts.values()) # total count of non-nodata pixels 
+
         for k in counts:
             areas[k] = counts[k] * ha__px 
 
@@ -438,33 +430,21 @@ class Disturbed(NoDbBase):
 
     @property
     def class_map(self):
-        return [(v, self.classify(v), self._counts[str(v)]) for v in self.classes]
+        sbs = SoilBurnSeverityMap(self.disturbed_path)
+        return sbs.class_map
 
     def modify_burn_class(self, breaks, nodata_vals):
-        self.lock()
+        assert len(breaks) == 4
+        assert breaks[0] <= breaks[1]
+        assert breaks[1] <= breaks[2]
+        assert breaks[2] <= breaks[3]
 
-        # noinspection PyBroadException
-        try:
-            assert len(breaks) == 4
-            assert breaks[0] <= breaks[1]
-            assert breaks[1] <= breaks[2]
-            assert breaks[2] <= breaks[3]
+        if nodata_vals is not None:
+            if str(nodata_vals).strip() != '':
+                nodata_vals = ast.literal_eval('[{}]'.format(nodata_vals))
+                assert all(isint(v) for v in nodata_vals)
 
-            self._breaks = breaks
-            if nodata_vals is not None:
-                if str(nodata_vals).strip() != '':
-                    _nodata_vals = ast.literal_eval('[{}]'.format(nodata_vals))
-                    assert all(isint(v) for v in _nodata_vals)
-                    self._nodata_vals = _nodata_vals
-
-            self.write_color_table()
-            self.build_color_map()
-
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
+        self.validate(self.disturbed_path, breaks, nodata_vals)
 
         try:
             prep = Prep.getInstance(self.wd)
@@ -472,6 +452,30 @@ class Disturbed(NoDbBase):
             prep.has_sbs = True
         except FileNotFoundError:
             pass
+
+    def modify_color_map(self, color_map):
+
+        self.validate(self.disturbed_path, color_map=color_map)
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('landuse_map')
+            prep.has_sbs = True
+        except FileNotFoundError:
+            pass
+
+    @property
+    def color_to_severity_map(self):
+        if getattr(self, '_ct', None) is None:
+            return None
+
+        color_map = getattr(self, '_color_map', None)
+
+        if color_map is None:
+            self.validate(self.disturbed_path, self.breaks, self.nodata_vals)
+            color_map = getattr(self, '_color_map', None)
+
+        return {tuple(rgb.split('_')): v for rgb, v in color_map.items()}
 
     def remove_sbs(self):
         self.lock()
@@ -505,7 +509,7 @@ class Disturbed(NoDbBase):
         except FileNotFoundError:
             pass
 
-    def validate(self, fn):
+    def validate(self, fn, breaks=None, nodata_vals=None, color_map=None):
         self.lock()
 
         # noinspection PyBroadException
@@ -516,71 +520,22 @@ class Disturbed(NoDbBase):
             disturbed_path = self.disturbed_path
             assert _exists(disturbed_path), disturbed_path
 
-            ds = gdal.Open(disturbed_path)
-            assert ds is not None
-            del ds
+            if not validate_srs(disturbed_path):
+                raise InvalidProjection("Map contains an invalid projection. Try reprojecting to UTM.")
 
-            # transform to WGS1984 to display on map
-            disturbed_wgs = self.disturbed_wgs
-            if _exists(disturbed_wgs):
-                os.remove(disturbed_wgs)
+            sbs = SoilBurnSeverityMap(disturbed_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
+            self._bounds = sbs.export_wgs_map(self.disturbed_wgs)
+            sbs.export_rgb_map(self.disturbed_wgs, self.disturbed_rgb, self.disturbed_rgb_png)
 
-            cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
-                   '-r', 'near', disturbed_path, disturbed_wgs]
-            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            p.wait()
-
-            assert _exists(disturbed_wgs), ' '.join(cmd)
-
-            ds = gdal.Open(disturbed_wgs)
-            assert ds is not None
-
-            transform = ds.GetGeoTransform()
-            band = ds.GetRasterBand(1)
-            data = np.array(band.ReadAsArray(), dtype=np.int)
-
-            nodata = band.GetNoDataValue()
-            if nodata is not None:
-                self._nodata_vals = [np.int(nodata)]
-
-            del ds
-
-            # need the bounds for Leaflet
-            sw_x = transform[0]
-            sw_y = transform[3] + transform[5] * data.shape[0]
-
-            ne_x = transform[0] + transform[1] * data.shape[1]
-            ne_y = transform[3]
-
-            self._bounds = [[sw_y, sw_x], [ne_y, ne_x]]
-
-            # build rgba for interface
-
-            # determine classes
-            classes = list(set(data.flatten()))
-            classes = [int(v) for v in classes]
-            if self._nodata_vals is not None:
-                classes = [v for v in classes if v not in self._nodata_vals]
-
-            counts = Counter(data.flatten())
-
-            is256 = len(classes) > 7 or max(classes) >= 255
-
-            if is256:
-                breaks = [75, 109, 187, max(counts)]
+            self._ct = sbs.ct
+            self._is256 = sbs.is256
+            self._classes = sorted([int(x) for x in sbs.classes])
+            self._counts = sbs.burn_class_counts
+            if sbs.color_map is None:
+                self._color_map = None
             else:
-                if max(counts) == 3:
-                    breaks = [0, 1, 2, max(counts)]
-                else:
-                    breaks = [1, 2, 3, max(counts)]
-
-            self._is256 = is256
-            self._classes = classes
-            self._counts = {str(k): v for k, v in counts.items()}
-            self._breaks = breaks
-
-            self.write_color_table()
-            self.build_color_map()
+                self._color_map = {'_'.join(str(x) for x in rgb): v for rgb, v in sbs.color_map.items()}
+            self._breaks = sbs.breaks
 
             self.dump_and_unlock()
 
@@ -699,9 +654,16 @@ class Disturbed(NoDbBase):
 
             self._calc_sbs_coverage(sbs)
 
-            sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
+            if rustpy_geo is None:
+                sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
+            else:
+                sbs_lc_d = rustpy_geo.mode_identify(subwta_fn=watershed.subwta, parameter_fn=self.disturbed_cropped)
+                sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
 
             for topaz_id, burn_class in sbs_lc_d.items():
+                if (int(topaz_id) - 4) % 10 == 0:
+                    continue
+
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
 
@@ -723,7 +685,6 @@ class Disturbed(NoDbBase):
         except Exception:
             landuse.unlock('-f')
             raise
-
 
         # noinspection PyBroadException
         try:
@@ -793,15 +754,17 @@ class Disturbed(NoDbBase):
 
     @property
     def lookup_fn(self):
-        return _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
+        _lookup = _join(self.disturbed_dir, 'disturbed_land_soil_lookup.csv')
+
+        if not _exists(_lookup):
+            self.reset_land_soil_lookup()
+
+        return _lookup
 
     @property
     def land_soil_replacements_d(self):
-        default_fn = _join(_data_dir, 'disturbed_land_soil_lookup.csv')
-
+        default_fn = self.default_land_soil_lookup_fn
         _lookup_fn = self.lookup_fn
-        if not _exists(_lookup_fn):
-            shutil.copyfile(default_fn, _lookup_fn)
 
         lookup = read_disturbed_land_soil_lookup(_lookup_fn)
         for k in lookup:
@@ -861,6 +824,9 @@ class Disturbed(NoDbBase):
                 texid = simple_texture(clay=clay, sand=sand)
                 disturbed_class = man_summary.disturbed_class
 
+                if (texid, disturbed_class) not in _land_soil_replacements_d:
+                    texid = 'all'
+
                 if disturbed_class is None or 'developed' in disturbed_class:
                     kcb = 0.95
                     rawb = 0.80
@@ -910,6 +876,11 @@ class Disturbed(NoDbBase):
                     assert man is not None, dom
 
                     key = (texid, man.disturbed_class)
+
+                    if key not in _land_soil_replacements_d:
+                        texid = 'all'
+                        key = (texid, man.disturbed_class)
+
                     replacements = _land_soil_replacements_d.get(key, None)
 
                     if replacements is None:
@@ -996,6 +967,9 @@ class Disturbed(NoDbBase):
             soils.lock()
 
             for topaz_id, mukey in soils.domsoil_d.items():
+                if (int(topaz_id) - 4) % 10 == 0:
+                    continue
+
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
 
@@ -1025,6 +999,11 @@ class Disturbed(NoDbBase):
                     texid = simple_texture(clay=clay, sand=sand)
 
                     key = (texid, man.disturbed_class)
+
+                    if key not in _land_soil_replacements_d:
+                        texid = 'all'
+                        key = (texid, man.disturbed_class)
+
                     if key not in _land_soil_replacements_d:
                         continue
 
@@ -1087,7 +1066,7 @@ class Disturbed(NoDbBase):
         try:
             if sbs is None:
                 self.sbs_coverage = {
-                    'noburn': 100.0,
+                    'noburn': 1.0,
                     'low': 0.0,
                     'moderate': 0.0,
                     'high': 0.0

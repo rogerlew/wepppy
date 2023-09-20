@@ -11,6 +11,8 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 
+from deprecated import deprecated
+
 import jsonpickle
 
 from ....base import NoDbBase, TriggerEvents
@@ -27,7 +29,7 @@ class LakeTahoeNoDbLockedException(Exception):
 
 DEFAULT_WEPP_TYPE = 'Granitic'
 
-
+@deprecated(reason='Use Disturbed instead')
 class LakeTahoe(NoDbBase, LocationMixin):
     __name__ = 'LakeTahoe'
 

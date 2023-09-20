@@ -387,6 +387,10 @@ class NoDbBase(object):
             disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
             disturbed.on(evt)
 
+        if 'revegetation' in self.mods:
+            reveg = wepppy.nodb.mods.Revegetation.getInstance(self.wd)
+            reveg.on(evt)
+
         if 'rred' in self.mods:
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
             rred.on(evt)
