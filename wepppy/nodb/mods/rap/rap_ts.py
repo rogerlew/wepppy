@@ -19,6 +19,7 @@ from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from ...ron import Ron
 from ...base import NoDbBase, TriggerEvents
 from ...watershed import Watershed
+from ...mixins.log_mixin import LogMixin
 
 from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV2, 
@@ -27,6 +28,11 @@ from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV2Dataset,
     RangelandAnalysisPlatformV3Dataset
 )
+
+try:
+    import rustpy_geo
+except:
+    rustpy_geo = None
 
 from .rap import RAPPointData
 
@@ -41,7 +47,7 @@ class RAPNoDbLockedException(Exception):
     pass
 
 
-class RAP_TS(NoDbBase):
+class RAP_TS(NoDbBase, LogMixin):
     __name__ = 'RAP_TS'
 
     def __init__(self, wd, cfg_fn):
@@ -72,6 +78,15 @@ class RAP_TS(NoDbBase):
     def getInstance(wd):
         with open(_join(wd, 'rap_ts.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
+
+            if db.data is not None:
+                data = {}
+                for key in RAP_Band:
+                    if repr(key) not in db.data:
+                        continue
+                    data[key] = db.data[repr(key)]
+
+                db.data = data
             assert isinstance(db, RAP_TS), db
 
             if _exists(_join(wd, 'READONLY')):
@@ -92,6 +107,10 @@ class RAP_TS(NoDbBase):
     @property
     def _lock(self):
         return _join(self.wd, 'rap_ts.nodb.lock')
+
+    @property
+    def status_log(self):
+        return os.path.abspath(_join(self.rap_dir, 'status.log'))
 
     @property
     def rap_end_year(self):
@@ -149,7 +168,11 @@ class RAP_TS(NoDbBase):
 
             _map = Ron.getInstance(self.wd).map
             rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent)
-            rap_mgr.retrieve(list(range(start_year, end_year+1)))
+
+            for year in range(start_year, end_year+1):
+                self.log(f'  retrieving rap {year}...')
+                rap_mgr.retrieve([year])
+                self.log_done()
 
             self._rap_mgr = rap_mgr
             self.dump_and_unlock()
@@ -165,7 +188,8 @@ class RAP_TS(NoDbBase):
         #    self.acquire_rasters()
 
 
-    def analyze(self):
+    def analyze(self, use_sbs=False, verbose=True):
+        global rustpy_geo
         from wepppy.nodb import Ron
         from wepppy.nodb.mods import Disturbed
 
@@ -184,7 +208,7 @@ class RAP_TS(NoDbBase):
         self.lock()
         try:
 
-            if ron.has_sbs:
+            if ron.has_sbs and use_sbs:
                 disturbed = Disturbed.getInstance(wd)
                 sbs = disturbed.get_sbs_4class()
                 disturbed_fn = disturbed.sbs_4class_path
@@ -195,50 +219,69 @@ class RAP_TS(NoDbBase):
             px_counts = None
 
             for year in range(start_year, end_year+1):
-                rap_ds = rap_mgr.get_dataset(year=year)
-       
-                for band in RAP_Band:
+                if verbose:
+                    print(year)
+                rap_ds_fn = rap_mgr.get_dataset_fn(year=year)
+
+                for i, band in enumerate([RAP_Band.ANNUAL_FORB_AND_GRASS,
+                                          RAP_Band.BARE_GROUND,
+                                          RAP_Band.LITTER,
+                                          RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                                          RAP_Band.SHRUB,
+                                          RAP_Band.TREE]):
+                    if verbose:
+                        print(band)
+
                     if band not in data_ds:
                         data_ds[band] = {}
 
-                    data_ds[band][year], px_counts = \
-                        rap_ds.spatial_aggregation(band=band, subwta_fn=subwta_fn, lcmap_fn=disturbed_fn)
-
-#            data = {topaz_id: {} for topaz_id in data_ds[RAP_Band.LITTER][start_year]}
-#            for topaz_id in data_ds[RAP_Band.LITTER][start_year]:
-#                for year in range(start_year, end_year+1):
-#                    data[topaz_id][year] = {band: data_ds[band][year][topaz_id] for band in RAP_Band}
+                    self.log(f'  analyzing rap {year} {band}...')
+                    data_ds[band][year] = rustpy_geo.median_identify(subwta_fn=subwta_fn,
+                                                                      parameter_fn=rap_ds_fn,
+                                                                      band_indx=band,
+                                                                      lcmap_fn=disturbed_fn)
+                    self.log_done()
 
             self.data = data_ds
 
             self.dump_and_unlock()
 
+            self.log('analysis complete...')
+            self.log_done()
+
         except Exception:
             self.unlock('-f')
             raise
-
-#    @property
-#    def report(self):
-#        if self.data is None:
-#            return None
-#        
-#        watershed = Watershed.getInstance(self.wd)
-#        bound_fn = watershed.bound
-#        assert _exists(bound_fn)
-#
-#        rap_mgr = self._rap_mgr
-#        rap_ds = rap_mgr.get_dataset(year=self.rap_year)       
-#
-#        d = {}
-#        for band in RAP_Band:
-#            name = ' '.join([t[0] + t[1:].lower() for t in band.name.split('_')])
-#            d[name] = rap_ds.spatial_stats(band=band, bound_fn=bound_fn)
-#
-#        return d
 
     def __iter__(self):
         assert self.data is not None
 
         for topaz_id in self.data:
             yield topaz_id, RAPPointData(**{band.name.lower(): v for band, v in self.data[topaz_id].items()})
+
+    def prep_cover(self, runs_dir):
+        data = self.data
+
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+
+
+        for key in data:
+            print()
+        years = [yr for yr in data[RAP_Band.TREE]]
+
+        for wepp_id in translator.iter_wepp_sub_ids():
+            topaz_id = translator.top(wepp=wepp_id)
+
+            with open(_join(runs_dir, f'p{wepp_id}.cov'), 'w') as fp:
+                fp.write(' \t'.join([str(yr) for yr in years]))
+                fp.write('\n')
+
+                for band in [RAP_Band.TREE,
+                             RAP_Band.SHRUB,
+                             RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                             RAP_Band.ANNUAL_FORB_AND_GRASS]:
+                    fp.write(' \t'.join([str(data[band][yr][str(topaz_id)]) for yr in years]))
+                    fp.write('\n')
+
 
