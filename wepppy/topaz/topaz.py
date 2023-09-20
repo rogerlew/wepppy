@@ -94,6 +94,12 @@ class TopazUnexpectedTermination(Exception):
 
     __name__ = 'Topaz Unexpected Termination'
 
+class SelectedOutletCellNotChannelCellError(Exception):
+    """
+    THE SELECTED OUTLET CELL IS NOT A CHANNEL CELL.
+    """
+
+    __name__ = 'Selected Outlet Cell Not Channel Cell Error'
 
 class WatershedBoundaryTouchesEdgeError(Exception):
     """
@@ -876,6 +882,8 @@ class TopazRunner:
                 raise TopazUnexpectedTermination()
             if 'THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM' in line:
                 raise WatershedBoundaryTouchesEdgeError()
+            if 'THE SELECTED OUTLET CELL IS NOT A CHANNEL CELL' in line:
+                raise SelectedOutletCellNotChannelCellError()
             if 'THE VALUE FOR THE MINIMUM CHANNEL LENGTH FOR A CHANNEL TO BE' in line and \
                'CLASSIFIED AS A CHANNEL IS TOO SHORT.' in output[i+1]:
                 raise MinimumChannelLengthTooShortError()
