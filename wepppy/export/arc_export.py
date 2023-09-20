@@ -12,7 +12,7 @@ import math
 from time import sleep
 
 from wepppy.all_your_base import isnan, isinf
-from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash, AshPost
+from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash
 from wepppy.watershed_abstraction.support import json_to_wgs
 
 
@@ -34,6 +34,9 @@ def has_arc_export(wd):
 
 
 def arc_export(wd, verbose=False):
+    from wepppy.nodb.mods.ash_transport import AshPost
+    from wepppy.nodb.mods.rhem import RhemPost
+
     ron = Ron.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     #topaz = Topaz.getInstance(wd)
@@ -54,10 +57,17 @@ def arc_export(wd, verbose=False):
         except:
             ash_out = None
 
+    try:
+        rhempost = RhemPost.getInstance(wd)
+    except:
+        rhempost = None
+
     name = ron.name
     export_dir = ron.export_arc_dir
     gtiff_dir = _join(export_dir, 'gtiffs')
     topaz_wd = ron.topaz_wd
+
+    runid = ron.runid
 
     if _exists(export_dir):
         shutil.rmtree(export_dir)
@@ -89,18 +99,21 @@ def arc_export(wd, verbose=False):
 
     subs_summary = {str(ss['meta']['topaz_id']): ss for ss in ron.subs_summary()}
 
-    weppout= {}
-    weppout['Runoff'] = wepp.query_sub_val('Runoff')
-    weppout['Subrunoff'] = wepp.query_sub_val('Subrunoff')
-    weppout['Baseflow'] = wepp.query_sub_val('Baseflow')
-    weppout['DepLoss'] = wepp.query_sub_val('DepLoss')
-    weppout['Total P Density'] = wepp.query_sub_val('Total P Density')
-    weppout['Solub. React. P Density'] = wepp.query_sub_val('Solub. React. P Density')
-    weppout['Particulate P Density'] = wepp.query_sub_val('Particulate P Density')
+    weppout = None
+    if wepp.has_run:
+        weppout= {}
 
-    weppout['Soil Loss Density'] = wepp.query_sub_val('Soil Loss Density')
-    weppout['Sediment Deposition Density'] = wepp.query_sub_val('Sediment Deposition Density')
-    weppout['Sediment Yield Density'] = wepp.query_sub_val('Sediment Yield Density')
+        weppout['Runoff'] = wepp.query_sub_val('Runoff')
+        weppout['Subrunoff'] = wepp.query_sub_val('Subrunoff')
+        weppout['Baseflow'] = wepp.query_sub_val('Baseflow')
+        weppout['DepLoss'] = wepp.query_sub_val('DepLoss')
+        weppout['Total P Density'] = wepp.query_sub_val('Total P Density')
+        weppout['Solub. React. P Density'] = wepp.query_sub_val('Solub. React. P Density')
+        weppout['Particulate P Density'] = wepp.query_sub_val('Particulate P Density')
+
+        weppout['Soil Loss Density'] = wepp.query_sub_val('Soil Loss Density')
+        weppout['Sediment Deposition Density'] = wepp.query_sub_val('Sediment Deposition Density')
+        weppout['Sediment Yield Density'] = wepp.query_sub_val('Sediment Yield Density')
 
     for i, f in enumerate(js['features']):
         topaz_id = str(f['properties']['TopazID'])
@@ -126,45 +139,52 @@ def arc_export(wd, verbose=False):
         except KeyError:
             pass
 
-        if weppout['Runoff'] is not None:
-            f['properties']['Runoff(mm)'] = weppout['Runoff'][topaz_id]['value']
+        if weppout:
+            if weppout['Runoff'] is not None:
+                f['properties']['Runoff (mm)'] = weppout['Runoff'][topaz_id]['value']
 
-        if weppout['Subrunoff'] is not None:
-            f['properties']['Subrun(mm)'] = weppout['Subrunoff'][topaz_id]['value']
+            if weppout['Subrunoff'] is not None:
+                f['properties']['Subrunoff (mm)'] = weppout['Subrunoff'][topaz_id]['value']
 
-        if weppout['Baseflow'] is not None:
-            f['properties']['BaseF(mm)'] = weppout['Baseflow'][topaz_id]['value']
+            if weppout['Baseflow'] is not None:
+                f['properties']['BaseFlow (mm)'] = weppout['Baseflow'][topaz_id]['value']
 
-        if weppout['DepLoss'] is not None:
-            f['properties']['DepLos(kg)'] = weppout['DepLoss'][topaz_id]['value']
+            if weppout['DepLoss'] is not None:
+                f['properties']['Deposition Loss (kg)'] = weppout['DepLoss'][topaz_id]['value']
 
-        if weppout['Soil Loss Density'] is not None:
-            f['properties']['SoLs(kg/ha)'] = weppout['Soil Loss Density'][topaz_id]['value']
+            if weppout['Soil Loss Density'] is not None:
+                f['properties']['Soil Loss (kg/ha)'] = weppout['Soil Loss Density'][topaz_id]['value']
 
-        if weppout['Sediment Deposition Density'] is not None:
-            f['properties']['SdDp(kg/ha)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
+            if weppout['Sediment Deposition Density'] is not None:
+                f['properties']['Sediment Deposition (kg/ha)'] = weppout['Sediment Deposition Density'][topaz_id]['value']
 
-        if weppout['Sediment Yield Density'] is not None:
-            f['properties']['SdYd(kg/ha)'] = weppout['Sediment Yield Density'][topaz_id]['value']
+            if weppout['Sediment Yield Density'] is not None:
+                f['properties']['Sediment Yield (kg/ha)'] = weppout['Sediment Yield Density'][topaz_id]['value']
 
-        if weppout['Total P Density'] is not None:
-            f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
+            if weppout['Total P Density'] is not None:
+                f['properties']['Total P (kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
 
-        if weppout['Solub. React. P Density'] is not None:
-            f['properties']['SRP(kg/ha)'] = weppout['Solub. React. P Density'][topaz_id]['value']
+            if weppout['Solub. React. P Density'] is not None:
+                f['properties']['Solub. React. P (kg/ha)'] = weppout['Solub. React. P Density'][topaz_id]['value']
 
-        if weppout['Particulate P Density'] is not None:
-            f['properties']['PP(kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
+            if weppout['Particulate P Density'] is not None:
+                f['properties']['Particulate P (kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
+
+        if rhempost is not None:
+            f['properties']['Avg-Runoff (m^3/yr)'] = rhempost.hill_summaries[topaz_id].annuals['Avg-Runoff (m^3/yr)']
+            f['properties']['Avg-Soil-Yield (tonne/yr)'] = rhempost.hill_summaries[topaz_id].annuals['Avg-SY (tonne/yr)']
+            f['properties']['Avg-Soil-Loss (tonne/yr)'] = rhempost.hill_summaries[topaz_id].annuals['Avg-Soil-Loss (tonne/yr)']
+            f['properties']['Avg. Precipitation (m^3/yr)'] = rhempost.hill_summaries[topaz_id].annuals['Avg. Precipitation (m^3/yr)']
 
         if ash is not None:
             if ash_out is not None:
                 if topaz_id in ash_out:
-                    f['properties']['Awat(kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
-                    f['properties']['Awnd(kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
-                    f['properties']['AshT(kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
-                    f['properties']['Awat(tonne)'] = ash_out[topaz_id]['water_transport (kg/ha)'] * area_ha / 1000.0
-                    f['properties']['Awnd(tonne)'] = ash_out[topaz_id]['wind_transport (kg/ha)'] * area_ha / 1000.0
-                    f['properties']['AshT(tonne)'] = ash_out[topaz_id]['ash_transport (kg/ha)'] * area_ha / 1000.0
+                    f['properties']['Ash Transport Water (kg/ha)'] = ash_out[topaz_id]['water_transport (kg/ha)']
+                    f['properties']['Ash Transport Wind (kg/ha)'] = ash_out[topaz_id]['wind_transport (kg/ha)']
+                    f['properties']['Ash Transport (kg/ha)'] = ash_out[topaz_id]['ash_transport (kg/ha)']
+                    f['properties']['Ash Transport Water (tonne)'] = ash_out[topaz_id]['water_transport (kg/ha)'] * area_ha / 1000.0
+                    f['properties']['Ash Transport Wind (tonne)'] = ash_out[topaz_id]['wind_transport (kg/ha)'] * area_ha / 1000.0
+                    f['properties']['Ash Transport (tonne)'] = ash_out[topaz_id]['ash_transport (kg/ha)'] * area_ha / 1000.0
                     f['properties']['Burnclass'] = ash_out[topaz_id]['burn_class']
 
         for k, v in f['properties'].items():
@@ -188,44 +208,17 @@ def arc_export(wd, verbose=False):
     if verbose:
         print('done.')
 
-    cmd = ['ogr2ogr', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
-           'subcatchments.shp', 'subcatchments.json']
+    if _exists(_join(export_dir, f'{runid}.gpkg')):
+        os.remove(_join(export_dir, f'{runid}.gpkg'))
+
+    cmd = ['ogr2ogr', '-f', 'GPKG', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
+           f'{runid}.gpkg', 'subcatchments.json', '-nln', 'subcatchments']
     if verbose:
         print(cmd)
     subprocess.check_call(cmd, cwd=export_dir)
 
-    assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
+    assert _exists(_join(export_dir, f'{runid}.gpkg')), cmd
 
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
-           'subcatchments.kml', 'subcatchments.json']
-    if verbose:
-        print(cmd)
-    subprocess.check_call(cmd, cwd=export_dir)
-
-    assert _exists(_join(export_dir, 'subcatchments.kml')), cmd
-
-    geojson_fn = _join(export_dir, 'subcatchments.json')
-    with open(geojson_fn, 'w') as fp:
-        json.dump(js, fp, allow_nan=False)
-
-    if verbose:
-        print('done.')
-
-    cmd = ['ogr2ogr', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
-           'subcatchments.shp', 'subcatchments.json']
-    if verbose:
-        print(cmd)
-    subprocess.check_call(cmd, cwd=export_dir)
-
-    assert _exists(_join(export_dir, 'subcatchments.shp')), cmd
-
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', utm_epsg, '-t_srs', utm_epsg,
-           'subcatchments.kml', 'subcatchments.json']
-    if verbose:
-        print(cmd)
-    subprocess.check_call(cmd, cwd=export_dir)
-
-    assert _exists(_join(export_dir, 'subcatchments.kml')), cmd
 
 #    os.remove(geojson_fn)
 
@@ -279,31 +272,31 @@ def arc_export(wd, verbose=False):
         f['properties']['aspect'] = ss['watershed']['aspect']
 
         try:
-            f['properties']['Disch(m3)'] = weppout['Discharge Volume'][topaz_id]['value'] 
-            f['properties']['Disch(m3)'] = round(f['properties']['Disch(m3)'], 3)
+            f['properties']['Discharge Volume (m3)'] = weppout['Discharge Volume'][topaz_id]['value']
+            f['properties']['Discharge Volume (m3)'] = round(f['properties']['Discharge Volume (m3)'], 3)
         except:
-            f['properties']['Disch(m3)'] = -9999
+            f['properties']['Discharge Volume (m3)'] = -9999
 
         try:
-            f['properties']['SdYd(tn/h)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
-            f['properties']['SdYd(tn/h)'] = round(f['properties']['SdYd(tn/h)'], 3)
+            f['properties']['Sediment Yield (tn/h)'] = weppout['Sediment Yield'][topaz_id]['value'] / _area
+            f['properties']['Sediment Yield (tn/h)'] = round(f['properties']['Sediment Yield (tn/h)'], 3)
         except:
             f['properties']['SdYd(tn/h)'] = -9999
 
         try:
-            f['properties']['SlLs(kg/h)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
-            f['properties']['SlLs(kg/h)'] = round(f['properties']['SlLs(kg/h)'], 3)
+            f['properties']['Soil Loss (kg/h)'] = weppout['Soil Loss'][topaz_id]['value'] / _area
+            f['properties']['Soil Loss (kg/h)'] = round(f['properties']['Soil Loss (kg/h)'], 3)
         except:
-            f['properties']['SlLs(kg/h)'] = -9999
+            f['properties']['Soil Loss (kg/h)'] = -9999
 
         if weppout['Total P Density'] is not None:
-            f['properties']['TP(kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
+            f['properties']['Total P (kg/ha)'] = weppout['Total P Density'][topaz_id]['value']
 
         if weppout['Solub. React. P Density'] is not None:
-            f['properties']['SRP(kg/ha)'] = weppout['Solub. React. P Density'][topaz_id]['value']
+            f['properties']['Solub. React. P (kg/ha)'] = weppout['Solub. React. P Density'][topaz_id]['value']
 
         if weppout['Particulate P Density'] is not None:
-            f['properties']['PP(kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
+            f['properties']['Particulate P (kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
 
         try:
             f['properties']['landuse'] = ss['landuse']['desc']
@@ -331,23 +324,11 @@ def arc_export(wd, verbose=False):
     with open(geojson_fn, 'w') as fp:
         fp.write(json_txt)
 
-    cmd = ['ogr2ogr', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
-           'channels.shp', 'channels.json']
+    cmd = ['ogr2ogr', '-f', 'GPKG', '-append', '-update', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
+           f'{runid}.gpkg', 'channels.json', '-nln', 'channels']
     if verbose:
         print(cmd)
     subprocess.check_call(cmd, cwd=export_dir)
-
-    assert _exists(_join(export_dir, 'channels.shp')), cmd
-
-    cmd = ['ogr2ogr', '-f', 'KML', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
-           'channels.kml', 'channels.json']
-    if verbose:
-        print(cmd)
-    subprocess.check_call(cmd, cwd=export_dir)
-
-    assert _exists(_join(export_dir, 'channels.kml')), cmd
-
-#    os.remove(geojson_fn)
 
 
 if __name__ == '__main__':
