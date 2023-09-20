@@ -1,0 +1,570 @@
+{
+    "1": {
+        "Key": 1,
+        "Color": [
+            229,
+            0,
+            76,
+            255
+        ],
+        "DisturbedClass": "developed high intensity",
+        "Description": "Continuous urban fabric",
+        "ManagementFile": "UnDisturbed/Developed_High_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_High_Intensity.sol"
+    },
+    "2": {
+        "Key": 2,
+        "Color": [
+            255,
+            0,
+            0,
+            255
+        ],
+        "DisturbedClass": "developed moderate intensity",
+        "Description": "Discontinuous urban fabric",
+        "ManagementFile": "UnDisturbed/Developed_Moderate_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_Moderate_Intensity.sol"
+    },
+    "3": {
+        "Key": 3,
+        "Color": [
+            204,
+            76,
+            241,
+            255
+        ],
+        "DisturbedClass": "developed high intensity",
+        "Description": "Industrial or commercial units",
+        "ManagementFile": "UnDisturbed/Developed_High_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_High_Intensity.sol"
+    },
+    "4": {
+        "Key": 4,
+        "Color": [
+            204,
+            0,
+            0,
+            255
+        ],
+        "DisturbedClass": "developed moderate intensity",
+        "Description": "Road and rail networks and associated land",
+        "ManagementFile": "UnDisturbed/Developed_Moderate_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_Moderate_Intensity.sol"
+    },
+    "5": {
+        "Key": 5,
+        "Color": [
+            229,
+            204,
+            204,
+            255
+        ],
+        "DisturbedClass": "developed high intensity",
+        "Description": "Port areas",
+        "ManagementFile": "UnDisturbed/Developed_High_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_High_Intensity.sol"
+    },
+    "6": {
+        "Key": 6,
+        "Color": [
+            229,
+            204,
+            229,
+            255
+        ],
+        "DisturbedClass": "developed high intensity",
+        "Description": "Airports",
+        "ManagementFile": "UnDisturbed/Developed_High_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_High_Intensity.sol"
+    },
+    "7": {
+        "Key": 7,
+        "Color": [
+            166,
+            0,
+            204,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Mineral extraction sites",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "8": {
+        "Key": 8,
+        "Color": [
+            166,
+            76,
+            0,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Dump sites",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "9": {
+        "Key": 9,
+        "Color": [
+            255,
+            76,
+            255,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Construction sites",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "10": {
+        "Key": 10,
+        "Color": [
+            255,
+            166,
+            255,
+            255
+        ],
+        "DisturbedClass": "developed low intensity",
+        "Description": "Green urban areas",
+        "ManagementFile": "UnDisturbed/Developed_Low_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_Low_Intensity.sol"
+    },
+    "11": {
+        "Key": 11,
+        "Color": [
+            255,
+            229,
+            255,
+            255
+        ],
+        "DisturbedClass": "developed low intensity",
+        "Description": "Sport and leisure facilities",
+        "ManagementFile": "UnDisturbed/Developed_Low_Intensity.man",
+        "SoilFile": "UnDisturbed/Developed_Low_Intensity.sol"
+    },
+    "12": {
+        "Key": 12,
+        "Color": [
+            255,
+            255,
+            167,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Non-irrigated arable land",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "13": {
+        "Key": 13,
+        "Color": [
+            255,
+            255,
+            0,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Permanently irrigated land",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "14": {
+        "Key": 14,
+        "Color": [
+            229,
+            229,
+            0,
+            255
+        ],
+        "DisturbedClass": "agriculture crops",
+        "Description": "Rice fields",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "15": {
+        "Key": 15,
+        "Color": [
+            229,
+            127,
+            0,
+            255
+        ],
+        "DisturbedClass": "agriculture crops",
+        "Description": "Vineyards",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "16": {
+        "Key": 16,
+        "Color": [
+            241,
+            166,
+            76,
+            255
+        ],
+        "DisturbedClass": "young forest",
+        "Description": "Fruit trees and berry plantations",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "17": {
+        "Key": 17,
+        "Color": [
+            229,
+            166,
+            0,
+            255
+        ],
+        "DisturbedClass": "young forest",
+        "Description": "Olive groves",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "18": {
+        "Key": 18,
+        "Color": [
+            229,
+            229,
+            76,
+            255
+        ],
+        "DisturbedClass": "agriculture crops",
+        "Description": "Pastures",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "19": {
+        "Key": 19,
+        "Color": [
+            255,
+            229,
+            166,
+            255
+        ],
+        "DisturbedClass": "agriculture crops",
+        "Description": "Annual crops associated with permanent crops",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "20": {
+        "Key": 20,
+        "Color": [
+            255,
+            229,
+            76,
+            255
+        ],
+        "DisturbedClass": "agriculture crops",
+        "Description": "Complex cultivation patterns",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "21": {
+        "Key": 21,
+        "Color": [
+            229,
+            204,
+            76,
+            255
+        ],
+        "DisturbedClass": "agriculture crops",
+        "Description": "Land principally occupied by agriculture, with significant areas of natural vegetation",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "22": {
+        "Key": 22,
+        "Color": [
+            241,
+            204,
+            166,
+            255
+        ],
+        "DisturbedClass": "forest",
+        "Description": "Agro-forestry areas",
+        "ManagementFile": "UnDisturbed/Old_Forest.man"
+    },
+    "23": {
+        "Key": 23,
+        "Color": [
+            127,
+            255,
+            0,
+            255
+        ],
+        "DisturbedClass": "forest",
+        "Description": "Broad-leaved forest",
+        "ManagementFile": "UnDisturbed/Old_Forest.man"
+    },
+    "24": {
+        "Key": 24,
+        "Color": [
+            0,
+            166,
+            0,
+            255
+        ],
+        "DisturbedClass": "forest",
+        "Description": "Coniferous forest",
+        "ManagementFile": "UnDisturbed/Old_Forest.man"
+    },
+    "25": {
+        "Key": 25,
+        "Color": [
+            76,
+            255,
+            0,
+            255
+        ],
+        "DisturbedClass": "forest",
+        "Description": "Mixed forest",
+        "ManagementFile": "UnDisturbed/Old_Forest.man"
+    },
+    "26": {
+        "Key": 26,
+        "Color": [
+            204,
+            241,
+            76,
+            255
+        ],
+        "DisturbedClass": "tall grass",
+        "Description": "Natural grasslands",
+        "ManagementFile": "Forest/DisturbedWEPPManagement/Tall grass prarie.man"
+},
+    "27": {
+        "Key": 27,
+        "Color": [
+            166,
+            255,
+            127,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Moors and heathland",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "28": {
+        "Key": 28,
+        "Color": [
+            166,
+            229,
+            76,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Sclerophyllous vegetation",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "29": {
+        "Key": 29,
+        "Color": [
+            166,
+            241,
+            0,
+            255
+        ],
+        "DisturbedClass": "forest",
+        "Description": "Transitional woodland-shrub",
+        "ManagementFile": "UnDisturbed/Old_Forest.man"
+    },
+    "30": {
+        "Key": 30,
+        "Color": [
+            229,
+            229,
+            229,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Beaches, dunes, sands",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "31": {
+        "Key": 31,
+        "Color": [
+            204,
+            204,
+            204,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Bare rocks",
+        "ManagementFile": "GIS/Bare.man"
+    },
+    "32": {
+        "Key": 32,
+        "Color": [
+            204,
+            255,
+            204,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Sparsely vegetated areas",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "33": {
+        "Key": 33,
+        "Color": [
+            0,
+            0,
+            0,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Burnt areas",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "34": {
+        "Key": 34,
+        "Color": [
+            166,
+            229,
+            204,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Glaciers and perpetual snow",
+        "ManagementFile": "GIS/Bare.man"
+    },
+    "35": {
+        "Key": 35,
+        "Color": [
+            166,
+            166,
+            255,
+            255
+        ],
+        "DisturbedClass": "wetland",
+        "Description": "Inland marshes",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "36": {
+        "Key": 36,
+        "Color": [
+            76,
+            76,
+            255,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Peat bogs",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "37": {
+        "Key": 37,
+        "Color": [
+            204,
+            204,
+            255,
+            255
+        ],
+        "DisturbedClass": "wetland",
+        "Description": "Salt marshes",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "38": {
+        "Key": 38,
+        "Color": [
+            229,
+            229,
+            255,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Salines",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "39": {
+        "Key": 39,
+        "Color": [
+            166,
+            166,
+            229,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Intertidal flats",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "40": {
+        "Key": 40,
+        "Color": [
+            0,
+            204,
+            241,
+            255
+        ],
+        "DisturbedClass": "water",
+        "Description": "Water courses",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "41": {
+        "Key": 41,
+        "Color": [
+            127,
+            241,
+            229,
+            255
+        ],
+        "DisturbedClass": "water",
+        "Description": "Water bodies",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "42": {
+        "Key": 42,
+        "Color": [
+            0,
+            255,
+            166,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Coastal lagoons",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "43": {
+        "Key": 43,
+        "Color": [
+            166,
+            255,
+            229,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Estuaries",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "44": {
+        "Key": 44,
+        "Color": [
+            229,
+            241,
+            255,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "Sea and ocean",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+    "48": {
+        "Key": 48,
+        "Color": [
+            255,
+            255,
+            255,
+            255
+        ],
+        "DisturbedClass": "",
+        "Description": "NODATA",
+        "ManagementFile": "GeoWEPP/grass.man"
+    },
+"105": {"Key": 105, "Color": [255,0,0,255],     "DisturbedClass": "forest high sev fire", "Description": "High Severity Fire", "ManagementFile": "UnDisturbed/High_Severity_Fire.man"},
+"118": {"Key": 118, "Color": [255,255,0,255],   "DisturbedClass": "forest moderate sev fire", "Description": "Moderate Severity Fire", "ManagementFile": "UnDisturbed/Moderate_Severity_Fire.man"},
+"106": {"Key": 106, "Color": [77,230,0,255],    "DisturbedClass": "forest low sev fire", "Description": "Low Severity Fire", "ManagementFile": "UnDisturbed/Low_Severity_Fire.man"},
+"110": {"Key": 110, "Color": [255,148,218,255], "DisturbedClass": "forest prescribed fire", "Description": "Prescribed Fire", "ManagementFile": "UnDisturbed/Prescribed_Fire.man"},
+"108": {"Key": 108, "Color": [236,155,53,255],  "DisturbedClass": "mulch", "Description": "Mulch", "ManagementFile": "UnDisturbed/Mulch.man"},
+"109": {"Key": 109, "Color": [227,113,74,255],  "DisturbedClass": "mulch", "Description": "Mulch Tilled", "ManagementFile": "UnDisturbed/Mulch_Tilled.man"},
+"111": {"Key": 111, "Color": [85,170,170,255],  "DisturbedClass": "skid", "Description": "Skid Trail", "ManagementFile": "UnDisturbed/Skid_Trail.man"},
+"119": {"Key": 119, "Color": [161,2,0,255],     "DisturbedClass": "shrub high sev fire", "Description": "Shrub High Severity Fire", "ManagementFile": "UnDisturbed/Shrub_High_Severity_Fire.man"},
+"120": {"Key": 120, "Color": [234,204,0,255],   "DisturbedClass": "shrub moderate sev fire", "Description": "Shrub Moderate Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Moderate_Severity_Fire.man"},
+"121": {"Key": 121, "Color": [48,153,0,255],    "DisturbedClass": "shrub low sev fire", "Description": "Shrub Low Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
+"122": {"Key": 122, "Color": [44,145,0,255],    "DisturbedClass": "shrub prescribed fire", "Description": "Shrub Prescribed Fire", "ManagementFile": "UnDisturbed/Prescribed_Fire.man"},
+"115": {"Key": 115, "Color": [0,255,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 93 Cover (Cable)", "ManagementFile": "UnDisturbed/Cable_Thinning_93_Cover.man"},
+"116": {"Key": 116, "Color": [0,255,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 90 Cover (Forwarder)", "ManagementFile": "UnDisturbed/Forward_Thinning_90_Cover.man"},
+"117": {"Key": 117, "Color": [0,255,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 85 Cover (Skidder)", "ManagementFile": "UnDisturbed/Skidder_Thinning_85_Cover.man"},
+"123": {"Key": 123, "Color": [0,250,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 96 Cover", "ManagementFile": "UnDisturbed/Thinning_96_Cover.man"},
+"124": {"Key": 124, "Color": [0,245,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 75 Cover", "ManagementFile": "UnDisturbed/Thinning_75_Cover.man"},
+"129": {"Key": 129, "Color": [161,2,0,255],     "DisturbedClass": "grass high sev fire", "Description": "Grass High Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
+"130": {"Key": 130, "Color": [234,204,0,255],   "DisturbedClass": "grass moderate sev fire", "Description": "Grass Moderate Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
+"131": {"Key": 131, "Color": [48,153,0,255],    "DisturbedClass": "grass low sev fire", "Description": "Grass Low Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
+"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Prescribed_Fire.man"}
+}
