@@ -160,5 +160,9 @@ class WeppTopTranslator:
             yield self.wepp(chn_id=chn_id)
             
     def iter_wepp_sub_ids(self):
+        wepp_ids = []
         for sub_id in self.sub_ids:
-            yield self.wepp(sub_id=sub_id)
+            wepp_ids.append(self.wepp(sub_id=sub_id))
+
+        for wepp_id in sorted(wepp_ids):
+            yield wepp_id
