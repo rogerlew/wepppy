@@ -53,6 +53,7 @@ class RangelandAnalysisPlatform(object):
             .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
 
         for year in years:
+            year = str(year)
             dst_fn = _join(self.wd, f'_rap_{version}_{year}.tif')
 
             cmd = ['gdalwarp', 
@@ -79,14 +80,19 @@ class RangelandAnalysisPlatform(object):
             self.ds[year] = dst_fn
 
         self.proj4 = proj4
-        self.ul_x, self.ul_y = ul_x, ul_y
-        self.lr_x, self.lr_y = lr_x, lr_y
+        self.ul_x, self.ul_y = float(ul_x), float(ul_y)
+        self.lr_x, self.lr_y = float(lr_x), float(lr_y)
 
-    def get_dataset(self, year):
+    def get_dataset_fn(self, year):
+        year = str(year)
         if year not in self.ds:
             self.retrieve([year])
 
-        return RangelandAnalysisPlatformDataset(self.ds[year])
+        return self.ds[year]
+
+    def get_dataset(self, year):
+        fn = self.get_dataset_fn(year)
+        return RangelandAnalysisPlatformDataset(fn)
 
     def _attribution(self):
         readme_txt = _join(self.wd, 'rap_readme.txt')
