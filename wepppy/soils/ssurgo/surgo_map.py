@@ -125,6 +125,9 @@ class SurgoMap:
             if _id == 0:
                 continue
 
+            if (_id - 4) % 10 == 0:
+                continue
+
             indices = np.where(subwta == _id)
             dom = self._get_dominant(indices, valid_mukeys)
             if dom is None:
