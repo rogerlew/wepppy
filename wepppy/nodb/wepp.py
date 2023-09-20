@@ -1129,6 +1129,10 @@ class Wepp(NoDbBase, LogMixin):
         build_d = {}
 
         for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
+            if (int(topaz_id) - 4) % 10 == 0:
+                continue
+
+
             self.log(f'    _prep_managements:{topaz_id}:{mukey}... ')
 
             dom = landuse.domlc_d[topaz_id]

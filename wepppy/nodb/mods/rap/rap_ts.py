@@ -265,9 +265,9 @@ class RAP_TS(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
+        with open(_join(runs_dir, 'cancov.txt'), 'w') as fp:
+            fp.write("")
 
-        for key in data:
-            print()
         years = [yr for yr in data[RAP_Band.TREE]]
 
         for wepp_id in translator.iter_wepp_sub_ids():

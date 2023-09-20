@@ -1556,6 +1556,12 @@ class Climate(NoDbBase, LogMixin):
         if self.climate_spatialmode == ClimateSpatialMode.Multiple:
             self._prism_revision(verbose=verbose)
 
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('build_climate')
+        except FileNotFoundError:
+            pass
+
     def _build_climate_vanilla(self, verbose=False, attrs=None):
         self.lock()
 
