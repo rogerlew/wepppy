@@ -3,7 +3,7 @@ import pandas as pd
 import json
 
 
-def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='20170110'):
+def retrieve_daily(lon=-117.45, lat=46.534, start_date='19810101', end_date='20221231'):
     headers = {
         'Connection': 'keep-alive',
         'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -18,7 +18,7 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='201
     data = {
         'spares': '4km',
         'interp': 'idw',
-        'stats': 'ppt tmin tmax',
+        'stats': 'ppt tmin tmean tmax tdmean vpdmin vpdmax',
         'units': 'si',
         'range': 'daily',
         'start': start_date,
@@ -26,15 +26,10 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='201
         'stability': 'stable',
         'lon': str(lon),
         'lat': str(lat),
-        'elev': '48',
+        'elev': '143',
         'call': 'pp/daily_timeseries',
         'proc': 'gridserv'
     }
-
-    data['start'] = '19900101'
-    data['end'] = '20171231'
-    data['lat'] = '46.0000'
-    data['lon'] = '-116.0000'
 
     response = requests.post(
         'https://www.prism.oregonstate.edu/explorer/dataexplorer/rpc.php',
@@ -60,5 +55,5 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19790101', end_date='201
     return prism
 
 if __name__ == "__main__":
-    d = retrieve_daily(start_date='19810101')
+    d = retrieve_daily()
     print(d)
