@@ -299,13 +299,15 @@ def arc_export(wd, verbose=False):
             f['properties']['Particulate P (kg/ha)'] = weppout['Particulate P Density'][topaz_id]['value']
 
         try:
-            f['properties']['landuse'] = ss['landuse']['desc']
-        except KeyError:
+            desc = ss['landuse']['desc']
+            f['properties']['landuse'] = desc
+        except:
             pass
 
         try:
-            f['properties']['soil'] = ss['soil']['desc']
-        except KeyError:
+            desc = ss['soil']['desc']
+            f['properties']['soil'] = desc
+        except:
             pass
 
         for k, v in f['properties'].items():

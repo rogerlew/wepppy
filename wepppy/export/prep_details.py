@@ -29,78 +29,78 @@ def export_hillslopes_prep_details(wd):
     for d in subcatchments_summary:
         try:
             topaz_id = d['meta']['topaz_id']
-        except KeyError:
+        except:
             topaz_id = None
 
         try:
             wepp_id = d['meta']['wepp_id']
-        except KeyError:
+        except:
             wepp_id = None
 
         try:
             width = d['watershed']['width']
-        except KeyError:
+        except:
             width = None
 
         try:
             length = d['watershed']['length']
-        except KeyError:
+        except:
             length = None
 
         try:
             area = d['watershed']['area']
             area *= 0.0001
-        except KeyError:
+        except:
             area = None
 
         try:
             slope = d['watershed']['slope_scalar']
-        except KeyError:
+        except:
             slope = None
 
         try:
             aspect = d['watershed']['aspect']
-        except KeyError:
+        except:
             aspect = None
 
         try:
             dom_landuse = d['landuse']['key']
-        except KeyError:
+        except:
             dom_landuse = None
 
         try:
             landuse_description = d['landuse']['desc']
-        except KeyError:
+        except:
             landuse_description = None
 
         try:
             dom_soil = d['soil']['mukey']
-        except KeyError:
+        except:
             dom_soil = None
 
         try:
             soil_description = d['soil']['desc']
-        except KeyError:
+        except:
             soil_description = None
 
         try:
             cli_fn = d['climate']['cli_fn']
-        except KeyError:
+        except:
             cli_fn = None
 
         try:
             longest_fp = d['watershed']['fp_longest']
-        except KeyError:
+        except:
             longest_fp = None
 
         try:
             longest_fp_length = d['watershed']['fp_longest_length']
-        except KeyError:
+        except:
             longest_fp_length = None
 
         try:
             longest_fp_slope = d['watershed']['fp_longest_slope']
-        except KeyError:
+        except:
             longest_fp_slope = None
 
         wtr.writerow(dict(topaz_id=topaz_id, wepp_id=wepp_id,
@@ -140,68 +140,68 @@ def export_channels_prep_details(wd):
     for d in chns_summary:
         try:
             topaz_id = d['meta']['topaz_id']
-        except KeyError:
+        except:
             topaz_id = None
 
         try:
             wepp_id = d['meta']['wepp_id']
-        except KeyError:
+        except:
             wepp_id = None
 
         try:
             chn_enum = d['meta']['wepp_id']
-        except KeyError:
+        except:
             chn_enum = None
 
         try:
             chn_wepp_width = d['watershed']['chn_wepp_width']
-        except KeyError:
+        except:
             chn_wepp_width = None
 
         try:
             length = d['watershed']['length']
-        except KeyError:
+        except:
             length = None
 
         try:
             order = d['watershed']['order']
-        except KeyError:
+        except:
             order = None
 
         try:
             area = d['watershed']['area']
             area *= 0.0001
-        except KeyError:
+        except:
             area = None
 
         try:
             slope = d['watershed']['slope_scalar']
-        except KeyError:
+        except:
             slope = None
 
         try:
             aspect = d['watershed']['aspect']
-        except KeyError:
+        except:
             aspect = None
 
         try:
             channel_type = d['watershed']['channel_type']
-        except KeyError:
+        except:
             channel_type = None
 
         try:
             dom_soil = d['soil']['mukey']
-        except KeyError:
+        except:
             dom_soil = None
 
         try:
             soil_description = d['soil']['desc']
-        except KeyError:
+        except:
             soil_description = None
 
         try:
             cli_fn = d['climate']['cli_fn']
-        except KeyError:
+        except:
             cli_fn = None
 
         wtr.writerow(dict(topaz_id=topaz_id, wepp_id=wepp_id, chn_enum=chn_enum, order=order,
