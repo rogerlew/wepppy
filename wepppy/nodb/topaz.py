@@ -87,21 +87,29 @@ class Topaz(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'topaz.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'topaz.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Topaz)
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
+
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
 
     @property
     def _nodb(self):

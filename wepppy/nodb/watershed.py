@@ -145,21 +145,29 @@ class Watershed(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'watershed.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'watershed.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Watershed)
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
+
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
 
     @property
     def delineation_backend(self):
@@ -418,7 +426,7 @@ class Watershed(NoDbBase):
 
     @outlet.setter
     def outlet(self, value):
-        assert isinstance(value, Outlet)
+        assert isinstance(value, Outlet) or value is None
 
         self.lock()
 
@@ -475,6 +483,9 @@ class Watershed(NoDbBase):
                 self.unlock('-f')
                 raise
 
+        if self.outlet is not None:
+            self.remove_outlet()
+
         if self.delineation_backend_is_topaz:      
             Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
         else:
@@ -515,6 +526,9 @@ class Watershed(NoDbBase):
             prep.timestamp('set_outlet')
         except FileNotFoundError:
             pass
+
+    def remove_outlet(self):
+        self.outlet = None
         
     #
     # build subcatchments

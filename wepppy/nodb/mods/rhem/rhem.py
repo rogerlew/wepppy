@@ -6,6 +6,7 @@ from wepppy.all_your_base import NCPU
 
 from wepppy.watershed_abstraction import SlopeFile
 
+
 # wepppy submodules
 from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.base import NoDbBase
@@ -211,6 +212,7 @@ class Rhem(NoDbBase, LogMixin):
         os.makedirs(output_dir)
 
     def run_hillslopes(self):
+        from wepppy.export import arc_export
 
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
@@ -240,6 +242,8 @@ class Rhem(NoDbBase, LogMixin):
         self.log('Running RhemPost... ')
         rhempost = RhemPost.getInstance(self.wd)
         rhempost.run_post()
+
+        arc_export(self.wd)
 
 #        self.run_wepp_hillslopes()
         self.log_done()

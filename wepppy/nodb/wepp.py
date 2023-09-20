@@ -66,8 +66,8 @@ from wepppy.all_your_base import (
     IS_WINDOWS,
     NumpyEncoder
 )
-from wepppy.all_your_base import try_parse_float
-from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator
+from wepppy.all_your_base import try_parse_float, isint
+from wepppy.all_your_base.geo import read_raster, wgs84_proj4, RasterDatasetInterpolator, RDIOutOfBoundsException
 
 from wepppy.wepp.soils.utils import WeppSoilUtil
 
@@ -380,8 +380,10 @@ class Wepp(NoDbBase, LogMixin):
             self._channel_erodibility =  self.config_get_float('wepp', 'channel_erodibility')
             self._channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
             self._kslast = self.config_get_float('wepp', 'kslast')
+            self._kslast_map = self.config_get_path('wepp', 'kslast_map')
 
             self._pmet_kcb = self.config_get_float('wepp', 'pmet_kcb')
+            self._pmet_kcb_map = self.config_get_path('wepp', 'pmet_kcb_map')
             self._pmet_rawp = self.config_get_float('wepp', 'pmet_rawp')
 
             self._multi_ofe = self.config_get_bool('wepp', 'multi_ofe')
@@ -402,29 +404,35 @@ class Wepp(NoDbBase, LogMixin):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'wepp.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'wepp.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Wepp)
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
 
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
+
+        
     @property
     def multi_ofe(self):
-        if not hasattr(self, "_multi_ofe"):
-            return False
-
-        return self._multi_ofe
-
+        return getattr(self, "_multi_ofe", False)
+        
     @multi_ofe.setter
     def multi_ofe(self, value):
         self.lock()
@@ -603,6 +611,8 @@ class Wepp(NoDbBase, LogMixin):
     def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None):
         self.log('Prepping Hillslopes... ')
 
+        soils = Soils.getInstance(self.wd)
+
         # get translator
         translator = Watershed.getInstance(self.wd).translator_factory()
 
@@ -643,6 +653,38 @@ class Wepp(NoDbBase, LogMixin):
         else:
             self._remove_snow()
 
+        disturbed = Disturbed.getInstance(self.wd, allow_nonexistent=True)
+        if disturbed is not None:
+            if disturbed.sol_ver == 9005.0:
+                self._prep_revegetation()
+
+        self.log_done()
+
+    def _prep_revegetation(self):
+        self.log('    _prep_revegetation... ')
+
+        self.log('      prep pw0.cov... ')
+        from wepppy.nodb.mods import RAP_TS
+        rap_ts = RAP_TS.getInstance(self.wd)
+        rap_ts.prep_cover(self.runs_dir)
+        self.log_done()
+
+        self._prep_firedate()
+
+        self.log_done()
+
+    def _prep_firedate(self):
+
+        self.log('    prep firedate.txt... ')
+        disturbed = Disturbed.getInstance(self.wd)
+        if disturbed.fire_date is not None:
+            with open(_join(self.runs_dir, 'firedate.txt'), 'w') as fp:
+                firedate = disturbed.fire_date
+                mo, da, yr = firedate.split()
+                assert isint(mo), mo
+                assert isint(da), da
+                assert isint(yr), yr
+                fp.write(firedate)
         self.log_done()
 
     @property
@@ -710,6 +752,10 @@ class Wepp(NoDbBase, LogMixin):
     def pmet_kcb(self):
         return getattr(self, '_pmet_kcb', self.config_get_float('wepp', 'pmet_kcb'))
 
+    @property
+    def pmet_kcb_map(self):
+        return getattr(self, '_pmet_kcb_map', self.config_get_path('wepp', 'pmet_kcb_map'))
+
     @pmet_kcb.setter
     def pmet_kcb(self, value):
         self.lock()
@@ -741,27 +787,47 @@ class Wepp(NoDbBase, LogMixin):
             raise
 
     def _prep_pmet(self, kcb=None, rawp=None):
-        if 'disturbed' not in self.mods:
-            if kcb is None:
-                kcb = self.pmet_kcb
-            else:
-                self.pmet_kcb = kcb
 
-            if rawp is None:
-                rawp = self.pmet_rawp
-            else:
-                self.pmet_rawp = rawp
-
-            self.log(f'nodb.Wepp._prep_pmet::kcb = {kcb}, rawp = {rawp} ')
-            self.log_done()
+        if kcb is not None and rawp is not None:
+            self.log(f'nodb.Wepp._prep_pmet::kwargs routine')
             pmetpara_prep(self.runs_dir, kcb=kcb, rawp=rawp)
-        else:
-            from wepppy.nodb.mods import Disturbed
-            disturbed = Disturbed.getInstance(self.wd)
-            disturbed.pmetpara_prep()
+            assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
+            self.log_done()
+            return
 
+        pmet_kcb_map = self.pmet_kcb_map
+        if pmet_kcb_map is not None:
+            rdi = RasterDatasetInterpolator(pmet_kcb_map)
+            wd = self.wd
+            watershed = Watershed.getInstance(wd)
+            ws_lng, ws_lat = watershed.centroid
 
+            try:
+                kcb = rdi.get_location_info(ws_lng, ws_lat, method='nearest')
+            except RDIOutOfBoundsException:
+                kcb = None
+
+            if kcb is not None:
+                self.log(f'nodb.Wepp._prep_pmet::kcb_map routine')
+                pmetpara_prep(self.runs_dir, kcb=kcb, rawp=self.pmet_rawp)
+                assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
+                self.log_done()
+                return
+
+        if 'disturbed' not in self.mods:
+            self.log(f'nodb.Wepp._prep_pmet::defaults routine')
+            pmetpara_prep(self.runs_dir, kcb=self.pmet_kcb, rawp=self.pmet_rawp)
+            assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
+            self.log_done()
+            return
+
+        self.log(f'nodb.Wepp._prep_pmet::disturbed routine')
+        from wepppy.nodb.mods import Disturbed
+        disturbed = Disturbed.getInstance(self.wd)
+        disturbed.pmetpara_prep()
         assert _exists(_join(self.runs_dir, 'pmetpara.txt'))
+        self.log_done()
+
 
     def _remove_pmet(self):
         fn = _join(self.runs_dir, 'pmet.txt')
@@ -965,10 +1031,8 @@ class Wepp(NoDbBase, LogMixin):
         soils = Soils.getInstance(wd)
         try:
             disturbed = Disturbed.getInstance(wd)
-            _land_soil_replacements_d = disturbed.land_soil_replacements_d 
         except:
             disturbed = None
-            _land_soil_replacements_d = None
 
         years = climate.input_years
 
@@ -979,6 +1043,11 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
 
         kslast = self.kslast
+
+        kslast_map_fn = self.kslast_map
+        kslast_map = None
+        if kslast_map_fn is not None:
+            kslast_map = RasterDatasetInterpolator(kslast_map_fn)
 
         for topaz_id, _ in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
@@ -991,13 +1060,36 @@ class Wepp(NoDbBase, LogMixin):
             # soils
             src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
-            
-            if kslast is not None:
+
+            _kslast = None
+
+            if kslast_map is not None:
+                lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
+
+                try:
+                    _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
+                except RDIOutOfBoundsException:
+                    _kslast = None
+
+                if not isfloat(_kslast):
+                    if kslast is not None:
+                        _kslast = kslast
+                    else:
+                        _kslast = None
+                elif _kslast <= 0.0:
+                    if kslast is not None:
+                        _kslast = kslast
+                    else:
+                        _kslast = None
+            elif kslast is not None:
+                _kslast = kslast
+
+            if _kslast is not None:
                 soilu = WeppSoilUtil(src_fn)
-                soilu.modify_kslast(kslast)
+                soilu.modify_kslast(_kslast)
                 soilu.write(dst_fn)
-            else:    
-                _copyfile(src_fn, dst_fn) 
+            else:
+                _copyfile(src_fn, dst_fn)
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
@@ -1067,6 +1159,9 @@ class Wepp(NoDbBase, LogMixin):
                     clay = _soil.clay
                     sand = _soil.sand
                     texid = simple_texture(clay=clay, sand=sand)
+
+                    if (texid, disturbed_class) not in _land_soil_replacements_d:
+                        texid = 'all'
                     
                     if disturbed_class is None or 'developed' in disturbed_class:
                         rdmax = None
@@ -1101,18 +1196,6 @@ class Wepp(NoDbBase, LogMixin):
 
                 self.log_done()
 
-        if 'rap_ts' in self.mods:
-            self.log('    _prep_managements:rap_ts.analyze... ')
-            from wepppy.nodb.mods import RAP_TS
-            assert climate.observed_start_year is not None
-            assert climate.observed_end_year is not None
-
-            rap_ts = RAP_TS.getInstance(wd)
-            rap_ts.acquire_rasters(start_year=climate.observed_start_year,
-                                   end_year=climate.observed_end_year)
-            rap_ts.analyze()
-            self.log_done()
-
         if 'emapr_ts' in self.mods:
             self.log('    _prep_managements:emapr_ts.analyze... ')
             from wepppy.nodb.mods import OSUeMapR_TS
@@ -1134,20 +1217,50 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
         kslast = self.kslast
 
+        kslast_map_fn = self.kslast_map
+
+        kslast_map = None
+        if kslast_map_fn is not None:
+            kslast_map = RasterDatasetInterpolator(kslast_map_fn)
+
         build_d = {} # mukey: fn
         for topaz_id, soil in soils.sub_iter():
+
             self.log(f'    _prep_soils:{topaz_id}:{soil}... ')
             wepp_id = translator.wepp(top=int(topaz_id))
             src_fn = _join(soils_dir, soil.fname)
             dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
 
-            if kslast is not None:
+            _kslast = None
+
+            if kslast_map is not None:
+                lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
+
+                try:
+                    _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
+                except RDIOutOfBoundsException:
+                    _kslast = None
+
+                if not isfloat(_kslast):
+                    if kslast is not None:
+                        _kslast = kslast
+                    else:
+                        _kslast = None
+                elif _kslast <= 0.0:
+                    if kslast is not None:
+                        _kslast = kslast
+                    else:
+                        _kslast = None
+            elif kslast is not None:
+                _kslast = kslast
+
+            if _kslast is not None:
                 mukey = soil.mukey
                 if mukey in build_d:
                     _copyfile(build_d[mukey], dst_fn)
                 else:
                     soilu = WeppSoilUtil(src_fn)
-                    soilu.modify_kslast(kslast)
+                    soilu.modify_kslast(_kslast)
                     soilu.write(dst_fn)
                     build_d[mukey] = dst_fn
             else:    
@@ -1341,13 +1454,15 @@ class Wepp(NoDbBase, LogMixin):
 
         if critical_shear is None:
             crit_shear_map = getattr(self, 'channel_critical_shear_map', None)
+
             if crit_shear_map is not None:
-                lng, lat = watershed.outlet.actual_loc
-                crit_shear = RasterDatasetInterpolator(crit_shear_map).get_location_info(lng, lat, method='nearest')
-                if crit_shear > 0.0:
-                    self.log('wepp:prep_watershed setting critical shear to {} from map'.format(crit_shear))
-                    critical_shear = crit_shear
-                    self.log_done()
+                lng, lat = watershed.centroid
+                rdi = RasterDatasetInterpolator(crit_shear_map)
+                critical_shear = rdi.get_location_info(lng, lat, method='nearest')
+                self.log(f'critical_shear from map {crit_shear_map} at {watershed.centroid} ={critical_shear}... ')
+                self.log_done()
+        if critical_shear is None:
+            critical_shear = self.channel_critical_shear
 
         self._prep_structure(translator)
         self._prep_channel_slopes()
@@ -1846,10 +1961,8 @@ class Wepp(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def query_sub_val(self, measure):
-        wd = self.wd
-
-        translator = Watershed.getInstance(wd).translator_factory()
+    @property
+    def loss_report(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
 
@@ -1859,7 +1972,15 @@ class Wepp(NoDbBase, LogMixin):
         if not hasattr(self, '_loss_report'):
             self._loss_report = Loss(loss_pw0, self.has_phosphorus, self.wd)
 
-        report = self._loss_report
+        return self._loss_report
+
+    def query_sub_val(self, measure):
+        wd = self.wd
+        report = self.loss_report
+        if report is None:
+            return None
+
+        translator = Watershed.getInstance(wd).translator_factory()
 
         d = {}
         for row in report.hill_tbl:
@@ -1959,6 +2080,13 @@ class Wepp(NoDbBase, LogMixin):
             return None
 
         return self._kslast
+
+    @property
+    def kslast_map(self):
+        if not hasattr(self, '_kslast_map'):
+            return None
+
+        return self._kslast_map
 
     @kslast.setter
     def kslast(self, value):

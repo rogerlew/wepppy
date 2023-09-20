@@ -7,6 +7,7 @@ from .rap import RAP, RAP_TS
 from .emapr import OSUeMapR_TS
 from .shrubland import Shrubland, nlcd_shrubland_layers
 from .rangeland_cover import RangelandCover, RangelandCoverMode
+from .revegetation import Revegetation
 from .rhem import Rhem, RhemPost
 from .treecanopy import Treecanopy
 from .skid_trails import SkidTrails

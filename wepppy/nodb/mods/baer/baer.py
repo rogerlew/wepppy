@@ -20,8 +20,10 @@ from os.path import exists as _exists
 import numpy as np
 from osgeo import gdal
 
+from deprecated import deprecated
+
 from wepppy.all_your_base import isint
-from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine
+from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import SoilReplacements, simple_texture, WeppSoilUtil
 
@@ -41,7 +43,6 @@ gdal.UseExceptions()
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
-
 class BaerNoDbLockedException(Exception):
     pass
 
@@ -54,6 +55,8 @@ sbs_soil_replacements = dict(
     high=SoilReplacements(interErod='*0.4', rillErod='*0.4', effHC='*0.4'))
 
 
+
+@deprecated("supplanted by Disturbed, needed for Portland")
 class Baer(NoDbBase):
     __name__ = 'Baer'
 
@@ -436,13 +439,14 @@ class Baer(NoDbBase):
 
             is256 = len(classes) > 7 or max(classes) >= 255
 
+            max_counts = max(classes)
             if is256:
-                breaks = [75, 109, 187, max(counts)]
+                breaks = [75, 109, 187, max_counts]
             else:
                 if max(counts) == 3:
-                    breaks = [0, 1, 2, max(counts)]
+                    breaks = [0, 1, 2, max_counts]
                 else:
-                    breaks = [1, 2, 3, max(counts)]
+                    breaks = [1, 2, 3, max_counts]
 
             self._is256 = is256
             self._classes = classes
@@ -470,7 +474,7 @@ class Baer(NoDbBase):
             self.remap_landuse()
             if 'rred' in self.mods:
                 baer_cropped = self.baer_cropped
-                sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals)
+                sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals, ignore_ct=True)
 
                 baer_4class = baer_cropped.replace('.tif', '.4class.tif')
                 sbs.export_4class_map(baer_4class)
@@ -491,6 +495,10 @@ class Baer(NoDbBase):
                 self._assign_au_soils()
             else:
                 self.modify_soils()
+
+    @property
+    def ct(self):
+        return None
 
     def remap_landuse(self):
         wd = self.wd
@@ -521,8 +529,8 @@ class Baer(NoDbBase):
 
         # noinspection PyBroadException
         try:
-            sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals)
-            self._calc_sbs_coverage(sbs.data)
+            sbs = SoilBurnSeverityMap(baer_cropped, self.breaks, self._nodata_vals, ignore_ct=True)
+            self._calc_sbs_coverage(sbs)
 
             if landuse.mode != LanduseMode.Single:
                 domlc_d = sbs.build_lcgrid(watershed.subwta, None)
@@ -751,28 +759,42 @@ class Baer(NoDbBase):
             soils.unlock('-f')
             raise
 
+
     def _calc_sbs_coverage(self, sbs):
 
         self.lock()
 
         try:
+            if sbs is None:
+                self.sbs_coverage = {
+                    'noburn': 1.0,
+                    'low': 0.0,
+                    'moderate': 0.0,
+                    'high': 0.0
+                }
+            else:
+                watershed = Watershed.getInstance(self.wd)
+                bounds, transform, proj = read_raster(watershed.bound)
 
-            watershed = Watershed.getInstance(self.wd)
-            bounds, transform, proj = read_raster(watershed.bound)
+                if not sbs.data.shape == bounds.shape:
+                    dst_fn = watershed.bound.replace('.ARC', '.fixed.tif')
+                    raster_stacker(watershed.bound, sbs.fname, dst_fn)
+                    bounds, transform, proj = read_raster(dst_fn, dtype=np.int32)
 
-            assert bounds.shape == sbs.shape
+                assert sbs.data.shape == bounds.shape, [sbs.data.shape, bounds.shape]
 
-            c = Counter(sbs[np.where(bounds == 1.0)])
 
-            total_px = float(sum(c.values()))
+                c = Counter(sbs.data[np.where(bounds == 1.0)])
 
-            self.sbs_coverage = {
-                                 'noburn': c[130] / total_px,
-                                 'low': c[131] / total_px,
-                                 'moderate': c[132] / total_px,
-                                 'high': c[133] / total_px,
-                                 }
+                total_px = float(sum(c.values()))
 
+                # todo: calcuate based on disturbed burn classes
+                self.sbs_coverage = {
+                                     'noburn': c[130] / total_px,
+                                     'low': c[131] / total_px,
+                                     'moderate': c[132] / total_px,
+                                     'high': c[133] / total_px
+                                     }
             self.dump_and_unlock()
 
         except:

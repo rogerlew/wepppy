@@ -45,6 +45,12 @@ from .base import (
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
 from .prep import Prep
+from .mixins.log_mixin import LogMixin
+
+try:
+    import rustpy_geo
+except:
+    rustpy_geo = None
 
 
 class SoilsNoDbLockedException(Exception):
@@ -61,7 +67,7 @@ class SoilsMode(IntEnum):
 
 
 # noinspection PyPep8Naming
-class Soils(NoDbBase):
+class Soils(NoDbBase, LogMixin):
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -119,8 +125,16 @@ class Soils(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
-        with open(_join(wd, 'soils.nodb')) as fp:
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+        filepath = _join(wd, 'soils.nodb')
+
+        if not os.path.exists(filepath):
+            if allow_nonexistent:
+                return None
+            else:
+                raise FileNotFoundError(f"'{filepath}' not found!")
+
+        with open(filepath) as fp:
             db = jsonpickle.decode(fp.read().replace('"simple_texture"', '"_simple_texture"')
                                             .replace('"texture"', '"_texture"')
                                             .replace('"clay_pct"', '"_deprecated_clay_pct"')
@@ -131,16 +145,16 @@ class Soils(NoDbBase):
                                             .replace('"clay"', '"_deprecated_clay"'))
             assert isinstance(db, Soils)
 
-            if _exists(_join(wd, 'READONLY')):
-                db.wd = os.path.abspath(wd)
-                return db
-
-            if os.path.abspath(wd) != os.path.abspath(db.wd):
-                db.wd = wd
-                db.lock()
-                db.dump_and_unlock()
-
+        if _exists(_join(wd, 'READONLY')) or ignore_lock:
+            db.wd = os.path.abspath(wd)
             return db
+
+        if os.path.abspath(wd) != os.path.abspath(db.wd):
+            db.wd = wd
+            db.lock()
+            db.dump_and_unlock()
+
+        return db
 
     @property
     def _nodb(self):
@@ -682,6 +696,10 @@ class Soils(NoDbBase):
             self.unlock('-f')
             raise
 
+    @property
+    def status_log(self):
+        return os.path.abspath(_join(self.soils_dir, 'status.log'))
+
     def _build_gridded(self, initial_sat=None, ksflag=None):
         soils_dir = self.soils_dir
         self.lock()
@@ -704,6 +722,9 @@ class Soils(NoDbBase):
             # Make SSURGO Soils
             sm = SurgoMap(ssurgo_fn)
             mukeys = set(sm.mukeys)
+            self.log(f"ssurgo mukeys: {mukeys}")
+            self.log_done()
+
             surgo_c = SurgoSoilCollection(mukeys)
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
 
@@ -711,22 +732,42 @@ class Soils(NoDbBase):
             soils = {str(k): v for k, v in soils.items()}
             surgo_c.logInvalidSoils(wd=soils_dir)
 
+            self.log(f"valid mukeys: {soils.keys()}")
+            self.log_done()
+
+
             valid = list(int(v) for v in soils.keys())
 
-            try:
+            if rustpy_geo is None:
+                self.log(f"using build_soilgrid {valid}")
                 domsoil_d = sm.build_soilgrid(
-                    watershed.subwta,
-                    bounds_fn=watershed.bound,
-                    valid_mukeys=valid
+                    watershed.subwta
                 )
-            except NoValidSoilsException:
+                self.log_done()
+            else:
+                self.log(f"using rustpy_geo {valid}")
+                domsoil_d = rustpy_geo.mode_identify(
+                    subwta_fn=watershed.subwta,
+                    parameter_fn=ssurgo_fn
+                )
+                domsoil_d = {k: str(v) for k, v in domsoil_d.items()}
+                self.log_done()
+
+            dom_mukey = None
+            for mukey, count in Counter(domsoil_d.values()).most_common():
+                if mukey in soils:
+                    dom_mukey = mukey
+                    break
+
+            if dom_mukey is None:
                 self.dump_and_unlock()
                 self.build_statsgo(initial_sat=self.initial_sat,
                                    ksflag=self.ksflag)
                 return
 
-            domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
-
+            for topaz_id, mukey in domsoil_d.items():
+                if mukey not in soils:
+                    domsoil_d[topaz_id] = dom_mukey
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -743,7 +784,7 @@ class Soils(NoDbBase):
 
 
             # store the soils dict
-            self.domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
+            self.domsoil_d = domsoil_d
             self.ssurgo_domsoil_d = deepcopy(domsoil_d)
             self.soils = {str(k): v for k, v in soils.items()}
 
