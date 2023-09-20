@@ -1,1 +1,0 @@
-# wepppy_locations_seattle
