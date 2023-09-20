@@ -59,6 +59,8 @@ from wtforms import StringField
 
 import wepppy
 
+import requests
+
 from wepppy.all_your_base import isfloat, isint
 from wepppy.all_your_base.geo import crop_geojson, read_raster
 from wepppy.all_your_base.dateutils import parse_datetime, YearlessDate
@@ -146,8 +148,11 @@ def sort_numeric_keys(value, reverse=False):
     return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
 
 def extract_leading_digits(s):
-    match = re.match(r'(\d+)', s)
-    return int(match.group(1)) if match else 0
+    if isfloat(s):
+        return float(s)
+
+    match = re.match(r'^(\d+(\.\d+)?)', str(s))
+    return float(match.group(1)) if match else 0
 
 def sort_numeric(value, reverse=False):
     return sorted(value, key=extract_leading_digits, reverse=reverse)
@@ -439,6 +444,83 @@ def usermod():
         return exception_factory()
 
 
+@app.route('/huc-fire')
+@app.route('/huc-fire/')
+def huc_fire():
+    try:
+        return render_template('huc-fire/index.html', user=current_user)
+    except:
+        return exception_factory()
+
+
+@app.route('/huc-fire/tasks/upload_sbs/', methods=['POST'])
+def upload_sbs():
+
+    try:
+        file = request.files['input_upload_sbs']
+    except Exception:
+        return exception_factory('Could not find file')
+
+    try:
+        if file.filename == '':
+            return error_factory('no filename specified')
+
+        filename = secure_filename(file.filename)
+    except Exception:
+        return exception_factory('Could not obtain filename')
+
+    runid, wd = create_run_dir(current_user)
+
+    config = 'disturbed9002'
+    cfg = f'{config}.cfg'
+
+    try:
+        Ron(wd, cfg)
+    except Exception:
+        return exception_factory('Could not create run')
+
+    try:
+        user_datastore.create_run(runid, config, current_user)
+    except Exception:
+        return exception_factory('Could not add run to user database')
+
+
+    disturbed = Disturbed.getInstance(wd)
+    file_path = _join(disturbed.disturbed_dir, filename)
+    try:
+        file.save(file_path)
+    except Exception:
+        return exception_factory('Could not save file')
+
+    try:
+        res = disturbed.validate(filename)
+    except Exception:
+        return exception_factory('Failed validating file')
+
+    return jsonify(dict(runid=runid))
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/resources/huc.json')
+def huc(runid, config):
+
+    wd = get_wd(runid)
+    disturbed = Disturbed.getInstance(wd)
+    ((ymin, xmin), (ymax, xmax)) = disturbed.bounds
+
+    # Construct the URL to query the hydro.nationalmap.gov server
+    url = (f"https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/6/query?"
+           f"geometry=%7B%0D%0A++%22xmin%22%3A+{xmin}%2C%0D%0A++%22ymin%22%3A+{ymin}%2C%0D%0A++%22xmax%22%3A+{xmax}%2C%0D%0A++%22ymax%22%3A+{ymax}%2C%0D%0A++%22spatialReference%22%3A+%7B%0D%0A++++%22wkid%22%3A+4326%0D%0A++%7D%0D%0A%7D"
+           f"&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&returnGeometry=true&f=geojson&inSR=4326&outSR=4326")
+
+    # Fetch the GeoJSON from the hydro.nationalmap.gov server
+    response = requests.get(url)
+    geojson_data = response.json()
+
+    with open(_join(disturbed.disturbed_dir, 'huc.json'), 'w') as fp:
+        json.dump(geojson_data, fp)
+
+    return geojson_data
+
 # @app.route('/ispoweruser')
 # @app.route('/ispoweruser/')
 # def ispoweruser():
@@ -510,7 +592,7 @@ def htmltree(_dir='.', padding='', print_files=True, recurse=False):
                     s.extend(htmltree(path, _padding + '|', _print_files) + '\n')
             else:
                 if isdir(path):
-                    s.append(_padding + '+-<a href="{file}">{file}</a>\n'.format(file=file))
+                    s.append(_padding + '+-<a href="{file}/\">{file}</a>\n'.format(file=file))
                 else:
                     if os.path.islink(path):
                         target = ' -> {}'.format('/'.join(os.readlink(path).split('/')[-2:]))
@@ -987,6 +1069,13 @@ def create_run_dir(current_user):
     return runid, wd
 
 
+@app.route('/browse/<config>')
+@app.route('/browse/<config>/')
+def browse_config(config):
+
+    return browse_response(f'/wepppy/wepppy/wepppy/nodb/configs/{config}.cfg', show_up=False, args=request.args, headers=request.headers)
+
+
 @app.route('/create/<config>')
 @app.route('/create/<config>/')
 def create(config):
@@ -1391,33 +1480,26 @@ def clear_locks(runid, config):
 @app.route('/runs/<string:runid>/<config>/archive/')
 def archive(runid, config):
 
-    # get working dir of original directory
-    wd = get_wd(runid)
-
-    from wepppy.export import archive_project, arc_export
-    from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
-
-    # jon fix. make sure the export dir doesn't contain irrelevent files inherited from forked
-    # runs
-    export_dir = _join(wd, 'export')
-    if _exists(export_dir):
-        shutil.rmtree(export_dir)
-    os.mkdir(export_dir)
-
     try:
-        arc_export(wd)
-    except Exception:
-        return exception_factory()
+        # get working dir of original directory
+        wd = get_wd(runid)
 
-    try:
-        export_hillslopes_prep_details(wd)
-        export_channels_prep_details(wd)
-    except Exception:
-        return exception_factory()
+        from wepppy.export import archive_project, arc_export
+        from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
 
-    archive_path = archive_project(wd)
-    return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
+        ron = Ron.getInstance(wd)
+        if not _exists( _join(ron.export_dir, 'prep_details', 'hillslopes.csv')):
+            export_hillslopes_prep_details(wd)
 
+        if not _exists(_join(ron.export_dir, 'prep_details', 'channels.csv')):
+            export_channels_prep_details(wd)
+
+
+        archive_path = archive_project(wd)
+        return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
+
+    except:
+        return exception_factory('Error Archiving Project')
 
 
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
@@ -2409,11 +2491,15 @@ def export_arcmap(runid, config):
     ron = Ron.getInstance(wd)
 
     try:
-        arc_export(wd)
+        if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
+            arc_export(wd)
+    except Exception:
+        return exception_factory('Error running arc_export')
 
+    try:
         if not request.args.get('no_retrieve', None) is not None:
             archive_path = archive_project(ron.export_arc_dir)
-            return send_file(archive_path, as_attachment=True, attachment_filename='{}_arcmap.zip'.format(runid))
+            return send_file(archive_path, as_attachment=True, attachment_filename=f'{runid}_arcmap.zip')
         else:
             return success_factory()
 
@@ -3205,7 +3291,7 @@ def set_climate_spatialmode(runid, config):
 @app.route('/runs/<string:runid>/<config>/view/closest_stations/')
 def view_closest_stations(runid, config):
     wd = get_wd(runid)
-    climate = Climate.getInstance(wd)
+    climate = Climate.getInstance(wd, ignore_lock=True)
 
     if climate.readonly:
         results = climate.closest_stations
@@ -3232,7 +3318,7 @@ def view_closest_stations(runid, config):
 @app.route('/runs/<string:runid>/<config>/view/heuristic_stations/')
 def view_heuristic_stations(runid, config):
     wd = get_wd(runid)
-    climate = Climate.getInstance(wd)
+    climate = Climate.getInstance(wd, ignore_lock=True)
 
     if climate.readonly:
         results = climate.heuristic_stations
@@ -3581,6 +3667,13 @@ def get_wepp_run_status(runid, config, nodb):
         except:
             return exception_factory('Could not determine status')
 
+    elif nodb == 'climate':
+        climate = Climate.getInstance(wd)
+        try:
+            return success_factory(climate.get_log_last())
+        except:
+            return exception_factory('Could not determine status')
+
     elif nodb == 'rhem':
         rhem = Rhem.getInstance(wd)
         try:
@@ -3588,10 +3681,11 @@ def get_wepp_run_status(runid, config, nodb):
         except:
             return exception_factory('Could not determine status')
 
-    elif nodb == 'climate':
-        climate = Climate.getInstance(wd)
+    elif nodb == 'rap_ts':
+        from wepppy.nodb.mods import RAP_TS
+        rap_ts = RAP_TS.getInstance(wd)
         try:
-            return success_factory(climate.get_log_last())
+            return success_factory(rap_ts.get_log_last())
         except:
             return exception_factory('Could not determine status')
 
@@ -4490,8 +4584,8 @@ def query_baer_wgs_bounds(runid, config):
             return error_factory('No SBS map has been specified')
 
         return success_factory(dict(bounds=baer.bounds,
-                               classes=baer.classes,
-                               imgurl='resources/baer.png'))
+                                    classes=baer.classes,
+                                    imgurl='resources/baer.png'))
     except Exception:
         return exception_factory()
 
@@ -4541,6 +4635,30 @@ def task_baer_class_map(runid, config):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/modify_color_map', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/modify_color_map/', methods=['POST'])
+def task_baer_modify_color_map(runid, config):
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        if 'baer' in ron.mods:
+            baer = Baer.getInstance(wd)
+        else:
+            baer = Disturbed.getInstance(wd)
+
+        if not baer.has_map:
+            return error_factory('No SBS map has been specified')
+
+        color_map = request.json.get('color_map', None)
+        color_map = {tuple(int(c) for c in color.split('_')) : sev for color, sev in color_map.items()}
+
+        baer.modify_color_map(color_map)
+
+        return success_factory()
+    except Exception:
+        return exception_factory()
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/resources/baer.png')
 def resources_baer_sbs(runid, config):
     try:
@@ -4557,6 +4675,37 @@ def resources_baer_sbs(runid, config):
         return send_file(baer.baer_rgb_png, mimetype='image/png')
     except Exception:
         return exception_factory()
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_firedate/', methods=['POST'])
+def set_firedate(runid, config):
+    wd = get_wd(runid)
+    disturbed = Disturbed.getInstance(wd)
+    try:
+        fire_date = request.json.get('fire_date', None)
+        disturbed.fire_date = fire_date
+        return success_factory()
+    except Exception:
+        return exception_factory("failed to set firedate")
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/acquire_rap_ts/', methods=['POST'])
+def task_rap_ts_acquire(runid, config):
+    from wepppy.nodb.mods import RAP_TS
+    wd = get_wd(runid)
+    rap_ts = RAP_TS.getInstance(wd)
+    climate = Climate.getInstance(wd)
+    try:
+        assert climate.observed_start_year is not None
+        assert climate.observed_end_year is not None
+
+        rap_ts.acquire_rasters(start_year=climate.observed_start_year,
+                               end_year=climate.observed_end_year)
+        rap_ts.analyze()
+        return success_factory("RAP TS acquired and analyzed")
+    except Exception:
+        return exception_factory("failed to set firedate")
 
 
 # noinspection PyBroadException

@@ -81,13 +81,10 @@
             <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified
                 <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
-            <label class="radio"><input type="radio" value="2" class="disable-readonly" id="climate_mode2" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 2] }}> Observed (DAYMET) [1980 - {{ climate.daymet_last_available_year}}]
+            <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET with GRIDMET wind with PRISM Revision [1980 - {{ climate.daymet_last_available_year }}]
                 <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
-            <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed (DAYMET) with PRISM Revision [1980 - {{ climate.daymet_last_available_year }}]
-                <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed (GRIDMET) with PRISM Revision [1980 - Present]
+            <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET with PRISM Revision [1980 - Present]
                 <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to the day before yesterday. (For current year data to the end of the year is stochastically generated to allow WEPP to run.)"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01 deg grid)
@@ -182,6 +179,9 @@
     </div>
     <div id="climate_mode2_controls">
         <h5>Observed</h5>
+        {% if 'rap_ts' in ron.mods %}
+            <p> Available range for RAP is 1986 - 2022</p>
+        {% endif %}
         <div class="form-group row">
             <div class="col-sm-4">
                 <label for="observed_start_year">Start Year:</label>

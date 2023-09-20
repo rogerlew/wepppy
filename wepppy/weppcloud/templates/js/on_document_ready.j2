@@ -284,8 +284,56 @@ function onReady() {
         input_csa.val(parseFloat(input_csa_en.val()) / 2.47105 );
     });
 
-    $("#btn_build_channels").click(channel_ctrl.build_router);
-    $("#btn_build_channels_en").click(channel_ctrl.build_router);
+    // Event handler for #btn_build_channels
+    $('#btn_build_channels').on('click', function(event) {
+        // Prevent the default behavior of the button
+        event.preventDefault();
+
+        // Get the values of the input fields and convert them to integers
+        var mclValue = parseFloat($('#input_mcl').val());
+        var csaValue = parseFloat($('#input_csa').val());
+
+        // Check the values
+        if (mclValue > 100 || csaValue > 10) {
+            // If the values are not in the desired range, show a confirmation dialog
+            var result = confirm("Model has been validated with MCL less than 100 m and CSA less than 10 ha. Are you sure you want to continue?");
+
+            // If user clicked "Cancel" in the confirmation dialog
+            if (!result) {
+                // Stop here and don't call the build_router function
+                return;
+            }
+        }
+
+        // If everything is fine, or user confirmed, then call channel_ctrl.build_router
+        channel_ctrl.build_router();
+    });
+
+
+    // Event handler for #btn_build_channels
+    $('#btn_build_channels_en').on('click', function(event) {
+        // Prevent the default behavior of the button
+        event.preventDefault();
+
+        // Get the values of the input fields and convert them to integers
+        var mclValue = parseFloat($('#input_mcl_en').val());
+        var csaValue = parseFloat($('#input_csa_en').val());
+
+        // Check the values
+        if (mclValue > 330 || csaValue > 25) {
+            // If the values are not in the desired range, show a confirmation dialog
+            var result = confirm("Model has been validated with MCL less than 330 ft and CSA less than 25 acres. Are you sure you want to continue?");
+
+            // If user clicked "Cancel" in the confirmation dialog
+            if (!result) {
+                // Stop here and don't call the build_router function
+                return;
+            }
+        }
+
+        // If everything is fine, or user confirmed, then call channel_ctrl.build_router
+        channel_ctrl.build_router();
+    });
 
     //
     // Channel Event Handling
@@ -828,6 +876,8 @@ function onReady() {
 
     {% endif %}
 
+    project.set_readonly_controls({{ ron.readonly | tojson }})
+
     /*
      * Team Initialization
      * ======================
@@ -836,8 +886,6 @@ function onReady() {
     //
     // Bindings
     //
-    $("#btn_adduser").click(team.adduser);
-
     team.form.on("TEAM_ADDUSER_TASK_COMPLETED", function () {
         team.report();
     });

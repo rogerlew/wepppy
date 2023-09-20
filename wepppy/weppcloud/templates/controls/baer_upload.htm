@@ -15,7 +15,7 @@
     </div>
 
     <div id="sbs_mode0_controls">
-        <p>Upload a raster SBS map (.img or .tif). The map can be a 4 class SBS map or a 256 dNBR map.</p>
+        <p>Upload a raster SBS map (.img or .tif). The map can be a thematic SBS map or a 256 dNBR map. Preferably in UTM. Maps with color tables will use colors to assign severities.</p>
         <div class="form-group row hide-readonly">
             <div class="col-md-6">
                 <input id="input_upload_sbs" name="input_upload_sbs" type="file" class="file">
@@ -79,6 +79,21 @@
             </div>
         </div>
 
+    </div>
+
+    <h5>Fire Date</h5>
+    <div class="form-group row" id="firedate_container">
+        <div class="col-sm-3">
+            <label for="firedate">Fire Date (mo da yr): </label>
+        </div>
+        <div class="col-sm-2">
+            <input id="firedate" name="firedate" class="form-control mr-sm-3" type="text"
+            value="{{ disturbed.fire_date }}" aria-label="firedate mo da yr">
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Baer.getInstance().set_firedate($('#firedate').val())">Set Fire Date</button>
+
+        </div>
     </div>
 
 {% endblock %}
