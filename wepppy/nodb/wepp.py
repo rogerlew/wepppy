@@ -1227,7 +1227,6 @@ class Wepp(NoDbBase, LogMixin):
         if kslast_map_fn is not None:
             kslast_map = RasterDatasetInterpolator(kslast_map_fn)
 
-        build_d = {} # mukey: fn
         for topaz_id, soil in soils.sub_iter():
 
             self.log(f'    _prep_soils:{topaz_id}:{soil}... ')
@@ -1237,11 +1236,13 @@ class Wepp(NoDbBase, LogMixin):
 
             _kslast = None
 
+            pars = None
             if kslast_map is not None:
                 lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
 
                 try:
                     _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
+                    pars = dict(map_fn=kslast_map_fn, lng=lng, lat=lat, kslast=_kslast)
                 except RDIOutOfBoundsException:
                     _kslast = None
 
@@ -1259,14 +1260,9 @@ class Wepp(NoDbBase, LogMixin):
                 _kslast = kslast
 
             if _kslast is not None:
-                mukey = soil.mukey
-                if mukey in build_d:
-                    _copyfile(build_d[mukey], dst_fn)
-                else:
-                    soilu = WeppSoilUtil(src_fn)
-                    soilu.modify_kslast(_kslast)
-                    soilu.write(dst_fn)
-                    build_d[mukey] = dst_fn
+                soilu = WeppSoilUtil(src_fn)
+                soilu.modify_kslast(_kslast, pars=pars)
+                soilu.write(dst_fn)
             else:    
                 _copyfile(src_fn, dst_fn) 
 
