@@ -249,9 +249,9 @@ class PlantLoopCropland(ScenarioBase):
         self.xmxlai = float(line.pop(0))
         self.yld = float(line.pop(0))
         if len(line) == 4:
-            self.reveg2 = float(line.pop(0))
+            self.rcc = float(line.pop(0)) # release cover crop for 2017.1 mans
         else:
-            self.reveg2 = ''
+            self.rcc = '' 
         
     def __str__(self):
         return """\
@@ -263,7 +263,7 @@ class PlantLoopCropland(ScenarioBase):
 {0.mfocod}
 {0.oratea:0.5f} {0.orater:0.5f} {0.otemp:0.5f} {0.pltol:0.5f} {0.pltsp:0.5f} \
 {0.rdmax:0.5f} {0.rsr:0.5f} {0.rtmmax:0.5f} {0.spriod} {0.tmpmax:0.5f}
-{0.tmpmin:0.5f} {0.xmxlai:0.5f} {0.yld:0.5f} {0.reveg2}
+{0.tmpmin:0.5f} {0.xmxlai:0.5f} {0.yld:0.5f} {0.rcc}
 """.format(self)
 
 
@@ -477,12 +477,20 @@ class IniLoopCropland(ScenarioBase):
         assert len(line) in (2, 4), line
         self.sumrtm = float(line.pop(0))
         self.sumsrm = float(line.pop(0))
+
+
         if len(line) == 4:
-            self.reveg3 = float(line.pop(0))
-            self.reveg4 = float(line.pop(0))
+            self.usinrco = float(line.pop(0)) # resurface 2017.1
+            self.usrilco = float(line.pop(0)) # resurface for non-fragile 2017.1
         else:
-            self.reveg3 = ''
-            self.reveg4 = ''
+            self.usinrco = '' # 0 defaults
+            self.usrilco = '' # 0 defaults
+#        if len(line) == 4:
+#            self.resurf = float(line.pop(0)) # resurface 2017.1
+#            self.resurnf = float(line.pop(0)) # resurface for non-fragile 2017.1
+#        else:
+#            self.resurf = '' # 0 defaults
+#            self.resurnf = '' # 0 defaults
 
     def __str__(self):
         return """\
@@ -492,7 +500,7 @@ class IniLoopCropland(ScenarioBase):
 {0.rfcum:0.5f} {0.rhinit:0.5f} {0.rilcov:0.5f} {0.rrinit:0.5f} {0.rspace:0.5f} 
 {0.rtyp} 
 {0.snodpy:0.5f} {0.thdp:0.5f} {0.tillay1:0.5f} {0.tillay2:0.5f} {0.width:0.5f} 
-{0.sumrtm:0.5f} {0.sumsrm:0.5f} {0.reveg3} {0.reveg4}
+{0.sumrtm:0.5f} {0.sumsrm:0.5f} {0.usinrco} {0.usrilco}
 """.format(self)
 
 
