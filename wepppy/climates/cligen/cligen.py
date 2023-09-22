@@ -497,7 +497,8 @@ class ClimateFile(object):
                 nbrkpt = d['nbrkpt'][-1]
                 if nbrkpt > 0:
                     x = self.lines[data0line + i + nbrkpt].split()
-                    assert len(x) == 2, (data0line, i, nbrkpt)
+                    if len(x) != 2:
+                        raise Exception(f'Expecting {nbrkpt} breakpoints for {date_str}')
                     timem, pptcum = x
                     timem = float(timem)
                     pptcum = float(pptcum)
