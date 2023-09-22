@@ -614,6 +614,12 @@ class Climate(NoDbBase, LogMixin):
 
         return station_meta
 
+    @property
+    def climatestation_par_contents(self):
+        par_fn = self.climatestation_meta.parpath
+        with open(par_fn) as fp:
+            return fp.read()
+
     #
     # climate_mode
     #
@@ -826,6 +832,10 @@ class Climate(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
+    @property
+    def has_station(self):
+        return self.climatestation is not None
 
     #
     # has_climate
