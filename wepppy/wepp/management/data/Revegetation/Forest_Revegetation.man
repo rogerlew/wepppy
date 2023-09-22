@@ -1,188 +1,121 @@
 98.4
-3 # number of ofes or channels
-1 # sim_years
+#
+#
+#
+#
 
-#############################
-#   Plant Growth Section    #
-#############################
-3 # ncrop
-Tah_4899
-With no Senescence or decomposition
-(null)
-W. Elliot 05/10
-1 # Landuse - <Cropland>
-WeppWillSet
-0.15000 0.30000 15.00000 4.00000 1.80000 5.00000 0.00000 0.25000 0.75000 0.06000
-1.0000 0.95000 0.65000 0.99000 17.00000 0.00000 0.42000 18.00000
-2  # mfo - <non fragile>
-0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 10.50000 90 40.00000
--40.00000 6.00000 0.00000 0.00000
+1 # number of OFE's
+1 # (total) years in simulation
 
-Tah_4899
-With no Senescence or decomposition
-(null)
-W. Elliot 05/10
-1 # Landuse - <Cropland>
-WeppWillSet
-0.15000 0.30000 15.00000 4.00000 1.80000 5.00000 0.00000 0.25000 0.75000 0.06000
-1.0000 0.95000 0.65000 0.99000 17.00000 0.00000 0.42000 18.00000
-2  # mfo - <non fragile>
-0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 10.50000 90 40.00000
--40.00000 6.00000 0.00000 0.00000
+#######################
+# Plant Section       #
+#######################
+
+1  # Number of plant scenarios
+
 
 Tah_4899
 With no Senescence or decomposition
 (null)
 W. Elliot 05/10
-1 # Landuse - <Cropland>
+1  #landuse
 WeppWillSet
-0.15000 0.30000 15.00000 4.00000 1.80000 5.00000 0.00000 0.25000 0.75000 0.06000
-1.0000 0.95000 0.65000 0.99000 17.00000 0.00000 0.42000 18.00000
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 20.00000 1.00000 1.00000
+0.50000 1.00000 0.90000 0.99000 17.00000 0.00000 0.42000 20.00000
 2  # mfo - <non fragile>
-0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 10.50000 90 40.00000
--40.00000 6.00000 0.00000 0.00000
+0.00000 0.00000 20.00000 0.10000 4.00000 2.00000 0.33000 0.50000 90 40.00000
+-40.00000 14.00000 0.00000
 
-#############################
-#     Operation Section     #
-#############################
-0 # nop
+#######################
+# Operation Section   #
+#######################
 
-#############################
-# Initial Condition Section
-#############################
-3 # nini
-Tah_4089
-For no growth, no decomp, no senescence
-(null)
-W. Elliot  05/10
-1 # Landuse - <Cropland>
-1.10000 0.55210 330 1000 0.00000 0.90000
-1
-2
-400.00000 0.00000 0.90000 0.00000 0.00000
-1
-0.00000 0.00000 0.00000 0.00000 0.00000
-0.00000 0.00000 0.00000 0.00000
+0  # Number of operation scenarios
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
 
 Tah_4089
 For no growth, no decomp, no senescence
-(null)
+
 W. Elliot  05/10
-1 # Landuse - <Cropland>
-1.10000 0.45410 330 1000 0.00000 0.90000
-2
-2
-400.00000 0.00000 0.90000 0.00000 0.00000
-1
+1  #landuse
+1.10000 0.90000 330 1000 0.00000 1.00000
+1 # iresd  <Tah_4899>
+2 # mang perennial
+400.00000 0.10000 1.00000 0.10000 0.00000
+1  # rtyp - temporary
 0.00000 0.00000 0.00000 0.00000 0.00000
-0.00000 0.00000 0.00000 0.00000
-
-Tah_4089
-For no growth, no decomp, no senescence
-(null)
-W. Elliot  05/10
-1 # Landuse - <Cropland>
-1.10000 0.35660 330 1000 0.00000 0.90000
-3
-2
-400.00000 0.00000 0.90000 0.00000 0.00000
-1
-0.00000 0.00000 0.00000 0.00000 0.00000
-0.00000 0.00000 0.00000 0.00000
-
-#############################
-#  Surface Effects Section  #
-#############################
-0 # nseq
-
-#############################
-#      Contour Section      #
-#############################
-0 # ncnt
-
-#############################
-#      Drainage Section     #
-#############################
-0 # ndrain
-
-#############################
-#       Yearly Section      #
-#############################
-3 # nscen
-Year 1
-(null)
-(null)
-(null)
-1 # Landuse - <Cropland>
-1 	# Plant Growth Scenario index (itype)
-0 	# Surface Effect Scenario index (itype)
-0 	# Contour Scenario index (conset)
-0 	# Drainage Scenario index (drset)
-2 	# Cropping system (imngmt)
-   250 	# Harvesting date or end of fallow period (jdharv)
-   0 	# Planting date or start of fallow period (jdplt)
-   0 	# Planting date or start of fallow period (jdstop)
-   0.00000 	# Row width (rw)
-   3 	# Crop management option (mgtopt)
+0.50000 0.50000
 
 
 
 
-OFE2 Year 1
-(null)
-(null)
-(null)
-1 # Landuse - <Cropland>
-2 	# Plant Growth Scenario index (itype)
-0 	# Surface Effect Scenario index (itype)
-0 	# Contour Scenario index (conset)
-0 	# Drainage Scenario index (drset)
-2 	# Cropping system (imngmt)
-   250 	# Harvesting date or end of fallow period (jdharv)
-   0 	# Planting date or start of fallow period (jdplt)
-   0 	# Planting date or start of fallow period (jdstop)
-   0.00000 	# Row width (rw)
-   3 	# Crop management option (mgtopt)
+############################
+# Surface Effects Section  #
+############################
+
+0  # Number of Surface Effects Scenarios
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1
+#
+Year 1 
 
 
 
-
-OFE3 Year 1
-(null)
-(null)
-(null)
-1 # Landuse - <Cropland>
-3 	# Plant Growth Scenario index (itype)
-0 	# Surface Effect Scenario index (itype)
-0 	# Contour Scenario index (conset)
-0 	# Drainage Scenario index (drset)
-2 	# Cropping system (imngmt)
-   250 	# Harvesting date or end of fallow period (jdharv)
-   0 	# Planting date or start of fallow period (jdplt)
-   0 	# Planting date or start of fallow period (jdstop)
-   0.00000 	# Row width (rw)
-   3 	# Crop management option (mgtopt)
+1  # landuse <cropland>
+1  # plant growth scenario
+0  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+2 # management <perennial>
+   0 # senescence date 
+   0 # perennial plant date --- 0 /0
+   0 # perennial stop growth date --- 0/0
+   0.0000  # row width
+   3  # neither cut or grazed
 
 
+#######################
+# Management Section  #
+#######################
 
-
-#############################
-#     Management Section    #
-#############################
 Manage
 description 1
 description 2
 description 3
-3 # number of ofes in the rotation (nofe)
-# Initial Condition Scenario indices used for each OFE
-  1
-  2
-  3
-1 # number of times the rotation is repeated (nrots)
-1 # number of years in a single rotation
-   1 	# plants/year; <Year: 1 - OFE: 1>  (nycrop)
-      1 	# yearly index <Year 1>
-   1 	# plants/year; <Year: 1 - OFE: 2>  (nycrop)
-      2 	# yearly index <OFE2 Year 1>
-   1 	# plants/year; <Year: 1 - OFE: 3>  (nycrop)
-      3 	# yearly index <OFE3 Year 1>
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index
