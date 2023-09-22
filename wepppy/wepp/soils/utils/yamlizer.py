@@ -27,6 +27,15 @@ def _replace_parameter(original, replacement):
     else:
         return replacement
 
+def _pars_to_string(d):
+    kv_pairs = []
+    for k, v in d.items():
+        if isinstance(v, str):
+            kv_pairs.append(f"{k}='{v}'")
+        else:
+            kv_pairs.append(f"{k}={v}")
+    return f"({', '.join(kv_pairs)})"
+
 
 class WeppSoilUtil(object):
     def __init__(self, fn):
@@ -204,7 +213,7 @@ class WeppSoilUtil(object):
 
 #        self.obj = yaml.safe_load(yaml_txt)
 
-    def modify_kslast(self, kslast):
+    def modify_kslast(self, kslast, pars=None):
         luse = self.obj['ofes'][0]['luse']
 
         if luse is not None:
@@ -212,6 +221,10 @@ class WeppSoilUtil(object):
                 return
 
         self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
+
+        if pars is not None:
+            self.obj['header'][-1] += _pars_to_string(pars)
+
         for i in range(len(self.obj['ofes'])):
             self.obj['ofes'][i]['res_lyr']['kslast'] = kslast
 
