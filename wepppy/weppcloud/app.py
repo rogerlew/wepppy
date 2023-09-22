@@ -877,6 +877,20 @@ def portland_index():
     return render_template('locations/portland/index.htm', user=current_user)
 
 
+@app.route('/portland-municipal/results')
+@app.route('/portland-municipal/results/')
+@app.route('/locations/portland-municipal/results')
+@app.route('/locations/portland-municipal/results/')
+def portland_results_index():
+
+    import io
+    import wepppy
+    fn = _join(wepppy.nodb.mods.locations.portland.portland._thisdir, 'results', 'index.htm')
+
+    if _exists(fn):
+        with io.open(fn, mode="r", encoding="utf-8") as fp:
+            return fp.read()
+
 @app.route('/portland-municipal/results/<file>')
 @app.route('/portland-municipal/results/<file>/')
 @app.route('/locations/portland-municipal/results/<file>')
@@ -1484,8 +1498,18 @@ def archive(runid, config):
         # get working dir of original directory
         wd = get_wd(runid)
 
-        from wepppy.export import archive_project, arc_export
+        from wepppy.export import archive_project, arc_export, legacy_arc_export
         from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
+
+        legacy = request.args.get('legacy', None) is not None
+
+        if legacy:
+            try:
+                ron = Ron.getInstance(wd)
+                if len(glob(_join(ron.export_arc_dir, '*.shp'))) == 0:
+                    legacy_arc_export(wd)
+            except Exception:
+                return exception_factory('Error running legacy_arc_export')
 
         ron = Ron.getInstance(wd)
         if not _exists( _join(ron.export_dir, 'prep_details', 'hillslopes.csv')):
@@ -2484,17 +2508,26 @@ def export_ermit(runid, config):
 @app.route('/runs/<string:runid>/<config>/export/arcmap')
 @app.route('/runs/<string:runid>/<config>/export/arcmap/')
 def export_arcmap(runid, config):
-    from wepppy.export import arc_export, archive_project
+    from wepppy.export import arc_export, archive_project, legacy_arc_export
 
     # get working dir of original directory
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
-    try:
-        if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
-            arc_export(wd)
-    except Exception:
-        return exception_factory('Error running arc_export')
+    legacy = request.args.get('legacy', None) is not None
+    
+    if legacy:
+        try:
+            if len(glob(_join(ron.export_arc_dir, '*.shp'))) == 0:
+                legacy_arc_export(wd)
+        except Exception:
+            return exception_factory('Error running legacy_arc_export')
+    else:
+        try:
+            if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
+                arc_export(wd)
+        except Exception:
+            return exception_factory('Error running arc_export')
 
     try:
         if not request.args.get('no_retrieve', None) is not None:
@@ -3346,6 +3379,15 @@ def view_heuristic_stations(runid, config):
                        .format(**r))
 
     return Response('n'.join(options), mimetype='text/html')
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/view/par/')
+def view_station_par(runid, config):
+    wd = get_wd(runid)
+    climate = Climate.getInstance(wd, ignore_lock=True)
+    contents = climate.climatestation_par_contents
+    return Response(contents, content_type='text/plain;charset=utf-8')
 
 
 # noinspection PyBroadException
