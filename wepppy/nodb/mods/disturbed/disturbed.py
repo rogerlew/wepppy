@@ -338,6 +338,19 @@ class Disturbed(NoDbBase):
             with rasterio.open(sbs_fn, 'w', **out_meta) as dst:
                 dst.write(out_arr, 1)
 
+        # Open the written raster file with GDAL to set color table
+        ds = gdal.Open(sbs_fn, gdal.GA_Update)
+        band = ds.GetRasterBand(1)
+        color_table = gdal.ColorTable()
+        color_table.SetColorEntry(0, (0, 100, 0, 255))  # unburned
+        color_table.SetColorEntry(1, (127, 255, 212, 255))  # low
+        color_table.SetColorEntry(2, (255, 255, 0, 255))  # moderate
+        color_table.SetColorEntry(3, (255, 0, 0, 255))  # high
+        color_table.SetColorEntry(255, (255, 255, 255, 0))  # n/a
+        band.SetColorTable(color_table)
+        band = None  # Dereference to make sure all data is written
+        ds = None  # Dereference to make sure all data is written
+
         return sbs_fn
 
     @property
@@ -658,7 +671,7 @@ class Disturbed(NoDbBase):
                 sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
             else:
                 sbs_lc_d = rustpy_geo.mode_identify(subwta_fn=watershed.subwta, parameter_fn=self.disturbed_cropped)
-                sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
+                sbs_lc_d = {k: str(v+130) for k, v in sbs_lc_d.items()}
 
             for topaz_id, burn_class in sbs_lc_d.items():
                 if (int(topaz_id) - 4) % 10 == 0:
@@ -804,16 +817,23 @@ class Disturbed(NoDbBase):
         soils = Soils.getInstance(wd)
         wepp = Wepp.getInstance(wd)
 
-        n = len(landuse.domlc_d)
+        domlc_d = {}
+        for topaz_id, dom in landuse.domlc_d.items():
+            if (int(topaz_id) - 4) % 10 == 0:
+                continue
+            domlc_d[topaz_id] = dom
+
+        n = len(domlc_d)
 
         with open(_join(wepp.runs_dir, 'pmetpara.txt'), 'w') as fp:
             fp.write('{n}\n'.format(n=n))
 
-            for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
-                dom = landuse.domlc_d[topaz_id]
-                man_summary = landuse.managements[dom]
-                man = man_summary.get_management() 
+            for i, (topaz_id, dom) in enumerate(domlc_d.items()):
 
+                man_summary = landuse.managements[dom]
+                man = man_summary.get_management()
+
+                mukey = soils.domsoil_d[topaz_id]
                 _soil = soils.soils[mukey]
                 clay = _soil.clay
                 sand = _soil.sand
