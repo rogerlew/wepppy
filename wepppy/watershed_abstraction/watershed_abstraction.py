@@ -88,7 +88,7 @@ def _walk_flowpath(subwta, flopat, flovec, fvslop, sub_id: int, c: int, r: int, 
              2: ([0, -1], 1),
              3: ([1, -1], sqrt2),
              4: ([-1, 0], 1),
-             6: ([0, 1], 1),
+             6: ([1, 0], 1),
              7: ([-1, 1], sqrt2),
              8: ([0, 1], 1),
              9: ([1, 1], 1)}

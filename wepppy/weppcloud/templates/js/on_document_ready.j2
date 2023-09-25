@@ -754,19 +754,6 @@ function onReady() {
 
     $("#btn_build_climate").click(climate.build);
 
-    $('#climate_par_link').click(function (e) {
-        e.preventDefault();
-
-        var station_id = $("#climate_station_selection").val();
-        var url = "https://wepp.cloud/webservices/cligen/fetchpar/" + station_id;
-        var win = window.open(url, '_blank');
-        if (win) {
-            win.focus();
-        }
-
-        return false;
-    });
-
     //
     // Climate Event Bindings
     //
@@ -790,10 +777,13 @@ function onReady() {
     observed.hideControl();
     climate.showHideControls({{ climate.climate_mode | int }});
     // load climate
-    if ( {{ climate.has_climate | tojson }} ) {
+    if ( {{ climate.has_station | tojson }} ) {
         climate.refreshStationSelection();
-        climate.report();
         climate.viewStationMonthlies();
+    }
+
+    if ( {{ climate.has_climate | tojson }} ) {
+        climate.report();
     }
 
     if ( {{ climate.has_observed | tojson }} ||
