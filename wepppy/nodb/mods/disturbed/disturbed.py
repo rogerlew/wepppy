@@ -669,29 +669,54 @@ class Disturbed(NoDbBase):
 
             if rustpy_geo is None:
                 sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
+
+                for topaz_id, burn_class in sbs_lc_d.items():
+                    if (int(topaz_id) - 4) % 10 == 0:
+                        continue
+
+                    dom = landuse.domlc_d[topaz_id]
+                    man = landuse.managements[dom]
+
+                    # TODO: probably a better way to do this based on the disturbed_class
+                    if burn_class in ['131', '132', '133']:
+                        if man.disturbed_class in ['forest', 'young forest']:
+                            landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
+
+                        elif man.disturbed_class == 'shrub':
+                            landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+
+                        elif man.disturbed_class in ['short grass', 'tall grass']:
+                            landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+
+                    meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+
             else:
                 sbs_lc_d = rustpy_geo.mode_identify(subwta_fn=watershed.subwta, parameter_fn=self.disturbed_cropped)
-                sbs_lc_d = {k: str(v+130) for k, v in sbs_lc_d.items()}
+                sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
 
-            for topaz_id, burn_class in sbs_lc_d.items():
-                if (int(topaz_id) - 4) % 10 == 0:
-                    continue
+                class_pixel_map = sbs.class_pixel_map
 
-                dom = landuse.domlc_d[topaz_id]
-                man = landuse.managements[dom]
+                for topaz_id, val in sbs_lc_d.items():
+                    if (int(topaz_id) - 4) % 10 == 0:
+                        continue
 
-                # TODO: probably a better way to do this based on the disturbed_class
-                if burn_class in ['131', '132', '133']:
-                    if man.disturbed_class in ['forest', 'young forest']:
-                        landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
+                    dom = landuse.domlc_d[topaz_id]
+                    man = landuse.managements[dom]
 
-                    elif man.disturbed_class == 'shrub':
-                        landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+                    burn_class = class_pixel_map[val]
 
-                    elif man.disturbed_class in ['short grass', 'tall grass']:
-                        landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+                    # TODO: probably a better way to do this based on the disturbed_class
+                    if burn_class in ['131', '132', '133']:
+                        if man.disturbed_class in ['forest', 'young forest']:
+                            landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
 
-                meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+                        elif man.disturbed_class == 'shrub':
+                            landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+
+                        elif man.disturbed_class in ['short grass', 'tall grass']:
+                            landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+
+                    meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
             landuse.dump_and_unlock()
 

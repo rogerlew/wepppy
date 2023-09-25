@@ -253,6 +253,23 @@ class SoilBurnSeverityMap(LandcoverMap):
 
         return sorted(class_map, key=lambda x: x[0])
 
+    @property
+    def class_pixel_map(self):
+        ct = self.ct
+        breaks = self.breaks
+        nodata_vals = self.nodata_vals
+
+        class_map = {}
+        for v, cnt in self.counts:
+            if ct is None:
+                k = _classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
+            else:
+                k = _ct_classify(v, ct, offset=130, nodata_val=255)
+
+            class_map[str(v)] = str(k)
+
+        return class_map
+
     def _write_color_table(self, color_tbl_path):
         ct = self.ct
 
