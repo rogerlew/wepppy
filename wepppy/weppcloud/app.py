@@ -2518,10 +2518,21 @@ def export_arcmap(runid, config):
     
     if legacy:
         try:
-            if len(glob(_join(ron.export_arc_dir, '*.shp'))) == 0:
+            if len(glob(_join(ron.export_legacy_arc_dir, '*.shp'))) == 0:
                 legacy_arc_export(wd)
         except Exception:
             return exception_factory('Error running legacy_arc_export')
+
+        try:
+            if not request.args.get('no_retrieve', None) is not None:
+                archive_path = archive_project(ron.export_legacy_arc_dir)
+                return send_file(archive_path, as_attachment=True, attachment_filename=f'{runid}_arcmap.zip')
+            else:
+                return success_factory()
+
+        except Exception:
+            return exception_factory('Error running arc_export')
+
     else:
         try:
             if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
@@ -2529,15 +2540,15 @@ def export_arcmap(runid, config):
         except Exception:
             return exception_factory('Error running arc_export')
 
-    try:
-        if not request.args.get('no_retrieve', None) is not None:
-            archive_path = archive_project(ron.export_arc_dir)
-            return send_file(archive_path, as_attachment=True, attachment_filename=f'{runid}_arcmap.zip')
-        else:
-            return success_factory()
+        try:
+            if not request.args.get('no_retrieve', None) is not None:
+                archive_path = archive_project(ron.export_arc_dir)
+                return send_file(archive_path, as_attachment=True, attachment_filename=f'{runid}_arcmap.zip')
+            else:
+                return success_factory()
 
-    except Exception:
-        return exception_factory('Error running arc_export')
+        except Exception:
+            return exception_factory('Error running arc_export')
 
 
 @app.route('/runs/<string:runid>/<config>/export/prep_details')
