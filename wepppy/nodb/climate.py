@@ -12,7 +12,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
-from datetime import datetime
+from datetime import datetime, date
 
 from subprocess import Popen, PIPE
 
@@ -1259,6 +1259,15 @@ class Climate(NoDbBase, LogMixin):
 
             download_file(url, _join(cli_dir, cli_fn))
 
+            # clip climate file
+            cli = ClimateFile(_join(cli_dir, cli_fn))
+
+            start_year = int(self.observed_start_year)
+            end_year = int(self.observed_end_year)
+            assert end_year >= start_year, (start_year, end_year)
+            cli.clip(date(start_year, 1, 1), date(end_year, 12, 31))
+            cli.write(_join(cli_dir, cli_fn))
+
             url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}&intensity=10,30,60'
             download_file(url, _join(cli_dir, f'{lng:.02f}x{lat:.02f}.intensities.csv'))
 
@@ -1284,6 +1293,12 @@ class Climate(NoDbBase, LogMixin):
 
                     if not _exists(_join(cli_dir, cli_fn)):
                         download_file(url, _join(cli_dir, cli_fn))
+
+                        # clip climate file
+                        cli = ClimateFile(_join(cli_dir, cli_fn))
+                        cli.clip(date(start_year, 1, 1), date(end_year, 12, 31))
+                        cli.write(_join(cli_dir, cli_fn))
+
  #                       breakpoint_file_fix(_join(cli_dir, cli_fn))
 
                     sub_par_fns[topaz_id] = '.par'

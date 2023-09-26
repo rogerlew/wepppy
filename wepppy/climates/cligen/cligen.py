@@ -11,6 +11,8 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+import datetime
+
 from subprocess import (
     Popen, PIPE
 )
@@ -215,6 +217,7 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
 
     fp.close()
 
+
 class ClimateFile(object):
     def __init__(self, cli_fn):
 
@@ -267,6 +270,38 @@ class ClimateFile(object):
         self.lines = lines
         self.header = header
         self.colnames = colnames
+
+    def clip(self, start_date: datetime.date, end_date: datetime.date):
+
+        colnames = self.colnames
+        breakpoint = self.breakpoint
+        dtypes = self.dtypes
+        data0line = self.data0line
+
+        in_range = False
+
+        lines = self.lines[:data0line]
+        for i, L in enumerate(self.lines[data0line:]):
+            row = [v.strip() for v in L.split()]
+            if L.strip() == '':
+                break
+
+            if breakpoint:
+                if len(row) == 2 and len(row) != len(colnames):
+                    if in_range:
+                        lines.append(L)
+                    continue
+
+            assert len(row) == len(colnames), (len(row), len(colnames))
+
+            d = {name: dtype(v) for dtype, name, v in zip(dtypes, colnames, row)}
+            cur_date = datetime.date(d['year'], d['mo'], d['da'])
+            in_range = cur_date >= start_date and cur_date <= end_date
+
+            if in_range:
+                lines.append(L)
+
+        self.lines = lines
 
     def discontinuous_temperature_adjustment(self, target_date: datetime.date):
         """
