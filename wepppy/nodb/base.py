@@ -496,6 +496,10 @@ class NoDbBase(object):
         return _join(self.wd, 'export', 'arcmap')
 
     @property
+    def export_legacy_arc_dir(self):
+        return _join(self.wd, 'export', 'legacy_arcmap')
+
+    @property
     def observed_dir(self):
         return _join(self.wd, 'observed')
 
