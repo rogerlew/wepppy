@@ -567,6 +567,22 @@ class Climate(NoDbBase, LogMixin):
         return json.dumps(self.climatestation_mode is not ClimateStationMode.Undefined)
 
     @property
+    def year0(self):
+        try:
+            cli_fn = self.cli_fn
+
+            if cli_fn is None:
+                return False
+
+            cli_path = _join(self.cli_dir, self.cli_fn)
+            cli = ClimateFile(cli_path)
+            years = cli.years
+
+            return years[0]
+        except:
+            return None
+
+    @property
     def has_observed(self):
         try:
             cli_fn = self.cli_fn
