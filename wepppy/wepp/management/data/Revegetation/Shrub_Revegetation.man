@@ -93,7 +93,7 @@ Year 1
 0  # contour scenario
 0  # drainage scenario
 2 # management <perennial>
-   0 # senescence date
+   250 # senescence date
    0 # perennial plant date --- 0 /0
    0 # perennial stop growth date --- 0/0
    0.0000  # row width
