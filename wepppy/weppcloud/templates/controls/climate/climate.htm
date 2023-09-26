@@ -87,7 +87,7 @@
             <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET with PRISM Revision [1980 - Present]
                 <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to the day before yesterday. (For current year data to the end of the year is stochastically generated to allow WEPP to run.)"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
-            <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01 deg grid)
+            <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01 deg grid) [2007 - Present]
                 <a data-toggle="tooltip" data-placement="top" title="Breakpoint climate files 2007-present"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) [2006 - 2099]
