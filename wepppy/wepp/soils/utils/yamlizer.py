@@ -97,6 +97,8 @@ class WeppSoilUtil(object):
             luse = None  # Disturbed Class
             stext = None
             lkeff = None
+            uksat = None
+            texid_enum = None
             ksatfac = None
             ksatrec = None
 
@@ -194,6 +196,8 @@ class WeppSoilUtil(object):
                      ksatadj=ksatadj,
                      luse=luse,
                      stext=stext,
+                     uksat=uksat,
+                     texid_enum=texid_enum,
                      lkeff=lkeff,
                      ksatfac=ksatfac,
                      ksatrec=ksatrec,
