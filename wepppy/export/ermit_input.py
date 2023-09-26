@@ -23,86 +23,58 @@ import numpy as np
 from scipy import stats
 
 import numpy as np
-from scipy.interpolate import KroghInterpolator
 
 from wepppy.nodb import Watershed, Landuse, Ron, Climate, Soils
 
 
-def polycurve(x, dy):
-    #
-    # Calculate the y positions from the derivatives
-    #
-
-    # for each segment calculate the average gradient from the derivatives at each point
-    dy = np.array(dy)
-    dy_ = np.array([np.mean(dy[i:i + 2]) for i in range(len(dy) - 1)])
-
-    # calculate the positions, assume top of hillslope is 0 y
-    y = [0]
-    for i in range(len(dy) - 1):
-        step = x[i + 1] - x[i]
-        y.append(y[-1] - step * dy_[i])
-    y = np.array(y)
-
-    assert len(dy) == len(y), '%i, %i, %i' % (len(x), len(dy), len(y))
-    assert dy.shape == y.shape, '%i, %i' % (dy.shape, y.shape)
-
-    xi_k = np.repeat(x, 2)
-    yi_k = np.ravel(np.dstack((y, -1 * dy)))
-
-    #
-    # Return the model
-    #
-    return KroghInterpolator(xi_k, yi_k)
-
-
 def calc_ERMiT_grads(hillslope_model):
-    p = hillslope_model
-    assert p.xi[0] == 0.0
-    assert p.xi[-1] == 1.0
+    distances, relative_elevs = hillslope_model
 
-    y1 = p(0.1)
-    y0 = p(0.0)
-    top = -(y1 - y0) / 0.1
+    length = distances[-1]
 
-    y1 = p(0.9)
-    y0 = p(0.1)
-    middle = -(y1 - y0) / 0.8
+    y1 = np.interp(0.1 * length, distances, relative_elevs)
+    y0 = relative_elevs[0]
+    top = (y1 - y0) / (0.1 * length)
 
-    y1 = p(1.0)
-    y0 = p(0.9)
-    bottom = -(y1 - y0) / 0.1
+    y1 = np.interp(0.9 * length, distances, relative_elevs)
+    y0 = np.interp(0.1 * length, distances, relative_elevs)
+    middle = (y1 - y0) / (0.8 * length)
+
+    y1 = relative_elevs[-1]
+    y0 = np.interp(0.9 * length, distances, relative_elevs)
+    bottom = (y1 - y0) / (0.1 * length)
 
     return top, middle, bottom
 
 
 def calc_disturbed_grads(hillslope_model):
-    p = hillslope_model
-    assert p.xi[0] == 0.0
-    assert p.xi[-1] == 1.0
+    distances, relative_elevs = hillslope_model
 
-    y1 = p(0.25)
-    y0 = p(0.0)
-    upper_top = -(y1 - y0) / 0.25
+    length = distances[-1]
 
-    y1 = p(0.50)
-    y0 = p(0.25)
-    upper_bottom = -(y1 - y0) / 0.25
+    y1 = np.interp(0.25 * length, distances, relative_elevs)
+    y0 = relative_elevs[0]
+    upper_top = (y1 - y0) / (0.25 * length)
 
-    y1 = p(0.75)
-    y0 = p(0.50)
-    lower_top = -(y1 - y0) / 0.25
+    y1 = np.interp(0.5 * length, distances, relative_elevs)
+    y0 = np.interp(0.25 * length, distances, relative_elevs)
+    upper_bottom = (y1 - y0) / (0.25 * length)
 
-    y1 = p(1.00)
-    y0 = p(0.75)
-    lower_bottom = -(y1 - y0) / 0.25
+    y1 = np.interp(0.75 * length, distances, relative_elevs)
+    y0 = np.interp(0.5 * length, distances, relative_elevs)
+    lower_top = (y1 - y0) / (0.25 * length)
+
+    y1 = relative_elevs[-1]
+    y0 = np.interp(0.75 * length, distances, relative_elevs)
+    lower_bottom = (y1 - y0) / (0.25 * length)
 
     return upper_top, upper_bottom, lower_top, lower_bottom
 
 
 def readSlopeFile(fname):
-    fid = open(fname)
-    lines = fid.readlines()
+
+    with open(fname) as fid:
+        lines = fid.readlines()
 
     assert int(lines[1]), 'expecting 1 ofe'
 
@@ -119,22 +91,22 @@ def readSlopeFile(fname):
         distances.append(row[i * 2])
         slopes.append(row[i * 2 + 1])
 
-    fid.close()
+    assert distances[0] == 0.0
+    assert distances[-1] == 1.0
 
-    hillslope_model = polycurve(distances, slopes)
+    distances = [d * length for d in distances]
+    relative_elevs = [10000]
+    for i in range(1, nSegments):
+        dx = distances[i] - distances[i - 1]
+        relative_elevs.append(relative_elevs[-1] + dx * slopes[i-1])
+
+    hillslope_model = (distances, relative_elevs)
 
     #    top, middle, bottom = calc_ERMiT_grads(hillslope_model)
     upper_top, upper_bottom, lower_top, lower_bottom = \
         calc_disturbed_grads(hillslope_model)
 
-    # How slopes are calculated on Jim Frankberger's WEPP interface
-    total_slope = sum(slopes)
-    top = slopes[0]
-    bottom = slopes[-1]
-    if len(slopes) > 2:
-        middle = total_slope / (nSegments - 2.0)
-    else:
-        middle = total_slope / 2.0
+    top, middle, bottom  = calc_ERMiT_grads(hillslope_model)
 
     return dict(Length=length,
                 TopSlope=top * 100.0,

@@ -1121,7 +1121,15 @@ class Wepp(NoDbBase, LogMixin):
             disturbed = None
             _land_soil_replacements_d = None
 
+        try:
+            from wepppy.nodb.mods import RAP_TS
+            rap_ts = RAP_TS.getInstance(wd)
+        except:
+            rap_ts = None
+
         years = climate.input_years
+        year0 = climate.year0
+
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
         bd_d = soils.bd_d
@@ -1131,7 +1139,6 @@ class Wepp(NoDbBase, LogMixin):
         for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
             if (int(topaz_id) - 4) % 10 == 0:
                 continue
-
 
             self.log(f'    _prep_managements:{topaz_id}:{mukey}... ')
 
@@ -1146,6 +1153,9 @@ class Wepp(NoDbBase, LogMixin):
                 disturbed_class = man_summary.disturbed_class
                 meoization_key = (mukey, disturbed_class)
 
+            if rap_ts is not None:
+                meoization_key = (topaz_id, mukey)
+
             if meoization_key in build_d:
                 shutil.copyfile(build_d[meoization_key], dst_fn)
                 self.log_done()
@@ -1154,7 +1164,7 @@ class Wepp(NoDbBase, LogMixin):
                 management = man_summary.get_management()
                 sol_key = soils.domsoil_d[topaz_id]
                 management.set_bdtill(bd_d[sol_key])
-    
+
                 # probably isn't the right location for this code. should be in nodb.disturbed
                 if disturbed is not None:
                     disturbed_class = man_summary.disturbed_class
@@ -1181,7 +1191,12 @@ class Wepp(NoDbBase, LogMixin):
                         management.set_xmxlai(float(xmxlai))
     
                     meoization_key = (mukey, disturbed_class)
-    
+
+                if rap_ts is not None:
+                    if year0 >= rap_ts.rap_start_year and year0 <= rap_ts.rap_end_year:
+                        cover = rap_ts.get_cover(topaz_id, year0)
+                        management.set_cancov(cover)
+
                 multi = management.build_multiple_year_man(years)
     
                 fn_contents = str(multi)

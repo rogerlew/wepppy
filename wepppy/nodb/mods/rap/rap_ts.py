@@ -187,6 +187,14 @@ class RAP_TS(NoDbBase, LogMixin):
         #if evt == TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE:
         #    self.acquire_rasters()
 
+    def get_cover(self, topaz_id, year):
+        cover = 0.0
+        for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
+                     RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                     RAP_Band.SHRUB,
+                     RAP_Band.TREE]:
+            cover += self.data[band][str(year)][str(topaz_id)]
+        return cover
 
     def analyze(self, use_sbs=False, verbose=True):
         global rustpy_geo

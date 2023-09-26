@@ -57,12 +57,13 @@ def legacy_arc_export(wd, verbose=False):
             ash_out = None
 
     name = ron.name
-    export_dir = ron.export_arc_dir
-    gtiff_dir = _join(export_dir, 'gtiffs')
-    topaz_wd = ron.topaz_wd
+    export_dir = ron.export_legacy_arc_dir
 
     if _exists(export_dir):
         shutil.rmtree(export_dir)
+
+    gtiff_dir = _join(export_dir, 'gtiffs')
+    topaz_wd = ron.topaz_wd
 
     os.mkdir(export_dir)
     os.mkdir(gtiff_dir)
@@ -309,12 +310,12 @@ def legacy_arc_export(wd, verbose=False):
 
         try:
             f['properties']['landuse'] = ss['landuse']['desc']
-        except KeyError:
+        except:
             pass
 
         try:
             f['properties']['soil'] = ss['soil']['desc']
-        except KeyError:
+        except:
             pass
 
         for k, v in f['properties'].items():
