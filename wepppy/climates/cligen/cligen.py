@@ -271,6 +271,28 @@ class ClimateFile(object):
         self.header = header
         self.colnames = colnames
 
+    @property
+    def last_date(self) -> datetime.date:
+
+        colnames = self.colnames
+        dtypes = self.dtypes
+
+        for i in range(len(self.lines) - 1, 0, -1):
+            L = self.lines[i]
+
+            row = [v.strip() for v in L.split()]
+            if L.strip() == '':
+                continue
+
+            if len(row) != len(colnames):
+                continue
+
+            assert len(row) == len(colnames), (len(row), len(colnames))
+
+            d = {name: dtype(v) for dtype, name, v in zip(dtypes, colnames, row)}
+            cur_date = datetime.date(d['year'], d['mo'], d['da'])
+            return cur_date
+
     def clip(self, start_date: datetime.date, end_date: datetime.date):
 
         colnames = self.colnames
@@ -569,7 +591,6 @@ class ClimateFile(object):
 
     def header_ppts(self):
         """
-
         :return: daily precipitation in daily inches
         """
         ppts = []
