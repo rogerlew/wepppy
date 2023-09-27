@@ -102,7 +102,6 @@ def readSlopeFile(fname):
 
     hillslope_model = (distances, relative_elevs)
 
-    #    top, middle, bottom = calc_ERMiT_grads(hillslope_model)
     upper_top, upper_bottom, lower_top, lower_bottom = \
         calc_disturbed_grads(hillslope_model)
 
