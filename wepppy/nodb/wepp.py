@@ -804,6 +804,11 @@ class Wepp(NoDbBase, LogMixin):
 
             try:
                 kcb = rdi.get_location_info(ws_lng, ws_lat, method='nearest')
+                if kcb < 0.0:
+                    if self.pmet_kcb is not None:
+                        kcb = self.pmet_kcb
+                    else:
+                        kcb = None
             except RDIOutOfBoundsException:
                 kcb = None
 
