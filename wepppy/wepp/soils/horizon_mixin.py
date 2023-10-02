@@ -4,9 +4,40 @@ from math import exp
 from wepppy.all_your_base import isfloat
 
 
+def estimate_bulk_density(sand_percent, silt_percent, clay_percent):
+    """
+    Estimate bulk density based on sand, silt, and clay percentages using general mid-point values.
+
+    Parameters:
+    - sand_percent: Percentage of sand in the soil.
+    - silt_percent: Percentage of silt in the soil.
+    - clay_percent: Percentage of clay in the soil.
+
+    Returns:
+    - Estimated bulk density (g/cm^3).
+    """
+
+    # Define mid-point values for each soil type
+    sand_density = 1.6  # Midpoint of 1.5 - 1.7 g/cm^3
+    silt_density = 1.4  # Midpoint of 1.3 - 1.5 g/cm^3
+    clay_density = 1.2  # Midpoint of 1.1 - 1.3 g/cm^3
+    remainder_density = 1.4  # Assuming remainder is loamy in nature
+
+    # Calculate the remainder percentage
+    remainder_percent = 100 - sand_percent - silt_percent - clay_percent
+
+    # Calculate the estimated bulk density using a weighted average approach
+    estimated_density = ((sand_percent * sand_density) +
+                         (silt_percent * silt_density) +
+                         (clay_percent * clay_density) +
+                         (remainder_percent * remainder_density)) / 100
+
+    return estimated_density
+
+
 class HorizonMixin(object):
     def _rosettaPredict(self):
-        from rosetta import Rosetta3, Rosetta3
+        from rosetta import Rosetta2, Rosetta3
 
         clay = self.clay
         sand = self.sand
@@ -20,6 +51,8 @@ class HorizonMixin(object):
         if isfloat(bd):
             r3 = Rosetta3()
             res_dict = r3.predict_kwargs(sand=sand, silt=vfs, clay=clay, bd=bd)
+            #{'theta_r': 0.07949616246974722, 'theta_s': 0.3758162328532708, 'alpha': 0.0195926196444751,
+            # 'npar': 1.5931548676406013, 'ks': 40.19261619137084, 'wp': 0.08967567432339575, 'fc': 0.1877343793032436}
 
         else:
             r2 = Rosetta2()
