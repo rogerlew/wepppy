@@ -43,13 +43,17 @@ from wepppy.climates.cligen import ClimateFile
 from wepppy.wepp.runner import (
     make_hillslope_run,
     make_ss_hillslope_run,
+    make_ss_batch_hillslope_run,
     run_hillslope,
+    run_ss_batch_hillslope,
     make_flowpath_run,
     make_ss_flowpath_run,
     run_flowpath,
     make_watershed_run,
     make_ss_watershed_run,
-    run_watershed
+    make_ss_batch_watershed_run,
+    run_watershed,
+    run_ss_batch_watershed
 )
 from wepppy.wepp.management import (
     get_channel,
@@ -388,6 +392,10 @@ class Wepp(NoDbBase, LogMixin):
 
             self._multi_ofe = self.config_get_bool('wepp', 'multi_ofe')
 
+            self._prep_details_on_run_completion = self.config_get_bool('wepp', 'prep_details_on_run_completion', False)
+            self._arc_export_on_run_completion = self.config_get_bool('wepp', 'arc_export_on_run_completion', True)
+            self._legacy_arc_export_on_run_completion = self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False)
+
             self.run_flowpaths = False
             self.loss_grid_d_path = None
 
@@ -473,6 +481,22 @@ class Wepp(NoDbBase, LogMixin):
     @property
     def _lock(self):
         return _join(self.wd, 'wepp.nodb.lock')
+
+
+    @property
+    def prep_details_on_run_completion(self):
+        return getattr(self, '_prep_details_on_run_completion',
+                       self.config_get_bool('wepp', 'prep_details_on_run_completion', False))
+
+    @property
+    def arc_export_on_run_completion(self):
+        return getattr(self, '_arc_export_on_run_completion',
+                       self.config_get_bool('wepp', 'arc_export_on_run_completion', False))
+
+    @property
+    def legacy_arc_export_on_run_completion(self):
+        return getattr(self, '_legacy_arc_export_on_run_completion',
+                       self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False))
 
     @property
     def status_log(self):
@@ -597,7 +621,17 @@ class Wepp(NoDbBase, LogMixin):
     def has_run(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        return _exists(loss_pw0)
+        if _exists(loss_pw0):
+            return True
+
+        climate = Climate.getInstance(self.wd)
+        if climate.ss_batch_storms:
+            for d in climate.ss_batch_storms:
+                ss_batch_key = d['ss_batch_key']
+                if _exists(_join(output_dir, f'{ss_batch_key}/loss_pw0.txt')):
+                    return True
+
+        return False
 
     @property
     def has_phosphorus(self):
@@ -1002,6 +1036,14 @@ class Wepp(NoDbBase, LogMixin):
             if not _exists(_dir):
                 os.makedirs(_dir)
 
+        climate = Climate.getInstance(self.wd)
+        if climate.climate_mode == ClimateMode.SingleStormBatch:
+            for d in climate.ss_batch_storms:
+                ss_batch_key = d['ss_batch_key']
+                ss_batch_dir = _join(self.output_dir, ss_batch_key)
+                if not _exists(ss_batch_dir):
+                    os.makedirs(ss_batch_dir)
+
     def _prep_slopes(self, translator):
         self.log('    Prepping _prep_slopes... ')
         watershed = Watershed.getInstance(self.wd)
@@ -1241,6 +1283,9 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
         kslast = self.kslast
 
+        clip_soils = soils.clip_soils
+        clip_soils_depth = soils.clip_soils_depth
+
         kslast_map_fn = self.kslast_map
 
         kslast_map = None
@@ -1279,9 +1324,12 @@ class Wepp(NoDbBase, LogMixin):
             elif kslast is not None:
                 _kslast = kslast
 
-            if _kslast is not None:
+            if _kslast is not None or clip_soils:
                 soilu = WeppSoilUtil(src_fn)
-                soilu.modify_kslast(_kslast, pars=pars)
+                if _kslast is not None:
+                    soilu.modify_kslast(_kslast, pars=pars)
+                if clip_soils:
+                    soilu.clip_soil_depth(clip_soils_depth)
                 soilu.write(dst_fn)
             else:    
                 _copyfile(src_fn, dst_fn) 
@@ -1296,10 +1344,12 @@ class Wepp(NoDbBase, LogMixin):
         self.log_done()
 
     def _prep_climates(self, translator):
+        climate = Climate.getInstance(self.wd)
+        if climate.climate_mode == ClimateMode.SingleStormBatch:
+            return self._prep_climates_ss_batch(translator)
 
         self.log('    _prep_climates... ')
         watershed = Watershed.getInstance(self.wd)
-        climate = Climate.getInstance(self.wd)
         cli_dir = self.cli_dir
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
@@ -1323,6 +1373,36 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
+    def _prep_climates_ss_batch(self, translator):
+        climate = Climate.getInstance(self.wd)
+
+        self.log('    _prep_climates_ss_batch... ')
+        watershed = Watershed.getInstance(self.wd)
+        cli_dir = self.cli_dir
+        runs_dir = self.runs_dir
+
+        for d in climate.ss_batch_storms:
+            ss_batch_id = d['ss_batch_id']
+            ss_batch_key = d['ss_batch_key']
+            cli_fn = d['cli_fn']
+
+            for topaz_id, _ in watershed.sub_iter():
+                self.log(f'    _prep_climates:{topaz_id}... ')
+
+                wepp_id = translator.wepp(top=int(topaz_id))
+                dst_fn = _join(runs_dir, f'p{wepp_id}.{ss_batch_id}.cli')
+
+                src_fn = _join(cli_dir, cli_fn)
+                _copyfile(src_fn, dst_fn)
+
+                self.log_done()
+
+            dst_fn = _join(runs_dir, f'pw0.{ss_batch_id}.cli')
+            src_fn = _join(cli_dir, cli_fn)
+            _copyfile(src_fn, dst_fn)
+
+        self.log_done()
+
     def _make_hillslope_runs(self, translator):
         self.log('    Prepping _make_hillslope_runs... ')
         watershed = Watershed.getInstance(self.wd)
@@ -1331,7 +1411,7 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         years = climate.input_years
 
-        if climate.is_single_storm:
+        if climate.climate_mode == ClimateMode.SingleStorm:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
 
@@ -1340,6 +1420,16 @@ class Wepp(NoDbBase, LogMixin):
                 if getattr(self, 'run_flowpaths', False):
                     for fp in watershed.fps_summary(topaz_id):
                         make_ss_flowpath_run(fp, fp_runs_dir)
+
+        elif climate.climate_mode == ClimateMode.SingleStormBatch:
+            for topaz_id, _ in watershed.sub_iter():
+                wepp_id = translator.wepp(top=int(topaz_id))
+
+                for d in climate.ss_batch_storms:
+                    ss_batch_id = d['ss_batch_id']
+                    ss_batch_key = d['ss_batch_key']
+                    make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key)
+
         else:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
@@ -1353,8 +1443,9 @@ class Wepp(NoDbBase, LogMixin):
 
     def run_hillslopes(self):
         self.log('Running Hillslopes\n')
-        translator = Watershed.getInstance(self.wd).translator_factory()
         watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        climate = Climate.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
         run_flowpaths = getattr(self, 'run_flowpaths', False)
@@ -1371,32 +1462,41 @@ class Wepp(NoDbBase, LogMixin):
             self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
-        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-            self.log('  submitting topaz={} (hill {} of {})\n'.format(topaz_id, i+1, sub_n))
-            wepp_id = translator.wepp(top=int(topaz_id))
-            futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
-            futures[-1].add_done_callback(oncomplete)
+        if climate.climate_mode == ClimateMode.SingleStormBatch:
+            for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
 
-            # run flowpaths if specified
-            if run_flowpaths:
+                ss_n = len(climate.ss_batch_storms)
+                for d in climate.ss_batch_storms:
+                    ss_batch_id = d['ss_batch_id']
+                    ss_batch_key = d['ss_batch_key']
 
-                # iterate over the flowpath ids
-                fps_summary = watershed.fps_summary(topaz_id)
-                fp_n = len(fps_summary)
-                for j, fp in enumerate(fps_summary):
-                    self.log('    submitting flowpath={} (hill {} of {}, fp {} of {})... '
-                             .format(fp, i+1, sub_n, j + 1, fp_n))
-
-                    # run wepp for flowpath
-                    futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir, wepp_bin)))
+                    self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
+                    wepp_id = translator.wepp(top=int(topaz_id))
+                    futures.append(pool.submit(lambda p: run_ss_batch_hillslope(*p), (wepp_id, runs_dir, wepp_bin, ss_batch_id)))
                     futures[-1].add_done_callback(oncomplete)
 
-                    self.log_done()
+        else:
+            for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
+                wepp_id = translator.wepp(top=int(topaz_id))
+                futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
+                futures[-1].add_done_callback(oncomplete)
+
+                # run flowpaths if specified
+                if run_flowpaths:
+                    # iterate over the flowpath ids
+                    fps_summary = watershed.fps_summary(topaz_id)
+                    fp_n = len(fps_summary)
+                    for j, fp in enumerate(fps_summary):
+                        self.log(f'    submitting flowpath={fp} (hill { i+1} of {sub_n}, fp {j + 1} of {fp_n}).\n')
+                        # run wepp for flowpath
+                        futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir, wepp_bin)))
+                        futures[-1].add_done_callback(oncomplete)
 
         wait(futures, return_when=FIRST_EXCEPTION)
 
         # Flowpath post-processing
-        if run_flowpaths:
+        if run_flowpaths and not climate.climate_mode == ClimateMode.SingleStormBatch:
             self.log('    building loss grid')
 
             # data structure to contain flowpath soil loss results
@@ -1440,7 +1540,6 @@ class Wepp(NoDbBase, LogMixin):
             pickle.dump(loss_grid_d, fp)
 
         self.lock()
-
         # noinspection PyBroadException
         try:
             self.loss_grid_d_path = loss_grid_d_path
@@ -1724,8 +1823,13 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         years = climate.input_years
 
-        if climate.is_single_storm:
+        if climate.climate_mode == ClimateMode.SingleStorm:
             make_ss_watershed_run(wepp_ids, runs_dir)
+        elif climate.climate_mode == ClimateMode.SingleStormBatch:
+            for d in climate.ss_batch_storms:
+                ss_batch_id = d['ss_batch_id']
+                ss_batch_key = d['ss_batch_key']
+                make_ss_batch_watershed_run(wepp_ids, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key)
         else:
             make_watershed_run(years, wepp_ids, runs_dir)
 
@@ -1735,31 +1839,57 @@ class Wepp(NoDbBase, LogMixin):
             export_hillslopes_prep_details
         )
         wd = self.wd
-        self.log('Running Watershed... ')
-
-        self.log('    wepp_bin:{}'.format(self.wepp_bin))
+        climate = Climate.getInstance(wd)
+        wepp_bin = self.wepp_bin
+        self.log(f'Running Watershed wepp_bin:{self.wepp_bin}... ')
 
         runs_dir = self.runs_dir
-        assert run_watershed(runs_dir, self.wepp_bin)
 
-        export_channels_prep_details(wd)
-        export_hillslopes_prep_details(wd)
+        if climate.climate_mode == ClimateMode.SingleStormBatch:
 
-        for fn in glob(_join(self.runs_dir, '*.out')):
-            dst_path = _join(self.output_dir, _split(fn)[1])
-            shutil.move(fn, dst_path)
+            for d in climate.ss_batch_storms:
+                ss_batch_key = d['ss_batch_key']
+                ss_batch_id = d['ss_batch_id']
+                run_ss_batch_watershed(runs_dir, wepp_bin, ss_batch_id)
+
+                self.log('    moving .out files...')
+                for fn in glob(_join(self.runs_dir, '*.out')):
+                    dst_path = _join(self.output_dir, ss_batch_key, _split(fn)[1])
+                    shutil.move(fn, dst_path)
+                self.log_done()
+
+        else:
+            assert run_watershed(runs_dir, wepp_bin)
+
+            self.log('    moving .out files...')
+            for fn in glob(_join(self.runs_dir, '*.out')):
+                dst_path = _join(self.output_dir, _split(fn)[1])
+                shutil.move(fn, dst_path)
+            self.log_done()
+
+        self.log_done()
+
+        if self.prep_details_on_run_completion:
+            self.log('    exporting prep details...')
+            export_channels_prep_details(wd)
+            export_hillslopes_prep_details(wd)
+            self.log_done()
 
         if not _exists(_join(wd, 'wepppost.nodb')):
             WeppPost(wd, '0.cfg')
 
-        self.log_done()
-
         climate = Climate.getInstance(wd)
 
-        if climate.climate_mode != ClimateMode.SingleStorm:
-            self.log(' running arcexport... ')
-            self._run_arcexport()
-            self.log_done()
+        if not climate.is_single_storm:
+            if self.arc_export_on_run_completion:
+                self.log(' running arcexport... ')
+                self._run_arcexport()
+                self.log_done()
+
+            if self.legacy_arc_export_on_run_completion:
+                self.log(' running legacy arcexport... ')
+                self._run_arcexport(legacy=True)
+                self.log_done()
 
             self.log(' running wepppost... ')
             self._run_wepppost()
@@ -1773,7 +1903,6 @@ class Wepp(NoDbBase, LogMixin):
             self._run_hillslope_watbal()
             self.log_done()
 
-
             self.log(' compressing pass_pw0.txt... ')
             compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
             self.log_done()
@@ -1782,25 +1911,7 @@ class Wepp(NoDbBase, LogMixin):
             compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
             self.log_done()
 
-
-            """
-            with ThreadPoolExecutor(max_workers=4) as executor:
-                self.log('Running Post Wepp Run Activities... ')
-
-                futures = []
-                futures.append(executor.submit(self._run_arcexport))
-                futures.append(executor.submit(self._run_wepppost))
-                futures.append(executor.submit(self._build_totalwatsed2))
-                futures.append(executor.submit(self._run_hillslope_watbal))
-                futures.append(executor.submit(compress_fn, _join(self.output_dir, 'pass_pw0.txt')))
-                futures.append(executor.submit(compress_fn, _join(self.output_dir, 'soil_pw0.txt')))
-
-                # Wait for all tasks to complete before proceeding
-                for future in futures:
-                    future.result()
-            """
-
-        self.log_done()
+        self.log('Watershed Run Complete')
 
         try:
             prep = Prep.getInstance(self.wd)
@@ -1813,10 +1924,13 @@ class Wepp(NoDbBase, LogMixin):
         HillslopeWatbal(self.wd)
         self.log_done()
 
-    def _run_arcexport(self):
+    def _run_arcexport(self, legacy=False):
         self.log('Running ArcExport... ')
-        from wepppy.export import arc_export
-        arc_export(self.wd)
+        from wepppy.export import arc_export, legacy_arc_export
+        if legacy:
+            legacy_arc_export(self.wd)
+        else:
+            arc_export(self.wd)
         self.log_done()
 
     def _run_wepppost(self):

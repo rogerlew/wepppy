@@ -1,0 +1,20 @@
+m                               # metric units
+Yes                             # not watershed option
+2                               # storm option, 1=abbreviated annual soil loss output option for continuous simulation
+1                               # hillslope version
+Yes                             # pass file output
+../output/{ss_batch_key}/H{wepp_id}.pass.dat   #
+../output/{ss_batch_key}/H{wepp_id}.single_event.dat
+Yes                             # distance and sediment loss
+../output/{ss_batch_key}/H{wepp_id}.plot.dat   #
+Yes                             # event by event output
+../output/{ss_batch_key}/H{wepp_id}.ebe.dat    #
+Yes                             # element output
+../output/{ss_batch_key}/H{wepp_id}.element.dat    #
+No                              # final summary output
+No                              # daily winter output
+p{wepp_id}.man                  # management file
+p{wepp_id}.slp                  # slope file
+p{wepp_id}.{ss_batch_id}.cli    # climate file
+p{wepp_id}.sol                  # soil file
+0                               # irrigation option, 0=no irrigation
