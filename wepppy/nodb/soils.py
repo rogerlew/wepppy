@@ -96,6 +96,8 @@ class Soils(NoDbBase, LogMixin):
             
             self._initial_sat = 0.75
             self._ksflag = self.config_get_bool('soils', 'ksflag')
+            self._clip_soils = self.config_get_bool('soils', 'clip_soils', False)
+            self._clip_soils_depth = self.config_get_float('soils', 'clip_soils', 1000)
 
             soils_dir = self.soils_dir
             if not _exists(soils_dir):
@@ -163,6 +165,38 @@ class Soils(NoDbBase, LogMixin):
     @property
     def _lock(self):
         return _join(self.wd, 'soils.nodb.lock')
+
+    @property
+    def clip_soils(self):
+        return getattr(self, '_clip_soils', False)
+
+    @clip_soils.setter
+    def clip_soils(self, value: bool):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._clip_soils = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def clip_soils_depth(self):
+        return getattr(self, '_clip_soils_depth', 1000)
+
+    @clip_soils_depth.setter
+    def clip_soils_depth(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._clip_soils_depth = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def initial_sat(self):
@@ -429,6 +463,7 @@ class Soils(NoDbBase, LogMixin):
             raise
 
     def build(self, initial_sat=None, ksflag=None):
+
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
