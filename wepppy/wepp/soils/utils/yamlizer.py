@@ -228,11 +228,33 @@ class WeppSoilUtil(object):
 
         if pars is not None:
             self.obj['header'][-1] += _pars_to_string(pars)
+        else:
+            self.obj['header'][-1] += f'(kslast={kslast})'
 
         for i in range(len(self.obj['ofes'])):
             self.obj['ofes'][i]['res_lyr']['kslast'] = kslast
 
         self.obj['res_lyr']['kslast'] = kslast
+
+    def clip_soil_depth(self, max_depth):
+
+        self.obj['header'].append(f'wepppy.wepp.soils.utils.WeppSoilUtil::clip_soil_depth(max_depth={max_depth})')
+
+        for i in range(len(self.obj['ofes'])):
+            ofe = self.obj['ofes'][i]
+
+            horizons = []
+            for j in range(len(ofe['horizons'])):
+                horizon = ofe['horizons'][j]
+                if horizon['solthk'] <= max_depth:
+                    horizons.append(horizon)
+                else:
+                    horizon['solthk'] = max_depth
+                    horizons.append(horizon)
+                    depth = max_depth
+                    break
+            self.obj['ofes'][i]['horizons'] = horizons
+            self.obj['ofes'][i]['nsl'] = len(horizons)
 
     def to7778(self, hostname=''):
         from rosetta import Rosetta2, Rosetta3
