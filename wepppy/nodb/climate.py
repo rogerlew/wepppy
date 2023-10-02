@@ -155,6 +155,7 @@ class ClimateMode(IntEnum):
     GridMetPRISM = 11    # Daymet, single or multiple
     UserDefined = 12
     DepNexrad = 13
+    SingleStormBatch = 14 # Single Only
 
     @staticmethod
     def parse(x):
@@ -354,6 +355,8 @@ class Climate(NoDbBase, LogMixin):
             self._ss_duration_of_storm_in_hours = 6.0
             self._ss_time_to_peak_intensity_pct = 0.4
             self._ss_max_intensity_inches_per_hour = 3.0
+            self._ss_batch = ''
+            self._ss_batch_storms = None
 
             self._precip_scale_factor =  self.config_get_float('climate', 'precip_scale_factor', None)
             self._precip_scale_factor_map =  self.config_get_path('climate', 'precip_scale_factor_map', None)
@@ -528,6 +531,28 @@ class Climate(NoDbBase, LogMixin):
     def ss_max_intensity_inches_per_hour(self):
         return self._ss_max_intensity_inches_per_hour
 
+    @property
+    def ss_batch_storms(self):
+        return getattr(self, '_ss_batch_storms', None)
+
+    @property
+    def ss_batch(self):
+        return getattr(self, '_ss_batch', '')
+
+
+    @ss_batch.setter
+    def ss_batch(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._ss_batch = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     #
     # climatestation_mode
     #
@@ -664,7 +689,7 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def is_single_storm(self):
-        return self._climate_mode == ClimateMode.SingleStorm
+        return self._climate_mode in [ClimateMode.SingleStorm, ClimateMode.SingleStormBatch]
 
     #
     # climate_spatial mode
@@ -1006,6 +1031,8 @@ class Climate(NoDbBase, LogMixin):
             ss_time_to_peak_intensity_pct = \
                 kwds['ss_time_to_peak_intensity_pct']
 
+            ss_batch = kwds['ss_batch']
+
             # Some sort of versioning annoyance. On VM these are strings
             # on wepp1 they are lists
             if isinstance(ss_storm_date, list):
@@ -1063,6 +1090,7 @@ class Climate(NoDbBase, LogMixin):
                 ss_max_intensity_inches_per_hour
             self._ss_time_to_peak_intensity_pct = \
                 ss_time_to_peak_intensity_pct
+            self._ss_batch = ss_batch
 
             self.dump_and_unlock()
 
@@ -1119,6 +1147,10 @@ class Climate(NoDbBase, LogMixin):
         # single storm
         elif climate_mode == ClimateMode.SingleStorm:
             self._build_climate_single_storm(verbose=verbose, attrs=attrs)
+
+        # single storm batch
+        elif climate_mode == ClimateMode.SingleStormBatch:
+            self._build_climate_single_storm_batch(verbose=verbose, attrs=attrs)
 
         # PRISM
         elif climate_mode == ClimateMode.PRISM:
@@ -1760,6 +1792,68 @@ class Climate(NoDbBase, LogMixin):
             self.log_done()
 
             self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    def _build_climate_single_storm_batch(self, verbose=False, attrs=None):
+        """
+        single storm
+        """
+
+        climatestation = self.climatestation
+
+        ss_batch = self.ss_batch.split('\n')
+        assert len(ss_batch) > 0, ss_batch
+
+        specs = {}
+        for L in [spec.split() for spec in ss_batch]:
+            if len(L) == 0:
+                continue
+
+            assert len(L) == 7, L
+            mo, da, yr, prcp, duration, tp, ip = L
+            key ='ss_' + '_'.join(v.strip() for v in L)
+            specs[key] = dict(ss_storm_date=f'{mo} {da} {yr}',
+                              ss_design_storm_amount_inches=float(prcp),
+                              ss_duration_of_storm_in_hours=float(duration),
+                              ss_time_to_peak_intensity_pct=float(tp),
+                              ss_max_intensity_inches_per_hour=float(tp))
+
+        self.lock()
+        # noinspection PyBroadInspection
+        try:
+            self.set_attrs(attrs)
+
+            self.log('  running _build_climate_single_storm... ')
+
+            storms = []
+            for i, (key, spec) in enumerate(specs.items()):
+
+                result = cc.selected_single_storm(
+                    climatestation,
+                    spec['ss_storm_date'],
+                    spec['ss_design_storm_amount_inches'],
+                    spec['ss_duration_of_storm_in_hours'],
+                    spec['ss_time_to_peak_intensity_pct'],
+                    spec['ss_max_intensity_inches_per_hour'],
+                    version=self.cligen_db
+                )
+
+                par_fn, cli_fn, monthlies = cc.unpack_json_result(
+                    result,
+                    key,
+                    self.cli_dir
+                )
+                storms.append(dict(ss_batch_id=i+1, ss_batch_key=key, spec=spec, par_fn=par_fn, cli_fn=cli_fn))
+
+            self._ss_batch_storms = storms
+            self.monthlies = monthlies
+            self.par_fn = par_fn
+            self.cli_fn = cli_fn
+            self.dump_and_unlock()
+            self.log_done()
 
         except Exception:
             self.unlock('-f')

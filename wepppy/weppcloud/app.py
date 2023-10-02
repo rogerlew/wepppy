@@ -3863,8 +3863,6 @@ def get_wepp_prep_details(runid, config):
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
 def submit_task_run_wepp(runid, config):
-    from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
-
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
 
@@ -3872,6 +3870,56 @@ def submit_task_run_wepp(runid, config):
         wepp.parse_inputs(request.form)
     except Exception:
         return exception_factory('Error parsing climate inputs')
+
+    try:
+        clip_soils = request.form.get('clip_soils') == 'on'
+    except:
+        clip_soils = None
+
+    soils = Soils.getInstance(wd)
+
+    if clip_soils is not None:
+        soils.clip_soils = clip_soils
+
+    try:
+        clip_soils_depth = int(request.form.get('clip_soils_depth'))
+    except:
+            clip_soils_depth = None
+
+    if clip_soils_depth is not None:
+        soils.clip_soils_depth = clip_soils_depth
+
+
+    try:
+        prep_details_on_run_completion = request.form.get('prep_details_on_run_completion') == 'on'
+    except:
+        prep_details_on_run_completion = None
+
+    try:
+        arc_export_on_run_completion = request.form.get('arc_export_on_run_completion') == 'on'
+    except:
+        arc_export_on_run_completion = None
+
+    try:
+        legacy_arc_export_on_run_completion = request.form.get('legacy_arc_export_on_run_completion') == 'on'
+    except:
+        legacy_arc_export_on_run_completion = None
+
+    try:
+        wepp.lock()
+        if prep_details_on_run_completion is not None:
+            wepp._prep_details_on_run_completion = prep_details_on_run_completion
+
+        if arc_export_on_run_completion is not None:
+            wepp._arc_export_on_run_completion = arc_export_on_run_completion
+
+        if legacy_arc_export_on_run_completion is not None:
+            wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
+
+        wepp.dump_and_unlock()
+    except:
+        wepp.unlock('-f')
+        raise
 
     try:
         wepp.clean()
@@ -3888,12 +3936,6 @@ def submit_task_run_wepp(runid, config):
         # Prep Hillslopes
         wepp.prep_hillslopes()
 
-        #
-        # Run Hillslopes
-#        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-#            wepp_id = translator.wepp(top=int(topaz_id))
-#            assert run_hillslope(wepp_id, runs_dir)
-
         wepp.run_hillslopes()
 
         #
@@ -3903,9 +3945,6 @@ def submit_task_run_wepp(runid, config):
         #
         # Run Watershed
         wepp.run_watershed()
-
-        export_hillslopes_prep_details(wd)
-        export_channels_prep_details(wd)
 
     except Exception:
         return exception_factory('Error running wepp')
@@ -4038,6 +4077,7 @@ def report_wepp_run_summary(runid, config):
 
     flowpaths_n = len(glob(_join(wd, 'wepp/flowpaths/output/*.plot.dat')))
     subs_n = len(glob(_join(wd, 'wepp/output/*.pass.dat')))
+    subs_n += len(glob(_join(wd, 'wepp/output/*/*.pass.dat')))
 
     t0, tend = None, None
     with open(_join(wd, 'wepp/runs/status.log')) as fp:

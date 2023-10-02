@@ -13,11 +13,20 @@
     <dd>{{ station_meta.elevation * 0.3048}} m</dd>
 </dl>
 {% endif %}
+{% if climate.ss_batch_storms %}
+<h5>Single Storm Batch Climates</h5>
+<dl class="dl-horizontal">
+    {% for d in climate.ss_batch_storms %}
+        <dd><a href="browse/climate/{{ d.cli_fn }}" target="_blank">{{ d.cli_fn }}</a></dd>
+    {% endfor %}
+</dl>
+{% else %}
 <h5>Global Climate</h5>
 <dl class="dl-horizontal">
     <dd><a href="browse/climate/{{ climate.par_fn }}" target="_blank">{{ climate.par_fn }}</a></dd>
     <dd><a href="browse/climate/{{ climate.cli_fn }}" target="_blank">{{ climate.cli_fn }}</a></dd>
 </dl>
+{% endif %}
 <h5>Climate Build Log</h5>
 <p>
     <a href="browse/climate/status.log/" target="_blank">View Climate Build Log</a>
@@ -65,21 +74,28 @@
     </thead>
     <tbody>
       <tr>
-        <td>P MEAN</td>
+        <td>Mean Precip</td>
         {% for v in climate.monthlies.ppts %}
         <td class="text-right">{{ unitizer(v, 'in') | safe  }}</td>
         {% endfor %}
         <td>{{ unitizer_units('in') | safe }}</td>
       </tr>
       <tr>
-        <td>T MAX</td>
+        <td>Num Wet Days </td>
+        {% for v in climate.monthlies.nwds %}
+        <td class="text-right">{{ v  | round | int }}</td>
+        {% endfor %}
+        <td>days</td>
+      </tr>
+      <tr>
+        <td>T Max</td>
         {% for v in climate.monthlies.tmaxs %}
         <td class="text-right">{{ unitizer(v, 'degf') | safe }}</td>
         {% endfor %}
         <td>{{ unitizer_units('degf') | safe }}</td>
       </tr>
       <tr>
-        <td>T MIN</td>
+        <td>T Min</td>
         {% for v in climate.monthlies.tmins %}
         <td class="text-right">{{ unitizer(v, 'degf') | safe }}</td>
         {% endfor %}

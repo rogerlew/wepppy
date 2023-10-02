@@ -9,6 +9,10 @@
     Please directly interpret the WEPP outputs in the the wepp/output directory.
     </div>
     <p><a href="browse/wepp/output/" target="_blank">View WEPP Outputs Directory</a></p>
+    {% if not climate.ss_batch_storms %}
+        <p>&gt; <a href="browse/wepp/output/loss_pw0.txt" target="_blank">Watershed Loss Summary</a></p>
+        <p>&gt; <a href="browse/wepp/output/ebe_pw0.txt" target="_blank">Watershed Event by Event Output</a></p>
+    {% endif %}
 </div>
 {% else %}
 <div>
