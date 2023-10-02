@@ -26,6 +26,8 @@ import jsonpickle
 
 import sqlite3
 
+from rosetta import Rosetta2, Rosetta3
+
 from wepppy.all_your_base import (
     try_parse,
     try_parse_float,
@@ -33,7 +35,7 @@ from wepppy.all_your_base import (
     isint
 )
 
-from wepppy.wepp.soils import HorizonMixin
+from wepppy.wepp.soils import HorizonMixin, estimate_bulk_density
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 
 __version__ = 'v.0.1.0'
@@ -185,8 +187,8 @@ class MajorComponent:
 
 # noinspection PyPep8Naming
 class Horizon(HorizonMixin):
-    def __init__(self, cokey, layer, defaults=None):
-        self.cokey = cokey
+    def __init__(self, chkey, layer, defaults=None):
+        self.chkey = chkey
         
         if defaults is None:
             defaults = {}
@@ -208,6 +210,8 @@ class Horizon(HorizonMixin):
         self.ksat_r = None
         self.dbthirdbar_r = None
 
+        self.horizon_build_notes = []
+
         for k, v in layer.items():
             # we want to copy the current the current layer
             # but for each layer we need to apply defaults and
@@ -217,12 +221,58 @@ class Horizon(HorizonMixin):
             else:
                 setattr(self, k, v)
 
+        rock, not_rock = self._computeRock(defaults.get('smr', None))
+        self.smr = rock
+
+        clay = self.claytotal_r
+        sand = self.sandtotal_r
+        vfs = self.sandvf_r
+        bd = self.dbthirdbar_r
+
+        assert isfloat(clay), clay
+        assert isfloat(sand), sand
+        assert isfloat(vfs), vfs
+
+        if isfloat(bd):
+            r3 = Rosetta3()
+            rosetta_model = 'rosetta3'
+            res_dict = r3.predict_kwargs(sand=sand, silt=vfs, clay=clay, bd=bd)
+            # {'theta_r': 0.07949616246974722, 'theta_s': 0.3758162328532708, 'alpha': 0.0195926196444751,
+            # 'npar': 1.5931548676406013, 'ks': 40.19261619137084, 'wp': 0.08967567432339575, 'fc': 0.1877343793032436}
+        else:
+            rosetta_model = 'rosetta2'
+            r2 = Rosetta2()
+            res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
+
+        if not isfloat(self.ksat_r):
+            self.ksat_r = res_dict['ks']
+            self.horizon_build_notes.append(f'  {chkey}::ksat_r estimated from {rosetta_model}')
+
+        # wilting point
+        if isfloat(self.wfifteenbar_r) and isfloat(rock):
+            self.horizon_build_notes.append(f'  {chkey}::wilt_pt estimated from wfifteenbar_r and rock')
+            self.wilt_pt = (0.01 * self.wfifteenbar_r) / (1.0 - min(50.0, rock) / 100.0)  # ERIN_ADJUST_FCWP
+        else:
+            self.horizon_build_notes.append(f'  {chkey}::wilt_pt estimated from {rosetta_model}')
+            self.wilt_pt = res_dict['wp']
+
+        # field capacity
+        if isfloat(self.wthirdbar_r) and isfloat(rock):
+            self.horizon_build_notes.append(f'  {chkey}::field_cap estimated from wthirdbar_r and rock')
+            self.field_cap = (0.01 * self.wthirdbar_r) / (1.0 - min(50.0, rock) / 100.0)  # ERIN_ADJUST_FCWP
+        else:
+            self.horizon_build_notes.append(f'  {chkey}::field_cap estimated from {rosetta_model}')
+            self.field_cap = res_dict['fc']
+
+        if not isfloat(self.dbthirdbar_r):
+            self.horizon_build_notes.append(f'  {chkey}::bd estimated from sand, vfs, and clay')
+            self.dbthirdbar_r = estimate_bulk_density(sand_percent=sand, silt_percent=vfs, clay_percent=clay)
+
         self._computeAnisotropy()
-        self._computeRock(defaults.get('smr', None), 
-                          defaults.get('field_cap', None),
-                          defaults.get('wilt_pt', None))
         self._computeConductivity()
-        
+        self._computeErodibility()
+
+
     @property
     def clay(self):
         return try_parse_float(self.claytotal_r)
@@ -247,8 +297,7 @@ class Horizon(HorizonMixin):
     def depth(self):
         return try_parse_float(self.hzdepb_r)
  
-    def _computeRock(self, rock_default, 
-                     field_cap_default, wilt_pt_default):
+    def _computeRock(self, rock_default):
 
         # TODO: need to update wc and fc calculations IN3 for LH1 with obs
 
@@ -256,17 +305,13 @@ class Horizon(HorizonMixin):
         fraggt10_r = self.fraggt10_r
         frag3to10_r = self.frag3to10_r
         sieveno10_r = self.sieveno10_r
-        wthirdbar_r = self.wthirdbar_r
-        wfifteenbar_r = self.wfifteenbar_r
-        
+
         if desgnmaster is None:
            desgnmaster = 'O'
 
         if desgnmaster.startswith('O') or not isfloat(sieveno10_r):
-            self.smr = rock_default
-            self.field_cap = field_cap_default
-            self.wilt_pt = wilt_pt_default
-            return
+            self.horizon_build_notes.append(f'  {self.chkey}::using default rock content of {rock_default}%')
+            return rock_default, None
             
         # calculate rock content
         if not isfloat(fraggt10_r):
@@ -278,50 +323,9 @@ class Horizon(HorizonMixin):
         rocks_soil = fraggt10_r + frag3to10_r
         rock = (100.0-rocks_soil) / 100.0 * (100.0-sieveno10_r) + rocks_soil
         not_rock = 100.0 - rock
-	
-	# This ended up being not necessary because the bulk-density is corrected up to 50 pct rock 
-	# 
-	# rock_min50 = min(50.0, rock)
-        # dbthirdbar_r = 2.65 * (rock_min50/100.0 + dbthirdbar_r/2.65 - rock_min50 * dbthirdbar_r / 265.0)
-	
-        if ERIN_ADJUST_FCWP:
-            # calculate fc
-            if not_rock == 0.0:
-                fc = 0.001
-            elif not isfloat(wthirdbar_r):
-                fc = field_cap_default
-            else:
-                fc = (0.01 * wthirdbar_r) / (1.0 - min(50.0, rock) / 100.0)
 
-            # calculate wp
-            if not_rock == 0.0:
-                wc = 0.001
-            elif not isfloat(wfifteenbar_r):
-                wc = wilt_pt_default
-            else:
-                wc = (0.01 * wfifteenbar_r) / (1.0 - min(50.0, rock) / 100.0)
+        return rock, not_rock
 
-        else:
-            # calculate fc
-            if not_rock == 0.0:
-                fc = 0.001
-            elif not isfloat(wthirdbar_r):
-                fc = field_cap_default
-            else:
-                fc = wthirdbar_r / not_rock
-
-            # calculate wp
-            if not_rock == 0.0:
-                wc = 0.001
-            elif not isfloat(wfifteenbar_r):
-                wc = wilt_pt_default
-            else:
-                wc = wfifteenbar_r / not_rock
-
-        self.smr = rock
-        self.field_cap = fc
-        self.wilt_pt = wc
-        
     def valid(self):
         desgnmaster = self.desgnmaster
         if desgnmaster is None:
@@ -523,7 +527,6 @@ class WeppSoil:
         self.res_lyr_ksat = None
         self.num_layers = 0
         self.res_lyr_ksat_threshold = res_lyr_ksat_threshold
-        self.albedo_estimated = False
         self.is_urban = False
         self.is_water = False
         self._pickle_fn = None
@@ -548,7 +551,7 @@ POSSIBILITY OF SUCH DAMAGE."""
         
         self.num_ofes = 1
         self.log = None
-        
+
         self.build()
 
     @property
@@ -558,15 +561,17 @@ POSSIBILITY OF SUCH DAMAGE."""
         elif self.is_water:
             return "Water"
         else:
-            return "%s (%s)" % (self.majorComponent.muname, 
+            return "%s (%s)" % (self.majorComponent.muname,
                                 self.horizons[0].texture)
-                
+
     def build(self):
         """
-        Return the major component for a given mukey is the component 
-        with the highest comppct_r value and a obtained cokey. If no 
+        Return the major component for a given mukey is the component
+        with the highest comppct_r value and a obtained cokey. If no
         components have a usable cokey then None is returned.
         """
+        self.build_notes = []
+
         ssurgo_c = self.ssurgo_c
         mukey = self.mukey
         self.log = ['mukey: {}'.format(mukey)]
@@ -579,12 +584,18 @@ POSSIBILITY OF SUCH DAMAGE."""
             cokey = c['cokey']
             self.log.append('analyzing cokey {}'.format(cokey))
 
-            horizons, mask = self._getHorizons(cokey)
+            horizons, mask = self._get_horizons(cokey)
             if sum(mask) > 0:
                 self.log.append('building major component')
                 self.majorComponent = MajorComponent(c)
                 self.horizons = horizons
                 self.horizons_mask = mask
+
+                for h, m in zip(self.horizons, self.horizons_mask):
+                    if m == 0:
+                        continue
+                    self.build_notes.extend(h.horizon_build_notes)
+
                 if not isfloat(self.majorComponent.albedodry_r):
                     self._compute_albedo()
                 self._analyze_restrictive_layer()
@@ -623,7 +634,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             
         return None
     
-    def _getHorizons(self, cokey):
+    def _get_horizons(self, cokey):
         """
         Return all layer information matching the cokey, ordered by depth
         """
@@ -642,8 +653,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             L['fragvol_r'] = ssurgo_c.get_fragvol_r(chkey)
             L['texture'] = ssurgo_c.get_texture(chkey)
             L['reskind'] = ssurgo_c.get_reskind(L['cokey'])
-            h = Horizon(cokey, L, defaults)
-            h._computeErodibility()
+            h = Horizon(chkey, L, defaults)
             horizons.append(h)
         
         # create mask of valid layers
@@ -660,7 +670,8 @@ POSSIBILITY OF SUCH DAMAGE."""
         om_r = self.horizons[0].om_r
         self.majorComponent.albedodry_r = \
             0.6 / exp(0.4 * om_r)
-        self.albedo_estimated = 1
+
+        self.build_notes.append(f'  albedo estimated from om_r ({om_r}%)')
         
     def _analyze_restrictive_layer(self):
         """
@@ -698,7 +709,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             n += 1
 
         self.num_layers = n
-
+        self.build_notes.append(f'  res_lyr_i {self.res_lyr_i}')
         self.log.append('identified {} layers, ksat_min={}'.format(n, ksat_min))
 
     def _abbreviated_description(self):
@@ -776,10 +787,8 @@ POSSIBILITY OF SUCH DAMAGE."""
         s.append('')
         
         s.append('Build Notes:')
-        s.append('  initial assumed ksat = %0.03f' % self.initial_sat)
-        if self.albedo_estimated:
-            s.append('  albedo estimated from om_r')
-            s.append('')
+        s.extend(self.build_notes)
+        s.append('')
             
         val_file = 'erin_lt_files/%s.sol' % str(self.mukey)
         if _exists(val_file):
@@ -1311,17 +1320,15 @@ class SurgoSoilCollection(object):
         csvfile.close()
 
     def makeWeppSoils(self, initial_sat=0.75, verbose=False,
-                      horizon_defaults=OrderedDict([('sandtotal_r', 66.8),
-                                               ('claytotal_r', 7.0),
-                                               ('om_r', 7.0),
-                                               ('cec7_r', 11.3),
-                                               ('sandvf_r', 10.0),
-                                               ('ksat_r', 28.0),
-                                               ('dbthirdbar_r', 1.4),
-                                               ('smr', 55.5),
-                                               ('field_cap', 0.242),
-                                               ('wilt_pt', 0.1145)]),
+                      horizon_defaults=None,
                       ksflag=True):
+        if horizon_defaults is None:
+            horizon_defaults = OrderedDict([('sandtotal_r', 66.8),
+                         ('claytotal_r', 7.0),
+                         ('om_r', 7.0),
+                         ('cec7_r', 11.3),
+                         ('sandvf_r', 10.0),
+                         ('smr', 55.5)])
 
         ksflag = int(ksflag)
         assert ksflag in (0, 1)
