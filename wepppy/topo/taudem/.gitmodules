@@ -1,0 +1,3 @@
+[submodule "taudem/all_your_base"]
+	path = taudem/all_your_base
+	url = https://github.com/rogerlew/all_your_base

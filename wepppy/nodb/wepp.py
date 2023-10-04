@@ -1044,9 +1044,36 @@ class Wepp(NoDbBase, LogMixin):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
+    def _prep_slopes_peridot(self, watershed, translator):
+        self.log('    Prepping _prep_slopes_peridot... ')
+        wat_dir = self.wat_dir
+        runs_dir = self.runs_dir
+        fp_runs_dir = self.fp_runs_dir
+
+        for topaz_id, _ in watershed.sub_iter():
+            wepp_id = translator.wepp(top=int(topaz_id))
+
+            src_fn = _join(wat_dir, 'slope_files/hillslopes/hill_{}.slp'.format(topaz_id))
+            dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
+            _copyfile(src_fn, dst_fn)
+
+            # use getattr for old runs that don't have a run_flowpaths attribute
+            if getattr(self, 'run_flowpaths', False):
+                for fp in watershed.fps_summary(topaz_id):
+                    fn = '{}.slp'.format(fp)
+                    src_fn = _join(wat_dir, f'slope_files/flowpaths/{topaz_id}/', fn)
+                    dst_fn = _join(fp_runs_dir, fn)
+                    _copyfile(src_fn, dst_fn)
+
+        self.log_done()
+
     def _prep_slopes(self, translator):
         self.log('    Prepping _prep_slopes... ')
+
         watershed = Watershed.getInstance(self.wd)
+        if watershed.abstraction_backend == 'peridot':
+            return self._prep_slopes_peridot(watershed, translator)
+
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
@@ -1628,7 +1655,10 @@ class Wepp(NoDbBase, LogMixin):
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
 
-        src_fn = _join(wat_dir, 'channels.slp')
+        src_fn = _join(wat_dir, 'slope_files/channels.slp')
+        if not _exists(src_fn):
+            src_fn = _join(wat_dir, 'channels.slp')
+
         dst_fn = _join(runs_dir, 'pw0.slp')
         _copyfile(src_fn, dst_fn)
 

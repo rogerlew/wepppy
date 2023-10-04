@@ -7,10 +7,13 @@ from .ron import (
     Map, 
     RonNoDbLockedException
 )
-from .prep import (
-    Prep,
-    PrepNoDbLockedException
-)
+
+from .redis_prep import RedisPrep as Prep
+
+#from .prep import (
+#    Prep,
+#    PrepNoDbLockedException
+#)
 from .topaz import (
     Topaz,
     TopazNoDbLockedException

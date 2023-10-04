@@ -26,21 +26,14 @@ import shutil
 from shutil import copyfile
 import multiprocessing
 
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
-
 # non-standard
 import jsonpickle
-import pandas as pd
 
-from metpy.units import units
-from metpy.calc.thermo import dewpoint
 from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 
 # wepppy
 from wepppy.climates import cligen_client as cc
-from wepppy.climates.metquery_client import get_daily
-from wepppy.climates.gridmet import client as gridmet_client
-from wepppy.climates.prism import prism_mod, prism_revision
+from wepppy.climates.prism import prism_mod
 from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
@@ -54,9 +47,9 @@ from wepppy.climates.cligen import (
     df_to_prn
 )
 from wepppy.all_your_base import isint, isfloat, NCPU
-from wepppy.all_your_base.geo import RasterDatasetInterpolator, haversine
+from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
-from wepppy.watershed_abstraction.support import is_channel
+from wepppy.topo.watershed_abstraction.support import is_channel
 import numpy as np
 
 from copy import deepcopy
@@ -65,7 +58,7 @@ from copy import deepcopy
 from .base import NoDbBase, TriggerEvents
 from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
-from .prep import Prep
+from .redis_prep import RedisPrep as Prep
 from wepppy.nodb.mixins.log_mixin import LogMixin
 
 
@@ -94,8 +87,8 @@ def breakpoint_file_fix(fn):
 
 CLIMATE_MAX_YEARS = 1000
 
-if NCPU > 8:
-    NCPU = 8
+if NCPU > 24:
+    NCPU = 24
 
 class ClimateSummary(object):
     def __init__(self):

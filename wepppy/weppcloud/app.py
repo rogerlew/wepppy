@@ -18,7 +18,6 @@ from os.path import split as _split
 
 from collections import Counter
 
-import io
 from io import BytesIO
 import json
 import shutil
@@ -26,10 +25,7 @@ import traceback
 from glob import glob
 from subprocess import check_output, Popen, PIPE
 
-import numpy as np
 import pandas as pd
-
-import markdown
 
 import awesome_codename
 
@@ -65,18 +61,18 @@ from wepppy.all_your_base import isfloat, isint
 from wepppy.all_your_base.geo import crop_geojson, read_raster
 from wepppy.all_your_base.dateutils import parse_datetime, YearlessDate
 
-from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup, Disturbed
+from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup
 from wepppy.nodb.preflight import preflight_check
 
 from wepppy.soils.ssurgo import NoValidSoilsException
-from wepppy.topaz import (
+from wepppy.topo.topaz import (
     WatershedBoundaryTouchesEdgeError,
     MinimumChannelLengthTooShortError
 )
 from wepppy.climates.cligen import (
     StationMeta
 )
-from wepppy.watershed_abstraction import (
+from wepppy.topo.watershed_abstraction import (
     ChannelRoutingError,
 )
 from wepppy.wepp import management
@@ -111,7 +107,6 @@ from wepppy.nodb import (
     Wepp, WeppPost,
     Unitizer,
     Observed,
-    Shrubland,
     RangelandCover, RangelandCoverMode,
     Rhem, RhemPost,
     Baer,
@@ -142,7 +137,6 @@ else:
 
 import hashlib
 
-from jinja2 import Environment, FileSystemLoader
 
 def sort_numeric_keys(value, reverse=False):
     return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
@@ -1529,7 +1523,7 @@ def archive(runid, config):
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json/')
 def meta_subcatchmets_wgs(runid, config):
-    from wepppy.export import arc_export, archive_project
+    from wepppy.export import arc_export
 
     # get working dir of original directory
     wd = get_wd(runid)
@@ -2557,7 +2551,7 @@ def export_prep_details(runid, config):
     # get working dir of original directory
     wd = get_wd(runid)
 
-    from wepppy.export import archive_project, arc_export
+    from wepppy.export import archive_project
     from wepppy.export.prep_details import export_channels_prep_details, export_hillslopes_prep_details
 
     try:

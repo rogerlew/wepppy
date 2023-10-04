@@ -4,7 +4,7 @@
 
 from wepppy.all_your_base import NCPU
 
-from wepppy.watershed_abstraction import SlopeFile
+from wepppy.topo.watershed_abstraction import SlopeFile
 
 
 # wepppy submodules
@@ -36,7 +36,6 @@ from glob import glob
 
 import shutil
 from time import sleep
-from enum import IntEnum
 
 # non-standard
 import jsonpickle

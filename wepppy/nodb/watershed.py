@@ -9,14 +9,12 @@
 from typing import Generator, Dict, Union, Tuple
 
 import os
-import json
 from enum import IntEnum
 
 from os.path import join as _join
 from os.path import exists as _exists
 
 import jsonpickle
-import utm
 import numpy as np
 
 import multiprocessing
@@ -24,25 +22,29 @@ import multiprocessing
 from osgeo import gdal, osr
 from osgeo.gdalconst import *
 
-import wepppy
-from wepppy.watershed_abstraction import (
+from wepppy.topo.watershed_abstraction import (
     WatershedAbstraction,
     WeppTopTranslator
 )
-from wepppy.taudem import TauDEMTopazEmulator
-from wepppy.watershed_abstraction import SlopeFile
-from wepppy.watershed_abstraction.support import HillSummary, ChannelSummary
+from wepppy.topo.taudem import TauDEMTopazEmulator
+from wepppy.topo.peridot.runner import run_peridot_abstract_watershed, post_abstract_watershed, read_network
+from wepppy.topo.watershed_abstraction import SlopeFile
+from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary
 from wepppy.all_your_base.geo import read_raster, haversine
 
 from .ron import Ron
 from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
-from .prep import Prep
+from .redis_prep import RedisPrep as Prep
 
 from wepppy.all_your_base import (
-    isfloat,
     NCPU
 )
+
+
+# https://dev.wepp.cloud/weppcloud/runs/combatant-fixer/disturbed9002/
+# https://dev.wepp.cloud/weppcloud/runs/waking-clang/disturbed9002/
+
 
 NCPU = multiprocessing.cpu_count() - 2
 
@@ -104,7 +106,7 @@ class Watershed(NoDbBase):
             self._centroid = None
             self._outlet_top_id = None
             self._outlet = None
-            
+
             self._wepp_chn_type = self.config_get_str('soils', 'wepp_chn_type')
 
             self._clip_hillslope_length = self.config_get_float('watershed', 'clip_hillslope_length')
@@ -124,6 +126,8 @@ class Watershed(NoDbBase):
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
+
+            self._abstraction_backend = self.config_get_str('watershed', 'abstraction_backend', 'peridot')
 
             wat_dir = self.wat_dir
             if not _exists(wat_dir):
@@ -189,6 +193,14 @@ class Watershed(NoDbBase):
         if pts is None:
             return 99
         return pts
+
+    @property
+    def abstraction_backend(self):
+        return getattr(self, '_abstraction_backend', 'topaz')
+
+    @property
+    def abstraction_backend_is_peridot(self):
+        return self.abstraction_backend == 'peridot'
 
     @property
     def clip_hillslopes(self):
@@ -494,11 +506,8 @@ class Watershed(NoDbBase):
         if _exists(self.subwta):
             os.remove(self.subwta)
 
-        try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('build_channels')
-        except FileNotFoundError:
-            pass
+        prep = Prep.getInstance(self.wd)
+        prep.timestamp('build_channels')
 
     #
     # set outlet
@@ -588,12 +597,40 @@ class Watershed(NoDbBase):
     #
     # abstract watershed
     #
+
     def abstract_watershed(self):
 
-        if self.delineation_backend_is_topaz:
-            self._topaz_abstract_watershed()
+        if self.abstraction_backend_is_peridot:
+            assert self.delineation_backend_is_topaz
+            run_peridot_abstract_watershed(self.wd,
+                                           clip_hillslopes=self.clip_hillslopes,
+                                           clip_hillslope_length=self.clip_hillslope_length)
+
+            self.lock()
+            try:
+                self._subs_summary, self._chns_summary, self._fps_summary = post_abstract_watershed(self.wd)
+
+                lnglat = np.array([summary.centroid.lnglat for summary in self._subs_summary.values()])
+                lnglat = np.mean(lnglat, axis=0)
+                self._centroid = [float(x) for x in lnglat]
+
+                self._wsarea = sum(summary.area for summary in self._subs_summary.values()) + \
+                               sum(summary.area for summary in self._chns_summary.values())
+
+                network = read_network(_join(self.wat_dir, 'network.txt'))
+                translator = self.translator_factory()
+                self._structure = translator.build_structure(network)
+
+                self.dump_and_unlock()
+            except:
+                self.unlock('-f')
+                raise
+
         else:
-            self._taudem_abstract_watershed()
+            if self.delineation_backend_is_topaz:
+                self._topaz_abstract_watershed()
+            else:
+                self._taudem_abstract_watershed()
 
         if self.multi_ofe:
             self._build_multiple_ofe()
@@ -603,6 +640,7 @@ class Watershed(NoDbBase):
             prep.timestamp('abstract_watershed')
         except FileNotFoundError:
             pass
+
 
     @property
     def sub_area(self):

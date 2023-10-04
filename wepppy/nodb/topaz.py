@@ -12,18 +12,14 @@ from os.path import exists as _exists
 
 import math
 import jsonpickle
-import utm
 
 import numpy as np
 import numpy.ma as ma
 
-from wepppy.topaz import TopazRunner
-from wepppy.all_your_base.geo import read_arc, utm_srid
+from wepppy.topo.topaz import TopazRunner
+from wepppy.all_your_base.geo import read_arc
 
 from .base import NoDbBase
-
-import rasterio
-import rasterio.warp
 
 
 # this needs to be here to unpickle old projects
