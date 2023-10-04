@@ -24,13 +24,13 @@ class RedisPrep:
 
     @staticmethod
     def getInstance(wd):
-        self = RedisPrep(wd)
-        self.lazy_load()
-        return self
+        instance = RedisPrep(wd)
+        instance.lazy_load()
+        return instance
 
     @property
     def dump_filepath(self):
-        return os.path.join(self.wd, 'redisprep.dump')
+        return _join(self.wd, 'redisprep.dump')
 
     def dump(self):
         all_fields_and_values = self.redis.hgetall(self.run_id)
@@ -43,11 +43,12 @@ class RedisPrep:
             return
 
         if _exists(self.dump_filepath):
-            with open(dump_filepath, 'r') as dump_file:
+            with open(self.dump_filepath, 'r') as dump_file:
                 all_fields_and_values = json.load(dump_file)
             
             for field, value in all_fields_and_values.items():
                 self.redis.hset(self.run_id, field, value)
+            self.redis.hset(self.run_id, 'attrs:loaded', 'true')
 
     @property
     def sbs_required(self):
