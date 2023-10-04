@@ -64,6 +64,12 @@ from wepppy.nodb.mixins.log_mixin import LogMixin
 
 import requests
 
+try:
+    import wepppyo3
+    from wepppyo3.climate import cli_revision as pyo3_cli_revision
+except:
+    wepppyo3 = None
+
 
 def download_file(url, dst):
     response = requests.get(url)
@@ -291,6 +297,14 @@ def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmi
     hill_tmins = get_monthlies(tmin_fn, hill_lng, hill_lat)
     hill_tmaxs = get_monthlies(tmax_fn, hill_lng, hill_lat)
 
+    if wepppyo3 is not None and not cli.breakpoint:
+        pyo3_cli_revision(cli.cli_fn, new_cli_path,
+                          ws_ppts, ws_tmaxs, ws_tmins,
+                          hill_ppts, hill_tmaxs, hill_tmins)
+        assert _exists(new_cli_path), 'wepppyo3.climate.cli_revision failed'
+        return
+
+    
     cli2 = deepcopy(cli)
 
     df = cli2.as_dataframe()
