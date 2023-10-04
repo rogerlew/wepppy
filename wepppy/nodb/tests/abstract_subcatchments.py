@@ -1,5 +1,3 @@
-from wepppy.watershed_abstraction import WatershedAbstraction
-
 from wepppy.nodb import Watershed
 
 if __name__ == '__main__':

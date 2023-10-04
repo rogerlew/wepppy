@@ -30,7 +30,6 @@ def prism_mod(par: int, years: int, lng: float, lat: float, wd: str,
                    logger=logger)
 
 
-# noinspection PyPep8Naming
 def prism_revision(cli_fn: str, ws_lng: float, ws_lat: float,
                    hill_lng: float, hill_lat: float, new_cli_fn: None):
 
