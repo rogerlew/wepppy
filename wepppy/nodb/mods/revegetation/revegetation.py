@@ -30,7 +30,7 @@ from datetime import datetime
 # non-standard
 
 
-from wepppy.watershed_abstraction import SlopeFile
+from wepppy.topo.watershed_abstraction import SlopeFile
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture
 
