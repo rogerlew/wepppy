@@ -26,15 +26,12 @@ import jsonpickle
 from wepppy.soils.ssurgo import (
     SurgoMap, 
     StatsgoSpatial, 
-    SurgoSoilCollection, 
-    NoValidSoilsException, 
+    SurgoSoilCollection,
     SoilSummary
 )
-from wepppy.watershed_abstraction.support import is_channel
-from wepppy.all_your_base import isfloat
+from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
-from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, WeppSoilUtil
 
 # wepppy submodules
 from .base import (
@@ -44,7 +41,7 @@ from .base import (
 
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
-from .prep import Prep
+from .redis_prep import RedisPrep as Prep
 from .mixins.log_mixin import LogMixin
 
 try:

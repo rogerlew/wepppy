@@ -24,7 +24,7 @@ import numpy as np
 # wepppy
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
-from wepppy.watershed_abstraction.support import is_channel
+from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import read_raster
@@ -36,7 +36,7 @@ from .base import (
 )
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
-from .prep import Prep
+from .redis_prep import RedisPrep as Prep
 
 try:
     import rustpy_geo
@@ -76,8 +76,6 @@ class Landuse(NoDbBase):
         super(Landuse, self).__init__(wd, cfg_fn)
 
         self.lock()
-
-        from wepppy.nodb.mods import MODS_DIR
 
         # noinspection PyBroadException
         try:

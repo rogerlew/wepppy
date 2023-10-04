@@ -36,7 +36,7 @@ from ...soils import Soils
 from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
-from ...prep import Prep
+from ...redis_prep import RedisPrep as Prep
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 
