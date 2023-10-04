@@ -1142,7 +1142,9 @@ function heartbeat(){
 }
 
 var run_heartbeat = 0;
-var heartbeat_interval = setInterval(heartbeat, 2000);
+if ( !{{ ron.readonly | tojson }} ) {
+    var heartbeat_interval = setInterval(heartbeat, 2000);
+}
 
 $( window ).scroll(function() {
     run_heartbeat = 0;

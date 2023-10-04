@@ -131,7 +131,7 @@
                 <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_spatialmode0" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 0] }}> Single Climate
                     <a data-toggle="tooltip" data-placement="top" title="One per watershed."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates (this is slow)
+                <label class="radio"><input type="radio" value="1" class="disable-readonly" id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
             </div>
