@@ -4,16 +4,12 @@ from os.path import join as _join
 from os.path import split as _split
 import shutil
 import json
-import sys
 import subprocess
-from subprocess import PIPE
 from glob import glob
-import math
-from time import sleep
 
 from wepppy.all_your_base import isnan, isinf
-from wepppy.nodb import Ron, Wepp, Topaz, Watershed, Ash
-from wepppy.watershed_abstraction.support import json_to_wgs
+from wepppy.nodb import Ron, Wepp, Watershed, Ash
+from wepppy.topo.watershed_abstraction.support import json_to_wgs
 
 
 def has_arc_export(wd):
