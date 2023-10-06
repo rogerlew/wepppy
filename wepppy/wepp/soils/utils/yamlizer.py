@@ -356,9 +356,13 @@ class WeppSoilUtil(object):
         for i in range(ntemp):
             ofe = ofes[i]
 
+            _luse = None
             # build its over 9000 header
             if datver > 9000:
                 _luse = ofe['luse']
+                if _luse is None:
+                    _luse = ()
+
                 _burn_code = 0
                 if 'agriculture' in _luse:
                     _burn_code = 100
@@ -375,6 +379,9 @@ class WeppSoilUtil(object):
                     _burn_code += 2
                 elif 'high sev' in _luse:
                     _burn_code += 3
+
+            if not _luse:
+                _luse = "N/A"
 
             if datver > 9000.0 and datver < 9003.0:
                 _ksatadj = ofe['ksatadj']

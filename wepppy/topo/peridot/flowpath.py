@@ -60,6 +60,9 @@ class PeridotFlowpath:
 
         return d
 
+    @property
+    def fname(self):
+        return f'slope_files/flowpaths/{self.topaz_id}/fp_{self.topaz_id}_{self.fp_id}.slp'
 
 @dataclass
 class PeridotHillslope:
@@ -114,6 +117,10 @@ class PeridotHillslope:
             d['fp_longest_slope'] = self.fp_longest_slope
 
         return d
+
+    @property
+    def fname(self):
+        return f'slope_files/hillslopes/hill_{self.topaz_id}.slp'
 
 @dataclass
 class PeridotChannel:
