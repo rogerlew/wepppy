@@ -621,16 +621,19 @@ def exception_factory(msg='Error Handling Request',
     if stacktrace is None:
         stacktrace = traceback.format_exc()
 
-    if run_id is not None:
+    if runid is not None:
         wd = get_wd(runid)
         with open(_join(wd, 'exceptions.log'), 'a') as fp:
+            fp.write(f'[{datetime.now()}]\n')
             fp.write(stacktrace)
+            fp.write('\n\n')
 
     with open('/var/log/exceptions.log', 'a') as fp:
-        if run_id is not None:
-            fp.write(f'{run_id}\n')
+        fp.write(f'[{datetime.now()}] ')
+        if runid is not None:
+            fp.write(f'{runid}\n')
         fp.write(stacktrace)
-
+        fp.write('\n\n')
 
     return make_response(jsonify({'Success': False,
                          'Error': msg,
@@ -4465,8 +4468,8 @@ def report_wepp_sediment_delivery(runid, config):
                                user=current_user)
 
     except Exception:
-        return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss. , runid=runid)
-                                 "Check that the loss_pw0.txt contains a class fractions table.")
+        return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss."
+                                 "Check that the loss_pw0.txt contains a class fractions table.", runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/rhem/runoff/subcatchments')
