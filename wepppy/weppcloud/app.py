@@ -616,13 +616,25 @@ def error_factory(msg='Error Handling Request'):
 
 
 def exception_factory(msg='Error Handling Request',
-                      stacktrace=None):
+                      stacktrace=None,
+                      runid=None):
     if stacktrace is None:
-        stacktrace = traceback.format_exc().split('\n')
+        stacktrace = traceback.format_exc()
+
+    if run_id is not None:
+        wd = get_wd(runid)
+        with open(_join(wd, 'exceptions.log'), 'a') as fp:
+            fp.write(stacktrace)
+
+    with open('/var/log/exceptions.log', 'a') as fp:
+        if run_id is not None:
+            fp.write(f'{run_id}\n')
+        fp.write(stacktrace)
+
 
     return make_response(jsonify({'Success': False,
                          'Error': msg,
-                         'StackTrace': stacktrace}), 500)
+                         'StackTrace': stacktrace.split('\n')}), 500)
 
 
 def success_factory(kwds=None):
@@ -1367,7 +1379,7 @@ def modify_disturbed(runid, config):
         return render_template('controls/edit_csv.htm', 
             csv_url='../browse/disturbed/disturbed_land_soil_lookup.csv?raw')
     except:
-        return exception_factory('Error Clearing Locks')
+        return exception_factory('Error Clearing Locks', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/reset_disturbed')
@@ -1404,7 +1416,7 @@ def reset_disturbed(runid, config):
 
         return success_factory()
     except:
-        return exception_factory('Error Clearing Locks')
+        return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
 
 
 
@@ -1426,7 +1438,7 @@ def task_modify_disturbed(runid, config):
         write_disturbed_land_soil_lookup(lookup_fn, data)
         return success_factory()
     except:
-        return exception_factory('Error Clearing Locks')
+        return exception_factory('Error Modifying Disturbed', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/delete', methods=['POST'])
@@ -1454,13 +1466,13 @@ def delete_run(runid, config):
     try:
         shutil.rmtree(wd)
     except:
-        return exception_factory('Error removing project folder')
+        return exception_factory('Error removing project folder', runid=runid)
 
     try:
         run = Run.query.filter(Run.runid == runid).first()
         user_datastore.delete_run(run)
     except:
-        return exception_factory('Error Clearing Locks')
+        return exception_factory('Error removing run from database', runid=runid)
 
     return success_factory()
 
@@ -1481,7 +1493,7 @@ def clear_locks(runid, config):
         return success_factory()
 
     except:
-        return exception_factory('Error Clearing Locks')
+        return exception_factory('Error Clearing Locks', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/archive')
@@ -1503,7 +1515,7 @@ def archive(runid, config):
                 if len(glob(_join(ron.export_arc_dir, '*.shp'))) == 0:
                     legacy_arc_export(wd)
             except Exception:
-                return exception_factory('Error running legacy_arc_export')
+                return exception_factory('Error running legacy_arc_export', runid=runid)
 
         ron = Ron.getInstance(wd)
         if not _exists( _join(ron.export_dir, 'prep_details', 'hillslopes.csv')):
@@ -1517,7 +1529,7 @@ def archive(runid, config):
         return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
 
     except:
-        return exception_factory('Error Archiving Project')
+        return exception_factory('Error Archiving Project', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/meta/subcatchments.WGS.json')
@@ -1539,7 +1551,7 @@ def meta_subcatchmets_wgs(runid, config):
             return success_factory()
 
     except Exception:
-        return exception_factory('Error running arc_export')
+        return exception_factory('Error running arc_export', runid=runid)
 
 
 def log_access(wd, current_user, ip):
@@ -1654,7 +1666,7 @@ def runs0(runid, config):
                                precisions=wepppy.nodb.unitizer.precisions,
                                run_id=runid)
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # https://wepp.cloud/weppcloud/runs/proletarian-respondent/baer/hillslope/21/ash/?fire_date=8.4&ash_type=white&ini_ash_depth=5.0
@@ -1764,7 +1776,7 @@ def hillslope0_ash(runid, config, topaz_id):
                                user=current_user)
 
     except:
-        return exception_factory('Error loading ash hillslope results')
+        return exception_factory('Error loading ash hillslope results', runid=runid)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/adduser/', methods=['POST'])
@@ -1857,7 +1869,7 @@ def resources_netful_geojson(runid, config):
         fn = watershed.netful_shp
         return send_file(fn, mimetype='application/json')
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -1883,7 +1895,7 @@ def resources_subcatchments_geojson(runid, config):
 
         return jsonify(js)
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -1923,7 +1935,7 @@ def resources_bounds_geojson(runid, config):
 
         return jsonify(js)
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -1945,7 +1957,7 @@ def resources_channels_geojson(runid, config):
 
         return jsonify(js)
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/setname/', methods=['POST'])
@@ -1973,7 +1985,7 @@ def task_set_unit_preferences(runid, config):
         res = unitizer.set_preferences(request.form)
         return success_factory(res)
     except:
-        return exception_factory('Error setting unit preferences')
+        return exception_factory('Error setting unit preferences', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/delineation_pass')
@@ -1996,7 +2008,7 @@ def query_topaz_pass(runid, config):
 
         return None
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/extent')
@@ -2043,7 +2055,7 @@ def task_setoutlet(runid, config):
         lat = float(request.form.get('latitude', None))
         lng = float(request.form.get('longitude', None))
     except Exception:
-        return exception_factory('latitude and longitude must be provided as floats')
+        return exception_factory('latitude and longitude must be provided as floats', runid=runid)
 
     wd = get_wd(runid)
     watershed = Watershed.getInstance(wd)
@@ -2051,7 +2063,7 @@ def task_setoutlet(runid, config):
     try:
         watershed.set_outlet(lng, lat)
     except Exception:
-        return exception_factory('Could not set outlet')
+        return exception_factory('Could not set outlet', runid=runid)
 
     return success_factory()
 
@@ -2482,7 +2494,7 @@ def task_fetch_dem(runid, config):
     try:
         ron.fetch_dem()
     except Exception:
-        return exception_factory('Fetching DEM Failed')
+        return exception_factory('Fetching DEM Failed', runid=runid)
 
     return success_factory()
 
@@ -2497,7 +2509,7 @@ def export_ermit(runid, config):
         name = _split(fn)[-1]
         return send_file(fn, as_attachment=True, attachment_filename=name)
     except:
-        return exception_factory('Error exporting ERMiT')
+        return exception_factory('Error exporting ERMiT', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/export/arcmap')
@@ -2516,7 +2528,7 @@ def export_arcmap(runid, config):
             if len(glob(_join(ron.export_legacy_arc_dir, '*.shp'))) == 0:
                 legacy_arc_export(wd)
         except Exception:
-            return exception_factory('Error running legacy_arc_export')
+            return exception_factory('Error running legacy_arc_export', runid=runid)
 
         try:
             if not request.args.get('no_retrieve', None) is not None:
@@ -2526,14 +2538,14 @@ def export_arcmap(runid, config):
                 return success_factory()
 
         except Exception:
-            return exception_factory('Error running arc_export')
+            return exception_factory('Error running arc_export', runid=runid)
 
     else:
         try:
             if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
                 arc_export(wd)
         except Exception:
-            return exception_factory('Error running arc_export')
+            return exception_factory('Error running arc_export', runid=runid)
 
         try:
             if not request.args.get('no_retrieve', None) is not None:
@@ -2543,7 +2555,7 @@ def export_arcmap(runid, config):
                 return success_factory()
 
         except Exception:
-            return exception_factory('Error running arc_export')
+            return exception_factory('Error running arc_export', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/export/prep_details')
@@ -2559,7 +2571,7 @@ def export_prep_details(runid, config):
         export_hillslopes_prep_details(wd)
         fn = export_channels_prep_details(wd)
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
     if not request.args.get('no_retrieve', None) is not None:
         archive_path = archive_project(_split(fn)[0])
@@ -2608,7 +2620,7 @@ def task_build_channels(runid, config):
             try:
                 ron.fetch_dem()
             except Exception:
-                return exception_factory('Fetching DEM Failed')
+                return exception_factory('Fetching DEM Failed', runid=runid)
 
     # Delineate channels
     watershed = Watershed.getInstance(wd)
@@ -2617,9 +2629,9 @@ def task_build_channels(runid, config):
 
     except Exception as e:
         if isinstance(e, MinimumChannelLengthTooShortError):
-            return exception_factory(e.__name__, e.__doc__)
+            return exception_factory(e.__name__, e.__doc__, runid=runid)
         else:
-            return exception_factory('Building Channels Failed')
+            return exception_factory('Building Channels Failed', runid=runid)
 
     return success_factory()
 
@@ -2696,13 +2708,13 @@ def task_build_subcatchments(runid, config):
             watershed.build_subcatchments(pkcsa=pkcsa)
         except Exception as e:
             if isinstance(e, WatershedBoundaryTouchesEdgeError):
-                return exception_factory(e.__name__, e.__doc__)
+                return exception_factory(e.__name__, e.__doc__, runid=runid)
             else:
-                return exception_factory('Building Subcatchments Failed')
+                return exception_factory('Building Subcatchments Failed', runid=runid)
 
         return success_factory()
     except:
-        return exception_factory('Building Subcatchments Failed')
+        return exception_factory('Building Subcatchments Failed', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/watershed/subcatchments')
@@ -2728,7 +2740,7 @@ def query_watershed_summary(runid, config):
                                user=current_user,
                                watershed=Watershed.getInstance(wd))
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/abstract_watershed/', methods=['GET', 'POST'])
@@ -2740,9 +2752,9 @@ def task_abstract_watershed(runid, config):
         watershed.abstract_watershed()
     except Exception as e:
         if isinstance(e, ChannelRoutingError):
-            return exception_factory(e.__name__, e.__doc__)
+            return exception_factory(e.__name__, e.__doc__, runid=runid)
         else:
-            return exception_factory('Abstracting Watershed Failed')
+            return exception_factory('Abstracting Watershed Failed', runid=runid)
 
     return success_factory()
 
@@ -2763,7 +2775,7 @@ def sub_intersection(runid, config):
         topaz_ids = map.raster_intersection(extent, raster_fn=subwta_fn, discard=(0,))
         return jsonify(topaz_ids)
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/current_cover_summary/', methods=['POST'])
@@ -2786,7 +2798,7 @@ def set_rangeland_cover_mode(runid, config):
         mode = int(request.form.get('mode', None))
         rap_year = int(request.form.get('rap_year', None))
     except Exception:
-        exception_factory('mode and rap_year must be provided')
+        exception_factory('mode and rap_year must be provided', runid=runid)
 
     wd = get_wd(runid)
     rangeland_cover = RangelandCover.getInstance(wd)
@@ -2795,7 +2807,7 @@ def set_rangeland_cover_mode(runid, config):
         rangeland_cover.mode = RangelandCoverMode(mode)
         rangeland_cover.rap_year = rap_yearsingle_selection
     except Exception:
-        exception_factory('error setting mode or rap_year')
+        exception_factory('error setting mode or rap_year', runid=runid)
 
     return success_factory()
 
@@ -2811,7 +2823,7 @@ def set_landuse_mode(runid, config):
         single_selection = \
             int(request.form.get('landuse_single_selection', None))
     except Exception:
-        exception_factory('mode and landuse_single_selection must be provided')
+        exception_factory('mode and landuse_single_selection must be provided', runid=runid)
 
     wd = get_wd(runid)
     landuse = Landuse.getInstance(wd)
@@ -2820,7 +2832,7 @@ def set_landuse_mode(runid, config):
         landuse.mode = LanduseMode(mode)
         landuse.single_selection = single_selection
     except Exception:
-        exception_factory('error setting landuse mode')
+        exception_factory('error setting landuse mode', runid=runid)
 
     return success_factory()
 
@@ -2834,7 +2846,7 @@ def set_landuse_db(runid, config):
     try:
         db = request.form.get('landuse_db', None)
     except Exception:
-        exception_factory('landuse_db must be provided')
+        exception_factory('landuse_db must be provided', runid=runid)
 
     wd = get_wd(runid)
     landuse = Landuse.getInstance(wd)
@@ -2842,7 +2854,7 @@ def set_landuse_db(runid, config):
     try:
         landuse.nlcd_db = db
     except Exception:
-        exception_factory('error setting landuse mode')
+        exception_factory('error setting landuse mode', runid=runid)
 
     return success_factory()
 
@@ -2982,7 +2994,7 @@ def report_landuse(runid, config):
                                report=landuse.report)
 
     except Exception:
-        return exception_factory('Reporting landuse failed')
+        return exception_factory('Reporting landuse failed', runid=runid)
 
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments')
 @app.route('/runs/<string:runid>/<config>/query/rangeland_cover/subcatchments/')
@@ -3034,9 +3046,9 @@ def task_build_landuse(runid, config):
         landuse.build()
     except Exception as e:
         if isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__)
+            return exception_factory(e.__name__, e.__doc__, runid=runid)
         else:
-            return exception_factory('Building Landuse Failed')
+            return exception_factory('Building Landuse Failed', runid=runid)
 
     return success_factory()
 
@@ -3097,12 +3109,12 @@ def task_modify_landuse(runid, config):
         lccode = request.form.get('landuse', None)
         lccode = str(int(lccode))
     except Exception:
-        return exception_factory('Unpacking Modify Landuse Args Faied')
+        return exception_factory('Unpacking Modify Landuse Args Faied', runid=runid)
 
     try:
         landuse.modify(topaz_ids, lccode)
     except Exception:
-        return exception_factory('Modifying Landuse Failed')
+        return exception_factory('Modifying Landuse Failed', runid=runid)
 
     return success_factory()
 
@@ -3123,7 +3135,7 @@ def set_soil_mode(runid, config):
             request.form.get('soil_single_dbselection', None)
 
     except Exception:
-        exception_factory('mode and soil_single_selection must be provided')
+        exception_factory('mode and soil_single_selection must be provided', runid=runid)
 
     wd = get_wd(runid)
 
@@ -3134,7 +3146,7 @@ def set_soil_mode(runid, config):
         soils.single_dbselection = single_dbselection
 
     except Exception:
-        exception_factory('error setting soils mode')
+        exception_factory('error setting soils mode', runid=runid)
 
     return success_factory()
 
@@ -3183,9 +3195,9 @@ def task_build_soil(runid, config):
         soils.build(initial_sat=initial_sat)
     except Exception as e:
         if isinstance(e, NoValidSoilsException) or isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__)
+            return exception_factory(e.__name__, e.__doc__, runid=runid)
         else:
-            return exception_factory('Building Soil Failed')
+            return exception_factory('Building Soil Failed', runid=runid)
 
     return success_factory()
 
@@ -3197,7 +3209,7 @@ def set_climatestation_mode(runid, config):
     try:
         mode = int(request.form.get('mode', None))
     except Exception:
-        return exception_factory('Could not determine mode')
+        return exception_factory('Could not determine mode', runid=runid)
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
@@ -3205,7 +3217,7 @@ def set_climatestation_mode(runid, config):
     try:
         climate.climatestation_mode = ClimateStationMode(int(mode))
     except Exception:
-        return exception_factory('Building setting climate station mode')
+        return exception_factory('Building setting climate station mode', runid=runid)
 
     return success_factory()
 
@@ -3217,7 +3229,7 @@ def set_climatestation(runid, config):
     try:
         station = request.form.get('station', None)
     except Exception:
-        return exception_factory('Station not provided')
+        return exception_factory('Station not provided', runid=runid)
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
@@ -3225,7 +3237,7 @@ def set_climatestation(runid, config):
     try:
         climate.climatestation = station
     except Exception:
-        return exception_factory('Building setting climate station mode')
+        return exception_factory('Building setting climate station mode', runid=runid)
 
     return success_factory()
 
@@ -3241,7 +3253,7 @@ def task_upload_cli(runid, config):
     try:
         file = request.files['input_upload_cli']
     except Exception:
-        return exception_factory('Could not find file')
+        return exception_factory('Could not find file', runid=runid)
 
     try:
         if file.filename == '':
@@ -3249,17 +3261,17 @@ def task_upload_cli(runid, config):
 
         filename = secure_filename(file.filename)
     except Exception:
-        return exception_factory('Could not obtain filename')
+        return exception_factory('Could not obtain filename', runid=runid)
 
     try:
         file.save(_join(climate.cli_dir, filename))
     except Exception:
-        return exception_factory('Could not save file')
+        return exception_factory('Could not save file', runid=runid)
 
     try:
         res = climate.set_user_defined_cli(filename)
     except Exception:
-        return exception_factory('Failed validating file')
+        return exception_factory('Failed validating file', runid=runid)
 
     return success_factory()
 
@@ -3294,7 +3306,7 @@ def set_climate_mode(runid, config):
     try:
         mode = int(request.form.get('mode', None))
     except Exception:
-        return exception_factory('Could not determine mode')
+        return exception_factory('Could not determine mode', runid=runid)
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
@@ -3302,7 +3314,7 @@ def set_climate_mode(runid, config):
     try:
         climate.climate_mode = mode
     except Exception:
-        return exception_factory('Building setting climate mode')
+        return exception_factory('Building setting climate mode', runid=runid)
 
     return success_factory()
 
@@ -3313,7 +3325,7 @@ def set_climate_spatialmode(runid, config):
     try:
         spatialmode = int(request.form.get('spatialmode', None))
     except Exception:
-        return exception_factory('Could not determine mode')
+        return exception_factory('Could not determine mode', runid=runid)
 
     wd = get_wd(runid)
     climate = Climate.getInstance(wd)
@@ -3321,7 +3333,7 @@ def set_climate_spatialmode(runid, config):
     try:
         climate.climate_spatialmode = spatialmode
     except Exception:
-        return exception_factory('Building setting climate spatial mode')
+        return exception_factory('Building setting climate spatial mode', runid=runid)
 
     return success_factory()
 
@@ -3338,7 +3350,7 @@ def view_closest_stations(runid, config):
         try:
             results = climate.find_closest_stations()
         except Exception:
-            return exception_factory('Error finding closest stations')
+            return exception_factory('Error finding closest stations', runid=runid)
 
     if results is None:
         return Response('<!-- closest_stations is None -->', mimetype='text/html')
@@ -3365,7 +3377,7 @@ def view_heuristic_stations(runid, config):
         try:
             results = climate.find_heuristic_stations()
         except Exception:
-            return exception_factory('Error finding heuristic stations')
+            return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
@@ -3405,7 +3417,7 @@ def view_eu_heuristic_stations(runid, config):
     try:
         results = climate.find_eu_heuristic_stations()
     except Exception:
-        return exception_factory('Error finding heuristic stations')
+        return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
@@ -3428,7 +3440,7 @@ def view_au_heuristic_stations(runid, config):
     try:
         results = climate.find_au_heuristic_stations()
     except Exception:
-        return exception_factory('Error finding heuristic stations')
+        return exception_factory('Error finding heuristic stations', runid=runid)
 
     if results is None:
         return Response('<!-- heuristic_stations is None -->', mimetype='text/html')
@@ -3452,7 +3464,7 @@ def view_climate_monthlies(runid, config):
     try:
         station_meta = climate.climatestation_meta
     except Exception:
-        return exception_factory('Could not find climatestation_meta')
+        return exception_factory('Could not find climatestation_meta', runid=runid)
 
     if station_meta is None:
         return error_factory('Climate Station not Set')
@@ -3473,7 +3485,7 @@ def task_build_climate(runid, config):
     try:
         climate.parse_inputs(request.form)
     except Exception:
-        return exception_factory('Error parsing climate inputs')
+        return exception_factory('Error parsing climate inputs', runid=runid)
 
     try:
         climate.build()
@@ -3481,9 +3493,9 @@ def task_build_climate(runid, config):
         if isinstance(e, NoClimateStationSelectedError) or \
            isinstance(e, ClimateModeIsUndefinedError) or \
            isinstance(e, WatershedNotAbstractedError):
-            return exception_factory(e.__name__, e.__doc__)
+            return exception_factory(e.__name__, e.__doc__, runid=runid)
         else:
-            return exception_factory('Error building climate')
+            return exception_factory('Error building climate', runid=runid)
 
     return success_factory()
 
@@ -3495,7 +3507,7 @@ def task_set_wepp_bin(runid, config):
     try:
         wepp_bin = request.json.get('wepp_bin', None)
     except Exception:
-        return exception_factory('Error parsing routine')
+        return exception_factory('Error parsing routine', runid=runid)
 
     if wepp_bin is None:
         return error_factory('wepp_bin is None')
@@ -3510,7 +3522,7 @@ def task_set_wepp_bin(runid, config):
         wepp = Wepp.getInstance(wd)
         wepp.wepp_bin = wepp_bin
     except Exception:
-        return exception_factory('Error setting wepp_bin')
+        return exception_factory('Error setting wepp_bin', runid=runid)
 
     return success_factory()
 
@@ -3522,7 +3534,7 @@ def task_set_hourly_seepage(runid, config):
     try:
         routine = request.json.get('routine', None)
     except Exception:
-        return exception_factory('Error parsing routine')
+        return exception_factory('Error parsing routine', runid=runid)
 
     if routine is None:
         return error_factory('routine is None')
@@ -3533,7 +3545,7 @@ def task_set_hourly_seepage(runid, config):
     try:
         state = request.json.get('state', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -3554,7 +3566,7 @@ def task_set_hourly_seepage(runid, config):
             wepp.set_run_snow(state)
 
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -3566,7 +3578,7 @@ def task_set_soils_ksflag(runid, config):
     try:
         state = request.json.get('ksflag', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -3576,7 +3588,7 @@ def task_set_soils_ksflag(runid, config):
         soils = Soils.getInstance(wd)
         soils.ksflag = state
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -3589,7 +3601,7 @@ def task_set_disturbed_sol_ver(runid, config):
     try:
         state = request.json.get('sol_ver', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -3599,7 +3611,7 @@ def task_set_disturbed_sol_ver(runid, config):
         disturbed = Disturbed.getInstance(wd)
         disturbed.sol_ver = state
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -3612,7 +3624,7 @@ def task_set_run_flowpaths(runid, config):
     try:
         state = request.json.get('run_flowpaths', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -3622,7 +3634,7 @@ def task_set_run_flowpaths(runid, config):
         wepp = Wepp.getInstance(wd)
         wepp.set_run_flowpaths(state)
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -3645,7 +3657,7 @@ def task_set_public(runid, config):
     try:
         state = request.json.get('public', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -3655,7 +3667,7 @@ def task_set_public(runid, config):
         ron = Ron.getInstance(wd)
         ron.public = state
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -3687,7 +3699,7 @@ def task_set_readonly(runid, config):
     try:
         state = request.json.get('readonly', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -3697,7 +3709,7 @@ def task_set_readonly(runid, config):
         ron = Ron.getInstance(wd)
         ron.readonly = state
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -3713,21 +3725,21 @@ def get_wepp_run_status(runid, config, nodb):
         try:
             return success_factory(wepp.get_log_last())
         except:
-            return exception_factory('Could not determine status')
+            return exception_factory('Could not determine status', runid=runid)
 
     elif nodb == 'climate':
         climate = Climate.getInstance(wd)
         try:
             return success_factory(climate.get_log_last())
         except:
-            return exception_factory('Could not determine status')
+            return exception_factory('Could not determine status', runid=runid)
 
     elif nodb == 'rhem':
         rhem = Rhem.getInstance(wd)
         try:
             return success_factory(rhem.get_log_last())
         except:
-            return exception_factory('Could not determine status')
+            return exception_factory('Could not determine status', runid=runid)
 
     elif nodb == 'rap_ts':
         from wepppy.nodb.mods import RAP_TS
@@ -3735,7 +3747,7 @@ def get_wepp_run_status(runid, config, nodb):
         try:
             return success_factory(rap_ts.get_log_last())
         except:
-            return exception_factory('Could not determine status')
+            return exception_factory('Could not determine status', runid=runid)
 
     return error_factory('Unknown nodb')
 
@@ -3748,7 +3760,7 @@ def report_rhem_results(runid, config):
     try:
         return render_template('controls/rhem_reports.htm')
     except:
-        return exception_factory('Error building reports template')
+        return exception_factory('Error building reports template', runid=runid)
 
 
 # noinspection PyBroadException
@@ -3769,7 +3781,7 @@ def report_wepp_results(runid, config):
                                prep=prep,
                                user=current_user)
     except:
-        return exception_factory('Error building reports template')
+        return exception_factory('Error building reports template', runid=runid)
 
 
 # noinspection PyBroadException
@@ -3796,7 +3808,7 @@ def get_wepp_run_status_full(runid, config, nodb):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error reading status.log')
+        return exception_factory('Error reading status.log', runid=runid)
 
 
 # noinspection PyBroadException
@@ -3811,7 +3823,7 @@ def query_subcatchments_summary(runid, config):
 
         return jsonify(subcatchments_summary)
     except:
-        return exception_factory('Error building summary')
+        return exception_factory('Error building summary', runid=runid)
 
 
 # noinspection PyBroadException
@@ -3826,7 +3838,7 @@ def query_channels_summary(runid, config):
 
         return jsonify(channels_summary)
     except:
-        return exception_factory('Error building summary')
+        return exception_factory('Error building summary', runid=runid)
 
 
 # noinspection PyBroadException
@@ -3851,7 +3863,7 @@ def get_wepp_prep_details(runid, config):
                                user=current_user,
                                ron=ron)
     except:
-        return exception_factory('Error building summary')
+        return exception_factory('Error building summary', runid=runid)
 
 
 # noinspection PyBroadException
@@ -3864,7 +3876,7 @@ def submit_task_run_wepp(runid, config):
     try:
         wepp.parse_inputs(request.form)
     except Exception:
-        return exception_factory('Error parsing climate inputs')
+        return exception_factory('Error parsing climate inputs', runid=runid)
 
     try:
         clip_soils = request.form.get('clip_soils') == 'on'
@@ -3919,7 +3931,7 @@ def submit_task_run_wepp(runid, config):
     try:
         wepp.clean()
     except Exception:
-        return exception_factory('Error cleaning wepp directories')
+        return exception_factory('Error cleaning wepp directories', runid=runid)
 
     try:
 
@@ -3942,7 +3954,7 @@ def submit_task_run_wepp(runid, config):
         wepp.run_watershed()
 
     except Exception:
-        return exception_factory('Error running wepp')
+        return exception_factory('Error running wepp', runid=runid)
 
     return success_factory()
 
@@ -3957,7 +3969,7 @@ def submit_task_run_wepp_watershed(runid, config):
     try:
         wepp.parse_inputs(request.form)
     except Exception:
-        return exception_factory('Error parsing climate inputs')
+        return exception_factory('Error parsing climate inputs', runid=runid)
 
     try:
 
@@ -3974,7 +3986,7 @@ def submit_task_run_wepp_watershed(runid, config):
         wepp.run_watershed()
 
     except Exception:
-        return exception_factory('Error running wepp')
+        return exception_factory('Error running wepp', runid=runid)
 
     return success_factory()
 
@@ -3991,12 +4003,12 @@ def submit_task_run_model_fit(runid, config):
     try:
         observed.parse_textdata(textdata)
     except Exception:
-        return exception_factory('Error parsing text')
+        return exception_factory('Error parsing text', runid=runid)
 
     try:
         observed.calc_model_fit()
     except Exception:
-        return exception_factory('Error running model fit')
+        return exception_factory('Error running model fit', runid=runid)
 
     return success_factory()
 
@@ -4185,7 +4197,7 @@ def report_wepp_loss(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/yearly_watbal')
@@ -4218,7 +4230,7 @@ def report_wepp_yearly_watbal(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_by_landuse')
@@ -4240,7 +4252,7 @@ def report_wepp_avg_annual_by_landuse(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error running wepp_avg_annual_by_landuse')
+        return exception_factory('Error running wepp_avg_annual_by_landuse', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/avg_annual_watbal')
@@ -4264,7 +4276,7 @@ def report_wepp_avg_annual_watbal(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error running watbal')
+        return exception_factory('Error running watbal', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/resources/wepp/daily_streamflow.csv')
@@ -4356,7 +4368,7 @@ def plot_wepp_streamflow(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error running plot_wepp_streamflow')
+        return exception_factory('Error running plot_wepp_streamflow', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/rhem/return_periods')
@@ -4378,7 +4390,7 @@ def report_rhem_return_periods(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error running report_rhem_return_periods')
+        return exception_factory('Error running report_rhem_return_periods', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
@@ -4407,7 +4419,7 @@ def report_wepp_return_periods(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error generating return periods report')
+        return exception_factory('Error generating return periods report', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/wepp/frq_flood')
@@ -4429,7 +4441,7 @@ def report_wepp_frq_flood(runid, config):
                                ron=ron,
                                user=current_user)
     except:
-        return exception_factory('Error running report_wepp_frq_flood')
+        return exception_factory('Error running report_wepp_frq_flood', runid=runid)
 
 
 
@@ -4453,7 +4465,7 @@ def report_wepp_sediment_delivery(runid, config):
                                user=current_user)
 
     except Exception:
-        return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss. "
+        return exception_factory("Error Handling Request: This may have occured if the run did not produce soil loss. , runid=runid)
                                  "Check that the loss_pw0.txt contains a class fractions table.")
 
 
@@ -4585,7 +4597,7 @@ def resources_wepp_loss(runid, config):
         return error_factory('loss_grid_wgs does not exist')
 
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -4608,7 +4620,7 @@ def query_bound_coords(runid, config):
         return error_factory('Could not determine coords')
 
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 #
 # Unitizer
@@ -4631,7 +4643,7 @@ def unitizer_route(runid, config):
         return success_factory(contents)
 
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 @app.route('/runs/<string:runid>/<config>/unitizer_units')
 @app.route('/runs/<string:runid>/<config>/unitizer_units/')
@@ -4648,7 +4660,7 @@ def unitizer_units_route(runid, config):
         return success_factory(contents)
 
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 #
@@ -4675,7 +4687,7 @@ def query_baer_wgs_bounds(runid, config):
                                     classes=baer.classes,
                                     imgurl='resources/baer.png'))
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -4695,7 +4707,7 @@ def query_baer_class_map(runid, config):
 
         return render_template('mods/baer/classify.htm', baer=baer)
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -4719,7 +4731,7 @@ def task_baer_class_map(runid, config):
         baer.modify_burn_class(classes, nodata_vals)
         return success_factory()
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -4744,7 +4756,7 @@ def task_baer_modify_color_map(runid, config):
 
         return success_factory()
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/resources/baer.png')
@@ -4762,7 +4774,7 @@ def resources_baer_sbs(runid, config):
 
         return send_file(baer.baer_rgb_png, mimetype='image/png')
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_firedate/', methods=['POST'])
@@ -4774,7 +4786,7 @@ def set_firedate(runid, config):
         disturbed.fire_date = fire_date
         return success_factory()
     except Exception:
-        return exception_factory("failed to set firedate")
+        return exception_factory("failed to set firedate", runid=runid)
 
 
 # noinspection PyBroadException
@@ -4793,7 +4805,7 @@ def task_rap_ts_acquire(runid, config):
         rap_ts.analyze()
         return success_factory("RAP TS acquired and analyzed")
     except Exception:
-        return exception_factory("failed to set firedate")
+        return exception_factory("failed to set firedate", runid=runid)
 
 
 # noinspection PyBroadException
@@ -4810,7 +4822,7 @@ def task_upload_sbs(runid, config):
     try:
         file = request.files['input_upload_sbs']
     except Exception:
-        return exception_factory('Could not find file')
+        return exception_factory('Could not find file', runid=runid)
 
     try:
         if file.filename == '':
@@ -4818,17 +4830,17 @@ def task_upload_sbs(runid, config):
 
         filename = secure_filename(file.filename)
     except Exception:
-        return exception_factory('Could not obtain filename')
+        return exception_factory('Could not obtain filename', runid=runid)
 
     try:
         file.save(_join(baer.baer_dir, filename))
     except Exception:
-        return exception_factory('Could not save file')
+        return exception_factory('Could not save file', runid=runid)
 
     try:
         res = baer.validate(filename)
     except Exception:
-        return exception_factory('Failed validating file')
+        return exception_factory('Failed validating file', runid=runid)
 
     return success_factory(res)
 
@@ -4851,7 +4863,7 @@ def task_remove_sbs(runid, config):
         return success_factory()
 
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 # noinspection PyBroadException
@@ -4863,12 +4875,12 @@ def task_build_uniform_sbs(runid, config, value):
         disturbed = Disturbed.getInstance(wd)
         sbs_fn = disturbed.build_uniform_sbs(int(value))
     except:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
     try:
         res = disturbed.validate(sbs_fn)
     except Exception:
-        return exception_factory('Failed validating file')
+        return exception_factory('Failed validating file', runid=runid)
 
     return success_factory()
 
@@ -4885,7 +4897,7 @@ def run_debris_flow(runid, config):
         return success_factory()
 
     except:
-        return exception_factory('Error Running Debris Flow')
+        return exception_factory('Error Running Debris Flow', runid=runid)
 
 
 def _task_upload_ash_map(wd, request, file_input_id):
@@ -4981,7 +4993,7 @@ def run_ash(runid, config):
         return success_factory()
 
     except:
-        return exception_factory('Error Running Ash Transport')
+        return exception_factory('Error Running Ash Transport', runid=runid)
 
 
 # noinspection PyBroadException
@@ -4992,7 +5004,7 @@ def task_set_ash_wind_transport(runid, config):
     try:
         state = request.json.get('run_wind_transport', None)
     except Exception:
-        return exception_factory('Error parsing state')
+        return exception_factory('Error parsing state', runid=runid)
 
     if state is None:
         return error_factory('state is None')
@@ -5002,7 +5014,7 @@ def task_set_ash_wind_transport(runid, config):
         ash = Ash.getInstance(wd)
         ash.run_wind_transport = state
     except Exception:
-        return exception_factory('Error setting state')
+        return exception_factory('Error setting state', runid=runid)
 
     return success_factory()
 
@@ -5101,7 +5113,7 @@ def report_ash(runid, config):
                                user=current_user)
 
     except Exception:
-        return exception_factory('Error')
+        return exception_factory('Error', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/query/ash_out')
@@ -5115,7 +5127,7 @@ def query_ash_out(runid, config):
         return jsonify(ash_out)
 
     except Exception:
-        return exception_factory()
+        return exception_factory(runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/report/ash_by_hillslope')
@@ -5182,7 +5194,7 @@ def report_ash_by_hillslope(runid, config):
                                user=current_user)
 
     except Exception:
-        return exception_factory('Error')
+        return exception_factory('Error', runid=runid)
 
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant', methods=['GET', 'POST'])
 @app.route('/runs/<string:runid>/<config>/report/ash_contaminant/', methods=['GET', 'POST'])
@@ -5229,7 +5241,7 @@ def report_contaminant(runid, config):
                                user=current_user)
 
     except Exception:
-        return exception_factory('Error')
+        return exception_factory('Error', runid=runid)
 
 
 @app.route('/combined_ws_viewer')
@@ -5325,12 +5337,12 @@ def submit_task_run_rhem(runid, config):
 #    try:
 #        rhem.parse_inputs(request.form)
 #    except Exception:
-#        return exception_factory('Error parsing climate inputs')
+#        return exception_factory('Error parsing climate inputs', runid=runid)
 
     try:
         rhem.clean()
     except Exception:
-        return exception_factory('Error cleaning rhem directories')
+        return exception_factory('Error cleaning rhem directories', runid=runid)
 
     try:
         watershed = Watershed.getInstance(wd)
@@ -5350,7 +5362,7 @@ def submit_task_run_rhem(runid, config):
         rhem.run_hillslopes()
 
     except Exception:
-        return exception_factory('Error running rhem')
+        return exception_factory('Error running rhem', runid=runid)
 
     return success_factory()
 
@@ -5415,7 +5427,7 @@ def viz_r(runid, config, r_format, routine):
             return fp.read()
 
     except:
-        return exception_factory('Error running script')
+        return exception_factory('Error running script', runid=runid)
 
 
 WEPPCLOUDR_DIR = '/workdir/WEPPcloudR/scripts'
@@ -5531,7 +5543,7 @@ def deval_details(runid, config):
             from wepppy.export import arc_export
             arc_export(wd)
     except:
-        return exception_factory('Error running script')
+        return exception_factory('Error running script', runid=runid)
 
     return weppcloudr_runner(runid, config, routine='new_report.Rmd', user='chinmay')
 
@@ -5617,4 +5629,5 @@ if __name__ == '__main__':
 
 #rsync -av --progress --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /home/roger/wepppy/wepppy/  roger@wepp.cloud:/usr/lib/python3/dist-packages/wepppy/
 #rsync -av --progress --no-times --no-perms --no-owner --no-group --exclude=scripts --exclude=__pycache__ --exclude=validation  --exclude=*.pyc  /workdir/wepppy/wepppy/  roger@wepp.cloud:/usr/lib/python3/dist-packages/wepppy/
+
 
