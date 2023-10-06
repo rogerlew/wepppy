@@ -10,6 +10,8 @@ var error = null;
 
 var cellsize = {{ron.cellsize}};
 
+var readonly = {{ ron.readonly | tojson }};
+
 function window_resize() {
     console.log('window_resize');
     var _map = $('#mapid');
@@ -960,22 +962,29 @@ $(window).on('load', function() {
 var ws;
 
 function updateUI(checklist) {
-    // Example: If checklist contains { "sbs_map": true, "channels": false }, 
-    // it will add the 'checked' class to the '#upload-soil-burn-severity' element and remove it from '#channel-delineation'.
     for (var key in checklist) {
         var selector = getSelectorForKey(key);
-        if (checklist[key]) {
+        if (readonly === true) {
+            $(selector).removeClass('checked').removeClass('unchecked');
+        } else if (checklist[key]) {
             $(selector).addClass('checked').removeClass('unchecked');
         } else {
             $(selector).addClass('unchecked').removeClass('checked');
         }
+    }
+    
+    var selector = getSelectorForKey("sbs_map");
+    if (checklist.sbs_map) {
+        $(selector).addClass('burned').removeClass('unburned');
+    } else {
+        $(selector).addClass('unburned').removeClass('burned');
     }
 }
 
 // Map keys from the checklist to their corresponding CSS selectors
 function getSelectorForKey(key) {
     var mapping = {
-        "sbs_map": 'a[href^="#upload-soil-burn-severity"]',
+        "sbs_map": 'a[href^="#soil-burn-severity-optional"]',
         "channels": 'a[href="#channel-delineation"]',
         "outlet": 'a[href="#outlet"]',
         "subcatchments": 'a[href="#subcatchments-delineation"]',
