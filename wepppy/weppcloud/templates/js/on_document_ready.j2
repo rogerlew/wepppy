@@ -952,201 +952,77 @@ $('.nav li a').click(function(event) {
 
 $(window).on('load', function() {
     $(window).on('resize', window_resize);
-    heartbeat();
     setTimeout(function(){
         window_resize();
     }, 2000);
 });
 
-function heartbeat(){
-    var sbs_li = $('a[href^="#upload-soil-burn-severity"]');
-    var channels_li = $('a[href="#channel-delineation"]');
-    var outlet_li = $('a[href="#outlet"]');
-    var subcatchments_li = $('a[href="#subcatchments-delineation"]');
-    var landuse_li = $('a[href="#landuse-options"]');
-    var soil_li = $('a[href="#soil-options"]');
-    var climate_li = $('a[href="#climate-options"]');
-    var wepp_li = $('a[href="#wepp"]');
-    var observed_li = $('a[href="#observed-data-model-fit"]');
-    var debris_li = $('a[href="#debris-flow-analysis"]');
-    var watar_li = $('a[href="#wildfire-ash-transport-and-risk-watar"]');
+var ws;
 
-    if (run_heartbeat > 10000 || !$("#toc").is(":visible")) {
-        
-        if (!!sbs_li) {
-            sbs_li.removeClass('unchecked');
-            sbs_li.removeClass('burned');
-            sbs_li.removeClass('unburned');
+function updateUI(checklist) {
+    // Example: If checklist contains { "sbs_map": true, "channels": false }, 
+    // it will add the 'checked' class to the '#upload-soil-burn-severity' element and remove it from '#channel-delineation'.
+    for (var key in checklist) {
+        var selector = getSelectorForKey(key);
+        if (checklist[key]) {
+            $(selector).addClass('checked').removeClass('unchecked');
+        } else {
+            $(selector).addClass('unchecked').removeClass('checked');
         }
-        channels_li.removeClass('unchecked');
-        channels_li.removeClass('checked');
-        
-        outlet_li.removeClass('unchecked');
-        outlet_li.removeClass('checked');
-
-        subcatchments_li.removeClass('unchecked');
-        subcatchments_li.removeClass('checked');
-
-        landuse_li.removeClass('unchecked');
-        landuse_li.removeClass('checked');
-
-        soil_li.removeClass('unchecked');
-        soil_li.removeClass('checked');
-
-        landuse_li.removeClass('unchecked');
-        landuse_li.removeClass('checked');
-
-        climate_li.removeClass('unchecked');
-        climate_li.removeClass('checked');
-
-        if (!!wepp_li) {
-            wepp_li.removeClass('unchecked');
-            wepp_li.removeClass('checked');
-        }
-
-        if (!!watar_li) {
-            watar_li.removeClass('unchecked');
-            watar_li.removeClass('checked');
-        }
-
-        if (!!debris_li) {
-            debris_li.removeClass('unchecked');
-            debris_li.removeClass('checked');
-        }
-
-        if (!!observed_li) {
-            observed_li.removeClass('unchecked');
-            observed_li.removeClass('checked');
-        }
-        return null;
-
-    } 
-
-    run_heartbeat = run_heartbeat + 1;
-
-    $.post({
-        url: "tasks/preflight/",
-        contentType: "application/json; charset=utf-8",
-        success: function(response){
-          if (response === null) {
-              return;
-          }
-
-          if (!!sbs_li) {
-              if (response.sbs_map === null) {
-                  sbs_li.removeClass('unchecked');
-                  sbs_li.removeClass('burned');
-                  sbs_li.addClass('unburned');
-              } else {
-                  if (response.sbs_map) {
-                     sbs_li.removeClass('unchecked');
-                     sbs_li.addClass('burned');
-                     sbs_li.removeClass('unburned');
-                  } else {
-                     sbs_li.addClass('unchecked');
-                     sbs_li.removeClass('burned');
-                     sbs_li.removeClass('unburned');
-                  }
-              }
-          }
-
-          if (response.channels) {
-              channels_li.removeClass('unchecked');
-              channels_li.addClass('checked');
-          } else {
-              channels_li.removeClass('checked');
-              channels_li.addClass('unchecked');
-          }
-
-          if (response.outlet) {
-              outlet_li.removeClass('unchecked');
-              outlet_li.addClass('checked');
-          } else {
-              outlet_li.removeClass('checked');
-              outlet_li.addClass('unchecked');
-          }
-
-          if (response.subcatchments) {
-              subcatchments_li.removeClass('unchecked');
-              subcatchments_li.addClass('checked');
-          } else {
-              subcatchments_li.removeClass('checked');
-              subcatchments_li.addClass('unchecked');
-          }
-
-          if (response.landuse) {
-              landuse_li.removeClass('unchecked');
-              landuse_li.addClass('checked');
-          } else {
-              landuse_li.removeClass('checked');
-              landuse_li.addClass('unchecked');
-          }
-
-          if (response.soils) {
-              soil_li.removeClass('unchecked');
-              soil_li.addClass('checked');
-          } else {
-              soil_li.removeClass('checked');
-              soil_li.addClass('unchecked');
-          }
-
-          if (response.climate) {
-              climate_li.removeClass('unchecked');
-              climate_li.addClass('checked');
-          } else {
-              climate_li.removeClass('checked');
-              climate_li.addClass('unchecked');
-          }
-
-          if (!!wepp_li) {
-              if (response.wepp) {
-                  wepp_li.removeClass('unchecked');
-                  wepp_li.addClass('checked');
-              } else {
-                  wepp_li.removeClass('checked');
-                  wepp_li.addClass('unchecked');
-              }
-          }
-
-          if (!!debris_li) {
-              if (response.debris) {
-                  debris_li.removeClass('unchecked');
-                  debris_li.addClass('checked');
-              } else {
-                  debris_li.removeClass('checked');
-                  debris_li.addClass('unchecked');
-              }
-          }
-
-          if (!!observed_li) {
-              if (response.observed) {
-                  observed_li.removeClass('unchecked');
-                  observed_li.addClass('checked');
-              } else {
-                  observed_li.removeClass('checked');
-                  observed_li.addClass('unchecked');
-              }
-          }
-
-          if (!!watar_li) {
-              if (response.watar) {
-                  watar_li.removeClass('unchecked');
-                  watar_li.addClass('checked');
-              } else {
-                  watar_li.removeClass('checked');
-                  watar_li.addClass('unchecked');
-              }
-          }
-        }
-    });
+    }
 }
 
-var run_heartbeat = 0;
-if ( !{{ ron.readonly | tojson }} ) {
-    var heartbeat_interval = setInterval(heartbeat, 2000);
+// Map keys from the checklist to their corresponding CSS selectors
+function getSelectorForKey(key) {
+    var mapping = {
+        "sbs_map": 'a[href^="#upload-soil-burn-severity"]',
+        "channels": 'a[href="#channel-delineation"]',
+        "outlet": 'a[href="#outlet"]',
+        "subcatchments": 'a[href="#subcatchments-delineation"]',
+        "landuse": 'a[href="#landuse-options"]',
+        "soils": 'a[href="#soil-options"]',
+        "climate": 'a[href="#climate-options"]',
+        "wepp": 'a[href="#wepp"]',
+        "observed": 'a[href="#observed-data-model-fit"]',
+        "debris": 'a[href="#debris-flow-analysis"]',
+        "watar": 'a[href="#wildfire-ash-transport-and-risk-watar"]'
+    };
+
+    return mapping[key];
 }
 
-$( window ).scroll(function() {
-    run_heartbeat = 0;
+function initWebSocket() {
+    var run_id = "{{ run_id }}";  // assuming run_id is passed to the rendering context
+    var host = window.location.host;  // gets the current host and port
+    var wsUrl = "wss://" + host + "/weppcloud-microservices/preflight/" + run_id;
+    
+    ws = new WebSocket(wsUrl);
+    
+    ws.onopen = function() {
+        console.log("Connected");
+        $("#status").html("Connected");
+        ws.send(JSON.stringify({"type": "init"}));
+    };
+
+    ws.onmessage = function(event) {
+        var payload = JSON.parse(event.data);
+        if(payload.type === "ping") {
+            console.log("Received ping from server");
+            ws.send(JSON.stringify({"type": "pong"}));
+        } else if (payload.type === "preflight") {
+            console.log(payload.checklist);
+            updateUI(payload.checklist);
+        }
+    };
+
+    ws.onclose = function() {
+        $("#status").html("Connection Closed");
+        console.log("Connection closed. Reconnecting...");
+        setTimeout(initWebSocket, 5000);  // Try to reconnect every 5 seconds.
+    };
+}
+
+$(document).ready(function() {
+    initWebSocket();
 });
 

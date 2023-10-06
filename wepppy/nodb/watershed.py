@@ -756,7 +756,7 @@ class Watershed(NoDbBase):
             _discha_vals = discha[indices]
             max_discha = np.max(_discha_vals)
 
-            mofe_slp_fn = _join(self.wat_dir, f'hill_{topaz_id}.mofe.slp')
+            mofe_slp_fn = _join(self.wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
             d_fractions = SlopeFile.mofe_distance_fractions(mofe_slp_fn)
 
             n_ofe = len(d_fractions) - 1
@@ -955,7 +955,11 @@ class Watershed(NoDbBase):
             return None
 
         if str(topaz_id) in self._subs_summary:
-            return self._subs_summary[str(topaz_id)].as_dict()
+            d = self._subs_summary[str(topaz_id)]
+            if isinstance(d, dict):
+                return d
+            else:
+                return d.as_dict()
         else:
             return None
 
@@ -991,7 +995,11 @@ class Watershed(NoDbBase):
 
     def chn_summary(self, topaz_id) -> Union[Generator[ChannelSummary, None, None], None]:
         if str(topaz_id) in self._chns_summary:
-            return self._chns_summary[str(topaz_id)].as_dict()
+            d =  self._chns_summary[str(topaz_id)]
+            if isinstance(d, dict):
+                return d
+            else:
+                return d.as_dict()
         else:
             return None
 

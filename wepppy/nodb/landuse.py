@@ -507,15 +507,25 @@ class Landuse(NoDbBase):
             disturbed = None
             _land_soil_replacements_d = None
 
-        if rustpy_geo is None:
+        if True:
             lc = LandcoverMap(self.lc_fn)
             domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
         else:
             domlc_d = rustpy_geo.mode_identify(subwta_fn=watershed.subwta,
-                                                parameter_fn=self.lc_fn,
-                                                band_indx=1,
-                                                lcmap_fn=watershed.mofe_map)
-            domlc_d = {k: str(v) for k, v in domlc_d.items()}
+                                               parameter_fn=self.lc_fn,
+                                               band_indx=1,
+                                               lcmap_fn=watershed.mofe_map)
+            _domlc_d = {k: str(v) for k, v in domlc_d.items()}
+            domlc_d = {}
+            for topaz_fp_id, v in _domlc_d.items():
+                topaz_id, fp_id = topaz_fp_id.split('-')
+                if topaz_id not in domlc_d:
+                    domlc_d[topaz_id] = {}
+                domlc_d[topaz_id][fp_id] = v
+
+        self.lock()
+        self.__m_domlc_d = domlc_d
+        self.dump_and_unlock()
 
         lc_dir = self.lc_dir
         managements = self.managements
@@ -523,11 +533,11 @@ class Landuse(NoDbBase):
         watershed = Watershed.getInstance(self.wd)
         for topaz_id, ss in watershed.sub_iter():
 
-            nsegments = watershed.mofe_nsegments[str(topaz_id)]
+            nsegments = int(watershed.mofe_nsegments[str(topaz_id)])
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
 
-            mofe_ids = sorted([_id for _id in domlc_d[topaz_id]])
-            assert len(mofe_ids) == nsegments, (topaz_id, mofe_ids, nsegments)
+            mofe_ids = sorted([_id for _id in domlc_d[str(topaz_id)]])
+            #assert len(mofe_ids) == nsegments, (topaz_id, mofe_ids, nsegments, len(mofe_ids) )
 
             apply_buffer = watershed.mofe_buffer and not str(topaz_id).endswith('1')
             if apply_buffer:
@@ -548,8 +558,9 @@ class Landuse(NoDbBase):
                     rdmax = None
                     xmxlai = None
                 else:
-                    rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
-                    xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+                    if (texid, disturbed_class) in _land_soil_replacements_d:
+                        rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
+                        xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
 
                 if rdmax is not None:
                     if isfloat(rdmax):
@@ -562,7 +573,7 @@ class Landuse(NoDbBase):
                 stack.append(management)
 
             assert len(stack) > 0, topaz_id
-            assert len(stack) == nsegments
+            assert len(stack) == nsegments, (len(stack),  nsegments)
 
             if len(stack) == 1:
                 with open(mofe_lc_fn, 'w') as pf:

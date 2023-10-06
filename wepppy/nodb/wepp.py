@@ -97,7 +97,7 @@ from .soils import Soils
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
 from .wepppost import WeppPost
-from .prep import Prep
+from .redis_prep import RedisPrep as Prep
 
 from wepppy.wepp.soils.utils import simple_texture
 
@@ -1123,11 +1123,11 @@ class Wepp(NoDbBase, LogMixin):
         if kslast_map_fn is not None:
             kslast_map = RasterDatasetInterpolator(kslast_map_fn)
 
-        for topaz_id, _ in watershed.sub_iter():
+        for topaz_id, sub in watershed.sub_iter():
             wepp_id = translator.wepp(top=int(topaz_id))
 
             # slope files
-            src_fn = _join(wat_dir, f'hill_{topaz_id}.mofe.slp')
+            src_fn = _join(wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
             _copyfile(src_fn, dst_fn) 
 
@@ -1693,7 +1693,12 @@ class Wepp(NoDbBase, LogMixin):
                      .format(chn_n=chn_n))
 
         for topaz_id, chn_summary in watershed.chn_iter():
-            chn_key = chn_summary.channel_type
+            # need to do this incase someone tries to run a pre peridot project
+            if isinstance(chn_summary, dict):
+                chn_key = chn_summary.get('channel_type', 'Default')
+            else:
+                chn_key = chn_summary.channel_type
+
             chn_d = get_channel(chn_key, erodibility, critical_shear)
             contents = chn_d['contents']
 

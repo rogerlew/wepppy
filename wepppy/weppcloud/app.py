@@ -1651,7 +1651,8 @@ def runs0(runid, config):
                                landuseoptions=landuseoptions,
                                soildboptions=soildboptions,
                                critical_shear_options=critical_shear_options,
-                               precisions=wepppy.nodb.unitizer.precisions)
+                               precisions=wepppy.nodb.unitizer.precisions,
+                               run_id=runid)
     except:
         return exception_factory()
 
