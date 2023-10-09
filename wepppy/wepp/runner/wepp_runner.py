@@ -19,6 +19,8 @@ from time import time
 
 import subprocess
 
+from wepppy.nodb.status_messenger import StatusMessenger
+
 _thisdir = os.path.dirname(__file__)
 _template_dir = _join(_thisdir, "templates")
 
@@ -297,38 +299,40 @@ def make_ss_batch_watershed_run(wepp_ids, runs_dir, ss_batch_key, ss_batch_id):
         fp.write(s)
 
 
-def run_watershed(runs_dir, wepp_bin=None):
+def run_watershed(runs_dir, wepp_bin=None, status_channel=None):
     t0 = time()
 
     if wepp_bin is not None:
-        cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
+        cmd = [os.path.abspath(os.path.join(wepp_bin_dir, wepp_bin))]
     else:
-        cmd = [os.path.abspath(_wepp)]
+        cmd = [os.path.abspath(_wepp)] 
 
-    assert _exists(_join(runs_dir, 'pw0.str'))
-    assert _exists(_join(runs_dir, 'pw0.chn'))
-    assert _exists(_join(runs_dir, 'pw0.imp'))
-    assert _exists(_join(runs_dir, 'pw0.man'))
-    assert _exists(_join(runs_dir, 'pw0.slp'))
-    assert _exists(_join(runs_dir, 'pw0.cli'))
-    assert _exists(_join(runs_dir, 'pw0.sol'))
-    assert _exists(_join(runs_dir, 'pw0.run'))
+    _run = open(os.path.join(runs_dir, 'pw0.run'))
+    _stderr_fn = os.path.join(runs_dir, 'pw0.err')
+    _log = open(_stderr_fn, 'w')
+    
+    p = subprocess.Popen(cmd, stdin=_run, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+                         cwd=runs_dir, universal_newlines=True)
 
-    _run = open(_join(runs_dir, 'pw0.run'))
-    _stderr_fn = _join(runs_dir, 'pw0.err')
-    _log = open(_join(runs_dir, 'pw0.err'), 'w')
+    # Streaming the output to _log and, if provided, to the status channel
+    while p.poll() is None:
+        output = p.stdout.readline()
+        output = output.strip()
 
-    p = subprocess.Popen(cmd, stdin=_run, stdout=_log, stderr=_log, cwd=runs_dir)
-    p.wait()
+        if output != '':
+            _log.write(output)
+            if status_channel:
+                StatusMessenger.publish(status_channel, output)
+    
     _run.close()
     _log.close()
 
     with open(_stderr_fn) as fp:
-        stdout = fp.read()
-        if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in stdout:
+        stderr_content = fp.read()
+        if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in stderr_content:
             return True, time() - t0
 
-    raise Exception('Error running wepp for watershed \nSee <a href="browse/wepp/runs/pw0.err">%s</a>' % _stderr_fn)
+    raise Exception(f'Error running wepp for watershed \nSee <a href="browse/wepp/runs/pw0.err">{_stderr_fn}</a>')
 
 
 def run_ss_batch_watershed(runs_dir, wepp_bin=None, ss_batch_id=None):

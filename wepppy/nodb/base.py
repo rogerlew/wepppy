@@ -180,8 +180,6 @@ class NoDbBase(object):
         with open(self._nodb, 'w') as fp:
             fp.write(js)
 
-        # validate
-
     @property
     def stub(self):
 

@@ -757,7 +757,7 @@ class Watershed(NoDbBase):
             max_discha = np.max(_discha_vals)
 
             mofe_slp_fn = _join(self.wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
-            d_fractions = SlopeFile.mofe_distance_fractions(mofe_slp_fn)
+            d_fractions = SlopeFile(mofe_slp_fn).distances
 
             n_ofe = len(d_fractions) - 1
             if n_ofe == 1:

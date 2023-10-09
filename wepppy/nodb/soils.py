@@ -45,9 +45,11 @@ from .redis_prep import RedisPrep as Prep
 from .mixins.log_mixin import LogMixin
 
 try:
-    import rustpy_geo
+    import wepppyo3
+    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
 except:
-    rustpy_geo = None
+    wepppyo3 = None
 
 
 class SoilsNoDbLockedException(Exception):
@@ -733,6 +735,8 @@ class Soils(NoDbBase, LogMixin):
         return os.path.abspath(_join(self.soils_dir, 'status.log'))
 
     def _build_gridded(self, initial_sat=None, ksflag=None):
+        global wepppyo3
+
         soils_dir = self.soils_dir
         self.lock()
 
@@ -770,18 +774,16 @@ class Soils(NoDbBase, LogMixin):
 
             valid = list(int(v) for v in soils.keys())
 
-            if rustpy_geo is None:
+            if wepppyo3 is None:
                 self.log(f"using build_soilgrid {valid}")
                 domsoil_d = sm.build_soilgrid(
                     watershed.subwta
                 )
                 self.log_done()
             else:
-                self.log(f"using rustpy_geo {valid}")
-                domsoil_d = rustpy_geo.mode_identify(
-                    subwta_fn=watershed.subwta,
-                    parameter_fn=ssurgo_fn
-                )
+                self.log(f"using wepppyo3 {valid}")
+                domsoil_d = identify_mode_single_raster_key(
+                    key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
                 domsoil_d = {k: str(v) for k, v in domsoil_d.items()}
                 self.log_done()
 

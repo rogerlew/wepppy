@@ -436,6 +436,9 @@ class Wepp(NoDbBase, LogMixin):
 
         return db
 
+    @property
+    def _status_channel(self):
+        return f'{self.runid}:wepp'
         
     @property
     def multi_ofe(self):
@@ -1894,7 +1897,7 @@ class Wepp(NoDbBase, LogMixin):
                 self.log_done()
 
         else:
-            assert run_watershed(runs_dir, wepp_bin)
+            assert run_watershed(runs_dir, wepp_bin, status_channel=self._status_channel)
 
             self.log('    moving .out files...')
             for fn in glob(_join(self.runs_dir, '*.out')):

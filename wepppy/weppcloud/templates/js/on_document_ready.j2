@@ -24,6 +24,68 @@ function window_resize() {
 };
 
 
+var climate_ws;
+
+function climate_ws_connect() {
+    var ws_climate_url = "wss://" + window.location.host + "/weppcloud-microservices/status/{{ run_id }}:climate";
+    climate_ws = new WebSocket(ws_climate_url);
+    
+    climate_ws.onopen = function() {
+        $("#climate_form  #status").html("Connected");
+        climate_ws.send(JSON.stringify({"type": "init"}));
+    };
+
+    climate_ws.onmessage = function(event) {
+        var payload = JSON.parse(event.data);
+        if(payload.type === "ping") {
+            climate_ws.send(JSON.stringify({"type": "pong"}));
+        }
+        else if (payload.type === "status") {
+            console.log(payload.data);
+            $("#climate_form  #status").html(payload.data);
+        }
+    };
+
+    climate_ws.onclose = function() {
+        $("#climate_form  #status").html("Connection Closed. Reconnecting...");
+        setTimeout(climate_ws_connect, 5000);
+    };
+}
+
+
+
+var wepp_ws;
+
+function wepp_ws_connect() {
+    var ws_wepp_url = "wss://" + window.location.host + "/weppcloud-microservices/status/{{ run_id }}:wepp";
+    wepp_ws = new WebSocket(ws_wepp_url);
+    
+    wepp_ws.onopen = function() {
+        $("#wepp_form  #status").html("Connected");
+        wepp_ws.send(JSON.stringify({"type": "init"}));
+    };
+
+    wepp_ws.onmessage = function(event) {
+        var payload = JSON.parse(event.data);
+        if(payload.type === "ping") {
+            wepp_ws.send(JSON.stringify({"type": "pong"}));
+        }
+        else if (payload.type === "status") {
+            console.log(payload.data);
+            $("#wepp_form  #status").html(payload.data);
+        }
+    };
+
+    wepp_ws.onclose = function() {
+        $("wepp_form  #status").html("Connection Closed. Reconnecting...");
+        setTimeout(wepp_ws_connect, 5000);
+    };
+}
+
+
+
+
+
 //jQuery.readyException = function( e ) {
 //  console.error( e );
 //  error = e;
@@ -37,6 +99,7 @@ function onReady() {
      * Controller Singletons
      * =====================
      */
+
 
 
     var project = Project.getInstance();
@@ -76,6 +139,9 @@ function onReady() {
     try {
         ash.hideStacktrace();
     } catch (e) { }
+
+    climate_ws_connect();
+    wepp_ws_connect();
 
     /*
      * Project Initialization
@@ -1001,22 +1067,19 @@ function getSelectorForKey(key) {
 }
 
 function initWebSocket() {
-    var run_id = "{{ run_id }}";  // assuming run_id is passed to the rendering context
-    var host = window.location.host;  // gets the current host and port
-    var wsUrl = "wss://" + host + "/weppcloud-microservices/preflight/" + run_id;
+    var wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/preflight/{{ run_id }}";
     
     ws = new WebSocket(wsUrl);
     
     ws.onopen = function() {
-        console.log("Connected");
-        $("#status").html("Connected");
+        console.log("Preflight Connected");
+        $("#preflight_status").html("Connected");
         ws.send(JSON.stringify({"type": "init"}));
     };
 
     ws.onmessage = function(event) {
         var payload = JSON.parse(event.data);
         if(payload.type === "ping") {
-            console.log("Received ping from server");
             ws.send(JSON.stringify({"type": "pong"}));
         } else if (payload.type === "preflight") {
             console.log(payload.checklist);
@@ -1025,8 +1088,8 @@ function initWebSocket() {
     };
 
     ws.onclose = function() {
-        $("#status").html("Connection Closed");
-        console.log("Connection closed. Reconnecting...");
+        $("#preflight_status").html("Preflight Connection Closed");
+        console.log("Preflight Connection closed. Reconnecting...");
         setTimeout(initWebSocket, 5000);  // Try to reconnect every 5 seconds.
     };
 }
