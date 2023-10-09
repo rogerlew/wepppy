@@ -12,3 +12,4 @@ wepppy/au/soils/asris_2001/cache/*
 wepppy/taudem/tests/*/*
 .ipynb_checkpoints/
 .ipynb_checkpoints/*
+.env
