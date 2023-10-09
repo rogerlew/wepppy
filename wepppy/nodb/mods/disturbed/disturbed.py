@@ -41,10 +41,11 @@ from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 
 try:
-    import rustpy_geo
-
+    import wepppyo3
+    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
 except:
-    rustpy_geo = None
+    wepppyo3 = None
 
 gdal.UseExceptions()
 
@@ -667,7 +668,7 @@ class Disturbed(NoDbBase):
 
             self._calc_sbs_coverage(sbs)
 
-            if rustpy_geo is None:
+            if wepppyo3 is None:
                 sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
 
                 for topaz_id, burn_class in sbs_lc_d.items():
@@ -691,7 +692,8 @@ class Disturbed(NoDbBase):
                     meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
             else:
-                sbs_lc_d = rustpy_geo.mode_identify(subwta_fn=watershed.subwta, parameter_fn=self.disturbed_cropped)
+                sbs_lc_d = identify_mode_single_raster_key(
+                    key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
                 sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
 
                 class_pixel_map = sbs.class_pixel_map
