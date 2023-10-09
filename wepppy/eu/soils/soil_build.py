@@ -17,7 +17,7 @@ from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.eu.soils.esdac import ESDAC
 
 from wepppy.all_your_base import NCPU
-NCPU = math.ceil(NCPU * 0.6)
+NCPU = 32
 
 
 def _build_esdac_soil(kwargs):
