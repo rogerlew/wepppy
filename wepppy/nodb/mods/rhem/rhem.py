@@ -114,6 +114,10 @@ class Rhem(NoDbBase, LogMixin):
             return db
 
     @property
+    def _status_channel(self):
+        return f'{self.runid}:rhem'
+
+    @property
     def _nodb(self):
         return _join(self.wd, 'rhem.nodb')
 
