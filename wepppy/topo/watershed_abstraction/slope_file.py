@@ -65,24 +65,6 @@ class SlopeFile(object):
         self.azm = azm
         self.fwidth = fwidth
 
-    @staticmethod
-    def mofe_distance_fractions(fn):
-        with open(fn) as fp:
-            lines = fp.readlines()
-
-        mofes = int(lines[1])
-       
-        distances = [0]
-        tot_d = 0
-        for i, L in enumerate(lines[3:]):
-            if i % 2 == 0:
-                n, d = L.split()
-                d = float(d)
-                tot_d += d
-                distances.append(tot_d)
-
-        return np.array(distances) / tot_d
-
     @property
     def slope_scalar(self):
         x = np.array(self.distances)
