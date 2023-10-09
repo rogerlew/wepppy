@@ -7,11 +7,14 @@ import json
 import subprocess
 from glob import glob
 
+from deprecated import deprecated
+
 from wepppy.all_your_base import isnan, isinf
 from wepppy.nodb import Ron, Wepp, Watershed, Ash
 from wepppy.topo.watershed_abstraction.support import json_to_wgs
 
 
+@deprecated()
 def has_arc_export(wd):
     ron = Ron.getInstance(wd)
     name = ron.name
@@ -28,7 +31,7 @@ def has_arc_export(wd):
 
     return True
 
-
+    
 def legacy_arc_export(wd, verbose=False):
     from wepppy.nodb.mods import AshPost
 
@@ -346,6 +349,8 @@ def legacy_arc_export(wd, verbose=False):
 
     assert _exists(_join(export_dir, 'channels.kml')), cmd
 
+
+@deprecated()
 def arc_export(wd, verbose=False):
     from wepppy.nodb.mods.ash_transport import AshPost
     from wepppy.nodb.mods.rhem import RhemPost
