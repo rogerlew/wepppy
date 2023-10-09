@@ -3720,8 +3720,8 @@ def task_set_readonly(runid, config):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/query/status/<nodb>', methods=['GET', 'POST'])
-@app.route('/runs/<string:runid>/<config>/query/status/<nodb>/', methods=['GET', 'POST'])
+#@app.route('/runs/<string:runid>/<config>/query/status/<nodb>', methods=['GET', 'POST'])
+#@app.route('/runs/<string:runid>/<config>/query/status/<nodb>/', methods=['GET', 'POST'])
 def get_wepp_run_status(runid, config, nodb):
     wd = get_wd(runid)
 

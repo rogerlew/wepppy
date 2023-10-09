@@ -22,6 +22,8 @@ from collections import Counter
 # non-standard
 import jsonpickle
 
+import pandas as pd
+
 # wepppy
 from wepppy.soils.ssurgo import (
     SurgoMap, 
@@ -491,6 +493,9 @@ class Soils(NoDbBase, LogMixin):
             rred.build_soils(self._mode)
             return
 
+        self = Soils.getInstance(self.wd)
+        self.dump_soils_parquet()
+
         try:
             prep = Prep.getInstance(self.wd)
             prep.timestamp('build_soils')
@@ -865,8 +870,7 @@ class Soils(NoDbBase, LogMixin):
     @property
     def subs_summary(self):
         """
-        returns a dictionary of topaz_id keys and dictionary soils
-        values
+        Returns a dictionary with topaz_id keys and dictionary soils values.
         """
         domsoil_d = self.domsoil_d
         
@@ -874,15 +878,32 @@ class Soils(NoDbBase, LogMixin):
             return None
             
         soils = self.soils
+        
+        # Cache soil dictionaries to avoid multiple calls to as_dict for the same soil
+        soil_dicts_cache = {mukey: soil.as_dict() for mukey, soil in soils.items()}
 
-        summary = {}
-        for topaz_id, k in domsoil_d.items():
-            if is_channel(topaz_id):
-                continue
-
-            summary[topaz_id] = soils[k].as_dict()
-
+        # Compile the summary using cached soil dictionaries
+        summary = {
+            topaz_id: soil_dicts_cache[mukey] 
+            for topaz_id, mukey in domsoil_d.items() 
+            if not is_channel(topaz_id)
+        }
+        
         return summary
+
+    def dump_soils_parquet(self):
+        """
+        Dumps the subs_summary to a Parquet file using Pandas.
+        """
+        subs_summary = self.subs_summary
+        assert subs_summary is not None
+            
+        df = pd.DataFrame.from_dict(subs_summary, orient='index')
+        df.index.name = 'TopazID'
+        df.reset_index(inplace=True)
+        df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+        df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
+   
 
     def sub_iter(self):
         domsoil_d = self.domsoil_d
