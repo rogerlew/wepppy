@@ -30,9 +30,11 @@ from wepppy.landcover.rap import (
 )
 
 try:
-    import rustpy_geo
+    import wepppyo3
+    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
 except:
-    rustpy_geo = None
+    wepppyo3 = None
 
 from .rap import RAPPointData
 
@@ -197,7 +199,10 @@ class RAP_TS(NoDbBase, LogMixin):
         return cover
 
     def analyze(self, use_sbs=False, verbose=True):
-        global rustpy_geo
+        import rustpy_geo
+
+        # todo! add median_identify to wepppyo3
+
         from wepppy.nodb import Ron
         from wepppy.nodb.mods import Disturbed
 

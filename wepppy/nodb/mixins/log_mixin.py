@@ -13,6 +13,7 @@ from datetime import datetime
 
 from wepppy.all_your_base.dateutils import parse_datetime
 
+from wepppy.nodb.status_messenger import StatusMessenger
 
 class LogMixin(object):
 
@@ -64,6 +65,9 @@ class LogMixin(object):
             self._write('[{}] {}'.format(t0, msg))
         except FileNotFoundError:
             warnings.warn('FileNotFoundError')
+
+        if hasattr(self, '_status_channel'):
+            StatusMessenger.publish(self._status_channel, msg)
 
     def log_done(self):
         r_elapsed, t_elapsed, s = self._calc_log_elapsed()

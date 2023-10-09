@@ -1222,6 +1222,7 @@ def fork(runid, config):
         abort(404)
 
     def generate(undisturbify=False):
+        from wepppy.nodb.redis_prep import RedisPrep as Prep
         yield f'undisturbify = {undisturbify}\n'
 
         yield 'generating new runid...'
@@ -1310,6 +1311,7 @@ def fork(runid, config):
             yield '  removing sbs...'
             disturbed = Disturbed.getInstance(new_wd)
             disturbed.remove_sbs()
+            Prep.getInstance()
             yield ' done.\n\n'
 
             yield '  rebuilding landuse...'

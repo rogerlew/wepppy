@@ -325,9 +325,6 @@ var RAP_TS = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
-            self.attempts = 0;
-            setTimeout(self.status_loop, 5000);
-
             $.post({
                 url: "tasks/acquire_rap_ts/",
                 cache: false,
@@ -342,30 +339,6 @@ var RAP_TS = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function () {
-                    self.attempts = 9999999;
-            });
-        };
-
-        that.status_loop = function () {
-            var self = instance;
-
-            $.post({
-                url: 'query/status/rap_ts/',
-                success: function success(response) {
-
-                    if (response.Success === true && self.attempts < 14400) {
-                        self.status.html(response.Content + "*".repeat(self.attempts % 4));
-                        self.attempts += 1;
-                    } else {
-                        self.attempts += 1000;
-                    }
-                }
-            }).done(function () {
-                if (self.attempts < 32000) {
-                    setTimeout(self.status_loop, 1000);
-                }
-
             });
         };
 
@@ -4310,7 +4283,6 @@ var Climate = function () {
             var task_msg = "Setting Station Mode to " + mode;
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync climate with nodb
@@ -4319,7 +4291,6 @@ var Climate = function () {
                 data: { "mode": mode },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATIONMODE_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
@@ -4340,7 +4311,6 @@ var Climate = function () {
             var task_msg = "Uploading cli";
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             var formData = new FormData($('#climate_form')[0]);
@@ -4353,7 +4323,6 @@ var Climate = function () {
                 processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
@@ -4380,7 +4349,6 @@ var Climate = function () {
             var task_msg = "Fetching Stations " + mode;
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             if (mode === 0) {
@@ -4391,7 +4359,6 @@ var Climate = function () {
                     data: { "mode": mode },
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
                     error: function error(jqXHR)  {
@@ -4409,7 +4376,6 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
                     error: function error(jqXHR)  {
@@ -4427,7 +4393,6 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
                     error: function error(jqXHR)  {
@@ -4445,7 +4410,6 @@ var Climate = function () {
                     cache: false,
                     success: function success(response) {
                         self.stationselection.html(response);
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     },
                     error: function error(jqXHR)  {
@@ -4472,7 +4436,6 @@ var Climate = function () {
             var task_msg = "Setting station " + station;
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             $.post({
@@ -4480,7 +4443,6 @@ var Climate = function () {
                 data: { "station": station },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
                         self.form.trigger("CLIMATE_SETSTATION_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
@@ -4519,11 +4481,7 @@ var Climate = function () {
             var task_msg = "Building climate";
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
-
-            self.attempts = 0;
-            setTimeout(self.status_loop, 5000);
 
             $.post({
                 url: "tasks/build_climate/",
@@ -4531,7 +4489,6 @@ var Climate = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4542,10 +4499,7 @@ var Climate = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function () {
-                    self.attempts = 9999999;
             });
-
         };
 
         that.report = function () {
@@ -4567,27 +4521,6 @@ var Climate = function () {
             });
         };
 
-        that.status_loop = function () {
-            var self = instance;
-
-            $.post({
-                url: 'query/status/climate/',
-                success: function success(response) {
-
-                    if (response.Success === true && self.attempts < 14400) {
-                        self.status.html(response.Content + "*".repeat(self.attempts % 4));
-                        self.attempts += 1;
-                    } else {
-                        self.attempts += 1000;
-                    }
-                }
-            }).done(function () {
-                if (self.attempts < 32000) {
-                    setTimeout(self.status_loop, 1000);
-                }
-
-            });
-        };
 
         that.setMode = function (mode) {
             var self = instance;
@@ -4602,7 +4535,6 @@ var Climate = function () {
             var task_msg = "Setting Mode to " + mode + " (" + climate_single_selection + ")";
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync climate with nodb
@@ -4612,7 +4544,6 @@ var Climate = function () {
                         "climate_single_selection": climate_single_selection },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4832,7 +4763,6 @@ var Climate = function () {
             var task_msg = "Setting SpatialMode to " + mode;
 
             self.info.text("");
-            self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
             // sync climate with nodb
@@ -4841,7 +4771,6 @@ var Climate = function () {
                 data: { "spatialmode": mode},
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4893,7 +4822,6 @@ var Wepp = function () {
         that.sediment = $("#wepp_form #sediment");
         that.channel_critical_shear = $("#wepp_form #channel_critical_shear");
 
-        that.attempts = 0;
 
         that.addChannelCriticalShear = function (x) {
             var self = instance;
@@ -5023,9 +4951,6 @@ var Wepp = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
-            self.attempts = 0;
-            setTimeout(self.status_loop, 5000);
-
             var data = self.form.serialize();
 
             $.post({
@@ -5045,8 +4970,6 @@ var Wepp = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function () {
-                    self.attempts = 9999999;
             });
         };
 
@@ -5058,9 +4981,6 @@ var Wepp = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
-
-            self.attempts = 0;
-            setTimeout(self.status_loop, 5000);
 
             var data = self.form.serialize();
 
@@ -5081,8 +5001,6 @@ var Wepp = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function () {
-                    self.attempts = 9999999;
             });
         };
 
@@ -5126,28 +5044,6 @@ var Wepp = function () {
                 }
             });
 
-        };
-
-        that.status_loop = function () {
-            var self = instance;
-
-            $.post({
-                url: 'query/status/wepp/',
-                success: function success(response) {
-
-                    if (response.Success === true && self.attempts < 14400) {
-                        self.status.html(response.Content + "*".repeat(self.attempts % 4));
-                        self.attempts += 1;
-                    } else {
-                        self.attempts += 1000;
-                    }
-                }
-            }).done(function () {
-                if (self.attempts < 32000) {
-                    setTimeout(self.status_loop, 1000);
-                }
-
-            });
         };
 
         return that;
@@ -5485,7 +5381,6 @@ var Rhem = function () {
             self.stacktrace.hide();
         };
 
-        that.attempts = 0;
 
         that.run = function () {
             var self = instance;
@@ -5495,8 +5390,6 @@ var Rhem = function () {
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
 
-            self.attempts = 0;
-            setTimeout(self.status_loop, 5000);
 
             $.post({
                 url: "tasks/run_rhem/",
@@ -5515,8 +5408,6 @@ var Rhem = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function () {
-                    self.attempts = 9999999;
             });
         };
 
@@ -5559,28 +5450,6 @@ var Rhem = function () {
                 }
             });
 
-        };
-
-        that.status_loop = function () {
-            var self = instance;
-
-            $.post({
-                url: 'query/status/rhem/',
-                success: function success(response) {
-
-                    if (response.Success === true && self.attempts < 14400) {
-                        self.status.html(response.Content);
-                        self.attempts += 1;
-                    } else {
-                        self.attempts += 1000;
-                    }
-                }
-            }).done(function () {
-                if (self.attempts < 32000) {
-                    setTimeout(self.status_loop, 1000);
-                }
-
-            });
         };
 
         return that;

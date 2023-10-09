@@ -434,6 +434,10 @@ class Climate(NoDbBase, LogMixin):
         return db
 
     @property
+    def _status_channel(self):
+        return f'{self.runid}:climate'
+
+    @property
     def daymet_last_available_year(self):
         return 2022
 
@@ -1205,7 +1209,9 @@ class Climate(NoDbBase, LogMixin):
         except FileNotFoundError:
             pass
 
+        self.log('Climate Build Successful.')
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
+
 
     def _scale_precip(self, scale_factor):
         self.lock()
