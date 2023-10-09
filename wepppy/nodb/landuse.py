@@ -20,6 +20,7 @@ import time
 # non-standard
 import jsonpickle
 import numpy as np
+import pandas as pd
 
 # wepppy
 from wepppy.landcover import LandcoverMap
@@ -448,6 +449,8 @@ class Landuse(NoDbBase):
         self.build_managements()
         self.set_cover_defaults()
 
+        self.dump_landuse_parquet()
+
         try:
             prep = Prep.getInstance(self.wd)
             prep.timestamp('build_landuse')
@@ -867,25 +870,42 @@ class Landuse(NoDbBase):
         
     def chn_summary(self, topaz_id):
         return self._x_summary(topaz_id)
-        
+       
     @property
     def subs_summary(self):
         """
-        returns a dictionary of topaz_id keys and
-        management summaries as dicts
+        Returns a dictionary with topaz_id keys and dictionary soils values.
         """
         domlc_d = self.domlc_d
         mans = self.managements
+        
+        if domlc_d is None:
+            return None
+            
+        man_dicts_cache = {dom: man.as_dict() for dom, man in mans.items()}
 
-        summary = {}
-        for topaz_id, k in domlc_d.items():
-            if is_channel(topaz_id):
-                continue
-
-            summary[topaz_id] = mans[k].as_dict()
-
+        # Compile the summary using cached soil dictionaries
+        summary = {
+            topaz_id: man_dicts_cache[dom] 
+            for topaz_id, dom in domlc_d.items() 
+            if not is_channel(topaz_id)
+        }
+        
         return summary
-
+     
+    def dump_landuse_parquet(self):
+        """
+        Dumps the subs_summary to a Parquet file using Pandas.
+        """
+        subs_summary = self.subs_summary
+        assert subs_summary is not None
+            
+        df = pd.DataFrame.from_dict(subs_summary, orient='index')
+        df.index.name = 'TopazID'
+        df.reset_index(inplace=True)
+        df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+        df.to_parquet(_join(self.lc_dir, 'landuse.parquet'))
+   
     def sub_iter(self):
         domlc_d = self.domlc_d
         mans = self.managements
