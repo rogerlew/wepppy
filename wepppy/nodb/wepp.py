@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, University of Idaho
+# Copyright (c) 2016-2023, University of Idaho
 # All rights reserved.
 #
 # Roger Lew (rogerlew@gmail.com)
@@ -38,9 +38,17 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
+import redis
+from rq import Queue
+from rq.job import Job
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+RQ_DB = 9
+
+
 # wepppy
 from wepppy.climates.cligen import ClimateFile
-from wepppy.wepp.runner import (
+from wepp_runner.wepp_runner import (
     make_hillslope_run,
     make_ss_hillslope_run,
     make_ss_batch_hillslope_run,
@@ -1471,7 +1479,110 @@ class Wepp(NoDbBase, LogMixin):
                         make_flowpath_run(fp, years, fp_runs_dir)
         self.log_done()
 
+
+
+
+
     def run_hillslopes(self):
+        self.log('Running Hillslopes\n')
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        climate = Climate.getInstance(self.wd)
+        runs_dir = os.path.abspath(self.runs_dir)
+        fp_runs_dir = self.fp_runs_dir
+        run_flowpaths = getattr(self, 'run_flowpaths', False)
+        wepp_bin = self.wepp_bin
+
+        self.log('    wepp_bin:{}'.format(wepp_bin))
+
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+
+            sub_n = watershed.sub_n
+            if climate.climate_mode == ClimateMode.SingleStormBatch:
+                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+
+                    ss_n = len(climate.ss_batch_storms)
+                    for d in climate.ss_batch_storms:
+                        ss_batch_id = d['ss_batch_id']
+                        ss_batch_key = d['ss_batch_key']
+
+                        self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
+                        wepp_id = translator.wepp(top=int(topaz_id))
+                        futures.append(pool.submit(lambda p: run_ss_batch_hillslope(*p), (wepp_id, runs_dir, wepp_bin, ss_batch_id)))
+                        futures[-1].add_done_callback(oncomplete)
+
+            else:
+                run_hillslope_q = Queue('run_hillslope', connection=redis_conn)
+                job_ids = []
+                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                    wepp_id = translator.wepp(top=int(topaz_id))
+                    job = run_hillslope_q.enqueue(run_hillslope, wepp_id, runs_dir, wepp_bin)
+                    job_ids.append(job.id)
+
+                    self.log(f'  submited topaz={topaz_id} (hill {i+1} of {sub_n}, job {job.id})')
+
+                while True:
+                    all_done = all(Job(id, connection=redis_conn).is_finished for id in job_ids)
+                    if all_done:
+                        self.log(f'all jobs completed')
+                        break
+                    time.sleep(1)  # Sleep for a while before checking again
+
+            # Flowpath post-processing
+            if run_flowpaths and not climate.climate_mode == ClimateMode.SingleStormBatch:
+                self.log('    building loss grid')
+
+                # data structure to contain flowpath soil loss results
+                # keys are (x, y) pixel locations
+                # values are lists of soil loss/deposition from flow paths
+                loss_grid_d = {}
+
+                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                    fps_summary = watershed.fps_summary(topaz_id)
+                    for j, fp in enumerate(fps_summary):
+
+                        # read plot file data
+                        plo = PlotFile(_join(self.fp_output_dir, '%s.plot.dat' % fp))
+
+                        # interpolate soil loss to cell locations of flowpath
+                        d = fps_summary[fp].distance_p
+                        loss = plo.interpolate(d)
+
+                        # store non-zero values in loss_grid_d
+                        for L, coord in zip(loss, fps_summary[fp].coords):
+                            if L != 0.0 and not math.isnan(L):
+                                if coord in loss_grid_d:
+                                    loss_grid_d[coord].append(L)
+                                else:
+                                    loss_grid_d[coord] = [L]
+
+                self.log_done()
+
+                self.log('Processing flowpaths... ')
+
+                self._pickle_loss_grid_d(loss_grid_d)
+                self.make_loss_grid()
+
+                self.log_done()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def run_hillslopes2(self):
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1561,6 +1672,16 @@ class Wepp(NoDbBase, LogMixin):
             self.make_loss_grid()
 
             self.log_done()
+
+
+
+
+
+
+
+
+
+
 
     def _pickle_loss_grid_d(self, loss_grid_d):
         plot_dir = self.plot_dir
