@@ -1,9 +1,16 @@
+import os
+from os.path import join as _join
 import redis
+
+from dotenv import load_dotenv
+_thisdir = os.path.dirname(__file__)
+load_dotenv(_join(_thisdir, '.env'))
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 
 class StatusMessenger:
     _client = None
     _redis_config = {
-        'host': 'localhost',
+        'host': REDIS_HOST,
         'port': 6379,
         'db': 2,
         'decode_responses': True,
