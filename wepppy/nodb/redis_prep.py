@@ -8,13 +8,20 @@ import json
 import time
 import redis
 
+from dotenv import load_dotenv
+_thisdir = os.path.dirname(__file__)
+
+load_dotenv(_join(_thisdir, '.env'))
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+
 
 class RedisPrep:
     def __init__(self, wd, cfg_fn=None):
         wd = wd.rstrip('/')
         self.wd = wd
         self.cfg_fn = cfg_fn
-        self.redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        self.redis = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
         
         parent, run_id = _split(wd)
         self.run_id = run_id
