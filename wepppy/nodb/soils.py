@@ -160,6 +160,10 @@ class Soils(NoDbBase, LogMixin):
         return db
 
     @property
+    def _status_channel(self):
+        return f'{self.runid}:soils'
+
+    @property
     def _nodb(self):
         return _join(self.wd, 'soils.nodb')
 
@@ -799,6 +803,7 @@ class Soils(NoDbBase, LogMixin):
                     break
 
             if dom_mukey is None:
+                self.log('no surgo keys found, falling back to statsgo')
                 self.dump_and_unlock()
                 self.build_statsgo(initial_sat=self.initial_sat,
                                    ksflag=self.ksflag)
@@ -810,6 +815,7 @@ class Soils(NoDbBase, LogMixin):
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
+            self.log('calculating soil coverage')
             for k in soils:
                 soils[k].area = 0.0
 
@@ -829,6 +835,7 @@ class Soils(NoDbBase, LogMixin):
 
             self.dump_and_unlock()
 
+            self.log('triggering SOILS_BUILD_COMPLETE')
             self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
 
             # noinspection PyMethodFirstArgAssignment
@@ -895,6 +902,7 @@ class Soils(NoDbBase, LogMixin):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
+        self.log('ceating soils parquet table')
         subs_summary = self.subs_summary
         assert subs_summary is not None
             

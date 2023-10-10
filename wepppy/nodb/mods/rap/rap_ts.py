@@ -103,6 +103,10 @@ class RAP_TS(NoDbBase, LogMixin):
             return db
 
     @property
+    def _status_channel(self):
+        return f'{self.runid}:rap_ts'
+
+    @property
     def _nodb(self):
         return _join(self.wd, 'rap_ts.nodb')
 
