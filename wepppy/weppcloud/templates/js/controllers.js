@@ -17,6 +17,52 @@ function pass() {
 }
 
 /* ----------------------------------------------------------------------------
+ * WebSocketManager
+ * ----------------------------------------------------------------------------
+ */
+
+function WSClient(formId, runId, channel) {
+    this.formId = formId;
+    this.runId = runId;
+    this.channel = channel;
+    this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runId + ":" + channel;
+    this.ws = null;
+    this.connect();
+}
+
+WSClient.prototype.connect = function() {
+    var self = this;
+
+    self.ws = new WebSocket(self.wsUrl);
+
+    self.ws.onopen = function() {
+        $("#" + self.formId + " #status").html("Connected");
+        self.ws.send(JSON.stringify({"type": "init"}));
+    };
+
+    self.ws.onmessage = function(event) {
+        var payload = JSON.parse(event.data);
+        if(payload.type === "ping") {
+            self.ws.send(JSON.stringify({"type": "pong"}));
+        }
+        else if (payload.type === "status") {
+            var data = payload.data;
+            var lines = data.split('\n');
+            if (lines.length > 1) {
+                data = lines[0] + '...';
+            }
+            $("#" + self.formId + " #status").html(data);
+        }
+    };
+
+    self.ws.onclose = function() {
+        $("#" + self.formId + " #status").html("Connection Closed. Reconnecting...");
+        setTimeout(function() { self.connect(); }, 5000);
+    };
+};
+
+
+/* ----------------------------------------------------------------------------
  * Control Base
  * ----------------------------------------------------------------------------
  */
