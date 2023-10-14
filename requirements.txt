@@ -180,7 +180,7 @@ PyYAML==3.12
 pyzmq==20.0.0
 qrcode==6.1
 rasterio==1.2.10
-reportlab==3.4.0
+reportlab==3.5.55
 requests==2.21.0
 requests-futures==1.0.0
 requests-toolbelt==0.9.1
