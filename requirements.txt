@@ -157,7 +157,7 @@ pycups==1.9.73
 pycurl==7.43.0.1
 pygdal==2.4.2.6
 pygdaltools==1.1
-Pygments==2.7.2
+Pygments==2.7.4
 PyGObject==3.26.1
 pyhdf==0.10.2
 pylibmc==1.6.1
