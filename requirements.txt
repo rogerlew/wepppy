@@ -16,7 +16,7 @@ billiard==3.3.0.22
 bleach==3.2.1
 blinker==1.4
 celery==3.1.20
-certifi==2020.6.20
+certifi==2022.12.7
 cffi==1.11.5
 cftime==1.1.1.2
 chardet==3.0.4
