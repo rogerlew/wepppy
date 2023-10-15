@@ -1222,132 +1222,138 @@ def fork(runid, config):
         abort(404)
 
     def generate(undisturbify=False):
-        from wepppy.nodb.redis_prep import RedisPrep as Prep
-        yield f'undisturbify = {undisturbify}\n'
+        try:
+            from wepppy.nodb.redis_prep import RedisPrep as Prep
+            yield f'undisturbify = {undisturbify}\n'
 
-        yield 'generating new runid...'
+            yield 'generating new runid...'
+     
+            yield 'test raising error'
 
-        dir_created = False
-        while not dir_created:
-            new_runid = awesome_codename.generate_codename().replace(' ', '-')
+            dir_created = False
+            while not dir_created:
+                new_runid = awesome_codename.generate_codename().replace(' ', '-')
 
-            email = getattr(current_user, 'email', '')
-            if email.startswith('rogerlew@'):
-                new_runid = 'rlew-' + new_runid
-            elif email.startswith('mdobre@'):
-                new_runid = 'mdobre-' + new_runid
-            elif email.startswith('srivas42@'):
-                new_runid = 'srivas42-' + new_runid
-            elif request.remote_addr == '127.0.0.1':
-                new_runid = 'devvm-' + new_runid
+                email = getattr(current_user, 'email', '')
+                if email.startswith('rogerlew@'):
+                    new_runid = 'rlew-' + new_runid
+                elif email.startswith('mdobre@'):
+                    new_runid = 'mdobre-' + new_runid
+                elif email.startswith('srivas42@'):
+                    new_runid = 'srivas42-' + new_runid
+                elif request.remote_addr == '127.0.0.1':
+                    new_runid = 'devvm-' + new_runid
 
-            new_wd = get_wd(new_runid)
-            if _exists(new_wd):
-                continue
+                new_wd = get_wd(new_runid)
+                if _exists(new_wd):
+                    continue
 
-            dir_created = True
+                dir_created = True
 
-        assert not _exists(new_wd)
+            assert not _exists(new_wd)
 
-        yield ' done.\nNew runid: {}\n\nAdding new run to database...'.format(new_runid)
+            yield ' done.\nNew runid: {}\n\nAdding new run to database...'.format(new_runid)
 
-        user_datastore.create_run(new_runid, config, current_user)
+            user_datastore.create_run(new_runid, config, current_user)
 
-        yield ' done.\n\nCopying files...'.format(new_runid)
+            yield ' done.\n\nCopying files...'.format(new_runid)
 
-        run_left = get_wd(runid)
-        if not run_left.endswith('/'):
-            run_left += '/'
+            run_left = get_wd(runid)
+            if not run_left.endswith('/'):
+                run_left += '/'
 
-        run_right = get_wd(new_runid)
-        if not run_right.endswith('/'):
-            run_right += '/'
+            run_right = get_wd(new_runid)
+            if not run_right.endswith('/'):
+                run_right += '/'
 
-        cmd = ['rsync', '-av', '--progress', run_left, run_right]
+            cmd = ['rsync', '-av', '--progress', run_left, run_right]
 
-        yield '\n   cmd: {}\n'.format(' '.join(cmd))
+            yield '\n   cmd: {}\n'.format(' '.join(cmd))
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
 
-        while p.poll() is None:
-            output = p.stdout.readline()
-            yield output.decode('UTF-8')
+            while p.poll() is None:
+                output = p.stdout.readline()
+                yield output.decode('UTF-8')
 
-        yield 'done copying files.\n\nSetting wd in .nodbs...\n'
+            yield 'done copying files.\n\nSetting wd in .nodbs...\n'
 
-        # replace the runid in the nodb files
-        nodbs = glob(_join(new_wd, '*.nodb'))
-        for fn in nodbs:
-            yield '  {fn}...'.format(fn=fn)
-            with open(fn) as fp:
-                s = fp.read()
+            # replace the runid in the nodb files
+            nodbs = glob(_join(new_wd, '*.nodb'))
+            for fn in nodbs:
+                yield '  {fn}...'.format(fn=fn)
+                with open(fn) as fp:
+                    s = fp.read()
 
-            s = s.replace(runid, new_runid)
-            with open(fn, 'w') as fp:
-                fp.write(s)
+                s = s.replace(runid, new_runid)
+                with open(fn, 'w') as fp:
+                    fp.write(s)
+
+                yield ' done.\n'
+
+            yield ' done setting wds.\n\nCleanup locks, READONLY, PUBLIC...\n'
+
+            # delete any active locks
+            locks = glob(_join(new_wd, '*.lock'))
+            for fn in locks:
+                os.remove(fn)
+
+            fn = _join(new_wd, 'READONLY')
+            if _exists(fn):
+                os.remove(fn)
+
+            fn = _join(new_wd, 'PUBLIC')
+            if _exists(fn):
+                os.remove(fn)
 
             yield ' done.\n'
 
-        yield ' done setting wds.\n\nCleanup locks, READONLY, PUBLIC...\n'
+            if undisturbify:
+                yield '\nUndisturbifying Project...\n'
 
-        # delete any active locks
-        locks = glob(_join(new_wd, '*.lock'))
-        for fn in locks:
-            os.remove(fn)
+                yield '  removing sbs...'
+                disturbed = Disturbed.getInstance(new_wd)
+                disturbed.remove_sbs()
+                yield ' done.\n\n'
 
-        fn = _join(new_wd, 'READONLY')
-        if _exists(fn):
-            os.remove(fn)
+                yield '  rebuilding landuse...'
+                landuse = Landuse.getInstance(new_wd)
+                landuse.build()
+                yield ' done.\n\n'
 
-        fn = _join(new_wd, 'PUBLIC')
-        if _exists(fn):
-            os.remove(fn)
+                yield '  rebuilding soils...'
+                soils = Soils.getInstance(new_wd)
+                soils.build()
+                yield ' done.\n\n'
 
-        yield ' done.\n'
+                yield '  cleaning wepp runs and outputs...'
+                wepp = Wepp.getInstance(new_wd)
+                wepp.clean()
+                yield ' done.\n\n'
 
-        if undisturbify:
-            yield '\nUndisturbifying Project...\n'
+                yield '  prepping wepp hillslopes...'
+                wepp.prep_hillslopes()
+                yield ' done.\n\n'
 
-            yield '  removing sbs...'
-            disturbed = Disturbed.getInstance(new_wd)
-            disturbed.remove_sbs()
-            Prep.getInstance()
-            yield ' done.\n\n'
+                yield '  running wepp hillslopes...'
+                wepp.run_hillslopes()
+                yield ' done.\n\n'
 
-            yield '  rebuilding landuse...'
-            landuse = Landuse.getInstance(new_wd)
-            landuse.build()
-            yield ' done.\n\n'
+                yield '  prepping wepp watershed...'
+                wepp.prep_watershed()
+                yield ' done.\n\n'
 
-            yield '  rebuilding soils...'
-            soils = Soils.getInstance(new_wd)
-            soils.build()
-            yield ' done.\n\n'
+                yield '  running wepp watershed...'
+                wepp.run_watershed()
+                yield ' done.\n\n'
 
-            yield '  cleaning wepp runs and outputs...'
-            wepp = Wepp.getInstance(new_wd)
-            wepp.clean()
-            yield ' done.\n\n'
+            url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
 
-            yield '  prepping wepp hillslopes...'
-            wepp.prep_hillslopes()
-            yield ' done.\n\n'
+            yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
 
-            yield '  running wepp hillslopes...'
-            wepp.run_hillslopes()
-            yield ' done.\n\n'
-
-            yield '  prepping wepp watershed...'
-            wepp.prep_watershed()
-            yield ' done.\n\n'
-
-            yield '  running wepp watershed...'
-            wepp.run_watershed()
-            yield ' done.\n\n'
-
-        url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
-
-        yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
+        except Exception as e:
+            yield 'encountered error'
+            yield  traceback.format_exc()
 
     return Response(stream_with_context(generate(undisturbify=undisturbify)))
 
@@ -1647,7 +1653,8 @@ def runs0(runid, config):
 
         critical_shear_options = management.load_channel_d50_cs()
 
-        from wepppy.wepp.runner import linux_wepp_bin_opts
+        from wepp_runner.wepp_runner import linux_wepp_bin_opts
+
 
         log_access(wd, current_user, request.remote_addr)
         return render_template('0.html',
@@ -3180,9 +3187,12 @@ def query_soils_channels(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/soils')
 @app.route('/runs/<string:runid>/<config>/report/soils/')
 def report_soils(runid, config):
-    wd = get_wd(runid)
-    return render_template('reports/soils.htm',
-                           report=Soils.getInstance(wd).report)
+    try:
+        wd = get_wd(runid)
+        return render_template('reports/soils.htm',
+                               report=Soils.getInstance(wd).report)
+    except Exception as e:
+        return exception_factory('Building Soil Failed', runid=runid)
 
 
 @app.route('/runs/<string:runid>/<config>/tasks/build_soil/', methods=['POST'])
