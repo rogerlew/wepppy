@@ -29,12 +29,9 @@ from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV3Dataset
 )
 
-try:
-    import wepppyo3
-    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
-    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
-except:
-    wepppyo3 = None
+import wepppyo3
+from wepppyo3.raster_characteristics import identify_median_single_raster_key
+from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
 
 from .rap import RAPPointData
 
@@ -203,9 +200,6 @@ class RAP_TS(NoDbBase, LogMixin):
         return cover
 
     def analyze(self, use_sbs=False, verbose=True):
-        import rustpy_geo
-
-        # todo! add median_identify to wepppyo3
 
         from wepppy.nodb import Ron
         from wepppy.nodb.mods import Disturbed
@@ -215,10 +209,9 @@ class RAP_TS(NoDbBase, LogMixin):
 
         wd = self.wd
 
-        subwta_fn = Watershed.getInstance(wd).subwta
-        ron = Ron.getInstance(wd)
 
-        assert _exists(subwta_fn)
+        watershed = Watershed.getInstance(wd)
+        ron = Ron.getInstance(wd)
 
         rap_mgr = self._rap_mgr
 
@@ -253,10 +246,14 @@ class RAP_TS(NoDbBase, LogMixin):
                         data_ds[band] = {}
 
                     self.log(f'  analyzing rap {year} {band}...')
-                    data_ds[band][year] = rustpy_geo.median_identify(subwta_fn=subwta_fn,
-                                                                      parameter_fn=rap_ds_fn,
-                                                                      band_indx=band,
-                                                                      lcmap_fn=disturbed_fn)
+
+                    if self.multi_ofe:
+                        data_ds[band][year] = identify_median_intersecting_raster_keys(
+                            key_fn=watershed.subwta,key2_fn=watershed.mofe_map, parameter_fn=rap_ds_fn, band_indx=band)
+                    else:
+                        data_ds[band][year] = identify_median_single_raster_key(
+                            key_fn=watershed.subwta, parameter_fn=rap_ds_fn, band_indx=band)
+
                     self.log_done()
 
             self.data = data_ds
@@ -288,17 +285,28 @@ class RAP_TS(NoDbBase, LogMixin):
         years = [yr for yr in data[RAP_Band.TREE]]
 
         for wepp_id in translator.iter_wepp_sub_ids():
-            topaz_id = translator.top(wepp=wepp_id)
+            topaz_id = str(translator.top(wepp=wepp_id))
 
             with open(_join(runs_dir, f'p{wepp_id}.cov'), 'w') as fp:
                 fp.write(' \t'.join([str(yr) for yr in years]))
                 fp.write('\n')
 
-                for band in [RAP_Band.TREE,
-                             RAP_Band.SHRUB,
-                             RAP_Band.PERENNIAL_FORB_AND_GRASS,
-                             RAP_Band.ANNUAL_FORB_AND_GRASS]:
-                    fp.write(' \t'.join([str(data[band][yr][str(topaz_id)]) for yr in years]))
-                    fp.write('\n')
+                
+                if self.multi_ofe:
+                    for fp_id in data[RAP_Band.TREE][years[0]][str(topaz_id)]: 
 
+                        for band in [RAP_Band.TREE,
+                                     RAP_Band.SHRUB,
+                                     RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                                     RAP_Band.ANNUAL_FORB_AND_GRASS]:
+                            fp.write(' \t'.join([str(data[band][yr][topaz_id][fp_id]) for yr in years]))
+                            fp.write('\n')
+
+                else:
+                    for band in [RAP_Band.TREE,
+                                 RAP_Band.SHRUB,
+                                 RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                                 RAP_Band.ANNUAL_FORB_AND_GRASS]:
+                        fp.write(' \t'.join([str(data[band][yr][str(topaz_id)]) for yr in years]))
+                        fp.write('\n')
 
