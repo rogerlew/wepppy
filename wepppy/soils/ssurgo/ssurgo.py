@@ -44,7 +44,11 @@ ERIN_ADJUST_FCWP = True
 
 _thisdir = os.path.dirname(__file__)
 # _ssurgo_cache_db = ":memory:"  # _join(_thisdir, 'ssurgo_cache.db')
-_ssurgo_cache_db = _join(_thisdir, 'data', 'surgo', 'surgo_tabular.db')
+if _exists('/media/ramdisk'):
+    _ssurgo_cache_db = '/media/ramdisk/surgo_tabular.db'
+else:
+    _ssurgo_cache_db = _join(_thisdir, 'data', 'surgo', 'surgo_tabular.db')
+
 _statsgo_cache_db = _join(_thisdir, 'data', 'statsgo', 'statsgo_tabular.db')
 
 # Developer Notes
@@ -245,7 +249,7 @@ class Horizon(HorizonMixin):
             res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
 
         if not isfloat(self.ksat_r):
-            self.ksat_r = res_dict['ks']
+            self.ksat_r = res_dict['ks'] * 10.0 / 24.0  # convert from cm/day to mm/hour
             self.horizon_build_notes.append(f'  {chkey}::ksat_r estimated from {rosetta_model}')
 
         # wilting point
@@ -374,7 +378,7 @@ class SoilSummary(object):
             self.mukey = kwargs['mukey']
 
         if isint(self.mukey):
-            self.color = colors[self.mukey % len(colors)]
+            self.color = colors[int(self.mukey) % len(colors)]
         else:
             k = int(hashlib.sha1(str.encode(self.mukey)).hexdigest(), 16)
             self.color = colors[k % len(colors)]
@@ -929,7 +933,7 @@ Any comments:
             soils_dir=wd,
             build_date=str(datetime.now()),
             desc=self.short_description,
-            meta_fn=self.pickle_fn
+            meta_fn=None #self.pickle_fn
         )
 
     def _write2006_2(self, wd, overwrite, fname, db_build, ag=False):
@@ -1357,7 +1361,7 @@ class SurgoSoilCollection(object):
 
     def writeWeppSoils(self, wd='./', overwrite=True,
                        write_logs=False, db_build=False,
-                       version='7778', pickle=True) -> Dict[int, SoilSummary]:
+                       version='7778', pickle=False) -> Dict[int, SoilSummary]:
         assert self.weppSoils is not None
         soils = {}
         for weppSoil in self.weppSoils.values():
