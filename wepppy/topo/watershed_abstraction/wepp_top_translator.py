@@ -199,7 +199,8 @@ class WeppTopTranslator:
             # already been read into {network}
             # the 0s are appended to make sure it has a length of
             # at least 3
-            chns = network.get(top, []) + [0, 0, 0]
+            chns = network.get(top, [])
+            chns = [v for v in sorted(chns, reverse=True) if v != 24] + [0, 0, 0]
 
             # structure line with top ids
             _structure += [hright, hleft, hcenter] + chns[:3]
