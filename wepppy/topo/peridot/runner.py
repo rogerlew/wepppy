@@ -49,22 +49,22 @@ def post_abstract_watershed(wd: str, verbose: bool = True):
     del df
 
 
-    df = pd.read_csv(_join(wd, 'watershed/flowpaths.csv'))
-    df['topaz_id'] = df['topaz_id'].astype(str)
-    df['fp_id'] = df['fp_id'].astype(str)
+#    df = pd.read_csv(_join(wd, 'watershed/flowpaths.csv'))
+#    df['topaz_id'] = df['topaz_id'].astype(str)
+#    df['fp_id'] = df['fp_id'].astype(str)
+#
+#    # Create the dictionary structure
+#    fp_summary = {}
+#    for rec in df.to_dict('records'):
+#        topaz_id = rec['topaz_id']
+#        fp_id = rec['fp_id']
+#        fp = PeridotFlowpath.from_dict(rec)
+#        if topaz_id not in fp_summary:
+#            fp_summary[topaz_id] = {}
+#        fp_summary[topaz_id][fp_id] = fp
+#    del df
 
-    # Create the dictionary structure
-    fp_summary = {}
-    for rec in df.to_dict('records'):
-        topaz_id = rec['topaz_id']
-        fp_id = rec['fp_id']
-        fp = PeridotFlowpath.from_dict(rec)
-        if topaz_id not in fp_summary:
-            fp_summary[topaz_id] = {}
-        fp_summary[topaz_id][fp_id] = fp
-    del df
-
-    return subs_summary, chns_summary, fp_summary
+    return subs_summary, chns_summary, None #fp_summary
 
 
 def read_network(fname):
