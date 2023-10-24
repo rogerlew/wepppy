@@ -32,6 +32,7 @@ from wepppy.soils.ssurgo import (
     SoilSummary
 )
 from wepppy.topo.watershed_abstraction.support import is_channel
+from wepppy.all_your_base.geo import read_raster, raster_stacker
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.wepp.soils.soilsdb import load_db, get_soil
 
@@ -104,18 +105,7 @@ class Soils(NoDbBase, LogMixin):
             if not _exists(soils_dir):
                 os.mkdir(soils_dir)
 
-            _soils_map = self.config_get_path('soils', 'soils_map')
-            if _soils_map is not None:
-                _soil_fn = _join(self.soils_dir, _split(_soils_map)[-1])
-                shutil.copyfile(_soils_map, _soil_fn)
-
-                if _exists(_soils_map[:-4] + '.prj'):
-                    shutil.copyfile(_soils_map[:-4] + '.prj', _soil_fn[:-4] + '.prj')
-
-                _soils_map = _split(_soils_map)[-1]
-
-            self._soils_map = _soils_map
-
+            self._soils_map = self.config_get_path('soils', 'soils_map', None)
 
             self.dump_and_unlock()
 
@@ -467,6 +457,78 @@ class Soils(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+
+    def _build_from_map_db(self):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+
+        soils_dir = self.soils_dir
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            assert _exists(self.soils_map)
+            soils_db_dir = _join(_split(self.soils_map)[0], 'db')
+
+            soils_fn = _join(soils_dir, 'soils.tif')
+            if _exists(soils_fn):
+                os.remove(soils_fn)
+
+            raster_stacker(self.soils_map, watershed.dem_fn, soils_fn)
+
+            domsoil_d = identify_mode_single_raster_key(
+                key_fn=watershed.subwta, parameter_fn=soils_fn, ignore_channels=True, ignore_keys=set())
+            domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
+
+            self.log(f'domsoil_d: {repr(domsoil_d)}')
+
+            soils = {}
+            for topaz_id, mukey in domsoil_d.items():
+                sol_fn = _join(soils_dir, f'{mukey}.sol')
+                if not _exists(sol_fn):
+                    shutil.copyfile(_join(soils_db_dir,  f'{mukey}.sol'), sol_fn)
+
+                if mukey not in soils:
+                    wsu = WeppSoilUtil(sol_fn)
+                    soils[mukey] = SoilSummary(
+                        mukey=mukey,
+                        fname=f'{mukey}.sol',
+                        soils_dir=soils_dir,
+                        build_date=str(datetime.now()),
+                        desc=wsu.obj['ofes'][0]['slid'],
+                        pct_coverage=0.0
+                    )
+
+            self.log(repr(soils))
+
+            for topaz_id, k in domsoil_d.items():
+                soils[k].area += watershed.area_of(topaz_id)
+
+            for k in soils:
+                coverage = 100.0 * soils[k].area / watershed.sub_area
+                soils[k].pct_coverage = coverage
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+            self.soils = soils
+
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
+
     def build(self, initial_sat=None, ksflag=None):
 
         wd = self.wd
@@ -476,7 +538,9 @@ class Soils(NoDbBase, LogMixin):
 
         ron = Ron.getInstance(wd)
 
-        if self.config_stem.startswith('ak'):
+        if self.soils_map is not None:
+             self._build_from_map_db()
+        elif self.config_stem.startswith('ak'):
             self._build_ak()
         elif self.mode == SoilsMode.Gridded:
             if 'eu' in ron.locales:

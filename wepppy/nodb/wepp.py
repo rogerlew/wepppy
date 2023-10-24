@@ -91,6 +91,8 @@ from wepppy.wepp.out import (
     HillPass
 )
 
+from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
+
 from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, SedimentDelivery
 
 # wepppy submodules
@@ -656,15 +658,14 @@ class Wepp(NoDbBase, LogMixin):
     def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None):
         self.log('Prepping Hillslopes... ')
 
-        soils = Soils.getInstance(self.wd)
-
         # get translator
-        translator = Watershed.getInstance(self.wd).translator_factory()
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
 
         if self.multi_ofe:
             self._prep_multi_ofe(translator)
         else:
-            self._prep_slopes(translator)
+            self._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
             self._prep_managements(translator)
             self._prep_soils(translator)
 
@@ -1078,7 +1079,7 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
-    def _prep_slopes(self, translator):
+    def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
         self.log('    Prepping _prep_slopes... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -1094,7 +1095,10 @@ class Wepp(NoDbBase, LogMixin):
 
             src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            _copyfile(src_fn, dst_fn) 
+            if clip_hillslopes:
+                clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+            else:
+                _copyfile(src_fn, dst_fn)
 
             # use getattr for old runs that don't have a run_flowpaths attribute
             if getattr(self, 'run_flowpaths', False):
@@ -1483,7 +1487,7 @@ class Wepp(NoDbBase, LogMixin):
 
 
 
-    def run_hillslopes(self):
+    def run_hillslopes2(self):
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1582,7 +1586,7 @@ class Wepp(NoDbBase, LogMixin):
 
 
 
-    def run_hillslopes2(self):
+    def run_hillslopes(self):
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
