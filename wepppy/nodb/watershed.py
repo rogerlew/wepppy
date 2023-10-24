@@ -30,12 +30,14 @@ from wepppy.topo.taudem import TauDEMTopazEmulator
 from wepppy.topo.peridot.runner import run_peridot_abstract_watershed, post_abstract_watershed, read_network
 from wepppy.topo.watershed_abstraction import SlopeFile
 from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary
+from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.all_your_base.geo import read_raster, haversine
 
 from .ron import Ron
 from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
 from .redis_prep import RedisPrep as Prep
+from .mixins.log_mixin import LogMixin
 
 from wepppy.all_your_base import (
     NCPU
@@ -87,7 +89,7 @@ def process_subcatchment(args):
     return sub_id, sub_summary, fp_d
 
 
-class Watershed(NoDbBase):
+class Watershed(NoDbBase, LogMixin):
     __name__ = 'Watershed'
 
     def __init__(self, wd, cfg_fn):
@@ -172,6 +174,14 @@ class Watershed(NoDbBase):
             db.dump_and_unlock()
 
         return db
+
+    @property
+    def _status_channel(self):
+        return f'{self.runid}:watershed'
+
+    @property
+    def status_log(self):
+        return os.path.abspath(_join(self.wat_dir, 'status.log'))
 
     @property
     def delineation_backend(self):
@@ -481,6 +491,9 @@ class Watershed(NoDbBase):
     # build channels
     #
     def build_channels(self, csa=None, mcl=None):
+        assert not self.islocked()
+        self.log('Building Channels')
+
         if csa or mcl:
             self.lock()
             try:
@@ -513,6 +526,9 @@ class Watershed(NoDbBase):
     # set outlet
     #
     def set_outlet(self, lng=None, lat=None, da=0.0):
+        assert not self.islocked()
+        self.log('Setting Outlet')
+
         assert float(lng), lng
         assert float(lat), lat
 
@@ -543,6 +559,9 @@ class Watershed(NoDbBase):
     # build subcatchments
     #
     def build_subcatchments(self, pkcsa=None):
+        assert not self.islocked()
+        self.log('Building Subcatchments')
+
         if self.delineation_backend_is_topaz:
             Topaz.getInstance(self.wd).build_subcatchments()
         else:
@@ -599,11 +618,13 @@ class Watershed(NoDbBase):
     #
 
     def abstract_watershed(self):
+        assert not self.islocked()
+        self.log('Abstracting Watershed')
 
         if self.abstraction_backend_is_peridot:
             assert self.delineation_backend_is_topaz
             run_peridot_abstract_watershed(self.wd,
-                                           clip_hillslopes=self.clip_hillslopes,
+                                           clip_hillslopes=False,
                                            clip_hillslope_length=self.clip_hillslope_length)
 
             self.lock()
@@ -757,7 +778,7 @@ class Watershed(NoDbBase):
             max_discha = np.max(_discha_vals)
 
             mofe_slp_fn = _join(self.wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
-            d_fractions = SlopeFile(mofe_slp_fn).distances
+            d_fractions = mofe_distance_fractions(mofe_slp_fn)
 
             n_ofe = len(d_fractions) - 1
             if n_ofe == 1:
@@ -773,10 +794,19 @@ class Watershed(NoDbBase):
 
                     mofe_indices = np.where((subwta == int(topaz_id)) & 
                                             (discha >= _min) & (discha <= _max)) 
+                    if len(mofe_indices[0]) == 0:
+                        target_value = (1.0 - d_fractions[i]) * max_discha
+                        diff = np.abs(target_value - _discha_vals)
+                        closest_index = np.argmin(diff)
+                        mofe_indices = (indices[0][closest_index], indices[1][closest_index])
+        
                     mofe_map[mofe_indices] = j
                     j += 1             
 
             mofe_ids = set(mofe_map[indices])
+            if 0 in mofe_ids:
+                mofe_ids.remove(0)
+
             assert len(mofe_ids) == n_ofe, (topaz_id, mofe_ids)
 
         num_cols, num_rows = mofe_map.shape
