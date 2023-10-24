@@ -38,6 +38,7 @@ from .base import (
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
 from .redis_prep import RedisPrep as Prep
+from .mixins.log_mixin import LogMixin
 
 
 try:
@@ -70,7 +71,7 @@ def read_cover_defaults(fn):
     return d
 
 
-class Landuse(NoDbBase):
+class Landuse(NoDbBase, LogMixin):
     """
     Manager that keeps track of project details
     and coordinates access of NoDb instances.
@@ -152,6 +153,14 @@ class Landuse(NoDbBase):
             db.dump_and_unlock()
 
         return db
+
+    @property
+    def _status_channel(self):
+        return f'{self.runid}:landuse'
+
+    @property
+    def status_log(self):
+        return os.path.abspath(_join(self.lc_dir, 'status.log'))
 
     @property
     def _nodb(self):
@@ -400,6 +409,9 @@ class Landuse(NoDbBase):
         self.domlc_d = domlc_d
 
     def build(self):
+        assert not self.islocked()
+        self.log('Building landuse')
+
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -501,8 +513,6 @@ class Landuse(NoDbBase):
             json.dump(frac_d, fp, indent=2)
 
     def _build_multiple_ofe(self):
-        global wepppyo3
-
         from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
         from wepppy.nodb.mods.disturbed import Disturbed
 
@@ -521,21 +531,13 @@ class Landuse(NoDbBase):
             lc = LandcoverMap(self.lc_fn)
             domlc_d = lc.build_lcgrid(watershed.subwta, watershed.mofe_map)
         else:
-            domlc_d = identify_mode_intersecting_raster_keys(
+            domlc_d = identify_mode_multiple_raster_key(
                 key_fn=watershed.subwta,
                 key2_fn=watershed.mofe_map,
-                parameter_fn=self.lc_fn,
-                ignore_channels=True,
-                ignore_keys=set(),
-                ignore_keys2=set(),
+                parameter_fn=self.lc_fn
             )
-            _domlc_d = {k: str(v) for k, v in domlc_d.items()}
-            domlc_d = {}
-            for topaz_fp_id, v in _domlc_d.items():
-                topaz_id, fp_id = topaz_fp_id.split('-')
-                if topaz_id not in domlc_d:
-                    domlc_d[topaz_id] = {}
-                domlc_d[topaz_id][fp_id] = v
+
+        self.log(f'domlc_d = {domlc_d}')
 
         self.lock()
         self.__m_domlc_d = domlc_d
@@ -587,7 +589,7 @@ class Landuse(NoDbBase):
                 stack.append(management)
 
             assert len(stack) > 0, topaz_id
-            assert len(stack) == nsegments, (len(stack),  nsegments)
+            assert len(stack) == nsegments, (topaz_id, len(stack),  nsegments)
 
             if len(stack) == 1:
                 with open(mofe_lc_fn, 'w') as pf:
@@ -728,11 +730,11 @@ class Landuse(NoDbBase):
         if "lt" in self.mods or "portland" in self.mods or "seattle" in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
 
-        if 'disturbed' in self.mods:
-            import wepppy
-            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
-            _lookup = disturbed.land_soil_replacements_d
-            landuseoptions = [opt for opt in landuseoptions if opt.get('DisturbedClass') != ''] 
+#        if 'disturbed' in self.mods:
+#            import wepppy
+#            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
+#            _lookup = disturbed.land_soil_replacements_d
+#            landuseoptions = [opt for opt in landuseoptions if opt.get('DisturbedClass') != ''] 
 
         return landuseoptions
 
@@ -904,6 +906,7 @@ class Landuse(NoDbBase):
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+        #df['dom'] = df['dom'].astype(str)
         df.to_parquet(_join(self.lc_dir, 'landuse.parquet'))
    
     def sub_iter(self):
