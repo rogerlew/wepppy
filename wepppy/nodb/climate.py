@@ -1110,6 +1110,9 @@ class Climate(NoDbBase, LogMixin):
             raise
 
     def build(self, verbose=False, attrs=None):
+        self.log('Build Climates')
+        assert not self.islocked()
+
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
