@@ -688,7 +688,7 @@ class Wepp(NoDbBase, LogMixin):
             self._prep_wepp_ui()
         else:
             self._remove_wepp_ui()
-            
+
         if (pmet is None and self.run_pmet) or pmet:
             self._prep_pmet()
         else:
@@ -1118,6 +1118,10 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(wd)
         watershed = Watershed.getInstance(wd)
         soils = Soils.getInstance(wd)
+
+        clip_soils = soils.clip_soils
+        clip_soils_depth = soils.clip_soils_depth
+
         try:
             disturbed = Disturbed.getInstance(wd)
         except:
@@ -1144,7 +1148,7 @@ class Wepp(NoDbBase, LogMixin):
             # slope files
             src_fn = _join(wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            _copyfile(src_fn, dst_fn) 
+            _copyfile(src_fn, dst_fn)
 
             # soils
             src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
@@ -1173,22 +1177,25 @@ class Wepp(NoDbBase, LogMixin):
             elif kslast is not None:
                 _kslast = kslast
 
-            if _kslast is not None:
+            if _kslast is not None or clip_soils:
                 soilu = WeppSoilUtil(src_fn)
-                soilu.modify_kslast(_kslast)
+                if _kslast is not None:
+                    soilu.modify_kslast(_kslast)
+                if clip_soils:
+                    soilu.clip_soil_depth(clip_soils_depth)
                 soilu.write(dst_fn)
             else:
                 _copyfile(src_fn, dst_fn)
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
-            man = Management(Key=f'hill_{topaz_id}', 
-                             ManagementFile=man_fn, 
-                             ManagementDir=lc_dir, 
-                             Description=f"hill_{topaz_id} Multiple OFE", 
+            man = Management(Key=f'hill_{topaz_id}',
+                             ManagementFile=man_fn,
+                             ManagementDir=lc_dir,
+                             Description=f"hill_{topaz_id} Multiple OFE",
                              Color=(0,0,0))
 
-            man = man.build_multiple_year_man(years)    
+            man = man.build_multiple_year_man(years)
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
             with open(dst_fn, 'w') as pf:
                 pf.write(str(man))
@@ -1248,7 +1255,7 @@ class Wepp(NoDbBase, LogMixin):
             if meoization_key in build_d:
                 shutil.copyfile(build_d[meoization_key], dst_fn)
                 self.log_done()
-                
+
             else:
                 management = man_summary.get_management()
                 sol_key = soils.domsoil_d[topaz_id]
@@ -1257,7 +1264,7 @@ class Wepp(NoDbBase, LogMixin):
                 # probably isn't the right location for this code. should be in nodb.disturbed
                 if disturbed is not None:
                     disturbed_class = man_summary.disturbed_class
-                    
+
                     _soil = soils.soils[mukey]
                     clay = _soil.clay
                     sand = _soil.sand
@@ -1265,20 +1272,20 @@ class Wepp(NoDbBase, LogMixin):
 
                     if (texid, disturbed_class) not in _land_soil_replacements_d:
                         texid = 'all'
-                    
+
                     if disturbed_class is None or 'developed' in disturbed_class:
                         rdmax = None
                         xmxlai = None
                     else:
                         rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
                         xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
-    
+
                     if isfloat(rdmax):
                         management.set_rdmax(float(rdmax))
-    
+
                     if isfloat(xmxlai):
                         management.set_xmxlai(float(xmxlai))
-    
+
                     meoization_key = (mukey, disturbed_class)
 
                 if rap_ts is not None:
@@ -1287,9 +1294,9 @@ class Wepp(NoDbBase, LogMixin):
                         management.set_cancov(cover)
 
                 multi = management.build_multiple_year_man(years)
-    
+
                 fn_contents = str(multi)
-    
+
                 with open(dst_fn, 'w') as fp:
                     fp.write(fn_contents)
 
@@ -1298,7 +1305,7 @@ class Wepp(NoDbBase, LogMixin):
                 if getattr(self, 'run_flowpaths', False):
                     for flowpath in watershed.fps_summary(topaz_id):
                         dst_fn = _join(fp_runs_dir, '{}.man'.format(flowpath))
-    
+
                         with open(dst_fn, 'w') as fp:
                             fp.write(fn_contents)
 
@@ -1373,8 +1380,8 @@ class Wepp(NoDbBase, LogMixin):
                 if clip_soils:
                     soilu.clip_soil_depth(clip_soils_depth)
                 soilu.write(dst_fn)
-            else:    
-                _copyfile(src_fn, dst_fn) 
+            else:
+                _copyfile(src_fn, dst_fn)
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
