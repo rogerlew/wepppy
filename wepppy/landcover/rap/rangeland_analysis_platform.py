@@ -27,7 +27,7 @@ class RangelandAnalysisPlatform(object):
         self.wd = wd
         if bbox is not None:
             bbox = [float(v) for v in  bbox]
-        
+
         self.bbox = bbox
 
         self.ds = {}
@@ -47,7 +47,7 @@ class RangelandAnalysisPlatform(object):
         version = self.version
 
         ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
-        lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2], 
+        lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2],
                                        force_zone_number=utm_number)
         proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84" \
             .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
@@ -56,9 +56,9 @@ class RangelandAnalysisPlatform(object):
             year = str(year)
             dst_fn = _join(self.wd, f'_rap_{version}_{year}.tif')
 
-            cmd = ['gdalwarp', 
-                   '-co', 'compress=lzw', 
-                   '-co', 'tiled=yes', 
+            cmd = ['gdalwarp',
+                   '-co', 'compress=lzw',
+                   '-co', 'tiled=yes',
                    '-co', 'bigtiff=yes',
                    '-t_srs', proj4,
                    '-te', str(ul_x), str(lr_y), str(lr_x), str(ul_y),
@@ -127,7 +127,7 @@ class RAP_Band(IntEnum):
 
 class RangelandAnalysisPlatformDataset(object):
     def __init__(self, fn):
-        self.ds = rasterio.open(fn)    
+        self.ds = rasterio.open(fn)
 
     @property
     def shape(self):
@@ -183,7 +183,7 @@ class RangelandAnalysisPlatformDataset(object):
                     key = f'{_id}-{landuse}'
                     domlc_d[key] = dom
                     px_counts[key] += len(_indices[0])
-                 
+
             else:
                 dom = self._get_median(band, indices)
                 domlc_d[str(_id)] = dom
@@ -198,7 +198,7 @@ class RangelandAnalysisPlatformDataset(object):
 
         data = self.get_band(band)
         if data is None:
-            return  
+            return
 
         x = data[indices]
 
@@ -211,17 +211,18 @@ class RangelandAnalysisPlatformDataset(object):
 RangelandAnalysisPlatformV2Dataset = RangelandAnalysisPlatformDataset
 RangelandAnalysisPlatformV3Dataset = RangelandAnalysisPlatformDataset
 
+
 if __name__ == "__main__":
     bbox = [-114.63661319270066,45.41139471986449,-114.60663682475024,45.43207316134328]
     rap = RangelandAnalysisPlatformV2(wd='test', bbox=bbox)
     rap_ds = rap.get_dataset(2020)
     litter = rap_ds.get_band(RAP_Band.LITTER)
     print(litter)
-     
+
 
     rap = RangelandAnalysisPlatformV3(wd='test', bbox=bbox)
     rap_ds = rap.get_dataset(2020)
     litter = rap_ds.get_band(RAP_Band.LITTER)
     print(litter)
-     
+
 
