@@ -1260,10 +1260,10 @@ var ChannelDelineation = function () {
                 $("#hint_build_channels_en").text("");
             } else {
                 $("#btn_build_channels").prop("disabled", true);
-                $("#hint_build_channels").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
+                $("#hint_build_channels").text("Area is too large, zoom must be 13 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
 
                 $("#btn_build_channels_en").prop("disabled", true);
-                $("#hint_build_channels_en").text("Area is too large, zoom must be \u2265 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
+                $("#hint_build_channels_en").text("Area is too large, zoom must be 13 " + self.zoom_min.toString() + ", current zoom is " + zoom.toString());
             }
         };
 
@@ -1392,7 +1392,7 @@ var ChannelDelineation = function () {
             self.polys.addTo(map);
             map.ctrls.addOverlay(self.polys, "Channels");
 
-            self.labels.addTo(map);
+            //self.labels.addTo(map);
             map.ctrls.addOverlay(self.labels, "Channel Labels");
         };
 
@@ -1724,7 +1724,7 @@ var SubcatchmentDelineation = function () {
             self.polys.addTo(map);
             map.ctrls.addOverlay(self.polys, "Subcatchments");
 
-            self.labels.addTo(map);
+            //self.labels.addTo(map);
             map.ctrls.addOverlay(self.labels, "Subcatchment Labels");
         };
 
