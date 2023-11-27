@@ -24,16 +24,16 @@ from metpy.units import units
 def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_years=True):
     assert isint(start_year)
     assert isint(end_year)
-    
+
     start_year = int(start_year)
     end_year = int(end_year)
-    
+
     years = ','.join(str(v) for v in range(start_year, end_year+1))
-    
+
     assert start_year <= end_year
     assert 1980 <= start_year <= int(time.strftime("%Y"))-1
     assert 1980 <= end_year <= int(time.strftime("%Y"))-1
-    
+
     # request data
     url = 'https://daymet.ornl.gov/single-pixel/api/data'\
           '?lat={lat}&lon={lon}'\
