@@ -111,33 +111,36 @@
             <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
-            <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified
-                <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET (GRIDMET wind) with PRISM Revision [1980 - {{ climate.daymet_last_available_year }}]
-                <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET with PRISM Revision [1980 - Present]
-                <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to the day before yesterday. (For current year data to the end of the year is stochastically generated to allow WEPP to run.)"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01 deg grid) [2007 - Present]
-                <a data-toggle="tooltip" data-placement="top" title="Breakpoint climate files 2007-present"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) [2006 - 2099]
-                <a data-toggle="tooltip" data-placement="top" title="Experimental."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
-                <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
-            <label class="radio"><input type="radio" value="14" class="disable-readonly" id="climate_mode14" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 14] }}> Single Storm Batch
-                <a data-toggle="tooltip" data-placement="top" title="Designed Events ran in Batch Mode."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-            </label><br/>
 
-            {% if climate.observed_clis != none %}
-            <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
-            {%  endif %}
-            {% if climate.future_clis != none %}
-            <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
+            {% if 'alaska' not in ron.locales and 'hawaii' not in ron.locales %}
+                <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified
+                    <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET (GRIDMET wind) with PRISM Revision [1980 - {{ climate.daymet_last_available_year }}]
+                    <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET with PRISM Revision [1980 - Present]
+                    <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to the day before yesterday. (For current year data to the end of the year is stochastically generated to allow WEPP to run.)"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01 deg grid) [2007 - Present]
+                    <a data-toggle="tooltip" data-placement="top" title="Breakpoint climate files 2007-present"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) [2006 - 2099]
+                    <a data-toggle="tooltip" data-placement="top" title="Experimental."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
+                    <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="14" class="disable-readonly" id="climate_mode14" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 14] }}> Single Storm Batch
+                    <a data-toggle="tooltip" data-placement="top" title="Designed Events ran in Batch Mode."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+
+                {% if climate.observed_clis != none %}
+                    <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
+                {%  endif %}
+                {% if climate.future_clis != none %}
+                    <label class="radio"><input type="radio" value="7" class="disable-readonly" id="climate_mode7" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 7] }}> Future Climate Database</label><br/>
+                {%  endif %}
             {%  endif %}
 
             {% elif 'eu' in ron.locales %}
