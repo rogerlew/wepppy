@@ -10,8 +10,7 @@ except ImportError:
     from yaml import Loader, Dumper
 
 
-from wepppy.all_your_base import try_parse
-
+from wepppy.all_your_base import try_parse, isfloat
 
 
 def _replace_parameter(original, replacement):
@@ -27,6 +26,7 @@ def _replace_parameter(original, replacement):
     else:
         return replacement
 
+
 def _pars_to_string(d):
     kv_pairs = []
     for k, v in d.items():
@@ -38,7 +38,10 @@ def _pars_to_string(d):
 
 
 class WeppSoilUtil(object):
-    def __init__(self, fn):
+    def __init__(self, fn, compute_erodibilities=False, compute_conductivity=False):
+        self.compute_erodibilities = compute_erodibilities
+        self.compute_conductivity = compute_conductivity
+
         if fn.endswith('.sol'):
             try:
                 self._parse_sol(fn)
@@ -143,6 +146,24 @@ class WeppSoilUtil(object):
                     solthk, sand, clay, orgmat, cec, rfg = line
                     bd = ksat = fc = wp = anisotropy = None
 
+                assert float(clay) + float(sand) <= 100.0
+
+                if j == 0:
+                    if self.compute_erodibilities:
+                        from wepppy.wepp.soils.horizon_mixin import compute_erodibilities
+                        vfs = 100.0 - float(clay) - float(sand)
+                        res = compute_erodibilities(clay=float(clay), sand=float(sand), vfs=vfs, om=float(orgmat))
+                        ki = round(res['interrill'])
+                        kr = round(res['rill'], 5)
+                        shcrit = round(res['shear'], 1)
+
+                if self.compute_conductivity:
+                    from wepppy.wepp.soils.horizon_mixin import compute_conductivity
+                    ksat = compute_conductivity(clay=float(clay), sand=float(sand), cec=float(cec))
+
+                    if ksat is not None:
+                        ksat = round(ksat, 4)
+
                 horizons.append(
                     dict(solthk=try_parse(solthk),
                          bd=try_parse(bd),
@@ -182,12 +203,17 @@ class WeppSoilUtil(object):
                 else:
                     raise NotImplementedError(solwpv)
 
+            if isfloat(sat):
+                sat = float(sat)
+            else:
+                sat = 0.75
+
             ofes.append(
                 dict(slid=slid.replace("'", '').replace('"', ''),
                      texid=texid.replace("'", '').replace('"', ''),
                      nsl=try_parse(nsl),
                      salb=try_parse(salb),
-                     sat=try_parse(sat),
+                     sat=sat,
                      ki=try_parse(ki),
                      kr=try_parse(kr),
                      shcrit=try_parse(shcrit),
@@ -212,10 +238,6 @@ class WeppSoilUtil(object):
                     res_lyr=res_lyr)
 
         self.obj = soil
-
-#        yaml_txt = yaml.dump(soil)
-
-#        self.obj = yaml.safe_load(yaml_txt)
 
     def modify_kslast(self, kslast, pars=None):
         luse = self.obj['ofes'][0]['luse']
@@ -278,29 +300,30 @@ class WeppSoilUtil(object):
             for j, horizon in enumerate(ofe['horizons']):
                 clay, sand, bd = horizon['clay'], horizon['sand'], horizon['bd']
                 silt = 100 - clay - sand
-                ros_model = f'Rosetta(clay={clay}, sand={sand}, bd={bd}, silt={silt})'
-                if bd is None:
-                    res_dict = r2.predict_kwargs(clay=clay, sand=sand, silt=silt)
+                if not isfloat(bd):
+                    ros_model = f'Rosetta(clay={clay}, sand={sand}, silt={silt})'
+                    res_dict = r2.predict_kwargs(clay=float(clay), sand=float(sand), silt=float(silt))
                 else:
-                    res_dict = r3.predict_kwargs(bd=bd, clay=clay, sand=sand, silt=silt)
+                    ros_model = f'Rosetta(clay={clay}, sand={sand}, bd={bd}, silt={silt})'
+                    res_dict = r3.predict_kwargs(bd=float(bd), clay=float(clay), sand=float(sand), silt=float(silt))
             
-                if horizon['bd'] is None:
+                if not isfloat(horizon['bd']):
                     horizon['bd'] = 1.4
                     header.append(f'ofe={i},horizon{j} bd default value of 1.4')
 
-                if horizon['fc'] is None:
+                if not isfloat(horizon['fc']):
                     horizon['fc'] = round(res_dict['fc'], 4)
                     header.append(f'ofe={i},horizon{j} fc estimated using {ros_model}')
 
-                if horizon['wp'] is None:
+                if not isfloat(horizon['wp']):
                     horizon['wp'] = round(res_dict['wp'], 4)
                     header.append(f'ofe={i},horizon{j} wp estimated using {ros_model}')
 
-                if horizon['ksat'] is None:
-                    horizon['ksat'] = round(res_dict['ks'], 4)
+                if not isfloat(horizon['ksat']):
+                    horizon['ksat'] = round(res_dict['ks'] * 10 / 24, 4)  # convert from cm/day to mm/hour
                     header.append(f'ofe={i},horizon{j} ksat estimated using {ros_model}')
 
-                if horizon['anisotropy'] is None:
+                if not isfloat(horizon['anisotropy']):
                     if horizon['solthk'] > 50:
                         horizon['anisotropy'] = 1.0
                     else:
