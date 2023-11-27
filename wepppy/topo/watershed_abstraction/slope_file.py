@@ -89,7 +89,7 @@ class SlopeFile(object):
         self.relative_elevs = np.array(relative_elevs)
 
     def interp_slope(self, d):
-        idx = np.searchsorted(self.distances, d)
+        idx = np.searchsorted(self.distances, np.clip(0.0, 1.0, d))
         return self.slopes[idx]
 
     def slope_of_segment(self, d0=0.0, dend=1.0):
@@ -105,8 +105,8 @@ class SlopeFile(object):
     def slope_scalar(self):
         return self.slope_of_segment()
 
-    def segmented_multiple_ofe(self, 
-        dst_fn=None, 
+    def segmented_multiple_ofe(self,
+        dst_fn=None,
         target_length=50,
         apply_buffer=False,
         buffer_length=15,
@@ -119,7 +119,15 @@ class SlopeFile(object):
         d_d = [0.0] # fraction of ofe segment
         n_mofes = None
         if apply_buffer:
-            n_mofes = int(round((length - buffer_length) / target_length)) + 1
+            if length <= buffer_length:
+                n_mofes = 1
+                buffer_length = length
+            elif length <= buffer_length + target_length:
+                n_mofes = 2
+            else:
+                n_mofes = int(round((length - buffer_length) / target_length)) + 1
+                assert n_mofes >= 2
+
             n_buffer = 1
             d_buffer = buffer_length / length
             d_d.append(d_buffer)
@@ -133,7 +141,10 @@ class SlopeFile(object):
         if n_mofes == 0:
             n_mofes = 1
 
-        ofe_length = (length - buffer_length) / (n_mofes -n_buffer)
+        if n_mofes - n_buffer == 0:
+            ofe_length = 0.0
+        else:
+            ofe_length = (length - buffer_length) / (n_mofes - n_buffer)
 
         # add non-buffer segments to d_d
         _d_d = ofe_length / length
@@ -142,7 +153,7 @@ class SlopeFile(object):
 
         d_d = np.cumsum(d_d)
 
-        assert d_d[-1] == 1.0, d_d
+        assert abs(d_d[-1] - 1.0) < 0.0001, (d_d, dst_fn, n_mofes, self.fname)
         assert len(d_d) == n_mofes + 1, (len(d_d), n_mofes + 1)
 
         s = []
