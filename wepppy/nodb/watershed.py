@@ -705,7 +705,7 @@ class Watershed(NoDbBase, LogMixin):
 
     @property
     def mofe_buffer(self):
-        return getattr(self, '_mofe_target_length', False)
+        return getattr(self, '_mofe_buffer', False)
 
     @mofe_buffer.setter
     def mofe_buffer(self, value):
@@ -792,16 +792,17 @@ class Watershed(NoDbBase, LogMixin):
                     _min = np.percentile(_discha_vals, _min_pct)
                     _max = np.percentile(_discha_vals, _max_pct)
 
-                    mofe_indices = np.where((subwta == int(topaz_id)) & 
-                                            (discha >= _min) & (discha <= _max)) 
+                    mofe_indices = np.where((subwta == int(topaz_id)) &
+                                            (mofe_map == 0) &
+                                            (discha >= _min) & (discha <= _max))
                     if len(mofe_indices[0]) == 0:
                         target_value = (1.0 - d_fractions[i]) * max_discha
                         diff = np.abs(target_value - _discha_vals)
                         closest_index = np.argmin(diff)
                         mofe_indices = (indices[0][closest_index], indices[1][closest_index])
-        
+
                     mofe_map[mofe_indices] = j
-                    j += 1             
+                    j += 1
 
             mofe_ids = set(mofe_map[indices])
             if 0 in mofe_ids:
@@ -824,7 +825,7 @@ class Watershed(NoDbBase, LogMixin):
         band = dst.GetRasterBand(1)
         band.WriteArray(mofe_map.T)
         del dst  # Writes and closes file
-        
+
         assert _exists(self.mofe_map)
 
 #        mofe_map2, transform_m, proj_m = read_raster(self.mofe_map)
