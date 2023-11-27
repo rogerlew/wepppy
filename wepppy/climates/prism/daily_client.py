@@ -1,9 +1,15 @@
 import requests
+import numpy as np
 import pandas as pd
 import json
 
+from pprint import pprint
 
-def retrieve_daily(lon=-117.45, lat=46.534, start_date='19810101', end_date='20221231'):
+
+def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2022, end_year=2022):
+    start_date = f'{start_year}0101'
+    end_date = f'{end_year}1231'
+
     headers = {
         'Connection': 'keep-alive',
         'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -24,7 +30,7 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19810101', end_date='202
         'start': start_date,
         'end': end_date,
         'stability': 'stable',
-        'lon': str(lon),
+        'lon': str(lng),
         'lat': str(lat),
         'elev': '143',
         'call': 'pp/daily_timeseries',
@@ -33,27 +39,29 @@ def retrieve_daily(lon=-117.45, lat=46.534, start_date='19810101', end_date='202
 
     response = requests.post(
         'https://www.prism.oregonstate.edu/explorer/dataexplorer/rpc.php',
-        headers=headers, data=data, verify=False)
+        headers=headers, data=data)
 
-    print(response.text)
-    my_data = json.loads(response.text)
-    ppt = my_data['result']['data']['ppt']
-    tmin = my_data['result']['data']['tmin']
-    tmax = my_data['result']['data']['tmax']
+    result = json.loads(response.text)
+    data = result['result']['data']
+    df = pd.DataFrame(data)
 
-    prism = pd.DataFrame(
-        {'Prepitation (mm)': ppt,
-         'Tmax (degC)': tmax,
-         'Tmin (degC)': tmin,
-         })
-    prism['Date'] = pd.date_range(start=data['start'], end=data['end'])
-    prism = prism[['Date', 'Precipitation (mm)', 'Tmax (degC)', 'Tmin (degC)']]
+    df['tdmean'] = np.clip(df['tdmean'], df['tmin'], None)
 
-    # View the first ten rows
-    prism.to_csv("prism.csv", index=False)
+    df.rename(columns={'ppt': 'ppt(mm)',
+                       'tmax': 'tmax(degc)',
+                       'tmin': 'tmin(degc)',
+                       'tdmean': 'tdmean(degc)',
+                       'tmean': 'tmean(degc)',
+                       'vpdmin': 'vpdmin(hPa)',
+                       'vpdmax': 'vpdmax(hPa)'}, inplace=True)
 
-    return prism
+    _start_date = pd.to_datetime(start_date, format='%Y%m%d')
+    _end_date = pd.to_datetime(end_date, format='%Y%m%d')
+    df['date'] = pd.date_range(start=_start_date, end=_end_date)
+    df.set_index('date', inplace=True)
+
+    return df
 
 if __name__ == "__main__":
-    d = retrieve_daily()
+    d = retrieve_historical_timeseries(lng=-118, lat=43)
     print(d)
