@@ -38,6 +38,7 @@ from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retr
 from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
 #from wepppy.climates.daymet import single_point_extraction as daymet_single_point_extraction
+from wepppy.climates.prism.daily_client import retrieve_historical_timeseries as prism_retrieve_historical_timeseries
 from wepppy.eu.climates.eobs import eobs_mod
 from wepppy.au.climates.agdc import agdc_mod
 from wepppy.climates.cligen import (
@@ -205,8 +206,39 @@ class ClimateSpatialMode(IntEnum):
         raise KeyError
 
 
+def build_observed_prism(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
+    df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df_to_prn(df, _join(cli_dir, prn_fn), 'ppt(mm)', 'tmax(degc)', 'tmin(degc)')
+    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+
+    dates = df.index
+
+    cli_path = _join(cli_dir, cli_fn)
+    climate = ClimateFile(cli_path)
+
+    climate.replace_var('tdew', dates, df['tdmean(degc)'])
+
+    if gridmet_wind:
+        wind_df = gridmet_retrieve_historical_wind(lng, lat, start_year, end_year)
+
+        wind_dates = wind_df.index
+
+        climate.replace_var('w-vl', wind_dates, wind_df['vs(m/s)'])
+        climate.replace_var('w-dir', wind_dates, wind_df['th(DegreesClockwisefromnorth)'])
+
+        df['vs(m/s)'] = wind_df['vs(m/s)']
+        df['vs(m/s)'] = wind_df['th(DegreesClockwisefromnorth)']
+
+        df.to_parquet(_join(cli_dir, f'prism_gridmetwind_{start_year}-{end_year}.parquet'))
+    else:
+        df.to_parquet(_join(cli_dir, f'prism_{start_year}-{end_year}.parquet'))
+
+    climate.write(cli_path)
+
+
 def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
     df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
 
