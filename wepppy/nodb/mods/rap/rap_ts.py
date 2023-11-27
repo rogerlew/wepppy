@@ -22,9 +22,9 @@ from ...watershed import Watershed
 from ...mixins.log_mixin import LogMixin
 
 from wepppy.landcover.rap import (
-    RangelandAnalysisPlatformV2, 
-    RangelandAnalysisPlatformV3, 
-    RAP_Band, 
+    RangelandAnalysisPlatformV2,
+    RangelandAnalysisPlatformV3,
+    RAP_Band,
     RangelandAnalysisPlatformV2Dataset,
     RangelandAnalysisPlatformV3Dataset
 )
@@ -61,7 +61,7 @@ class RAP_TS(NoDbBase, LogMixin):
             self._rap_start_year = None
             self._rap_end_year = None
             self._rap_mgr = None
-            
+
             self.dump_and_unlock()
 
         except Exception:
@@ -131,7 +131,7 @@ class RAP_TS(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-  
+
     @property
     def rap_start_year(self):
         return self._rap_start_year
@@ -148,7 +148,7 @@ class RAP_TS(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-  
+
     @property
     def rap_dir(self):
         return _join(self.wd, 'rap')
@@ -170,7 +170,7 @@ class RAP_TS(NoDbBase, LogMixin):
                 end_year = self.rap_end_year
 
             _map = Ron.getInstance(self.wd).map
-            rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent)
+            rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent, cellsize=_map.cellsize)
 
             for year in range(start_year, end_year+1):
                 self.log(f'  retrieving rap {year}...')
@@ -183,7 +183,7 @@ class RAP_TS(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-        
+
     def on(self, evt):
         pass
 
@@ -291,9 +291,9 @@ class RAP_TS(NoDbBase, LogMixin):
                 fp.write(' \t'.join([str(yr) for yr in years]))
                 fp.write('\n')
 
-                
+
                 if self.multi_ofe:
-                    for fp_id in data[RAP_Band.TREE][years[0]][str(topaz_id)]: 
+                    for fp_id in data[RAP_Band.TREE][years[0]][str(topaz_id)]:
 
                         for band in [RAP_Band.TREE,
                                      RAP_Band.SHRUB,
