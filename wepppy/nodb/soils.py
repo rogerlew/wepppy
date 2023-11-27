@@ -867,6 +867,11 @@ class Soils(NoDbBase, LogMixin):
                     break
 
             if dom_mukey is None:
+                if len(valid) > 0:
+                    dom_mukey = str(valid[0])
+
+
+            if dom_mukey is None:
                 self.log('no surgo keys found, falling back to statsgo')
                 self.dump_and_unlock()
                 self.build_statsgo(initial_sat=self.initial_sat,
@@ -959,7 +964,7 @@ class Soils(NoDbBase, LogMixin):
             for topaz_id, mukey in domsoil_d.items() 
             if not is_channel(topaz_id)
         }
-        
+
         return summary
 
     def dump_soils_parquet(self):
@@ -969,13 +974,15 @@ class Soils(NoDbBase, LogMixin):
         self.log('ceating soils parquet table')
         subs_summary = self.subs_summary
         assert subs_summary is not None
-            
+
         df = pd.DataFrame.from_dict(subs_summary, orient='index')
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+        df['mukey'] = df['mukey'].astype(str)
+
         df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
-   
+
 
     def sub_iter(self):
         domsoil_d = self.domsoil_d
