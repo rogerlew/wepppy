@@ -2683,7 +2683,7 @@ def task_build_subcatchments(runid, config):
 
     mofe_buffer = request.form.get('mofe_buffer', 'off')
     try:
-        mofe_buffer = bool(mofe_buffer)
+        mofe_buffer = mofe_buffer.lower().startswith('on')
     except:
         pass
 
