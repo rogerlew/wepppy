@@ -825,8 +825,6 @@ function onReady() {
         wepp.setMode();
     });
 
-    $("#btn_run_wepp").click(wepp.run);
-
     wepp.form.on("WEPP_RUN_TASK_COMPLETED", function () {
         wepp.report();
         observed.onWeppRunCompleted();
