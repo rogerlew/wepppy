@@ -27,7 +27,11 @@
             </div>
             <div class="col-sm-8">
                 <select class="form-control disable-readonly" id="landuse_db" name="landuse_db" onchange="Landuse.getInstance().setLanduseDb(this.value)">
-                {% if 'eu' in ron.locales %}
+                {% if 'alaska' in ron.locales %}
+                  <option value="alaska/nlcd/2001" {% if landuse.nlcd_db == "alaska/nlcd/2001" %}selected{% endif %}>NLCD/2001</option>
+                  <option value="alaska/nlcd/2011" {% if landuse.nlcd_db == "alaska/nlcd/2011" %}selected{% endif %}>NLCD/2011</option>
+                  <option value="alaska/nlcd/2016" {% if landuse.nlcd_db == "alaska/nlcd/2016" %}selected{% endif %}>NLCD/2016</option>
+                {% elif 'eu' in ron.locales %}
                   <option value="eu/CORINE_LandCover/1990" {% if landuse.nlcd_db == "eu/CORINE_LandCover/1990" %}selected{% endif %}>CORINE 1990</option>
                   <option value="eu/CORINE_LandCover/2000" {% if landuse.nlcd_db == "eu/CORINE_LandCover/2000" %}selected{% endif %}>CORINE 2000</option>
                   <option value="eu/CORINE_LandCover/2006" {% if landuse.nlcd_db == "eu/CORINE_LandCover/2006" %}selected{% endif %}>CORINE 2006</option>
