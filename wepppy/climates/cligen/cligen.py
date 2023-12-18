@@ -303,6 +303,7 @@ class ClimateFile(object):
         in_range = False
 
         lines = self.lines[:data0line]
+        years = set()
         for i, L in enumerate(self.lines[data0line:]):
             row = [v.strip() for v in L.split()]
             if L.strip() == '':
@@ -322,6 +323,19 @@ class ClimateFile(object):
 
             if in_range:
                 lines.append(L)
+                years.add(d['year'])
+
+        nyears = len(years)
+        y0 = min(years)
+
+        lines[0] = '5.32100\n'
+
+        l4 = lines[4].split()
+        l4[3] = str(nyears) # years in sim
+        l4[4] = str(y0) # start year
+        l4[5] = str(nyears) # years in sim
+
+        lines[4] = ' '.join(l4) + '\n'
 
         self.lines = lines
 
