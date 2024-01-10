@@ -11,10 +11,10 @@
 # Plant Section       #
 #######################
 
-1  # Number of plant scenarios
+4  # Number of plant scenarios
 
 
-Tah_4899
+Rev_Frst
 With no Senescence or decomposition
 (null)
 W. Elliot 05/10
@@ -26,6 +26,46 @@ WeppWillSet
 0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 10.00000 90 40.00000
 -40.00000 8.00000 0.00000
 
+
+Rev_Shrb
+With no Senescence or decomposition
+
+W. Elliot 05/10
+1  #landuse
+WeppWillSet
+0.15000 0.30000 15.00000 2.00000 1.80000 5.00000 0.00000 0.25000 0.75000 0.06000
+1.0000 0.95000 0.65000 0.99000 17.00000 0.00000 0.42000 20.00000
+2  # mfo - <non fragile>
+0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 5.00000 90 40.00000
+-40.00000 8.00000 0.00000
+
+
+Rev_Prnl
+With no Senescence or decomposition
+
+W. Elliot 05/10
+1  #landuse
+WeppWillSet
+0.15000 0.30000 15.00000 2.00000 1.80000 5.00000 0.00000 0.25000 0.75000 0.06000
+1.0000 0.95000 0.65000 0.99000 17.00000 0.00000 0.42000 20.00000
+2  # mfo - <non fragile>
+0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 5.00000 90 40.00000
+-40.00000 8.00000 0.00000
+
+
+Rev_Annl
+With no Senescence or decomposition
+
+W. Elliot 05/10
+1  #landuse
+WeppWillSet
+0.15000 0.30000 15.00000 2.00000 1.80000 5.00000 0.00000 0.25000 0.75000 0.06000
+1.0000 0.95000 0.65000 0.99000 17.00000 0.00000 0.42000 20.00000
+2  # mfo - <non fragile>
+0.00600 0.00600 24.00000 0.10000 2.00000 2.00000 0.33000 5.00000 90 40.00000
+-40.00000 8.00000 0.00000
+
+
 #######################
 # Operation Section   #
 #######################
@@ -36,10 +76,10 @@ WeppWillSet
 # Initial Conditions Section  #
 ###############################
 
-1  # Number of initial scenarios
+4  # Number of initial scenarios
 
 
-Tah_4089
+Ini_Frst
 For no growth, no decomp, no senescence
 
 W. Elliot  05/10
@@ -53,6 +93,45 @@ W. Elliot  05/10
 0.50000 0.50000
 
 
+Ini_Shrb
+For no growth, no decomp, no senescence
+
+W. Elliot  05/10
+1  #landuse
+1.10000 0.90000 330 1000 0.00000 1.00000
+1 # iresd  <Tah_4899>
+2 # mang perennial
+400.00000 0.10000 1.00000 0.10000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.50000 0.50000
+
+
+Ini_Prnl
+For no growth, no decomp, no senescence
+
+W. Elliot  05/10
+1  #landuse
+1.10000 0.90000 330 1000 0.00000 1.00000
+1 # iresd  <Tah_4899>
+2 # mang perennial
+400.00000 0.10000 1.00000 0.10000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.50000 0.50000
+
+Ini_Annl
+For no growth, no decomp, no senescence
+
+W. Elliot  05/10
+1  #landuse
+1.10000 0.90000 330 1000 0.00000 1.00000
+1 # iresd  <Tah_4899>
+2 # mang perennial
+400.00000 0.10000 1.00000 0.10000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.50000 0.50000
 
 
 ############################
