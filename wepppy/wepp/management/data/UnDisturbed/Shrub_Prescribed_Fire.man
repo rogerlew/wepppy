@@ -13,17 +13,18 @@
 
 1  # Number of plant scenarios
 
-Tah_1588
+
+Tah_9591
 With no Senescence or decomposition
-(null)
+
 W. Elliot 05/10
 1  #landuse
 WeppWillSet
 14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 4.00000 1.00000 0.10000
 0.50000 1.00000 0.75000 0.99000 17.00000 0.00000 0.42000 2.00000
 2  # mfo - <non fragile>
-0.00000 0.00000 20.00000 0.10000 1.00000 0.30000 0.33000 0.50000 90 40.00000
--40.00000 8.00000 0.00000
+0.00000 0.00000 20.00000 0.10000 1.00000 0.20000 0.33000 0.50000 90 40.00000
+-40.00000 3.00000 0.00000
 
 #######################
 # Operation Section   #
@@ -37,18 +38,22 @@ WeppWillSet
 
 1  # Number of initial scenarios
 
-Tah_1712
+
+Tah_8719
 For no growth, no decomp, no senescence
-(null)
+
 W. Elliot  05/10
 1  #landuse
-1.10000 0.85000 330 1000 0.00000 0.85000
-1 # iresd  <Tah_1588>
+1.10000 0.38000 330 1000 0.00000 0.80000
+1 # iresd  <Tah_9591>
 2 # mang perennial
-400.00000 0.06000 0.85000 0.06000 2.00000
+400.00000 0.06000 0.80000 0.06000 2.00000
 1  # rtyp - temporary
 0.00000 0.00000 0.00000 0.00000 0.00000
 0.30000 0.30000
+
+
+
 
 ############################
 # Surface Effects Section  #
@@ -80,6 +85,8 @@ W. Elliot  05/10
 #
 Year 1
 
+
+
 1  # landuse <cropland>
 1  # plant growth scenario
 0  # surface effect scenario
@@ -91,6 +98,7 @@ Year 1
    0 # perennial stop growth date --- 0/0
    0.0000  # row width
    3  # neither cut or grazed
+
 
 #######################
 # Management Section  #

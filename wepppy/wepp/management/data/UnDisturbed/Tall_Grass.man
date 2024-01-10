@@ -14,17 +14,17 @@
 1  # Number of plant scenarios
 
 
-Tah_9591
+Tah_7670
 With no Senescence or decomposition
 
 W. Elliot 05/10
 1  #landuse
 WeppWillSet
-14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 4.00000 1.00000 0.10000
-0.50000 1.00000 0.75000 0.99000 17.00000 0.00000 0.42000 2.00000
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 1.00000 1.00000 0.00500
+1.00000 1.00000 0.65000 0.99000 17.00000 0.00000 0.42000 0.60000
 2  # mfo - <non fragile>
-0.00000 0.00000 20.00000 0.10000 1.00000 0.20000 0.33000 0.50000 90 40.00000
--40.00000 2.00000 0.00000
+0.00000 0.00000 20.00000 0.10000 0.10000 0.60000 0.33000 0.20000 90 40.00000
+-40.00000 6.00000 0.00000
 
 #######################
 # Operation Section   #
@@ -39,18 +39,18 @@ WeppWillSet
 1  # Number of initial scenarios
 
 
-Tah_8719
+Tah_7138
 For no growth, no decomp, no senescence
 
 W. Elliot  05/10
 1  #landuse
-1.10000 0.27000 330 1000 0.00000 0.55000
-1 # iresd  <Tah_9591>
+1.10000 0.14000 330 1000 0.00000 0.60000
+1 # iresd  <Tah_7670>
 2 # mang perennial
-400.00000 0.06000 0.55000 0.06000 2.00000
+400.00000 0.02000 0.60000 0.02000 0.00000
 1  # rtyp - temporary
 0.00000 0.00000 0.00000 0.00000 0.00000
-0.30000 0.30000
+0.10000 0.10000
 
 
 ############################
@@ -65,11 +65,13 @@ W. Elliot  05/10
 
 0  # Number of contour scenarios
 
+
 #######################
 # Drainage Section    #
 #######################
 
 0  # Number of drainage scenarios
+
 
 #######################
 # Yearly Section      #
@@ -79,7 +81,7 @@ W. Elliot  05/10
 #
 # Yearly scenario 1 of 1
 #
-Year 1
+Year 1 
 
 
 
@@ -89,7 +91,7 @@ Year 1
 0  # contour scenario
 0  # drainage scenario
 2 # management <perennial>
-   0 # senescence date
+   0 # senescence date 
    0 # perennial plant date --- 0 /0
    0 # perennial stop growth date --- 0/0
    0.0000  # row width
