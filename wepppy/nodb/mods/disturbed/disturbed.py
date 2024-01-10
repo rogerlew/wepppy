@@ -686,7 +686,7 @@ class Disturbed(NoDbBase):
                         elif man.disturbed_class == 'shrub':
                             landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
 
-                        elif man.disturbed_class in ['short grass', 'tall grass']:
+                        elif man.disturbed_class in ['tall grass']:
                             landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
 
                     meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
@@ -715,7 +715,7 @@ class Disturbed(NoDbBase):
                         elif man.disturbed_class == 'shrub':
                             landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
 
-                        elif man.disturbed_class in ['short grass', 'tall grass']:
+                        elif man.disturbed_class in ['tall grass']:
                             landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
 
                     meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
