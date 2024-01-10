@@ -14,23 +14,26 @@
 1  # Number of plant scenarios
 
 
-Tah_9591
-With no Senescence or decomposition
-
-W. Elliot 05/10
+Shr_6877
+Shrub prairie including sage and Pinyon-Juniper
+for disturbed WEPP with WSU Senescence Modifications
+W. Elliot  01/07
 1  #landuse
 WeppWillSet
-14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 4.00000 1.00000 0.10000
-0.50000 1.00000 0.75000 0.99000 17.00000 0.00000 0.42000 2.00000
+14.00000 3.00000 6.00000 2.00000 5.00000 5.00000 0.00000 1.20000 0.40000 0.10000
+0.50000 0.40000 0.90000 0.99000 13.00000 0.00000 0.42000 1.00000
 2  # mfo - <non fragile>
-0.00000 0.00000 20.00000 0.10000 1.00000 0.50000 0.33000 0.50000 90 40.00000
--40.00000 10.00000 0.00000
+0.00800 0.00800 20.00000 0.10000 0.50000 0.40000 0.33000 0.20000 45 40.00000
+-40.00000 2.00000 0.00000
 
 #######################
 # Operation Section   #
 #######################
 
 0  # Number of operation scenarios
+
+
+
 
 ###############################
 # Initial Conditions Section  #
@@ -39,18 +42,18 @@ WeppWillSet
 1  # Number of initial scenarios
 
 
-Tah_8719
-For no growth, no decomp, no senescence
-
-W. Elliot  05/10
+Shr_7020
+Shrub Rangeland including sage and Pinyon Juniper
+for WEPP with WSU senescence modification
+W. Elliot 01/07
 1  #landuse
-1.10000 0.70000 330 1000 0.00000 0.90000
-1 # iresd  <Tah_9591>
+1.10000 0.40000 1000 1000 0.00000 0.85000
+1 # iresd  <Shr_6877>
 2 # mang perennial
-400.00000 0.06000 0.90000 0.06000 2.00000
+1000.00000 0.10000 0.85000 0.10000 0.00000
 1  # rtyp - temporary
-0.00000 0.00000 0.00000 0.00000 0.00000
-0.30000 0.30000
+0.00000 0.00000 0.10000 0.20000 0.00000
+0.20000 0.20000
 
 
 
@@ -60,6 +63,8 @@ W. Elliot  05/10
 ############################
 
 0  # Number of Surface Effects Scenarios
+
+
 
 #######################
 # Contouring Section  #
@@ -93,7 +98,7 @@ Year 1
 0  # contour scenario
 0  # drainage scenario
 2 # management <perennial>
-   0 # senescence date 
+   250 # senescence date 
    0 # perennial plant date --- 0 /0
    0 # perennial stop growth date --- 0/0
    0.0000  # row width

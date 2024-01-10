@@ -10,11 +10,11 @@
  "41": {"Key": 41,  "Color": [104,170,99,255],  "DisturbedClass": "forest", "Description": "Deciduous Forest", "ManagementFile": "UnDisturbed/Old_Forest.man"},
  "42": {"Key": 42,  "Color": [28,99,48,255],    "DisturbedClass": "forest", "Description": "Evergreen Forest", "ManagementFile": "UnDisturbed/Old_Forest.man"},
  "43": {"Key": 43,  "Color": [181,201,142,255], "DisturbedClass": "forest", "Description": "Mixed Forest", "ManagementFile": "UnDisturbed/Old_Forest.man"},
- "51": {"Key": 51,  "Color": [165,140,48,255],  "DisturbedClass": "shrub", "Description": "Shrubland", "ManagementFile": "GeoWEPP/28% cover-short grass prarie.man"},
- "52": {"Key": 52,  "Color": [204,186,124,255], "DisturbedClass": "shrub", "Description": "Shrub/Scrub", "ManagementFile": "Forest/DisturbedWEPPManagement/Shrub perennial.man"},
+ "51": {"Key": 51,  "Color": [165,140,48,255],  "DisturbedClass": "shrub", "Description": "Shrubland", "ManagementFile": "UnDisturbed/Shrub.man"},
+ "52": {"Key": 52,  "Color": [204,186,124,255], "DisturbedClass": "shrub", "Description": "Shrub/Scrub", "ManagementFile": "UnDisturbed/Shrub.man"},
  "61": {"Key": 61,  "Color": [252,163,205,255], "DisturbedClass": "young forest", "Description": "Orchards/Vineyards/Other", "ManagementFile": "GeoWEPP/grass.man"},
- "71": {"Key": 71,  "Color": [226,226,193,255], "DisturbedClass": "tall grass", "Description": "Grasslands/Herbaceous", "ManagementFile": "Forest/DisturbedWEPPManagement/Tall grass prarie.man"},
- "72": {"Key": 72,  "Color": [201,201,119,255], "DisturbedClass": "tall grass", "Description": "Sedge/Herbaceous", "ManagementFile": "Forest/DisturbedWEPPManagement/Tall grass prarie.man"},
+ "71": {"Key": 71,  "Color": [226,226,193,255], "DisturbedClass": "tall grass", "Description": "Grasslands/Herbaceous", "ManagementFile": "UnDisturbed/Tall_Grass.man"},
+ "72": {"Key": 72,  "Color": [201,201,119,255], "DisturbedClass": "", "Description": "Sedge/Herbaceous", "ManagementFile": "Forest/DisturbedWEPPManagement/Tall grass prarie.man"},
  "73": {"Key": 73,  "Color": [153,193,71,255],  "DisturbedClass": "short grass", "Description": "Lichens", "ManagementFile": "GIS/Poor grass.man"},
  "74": {"Key": 74,  "Color": [119,173,147,255], "DisturbedClass": "short grass", "Description": "Moss", "ManagementFile": "GIS/Poor grass.man"},
  "81": {"Key": 81,  "Color": [219,216,61,255],  "DisturbedClass": "agriculture crops", "Description": "Pasture/Hay", "ManagementFile": "GeoWEPP/grass.man"},
@@ -37,8 +37,8 @@
 "117": {"Key": 117, "Color": [0,255,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 85 Cover (Skidder)", "ManagementFile": "UnDisturbed/Skidder_Thinning_85_Cover.man"},
 "123": {"Key": 123, "Color": [0,250,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 96 Cover", "ManagementFile": "UnDisturbed/Thinning_96_Cover.man"},
 "124": {"Key": 124, "Color": [0,245,197,255],   "DisturbedClass": "thinning", "Description": "Thinning 75 Cover", "ManagementFile": "UnDisturbed/Thinning_75_Cover.man"},
-"129": {"Key": 129, "Color": [161,2,0,255],     "DisturbedClass": "grass high sev fire", "Description": "Grass High Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
-"130": {"Key": 130, "Color": [234,204,0,255],   "DisturbedClass": "grass moderate sev fire", "Description": "Grass Moderate Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
-"131": {"Key": 131, "Color": [48,153,0,255],    "DisturbedClass": "grass low sev fire", "Description": "Grass Low Severity Fire", "ManagementFile": "UnDisturbed/Shrub_Low_Severity_Fire.man"},
-"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Prescribed_Fire.man"}
+"129": {"Key": 129, "Color": [161,2,0,255],     "DisturbedClass": "grass high sev fire", "Description": "Grass High Severity Fire", "ManagementFile": "UnDisturbed/Grass_High_Severity_Fire.man"},
+"130": {"Key": 130, "Color": [234,204,0,255],   "DisturbedClass": "grass moderate sev fire", "Description": "Grass Moderate Severity Fire", "ManagementFile": "UnDisturbed/Grass_Moderate_Severity_Fire.man"},
+"131": {"Key": 131, "Color": [48,153,0,255],    "DisturbedClass": "grass low sev fire", "Description": "Grass Low Severity Fire", "ManagementFile": "UnDisturbed/Grass_Low_Severity_Fire.man"},
+"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Grass_Low_Severity_Fire.man"}
 }
