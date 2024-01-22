@@ -971,7 +971,7 @@ class Soils(NoDbBase, LogMixin):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
-        self.log('ceating soils parquet table')
+        self.log('creating soils parquet table')
         subs_summary = self.subs_summary
         assert subs_summary is not None
 

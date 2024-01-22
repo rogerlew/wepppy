@@ -22,6 +22,9 @@ import shutil
 from time import sleep
 from enum import IntEnum
 
+import pandas as pd
+import numpy as np
+
 # non-standard
 import jsonpickle
 
@@ -51,11 +54,10 @@ from wepppy.all_your_base import isfloat, NCPU
 
 from ...base import NoDbBase, TriggerEvents
 
-from wepppy.nodb.mods.disturbed.disturbed import read_disturbed_land_soil_lookup, migrate_land_soil_lookup
-
 
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
+_cover_transforms_dir = _join(_data_dir, 'cover_transforms')
 
 
 class RevegetationNoDbLockedException(Exception):
@@ -73,12 +75,23 @@ class Revegetation(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self.clean()
+            self._cover_transform_fn = ''
+            self._user_defined_cover_transform = False
+            self.dump_and_unlock()
 
-            self._h0_max_om = self.config_get_float('revegetation', 'h0_max_om')
-            self._sol_ver = self.config_get_float('revegetation', 'sol_ver')
+        except Exception:
+            self.unlock('-f')
+            raise
 
-            self.reset_land_soil_lookup()
+    def validate_user_defined_cover_transform(self, fn):
+        self.lock()
 
+        # noinspection PyBroadException
+        try:
+            assert _exists(_join(self.revegetation_dir, fn)), fn
+
+            self._cover_transform_fn = fn
+            self._user_defined_cover_transform = True
             self.dump_and_unlock()
 
         except Exception:
@@ -86,63 +99,76 @@ class Revegetation(NoDbBase, LogMixin):
             raise
 
     @property
-    def lookup_fn(self):
-        land_soil_lookup_path = self.config_get_path('revegetation', 'land_soil_lookup_path', None)
-        if land_soil_lookup_path is None:
-            return _join(self.revegetation_dir, 'revegetation_land_soil_lookup.csv')
-        else:
-            assert _exists(land_soil_lookup_path), land_soil_lookup_path
-            return land_soil_lookup_path
+    def user_defined_cover_transform(self) -> bool:
+        return getattr(self, '_user_defined_cover_transform', False)
+    
+    def load_cover_transform(self, reveg_scenario: str):
+        if reveg_scenario == 'user_cover_transform':
+            return
+        
+        if reveg_scenario == '':
+            self.cover_transform_fn = ''
+            return
+        
+        src_fn = _join(_cover_transforms_dir, reveg_scenario)
+        assert _exists(src_fn), src_fn
+        self.cover_transform_fn = reveg_scenario
+        shutil.copyfile(src_fn, self.cover_transform_path)
 
     @property
-    def default_land_soil_lookup_fn(self):
-        _lookup_path = self.config_get_path('revegetation', 'land_soil_lookup', None)
-        if _lookup_path is None:
-            _lookup_path = _join(_data_dir, 'revegetation_land_soil_lookup.csv')
-        return _lookup_path
+    def cover_transform_fn(self) -> str:
+        return getattr(self, '_cover_transform_fn', '')
+    
+    @cover_transform_fn.setter
+    def cover_transform_fn(self, value: str) -> str:
+        self.lock()
 
-    def reset_land_soil_lookup(self):
-        if _exists(self.lookup_fn):
-            os.remove(self.lookup_fn)
-        shutil.copyfile(self.default_land_soil_lookup_fn, self.lookup_fn)
+        # noinspection PyBroadException
+        try:
+            self._cover_transform_fn = value
+            self.dump_and_unlock()
 
-    @property
-    def land_soil_replacements_d(self):
-        default_fn = self.default_land_soil_lookup_fn
-        _lookup_fn = self.lookup_fn
-
-        lookup = read_disturbed_land_soil_lookup(_lookup_fn)
-        for k in lookup:
-            if 'pmet_kcb' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['pmet_kcb', 'pmet_rawp', 'rdmax', 'xmxlai'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-            elif 'rdmax' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['rdmax', 'xmxlai'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-            elif 'xmxlai' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['xmxlai'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-            elif 'keffflag' not in lookup[k]:
-                migrate_land_soil_lookup(
-                    default_fn, _lookup_fn, ['keffflag', 'lkeff'], {})
-                return read_disturbed_land_soil_lookup(_lookup_fn)
-
-        if ('loam', 'forest moderate sev fire') not in lookup:
-            migrate_land_soil_lookup(
-                default_fn, _lookup_fn, [], {})
-            return read_disturbed_land_soil_lookup(_lookup_fn)
-
-        return lookup
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def revegetation_dir(self):
         return _join(self.wd, 'revegetation')
+
+    @property
+    def cover_transform_path(self) -> str:
+        return _join(self.revegetation_dir, self.cover_transform_fn)
+    
+
+    @property
+    def cover_transform(self):
+        cover_transform_path = self.cover_transform_path 
+        if not _exists(cover_transform_path) or not cover_transform_path.endswith('.csv'):
+            return None
+
+        # Replace 'your_file.csv' with the path to your CSV file
+        df = pd.read_csv(cover_transform_path, header=None)
+
+        # Extracting the first two rows for keys
+        sbs = df.iloc[0]  # Soil burn severities
+        landuse = df.iloc[1]  # Landuse types
+
+        # Initialize the dictionary
+        data_dict = {}
+
+        # Iterate over columns to populate the dictionary
+        for col in range(df.shape[1]):
+            key = (sbs[col], landuse[col])
+            if key not in data_dict:
+                data_dict[key] = []
+            data_dict[key].extend(df.iloc[2:, col])
+
+        # Convert lists to np.array of type np.float32
+        for key in data_dict:
+            data_dict[key] = np.array(data_dict[key], dtype=np.float32)
+
+        return data_dict
 
     @property
     def status_log(self):
@@ -184,121 +210,5 @@ class Revegetation(NoDbBase, LogMixin):
             shutil.rmtree(revegetation_dir)
         os.mkdir(revegetation_dir)
 
-
     def on(self, evt):
-
-        if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
-            pass
-
-        elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
-            self.modify_soils()
-
-    @property
-    def sol_ver(self):
-        return getattr(self, '_sol_ver', 9005.0)
-
-    @sol_ver.setter
-    def sol_ver(self, value):
-        self.lock()
-
-        try:
-            self._sol_ver = float(value)
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    @property
-    def h0_max_om(self):
-        return getattr(self, '_h0_max_om', None)
-
-    def modify_soils(self):
-        from wepppy.nodb import Ron, Landuse
-
-        wd = self.wd
-        sol_ver = self.sol_ver
-
-        watershed = Watershed.getInstance(self.wd)
-        soils = Soils.getInstance(wd)
-        _land_soil_replacements_d = self.land_soil_replacements_d
-        _h0_max_om= self.h0_max_om
-
-        soils.lock()
-        try:
-
-            mukey_map = {}
-
-            # burn all the soils
-            soils_d = deepcopy(soils.soils)
-            for mukey, soil_summary in soils.soils.items():
-                soil_path = _join(soils.soils_dir, soil_summary.fname)
-
-                soil_u = WeppSoilUtil(soil_path)
-                texid = soil_u.simple_texture
-
-                stack = []
-                desc = []
-                for disturbed_class in ('forest',
-                                        'forest high sev fire',
-                                        'forest moderate sev fire',
-                                        'forest low sev fire'):
-                    key = texid, disturbed_class
-                    if key not in _land_soil_replacements_d:
-                        texid = 'all'
-                        key = (texid, disturbed_class)
-
-                    replacements = _land_soil_replacements_d[key]
-                    new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om,
-                                             version=sol_ver)
-
-                    disturbed_mukey = f'{mukey}-{texid}-{disturbed_class}'
-                    disturbed_fn = f'{disturbed_mukey}.sol'
-                    new.write(_join(soils.soils_dir, disturbed_fn))
-
-                    desc.append(disturbed_class)
-                    stack.append(_join(soils.soils_dir, disturbed_fn))
-
-                # create soils with high, moderate, and low fire severity
-                mofe_synth = SoilMultipleOfeSynth()
-                mofe_synth.stack = stack
-                sol_fn = soil_summary.fname.replace('.sol', '.reveg.sol')
-                mofe_synth.write(_join(soils.soils_dir, sol_fn))
-
-                # add soil to the soils dictionary
-                reveg_mukey = mukey + '-reveg'
-                soils_d[reveg_mukey] = SoilSummary(mukey=reveg_mukey,
-                                                           fname=sol_fn,
-                                                           soils_dir=soils.soils_dir,
-                                                           desc=soil_summary.desc + ' reveg',
-                                                           meta_fn=None,
-                                                           build_date=str(datetime.now()))
-                mukey_map[mukey] = reveg_mukey
-            soils.soils = soils_d
-
-            # update the soils dictionary to use the reveg soils
-            domsoil_d = {}
-            for topaz_id, mukey in soils.domsoil_d.items():
-                domsoil_d[topaz_id] = mukey_map[mukey]
-
-            soils.domsoil_d = domsoil_d
-
-            # need to recalculate the pct_coverages
-            for k in soils.soils:
-                soils.soils[k].area = 0.0
-
-            total_area = 0.0
-            for topaz_id, k in soils.domsoil_d.items():
-                sub_area = watershed.area_of(topaz_id)
-                soils.soils[k].area += sub_area
-                total_area += sub_area
-
-            for k in soils.soils:
-                coverage = 100.0 * soils.soils[k].area / total_area
-                soils.soils[k].pct_coverage = coverage
-
-            soils.dump_and_unlock()
-
-        except Exception:
-            soils.unlock('-f')
-            raise
+        pass

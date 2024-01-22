@@ -662,6 +662,12 @@ class Wepp(NoDbBase, LogMixin):
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
 
+        reveg = False
+        disturbed = Disturbed.getInstance(self.wd, allow_nonexistent=True)
+        if disturbed is not None:
+            if disturbed.sol_ver == 9005.0:
+                reveg = True
+
         if self.multi_ofe:
             self._prep_multi_ofe(translator)
         else:
@@ -670,7 +676,7 @@ class Wepp(NoDbBase, LogMixin):
             self._prep_soils(translator)
 
         self._prep_climates(translator)
-        self._make_hillslope_runs(translator)
+        self._make_hillslope_runs(translator, reveg=reveg)
 
         if (frost is None and self.run_frost) or frost:
             self._prep_frost()
@@ -699,10 +705,8 @@ class Wepp(NoDbBase, LogMixin):
         else:
             self._remove_snow()
 
-        disturbed = Disturbed.getInstance(self.wd, allow_nonexistent=True)
-        if disturbed is not None:
-            if disturbed.sol_ver == 9005.0:
-                self._prep_revegetation()
+        if reveg:
+            self._prep_revegetation()
 
         self.log_done()
 
@@ -1331,9 +1335,9 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
         kslast = self.kslast
-
         clip_soils = soils.clip_soils
         clip_soils_depth = soils.clip_soils_depth
+        initial_sat = soils.initial_sat
 
         kslast_map_fn = self.kslast_map
 
@@ -1373,15 +1377,14 @@ class Wepp(NoDbBase, LogMixin):
             elif kslast is not None:
                 _kslast = kslast
 
-            if _kslast is not None or clip_soils:
-                soilu = WeppSoilUtil(src_fn)
-                if _kslast is not None:
-                    soilu.modify_kslast(_kslast, pars=pars)
-                if clip_soils:
-                    soilu.clip_soil_depth(clip_soils_depth)
-                soilu.write(dst_fn)
-            else:
-                _copyfile(src_fn, dst_fn)
+            soilu = WeppSoilUtil(src_fn)
+            soilu.modify_initial_sat(initial_sat)
+
+            if _kslast is not None:
+                soilu.modify_kslast(_kslast, pars=pars)
+            if clip_soils:
+                soilu.clip_soil_depth(clip_soils_depth)
+            soilu.write(dst_fn)
 
             if getattr(self, 'run_flowpaths', False):
                 for fp in watershed.fps_summary(topaz_id):
@@ -1452,7 +1455,7 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
-    def _make_hillslope_runs(self, translator):
+    def _make_hillslope_runs(self, translator, reveg=False):
         self.log('    Prepping _make_hillslope_runs... ')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
@@ -1483,7 +1486,7 @@ class Wepp(NoDbBase, LogMixin):
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
 
-                make_hillslope_run(wepp_id, years, runs_dir)
+                make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg)
 
                 if getattr(self, 'run_flowpaths', False):
                     for fp in watershed.fps_summary(topaz_id):
