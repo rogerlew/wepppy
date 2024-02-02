@@ -107,16 +107,22 @@ def compute_erodibilities(clay: float, sand: float, vfs: float, om: float):
 
 class HorizonMixin(object):
     def _rosettaPredict(self):
-        from rosetta import Rosetta2, Rosetta3
+        from rosetta import Rosetta2, Rosetta3, Rosetta5
 
         clay = self.clay
         sand = self.sand
         vfs = self.vfs
         bd = self.bd
+        th33 = getattr(self, 'th33', None)
+        th1500 = getattr(self, 'th1500', None)
 
         assert isfloat(clay), clay
         assert isfloat(sand), sand
         assert isfloat(vfs), vfs
+
+        #if isfloat(bd) and isfloat(th33) and isfloat(th1500):
+        #    r5 = Rosetta5()
+        #    res_dict = r5.predict_kwargs(sand=sand, silt=vfs, clay=clay, bd=bd, th33=th33, th1500=th1500)
 
         if isfloat(bd):
             r3 = Rosetta3()
@@ -135,6 +141,10 @@ class HorizonMixin(object):
 
     def _computeConductivity(self):
         self.conductivity = compute_conductivity(clay=self.clay, sand=self.sand, cec=self.cec)
+
+    @property
+    def ksat(self):
+        return self.conductivity
 
     def _computeErodibility(self):
         """
@@ -171,3 +181,30 @@ class HorizonMixin(object):
         from wepppy.wepp.soils.utils import simple_texture
         return simple_texture(self.clay, self.sand)
 
+    def _computeAlbedo(self):
+        albedo = 0.6 / exp(0.4 * self.om)
+        if albedo > 0.0005:
+            albedo = 0.06
+        self.albedo = albedo
+
+    def to_dict(self):
+        return dict(
+            clay=self.clay,
+            sand=self.sand,
+            vfs=self.vfs,
+            bd=self.bd,
+            om=self.om,
+            cec=self.cec,
+            ki=self.interrill,
+            kr=self.rill,
+            shcrit=self.shear,
+            anisotropy=self.anisotropy,
+            ksat=self.conductivity,
+            th33=self.th33,
+            th1500=self.th1500,
+            depth=self.depth,
+            simple_texture=self.simple_texture,
+        )
+    
+    def __str__(self):
+        return f'{int(self.depth)} {self.bd:0.1f} {self.conductivity:0.2f} {self.anisotropy:0.1f} {self.field_cap:0.3f} {self.wilt_pt:0.3f} {self.sand:0.1f} {self.clay:0.1f} {self.om:0.1f} {self.cec:0.1f} {self.rfg:0.1f}'
