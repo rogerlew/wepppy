@@ -146,7 +146,8 @@ class WeppSoilUtil(object):
                     solthk, sand, clay, orgmat, cec, rfg = line
                     bd = ksat = fc = wp = anisotropy = None
 
-                assert float(clay) + float(sand) <= 100.0
+                if float(clay) + float(sand) > 100.0:
+                    sand = str(100.0 - float(clay))
 
                 if j == 0:
                     if self.compute_erodibilities:
@@ -238,6 +239,13 @@ class WeppSoilUtil(object):
                     res_lyr=res_lyr)
 
         self.obj = soil
+
+    def modify_initial_sat(self, initial_sat):
+        self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_initial_sat')
+        self.obj['header'][-1] += f'(initial_sat={initial_sat})'
+
+        for i in range(len(self.obj['ofes'])):
+            self.obj['ofes'][i]['sat'] = initial_sat
 
     def modify_kslast(self, kslast, pars=None):
         luse = self.obj['ofes'][0]['luse']
@@ -395,6 +403,8 @@ class WeppSoilUtil(object):
                     _burn_code = 300
                     if 'young' in _luse:
                         _burn_code += 6
+                elif 'grass' in _luse:
+                    _burn_code = 400
 
                 if 'low sev' in _luse:
                     _burn_code += 1
@@ -402,6 +412,7 @@ class WeppSoilUtil(object):
                     _burn_code += 2
                 elif 'high sev' in _luse:
                     _burn_code += 3
+
 
             if not _luse:
                 _luse = "N/A"
