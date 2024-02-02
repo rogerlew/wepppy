@@ -1577,6 +1577,10 @@ def log_access(wd, current_user, ip):
 
 @app.route('/runs/<string:runid>/<config>/')
 def runs0(runid, config):
+
+    
+    from wepppy.nodb.mods.revegetation import Revegetation
+
     assert config is not None
 
     wd = get_wd(runid)
@@ -1648,6 +1652,11 @@ def runs0(runid, config):
         except:
             skid_trails = None
 
+        try:    
+            reveg = Revegetation.getInstance(wd)
+        except:
+            reveg = None
+            
         landuseoptions = landuse.landuseoptions
         soildboptions = soilsdb.load_db()
 
@@ -1668,6 +1677,7 @@ def runs0(runid, config):
                                disturbed=disturbed,
                                ash=ash,
                                skid_trails=skid_trails,
+                               reveg=reveg,
                                watershed=watershed,
                                unitizer_nodb=unitizer,
                                observed=observed,
@@ -3911,6 +3921,24 @@ def submit_task_run_wepp(runid, config):
     if clip_soils_depth is not None:
         soils.clip_soils_depth = clip_soils_depth
 
+    try:
+        initial_sat = float(request.form.get('initial_sat'))
+    except:
+        initial_sat = None
+
+    if initial_sat is not None:
+        soils.initial_sat = initial_sat
+
+
+    try:
+        reveg_scenario = request.form.get('reveg_scenario', None)
+    except:
+        reveg_scenario = None
+
+    if reveg_scenario is not None:
+        from wepppy.nodb.mods.revegetation import Revegetation
+        reveg = Revegetation.getInstance(wd)
+        reveg.load_cover_transform(reveg_scenario)
 
     try:
         prep_details_on_run_completion = request.form.get('prep_details_on_run_completion') == 'on'
@@ -4820,7 +4848,7 @@ def task_rap_ts_acquire(runid, config):
         rap_ts.analyze()
         return success_factory("RAP TS acquired and analyzed")
     except Exception:
-        return exception_factory("failed to set firedate", runid=runid)
+        return exception_factory("failed to acquire RAP TS", runid=runid)
 
 
 # noinspection PyBroadException
@@ -4859,6 +4887,40 @@ def task_upload_sbs(runid, config):
 
     return success_factory(res)
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/upload_cover_transform/', methods=['POST'])
+def task_upload_cover_transform(runid, config):
+    from wepppy.nodb.mods.revegetation import Revegetation
+
+    wd = get_wd(runid)
+
+    reveg = Revegetation.getInstance(wd)
+
+    try:
+        file = request.files['input_upload_cover_transform']
+    except Exception:
+        return exception_factory('Could not find file', runid=runid)
+
+    try:
+        if file.filename == '':
+            return error_factory('no filename specified')
+
+        filename = secure_filename(file.filename)
+    except Exception:
+        return exception_factory('Could not obtain filename', runid=runid)
+
+    try:
+        file.save(_join(reveg.revegetation_dir, filename))
+    except Exception:
+        return exception_factory('Could not save file', runid=runid)
+
+    try:
+        res = reveg.validate_user_defined_cover_transform(filename)
+    except Exception:
+        return exception_factory('Failed validating file', runid=runid)
+
+    return success_factory(res)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/remove_sbs/', methods=['POST'])
