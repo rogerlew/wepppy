@@ -31,6 +31,8 @@
                   <option value="alaska/nlcd/2001" {% if landuse.nlcd_db == "alaska/nlcd/2001" %}selected{% endif %}>NLCD/2001</option>
                   <option value="alaska/nlcd/2011" {% if landuse.nlcd_db == "alaska/nlcd/2011" %}selected{% endif %}>NLCD/2011</option>
                   <option value="alaska/nlcd/2016" {% if landuse.nlcd_db == "alaska/nlcd/2016" %}selected{% endif %}>NLCD/2016</option>
+                {% elif 'virgin_islands' in ron.locales %}
+                  <option value="locales/virgin_islands/landcover" {% if landuse.nlcd_db == "locales/virgin_islands/landcover" %}selected{% endif %}>USVI Landcover 2018</option>
                 {% elif 'eu' in ron.locales %}
                   <option value="eu/CORINE_LandCover/1990" {% if landuse.nlcd_db == "eu/CORINE_LandCover/1990" %}selected{% endif %}>CORINE 1990</option>
                   <option value="eu/CORINE_LandCover/2000" {% if landuse.nlcd_db == "eu/CORINE_LandCover/2000" %}selected{% endif %}>CORINE 2000</option>
@@ -39,7 +41,7 @@
                   <option value="eu/CORINE_LandCover/2018" {% if landuse.nlcd_db == "eu/CORINE_LandCover/2018" %}selected{% endif %}>CORINE 2018</option>
                 {% elif 'au' in ron.locales %}
                 {% else %}
-                  <option value="nlcd/2019" {% if landuse.nlcd_db == "nlcd/2021" %}selected{% endif %}>nlcd/2021</option>
+                  <option value="nlcd/2021" {% if landuse.nlcd_db == "nlcd/2021" %}selected{% endif %}>nlcd/2021</option>
                   <option value="nlcd/2019" {% if landuse.nlcd_db == "nlcd/2019" %}selected{% endif %}>nlcd/2019</option>
                   <option value="nlcd/2016" {% if landuse.nlcd_db == "nlcd/2016" %}selected{% endif %}>nlcd/2016</option>
                   <option value="nlcd/2013" {% if landuse.nlcd_db == "nlcd/2013" %}selected{% endif %}>nlcd/2013</option>
