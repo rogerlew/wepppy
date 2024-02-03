@@ -165,7 +165,10 @@ class SlopeFile(object):
             for _d in self.distances:
                 if d0 < _d < dend:
                     _distance_p.append(_d)
-            _distance_p.append(dend)
+
+            if round(_distance_p[-1], 4) < round(dend, 4):
+                _distance_p.append(dend)
+
             _slopes = self.interp_slope(_distance_p)
 
             _npts = len(_slopes)
@@ -174,8 +177,14 @@ class SlopeFile(object):
 #            s.append('# ' + ' '.join(f'{_d:.4f}, {_s:.4f}' for _d, _s in zip(_distance_p, _slopes)))
 
             _distance_p = (_distance_p - d0) / (dend - d0)
-            s.append('  ' + ' '.join(f'{_d:.4f}, {_s:.4f}' for _d, _s in zip(_distance_p, _slopes)))
+            _profile = []
+            _d_old = -1.0
+            for _d, _s in zip(_distance_p, _slopes):
+                assert _d > _d_old, (_d, _d_old, _distance_p, _slopes)
+                _d_old = _d
+                _profile.append(f'{_d:.4f}, {_s:.4f}')
 
+            s.append('  ' + ' '.join(_profile))
 
         s = ['97.5',
              str(n_mofes),
