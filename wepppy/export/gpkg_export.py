@@ -6,6 +6,15 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
+from wepppy.nodb.soils import Soils
+
+def esri_compatible_colnames(df):
+    # Create a dictionary to hold the mappings from original to new names
+    rename_dict = {col: col.replace(' ', '_').replace('(', '').replace(')', '') for col in df.columns}
+
+    # Rename the columns and return the modified dataframe
+    return df.rename(columns=rename_dict)
+
 
 def gpkg_export(wd: str):
     wat_hill_fn = _join(wd, 'watershed/hillslopes.csv')
@@ -29,6 +38,7 @@ def gpkg_export(wd: str):
     hill_gdf = gpd.read_file(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON'))
 
     wat_hill_df = pd.read_csv(wat_hill_fn)
+    wat_hill_df = esri_compatible_colnames(wat_hill_df)
     hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     lc_hill_fn = _join(wd, 'landuse/landuse.parquet')
@@ -37,11 +47,18 @@ def gpkg_export(wd: str):
         columns_to_drop = ['man_dir', 'area', 'cancov_override', 'inrcov_override', 'rilcov_override']
         lc_hill_df.drop(columns=columns_to_drop, inplace=True)
         lc_hill_df.rename(columns={'key': 'dom'}, inplace=True)
+        lc_hill_df = esri_compatible_colnames(lc_hill_df)
         hill_gdf = hill_gdf.merge(lc_hill_df, on='TopazID', how='left')
 
     soils_hill_fn = _join(wd, 'soils/soils.parquet')
+    soils_hill_df = None
     if _exists(soils_hill_fn):
         soils_hill_df = pd.read_parquet(soils_hill_fn)
+
+    if soils_hill_df is None:
+        soils_hill_df = Soils.getInstance(wd).hill_table
+
+    if soils_hill_df is not None:
         columns_to_drop = ['soils_dir', 'area', 'color', 'build_date', 'desc',  'pct_coverage', 'avke', 'bd']
         soils_hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_gdf = hill_gdf.merge(soils_hill_df, on='TopazID', how='left')
@@ -51,14 +68,17 @@ def gpkg_export(wd: str):
         hill_df = pd.read_parquet(hill_loss_fn)
         columns_to_drop = ['Type', 'Hillslopes', 'Length', 'Landuse']
         hill_df.drop(columns=columns_to_drop, inplace=True)
+        hill_df = esri_compatible_colnames(hill_df)
         hill_gdf = hill_gdf.merge(hill_df, on='TopazID', how='left')
 
+#    hill_gdf = esri_compatible_colnames(hill_gdf)
     hill_gdf.to_file(gpkg_fn, driver='GPKG', layer='subcatchments')
 
     chn_gdf = gpd.read_file(_join(wd, 'dem/topaz/CHANNELS.WGS.JSON'))
 
     wat_chn_fn = _join(wd, 'watershed/channels.csv')
     wat_chn_df = pd.read_csv(wat_chn_fn)
+    wat_chn_df = esri_compatible_colnames(wat_chn_df)
     chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
@@ -66,8 +86,10 @@ def gpkg_export(wd: str):
         chn_df = pd.read_parquet(chn_loss_fn)
         columns_to_drop = ['Channels and Impoundments', 'Length', 'Area']
         chn_df.drop(columns=columns_to_drop, inplace=True)
+        chn_df = esri_compatible_colnames(chn_df)
         chn_gdf = chn_gdf.merge(chn_df, on='TopazID', how='left')
 
+#    chn_gdf = esri_compatible_colnames(chn_gdf)
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
 if __name__ == '__main__':
