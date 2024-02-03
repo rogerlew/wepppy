@@ -24,6 +24,35 @@ function window_resize() {
 };
 
 
+function upload_cover_transform() {
+    var fileInput = document.getElementById('input_upload_cover_transform');
+    var file = fileInput.files[0]; // Get the file from the input
+
+    if (file) { // Check if any file is selected
+        var formData = new FormData();
+        formData.append('input_upload_cover_transform', file); // Append the file
+
+        $.post({
+            url: "tasks/upload_cover_transform/", // Ensure this URL is correct
+            data: formData,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function (response) {
+                console.log("upload successful");
+            },
+            error: function (jqXHR) {
+                console.log(jqXHR.responseJSON);
+            },
+            fail: function (jqXHR, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        });
+    } else {
+        console.log("No file selected.");
+    }
+};
+
 var climate_ws = new WSClient('climate_form', runid, 'climate');
 var wepp_ws = new WSClient('wepp_form', runid, 'wepp');
 var soils_ws = new WSClient('soil_form', runid, 'soils');
@@ -1039,6 +1068,9 @@ function initWebSocket() {
         setTimeout(initWebSocket, 5000);  // Try to reconnect every 5 seconds.
     };
 }
+
+
+
 
 $(document).ready(function() {
     initWebSocket();
