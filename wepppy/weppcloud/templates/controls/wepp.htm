@@ -22,6 +22,10 @@
             {% include("controls/wepp_advanced_options/channels.htm") %}
             <br/>
             {% include("controls/wepp_advanced_options/bedrock.htm") %}
+            {% if "revegetation" in ron.mods %}
+                <br/>
+                {% include("controls/wepp_advanced_options/revegetation.htm") %}
+            {% endif %}
             <br/>
             {% include("controls/wepp_advanced_options/clip_soils_depth.htm") %}
             <br/>
