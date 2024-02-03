@@ -48,6 +48,8 @@ def fetch_dem(extent, dst_fn, cellsize, dataset='SRTMGL1_E', resample='bilinear'
         print(f'An error occurred: {err}')
 
     utm_raster_transform(extent, src_fn, dst_fn, cellsize, resample=resample)
-    
+
+
 if __name__ == "__main__":
     fetch_dem((-120.5, 38.5, -120.4, 38.6), 'test.tif', 30)
+
