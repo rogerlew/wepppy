@@ -195,6 +195,7 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
 
     df[p_key] *= 100.0
     df[p_key] = np.round(df[p_key])
+
     df[tmax_key] = np.round(c_to_f(df[tmax_key]))
     df[tmin_key] = np.round(c_to_f(df[tmin_key]))
 
@@ -206,9 +207,14 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
         mo, da, yr = index.month, index.day, index.year
         p, tmax, tmin = row[p_key], row[tmax_key], row[tmin_key]
 
-        if math.isnan(p) or math.isnan(tmax) or math.isnan(tmin):
-            print('encountered nan df writing ', prn_fn)
-            continue
+        if math.isnan(p):
+            p = 9999
+            
+        if math.isnan(tmax):
+            tmax = 9999
+        
+        if math.isnan(tmin):
+            tmin = 9999
 
         p, tmax, tmin = int(p), int(tmax), int(tmin)
 
@@ -292,7 +298,7 @@ class ClimateFile(object):
             d = {name: dtype(v) for dtype, name, v in zip(dtypes, colnames, row)}
             cur_date = datetime.date(d['year'], d['mo'], d['da'])
             return cur_date
-
+        
     def clip(self, start_date: datetime.date, end_date: datetime.date):
 
         colnames = self.colnames
@@ -469,10 +475,15 @@ class ClimateFile(object):
                 row[col_index] = str(value)
 
                 for j, (c, v) in enumerate(zip(colnames, row)):
+                    try:
+                        float(v)
+                    except ValueError:
+                        continue
+
                     if c in ['da', 'mo', 'year', 'nbrkpt']:
                         row[j] = '%i' % int(v)
                     elif c in ['rad', 'w-dir']:
-                        row[j] = '%.f' % float(v)
+                        row[j] = str(int(round(float(v))))
                     else:
                         row[j] = '%.1f' % float(v)
 
