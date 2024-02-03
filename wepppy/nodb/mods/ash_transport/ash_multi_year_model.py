@@ -119,9 +119,6 @@ class AshModel(object):
         self.ini_ash_depth_mm = None
         self.ini_ash_load_tonneha = ini_ash_load
 
-#        ini_ash_load = 46.5  # TODO delete this line
-#        fire_date = YearlessDate(5, 1)  # TODO delete this line
-
         assert isfloat(self.par_den), (prefix, self.par_den)
         assert isfloat(self.ini_bulk_den), (prefix, self.ini_bulk_den)
         assert isfloat(self.fin_bulk_den), (prefix, self.fin_bulk_den)
