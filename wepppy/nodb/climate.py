@@ -268,6 +268,57 @@ def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_f
     climate.write(cli_path)
 
 
+def build_observed_snotel(cligen, lng, lat, snotel_id, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_supplement=True):
+    import pandas as pd
+    snotel_data_dir = '/workdir/wepppy/wepppy/climates/snotel/processed'
+
+    df = pd.read_csv(_join(snotel_data_dir, f'{snotel_id}.csv'), parse_dates=[0], na_values=['', ' '])
+
+    # Adding a 'Year' column to the DataFrame
+    df['Year'] = df['Date'].dt.year
+
+    # apply start_year filter
+    df = df[df['Year'] >= start_year]
+    df = df[df['Year'] <= end_year]
+
+    start_year = min(df['Year'])
+    end_year = max(df['Year'])
+
+    df['prcp(mm/day)'] = df['Precipitation Increment (in)'] * 25.4
+    df['tmax(degc)'] = (df['Air Temperature Maximum (degF)'] - 32) * 5/9
+    df['tmin(degc)'] = (df['Air Temperature Minimum (degF)'] - 32) * 5/9
+
+    df.to_parquet(_join(cli_dir, f'snotel_{start_year}-{end_year}.parquet'))
+    df_to_prn(df.set_index('Date'), _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
+    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+
+
+    cli_path = _join(cli_dir, cli_fn)
+    climate = ClimateFile(cli_path)
+
+    if gridmet_supplement:
+        
+        wind_df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+
+        dates = df.index
+        climate.replace_var('rad', dates, wind_df['srad(l/day)'])
+        climate.replace_var('tdew', dates, wind_df['tdew(degc)'])
+
+        wind_dates = wind_df.index
+
+        climate.replace_var('w-vl', wind_dates, wind_df['vs(m/s)'])
+        climate.replace_var('w-dir', wind_dates, wind_df['th(DegreesClockwisefromnorth)'])
+
+        df['vs(m/s)'] = wind_df['vs(m/s)']
+        df['vs(m/s)'] = wind_df['th(DegreesClockwisefromnorth)']
+
+        df.to_parquet(_join(cli_dir, f'snotel_gridmet_{start_year}-{end_year}.parquet'))
+    else:
+        df.to_parquet(_join(cli_dir, f'snotel_{start_year}-{end_year}.parquet'))
+
+    climate.write(cli_path)
+
+
 def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn):
     df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
     df.to_parquet(_join(cli_dir, f'gridmet_{start_year}-{end_year}.parquet'))
