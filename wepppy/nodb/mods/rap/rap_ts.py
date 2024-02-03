@@ -357,7 +357,7 @@ class RAP_TS(NoDbBase, LogMixin):
         disturbed = Disturbed.getInstance(wd)
         reveg = Revegetation.getInstance(wd)
         landuse = Landuse.getInstance(wd)
-        
+
         fire_date = disturbed.fire_date
         cover_transform = reveg.cover_transform
         managements = landuse.managements
@@ -366,6 +366,9 @@ class RAP_TS(NoDbBase, LogMixin):
 
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
+
+        with open(_join(runs_dir, 'simfire.txt'), 'w') as fp:
+            fp.write("")
 
         with open(_join(runs_dir, 'cancov.txt'), 'w') as fp:
             fp.write("")
