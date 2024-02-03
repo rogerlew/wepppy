@@ -611,8 +611,34 @@ class Landuse(NoDbBase, LogMixin):
             raise
 
 
-    def identify_burn_class(self, topaz_id):
-        dom = self.domlc_d[str(topaz_id)]
+    def identify_disturbed_class(self, topaz_id, mofe_id = None):
+
+        if mofe_id is None:
+            dom = self.domlc_d[str(topaz_id)]
+        else:
+            dom = self.domlc_mofe_d[str(topaz_id)][str(mofe_id)]
+
+        man = self.managements[dom]
+        disturbed_class = man.disturbed_class.lower()
+        
+        if 'forest' in disturbed_class:
+            return 'forest'
+        
+        elif 'shrub' in disturbed_class:
+            return 'shrub'
+        
+        if 'grass' in disturbed_class:
+            return 'grass'
+        
+        return ''
+    
+    def identify_burn_class(self, topaz_id, mofe_id = None):
+
+        if mofe_id is None:
+            dom = self.domlc_d[str(topaz_id)]
+        else:
+            dom = self.domlc_mofe_d[str(topaz_id)][str(mofe_id)]
+
         man = self.managements[dom]
         desc = man.desc.lower()
         
