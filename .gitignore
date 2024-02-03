@@ -13,3 +13,4 @@ wepppy/taudem/tests/*/*
 .ipynb_checkpoints/
 .ipynb_checkpoints/*
 .env
+wepppy/locales/global/soils/isric/test
