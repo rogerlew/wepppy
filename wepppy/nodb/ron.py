@@ -25,6 +25,8 @@ import what3words
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 
+from wepppy.locales.earth.opentopography import opentopo_retrieve
+
 # wepppy submodules
 from .base import (
     NoDbBase,
@@ -693,8 +695,13 @@ class Ron(NoDbBase):
     #
     def fetch_dem(self):
         assert self.map is not None
-        wmesque_retrieve(self.dem_db, self.map.extent,
-                         self.dem_fn, self.map.cellsize)
+
+        if self.dem_db.startswith('opentopo://'):
+            opentopo_retrieve(self.map.extent, self.dem_fn,
+                self.map.cellsize, dataset=self.dem_db, resample='bilinear')
+        else:
+            wmesque_retrieve(self.dem_db, self.map.extent,
+                             self.dem_fn, self.map.cellsize)
 
         assert _exists(self.dem_fn)
 
