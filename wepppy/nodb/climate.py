@@ -156,6 +156,7 @@ class ClimateMode(IntEnum):
     UserDefined = 12
     DepNexrad = 13
     SingleStormBatch = 14 # Single Only
+    UserDefinedSingleStorm = 15 # Single Only
 
     @staticmethod
     def parse(x):
@@ -187,6 +188,8 @@ class ClimateMode(IntEnum):
             return ClimateMode.UserDefined
         elif x == 'dep_nexrad':
             return ClimateMode.DepNexrad
+        elif x == 'user_defined_single_storm':
+            return ClimateMode.UserDefinedSingleStorm
         raise KeyError
 
 
@@ -783,7 +786,10 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def is_single_storm(self):
-        return self._climate_mode in [ClimateMode.SingleStorm, ClimateMode.SingleStormBatch]
+        return self._climate_mode in (
+    ClimateMode.SingleStorm,
+    ClimateMode.SingleStormBatch,
+    ClimateMode.UserDefinedSingleStorm)
 
     #
     # climate_spatial mode
@@ -1714,6 +1720,10 @@ class Climate(NoDbBase, LogMixin):
             self._orig_cli_fn = _join(self.cli_dir, cli_fn)
 #            cli_path = self.cli_path
             cli = ClimateFile(self.orig_cli_fn)
+
+            if cli.is_single_storm:
+                self._climate_mode = ClimateMode.UserDefinedSingleStorm
+
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
             self.dump_and_unlock()
@@ -1946,6 +1956,9 @@ class Climate(NoDbBase, LogMixin):
                     self.cli_dir
                 )
                 storms.append(dict(ss_batch_id=i+1, ss_batch_key=key, spec=spec, par_fn=par_fn, cli_fn=cli_fn))
+
+            if len(storms) > 20:
+                raise ValueError('Only 20 single storms can be ran in batch mode')
 
             self._ss_batch_storms = storms
             self.monthlies = monthlies

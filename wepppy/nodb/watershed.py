@@ -161,7 +161,10 @@ class Watershed(NoDbBase, LogMixin):
                 raise FileNotFoundError(f"'{filepath}' not found!")
 
         with open(filepath) as fp:
-            db = jsonpickle.decode(fp.read())
+            _json = fp.read()
+            _json = _json.replace("wepppy.watershed_abstraction.support.HillSummary",
+                                  "wepppy.topo.watershed_abstraction.support.HillSummary")
+            db = jsonpickle.decode(_json)
             assert isinstance(db, Watershed)
 
         if _exists(_join(wd, 'READONLY')) or ignore_lock:

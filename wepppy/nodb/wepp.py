@@ -1463,7 +1463,7 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         years = climate.input_years
 
-        if climate.climate_mode == ClimateMode.SingleStorm:
+        if climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
 
@@ -1996,7 +1996,7 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         years = climate.input_years
 
-        if climate.climate_mode == ClimateMode.SingleStorm:
+        if climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
             make_ss_watershed_run(wepp_ids, runs_dir)
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
             for d in climate.ss_batch_storms:
