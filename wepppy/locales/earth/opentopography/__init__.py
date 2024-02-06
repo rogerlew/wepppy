@@ -14,7 +14,9 @@ load_dotenv(_join(_thisdir, '.env'))
 OPENTOPOGRAPHY_API_KEY = os.environ.get('OPENTOPOGRAPHY_API_KEY', None)
 assert OPENTOPOGRAPHY_API_KEY is not None, 'You must set OPENTOPOGRAPHY_API_KEY in .env file'
 
-def fetch_dem(extent, dst_fn, cellsize, dataset='SRTMGL1_E', resample='bilinear'):
+
+def opentopo_retrieve(extent, dst_fn, cellsize, dataset='SRTMGL1_E', resample='bilinear'):
+    dataset = dataset.replace('opentopo://', '')
 
     data_dir, fname = _split(os.path.abspath(dst_fn))
 
