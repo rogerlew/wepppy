@@ -237,6 +237,9 @@ class ClimateFile(object):
         self.lng = float(_[1])
         self.elevation = float(_[2])
 
+        _ = lines[1].split()
+        self.breakpoint = int(_[1]) > 0
+
         i = 0
         for i, L in enumerate(lines):
             if L.strip().lower().startswith('da'):
@@ -257,9 +260,7 @@ class ClimateFile(object):
 
         colnames = [v.strip() for v in lines[i].split()]
 
-        if len(colnames) == 10:
-            assert 'nbrkpt' in colnames, lines[:15]
-            self.breakpoint = True
+        if self.breakpoint:
 
             #              da  mo year nbrkpt tmax   tmin   rad
             self.dtypes = [int, int,  int, int,   float, float, float,
@@ -268,7 +269,6 @@ class ClimateFile(object):
         else:
             assert ' '.join(colnames) == \
                    'da mo year prcp dur tp ip tmax tmin rad w-vl w-dir tdew', colnames
-            self.breakpoint = False
             self.dtypes = [int, int, int, float, float, float, float,
                            float, float, float, float, float, float]
 
@@ -276,6 +276,30 @@ class ClimateFile(object):
         self.lines = lines
         self.header = header
         self.colnames = colnames
+
+    @property
+    def is_single_storm(self) -> bool:
+        breakpoint = self.breakpoint
+        data0line = self.data0line
+        colnames = self.colnames
+
+        count = 0
+        for i, L in enumerate(self.lines[data0line:]):
+            row = [v.strip() for v in L.split()]
+            if L.strip() == '':
+                break
+
+            if breakpoint:
+                if len(row) == 2 and len(row) != len(colnames):
+                    continue
+
+            assert len(row) == len(colnames), (row, colnames, L)
+            count += 1
+
+            if count > 1:
+                return False
+
+        return count == 1
 
     @property
     def last_date(self) -> datetime.date:
@@ -298,7 +322,7 @@ class ClimateFile(object):
             d = {name: dtype(v) for dtype, name, v in zip(dtypes, colnames, row)}
             cur_date = datetime.date(d['year'], d['mo'], d['da'])
             return cur_date
-        
+
     def clip(self, start_date: datetime.date, end_date: datetime.date):
 
         colnames = self.colnames
