@@ -155,6 +155,29 @@
             {% endif %}
         </div>
     </div>
+    <div id="climate_mode13_controls">
+        <h5>NEXRAD Daily Temperature Dataset</h5>
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <label class="radio">
+                    <input type="radio" value="null" class="disable-readonly" 
+                    id="climate_daily_temp_ds_null" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'null'] }}> Keep Original</a>
+                </label><br/>
+                <label class="radio">
+                    <input type="radio" value="prism" class="disable-readonly" 
+                    id="climate_daily_temp_ds_prism" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'prism'] }}> PRISM (- 2023)</a>
+                </label><br/>
+                <label class="radio">
+                    <input type="radio" value="gridmet" class="disable-readonly" 
+                    id="climate_daily_temp_ds_gridmet" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'gridmet'] }}> GRIDMET (- 2023)</a>
+                </label><br/>
+                <label class="radio">
+                    <input type="radio" value="daymet" class="disable-readonly" 
+                    id="climate_daily_temp_ds_daymet" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'daymet'] }}> DAYMET (- 2022</a>
+                </label><br/>
+            </div>
+        </div>
+    </div>
     <div id="climate_spatialmode_controls">
         <h5>Spatial Mode</h5>
         <div class="form-group row">
@@ -184,6 +207,11 @@
                 <input id="input_years" name="input_years" class="form-control mr-sm-3 disable-readonly" type="text"
                 value="{{ climate.input_years }}" aria-label="Years to simulate">
             </div>
+        </div>
+    </div>
+    <div id="observed_years_container">
+        <h5>Observed Years</h5>
+        <div class="form-group row">
             <div class="col-sm-4">
                 <label for="observed_start_year">Start Year:</label>
             </div>
@@ -204,7 +232,7 @@
             </div>
         </div>
     </div>
-    <div id="climate_mode3_controls">
+    <div id="future_years_container">
         <h5>Future (CMIP5)</h5>
         <div class="form-group row">
             <div class="col-sm-4">
@@ -304,3 +332,4 @@
     </div>
 </div>
 {% endblock %}
+
