@@ -300,7 +300,7 @@ def build_observed_snotel(cligen, lng, lat, snotel_id, start_year, end_year, cli
     climate = ClimateFile(cli_path)
 
     if gridmet_supplement:
-        
+
         wind_df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
 
         dates = df.index
@@ -390,7 +390,7 @@ def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmi
         assert _exists(new_cli_path), 'wepppyo3.climate.cli_revision failed'
         return
 
-    
+
     cli2 = deepcopy(cli)
 
     df = cli2.as_dataframe()
@@ -457,6 +457,8 @@ class Climate(NoDbBase, LogMixin):
             self._gridmet_precip_scale_factor_map =  self.config_get_path('climate', 'gridmet_precip_scale_factor_map', None)
             self._daymet_precip_scale_factor =  self.config_get_float('climate', 'daymet_precip_scale_factor', None)
             self._daymet_precip_scale_factor_map =  self.config_get_path('climate', 'daymet_precip_scale_factor_map', None)
+
+            self._climate_daily_temp_ds = None
 
             self._orig_cli_fn = None
 
@@ -644,6 +646,23 @@ class Climate(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self._ss_batch = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def climate_daily_temp_ds(self):
+        return getattr(self, '_climate_daily_temp_ds', 'null')
+
+    @climate_daily_temp_ds.setter
+    def climate_daily_temp_ds(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._climate_daily_temp_ds = value
             self.dump_and_unlock()
 
         except Exception:
@@ -1024,6 +1043,8 @@ class Climate(NoDbBase, LogMixin):
             self._climate_mode = climate_mode
             self._climate_spatialmode = climate_spatialmode
             self._input_years = input_years
+
+            self._climate_daily_temp_ds = kwds.get('climate_daily_temp_ds', None)
 
             self.dump_and_unlock()
 
@@ -1410,6 +1431,41 @@ class Climate(NoDbBase, LogMixin):
 
             self.log('Calculating monthlies...')
             cli = ClimateFile(_join(cli_dir, cli_fn))
+
+            if self.climate_daily_temp_ds == 'prism':
+                from wepppy.climates.prism.daily_client import retrieve_historical_timeseries
+                df = retrieve_historical_timeseries(lng=lng, lat=lat, start_year=start_year, end_year=end_year)
+
+                dates = df.index
+                cli.replace_var('tmax', dates, df['tmax(degc)'])
+                cli.replace_var('tmin', dates, df['tmin(degc)'])
+
+                self.cli_fn = cli_fn = cli_fn[:-4] + '.prism.cli'
+                cli.write(_join(cli_dir, cli_fn))
+
+            if self.climate_daily_temp_ds == 'gridmet':
+                from wepppy.all_your_base import c_to_f
+                df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+
+                dates = df.index
+                cli.replace_var('tmax', dates, df['tmmx(degc)'])
+                cli.replace_var('tmin', dates, df['tmmn(degc)'])
+
+                self.cli_fn = cli_fn = cli_fn[:-4] + '.gridmet.cli'
+                cli.write(_join(cli_dir, cli_fn))
+
+            if self.climate_daily_temp_ds == 'daymet':
+                from wepppy.all_your_base import c_to_f
+                df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+
+                dates = df.index
+                cli.replace_var('tmax', dates, df['tmax(degc)'])
+                cli.replace_var('tmin', dates, df['tmin(degc)'])
+
+                self.cli_fn = cli_fn = cli_fn[:-4] + '.daymet.cli'
+                cli.write(_join(cli_dir, cli_fn))
+
+
             self._input_years = cli.input_years
             self.monthlies = cli.calc_monthlies()
             self.log_done()
