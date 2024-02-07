@@ -4619,13 +4619,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").hide();
             } else if (mode === 0) {
@@ -4634,13 +4635,14 @@ var Climate = function () {
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").show();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if ((mode === 2) || (mode === 11)) {
@@ -4649,13 +4651,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").show();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").show();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 3) {
@@ -4664,13 +4667,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").show();
+                $("#observed_years_container").hide();
+                $("#future_years_container").show();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 4) {
@@ -4679,13 +4683,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").show();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 14) {
@@ -4694,13 +4699,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").show();
                 $("#btn_build_climate_container").show();
             } else if (mode === 5) {
@@ -4709,13 +4715,14 @@ var Climate = function () {
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").show();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 6) {
@@ -4724,13 +4731,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").show();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 7) {
@@ -4739,13 +4747,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").show();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             }  else if (mode === 8) {
@@ -4754,13 +4763,14 @@ var Climate = function () {
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").show();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 9) {
@@ -4769,13 +4779,14 @@ var Climate = function () {
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").show();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").show();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").hide();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if (mode === 10) {
@@ -4784,13 +4795,30 @@ var Climate = function () {
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
                 $("#climate_mode5_controls").hide();
-                $("#climate_mode2_controls").hide();
-                $("#climate_mode3_controls").hide();
+                $("#observed_years_container").hide();
+                $("#future_years_container").hide();
                 $("#climate_mode4_controls").hide();
                 $("#climate_mode6_controls").hide();
                 $("#climate_mode7_controls").hide();
                 $("#climate_mode8_controls").hide();
                 $("#climate_mode10_controls").show();
+                $("#climate_mode13_controls").hide();
+                $("#climate_mode14_controls").hide();
+                $("#btn_build_climate_container").show();
+            } else if (mode === 13) {
+                // NEXRAD
+                $("#climate_spatialmode_controls").show();
+                $("#input_years_container").hide();
+                $("#climate_mode0_controls").hide();
+                $("#climate_mode5_controls").hide();
+                $("#observed_years_container").show();
+                $("#future_years_container").hide();
+                $("#climate_mode4_controls").hide();
+                $("#climate_mode6_controls").hide();
+                $("#climate_mode7_controls").hide();
+                $("#climate_mode8_controls").hide();
+                $("#climate_mode10_controls").hide();
+                $("#climate_mode13_controls").show();
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } 
