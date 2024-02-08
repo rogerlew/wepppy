@@ -571,6 +571,11 @@ class Climate(NoDbBase, LogMixin):
         return _join(self.cli_dir, self.cli_fn)
 
     @property
+    def is_breakpoint(self):
+        cli = ClimateFile(self.cli_path)
+        return cli.breakpoint
+
+    @property
     def status_log(self):
         return os.path.abspath(_join(self.cli_dir, 'status.log'))
 
@@ -1439,6 +1444,7 @@ class Climate(NoDbBase, LogMixin):
                 dates = df.index
                 cli.replace_var('tmax', dates, df['tmax(degc)'])
                 cli.replace_var('tmin', dates, df['tmin(degc)'])
+                cli.replace_var('tdew', dates, df['tdmean(degc)'])
 
                 self.cli_fn = cli_fn = cli_fn[:-4] + '.prism.cli'
                 cli.write(_join(cli_dir, cli_fn))
@@ -1450,6 +1456,10 @@ class Climate(NoDbBase, LogMixin):
                 dates = df.index
                 cli.replace_var('tmax', dates, df['tmmx(degc)'])
                 cli.replace_var('tmin', dates, df['tmmn(degc)'])
+                cli.replace_var('rad', dates, df['srad(l/day)'])
+                cli.replace_var('tdew', dates, df['tdew(degc)'])
+                cli.replace_var('w-vl', dates, df['vs(m/s)'])
+                cli.replace_var('w-dir', dates, df['th(DegreesClockwisefromnorth)'])
 
                 self.cli_fn = cli_fn = cli_fn[:-4] + '.gridmet.cli'
                 cli.write(_join(cli_dir, cli_fn))
@@ -1461,6 +1471,8 @@ class Climate(NoDbBase, LogMixin):
                 dates = df.index
                 cli.replace_var('tmax', dates, df['tmax(degc)'])
                 cli.replace_var('tmin', dates, df['tmin(degc)'])
+                cli.replace_var('rad', dates, df['srad(l/day)'])
+                cli.replace_var('tdew', dates, df['tdew(degc)'])
 
                 self.cli_fn = cli_fn = cli_fn[:-4] + '.daymet.cli'
                 cli.write(_join(cli_dir, cli_fn))
