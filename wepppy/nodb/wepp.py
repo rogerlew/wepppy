@@ -1852,15 +1852,24 @@ class Wepp(NoDbBase, LogMixin):
     def _prep_channel_input(self):
 
         wat = Watershed.getInstance(self.wd)
+        climate = Climate.getInstance(self.wd)
+
         chn_n = wat.chn_n
         sub_n = wat.sub_n
         total = chn_n + sub_n
+
+        flag = 1
+        rate = 600
+        if climate.is_single_storm and climate.is_breakpoint:
+            flag = 3
+            rate = 60
 
         runs_dir = self.runs_dir
         with open(_join(runs_dir, 'chan.inp'), 'w') as fp:
             # 1 is the Peak Flow time and rate, 600s is the interval
             # 2 Daily average discharge, 600 probably doesn't do anything
-            fp.write('1 600\n0\n1\n{}\n'.format(total))
+
+            fp.write(f'{flag} {rate}\n0\n1\n{total}\n')
 
     def _prep_channel_soils(self, translator, erodibility, critical_shear, avke=None):
 
