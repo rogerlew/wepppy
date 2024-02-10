@@ -8,6 +8,7 @@ from os.path import exists as _exists
 
 from wepppy.nodb.soils import Soils
 
+
 def esri_compatible_colnames(df):
     # Create a dictionary to hold the mappings from original to new names
     rename_dict = {col: col.replace(' ', '_').replace('(', '').replace(')', '') for col in df.columns}
@@ -71,7 +72,7 @@ def gpkg_export(wd: str):
         hill_df = esri_compatible_colnames(hill_df)
         hill_gdf = hill_gdf.merge(hill_df, on='TopazID', how='left')
 
-#    hill_gdf = esri_compatible_colnames(hill_gdf)
+    hill_gdf = esri_compatible_colnames(hill_gdf)
     hill_gdf.to_file(gpkg_fn, driver='GPKG', layer='subcatchments')
 
     chn_gdf = gpd.read_file(_join(wd, 'dem/topaz/CHANNELS.WGS.JSON'))
@@ -89,9 +90,9 @@ def gpkg_export(wd: str):
         chn_df = esri_compatible_colnames(chn_df)
         chn_gdf = chn_gdf.merge(chn_df, on='TopazID', how='left')
 
-#    chn_gdf = esri_compatible_colnames(chn_gdf)
+    chn_gdf = esri_compatible_colnames(chn_gdf)
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
 if __name__ == '__main__':
-    gpkg_export('/geodata/weppcloud_runs/rlew-extragalactic-beechnut')
+    gpkg_export('/geodata/weppcloud_runs//bacterial-anorexia')
 
