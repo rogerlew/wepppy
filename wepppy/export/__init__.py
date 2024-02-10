@@ -1,3 +1,4 @@
 from .export import *
 from .arc_export import arc_export, has_arc_export, legacy_arc_export
 from .ermit_input import create_ermit_input
+from .gpkg_export import gpkg_export

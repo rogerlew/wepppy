@@ -34,7 +34,7 @@ from werkzeug.utils import secure_filename
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort, make_response,
-    stream_with_context,
+    stream_with_context, url_for
 )
 
 from flask_sqlalchemy import SQLAlchemy
@@ -1578,7 +1578,6 @@ def log_access(wd, current_user, ip):
 @app.route('/runs/<string:runid>/<config>/')
 def runs0(runid, config):
 
-    
     from wepppy.nodb.mods.revegetation import Revegetation
 
     assert config is not None
@@ -1589,6 +1588,10 @@ def runs0(runid, config):
         ron = Ron.getInstance(wd)
     except FileNotFoundError:
         abort(404)
+
+    # check config
+    if config != ron.config_stem:
+        return redirect(url_for('runs0', runid=runid, config=ron.config_stem))
 
     should_abort = True
     if current_user in owners:
@@ -2537,14 +2540,15 @@ def export_ermit(runid, config):
 @app.route('/runs/<string:runid>/<config>/export/arcmap')
 @app.route('/runs/<string:runid>/<config>/export/arcmap/')
 def export_arcmap(runid, config):
-    from wepppy.export import arc_export, archive_project, legacy_arc_export
+    from wepppy.export import gpkg_export, archive_project, legacy_arc_export
 
     # get working dir of original directory
     wd = get_wd(runid)
     ron = Ron.getInstance(wd)
 
     legacy = request.args.get('legacy', None) is not None
-    
+    no_cache = True
+
     if legacy:
         try:
             if len(glob(_join(ron.export_legacy_arc_dir, '*.shp'))) == 0:
@@ -2564,8 +2568,8 @@ def export_arcmap(runid, config):
 
     else:
         try:
-            if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
-                arc_export(wd)
+            if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0 or no_cache:
+                gpkg_export(wd)
         except Exception:
             return exception_factory('Error running arc_export', runid=runid)
 
