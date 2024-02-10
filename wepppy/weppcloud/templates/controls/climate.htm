@@ -156,24 +156,28 @@
         </div>
     </div>
     <div id="climate_mode13_controls">
-        <h5>NEXRAD Daily Temperature Dataset</h5>
+        <h5>NEXRAD Daily Modified Dataset</h5>
         <div class="form-group row">
             <div class="col-sm-6">
                 <label class="radio">
                     <input type="radio" value="null" class="disable-readonly" 
-                    id="climate_daily_temp_ds_null" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'null'] }}> Keep Original</a>
+                    id="climate_daily_temp_ds_null" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'null'] }}> 
+                    Keep Original</a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="prism" class="disable-readonly" 
-                    id="climate_daily_temp_ds_prism" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'prism'] }}> PRISM (- 2023)</a>
+                    id="climate_daily_temp_ds_prism" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'prism'] }}> 
+                    PRISM:tmax, tmin, tdew (- 2023)</a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="gridmet" class="disable-readonly" 
-                    id="climate_daily_temp_ds_gridmet" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'gridmet'] }}> GRIDMET (- 2023)</a>
+                    id="climate_daily_temp_ds_gridmet" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'gridmet'] }}> 
+                    GRIDMET: tmax, tmin, tdew, srad, w-vl, w-dir (- 2023)</a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="daymet" class="disable-readonly" 
-                    id="climate_daily_temp_ds_daymet" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'daymet'] }}> DAYMET (- 2022</a>
+                    id="climate_daily_temp_ds_daymet" name="climate_daily_temp_ds" {{ ('', 'checked')[climate.climate_daily_temp_ds == 'daymet'] }}> 
+                    DAYMET: tmax, tmin, tdew, srad (- 2022)</a>
                 </label><br/>
             </div>
         </div>
