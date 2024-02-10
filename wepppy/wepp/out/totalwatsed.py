@@ -119,8 +119,8 @@ def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
 
     # Determine Water Year Column
     _wy = np.zeros(d.shape[0], dtype=np.int)
-    for i, (j, y) in enumerate(zip(d['Julian'], d['Year'])):
-        _wy[i] = determine_wateryear(y, j=j)
+    for i, (mo, y) in enumerate(zip(d['Month'], d['Year'])):
+        _wy[i] = determine_wateryear(y, mo=mo)
     d['Water Year'] = _wy
 
     return d
@@ -517,7 +517,7 @@ class TotalWatSed(object):
             date = datetime(y, 1, 1) + timedelta(j - 1)
             d['mo'].append(int(date.month))
             d['da'].append(int(date.day))
-            d['Water Year'].append(determine_wateryear(y, j=j))
+            d['Water Year'].append(determine_wateryear(y, mo=d['mo']))
 
         for k in d:
             if k in ['Water Year', 'Year', 'Julian', 'mo', 'da']:
