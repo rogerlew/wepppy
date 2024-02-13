@@ -792,7 +792,7 @@ class Landuse(NoDbBase, LogMixin):
             for topaz_id, k in domlc_d.items():
                 area = len(np.where(subwta == int(topaz_id))[0])
                 area *= cell2 / 10000
-                    
+
                 if k not in managements:
                     man = get_management_summary(k, _map)
                     man.area = area
