@@ -181,6 +181,12 @@ app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
 
 app = config_app(app)
 
+
+# Configure SameSite for session cookies
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True  # Require a secure context (HTTPS)
+
+
 mail = Mail(app)
 
 # Setup Flask-Security
@@ -1573,6 +1579,19 @@ def log_access(wd, current_user, ip):
     with open(fn, 'a') as fp:
         email = getattr(current_user, 'email', '<anonymous>')
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
+
+
+@app.route('/runs/<string:runid>/')
+def runs0_nocfg(runid):
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    return redirect(url_for('runs0', runid=runid, config=ron.config_stem))
 
 
 @app.route('/runs/<string:runid>/<config>/')
