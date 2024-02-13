@@ -40,6 +40,8 @@
                   <option value="eu/CORINE_LandCover/2012" {% if landuse.nlcd_db == "eu/CORINE_LandCover/2012" %}selected{% endif %}>CORINE 2012</option>
                   <option value="eu/CORINE_LandCover/2018" {% if landuse.nlcd_db == "eu/CORINE_LandCover/2018" %}selected{% endif %}>CORINE 2018</option>
                 {% elif 'au' in ron.locales %}
+                {% elif 'earth' in ron.locales %}
+                  <option value="locales/earth/C3Slandcover/2020" {% if landuse.nlcd_db == "locales/earth/C3Slandcover/2020" %}selected{% endif %}>C3Slandcover/2020</option>
                 {% else %}
                   <option value="nlcd/2021" {% if landuse.nlcd_db == "nlcd/2021" %}selected{% endif %}>nlcd/2021</option>
                   <option value="nlcd/2019" {% if landuse.nlcd_db == "nlcd/2019" %}selected{% endif %}>nlcd/2019</option>
