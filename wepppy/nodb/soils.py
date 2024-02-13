@@ -26,8 +26,8 @@ import pandas as pd
 
 # wepppy
 from wepppy.soils.ssurgo import (
-    SurgoMap, 
-    StatsgoSpatial, 
+    SurgoMap,
+    StatsgoSpatial,
     SurgoSoilCollection,
     SoilSummary
 )
@@ -316,7 +316,6 @@ class Soils(NoDbBase, LogMixin):
     #
     # build
     #
-    
     def clean(self):
 
         soils_dir = self.soils_dir
@@ -341,6 +340,79 @@ class Soils(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def build_isric(self, initial_sat=None, ksflag=None):
+        from wepppy.locales.earth.soils.isric import ISRICSoilData
+
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+        if not watershed.is_abstracted:
+            raise WatershedNotAbstractedError()
+
+        ron = Ron.getInstance(wd)
+
+        soils_dir = self.soils_dir
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            if initial_sat is not None:
+                self._initial_sat = initial_sat
+            if ksflag is not None:
+                self._ksflag = bool(ksflag)
+
+            isric = ISRICSoilData(soils_dir)
+
+            self.log('fetching soil maps...')
+            isric.fetch(ron.map.extent)
+            self.log_done()
+#            isric.wgs_bbox = ron.map.extent
+
+            domsoil_d = {}
+            soils = {}
+            valid_k_counts = Counter()
+            for topaz_id, sub in watershed.sub_iter():
+                lng, lat = sub.centroid.lnglat
+                self.log(f'building soil for {lng}, {lat}')
+                mukey, soil_summary = isric.build_soil(lng, lat, ksflag=self.ksflag, ini_sat=self.initial_sat)
+                if mukey is not None:
+                    domsoil_d[str(topaz_id)] = mukey
+                    valid_k_counts[mukey] += watershed.area_of(topaz_id)
+                    soils[mukey] = soil_summary
+                self.log_done()
+
+            # now assign hillslopes with invalid mukeys the most common valid mukey
+            most_common_k = valid_k_counts.most_common()[0][0]
+            for topaz_id, sub in watershed.sub_iter():
+                if topaz_id not in domsoil_d:
+                   domsoil_d[topaz_id] = most_common_k
+
+            # while we are at it we will calculate the pct coverage
+            # for the landcover types in the watershed
+            for topaz_id, k in domsoil_d.items():
+                soils[k].area += watershed.area_of(topaz_id)
+
+            for k in soils:
+                coverage = 100.0 * soils[k].area / watershed.sub_area
+                soils[k].pct_coverage = coverage
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+            self.soils = soils
+
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(wd)  # reload instance from .nodb
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
     def build_statsgo(self, initial_sat=None, ksflag=None):
         wd = self.wd
         watershed = Watershed.getInstance(wd)
@@ -357,7 +429,7 @@ class Soils(NoDbBase, LogMixin):
                 self._initial_sat = initial_sat
             if ksflag is not None:
                 self._ksflag = bool(ksflag)
- 
+
             statsgoSpatial = StatsgoSpatial()
             watershed = Watershed.getInstance(wd)
 
@@ -543,7 +615,9 @@ class Soils(NoDbBase, LogMixin):
         elif self.config_stem.startswith('ak'):
             self._build_ak()
         elif self.mode == SoilsMode.Gridded:
-            if 'eu' in ron.locales:
+            if self.ssurgo_db == 'isric':
+                self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
+            elif 'eu' in ron.locales:
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
             elif 'au' in ron.locales:
