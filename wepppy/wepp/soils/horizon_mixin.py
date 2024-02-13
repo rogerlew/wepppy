@@ -183,8 +183,9 @@ class HorizonMixin(object):
 
     def _computeAlbedo(self):
         albedo = 0.6 / exp(0.4 * self.om)
-        if albedo > 0.0005:
-            albedo = 0.06
+        if albedo < 0.01:
+            albedo = 0.01
+
         self.albedo = albedo
 
     def to_dict(self):
