@@ -5,14 +5,18 @@ from os.path import join as _join
 
 from datetime import datetime
 
+from wepppy.all_your_base import isfloat
 from wepppy.all_your_base.geo import GeoTransformer
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
 
 from wepppy.wepp.soils import  HorizonMixin
+from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture
 from wepppy.wepp.soils.utils import WeppSoilUtil
 from rosetta import Rosetta
 
+import hashlib
+import base64
 
 from osgeo import gdal
 
@@ -116,7 +120,7 @@ isric_conversion_factors = {
     'wv0010': 10   # Water content at 10 kPa
 }
 
-def fetch_isric_soil_layers(wgs_bbox, soil_dir='./'):
+def fetch_isric_soil_layers(wgs_bbox, soils_dir='./'):
     """
     Fetches the ISRIC soil layers for the given bounding box.
     """
@@ -143,11 +147,11 @@ def fetch_isric_soil_layers(wgs_bbox, soil_dir='./'):
                                 format=format)
             # Save the response to a file
             filename = f'{layer}.tif'
-            with open(_join(soil_dir, filename), 'wb') as out:
+            with open(_join(soils_dir, filename), 'wb') as out:
                 out.write(response.read())
 
 
-def fetch_isric_wrb(wgs_bbox, soil_dir='./'):
+def fetch_isric_wrb(wgs_bbox, soils_dir='./'):
     """
     Fetches the ISRIC soil layers for the given bounding box.
     """
@@ -169,12 +173,12 @@ def fetch_isric_wrb(wgs_bbox, soil_dir='./'):
 
     # Save the response to a file
     filename = 'wrb_MostProbable.tif'
-    with open(_join(soil_dir, filename), 'wb') as out:
+    with open(_join(soils_dir, filename), 'wb') as out:
         out.write(response.read())
 
 
     # Open the GeoTIFF in update mode
-    ds = gdal.Open(_join(soil_dir, filename), gdal.GA_Update)
+    ds = gdal.Open(_join(soils_dir, filename), gdal.GA_Update)
 
     if ds is None:
         print("Error opening the GeoTIFF file.")
@@ -234,14 +238,14 @@ _disclaimer = '''\
 # '''
 
 class ISRICSoilData:
-    def __init__(self, soil_dir='./'):
-        self.soil_dir = soil_dir
+    def __init__(self, soils_dir='./'):
+        self.soils_dir = soils_dir
         self.wgs_bbox = None
 
     def fetch(self, wgs_bbox):
         self.wgs_bbox = wgs_bbox
-        fetch_isric_soil_layers(wgs_bbox, self.soil_dir)
-        fetch_isric_wrb(wgs_bbox, self.soil_dir)
+        fetch_isric_soil_layers(wgs_bbox, self.soils_dir)
+        fetch_isric_wrb(wgs_bbox, self.soils_dir)
 
     def extract_soil_data(self, lng, lat):
         global isric_measures, isric_depths, isric_conversion_factors
@@ -253,7 +257,7 @@ class ISRICSoilData:
         for depth in isric_depths:
             soil_data[depth] = {}
             for measure in isric_measures:
-                file_path = _join(self.soil_dir, f'{measure}_{depth}_Q0.5.tif')
+                file_path = _join(self.soils_dir, f'{measure}_{depth}_Q0.5.tif')
                 if not file_path:
                     raise ValueError(f'File {file_path} does not exist. Please call the fetch method first.')
 
@@ -265,17 +269,24 @@ class ISRICSoilData:
         return soil_data
 
     def get_wrb(self, lng, lat):
-        file_path = _join(self.soil_dir, 'wrb_MostProbable.tif')
+        file_path = _join(self.soils_dir, 'wrb_MostProbable.tif')
         interpolator = RasterDatasetInterpolator(file_path)
         value = interpolator.get_location_info(lng, lat, method='nearest')
         return wrb_rat[int(value)]
 
-    def build_soil(self, lng, lat, soil_fn, res_lyr_ksat_threshold=2.0, ksflag=0, ini_sat=0.75):
+    def build_soil(self, lng, lat, soil_fn=None, res_lyr_ksat_threshold=2.0, ksflag=0, ini_sat=0.75):
         """
         ksflag
            0 - do not use adjustments (conductivity will be held constant)
            1 - use internal adjustments
         """
+
+        assert int(ksflag) in [0, 1]
+        ksflag = int(ksflag)
+
+        assert isfloat(ini_sat)
+
+        build_date = datetime.now()
         soil_data = self.extract_soil_data(lng, lat)
 
         # create wepp soil
@@ -290,7 +301,6 @@ class ISRICSoilData:
         horizons = []
         for i, depth in enumerate(isric_depths):
             horizon_data = soil_data[depth]
-            print(horizon_data)
             horizon = ISRICHorizon(depth, horizon_data)
             horizon._rosettaPredict()
             horizon._computeErodibility()
@@ -314,16 +324,21 @@ class ISRICSoilData:
             horizons.append(horizon)
 
         if not horizons:
-            return 0
+            return None, None
 
         h0 = horizons[0]
         nsl = len(horizons)
+
+        simple_texture = h0.simple_texture
+
+        if simple_texture is None:
+            return None, None
 
         s = ['7778',
              '#',
              '#            WEPPcloud (c) University of Idaho',
              '#',
-             '#  Build Date: ' + str(datetime.now()),
+             '#  Build Date: ' + str(build_date),
              '#  Source Data: ISRIC SoilGrids',
              '#', '#']
 
@@ -335,8 +350,10 @@ class ISRICSoilData:
         s.append('Any comments:')
         s.append(f'1 {ksflag}')
 
+        print(wrb, simple_texture, nsl, h0.albedo, ini_sat, h0.interrill, h0.rill, h0.shear)
 
-        s.append(f"'{wrb}'\t\t'{h0.simple_texture}'\t"\
+
+        s.append(f"'{wrb}'\t\t'{simple_texture}'\t"\
                  f"{nsl}\t{h0.albedo:0.4f}\t"\
                  f"{ini_sat:0.4f}\t{h0.interrill:0.2f}\t{h0.rill:0.4f}\t"\
                  f"{h0.shear:0.4f}")
@@ -354,41 +371,71 @@ class ISRICSoilData:
         else:
             s.append('1 10000.0 %0.5f' % (res_lyr_ksat * 3.6))
 
-        with open(_join(self.soil_dir, soil_fn), 'w') as fp:
+        mukey = short_hash_id('\n'.join(s[9:]))
+        if soil_fn is None:
+            soil_fn = f'{mukey}.sol'
+
+        with open(_join(self.soils_dir, soil_fn), 'w') as fp:
             fp.write('\n'.join(s))
 
-        return 1
+
+        return mukey, SoilSummary(mukey=mukey,
+                                  fname=soil_fn,
+                                  soils_dir=self.soils_dir,
+                                  build_date=str(build_date),
+                                  desc=wrb)
 
 
-def _build_soil(lng, lat, soil_dir):
-    os.makedirs(soil_dir, exist_ok=True)
-    soil = ISRICSoilData(soil_dir)
+def short_hash_id(input_string, length=8):
+    """
+    Generate a short hash ID from a given string.
+
+    :param input_string: The input string to hash.
+    :param length: The desired length of the short hash. Default is 8 characters.
+    :return: A short hash ID of the specified length.
+    """
+    # Hash the input string using SHA-256
+    hash_bytes = hashlib.sha256(input_string.encode('utf-8')).digest()
+
+    # Encode the hash using Base64 to get a shorter representation
+    base64_encoded = base64.urlsafe_b64encode(hash_bytes).decode('utf-8')
+
+    # Truncate the Base64-encoded string to the desired length
+    short_hash = base64_encoded.replace('_','')[:length]
+
+    return short_hash
+
+
+def _build_soil(lng, lat, soils_dir):
+    os.makedirs(soils_dir, exist_ok=True)
+    soil = ISRICSoilData(soils_dir)
     soil.fetch((lng-0.1, lat-0.1, lng+0.1, lat+0.1))
     ret = soil.build_soil(lng, lat, 'wepp.sol')
 
     if ret:
-        with open(_join(soil_dir, 'wepp.sol')) as fp:
+        with open(_join(soils_dir, 'wepp.sol')) as fp:
             print(fp.read())
     else:
         with open('failed.txt', 'a') as fp:
-            fp.write(f'{soil_dir},{lng},{lat}\n')
+            fp.write(f'{soils_dir},{lng},{lat}\n')
+
 
 if __name__ == "__main__":
     from os.path import exists as _exists
     from wepppy.climates.cligen import CligenStationsManager
     mgr = CligenStationsManager(version='ghcn')
 
-#    lng, lat, soil_dir = 87.75, 58.88, 'RSE00150200'
-#    soil = ISRICSoilData(soil_dir)
+#    lng, lat, soils_dir = 87.75, 58.88, 'RSE00150200'
+#    soil = ISRICSoilData(soils_dir)
 #    soil.fetch((lng-0.1, lat-0.1, lng+0.1, lat+0.1))
 #    import sys
 #    sys.exit()
 
     for station in mgr.stations:
-        soil_dir = station.par.replace('.par', '')
-        if _exists(_join(soil_dir, 'wepp.sol')):
+        soils_dir = station.par.replace('.par', '')
+        if _exists(_join(soils_dir, 'wepp.sol')):
             continue
 
         print(station.par, station.longitude, station.latitude)
-        _build_soil(station.longitude, station.latitude, soil_dir)
+        _build_soil(station.longitude, station.latitude, soils_dir)
 
