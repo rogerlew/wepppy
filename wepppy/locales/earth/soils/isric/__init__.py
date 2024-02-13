@@ -2,6 +2,7 @@ from owslib.wms import WebMapService
 
 import os
 from os.path import join as _join
+from concurrent.futures import ThreadPoolExecutor
 
 from datetime import datetime
 
@@ -120,35 +121,47 @@ isric_conversion_factors = {
     'wv0010': 10   # Water content at 10 kPa
 }
 
+def fetch_layer(wms_url, layer, crs, adj_bbox, size, format, soils_dir):
+    """
+    Fetch a single ISRIC soil layer.
+    """
+    wms = WebMapService(wms_url)
+    response = wms.getmap(layers=[layer],
+                          srs=crs,
+                          bbox=adj_bbox,
+                          size=size,
+                          format=format)
+    filename = f'{layer}.tif'
+    with open(os.path.join(soils_dir, filename), 'wb') as out:
+        out.write(response.read())
+
 def fetch_isric_soil_layers(wgs_bbox, soils_dir='./'):
     """
-    Fetches the ISRIC soil layers for the given bounding box.
+    Fetches the ISRIC soil layers for the given bounding box in parallel.
     """
     global isric_maps
 
     adj_bbox, size = adjust_to_grid(wgs_bbox)
 
-    print(adj_bbox, size)
-
     crs = 'EPSG:152160'  # Coordinate Reference System
     format = 'image/tiff'  # Desired output format
 
+    # Prepare tasks
+    tasks = []
     for wms_url in isric_maps:
         wms = WebMapService(wms_url)
         for layer in wms.contents:
-            if not 'Q0.5' in layer:
+            if 'Q0.5' not in layer:
                 continue
+            task = (wms_url, layer, crs, adj_bbox, size, format, soils_dir)
+            tasks.append(task)
 
-            # Request the map
-            response = wms.getmap(layers=[layer],
-                                srs=crs,
-                                bbox=adj_bbox,
-                                size=size,
-                                format=format)
-            # Save the response to a file
-            filename = f'{layer}.tif'
-            with open(_join(soils_dir, filename), 'wb') as out:
-                out.write(response.read())
+    # Execute tasks in parallel
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(fetch_layer, *task) for task in tasks]
+        futures.append(executor.submit(fetch_isric_wrb, wgs_bbox, soils_dir))
+        for future in futures:
+            future.result()  # Wait for each task to complete
 
 
 def fetch_isric_wrb(wgs_bbox, soils_dir='./'):
@@ -245,7 +258,6 @@ class ISRICSoilData:
     def fetch(self, wgs_bbox):
         self.wgs_bbox = wgs_bbox
         fetch_isric_soil_layers(wgs_bbox, self.soils_dir)
-        fetch_isric_wrb(wgs_bbox, self.soils_dir)
 
     def extract_soil_data(self, lng, lat):
         global isric_measures, isric_depths, isric_conversion_factors
@@ -425,11 +437,11 @@ if __name__ == "__main__":
     from wepppy.climates.cligen import CligenStationsManager
     mgr = CligenStationsManager(version='ghcn')
 
-#    lng, lat, soils_dir = 87.75, 58.88, 'RSE00150200'
-#    soil = ISRICSoilData(soils_dir)
-#    soil.fetch((lng-0.1, lat-0.1, lng+0.1, lat+0.1))
-#    import sys
-#    sys.exit()
+    lng, lat, soils_dir = 87.75, 58.88, 'RSE00150200'
+    soil = ISRICSoilData(soils_dir)
+    soil.fetch((lng-0.1, lat-0.1, lng+0.1, lat+0.1))
+    import sys
+    sys.exit()
 
     for station in mgr.stations:
         soils_dir = station.par.replace('.par', '')
