@@ -17,6 +17,8 @@ import shutil
 from enum import IntEnum
 from copy import deepcopy
 
+from concurrent.futures import ProcessPoolExecutor
+
 from collections import Counter
 
 # non-standard
@@ -354,6 +356,7 @@ class Soils(NoDbBase, LogMixin):
 
         self.lock()
 
+
         # noinspection PyBroadException
         try:
             if initial_sat is not None:
@@ -362,24 +365,41 @@ class Soils(NoDbBase, LogMixin):
                 self._ksflag = bool(ksflag)
 
             isric = ISRICSoilData(soils_dir)
-
             self.log('fetching soil maps...')
             isric.fetch(ron.map.extent)
             self.log_done()
-#            isric.wgs_bbox = ron.map.extent
 
             domsoil_d = {}
             soils = {}
             valid_k_counts = Counter()
-            for topaz_id, sub in watershed.sub_iter():
-                lng, lat = sub.centroid.lnglat
-                self.log(f'building soil for {lng}, {lat}')
-                mukey, soil_summary = isric.build_soil(lng, lat, ksflag=self.ksflag, ini_sat=self.initial_sat)
-                if mukey is not None:
-                    domsoil_d[str(topaz_id)] = mukey
-                    valid_k_counts[mukey] += watershed.area_of(topaz_id)
-                    soils[mukey] = soil_summary
-                self.log_done()
+
+            self.log('building soils...')
+
+            # Prepare arguments for multiprocessing
+
+            # Execute in parallel
+            with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 16)) as executor:
+                futures = []
+                for topaz_id, sub in watershed.sub_iter():
+                    lng, lat = sub.centroid.lnglat
+                    futures.append(
+                        executor.submit(
+                            isric.build_soil, lng, lat,
+                            ksflag=self._ksflag, ini_sat=self._initial_sat,
+                            meta=dict(topaz_id=topaz_id)))
+
+                domsoil_d = {}
+                soils = {}
+                valid_k_counts = Counter()
+                for future in futures:
+                    mukey, soil_summary, meta = future.result()
+                    topaz_id = meta['topaz_id']
+                    if mukey is not None:
+                        domsoil_d[str(topaz_id)] = mukey
+                        valid_k_counts[mukey] += watershed.area_of(topaz_id)
+                        soils[mukey] = soil_summary
+
+            self.log_done()
 
             # now assign hillslopes with invalid mukeys the most common valid mukey
             most_common_k = valid_k_counts.most_common()[0][0]
