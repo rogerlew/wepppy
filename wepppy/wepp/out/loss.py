@@ -355,18 +355,21 @@ class Loss(object):
                         hill_tbl[i]['Solub. React. P Density'] = float(row['Solub. React. Phosphorus']) / area
                     else:
                         hill_tbl[i]['Solub. React. P Density'] = float('nan')
+                        hill_tbl[i]['Solub. React. Phosphorus'] = float('nan')
 
                 if 'Particulate Phosphorus' in row:
                     if isfloat(row['Particulate Phosphorus']):
                         hill_tbl[i]['Particulate P Density'] = float(row['Particulate Phosphorus']) / area
                     else:
                         hill_tbl[i]['Particulate P Density'] = float('nan')
+                        hill_tbl[i]['Particulate Phosphorus'] = float('nan')
 
                 if 'Total Phosphorus' in row:
                     if isfloat(row['Total Phosphorus']):
                         hill_tbl[i]['Total P Density'] = float(row['Total Phosphorus']) / area
                     else:
                         hill_tbl[i]['Total P Density'] = float('nan')
+                        hill_tbl[i]['Total Phosphorus'] = float('nan')
 
             for i in range(len(chn_tbl)):
                 row = chn_tbl[i]
@@ -388,34 +391,50 @@ class Loss(object):
                     chn_tbl[i]['Sediment Yield Density'] = float(row['Sediment Yield']) / area
                 else:
                     chn_tbl[i]['Sediment Yield Density'] = float('nan')
+                    chn_tbl[i]['Sediment Yield'] = float('nan')
 
                 if isfloat(row['Soil Loss']):
                     chn_tbl[i]['Soil Loss Density'] = float(row['Soil Loss']) / area
                 else:
                     chn_tbl[i]['Soil Loss Density'] = float('nan')
+                    chn_tbl[i]['Soil Loss'] = float('nan')
 
                 if 'Solub. React. Phosphorus' in row:
                     if isfloat(row['Solub. React. Phosphorus']):
                         chn_tbl[i]['Solub. React. P Density'] = float(row['Solub. React. Phosphorus']) / area
                     else:
                         chn_tbl[i]['Solub. React. P Density'] = float('nan')
+                        chn_tbl[i]['Solub. React. Phosphorus'] = float('nan')
 
                 if 'Particulate Phosphorus' in row:
                     if isfloat(row['Particulate Phosphorus']):
                         chn_tbl[i]['Particulate P Density'] = float(row['Particulate Phosphorus']) / area
                     else:
                         chn_tbl[i]['Particulate P Density'] = float('nan')
+                        chn_tbl[i]['Particulate Phosphorus'] = float('nan')
 
                 if 'Total Phosphorus' in row:
                     if isfloat(row['Total Phosphorus']):
                         chn_tbl[i]['Total P Density'] = float(row['Total Phosphorus']) / area
                     else:
                         chn_tbl[i]['Total P Density'] = float('nan')
+                        chn_tbl[i]['Total Phosphorus'] = float('nan')
 
         hill_tbl = pd.DataFrame(hill_tbl)
         chn_tbl = pd.DataFrame(chn_tbl)
         out_tbl = pd.DataFrame(out_tbl)
         class_data = pd.DataFrame(class_data)
+
+
+        # phosphorus NaN values are very stubborn 
+        chn_tbl['Solub. React. Phosphorus'] = pd.to_numeric(chn_tbl['Solub. React. Phosphorus'], errors='coerce')
+        chn_tbl['Solub. React. Phosphorus'] = chn_tbl['Solub. React. Phosphorus'].astype(float)
+
+        chn_tbl['Particulate Phosphorus'] = pd.to_numeric(chn_tbl['Particulate Phosphorus'], errors='coerce')
+        chn_tbl['Particulate Phosphorus'] = chn_tbl['Particulate Phosphorus'].astype(float)
+
+        chn_tbl['Total Phosphorus'] = pd.to_numeric(chn_tbl['Total Phosphorus'], errors='coerce')
+        chn_tbl['Total Phosphorus'] = chn_tbl['Total Phosphorus'].astype(float)
 
         return hill_tbl, chn_tbl, out_tbl, class_data, yearlies, avg_years
 
