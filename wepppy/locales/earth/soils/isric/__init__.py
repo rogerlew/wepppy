@@ -286,7 +286,7 @@ class ISRICSoilData:
         value = interpolator.get_location_info(lng, lat, method='nearest')
         return wrb_rat[int(value)]
 
-    def build_soil(self, lng, lat, soil_fn=None, res_lyr_ksat_threshold=2.0, ksflag=0, ini_sat=0.75):
+    def build_soil(self, lng, lat, soil_fn=None, res_lyr_ksat_threshold=2.0, ksflag=0, ini_sat=0.75, meta=None):
         """
         ksflag
            0 - do not use adjustments (conductivity will be held constant)
@@ -395,7 +395,7 @@ class ISRICSoilData:
                                   fname=soil_fn,
                                   soils_dir=self.soils_dir,
                                   build_date=str(build_date),
-                                  desc=wrb)
+                                  desc=wrb), meta
 
 
 def short_hash_id(input_string, length=8):
