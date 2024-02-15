@@ -31,19 +31,20 @@ function WSClient(formId, runId, channel) {
 }
 
 WSClient.prototype.connect = function() {
-    var self = this;
 
-    self.ws = new WebSocket(self.wsUrl);
+    this.ws = new WebSocket(this.wsUrl);
 
-    self.ws.onopen = function() {
-        $("#" + self.formId + " #status").html("Connected");
-        self.ws.send(JSON.stringify({"type": "init"}));
+    this.ws.onopen = () => {
+        console.log("wss:", this.channel, "onclose");
+        $("#" + this.formId + " #status").html("Connected");
+        this.ws.send(JSON.stringify({"type": "init"}));
     };
 
-    self.ws.onmessage = function(event) {
+    this.ws.onmessage = (event) => {
+        console.log("wss:", this.channel, event.data);
         var payload = JSON.parse(event.data);
         if(payload.type === "ping") {
-            self.ws.send(JSON.stringify({"type": "pong"}));
+            this.ws.send(JSON.stringify({"type": "pong"}));
         }
         else if (payload.type === "status") {
             var data = payload.data;
@@ -51,13 +52,21 @@ WSClient.prototype.connect = function() {
             if (lines.length > 1) {
                 data = lines[0] + '...';
             }
-            $("#" + self.formId + " #status").html(data);
+            $("#" + this.formId + " #status").html(data);
         }
     };
 
-    self.ws.onclose = function() {
-        $("#" + self.formId + " #status").html("Connection Closed. Reconnecting...");
-        setTimeout(function() { self.connect(); }, 5000);
+    this.ws.onerror = (error) => {
+        this.ws = null;
+        console.error("wss:", channel, error);
+    };
+
+    this.ws.onclose = () => {
+        console.log("wss:", this.channel, "onclose");
+
+        $("#" + this.formId + " #status").html("Connection Closed");
+        this.ws = null;
+        setTimeout(() => { this.connect(); }, 5000);
     };
 };
 
