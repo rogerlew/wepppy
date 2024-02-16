@@ -42,6 +42,9 @@ import redis
 from rq import Queue
 from rq.job import Job
 
+from wepppyo3.wepp_viz import make_soil_loss_grid
+
+
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
@@ -54,9 +57,6 @@ from wepp_runner.wepp_runner import (
     make_ss_batch_hillslope_run,
     run_hillslope,
     run_ss_batch_hillslope,
-    make_flowpath_run,
-    make_ss_flowpath_run,
-    run_flowpath,
     make_watershed_run,
     make_ss_watershed_run,
     make_ss_batch_watershed_run,
@@ -1073,14 +1073,6 @@ class Wepp(NoDbBase, LogMixin):
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
             _copyfile(src_fn, dst_fn)
 
-            # use getattr for old runs that don't have a run_flowpaths attribute
-            if getattr(self, 'run_flowpaths', False):
-                for fp in watershed.fps_summary(topaz_id):
-                    fn = '{}.slp'.format(fp)
-                    src_fn = _join(wat_dir, f'slope_files/flowpaths/{topaz_id}/', fn)
-                    dst_fn = _join(fp_runs_dir, fn)
-                    _copyfile(src_fn, dst_fn)
-
         self.log_done()
 
     def _prep_slopes(self, translator, clip_hillslopes, clip_hillslope_length):
@@ -1103,14 +1095,6 @@ class Wepp(NoDbBase, LogMixin):
                 clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
             else:
                 _copyfile(src_fn, dst_fn)
-
-            # use getattr for old runs that don't have a run_flowpaths attribute
-            if getattr(self, 'run_flowpaths', False):
-                for fp in watershed.fps_summary(topaz_id):
-                    fn = '{}.slp'.format(fp)
-                    src_fn = _join(wat_dir, fn)
-                    dst_fn = _join(fp_runs_dir, fn)
-                    _copyfile(src_fn, dst_fn) 
 
         self.log_done()
 
@@ -1306,13 +1290,6 @@ class Wepp(NoDbBase, LogMixin):
 
                 build_d[meoization_key] = dst_fn
 
-                if getattr(self, 'run_flowpaths', False):
-                    for flowpath in watershed.fps_summary(topaz_id):
-                        dst_fn = _join(fp_runs_dir, '{}.man'.format(flowpath))
-
-                        with open(dst_fn, 'w') as fp:
-                            fp.write(fn_contents)
-
                 self.log_done()
 
         if 'emapr_ts' in self.mods:
@@ -1386,11 +1363,6 @@ class Wepp(NoDbBase, LogMixin):
                 soilu.clip_soil_depth(clip_soils_depth)
             soilu.write(dst_fn)
 
-            if getattr(self, 'run_flowpaths', False):
-                for fp in watershed.fps_summary(topaz_id):
-                    dst_fn = _join(fp_runs_dir, '{}.sol'.format(fp))
-                    _copyfile(src_fn, dst_fn)
-
             self.log_done()
 
         self.log_done()
@@ -1415,11 +1387,6 @@ class Wepp(NoDbBase, LogMixin):
             cli_summary = climate.sub_summary(topaz_id)
             src_fn = _join(cli_dir, cli_summary['cli_fn'])
             _copyfile(src_fn, dst_fn) 
-
-            if getattr(self, 'run_flowpaths', False):
-                for fp in watershed.fps_summary(topaz_id):
-                    dst_fn = _join(fp_runs_dir, '{}.cli'.format(fp))
-                    _copyfile(src_fn, dst_fn)
 
             self.log_done()
 
@@ -1469,10 +1436,6 @@ class Wepp(NoDbBase, LogMixin):
 
                 make_ss_hillslope_run(wepp_id, runs_dir)
 
-                if getattr(self, 'run_flowpaths', False):
-                    for fp in watershed.fps_summary(topaz_id):
-                        make_ss_flowpath_run(fp, fp_runs_dir)
-
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
@@ -1485,12 +1448,8 @@ class Wepp(NoDbBase, LogMixin):
         else:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
-
                 make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg)
 
-                if getattr(self, 'run_flowpaths', False):
-                    for fp in watershed.fps_summary(topaz_id):
-                        make_flowpath_run(fp, years, fp_runs_dir)
         self.log_done()
 
 
@@ -1504,7 +1463,6 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
-        run_flowpaths = getattr(self, 'run_flowpaths', False)
         wepp_bin = self.wepp_bin
 
         self.log('    wepp_bin:{}'.format(wepp_bin))
@@ -1543,58 +1501,6 @@ class Wepp(NoDbBase, LogMixin):
                         break
                     time.sleep(1)  # Sleep for a while before checking again
 
-            # Flowpath post-processing
-            if run_flowpaths and not climate.climate_mode == ClimateMode.SingleStormBatch:
-                self.log('    building loss grid')
-
-                # data structure to contain flowpath soil loss results
-                # keys are (x, y) pixel locations
-                # values are lists of soil loss/deposition from flow paths
-                loss_grid_d = {}
-
-                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-                    fps_summary = watershed.fps_summary(topaz_id)
-                    for j, fp in enumerate(fps_summary):
-
-                        # read plot file data
-                        plo = PlotFile(_join(self.fp_output_dir, '%s.plot.dat' % fp))
-
-                        # interpolate soil loss to cell locations of flowpath
-                        d = fps_summary[fp].distance_p
-                        loss = plo.interpolate(d)
-
-                        # store non-zero values in loss_grid_d
-                        for L, coord in zip(loss, fps_summary[fp].coords):
-                            if L != 0.0 and not math.isnan(L):
-                                if coord in loss_grid_d:
-                                    loss_grid_d[coord].append(L)
-                                else:
-                                    loss_grid_d[coord] = [L]
-
-                self.log_done()
-
-                self.log('Processing flowpaths... ')
-
-                self._pickle_loss_grid_d(loss_grid_d)
-                self.make_loss_grid()
-
-                self.log_done()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def run_hillslopes(self):
         self.log('Running Hillslopes\n')
@@ -1603,7 +1509,6 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         runs_dir = os.path.abspath(self.runs_dir)
         fp_runs_dir = self.fp_runs_dir
-        run_flowpaths = getattr(self, 'run_flowpaths', False)
         wepp_bin = self.wepp_bin
 
         self.log('    wepp_bin:{}'.format(wepp_bin))
@@ -1637,94 +1542,7 @@ class Wepp(NoDbBase, LogMixin):
                 futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
                 futures[-1].add_done_callback(oncomplete)
 
-                # run flowpaths if specified
-                if run_flowpaths:
-                    # iterate over the flowpath ids
-                    fps_summary = watershed.fps_summary(topaz_id)
-                    fp_n = len(fps_summary)
-                    for j, fp in enumerate(fps_summary):
-                        self.log(f'    submitting flowpath={fp} (hill { i+1} of {sub_n}, fp {j + 1} of {fp_n}).\n')
-                        # run wepp for flowpath
-                        futures.append(pool.submit(lambda p: run_flowpath(*p), (fp, fp_runs_dir, wepp_bin)))
-                        futures[-1].add_done_callback(oncomplete)
-
         wait(futures, return_when=FIRST_EXCEPTION)
-
-        # Flowpath post-processing
-        if run_flowpaths and not climate.climate_mode == ClimateMode.SingleStormBatch:
-            self.log('    building loss grid')
-
-            # data structure to contain flowpath soil loss results
-            # keys are (x, y) pixel locations
-            # values are lists of soil loss/deposition from flow paths
-            loss_grid_d = {}
-
-            for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-                fps_summary = watershed.fps_summary(topaz_id)
-                for j, fp in enumerate(fps_summary):
-
-                    # read plot file data
-                    plo = PlotFile(_join(self.fp_output_dir, '%s.plot.dat' % fp))
-
-                    # interpolate soil loss to cell locations of flowpath
-                    d = fps_summary[fp].distance_p
-                    loss = plo.interpolate(d)
-
-                    # store non-zero values in loss_grid_d
-                    for L, coord in zip(loss, fps_summary[fp].coords):
-                        if L != 0.0 and not math.isnan(L):
-                            if coord in loss_grid_d:
-                                loss_grid_d[coord].append(L)
-                            else:
-                                loss_grid_d[coord] = [L]
-
-            self.log_done()
-
-            self.log('Processing flowpaths... ')
-
-            self._pickle_loss_grid_d(loss_grid_d)
-            self.make_loss_grid()
-
-            self.log_done()
-
-
-
-
-
-
-
-
-
-
-
-    def _pickle_loss_grid_d(self, loss_grid_d):
-        plot_dir = self.plot_dir
-        loss_grid_d_path = _join(plot_dir, 'loss_grid_d.pickle')
-
-        with open(loss_grid_d_path, 'wb') as fp:
-            pickle.dump(loss_grid_d, fp)
-
-        self.lock()
-        # noinspection PyBroadException
-        try:
-            self.loss_grid_d_path = loss_grid_d_path
-            self.dump_and_unlock()
-
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    @property
-    def loss_grid_d(self):
-        loss_grid_d_path = self.loss_grid_d_path
-
-        assert loss_grid_d_path is not None
-        assert _exists(loss_grid_d_path)
-
-        with open(loss_grid_d_path, 'rb') as fp:
-            _loss_grid_d = pickle.load(fp)
-
-        return _loss_grid_d
 
     #
     # watershed
@@ -2097,6 +1915,8 @@ class Wepp(NoDbBase, LogMixin):
                 legacy_arc_export(self.wd)
                 self.log_done()
 
+            self.make_loss_grid()
+
         self.log('Watershed Run Complete')
 
         try:
@@ -2340,35 +2160,8 @@ class Wepp(NoDbBase, LogMixin):
 
     def make_loss_grid(self):
         watershed = Watershed.getInstance(self.wd)
-        bound, transform, proj = read_raster(watershed.bound, dtype=np.int32)
-
-        num_cols, num_rows = bound.shape
-        loss_grid = np.zeros((num_cols, num_rows))
-
-        _loss_grid_d = self.loss_grid_d
-        for (x, y) in _loss_grid_d:
-            loss = np.mean(np.array(_loss_grid_d[(x, y)]))
-            loss_grid[x, y] = loss
-
-        indx = np.where(bound == 0.0)
-        loss_grid[indx] = -9999
-
         loss_grid_path = _join(self.plot_dir, 'loss.tif')
-        driver = gdal.GetDriverByName("GTiff")
-        dst = driver.Create(loss_grid_path, num_cols, num_rows,
-                            1, GDT_Float32)
-
-        srs = osr.SpatialReference()
-        srs.ImportFromProj4(proj)
-        wkt = srs.ExportToWkt()
-
-        dst.SetProjection(wkt)
-        dst.SetGeoTransform(transform)
-        band = dst.GetRasterBand(1)
-        band.SetNoDataValue(-1e38)
-        band.WriteArray(loss_grid.T)
-        del dst
-
+        make_soil_loss_grid(watershed.subwta, watershed.discha, self.output_dir, loss_grid_path)
         assert _exists(loss_grid_path)
 
         loss_grid_wgs = _join(self.plot_dir, 'loss.WGS.tif')
