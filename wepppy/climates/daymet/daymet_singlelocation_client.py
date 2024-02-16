@@ -31,8 +31,8 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
     years = ','.join(str(v) for v in range(start_year, end_year+1))
 
     assert start_year <= end_year
-    assert 1980 <= start_year <= int(time.strftime("%Y"))-1
-    assert 1980 <= end_year <= int(time.strftime("%Y"))-1
+    assert 1980 <= start_year <= int(time.strftime("%Y"))-1, start_year
+    assert 1980 <= end_year <= int(time.strftime("%Y"))-1, end_year
 
     # request data
     url = 'https://daymet.ornl.gov/single-pixel/api/data'\
