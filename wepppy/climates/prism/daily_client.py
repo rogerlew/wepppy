@@ -42,6 +42,10 @@ def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2022, end_ye
         headers=headers, data=data)
 
     result = json.loads(response.text)
+    if 'result' not in result:
+        print(response.text)
+        return None
+
     data = result['result']['data']
     df = pd.DataFrame(data)
 
@@ -63,5 +67,5 @@ def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2022, end_ye
     return df
 
 if __name__ == "__main__":
-    d = retrieve_historical_timeseries(lng=-118, lat=43)
+    d = retrieve_historical_timeseries(lng=-122.0, lat=44.5)
     print(d)
