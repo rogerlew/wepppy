@@ -23,6 +23,7 @@ L.LeafletGeotiff = L.ImageOverlay.extend({
         if (options.bounds) {
             this._rasterBounds = L.latLngBounds(options.bounds);
         }
+        this._url = url;
         L.Util.setOptions(this, options);
 
         this.options.colorScale = (options.colorScale==undefined) ? 'viridis' : options.colorScale;
