@@ -16,7 +16,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
     <script   src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" crossorigin=""></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
      integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.js"></script>
@@ -92,8 +92,8 @@
                 <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
                 <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
                 <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
-                <script type="text/javascript" src="https://stuartmatthews.github.io/leaflet-geotiff/leaflet-geotiff.js"></script>
-                <script type="text/javascript" src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/geotiff.js"></script>
+                <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
+                <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
                 <script type="text/javascript" src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/plotty.js"></script>
                 <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
                 <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff-vector-arrows.js') }}"></script> -->
