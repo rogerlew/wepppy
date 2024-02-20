@@ -336,7 +336,7 @@ class ISRICSoilData:
             horizons.append(horizon)
 
         if not horizons:
-            return None, None
+            return None, None, meta
 
         h0 = horizons[0]
         nsl = len(horizons)
@@ -344,7 +344,7 @@ class ISRICSoilData:
         simple_texture = h0.simple_texture
 
         if simple_texture is None:
-            return None, None
+            return None, None, meta
 
         s = ['7778',
              '#',
@@ -413,7 +413,7 @@ def short_hash_id(input_string, length=8):
     base64_encoded = base64.urlsafe_b64encode(hash_bytes).decode('utf-8')
 
     # Truncate the Base64-encoded string to the desired length
-    short_hash = base64_encoded.replace('_','')[:length]
+    short_hash = base64_encoded.replace('_', '').replace('-', '')[:length]
 
     return short_hash
 
