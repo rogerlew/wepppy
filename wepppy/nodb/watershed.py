@@ -163,7 +163,11 @@ class Watershed(NoDbBase, LogMixin):
         with open(filepath) as fp:
             _json = fp.read()
             _json = _json.replace("wepppy.watershed_abstraction.support.HillSummary",
-                                  "wepppy.topo.watershed_abstraction.support.HillSummary")
+                                  "wepppy.topo.watershed_abstraction.support.HillSummary") \
+                         .replace("wepppy.watershed_abstraction.support.ChannelSummary",
+                                  "wepppy.topo.watershed_abstraction.support.ChannelSummary") \
+                         .replace("wepppy.watershed_abstraction.support.CentroidSummary",
+                                  "wepppy.topo.watershed_abstraction.support.CentroidSummary")
             db = jsonpickle.decode(_json)
             assert isinstance(db, Watershed)
 
