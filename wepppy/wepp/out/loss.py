@@ -426,15 +426,21 @@ class Loss(object):
         class_data = pd.DataFrame(class_data)
 
 
-        # phosphorus NaN values are very stubborn 
-        chn_tbl['Solub. React. Phosphorus'] = pd.to_numeric(chn_tbl['Solub. React. Phosphorus'], errors='coerce')
-        chn_tbl['Solub. React. Phosphorus'] = chn_tbl['Solub. React. Phosphorus'].astype(float)
 
-        chn_tbl['Particulate Phosphorus'] = pd.to_numeric(chn_tbl['Particulate Phosphorus'], errors='coerce')
-        chn_tbl['Particulate Phosphorus'] = chn_tbl['Particulate Phosphorus'].astype(float)
-
-        chn_tbl['Total Phosphorus'] = pd.to_numeric(chn_tbl['Total Phosphorus'], errors='coerce')
-        chn_tbl['Total Phosphorus'] = chn_tbl['Total Phosphorus'].astype(float)
+        for key in (
+            'Type',
+            'Channels and Impoundments',
+            'Discharge Volume',
+            'Sediment Yield',
+            'Soil Loss',
+            'Upland Charge',
+            'Subsuface Flow Volume',
+            'Contributing Area',
+            'Solub. React. Phosphorus',
+            'Particulate Phosphorus',
+            'Total Phosphorus' ):
+            chn_tbl[key] = pd.to_numeric(chn_tbl[key], errors='coerce')
+            chn_tbl[key] = chn_tbl[key].astype(float)
 
         return hill_tbl, chn_tbl, out_tbl, class_data, yearlies, avg_years
 
