@@ -186,10 +186,15 @@ function onReady() {
         }
     });
 
-    // parse the entry and fly to requested location/zoom
     $("#btn_setloc").click(function () {
-        var loc = $("#input_centerloc").val();
-        loc = loc.split(",");
+        var input = $("#input_centerloc").val();
+
+        // Remove unwanted characters: a-z, A-Z, and specified special characters
+        var sanitizedInput = input.replace(/[a-zA-Z{}[\]\\|\/<>;:]/g, '');
+
+        // Split the sanitized input by any sequence of spaces or commas
+        var loc = sanitizedInput.split(/[\s,]+/);
+
         var lon = parseFloat(loc[0]);
         var lat = parseFloat(loc[1]);
 
@@ -200,6 +205,7 @@ function onReady() {
 
         map.flyTo([lat, lon], zoom);
     });
+
 
     /* requires https
     $("#btn_currentloc").click(function (){
