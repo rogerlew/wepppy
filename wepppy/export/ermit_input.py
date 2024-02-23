@@ -126,6 +126,11 @@ def create_ermit_input(wd):
     ron = Ron.getInstance(wd)
     name = ron.name.replace(' ', '_')
     climate = Climate.getInstance(wd)
+    climatestation_meta = climate.climatestation_meta
+
+    if climatestation_meta is None:
+        climatestation_meta = 'N/A'
+
     soils = Soils.getInstance(wd)
 
     if name == '':
@@ -295,7 +300,7 @@ ROCK_PCT
            num_chns=watershed.chn_n,
            centroid_lat=watershed.centroid[1],
            centroid_lng=watershed.centroid[0],
-           station=climate.climatestation_meta))
+           station=climatestation_meta))
 
     fp2.close()
 
