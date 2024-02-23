@@ -69,7 +69,7 @@ _rowfmt = lambda x: '\t'.join(['%0.2f' % v for v in x])
 days_in_mo = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
 
-NullStation = namedtuple("NullStation", ["state", "par", "desc", "elevation", "latitude", "longitude")
+NullStation = namedtuple("NullStation", ["state", "par", "desc", "elevation", "latitude", "longitude"])
 nullStation = NullStation(state="N/A", par=".par", desc="N/A", elevation="N/A", latitude="N/A", longitude="N/A")
 
 def _row_formatter(values):
