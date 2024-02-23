@@ -26,6 +26,8 @@ import numpy as np
 
 from wepppy.nodb import Watershed, Landuse, Ron, Climate, Soils
 
+from wepppy.climates.cligen import nullStation
+
 
 def calc_ERMiT_grads(hillslope_model):
     distances, relative_elevs = hillslope_model
@@ -129,7 +131,7 @@ def create_ermit_input(wd):
     climatestation_meta = climate.climatestation_meta
 
     if climatestation_meta is None:
-        climatestation_meta = 'N/A'
+        climatestation_meta = nullStation
 
     soils = Soils.getInstance(wd)
 
