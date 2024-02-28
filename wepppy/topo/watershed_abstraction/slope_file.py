@@ -8,7 +8,8 @@ def clip_slope_file_length(src_fn, dst_fn, clip_length):
         lines = fp.readlines()
         lines = [L for L in lines if not L.startswith('#')]
 
-    aspect, fwidth = lines[2].split()
+    line2 = lines[2].strip().split()
+    aspect, fwidth = line2[0], line2[1]
     npts, length = lines[3].split()
 
     fwidth = float(fwidth)
@@ -19,7 +20,9 @@ def clip_slope_file_length(src_fn, dst_fn, clip_length):
         length = clip_length
         fwidth = area / length
 
-    lines[2] = f'{aspect} {fwidth}\n'
+    line2[0] = str(aspect)
+    line2[1] = str(fwidth)
+    lines[2] = ' '.join(line2) + '\n'
     lines[3] = f'{npts} {length}\n'
 
     with open(dst_fn, 'w') as fp:
