@@ -76,55 +76,9 @@
 
         {% else %}
 
-        <h5>Clip Hillslopes</h5>
-        <p>WEPP can overpredict erosion with long hillslopes. 
-           Clipping will restrict the length and maintain area by increasing the width of the hillslope.</p>
-        <div class="form-group row">
-            <div class="col-sm-5">
-                <div style="margin-left:2em;">
-                    <input id="checkbox_clip_hillslopes"
-                           name="clip_hillslopes"
-                           type="checkbox"
-                           class="form-check-input disable-readonly"
-                       {% if watershed.clip_hillslopes %}checked{% endif %}>
-                </div>
-                <label for="checkbox_clip_hillslopes" style="margin-left:3em;">Clip Hillslopes</label>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <div class="col-sm-5">
-                <label for="input_hillslope_clip_length">Hillslope Clip Length (m)</label>
-            </div>
-            <div class="col-sm-3">
-                <input id="input_hillslope_clip_length"
-                name="hillslope_clip_length"
-                class="form-control mr-sm-3 disable-readonly"
-                type="text"
-                value="{{ watershed.clip_hillslope_length | round | int }}"
-                       aria-label="Hillslope Clip Length">
-            </div>
-        </div>
-
-        <h5>Walk Flowpaths</h5>
-        <p>This option walks the flowpaths so that wepp can run individual flowpaths. This is needed from gridded WEPP
-            product but isn't needed for hillslope and watershed level outputs..</p>
-        <div class="form-group row">
-        <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="checkbox_walk_flowpaths"
-                   name="walk_flowpaths"
-                   type="checkbox"
-                   class="form-check-input disable-readonly"
-               {% if watershed.walk_flowpaths %}checked{% endif %}>
-        </div>
-        <label for="checkbox_walk_flowpaths" style="margin-left:3em;">Walk Flowpaths</label>
-        </div>
-        </div>
+        <div><i>no advanced options currently available</i></div>
         {% endif %}
-        
     </div>
-    
     <div style="height:1em;"> </div>
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">

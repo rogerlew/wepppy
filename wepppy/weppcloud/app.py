@@ -3134,7 +3134,7 @@ def view_management(runid, config, key):
 
     landuse = Landuse.getInstance(wd)
     man = landuse.managements[str(key)].get_management()
-    contents = str(man)
+    contents = repr(man)
 
     r = Response(response=contents, status=200, mimetype="text/plain")
     r.headers["Content-Type"] = "text/plain; charset=utf-8"
@@ -3926,12 +3926,13 @@ def submit_task_run_wepp(runid, config):
     except Exception:
         return exception_factory('Error parsing climate inputs', runid=runid)
 
+    soils = Soils.getInstance(wd)
+
     try:
         clip_soils = request.form.get('clip_soils') == 'on'
     except:
         clip_soils = None
 
-    soils = Soils.getInstance(wd)
 
     if clip_soils is not None:
         soils.clip_soils = clip_soils
@@ -3939,10 +3940,28 @@ def submit_task_run_wepp(runid, config):
     try:
         clip_soils_depth = int(request.form.get('clip_soils_depth'))
     except:
-            clip_soils_depth = None
+        clip_soils_depth = None
 
     if clip_soils_depth is not None:
         soils.clip_soils_depth = clip_soils_depth
+
+    watershed = Watershed.getInstance(wd)
+
+    try:
+        clip_hillslopes = request.form.get('clip_hillslopes') == 'on'
+    except:
+        clip_hillslopes = None
+
+    if clip_hillslopes is not None:
+        watershed.clip_hillslopes = clip_hillslopes
+
+    try:
+        clip_hillslope_length = int(request.form.get('clip_hillslope_length'))
+    except:
+        clip_hillslope_length = None
+
+    if clip_hillslope_length is not None:
+        watershed.clip_hillslope_length = clip_hillslope_length
 
     try:
         initial_sat = float(request.form.get('initial_sat'))
