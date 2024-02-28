@@ -1060,7 +1060,7 @@ class Wepp(NoDbBase, LogMixin):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
-    def _prep_slopes_peridot(self, watershed, translator):
+    def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.log('    Prepping _prep_slopes_peridot... ')
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
@@ -1071,7 +1071,10 @@ class Wepp(NoDbBase, LogMixin):
 
             src_fn = _join(wat_dir, 'slope_files/hillslopes/hill_{}.slp'.format(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            _copyfile(src_fn, dst_fn)
+            if clip_hillslopes:
+                clip_slope_file_length(src_fn, dst_fn, clip_hillslope_length)
+            else:
+                _copyfile(src_fn, dst_fn)
 
         self.log_done()
 
@@ -1080,7 +1083,7 @@ class Wepp(NoDbBase, LogMixin):
 
         watershed = Watershed.getInstance(self.wd)
         if watershed.abstraction_backend == 'peridot':
-            return self._prep_slopes_peridot(watershed, translator)
+            return self._prep_slopes_peridot(watershed, translator, clip_hillslopes, clip_hillslope_length)
 
         wat_dir = self.wat_dir
         runs_dir = self.runs_dir
@@ -1678,7 +1681,7 @@ class Wepp(NoDbBase, LogMixin):
 
         flag = 1
         rate = 600
-        if climate.is_single_storm and climate.is_breakpoint:
+        if climate.is_single_storm:  # and climate.is_breakpoint:
             flag = 3
             rate = 60
 
