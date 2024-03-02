@@ -44,7 +44,7 @@ For no growth, no decomp, no senescence
 
 W. Elliot  05/10
 1  #landuse
-1.10000 0.09000 330 1000 0.00000 0.35000
+1.10000 0.25000 330 1000 0.00000 0.35000
 1 # iresd  <Tah_7670>
 2 # mang perennial
 400.00000 0.02000 0.35000 0.02000 0.00000
