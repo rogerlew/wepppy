@@ -871,7 +871,7 @@ class Ash(NoDbBase, LogMixin):
                             logger=self)
 
                 args.append(kwds)
- 
+
             if MULTIPROCESSING:
                 # Use a 'with' statement to create the pool and automatically close and join it
                 with multiprocessing.Pool(NCPU) as pool:

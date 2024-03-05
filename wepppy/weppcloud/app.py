@@ -3035,6 +3035,7 @@ def report_landuse(runid, config):
         landuseoptions = landuse.landuseoptions
 
         return render_template('reports/landuse.htm',
+                               landuse=landuse,
                                landuseoptions=landuseoptions,
                                report=landuse.report)
 
@@ -5292,7 +5293,7 @@ def report_ash_by_hillslope(runid, config):
         ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
 
         burn_class_summary = ash.burn_class_summary()
-        ash_out = ashpost.hillslope_annuals
+        ash_out = ashpost.ash_out
 
         return render_template('reports/ash/ash_watershed_by_hillslope.htm',
                                out_rpt=out_rpt,
