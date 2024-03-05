@@ -72,14 +72,15 @@
       {% for value, units in row %}
         <td>{{ unitizer(value, units) | safe }}</td>
       {% endfor %}
-      <td class="text-right">{{ unitizer(_ash_row['wind_transport (tonne/ha)'], 'tonne/ha') | safe }}</td>
-      <td class="text-right">{{ unitizer(_ash_row['water_transport (tonne/ha)'], 'tonne/ha') | safe }}</td>
-      <td class="text-right">{{ unitizer(_ash_row['ash_transport (tonne/ha)'], 'tonne/ha') | safe }}</td>
+      <td class="text-right">{{ unitizer(_ash_row['wind_transport (kg/ha)'], 'kg/ha') | safe }}</td>
+      <td class="text-right">{{ unitizer(_ash_row['water_transport (kg/ha)'], 'kg/ha') | safe }}</td>
+      <td class="text-right">{{ unitizer(_ash_row['ash_transport (kg/ha)'], 'kg/ha') | safe }}</td>
       <td class="text-right">{{ unitizer(_ash_row['ash_ini_depth (mm)'], 'mm') | safe }}</td>
       <td><a href="{{ site_prefix }} }}/runs/{{ ron.runid }}/{{ ron.config_stem }}/hillslope/{{ _topaz_id }}/ash/
 ?fire_date={{ fire_date.month }}.{{ fire_date.day }}&ash_type={{ _ash_row['ash_type'] }}
 &ini_ash_depth={{ _ash_row['ash_ini_depth (mm)'] }}" target="_blank">Ash Results</a></td>
     </tr>
+    {% set _ash_row = None %}
     {% endif %}
     {% endfor %}
   </tbody>

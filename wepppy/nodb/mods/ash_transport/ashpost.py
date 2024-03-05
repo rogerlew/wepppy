@@ -133,8 +133,6 @@ def calculate_hillslope_statistics(df, ash, ash_post_dir):
     # group the dataframe by topaz_id and year, and calculate the sum of x within each group
     df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
     df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean().reset_index()
-    df_hillslope_average_annuals['ash_ini_depth (mm)'] = \
-        df['topaz_id'].apply(lambda topaz_id: ash.get_ini_ash_depth(topaz_id))
     df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
     df_hillslope_average_annuals.to_pickle(_join(ash_post_dir, 'hillslope_annuals.pkl'))
 
