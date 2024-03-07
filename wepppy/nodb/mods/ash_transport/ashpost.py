@@ -319,6 +319,7 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
             hill_data_frames.append(read_hillslope_out_fn(out_fn,
                 meta_data=meta,
                 meta_data_types=meta_dtypes))
+    print('hill_data_frames', hill_data_frames)
 
     if hill_data_frames == []:
         return None
@@ -478,6 +479,8 @@ class AshPost(NoDbBase):
             res = watershed_daily_aggregated(self.wd, recurrence=recurrence)
             if res != None:
                 self._return_periods, self._cum_return_periods, self._burn_class_return_periods = res
+            else:
+                self._return_periods, self._cum_return_periods, self._burn_class_return_periods = None, None, None
 
             self.dump_and_unlock()
         except Exception:

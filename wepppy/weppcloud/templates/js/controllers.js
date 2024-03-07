@@ -5427,9 +5427,29 @@ var Ash = function () {
 
         that.report = function () {
             var self = instance;
-            self.info.html("<p><a href='report/ash/' target='_blank'>View Watershed Ash Transport Model Results</a></p>\n" +
-                           "<p><a href='report/ash_by_hillslope/' target='_blank'>View Ash Transport Model Results by Hillslope</a></p>\n" +
-                           "<p><a href='report/ash_contaminant/' target='_blank'>Contaminant and Reservoir Loading Analysis</a></p>");
+            var project = Project.getInstance();
+            var task_msg = "Fetching Summary";
+
+            self.info.text("");
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.get({
+                url: "report/run_ash/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                    self.status.html(task_msg + "... Success");
+                    project.set_preferred_units();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+
         };
 
         return that;

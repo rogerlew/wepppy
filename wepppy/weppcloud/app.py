@@ -5184,6 +5184,19 @@ def _parse_rec_intervals(request, years):
 
     return rec_intervals
 
+@app.route('/runs/<string:runid>/<config>/report/run_ash')
+@app.route('/runs/<string:runid>/<config>/report/run_ash/')
+def report_run_ash(runid, config):
+    try:
+        wd = get_wd(runid)
+        ash = Ash.getInstance(wd)
+
+        return render_template('reports/ash/run_summary.htm',
+                               ash=ash)
+
+    except Exception:
+        return exception_factory('Error', runid=runid)
+
 
 @app.route('/runs/<string:runid>/<config>/report/ash')
 @app.route('/runs/<string:runid>/<config>/report/ash/')
