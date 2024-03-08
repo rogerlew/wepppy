@@ -522,6 +522,12 @@ function onReady() {
     });
 
 
+    {% if 'rap' in ron.mods %}
+        // Cover
+        render_legend("viridis", "landuse_sub_cmap_canvas_cover");
+        sub_ctrl.renderCover();
+    {% endif %}
+    
     //
     // Hillslopes Visualizations
     {% if 'rhem' not in ron.mods %}
