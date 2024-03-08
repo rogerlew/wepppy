@@ -53,6 +53,27 @@
             </a>
           </li>
           {% endif %}
+          {% if 'rap' in ron.mods %}
+          <div class="radio radio-primary">
+            <input type="radio" name="landuse_sub_cmap_radio_cover" id="landuse_sub_cmap_radio_cover" value="sub_cover" >
+            <label for="landuse_sub_cmap_radio_cover">
+                Vegetation Cover (%)
+            </label>
+            <br/>
+            <span id="landuse_sub_cmap_canvas_cover_units"></span><br/>
+            <div style='width:240px;height:40px'>
+                <canvas id="landuse_sub_cmap_canvas_cover" width=200 height=20
+                        style='width:200px;height:20px;display:table;margin:0 auto;'></canvas>
+                <div class="row">
+                    <div class="col-md-4"><span id="landuse_sub_cmap_canvas_cover_min"></span></div>
+                    <div class="col-md-4" style="text-align: center;"></div>
+                    <div class="col-md-4" style="text-align: right;">
+                        <span id="landuse_sub_cmap_canvas_cover_max">
+                        </span></div>
+                </div>
+            </div>
+          </div>
+          {% endif %}
           {% if false %}
           <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#spatialclimate" role="tab">
