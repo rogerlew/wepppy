@@ -1811,6 +1811,8 @@ var SubcatchmentDelineation = function () {
                 self.cmapRangelandCover();
             } else if (cmap_name === "dom_soil") {
                 self.cmapSoils();
+            } else if (cmap_name === "landuse_cover") {
+                self.cmapCover();
             } else if (cmap_name === "sub_runoff") {
                 self.cmapRunoff();
             } else if (cmap_name === "sub_subrunoff") {
@@ -1927,6 +1929,8 @@ var SubcatchmentDelineation = function () {
             });
         };
 
+        
+
         that.cmapRangelandCover = function () {
             var self = instance;
 
@@ -1993,6 +1997,63 @@ var SubcatchmentDelineation = function () {
             });
         };
 
+        //
+        // Cover
+        //
+        that.dataCover = null;
+        that.labelCoverMin = $('#wepp_sub_cmap_canvas_cover_min');
+        that.labelCoverMax = $('#wepp_sub_cmap_canvas_cover_max');
+        that.labelCoverUnits = $('#wepp_sub_cmap_canvas_cover_units');
+        that.cmapperCover = createColormap({ colormap: 'viridis', nshades: 64 });
+
+        that.cmapCover = function () {
+            var self = instance;
+            $.get({
+                url: "query/landuse/cover/subcatchments/",
+                cache: false,
+                success: function success(data) {
+                    if (data === null) {
+                        throw "query returned null";
+                    }
+                    self.dataCover = data;
+                    self.renderCover();
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+        that.renderCover = function () {
+            var self = instance;
+
+            self.labelCoverMin.html("0");
+            self.labelCoverMax.html("100");
+            self.labelCoverUnits.html("%");
+
+            if (self.polys == null) {
+                return;
+            }
+
+            self.polys.eachLayer(function (layer) {
+                var topId = layer.feature.properties.TopazID;
+                var v = parseFloat(self.dataCover[topId].value);
+                var c = self.cmapperCover.map(v);
+
+                layer.setStyle({
+                    color: c,
+                    weight: 1,
+                    opacity: 0.9,
+                    fillColor: c,
+                    fillOpacity: 0.9
+                });
+            });
+        };
+        // end Cover
+        
         //
         // Phosphorus
         //
