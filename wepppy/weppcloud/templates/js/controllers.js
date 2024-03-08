@@ -2001,8 +2001,8 @@ var SubcatchmentDelineation = function () {
         // Cover
         //
         that.dataCover = null;
-        that.labelCoverMin = $('#wepp_sub_cmap_canvas_cover_min');
-        that.labelCoverMax = $('#wepp_sub_cmap_canvas_cover_max');
+        that.labelCoverMin = $('#landuse_sub_cmap_canvas_cover_min');
+        that.labelCoverMax = $('#landuse_sub_cmap_canvas_cover_max');
         that.labelCoverUnits = $('#wepp_sub_cmap_canvas_cover_units');
         that.cmapperCover = createColormap({ colormap: 'viridis', nshades: 64 });
 
