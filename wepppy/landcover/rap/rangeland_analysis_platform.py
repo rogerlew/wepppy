@@ -140,57 +140,6 @@ class RangelandAnalysisPlatformDataset(object):
             return None
         return np.ma.masked_values(data, 65535)
 
-    def _get_median(self, band: RAP_Band, indices):
-        data = self.get_band(band)
-        if data is None:
-            return
-
-        x = data[indices]
-
-        retval = float(np.ma.median(x))
-        if math.isnan(retval):
-            return None
-
-        return retval
-
-    def spatial_aggregation(self, band: RAP_Band, subwta_fn, lcmap_fn=None):
-        assert _exists(subwta_fn)
-        subwta, transform, proj = read_raster(subwta_fn, dtype=np.int32)
-        assert self.shape == subwta.shape
-
-        if lcmap_fn is not None:
-            lcmap, _transform, _proj = read_raster(lcmap_fn, dtype=np.int32)
-            assert self.shape == lcmap.shape
-        else:
-            lcmap = None
-
-        _ids = sorted(list(set(subwta.flatten())))
-
-        domlc_d = {}
-        px_counts = Counter()
-
-        for _id in _ids:
-            if _id == 0:
-                continue
-            _id = int(_id)
-            indices = np.where(subwta == _id)
-
-            if lcmap is not None:
-                landuses = sorted(set(lcmap[indices].flatten()))
-                for landuse in landuses:
-                    _indices = np.where((subwta == _id) & (lcmap == landuse))
-                    dom = self._get_median(band, _indices)
-                    key = f'{_id}-{landuse}'
-                    domlc_d[key] = dom
-                    px_counts[key] += len(_indices[0])
-
-            else:
-                dom = self._get_median(band, indices)
-                domlc_d[str(_id)] = dom
-                px_counts[str(_id)] += len(indices[0])
-
-        return domlc_d, px_counts
-
     def spatial_stats(self, band: RAP_Band, bound_fn):
         assert _exists(bound_fn)
         bounds, transform, proj = read_raster(bound_fn, dtype=np.int32)
