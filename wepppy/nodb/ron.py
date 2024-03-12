@@ -184,7 +184,7 @@ class Map(object):
 
         return x, y
 
-    def lnglat_to_px(self, long, lat):
+    def lnglat_to_px(self, lng, lat):
         """
         return the x,y pixel coords of long, lat
         """
@@ -194,7 +194,7 @@ class Map(object):
         ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
 
         # find easting and northing
-        x, y, _, _ = utm.from_latlon(lat, long, self.utm_zone)
+        x, y, _, _ = utm.from_latlon(lat, lng, self.utm_zone)
 
         # assert this makes sense with the stored extent
         assert round(x) >= round(ul_x), (x, ul_x)
@@ -261,10 +261,8 @@ class Map(object):
         assert extent[0] < extent[2]
         assert extent[1] < extent[3]
 
-        map = self.map
-
-        x0, y0 = map.lnglat_to_pixel(extent[0], extent[3])
-        xend, yend = map.lnglat_to_pixel(extent[2], extent[1])
+        x0, y0 = self.lnglat_to_px(extent[0], extent[3])
+        xend, yend = self.lnglat_to_px(extent[2], extent[1])
 
         assert x0 < xend
         assert y0 < yend

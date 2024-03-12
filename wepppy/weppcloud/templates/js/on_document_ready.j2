@@ -492,6 +492,14 @@ function onReady() {
         sub_ctrl.setColorMap($("input[name='sub_cmap_radio']:checked").val());
     });
 
+    {% if 'rap' in ron.mods %}
+    // Bind radio to change subcatchment appearance
+    // radios live in the map.htm template
+    $("[name='sub_cmap_radio']").change(function () {
+        sub_ctrl.setColorMap("landuse_cover");
+    });
+    {% endif %}
+
     {% if 'rhem' not in ron.mods %}
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
@@ -849,6 +857,33 @@ function onReady() {
     }
 
     climate.setBuildMode(parseInt($("input[name='climate_build_mode']:checked").val(), 10));
+
+
+    //
+    // Single Storm Unitization
+    //
+    var ss_design_storm_amount_mm = $("#ss_design_storm_amount_mm");
+    var ss_design_storm_amount_inches = $("#ss_design_storm_amount_inches");
+
+    ss_design_storm_amount_mm.on("input", function () {
+        ss_design_storm_amount_inches.val(parseFloat(ss_design_storm_amount_mm.val()) / 25.4 );
+    });
+
+    ss_design_storm_amount_inches.on("input", function () {
+        ss_design_storm_amount_mm.val(parseFloat(ss_design_storm_amount_inches.val()) * 25.4 );
+    });
+
+
+    var ss_max_intensity_mm_per_hour = $("#ss_max_intensity_mm_per_hour");
+    var ss_max_intensity_inches_per_hour = $("#ss_max_intensity_inches_per_hour");
+
+    ss_max_intensity_mm_per_hour.on("input", function () {
+        ss_max_intensity_inches_per_hour.val(parseFloat(ss_max_intensity_mm_per_hour.val()) / 25.4 );
+    });
+
+    ss_max_intensity_inches_per_hour.on("input", function () {
+        ss_max_intensity_mm_per_hour.val(parseFloat(ss_max_intensity_inches_per_hour.val()) * 25.4 );
+    });
 
     /*
     * Wepp Initialization
