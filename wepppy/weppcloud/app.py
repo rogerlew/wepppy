@@ -2813,11 +2813,11 @@ def sub_intersection(runid, config):
         extent = request.json.get('extent', None)
 
         ron = Ron.getInstance(wd)
-        map = ron.map
+        _map = ron.map
 
         subwta_fn = Watershed.getInstance(wd).subwta
 
-        topaz_ids = map.raster_intersection(extent, raster_fn=subwta_fn, discard=(0,))
+        topaz_ids = _map.raster_intersection(extent, raster_fn=subwta_fn, discard=(0,))
         return jsonify(topaz_ids)
     except:
         return exception_factory(runid=runid)
@@ -4152,6 +4152,14 @@ def resources_observed_data(runid, config, file):
 
     assert _exists(fn)
     return send_file(fn, mimetype='text/csv', attachment_filename=file)
+
+
+@app.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments')
+@app.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments/')
+def query_landuse_cover_subcatchments(runid, config):
+    wd = get_wd(runid)
+    d = Landuse.getInstance(wd).hillslope_cancovs
+    return jsonify(d)
 
 
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus_opts')

@@ -1929,7 +1929,7 @@ var SubcatchmentDelineation = function () {
             });
         };
 
-        
+
 
         that.cmapRangelandCover = function () {
             var self = instance;
@@ -2004,7 +2004,7 @@ var SubcatchmentDelineation = function () {
         that.labelCoverMin = $('#landuse_sub_cmap_canvas_cover_min');
         that.labelCoverMax = $('#landuse_sub_cmap_canvas_cover_max');
         that.labelCoverUnits = $('#wepp_sub_cmap_canvas_cover_units');
-        that.cmapperCover = createColormap({ colormap: 'viridis', nshades: 64 });
+        that.cmapperCover = createColormap({ colormap: 'viridis', nshades: 100 });
 
         that.cmapCover = function () {
             var self = instance;
@@ -2040,7 +2040,9 @@ var SubcatchmentDelineation = function () {
 
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
-                var v = parseFloat(self.dataCover[topId].value);
+                var v = self.dataCover[topId];
+                console.log('cmapCover: ' + v.toString());
+
                 var c = self.cmapperCover.map(v);
 
                 layer.setStyle({
@@ -2053,7 +2055,7 @@ var SubcatchmentDelineation = function () {
             });
         };
         // end Cover
-        
+
         //
         // Phosphorus
         //
@@ -3864,7 +3866,6 @@ var LanduseModify = function () {
         };
 
         that.checkbox = $('#checkbox_modify_landuse');
-        that.checkbox_box_select = $('#checkbox_box_select_modify_landuse');
         that.textarea = $('#textarea_modify_landuse');
         that.selection = $('#selection_modify_landuse');
         that.data = null; // Leaflet geoJSON layer
@@ -4012,9 +4013,7 @@ var LanduseModify = function () {
                     self.selected = new Set();
                 }
             } else {
-                if (self.checkbox_box_select.prop("checked") === false) {
-                    self.hideModifyMap();
-                }
+                self.hideModifyMap();
             }
         };
 
@@ -4023,6 +4022,7 @@ var LanduseModify = function () {
 
             var map = Map.getInstance();
             map.boxZoom.disable();
+            //map.dragging.disable();
 
             map.on('mousedown', self.boxSelectionModeMouseDown);
             map.on('mousemove', self.boxSelectionModeMouseMove);
@@ -4047,6 +4047,7 @@ var LanduseModify = function () {
             var map = Map.getInstance();
 
             map.boxZoom.enable();
+            //map.dragging.enable();
             map.off('mousedown', self.boxSelectionModeMouseDown);
             map.off('mousemove', self.boxSelectionModeMouseMove);
             map.off('mouseup', self.boxSelectionModeMouseUp);
