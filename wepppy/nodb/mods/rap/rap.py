@@ -21,10 +21,16 @@ from ...base import NoDbBase, TriggerEvents
 from ...watershed import Watershed
 
 from wepppy.landcover.rap import (
-    RangelandAnalysisPlatformV2, 
-    RAP_Band, 
-    RangelandAnalysisPlatformV2Dataset
+    RangelandAnalysisPlatformV3,
+    RAP_Band,
+    RangelandAnalysisPlatformV3Dataset
 )
+
+
+import wepppyo3
+from wepppyo3.raster_characteristics import identify_median_single_raster_key
+from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
+
 
 gdal.UseExceptions()
 
@@ -107,9 +113,10 @@ class RAP(NoDbBase):
         try:
             os.mkdir(self.rap_dir)
             self.data = None
+            self.mofe_data = None
             self._rap_year = None
             self._rap_mgr = None
-            
+
             self.dump_and_unlock()
 
         except Exception:
@@ -125,6 +132,13 @@ class RAP(NoDbBase):
     def getInstance(wd):
         with open(_join(wd, 'rap.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
+
+            if db.data is not None:
+                db.data = {key: value for key, (_key, value) in zip(RAP_Band, db.data.items())}
+
+            if db.mofe_data is not None:
+                db.mofe_data = {key: value for key, (_key, value) in zip(RAP_Band, db.mofe_data.items())}
+
             assert isinstance(db, RAP), db
 
             if _exists(_join(wd, 'READONLY')):
@@ -162,14 +176,14 @@ class RAP(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-  
+
     @property
     def rap_dir(self):
         return _join(self.wd, 'rap')
 
     def acquire_rasters(self, year):
         _map = Ron.getInstance(self.wd).map
-        rap_mgr = RangelandAnalysisPlatformV2(wd=self.rap_dir, bbox=_map.extent)
+        rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent)
         rap_mgr.retrieve([year])
 
         self.lock()
@@ -183,7 +197,7 @@ class RAP(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
-        
+
     def on(self, evt):
         pass
 
@@ -194,36 +208,55 @@ class RAP(NoDbBase):
     def analyze(self):
         wd = self.wd
 
-        subwta_fn = Watershed.getInstance(wd).subwta
-
+        watershed = Watershed.getInstance(wd)
+        subwta_fn = watershed.subwta
         assert _exists(subwta_fn)
 
         rap_mgr = self._rap_mgr
-        rap_ds = rap_mgr.get_dataset(year=self.rap_year)       
+        rap_ds_fn = rap_mgr.get_dataset_fn(year=self.rap_year)
 
         self.lock()
         try:
-
             data_ds = {}
-            for band in RAP_Band:
-                data_ds[band], px_counts = rap_ds.spatial_aggregation(band=band, subwta_fn=subwta_fn)
+            mofe_data = {}
+            for i, band in enumerate([RAP_Band.ANNUAL_FORB_AND_GRASS,
+                                      RAP_Band.BARE_GROUND,
+                                      RAP_Band.LITTER,
+                                      RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                                      RAP_Band.SHRUB,
+                                      RAP_Band.TREE]):
 
-            data = {}
-            for topaz_id in data_ds[RAP_Band.LITTER]:
-                data[topaz_id] = {band: data_ds[band][topaz_id] for band in RAP_Band}
+                if self.multi_ofe:
+                    mofe_data[band] = identify_median_intersecting_raster_keys(
+                        key_fn=subwta_fn, key2_fn=watershed.mofe_map, parameter_fn=rap_ds_fn, band_indx=band)
 
-            self.data = data
+                data_ds[band] = identify_median_single_raster_key(
+                    key_fn=subwta_fn, parameter_fn=rap_ds_fn, band_indx=band)
+
+
+            self.data = data_ds
+            self.mofe_data = mofe_data
             self.dump_and_unlock()
+
 
         except Exception:
             self.unlock('-f')
             raise
 
+    def get_cover(self, topaz_id):
+        cover = 0.0
+        for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
+                     RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                     RAP_Band.SHRUB,
+                     RAP_Band.TREE]:
+            cover += self.data[str(topaz_id)][band]
+        return cover
+
     @property
     def report(self):
         if self.data is None:
             return None
-        
+
         watershed = Watershed.getInstance(self.wd)
         bound_fn = watershed.bound
         assert _exists(bound_fn)
