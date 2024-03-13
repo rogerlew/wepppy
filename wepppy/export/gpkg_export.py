@@ -11,7 +11,10 @@ from wepppy.nodb.soils import Soils
 
 def esri_compatible_colnames(df):
     # Create a dictionary to hold the mappings from original to new names
-    rename_dict = {col: col.replace(' ', '_').replace('(', '').replace(')', '') for col in df.columns}
+    rename_dict = {col: col.replace(' ', '_')
+                           .replace('(', '')
+                           .replace(')', '')
+                           .replace('.', '') for col in df.columns}
 
     # Rename the columns and return the modified dataframe
     return df.rename(columns=rename_dict)
