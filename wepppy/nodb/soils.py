@@ -1021,41 +1021,41 @@ class Soils(NoDbBase, LogMixin):
 
     def _x_summary(self, topaz_id, abbreviated=False):
         domsoil_d = self.domsoil_d
-        
+
         if domsoil_d is None:
             return None
-            
+
         if str(topaz_id) in domsoil_d:
             mukey = str(domsoil_d[str(topaz_id)])
             return self.soils[mukey].as_dict(abbreviated=abbreviated)
         else:
             return None
-            
+
     def sub_summary(self, topaz_id, abbreviated=False):
         return self._x_summary(topaz_id, abbreviated=abbreviated)
-        
+
     def chn_summary(self, topaz_id, abbreviated=False):
         return self._x_summary(topaz_id, abbreviated=abbreviated)
-        
+
     @property
     def subs_summary(self):
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
         domsoil_d = self.domsoil_d
-        
+
         if domsoil_d is None:
             return None
-            
+
         soils = self.soils
-        
+
         # Cache soil dictionaries to avoid multiple calls to as_dict for the same soil
         soil_dicts_cache = {mukey: soil.as_dict() for mukey, soil in soils.items()}
 
         # Compile the summary using cached soil dictionaries
         summary = {
-            topaz_id: soil_dicts_cache[mukey] 
-            for topaz_id, mukey in domsoil_d.items() 
+            topaz_id: deepcopy(soil_dicts_cache[mukey])
+            for topaz_id, mukey in domsoil_d.items()
             if not is_channel(topaz_id)
         }
 
