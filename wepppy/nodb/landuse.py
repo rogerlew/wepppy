@@ -1059,7 +1059,7 @@ class Landuse(NoDbBase, LogMixin):
             if not is_channel(topaz_id)
         }
 
-        hillslope_cancovs = self._hillslope_cancovs
+        hillslope_cancovs = getattr(self, '_hillslope_cancovs', None)
 
         if hillslope_cancovs is not None:
             for topaz_id in hillslope_cancovs:
