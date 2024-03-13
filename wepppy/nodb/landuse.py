@@ -996,7 +996,7 @@ class Landuse(NoDbBase, LogMixin):
             dom = str(domlc_d[topaz_id])
             d = self.managements[dom].as_dict()
 
-            if self._hillslope_cancovs:
+            if self.hillslope_cancovs:
                 d['cancov'] = self._hillslope_cancovs.get(topaz_id, d['cancov'])
             return d
         else:
@@ -1059,7 +1059,7 @@ class Landuse(NoDbBase, LogMixin):
             if not is_channel(topaz_id)
         }
 
-        hillslope_cancovs = getattr(self, '_hillslope_cancovs', None)
+        hillslope_cancovs = self.hillslope_cancovs
 
         if hillslope_cancovs is not None:
             for topaz_id in hillslope_cancovs:
