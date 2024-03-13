@@ -1204,8 +1204,8 @@ class Climate(NoDbBase, LogMixin):
                 assert ss_max_intensity_inches_per_hour > 0
 
                 assert isfloat(ss_time_to_peak_intensity_pct)
-                assert ss_time_to_peak_intensity_pct > 0
-                assert ss_time_to_peak_intensity_pct < 1
+                assert ss_time_to_peak_intensity_pct > 0.0
+                assert ss_time_to_peak_intensity_pct < 100.0
 
             self._ss_storm_date = ss_storm_date
             self._ss_design_storm_amount_inches = \
