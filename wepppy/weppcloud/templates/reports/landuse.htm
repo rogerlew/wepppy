@@ -30,13 +30,23 @@
         <td></td>
         <td></td>
         <td colspan="2">
-          Canopy Vegetation (Tree/Shrub) Cover:
+          Canopy Vegetation (Tree/Shrub/Grass) Cover
+          {% if 'rap' not in landuse.mods %}
+          :
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'cancov', this.value)">
             <option value="" {% if row.cancov_override is none %}selected{% endif %}>{{ (row.cancov * 100) | round | int }}% default</option>
             {% for pct in range(0, 103, 1) %}
             <option value="{{ pct / 100.0 }}" {% if row.cancov_override == pct / 100.0 %}selected{% endif %}>{{ pct }}%</option>
             {% endfor %}
           </select>
+          {% else %}
+            from RAP:
+            {% if row.cancov_override is none %}
+            <input type="text" value="-" readonly style="width: 50px; background-color: lightgray;">
+            {% else %}
+            <input type="text" value="{{ (row.cancov_override * 100) | round | int }}%" readonly style="width: 50px; background-color: lightgray;">
+            {% endif %}
+          {% endif %}
           Interrill Ground Cover:
           <select onchange="Landuse.getInstance().modify_coverage({{ row.key }}, 'inrcov', this.value)">
             <option value="" {% if row.inrcov_override is none %}selected{% endif %}>{{ (row.inrcov * 100) | round | int }}% default</option>
