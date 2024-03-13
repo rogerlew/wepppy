@@ -6,6 +6,9 @@
 # The project described was supported by NSF award number IIA-1301792
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
+from typing import Union
+from collections.abc import Iterable
+
 import os
 from os.path import join as _join
 from os.path import exists as _exists
@@ -418,7 +421,7 @@ class ClimateFile(object):
         self.replace_var('tmin', _dates, tmins)
         self.replace_var('tdew', _dates, tdews)
 
-    def transform_precip(self, offset: float, scale: float):
+    def transform_precip(self, offset: Union[float, Iterable], scale: Union[float, Iterable]):
         """
         linearly transforms precipitation by:
         new_precip = offset + precip * scale
@@ -427,8 +430,20 @@ class ClimateFile(object):
         :param scale:
         :return:
         """
-        if self.breakpoint:
-            raise NotImplementedError()
+
+        if isinstance(offset, Iterable):
+            offset = np.array(offset)
+
+        if isinstance(scale, Iterable):
+            scale = np.array(scale)
+
+        if self.breakpoint or not isinstance(offset, np.ndarray) or isinstance(scale, np.ndarray):
+            if not isinstance(offset, np.ndarray):
+                offset = np.array([offset for i in range(12)])
+            if not isinstance(scale, np.ndarray):
+                scale = np.array([scale for i in range(12)])
+            return self._transform_precip_monthlies(offset, scale)
+
 
         df = self.as_dataframe()
         _dates = [(int(row.year), int(row.mo), int(row.da)) for i, row in df.iterrows()]
@@ -440,6 +455,58 @@ class ClimateFile(object):
 
         prcp = offset + prcp * scale
         self.replace_var('prcp', _dates, prcp)
+
+
+    def _transform_precip_monthlies(self, monthly_offsets: np.ndarray, monthly_scales: np.ndarray):
+        """
+        """
+        if isinstance(monthly_offsets, np.ndarray):
+            assert len(monthly_offsets) == 12, "offset array must be of length 12"
+        if isinstance(monthly_scales, np.ndarray):
+            assert len(monthly_scales) == 12, "scale array must be of length 12"
+
+        breakpoint = self.breakpoint
+
+        colnames = self.colnames
+        if not breakpoint:
+            col_index = colnames.index('prcp')
+
+        data0line = self.data0line
+
+        for i, L in enumerate(self.lines[data0line:]):
+            row = [v.strip() for v in L.split()]
+            if L.strip() == '':
+                break
+
+            if breakpoint:
+                if len(row) == 2 and len(row) != len(colnames):
+                    continue
+
+            assert len(row) == len(colnames), (row, colnames, L)
+
+            day, month, year = [int(v) for v in row[:3]]
+            offset = monthly_offsets[month - 1]
+            scale = monthly_scales[month - 1]
+
+            if breakpoint:
+                nbrkpt = int(row[3])
+                if nbrkpt > 0:
+                    for j in range(nbrkpt):
+                        index = data0line + i + j + 1
+                        x = self.lines[index].split()
+                        _timem, _pptcum = x
+                        _pptcum = offset + float(_pptcum) * scale
+                        self.lines[index] = '{timem} {pptcum:>9}\n'.format(timem=_timem, pptcum=f'{_pptcum:.3f}')
+
+            else:
+                _ppt = offset + float(row[col_index]) * scale
+                row[col_index] = '%.1f' % _ppt
+                row = '{0:>3}{1:>3}{2:>5}{3:>6}{4:>6}{5:>5}{6:>7}'\
+                      '{7:>6}{8:>6}{9:>5}{10:>5}{11:>6}{12:>6}\n'\
+                      .format(*row)
+
+                self.lines[data0line + i] = row
+
 
     def replace_var(self, colname, dates, values):
         """
