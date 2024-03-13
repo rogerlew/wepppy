@@ -98,7 +98,7 @@ from wepppy.wepp.stats import ChannelWatbal, HillslopeWatbal, ReturnPeriods, Sed
 # wepppy submodules
 from wepppy.wepp.stats.frq_flood import FrqFlood
 from .base import (
-    NoDbBase, 
+    NoDbBase,
     TriggerEvents
 )
 
@@ -1198,12 +1198,14 @@ class Wepp(NoDbBase, LogMixin):
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
+        hillslope_cancovs = landuse.hillslope_cancovs
+
         climate = Climate.getInstance(wd)
         watershed = Watershed.getInstance(wd)
         soils = Soils.getInstance(wd)
         try:
             disturbed = Disturbed.getInstance(wd)
-            _land_soil_replacements_d = disturbed.land_soil_replacements_d 
+            _land_soil_replacements_d = disturbed.land_soil_replacements_d
         except:
             disturbed = None
             _land_soil_replacements_d = None
@@ -1255,6 +1257,10 @@ class Wepp(NoDbBase, LogMixin):
                 # probably isn't the right location for this code. should be in nodb.disturbed
                 if disturbed is not None:
                     disturbed_class = man_summary.disturbed_class
+
+                    if hillslope_cancovs is not None and 'mulch' not in disturbed_class and 'thinning' not in disturbed_class:
+                        assert rap_ts is None, 'project has rap and rap_ts'
+                        management.set_cancov(hillslope_cancovs[str(topaz_id)])
 
                     _soil = soils.soils[mukey]
                     clay = _soil.clay
