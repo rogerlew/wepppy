@@ -314,7 +314,7 @@ class WeppSoilUtil(object):
                 else:
                     ros_model = f'Rosetta(clay={clay}, sand={sand}, bd={bd}, silt={silt})'
                     res_dict = r3.predict_kwargs(bd=float(bd), clay=float(clay), sand=float(sand), silt=float(silt))
-            
+
                 if not isfloat(horizon['bd']):
                     horizon['bd'] = 1.4
                     header.append(f'ofe={i},horizon{j} bd default value of 1.4')
@@ -514,7 +514,7 @@ class WeppSoilUtil(object):
         _kslast = replacements.get('kslast', None)
         _luse = replacements.get('luse', None)
         _stext = replacements.get('stext', None)
-       
+
         ofes = []
         for i, ofe in enumerate(new.obj['ofes']):
             ofe['ki'] = _replace_parameter(ofe['ki'], _ki)
@@ -524,13 +524,19 @@ class WeppSoilUtil(object):
             ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
 
             horizons = []
+            cur_depth = 0.0
             for j, horizon in enumerate(ofe['horizons']):
                 solthk = horizon['solthk']
                 if j == 0 and h0_min_depth is not None:
                     solthk = horizon['solthk'] = _replace_parameter(solthk, max(solthk, h0_min_depth))
-                   
-                if j == 0 or solthk < 200:
+
+                if solthk < 200:
                     horizon['ksat'] = _replace_parameter(horizon['ksat'], _ksat)
+                elif solthk > 200 and cur_depth < 200:
+                    new_horizon = deepcopy(horizon)
+                    new_horizon['solthk'] = 200.0
+                    new_horizon['ksat'] = _replace_parameter(new_horizon['ksat'], _ksat)
+                    horizons.append(new_horizon)
 
                 if j == 0 and h0_max_om is not None:
                     if horizon['om'] < h0_max_om:
@@ -538,7 +544,10 @@ class WeppSoilUtil(object):
                 else:
                     horizons.append(horizon)
 
+                cur_depth = solthk
+
             ofe['horizons'] = horizons
+            ofe['nsl'] = len(horizons)
 
             ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
             ofes.append(ofe)
@@ -552,14 +561,13 @@ class WeppSoilUtil(object):
                                 h0_min_depth=h0_min_depth, 
                                 h0_max_om=h0_max_om, hostname=hostname,
                                 version=9001)
-   
+
     def to9002(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
         return self.to_over9000(replacements, 
                                 h0_min_depth=h0_min_depth, 
                                 h0_max_om=h0_max_om, hostname=hostname, 
                                 version=9002)
-   
-   
+
     def to9003(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
         return self.to_over9000(replacements, 
                                 h0_min_depth=h0_min_depth, 
@@ -618,7 +626,7 @@ class WeppSoilUtil(object):
             _uksat = '-9999'
 
         new.obj['ksflag'] = _replace_parameter(new.obj['ksflag'], _ksflag)
- 
+
         ofes = []
         for i, ofe in enumerate(new.obj['ofes']):
             ofe['ki'] = _replace_parameter(ofe['ki'], _ki)
@@ -626,7 +634,7 @@ class WeppSoilUtil(object):
             ofe['shcrit'] = _replace_parameter(ofe['shcrit'], _shcrit)
 
             ofe['ksatadj'] = _replace_parameter(ofe['ksatadj'], _ksatadj)
-            
+
             if version < 9003:
                 ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
                 ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
@@ -640,13 +648,19 @@ class WeppSoilUtil(object):
             ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
 
             horizons = []
+            cur_depth = 0.0
             for j, horizon in enumerate(ofe['horizons']):
                 solthk = horizon['solthk']
                 if j == 0 and h0_min_depth is not None:
                     solthk = horizon['solthk'] = _replace_parameter(solthk, max(solthk, h0_min_depth))
-                   
-                if j == 0 or solthk < 200:
+
+                if solthk < 200:
                     horizon['ksat'] = _replace_parameter(horizon['ksat'], _ksat)
+                elif solthk > 200 and cur_depth < 200:
+                    new_horizon = deepcopy(horizon)
+                    new_horizon['solthk'] = 200.0
+                    new_horizon['ksat'] = _replace_parameter(new_horizon['ksat'], _ksat)
+                    horizons.append(new_horizon)
 
                 if j == 0 and h0_max_om is not None:
                     if horizon['om'] < h0_max_om:
@@ -654,7 +668,10 @@ class WeppSoilUtil(object):
                 else:
                     horizons.append(horizon)
 
+                cur_depth = solthk
+
             ofe['horizons'] = horizons
+            ofe['nsl'] = len(horizons)
 
             ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
             ofes.append(ofe)
@@ -663,7 +680,7 @@ class WeppSoilUtil(object):
         new.obj['datver'] = version
 
         return new
-         
+
     def _load_yaml(self, fn):
         with open(fn) as fp:
             yaml_txt = fp.read()
@@ -694,7 +711,7 @@ class WeppSoilUtil(object):
             clay = s7778.obj['ofes'][0]['horizons'][0]['clay']
         assert clay is not None
         return clay
-            
+
     @property
     def avke(self):
         avke = self.obj['ofes'][0]['avke']
