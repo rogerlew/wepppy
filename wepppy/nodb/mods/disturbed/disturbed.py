@@ -568,11 +568,11 @@ class Disturbed(NoDbBase):
         multi_ofe = self.multi_ofe
 
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
+            self.remap_landuse()
+            self.spatialize_treecanopy()
+
             if multi_ofe:
                 self.remap_mofe_landuse()
-            else:
-                self.remap_landuse()
-                self.spatialize_treecanopy()
 
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             if self.multi_ofe:
@@ -604,6 +604,7 @@ class Disturbed(NoDbBase):
                     _dom = '{}-{}'.format(dom, topaz_id)
                     _man = deepcopy(man)
                     _man.key = _dom
+                    # this it not the right way to do it, because it will keep overwriting.
                     _man.cancov_override = round(treecanopy.data[topaz_id]) / 100.0
                     landuse.domlc_d[topaz_id] = _dom
                     landuse.managements[_dom] = _man
