@@ -17,6 +17,8 @@ import shutil
 from enum import IntEnum
 import time
 
+from copy import deepcopy
+
 # non-standard
 import jsonpickle
 import numpy as np
@@ -40,6 +42,8 @@ from .watershed import Watershed, WatershedNotAbstractedError
 from .redis_prep import RedisPrep as Prep
 from .mixins.log_mixin import LogMixin
 
+
+from wepppy.landcover.rap import RAP_Band
 
 try:
     import wepppyo3
@@ -118,6 +122,9 @@ class Landuse(NoDbBase, LogMixin):
             self._buffer_man = None
 
             self._fractionals = self.config_get_list('landuse', 'fractionals')
+
+            self._hillslope_cancovs = None
+            self._hillslope_mofe_cancovs = None
 
             self.dump_and_unlock()
 
@@ -284,7 +291,7 @@ class Landuse(NoDbBase, LogMixin):
     #
     # build
     #
-    
+
     def clean(self):
 
         lc_dir = self.lc_dir
@@ -452,14 +459,90 @@ class Landuse(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+        if 'rap' in self.mods:
+            self.log('Running RAP')
+
+            from wepppy.nodb.mods.rap import RAP
+
+            rap = RAP.getInstance(wd)
+            year = int(self.nlcd_db[-4:])
+            rap.acquire_rasters(year)
+            rap.analyze()
+            self.log_done()
+        else:
+            rap = None
+
         if self.multi_ofe:
             self._build_multiple_ofe()
 
         self = Landuse.getInstance(wd)
         self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
+
         self = Landuse.getInstance(wd)
         self.build_managements()
+
         self.set_cover_defaults()
+        if rap:
+            self.log('Calculating covers from RAP')
+
+            cancov_d = {}
+            for i, (topaz_id, dom) in enumerate(self.domlc_d.items()):
+                if topaz_id.endswith('4'):
+                    continue
+
+                _tree_cov = rap.data[RAP_Band.TREE][topaz_id] / 100.0
+                _shrub_cov = rap.data[RAP_Band.SHRUB][topaz_id] / 100.0
+                _grass_cov = (rap.data[RAP_Band.ANNUAL_FORB_AND_GRASS][topaz_id] + rap.data[RAP_Band.PERENNIAL_FORB_AND_GRASS][topaz_id]) / 100.0
+
+                man_summary = self.managements[dom]
+
+                # rhem has rap but no disturbed class
+                disturbed_class = getattr(man_summary, 'disturbed_class', None)
+                self.log(f'topaz_id: {topaz_id}\t dom:{dom}\t disturbed_class: {disturbed_class}')
+                self.log_done()
+
+                if disturbed_class is None:
+                    continue
+
+                cancov = 0.0
+                if disturbed_class in ['tall grass', 'grass high sev fire', 'grass moderate sev fire', 'grass low sev fire']:
+                    cancov = _grass_cov
+                elif disturbed_class in ['shrub', 'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire']:
+                    cancov = _grass_cov + _shrub_cov
+                elif disturbed_class in ['forest', 'young forest', 'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+                    cancov = _grass_cov + _shrub_cov + _tree_cov
+                cancov_d[topaz_id] = max(cancov, 0.05)
+
+#            self.log(f"cancov: {cancov_d}")
+
+            if cancov_d:
+                self.hillslope_cancovs = cancov_d
+
+            # need to find covers by landuse type
+            area_data = {}
+            for i, (topaz_id, dom) in enumerate(self.domlc_d.items()):
+                if topaz_id.endswith('4'):
+                    continue
+
+                if dom not in area_data:
+                    area_data[dom] = []
+
+                area = watershed.area_of(topaz_id)
+                area_data[dom].append(dict(area=area, cancov=cancov_d[topaz_id]))
+
+            self.lock()
+            # noinspection PyBroadException
+            try:
+                for dom, values in area_data.items():
+                    dom_total_area = sum(d['area'] for d in values)
+                    x = sum(d['area'] * d['cancov'] for d in values)
+                    cancov = x / dom_total_area
+                    self._modify_coverage(dom, 'cancov', cancov)
+
+                self.dump_and_unlock()
+            except Exception:
+                self.unlock('-f')
+                raise
 
         self.dump_landuse_parquet()
 
@@ -470,7 +553,6 @@ class Landuse(NoDbBase, LogMixin):
             pass
 
         self._build_fractionals()
-
 
     def _build_fractionals(self):
         global wepppyo3
@@ -522,7 +604,7 @@ class Landuse(NoDbBase, LogMixin):
 
         try:
             disturbed = Disturbed.getInstance(wd)
-            _land_soil_replacements_d = disturbed.land_soil_replacements_d 
+            _land_soil_replacements_d = disturbed.land_soil_replacements_d
         except:
             disturbed = None
             _land_soil_replacements_d = None
@@ -538,16 +620,27 @@ class Landuse(NoDbBase, LogMixin):
             )
 
         self.log(f'domlc_d = {domlc_d}')
+        self.log_done()
 
-        self.lock()
-        self.__m_domlc_d = domlc_d
-        self.dump_and_unlock()
+        if 'rap' in self.mods:
+            self.log(f'acquiring rap')
+            from wepppy.nodb.mods.rap import RAP
+
+            rap = RAP.getInstance(wd)
+        else:
+            rap = None
+
 
         lc_dir = self.lc_dir
         managements = self.managements
 
         watershed = Watershed.getInstance(self.wd)
+        cancov_d = {}
         for topaz_id, ss in watershed.sub_iter():
+            if rap is not None:
+                cancov_d[topaz_id] = {}
+
+            self.log(f'building management for hillslope: {topaz_id}')
 
             nsegments = int(watershed.mofe_nsegments[str(topaz_id)])
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
@@ -562,18 +655,35 @@ class Landuse(NoDbBase, LogMixin):
             doms = [domlc_d[topaz_id][_id] for _id in mofe_ids]
 
             stack = []
-            for dom in doms:
+            for i, dom in enumerate(doms):
+                mofe_id = str(i + 1)
+
                 if dom not in managements:
                     managements[dom] = get_management_summary(dom, self.mapping)
 
                 management = managements[dom].get_management()
                 disturbed_class = managements[dom].disturbed_class
                 texid = 'sand loam'
-               
+
                 if disturbed_class is None:
                     rdmax = None
                     xmxlai = None
                 else:
+                    if rap is not None:
+                        _tree_cov = rap.mofe_data[RAP_Band.TREE][topaz_id][mofe_id] / 100.0
+                        _shrub_cov = rap.mofe_data[RAP_Band.SHRUB][topaz_id][mofe_id] / 100.0
+                        _grass_cov = (rap.mofe_data[RAP_Band.ANNUAL_FORB_AND_GRASS][topaz_id][mofe_id] + rap.mofe_data[RAP_Band.PERENNIAL_FORB_AND_GRASS][topaz_id][mofe_id]) / 100.0
+                        cancov = 0.0
+                        if disturbed_class in ['tall grass', 'grass high sev fire', 'grass moderate sev fire', 'grass low sev fire']:
+                            cancov = _grass_cov
+                        elif disturbed_class in ['shrub', 'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire']:
+                            cancov = _grass_cov + _shrub_cov
+                        elif disturbed_class in ['forest', 'young forest', 'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+                            cancov = _grass_cov + _shrub_cov + _tree_cov
+                        cancov_d[topaz_id][mofe_id] = max(cancov, 0.05)
+
+                        management.set_cancov(cancov_d[topaz_id][mofe_id])
+
                     if (texid, disturbed_class) in _land_soil_replacements_d:
                         rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
                         xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
@@ -600,16 +710,20 @@ class Landuse(NoDbBase, LogMixin):
                 # just replicate the dom
                 mofe_synth.stack = stack
                 merged = mofe_synth.write(mofe_lc_fn)
-                    
+
+            self.log_done()
+
         self.lock()
+
         try:
+            if cancov_d:
+                self._hillslope_mofe_cancovs = cancov_d
             self.domlc_mofe_d = domlc_d
             self.managements = managements
             self.dump_and_unlock()
         except Exception:
             self.unlock('-f')
             raise
-
 
     def identify_disturbed_class(self, topaz_id, mofe_id = None):
 
@@ -620,18 +734,18 @@ class Landuse(NoDbBase, LogMixin):
 
         man = self.managements[dom]
         disturbed_class = man.disturbed_class.lower()
-        
+
         if 'forest' in disturbed_class:
             return 'forest'
-        
+
         elif 'shrub' in disturbed_class:
             return 'shrub'
-        
+
         if 'grass' in disturbed_class:
             return 'grass'
-        
+
         return ''
-    
+
     def identify_burn_class(self, topaz_id, mofe_id = None):
 
         if mofe_id is None:
@@ -641,24 +755,24 @@ class Landuse(NoDbBase, LogMixin):
 
         man = self.managements[dom]
         desc = man.desc.lower()
-        
+
         if 'unburned' in desc:
             return 'Unburned'
-        
+
         if 'sev' not in desc or 'fire' not in desc:
             return 'Unburned'
-        
+
         if 'low' in desc or 'prescribed' in desc:
             return 'Low'
-        
+
         elif 'mod' in desc:
             return 'Moderate'
-        
+
         elif 'high' in desc:
             return 'High'
-        
+
         return 'Unburned'
-        
+
     def set_cover_defaults(self):
 
         defaults = self.cover_defaults_d
@@ -666,7 +780,6 @@ class Landuse(NoDbBase, LogMixin):
         if defaults is None:
             return
 
-        time.sleep(0.5)
         self.lock()
 
         # noinspection PyBroadException
@@ -760,7 +873,7 @@ class Landuse(NoDbBase, LogMixin):
 #            import wepppy
 #            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
 #            _lookup = disturbed.land_soil_replacements_d
-#            landuseoptions = [opt for opt in landuseoptions if opt.get('DisturbedClass') != ''] 
+#            landuseoptions = [opt for opt in landuseoptions if opt.get('DisturbedClass') != '']
 
         return landuseoptions
 
@@ -815,7 +928,7 @@ class Landuse(NoDbBase, LogMixin):
                         area = len(np.where((subwta == int(topaz_id)) &
                                             (mofe_map == int(_id)))[0])
                         area *= cell2 / 10000
-                        
+
                         if k not in managements:
                             man = get_management_summary(k, _map)
                             man.area = area
@@ -823,11 +936,11 @@ class Landuse(NoDbBase, LogMixin):
                         else:
                             managements[k].area += area
                         total_area += area
-     
+
             for k in managements:
                 coverage = 100.0 * managements[k].area / total_area
                 managements[k].pct_coverage = coverage
-                        
+
             # store the managements dict
             self.managements = managements
             self.dump_and_unlock()
@@ -859,28 +972,33 @@ class Landuse(NoDbBase, LogMixin):
         try:
             landuse = str(int(landuse))
             assert self.domlc_d is not None
-            
+
             for topaz_id in topaz_ids:
                 assert topaz_id in self.domlc_d
                 self.domlc_d[topaz_id] = landuse
-                
+
             self.dump_and_unlock()
             self.build_managements()
             self.set_cover_defaults()
-            
+
         except Exception:
             self.unlock('-f')
             raise
-            
-    def _x_summary(self, topaz_id):
+
+    def _x_summary(self, topaz_id: str):
+        topaz_id = str(topaz_id)
         domlc_d = self.domlc_d
-        
+
         if domlc_d is None:
             return None
-            
+
         if str(topaz_id) in domlc_d:
-            dom = str(domlc_d[str(topaz_id)])
-            return self.managements[dom].as_dict()
+            dom = str(domlc_d[topaz_id])
+            d = self.managements[dom].as_dict()
+
+            if self._hillslope_cancovs:
+                d['cancov'] = self._hillslope_cancovs.get(topaz_id, d['cancov'])
+            return d
         else:
             return None
 
@@ -893,12 +1011,34 @@ class Landuse(NoDbBase, LogMixin):
 
         return list(zip(doms, descs, colors))
 
-    def sub_summary(self, topaz_id):
+    def sub_summary(self, topaz_id: str):
         return self._x_summary(topaz_id)
-        
-    def chn_summary(self, topaz_id):
+
+    def chn_summary(self, topaz_id: str):
         return self._x_summary(topaz_id)
-       
+
+    @property
+    def hillslope_cancovs(self):
+        return getattr(self, '_hillslope_cancovs', None)
+
+    @hillslope_cancovs.setter
+    def hillslope_cancovs(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._hillslope_cancovs = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def hillslope_mofe_cancovs(self):
+        return getattr(self, '_hillslope_mofe_cancovs', None)
+
     @property
     def subs_summary(self):
         """
@@ -906,39 +1046,45 @@ class Landuse(NoDbBase, LogMixin):
         """
         domlc_d = self.domlc_d
         mans = self.managements
-        
+
         if domlc_d is None:
             return None
-            
+
         man_dicts_cache = {dom: man.as_dict() for dom, man in mans.items()}
 
         # Compile the summary using cached soil dictionaries
         summary = {
-            topaz_id: man_dicts_cache[dom] 
-            for topaz_id, dom in domlc_d.items() 
+            topaz_id: deepcopy(man_dicts_cache[dom])
+            for topaz_id, dom in domlc_d.items()
             if not is_channel(topaz_id)
         }
-        
+
+        hillslope_cancovs = self._hillslope_cancovs
+
+        if hillslope_cancovs is not None:
+            for topaz_id in hillslope_cancovs:
+                summary[topaz_id].update(dict(cancov=hillslope_cancovs[topaz_id]))
+
         return summary
-     
+
     def dump_landuse_parquet(self):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
         subs_summary = self.subs_summary
         assert subs_summary is not None
-            
+
         df = pd.DataFrame.from_dict(subs_summary, orient='index')
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
         #df['dom'] = df['dom'].astype(str)
         df.to_parquet(_join(self.lc_dir, 'landuse.parquet'))
-   
+
     def sub_iter(self):
         domlc_d = self.domlc_d
         mans = self.managements
-        
+
         assert mans is not None
 
         if domlc_d is not None:
@@ -947,18 +1093,18 @@ class Landuse(NoDbBase, LogMixin):
                     continue
 
                 yield topaz_id, mans[k]
-        
+
     @property
     def chns_summary(self):
         """
-        returns a dictionary of topaz_id keys and jsonified 
+        returns a dictionary of topaz_id keys and jsonified
         managements values
         """
         domlc_d = self.domlc_d
         mans = self.managements
 
         assert mans is not None
-        
+
         summary = {}
         for topaz_id, k in domlc_d.items():
             if not is_channel(topaz_id):
@@ -971,7 +1117,7 @@ class Landuse(NoDbBase, LogMixin):
     def chn_iter(self):
         domlc_d = self.domlc_d
         mans = self.managements
-        
+
         if domlc_d is not None:
             for topaz_id, k in domlc_d.items():
                 if not is_channel(topaz_id):
@@ -982,13 +1128,13 @@ class Landuse(NoDbBase, LogMixin):
     # gotcha: using __getitem__ breaks jinja's attribute lookup, so...
     def _(self, wepp_id):
         wd = self.wd
-        
+
         translator = Watershed.getInstance(wd).translator_factory()
         topaz_id = str(translator.top(wepp=int(wepp_id)))
         domlc_d = self.domlc_d
-        
+
         if topaz_id in domlc_d:
             key = domlc_d[topaz_id]
             return self.managements[key]
-            
+
         raise IndexError
