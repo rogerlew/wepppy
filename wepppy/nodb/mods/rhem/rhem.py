@@ -154,7 +154,12 @@ class Rhem(NoDbBase, LogMixin):
         for topaz_id, summary in watershed.sub_iter():
             mukey = soils.domsoil_d[topaz_id]
             soil_texture = soils.soils[mukey].texture
-            slp_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
+
+            if watershed.abstraction_backend == 'peridot':
+                slp_fn = _join(wat_dir, 'slope_files/hillslopes/hill_{}.slp'.format(topaz_id))
+            else:
+                slp_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
+
             slp = SlopeFile(slp_fn)
             cover = rangeland_covers.covers[topaz_id]
 
