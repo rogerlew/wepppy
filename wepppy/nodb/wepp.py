@@ -1112,6 +1112,7 @@ class Wepp(NoDbBase, LogMixin):
 
         clip_soils = soils.clip_soils
         clip_soils_depth = soils.clip_soils_depth
+        initial_sat = soils.initial_sat
 
         try:
             disturbed = Disturbed.getInstance(wd)
@@ -1168,15 +1169,16 @@ class Wepp(NoDbBase, LogMixin):
             elif kslast is not None:
                 _kslast = kslast
 
-            if _kslast is not None or clip_soils:
-                soilu = WeppSoilUtil(src_fn)
-                if _kslast is not None:
-                    soilu.modify_kslast(_kslast)
-                if clip_soils:
-                    soilu.clip_soil_depth(clip_soils_depth)
-                soilu.write(dst_fn)
-            else:
-                _copyfile(src_fn, dst_fn)
+            soilu = WeppSoilUtil(src_fn)
+            soilu.modify_initial_sat(initial_sat)
+
+            if _kslast is not None:
+                soilu.modify_kslast(_kslast)
+
+            if clip_soils:
+                soilu.clip_soil_depth(clip_soils_depth)
+
+            soilu.write(dst_fn)
 
             # managements
             man_fn = f'hill_{topaz_id}.mofe.man'
