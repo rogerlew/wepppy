@@ -1079,6 +1079,7 @@ function getSelectorForKey(key) {
         "landuse": 'a[href="#landuse-options"]',
         "soils": 'a[href="#soil-options"]',
         "climate": 'a[href="#climate-options"]',
+        "rap_ts": 'a[href="#rap-time-series-acquisition"]',
         "wepp": 'a[href="#wepp"]',
         "observed": 'a[href="#observed-data-model-fit"]',
         "debris": 'a[href="#debris-flow-analysis"]',
@@ -1090,9 +1091,9 @@ function getSelectorForKey(key) {
 
 function initWebSocket() {
     var wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/preflight/{{ run_id }}";
-    
+
     ws = new WebSocket(wsUrl);
-    
+
     ws.onopen = function() {
         console.log("Preflight Connected");
         $("#preflight_status").html("Connected");
