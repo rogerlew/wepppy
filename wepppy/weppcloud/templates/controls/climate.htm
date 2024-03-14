@@ -3,6 +3,9 @@
 {% block form_title %}Climate Options{% endblock %}
 {% block inputs %}
 
+{% if 'reveg' in climate.config_stem %}
+{% endif %}
+
 <div class="hide-readonly">
     <div class="form-group row">
         <div class="col-sm-4">
@@ -104,7 +107,12 @@
         </div>
     </div>
     <div id="climate_monthlies"></div>
+
     <h4 data-toc-skip>Climate Method</h4>
+    <div style="height:30px">
+      <i>Revegetation requires historical climates (e.g. DAYMET, GRIDMET) within the period available 
+      from RAP 1986-2023</i>
+    </div>
     <div class="form-group row">
         <div class="col-sm-6">
             {% if 'eu' not in ron.locales and 'au' not in ron.locales %}

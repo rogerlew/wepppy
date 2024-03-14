@@ -32,6 +32,8 @@ from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV3Dataset
 )
 
+from ...redis_prep import RedisPrep as Prep
+
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
 from wepppyo3.raster_characteristics import identify_median_intersecting_raster_keys
@@ -269,6 +271,12 @@ class RAP_TS(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
+        try:
+            prep = Prep.getInstance(self.wd)
+            prep.timestamp('build_rap_ts')
+        except FileNotFoundError:
+            pass
 
     def __iter__(self):
         assert self.data is not None

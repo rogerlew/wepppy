@@ -716,6 +716,12 @@ class Wepp(NoDbBase, LogMixin):
         self.log('      prep pw0.cov... ')
         from wepppy.nodb.mods import RAP_TS
         rap_ts = RAP_TS.getInstance(self.wd)
+        climate = Climate.getInstance(self.wd)
+        cli = ClimateFile(climate.cli_path)
+        years = cli.years
+        assert min(years) == rap_ts.rap_start_year, 'RAP_TS start year does not match climate'
+        assert max(years) == rap_ts.rap_end_year, 'RAP_TS end year does not match climate'
+
         rap_ts.prep_cover(self.runs_dir)
         self.log_done()
 
