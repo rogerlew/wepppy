@@ -429,7 +429,7 @@ class TopazRunner:
             x, y = self.lnglat_to_pixel(lng, lat)
         
         #pull drainage area for radius around the given outlet
-        r = 150 #150 seems to work really well
+        r = 150 #150 seems to work really well 
         num_cells = round(r/cellsize)
         # print('numcells=', num_cells)
 

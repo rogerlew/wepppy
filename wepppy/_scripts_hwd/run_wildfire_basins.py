@@ -23,14 +23,14 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 ############# THESE ARE THE ONLY INPUTS TO CHANGE
-filepath = 'geodata/small_basin_input_data/2018_basins/ranch_fire_perim_basins_utm10S.csv'
-firename = 'ranch_fire_v2'
+filepath = 'geodata/small_basin_input_data/2018_basins/2018_carr_fire_outlets_to_polygons_25km2_utm10t.csv'
+firename = 'Carr_Fire'
 fire_year = 2018
 water_year = 2019
 utmzn = 10
-utmzs = 'S'
-main_folder = '/media/helen/HelenData/wepppy_runs/2018_fires/'
-config_filepath = '/home/helen/wepppy/wepppy/nodb/configs/run_fire_basins.cfg'
+utmzs = 'T'
+main_folder = '/media/helen/HelenData1/wepppy_reruns/2018_fires/'
+config_filepath = '/home/helen/wepppy/wepppy/nodb/configs/run_wildfire_basins.cfg'
 #############
 
 base_name = main_folder + firename + '/'
@@ -41,6 +41,9 @@ new_da = []
 outlet_sed_yield = []
 hs_sed_yield = []
 basin_ids_keep = []
+firenames = []
+fireyears = []
+utmzones = []
 
 
 df = pd.read_csv(filepath)
@@ -55,7 +58,26 @@ os.chdir(firename)
 
 bigtic=time.perf_counter()
 
-for i in range(len(df)):
+if fire_year <= 2004:
+    nlcd_choice = 'nlcd/2001'
+elif fire_year >2004 and fire_year<=2006:
+    nlcd_choice = 'nlcd/2004'
+elif fire_year >2006 and fire_year<=2008:
+    nlcd_choice = 'nlcd/2006'
+elif fire_year >2008 and fire_year<=2011:
+    nlcd_choice = 'nlcd/2008'
+elif fire_year >2011 and fire_year<=2013:
+    nlcd_choice = 'nlcd/2011'
+elif fire_year >2013 and fire_year<=2016:
+    nlcd_choice = 'nlcd/2013'
+elif fire_year >2016 and fire_year<=2019:
+    nlcd_choice = 'nlcd/2016'
+elif fire_year >2019 and fire_year<=2021:
+    nlcd_choice = 'nlcd/2019'
+
+
+
+for i in range(0,12):
     print(firename)
     try:
         if __name__ == '__main__':
@@ -67,7 +89,7 @@ for i in range(len(df)):
                             outlet=[df.outlet_x[i], df.outlet_y[i]],
                             landuse=None,
                             cs=19, erod=0.000001, chn_chn_wepp_width=1.0,
-                            da=df.da_km2[i]),
+                            da=df.DA_km2[i]),
                         ]
 
             for proj in projects:
@@ -152,13 +174,14 @@ for i in range(len(df)):
                 translator = wat.translator_factory()
                 topaz_ids = [top.split('_')[1] for top in translator.iter_sub_ids()]
                 # print('watershed area=', wat.wsarea/1e6)
-                
 
                 print('building landuse')
                 landuse = Landuse.getInstance(wd)
+                landuse.nlcd_db = nlcd_choice
                 landuse.mode = LanduseMode.Gridded
                 landuse.build()
                 landuse = Landuse.getInstance(wd)
+                print('landuse.nlcd_db', landuse.nlcd_db)
 
                 print('building soils')
                 soils = Soils.getInstance(wd)
@@ -213,7 +236,7 @@ for i in range(len(df)):
                     wepp_output.loc[(wepp_output['month'] >9) & (wepp_output['year'] == j+1), 'wy'] = yr+1
                     yr = yr+1
                 annual_sed_data = wepp_output.groupby(["wy"])["sed_kg"].sum()
-                print('annual_sed_data.iloc[1]=',annual_sed_data.iloc[1])
+                print('outlet sed yield =',annual_sed_data.iloc[1])
                 outlet_sed_yield.append(annual_sed_data.iloc[1])
 
                 folder_name = base_name + wd + '/export'
@@ -222,6 +245,7 @@ for i in range(len(df)):
                 print('hillslopes_output=', hillslopes_output)
                 hs_annual_sed_data = hillslopes_output.groupby(["wy"])["sed_kg"].sum()
                 hs_sed_yield.append(hs_annual_sed_data.iloc[1])
+                print('hillslope sed yield = ', hs_annual_sed_data.iloc[1])
 
                 folder_name = base_name + wd + '/climate'
                 os.chdir(folder_name)
@@ -229,14 +253,19 @@ for i in range(len(df)):
                 climate_data['avg_intensity'] = climate_data['prcp'].divide(climate_data['dur'])
                 climate_data['peak_intensity'] = climate_data['ip'].multiply(climate_data['avg_intensity'])
                 # climate_data['wy'] = wepp_output['wy']
-                climate_data.loc[(climate_data['peak_intensity'] > 24) & (wepp_output['wy'] == water_year),'thresh_intensity'] = 1
-                precip_threshold_exceeded.append(climate_data['thresh_intensity'].sum())
+                # climate_data.loc[(climate_data['peak_intensity'] > 24) & (wepp_output['wy'] == water_year),'thresh_intensity'] = 1
+                # precip_threshold_exceeded.append(climate_data['thresh_intensity'].sum())
                 climate_data.to_csv('climate_data.csv')  
 
                 basin_ids_keep.append(df.basin_id[i])
                 new_outlet_x.append(no[0])
                 new_outlet_y.append(no[1])
                 new_da.append(wat.wsarea/1e6)
+
+                firenames.append(firename)
+                fireyears.append(fire_year)
+                ut = str(utmzn)+utmzs
+                utmzones.append(ut)
 
                 os.chdir('..')
                 ## remove a bunch of directories that take up too much space
@@ -265,10 +294,13 @@ for i in range(len(df)):
         pass
 
 newdf = pd.DataFrame()
+newdf['fire_name'] = firenames
+newdf['fire_year'] = fireyears
+newdf['utm_zone'] = utmzones
 newdf['basinid'] = basin_ids_keep
 newdf['outlet_sed_yield'] = outlet_sed_yield
 newdf['hillslope_sed_yield'] = hs_sed_yield
-newdf['precip_threshold_exceeded'] = precip_threshold_exceeded
+# newdf['precip_threshold_exceeded'] = precip_threshold_exceeded
 newdf['new_outlet_x'] = new_outlet_x
 newdf['new_outlet_y'] = new_outlet_y
 newdf['new_da'] = new_da

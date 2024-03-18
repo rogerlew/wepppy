@@ -10,12 +10,11 @@ except ImportError:
     from yaml import Loader, Dumper
 
 
-from wepppy.all_your_base import try_parse
-
+from wepppy.all_your_base import try_parse, isfloat
 
 
 def _replace_parameter(original, replacement):
-    if replacement is None:
+    if replacement is None or replacement.lower().replace('none', '').strip() == '':
         return original
 
     try:
@@ -28,10 +27,27 @@ def _replace_parameter(original, replacement):
         return replacement
 
 
+def _pars_to_string(d):
+    kv_pairs = []
+    for k, v in d.items():
+        if isinstance(v, str):
+            kv_pairs.append(f"{k}='{v}'")
+        else:
+            kv_pairs.append(f"{k}={v}")
+    return f"({', '.join(kv_pairs)})"
+
+
 class WeppSoilUtil(object):
-    def __init__(self, fn):
+    def __init__(self, fn, compute_erodibilities=False, compute_conductivity=False):
+        self.compute_erodibilities = compute_erodibilities
+        self.compute_conductivity = compute_conductivity
+
         if fn.endswith('.sol'):
-            self._parse_sol(fn)
+            try:
+                self._parse_sol(fn)
+            except:
+                print(fn)
+                raise
         elif fn.endswith('.yaml'):
             self._load_yaml(fn)
 
@@ -44,6 +60,7 @@ class WeppSoilUtil(object):
         header = [L.replace('#', '').strip() for L in lines if L.startswith('#')]
 #        header = [L for L in header if L != '']
         lines = [L.strip() for L in lines if not L.startswith('#')]
+        lines = [L for L in lines if L != '']
         i = 0
 
         datver = lines[i]  # data version
@@ -78,20 +95,32 @@ class WeppSoilUtil(object):
         for ofe_counter in range(ntemp):
             line = shlex.split(lines[i])
             i += 1
-     
-            if solwpv > 9000:
+
+            ksatadj = 0
+            luse = None  # Disturbed Class
+            stext = None
+            lkeff = None
+            uksat = None
+            texid_enum = None
+            ksatfac = None
+            ksatrec = None
+
+            if solwpv > 9000 and solwpv < 9003:
                 # 1      2     3      4        5
                 ksatadj, luse, stext, ksatfac, ksatrec = line
                 line = shlex.split(lines[i])
                 i += 1
-            else:
-                ksatadj = 0
-                luse = None  # Disturbed Class
-                stext = None
-                ksatfac = None
-                ksatrec = None
+            elif solwpv == 9003:
+                ksatadj, luse, burn_code, stext, lkeff = line
+                line = shlex.split(lines[i])
+                i += 1
 
-            if solwpv < 941 or solwpv >= 7777:       
+            elif solwpv == 9005:
+                ksatadj, luse, burn_code, stext, texid_enum, uksat, lkeff = line
+                line = shlex.split(lines[i])
+                i += 1
+
+            if solwpv < 941 or solwpv >= 7777 or datver == 2006.2:
                 # 1   2      3    4     5    6   7   8
                 slid, texid, nsl, salb, sat, ki, kr, shcrit = line[:8]
                 avke = None
@@ -116,6 +145,25 @@ class WeppSoilUtil(object):
                 else:
                     solthk, sand, clay, orgmat, cec, rfg = line
                     bd = ksat = fc = wp = anisotropy = None
+
+                if float(clay) + float(sand) > 100.0:
+                    sand = str(100.0 - float(clay))
+
+                if j == 0:
+                    if self.compute_erodibilities:
+                        from wepppy.wepp.soils.horizon_mixin import compute_erodibilities
+                        vfs = 100.0 - float(clay) - float(sand)
+                        res = compute_erodibilities(clay=float(clay), sand=float(sand), vfs=vfs, om=float(orgmat))
+                        ki = round(res['interrill'])
+                        kr = round(res['rill'], 5)
+                        shcrit = round(res['shear'], 1)
+
+                if self.compute_conductivity:
+                    from wepppy.wepp.soils.horizon_mixin import compute_conductivity
+                    ksat = compute_conductivity(clay=float(clay), sand=float(sand), cec=float(cec))
+
+                    if ksat is not None:
+                        ksat = round(ksat, 4)
 
                 horizons.append(
                     dict(solthk=try_parse(solthk),
@@ -156,12 +204,17 @@ class WeppSoilUtil(object):
                 else:
                     raise NotImplementedError(solwpv)
 
+            if isfloat(sat):
+                sat = float(sat)
+            else:
+                sat = 0.75
+
             ofes.append(
                 dict(slid=slid.replace("'", '').replace('"', ''),
                      texid=texid.replace("'", '').replace('"', ''),
                      nsl=try_parse(nsl),
                      salb=try_parse(salb),
-                     sat=try_parse(sat),
+                     sat=sat,
                      ki=try_parse(ki),
                      kr=try_parse(kr),
                      shcrit=try_parse(shcrit),
@@ -170,6 +223,9 @@ class WeppSoilUtil(object):
                      ksatadj=ksatadj,
                      luse=luse,
                      stext=stext,
+                     uksat=uksat,
+                     texid_enum=texid_enum,
+                     lkeff=lkeff,
                      ksatfac=ksatfac,
                      ksatrec=ksatrec,
                      res_lyr=res_lyr))
@@ -182,9 +238,53 @@ class WeppSoilUtil(object):
                     ofes=ofes,
                     res_lyr=res_lyr)
 
-        yaml_txt = yaml.dump(soil)
+        self.obj = soil
 
-        self.obj = yaml.safe_load(yaml_txt)
+    def modify_initial_sat(self, initial_sat):
+        self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_initial_sat')
+        self.obj['header'][-1] += f'(initial_sat={initial_sat})'
+
+        for i in range(len(self.obj['ofes'])):
+            self.obj['ofes'][i]['sat'] = initial_sat
+
+    def modify_kslast(self, kslast, pars=None):
+        luse = self.obj['ofes'][0]['luse']
+
+        if luse is not None:
+            if 'developed' in luse.lower():
+                return
+
+        self.obj['header'].append('wepppy.wepp.soils.utils.WeppSoilUtil::modify_kslast')
+
+        if pars is not None:
+            self.obj['header'][-1] += _pars_to_string(pars)
+        else:
+            self.obj['header'][-1] += f'(kslast={kslast})'
+
+        for i in range(len(self.obj['ofes'])):
+            self.obj['ofes'][i]['res_lyr']['kslast'] = kslast
+
+        self.obj['res_lyr']['kslast'] = kslast
+
+    def clip_soil_depth(self, max_depth):
+
+        self.obj['header'].append(f'wepppy.wepp.soils.utils.WeppSoilUtil::clip_soil_depth(max_depth={max_depth})')
+
+        for i in range(len(self.obj['ofes'])):
+            ofe = self.obj['ofes'][i]
+
+            horizons = []
+            for j in range(len(ofe['horizons'])):
+                horizon = ofe['horizons'][j]
+                if horizon['solthk'] <= max_depth:
+                    horizons.append(horizon)
+                else:
+                    horizon['solthk'] = max_depth
+                    horizons.append(horizon)
+                    depth = max_depth
+                    break
+            self.obj['ofes'][i]['horizons'] = horizons
+            self.obj['ofes'][i]['nsl'] = len(horizons)
 
     def to7778(self, hostname=''):
         from rosetta import Rosetta2, Rosetta3
@@ -197,7 +297,7 @@ class WeppSoilUtil(object):
 
         header = new.obj['header']
         header.append('')
-        header.append('wepppy.wepp.soils.utils.WeppSoilUtil 7778 migration')
+        header.append('wepppy.wepp.soils.utils.WeppSoilUtil::7778migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
@@ -208,29 +308,30 @@ class WeppSoilUtil(object):
             for j, horizon in enumerate(ofe['horizons']):
                 clay, sand, bd = horizon['clay'], horizon['sand'], horizon['bd']
                 silt = 100 - clay - sand
-                ros_model = f'Rosetta(clay={clay}, sand={sand}, bd={bd}, silt={silt})'
-                if bd is None:
-                    res_dict = r2.predict_kwargs(clay=clay, sand=sand, silt=silt)
+                if not isfloat(bd):
+                    ros_model = f'Rosetta(clay={clay}, sand={sand}, silt={silt})'
+                    res_dict = r2.predict_kwargs(clay=float(clay), sand=float(sand), silt=float(silt))
                 else:
-                    res_dict = r3.predict_kwargs(bd=bd, clay=clay, sand=sand, silt=silt)
+                    ros_model = f'Rosetta(clay={clay}, sand={sand}, bd={bd}, silt={silt})'
+                    res_dict = r3.predict_kwargs(bd=float(bd), clay=float(clay), sand=float(sand), silt=float(silt))
             
-                if horizon['bd'] is None:
+                if not isfloat(horizon['bd']):
                     horizon['bd'] = 1.4
                     header.append(f'ofe={i},horizon{j} bd default value of 1.4')
 
-                if horizon['fc'] is None:
+                if not isfloat(horizon['fc']):
                     horizon['fc'] = round(res_dict['fc'], 4)
                     header.append(f'ofe={i},horizon{j} fc estimated using {ros_model}')
 
-                if horizon['wp'] is None:
+                if not isfloat(horizon['wp']):
                     horizon['wp'] = round(res_dict['wp'], 4)
                     header.append(f'ofe={i},horizon{j} wp estimated using {ros_model}')
 
-                if horizon['ksat'] is None:
-                    horizon['ksat'] = round(res_dict['ks'], 4)
+                if not isfloat(horizon['ksat']):
+                    horizon['ksat'] = round(res_dict['ks'] * 10 / 24, 4)  # convert from cm/day to mm/hour
                     header.append(f'ofe={i},horizon{j} ksat estimated using {ros_model}')
 
-                if horizon['anisotropy'] is None:
+                if not isfloat(horizon['anisotropy']):
                     if horizon['solthk'] > 50:
                         horizon['anisotropy'] = 1.0
                     else:
@@ -263,7 +364,7 @@ class WeppSoilUtil(object):
         new.obj['datver'] = 7778.0
         return new
 
-    def write(self, fn):
+    def __str__(self):
         from rosetta import Rosetta3
         r3 = Rosetta3()
 
@@ -276,7 +377,7 @@ class WeppSoilUtil(object):
         ksflag = self.obj['ksflag']
         ofes = self.obj['ofes']
 
-        assert datver in (7778.0, 9001.0, 9002.0), datver
+        assert datver in (7778.0, 9001.0, 9002.0, 9003.0, 9005.0), datver
 
         s = [str(int(datver))] 
         s += header
@@ -285,14 +386,57 @@ class WeppSoilUtil(object):
 
         for i in range(ntemp):
             ofe = ofes[i]
-            if datver > 9000.0:
+
+            _luse = None
+            # build its over 9000 header
+            if datver > 9000:
+                _luse = ofe['luse']
+                if _luse is None:
+                    _luse = ()
+
+                _burn_code = 0
+                if 'agriculture' in _luse:
+                    _burn_code = 100
+                elif 'shrub' in _luse:
+                    _burn_code = 200
+                elif 'forest' in _luse:
+                    _burn_code = 300
+                    if 'young' in _luse:
+                        _burn_code += 6
+                elif 'grass' in _luse:
+                    _burn_code = 400
+
+                if 'low sev' in _luse:
+                    _burn_code += 1
+                elif 'moderate sev' in _luse:
+                    _burn_code += 2
+                elif 'high sev' in _luse:
+                    _burn_code += 3
+
+
+            if not _luse:
+                _luse = "N/A"
+
+            if datver > 9000.0 and datver < 9003.0:
                 _ksatadj = ofe['ksatadj']
                 _ksatfac = ofe['ksatfac']
                 _ksatrec = ofe['ksatrec']
-                _luse = ofe['luse']
                 _stext = ofe['stext']
-                s.append(f"{_ksatadj} '{_luse}'\t '{_stext}' \t {_ksatfac} \t {_ksatrec}")
-       
+                s.append(f"{_ksatadj}\t '{_luse}'\t '{_stext}'\t {_ksatfac} \t {_ksatrec}")
+
+            elif datver == 9003.0:
+                _ksatadj = ofe['ksatadj']
+                _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
+                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_lkeff}")
+
+            elif datver == 9005.0:
+                _ksatadj = ofe['ksatadj']
+                _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
+                _uksat = ofe['uksat']
+                _texid_enum = self.simple_texture_enum
+                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_texid_enum}\t {_uksat}\t {_lkeff}")
 
             L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])
             pars = 'nsl salb sat ki kr shcrit'.split()
@@ -303,7 +447,7 @@ class WeppSoilUtil(object):
                 pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
                 s.append('\t' + '\t '.join([str(horizon[p]) for p in pars]))
 
-                if datver == 9002.0:
+                if datver >= 9002.0:
                     clay = horizon['clay']
                     sand = horizon['sand']
                     silt = 100.0 - clay - sand
@@ -318,11 +462,18 @@ class WeppSoilUtil(object):
             else:
                 s.append('0 0.0 0.0')
 
-        s = '\n'.join(s)
+        return '\n'.join(s) + '\n'
+        
+    def write(self, fn):
+        s = self.__str__()
+
         with open(fn, 'w') as fp:
             fp.write(s)
 
     def to_7778disturbed(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        if replacements is None:
+            replacements = {}
+
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
             new = self.to7778()
@@ -341,7 +492,7 @@ class WeppSoilUtil(object):
 
         header = new.obj['header']
         header.append('')
-        header.append('wepppy.wepp.soils.utils.WeppSoilUtil 7778disturbed migration')
+        header.append('wepppy.wepp.soils.utils.WeppSoilUtil::7778disturbed_migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
@@ -408,14 +559,30 @@ class WeppSoilUtil(object):
                                 h0_max_om=h0_max_om, hostname=hostname, 
                                 version=9002)
    
+   
+    def to9003(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        return self.to_over9000(replacements, 
+                                h0_min_depth=h0_min_depth, 
+                                h0_max_om=h0_max_om, hostname=hostname, 
+                                version=9003)
+
+    def to9005(self, replacements, h0_min_depth=None, h0_max_om=None, hostname=''):
+        return self.to_over9000(replacements,
+                                h0_min_depth=h0_min_depth,
+                                h0_max_om=h0_max_om, hostname=hostname,
+                                version=9005)
+
     def to_over9000(self, replacements, h0_min_depth=None, h0_max_om=None, hostname='', version=9002):
+        if replacements is None:
+            replacements = {}
+
         new = deepcopy(self)
         if new.obj['datver'] != 7778.0:
             new = self.to7778()
 
         header = new.obj['header']
         header.append('')
-        header.append(f'wepppy.wepp.soils.utils.WeppSoilUtil {version} migration')
+        header.append(f'wepppy.wepp.soils.utils.WeppSoilUtil::{version}migration')
         header.append('  Build Date: ' + str(datetime.now()))
         header.append(f'  Source File: {hostname}:{self.fn}' )
         header.append('')
@@ -441,7 +608,15 @@ class WeppSoilUtil(object):
         _kslast = replacements.get('kslast', None)
         _luse = replacements.get('luse', None)
         _stext = replacements.get('stext', None)
-       
+        _lkeff = replacements.get('lkeff', '')
+        _uksat = replacements.get('uksat', '')
+
+        if _lkeff == '':
+            _lkeff = '-9999'
+
+        if _uksat == '':
+            _uksat = '-9999'
+
         new.obj['ksflag'] = _replace_parameter(new.obj['ksflag'], _ksflag)
  
         ofes = []
@@ -451,8 +626,16 @@ class WeppSoilUtil(object):
             ofe['shcrit'] = _replace_parameter(ofe['shcrit'], _shcrit)
 
             ofe['ksatadj'] = _replace_parameter(ofe['ksatadj'], _ksatadj)
-            ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
-            ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
+            
+            if version < 9003:
+                ofe['ksatfac'] = _replace_parameter(ofe['ksatfac'], _ksatfac)
+                ofe['ksatrec'] = _replace_parameter(ofe['ksatrec'], _ksatrec)
+            elif version == 9003:
+                ofe['lkeff'] = _replace_parameter(ofe['lkeff'], _lkeff)
+            elif version == 9005:
+                ofe['lkeff'] = _replace_parameter(ofe['lkeff'], _lkeff)
+                ofe['uksat'] = _uksat
+
             ofe['luse'] = _replace_parameter(ofe['luse'], _luse)
             ofe['stext'] = _replace_parameter(ofe['stext'], _stext)
 
@@ -511,8 +694,7 @@ class WeppSoilUtil(object):
             clay = s7778.obj['ofes'][0]['horizons'][0]['clay']
         assert clay is not None
         return clay
-
-
+            
     @property
     def avke(self):
         avke = self.obj['ofes'][0]['avke']
@@ -531,6 +713,16 @@ class WeppSoilUtil(object):
 #        assert bd is not None
         return bd
 
+    @property
+    def simple_texture(self):
+        from wepppy.wepp.soils.utils import simple_texture
+        return simple_texture(clay=self.clay, sand=self.sand)
+
+    @property
+    def simple_texture_enum(self):
+        from wepppy.wepp.soils.utils import simple_texture_enum
+        return simple_texture_enum(clay=self.clay, sand=self.sand)
+
 
 if __name__ == "__main__":
     from glob import glob
@@ -543,24 +735,23 @@ if __name__ == "__main__":
 
     #fp = open('/home/weppdev/PycharmProjects/wepppy/wepppy/nodb/mods/baer/data/soils/summary.csv', 'w')
     fp = open('/home/roger/PycharmProjects/wepppy/wepppy/wepp/soils/soilsdb/data/Forest/summary.csv', 'w')
-    fp.write('slid,texid,burnclass,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
+    fp.write('slid,texid,burn_class,salb,sat,ki,kr,shcrit,avke,sand,clay,orgmat,cec,rfg,solthk\n')
     for sol_fn in sol_fns:
-        print(sol_fn)
         sol = WeppSoilUtil(sol_fn)
         sol.dump_yaml(sol_fn.replace('.sol', '.sol.yaml'))
 
         ofe = sol.obj['ofes'][0]
         hor = ofe['horizons'][0]
 
-        burnclass = ''
+        burn_class = ''
         if 'high' in ofe['slid'].lower():
-            burnclass = 'high'
+            burn_class = 'high'
 
         if 'low' in ofe['slid'].lower():
-            burnclass = 'low'
+            burn_class = 'low'
 
         fp.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'
-                 .format(ofe['slid'], ofe['texid'], burnclass, ofe['salb'], ofe['sat'], ofe['ki'], ofe['kr'], ofe['shcrit'], ofe['avke'],
+                 .format(ofe['slid'], ofe['texid'], burn_class, ofe['salb'], ofe['sat'], ofe['ki'], ofe['kr'], ofe['shcrit'], ofe['avke'],
                          hor['sand'], hor['clay'], hor['orgmat'], hor['cec'], hor['rfg'], hor['solthk']))
 
     fp.close()
