@@ -29,11 +29,8 @@
         {% endif %}
     </div>
     <div id="soil_mode0_controls" class="form-group row">
-        <div class="col-sm-5">
-            <label for="initial_sat">Initial Soil Saturation (fraction; used for single storm climates only): </label>
-        </div>
         <div class="col-sm-3">
-            <input id="initial_sat" name="initial_sat" class="form-control mr-sm-3" type="text"
+            <input id="initial_sat" name="initial_sat" class="form-control mr-sm-3" type="hidden"
              value="{{ soils.initial_sat }}" aria-label="Soils Initial ksat">
         </div>
     </div>
