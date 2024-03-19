@@ -988,7 +988,7 @@ class Ash(NoDbBase, LogMixin):
 
     @property
     def has_watershed_summaries(self):
-        return len(glob(_join(self.ash_dir, 'pw0_burn_class=*,ash_stats_per_year_cum_ash_delivery_by_water.csv'))) > 0
+        return len(glob(_join(self.ash_dir, 'post/watershed_annuals.pkl'))) > 0
 
     def hillslope_is_burned(self, topaz_id):
         watershed = Watershed.getInstance(self.wd)
