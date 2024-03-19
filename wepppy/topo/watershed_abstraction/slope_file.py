@@ -113,7 +113,8 @@ class SlopeFile(object):
         target_length=50,
         apply_buffer=False,
         buffer_length=15,
-        min_length=10):
+        min_length=10,
+        max_ofes=19):
 
         length = self.length
         azm = self.azm
@@ -143,6 +144,9 @@ class SlopeFile(object):
 
         if n_mofes == 0:
             n_mofes = 1
+
+        if n_mofes > max_ofes:
+            n_mofes = max_ofes
 
         if n_mofes - n_buffer == 0:
             ofe_length = 0.0
