@@ -410,11 +410,11 @@ class Baer(NoDbBase):
 
             transform = ds.GetGeoTransform()
             band = ds.GetRasterBand(1)
-            data = np.array(band.ReadAsArray(), dtype=np.int)
+            data = np.array(band.ReadAsArray(), dtype=np.int64)
 
             nodata = band.GetNoDataValue()
             if nodata is not None:
-                self._nodata_vals = [np.int(nodata)]
+                self._nodata_vals = [np.int64(nodata)]
 
             del ds
 

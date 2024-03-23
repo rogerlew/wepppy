@@ -118,7 +118,7 @@ def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
             d['Soluble Reactive P (kg/ha)'] = d['Soluble Reactive P (kg)'] / totarea_ha
 
     # Determine Water Year Column
-    _wy = np.zeros(d.shape[0], dtype=np.int)
+    _wy = np.zeros(d.shape[0], dtype=np.int64)
     for i, (mo, y) in enumerate(zip(d['Month'], d['Year'])):
         _wy[i] = determine_wateryear(y, mo=mo)
     d['Water Year'] = _wy

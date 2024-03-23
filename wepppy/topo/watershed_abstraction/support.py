@@ -477,7 +477,7 @@ def polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2=None):
     gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
                     callback=prog_func)
 
-    ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int).flatten()])
+    ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int64).flatten()])
     top_sub_ids = []
     top_chn_ids = []
 
