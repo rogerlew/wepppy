@@ -212,7 +212,7 @@ class AshModel(object):
         # number of days in the file
         s_len = hill_wat.days_in_sim
 
-        days_from_fire = np.arange(s_len, dtype=np.int)
+        days_from_fire = np.arange(s_len, dtype=np.int64)
         yr = np.roll(hill_wat.data['Y'], -start_index)
         mo = np.roll(hill_wat.data['M'], -start_index)
         da = np.roll(hill_wat.data['D'], -start_index)

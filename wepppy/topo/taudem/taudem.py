@@ -207,8 +207,8 @@ class TauDEMRunner:
             assert 0 <= y < num_rows, (y, (num_rows, num_cols))
             assert 0 <= x < num_cols, (x, (num_rows, num_cols))
         else:
-            x = np.array(np.round((np.array(easting) - ul_x) / cellsize), dtype=np.int)
-            y = np.array(np.round((np.array(northing) - ul_y) / -cellsize), dtype=np.int)
+            x = np.array(np.round((np.array(easting) - ul_x) / cellsize), dtype=np.int64)
+            y = np.array(np.round((np.array(northing) - ul_y) / -cellsize), dtype=np.int64)
 
         return x, y
 
