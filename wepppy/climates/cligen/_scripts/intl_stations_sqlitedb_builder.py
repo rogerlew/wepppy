@@ -81,6 +81,7 @@ pars.extend(glob.glob("../GHCN_Intl_Stations/20-year/*.PAR"))
 pars.extend(glob.glob("../GHCN_Intl_Stations/20-year/*.par"))
 pars.extend(glob.glob("../GHCN_Intl_Stations/10-year/*.PAR"))
 pars.extend(glob.glob("../GHCN_Intl_Stations/10-year/*.par"))
+pars.extend(glob.glob("../GHCN_Intl_Stations/additional/*.par"))
 
 
 for par in pars:
