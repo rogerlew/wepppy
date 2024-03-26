@@ -1,0 +1,350 @@
+98.4
+#
+# Build Version: Apr 13 2023 16:09:39
+#
+#
+
+1 # number of OFE's
+100 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+3  # Number of plant scenarios
+
+
+L101_Pea_
+Annual lentil production. Suggest harvest oprn:  Harvest, knife, windrow, combin...
+(from WEPP LMOD service)
+comment...
+1  #landuse
+WeppWillSet
+12.00000 3.00000 20.00000 4.00000 5.20000 60.00000 0.00000 0.01000 0.80000 0.01400
+0.90000 0.80000 0.65000 0.99000 3.00000 0.00000 0.30000 0.45700
+1  # mfo - <fragile>
+0.01350 0.01350 20.00000 0.25000 0.14000 1.00000 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000 
+
+L165_Whea
+Annual, grass, cool season, spring grain.  Use wheat, winter, grain crop when pl...
+(from WEPP LMOD service)
+comment...
+1  #landuse
+WeppWillSet
+15.60000 2.65000 35.00000 3.00000 5.22794 45.00000 0.00000 0.30000 0.90000 0.00500
+0.80000 0.80000 0.65000 0.99200 3.00000 0.00000 0.41000 0.80000
+2  # mfo - <non fragile>
+0.00850 0.00850 25.00000 0.25000 0.07500 1.22000 0.18000 0.00000 14 0.00000
+0.00000 5.00000 0.00000 
+
+L166_Whea
+Annual, grass, cool season, winter, grain. Use wheat, winter, grain crop when pl...
+(from WEPP LMOD service)
+comment...
+1  #landuse
+WeppWillSet
+15.60000 3.00000 35.00000 2.00000 5.22794 60.00000 0.00000 0.30000 0.90000 0.00500
+0.80000 0.80000 0.65000 0.99200 3.00000 0.00000 0.41000 1.00000
+2  # mfo - <non fragile>
+0.00850 0.00850 25.00000 0.25000 0.07500 1.50000 0.20000 0.00000 14 0.00000
+0.00000 5.00000 0.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+4  # Number of operation scenarios
+
+
+DRILL_478316
+comment: Drill or airseeder, double disk
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.1900 0.1100 0
+4 # pcode - other 
+0.0254 0.2030 0.1900 0.1100 0.0076 0.5500 0.0381
+
+
+CHISEL_950245
+comment: Chisel plow, disk, st. pts.
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.6000 0.4000 0
+4 # pcode - other 
+0.0254 0.3600 0.6000 0.4000 0.0152 1.0000 0.0762
+
+
+CHISEL_950246
+comment: Chisel plow, disk, st. pts.
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.5700 0.3700 0
+4 # pcode - other 
+0.0762 0.3810 0.5700 0.3700 0.0152 1.0000 0.1778
+
+
+PLANTE_853861
+comment: Planter, double disk opnr
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.0525 0.0300 0
+4 # pcode - other 
+0.0508 0.7620 0.0525 0.0300 0.0102 0.1500 0.0635
+
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Default1
+Put here as default by LMOD -> .rot convert - Default corn initial conditions set - continuous corn - spring/summer tillage only
+90 percent cover, approximately 200 days since last tillage
+500 mm of rain since last tillage in summer prior
+1  #landuse
+1.10000 0.00000 200 92 0.00000 0.50000
+1 # iresd  <L101_Pea_>
+1 # mang annual
+500.12601 0.02000 0.50000 0.02000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.02540
+0.20000 0.19997 
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+2  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 2
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+6 # ntill - number of operations
+  105  # mdate  --- 4 / 15 
+  1  # op --- DRILL_478316
+      0.038  # depth
+      2  # type
+  258  # mdate  --- 9 / 15 
+  2  # op --- CHISEL_950245
+      0.076  # depth
+      2  # type
+  258  # mdate  --- 9 / 15 
+  3  # op --- CHISEL_950246
+      0.178  # depth
+      2  # type
+  263  # mdate  --- 9 / 20 
+  2  # op --- CHISEL_950245
+      0.076  # depth
+      2  # type
+  263  # mdate  --- 9 / 20 
+  3  # op --- CHISEL_950246
+      0.178  # depth
+      2  # type
+  268  # mdate  --- 9 / 25 
+  1  # op --- DRILL_478316
+      0.038  # depth
+      2  # type
+
+#
+#   Surface Effects Scenario 2 of 2
+#
+Year 2
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+1 # ntill - number of operations
+  105  # mdate  --- 4 / 15 
+  4  # op --- PLANTE_853861
+      0.064  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+7  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 7 (type=1)
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+2  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   196  # harvest date --- 7 / 15 / 1
+   105  # planting date --- 4 /15 /1
+   0.2540  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 2 of 7 (type=3)
+#
+Year 2 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   267  # fallow end --- 9 / 24 / 1
+   197  # fallow start --- 7 /16 / 1
+   0.0000  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 3 of 7 (type=1)
+#
+Year 3 
+
+
+
+1  # landuse <cropland>
+3  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15 / 2
+   268  # planting date --- 9 /25 /1
+   0.2540  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 4 of 7 (type=1)
+#
+Year 4 
+
+
+
+1  # landuse <cropland>
+3  # plant growth scenario
+0  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15 / 2
+   268  # planting date --- 9 /25 /1
+   0.2540  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 5 of 7 (type=3)
+#
+Year 5 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+0  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   365  # fallow end --- 12 / 31 / 2
+   228  # fallow start --- 8 /16 / 2
+   0.0000  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 6 of 7 (type=1)
+#
+Year 6 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+2  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15 / 3
+   105  # planting date --- 4 /15 /3
+   0.7620  # row width
+   6   # residue man - <none>
+#
+# Yearly scenario 7 of 7 (type=3)
+#
+Year 7 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+2  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+3 # management <fallow>
+   365  # fallow end --- 12 / 31 / 3
+   228  # fallow start --- 8 /16 / 3
+   0.0000  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+1  # rotation repeats
+3  # years in rotation
+
+#
+# Rotation 1: year 1 to 3
+#
+
+   3	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+      2	# year index
+      3	# year index
+#-----------------------------------
+   2	#  <plants/yr 2> - OFE: 1>
+      4	# year index
+      5	# year index
+#-----------------------------------
+   2	#  <plants/yr 3> - OFE: 1>
+      6	# year index
+      7	# year index
+
