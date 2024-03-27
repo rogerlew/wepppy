@@ -55,7 +55,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
             attempts += 1
             continue
 
-        skip = -1
+        skip = 0
         for L in lines:
             if L.lower().startswith('year'):
                 break
