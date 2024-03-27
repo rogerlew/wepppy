@@ -6,6 +6,10 @@ from os.path import exists as _exists
 from enum import IntEnum
 
 from pprint import pprint
+
+
+from wepppy.all_your_base.hydro import vec_determine_wateryear as determine_wateryear
+
 """
 p1.cli                                             
   100         1
@@ -149,6 +153,8 @@ class HillPass:
         df = pd.DataFrame()
         df['Julian'] = np.array(_julian)
         df['Year'] = np.array(_year)
+        df['WaterYear'] = determine_wateryear(df['Year'], df['Julian'])
+
 #        df['Area (ha)'] = np.ones(df.shape[0]) * harea
         _runoff_m3 = np.array(_runoff_m3)
         df['Runoff (m^3)'] = _runoff_m3
@@ -186,6 +192,7 @@ class HillPass:
 
 
 if __name__ == "__main__":
-    fn = '/geodata/weppcloud_runs/antsy-basilica/wepp/output/H1.pass.dat'
+    fn = '/geodata/weppcloud_runs/recessed-pap/wepp/output/H1.pass.dat'
     hill_pass = HillPass(fn)
-    hill_pass.write('_H1.pass.dat')
+    print(hill_pass.sed_df.info())
+    hill_pass.sed_df.to_csv('test/H1.sed.csv')
