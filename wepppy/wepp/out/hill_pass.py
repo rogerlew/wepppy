@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from os.path import exists as _exists
+from os.path import join as _join
 
 from enum import IntEnum
 
@@ -35,7 +36,7 @@ def _float(x):
 
 class HillPass:
     def __init__(self, fn):
-        assert _exists(fn)
+        assert _exists(fn), fn
 
         with open(fn) as fp:
             lines = fp.readlines()
@@ -191,7 +192,55 @@ class HillPass:
         fp.close()
 
 
+def read_all_hill_pass(wd):
+    from wepppy.nodb import Watershed
+
+    watershed = Watershed.getInstance(wd)
+    translator = watershed.translator_factory()
+
+    sed_dfs = []
+    for sub_id in translator.iter_sub_ids():
+        topaz_id = sub_id.split('_')[1]
+        wepp_id = translator.wepp(top=topaz_id)
+
+        hill_pass = HillPass(_join(wd, f'wepp/output/H{wepp_id}.pass.dat'))
+        n = len(hill_pass.sed_df)
+        hill_pass.sed_df['TopazID'] = np.ones(n, dtype=np.int64) * int(topaz_id)
+        hill_pass.sed_df['WeppID'] = np.ones(n, dtype=np.int64) * int(wepp_id)
+        sed_dfs.append(hill_pass.sed_df)
+
+    combined_df = pd.concat(sed_dfs)
+
+    return combined_df
+
+
+def export_sediment_delivery_by_wateryear(wd, sed_del_fn=None):
+    combined_df = read_all_hill_pass(wd)
+
+    columns_to_sum = ['Runoff (m^3)', 'Lateral (m^3)', 'Sed Del (kg)', 
+                      'Sed Del c1 (kg)', 'Sed Del c2 (kg)', 'Sed Del c3 (kg)',
+                      'Sed Del c4 (kg)', 'Sed Del c5 (kg)']
+
+    hillslope_sed_by_wy = combined_df.groupby(['WaterYear', 'TopazID', 'WeppID'])[columns_to_sum].sum().reset_index()
+
+    # Step 3: Aggregate the Julian column to count the days in each WaterYear
+    hillslope_sed_by_wy['days_in_wateryear'] = combined_df.groupby(['WaterYear', 'TopazID', 'WeppID'])['Julian'].count().values
+
+    if sed_del_fn is None:
+        sed_del_fn = _join(wd, f'wepp/output/sed_delivery_by_wateryear.csv')
+
+    hillslope_sed_by_wy.to_csv(sed_del_fn, index=False)
+    return hillslope_sed_by_wy
+
+
 if __name__ == "__main__":
+    wd =  '/geodata/weppcloud_runs/recessed-pap/'
+    df = export_sediment_delivery_by_wateryear(wd)
+    print(df.info())
+
+    import sys
+    sys.exit()
+
     fn = '/geodata/weppcloud_runs/recessed-pap/wepp/output/H1.pass.dat'
     hill_pass = HillPass(fn)
     print(hill_pass.sed_df.info())
