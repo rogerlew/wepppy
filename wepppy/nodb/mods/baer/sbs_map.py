@@ -68,7 +68,6 @@ def _ct_classify(v, ct, offset=0, nodata_val=255):
         for k in ct[burn_class]:
             if k == v:
                 return i + offset
-               
     return nodata_val
 
 
@@ -85,10 +84,8 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
     return i + offset
 
 
-
 class SoilBurnSeverityMap(LandcoverMap):
     def __init__(self, fname, breaks=None, nodata_vals=None, color_map=None, ignore_ct=False):
-        
         if nodata_vals is None:
             nodata_vals = []
 
@@ -106,26 +103,32 @@ class SoilBurnSeverityMap(LandcoverMap):
         if ignore_ct:
             ct = None
 
-        classes = set(v for v, c in counts)
+        nodata_vals = [int(v) for v in nodata_vals]
+        classes = set(int(v) for v, c in counts if int(v) not in nodata_vals)
         is256 = None
 
         if ct is None:
 
             if breaks is None:
-                for k in [15, 255]:
-                    if k in classes:
-                        nodata_vals.append(k)
-                        classes.remove(k)
+                # need to intuit breaks
 
-                _max_clases = int(max(classes))
-                if _max_clases == 3:
-                    breaks = [0, 1, 2, _max_clases]
-                else:
-                    breaks = [1, 2, 3, _max_clases]
+                min_val = min(classes)
+                max_val = max(classes)
 
-                is256 = len(classes) > 7 or _max_clases >= 255
+                run = 1
+                while min_val + run in classes:
+                    run += 1
+
+                is256 = run > 4
+
                 if is256:
-                    breaks = [75, 109, 187, _max_clases]
+                    breaks = [75, 109, 187, max_val]
+                else:
+                    breaks = [min_val + i for i in range(4)]
+
+                if max_val not in breaks:
+                    nodata_vals.append(k)
+                    classes.remove(k)
 
         else:
             breaks = None
