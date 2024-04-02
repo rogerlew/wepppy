@@ -529,7 +529,7 @@ class Disturbed(NoDbBase):
         # noinspection PyBroadException
         try:
             self._disturbed_fn = fn
-            self._nodata_vals = None
+            self._nodata_vals = nodata_vals
 
             disturbed_path = self.disturbed_path
             assert _exists(disturbed_path), disturbed_path
