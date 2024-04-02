@@ -550,7 +550,7 @@ class Disturbed(NoDbBase):
             else:
                 self._color_map = {'_'.join(str(x) for x in rgb): v for rgb, v in sbs.color_map.items()}
             self._breaks = sbs.breaks
-
+            self._nodata_vals = sbs.nodata_vals
             self.dump_and_unlock()
 
         except Exception:
