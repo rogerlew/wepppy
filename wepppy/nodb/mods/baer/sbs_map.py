@@ -119,14 +119,14 @@ class SoilBurnSeverityMap(LandcoverMap):
                 while min_val + run in classes:
                     run += 1
 
-                is256 = run > 4
+                is256 = run > 4 or len(classes) > 7
 
                 if is256:
-                    breaks = [75, 109, 187, max_val]
+                    breaks = [0, 75, 109, 187]
                 else:
                     breaks = [min_val + i for i in range(4)]
 
-                if max_val not in breaks:
+                if max_val not in breaks and not is256:
                     nodata_vals.append(k)
                     classes.remove(k)
 
