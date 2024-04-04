@@ -33,6 +33,7 @@ def get_sbs_color_table(fn, color_to_severity_map=None):
 
     if color_to_severity_map is None:
         color_to_severity_map = dict([((0, 100, 0), 'unburned'),
+                                      ((0, 0, 0), 'unburned'),
                                       ((0, 115, 74), 'unburned'),
                                       ((0, 175, 166), 'unburned'),
                                       ((127, 255, 212), 'low'),
@@ -361,7 +362,7 @@ class SoilBurnSeverityMap(LandcoverMap):
             for i in range(n):
                 for j in range(m):
                     data[i, j] = _ct_classify(_data[i, j], ct)
-        
+
         num_cols, num_rows = _data.shape
         driver = gdal.GetDriverByName("GTiff")
         dst = driver.Create(fn, num_cols, num_rows,
