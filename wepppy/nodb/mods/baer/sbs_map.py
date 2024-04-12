@@ -128,8 +128,8 @@ class SoilBurnSeverityMap(LandcoverMap):
                     breaks = [min_val + i for i in range(4)]
 
                 if max_val not in breaks and not is256:
-                    nodata_vals.append(k)
-                    classes.remove(k)
+                    nodata_vals.append(max_val)
+                    classes.remove(max_val)
 
         else:
             breaks = None
