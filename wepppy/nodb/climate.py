@@ -527,7 +527,7 @@ class Climate(NoDbBase, LogMixin):
 
     @property
     def daymet_last_available_year(self):
-        return 2022
+        return 2023
 
 
     @property
