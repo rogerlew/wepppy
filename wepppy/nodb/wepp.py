@@ -393,6 +393,8 @@ class Wepp(NoDbBase, LogMixin):
             self._wepp_bin = self.config_get_str('wepp', 'bin')
             self._channel_erodibility =  self.config_get_float('wepp', 'channel_erodibility')
             self._channel_critical_shear = self.config_get_float('wepp', 'channel_critical_shear')
+            self._channel_manning_roughness_coefficient_bare = self.config_get_float('wepp', 'channel_manning_roughness_coefficient_bare')
+            self._channel_manning_roughness_coefficient_veg = self.config_get_float('wepp', 'channel_manning_roughness_coefficient_veg')
             self._kslast = self.config_get_float('wepp', 'kslast')
             self._kslast_map = self.config_get_path('wepp', 'kslast_map')
 
@@ -548,6 +550,14 @@ class Wepp(NoDbBase, LogMixin):
         return getattr(self, '_channel_critical_shear', self.config_get_float('wepp', 'channel_critical_shear'))
 
     @property
+    def channel_manning_roughness_coefficient_bare(self):
+        return getattr(self, '_channel_manning_roughness_coefficient_bare', self.config_get_float('wepp', 'channel_manning_roughness_coefficient_bare'))
+
+    @property
+    def channel_manning_roughness_coefficient_veg(self):
+        return getattr(self, '_channel_manning_roughness_coefficient_veg', self.config_get_float('wepp', 'channel_manning_roughness_coefficient_veg'))
+
+    @property
     def channel_2006_avke(self):
         return getattr(self, '_channel_2006_avke', self.config_get_float('wepp', 'channel_2006_avke'))
 
@@ -605,6 +615,14 @@ class Wepp(NoDbBase, LogMixin):
             _channel_erodibility = kwds.get('channel_erodibility', None)
             if isfloat(_channel_erodibility):
                 self._channel_erodibility = float(_channel_erodibility)
+
+            _channel_manning_roughness_coefficient_bare = kwds.get('channel_manning_roughness_coefficient_bare', None)
+            if isfloat(_channel_manning_roughness_coefficient_bare):
+                self._channel_manning_roughness_coefficient_bare = float(_channel_manning_roughness_coefficient_bare)
+
+            _channel_manning_roughness_coefficient_veg = kwds.get('channel_manning_roughness_coefficient_veg', None)
+            if isfloat(_channel_manning_roughness_coefficient_veg):
+                self._channel_manning_roughness_coefficient_veg = float(_channel_manning_roughness_coefficient_veg)
 
             _pmet_kcb = kwds.get('pmet_kcb', None)
             if isfloat(_pmet_kcb):
@@ -1565,7 +1583,9 @@ class Wepp(NoDbBase, LogMixin):
     # watershed
     #
     def prep_watershed(self, erodibility=None, critical_shear=None,
-                       tcr=None, avke=None):
+                       tcr=None, avke=None,
+                       channel_manning_roughness_coefficient_bare=None,
+                       channel_manning_roughness_coefficient_veg=None):
         self.log('Prepping Watershed... ')
 
         watershed = Watershed.getInstance(self.wd)
@@ -1585,7 +1605,9 @@ class Wepp(NoDbBase, LogMixin):
 
         self._prep_structure(translator)
         self._prep_channel_slopes()
-        self._prep_channel_chn(translator, erodibility, critical_shear)
+        self._prep_channel_chn(translator, erodibility, critical_shear, 
+                               channel_manning_roughness_coefficient_bare=channel_manning_roughness_coefficient_bare, 
+                               channel_manning_roughness_coefficient_veg=channel_manning_roughness_coefficient_veg)
         self._prep_impoundment()
         self._prep_channel_soils(translator, erodibility, critical_shear, avke)
         self._prep_channel_climate(translator)
@@ -1636,7 +1658,9 @@ class Wepp(NoDbBase, LogMixin):
         _copyfile(src_fn, dst_fn)
 
     def _prep_channel_chn(self, translator, erodibility, critical_shear,
-                          channel_routing_method=ChannelRoutingMethod.MuskingumCunge):
+                          channel_routing_method=ChannelRoutingMethod.MuskingumCunge,
+                          channel_manning_roughness_coefficient_bare=None,
+                          channel_manning_roughness_coefficient_veg=None):
 
         if erodibility is not None or critical_shear is not None:
             self.log('nodb.Wepp._prep_channel_chn::erodibility = {}, critical_shear = {} '
@@ -1649,6 +1673,12 @@ class Wepp(NoDbBase, LogMixin):
         if critical_shear is None:
             critical_shear = self.channel_critical_shear
 
+        if channel_manning_roughness_coefficient_bare is None:
+            channel_manning_roughness_coefficient_bare = self.channel_manning_roughness_coefficient_bare
+
+        if channel_manning_roughness_coefficient_veg is None:
+            channel_manning_roughness_coefficient_veg = self.channel_manning_roughness_coefficient_veg
+
         assert translator is not None
 
         watershed = Watershed.getInstance(self.wd)
@@ -1659,6 +1689,7 @@ class Wepp(NoDbBase, LogMixin):
         fp = open(_join(runs_dir, 'pw0.chn'), 'w')
 
         if channel_routing_method == ChannelRoutingMethod.MuskingumCunge:
+            # this specifies the creation of the chanwb.out
             fp.write('99.1\r\n{chn_n}\r\n4\r\n1.500000\r\n'
                      .format(chn_n=chn_n))
         else:
@@ -1672,7 +1703,9 @@ class Wepp(NoDbBase, LogMixin):
             else:
                 chn_key = chn_summary.channel_type
 
-            chn_d = get_channel(chn_key, erodibility, critical_shear)
+            chn_d = get_channel(chn_key, erodibility, critical_shear, 
+                                chnnbr=channel_manning_roughness_coefficient_bare, 
+                                chnn=channel_manning_roughness_coefficient_veg)
             contents = chn_d['contents']
 
             fp.write(contents)

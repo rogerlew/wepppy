@@ -68,14 +68,25 @@ def load_channels():
     return d
 
 
-def get_channel(key, erodibility=None, critical_shear=None):
+def get_channel(key, erodibility=None, critical_shear=None, chnnbr=None, chnn=None):
     d = load_channels()
     chan = d[key]
 
-    if erodibility is not None or critical_shear is not None:
+    if erodibility is not None or \
+       critical_shear is not None or \
+       chnnbr is not None or \
+       chnn is not None:
+
         contents = chan['contents'].split('\n')
 
+        line7 = contents[7].split()
+        if chnnbr is not None:
+            line7[1] = str(chnnbr)
+        contents[7] = ' '.join(line7)
+
         line8 = contents[8].split()
+        if chnn is not None:
+            line8[0] = str(chnn)
         if erodibility is not None:
             line8[1] = str(erodibility)
         if critical_shear is not None:

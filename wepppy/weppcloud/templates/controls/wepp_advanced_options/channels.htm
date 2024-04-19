@@ -36,6 +36,28 @@
     </div>
 </div>
 
+<h6><b>Manning Roughness Coefficient</b></h6>
+<p>WEPP is more sensitive to chnn. chnn must be greater than chnnbr for WEPP.</p>
+<div class="form-group row" id="channel_manning_roughness_coefficient_veg">
+    <div class="col-sm-4">
+        <label for="channel_manning_roughness_coefficient_veg">Total Manning roughness coefficient in channel allowing for vegetation (chnn): </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="channel_manning_roughness_coefficient_veg" name="channel_manning_roughness_coefficient_veg" class="form-control mr-sm-3" type="text"
+         value="{{ wepp.channel_manning_roughness_coefficient_veg }}" aria-label="Channel Manning Roughness Coefficient">
+    </div>
+</div>
+
+<div class="form-group row" id="channel_manning_roughness_coefficient_bare">
+    <div class="col-sm-4">
+        <label for="channel_manning_roughness_coefficient_bare">Manning roughness coefficient for bare soil in the channel (chnnbr): </label>
+    </div>
+    <div class="col-sm-4">
+        <input id="channel_manning_roughness_coefficient_bare" name="channel_manning_roughness_coefficient_bare" class="form-control mr-sm-3" type="text"
+         value="{{ wepp.channel_manning_roughness_coefficient_bare }}" aria-label="Channel Manning Roughness Coefficient Bare">
+    </div>
+</div>
+
 {% if hasattr(wepp, "tcr_opts")%}
 <h6><b>Variable CS Parameters</b></h6>
 <a href="https://github.com/rogerlew/wepppy/raw/master/wepppy/wepp/soils/resources/ChannelCriticalShear_Vs_ChannelSlope.xlsx">Download the Channel Critical Shear Calculation Spreadsheet</a>
