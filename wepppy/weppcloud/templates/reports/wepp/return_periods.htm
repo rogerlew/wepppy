@@ -2,11 +2,36 @@
 {% block report_title %}Return Periods{% endblock %}
 {% block report_content %}
 <h3>WEPPcloud Return Period Analysis</h3>
+
+<select id="yearSelection" class="form-control" style="width: 200px;" onchange="window.location.href=this.value">
+  <option value="./"
+    {{ 'selected' if report.exclude_yr_indxs is none }}>
+    All years included
+  </option>
+  <option value="./?exclude_yr_indxs=0"
+    {{ 'selected' if report.exclude_yr_indxs == [0] }}>
+    Exclude first year
+  </option>
+  <option value="./?exclude_yr_indxs=0,1"
+    {{ 'selected' if report.exclude_yr_indxs == [0, 1] }}>
+    Exclude first two years
+  </option>
+  <option value="./?exclude_yr_indxs=0,1,2,3,4"
+    {{ 'selected' if report.exclude_yr_indxs == [0, 1, 2, 3, 4] }}>
+    Exclude first five years
+  </option>
+  {% if report.exclude_yr_indxs and report.exclude_yr_indxs not in ([], [0], [0,1], [0,1,2,3,4]) %}
+  <option value="./?exclude_yr_indxs={{ report.exclude_yr_indxs|join(',') }}" selected>
+    Custom: {{ report.exclude_yr_indxs|join(', ') }}
+  </option>
+  {% endif %}
+</select>
+
 <p>
 <br>The Return period of the events are estimated by applying Weibull formula on annual maxima series:</br>
 <div style="margin-left: 50px">
     <i>T</i> = (<i>N</i> + 1)/<i>m</i>,</br>
-where <i>T</i> is the return period, <i>N</i> is the number of simulation years, and <i>m</i> is the rank of he annual maxima event.</div>
+where <i>T</i> is the return period, <i>N</i> is the number of simulated daily values, and <i>m</i> is the rank of the daily events.</div>
 <dl class="dl-horizontal">
     <dt>Years in Simulation</dt>
     <dd>{{ report.years }}</dd>
