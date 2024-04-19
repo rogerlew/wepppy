@@ -16,46 +16,31 @@ from wepppy.wepp.out import Loss, Ebe
 from copy import deepcopy
 
 class ReturnPeriods:
-    def __init__(self, ebe: Ebe = None, loss: Loss = None, cli_df: DataFrame = None, recurrence=(2, 5, 10, 20, 25)):
+    def __init__(self, ebe: Ebe = None, loss: Loss = None, 
+                 cli_df: DataFrame = None, 
+                 recurrence=(2, 5, 10, 20, 25),
+                 exclude_yr_indxs=None):
+
         if ebe is None or loss is None or cli_df is None:
             return
 
         self.has_phosphorus = loss.has_phosphorus
 
         df = deepcopy(ebe.df)
-        print(df.info())
 
-        pk_intensity_dict = {}
+        df['10-min Peak Rainfall Intensity'] = cli_df['10-min Peak Rainfall Intensity (mm/hour)']
+        df['30-min Peak Rainfall Intensity'] = cli_df['30-min Peak Rainfall Intensity (mm/hour)']
 
-        # annoyingly the ebe has enumerated years and not gregorian years
-        # so we have to add the keys with enumerated years FML
-        y0 = np.min(cli_df['year'])
-        yend = np.max(cli_df['year']) + 0.5
-        _years = np.arange(y0, yend, dtype=np.int32)
+        _years = sorted(set(df['year']))
+        if exclude_yr_indxs is not None:
+            __years = []
 
-        years_map = dict(zip(_years, range(1, len(_years) + 1)))
+            for indx, _yr in enumerate(sorted(set(df['year']))):
+                if indx not in exclude_yr_indxs:
+                    __years.append(_yr)
+            _years = __years
 
-        for i, d in cli_df.iterrows():
-            key = int(d['da']), int(d['mo']), years_map[int(d['year'])]
-            pk_intensity_dict[key] = d
-
-        _pk10 =[]
-        _pk30 = []
-        for i, d in df.iterrows():
-            key = int(d['da']), int(d['mo']), int(d['year'])
-            _pk10.append(pk_intensity_dict[key]['10-min Peak Rainfall Intensity (mm/hour)'])
-            _pk30.append(pk_intensity_dict[key]['30-min Peak Rainfall Intensity (mm/hour)'])
-
-        # Breakpoint climates don't have peak intensities
-
-        if _pk10[0] >= 0:
-            df['10-min Peak Rainfall Intensity'] = Series(_pk10, index=df.index)
-
-        if _pk30[0] >= 0:
-            df['30-min Peak Rainfall Intensity'] = Series(_pk30, index=df.index)
-
-        df['Sediment Yield (tonne)'] = df['Sediment Yield (kg)'] / 1000.0
-        del df['Sediment Yield (kg)']
+            df = df[df['year'].isin(_years)]
 
         header = list(df.keys())
         header.remove('da')
@@ -63,10 +48,11 @@ class ReturnPeriods:
         header.remove('year')
 
         self.header = header
-        self.y0 = y0
-        self.years = years = ebe.years
+        self.y0 = _years[0]
+        self.years = years = len(_years)
         self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
+        self.exclude_yr_indxs = exclude_yr_indxs
 
         rec = weibull_series(recurrence, years)
 
@@ -121,7 +107,8 @@ class ReturnPeriods:
             'return_periods': self.return_periods,
             'num_events': self.num_events,
             'intervals': self.intervals,
-            'units_d': self.units_d
+            'units_d': self.units_d,
+            'exclude_yr_indxs': self.exclude_yr_indxs
         }
 
     @classmethod
@@ -137,6 +124,7 @@ class ReturnPeriods:
         rp.num_events = data['num_events']
         rp.intervals = data['intervals']
         rp.units_d = data['units_d']
+        rp.exclude_yr_indxs = data.get('exclude_yr_indxs', None)
 
         ret_periods = data['return_periods']
         rp.return_periods = {}

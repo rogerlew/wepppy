@@ -4490,6 +4490,16 @@ def report_rhem_return_periods(runid, config):
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods')
 @app.route('/runs/<string:runid>/<config>/report/wepp/return_periods/')
 def report_wepp_return_periods(runid, config):
+    try:
+        res = request.args.get('exclude_yr_indxs')
+        exclude_yr_indxs = []
+        for yr in res.split(','):
+            if isint(yr):
+                exclude_yr_indxs.append(int(yr))
+
+    except:
+        exclude_yr_indxs = None
+
 
     try:
         wd = get_wd(runid)
@@ -4499,7 +4509,8 @@ def report_wepp_return_periods(runid, config):
         rec_intervals = _parse_rec_intervals(request, climate.years)
 
         ron = Ron.getInstance(wd)
-        report = Wepp.getInstance(wd).report_return_periods(rec_intervals=rec_intervals)
+        report = Wepp.getInstance(wd).report_return_periods(
+            rec_intervals=rec_intervals, exclude_yr_indxs=exclude_yr_indxs)
         translator = Watershed.getInstance(wd).translator_factory()
 
         unitizer = Unitizer.getInstance(wd)
