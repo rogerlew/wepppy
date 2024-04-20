@@ -310,6 +310,8 @@ class ISRICSoilData:
         res_lyr_i = None
         res_lyr_ksat = None
 
+        _log = []
+
         horizons = []
         for i, depth in enumerate(isric_depths):
             horizon_data = soil_data[depth]
@@ -319,6 +321,10 @@ class ISRICSoilData:
             horizon._computeAnisotropy()
             horizon._computeConductivity()
             horizon._computeAlbedo()
+
+            _log.append(f'sand={horizon.sand}')
+            _log.append(f'cec={horizon.cec}')
+            _log.append(f'conductivity={horizon.conductivity}')
 
             _ksat = horizon.ksat
             if _ksat is None:
@@ -389,6 +395,9 @@ class ISRICSoilData:
 
         with open(_join(self.soils_dir, soil_fn), 'w') as fp:
             fp.write('\n'.join(s))
+
+        with open(_join(self.soils_dir, soil_fn + '.log'), 'w') as fp:
+            fp.write('\n'.join(_log))
 
 
         return mukey, SoilSummary(mukey=mukey,
