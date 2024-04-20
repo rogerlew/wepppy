@@ -20,7 +20,13 @@ def _get_bin():
     return _bin
 
 
-def run_peridot_abstract_watershed(wd: str, clip_hillslopes: bool = True, clip_hillslope_length: float = 300.0, verbose: bool = True):
+def run_peridot_abstract_watershed(
+    wd: str,
+    clip_hillslopes: bool = True,
+    clip_hillslope_length: float = 300.0,
+    bieger2015_widths: bool = False,
+    verbose: bool = True
+):
     assert _exists(_join(wd, 'dem/topaz/SUBWTA.ARC'))
 
     cmd = [_get_bin(), wd, '--ncpu', '24']
@@ -29,12 +35,16 @@ def run_peridot_abstract_watershed(wd: str, clip_hillslopes: bool = True, clip_h
         assert clip_hillslope_length > 0.0
         cmd += ['--clip-hillslopes', '--clip-hillslope-length', str(clip_hillslope_length)]
 
+    if bieger2015_widths:
+        cmd += ['--bieger2015-widths']
+
     if verbose:
         print(' '.join(cmd))
 
     _log = open(_join(wd, '_peridot.log'), 'w')
     p = Popen(cmd, stdout=_log, stderr=_log)
     p.wait()
+
 
 
 def post_abstract_watershed(wd: str, verbose: bool = True):

@@ -2720,6 +2720,12 @@ def task_build_subcatchments(runid, config):
     except:
         pass
 
+    bieger2015_widths = request.form.get('bieger2015_widths', 'off')
+    try:
+        bieger2015_widths = bieger2015_widths.lower().startswith('on')
+    except:
+        pass
+
     mofe_buffer_length = request.form.get('mofe_buffer_length', None)
     try:
         mofe_buffer_length = float(mofe_buffer_length)
@@ -2748,6 +2754,9 @@ def task_build_subcatchments(runid, config):
 
         if mofe_buffer_length is not None:
             watershed.mofe_buffer_length = mofe_buffer_length
+
+        if bieger2015_widths is not None:
+            watershed.bieger2015_widths = bieger2015_widths
 
         try:
             watershed.build_subcatchments(pkcsa=pkcsa)

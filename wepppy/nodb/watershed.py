@@ -113,6 +113,7 @@ class Watershed(NoDbBase, LogMixin):
 
             self._clip_hillslope_length = self.config_get_float('watershed', 'clip_hillslope_length')
             self._clip_hillslopes = self.config_get_bool('watershed', 'clip_hillslopes')
+            self._bieger2015_widths = self.config_get_bool('watershed', 'bieger2015_widths')
             self._walk_flowpaths = self.config_get_bool('watershed', 'walk_flowpaths')
             self._max_points = self.config_get_int('watershed', 'max_points', None)
 
@@ -249,6 +250,24 @@ class Watershed(NoDbBase, LogMixin):
         # noinspection PyBroadException
         try:
             self._clip_hillslope_length = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def bieger2015_widths(self):
+        return getattr(self, '_bieger2015_widths', False)
+
+    @bieger2015_widths.setter
+    def bieger2015_widths(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._bieger2015_widths = value
             self.dump_and_unlock()
 
         except Exception:
@@ -561,7 +580,7 @@ class Watershed(NoDbBase, LogMixin):
 
     def remove_outlet(self):
         self.outlet = None
-        
+
     #
     # build subcatchments
     #
@@ -632,7 +651,8 @@ class Watershed(NoDbBase, LogMixin):
             assert self.delineation_backend_is_topaz
             run_peridot_abstract_watershed(self.wd,
                                            clip_hillslopes=False,
-                                           clip_hillslope_length=self.clip_hillslope_length)
+                                           clip_hillslope_length=self.clip_hillslope_length,
+                                           bieger2015_widths=self.bieger2015_widths)
 
             self.lock()
             try:
