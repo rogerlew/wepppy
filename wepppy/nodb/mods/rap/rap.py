@@ -274,6 +274,16 @@ class RAP(NoDbBase):
     def __iter__(self):
         assert self.data is not None
 
-        for topaz_id in self.data:
-            yield topaz_id, RAPPointData(**{band.name.lower(): v for band, v in self.data[topaz_id].items()})
+        for topaz_id in self.data[RAP_Band.TREE]:
+            d = {}
+            for i, band in enumerate([RAP_Band.ANNUAL_FORB_AND_GRASS,
+                                      RAP_Band.BARE_GROUND,
+                                      RAP_Band.LITTER,
+                                      RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                                      RAP_Band.SHRUB,
+                                      RAP_Band.TREE]):
+
+                d[band.name.lower()] = self.data[band][topaz_id]
+
+            yield topaz_id, RAPPointData(**d)
 
