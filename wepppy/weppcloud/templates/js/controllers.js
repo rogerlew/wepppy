@@ -1074,6 +1074,12 @@ var Baer = function () {
                     success: function (response) {
                         var map = Map.getInstance();
                         map.sub_legend.html(response);
+
+                        map.sub_legend.append('<div id="slider-container"><p>Map Opacity</p><input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.7"></div>');
+                        $('#opacity-slider').on('input change', function() {
+                            var newOpacity = $(this).val();
+                            self.baer_map.setOpacity(newOpacity);
+                        });
                     },
                     error: function error(jqXHR)  {
                         self.pushResponseStacktrace(self, jqXHR.responseJSON);
