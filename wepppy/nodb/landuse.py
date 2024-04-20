@@ -528,15 +528,20 @@ class Landuse(NoDbBase, LogMixin):
                     area_data[dom] = []
 
                 area = watershed.area_of(topaz_id)
-                area_data[dom].append(dict(area=area, cancov=cancov_d[topaz_id]))
+                _cancov=cancov_d.get(topaz_id, None)
+                if _cancov is not None:
+                    area_data[dom].append(dict(area=area, cancov=_cancov))
 
             self.lock()
+
+            cancov = 0.0
             # noinspection PyBroadException
             try:
                 for dom, values in area_data.items():
                     dom_total_area = sum(d['area'] for d in values)
                     x = sum(d['area'] * d['cancov'] for d in values)
-                    cancov = x / dom_total_area
+                    if dom_total_area > 0.0:
+                        cancov = x / dom_total_area
                     self._modify_coverage(dom, 'cancov', cancov)
 
                 self.dump_and_unlock()
