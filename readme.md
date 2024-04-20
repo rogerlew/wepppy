@@ -4,8 +4,6 @@ wepppy
 Wepppy is Python package for running WEPP (Water Erosion Prediction Project) and processing WEPP input and outputs.
 
 
-### Latest Release
-[![DOI](https://zenodo.org/badge/125935882.svg)](https://zenodo.org/badge/latestdoi/125935882)
 
 ### Linux Installation
 
