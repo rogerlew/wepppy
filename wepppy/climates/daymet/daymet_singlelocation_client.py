@@ -119,7 +119,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
 if __name__ == "__main__":
     from wepppy.climates.cligen import df_to_prn
     
-    df = retrieve_historical_timeseries(-121.829585, 36.272184, 1980, 2021)
+    df = retrieve_historical_timeseries(-121.829585, 36.272184, 2022, 2023)
     print(len(df.index))
     print(df.keys())
 
