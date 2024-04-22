@@ -535,6 +535,7 @@ var Map = function () {
         that.mouseelev = $("#mouseelev");
         that.drilldown = $("#drilldown");
         that.sub_legend = $("#sub_legend");
+        that.sbs_legend = $("#sbs_legend");
 
         that.fetchElevation = function (ev) {
             var self = instance;
@@ -846,7 +847,7 @@ var Baer = function () {
         that.remove_sbs = function () {
             var self = instance;
             var map = Map.getInstance();
-   
+
             $.post({
                 url: "tasks/remove_sbs/",
                 contentType: false,
@@ -867,7 +868,7 @@ var Baer = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
-   
+
             if (self.baer_map !== null) {
                 map.ctrls.removeLayer(self.baer_map);
                 map.removeLayer(self.baer_map);
@@ -1073,9 +1074,9 @@ var Baer = function () {
                     cache: false,
                     success: function (response) {
                         var map = Map.getInstance();
-                        map.sub_legend.html(response);
+                        map.sbs_legend.html(response);
 
-                        map.sub_legend.append('<div id="slider-container"><p>Map Opacity</p><input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.7"></div>');
+                        map.sbs_legend.append('<div id="slider-container"><p>SBS Map Opacity</p><input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.7"></div>');
                         $('#opacity-slider').on('input change', function() {
                             var newOpacity = $(this).val();
                             self.baer_map.setOpacity(newOpacity);
