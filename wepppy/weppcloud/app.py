@@ -2528,14 +2528,11 @@ def task_fetch_dem(runid, config):
 
     extent, center, zoom, mcl, csa = args
 
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-    ron.set_map(extent, center, zoom)
-
-    ron.fetch_dem()
-
     # Acquire DEM from wmesque server
     try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        ron.set_map(extent, center, zoom)
         ron.fetch_dem()
     except Exception:
         return exception_factory('Fetching DEM Failed', runid=runid)
@@ -3014,7 +3011,6 @@ def resources_sbs_legend(runid, config):
 def resources_usgs_gage_locations():
     bbox = request.args.get('bbox')
     bbox = literal_eval(bbox)
-    print('bbox', bbox)
     return jsonify(crop_geojson(_join(_thisdir, 'static/resources/usgs/usgs_gage_locations.geojson'), bbox=bbox))
 
 
@@ -3124,9 +3120,6 @@ def task_build_rangeland_cover(runid, config):
         rock=request.form.get('rock_cover'),
         litter=request.form.get('litter_cover'),
         cryptogams=request.form.get('cryptogams_cover'))
-
-    print(f'rap_year = {rap_year}')
-    print(default_covers)
 
     try:
         rangeland_cover.build(rap_year=rap_year, default_covers=default_covers)
