@@ -390,6 +390,11 @@ def get_run_owners(runid):
     return User.query.filter(User.runs.any(Run.runid == runid)).all()
 
 
+@app.route('/health')
+def health():
+    return jsonify('OK')
+
+
 @app.route('/profile')
 @app.route('/profile/')
 @login_required
