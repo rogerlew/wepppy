@@ -1325,7 +1325,6 @@ var ChannelDelineation = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
-           
         };
 
         // Topaz Pass 1

@@ -63,17 +63,18 @@
     <div><a href="#sol_advanced_opts_con" data-toggle="collapse">Advanced Options</a>
         <div id="sol_advanced_opts_con" style="padding-left: 2em;" class="collapse">
 
-<h5>Use internal hydraulic conductivity adjustments (ksflag)</h5>
-<p>Should be off 7778. Does not affect 9001 and 9002 soils. (Experimental use for Agriculture Only.)</p>
-<div style="padding-left:3em;">
-<label class="form-check-label">
-    <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
-      onchange="Soil.getInstance().set_ksflag(this.checked);"
-      {% if soils.ksflag %}checked{% endif %}>
-    ksflag
-</label>
-</div>
-            <br/><br/>
+    <h5>Use internal hydraulic conductivity adjustments (ksflag)</h5>
+    <p>Should be off 7778. Does not affect 9001 and 9002 soils. (Experimental use for Agriculture Only.)</p>
+    <div style="padding-left:3em;">
+    <label class="form-check-label">
+        <input id="checkbox_run_flowpaths" type="checkbox" class="form-check-input disable-readonly"
+          onchange="Soil.getInstance().set_ksflag(this.checked);"
+          {% if soils.ksflag %}checked{% endif %}>
+        ksflag
+    </label>
+    </div>
+
+    <br/><br/>
 
     {% if 'disturbed' in ron.mods%}
     <h5>Specify un/disturbed soil version (sol_ver)</h5>
@@ -97,6 +98,8 @@
 
         </div>
     </div>
+
+    <div style="height:1em;"> </div>
 
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">

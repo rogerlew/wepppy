@@ -39,8 +39,8 @@ code {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 30px; /* Set the fixed height of the footer here */
-  line-height: 30px; /* Vertically center the text there */
+  height: 30px;
+  line-height: 30px;
   background-color: #f5f5f5;
 }
 #mapid {
@@ -75,6 +75,29 @@ code {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+}
+
+.header-units {
+    font-size: smaller;
+    color: #777;
+}
+
+table.sortable thead {
+    background-color:#eee;
+    color:#666666;
+    font-weight: bold;
+    cursor: default;
+}
+
+table.sortable th {
+    position: relative;
+    padding-right: 5px;
+}
+
+#sorttable_sortfwdind, #sorttable_sortrevind {
+    position: absolute;
+    right: 15px;
+    bottom: 5px;
 }
 
 .tooltip {
