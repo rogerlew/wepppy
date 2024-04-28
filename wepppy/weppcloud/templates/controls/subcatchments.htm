@@ -10,43 +10,43 @@
         {% else %}
         <h5>TauDEM</h5>
         <div style="height:75px" class="unitizer-wrapper">
-        <div class="unitizer units-ha">
-            <div class="form-group row">
-            <div class="col-sm-5">
-                <label for="input_pkcsa">Peuker Douglas CSA (ha)</label>
+            <div class="unitizer units-ha">
+                <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_pkcsa">Peuker Douglas CSA (ha)</label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_pkcsa" name="pkcsa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="pkcsa">
+                </div>
+                </div>
             </div>
-            <div class="col-sm-3">
-                <input id="input_pkcsa" name="pkcsa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="pkcsa">
+            <div class="unitizer units-acre">
+                <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_pkcsa_en">Peuker Douglas CSA (acre)</label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_pkcsa_en" name="pkcsa_en" class="form-control mr-sm-3 disable-readonly" type="text"
+                       value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}" aria-label="pkcsa"t>
+                </div>
+                </div>
             </div>
             </div>
-        </div>
-        <div class="unitizer units-acre">
-            <div class="form-group row">
-            <div class="col-sm-5">
-                <label for="input_pkcsa_en">Peuker Douglas CSA (acre)</label>
-            </div>
-            <div class="col-sm-3">
-                <input id="input_pkcsa_en" name="pkcsa_en" class="form-control mr-sm-3 disable-readonly" type="text"
-                   value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}" aria-label="pkcsa"t>
-            </div>
-            </div>
-        </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if wepp.multi_ofe %}
-        <h5>Multiple OFE Parameters</h5>
-        <div class="form-group row">
-        <div class="col-sm-5">
-            <label for="input_mofe_target_length">OFE Target Length (m)</label>
-        </div>
-        <div class="col-sm-3">
-            <input id="input_mofe_target_length"
-            name="mofe_target_length"
-            class="form-control mr-sm-3 disable-readonly"
-            type="text"
-            value="{{ watershed.mofe_target_length }}" aria-label="OFE Target Length">
-        </div>
+            {% if wepp.multi_ofe %}
+            <h5>Multiple OFE Parameters</h5>
+            <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_mofe_target_length">OFE Target Length (m)</label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_mofe_target_length"
+                name="mofe_target_length"
+                class="form-control mr-sm-3 disable-readonly"
+                type="text"
+                value="{{ watershed.mofe_target_length }}" aria-label="OFE Target Length">
+            </div>
         </div>
 
 
