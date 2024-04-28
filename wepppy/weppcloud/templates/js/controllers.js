@@ -35,13 +35,11 @@ WSClient.prototype.connect = function() {
     this.ws = new WebSocket(this.wsUrl);
 
     this.ws.onopen = () => {
-        console.log("wss:", this.channel, "onclose");
         $("#" + this.formId + " #status").html("Connected");
         this.ws.send(JSON.stringify({"type": "init"}));
     };
 
     this.ws.onmessage = (event) => {
-        console.log("wss:", this.channel, event.data);
         var payload = JSON.parse(event.data);
         if(payload.type === "ping") {
             this.ws.send(JSON.stringify({"type": "pong"}));
@@ -58,12 +56,9 @@ WSClient.prototype.connect = function() {
 
     this.ws.onerror = (error) => {
         this.ws = null;
-        console.error("wss:", channel, error);
     };
 
     this.ws.onclose = () => {
-        console.log("wss:", this.channel, "onclose");
-
         $("#" + this.formId + " #status").html("Connection Closed");
         this.ws = null;
         setTimeout(() => { this.connect(); }, 5000);
@@ -2047,8 +2042,6 @@ var SubcatchmentDelineation = function () {
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = self.dataCover[topId];
-                console.log('cmapCover: ' + v.toString());
-
                 var c = self.cmapperCover.map(v);
 
                 layer.setStyle({
@@ -4685,10 +4678,6 @@ var Climate = function () {
             if (mode === undefined) {
                 mode = -1;
             }
-
-            console.log("mode:");
-            console.log(mode);
-
             // show the appropriate controls
             if (mode === -1) {
                 // none selected
@@ -4977,8 +4966,6 @@ var Wepp = function () {
         that.addChannelCriticalShear = function (x) {
             var self = instance;
             self.channel_critical_shear.append(new Option('User Defined: CS = ' + x, x, true, true));
-
-            console.log('User Defined critical shear has been added to selection');
         };
 
         that.updatePhosphorus = function () {
