@@ -11,31 +11,39 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon/favicon2.ico') }}" type="image/x-icon">
     <style type="text/css">
-
-/* Banner styles */
+/* styles.css */
 .youtube-banner {
-    background-color: #FFFFFF; /* White background */
-    color: #FF0000; /* YouTube's primary red color for text */
-    padding: 15px 25px;
-    text-align: center;
-    font-family: Arial, sans-serif;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 20px auto; /* Auto margins for centering */
-    font-size: 1.2em;
-    border: 1px solid #FF0000; /* YouTube's primary red color for border */
-    max-width: 500; /* Adjust this to your preferred maximum width */
+    background-color: #fff; /* White background */
+    text-align: center; /* Centering text */
+    padding: 20px 0; /* Padding around the text */
+    margin: 20px -10px;
+    border: 1px solid #ccc; /* Light grey border */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
-
 .youtube-banner a {
-    color: #FF0000; /* YouTube's primary red color for link */
-    text-decoration: underline; /* Underlined link */
-    font-weight: bold;
+    text-decoration: none; /* No underline */
+    font-family: 'Arial', sans-serif; /* Modern, readable font */
+    font-size: 16px; /* Adequate font size */
 }
 
 .youtube-banner a:hover {
-    text-decoration: none; /* Remove underline on hover */
+    text-decoration: underline; /* Underline on hover for better interactivity */
+}
+
+.youtube-logo {
+    width: 24px; /* Appropriate size for the logo */
+    vertical-align: middle; /* Align with the text */
+    margin-right: 10px; /* Space between logo and text */
+}
+.youtube-link {
+    color: red;         /* Set the text color to black */
+    text-decoration: none; /* No underline */
+}
+.doc-link {
+    color: black;         /* Set the text color to black */
+    font-style: italic;   /* Make the font style italic */
+    text-decoration: none; /* Optionally remove underline from links */
 }
     </style>
   </head>
@@ -73,14 +81,15 @@
 </header>
     <div role="main" class="container">
       <div style="height: 60px;"></div>
-
         <!-- The banner -->
         <div class="youtube-banner">
-            Check out our <a href="https://www.youtube.com/@fswepp4700" target="_blank">YouTube tutorials</a> and learn more!
+            <a href="https://www.youtube.com/@fswepp4700" target="_blank" class="youtube-link">
+                <img src="{{  url_for('static', filename='images/youtube.png') }}" alt="YouTube Logo" class="youtube-logo">
+                Check out our YouTube tutorials and learn more!
+            </a>
             <br/>
-            Documentation and a QuickStart Guide can be found <a href="https://doc.wepp.cloud">here</a>
+            <a href="https://doc.wepp.cloud" class="doc-link">Documentation and QuickStart Guide</a>
         </div>
-
       <div style="height: 2em;"></div>
       <div class="jumbotron row">
         <div class="col-lg-3">

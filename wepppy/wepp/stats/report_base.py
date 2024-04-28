@@ -24,6 +24,11 @@ class ReportBase(object):
         for colname in self.header:
             yield parse_units(colname)
 
+    @property
+    def hdr_units_zip(self):
+        for colname in self.header:
+            yield parse_name(colname), parse_units(colname)
+
     def write(self, fp, write_header=True, run_descriptors=None):
 
         wtr = csv.writer(fp)

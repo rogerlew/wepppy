@@ -1,6 +1,7 @@
 {% extends "reports/_page_container.htm" %}
 {% block report_title %}Loss Summary{% endblock %}
 {% block report_content %}
+
 <h2>WEPP Results Summary</h2>
 <h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
     <!-- (excluding years {{ excluded_years }}) -->
@@ -39,58 +40,51 @@
 
 <br/>
 
-<h5>Average Annual Summary for Subcatchments for Years {{ avg_annual_years }}
-    <!-- (excluding years {{ excluded_years }}) -->
+<h5>Average Annual Summary for Subcatchments for All Years
     <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
-<table class="table table-condensed" id="hill_tbl">
-  <thead>
-    <tr>
-    {% for name in hill_rpt.hdr %}
-      <th>{{ name }}
-      {% if name == "WeppID" %}
-      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      {% if name == "TopazID" %}
-      <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      {% if name == "Landuse" %}
-      <a data-toggle="tooltip" data-placement="top" title="Landuse key from landuse map"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      {% if name == "Soil" %}
-      <a data-toggle="tooltip" data-placement="top" title="Soil file name"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
-      {% endif %}
-      </th>
-    {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-    {% for units in hill_rpt.units %}
-      {% if units is none %}
-      <td>&nbsp;</td>
-      {% else %}
-      <td>{{ unitizer_units(units) | safe }}</td>
-      {% endif %}
-    {% endfor %}
-    </tr>
-    {% for row in hill_rpt %}
-    <tr>
-      {% for value, units in row %}
-        <td>{{ unitizer(value, units) | safe }}</td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
+
+<table class="table table-condensed sortable" id="hill_tbl">
+    <thead>
+        <tr>
+        {% for name, units in hill_rpt.hdr_units_zip %}
+            <th class="align-top">
+                {{ name }}
+                {% if name == "WeppID" %}
+                <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                {% endif %}
+                {% if name == "TopazID" %}
+                <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                {% endif %}
+                {% if name == "Landuse" %}
+                <a data-toggle="tooltip" data-placement="top" title="Landuse key from landuse map"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                {% endif %}
+                {% if name == "Soil" %}
+                <a data-toggle="tooltip" data-placement="top" title="Soil file name"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                {% endif %}
+                <br><span class="header-units">{{ unitizer_units(units) | safe }} &nbsp;</span>
+            </th>
+        {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in hill_rpt %}
+        <tr>
+            {% for value, units in row %}
+            <td sorttable_customkey="{{ value }}">{{ unitizer(value, units) | safe }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
-<h5>Average Annual Summary for Channels for Years {{ avg_annual_years }}
-    <!-- (excluding years {{ excluded_years }}) -->
+
+<h5>Average Annual Summary for Channels for Years for All Years
     <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
-<table class="table table-condensed" id="chn_tbl">
+<table class="table table-condensed sortable" id="chn_tbl">
   <thead>
     <tr>
-    {% for name in chn_rpt.hdr %}
+    {% for name, units in chn_rpt.hdr_units_zip %}
       <th>{{ name }}
       {% if name == "WeppID" %}
       <a data-toggle="tooltip" data-placement="top" title="ID Assigned by WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
@@ -101,24 +95,16 @@
       {% if name == "TopazID" %}
       <a data-toggle="tooltip" data-placement="top" title="ID Assigned by TOPAZ"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>      
       {% endif %}
+      <br><span class="header-units">{{ unitizer_units(units) | safe }} &nbsp;</span>
       </th>
     {% endfor %}
     </tr>
   </thead>
   <tbody>
-    <tr>
-    {% for units in chn_rpt.units %}
-      {% if units is none %}
-      <td>&nbsp;</td>
-      {% else %}
-      <td>{{ unitizer_units(units) | safe }}</td>
-      {% endif %}
-    {% endfor %}
-    </tr>
     {% for row in chn_rpt %}
     <tr>
       {% for value, units in row %}
-        <td>{{ unitizer(value, units) | safe }}</td>
+        <td sorttable_customkey="{{ value }}">{{ unitizer(value, units) | safe }}</td>
       {% endfor %}
     </tr>
     {% endfor %}
