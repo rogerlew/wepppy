@@ -82,6 +82,7 @@
     </div>
 
 
+    {% if 'rap_ts' in climate.mods %}
     <h5>Fire Date</h5>
     <div class="form-group row" id="firedate_container">
         <div class="col-sm-3">
@@ -96,5 +97,5 @@
 
         </div>
     </div>
-
+    {% endif %}
 {% endblock %}
