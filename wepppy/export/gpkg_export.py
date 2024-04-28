@@ -70,7 +70,8 @@ def gpkg_export(wd: str):
     hill_loss_fn = _join(wd, 'wepp/output/loss_pw0.hill.parquet')
     if _exists(hill_loss_fn):
         hill_df = pd.read_parquet(hill_loss_fn)
-        columns_to_drop = ['Type', 'Hillslopes', 'Length', 'Landuse']
+        # filter single storm
+        columns_to_drop = [c for c in ('Type', 'Hillslopes', 'Length', 'Landuse') if c in hill_df.columns]
         hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_df = esri_compatible_colnames(hill_df)
         hill_gdf = hill_gdf.merge(hill_df, on='TopazID', how='left')
