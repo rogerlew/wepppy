@@ -8,11 +8,13 @@
                 <input type="radio" class="disable-readonly" value="0" id="rangeland_cover_mode0" name="rangeland_cover_mode"
                 {% if rangeland_cover.mode == 0 %}checked{% endif %}> Determine Per Hillslope (USGS NLCD Shrubland 2016)</label>
         </div>
+        {% if 'rap' in rangeland_cover.mods %}
         <div class="col-sm-12">
             <label class="radio-inline">
                 <input type="radio" class="disable-readonly" value="2" id="rangeland_cover_mode2" name="rangeland_cover_mode"
                 {% if rangeland_cover.mode == 2 %}checked{% endif %}> Determine Per Hillslope (RAP)</label>
         </div>
+        {% endif %}
         <div class="col-sm-12">
             <label class="radio-inline">
                 <input type="radio" class="disable-readonly" value="1" id="rangeland_cover_mode1" name="rangeland_cover_mode"
