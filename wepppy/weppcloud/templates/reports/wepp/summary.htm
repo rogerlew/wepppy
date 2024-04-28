@@ -3,7 +3,7 @@
 {% block report_content %}
 
 <h2>WEPP Results Summary</h2>
-<h5>Average Annual Delivery From Channel Outlet for Years {{ avg_annual_years }}
+<h5>{% if not is_singlestorm %}Average Annual Delivery From Channel Outlet for Years {% else %}Delivery from Channel Outlet from Storm{% endif %}
     <!-- (excluding years {{ excluded_years }}) -->
     <a onclick="javascript:copytable('out_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
@@ -40,7 +40,8 @@
 
 <br/>
 
-<h5>Average Annual Summary for Subcatchments for All Years
+
+<h5>{% if not is_singlestorm %} Average Annual Summary for Subcatchments for All Years{% else %} Summary for Subcatchments for Storm {% endif %}
     <a onclick="javascript:copytable('hill_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 
@@ -78,7 +79,7 @@
     </tbody>
 </table>
 
-<h5>Average Annual Summary for Channels for Years for All Years
+<h5>{% if not is_singlestorm %} Average Annual Summary for Channels for Years for All Years{% else %} Summary for Subcatchments for Storm {% endif %}
     <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed sortable" id="chn_tbl">

@@ -4276,6 +4276,7 @@ def report_wepp_loss(runid, config):
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
         loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+        is_singlestorm = loss.is_singlestorm
         out_rpt = OutletSummary(loss)
         hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
         chn_rpt = ChannelSummary(loss)
@@ -4296,6 +4297,7 @@ def report_wepp_loss(runid, config):
                                unitizer_nodb=unitizer,
                                precisions=wepppy.nodb.unitizer.precisions,
                                ron=ron,
+                               is_singlestorm=is_singlestorm,
                                user=current_user)
     except:
         return exception_factory(runid=runid)

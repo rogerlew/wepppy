@@ -1884,8 +1884,8 @@ class Wepp(NoDbBase, LogMixin):
             make_watershed_run(years, wepp_ids, runs_dir)
 
     def run_watershed(self):
-        from wepppy.export.prep_details import ( 
-            export_channels_prep_details, 
+        from wepppy.export.prep_details import (
+            export_channels_prep_details,
             export_hillslopes_prep_details
         )
         wd = self.wd
@@ -1951,19 +1951,20 @@ class Wepp(NoDbBase, LogMixin):
             compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
             self.log_done()
 
-            _ = self.loss_report # make the .parquet files for loss report
-
-            if self.arc_export_on_run_completion:
-                self.log(' running gpkg_export... ')
-                from wepppy.export.gpkg_export import gpkg_export
-                gpkg_export(self.wd)
-                self.log_done()
-
             if self.legacy_arc_export_on_run_completion:
                 self.log(' running legacy arcexport... ')
                 from wepppy.export import  legacy_arc_export
                 legacy_arc_export(self.wd)
                 self.log_done()
+
+
+        _ = self.loss_report # make the .parquet files for loss report
+
+        if self.arc_export_on_run_completion:
+            self.log(' running gpkg_export... ')
+            from wepppy.export.gpkg_export import gpkg_export
+            gpkg_export(self.wd)
+            self.log_done()
 
             self.make_loss_grid()
 

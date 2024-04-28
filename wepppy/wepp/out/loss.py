@@ -472,6 +472,8 @@ class Loss(object):
             out_tbl.to_parquet(fn.replace('.txt', '.out.parquet'))
             class_data.to_parquet(fn.replace('.txt', '.class_data.parquet'))
 
+        with open(fn) as fp:
+            self.is_singlestorm = 'single storm' in fp.readline().lower()
 
         self.fn = fn
         self._hill_tbl = hill_tbl
