@@ -814,8 +814,11 @@ class Station:
         assert len(self.tmaxs) == 12
         assert len(self.tmins) == 12
 
+        # old method was taken from jimf but could yield nwds > mdays
+        # also denominator could be 0
+        den = np.maximum(0.01,  1.0 - self.pwws + self.pwds)
         mdays = np.array([31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
-        self.nwds = mdays * (self.pwds / (1.0 - self.pwws + self.pwds))
+        self.nwds = np.minimum(mdays, mdays * (self.pwds / den))
 
         self.lines = lines
 
