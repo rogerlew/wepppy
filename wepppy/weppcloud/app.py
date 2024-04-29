@@ -121,6 +121,12 @@ from wepppy.nodb.mods.ash_transport import (
 )
 
 
+try:
+    from weppcloud2.discord_bot.discord_client import send_discord_message
+except:
+    send_discord_message = None
+
+
 # load app configuration based on deployment
 import socket
 _hostname = socket.gethostname()
@@ -1236,9 +1242,7 @@ def fork(runid, config):
         try:
             from wepppy.nodb.redis_prep import RedisPrep as Prep
             yield f'undisturbify = {undisturbify}\n'
-
             yield 'generating new runid...'
-     
             yield 'test raising error'
 
             dir_created = False
@@ -1361,6 +1365,8 @@ def fork(runid, config):
             url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
 
             yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
+
+            post_discord_wepp_run_complete(new_runid, new_wd, config)
 
         except Exception as e:
             yield 'encountered error'
@@ -3922,6 +3928,24 @@ def get_wepp_prep_details(runid, config):
         return exception_factory('Error building summary', runid=runid)
 
 
+def post_discord_wepp_run_complete(runid, wd, config):
+    if send_discord_message is not None:
+        ron = Ron.getInstance(wd)
+        name = ron.name
+        scenario = ron.scenario
+
+        link = runid
+        if name or scenario:
+            if name and scenario:
+                link = f'{name} - {scenario} _{runid}_'
+            elif name:
+                link = f'{name} _{runid}_'
+            else:
+                link = f'{scenario} _{runid}_'
+
+        send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
+
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
@@ -4045,6 +4069,8 @@ def submit_task_run_wepp(runid, config):
         #
         # Run Watershed
         wepp.run_watershed()
+
+        post_discord_wepp_run_complete(runid, wd, config)
 
     except Exception:
         return exception_factory('Error running wepp', runid=runid)
