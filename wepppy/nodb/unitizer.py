@@ -547,9 +547,79 @@ class Unitizer(NoDbBase):
 
             return '<div class="unitizer-wrapper">{}</div>'.format(s)
 
+        def unitizer_with_units(value, in_units, other_classes=None, parentheses=False, precision=None):
+
+            if value is None:
+                return ''
+
+            if precision is not None:
+                assert float(int(precision)) == float(precision)
+                precision = int(precision)
+
+            if in_units is None:
+                if precision is None:
+                    precision = 3
+                    try:
+                        if float(int(value)) == float(value):
+                            precision = 0
+                    except:
+                        pass
+
+                if isfloat(value):
+                    return tostring(value, precision)
+
+                return str(value)
+
+            if in_units == 'pct' or in_units == '%':
+                if isfloat(value):
+                    if value < 0.1 and value != 0.0:
+                        return '%0.E' % float(value)
+                    else:
+                        return '%0.1f' % float(value)
+
+                return '<i>{}</i>'.format(value)
+
+            unitclass = determine_unitclass(in_units)
+            if unitclass is None:
+                return '<i>{}</i>'.format(value)
+
+            oc = str_other_class(other_classes)
+
+            if precision is not None:
+                p = precision
+            else:
+                p = precisions[unitclass][in_units]
+
+            if parentheses:
+                s = '<div class="unitizer units-{u} {oc}">({v} {u1})</div>' \
+                    .format(u=cls_units(in_units), oc=oc, u1=str_units(in_units), v=tostring(value, p))
+            else:
+                s = '<div class="unitizer units-{u} {oc}">{v} {u1}</div>' \
+                    .format(u=cls_units(in_units), oc=oc, u1=str_units(in_units), v=tostring(value, p))
+
+            for u in precisions[unitclass].keys():
+                if u == in_units:
+                    continue
+                f = converters[unitclass][(in_units, u)]
+                p = precisions[unitclass][u]
+                try:
+                    v = tostring(f(value), p)
+                except:
+                    v = '<i>%s</i>' % str(value)
+
+                if parentheses:
+                    s += '<div class="unitizer units-{u} invisible{oc}">({v} {u1})</div>' \
+                        .format(u=cls_units(u), oc=oc, v=v, u1=str_units(u))
+                else:
+                    s += '<div class="unitizer units-{u} invisible{oc}">{v} {u1}</div>' \
+                        .format(u=cls_units(u), oc=oc, v=v, u1=str_units(u))
+
+            return '<div class="unitizer-wrapper">{}</div>'.format(s)
+
         return dict(cls_units=cls_units,
                     str_units=str_units,
                     unitizer=unitizer,
                     sum=sum,
                     mean=lambda x: sum(x) / len(x),
-                    unitizer_units=unitizer_units)
+                    unitizer_units=unitizer_units,
+                    unitizer_with_units=unitizer_with_units)
