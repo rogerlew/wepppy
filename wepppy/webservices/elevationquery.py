@@ -69,8 +69,10 @@ def query_elevation():
         except:
             return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
-    img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
-    src = _join(geodata_dir, 'ned1', '2016', img, 'img' + img + '_1.img')
+#    img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
+#    src = _join(geodata_dir, 'ned1', '2016', img, 'img' + img + '_1.img')
+
+    src = _join(geodata_dir, 'ned13/2016/.vrt')
 
     cmd = ['gdallocationinfo', '-geoloc', '-valonly', src, str(lng), str(lat)]
 #    print cmd
