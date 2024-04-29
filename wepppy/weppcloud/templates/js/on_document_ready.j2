@@ -53,18 +53,6 @@ function upload_cover_transform() {
     }
 };
 
-var climate_ws = new WSClient('climate_form', runid, 'climate');
-var wepp_ws = new WSClient('wepp_form', runid, 'wepp');
-var soils_ws = new WSClient('soil_form', runid, 'soils');
-
-if ({{( 'rhem_ts' in ron.mods) | string | lower }}) {
-    var rhem_ts_ws = new WSClient('rhem_ts_form', runid, 'rhem_ts');
-}
-
-if ({{( 'rap_ts' in ron.mods) | string | lower }}) {
-    var rap_ts_ws = new WSClient('rap_ts_form', runid, 'rap_ts');
-}
-
 //jQuery.readyException = function( e ) {
 //  console.error( e );
 //  error = e;
