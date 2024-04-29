@@ -45,7 +45,58 @@
     font-style: italic;   /* Make the font style italic */
     text-decoration: none; /* Optionally remove underline from links */
 }
+
+
+.context-menu {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 120px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  padding: 12px 16px;
+  z-index: 1;
+}
+
+.context-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu li {
+  margin-bottom: 5px;
+}
     </style>
+
+
+<script>
+let selectedLink;
+
+function showContextMenu(event, link) {
+  event.preventDefault();
+  selectedLink = link;
+  var menu = document.getElementById("context-menu");
+  menu.style.display = "block";
+  menu.style.left = event.pageX + "px";
+  menu.style.top = event.pageY + "px";
+  document.addEventListener("click", hideContextMenu);
+}
+
+function hideContextMenu() {
+  var menu = document.getElementById("context-menu");
+  menu.style.display = "none";
+  document.removeEventListener("click", hideContextMenu);
+}
+
+
+function loadWithArgument(name, value) {
+  var url = new URL(selectedLink.href);
+  url.searchParams.append(name, value);
+  window.location.href = url.toString();
+}
+
+</script>
+
   </head>
   <body>
   <header>
@@ -78,7 +129,16 @@
     </button>
     </div>
   </nav>
-</header>
+  </header>
+
+  <div id="context-menu" class="context-menu">
+    <ul>
+      <li><a href="#" onclick="loadWithArgument('unitizer:is_english', false)">SI</a></li>
+      <li><a href="#" onclick="loadWithArgument('unitizer:is_english', true)">English</a></li>
+    </ul>
+  </div>
+
+
     <div role="main" class="container">
       <div style="height: 60px;"></div>
         <!-- The banner -->
@@ -107,16 +167,20 @@
              to replace the WEPPcloud-PEP interface.<br>
              This interface also incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).
           </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/disturbed9002" role="button" >Start Disturbed Run (CONUS)</a>
-            <br/>
-            <br/>
-            <a class="btn btn-primary" href="create/disturbed-hi" role="button" >Start Disturbed-Hawaii Run (Experimental)</a>
-            <br/>
-            <br/>
-            <a class="btn btn-primary" href="create/disturbed-ak" role="button" >Start Disturbed-Alaska Run (Experimental)</a>
-            <p>{{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2023</p>
-          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/disturbed9002" title="disturbed9002" oncontextmenu="showContextMenu(event, this)" role="button">Start Disturbed Run (CONUS)</a>
+              </div>
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/disturbed-hi" title="disturbed-hi" oncontextmenu="showContextMenu(event, this)" role="button">Start Disturbed-Hawaii Run (Experimental)</a>
+              </div>
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/disturbed-ak" title="disturbed-ak" oncontextmenu="showContextMenu(event, this)" role="button">Start Disturbed-Alaska Run (Experimental)</a>
+              </div>
+            </div>
+          </div>
+          <p>{{ runs_counter['disturbed_projects'] }} projects and {{ commafy(runs_counter['disturbed_hillruns']) }} hillslopes ({{ commafy(runs_counter['disturbed_ash_hillruns'])}} WATAR hillslopes) ran since January 1, 2023</p>
         </div>
       </div>
       <div style="height: 2em;"></div>
@@ -135,16 +199,21 @@
              then apply a cover transform specifying the recovery of perennial, annual, shrub, and tree covers after the 
              simulated fire.
           </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/reveg" role="button" >Start Revegetation Run (CONUS)</a>
-            <br/>
-            <br/>
-            <a class="btn btn-primary" href="create/reveg-mofe" role="button" >Start Multiple OFE Revegetation Run (CONUS)</a>
-            <br/>
-            <br/>
-            <a class="btn btn-primary" href="create/reveg-10m-mofe" role="button" >Start 10m Multiple OFE Revegetation Run (CONUS)</a>
-            <p>{{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes ran since January 1, 2023</p>
-          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/reveg" title="reveg" role="button" >Start Revegetation Run (CONUS)</a>
+              </div>
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/reveg-mofe" title="reveg-mofe" role="button" >Start Multiple OFE Revegetation Run (CONUS)</a>
+              </div>
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/reveg-10m-mofe" title="reveg-10m-mofe" role="button" >Start 10m Multiple OFE Revegetation Run (CONUS)</a>
+                <a class="btn btn-primary d-block mb-3" href="create/disturbed-ak" title="disturbed-ak" role="button">Start Disturbed-Alaska Run (Experimental)</a>
+              </div>
+            </div>
+          </div>
+          <p>{{ runs_counter['reveg_projects'] }} projects and {{ commafy(runs_counter['reveg_hillruns']) }} hillslopes ran since January 1, 2023</p>
         </div>
       </div>
       <div style="height: 2em;"></div>
@@ -165,13 +234,15 @@
              on burn severity and soil texture using Disturbed WEPP soil files. 
              The PeP interface incorporates the Wildfire Ash Transport And  Risk estimation tool (WATAR).
           </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/eu-disturbed" role="button">Start EU WEPPcloud-Disturbed Run</a><br><br>
-            <!--a class="btn btn-primary" href="create/eu-fire" role="button">PeP Method 1 (Experimental)</a><br><br-->
-            <!--a class="btn btn-primary" href="create/eu-fire2" role="button">EU WEPPcloud-PeP w/ WATAR</a-->
-            <p>{{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran since January 1, 2023</p>
-            <p>EU WATAR  hillslopes ran since January 1, 2023 {{ commafy(runs_counter['eu_ash_hillruns']) }}</p>
-          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/eu-disturbed" title="eu-disturbed" role="button">Start EU WEPPcloud-Disturbed Run</a><br><br>
+              </div>
+            </div>
+          </div>
+          <p>{{ runs_counter['eu_projects'] }} EU projects and {{ commafy(runs_counter['eu_hillruns']) }} hillslopes ran since January 1, 2023</p>
+          <p>EU WATAR  hillslopes ran since January 1, 2023 {{ commafy(runs_counter['eu_ash_hillruns']) }}</p>
         </div>
       </div>
 
@@ -186,11 +257,15 @@
           <p>Managements are assigned based on  Land Use of Australia 2010-11. Soils are built from ASRIS soil data.
               U.S. climate stations are selected based on AGDC monthly precip and temperatures.
           </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/au-disturbed" role="button">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a><br><br>
-            <p>{{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran since January 1, 2023</p>
-            <p>EU WATAR  hillslopes ran since January 1, 2023 {{ commafy(runs_counter['au_ash_hillruns']) }}</p>
-          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/au-disturbed" title="au-disturbed" role="button">Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)</a><br><br>
+              </div>
+            </div>
+          </div>
+          <p>{{ runs_counter['au_projects'] }} EU projects and {{ commafy(runs_counter['au_hillruns']) }} hillslopes ran since January 1, 2023</p>
+          <p>EU WATAR  hillslopes ran since January 1, 2023 {{ commafy(runs_counter['au_ash_hillruns']) }}</p>
         </div>
       </div>
 
@@ -207,10 +282,14 @@
           </p>
           <p>SURGO/STATSGO is used to identify soil textures
           </p>
-          <p>
-            <a class="btn btn-primary btn-lg" href="create/rhem" role="button">Start RHEM Run (Experimental)</a><br><br>
-            <p>{{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM hillslopes ran since January 1, 2023</p>
-          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <a class="btn btn-primary d-block mb-3" href="create/rhem" title="rhem" role="button">Start RHEM Run (Experimental)</a><br><br>
+              </div>
+            </div>
+          </div>
+          <p>{{ runs_counter['rhem_projects'] }} RHEM projects and {{ commafy(runs_counter['rhem_hillruns']) }} RHEM hillslopes ran since January 1, 2023</p>
         </div>
       </div>
 
