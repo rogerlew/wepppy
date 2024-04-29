@@ -60,6 +60,11 @@ def safe_float_parse(x):
         return None
 
 
+@app.route('/health')
+def health():
+    return jsonify("OK")
+
+
 # noinspection PyPep8Naming
 @app.route('/findstation', methods=['GET', 'POST'])
 @app.route('/findstation/', methods=['GET', 'POST'])

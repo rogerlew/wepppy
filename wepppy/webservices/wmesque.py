@@ -123,7 +123,6 @@ def build_catalog(geodata):
 
     for _dir in dirs:
         for root, dirnames, filenames in os.walk(_dir):
-            print(root, dirnames)
 
             for filename in fnmatch.filter(filenames, '.vrt'):
                 path = os.path.join(root, filename)
@@ -164,7 +163,7 @@ def parse_bbox(bbox):
 
     n = len(coords)
     if n < 4:
-        coords.extend([None for i in range(4-n)])
+        coords.extend([None for i in xrange(4-n)])
     if n > 4:
         coords = coords[:4]
 
@@ -172,6 +171,11 @@ def parse_bbox(bbox):
 
 
 app = Flask(__name__)
+
+
+@app.route('/health')
+def health():
+    return jsonify("OK")
 
 
 @app.route('/')
@@ -209,31 +213,45 @@ def api_dataset(dataset):
 @app.route('/<dataset>/<year>/<layer>/<foo>/')
 @app.route('/<dataset>/<year>/<layer>/<foo>/<bar>')
 @app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/')
-def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'POST']):
+@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>')
+@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/')
+@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>')
+@app.route('/<dataset>/<year>/<layer>/<foo>/<bar>/<foo2>/<bar2>/')
+def api_dataset_year(dataset, year, layer='', foo='', bar='', foo2='', bar2='', methods=['GET', 'POST']):
     """
-    Process and serve the map
+    Constructs a file path for a given dataset and year, with optional additional parameters for layering.
+    The path dynamically adjusts to include layer, foo, bar, foo2, and bar2 directories if provided.
+    
+    :param dataset: Name of the dataset.
+    :param year: Year of the dataset.
+    :param layer: Optional layer within the dataset.
+    :param foo: First optional subdirectory within layer.
+    :param bar: Second optional subdirectory within foo.
+    :param foo2: Third optional subdirectory within bar.
+    :param bar2: Fourth optional subdirectory within foo2.
+    :param methods: HTTP methods supported by the API endpoint.
+    :return: Path to the .vrt file constructed based on the provided parameters.
     """
-    # determine src vrt and dst filename
+    # Initialize the path with dataset and year
+    path_parts = [geodata_dir, dataset, year]
     
-    fn_list = set()
+    # Add optional parts if they are not empty
+    for part in [layer, foo, bar, foo2, bar2]:
+        if part:
+            path_parts.append(part)
     
-    if layer == '':
-        src = os.path.join(geodata_dir, dataset, year,'.vrt')
-    else:
-        if foo == '':
-            src = os.path.join(geodata_dir, dataset, year, layer, '.vrt')
-        else:
-            if bar == '':
-                src = os.path.join(geodata_dir, dataset, year, layer, foo, '.vrt')
-            else:
-                src = os.path.join(geodata_dir, dataset, year, layer, foo, bar, '.vrt')
+    # Append the .vrt filename at the end
+    path_parts.append('.vrt')
+    
+    # Construct and return the full file path
+    src = os.path.join(*path_parts)
 
     fn_uuid = str(uuid4().hex) + '.tif'
     dst = os.path.join(SCRATCH, fn_uuid)
 
     # if the src file doesn't exist we can abort
     if not os.path.exists(src):
-        return jsonify({'Error': 'Cannot find dataset/year: %s/%s' % (dataset, year)})
+        return jsonify({'Error': f'Cannot find dataset: {src}'})
 
     # if request is not GET we should abort
     # need to implement POST
@@ -275,8 +293,8 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
     height_px = int((ul_y - lr_y) / cellsize)
     width_px = int((ul_x - lr_y) / cellsize)
 
-#    if (height_px > 2048 or width_px > 2048):
-#        return jsonify({'Error:': 'output size cannot exceed 2048 x 2048'})
+    if height_px > 4096 or width_px > 4096:
+        return jsonify({'Error:': 'output size cannot exceed 4096 x 4096'})
 
     proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84" \
             .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
@@ -325,7 +343,8 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
                         'cmd': cmd,
                         'stdout': output})
 
-    fn_list.add(dst)
+    fn_list = []
+    fn_list.append(dst)
 
     # gdaldem processing
     dst2 = None
@@ -352,7 +371,7 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
                             'cmd2': cmd2,
                             'stdout2': output2})
 
-        fn_list.add(dst2)
+        fn_list.list(dst2)
 
     # build response
     dst_final = (dst, dst2)[dst2 != None]
@@ -367,7 +386,7 @@ def api_dataset_year(dataset, year, layer='', foo='', bar='', methods=['GET', 'P
             return jsonify({'Error': 'failed to convert to output format'})
         else:
             dst_final = dst3
-            fn_list.add(dst3)
+            fn_list.append(dst3)
 
     response = make_response(send_file(dst_final))
 

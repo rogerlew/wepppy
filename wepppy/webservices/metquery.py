@@ -210,6 +210,11 @@ def parse_bbox(bbox):
 app = Flask(__name__)
 
 
+@app.route('/health')
+def health():
+    return jsonify("OK")
+
+
 @app.route('/daily/catalog')
 @app.route('/daily/catalog/')
 def query_daily_catalog():
