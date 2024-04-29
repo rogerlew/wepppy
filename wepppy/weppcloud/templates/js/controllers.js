@@ -21,19 +21,23 @@ function pass() {
  * ----------------------------------------------------------------------------
  */
 
-function WSClient(formId, runId, channel) {
+function WSClient(formId, channel) {
+    // global runid
     this.formId = formId;
-    this.runId = runId;
     this.channel = channel;
-    this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runId + ":" + channel;
+    this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runid + ":" + channel;
     this.ws = null;
-    this.connect();
+    this.shouldReconnect = true;
+//    this.connect();
 }
 
 WSClient.prototype.connect = function() {
+    if (this.ws) {
+        return; // If already connected, do nothing
+    }
 
+    this.shouldReconnect = true;
     this.ws = new WebSocket(this.wsUrl);
-
     this.ws.onopen = () => {
         $("#" + this.formId + " #status").html("Connected");
         this.ws.send(JSON.stringify({"type": "init"}));
@@ -41,10 +45,9 @@ WSClient.prototype.connect = function() {
 
     this.ws.onmessage = (event) => {
         var payload = JSON.parse(event.data);
-        if(payload.type === "ping") {
+        if (payload.type === "ping") {
             this.ws.send(JSON.stringify({"type": "pong"}));
-        }
-        else if (payload.type === "status") {
+        } else if (payload.type === "status") {
             var data = payload.data;
             var lines = data.split('\n');
             if (lines.length > 1) {
@@ -55,14 +58,25 @@ WSClient.prototype.connect = function() {
     };
 
     this.ws.onerror = (error) => {
+        console.log("WebSocket Error: ", error);
         this.ws = null;
     };
 
     this.ws.onclose = () => {
         $("#" + this.formId + " #status").html("Connection Closed");
         this.ws = null;
-        setTimeout(() => { this.connect(); }, 5000);
+        if (this.shouldReconnect) {
+            setTimeout(() => { this.connect(); }, 5000);
+        }
     };
+};
+
+WSClient.prototype.disconnect = function() {
+    if (this.ws) {
+        this.shouldReconnect = false;
+        this.ws.close();
+        this.ws = null;
+    }
 };
 
 
@@ -366,6 +380,7 @@ var RAP_TS = function () {
             var self = instance;
             self.stacktrace.hide();
         };
+        that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
 
         that.acquire = function () {
             var self = instance;
@@ -374,6 +389,7 @@ var RAP_TS = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             $.post({
                 url: "tasks/acquire_rap_ts/",
@@ -389,6 +405,8 @@ var RAP_TS = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function() {
+                self.ws_client.disconnect();
             });
         };
 
@@ -4168,6 +4186,7 @@ var Soil = function () {
             var self = instance;
             self.stacktrace.hide();
         };
+        that.ws_client = new WSClient('soil_form', 'soils');
 
         that.build = function () {
             var self = instance;
@@ -4176,6 +4195,7 @@ var Soil = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             $.post({
                 url: "tasks/build_soil/",
@@ -4194,6 +4214,8 @@ var Soil = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function() {
+                self.ws_client.disconnect();
             });
         };
 
@@ -4371,6 +4393,7 @@ var Climate = function () {
             var self = instance;
             self.stacktrace.hide();
         };
+        that.ws_client = new WSClient('climate_form', 'climate');
 
         that.stationselection = $("#climate_station_selection");
 
@@ -4597,7 +4620,9 @@ var Climate = function () {
             var task_msg = "Building climate";
 
             self.info.text("");
+            self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             $.post({
                 url: "tasks/build_climate/",
@@ -4615,7 +4640,10 @@ var Climate = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function() {
+                self.ws_client.disconnect();
             });
+
         };
 
         that.report = function () {
@@ -4955,6 +4983,7 @@ var Wepp = function () {
             var self = instance;
             self.stacktrace.hide();
         };
+        that.ws_client = new WSClient('wepp_form', 'wepp');
 
         that.surf_runoff = $("#wepp_form #surf_runoff");
         that.lateral_flow = $("#wepp_form #lateral_flow");
@@ -5088,6 +5117,7 @@ var Wepp = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             var data = self.form.serialize();
 
@@ -5108,9 +5138,10 @@ var Wepp = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function() {
+                self.ws_client.disconnect();
             });
         };
-
 
         that.run_watershed = function () {
             var self = instance;
@@ -5538,7 +5569,7 @@ var Rhem = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-
+        that.ws_client = new WSClient('rhem_ts_form', 'rhem_ts');
 
         that.run = function () {
             var self = instance;
@@ -5547,7 +5578,7 @@ var Rhem = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
-
+            self.ws_client.connect();
 
             $.post({
                 url: "tasks/run_rhem/",
@@ -5566,6 +5597,8 @@ var Rhem = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
+            }).always(function() {
+                self.ws_client.disconnect();
             });
         };
 
