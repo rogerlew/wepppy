@@ -63,7 +63,7 @@ WSClient.prototype.connect = function() {
     };
 
     this.ws.onclose = () => {
-        $("#" + this.formId + " #status").html("Connection Closed");
+//        $("#" + this.formId + " #status").html("Connection Closed");
         this.ws = null;
         if (this.shouldReconnect) {
             setTimeout(() => { this.connect(); }, 5000);
