@@ -306,8 +306,6 @@ class TCROpts(object):
     def parse_inputs(self, kwds):
         for var in ('taumin', 'taumax', 'kch', 'nch'):
             _var = f'tcr_opts_{var}'
-            print('_var', _var)
-
 
             if var in kwds:
                 setattr(self, var, try_parse_float(kwds[var], None))
@@ -602,8 +600,6 @@ class Wepp(NoDbBase, LogMixin):
             self.phosphorus_opts.parse_inputs(kwds)
             if hasattr(self, 'tcr_opts'):
                 self.tcr_opts.parse_inputs(kwds)
-
-            print(self.tcr_opts.contents)
 
             if hasattr(self, 'snow_opts'):
                 self.snow_opts.parse_inputs(kwds)
