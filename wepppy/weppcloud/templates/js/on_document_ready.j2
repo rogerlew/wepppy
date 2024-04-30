@@ -1048,7 +1048,7 @@ function updateUI(checklist) {
             $(selector).addClass('unchecked').removeClass('checked');
         }
     }
-    
+
     var selector = getSelectorForKey("sbs_map");
     if (checklist.sbs_map) {
         $(selector).addClass('burned').removeClass('unburned');
@@ -1090,8 +1090,11 @@ function initWebSocket() {
 
     ws.onmessage = function(event) {
         var payload = JSON.parse(event.data);
-        if(payload.type === "ping") {
+        if (payload.type === "ping") {
             ws.send(JSON.stringify({"type": "pong"}));
+        } else if (payload.type === "hangup") {
+            ws.close();
+            ws = null;
         } else if (payload.type === "preflight") {
             console.log(payload.checklist);
             updateUI(payload.checklist);

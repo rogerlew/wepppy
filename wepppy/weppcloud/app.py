@@ -3146,14 +3146,17 @@ def view_management(runid, config, key):
     wd = get_wd(runid)
     assert wd is not None
 
-    landuse = Landuse.getInstance(wd)
-    man = landuse.managements[str(key)].get_management()
-    contents = repr(man)
+    try:
+        landuse = Landuse.getInstance(wd)
+        man = landuse.managements[str(key)].get_management()
+        contents = repr(man)
 
-    r = Response(response=contents, status=200, mimetype="text/plain")
-    r.headers["Content-Type"] = "text/plain; charset=utf-8"
-    return r
+        r = Response(response=contents, status=200, mimetype="text/plain")
+        r.headers["Content-Type"] = "text/plain; charset=utf-8"
+        return r
 
+    except Exception:
+        return exception_factory('Error retrieving management', runid=runid)
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/modify_landuse/', methods=['POST'])
@@ -5810,7 +5813,7 @@ def weppcloudr_proxy(routine):
 #  R -e 'library("rmarkdown"); rmarkdown::render("03_Rmarkdown_to_generate_reports.Rmd", params=list(proj_runid="lt_202012_26_Bliss_Creek_CurCond"), output_file="rmd_rpt.htm")'
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
+    app.run(debug=True, port=5003)
 
     # sudo docker run -i -p 5003:80 -v /Users/roger/geodata:/geodata -v /Users/roger/wepppy/wepppy:/workdir/wepppy/wepppy  -t wepppydocker-base
 
