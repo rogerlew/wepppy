@@ -557,7 +557,7 @@ var Map = function () {
             var self = instance;
 
             $.post({
-                url: "https://wepp.cloud/webservices/elevationquery/",
+                url: "/webservices/elevationquery/",
                 data: JSON.stringify({ lat: ev.latlng.lat, lng: ev.latlng.lng }),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -567,7 +567,6 @@ var Map = function () {
                     var lng = coordRound(ev.latlng.lng);
                     var lat = coordRound(ev.latlng.lat);
                     self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + lng + ", " + lat);
-                    self.isFetchingElevation = false;
                 },
                 error: function(jqXHR) {
                     console.log(jqXHR.responseJSON);
@@ -577,7 +576,7 @@ var Map = function () {
                     clearTimeout(self.fetchTimer);
                     self.fetchTimer = setTimeout(function() {
                         self.isFetchingElevation = false;
-                    }, 3000); // Wait for 3 seconds before allowing another request
+                    }, 1000); // Wait for 1 seconds before allowing another request
                 }
             });
         };
