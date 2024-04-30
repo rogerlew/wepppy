@@ -27,7 +27,7 @@ def safe_float_parse(x):
     except:
         return None
 
-        
+
 app = Flask(__name__)
 
 
@@ -35,7 +35,7 @@ app = Flask(__name__)
 def query_elevation():
     if request.method not in ['GET', 'POST']:
         return jsonify({'Error': 'Expecting GET or POST'})
-        
+
     lat = request.args.get('lat', None)
     lng = request.args.get('lng', None)
     srs = request.args.get('srs', None)
@@ -69,22 +69,22 @@ def query_elevation():
         except:
             return jsonify({'Error': 'Could not transform lng, lat to wgs'})
 
-#    img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
-#    src = _join(geodata_dir, 'ned1', '2016', img, 'img' + img + '_1.img')
+    img = 'n%02iw%03i' % (int(math.ceil(lat)), int(math.ceil(abs(lng))))
+    src = _join(geodata_dir, 'ned1', '2016', img, 'img' + img + '_1.img')
 
-    src = _join(geodata_dir, 'ned13/2016/.vrt')
+#    src = _join(geodata_dir, 'ned13/2016/.vrt')
 
     cmd = ['gdallocationinfo', '-geoloc', '-valonly', src, str(lng), str(lat)]
 #    print cmd
 
     p = Popen(cmd, stdout=PIPE)
     p.wait()
-    
+
     try:
         elev = float(p.stdout.read().strip())
     except:
         elev = float('nan')
-        
+
     return jsonify({'Elevation': elev,
                     'Units': 'm',
                     'Longitude': lng,
