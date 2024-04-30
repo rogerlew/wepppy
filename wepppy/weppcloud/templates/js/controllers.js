@@ -552,6 +552,7 @@ var Map = function () {
         that.sub_legend = $("#sub_legend");
         that.sbs_legend = $("#sbs_legend");
 
+        that.fetchTimer;
         that.fetchElevation = function (ev) {
             var self = instance;
 
@@ -561,19 +562,22 @@ var Map = function () {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 cache: false,
-                success: function success(response) {
+                success: function(response) {
                     var elev = response.Elevation.toFixed(1);
                     var lng = coordRound(ev.latlng.lng);
                     var lat = coordRound(ev.latlng.lat);
                     self.mouseelev.show().text("| Elevation: " + elev + " m | Cursor: " + lng + ", " + lat);
                     self.isFetchingElevation = false;
                 },
-                error: function error(jqXHR)  {
+                error: function(jqXHR) {
                     console.log(jqXHR.responseJSON);
                 },
-                fail: function fail(error) {
-                    console.log(error);
-                    that.isFetchingElevation = false;
+                complete: function() {
+                    // Reset the timer in the complete callback
+                    clearTimeout(self.fetchTimer);
+                    self.fetchTimer = setTimeout(function() {
+                        self.isFetchingElevation = false;
+                    }, 3000); // Wait for 3 seconds before allowing another request
                 }
             });
         };
@@ -586,6 +590,7 @@ var Map = function () {
                 self.fetchElevation(ev);
             }
         });
+
 
         that.on("mouseout", function () {
             var self = instance;
