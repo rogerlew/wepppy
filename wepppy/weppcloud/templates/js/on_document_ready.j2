@@ -1079,37 +1079,49 @@ function getSelectorForKey(key) {
 
 function initWebSocket() {
     var wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/preflight/{{ run_id }}";
+    var ws;
 
-    ws = new WebSocket(wsUrl);
+    function connectWebSocket() {
+        ws = new WebSocket(wsUrl);
 
-    ws.onopen = function() {
-        console.log("Preflight Connected");
-        $("#preflight_status").html("Connected");
-        ws.send(JSON.stringify({"type": "init"}));
-    };
+        ws.onopen = function() {
+            $("#preflight_status").html("Connected");
+            ws.send(JSON.stringify({"type": "init"}));
+        };
 
-    ws.onmessage = function(event) {
-        var payload = JSON.parse(event.data);
-        if (payload.type === "ping") {
-            ws.send(JSON.stringify({"type": "pong"}));
-        } else if (payload.type === "hangup") {
-            ws.close();
-            ws = null;
-        } else if (payload.type === "preflight") {
-            console.log(payload.checklist);
-            updateUI(payload.checklist);
+        ws.onmessage = function(event) {
+            var payload = JSON.parse(event.data);
+            if (payload.type === "ping") {
+                ws.send(JSON.stringify({"type": "pong"}));
+            } else if (payload.type === "hangup") {
+                ws.close();
+                ws = null;
+            } else if (payload.type === "preflight") {
+                updateUI(payload.checklist);
+            }
+        };
+
+        ws.onclose = function() {
+            if (!document.hidden) { // Only reconnect if the page is visible
+                $("#preflight_status").html("Preflight Connection Closed");
+                setTimeout(connectWebSocket, 5000); // Try to reconnect every 5 seconds.
+            }
+        };
+    }
+
+    connectWebSocket(); // Initial connection setup
+
+    // Handling visibility change
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            if (ws) {
+                ws.close();
+            }
+        } else {
+            connectWebSocket(); // Reconnect WebSocket when page is visible
         }
-    };
-
-    ws.onclose = function() {
-        $("#preflight_status").html("Preflight Connection Closed");
-        console.log("Preflight Connection closed. Reconnecting...");
-        setTimeout(initWebSocket, 5000);  // Try to reconnect every 5 seconds.
-    };
+    });
 }
-
-
-
 
 $(document).ready(function() {
     initWebSocket();
