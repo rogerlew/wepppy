@@ -648,7 +648,7 @@ class Wepp(NoDbBase, LogMixin):
     def has_run(self):
         output_dir = self.output_dir
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
-        if _exists(loss_pw0):
+        if _exists(loss_pw0) and not self.islocked():
             return True
 
         climate = Climate.getInstance(self.wd)
@@ -926,14 +926,14 @@ class Wepp(NoDbBase, LogMixin):
         # if the maps are available read the p parameters from the maps
         watershed = Watershed.getInstance(self.wd)
         lng, lat = watershed.outlet.actual_loc
-        
+
         if p_surf_runoff_map is not None:
             p_surf_runoff = RasterDatasetInterpolator(p_surf_runoff_map).get_location_info(lng, lat, method='nearest')
             if p_surf_runoff > 0.0:
                 self.log('wepp:_prep_phosphorus setting surf_runoff to {} from map'.format(p_surf_runoff))
                 phos_opts.surf_runoff = float(p_surf_runoff)
                 self.log_done()
-            
+
         if p_lateral_flow_map is not None:
             p_lateral_flow = RasterDatasetInterpolator(p_lateral_flow_map).get_location_info(lng, lat, method='nearest')
             if p_lateral_flow > 0.0:
@@ -941,7 +941,7 @@ class Wepp(NoDbBase, LogMixin):
                 phos_opts.lateral_flow = float(p_lateral_flow)
                 self.log_done()
 
-        if p_baseflow_map is not None: 
+        if p_baseflow_map is not None:
             p_baseflow = RasterDatasetInterpolator(p_baseflow_map).get_location_info(lng, lat, method='nearest')
             if p_baseflow > 0.0:
                 self.log('wepp:_prep_phosphorus setting baseflow to {} from map'.format(p_baseflow))
