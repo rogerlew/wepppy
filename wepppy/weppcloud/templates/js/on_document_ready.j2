@@ -95,6 +95,22 @@ function onReady() {
     soil.hideStacktrace();
     climate.hideStacktrace();
     wepp.hideStacktrace();
+
+
+    // kick off websocket clients if the nodb is locked. Likely building or running is in progress
+
+    if ({{ (soils.islocked()) | tojson }}) {
+        soil.ws_client.connect();
+    }
+
+    if ({{ (climate.islocked()) | tojson }}) {
+        climate.ws_client.connect();
+    }
+
+    if ({{ (wepp.islocked()) | tojson }}) {
+        wepp.ws_client.connect();
+    }
+
     try {
         observed.hideStacktrace();
     } catch (e) { }
