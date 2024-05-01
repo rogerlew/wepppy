@@ -287,7 +287,7 @@ class Run(db.Model):
                     scenario=ron.scenario,
                     w3w=ron.w3w,
                     readonly=ron.readonly)
-                    
+
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
@@ -490,10 +490,11 @@ def upload_sbs():
     except Exception:
         return exception_factory('Could not create run')
 
-    try:
-        user_datastore.create_run(runid, config, current_user)
-    except Exception:
-        return exception_factory('Could not add run to user database')
+    if not current_user.is_anonymous:
+        try:
+            user_datastore.create_run(runid, config, current_user)
+        except Exception:
+            return exception_factory('Could not add run to user database')
 
 
     disturbed = Disturbed.getInstance(wd)
@@ -1087,7 +1088,7 @@ def create_run_dir(current_user):
     wd = None
     dir_created = False
     while not dir_created:
-        runid = awesome_codename.generate_codename().replace(' ', '-')
+        runid = awesome_codename.generate_codename().replace(' ', '-').replace("'", '')
 
         email = getattr(current_user, 'email', '')
         if email.startswith('rogerlew@'):
@@ -1136,10 +1137,11 @@ def create(config):
 
     url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
 
-    try:
-        user_datastore.create_run(runid, config, current_user)
-    except Exception:
-        return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+    if not current_user.is_anonymous:
+        try:
+            user_datastore.create_run(runid, config, current_user)
+        except Exception:
+            return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
 
     return redirect(url)
 
@@ -1269,7 +1271,11 @@ def fork(runid, config):
 
             yield ' done.\nNew runid: {}\n\nAdding new run to database...'.format(new_runid)
 
-            user_datastore.create_run(new_runid, config, current_user)
+            if not current_user.is_anonymous:
+                try:
+                    user_datastore.create_run(new_runid, config, current_user)
+                except Exception:
+                    return exception_factory('Could not add run to user database')
 
             yield ' done.\n\nCopying files...'.format(new_runid)
 
@@ -1685,11 +1691,11 @@ def runs0(runid, config):
         except:
             skid_trails = None
 
-        try:    
+        try:
             reveg = Revegetation.getInstance(wd)
         except:
             reveg = None
-            
+
         landuseoptions = landuse.landuseoptions
         soildboptions = soilsdb.load_db()
 
@@ -1851,11 +1857,15 @@ def task_adduser(runid, config):
 
     email = request.form.get('adduser-email')
     user = User.query.filter(User.email == email).first()
-    run = Run.query.filter(Run.runid == runid).first()
 
     if user is None:
         return error_factory('{} does not have a WeppCloud account.'
                              .format(email))
+
+    run = Run.query.filter(Run.runid == runid).first()
+
+    if run is None:
+        run = user_datastore.create_run(runid, config, user)
 
     assert user not in owners
     assert run is not None
