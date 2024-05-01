@@ -49,6 +49,7 @@ code {
     width: 360;
     padding-bottom: 20px;
 }
+
 .text-muted {
   text-align: center;
 }
@@ -98,6 +99,19 @@ table.sortable th {
     position: absolute;
     right: 15px;
     bottom: 5px;
+}
+
+/* in wepp_hillslope_visualizations.htm */
+p.title {
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 1em;
+}
+@media (max-width: 768px) {
+    p.title {
+        margin-top: 2em;
+        padding: 5px;
+    }
 }
 
 .tooltip {
@@ -158,8 +172,8 @@ nav[data-toggle="toc"] {
   }
 */
   /* alternatively, if you *do* want the second-level navigation to be shown (as seen on this page on mobile), use this */
-  
-  nav[data-toggle='toc'] .nav .nav {
+
+nav[data-toggle='toc'] .nav .nav {
     display: block;
-  }
- 
+}
+
