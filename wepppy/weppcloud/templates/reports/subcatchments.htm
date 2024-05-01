@@ -6,7 +6,7 @@
         <dt>Channel Count:</dt>
         <dd>{{ watershed.chn_n }}</dd>
         <dt>Total Area:</dt>
-        <dd>{{ unitizer_with_units(watershed.wsarea, 'm^2') | safe  }}</dd>
+        <dd>{{ unitizer_with_units(watershed.wsarea, 'm^2') | safe  }} &nbsp;</dd>
     </dl>
     {% if user.has_role('Dev') %}
     {% if watershed.greater300_n / watershed.sub_n > 0.05 %}
