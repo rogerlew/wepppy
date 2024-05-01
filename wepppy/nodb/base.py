@@ -159,7 +159,6 @@ class NoDbBase(object):
             except Exception:
                 self.unlock('-f')
                 raise
-            
 
     def dump_and_unlock(self, validate=True):
         self.dump()
@@ -184,7 +183,7 @@ class NoDbBase(object):
     def stub(self):
 
         js = jsonpickle.encode(self)
-        obj = json.loads(js) 
+        obj = json.loads(js)
         del js
 
         exclude = getattr(self, '__exclude__', None)
@@ -233,7 +232,7 @@ class NoDbBase(object):
     def multi_ofe(self):
         import wepppy
         return getattr(wepppy.nodb.Wepp.getInstance(self.wd), '_multi_ofe', False)
-    
+
     @property
     def readonly(self):
         return _exists(_join(self.wd, 'READONLY'))
@@ -508,3 +507,4 @@ class NoDbBase(object):
     @property
     def ash_dir(self):
         return _join(self.wd, 'ash')
+
