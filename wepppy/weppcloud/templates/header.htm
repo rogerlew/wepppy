@@ -23,8 +23,6 @@
     </form>
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-      </li>
-      <li class="nav-item">
         <a href='./' class="nav-link" data-toggle="tooltip" title="Reload Page">
           <img src="{{ url_for('static', filename='open-iconic/png/reload-2x-wh.png') }}" /></a>
       </li>
@@ -37,20 +35,24 @@
           <img src="{{ url_for('static', filename='open-iconic/png/cloud-download-2x-wh.png') }}" /></a>
       </li>
       <li class="nav-item">
-      <div width="2em;"></div</li>
-      <li class="nav-item">
-      <button class="btn btn-link" type="button" id="btnPuModal"
-            data-toggle="modal" data-target="#puModal"
-            title="Poweruser Panel  (up up down down left right left right b a)">
-          <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}" />
-      </button>
+        <a href="#" class="nav-link" id="btnPuModal"
+           data-toggle="modal" data-target="#puModal"
+           title="Poweruser Panel  (up up down down left right left right b a)">
+            <img src="{{ url_for('static', filename='open-iconic/png/command-2x-wh.png') }}" />
+        </a>
       </li>
       <li class="nav-item">
-      <button class="btn btn-link" type="button" 
-            data-toggle="modal" data-target="#unitizerModal">
-          <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
-      </button>
+        <a href="#" class="nav-link" id="btnUnitizerModal"
+           data-toggle="modal" data-target="#unitizerModal">
+            <img src="{{ url_for('static', filename='open-iconic/png/cog-2x-wh.png') }}" />
+        </a>
       </li>
+      {% if user.has_role('Admin') %}
+      <li>
+        <a href='access-log' class="nav-link" target="_blank" data-toggle="tooltip" title="Access Log">
+          <img src="{{ url_for('static', filename='open-iconic/png/monitor-2x-wh.png') }}" /></a>
+      </li>
+      {% endif %}
     </ul>
     {% if user.is_authenticated %}
     <ul class="navbar-nav navbar-right">
