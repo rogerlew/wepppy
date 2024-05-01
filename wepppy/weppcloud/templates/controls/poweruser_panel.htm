@@ -54,6 +54,10 @@
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/debris_flow.nodb">nodb.debris_flow</a>
               {% endif %}
             </div>
+            <br>
+            <div class="list-group">
+              <a class="list-group-item list-group-item-action text-danger" onclick="Project.getInstance().clear_locks()" href="#">Clear Locks</a>
+            </div>
           </div>
           <div class="col-md-6">
             <h5>Directory Views</h5>
@@ -73,19 +77,16 @@
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/ash">ash</a>
               {% endif %}
             </div>
-            <br/>
-            <h5>Data Queries</h5>
+            <br>
+            <h5>Data Tables</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/query/subcatchments_summary/">subcatchments</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/query/channels_summary/">channels</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/hillslopes.csv/">Hillslope</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/channels.csv">Channels</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse/landuse.parquet/">Landuse</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils/soils.parquet/">Soils</a>
             </div>
-            <br/>
-            <h5>Commands</h5>
-            <div class="list-group">
-              <a class="list-group-item list-group-item-action" onclick="Project.getInstance().clear_locks()" href="#">Clear Locks</a>
-            </div>
+            <br>
             {% if 'disturbed' in ron.mods %}
-            <br/>
             <h5>Disturbed</h5>
             <div class="list-group">
               <a class="list-group-item list-group-item-action" href="modify_disturbed" target="_blank">Modify Disturbed Parameters</a>

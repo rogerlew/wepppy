@@ -1146,6 +1146,26 @@ def create(config):
     return redirect(url)
 
 
+@app.route('/runs/<string:runid>/<config>/access-log')
+@app.route('/runs/<string:runid>/<config>/access-log/')
+def view_access_log(runid, config):
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if should_abort:
+        abort(403)
+
+    wd = get_wd(runid)
+    access_fn = wd.replace(runid, f'.{runid}').rstrip('/')
+
+    contents = '<i>no access data available</i>'
+    if _exists(access_fn):
+        with open(access_fn) as fp:
+            contents = fp.read()
+
+    return f'<html><pre>{contents}</pre></html>'
+
+
 @app.route('/runs/<string:runid>/<config>/fork-console')
 @app.route('/runs/<string:runid>/<config>/fork-console/')
 def fork_console(runid, config):
@@ -1172,7 +1192,7 @@ def fork_console(runid, config):
             should_abort = False
 
     if should_abort:
-        abort(404)
+        abort(403)
 
     return Response('''\
 <html>
@@ -1708,8 +1728,11 @@ def runs0(runid, config):
         return render_template('0.html',
                                user=current_user,
                                site_prefix=site_prefix,
-                               topaz=topaz, soils=soils,
-                               ron=ron, landuse=landuse, climate=climate,
+                               topaz=topaz,
+                               soils=soils,
+                               ron=ron,
+                               landuse=landuse,
+                               climate=climate,
                                wepp=wepp,
                                wepp_bin_opts=linux_wepp_bin_opts,
                                rhem=rhem,
@@ -4056,7 +4079,7 @@ def submit_task_run_wepp(runid, config):
         wepp.dump_and_unlock()
     except:
         wepp.unlock('-f')
-        raise
+        return exception_factory('Error running wepp', runid=runid)
 
     try:
         wepp.clean()
@@ -4064,6 +4087,7 @@ def submit_task_run_wepp(runid, config):
         return exception_factory('Error cleaning wepp directories', runid=runid)
 
     try:
+
 
         watershed = Watershed.getInstance(wd)
         translator = Watershed.getInstance(wd).translator_factory()
@@ -4073,8 +4097,8 @@ def submit_task_run_wepp(runid, config):
         # Prep Hillslopes
         wepp.prep_hillslopes()
 
+        wepp.lock()
         wepp.run_hillslopes()
-
         #
         # Prep Watershed
         wepp.prep_watershed()
@@ -4082,10 +4106,13 @@ def submit_task_run_wepp(runid, config):
         #
         # Run Watershed
         wepp.run_watershed()
+        wepp.unlock()
 
         post_discord_wepp_run_complete(runid, wd, config)
 
+
     except Exception:
+        wepp.unlock('-f')
         return exception_factory('Error running wepp', runid=runid)
 
     return success_factory()
