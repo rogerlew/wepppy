@@ -217,10 +217,10 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
 
         if math.isnan(p):
             p = 9999
-            
+
         if math.isnan(tmax):
             tmax = 9999
-        
+
         if math.isnan(tmin):
             tmin = 9999
 
@@ -230,6 +230,32 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
                  .format(mo, da, yr, p, tmax, tmin))
 
     fp.close()
+
+
+def get_outlier_mask(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    return (df[column] < lower_bound) | (df[column] > upper_bound)
+
+
+def prn_replace_outliers(source_df, replacement_df):
+    """
+    replace values of prcp, tmax, and tmin that are outside 1.5 x their interquartile range
+    """
+    result_df = source_df.copy()
+
+    for column in ['prcp', 'tmax', 'tmin']:
+        mask = get_outlier_mask(source_df)
+        result_df.loc[mask, column] = replacement_df.loc[mask, column]
+
+    return result_df
+
+def read_prn(fn):
+    column_names = ['mo', 'da', 'year', 'prcp', 'tmax', 'tmin']
+    return pd.read_table(fn, names=column_names)
 
 
 class ClimateFile(object):
