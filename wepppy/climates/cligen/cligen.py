@@ -232,30 +232,97 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
     fp.close()
 
 
-def get_outlier_mask(df, column):
-    Q1 = df[column].quantile(0.25)
-    Q3 = df[column].quantile(0.75)
-    IQR = Q3 - Q1
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
-    return (df[column] < lower_bound) | (df[column] > upper_bound)
 
+class Prn:
+    def __init__(self, fn: str):
+        """
+        Prn file class
 
-def prn_replace_outliers(source_df, replacement_df):
-    """
-    replace values of prcp, tmax, and tmin that are outside 1.5 x their interquartile range
-    """
-    result_df = source_df.copy()
+        Units
+            prcp: hundredths of inches
+            tmax: degf
+            tmin: degf
+        """
 
-    for column in ['prcp', 'tmax', 'tmin']:
-        mask = get_outlier_mask(source_df)
-        result_df.loc[mask, column] = replacement_df.loc[mask, column]
+        self.fn = fn
+        self.header = ['mo', 'da', 'year', 'prcp', 'tmax', 'tmin']
 
-    return result_df
+        mo, da, year = self.header[:3]
+        self.df = pd.read_table(fn, sep='\\s+', names=self.header)
+        self.df['date'] = pd.to_datetime({
+            'year': self.df[year],
+            'month': self.df[mo],
+            'day': self.df[da]
+        })
+        self.df.set_index('date', inplace=True)
 
-def read_prn(fn):
-    column_names = ['mo', 'da', 'year', 'prcp', 'tmax', 'tmin']
-    return pd.read_table(fn, names=column_names)
+    @property
+    def prcp_key(self):
+        return self.header[3]
+
+    @property
+    def tmax_key(self):
+        return self.header[4]
+
+    @property
+    def tmin_key(self):
+        return self.header[5]
+
+    def get_outlier_mask(self, column):
+        df = self.df
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        return (df[column] < lower_bound) | (df[column] > upper_bound)
+
+    def replace_outliers(self, other):
+        """
+        inplace replace values of prcp, tmax, and tmin that are outside 1.5 x their interquartile range
+        """
+        if isinstance(other, Prn):
+            replacement_df = other.df
+        else:
+            replacement_df = other
+
+        # Ensure both dataframes are merged based on date keys to align them by date
+        combined_df = self.df.merge(replacement_df, left_index=True, right_index=True, how='left', suffixes=('', '_other'))
+
+        for key in [self.prcp_key, self.tmax_key, self.tmin_key]:
+            mask = self.get_outlier_mask(key)
+            replace_key = key + '_other'
+
+            # Replace outliers with matching values from replacement_df or with 9999 if no match is found
+            self.df.loc[mask, key] = combined_df.loc[mask, replace_key].fillna(9999)
+
+    def write(self, fn=None):
+        _fn = (fn, self.fn)[fn is None]
+        df = self.df
+        p_key, tmax_key, tmin_key = self.prcp_key, self.tmax_key, self.tmin_key
+
+        fp = open(_fn, 'w')
+        mo, da, yr = 0, 0, 0
+        p, tmax, tmin = '', '', ''
+        for index, row in df.iterrows():
+
+            mo, da, yr = index.month, index.day, index.year
+            p, tmax, tmin = row[p_key], row[tmax_key], row[tmin_key]
+
+            if math.isnan(p):
+                p = 9999
+
+            if math.isnan(tmax):
+                tmax = 9999
+
+            if math.isnan(tmin):
+                tmin = 9999
+
+            p, tmax, tmin = int(p), int(tmax), int(tmin)
+            fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                     .format(mo, da, yr, p, tmax, tmin))
+
+        fp.close()
 
 
 class ClimateFile(object):
@@ -1320,7 +1387,7 @@ class Cligen:
         _clinp = open(_clinp_path)
         _log = open(_join(cli_dir, "cligen_{}.log".format(cli_fname[:-4])), "w")
         p = subprocess.Popen(cmd, stdin=_clinp, stdout=_log, stderr=_log, cwd=cli_dir)
-        p.wait()
+        p.wait(timeout=5)
         _clinp.close()
         _log.close()
 
@@ -1372,6 +1439,9 @@ class Cligen:
         # change to working directory
         cli_dir = self.wd
 
+        prn_path = _join(cli_dir, prn_fn)
+        assert _exists(prn_path), f'{prn} does not exist, must be specified relative to wd of Cligen'
+
         # delete cli file if it exists
         if _exists(_join(cli_dir, cli_fn)):
             os.remove(_join(cli_dir, cli_fn))
@@ -1388,7 +1458,7 @@ class Cligen:
         # run cligen
         _log = open(_join(cli_dir, "cligen_{}.log".format(_split(cli_fn)[-1][:-4])), "w")
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
-        p.wait()
+        p.wait(timeout=5)
         _log.close()
 
         assert _exists(_join(cli_dir, cli_fn))
@@ -1518,7 +1588,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
     par_fn = '{}{}.par'.format(par, suffix)
 
     fp_log.write('par_fn = {}\n'.format(par_fn))
-    
+
     if _exists(par_fn):
         os.remove(par_fn)
 
@@ -1572,6 +1642,7 @@ def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_datas
         process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE)
     else:
         process = Popen(cmd, stdin=_clinp, stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
+    process.wait(timeout=5)
 
     output = process.stdout.read()
     output += process.stderr.read()
