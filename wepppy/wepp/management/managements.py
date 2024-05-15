@@ -42,6 +42,7 @@ _map_fn = _join(_management_dir, "map.json")
 _rred_map_fn = _join(_management_dir, "rred_map.json")
 _disturbed_map_fn = _join(_management_dir, "disturbed.json")
 _c3s_disturbed_map_fn = _join(_management_dir, "c3s-disturbed.json")
+_c3s_disturbed_nigeria_map_fn = _join(_management_dir, "c3s-disturbed-nigeria.json")
 _revegetation_map_fn = _join(_management_dir, "revegetation.json")
 _eu_disturbed_map_fn = _join(_management_dir, "eu-corine-disturbed.json")
 _au_disturbed_map_fn = _join(_management_dir, "au-disturbed.json")
@@ -2315,6 +2316,9 @@ def load_map(_map=None):
             d = json.load(fp)
     elif 'turkey' in _map.lower():
         with open(_turkey_map_fn) as fp:
+            d = json.load(fp)
+    elif 'c3s-disturbed-nigeria' in _map.lower():
+        with open(_c3s_disturbed_nigeria_map_fn) as fp:
             d = json.load(fp)
     elif 'c3s-disturbed' in _map.lower():
         with open(_c3s_disturbed_map_fn) as fp:
