@@ -122,7 +122,7 @@
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
 
-            {% if 'alaska' not in ron.locales and 'hawaii' not in ron.locales %}
+            {% if 'alaska' not in ron.locales and 'hawaii' not in ron.locales and 'nigeria' not in ron.locales %}
                 <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified
                     <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
@@ -138,12 +138,6 @@
                 <label class="radio"><input type="radio" value="3" class="disable-readonly" id="climate_mode3" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 3] }}> Future (CMIP5) [2006 - 2099]
                     <a data-toggle="tooltip" data-placement="top" title="Experimental."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
-                    <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                </label><br/>
-                <label class="radio"><input type="radio" value="14" class="disable-readonly" id="climate_mode14" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 14] }}> Single Storm Batch
-                    <a data-toggle="tooltip" data-placement="top" title="Designed Events ran in Batch Mode."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                </label><br/>
 
                 {% if climate.observed_clis != none %}
                     <label class="radio"><input type="radio" value="6" class="disable-readonly" id="climate_mode6" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 6] }}> Observed Climate Database</label><br/>
@@ -153,14 +147,18 @@
                 {%  endif %}
             {%  endif %}
 
+                <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
+                    <a data-toggle="tooltip" data-placement="top" title="Designed Event."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
+                <label class="radio"><input type="radio" value="14" class="disable-readonly" id="climate_mode14" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 14] }}> Single Storm Batch
+                    <a data-toggle="tooltip" data-placement="top" title="Designed Events ran in Batch Mode."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
             {% elif 'eu' in ron.locales %}
             <label class="radio"><input type="radio" value="0" class="disable-readonly" id="climate_mode0" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 0] }}> "Vanilla" CLIGEN
                 <a data-toggle="tooltip" data-placement="top" title="Actual climate station data. No spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
             </label><br/>
             <label class="radio"><input type="radio" value="8" class="disable-readonly" id="climate_mode8" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 8] }}> E-OBS Modified (Europe)
                 <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a><br/>
-            </label><br/>
-            <label class="radio"><input type="radio" value="4" class="disable-readonly" id="climate_mode4" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 4] }}> Single Storm
             </label><br/>
             {% endif %}
         </div>
