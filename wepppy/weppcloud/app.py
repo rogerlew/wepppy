@@ -7,6 +7,7 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 import os
+import sys
 import csv
 import gzip
 from datetime import datetime
@@ -141,6 +142,9 @@ elif 'wepp3' in _hostname:
 else:
     from wepppy.weppcloud.standalone_config import config_app
 
+
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
 import hashlib
 
 
@@ -187,11 +191,19 @@ app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
 
 app = config_app(app)
 
+app.config['USE_X_SENDFILE'] = True
 
 # Configure SameSite for session cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True  # Require a secure context (HTTPS)
 
+from routes.download import download_bp
+from routes.browse import browse_bp
+from routes.gdalinfo import gdalinfo_bp
+
+app.register_blueprint(download_bp)
+app.register_blueprint(browse_bp)
+app.register_blueprint(gdalinfo_bp)
 
 mail = Mail(app)
 
@@ -575,49 +587,6 @@ def task_usermod():
 _thisdir = os.path.dirname(__file__)
 
 static_dir = _join(_thisdir, 'static')
-
-def htmltree(_dir='.', padding='', print_files=True, recurse=False):
-    def _gdalinfo(__dir, _padding, _print_files, recurse=False):
-        # Original from Written by Doug Dahms
-        # http://code.activestate.com/recipes/217212/
-        #
-        # Adapted to return string instead of printing to stdout
-
-        from os import listdir, sep
-        from os.path import abspath, basename, isdir
-
-        s = [_padding[:-1] + '+-' + basename(abspath(__dir)) + '\n']
-        f = []
-        _padding += ' '
-        if _print_files:
-            files = listdir(__dir)
-        else:
-            files = [x for x in listdir(__dir) if isdir(__dir + sep + x)]
-        count = 0
-        for file in sorted(files):
-            count += 1
-            path = __dir + sep + file
-            if isdir(path) and recurse:
-                if count == len(files):
-                    s.extend(htmltree(path, _padding + ' ', _print_files) + '\n')
-                else:
-                    s.extend(htmltree(path, _padding + '|', _print_files) + '\n')
-            else:
-                if isdir(path):
-                    s.append(_padding + '+-<a href="{file}/\">{file}</a>\n'.format(file=file))
-                else:
-                    if os.path.islink(path):
-                        target = ' -> {}'.format('/'.join(os.readlink(path).split('/')[-2:]))
-                    else:
-                        target = ''
-
-                    f.append(_padding + '>-<a href="{file}">{file}</a>{target}\n'
-                             .format(file=file, target=target))
-
-        s.extend(f)
-        return s
-
-    return ''.join(_gdalinfo(_dir, padding, print_files))
 
 
 def get_wd(runid):
@@ -1108,13 +1077,6 @@ def create_run_dir(current_user):
         dir_created = True
 
     return runid, wd
-
-
-@app.route('/browse/<config>')
-@app.route('/browse/<config>/')
-def browse_config(config):
-
-    return browse_response(f'/wepppy/wepppy/wepppy/nodb/configs/{config}.cfg', show_up=False, args=request.args, headers=request.headers)
 
 
 @app.route('/create/<config>')
@@ -2154,366 +2116,6 @@ def task_setoutlet(runid, config):
         return exception_factory('Could not set outlet', runid=runid)
 
     return success_factory()
-
-
-def matplotlib_vis(path):
-    import matplotlib.pyplot as plt
-
-    data, transform, proj = read_raster(path)
-
-    plt.imshow(data)
-    img_bytes = BytesIO()
-    plt.savefig(img_bytes)
-    img_bytes.seek(0)
-    return send_file(img_bytes, mimetype='image/png')
-
-
-def csv_to_html(path):
-    with open(path) as fp:
-        reader = csv.reader(fp)
-
-        s = ['<table class="table table-nonfluid">']
-        for line in reader:
-            s.append('<tr>')
-            for c in line:
-                if isfloat(c):
-                    v = float(c)
-                    iv = int(v)
-                    if iv == v:
-                        s.append('<td class="text-right">%i</td>' % iv)
-                    else:
-                        s.append('<td class="text-right">%0.3f</td>' % v)
-                else:
-                    s.append('<td>%s</td>' % c)
-            s.append('</tr>')
-        s.append('</table>')
-
-    return '\n'.join(s)
-
-
-def browse_response(path, args=None, show_up=True, headers=None):
-    if not _exists(path):
-        return error_factory('path does not exist')
-
-    path_lower = path.lower()
-
-    if os.path.isdir(path):
-        up = ''
-        if show_up:
-            up = '<a href="../">Up</a>\n'
-
-        c = '<pre>\n{}{}</pre>'\
-            .format(up, htmltree(path))
-
-        return Response(c, mimetype='text/html')
-
-    else:
-        if path_lower.endswith('.gz'):
-            with gzip.open(path, 'rt') as fp:
-                contents = fp.read()
-            path_lower = path_lower[:-3]
-        else:
-            with open(path) as fp:
-                try:
-                    contents = fp.read()
-                except UnicodeDecodeError:
-                    contents = None
-
-        if 'raw' in args or 'Raw' in headers:
-            if contents is not None:
-                r = Response(response=contents, status=200, mimetype="text/plain")
-                r.headers["Content-Type"] = "text/plain; charset=utf-8"
-                return r
-
-        if 'download' in args or 'Download' in headers:
-            return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
-
-        if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
-            assert contents is not None
-            jsobj = json.loads(contents)
-            return jsonify(jsobj)
-
-        if path_lower.endswith('.xml'):
-            assert contents is not None
-            r = Response(response=contents, status=200, mimetype="text/xml")
-            r.headers["Content-Type"] = "text/xml; charset=utf-8"
-            return r
-
-        if path_lower.endswith('.arc'):
-            assert contents is not None
-            c = '<pre style="font-size:xx-small;">\n{}</pre>'.format(contents)
-            return Response(c, mimetype='text/html')
-
-        html = None
-        if path_lower.endswith('.pkl'):
-            df = pd.read_pickle(path)
-            html = df.to_html(classes=['table table-nonfluid'], border=0, justify='left')
-
-        if path_lower.endswith('.parquet'):
-            df = pd.read_parquet(path)
-            html = df.to_html(classes=['table table-nonfluid'], border=0, justify='left')
-
-        if path_lower.endswith('.csv'):
-            html = csv_to_html(path)
-
-        if html is not None:
-            c = ['<html>',
-                 '<head>',
-                 '<link rel="stylesheet" '
-                 'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"'
-                 'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"'
-                 'crossorigin="anonymous">',
-                 '<style>.table-nonfluid {width: auto !important;}</style>'
-                 '</head>'
-                 '<body>',
-                 '<a href="?download">Download File</a><hr>' + html,
-                 '</body>',
-                 '</html>']
-
-            return Response('\n'.join(c), mimetype='text/html')
- 
-        with open(path) as fp:
-            try:
-                contents = fp.read()
-            except UnicodeDecodeError:
-                return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
-
-        r = Response(response=contents, status=200, mimetype="text/plain")
-        r.headers["Content-Type"] = "text/plain; charset=utf-8"
-        return r
-
-
-#@app.route('/docs')
-#@app.route('/docs//')
-#def docs_index():
-#    """
-#    recursive list the file structure of the working directory
-#    """
-#    with open(_join(_thisdir, 'docs', 'index.md')) as fp:
-#        md = fp.read()
-#
-#    html = markdown.markdown(md)
-#    return Response(html, mimetype='text/html')
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>')
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/')
-def wp_dev_tree1(runid, config, wepp, dir):
-    return dev_tree1(runid, config, dir)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>')
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/')
-def wp_dev_tree2(runid, config, wepp, dir, dir2):
-    return dev_tree2(runid, config, dir, dir2)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>')
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/')
-def wp_dev_tree32(runid, config, wepp, dir, dir2, dir3):
-    return dev_tree32(runid, config, dir, dir2, dir3)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>')
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
-def wp_dev_tree432(runid, config, wepp, dir, dir2, dir3, dir4):
-    return dev_tree32(runid, config, dir, dir2, dir3, dir4)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>')
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
-def wp_dev_tree5432(runid, config, wepp, dir, dir2, dir3, dir4, dir5):
-    return dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5)
-
-
-@app.route('/runs/<string:runid>/<config>/browse/')
-def dev_tree(runid, config):
-    """
-    recursive list the file strucuture of the working directory
-    """
-    wd = get_wd(runid)
-    return browse_response(wd, show_up=False)
-
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/')
-def dev_tree1(runid, config, dir):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>')
-def _dev_tree1(runid, config, dir):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>')
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/')
-def dev_tree2(runid, config, dir, dir2):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>')
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/')
-def dev_tree32(runid, config, dir, dir2, dir3):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>')
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/')
-def dev_tree432(runid, config, dir, dir2, dir3, dir4):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>')
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
-def dev_tree5432(runid, config, dir, dir2, dir3, dir4, dir5):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>')
-@app.route('/runs/<string:runid>/<config>/browse/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
-def dev_tree65432(runid, config, dir, dir2, dir3, dir4, dir5, dir6):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5, dir6))
-    assert dir.startswith(wd)
-    return browse_response(dir, args=request.args, headers=request.headers)
-
-
-def gdalinfo_response(path):
-    if not _exists(path):
-        return error_factory('path does not exist')
-
-    contents = check_output('gdalinfo -json ' + path, shell=True)
-    jsobj = json.loads(contents)
-    return jsonify(jsobj)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/')
-def wp_dev_gdalinfo1(runid, config, wepp, dir):
-    return dev_gdalinfo1(runid, config, dir)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/')
-def wp_dev_gdalinfo2(runid, config, wepp, dir, dir2):
-    return dev_gdalinfo2(runid, config, dir, dir2)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/<dir3>/')
-def wp_dev_gdalinfo32(runid, config, wepp, dir, dir2, dir3):
-    return dev_gdalinfo32(runid, config, dir, dir2, dir3)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/')
-def wp_dev_gdalinfo432(runid, config, wepp, dir, dir2, dir3, dir4):
-    return dev_gdalinfo32(runid, config, dir, dir2, dir3, dir4)
-
-
-@app.route('/runs/<string:runid>/<config>/report/<string:wepp>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
-def wp_dev_gdalinfo5432(runid, config, wepp, dir, dir2, dir3, dir4, dir5):
-    return dev_gdalinfo5432(runid, config, dir, dir2, dir3, dir4, dir5)
-
-
-@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/')
-def dev_gdalinfo1(runid, config, dir):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir))
-    assert dir.startswith(wd)
-    return gdalinfo_response(dir)
-
-
-@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/')
-def dev_gdalinfo2(runid, config, dir, dir2):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2))
-    assert dir.startswith(wd)
-    return gdalinfo_response(dir)
-
-
-@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/')
-def dev_gdalinfo32(runid, config, dir, dir2, dir3):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3))
-    assert dir.startswith(wd)
-    return gdalinfo_response(dir)
-
-
-@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/')
-def dev_gdalinfo432(runid, config, dir, dir2, dir3, dir4):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4))
-    assert dir.startswith(wd)
-    return gdalinfo_response(dir)
-
-
-@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/')
-def dev_gdalinfo5432(runid, config, dir, dir2, dir3, dir4, dir5):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5))
-    assert dir.startswith(wd)
-    return gdalinfo_response(dir)
-
-
-@app.route('/runs/<string:runid>/<config>/gdalinfo/<dir>/<dir2>/<dir3>/<dir4>/<dir5>/<dir6>/')
-def dev_gdalinfo65432(runid, config, dir, dir2, dir3, dir4, dir5, dir6):
-    """
-    recursive list the file structure of the working directory
-    """
-    wd = os.path.abspath(get_wd(runid))
-    dir = os.path.abspath(_join(wd, dir, dir2, dir3, dir4, dir5, dir6))
-    assert dir.startswith(wd)
-    return gdalinfo_response(dir)
-
 
 
 @app.route('/runs/<string:runid>/<config>/query/has_dem')
