@@ -11,6 +11,25 @@ from utils.helpers import get_wd, htmltree
 
 download_bp = Blueprint('download', __name__)
 
+
+@download_bp.route('/runs/<string:runid>/<config>/aria2c.spec')
+def aria2c_spec(runid, config):
+    wd = os.path.abspath(get_wd(runid))
+    base_url = f"https://wepp.cloud/weppcloud/runs/{runid}/{config}/download"
+
+    file_list = []
+
+    for root, dirs, files in os.walk(wd):
+        for file in files:
+            file_path = os.path.join(root, file)
+            relative_path = os.path.relpath(file_path, wd)
+            url = f"{base_url}/{relative_path}"
+            file_list.append(f"{url}\n out={relative_path}")
+
+    spec_content = "\n".join(file_list)
+    return Response(spec_content, mimetype='text/plain')
+
+
 @download_bp.route('/runs/<string:runid>/<config>/download/', defaults={'subpath': ''}, strict_slashes=False)
 @download_bp.route('/runs/<string:runid>/<config>/download/<path:subpath>', strict_slashes=False)
 def download_tree(runid, config, subpath):
