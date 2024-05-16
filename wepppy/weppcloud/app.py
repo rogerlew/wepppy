@@ -191,7 +191,8 @@ app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
 
 app = config_app(app)
 
-app.config['USE_X_SENDFILE'] = True
+# this xsendfile mod is broken on wepp.cloud
+#app.config['USE_X_SENDFILE'] = True
 
 # Configure SameSite for session cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'

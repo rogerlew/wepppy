@@ -4,7 +4,7 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
-from flask import abort, Blueprint, request, Response, send_file
+from flask import abort, Blueprint, request, Response, send_file, jsonify
 
 from utils.helpers import get_wd, htmltree
 
@@ -26,6 +26,7 @@ def download_tree(runid, config, subpath):
     if not _exists(dir_path):
         abort(404)
 
+
     if os.path.isdir(dir_path):
         show_up = dir_path != wd
         return download_response_dir(dir_path, show_up=show_up, args=request.args, headers=request.headers)
@@ -39,7 +40,9 @@ def download_response_file(path, args=None, headers=None):
 def download_response_dir(path, show_up=False, args=None, headers=None):
     assert os.path.isdir(path)
 
-    up = '<a href="../">Up</a>\n'
+    up = ''
+    if show_up:
+        up = '<a href="../">Up</a>\n'
     c = '<pre>\n{}{}</pre>'.format(up, htmltree(path))
 
     return Response(c, mimetype='text/html')
