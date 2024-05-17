@@ -241,7 +241,6 @@ SOIL_TYPE
 AREA
     - Area in hectares
 
-    
 Slope parameters for Disturbed WEPP Batch File
 ----------------------------------------------
 
@@ -250,13 +249,13 @@ Slope is divided into four segments each 25% of total slope
 "U" is for Upper, "L" is for Lower
     
 UTREAT
-    - description of management file
+    - description of management: OldForest, YoungForest, Shrub, Bunchgrass, Sod, LowFire, HighFire, Skid
     
 USLP_LNG
     - length of the upper slope (50% of total slope)
 
 LTREAT
-    - description of management file
+    - description of management: OldForest, YoungForest, Shrub, Bunchgrass, Sod, LowFire, HighFire, Skid
     
 UGRD_TP
     - Upper top slope (%)
@@ -278,9 +277,6 @@ Slope parameters for ERMiT WEPP Batch File
 
 According to ERMiT documentation the slope is divided into 
 3 segments representing the top 10% middle 80% and bottom 10%.
-
-Interface replicates Jim Frakenberger's code which uses the first 
-slope point as the top and the last slope point as the bottom.
 
 ERM_TSLP
     - Top slope (%)
