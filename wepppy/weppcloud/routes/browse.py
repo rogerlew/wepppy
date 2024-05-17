@@ -1,4 +1,10 @@
 import os
+import time
+from os import listdir, sep
+from os.path import abspath, basename, isdir, isfile
+
+import math
+import json
 
 from os.path import join as _join
 from os.path import split as _split
@@ -6,24 +12,18 @@ from os.path import exists as _exists
 
 import pandas as pd
 
-from flask import abort, Blueprint, request, Response, send_file
+from flask import abort, Blueprint, request, Response, send_file, jsonify
 
-from utils.helpers import get_wd, htmltree
+from utils.helpers import get_wd
 
 
 browse_bp = Blueprint('browse', __name__)
 
 
-@browse_bp.route('/browse/<config>')
-def browse_config(config):
-
-    return browse_response(f'/wepppy/wepppy/wepppy/nodb/configs/{config}.cfg', show_up=False, args=request.args, headers=request.headers)
-
-
 @browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/', defaults={'subpath': ''}, strict_slashes=False)
 @browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>', strict_slashes=False)
 def wp_browse_tree(runid, config, wepp, subpath):
-    return browse_tree(runid, config, subpath)
+    return browse_tree(runid, config, subpath, args=request.args)
 
 
 @browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
@@ -45,10 +45,84 @@ def browse_tree(runid, config, subpath):
     if os.path.isdir(dir_path):
         show_up = dir_path != wd
 
-    return browse_response(dir_path, show_up=show_up, args=request.args, headers=request.headers)
+    return browse_response(dir_path, runid, wd, request)
 
 
-def browse_response(path, args=None, show_up=True, headers=None):
+def get_human_readable_size(path):
+    """
+    The human-readable file size.
+    """
+    size_bytes = os.path.getsize(path)
+
+    if size_bytes == 0:
+        return "0 B"
+
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+
+    return f"{s} {size_name[i]}"
+
+
+def sorted_paths(paths, _dir):
+    dirs = [x for x in paths if isdir(_join(_dir, x))]
+    files = [x for x in paths if isfile(_join(_dir, x))]
+    return sorted(dirs) + sorted(files)
+
+def get_pad(x):
+    if x < 1: return ' '
+    return x * ' '
+
+def html_dir_list(_dir, runid, wd, request_path):
+    _padding = ' '
+
+    s = ['+-' + basename(abspath(_dir)) + '\n']
+    files = listdir(_dir)
+    for _file in sorted_paths(files, _dir):
+        path = _dir + sep + _file
+
+        ts_pad = get_pad(31 - len(_file))
+        timestamp = os.path.getmtime(path)
+        last_modified_time = time.ctime(timestamp)
+
+        if isdir(path):
+            item_count = f'{len(listdir(path))} items'
+            item_pad = get_pad(8 - len(item_count.split()[0]))
+            s.append(_padding + f'+-<a href="{_file}/\">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}\n')
+        else:
+            if os.path.islink(path):
+                target = ' -> {}'.format('/'.join(os.readlink(path).split('/')[-2:]))
+            else:
+                target = ''
+
+            file_size = get_human_readable_size(path)
+            item_pad = get_pad(8 - len(file_size.split()[0]))
+
+            dl_pad = get_pad(6 - len(file_size.split()[1]))
+            dl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/download/')
+            dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
+
+            file_lower = _file.lower()
+            gl_link = ''
+            if file_lower.endswith('.arc') or file_lower.endswith('.tif') or file_lower.endswith('.img') or file_lower.endswith('.nc'):
+                gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/gdalinfo/')
+                gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
+
+            repr_link = ''
+            if file_lower.endswith('.man'):
+                repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
+                repr_link = f'  <a href="{repr_url}">annotated</a>'
+
+            s.append(_padding + f'>-<a href="{_file}">{_file}</a>{target} {ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}\n')
+
+    return ''.join(s)
+
+
+def browse_response(path, runid, wd, request):
+    args = request.args
+    headers = request.headers
+
     if not _exists(path):
         return error_factory('path does not exist')
 
@@ -56,11 +130,11 @@ def browse_response(path, args=None, show_up=True, headers=None):
 
     if os.path.isdir(path):
         up = ''
-        if show_up:
+        if path != wd:
             up = '<a href="../">Up</a>\n'
 
         c = '<pre>\n{}{}</pre>'\
-            .format(up, htmltree(path))
+            .format(up, html_dir_list(path, runid, wd, request.path))
 
         return Response(c, mimetype='text/html')
 
@@ -85,7 +159,7 @@ def browse_response(path, args=None, show_up=True, headers=None):
         if 'download' in args or 'Download' in headers:
             return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
 
-        if path_lower.endswith('.json') or path_lower.endswith('.nodb'):
+        if path_lower.endswith('.json') or path_lower.endswith('.nodb') or path_lower.endswith('.dump'):
             assert contents is not None
             jsobj = json.loads(contents)
             return jsonify(jsobj)

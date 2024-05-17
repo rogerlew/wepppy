@@ -2422,6 +2422,14 @@ def get_channel_management():
                              Color=[0, 0, 255, 255]))
 
 
+def read_management(man_path):
+    _dir, _fn = _split(man_path)
+    return Management(Key=None,
+                      ManagementFile=_fn,
+                      ManagementDir=_dir,
+                      Description='-',
+                      Color=(0, 0, 0, 0))
+
 def get_plant_loop_names(runs_dir):
     plant_loops = set()
     man_fns = glob(_join(runs_dir, '*.man'))

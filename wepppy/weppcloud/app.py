@@ -201,10 +201,12 @@ app.config['SESSION_COOKIE_SECURE'] = True  # Require a secure context (HTTPS)
 from routes.download import download_bp
 from routes.browse import browse_bp
 from routes.gdalinfo import gdalinfo_bp
+from routes.wepprepr import repr_bp
 
 app.register_blueprint(download_bp)
 app.register_blueprint(browse_bp)
 app.register_blueprint(gdalinfo_bp)
+app.register_blueprint(repr_bp)
 
 mail = Mail(app)
 
