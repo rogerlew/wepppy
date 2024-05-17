@@ -35,9 +35,8 @@ def gdalinfo_tree(runid, config, subpath):
     if not _exists(dir_path):
         abort(404)
 
-    show_up = False
     if os.path.isdir(dir_path):
-        show_up = dir_path != wd
+        abort(404)
 
     return gdalinfo_response(dir_path)
 
