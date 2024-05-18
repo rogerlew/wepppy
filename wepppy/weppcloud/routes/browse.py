@@ -79,17 +79,19 @@ def html_dir_list(_dir, runid, wd, request_path):
 
     s = ['+-' + basename(abspath(_dir)) + '\n']
     files = listdir(_dir)
-    for _file in sorted_paths(files, _dir):
+
+    for i, _file in enumerate(sorted_paths(files, _dir)):
         path = _dir + sep + _file
 
-        ts_pad = get_pad(31 - len(_file))
+        ts_pad = get_pad(36 - len(_file))
         timestamp = os.path.getmtime(path)
-        last_modified_time = time.ctime(timestamp)
+        last_modified_time = time.ctime(timestamp)[4:]
 
         if isdir(path):
             item_count = f'{len(listdir(path))} items'
             item_pad = get_pad(8 - len(item_count.split()[0]))
-            s.append(_padding + f'+-<a href="{_file}/\">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}\n')
+            end_pad = ' ' * 26
+            s.append(_padding + f'+-<a href="{_file}/\">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}\n')
         else:
             if os.path.islink(path):
                 target = ' -> {}'.format('/'.join(os.readlink(path).split('/')[-2:]))
@@ -104,17 +106,20 @@ def html_dir_list(_dir, runid, wd, request_path):
             dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
 
             file_lower = _file.lower()
-            gl_link = ''
+            gl_link = '        '
             if file_lower.endswith('.arc') or file_lower.endswith('.tif') or file_lower.endswith('.img') or file_lower.endswith('.nc'):
                 gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/gdalinfo/')
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
 
-            repr_link = ''
+            repr_link = '         '
             if file_lower.endswith('.man'):
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
 
             s.append(_padding + f'>-<a href="{_file}">{_file}</a>{target} {ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}\n')
+
+        if i % 2:
+            s[-1] = f'<span style="background-color:#f6f6f6;">{s[-1]}</span>'
 
     return ''.join(s)
 

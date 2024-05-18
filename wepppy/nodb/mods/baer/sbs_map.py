@@ -12,6 +12,8 @@ from os.path import join as _join
 from os.path import split as _split
 from collections import Counter
 
+from functools import lru_cache
+
 import numpy as np
 from osgeo import osr
 from osgeo import gdal
@@ -63,13 +65,13 @@ def get_sbs_color_table(fn, color_to_severity_map=None):
 
     return d, counts, color_map
 
+def make_hashable(v, breaks, nodata_vals, offset, nodata_val):
+    return (v, tuple(breaks), tuple(nodata_vals) if nodata_vals is not None else None, offset, nodata_val)
 
-def _ct_classify(v, ct, offset=0, nodata_val=255):
-    for i, burn_class in enumerate(['unburned', 'low', 'mod', 'high']):
-        for k in ct[burn_class]:
-            if k == v:
-                return i + offset
-    return nodata_val
+@lru_cache(maxsize=None)
+def memoized_classify(args):
+    v, breaks, nodata_vals, offset, nodata_val = args
+    return _classify(v, breaks, nodata_vals, offset, nodata_val)
 
 
 def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
@@ -83,6 +85,32 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
         if v <= brk:
             break
     return i + offset
+
+def classify(v, breaks, nodata_vals=None, offset=0, nodata_val=255):
+    args = make_hashable(v, breaks, nodata_vals, offset, nodata_val)
+    return memoized_classify(args)
+
+
+def make_hashable_ct(v, ct, offset, nodata_val):
+    ct_tuple = tuple((key, tuple(values)) for key, values in ct.items())
+    return (v, ct_tuple, offset, nodata_val)
+
+@lru_cache(maxsize=None)
+def memoized_ct_classify(args):
+    v, ct, offset, nodata_val = args
+    ct_dict = {key: list(values) for key, values in ct}
+    return _ct_classify(v, ct_dict, offset, nodata_val)
+
+def _ct_classify(v, ct, offset=0, nodata_val=255):
+    for i, burn_class in enumerate(['unburned', 'low', 'mod', 'high']):
+        for k in ct[burn_class]:
+            if k == v:
+                return i + offset
+    return nodata_val
+
+def ct_classify(v, ct, offset=0, nodata_val=255):
+    args = make_hashable_ct(v, ct, offset, nodata_val)
+    return memoized_ct_classify(args)
 
 
 class SoilBurnSeverityMap(LandcoverMap):
@@ -182,13 +210,13 @@ class SoilBurnSeverityMap(LandcoverMap):
             assert breaks is not None, breaks
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = _classify(data[i, j], breaks,
+                    data[i, j] = classify(data[i, j], breaks,
                                            nodata_vals, offset=130,
                                            nodata_val=130)
         else:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = _ct_classify(data[i, j], ct,
+                    data[i, j] = ct_classify(data[i, j], ct,
                                               offset=130,
                                               nodata_val=130)
 
@@ -248,9 +276,9 @@ class SoilBurnSeverityMap(LandcoverMap):
         class_map = []
         for v, cnt in self.counts:
             if ct is None:
-                k = _classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
+                k = classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
             else:
-                k = _ct_classify(v, ct, offset=130, nodata_val=255)
+                k = ct_classify(v, ct, offset=130, nodata_val=255)
 
             sev = _map[str(k)]
             class_map.append((int(v), sev, cnt))
@@ -266,9 +294,9 @@ class SoilBurnSeverityMap(LandcoverMap):
         class_map = {}
         for v, cnt in self.counts:
             if ct is None:
-                k = _classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
+                k = classify(v, breaks, nodata_vals, offset=130, nodata_val=255)
             else:
-                k = _ct_classify(v, ct, offset=130, nodata_val=255)
+                k = ct_classify(v, ct, offset=130, nodata_val=255)
 
             class_map[str(v)] = str(k)
 
@@ -289,7 +317,7 @@ class SoilBurnSeverityMap(LandcoverMap):
 
             with open(color_tbl_path, 'w') as fp:
                 for v, cnt in self.counts:
-                    k = _classify(v, breaks, nodata_vals, offset=130,  nodata_val=255)
+                    k = classify(v, breaks, nodata_vals, offset=130,  nodata_val=255)
                     fp.write('{} {}\n'.format(v, _map[str(k)]))
                 fp.write("nv 0 0 0 0\n")
         else:
@@ -342,7 +370,7 @@ class SoilBurnSeverityMap(LandcoverMap):
     def export_4class_map(self, fn, cellsize=None):
         if cellsize is None:
             transform = self.transform
-            assert transform[1] == abs(transform[5])
+            assert round(transform[1], 5) == round(abs(transform[5]), 5)
             cellsize = transform[1]
 
         fname = self.fname
@@ -357,11 +385,11 @@ class SoilBurnSeverityMap(LandcoverMap):
         if ct is None:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = _classify(_data[i, j], self.breaks, self.nodata_vals)
+                    data[i, j] = classify(_data[i, j], self.breaks, self.nodata_vals)
         else:
             for i in range(n):
                 for j in range(m):
-                    data[i, j] = _ct_classify(_data[i, j], ct)
+                    data[i, j] = ct_classify(_data[i, j], ct)
 
         num_cols, num_rows = _data.shape
         driver = gdal.GetDriverByName("GTiff")
