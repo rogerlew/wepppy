@@ -370,7 +370,7 @@ class SoilBurnSeverityMap(LandcoverMap):
     def export_4class_map(self, fn, cellsize=None):
         if cellsize is None:
             transform = self.transform
-            assert round(transform[1], 5) == round(abs(transform[5]), 5)
+            assert round(transform[1], 1) == round(abs(transform[5]), 1)
             cellsize = transform[1]
 
         fname = self.fname
@@ -391,14 +391,13 @@ class SoilBurnSeverityMap(LandcoverMap):
                 for j in range(m):
                     data[i, j] = ct_classify(_data[i, j], ct)
 
+        src_ds = gdal.Open(fname)
+        wkt = src_ds.GetProjection()
+
         num_cols, num_rows = _data.shape
         driver = gdal.GetDriverByName("GTiff")
         dst = driver.Create(fn, num_cols, num_rows,
                             1, GDT_Byte)
-
-        srs = osr.SpatialReference()
-        srs.ImportFromProj4(proj)
-        wkt = srs.ExportToWkt()
 
         dst.SetProjection(wkt)
         dst.SetGeoTransform(transform)
