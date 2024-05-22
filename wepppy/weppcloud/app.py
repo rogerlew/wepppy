@@ -202,11 +202,13 @@ from routes.download import download_bp
 from routes.browse import browse_bp
 from routes.gdalinfo import gdalinfo_bp
 from routes.wepprepr import repr_bp
+from routes.diff import diff_bp
 
 app.register_blueprint(download_bp)
 app.register_blueprint(browse_bp)
 app.register_blueprint(gdalinfo_bp)
 app.register_blueprint(repr_bp)
+app.register_blueprint(diff_bp)
 
 mail = Mail(app)
 
@@ -1357,7 +1359,8 @@ def fork(runid, config):
 
             yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
 
-            post_discord_wepp_run_complete(new_runid, new_wd, config)
+            wepp = Wepp.getInstance(new_wd)
+            wepp.post_discord_wepp_run_complete()
 
         except Exception as e:
             yield 'encountered error'
@@ -3569,24 +3572,6 @@ def get_wepp_prep_details(runid, config):
         return exception_factory('Error building summary', runid=runid)
 
 
-def post_discord_wepp_run_complete(runid, wd, config):
-    if send_discord_message is not None:
-        ron = Ron.getInstance(wd)
-        name = ron.name
-        scenario = ron.scenario
-
-        link = runid
-        if name or scenario:
-            if name and scenario:
-                link = f'{name} - {scenario} _{runid}_'
-            elif name:
-                link = f'{name} _{runid}_'
-            else:
-                link = f'{scenario} _{runid}_'
-
-        send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
-
-
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
@@ -3713,7 +3698,7 @@ def submit_task_run_wepp(runid, config):
         wepp.run_watershed()
         wepp.unlock()
 
-        post_discord_wepp_run_complete(runid, wd, config)
+        wepp.post_discord_wepp_run_complete()
 
 
     except Exception:

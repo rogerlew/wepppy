@@ -22,6 +22,8 @@ import utm
 import what3words
 
 # wepppy
+import requests
+
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 
@@ -374,7 +376,6 @@ class Ron(NoDbBase):
 
             if 'baer' in self.mods or 'disturbed' in self.mods:
                 assert not ('baer' in self.mods and 'disturbed' in self.mods)
-            
 
                 if 'baer' in self.mods:
                     Mod = wepppy.nodb.mods.Baer
@@ -386,17 +387,27 @@ class Ron(NoDbBase):
                 sbs_map = self.config_get_path('landuse', 'sbs_map')
 
                 if sbs_map is not None:
-                    from wepppy.nodb.mods import MODS_DIR
-                    sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
+                    sbs_name = _split(sbs_map)[1]
+                    sbs_path = _join(baer.baer_dir, sbs_name)
 
-                    # sbs_map = _join(_thisdir, sbs_map)
-                    assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
-                    assert not isdir(sbs_map)
+                    if sbs_map.startswith('http'):
+                        r = requests.get(sbs_map)
+                        r.raise_for_status()
 
-                    sbs_path = _join(baer.baer_dir, 'sbs.tif')
-                    shutil.copyfile(sbs_map, sbs_path)
+                        with open(sbs_path, 'wb') as f:
+                            f.write(r.content)
+                        baer.validate(_split(sbs_path)[-1])
+                    else:
+                        from wepppy.nodb.mods import MODS_DIR
+                        sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
 
-                    baer.validate(_split(sbs_path)[-1])
+                        # sbs_map = _join(_thisdir, sbs_map)
+                        assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
+                        assert not isdir(sbs_map)
+
+                        shutil.copyfile(sbs_map, sbs_path)
+
+                        baer.validate(_split(sbs_path)[-1])
 
             if 'revegetation' in self.mods:
                 wepppy.nodb.mods.Revegetation(wd, cfg_fn)

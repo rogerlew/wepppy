@@ -45,6 +45,13 @@ from rq.job import Job
 from wepppyo3.wepp_viz import make_soil_loss_grid
 
 
+
+try:
+    from weppcloud2.discord_bot.discord_client import send_discord_message
+except:
+    send_discord_message = None
+
+
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
@@ -113,6 +120,29 @@ from wepppy.wepp.soils.utils import simple_texture
 
 from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.nodb.mods.disturbed import Disturbed
+
+
+def run_wepp_rq(runid):
+    from wepppy.weppcloud.utils.helpers import get_wd
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+
+    #
+    # Prep Hillslopes
+    wepp.prep_hillslopes()
+
+    wepp.lock()
+    wepp.run_hillslopes_rq() # this would enqueue redis jobs
+    #
+    # Prep Watershed
+    wepp.prep_watershed()
+
+    #
+    # Run Watershed
+    wepp.run_watershed() # this would enqueue redis jobs
+    wepp.unlock()
+
+    wepp.post_discord_wepp_run_complete()
 
 
 def compress_fn(fn):
@@ -449,11 +479,11 @@ class Wepp(NoDbBase, LogMixin):
     @property
     def _status_channel(self):
         return f'{self.runid}:wepp'
-        
+
     @property
     def multi_ofe(self):
         return getattr(self, "_multi_ofe", False)
-        
+
     @multi_ofe.setter
     def multi_ofe(self, value):
         self.lock()
@@ -1484,10 +1514,7 @@ class Wepp(NoDbBase, LogMixin):
         self.log_done()
 
 
-
-
-
-    def run_hillslopes2(self):
+    def run_hillslopes_rq(self):
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1971,6 +1998,27 @@ class Wepp(NoDbBase, LogMixin):
             prep.timestamp('run_wepp')
         except FileNotFoundError:
             pass
+
+    def post_discord_wepp_run_complete(self):
+        if send_discord_message is not None:
+            from wepppy.nodb import Ron
+
+            ron = Ron.getInstance(self.wd)
+            name = ron.name
+            scenario = ron.scenario
+            runid = ron.runid
+            config = ron.config_stem
+
+            link = runid
+            if name or scenario:
+                if name and scenario:
+                    link = f'{name} - {scenario} _{runid}_'
+                elif name:
+                    link = f'{name} _{runid}_'
+                else:
+                    link = f'{scenario} _{runid}_'
+
+            send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
 
     def _run_hillslope_watbal(self):
         self.log('Calculating Hillslope Water Balance...')
