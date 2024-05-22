@@ -12,7 +12,7 @@ from os.path import exists as _exists
 
 import pandas as pd
 
-from flask import abort, Blueprint, request, Response, send_file, jsonify
+from flask import abort, Blueprint, request, Response, send_file, jsonify, redirect
 
 from utils.helpers import get_wd
 
@@ -43,6 +43,8 @@ def browse_tree(runid, config, subpath):
 
     show_up = False
     if os.path.isdir(dir_path):
+        if not request.path.endswith('/'):
+            return redirect( '/weppcloud' + request.path + '/', code=302)
         show_up = dir_path != wd
 
     return browse_response(dir_path, runid, wd, request)
