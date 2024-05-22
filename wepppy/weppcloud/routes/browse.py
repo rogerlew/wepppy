@@ -23,15 +23,6 @@ browse_bp = Blueprint('browse', __name__)
 @browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/', defaults={'subpath': ''}, strict_slashes=False)
 @browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>', strict_slashes=False)
 def wp_browse_tree(runid, config, wepp, subpath):
-    return browse_tree(runid, config, subpath, args=request.args)
-
-
-@browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
-@browse_bp.route('/runs/<string:runid>/<config>/browse/<path:subpath>', strict_slashes=False)
-def browse_tree(runid, config, subpath):
-    """
-    Recursive list the file structure of the working directory.
-    """
     wd = os.path.abspath(get_wd(runid))
     dir_path = os.path.abspath(os.path.join(wd, subpath))
 
@@ -41,19 +32,33 @@ def browse_tree(runid, config, subpath):
     if not _exists(dir_path):
         abort(404)
 
-    show_up = False
     if os.path.isdir(dir_path):
         if not request.path.endswith('/'):
             return redirect( '/weppcloud' + request.path + '/', code=302)
-        show_up = dir_path != wd
+
+    return browse_response(dir_path, runid, wd, request)
+
+
+@browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
+@browse_bp.route('/runs/<string:runid>/<config>/browse/<path:subpath>', strict_slashes=False)
+def browse_tree(runid, config, subpath):
+    wd = os.path.abspath(get_wd(runid))
+    dir_path = os.path.abspath(os.path.join(wd, subpath))
+
+    if not dir_path.startswith(wd):
+        abort(403)
+
+    if not _exists(dir_path):
+        abort(404)
+
+    if os.path.isdir(dir_path):
+        if not request.path.endswith('/'):
+            return redirect( '/weppcloud' + request.path + '/', code=302)
 
     return browse_response(dir_path, runid, wd, request)
 
 
 def get_human_readable_size(path):
-    """
-    The human-readable file size.
-    """
     size_bytes = os.path.getsize(path)
 
     if size_bytes == 0:
@@ -72,28 +77,37 @@ def sorted_paths(paths, _dir):
     files = [x for x in paths if isfile(_join(_dir, x))]
     return sorted(dirs) + sorted(files)
 
+
 def get_pad(x):
     if x < 1: return ' '
     return x * ' '
 
-def html_dir_list(_dir, runid, wd, request_path):
+def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg):
     _padding = ' '
 
     s = ['+-' + basename(abspath(_dir)) + '\n']
     files = listdir(_dir)
 
+    _diff_dir = None
+    if diff_runid is not None:
+        _diff_dir = _dir.replace(runid, diff_runid)
+        if not _exists(_diff_dir):
+            _diff_dir = None
+
+    n = max(36, max(len(x) for x in files))
+
     for i, _file in enumerate(sorted_paths(files, _dir)):
         path = _dir + sep + _file
 
-        ts_pad = get_pad(36 - len(_file))
+        ts_pad = get_pad(n - len(_file))
         timestamp = os.path.getmtime(path)
         last_modified_time = time.ctime(timestamp)[4:]
 
         if isdir(path):
             item_count = f'{len(listdir(path))} items'
             item_pad = get_pad(8 - len(item_count.split()[0]))
-            end_pad = ' ' * 26
-            s.append(_padding + f'+-<a href="{_file}/\">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}\n')
+            end_pad = ' ' * 32
+            s.append(_padding + f'+-<a href="{_file}/{diff_arg}">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}\n')
         else:
             if os.path.islink(path):
                 target = ' -> {}'.format('/'.join(os.readlink(path).split('/')[-2:]))
@@ -108,17 +122,27 @@ def html_dir_list(_dir, runid, wd, request_path):
             dl_link = f'{dl_pad}<a href="{dl_url}">download</a>'
 
             file_lower = _file.lower()
-            gl_link = '        '
+            gl_link = '          '
             if file_lower.endswith('.arc') or file_lower.endswith('.tif') or file_lower.endswith('.img') or file_lower.endswith('.nc'):
                 gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/gdalinfo/')
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
 
-            repr_link = '         '
+            repr_link = '           '
             if file_lower.endswith('.man'):
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
 
-            s.append(_padding + f'>-<a href="{_file}">{_file}</a>{target} {ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}\n')
+            diff_link = '    '
+            if _diff_dir:
+                if not (file_lower.endswith('.tif') or
+                        file_lower.endswith('.parquet') or
+                        file_lower.endswith('.gz') or
+                        file_lower.endswith('.img')):
+                    if _exists(_join(_diff_dir, _file)):
+                        diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
+                        diff_link = f'  <a href="{diff_url}">diff</a>'
+
+            s.append(_padding + f'>-<a href="{_file}">{_file}</a>{target} {ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}\n')
 
         if i % 2:
             s[-1] = f'<span style="background-color:#f6f6f6;">{s[-1]}</span>'
@@ -130,6 +154,13 @@ def browse_response(path, runid, wd, request):
     args = request.args
     headers = request.headers
 
+    diff_runid = args.get('diff', '')
+    diff_wd = None
+    diff_arg = ''
+    if diff_runid:
+        diff_wd = get_wd(diff_runid)
+        diff_arg = f'?diff={diff_runid}'
+
     if not _exists(path):
         return error_factory('path does not exist')
 
@@ -138,12 +169,30 @@ def browse_response(path, runid, wd, request):
     if os.path.isdir(path):
         up = ''
         if path != wd:
-            up = '<a href="../">Up</a>\n'
+            up = f'<a href="../{diff_arg}">Up</a>\n'
 
-        c = '<pre>\n{}{}</pre>'\
-            .format(up, html_dir_list(path, runid, wd, request.path))
+        tree = '<pre>\n{}{}</pre>'\
+               .format(up, html_dir_list(path, runid, wd, request.path, diff_runid, diff_wd, diff_arg))
 
-        return Response(c, mimetype='text/html')
+        return Response('''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{runid} browser</title>
+<script>
+function redirectToDiff() {{
+    var runId = document.getElementById('runIdInput').value;
+    window.location.href = '?diff=' + encodeURIComponent(runId);
+}}
+</script>
+</head>
+<body>
+    <input type="text" value="{value}" id="runIdInput" placeholder="runid">
+    <button onclick="redirectToDiff()">Compare project</button>
+    {tree}
+</body>
+</html>'''.format(runid=runid, value=diff_runid, tree=tree))
 
     else:
         if path_lower.endswith('.gz'):
