@@ -11,7 +11,7 @@ from wepppy.wepp.soils import HorizonMixin
 from wepppy.eu.soils.eusoilhydrogrids import SoilHydroGrids
 
 
-_esdac_esdb_raster_dir = '/geodata/eu/ESDAC_ESDB_rasters/'
+_esdac_esdb_raster_dir = '/geodata/eu/ESDAC_ESDB_rasters/' # 1km
 _esdac_derived_db_dir = '/geodata/eu/ESDAC_STU_EU_Layers/'
 
 
@@ -103,7 +103,7 @@ class Horizon(HorizonMixin):
         self.gravel = gravel
         self._cec = _cec
         self.depth = depth
-       
+
         self._computeConductivity()
         self._computeErodibility()
         self._computeAnisotropy()
