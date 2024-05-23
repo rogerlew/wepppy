@@ -1,0 +1,43 @@
+import os
+from rq import Queue, Worker
+from rq.job import Job
+import redis 
+
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+RQ_DB = 9
+
+
+def get_job_details(job, redis_conn):
+    """Recursively fetch job details including any children jobs."""
+    job_info = {
+        "id": job.id,
+        "status": job.get_status(),
+        "result": job.result,
+        "started_at": str(job.started_at) if job.started_at else None,
+        "ended_at": str(job.ended_at) if job.ended_at else None,
+        "description": job.description,
+        "children": {}
+    }
+
+    for key, child_job_id in job.meta.items():
+        if key.startswith('jobs:'):
+            job_order = key.split(',')[0].split(':')[1]
+            child_job = Job.fetch(child_job_id, connection=redis_conn)
+            child_job_info =None
+            if child_job:
+                child_job_info = get_job_details(child_job, redis_conn)
+            job_info["children"].setdefault(job_order, []).append(child_job_info)
+
+    return job_info
+
+
+def get_run_wepp_rq_job_info(job_id):
+    with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+        job = Job.fetch(job_id, connection=redis_conn)
+
+        if not job:
+            return {"error": "Job not found"}
+
+        return get_job_details(job, redis_conn)
+

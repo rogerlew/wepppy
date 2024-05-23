@@ -9,8 +9,8 @@ from os.path import exists as _exists
 from functools import wraps
 from subprocess import Popen, PIPE, call
 
+import redis
 from rq import Queue, get_current_job
-from redis import Redis
 
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -22,7 +22,7 @@ from wepp_runner import (
     run_ss_batch_watershed,
 )
 
-from wepppy.nodb import Ron, Prep, Wepp, Watershed, Climate, ClimateMode
+from wepppy.nodb import Ron, Prep, Wepp, Watershed, Climate, ClimateMode, WeppPost
 
 from wepppy.nodb.status_messenger import StatusMessenger
 
@@ -30,6 +30,11 @@ from wepppy.export.prep_details import (
     export_channels_prep_details,
     export_hillslopes_prep_details
 )
+
+try:
+    from weppcloud2.discord_bot.discord_client import send_discord_message
+except:
+    send_discord_message = None
 
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
@@ -115,10 +120,10 @@ def run_wepp_rq(runid):
     #
     # Run Hillslopes
     wepp.log('Running Hillslopes\n')
-    watershed = Watershed.getInstance(self.wd)
+    watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
-    climate = Climate.getInstance(self.wd)
-    runs_dir = os.path.abspath(self.runs_dir)
+    climate = Climate.getInstance(wd)
+    runs_dir = os.path.abspath(wepp.runs_dir)
     fp_runs_dir = wepp.fp_runs_dir
     wepp_bin = wepp.wepp_bin
 
@@ -147,6 +152,7 @@ def run_wepp_rq(runid):
 
                     job.meta[f'jobs:0,func:run_ss_batch_hillslope_rq,ss_batch_id:{ss_batch_id},hill:{topaz_id}'] = _job.id
                     jobs0_hillslopes.append(_job)
+                    job.save()
         else:
             for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
                 wepp.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
@@ -158,6 +164,7 @@ def run_wepp_rq(runid):
                            timeout=600)
                 job.meta[f'jobs:0,func:run_hillslope_rq,hill:{topaz_id}'] = _job.id
                 jobs0_hillslopes.append(_job)
+                job.save()
 
         #
         # TODO: flowpaths would go here
@@ -165,14 +172,15 @@ def run_wepp_rq(runid):
 
         #
         # Prep Watershed
-        _job = q.enqueue_call(_prep_watershed_rq, ('runid',))
+        _job = q.enqueue_call(_prep_watershed_rq, (runid,))
         job.meta[f'jobs:0,func:_prep_watershed_rq,hill:{topaz_id}'] = _job.id
         jobs0_hillslopes.append(_job)
 
         #
         # Run Watershed
-        wepp.log(f'Running Watershed wepp_bin:{self.wepp_bin}... ')
+        wepp.log(f'Running Watershed wepp_bin:{wepp_bin}... ')
 
+        # jobs:1
         jobs1_watersheds = []
         if climate.climate_mode == ClimateMode.SingleStormBatch:
 
@@ -188,57 +196,75 @@ def run_wepp_rq(runid):
                            depends_on=jobs0_hillslopes)
                 job.meta[f'jobs:1,func:run_ss_batch_watershed_rq,ss_batch_id:{ss_batch_id}'] = _job.id
                 jobs1_watersheds.append(_job)
+                job.save()
 
         else:
             _job = q.enqueue_call(
-                       func=run_watershed_rq(
+                       func=run_watershed_rq,
                        args=[runid],
                        kwargs=dict(wepp_bin=wepp_bin),
                        timeout='4h',
                        depends_on=jobs0_hillslopes)
             job.meta[f'jobs:1,func:run_watershed_rq'] = _job.id
             jobs1_watersheds.append(_job)
+            job.save()
 
-        job2_on_run_completed = q.enqueue_call(_post_unlock_wepp_rq, (run_id,), depends_on=jobs1_watersheds)
-        job.meta['jobs:2,func:_post_unlock_wepp_rq'] = job2_running_complete.id
+        # jobs:2
+        job2_on_run_completed = q.enqueue_call(_post_unlock_wepp_rq, (runid,), depends_on=jobs1_watersheds)
+        job.meta['jobs:2,func:_post_unlock_wepp_rq'] = job2_on_run_completed.id
+        job.save()
 
+        # jobs:3
         jobs3_post = []
-        post_jobs.append(q.enqueue_call(_post_run_cleanup_out_rq, (runid,), depends_on=job2_on_run_completed)
+
+        _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,), depends_on=job2_on_run_completed)
+        job.meta['jobs:3,func:_post_run_cleanup_out_rq'] = _job.id
+        jobs3_post.append(_job)
+        job.save()
+
         if wepp.prep_details_on_run_completion:
             _job = q.enqueue_call(_post_prep_details_rq, (runid,), depends_on=job2_on_run_completed)
             job.meta['jobs:3,func:_post_prep_details_rq'] = _job.id
             jobs3_post.append(_job)
+            job.save()
+            job.save()
 
         if not climate.is_single_storm:
             _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,), depends_on=job2_on_run_completed)
             job.meta['jobs:3,func:_post_run_wepp_post_rq'] = _job.id
             jobs3_post.append(_job)
+            job.save()
 
         _job = q.enqueue_call(_post_compress_pass_pw0_rq, (runid,), depends_on=job2_on_run_completed)
         job.meta['jobs:3,func:_post_compress_pass_pw0_rq'] = _job.id
         jobs3_post.append(_job)
+        job.save()
 
         _job = q.enqueue_call(_post_compress_soil_pw0_rq, (runid,), depends_on=job2_on_run_completed)
         job.meta['jobs:3,func:_post_compress_soil_pw0_rq'] = _job.id
         jobs3_post.append(_job)
+        job.save()
 
         if wepp.legacy_arc_export_on_run_completion:
             _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), depends_on=job2_on_run_completed)
             job.meta['jobs:3,func:_post_legacy_arc_export_rq'] = _job.id
             jobs3_post.append(_job)
+            job.save()
 
         if wepp.arc_export_on_run_completion:
             _job = q.enqueue_call(_post_gpkg_export_rq, (runid,), depends_on=job2_on_run_completed)
             job.meta['jobs:3,func:_post_gpkg_export_rq'] = _job.id
             jobs3_post.append(_job)
+            job.save()
 
         _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,), depends_on=job2_on_run_completed)
         job.meta['jobs:3,func:_post_make_loss_grid_rq'] = _job.id
         jobs3_post.append(_job)
+        job.save()
 
+        # jobs:4
         job4_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs3_post)
         job.meta['jobs:4,func:_log_complete_rq'] = _job.id
-
         job.save()
 
 
@@ -272,7 +298,7 @@ def _post_run_cleanup_out_rq(runid):
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_run_cleanup_out_rq({runid})')
 
     climate = Climate.getInstance(wd)
-
+    wepp = Wepp.getInstance(wd)
     if climate.climate_mode == ClimateMode.SingleStormBatch:
         for d in climate.ss_batch_storms:
             ss_batch_key = d['ss_batch_key']
@@ -354,7 +380,7 @@ def _post_gpkg_export_rq(runid):
     StatusMessenger.publish(status_channel, f'rq:{job.id} completed _post_gpkg_export_rq({runid})')
 
 
-def _post_make_loss_grid_rq(runid)
+def _post_make_loss_grid_rq(runid):
     job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
@@ -390,7 +416,8 @@ def _log_complete_rq(runid):
         else:
             link = f'{scenario} _{runid}_'
 
-    send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
+    if send_discord_message is not None:
+        send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
 
     StatusMessenger.publish(status_channel, f'rq:{job.id} completed _log_complete_rq({runid})')
 
