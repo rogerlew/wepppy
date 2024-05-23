@@ -186,14 +186,12 @@ class Landuse(NoDbBase, LogMixin):
         if hasattr(self, '_mapping'):
             return self._mapping
 
-        ron = Ron.getInstance(self.wd)
-
         _mapping = None
         if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
             _mapping = 'rred'
-        elif self._mode == LanduseMode.Gridded and 'eu' in ron.locales:
+        elif self._mode == LanduseMode.Gridded and 'eu' in self.locales:
             _mapping = 'esdac'
-        elif self._mode == LanduseMode.Gridded and 'au' in ron.locales:
+        elif self._mode == LanduseMode.Gridded and 'au' in self.locales:
             _mapping = 'lu10v5ua'
 
         return _mapping
@@ -434,14 +432,12 @@ class Landuse(NoDbBase, LogMixin):
 
         self.lock()
 
-        ron = Ron.getInstance(wd)
-
         # noinspection PyBroadException
         try:
             self.clean()
 
             if self._mode == LanduseMode.Gridded:
-                if 'au' in ron.locales:
+                if 'au' in self.locales:
                     self._build_lu10v5ua()
                 else:
                     self._build_NLCD()

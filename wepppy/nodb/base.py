@@ -138,6 +138,8 @@ class NoDbBase(object):
         if val is not None:
             val = ast.literal_eval(val)
 
+        if val is None:
+            val = []
         return val
 
     def set_attrs(self, attrs):
@@ -178,6 +180,31 @@ class NoDbBase(object):
         # noinspection PyUnresolvedReferences
         with open(self._nodb, 'w') as fp:
             fp.write(js)
+
+    @property
+    def locales(self):
+        from .ron import Ron
+        ron = Ron.getInstance(self.wd)
+
+        if hasattr(ron, '_locales'):
+            return ron._locales
+
+        config_stem = self.config_stem
+
+        if config_stem in ('au', 'au-fire'):
+            return 'au',
+        elif config_stem in ('eu', 'eu-75', 'eu-fire', 'eu-fire2'):
+            return 'eu',
+        elif config_stem in ('lt', 'lt-fire-future-snow', 'lt-wepp_347f3bd', 'lt-wepp_bd16b69-snow'):
+            return 'us', 'lt',
+        elif config_stem in ('portland', 'portland-simfire-eagle-snow', 'portland-simfire-norse-snow',
+                             'portland-snow', 'portland-wepp_64bf5aa_snow', 'portland-wepp_347f3bd',
+                             'portland-wepp_bd16b69'):
+            return 'us', 'portland'
+        elif config_stem in ('seattle-simfire-eagle-snow', 'seattle-simfire-norse-snow', 'seattle-snow'):
+            return 'us', 'seattle'
+        else:
+            return 'us',
 
     @property
     def stub(self):
