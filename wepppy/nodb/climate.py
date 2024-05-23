@@ -429,6 +429,7 @@ class Climate(NoDbBase, LogMixin):
             self._climatestation_mode = ClimateStationMode.Undefined
             self._climatestation = None
 
+            # this gets called from Ron.__init__ before it serializes
             locales = self.config_get_list('general', 'locales')
 
             if 'eu' in locales:
@@ -878,12 +879,11 @@ class Climate(NoDbBase, LogMixin):
         return [s.as_dict() for s in self._closest_stations]
 
     def find_heuristic_stations(self, num_stations=10):
-        ron = Ron.getInstance(self.wd)
-        if 'eu' in ron.locales:
+        if 'eu' in self.locales:
             return self.find_eu_heuristic_stations(num_stations=num_stations)
-        if 'au' in ron.locales:
+        if 'au' in self.locales:
             return self.find_au_heuristic_stations(num_stations=num_stations)
-  
+
         self.lock()
 
         # noinspection PyBroadInspection

@@ -628,8 +628,6 @@ class Soils(NoDbBase, LogMixin):
         if not watershed.is_abstracted:
             raise WatershedNotAbstractedError()
 
-        ron = Ron.getInstance(wd)
-
         if self.soils_map is not None:
              self._build_from_map_db()
         elif self.config_stem.startswith('ak'):
@@ -637,10 +635,10 @@ class Soils(NoDbBase, LogMixin):
         elif self.mode == SoilsMode.Gridded:
             if self.ssurgo_db == 'isric':
                 self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
-            elif 'eu' in ron.locales:
+            elif 'eu' in self.locales:
                 from wepppy.eu.soils import build_esdac_soils
                 self._build_by_identify(build_esdac_soils)
-            elif 'au' in ron.locales:
+            elif 'au' in self.locales:
                 from wepppy.au.soils import build_asris_soils
                 self._build_by_identify(build_asris_soils)
             else:

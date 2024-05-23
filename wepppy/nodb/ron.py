@@ -617,28 +617,6 @@ class Ron(NoDbBase):
             raise
 
     @property
-    def locales(self):
-        if hasattr(self, '_locales'):
-            return self._locales
-
-        config_stem = self.config_stem
-
-        if config_stem in ('au', 'au-fire'):
-            return 'au',
-        elif config_stem in ('eu', 'eu-75', 'eu-fire', 'eu-fire2'):
-            return 'eu',
-        elif config_stem in ('lt', 'lt-fire-future-snow', 'lt-wepp_347f3bd', 'lt-wepp_bd16b69-snow'):
-            return 'us', 'lt',
-        elif config_stem in ('portland', 'portland-simfire-eagle-snow', 'portland-simfire-norse-snow',
-                             'portland-snow', 'portland-wepp_64bf5aa_snow', 'portland-wepp_347f3bd',
-                             'portland-wepp_bd16b69'):
-            return 'us', 'portland'
-        elif config_stem in ('seattle-simfire-eagle-snow', 'seattle-simfire-norse-snow', 'seattle-snow'):
-            return 'us', 'seattle'
-        else:
-            return 'us',
-
-    @property
     def has_ash_results(self):
         if 'ash' not in self.mods:
             return False
