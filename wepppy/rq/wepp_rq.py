@@ -54,6 +54,7 @@ def run_ss_batch_hillslope_rq(runid, wepp_id, wepp_bin=None, ss_batch_id=None):
     return status, time
 
 def run_hillslope_rq(runid, wepp_id, wepp_bin=None):
+    job = get_current_job()
     wd = get_wd(runid)
     runs_dir = _join(wd, 'wepp/runs')
     status_channel = f'{runid}:wepp'
@@ -63,6 +64,7 @@ def run_hillslope_rq(runid, wepp_id, wepp_bin=None):
     return status, time
 
 def run_flowpath_rq(runid, flowpath, wepp_bin=None):
+    job = get_current_job()
     wd = get_wd(runid)
     runs_dir = _join(wd, 'wepp/runs')
     status_channel = f'{runid}:wepp'
@@ -72,6 +74,7 @@ def run_flowpath_rq(runid, flowpath, wepp_bin=None):
     return status, time
 
 def run_watershed_rq(runid, wepp_bin=None):
+    job = get_current_job()
     wd = get_wd(runid)
     runs_dir = _join(wd, 'wepp/runs')
     status_channel = f'{runid}:wepp'
@@ -81,6 +84,7 @@ def run_watershed_rq(runid, wepp_bin=None):
     return status, time
 
 def run_ss_batch_watershed_rq(runid, wepp_bin=None, ss_batch_id=None):
+    job = get_current_job()
     wd = get_wd(runid)
     runs_dir = _join(wd, 'wepp/runs')
     status_channel = f'{runid}:wepp'
@@ -239,6 +243,7 @@ def run_wepp_rq(runid):
 
 
 def _prep_watershed_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _prep_watershed_rq({runid})')
@@ -248,6 +253,7 @@ def _prep_watershed_rq(runid):
 
 
 def _post_unlock_wepp_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_unlock_wepp_rq({runid})')
@@ -260,6 +266,7 @@ def _post_unlock_wepp_rq(runid):
 
 
 def _post_run_cleanup_out_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_run_cleanup_out_rq({runid})')
@@ -287,6 +294,7 @@ def _post_run_cleanup_out_rq(runid):
 
 
 def _post_prep_details_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_prep_details_rq({runid})')
@@ -296,6 +304,7 @@ def _post_prep_details_rq(runid):
 
 
 def _post_run_wepp_post_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_run_wepp_post_rq({runid})')
@@ -305,25 +314,28 @@ def _post_run_wepp_post_rq(runid):
 
 
 def _post_compress_pass_pw0_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_compress_pass_pw0_rq({runid})')
-    target = _join(wd, 'wepp/output/pass_pw0.txt'
+    target = _join(wd, 'wepp/output/pass_pw0.txt')
     if _exists(target):
         compress_fn(target)
     StatusMessenger.publish(status_channel, f'rq:{job.id} completed _post_compress_pass_pw0_rq({runid})')
 
 
 def _post_compress_soil_pw0_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_compress_soil_pw0_rq({runid})')
-    target = _join(wd, 'wepp/output/soil_pw0.txt'
+    target = _join(wd, 'wepp/output/soil_pw0.txt')
     compress_fn(target)
     StatusMessenger.publish(status_channel, f'rq:{job.id} completed _post_compress_soil_pw0_rq({runid})')
 
 
 def _post_legacy_arc_export_rq(runid):
+    job = get_current_job()
     from wepppy.export import  legacy_arc_export
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
@@ -333,6 +345,7 @@ def _post_legacy_arc_export_rq(runid):
 
 
 def _post_gpkg_export_rq(runid):
+    job = get_current_job()
     from wepppy.export.gpkg_export import gpkg_export
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
@@ -342,6 +355,7 @@ def _post_gpkg_export_rq(runid):
 
 
 def _post_make_loss_grid_rq(runid)
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _post_make_loss_grid_rq({runid})')
@@ -351,6 +365,7 @@ def _post_make_loss_grid_rq(runid)
 
 
 def _log_complete_rq(runid):
+    job = get_current_job()
     wd = get_wd(runid)
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running _log_complete_rq({runid})')
@@ -364,7 +379,6 @@ def _log_complete_rq(runid):
     ron = Ron.getInstance(wd)
     name = ron.name
     scenario = ron.scenario
-    runid = ron.runid
     config = ron.config_stem
 
     link = runid
