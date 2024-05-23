@@ -750,7 +750,7 @@ class Wepp(NoDbBase, LogMixin):
         if disturbed.fire_date is not None:
             with open(_join(self.runs_dir, 'firedate.txt'), 'w') as fp:
                 firedate = disturbed.fire_date
-                mo, da, yr = firedate.split()
+                mo, da, yr = firedate.strip().replace('/', ' ').replace('-', ' ').split()
                 assert isint(mo), mo
                 assert isint(da), da
                 assert isint(yr), yr
