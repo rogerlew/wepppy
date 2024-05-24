@@ -697,9 +697,11 @@ class Wepp(NoDbBase, LogMixin):
         else:
             self._remove_frost()
 
+        self._check_and_set_phosphorus_map() # this locks
         self._prep_phosphorus()
 
         if (baseflow is None and self.run_baseflow) or baseflow:
+            self._check_and_set_baseflow_map() # this locks
             self._prep_baseflow()
         else:
             self._remove_baseflow()
@@ -909,7 +911,7 @@ class Wepp(NoDbBase, LogMixin):
         if _exists(fn):
             os.remove(fn)
 
-    def _prep_phosphorus(self):
+    def _check_and_set_phosphorus_map(self):
 
         # noinspection PyMethodFirstArgAssignment
         self = self.getInstance(self.wd)
@@ -967,6 +969,9 @@ class Wepp(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def _prep_phosphorus(self):
+        phos_opts = self.phosphorus_opts
+
         # create the phosphorus.txt file
         fn = _join(self.runs_dir, 'phosphorus.txt')
         if phos_opts.isvalid:
@@ -993,7 +998,7 @@ class Wepp(NoDbBase, LogMixin):
         if _exists(fn):
             os.remove(fn)
 
-    def _prep_baseflow(self):
+    def _check_and_set_baseflow_map(self):
         baseflow_opts = self.baseflow_opts
 
         gwstorage_map = getattr(self, 'baseflow_gwstorage_map', None)
@@ -1043,6 +1048,9 @@ class Wepp(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
+    def _prep_baseflow(self):
+        baseflow_opts = self.baseflow_opts
 
         fn = _join(self.runs_dir, 'gwcoeff.txt')
         with open(fn, 'w') as fp:
