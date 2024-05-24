@@ -94,7 +94,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg):
         if not _exists(_diff_dir):
             _diff_dir = None
 
-    n = max(36, max(len(x) for x in files))
+    n = max(36, max(len(x) for x in files) + 2)
 
     for i, _file in enumerate(sorted_paths(files, _dir)):
         path = _dir + sep + _file
