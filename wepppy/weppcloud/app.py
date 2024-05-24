@@ -49,8 +49,8 @@ from flask_security import (
 import re
 
 from flask_security.forms import Required
-
 from flask_mail import Mail
+from flask_migrate import Migrate
 
 from wtforms import StringField
 
@@ -215,7 +215,7 @@ mail = Mail(app)
 # Setup Flask-Security
 # Create database connection object
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 
 @app.context_processor
 def inject_site_prefix():
@@ -313,6 +313,7 @@ class Role(db.Model, RoleMixin):
 
 
 class User(db.Model, UserMixin):
+    fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False)
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True)
     first_name = db.Column(db.String(255))
@@ -398,15 +399,13 @@ security = Security(app, user_datastore,
                     confirm_register_form=ExtendedRegisterForm)
 
 
-# Create a user to test with
-@app.before_first_request
-def init_db():
-    if 'wepp1' in _hostname:
-        from wepppy.weppcloud.wepp1_config import _init
-    else:
-        from wepppy.weppcloud.standalone_config import _init
-
-    _init(db, user_datastore)
+#with app.app_context():
+#    if 'wepp1' in _hostname:
+#        from wepppy.weppcloud.wepp1_config import _init
+#    else:
+#        from wepppy.weppcloud.standalone_config import _init
+#
+#    _init(db, user_datastore)
 
 
 def get_run_owners(runid):

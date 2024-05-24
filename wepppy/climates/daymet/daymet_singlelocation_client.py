@@ -82,15 +82,19 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
         years = sorted(list(set(df.year)))
         leap_years = [yr for yr in years if isleap(yr)]
 
-        if len(leap_years) > 0:
-            for yr in leap_years:
-                index = df[(df['year'] == yr) & (df['yday'] == 365)].index[0]
-                new_row = df.loc[index].to_dict()
+        new_rows = []
+        for yr in leap_years:
+            condition = (df['year'] == yr) & (df['yday'] == 365)
+            if condition.any():
+                index = df.loc[condition].index[0]
+                new_row = df.loc[index].copy()
                 new_row['yday'] = 366
-                df = df.append(new_row, ignore_index=True)
+                new_rows.append(new_row)
 
-            # Sort the DataFrame by multiple columns
-            df = df.sort_values(by=['year', 'yday'], ascending=True).reset_index(drop=True)
+        if new_rows:
+            df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
+
+        df = df.sort_values(by=['year', 'yday'], ascending=True).reset_index(drop=True)
 
     try:
         df.index = pd.to_datetime(df.year.astype(int).astype(str) + '-' +
