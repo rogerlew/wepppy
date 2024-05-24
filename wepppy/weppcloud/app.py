@@ -1547,7 +1547,7 @@ def archive(runid, config):
 
 
         archive_path = archive_project(wd)
-        return send_file(archive_path, as_attachment=True, attachment_filename='{}.zip'.format(runid))
+        return send_file(archive_path, as_attachment=True, download_name='{}.zip'.format(runid))
 
     except:
         return exception_factory('Error Archiving Project', runid=runid)
@@ -2199,7 +2199,7 @@ def export_ermit(runid, config):
         wd = get_wd(runid)
         fn = create_ermit_input(wd)
         name = _split(fn)[-1]
-        return send_file(fn, as_attachment=True, attachment_filename=name)
+        return send_file(fn, as_attachment=True, download_name=name)
     except:
         return exception_factory('Error exporting ERMiT', runid=runid)
 
@@ -2226,7 +2226,7 @@ def export_arcmap(runid, config):
         try:
             if not request.args.get('no_retrieve', None) is not None:
                 archive_path = archive_project(ron.export_legacy_arc_dir)
-                return send_file(archive_path, as_attachment=True, attachment_filename=f'{runid}_arcmap.zip')
+                return send_file(archive_path, as_attachment=True, download_name=f'{runid}_arcmap.zip')
             else:
                 return success_factory()
 
@@ -2243,7 +2243,7 @@ def export_arcmap(runid, config):
         try:
             if not request.args.get('no_retrieve', None) is not None:
                 archive_path = archive_project(ron.export_arc_dir)
-                return send_file(archive_path, as_attachment=True, attachment_filename=f'{runid}_arcmap.zip')
+                return send_file(archive_path, as_attachment=True, download_name=f'{runid}_arcmap.zip')
             else:
                 return success_factory()
 
@@ -2268,7 +2268,7 @@ def export_prep_details(runid, config):
 
     if not request.args.get('no_retrieve', None) is not None:
         archive_path = archive_project(_split(fn)[0])
-        return send_file(archive_path, as_attachment=True, attachment_filename='{}_prep_details.zip'.format(runid))
+        return send_file(archive_path, as_attachment=True, download_name='{}_prep_details.zip'.format(runid))
     else:
         return success_factory()
 
@@ -2279,7 +2279,7 @@ def export_winwepp(runid, config):
     from wepppy.export import export_winwepp
     wd = get_wd(runid)
     export_winwepp_path = export_winwepp(wd)
-    return send_file(export_winwepp_path, as_attachment=True, attachment_filename='{}_winwepp.zip'.format(runid))
+    return send_file(export_winwepp_path, as_attachment=True, download_name='{}_winwepp.zip'.format(runid))
 
 
 # noinspection PyBroadException
@@ -3813,7 +3813,7 @@ def resources_observed_data(runid, config, file):
     fn = _join(ron.observed_dir, file)
 
     assert _exists(fn)
-    return send_file(fn, mimetype='text/csv', attachment_filename=file)
+    return send_file(fn, mimetype='text/csv', download_name=file)
 
 
 @app.route('/runs/<string:runid>/<config>/query/landuse/cover/subcatchments')
@@ -4063,7 +4063,7 @@ def resources_wepp_streamflow(runid, config):
 
     assert _exists(fn)
 
-    return send_file(fn, mimetype='text/csv', attachment_filename='daily_streamflow.csv')
+    return send_file(fn, mimetype='text/csv', download_name='daily_streamflow.csv')
 
 
 @app.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed.csv')
@@ -4082,7 +4082,7 @@ def resources_wepp_totalwatsed(runid, config):
 
     assert _exists(fn)
 
-    return send_file(fn, mimetype='text/csv', attachment_filename='totalwatsed.csv')
+    return send_file(fn, mimetype='text/csv', download_name='totalwatsed.csv')
 
 
 @app.route('/runs/<string:runid>/<config>/resources/wepp/totalwatsed2.csv')
@@ -4096,7 +4096,7 @@ def resources_wepp_totalwatsed2(runid, config):
         totwatsed.export(fn)
     assert _exists(fn)
 
-    return send_file(fn, mimetype='text/csv', attachment_filename='totalwatsed2.csv')
+    return send_file(fn, mimetype='text/csv', download_name='totalwatsed2.csv')
 
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')

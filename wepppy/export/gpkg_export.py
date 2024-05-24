@@ -27,9 +27,8 @@ def gpkg_export(wd: str):
     if not _exists(wat_hill_fn):
         return None
 
-
     if wd.endswith('/'):
-        runid = os.path.dirname(os.path.basename(wd))
+        runid = os.path.basename(os.path.dirname(wd))
     else:
         runid = os.path.basename(wd)
 
@@ -40,6 +39,7 @@ def gpkg_export(wd: str):
         os.remove(gpkg_fn)
 
     hill_gdf = gpd.read_file(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON'))
+    hill_gdf.set_crs("EPSG:4326", inplace=True)
 
     wat_hill_df = pd.read_csv(wat_hill_fn)
     wat_hill_df = esri_compatible_colnames(wat_hill_df)
@@ -77,9 +77,11 @@ def gpkg_export(wd: str):
         hill_gdf = hill_gdf.merge(hill_df, on='TopazID', how='left')
 
     hill_gdf = esri_compatible_colnames(hill_gdf)
+#    hill_gdf.to_file(_join(wd, 'export/subcatchments.geojson'), driver='GeoJSON')
     hill_gdf.to_file(gpkg_fn, driver='GPKG', layer='subcatchments')
 
     chn_gdf = gpd.read_file(_join(wd, 'dem/topaz/CHANNELS.WGS.JSON'))
+    chn_gdf.set_crs("EPSG:4326", inplace=True)
 
     wat_chn_fn = _join(wd, 'watershed/channels.csv')
     wat_chn_df = pd.read_csv(wat_chn_fn)
@@ -95,6 +97,7 @@ def gpkg_export(wd: str):
         chn_gdf = chn_gdf.merge(chn_df, on='TopazID', how='left')
 
     chn_gdf = esri_compatible_colnames(chn_gdf)
+#    chn_gdf.to_file(_join(wd, 'export/channels.geojson'), driver='GeoJSON')
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
 if __name__ == '__main__':

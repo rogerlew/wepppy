@@ -147,8 +147,8 @@ class AshModel(object):
             dfs.append(df)
 
             dates = np.linspace(start_index, start_index + len(df), len(df))
-            ax1.plot(dates, df['cum_ash_transport (tonne/ha)'], color='red')
-            ax2.scatter(df['cum_ash_runoff (mm)'], df['cum_ash_transport (tonne/ha)'], color='blue')
+            ax1.plot(dates, df['cum_ash_transport (tonne/ha)'].to_numpy(), color='red')
+            ax2.scatter(df['cum_ash_runoff (mm)'].to_numpy(), df['cum_ash_transport (tonne/ha)'].to_numpy(), color='blue')
 
         ax1.set_ylabel('cumulative ash transport (tonne/ha)')
         ax2.set_xlabel('cumulative ash runoff (mm)')

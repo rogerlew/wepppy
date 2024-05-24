@@ -54,7 +54,7 @@ def download_tree(runid, config, subpath):
 
 def download_response_file(path, args=None, headers=None):
     filename = os.path.basename(path)
-    return send_file(path, as_attachment=True, attachment_filename=filename)
+    return send_file(path, as_attachment=True, download_name=filename)
 
 def download_response_dir(path, show_up=False, args=None, headers=None):
     assert os.path.isdir(path)
