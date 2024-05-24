@@ -117,13 +117,19 @@ def run_wepp_rq(runid):
     if wepp.islocked():
         raise Exception(f'{runid} is locked')
 
-    #
-    # Prep Hillslopes
+    # send feedback to user
+    wepp.log('Running Wepp\n')
+
+    # quick prep operations that require locking
+    wepp._check_and_set_baseflow_map()
+    wepp._check_and_set_phosphorus_map()
+
+    # lock wepp
+    # Nothing beyond this point should require writing to nodb
     wepp.lock()
 
     #
     # Run Hillslopes
-    wepp.log('Running Hillslopes\n')
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
     climate = Climate.getInstance(wd)

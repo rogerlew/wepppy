@@ -9,6 +9,7 @@ from os.path import exists as _exists
 
 from flask import jsonify, make_response
 
+from datetime import datetime
 
 def get_wd(runid):
     return _join('/geodata/weppcloud_runs', runid)

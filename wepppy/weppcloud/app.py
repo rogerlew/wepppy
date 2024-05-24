@@ -203,12 +203,16 @@ from routes.browse import browse_bp
 from routes.gdalinfo import gdalinfo_bp
 from routes.wepprepr import repr_bp
 from routes.diff import diff_bp
+from routes.rq.api.jobinfo import jobinfo_bp
+from routes.rq.job_dashboard.routes import job_dashboard_bp
 
 app.register_blueprint(download_bp)
 app.register_blueprint(browse_bp)
 app.register_blueprint(gdalinfo_bp)
 app.register_blueprint(repr_bp)
 app.register_blueprint(diff_bp)
+app.register_blueprint(jobinfo_bp)
+app.register_blueprint(job_dashboard_bp)
 
 mail = Mail(app)
 
@@ -788,7 +792,7 @@ def access_by_year():
                 rdr = csv.DictReader(fp)
                 for d in rdr:
                     project_loads[int(d['year'])] += 1
-                    
+
     except Exception:
         return exception_factory()
 
