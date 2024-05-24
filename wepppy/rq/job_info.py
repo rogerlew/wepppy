@@ -1,8 +1,11 @@
 import os
 from rq import Queue, Worker
 from rq.job import Job
-import redis 
+import redis
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
@@ -17,6 +20,7 @@ def get_job_details(job, redis_conn):
         "started_at": str(job.started_at) if job.started_at else None,
         "ended_at": str(job.ended_at) if job.ended_at else None,
         "description": job.description,
+        "exc_info": job.latest_result(),
         "children": {}
     }
 
@@ -33,6 +37,7 @@ def get_job_details(job, redis_conn):
 
 
 def get_run_wepp_rq_job_info(job_id):
+    print(REDIS_HOST, RQ_DB)
     with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
         job = Job.fetch(job_id, connection=redis_conn)
 
@@ -40,4 +45,13 @@ def get_run_wepp_rq_job_info(job_id):
             return {"error": "Job not found"}
 
         return get_job_details(job, redis_conn)
+
+if __name__ == "__main__":
+    import sys
+    from pprint import pprint
+
+    if not sys.argv[-1].endswith('.py'):
+        job_id = str(sys.argv[-1])
+        job_info = get_run_wepp_rq_job_info(job_id)
+        pprint(job_info)
 
