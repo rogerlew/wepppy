@@ -8,7 +8,7 @@ from wepppy.nodb.base import NoDbBase
 
 from wepppy.all_your_base.geo import read_raster, get_utm_zone, utm_srid
 
-import cv2
+#import cv2
 
 # standard library
 import os
