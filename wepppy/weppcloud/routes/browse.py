@@ -213,7 +213,7 @@ function redirectToDiff() {{
                 return r
 
         if 'download' in args or 'Download' in headers:
-            return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
+            return send_file(path, as_attachment=True, download_name=_split(path)[-1])
 
         if path_lower.endswith('.json') or path_lower.endswith('.nodb') or path_lower.endswith('.dump'):
             assert contents is not None
@@ -266,7 +266,7 @@ function redirectToDiff() {{
             try:
                 contents = fp.read()
             except UnicodeDecodeError:
-                return send_file(path, as_attachment=True, attachment_filename=_split(path)[-1])
+                return send_file(path, as_attachment=True, download_name=_split(path)[-1])
 
         r = Response(response=contents, status=200, mimetype="text/plain")
         r.headers["Content-Type"] = "text/plain; charset=utf-8"

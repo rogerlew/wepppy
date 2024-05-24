@@ -300,16 +300,16 @@ class TopazRunner:
         """
         # open the channel map
         netful_arc = _join(self.topaz_wd, 'NETFUL.ARC')
-        data, _transform, _proj = read_arc(netful_arc, dtype=np.int3264)
+        data, _transform, _proj = read_arc(netful_arc, dtype=np.int32)
         n, m = data.shape
 
         # pad the data table with a border of zeros so we can slice
         # to count the neighbors
-        _data = np.zeros((n+2, m+2), dtype=np.int3264)
+        _data = np.zeros((n+2, m+2), dtype=np.int32)
         _data[1:-1, 1:-1] = data
 
         # iterate and fill the mask (neighbor counts)
-        mask = np.zeros((n, m), dtype=np.int3264)
+        mask = np.zeros((n, m), dtype=np.int32)
         for i in range(1, n+1):
             for j in range(1, m+1):
                 # only channel cells can have neighbors
