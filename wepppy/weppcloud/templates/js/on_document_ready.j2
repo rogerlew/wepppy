@@ -13,7 +13,6 @@ var cellsize = {{ron.cellsize}};
 var readonly = {{ ron.readonly | tojson }};
 
 function window_resize() {
-    console.log('window_resize');
     var _map = $('#mapid');
     var w = _map.parent().width();
     _map.css('min-height', w);
@@ -1093,6 +1092,9 @@ function getSelectorForKey(key) {
     return mapping[key];
 }
 
+
+let lastPreflightChecklist = null;
+
 function initWebSocket() {
     var wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/preflight/{{ run_id }}";
     var ws;
@@ -1114,6 +1116,18 @@ function initWebSocket() {
                 ws = null;
             } else if (payload.type === "preflight") {
                 updateUI(payload.checklist);
+
+                if (lastPreflightChecklist != null) {
+                  if (!lastPreflightChecklist.wepp && payload.checklist.wepp) {
+                    wepp = Wepp.getInstance();
+                    wepp.form.trigger("WEPP_RUN_TASK_COMPLETED");
+                    wepp.ws_client.disconnect();
+                    console.log('wepp_finished');
+                  }
+                }
+
+                lastPreflightChecklist = payload.checklist;
+
             }
         };
 

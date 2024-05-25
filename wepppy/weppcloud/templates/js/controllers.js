@@ -4990,13 +4990,13 @@ var Wepp = function () {
             self.stacktrace.hide();
         };
         that.ws_client = new WSClient('wepp_form', 'wepp');
+        that.rq_job_id = null;
 
         that.surf_runoff = $("#wepp_form #surf_runoff");
         that.lateral_flow = $("#wepp_form #lateral_flow");
         that.baseflow = $("#wepp_form #baseflow");
         that.sediment = $("#wepp_form #sediment");
         that.channel_critical_shear = $("#wepp_form #channel_critical_shear");
-
 
         that.addChannelCriticalShear = function (x) {
             var self = instance;
@@ -5128,12 +5128,13 @@ var Wepp = function () {
             var data = self.form.serialize();
 
             $.post({
-                url: "tasks/run_wepp/",
+                url: "rq/api/run_wepp",
                 data: data,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("WEPP_RUN_TASK_COMPLETED");
+                        self.status.html(`run_wepp_rq job submitted: ${response.job_id}`);
+                        self.rq_job_id = response.job_id;
+                        //self.form.trigger("WEPP_RUN_TASK_COMPLETED");
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -5144,8 +5145,6 @@ var Wepp = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function() {
-                self.ws_client.disconnect();
             });
         };
 
