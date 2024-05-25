@@ -23,7 +23,8 @@ from wepp_runner import (
     run_ss_batch_watershed,
 )
 
-from wepppy.nodb import Disturbed, Ron, Prep, Wepp, Watershed, Climate, ClimateMode, WeppPost
+from wepppy.nodb import Disturbed, Ron, Wepp, Watershed, Climate, ClimateMode, WeppPost
+from wepppy.nodb.redis_prep import RedisPrep
 
 from wepppy.nodb.status_messenger import StatusMessenger
 
@@ -67,7 +68,7 @@ def run_hillslope_rq(runid, wepp_id, wepp_bin=None):
     runs_dir = _join(wd, 'wepp/runs')
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin})')
-    status, wepp_id, time = run_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin)
+    status, wepp_id, time = run_hillslope(wepp_id, runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
     StatusMessenger.publish(status_channel, f'rq:{job.id} completed {func_name}({runid}, wepp_id={wepp_id}, wepp_bin={wepp_bin}) -> ({status}, {time})')
     return status, time
 
@@ -89,7 +90,7 @@ def run_watershed_rq(runid, wepp_bin=None):
     runs_dir = _join(wd, 'wepp/runs')
     status_channel = f'{runid}:wepp'
     StatusMessenger.publish(status_channel, f'rq:{job.id} running {func_name}({runid}, wepp_bin={wepp_bin})')
-    status, time = run_watershed(runs_dir, wepp_bin=wepp_bin)
+    status, time = run_watershed(runs_dir, wepp_bin=wepp_bin, status_channel=status_channel)
     StatusMessenger.publish(status_channel, f'rq:{job.id} completed {func_name}({runid}, wepp_bin={wepp_bin}) -> ({status}, {time})')
     return status, time
 
@@ -119,6 +120,11 @@ def run_wepp_rq(runid):
 
     # send feedback to user
     wepp.log('Running Wepp\n')
+
+    try:
+        wepp.clean()
+    except Exception:
+        return exception_factory('Error cleaning wepp directories', runid=runid)
 
     # quick prep operations that require locking
     wepp._check_and_set_baseflow_map()
@@ -572,7 +578,7 @@ def _log_complete_rq(runid):
     StatusMessenger.publish(status_channel, f'rq:{job.id} running {func_name}({runid})')
 
     try:
-        prep = Prep.getInstance(wd)
+        prep = RedisPrep.getInstance(wd)
         prep.timestamp('run_wepp')
     except FileNotFoundError:
         pass

@@ -22,10 +22,8 @@ class RedisPrep:
         self.wd = wd
         self.cfg_fn = cfg_fn
         self.redis = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
-        
         parent, run_id = _split(wd)
         self.run_id = run_id
-    
         if not _exists(self.dump_filepath):
             self._set_bool_config('loaded', True)
 
@@ -52,7 +50,7 @@ class RedisPrep:
         if _exists(self.dump_filepath):
             with open(self.dump_filepath, 'r') as dump_file:
                 all_fields_and_values = json.load(dump_file)
-            
+
             for field, value in all_fields_and_values.items():
                 self.redis.hset(self.run_id, field, value)
             self.redis.hset(self.run_id, 'attrs:loaded', 'true')
@@ -84,14 +82,28 @@ class RedisPrep:
     def timestamp(self, key):
         now = int(time.time())
         self.__setitem__(key, now)
-    
+
+    def remove_timestamp(self, key):
+        self.redis.hdel(self.run_id, f'timestamps:{key}')
+        self.dump()
+
     def __setitem__(self, key, value: int):
         self.redis.hset(self.run_id, f'timestamps:{key}', value)
         self.dump()
-    
+
     def __getitem__(self, key):
         v = self.redis.hget(self.run_id, f'timestamps:{key}')
         if v is None:
             return None
         return int(v)
-    
+
+    def set_rq_job_id(self, key, job_id):
+        self.redis.hset(self.run_id, f'rq:{key}', job_id)
+        self.dump()
+
+    def get_rq_job_id(self, key):
+        v = self.redis.hget(self.run_id, f'rq:{key}')
+        if v is None:
+            return None
+        return v
+
