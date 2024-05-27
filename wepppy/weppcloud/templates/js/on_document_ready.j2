@@ -1119,7 +1119,7 @@ function initWebSocket() {
 
                 if (lastPreflightChecklist != null) {
                   if (!lastPreflightChecklist.wepp && payload.checklist.wepp) {
-                    wepp = Wepp.getInstance();
+                    var wepp = Wepp.getInstance();
                     wepp.form.trigger("WEPP_RUN_TASK_COMPLETED");
                     wepp.ws_client.disconnect();
                     console.log('wepp_finished');

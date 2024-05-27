@@ -343,6 +343,7 @@ def run_wepp_rq(runid):
             job.save()
          
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER  Wepp WEPP_RUN_TASK_COMPLETED')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
