@@ -28,6 +28,8 @@
     <dl>
     <dt>Job ID</dt>
     <dd>{{ job_id }}</dd>
+    <dt>Run ID</dt>
+    <dd id="run-id"></dd>
     <dt>Query Count</dt>
     <dd id="query-count"></dd>
     <dt>Query Interval (ms)</dt>
@@ -38,6 +40,7 @@
 
   <script>
   const jobId = "{{ job_id }}";
+  let runid;
   let queryCount = 0;
   let jobCount = 0;
   let allFinishedCount = 0;
@@ -94,7 +97,14 @@
     allTotalCount = 0;
     allElapsedTime_s = 0.0;
 
+    runid = data.runid;
+
+    if (runid !== undefined) {
+      $('#run-id').text(runid);
+    }
+
     let jobs_html = renderJobs(data.children);
+
 
     let html = `<div class="card">
                   <div class="card-header">
@@ -114,9 +124,17 @@
                       <div class="progress-bar" role="progressbar" style="width: ${Math.round((allFinishedCount / allTotalCount) * 100)}%;" aria-valuenow="${Math.round((allFinishedCount / allTotalCount) * 100)}" aria-valuemin="0" aria-valuemax="100">
                         ${Math.round((allFinishedCount / allTotalCount) * 100)}%
                       </div>
-                    </div>
+                    </div>`;
 
-                  <div id="collapseParent" class="collapse show" aria-labelledby="headingParent" data-parent="#accordion">
+    if (data.status === 'failed') {
+      html += `<div class="row">
+                  <div class="col-md-12">
+                    <div><pre>${data.exc_info}</pre></div>
+                  </div>
+                </div>`;
+    }
+
+    html += `<div id="collapseParent" class="collapse show" aria-labelledby="headingParent" data-parent="#accordion">
                     <div class="card-body">
                       ${jobs_html}
                     </div>

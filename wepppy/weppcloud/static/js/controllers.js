@@ -67,7 +67,17 @@ WSClient.prototype.connect = function() {
                 stacktrace.text("");
                 stacktrace.append("<h6>Error</h6>");
                 stacktrace.append(`<p>${data}</p>`);
-                stacktrace.append("<p>See rq.log for stacktrace")
+
+                var job_id = data.split(' ')[0].slice(3);
+                var job_url = `https://${window.location.host}/weppcloud/rq/jobinfo/${job_id}`;
+
+                setTimeout(function() {
+                    $.get(job_url, function(job_info, status) {
+                        if (status === 'success') {
+                            stacktrace.append(`<pre><small class="text-muted">${job_info.exc_info}</small></pre>`);
+                        }
+                    });
+                }, 500);
             }
 
             if (data.includes("TRIGGER")) {
@@ -5038,12 +5048,12 @@ var Wepp = function () {
         
         that.set_rq_job_id = function (job_id) {
             var self = instance;
-            
+
             if (job_id === null)
                 return;
 
             self.rq_job_id = job_id;
-            self.rq_job.html(`job_id: <a href="../../../rq/job-dashboard/${job_id}" target="_blank">${job_id}</a><div style="height:30px;"></div>`);
+            self.rq_job.html(`job_id: <a href="https://${window.location.host}/weppcloud/rq/job-dashboard/${job_id}" target="_blank">${job_id}</a><div style="height:30px;"></div>`);
         }
 
         that.updatePhosphorus = function () {
@@ -5703,6 +5713,3 @@ var Rhem = function () {
         }
     };
 }();
-
-
-// end-of-file controller.js -----------------------------------------
