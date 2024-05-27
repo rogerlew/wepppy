@@ -39,8 +39,12 @@ WSClient.prototype.connect = function() {
     this.shouldReconnect = true;
     this.ws = new WebSocket(this.wsUrl);
     this.ws.onopen = () => {
-        $("#" + this.formId + " #status").html("Connected");
-        this.ws.send(JSON.stringify({"type": "init"}));
+        $("#preflight_status").html("Connected");
+        if (this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({"type": "init"}));
+        } else {
+            console.error("WebSocket is not in OPEN state: ", this.ws.readyState);
+        }
     };
 
     this.ws.onmessage = (event) => {
@@ -62,9 +66,8 @@ WSClient.prototype.connect = function() {
                 stacktrace.show();
                 stacktrace.text("");
                 stacktrace.append("<h6>Error</h6>");
-                stacktrace.append(`<pre><small class="text-muted">${data}</small></pre>`);
+                stacktrace.append(`<p>${data}</p>`);
                 stacktrace.append("<p>See rq.log for stacktrace")
-
             }
 
             if (data.includes("TRIGGER")) {
@@ -5013,6 +5016,7 @@ var Wepp = function () {
         that.info = $("#wepp_form #info");
         that.status = $("#wepp_form  #status");
         that.stacktrace = $("#wepp_form #stacktrace");
+        that.rq_job = $("#wepp_form #rq_job");
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -5030,6 +5034,17 @@ var Wepp = function () {
             var self = instance;
             self.channel_critical_shear.append(new Option('User Defined: CS = ' + x, x, true, true));
         };
+
+        
+        that.set_rq_job_id = function (job_id) {
+            var self = instance;
+            
+            if (job_id === null)
+                return;
+
+            self.rq_job_id = job_id;
+            self.rq_job.html(`job_id: <a href="../../../rq/job-dashboard/${job_id}" target="_blank">${job_id}</a><div style="height:30px;"></div>`);
+        }
 
         that.updatePhosphorus = function () {
             var self = instance;
@@ -5161,8 +5176,8 @@ var Wepp = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(`run_wepp_rq job submitted: ${response.job_id}`);
-                        self.rq_job_id = response.job_id;
-                        //self.form.trigger("WEPP_RUN_TASK_COMPLETED");
+                        self.set_rq_job_id(response.job_id);
+                        
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
