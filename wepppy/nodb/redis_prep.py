@@ -119,3 +119,10 @@ class RedisPrep:
             return None
         return v
 
+    def get_rq_job_ids(self):
+        keys = self.redis.hkeys(self.run_id)
+        job_ids = {}
+        for key in keys:
+            if key.startswith('rq:'):
+                job_ids[key[3:]] = self.redis.hget(self.run_id, key)
+        return job_ids

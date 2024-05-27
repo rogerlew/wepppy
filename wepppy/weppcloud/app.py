@@ -121,6 +121,7 @@ from wepppy.nodb.mods.ash_transport import (
     AshType, 
 )
 
+from wepppy.nodb.redis_prep import RedisPrep
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -1234,7 +1235,6 @@ def fork(runid, config):
 
     def generate(undisturbify=False):
         try:
-            from wepppy.nodb.redis_prep import RedisPrep as Prep
             yield f'undisturbify = {undisturbify}\n'
             yield 'generating new runid...'
             yield 'test raising error'
@@ -1726,6 +1726,16 @@ def runs0(runid, config):
         except:
             reveg = None
 
+        try:
+            redis_prep = RedisPrep.getInstance(wd)
+        except:
+            redis_prep = None
+
+        if redis_prep is not None:
+            rq_job_ids = redis_prep.get_rq_job_ids()
+        else:
+            rq_job_ids = {}
+
         landuseoptions = landuse.landuseoptions
         soildboptions = soilsdb.load_db()
 
@@ -1754,6 +1764,7 @@ def runs0(runid, config):
                                unitizer_nodb=unitizer,
                                observed=observed,
                                rangeland_cover=rangeland_cover,
+                               rq_job_ids=rq_job_ids,
                                landuseoptions=landuseoptions,
                                soildboptions=soildboptions,
                                critical_shear_options=critical_shear_options,
@@ -1896,9 +1907,7 @@ def task_adduser(runid, config):
                              .format(email))
 
     run = Run.query.filter(Run.runid == runid).first()
-
-    if run is None:
-        run = user_datastore.create_run(runid, config, user)
+    run = user_datastore.create_run(runid, config, user)
 
     assert user not in owners
     assert run is not None
@@ -3519,7 +3528,7 @@ def report_wepp_results(runid, config):
     climate = Climate.getInstance(wd)
     
     try:
-        prep = wepppy.nodb.Prep.getInstance(wd)
+        prep = RedisPrep.getInstance(wd)
     except FileNotFoundError:
         prep = None
 

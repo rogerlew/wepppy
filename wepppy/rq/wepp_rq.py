@@ -1,6 +1,7 @@
 import shutil
 from glob import glob
 
+import socket
 import os
 from os.path import join as _join
 from os.path import split as _split
@@ -38,6 +39,11 @@ try:
 except:
     send_discord_message = None
 
+
+_hostname = socket.gethostname()
+RQ_JOB_CLASS = None
+if 'wepp2' in _hostname:
+    RQ_JOB_CLASS = 'dev'
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
@@ -167,7 +173,7 @@ def run_wepp_rq(runid):
 
         # everything below here is asyncronous performed by workers
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
-            q = Queue(connection=redis_conn)
+            q = Queue(RQ_JOB_CLASS, connection=redis_conn)
 
             # jobs:0
             jobs0_hillslopes_prep = []
