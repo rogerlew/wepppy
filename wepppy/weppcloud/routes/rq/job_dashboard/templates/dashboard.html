@@ -42,6 +42,7 @@
   let allTotalCount = 0;
   let allElapsedTime_s = 0.0;
   let allSummary = ""
+  let anyFailed = false;
 
   function fetchJobStatus() {
     $.ajax({
@@ -56,14 +57,17 @@
         if (allFinishedCount == allTotalCount)
           return;
 
-        queryInterval = jobCount * 50;
+        if (anyFailed)
+          return;
 
-        if (queryInterval < 2000) {
-          queryInterval = 2000;
+        queryInterval = jobCount * 5;
+
+        if (queryInterval < 1000) {
+          queryInterval = 1000;
         }
 
-        if (queryInterval > 15000) {
-          queryInterval = 15000;
+        if (queryInterval > 5000) {
+          queryInterval = 5000;
         }
 
         $('#query-count').text(`${queryCount}`);
@@ -153,6 +157,7 @@
         if (jobs[jobOrder].some(job => job.status === 'failed')) {
           summary = `Job ${jobOrder} failed`;
           failed = true;
+          anyFailed = true;
         }
 
         allElapsedTime_s += elapsed_s;
@@ -173,7 +178,7 @@
                       </div>
                     </div>
                     <div class="progress mt-2">
-                      <div class="progress-bar${failed ? ': bg-danger' : ''}" role="progressbar" style="width: ${Math.round((finishedCount / totalCount) * 100)}%;" aria-valuenow="${Math.round((finishedCount / totalCount) * 100)}" aria-valuemin="0" aria-valuemax="100">
+                      <div class="progress-bar${failed ? ' bg-danger' : ''}" role="progressbar" style="width: ${Math.round((finishedCount / totalCount) * 100)}%;" aria-valuenow="${Math.round((finishedCount / totalCount) * 100)}" aria-valuemin="0" aria-valuemax="100">
                         ${Math.round((finishedCount / totalCount) * 100)}%
                       </div>
                     </div>

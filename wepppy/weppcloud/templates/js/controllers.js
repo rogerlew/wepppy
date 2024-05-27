@@ -55,7 +55,29 @@ WSClient.prototype.connect = function() {
             if (lines.length > 1) {
                 data = lines[0] + '...';
             }
-            $("#" + this.formId + " #status").html(data);
+
+            if (data.includes("EXCEPTION")) {
+                $("#" + this.formId + " #stacktrace").html(data);
+                // TODO: push stacktrace through pushResponseStacktrace
+            }
+
+            if (data.includes("TRIGGER")) {
+                // need to parse the trigger command and execute it
+                // second to last argument is the controller
+                // last argument is the event
+                var trigger = data.split(' ');
+                var controller = trigger[trigger.length - 2];
+                var event = trigger[trigger.length - 1];
+
+                if (controller === "Wepp") {
+                    console.log("Triggering Wepp event: " + event);
+                    Wepp.getInstance().form.trigger(event);
+                }
+
+            }
+            else {
+                $("#" + this.formId + " #status").html(data);
+            }
         }
     };
 
