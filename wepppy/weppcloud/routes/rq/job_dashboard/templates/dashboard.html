@@ -26,6 +26,8 @@
   <div class="container-fluid">
     <h1>WEPPcloud RQ Job Dashboard</h1>
     <dl>
+    <dt>Job ID</dt>
+    <dd>{{ job_id }}</dd>
     <dt>Query Count</dt>
     <dd id="query-count"></dd>
     <dt>Query Interval (ms)</dt>
@@ -202,8 +204,9 @@
     jobGroup.forEach(job => {
       html += `<div class="row">
                  <div class="col-md-6">${job.description}</div>
-                 <div class="col-md-2">${job.status}</div>
-                 <div class="col-md-4">${job.elapsed_s} s</div>
+                 <div class="col-md-3">${job.id}</div>
+                 <div class="col-md-1">${job.status}</div>
+                 <div class="col-md-1">${job.elapsed_s} s</div>
                </div>`;
       if (job.status === 'failed') {
         html += `<div class="row">

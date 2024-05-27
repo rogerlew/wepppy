@@ -1,3 +1,4 @@
+<script  type="text/javascript">
 "use strict";
 
 var site_prefix = "{{ site_prefix }}";
@@ -908,6 +909,8 @@ function onReady() {
         wepp.report();
         observed.onWeppRunCompleted();
     });
+    wepp.set_rq_job_id({{ rq_job_ids.get("run_wepp_rq") | tojson }});
+
 
     {% if 'rhem' in ron.mods %}
     /*
@@ -1048,112 +1051,7 @@ $(window).on('load', function() {
     setTimeout(function(){
         window_resize();
     }, 2000);
+
+    initPreflight("{{run_id}}");
 });
-
-var ws;
-
-function updateUI(checklist) {
-    for (var key in checklist) {
-        var selector = getSelectorForKey(key);
-        if (readonly === true) {
-            $(selector).removeClass('checked').removeClass('unchecked');
-        } else if (checklist[key]) {
-            $(selector).addClass('checked').removeClass('unchecked');
-        } else {
-            $(selector).addClass('unchecked').removeClass('checked');
-        }
-    }
-
-    var selector = getSelectorForKey("sbs_map");
-    if (checklist.sbs_map) {
-        $(selector).addClass('burned').removeClass('unburned');
-    } else {
-        $(selector).addClass('unburned').removeClass('burned');
-    }
-}
-
-// Map keys from the checklist to their corresponding CSS selectors
-function getSelectorForKey(key) {
-    var mapping = {
-        "sbs_map": 'a[href^="#soil-burn-severity-optional"]',
-        "channels": 'a[href="#channel-delineation"]',
-        "outlet": 'a[href="#outlet"]',
-        "subcatchments": 'a[href="#subcatchments-delineation"]',
-        "landuse": 'a[href="#landuse-options"]',
-        "soils": 'a[href="#soil-options"]',
-        "climate": 'a[href="#climate-options"]',
-        "rap_ts": 'a[href="#rap-time-series-acquisition"]',
-        "wepp": 'a[href="#wepp"]',
-        "observed": 'a[href="#observed-data-model-fit"]',
-        "debris": 'a[href="#debris-flow-analysis"]',
-        "watar": 'a[href="#wildfire-ash-transport-and-risk-watar"]'
-    };
-
-    return mapping[key];
-}
-
-
-let lastPreflightChecklist = null;
-
-function initWebSocket() {
-    var wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/preflight/{{ run_id }}";
-    var ws;
-
-    function connectWebSocket() {
-        ws = new WebSocket(wsUrl);
-
-        ws.onopen = function() {
-            $("#preflight_status").html("Connected");
-            ws.send(JSON.stringify({"type": "init"}));
-        };
-
-        ws.onmessage = function(event) {
-            var payload = JSON.parse(event.data);
-            if (payload.type === "ping") {
-                ws.send(JSON.stringify({"type": "pong"}));
-            } else if (payload.type === "hangup") {
-                ws.close();
-                ws = null;
-            } else if (payload.type === "preflight") {
-                updateUI(payload.checklist);
-
-                if (lastPreflightChecklist != null) {
-                  if (!lastPreflightChecklist.wepp && payload.checklist.wepp) {
-                    var wepp = Wepp.getInstance();
-                    wepp.form.trigger("WEPP_RUN_TASK_COMPLETED");
-                    wepp.ws_client.disconnect();
-                    console.log('wepp_finished');
-                  }
-                }
-
-                lastPreflightChecklist = payload.checklist;
-
-            }
-        };
-
-        ws.onclose = function() {
-            if (!document.hidden) { // Only reconnect if the page is visible
-                $("#preflight_status").html("Preflight Connection Closed");
-                setTimeout(connectWebSocket, 5000); // Try to reconnect every 5 seconds.
-            }
-        };
-    }
-
-    connectWebSocket(); // Initial connection setup
-
-    // Handling visibility change
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            if (ws) {
-                ws.close();
-            }
-        } else {
-            connectWebSocket(); // Reconnect WebSocket when page is visible
-        }
-    });
-}
-
-$(document).ready(function() {
-    initWebSocket();
-});
-
+</script>
