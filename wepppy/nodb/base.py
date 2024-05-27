@@ -31,6 +31,7 @@ from configparser import (
 )
 
 
+from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
 
 _thisdir = os.path.dirname(__file__)
@@ -236,10 +237,23 @@ class NoDbBase(object):
         with open(self._lock, 'w') as fp:
             fp.write(str(time()))
 
+        try:
+                RedisPrep.getInstance(self.wd).set_locked_status(self.basename, True)
+        except:
+            pass
+
+    @property
+    def basename(self):
+        return _split(self._lock)[-1].replace('.nodb.lock', '')
+
     def unlock(self, flag=None):
         if self.islocked():
             # noinspection PyUnresolvedReferences
             os.remove(self._lock)
+            try:
+                RedisPrep.getInstance(self.wd).set_locked_status(self.basename, False)
+            except:
+                pass
         else:
             if flag != '-f':
                 raise Exception('unlock() called on an already unlocked nodb')
