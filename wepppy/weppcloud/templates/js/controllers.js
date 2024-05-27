@@ -57,8 +57,14 @@ WSClient.prototype.connect = function() {
             }
 
             if (data.includes("EXCEPTION")) {
-                $("#" + this.formId + " #stacktrace").html(data);
-                // TODO: push stacktrace through pushResponseStacktrace
+                var stacktrace = $("#" + this.formId + " #stacktrace");
+
+                stacktrace.show();
+                stacktrace.text("");
+                stacktrace.append("<h6>Error</h6>");
+                stacktrace.append(`<pre><small class="text-muted">${data}</small></pre>`);
+                stacktrace.append("<p>See rq.log for stacktrace")
+
             }
 
             if (data.includes("TRIGGER")) {

@@ -30,7 +30,7 @@ def get_job_details(job, redis_conn, now):
         "ended_at": str(job.ended_at) if job.ended_at else None,
         "description": job.description,
         "elapsed_s": elapsed_s,
-        "exc_info": '', #job.latest_result(), ## ned redis-server 5.0+
+        "exc_info": "",
         "children": {}
     }
 
