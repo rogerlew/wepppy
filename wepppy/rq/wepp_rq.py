@@ -343,7 +343,6 @@ def run_wepp_rq(runid):
             job.save()
          
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER  Wepp WEPP_RUN_TASK_COMPLETED')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -693,6 +692,7 @@ def _log_complete_rq(runid):
             send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER  Wepp WEPP_RUN_TASK_COMPLETED')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
