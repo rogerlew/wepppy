@@ -60,6 +60,10 @@ class WepppyRqWorker(Worker):
         super().handle_exception(job, *exc_info)
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'exception'}))
         print(f"Job {job.id} Raised Exception")
+        exc_string = ''.join(traceback.format_exception(*exc_info))
+        job.meta['exc_string'] = exc_string
+        job.save()
+
 
 def start_worker():
     with Connection(redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB)):
