@@ -22,9 +22,11 @@ from wepppy.nodb.status_messenger import StatusMessenger
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
+DEFAULT_RESULT_TTL = 604_800  # 1 week
 
 class WepppyRqWorker(Worker):
     def perform_job(self, job: 'Job', queue: 'Queue') -> bool:
+        self.default_result_ttl = DEFAULT_RESULT_TTL
         runid = job.args[0]
         job.meta['runid'] = runid
         job.save()
