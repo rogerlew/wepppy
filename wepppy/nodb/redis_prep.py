@@ -96,6 +96,18 @@ class RedisPrep:
         if v is None:
             return None
         return int(v)
+    
+    def set_locked_status(self, key, status: bool):
+        print(self.run_id, f'locked:{key}', status)
+        self.redis.hset(self.run_id, f'locked:{key}', str(bool(status)).lower())
+        self.dump()
+
+    def get_locked_status(self, key):
+        v = self.redis.hget(self.run_id, f'locked:{key}')
+        if v is None:
+            return False
+        return v
+    
 
     def set_rq_job_id(self, key, job_id):
         self.redis.hset(self.run_id, f'rq:{key}', job_id)

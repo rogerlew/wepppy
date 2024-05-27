@@ -1515,7 +1515,44 @@ def clear_locks(runid, config):
         # delete any active locks
         locks = glob(_join(wd, '*.lock'))
         for fn in locks:
-            os.remove(fn)
+            
+            if 'ron.nodb.lock' in fn:
+                Ron.getInstance(wd).unlock('-f')
+            elif 'landuse.nodb.lock' in fn:
+                Landuse.getInstance(wd).unlock('-f')
+            elif 'soils.nodb.lock' in fn:
+                Soils.getInstance(wd).unlock('-f')
+            elif 'climate.nodb.lock' in fn:
+                Climate.getInstance(wd).unlock('-f')
+            elif 'wepp.nodb.lock' in fn:
+                Wepp.getInstance(wd).unlock('-f')
+            elif 'watershed.nodb.lock' in fn:
+                Watershed.getInstance(wd).unlock('-f')
+            elif 'unitizer.nodb.lock' in fn:
+                Unitizer.getInstance(wd).unlock('-f')
+            elif 'topaz.nodb.lock' in fn:
+                Topaz.getInstance(wd).unlock('-f')
+            elif 'observed.nodb.lock' in fn:
+                Observed.getInstance(wd).unlock('-f')
+            elif 'rangeland_cover.nodb.lock' in fn:
+                RangelandCover.getInstance(wd).unlock('-f')
+            elif 'rhem.nodb.lock' in fn:
+                Rhem.getInstance(wd).unlock('-f')
+            elif 'disturbed.nodb.lock' in fn:
+                Disturbed.getInstance(wd).unlock('-f')
+            elif 'ash.nodb.lock' in fn:
+                Ash.getInstance(wd).unlock('-f')
+            elif 'revegetation.nodb.lock' in fn:
+                from wepppy.nodb.mods import Revegetation
+                Revegetation.getInstance(wd).unlock('-f')
+            elif 'rap.nodb.lock' in fn:
+                from wepppy.nodb.mods import RAP
+                RAP.getInstance(wd).unlock('-f')
+            elif 'rap_ts.nodb.lock' in fn:
+                from wepppy.nodb.mods import RAP_TS
+                RAP_TS.getInstance(wd).unlock('-f')
+            else:
+                os.remove(fn)
 
         return success_factory()
 
