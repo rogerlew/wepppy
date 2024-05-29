@@ -45,6 +45,7 @@ _hostname = socket.gethostname()
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
+TIMEOUT = 43_200
 
 def compress_fn(fn):
     if _exists(fn):
@@ -208,7 +209,7 @@ def run_wepp_rq(runid):
 
             # jobs:1
 
-            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=7200, depends_on=jobs0_hillslopes_prep)]
+            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=TIMEOUT, depends_on=jobs0_hillslopes_prep)]
             job.meta['jobs:1,func:run_hillslopes_rq'] = jobs1_hillslopes[-1].id
             job.save()
 
@@ -219,7 +220,7 @@ def run_wepp_rq(runid):
             #
             # Prep Watershed
             job2_watershed_prep = q.enqueue_call(_prep_watershed_rq, (runid,),
-                                  timeout='1h',
+                                  timeout=TIMEOUT,
                                   depends_on=jobs1_hillslopes)
             job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
 
@@ -239,7 +240,7 @@ def run_wepp_rq(runid):
                             func=run_ss_batch_watershed_rq,
                             args=[runid],
                             kwargs=dict(wepp_bin=wepp_bin, ss_batch_id=ss_batch_id),
-                            timeout='1h',
+                            timeout=TIMEOUT,
                             depends_on=job2_watershed_prep)
                     job.meta[f'jobs:3,func:run_ss_batch_watershed_rq,ss_batch_id:{ss_batch_id}'] = _job.id
                     jobs3_watersheds.append(_job)
@@ -250,7 +251,7 @@ def run_wepp_rq(runid):
                         func=run_watershed_rq,
                         args=[runid],
                         kwargs=dict(wepp_bin=wepp_bin),
-                        timeout='4h',
+                        timeout=TIMEOUT,
                         depends_on=job2_watershed_prep)
                 job.meta[f'jobs:3,func:run_watershed_rq'] = _job.id
                 jobs3_watersheds.append(_job)
@@ -264,48 +265,48 @@ def run_wepp_rq(runid):
             # jobs:5
             jobs5_post = []
 
-            _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+            _job = q.enqueue_call(_post_run_cleanup_out_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
             job.meta['jobs:5,func:_post_run_cleanup_out_rq'] = _job.id
             jobs5_post.append(_job)
             job.save()
 
             if wepp.prep_details_on_run_completion:
-                _job = q.enqueue_call(_post_prep_details_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_prep_details_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_prep_details_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
                 job.save()
 
             if not climate.is_single_storm:
-                _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_run_wepp_post_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 
-            _job = q.enqueue_call(_post_compress_pass_pw0_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+            _job = q.enqueue_call(_post_compress_pass_pw0_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
             job.meta['jobs:5,func:_post_compress_pass_pw0_rq'] = _job.id
             jobs5_post.append(_job)
             job.save()
 
-            _job = q.enqueue_call(_post_compress_soil_pw0_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+            _job = q.enqueue_call(_post_compress_soil_pw0_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
             job.meta['jobs:5,func:_post_compress_soil_pw0_rq'] = _job.id
             jobs5_post.append(_job)
             job.save()
 
             if wepp.legacy_arc_export_on_run_completion:
-                _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=3600, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_legacy_arc_export_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 
             if wepp.arc_export_on_run_completion:
-                _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 
             if not climate.is_single_storm:
-                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=3600, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_make_loss_grid_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
