@@ -208,7 +208,7 @@ def run_wepp_rq(runid):
 
             # jobs:1
 
-            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), depends_on=jobs0_hillslopes_prep)]
+            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=3600, depends_on=jobs0_hillslopes_prep)]
             job.meta['jobs:1,func:run_hillslopes_rq'] = jobs1_hillslopes[-1].id
             job.save()
 
