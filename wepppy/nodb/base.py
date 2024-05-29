@@ -68,6 +68,50 @@ class NoDbBase(object):
             raise Exception('NoDb has already been initialized')
 
     @property
+    def watershed_instance(self):
+        from .watershed import Watershed
+        return Watershed.getInstance(self.wd)
+    
+    @property
+    def wepp_instance(self):
+        from .wepp import Wepp
+        return Wepp.getInstance(self.wd)
+    
+    @property
+    def climate_instance(self):
+        from .climate import Climate
+        return Climate.getInstance(self.wd)
+    
+    @property
+    def soils_instance(self):
+        from .soils import Soils
+        return Soils.getInstance(self.wd)
+    
+    @property
+    def landuse_instance(self):
+        from .landuse import Landuse
+        return Landuse.getInstance(self.wd)
+    
+    @property
+    def ron_instance(self):
+        from .ron import Ron
+        return Ron.getInstance(self.wd)
+    
+    @property
+    def redis_prep_instance(self):
+        return RedisPrep.getInstance(self.wd)
+    
+    @property
+    def disturbed_instance(self):
+        from .mods import Disturbed
+        return Disturbed.getInstance(self.wd)
+    
+    @property
+    def wepppost_instance(self):
+        from .wepppost import WeppPost
+        return WeppPost.getInstance(self.wd)
+    
+    @property
     def config_stem(self):
         return self._config.split('.cfg')[0]
 
@@ -76,7 +120,7 @@ class NoDbBase(object):
         try:
 
             val = self._configparser.get(section, option).lower()
-            if val.startswith('none') or val == '':
+            if val.startswith('none') or val == '' or val.startswith('null'):
                 return default
             return val.startswith('true')
         except (NoSectionError, NoOptionError):
@@ -87,7 +131,7 @@ class NoDbBase(object):
 
         try:
             val = self._configparser.get(section, option).lower()
-            if val.startswith('none') or val == '':
+            if val.startswith('none') or val == '' or val.startswith('null'):
                 return default
             return float(val)
         except (NoSectionError, NoOptionError):
@@ -98,7 +142,7 @@ class NoDbBase(object):
 
         try:
             val = self._configparser.get(section, option).lower()
-            if val.startswith('none') or val == '':
+            if val.startswith('none') or val == '' or val.startswith('null'):
                 return default
             return int(val)
         except (NoSectionError, NoOptionError):
@@ -108,7 +152,8 @@ class NoDbBase(object):
 
         try:
             val = self._configparser.get(section, option)
-            if val.lower().startswith('none') or val == '':
+            val = val.replace("'", '').replace('"', '')
+            if val.lower().startswith('none') or val == '' or val.startswith('null'):
                 return default
 
             if val.startswith("'") and val.endswith("'"):
