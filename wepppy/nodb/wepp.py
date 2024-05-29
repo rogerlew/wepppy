@@ -1105,8 +1105,6 @@ class Wepp(NoDbBase, LogMixin):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
-        ron = self.ron_instance
-        ron.clean_export_dir()
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.log('    Prepping _prep_slopes_peridot... ')
