@@ -34,9 +34,13 @@
     <dd id="query-count"></dd>
     <dt>Query Interval (ms)</dt>
     <dd id="query-interval"></dd>
-    </dl>
+    </dl>  
+    <div>
+      <button class="btn btn-danger" onclick="confirmCancelJob()">Cancel Job</button>
+    </div>
     <div id="job-dashboard"></div>
   </div>
+
 
   <script>
   const jobId = "{{ job_id }}";
@@ -48,6 +52,8 @@
   let allElapsedTime_s = 0.0;
   let allSummary = ""
   let anyFailed = false;
+  let paused = false;
+
 
   function fetchJobStatus() {
     $.ajax({
@@ -59,10 +65,13 @@
 
         $('#job-dashboard').html(renderJob(data));
 
-        if (allFinishedCount == allTotalCount)
+        if (allFinishedCount == allTotalCount && allTotalCount > 0)
           return;
 
         if (anyFailed)
+          return;
+
+        if (paused)
           return;
 
         queryInterval = jobCount * 5;
@@ -100,7 +109,7 @@
     runid = data.runid;
 
     if (runid !== undefined) {
-      $('#run-id').text(runid);
+      $('#run-id').html(`<a href="{{site_prefix}}/runs/${runid}/cfg">${runid}</a>`,);
     }
 
     let jobs_html = renderJobs(data.children);
@@ -172,7 +181,7 @@
           }
         });
 
-        let summary = `${finishedCount} of ${totalCount} jobs completed (${elapsed_s.toFixed(2)} s)`;
+        let summary = `${finishedCount} of ${totalCount} jobs completed (${elapsed_s.toFixed(0)} s)`;
         let failed = false;
         if (jobs[jobOrder].some(job => job.status === 'failed')) {
           summary = `Job ${jobOrder} failed`;
@@ -181,7 +190,7 @@
         }
 
         allElapsedTime_s += elapsed_s;
-        allSummary = `Finished ${allFinishedCount} of ${allTotalCount} (${allElapsedTime_s.toFixed(2)} s)`;
+        allSummary = `Finished ${allFinishedCount} of ${allTotalCount} (${allElapsedTime_s.toFixed(0)} s)`;
 
         html += `<div class="card">
                    <div class="card-header" id="heading${jobOrder}">
@@ -221,11 +230,12 @@
     let html = '';
     jobGroup.forEach(job => {
       html += `<div class="row">
-                 <div class="col-md-6">${job.description}</div>
-                 <div class="col-md-3">${job.id}</div>
-                 <div class="col-md-1">${job.status}</div>
-                 <div class="col-md-1">${job.elapsed_s} s</div>
-               </div>`;
+        <div class="col-md-6">${job.description}</div>
+        <div class="col-md-3">${job.id}</div>
+        <div class="col-md-1">${job.status}</div>
+        <div class="col-md-1">${job.elapsed_s !== null ? job.elapsed_s.toFixed(1) : 'N/A'} s</div>
+      </div>`;
+
       if (job.status === 'failed') {
         html += `<div class="row">
                    <div class="col-md-12">
@@ -238,6 +248,22 @@
       }
     });
     return html;
+  }
+
+  function confirmCancelJob() {
+    if (confirm("Are you sure you want to cancel the job?")) {
+        cancelJob();
+    }
+  }
+
+  function cancelJob() {
+    $.ajax({
+      url: `{{site_prefix}}/rq/canceljob/${jobId}`,
+      method: 'GET',
+      success: function(data) {
+        alert('Job cancelled');
+      },
+    });
   }
 
     $(document).ready(function() {

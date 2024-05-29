@@ -24,6 +24,7 @@ function initPreflight(runid) {
                 preflight_ws = null;
             } else if (payload.type === "preflight") {
                 updateUI(payload.checklist);
+                //updateLocks(payload.lock_statuses);
 
                 if (lastPreflightChecklist != null) {
                   if (!lastPreflightChecklist.wepp && payload.checklist.wepp) {
@@ -60,6 +61,29 @@ function initPreflight(runid) {
             connectWebSocket(); // Reconnect WebSocket when page is visible
         }
     });
+}
+
+function updateLock(btn_id, lock_id, lock_status) {
+    var button = $("#" + btn_id);
+    var lock = $("#" + lock_id);
+
+    if (lock_status) {
+        button.attr('disabled', true);
+        lock.show();
+    } else {
+        button.attr('disabled', false);
+        lock.hide();
+    }
+}
+
+function updateLocks(lock_statuses) {
+    
+    updateLock("btn_build_landuse", "build_landuse_lock", lock_statuses.landuse);
+    updateLock("btn_build_soil", "build_soil_lock", lock_statuses.soils);
+    updateLock("btn_build_channels_en", "build_channels_en_lock", lock_statuses.watershed);
+    updateLock("btn_build_subcatchments", "build_subcatchments_lock", lock_statuses.watershed);
+    updateLock("btn_build_climate", "build_climate_lock", lock_statuses.climate);
+    updateLock("btn_run_wepp", "run_wepp_lock", lock_statuses.wepp);
 }
 
 function updateUI(checklist) {
