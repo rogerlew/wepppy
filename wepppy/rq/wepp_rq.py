@@ -208,40 +208,9 @@ def run_wepp_rq(runid):
 
             # jobs:1
 
-            jobs1_hillslopes = []
-
-            sub_n = watershed.sub_n
-            if climate.climate_mode == ClimateMode.SingleStormBatch:
-                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-                    ss_n = len(climate.ss_batch_storms)
-                    for d in climate.ss_batch_storms:
-                        ss_batch_id = d['ss_batch_id']
-                        ss_batch_key = d['ss_batch_key']
-                        wepp.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id} of {ss_n}).\n')
-                        wepp_id = translator.wepp(top=int(topaz_id))
-                        _job = q.enqueue_call(
-                                func=run_ss_batch_hillslope_rq,
-                                args=[runid, wepp_id],
-                                kwargs=dict(wepp_bin=wepp_bin, ss_batch_id=ss_batch_id),
-                                timeout=600,
-                                depends_on=jobs0_hillslopes_prep)
-
-                        job.meta[f'jobs:1,func:run_ss_batch_hillslope_rq,ss_batch_id:{ss_batch_id},hill:{topaz_id}'] = _job.id
-                        jobs1_hillslopes.append(_job)
-                        job.save()
-            else:
-                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-                    wepp.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
-                    wepp_id = translator.wepp(top=int(topaz_id))
-                    _job = q.enqueue_call(
-                            func=run_hillslope_rq,
-                            args=[runid, wepp_id],
-                            kwargs=dict(wepp_bin=wepp_bin),
-                            timeout=600,
-                            depends_on=jobs0_hillslopes_prep)
-                    job.meta[f'jobs:1,func:run_hillslope_rq,hill:{topaz_id}'] = _job.id
-                    jobs1_hillslopes.append(_job)
-                    job.save()
+            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), depends_on=jobs0_hillslopes_prep)]
+            job.meta['jobs:0,func:run_hillslopes_rq'] = jobs1_hillslopes[-1].id
+            job.save()
 
             #
             # TODO: flowpaths would go here
@@ -383,6 +352,25 @@ def _prep_slopes_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+
+def _run_hillslopes_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        wepp.run_hillslopes()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
 
 
 def _prep_managements_rq(runid):
