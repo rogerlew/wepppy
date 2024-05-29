@@ -275,11 +275,30 @@ def run_wepp_rq(runid):
                 job.meta['jobs:5,func:_post_prep_details_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
-                job.save()
 
             if not climate.is_single_storm:
                 _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_run_wepp_post_rq'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+                
+                _job = q.enqueue_call(_build_totalwatsed2_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                job.meta['jobs:5,func:_build_totalwatsed2_rq'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+                
+                _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                job.meta['jobs:5,func:_run_hillslope_watbal_rq'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+
+                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                job.meta['jobs:5,func:_post_make_loss_grid_rq'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+                
+                _job = q.enqueue_call(_analyze_return_periods_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                job.meta['jobs:5,func:_analyze_return_periods_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 
@@ -302,12 +321,6 @@ def run_wepp_rq(runid):
             if wepp.arc_export_on_run_completion:
                 _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
-                jobs5_post.append(_job)
-                job.save()
-
-            if not climate.is_single_storm:
-                _job = q.enqueue_call(_post_make_loss_grid_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
-                job.meta['jobs:5,func:_post_make_loss_grid_rq'] = _job.id
                 jobs5_post.append(_job)
                 job.save()
 
@@ -371,8 +384,6 @@ def _run_hillslopes_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
-
-
 
 
 def _prep_managements_rq(runid):
@@ -541,6 +552,50 @@ def _post_run_cleanup_out_rq(runid):
                 shutil.move(fn, dst_path)
             wepp.log_done()
 
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def _analyze_return_periods_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        wepp.report_return_periods()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+def _build_totalwatsed2_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        wepp._build_totalwatsed2()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def _run_hillslope_watbal_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        wepp._run_hillslope_watbal()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
