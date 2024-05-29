@@ -131,6 +131,7 @@ def _copyfile(src_fn, dst_fn):
         os.link(src_fn, dst_fn)
 
 
+
 class ChannelRoutingMethod(IntEnum):
     Creams = 2
     MuskingumCunge = 4
@@ -327,6 +328,22 @@ class TCROpts(object):
             )
         else:
             return '\n'
+
+
+def prep_soil(args):
+    t0 = time.time()
+    topaz_id, src_fn, dst_fn, kslast, modify_kslast_pars, initial_sat, clip_soils, clip_soils_depth = args
+
+    soilu = WeppSoilUtil(src_fn)
+    soilu.modify_initial_sat(initial_sat)
+
+    if kslast is not None:
+        soilu.modify_kslast(kslast, pars=modify_kslast_pars)
+    if clip_soils:
+        soilu.clip_soil_depth(clip_soils_depth)
+    soilu.write(dst_fn)
+
+    return topaz_id, time.time() - t0
 
 
 class WeppNoDbLockedException(Exception):
@@ -1344,7 +1361,7 @@ class Wepp(NoDbBase, LogMixin):
             self.log_done()
 
     def _prep_soils(self, translator):
-        self.log('    _prep_soils... ')
+        # Remove logging
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         watershed = Watershed.getInstance(self.wd)
@@ -1356,55 +1373,46 @@ class Wepp(NoDbBase, LogMixin):
         initial_sat = soils.initial_sat
 
         kslast_map_fn = self.kslast_map
+        kslast_map = RasterDatasetInterpolator(kslast_map_fn) if kslast_map_fn is not None else None
 
-        kslast_map = None
-        if kslast_map_fn is not None:
-            kslast_map = RasterDatasetInterpolator(kslast_map_fn)
+        def oncomplete(prep_soils_task):
+            topaz_id, elapsed_time = prep_soils_task.result()
+            self.log('  {} completed soil prep in {}s\n'.format(topaz_id, elapsed_time))
 
-        for topaz_id, soil in soils.sub_iter():
+        with ThreadPoolExecutor() as pool:
+            futures = []
+            for topaz_id, soil in soils.sub_iter():
+                wepp_id = translator.wepp(top=int(topaz_id))
+                src_fn = _join(soils_dir, soil.fname)
+                dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
 
-            self.log(f'    _prep_soils:{topaz_id}:{soil}... ')
-            wepp_id = translator.wepp(top=int(topaz_id))
-            src_fn = _join(soils_dir, soil.fname)
-            dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
+                _kslast = None
+                modify_kslast_pars = None
 
-            _kslast = None
-
-            pars = None
-            if kslast_map is not None:
-                lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
-
-                try:
-                    _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
-                    pars = dict(map_fn=kslast_map_fn, lng=lng, lat=lat, kslast=_kslast)
-                except RDIOutOfBoundsException:
-                    _kslast = None
-
-                if not isfloat(_kslast):
-                    if kslast is not None:
-                        _kslast = kslast
-                    else:
+                if kslast_map is not None:
+                    lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
+                    try:
+                        _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
+                        modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
+                    except RDIOutOfBoundsException:
                         _kslast = None
-                elif _kslast <= 0.0:
-                    if kslast is not None:
-                        _kslast = kslast
-                    else:
-                        _kslast = None
-            elif kslast is not None:
-                _kslast = kslast
 
-            soilu = WeppSoilUtil(src_fn)
-            soilu.modify_initial_sat(initial_sat)
+                    if not isfloat(_kslast):
+                        _kslast = kslast if kslast is not None else None
+                    elif _kslast <= 0.0:
+                        _kslast = kslast if kslast is not None else None
+                elif kslast is not None:
+                    _kslast = kslast
 
-            if _kslast is not None:
-                soilu.modify_kslast(_kslast, pars=pars)
-            if clip_soils:
-                soilu.clip_soil_depth(clip_soils_depth)
-            soilu.write(dst_fn)
+                task_args = (
+                    topaz_id, src_fn, dst_fn, 
+                    _kslast, modify_kslast_pars, 
+                    initial_sat, 
+                    clip_soils, clip_soils_depth)
+                futures.append(pool.submit(lambda p: prep_soil(p), task_args))
+                futures[-1].add_done_callback(oncomplete)
 
-            self.log_done()
-
-        self.log_done()
+                wait(futures, return_when=FIRST_EXCEPTION)
 
     def _prep_climates(self, translator):
         climate = Climate.getInstance(self.wd)
@@ -1503,36 +1511,35 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log('    wepp_bin:{}'.format(wepp_bin))
 
-        pool = ThreadPoolExecutor(NCPU)
-        futures = []
-
         def oncomplete(wepprun):
             status, _id, elapsed_time = wepprun.result()
             assert status
             self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
-        sub_n = watershed.sub_n
-        if climate.climate_mode == ClimateMode.SingleStormBatch:
-            for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+        with ThreadPoolExecutor(NCPU) as pool:
+            futures = []
+            sub_n = watershed.sub_n
+            if climate.climate_mode == ClimateMode.SingleStormBatch:
+                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
 
-                ss_n = len(climate.ss_batch_storms)
-                for d in climate.ss_batch_storms:
-                    ss_batch_id = d['ss_batch_id']
-                    ss_batch_key = d['ss_batch_key']
+                    ss_n = len(climate.ss_batch_storms)
+                    for d in climate.ss_batch_storms:
+                        ss_batch_id = d['ss_batch_id']
+                        ss_batch_key = d['ss_batch_key']
 
-                    self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
+                        self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
+                        wepp_id = translator.wepp(top=int(topaz_id))
+                        futures.append(pool.submit(lambda p: run_ss_batch_hillslope(*p), (wepp_id, runs_dir, wepp_bin, ss_batch_id)))
+                        futures[-1].add_done_callback(oncomplete)
+
+            else:
+                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                    self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
                     wepp_id = translator.wepp(top=int(topaz_id))
-                    futures.append(pool.submit(lambda p: run_ss_batch_hillslope(*p), (wepp_id, runs_dir, wepp_bin, ss_batch_id)))
+                    futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
                     futures[-1].add_done_callback(oncomplete)
 
-        else:
-            for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-                self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
-                wepp_id = translator.wepp(top=int(topaz_id))
-                futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
-                futures[-1].add_done_callback(oncomplete)
-
-        wait(futures, return_when=FIRST_EXCEPTION)
+            wait(futures, return_when=FIRST_EXCEPTION)
 
     #
     # watershed
