@@ -1180,7 +1180,7 @@ window.onload = function(e){
     // set headers
     var xhr = new XMLHttpRequest();
 
-    xhr.open("GET", "../fork?undisturbify=__undisturbify__", true);
+    xhr.open("GET", "fork?undisturbify=__undisturbify__", true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
     xhr.onprogress = function (event) {
