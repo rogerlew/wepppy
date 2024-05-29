@@ -1404,7 +1404,7 @@ def modify_disturbed(runid, config):
 
     try:
         return render_template('controls/edit_csv.htm', 
-            csv_url='../browse/disturbed/disturbed_land_soil_lookup.csv?raw')
+            csv_url='download/disturbed/disturbed_land_soil_lookup.csv')
     except:
         return exception_factory('Error Clearing Locks', runid=runid)
 
