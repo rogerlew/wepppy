@@ -387,27 +387,7 @@ class Ron(NoDbBase):
                 sbs_map = self.config_get_path('landuse', 'sbs_map')
 
                 if sbs_map is not None:
-                    sbs_name = _split(sbs_map)[1]
-                    sbs_path = _join(baer.baer_dir, sbs_name)
-
-                    if sbs_map.startswith('http'):
-                        r = requests.get(sbs_map)
-                        r.raise_for_status()
-
-                        with open(sbs_path, 'wb') as f:
-                            f.write(r.content)
-                        baer.validate(_split(sbs_path)[-1])
-                    else:
-                        from wepppy.nodb.mods import MODS_DIR
-                        sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
-
-                        # sbs_map = _join(_thisdir, sbs_map)
-                        assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
-                        assert not isdir(sbs_map)
-
-                        shutil.copyfile(sbs_map, sbs_path)
-
-                        baer.validate(_split(sbs_path)[-1])
+                    self.init_sbs_map(sbs_map, baer)
 
             if 'revegetation' in self.mods:
                 wepppy.nodb.mods.Revegetation(wd, cfg_fn)
@@ -454,6 +434,40 @@ class Ron(NoDbBase):
         except Exception:
             self.unlock('-f')
             raise
+
+    def clean_export_dir(self):
+        export_dir = self.export_dir
+        if _exists(export_dir):
+            shutil.rmtree(export_dir)
+
+        os.mkdir(export_dir)
+
+    # this is here because it makes it agnostic to the modules
+    # that use it. e.g. it doesn't depend on Disturbed or Baer, or ...
+    def init_sbs_map(self, sbs_map, baer):
+        
+        sbs_name = _split(sbs_map)[1]
+        sbs_path = _join(baer.baer_dir, sbs_name)
+
+        if sbs_map.startswith('http'):
+            r = requests.get(sbs_map)
+            r.raise_for_status()
+
+            with open(sbs_path, 'wb') as f:
+                f.write(r.content)
+            baer.validate(_split(sbs_path)[-1])
+        else:
+            from wepppy.nodb.mods import MODS_DIR
+            sbs_map = sbs_map.replace('MODS_DIR', MODS_DIR)
+
+            # sbs_map = _join(_thisdir, sbs_map)
+            assert _exists(sbs_map), (sbs_map, os.path.abspath(sbs_map))
+            assert not isdir(sbs_map)
+
+            shutil.copyfile(sbs_map, sbs_path)
+
+            baer.validate(_split(sbs_path)[-1])
+
     #
     # Required for NoDbBase Subclass
     #
