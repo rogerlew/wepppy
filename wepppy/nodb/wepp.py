@@ -1097,13 +1097,16 @@ class Wepp(NoDbBase, LogMixin):
             if not _exists(_dir):
                 os.makedirs(_dir)
 
-        climate = Climate.getInstance(self.wd)
+        climate = self.climate_instance
         if climate.climate_mode == ClimateMode.SingleStormBatch:
             for d in climate.ss_batch_storms:
                 ss_batch_key = d['ss_batch_key']
                 ss_batch_dir = _join(self.output_dir, ss_batch_key)
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
+
+        ron = self.ron_instance
+        ron.clean_export_dir()
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.log('    Prepping _prep_slopes_peridot... ')
@@ -1986,13 +1989,11 @@ class Wepp(NoDbBase, LogMixin):
 
         output_dir = self.output_dir
 
-
         if exclude_yr_indxs is None:
             return_periods_fn = _join(output_dir, 'return_periods.json')
         else:
             x = ','.join(str(v) for v in exclude_yr_indxs)
             return_periods_fn = _join(output_dir, f'return_periods__exclude_yr_indxs={x}.json')
-
 
         if _exists(return_periods_fn):
             with open(return_periods_fn) as fp:
