@@ -2,104 +2,123 @@
 {% block form_id %}build_subcatchments_form{% endblock %}
 {% block form_title %}Subcatchments Delineation{% endblock %}
 {% block inputs %}
-    <a href="#sub_advanced_opts_con" data-toggle="collapse" class="" aria-expanded="true">Advanced Options</a>
-    <div id="sub_advanced_opts_con" class="collapse">
-        {% if watershed.delineation_backend_is_topaz %}
-        <input type="hidden" id="input_pkcsa" value="-1" name="pkcsa" />
-        <input type="hidden" id="input_pkcsa_en" value="-1" name="pkcsa_en" />
-        {% else %}
-        <h5>TauDEM</h5>
-        <div style="height:75px" class="unitizer-wrapper">
-            <div class="unitizer units-ha">
-                <div class="form-group row">
+<a href="#sub_advanced_opts_con" data-toggle="collapse" class
+    aria-expanded="true">Advanced Options</a>
+<div id="sub_advanced_opts_con" class="collapse">
+    {% if watershed.delineation_backend_is_topaz %}
+    <input type="hidden" id="input_pkcsa" value="-1" name="pkcsa" />
+    <input type="hidden" id="input_pkcsa_en" value="-1" name="pkcsa_en" />
+    {% else %}
+    <h5>TauDEM</h5>
+    <div style="height:75px" class="unitizer-wrapper">
+        <div class="unitizer units-ha">
+            <div class="form-group row">
                 <div class="col-sm-5">
                     <label for="input_pkcsa">Peuker Douglas CSA (ha)</label>
                 </div>
                 <div class="col-sm-3">
-                    <input id="input_pkcsa" name="pkcsa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="pkcsa">
-                </div>
+                    <input id="input_pkcsa" name="pkcsa"
+                        class="form-control mr-sm-3 disable-readonly"
+                        type="text" value="{{ watershed.pkcsa }}"
+                        aria-label="pkcsa">
                 </div>
             </div>
-            <div class="unitizer units-acre">
-                <div class="form-group row">
+        </div>
+        <div class="unitizer units-acre">
+            <div class="form-group row">
                 <div class="col-sm-5">
-                    <label for="input_pkcsa_en">Peuker Douglas CSA (acre)</label>
+                    <label for="input_pkcsa_en">Peuker Douglas CSA
+                        (acre)</label>
                 </div>
                 <div class="col-sm-3">
-                    <input id="input_pkcsa_en" name="pkcsa_en" class="form-control mr-sm-3 disable-readonly" type="text"
-                       value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}" aria-label="pkcsa"t>
-                </div>
+                    <input id="input_pkcsa_en" name="pkcsa_en"
+                        class="form-control mr-sm-3 disable-readonly"
+                        type="text"
+                        value="{% if isfloat(watershed.pkcsa) %}{{ watershed.pkcsa * 3.28084 }}{% else %}{{ watershed.pkcsa }}{% endif %}"
+                        aria-label="pkcsa" t>
                 </div>
             </div>
-            </div>
-            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
-            {% if wepp.multi_ofe %}
-            <h5>Multiple OFE Parameters</h5>
-            <div class="form-group row">
-            <div class="col-sm-5">
-                <label for="input_mofe_target_length">OFE Target Length (m)</label>
-            </div>
-            <div class="col-sm-3">
-                <input id="input_mofe_target_length"
+    {% if wepp.multi_ofe %}
+    <h5>Multiple OFE Parameters</h5>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_mofe_target_length">OFE Target Length (m)</label>
+        </div>
+        <div class="col-sm-3">
+            <input id="input_mofe_target_length"
                 name="mofe_target_length"
                 class="form-control mr-sm-3 disable-readonly"
                 type="text"
-                value="{{ watershed.mofe_target_length }}" aria-label="OFE Target Length">
-            </div>
+                value="{{ watershed.mofe_target_length }}"
+                aria-label="OFE Target Length">
         </div>
+    </div>
 
-
-        <h5>Buffers</h5>
-        <p></p>
-        <div class="form-group row">
-            <div class="col-sm-5">
-                <div style="margin-left:2em;"><input id="checkbox_mofe_buffer" name="mofe_buffer" type="checkbox" class="form-check-input disable-readonly"
-                       {% if watershed.mofe_buffer %}checked{% endif %}>
-                </div>
-                <label for="checkbox_mofe_buffer" style="margin-left:3em;">Apply Buffers</label>
-            </div>
-        </div>
-
-        <div class="form-group row">
+    <h5>Buffers</h5>
+    <p></p>
+    <div class="form-group row">
         <div class="col-sm-5">
-            <label for="input_mofe_buffer_length">Target Buffer Length (m)</label>
+            <div style="margin-left:2em;"><input id="checkbox_mofe_buffer"
+                    name="mofe_buffer" type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if watershed.mofe_buffer %}checked{% endif %}>
+            </div>
+            <label for="checkbox_mofe_buffer" style="margin-left:3em;">Apply
+                Buffers</label>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <label for="input_mofe_buffer_length">Target Buffer Length
+                (m)</label>
         </div>
         <div class="col-sm-3">
             <input id="input_mofe_buffer_length"
-            name="mofe_buffer_length"
-            class="form-control mr-sm-3 disable-readonly"
-            type="text"
-            value="{{ watershed.mofe_buffer_length }}" aria-label="Target Buffer Length">
+                name="mofe_buffer_length"
+                class="form-control mr-sm-3 disable-readonly"
+                type="text"
+                value="{{ watershed.mofe_buffer_length }}"
+                aria-label="Target Buffer Length">
         </div>
-        </div>
-
-        {% else %}
-            {% if watershed.abstraction_backend_is_peridot %}
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <div style="margin-left:2em;"><input id="checkbox_bieger2015_widths" name="bieger2015_widths" type="checkbox" class="form-check-input disable-readonly"
-                           {% if watershed.bieger2015_widths %}checked{% endif %}>
-                    </div>
-                    <label for="checkbox_bieger2015_widths" style="margin-left:3em;">Calculate channel widths based on uparea (Bieger 2015 Rocky Mountain System Model)</label>
-                </div>
-            </div>
-
-            {% else %}
-            <div><i>no advanced options currently available</i></div>
-            {% endif %}
-        {% endif %}
     </div>
-    <div style="height:1em;"> </div>
-    <div class="form-group row hide-readonly">
-        <div class="col-sm-4">
-            <button id="btn_build_subcatchments" 
-            class="btn btn-outline-success my-2 my-sm-0 col-sm-12" 
-            type="button">Build Subcatchments</button>
-        </div>
+
+    {% else %}
+    {% if watershed.abstraction_backend_is_peridot %}
+    <div class="form-group row">
         <div class="col-sm-5">
-            <small id="hint_build_subcatchments"></small>
+            <div style="margin-left:2em;"><input id="checkbox_bieger2015_widths"
+                    name="bieger2015_widths" type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if watershed.bieger2015_widths %}checked{% endif %}>
+            </div>
+            <label for="checkbox_bieger2015_widths"
+                style="margin-left:3em;">Calculate channel widths based on
+                uparea (Bieger 2015 Rocky Mountain System Model)</label>
         </div>
     </div>
+    {% else %}
+    <div><i>no advanced options currently available</i></div>
+    {% endif %}
+    {% endif %}
+</div>
+<div style="height:1em;"> </div>
+<div class="form-group row hide-readonly">
+    <div class="col-sm-4">
+        <button id="btn_build_subcatchments"
+            class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
+            type="button">
+            <img id="build_subcatchments_lock" style="display:none;"
+                src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
+            Build Subcatchments
+        </button>
+    </div>
+    <div class="col-sm-5">
+        <small id="hint_build_subcatchments"></small>
+    </div>
+</div>
 {% endblock %}
-

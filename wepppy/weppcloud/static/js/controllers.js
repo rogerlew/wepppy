@@ -71,6 +71,7 @@ WSClient.prototype.connect = function() {
                 var job_id = data.split(' ')[0].slice(3);
                 var job_url = `https://${window.location.host}/weppcloud/rq/jobinfo/${job_id}`;
 
+                // need a short delay here to avoid race condition
                 setTimeout(function() {
                     $.get(job_url, function(job_info, status) {
                         if (status === 'success') {
