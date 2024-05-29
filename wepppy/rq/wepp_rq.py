@@ -221,7 +221,7 @@ def run_wepp_rq(runid):
             job2_watershed_prep = q.enqueue_call(_prep_watershed_rq, (runid,),
                                   timeout='1h',
                                   depends_on=jobs1_hillslopes)
-            job.meta[f'jobs:2,func:_prep_watershed_rq'] = _job.id
+            job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
 
             #
             # Run Watershed
