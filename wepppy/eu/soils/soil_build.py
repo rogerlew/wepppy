@@ -1,21 +1,15 @@
-import hashlib
-import json
-import string
 from os.path import split as _split
 from os.path import join as _join
 from os.path import exists as _exists
 
-from glob import glob
 from datetime import datetime
-from copy import deepcopy
 
 from multiprocessing import Pool
-import math
 
 from wepppy.soils.ssurgo import SoilSummary
-from wepppy.all_your_base.geo import RasterDatasetInterpolator
 from wepppy.eu.soils.esdac import ESDAC
 
+from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.all_your_base import NCPU
 NCPU = 32
 
@@ -26,19 +20,23 @@ def _build_esdac_soil(kwargs):
     lat = kwargs['lat']
     soils_dir = kwargs['soils_dir']
     res_lyr_ksat_threshold = kwargs['res_lyr_ksat_threshold']
+    status_channel = kwargs['status_channel']
 
     esd = ESDAC()
     key, h0, desc = esd.build_wepp_soil(lng, lat, soils_dir, res_lyr_ksat_threshold)
+    if status_channel is not None:
+        StatusMessenger.publish(status_channel, f'_build_esdac_soil({topaz_id}) -> {key}, {desc}')
 
     return topaz_id, key, h0, desc
 
 
-def build_esdac_soils(orders, soils_dir, res_lyr_ksat_threshold=2.0):
+def build_esdac_soils(orders, soils_dir, res_lyr_ksat_threshold=2.0, status_channel=None):
 
     args = []
     for topaz_id, (lng, lat) in orders:
         args.append(dict(topaz_id=topaz_id, lng=lng, lat=lat, soils_dir=soils_dir, 
-                         res_lyr_ksat_threshold=res_lyr_ksat_threshold))
+                         res_lyr_ksat_threshold=res_lyr_ksat_threshold,
+                         status_channel=status_channel))
     
     pool = Pool(processes=NCPU)
     results = pool.map(_build_esdac_soil, args)

@@ -195,6 +195,12 @@ class Landuse(NoDbBase, LogMixin):
             _mapping = 'lu10v5ua'
 
         return _mapping
+    
+    def get_mapping_dict(self):
+        from wepppy.wepp.management import load_map
+        mapping = self.mapping
+        assert mapping is not None
+        return load_map(mapping)
 
     @mode.setter
     def mode(self, value):

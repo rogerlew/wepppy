@@ -356,7 +356,6 @@ class Soils(NoDbBase, LogMixin):
 
         self.lock()
 
-
         # noinspection PyBroadException
         try:
             if initial_sat is not None:
@@ -509,7 +508,7 @@ class Soils(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_by_identify(self, build_func):
+    def _build_by_identify(self, build_func, status_channel):
         soils_dir = self.soils_dir
         wd = self.wd
         self.lock()
@@ -525,7 +524,7 @@ class Soils(NoDbBase, LogMixin):
             for topaz_id, chn in watershed.chn_iter():
                 orders.append([topaz_id, chn.centroid.lnglat])
 
-            soils, domsoil_d = build_func(orders, soils_dir)
+            soils, domsoil_d = build_func(orders, soils_dir, status_channel=status_channel)
             for topaz_id, k in domsoil_d.items():
                 soils[k].area += watershed.area_of(topaz_id)
 
@@ -637,10 +636,10 @@ class Soils(NoDbBase, LogMixin):
                 self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
             elif 'eu' in self.locales:
                 from wepppy.eu.soils import build_esdac_soils
-                self._build_by_identify(build_esdac_soils)
+                self._build_by_identify(build_esdac_soils, status_channel)
             elif 'au' in self.locales:
                 from wepppy.au.soils import build_asris_soils
-                self._build_by_identify(build_asris_soils)
+                self._build_by_identify(build_asris_soils, status_channel)
             else:
                 self._build_gridded(initial_sat=initial_sat, ksflag=ksflag)
         elif self.mode == SoilsMode.Single:
