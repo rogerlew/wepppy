@@ -63,6 +63,8 @@ from wepppy.all_your_base import isint, isfloat
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
+TIMEOUT = 43_200
+
 rq_api_bp = Blueprint('rq_api', __name__)
 
 def _parse_map_change(form):
@@ -120,7 +122,7 @@ def fetch_dem_and_build_channels(runid, config):
         
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(fetch_dem_and_build_channels_rq, (runid, extent, center, zoom, csa, mcl))
+            job = q.enqueue_call(fetch_dem_and_build_channels_rq, (runid, extent, center, zoom, csa, mcl), timeout=TIMEOUT)
             prep.set_rq_job_id('fetch_dem_and_build_channels_rq', job.id)
     except Exception as e:
         if isinstance(e, MinimumChannelLengthTooShortError):
@@ -145,7 +147,7 @@ def api_set_outlet(runid, config):
         prep.remove_timestamp(TaskEnum.set_outlet)
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(set_outlet_rq, (runid, outlet_lng, outlet_lat))
+            job = q.enqueue_call(set_outlet_rq, (runid, outlet_lng, outlet_lat), timeout=TIMEOUT)
             prep.set_rq_job_id('set_outlet_rq', job.id)
     except Exception as e:
         return exception_factory('Could not set outlet', runid=runid)
@@ -237,7 +239,7 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
 
             with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
                 q = Queue(connection=redis_conn)
-                job = q.enqueue_call(build_subcatchments_and_abstract_watershed_rq, (runid,))
+                job = q.enqueue_call(build_subcatchments_and_abstract_watershed_rq, (runid,), timeout=TIMEOUT)
                 prep.set_rq_job_id('build_subcatchments_and_abstract_watershed_rq', job.id)
         except Exception as e:
             if isinstance(e, WatershedBoundaryTouchesEdgeError):
@@ -270,7 +272,7 @@ def api_build_landuse(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_landuse_rq, (runid,))
+            job = q.enqueue_call(build_landuse_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_landuse_rq', job.id)
         
     except Exception as e:
@@ -300,7 +302,7 @@ def api_build_soils(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_soils_rq, (runid,))
+            job = q.enqueue_call(build_soils_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_soils_rq', job.id)
             
     except Exception as e:
@@ -328,7 +330,7 @@ def api_build_climate(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_climate_rq, (runid,))
+            job = q.enqueue_call(build_climate_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('build_climate_rq', job.id)
     except Exception as e:
         if isinstance(e, NoClimateStationSelectedError) or \
@@ -443,7 +445,7 @@ def api_run_wepp(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_wepp_rq, (runid,))
+            job = q.enqueue_call(run_wepp_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_wepp_rq', job.id)
     except Exception:
         return exception_factory()
@@ -536,7 +538,7 @@ def api_run_ash(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_ash_rq, (runid, fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm)))
+            job = q.enqueue_call(run_ash_rq, (runid, fire_date, float(ini_white_ash_depth_mm), float(ini_black_ash_depth_mm)), timeout=TIMEOUT)
             prep.set_rq_job_id('run_ash_rq', job.id)
 
     except Exception as e:
@@ -556,7 +558,7 @@ def api_run_debris_flow(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_debris_flow_rq, (runid,))
+            job = q.enqueue_call(run_debris_flow_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_debris_flow_rq', job.id)
 
     except Exception:
@@ -575,7 +577,7 @@ def api_run_rhem(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(run_rhem_rq, (runid,))
+            job = q.enqueue_call(run_rhem_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('run_rhem_rq', job.id)
 
     except Exception:
@@ -594,7 +596,7 @@ def api_rap_ts_acquire(runid, config):
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(fetch_and_analyze_rap_ts_rq, (runid,))
+            job = q.enqueue_call(fetch_and_analyze_rap_ts_rq, (runid,), timeout=TIMEOUT)
             prep.set_rq_job_id('fetch_and_analyze_rap_ts_rq', job.id)
 
     except Exception:
