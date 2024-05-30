@@ -407,10 +407,11 @@ function onReady() {
     //
     // Initial Configuration
     //
+    channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
+
     channel_ctrl.zoom_min = 11;
     if ({{ watershed.has_channels | tojson }}) {
         channel_ctrl.report();
-        channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
     }
     if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
        channel_ctrl.show();
@@ -447,6 +448,8 @@ function onReady() {
     //
     // Outlet Event Bindings
     //
+    outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
+
     outlet.form.on("SET_OUTLET_TASK_COMPLETED", function () {
         outlet.ws_client.disconnect();
         outlet.popup.remove();
@@ -456,7 +459,6 @@ function onReady() {
     // Load outlet from server
     if ({{ watershed.has_outlet | tojson }}) {
         outlet.form.trigger("SET_OUTLET_TASK_COMPLETED");
-        outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
     }
 
     outlet.setMode(parseInt($("input[name='set_outlet_mode']:checked").val(), 10));
@@ -617,12 +619,13 @@ function onReady() {
 
 
     // load subcatchments
+    sub_ctrl.set_rq_job_id(sub_ctrl, {{ rq_job_ids.get("build_subcatchments_and_abstract_watershed_rq") | tojson }});
+
     if ({{ watershed.has_subcatchments | tojson }}) {
         sub_ctrl.show();
         sub_ctrl.report();
         channel_ctrl.show();
         sub_ctrl.enableColorMap("slp_asp");
-        sub_ctrl.set_rq_job_id(sub_ctrl, {{ rq_job_ids.get("build_subcatchments_and_abstract_watershed_rq") | tojson }});
     }
 
     {% if 'rangeland_cover' in ron.mods %}
@@ -720,6 +723,8 @@ function onReady() {
     //
     // Initial Configuration
     //
+    landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
+
     landuse.restore({{ landuse.mode | int }}, 0);
 
     $('#landuse_single_selection').val('{{ landuse.single_selection }}').prop('selected', true);
@@ -727,7 +732,6 @@ function onReady() {
     // load landuse
     if ( {{ landuse.has_landuse | tojson }} ) {
         landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
-        landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
     }
 
     /*
@@ -784,6 +788,8 @@ function onReady() {
     //
     // Initial Configuration
     //
+    soil.set_rq_job_id(soil, {{ rq_job_ids.get("build_soils_rq") | tojson }});
+
     soil.restore({{ soils.mode | int }});
 
     if ({{ (soils.single_dbselection != none) | tojson }})
@@ -793,7 +799,6 @@ function onReady() {
     // load soil
     if ( {{ soils.has_soils | tojson }} ) {
         soil.form.trigger("SOILS_BUILD_TASK_COMPLETED");
-        soil.set_rq_job_id(soil, {{ rq_job_ids.get("build_soils_rq") | tojson }});
     }
 
     /*
@@ -848,6 +853,7 @@ function onReady() {
     //
     // Initial Configuration
     //
+    climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
 
     observed.hideControl();
     climate.showHideControls({{ climate.climate_mode | int }});
@@ -859,7 +865,6 @@ function onReady() {
 
     if ( {{ climate.has_climate | tojson }} ) {
         climate.report();
-        climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
     }
 
     if ( {{ climate.has_observed | tojson }} ||
@@ -931,12 +936,12 @@ function onReady() {
     //
     // Bindings
     //
+    rhem.set_rq_job_id(rhem, {{ rq_job_ids.get("run_rhem_rq") | tojson }});
 
     rhem.form.on("RHEM_RUN_TASK_COMPLETED", function () {
         rhem.ws_client.disconnect();
         rhem.report();
     });
-    rhem.set_rq_job_id(rhem, {{ rq_job_ids.get("run_rhem_rq") | tojson }});
 
     if ( {{ rhem.has_run | tojson }} ) {
         rhem.report();
@@ -947,10 +952,11 @@ function onReady() {
     //
     // Initial Configuration
     //
+    wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
+
     // show report if wepp has run
     if ( {{ wepp.has_run | tojson }} ) {
         wepp.report();
-        wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
     }
 
     // show report if wepp has run
@@ -959,6 +965,8 @@ function onReady() {
     }
 
     {% if 'ash' in ron.mods %}
+        ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
+        
         $("[name='ash_depth_mode']").change(function () {
             ash.setAshDepthMode();
         });
@@ -974,7 +982,6 @@ function onReady() {
             ash.ws_client.disconnect();
             ash.report();
         });
-        ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
     {% endif %}
 
     rap_ts.form.on("RAP_TS_TASK_COMPLETED", function () {
