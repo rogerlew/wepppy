@@ -113,7 +113,7 @@
     }
 
     let jobs_html = renderJobs(data.children);
-
+    
     if (data.status == 'finished') {
       allFinishedCount += 1;
     }
@@ -125,7 +125,7 @@
                       <div class="col-6 d-flex align-items-center">
                         <button class="btn btn-link p-0 m-0 text-decoration-none${isExpanded ? '' : ' collapsed'}"  data-bs-toggle="collapse" data-bs-target="#collapseParent" aria-expanded="true" aria-controls="collapseParent">
                           <i class="fas fa-caret-right caret ms-2"></i>
-                          <span class="text-dark">${data.description}</span>
+                          <span class="text-dark">${data.description} - ${data.status}</span>
                         </button>
                       </div>
                       <div class="col-6">
@@ -248,7 +248,7 @@
       }
       if (job.children) {
         html += renderJobs(job.children);
-      }
+      } 
     });
     return html;
   }

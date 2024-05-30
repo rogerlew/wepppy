@@ -12,6 +12,7 @@ from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 from wepppy.wepp.soils.soilsdb import read_disturbed_wepp_soil_fire_pars
 from wepppy.au.landuse_201011 import Lu10v5ua
+from wepppy.nodb.status_messenger import StatusMessenger
 
 from wepppy.au.soils.asris_2001.asris_client import query_asris
 from wepppy.au.soils.asris_soil_grids import ASRISgrid
@@ -81,7 +82,7 @@ def _computeErodibility(clay, sand, vfs, om):
     return dict(interrill=interrill, rill=rill, shear=shear)
 
 
-def build_asris_soils(orders, soil_dir):
+def build_asris_soils(orders, soil_dir, status_channel=None):
     lu = Lu10v5ua()
     asris_grid = ASRISgrid()
 
@@ -89,9 +90,13 @@ def build_asris_soils(orders, soil_dir):
     soils = {}
 
     for topaz_id, (lng, lat) in orders:
+        
         d = query_asris(lng, lat)
 
         key = hashlib.sha224(json.dumps(d, allow_nan=False).encode('utf-8')).hexdigest()
+
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, f'build_asris_soils({topaz_id}) -> {key}')
 
         s = ['2006.2',
              '#',

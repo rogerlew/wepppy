@@ -16,7 +16,7 @@ assert OPENTOPOGRAPHY_API_KEY is not None, 'You must set OPENTOPOGRAPHY_API_KEY 
 
 
 def opentopo_retrieve(extent, dst_fn, cellsize, dataset='SRTMGL1_E', resample='bilinear'):
-    dataset = dataset.replace('opentopo://', '')
+    dataset = dataset.replace('opentopo://', '').upper()
 
     data_dir, fname = _split(os.path.abspath(dst_fn))
 
@@ -46,12 +46,17 @@ def opentopo_retrieve(extent, dst_fn, cellsize, dataset='SRTMGL1_E', resample='b
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
+        raise
     except Exception as err:
         print(f'An error occurred: {err}')
+        raise
+
+    if not _exists(src_fn):
+        raise Exception(response.text)
 
     utm_raster_transform(extent, src_fn, dst_fn, cellsize, resample=resample)
 
 
 if __name__ == "__main__":
-    fetch_dem((-120.5, 38.5, -120.4, 38.6), 'test.tif', 30)
+    opentopo_retrieve((-120.5, 38.5, -120.4, 38.6), 'test.tif', 30)
 

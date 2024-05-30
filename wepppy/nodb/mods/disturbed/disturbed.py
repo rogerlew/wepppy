@@ -40,12 +40,7 @@ from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 
-try:
-    import wepppyo3
-    from wepppyo3.raster_characteristics import identify_mode_single_raster_key
-    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
-except:
-    wepppyo3 = None
+from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 
 gdal.UseExceptions()
 
@@ -648,11 +643,37 @@ class Disturbed(NoDbBase):
         sbs = self.get_sbs()
         sbs.export_4class_map(self.sbs_4class_path)
         return SoilBurnSeverityMap(self.sbs_4class_path)
+    
+    def get_disturbed_key_lookup(self):
+        mapping_dict = self.landuse_instance.get_mapping_dict()
+        d = {}
+        for key in mapping_dict:
+            disturbed_class = mapping_dict[key]['DisturbedClass'].replace(' ', '')
+            if not disturbed_class:  # filter '' and None
+                continue
+
+            if disturbed_class not in d:
+                d[disturbed_class] = key
+
+        assert 'forest_low_sev_fire' in d
+        assert 'forest_moderate_sev_fire' in d
+        assert 'forest_high_sev_fire' in d
+
+        assert 'shrub_low_sev_fire' in d
+        assert 'shrub_moderate_sev_fire' in d
+        assert 'shrub_high_sev_fire' in d
+
+        assert 'grass_low_sev_fire' in d
+        assert 'grass_moderate_sev_fire' in d
+        assert 'grass_high_sev_fire' in d
+
+        return d
 
     def remap_landuse(self):
         wd = self.wd
 
         landuse = Landuse.getInstance(wd)
+        disturbed_key_lookup = self.get_disturbed_key_lookup()
         #assert landuse.mode != LanduseMode.Single
 
         watershed = Watershed.getInstance(wd)
@@ -669,57 +690,37 @@ class Disturbed(NoDbBase):
 
             self._calc_sbs_coverage(sbs)
 
-            if wepppyo3 is None:
-                sbs_lc_d = sbs.build_lcgrid(watershed.subwta, None)
+            sbs_lc_d = identify_mode_single_raster_key(
+                key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
+            sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
 
-                for topaz_id, burn_class in sbs_lc_d.items():
-                    if (int(topaz_id) - 4) % 10 == 0:
-                        continue
+            class_pixel_map = sbs.class_pixel_map
 
-                    dom = landuse.domlc_d[topaz_id]
-                    man = landuse.managements[dom]
+            for topaz_id, val in sbs_lc_d.items():
+                if (int(topaz_id) - 4) % 10 == 0:
+                    continue
 
-                    # TODO: probably a better way to do this based on the disturbed_class
-                    if burn_class in ['131', '132', '133']:
-                        if man.disturbed_class in ['forest', 'young forest']:
-                            landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
+                dom = landuse.domlc_d[topaz_id]
+                man = landuse.managements[dom]
 
-                        elif man.disturbed_class == 'shrub':
-                            landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+                burn_class = class_pixel_map[val]
 
-                        elif man.disturbed_class in ['tall grass']:
-                            landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+                if burn_class in ['131', '132', '133']:
+                    if man.disturbed_class in ['forest', 'young forest']:
+                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup('forest_low_sev_fire'), 
+                                                     '132': disturbed_key_lookup('forest_moderate_sev_fire'), 
+                                                     '133': disturbed_key_lookup('forest_high_sev_fire')}[burn_class]
 
-                    meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+                    elif man.disturbed_class == 'shrub':
+                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup('shrub_low_sev_fire'), 
+                                                     '132': disturbed_key_lookup('shrub_moderate_sev_fire'), 
+                                                     '133': disturbed_key_lookup('shrub_high_sev_fire')}[burn_class]
+                    elif man.disturbed_class in ['tall grass']:
+                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup('grass_low_sev_fire'), 
+                                                     '132': disturbed_key_lookup('grass_moderate_sev_fire'), 
+                                                     '133': disturbed_key_lookup('grass_high_sev_fire')}[burn_class]
 
-            else:
-                sbs_lc_d = identify_mode_single_raster_key(
-                    key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
-                sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
-
-                class_pixel_map = sbs.class_pixel_map
-
-                for topaz_id, val in sbs_lc_d.items():
-                    if (int(topaz_id) - 4) % 10 == 0:
-                        continue
-
-                    dom = landuse.domlc_d[topaz_id]
-                    man = landuse.managements[dom]
-
-                    burn_class = class_pixel_map[val]
-
-                    # TODO: probably a better way to do this based on the disturbed_class
-                    if burn_class in ['131', '132', '133']:
-                        if man.disturbed_class in ['forest', 'young forest']:
-                            landuse.domlc_d[topaz_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
-
-                        elif man.disturbed_class == 'shrub':
-                            landuse.domlc_d[topaz_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
-
-                        elif man.disturbed_class in ['tall grass']:
-                            landuse.domlc_d[topaz_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
-
-                    meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+                meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
             landuse.dump_and_unlock()
 
