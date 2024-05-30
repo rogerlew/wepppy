@@ -9,7 +9,6 @@
 import os
 import sys
 import csv
-import gzip
 from datetime import datetime
 
 from ast import literal_eval
@@ -19,21 +18,17 @@ from os.path import split as _split
 
 from collections import Counter
 
-from io import BytesIO
 import json
 import shutil
 import traceback
 from glob import glob
 from subprocess import check_output, Popen, PIPE
 
-import pandas as pd
-
 import awesome_codename
 
 from werkzeug.utils import secure_filename
 
 from deprecated import deprecated
-
 
 from flask import (
     Flask, jsonify, request, render_template,
@@ -138,8 +133,6 @@ import socket
 _hostname = socket.gethostname()
 if 'wepp1' in _hostname:
     from wepppy.weppcloud.wepp1_config import config_app
-elif 'wepp2' in _hostname:
-    from wepppy.weppcloud.wepp2_config import config_app
 elif 'wepp2' in _hostname:
     from wepppy.weppcloud.wepp2_config import config_app
 elif 'wepp3' in _hostname:
@@ -409,16 +402,6 @@ security = Security(app, user_datastore,
                     register_form=ExtendedRegisterForm,
                     confirm_register_form=ExtendedRegisterForm)
 
-
-#with app.app_context():
-#    if 'wepp1' in _hostname:
-#        from wepppy.weppcloud.wepp1_config import _init
-#    else:
-#        from wepppy.weppcloud.standalone_config import _init
-#
-#    _init(db, user_datastore)
-
-
 def get_run_owners(runid):
     return User.query.filter(User.runs.any(Run.runid == runid)).all()
 
@@ -538,6 +521,7 @@ def upload_sbs():
 
     return jsonify(dict(runid=runid))
 
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/resources/huc.json')
 def huc(runid, config):
@@ -559,11 +543,6 @@ def huc(runid, config):
         json.dump(geojson_data, fp)
 
     return geojson_data
-
-# @app.route('/ispoweruser')
-# @app.route('/ispoweruser/')
-# def ispoweruser():
-#     return jsonify(current_user.has_role('PowerUser'))
 
 
 @app.route('/tasks/usermod/', methods=['POST'])
@@ -3905,21 +3884,9 @@ def report_wepp_run_summary(runid, config):
     subs_n = len(glob(_join(wd, 'wepp/output/*.pass.dat')))
     subs_n += len(glob(_join(wd, 'wepp/output/*/*.pass.dat')))
 
-    t0, tend = None, None
-    with open(_join(wd, 'wepp/runs/status.log')) as fp:
-        lines = fp.readlines()
-        for line in lines:
-            try:
-                if t0 is None:
-                    t0 = parse_datetime(line)
-                tend = parse_datetime(line)
-            except Exception:
-                pass
-
     return render_template('reports/wepp_run_summary.htm',
                            flowpaths_n=flowpaths_n,
                            subs_n=subs_n,
-                           run_time=tend-t0,
                            ron=ron)
 
 
@@ -3931,20 +3898,8 @@ def report_rhem_run_summary(runid, config):
     rhempost = RhemPost.getInstance(wd)
     subs_n = len(glob(_join(wd, 'rhem/output/*.sum')))
 
-    t0, tend = None, None
-    with open(_join(wd, 'rhem/runs/status.log')) as fp:
-        lines = fp.readlines()
-        for line in lines:
-            try:
-                if t0 is None:
-                    t0 = parse_datetime(line)
-                tend = parse_datetime(line)
-            except Exception:
-                pass
-
     return render_template('reports/rhem_run_summary.htm',
                            subs_n=subs_n,
-                           run_time=tend-t0,
                            rhempost=rhempost,
                            ron=ron)
 
@@ -5188,26 +5143,6 @@ def runid_query():
         return error_factory('not authorized')
 
 
-@app.route('/dev/access/')
-def dev_access():
-    if current_user.has_role('Root') or \
-       current_user.has_role('Admin') or \
-       current_user.has_role('Dev'):
-
-        try:
-
-            cmd = ['goaccess', '--log-format', 'COMBINED', '-o', 'html',
-                   '-f', '/var/log/apache2/access.log', '/var/log/apache2/access.log.1']
-
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            p.wait()
-            output = p.stdout.read().decode('UTF-8')
-            return Response(output)
-        except:
-            return exception_factory()
-    else:
-        return error_factory('not authorized')
-
 # noinspection PyBroadException
 @deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/run_rhem', methods=['POST'])
@@ -5216,31 +5151,13 @@ def submit_task_run_rhem(runid, config):
     wd = get_wd(runid)
     rhem = Rhem.getInstance(wd)
 
-#    try:
-#        rhem.parse_inputs(request.form)
-#    except Exception:
-#        return exception_factory('Error parsing climate inputs', runid=runid)
-
     try:
         rhem.clean()
     except Exception:
         return exception_factory('Error cleaning rhem directories', runid=runid)
 
     try:
-        watershed = Watershed.getInstance(wd)
-        translator = Watershed.getInstance(wd).translator_factory()
-        runs_dir = os.path.abspath(rhem.runs_dir)
-
-        #
-        # Prep Hillslopes
         rhem.prep_hillslopes()
-
-        #
-        # Run Hillslopes
-#        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
-#            rhem_id = translator.rhem(top=int(topaz_id))
-#            assert run_hillslope(rhem_id, runs_dir)
-
         rhem.run_hillslopes()
 
     except Exception:
