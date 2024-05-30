@@ -89,9 +89,8 @@ WSClient.prototype.connect = function() {
                 var controller = trigger[trigger.length - 2];
                 var event = trigger[trigger.length - 1];
 
-                if (controller === "Wepp") {
-                    console.log("Triggering Wepp event: " + event);
-                    Wepp.getInstance().form.trigger(event);
+                if (controller == this.channel) {
+                    $("#" + this.formId).trigger(event);
                 }
 
             }
@@ -156,7 +155,15 @@ function controlBase() {
             self.stacktrace.append("<h6>" + jqXHR.status + "</h6>");
             self.stacktrace.append("<pre><small class=\"text-muted\">" + textStatus + "</small></pre>");
             self.stacktrace.append("<pre><small class=\"text-muted\">" + errorThrown + "</small></pre>");
+        },
+        set_rq_job_id: function (self, job_id) {
+            if (job_id === null)
+                return;
+
+            self.rq_job_id = job_id;
+            self.rq_job.html(`job_id: <a href="https://${window.location.host}/weppcloud/rq/job-dashboard/${job_id}" target="_blank">${job_id}</a><div style="height:30px;"></div>`);
         }
+
     };
 }
 
@@ -419,12 +426,14 @@ var RAP_TS = function () {
         that.info = $("#rap_ts_form #info");
         that.status = $("#rap_ts_form  #status");
         that.stacktrace = $("#rap_ts_form #stacktrace");
+        that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
+        that.rq_job_id = null;
+        that.rq_job = $("#rap_ts_form #rq_job");
 
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-        that.ws_client = new WSClient('rap_ts_form', 'rap_ts');
 
         that.acquire = function () {
             var self = instance;
@@ -436,12 +445,11 @@ var RAP_TS = function () {
             self.ws_client.connect();
 
             $.post({
-                url: "tasks/acquire_rap_ts/",
+                url: "rq/api/acquire_rap_ts",
                 cache: false,
                 success: function success(response) {
-                    self.info.html(response.Content);
-                    self.status.html("");
-                    self.stacktrace.html("");
+                    self.status.html(`fetch_and_analyze_rap_ts_rq job submitted: ${response.job_id}`);
+                    self.set_rq_job_id(self, response.job_id);
                 },
                 error: function error(jqXHR)  {
                     self.pushResponseStacktrace(self, jqXHR.responseJSON);
@@ -449,9 +457,12 @@ var RAP_TS = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function() {
-                self.ws_client.disconnect();
             });
+        };
+
+        that.report = function () {
+            var self = instance;
+            self.status.html("RAP Timeseries fetched and analyzed")
         };
 
         return that;
@@ -823,6 +834,10 @@ var Baer = function () {
         that.info = $("#sbs_upload_form #info");
         that.status = $("#sbs_upload_form  #status");
         that.stacktrace = $("#sbs_upload_form #stacktrace");
+        that.ws_client = new WSClient('sbs_upload_form', 'sbs_upload');
+        that.rq_job_id = null;
+        that.rq_job = $("#sbs_upload_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -1197,6 +1212,10 @@ var ChannelDelineation = function () {
         that.info = $("#build_channels_form #info");
         that.status = $("#build_channels_form  #status");
         that.stacktrace = $("#build_channels_form #stacktrace");
+        that.ws_client = new WSClient('build_channels_form', 'channel_delineation');
+        that.rq_job_id = null;
+        that.rq_job = $("#build_channels_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -1233,52 +1252,6 @@ var ChannelDelineation = function () {
             });
         };
 
-        that.build_router = function () {
-            var self = instance;
-            self.has_dem(self.build_router_callback);
-        };
-
-        that.build_router_callback = function (has_dem_response) {
-            var self = instance;
-
-            if (has_dem_response === true) {
-                self.build();
-            } else if (has_dem_response === false) {
-                self.fetch_dem();
-            } else {
-                self.stacktrace.text("has_dem state is unknown");
-            }
-        };
-
-        that.fetch_dem = function () {
-            var self = instance;
-
-            self.remove();
-            var task_msg = "Fetching DEM";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/fetch_dem/",
-                data: self.form.serialize(),
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.form.trigger("FETCH_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
 
         that.build = function () {
             var self = instance;
@@ -1291,14 +1264,15 @@ var ChannelDelineation = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             $.post({
-                url: "tasks/build_channels/",
+                url: "rq/api/fetch_dem_and_build_channels",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("BUILD_CHANNELS_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
+                        self.status.html(`fetch_dem_and_build_channels_rq job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -1541,10 +1515,14 @@ var Outlet = function () {
 
     function createInstance() {
         var that = controlBase();
-        that.form = $("#setoutlet_form");
-        that.info = $("#setoutlet_form #info");
-        that.status = $("#setoutlet_form  #status");
-        that.stacktrace = $("#setoutlet_form #stacktrace");
+        that.form = $("#set_outlet_form");
+        that.info = $("#set_outlet_form #info");
+        that.status = $("#set_outlet_form  #status");
+        that.stacktrace = $("#set_outlet_form #stacktrace");
+        that.ws_client = new WSClient('set_outlet_form', 'outlet');
+        that.rq_job_id = null;
+        that.rq_job = $("#set_outlet_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -1618,11 +1596,11 @@ var Outlet = function () {
         that.setClickHandler = function (ev) {
             var self = instance;
             if (self.cursorSelectionOn) {
-                self.put(ev);
+                self.set_outlet(ev);
             }
         };
 
-        that.put = function (ev) {
+        that.set_outlet = function (ev) {
             var self = instance;
             var map = Map.getInstance();
 
@@ -1631,6 +1609,7 @@ var Outlet = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             self.popup.setLatLng(ev.latlng).setContent("finding nearest channel...").openOn(map);
 
@@ -1638,12 +1617,12 @@ var Outlet = function () {
             var lng = ev.latlng.lng;
 
             $.post({
-                url: "tasks/setoutlet/",
+                url: "rq/api/set_outlet",
                 data: { latitude: lat, longitude: lng },
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("SETOUTLET_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
+                        self.status.html(`set_outlet job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -1663,13 +1642,13 @@ var Outlet = function () {
             self.cursorSelectionOn = state;
 
             if (state) {
-                $("#btn_setoutlet_cursor").text("Cancel");
+                $("#btn_set_outlet_cursor").text("Cancel");
                 $(".leaflet-container").css("cursor", "crosshair");
-                $("#hint_setoutlet_cursor").text("Click on the map to define outlet.");
+                $("#hint_set_outlet_cursor").text("Click on the map to define outlet.");
             } else {
-                $("#btn_setoutlet_cursor").text("Use Cursor");
+                $("#btn_set_outlet_cursor").text("Use Cursor");
                 $(".leaflet-container").css("cursor", "");
-                $("#hint_setoutlet_cursor").text("");
+                $("#hint_set_outlet_cursor").text("");
             }
         };
 
@@ -1678,12 +1657,12 @@ var Outlet = function () {
             self.mode = parseInt(mode, 10);
             if (self.mode === 0) {
                 // Enter lng, lat
-                $("#setoutlet_mode0_controls").show();
-                $("#setoutlet_mode1_controls").hide();
+                $("#set_outlet_mode0_controls").show();
+                $("#set_outlet_mode1_controls").hide();
             } else {
                 // user cursor
-                $("#setoutlet_mode0_controls").hide();
-                $("#setoutlet_mode1_controls").show();
+                $("#set_outlet_mode0_controls").hide();
+                $("#set_outlet_mode1_controls").show();
                 self.setCursorSelection(false);
             }
         };
@@ -1735,6 +1714,10 @@ var SubcatchmentDelineation = function () {
         that.info = $("#build_subcatchments_form #info");
         that.status = $("#build_subcatchments_form  #status");
         that.stacktrace = $("#build_subcatchments_form #stacktrace");
+        that.ws_client = new WSClient('build_subcatchments_form', 'subcatchment_delineation');
+        that.rq_job_id = null;
+        that.rq_job = $("#build_subcatchments_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -3101,6 +3084,7 @@ var SubcatchmentDelineation = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             if (self.polys !== null) {
                 map.ctrls.removeLayer(self.polys);
@@ -3111,39 +3095,12 @@ var SubcatchmentDelineation = function () {
             }
 
             $.post({
-                url: "tasks/build_subcatchments/",
+                url: "rq/api/build_subcatchments_and_abstract_watershed",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("BUILD_SUBCATCHMENTS_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
-        that.abstract_watershed = function () {
-            var self = instance;
-            var task_msg = "Abstracting Watershed";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            $.post({
-                url: "tasks/abstract_watershed/",
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.form.trigger("WATERSHED_ABSTRACTION_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
+                        self.status.html(`build_subcatchments_and_abstract_watershed_rq job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -3210,6 +3167,10 @@ var RangelandCover = function () {
         that.info = $("#rangeland_cover_form #info");
         that.status = $("#rangeland_cover_form  #status");
         that.stacktrace = $("#rangeland_cover_form #stacktrace");
+        that.ws_client = new WSClient('rangeland_cover_form', 'rangeland_cover');
+        that.rq_job_id = null;
+        that.rq_job = $("#rangeland_cover_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -3334,6 +3295,11 @@ var Landuse = function () {
         that.info = $("#landuse_form #info");
         that.status = $("#landuse_form  #status");
         that.stacktrace = $("#landuse_form #stacktrace");
+        that.ws_client = new WSClient('landuse_form', 'landuse');
+        that.rq_job_id = null;
+        that.rq_job = $("#landuse_form #rq_job");
+
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -3346,14 +3312,15 @@ var Landuse = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             $.post({
-                url: "tasks/build_landuse/",
+                url: "rq/api/build_landuse",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
+                        self.status.html(`build_landuse job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -3570,6 +3537,10 @@ var RangelandCoverModify = function () {
         that.form = $("#modify_rangeland_cover_form");
         that.status = $("#modify_rangeland_cover_form  #status");
         that.stacktrace = $("#modify_rangeland_cover_form #stacktrace");
+        //that.ws_client = new WSClient('modify_rangeland_cover_form', 'modify_rangeland_cover');
+        that.rq_job_id = null;
+        that.rq_job = $("#modify_rangeland_cover_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -3925,6 +3896,9 @@ var LanduseModify = function () {
         that.form = $("#modify_landuse_form");
         that.status = $("#modify_landuse_form  #status");
         that.stacktrace = $("#modify_landuse_form #stacktrace");
+        //that.ws_client = new WSClient('modify_landuse_form', 'modify_landuse');
+        that.rq_job_id = null;
+        that.rq_job = $("#modify_landuse_form #rq_job");
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -4230,11 +4204,14 @@ var Soil = function () {
         that.info = $("#soil_form #info");
         that.status = $("#soil_form  #status");
         that.stacktrace = $("#soil_form #stacktrace");
+        that.ws_client = new WSClient('soil_form', 'soils');
+        that.rq_job_id = null;
+        that.rq_job = $("#soil_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-        that.ws_client = new WSClient('soil_form', 'soils');
 
         that.build = function () {
             var self = instance;
@@ -4246,12 +4223,12 @@ var Soil = function () {
             self.ws_client.connect();
 
             $.post({
-                url: "tasks/build_soil/",
+                url: "rq/api/build_soils",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("SOIL_BUILD_TASK_COMPLETED");
-                        self.status.html(task_msg + "... Success");
+                        self.status.html(`build_soils_rq job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4262,8 +4239,6 @@ var Soil = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function() {
-                self.ws_client.disconnect();
             });
         };
 
@@ -4437,11 +4412,14 @@ var Climate = function () {
         that.info = $("#climate_form #info");
         that.status = $("#climate_form  #status");
         that.stacktrace = $("#climate_form #stacktrace");
+        that.ws_client = new WSClient('climate_form', 'climate');
+        that.rq_job_id = null;
+        that.rq_job = $("#climate_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-        that.ws_client = new WSClient('climate_form', 'climate');
 
         that.stationselection = $("#climate_station_selection");
 
@@ -4673,11 +4651,12 @@ var Climate = function () {
             self.ws_client.connect();
 
             $.post({
-                url: "tasks/build_climate/",
+                url: "rq/api/build_climate",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.form.trigger("CLIMATE_BUILD_TASK_COMPLETED");
+                        self.status.html(`build_climate job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -4688,8 +4667,6 @@ var Climate = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function() {
-                self.ws_client.disconnect();
             });
 
         };
@@ -5027,13 +5004,14 @@ var Wepp = function () {
         that.info = $("#wepp_form #info");
         that.status = $("#wepp_form  #status");
         that.stacktrace = $("#wepp_form #stacktrace");
+        that.ws_client = new WSClient('wepp_form', 'wepp');
+        that.rq_job_id = null;
         that.rq_job = $("#wepp_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-        that.ws_client = new WSClient('wepp_form', 'wepp');
-        that.rq_job_id = null;
 
         that.surf_runoff = $("#wepp_form #surf_runoff");
         that.lateral_flow = $("#wepp_form #lateral_flow");
@@ -5047,16 +5025,6 @@ var Wepp = function () {
         };
 
         
-        that.set_rq_job_id = function (job_id) {
-            var self = instance;
-
-            if (job_id === null)
-                return;
-
-            self.rq_job_id = job_id;
-            self.rq_job.html(`job_id: <a href="https://${window.location.host}/weppcloud/rq/job-dashboard/${job_id}" target="_blank">${job_id}</a><div style="height:30px;"></div>`);
-        }
-
         that.updatePhosphorus = function () {
             var self = instance;
 
@@ -5187,8 +5155,7 @@ var Wepp = function () {
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(`run_wepp_rq job submitted: ${response.job_id}`);
-                        self.set_rq_job_id(response.job_id);
-                        
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -5201,37 +5168,6 @@ var Wepp = function () {
                 }
             });
         };
-
-        that.run_watershed = function () {
-            var self = instance;
-            var task_msg = "Submitting wepp watershed run";
-
-            self.info.text("");
-            self.status.html(task_msg + "...");
-            self.stacktrace.text("");
-
-            var data = self.form.serialize();
-
-            $.post({
-                url: "tasks/run_wepp_watershed/",
-                data: data,
-                success: function success(response) {
-                    if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("WEPP_RUN_TASK_COMPLETED");
-                    } else {
-                        self.pushResponseStacktrace(self, response);
-                    }
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
-        };
-
 
         that.report = function () {
             var self = instance;
@@ -5302,6 +5238,10 @@ var Observed = function () {
         that.info = $("#observed_form #info");
         that.status = $("#observed_form  #status");
         that.stacktrace = $("#observed_form #stacktrace");
+        that.ws_client = new WSClient('observed_form', 'observed');
+        that.rq_job_id = null;
+        that.rq_job = $("#observed_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -5403,6 +5343,10 @@ var DebrisFlow = function () {
         that.info = $("#debris_flow_form #info");
         that.status = $("#debris_flow_form  #status");
         that.stacktrace = $("#debris_flow_form #stacktrace");
+        that.ws_client = new WSClient('debris_flow_form', 'debris_flow');
+        that.rq_job_id = null;
+        that.rq_job = $("#debris_flow_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -5416,15 +5360,16 @@ var DebrisFlow = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             $.post({
-                url: "tasks/run_debris_flow/",
+                url: "rq/api/run_debris_flow",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... done.");
-                        self.report();
+                        self.status.html(`run_debris_flow_rq job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -5471,6 +5416,10 @@ var Ash = function () {
         that.info = $("#ash_form #info");
         that.status = $("#ash_form  #status");
         that.stacktrace = $("#ash_form #stacktrace");
+        that.ws_client = new WSClient('ash_form', 'ash');
+        that.rq_job_id = null;
+        that.rq_job = $("#ash_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
@@ -5484,19 +5433,20 @@ var Ash = function () {
             self.info.text("");
             self.status.html(task_msg + "...");
             self.stacktrace.text("");
+            self.ws_client.connect();
 
             var formData = new FormData($('#ash_form')[0]);
 
             $.post({
-                url: "tasks/run_ash/",
+                url: "rq/api/run_ash",
                 data: formData,
                 contentType: false,
                 cache: false,
                 processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... done.");
-                        self.report();
+                        self.status.html(`run_ash job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -5624,11 +5574,14 @@ var Rhem = function () {
         that.info = $("#rhem_form #info");
         that.status = $("#rhem_form  #status");
         that.stacktrace = $("#rhem_form #stacktrace");
+        that.ws_client = new WSClient('rhem_form', 'rhem');
+        that.rq_job_id = null;
+        that.rq_job = $("#rhem_form #rq_job");
+
         that.hideStacktrace = function () {
             var self = instance;
             self.stacktrace.hide();
         };
-        that.ws_client = new WSClient('rhem_ts_form', 'rhem_ts');
 
         that.run = function () {
             var self = instance;
@@ -5640,12 +5593,12 @@ var Rhem = function () {
             self.ws_client.connect();
 
             $.post({
-                url: "tasks/run_rhem/",
+                url: "rq_api/run_rhem/",
                 data: self.form.serialize(),
                 success: function success(response) {
                     if (response.Success === true) {
-                        self.status.html(task_msg + "... Success");
-                        self.form.trigger("RHEM_RUN_TASK_COMPLETED");
+                        self.status.html(`run_rhem_rq job submitted: ${response.job_id}`);
+                        self.set_rq_job_id(self, response.job_id);
                     } else {
                         self.pushResponseStacktrace(self, response);
                     }
@@ -5656,8 +5609,6 @@ var Rhem = function () {
                 fail: function fail(jqXHR, textStatus, errorThrown) {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
-            }).always(function() {
-                self.ws_client.disconnect();
             });
         };
 

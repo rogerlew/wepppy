@@ -103,7 +103,7 @@
   function renderJob(data) {
     const isExpanded = $("#collapseParent").hasClass("show");
     allFinishedCount = 0;
-    allTotalCount = 0;
+    allTotalCount = 1;
     allElapsedTime_s = 0.0;
 
     runid = data.runid;
@@ -114,6 +114,9 @@
 
     let jobs_html = renderJobs(data.children);
 
+    if (data.status == 'finished') {
+      allFinishedCount += 1;
+    }
 
     let html = `<div class="card">
                   <div class="card-header">

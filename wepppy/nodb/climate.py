@@ -59,7 +59,7 @@ from copy import deepcopy
 from .base import NoDbBase, TriggerEvents
 from .watershed import Watershed, WatershedNotAbstractedError
 from .ron import Ron
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.mixins.log_mixin import LogMixin
 
 
@@ -1322,8 +1322,8 @@ class Climate(NoDbBase, LogMixin):
             self._spatial_scale_precip(self.precip_scale_factor_map)
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('build_climate')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.build_climate)
         except FileNotFoundError:
             pass
 
@@ -1807,8 +1807,8 @@ class Climate(NoDbBase, LogMixin):
             self._prism_revision(verbose=verbose)
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('build_climate')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.build_climate)
         except FileNotFoundError:
             pass
 

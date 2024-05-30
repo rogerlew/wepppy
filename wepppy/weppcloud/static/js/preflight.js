@@ -26,15 +26,6 @@ function initPreflight(runid) {
                 updateUI(payload.checklist);
                 //updateLocks(payload.lock_statuses);
 
-                if (lastPreflightChecklist != null) {
-                  if (!lastPreflightChecklist.wepp && payload.checklist.wepp) {
-                    var wepp = Wepp.getInstance();
-                    wepp.form.trigger("WEPP_RUN_TASK_COMPLETED");
-                    wepp.ws_client.disconnect();
-                    console.log('wepp_finished');
-                  }
-                }
-
                 lastPreflightChecklist = payload.checklist;
                 controller_lock_statuses = payload.lock_statuses;
 

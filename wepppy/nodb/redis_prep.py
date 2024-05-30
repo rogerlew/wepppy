@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 from os.path import join as _join
 from os.path import split as _split
@@ -14,6 +15,29 @@ _thisdir = os.path.dirname(__file__)
 load_dotenv(_join(_thisdir, '.env'))
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+
+
+class TaskEnum(Enum):
+    project_init = 'project_init'
+    set_outlet = 'set_outlet'
+    abstract_watershed = 'abstract_watershed'
+    build_channels = 'build_channels'
+    build_subcatchments = 'build_subcatchments'
+    build_landuse = 'build_landuse'
+    build_soils = 'build_soils'
+    build_climate = 'build_climate'
+    fetch_rap_ts = 'build_rap_ts'
+    run_wepp = 'run_wepp'
+    run_observed = 'run_observed'
+    run_debris = 'run_debris'
+    run_watar = 'run_watar'
+    run_rhem = 'run_rhem'
+    fetch_dem = 'fetch_dem'
+    landuse_map = 'landuse_map'
+    init_sbs_map = 'init_sbs_map'
+
+    def __str__(self):
+        return self.value.replace('TaskEnum.', '')
 
 
 class RedisPrep:
@@ -79,11 +103,11 @@ class RedisPrep:
         self.redis.hset(self.run_id, f'attrs:{key}', str(bool(value)).lower())
         self.dump()
 
-    def timestamp(self, key):
+    def timestamp(self, key: TaskEnum):
         now = int(time.time())
-        self.__setitem__(key, now)
+        self.__setitem__(str(key), now)
 
-    def remove_timestamp(self, key):
+    def remove_timestamp(self, key: TaskEnum):
         self.redis.hdel(self.run_id, f'timestamps:{key}')
         self.dump()
 

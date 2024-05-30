@@ -83,6 +83,7 @@ function onReady() {
     var observed = Observed.getInstance();
     var debris_flow = DebrisFlow.getInstance();
     var ash = Ash.getInstance();
+    var rap_ts = RAP_TS.getInstance();
     var disturbed = Disturbed.getInstance();
 
 
@@ -288,16 +289,16 @@ function onReady() {
     baer.hideStacktrace();
 
     baer.form.on("SBS_UPLOAD_TASK_COMPLETE", function () {
-        setTimeout(baer.show_sbs, 4000);
-        setTimeout(baer.load_modify_class, 4000);
+        setTimeout(baer.show_sbs, 100);
+        setTimeout(baer.load_modify_class, 100);
     });
 
     baer.form.on("SBS_REMOVE_TASK_COMPLETE", function () {
     });
 
     baer.form.on("MODIFY_BURN_CLASS_TASK_COMPLETE", function () {
-        setTimeout(baer.show_sbs, 2000);
-        setTimeout(baer.load_modify_class, 4000);
+        setTimeout(baer.show_sbs, 100);
+        setTimeout(baer.load_modify_class, 100);
     });
 
     if ({{ ron.has_sbs | tojson}})
@@ -355,13 +356,13 @@ function onReady() {
 
             // If user clicked "Cancel" in the confirmation dialog
             if (!result) {
-                // Stop here and don't call the build_router function
+                // Stop here and don't call the build function
                 return;
             }
         }
 
-        // If everything is fine, or user confirmed, then call channel_ctrl.build_router
-        channel_ctrl.build_router();
+        // If everything is fine, or user confirmed, then call channel_ctrl.build
+        channel_ctrl.build();
     });
 
 
@@ -381,25 +382,21 @@ function onReady() {
 
             // If user clicked "Cancel" in the confirmation dialog
             if (!result) {
-                // Stop here and don't call the build_router function
+                // Stop here and don't call the build function
                 return;
             }
         }
 
-        // If everything is fine, or user confirmed, then call channel_ctrl.build_router
-        channel_ctrl.build_router();
+        // If everything is fine, or user confirmed, then call channel_ctrl.build
+        channel_ctrl.build();
     });
 
     //
     // Channel Event Handling
     //
-    channel_ctrl.form.on("FETCH_TASK_COMPLETED", function () {
-        // Build the channels when the dem has been obtained
-        setTimeout(channel_ctrl.build, 2000);
-    });
 
     channel_ctrl.form.on("BUILD_CHANNELS_TASK_COMPLETED", function () {
-        // Show the results on the map and build a report
+        channel_ctrl.ws_client.disconnect();
         channel_ctrl.show();
         channel_ctrl.report();
     });
@@ -413,6 +410,7 @@ function onReady() {
     channel_ctrl.zoom_min = 11;
     if ({{ watershed.has_channels | tojson }}) {
         channel_ctrl.report();
+        channel_ctrl.set_rq_job_id(channel_ctrl, {{ rq_job_ids.get("fetch_dem_and_build_channels_rq") | tojson }});
     }
     if ({{ watershed.has_channels | tojson }} && !({{ watershed.has_subcatchments | tojson }})) {
        channel_ctrl.show();
@@ -427,13 +425,13 @@ function onReady() {
     // Bindings
     //
     // Bind Use Cursor button to the setCursorSelection
-    $("#btn_setoutlet_cursor").click(function () {
+    $("#btn_set_outlet_cursor").click(function () {
         outlet.setCursorSelection(!outlet.cursorSelectionOn);
     });
 
     // Text Entry Control
-    $("#btn_setoutlet_entry").click(function () {
-        var loc = $("#input_setoutlet_entry").val().split(",");
+    $("#btn_set_outlet_entry").click(function () {
+        var loc = $("#input_set_outlet_entry").val().split(",");
         var lng = parseFloat(loc[0]);
         var lat = parseFloat(loc[1]);
         var ev = { latlng: L.latLng(lat, lng) };
@@ -441,25 +439,27 @@ function onReady() {
     });
 
     // Bind radio to the set outlet mode on change
-    $("[name='setoutlet_mode']").change(function () {
-        var mode = parseInt($("input[name='setoutlet_mode']:checked").val(), 10);
+    $("[name='set_outlet_mode']").change(function () {
+        var mode = parseInt($("input[name='set_outlet_mode']:checked").val(), 10);
         outlet.setMode(mode);
     });
 
     //
     // Outlet Event Bindings
     //
-    outlet.form.on("SETOUTLET_TASK_COMPLETED", function () {
+    outlet.form.on("SET_OUTLET_TASK_COMPLETED", function () {
+        outlet.ws_client.disconnect();
         outlet.popup.remove();
         outlet.show();
     });
 
     // Load outlet from server
     if ({{ watershed.has_outlet | tojson }}) {
-        outlet.form.trigger("SETOUTLET_TASK_COMPLETED");
+        outlet.form.trigger("SET_OUTLET_TASK_COMPLETED");
+        outlet.set_rq_job_id(outlet, {{ rq_job_ids.get("set_outlet_rq") | tojson }});
     }
 
-    outlet.setMode(parseInt($("input[name='setoutlet_mode']:checked").val(), 10));
+    outlet.setMode(parseInt($("input[name='set_outlet_mode']:checked").val(), 10));
 
     /*
      * Subcatchment Initialization
@@ -524,11 +524,11 @@ function onReady() {
     sub_ctrl.form.on("BUILD_SUBCATCHMENTS_TASK_COMPLETED", function () {
         sub_ctrl.show();
         channel_ctrl.show();
-        setTimeout(sub_ctrl.abstract_watershed, 2000);
     });
 
     sub_ctrl.form.on("WATERSHED_ABSTRACTION_TASK_COMPLETED", function () {
-        setTimeout(sub_ctrl.report, 1500);
+        sub_ctrl.ws_client.disconnect();
+        sub_ctrl.report();
         sub_ctrl.enableColorMap("slp_asp");
         wepp.updatePhosphorus();
     });
@@ -615,12 +615,14 @@ function onReady() {
         });
     {% endif %}
 
+
     // load subcatchments
     if ({{ watershed.has_subcatchments | tojson }}) {
         sub_ctrl.show();
         sub_ctrl.report();
         channel_ctrl.show();
         sub_ctrl.enableColorMap("slp_asp");
+        sub_ctrl.set_rq_job_id(sub_ctrl, {{ rq_job_ids.get("build_subcatchments_and_abstract_watershed_rq") | tojson }});
     }
 
     {% if 'rangeland_cover' in ron.mods %}
@@ -710,6 +712,7 @@ function onReady() {
     // Landuse Event Bindings
     //
     landuse.form.on("LANDUSE_BUILD_TASK_COMPLETED", function () {
+        landuse.ws_client.disconnect();
         landuse.report();
         sub_ctrl.enableColorMap("dom_lc");
     });
@@ -724,6 +727,7 @@ function onReady() {
     // load landuse
     if ( {{ landuse.has_landuse | tojson }} ) {
         landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
+        landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
     }
 
     /*
@@ -771,7 +775,8 @@ function onReady() {
     //
     // Subcatchment Event Bindings
     //
-    soil.form.on("SOIL_BUILD_TASK_COMPLETED", function () {
+    soil.form.on("SOILS_BUILD_TASK_COMPLETED", function () {
+        soil.ws_client.disconnect();
         soil.report();
         sub_ctrl.enableColorMap("dom_soil");
     });
@@ -787,8 +792,8 @@ function onReady() {
     }
     // load soil
     if ( {{ soils.has_soils | tojson }} ) {
-        soil.form.trigger("SOIL_BUILD_TASK_COMPLETED");
-        sub_ctrl.enableColorMap("dom_soil");
+        soil.form.trigger("SOILS_BUILD_TASK_COMPLETED");
+        soil.set_rq_job_id(soil, {{ rq_job_ids.get("build_soils_rq") | tojson }});
     }
 
     /*
@@ -836,6 +841,7 @@ function onReady() {
     });
 
     climate.form.on("CLIMATE_BUILD_TASK_COMPLETED", function () {
+        climate.ws_client.disconnect();
         climate.report();
     });
 
@@ -853,6 +859,7 @@ function onReady() {
 
     if ( {{ climate.has_climate | tojson }} ) {
         climate.report();
+        climate.set_rq_job_id(climate, {{ rq_job_ids.get("build_climate_rq") | tojson }});
     }
 
     if ( {{ climate.has_observed | tojson }} ||
@@ -906,10 +913,10 @@ function onReady() {
     });
 
     wepp.form.on("WEPP_RUN_TASK_COMPLETED", function () {
+        wepp.ws_client.disconnect();
         wepp.report();
         observed.onWeppRunCompleted();
     });
-    wepp.set_rq_job_id({{ rq_job_ids.get("run_wepp_rq") | tojson }});
 
 
     {% if 'rhem' in ron.mods %}
@@ -926,8 +933,10 @@ function onReady() {
     //
 
     rhem.form.on("RHEM_RUN_TASK_COMPLETED", function () {
+        rhem.ws_client.disconnect();
         rhem.report();
     });
+    rhem.set_rq_job_id(rhem, {{ rq_job_ids.get("run_rhem_rq") | tojson }});
 
     if ( {{ rhem.has_run | tojson }} ) {
         rhem.report();
@@ -941,6 +950,7 @@ function onReady() {
     // show report if wepp has run
     if ( {{ wepp.has_run | tojson }} ) {
         wepp.report();
+        wepp.set_rq_job_id(wepp, {{ rq_job_ids.get("run_wepp_rq") | tojson }});
     }
 
     // show report if wepp has run
@@ -960,7 +970,25 @@ function onReady() {
 
         ash.setAshDepthMode({{ ash.ash_depth_mode }});
 
+        ash.form.on("ASH_RUN_TASK_COMPLETED", function () {
+            ash.ws_client.disconnect();
+            ash.report();
+        });
+        ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
     {% endif %}
+
+    rap_ts.form.on("RAP_TS_TASK_COMPLETED", function () {
+        rap_ts.ws_client.disconnect();
+        rap_ts.report();
+    });
+    rap_ts.set_rq_job_id(rap_ts, {{ rq_job_ids.get("fetch_and_analyze_rap_ts_rq") | tojson }});
+
+
+    debris_flow.form.on("DEBRIS_FLOW_RUN_TASK_COMPLETED", function () {
+        debris_flow.ws_client.disconnect();
+        debris_flow.report();
+    });
+    debris_flow.set_rq_job_id(debris_flow, {{ rq_job_ids.get("run_debris_flow_rq") | tojson }});
 
     project.set_readonly_controls({{ ron.readonly | tojson }})
 

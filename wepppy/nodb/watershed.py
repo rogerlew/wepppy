@@ -36,7 +36,7 @@ from wepppy.all_your_base.geo import read_raster, haversine
 from .ron import Ron
 from .base import NoDbBase, TriggerEvents
 from .topaz import Topaz
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep, TaskEnum
 from .mixins.log_mixin import LogMixin
 
 from wepppy.all_your_base import (
@@ -545,8 +545,8 @@ class Watershed(NoDbBase, LogMixin):
         if _exists(self.subwta):
             os.remove(self.subwta)
 
-        prep = Prep.getInstance(self.wd)
-        prep.timestamp('build_channels')
+        prep = RedisPrep.getInstance(self.wd)
+        prep.timestamp(TaskEnum.build_channels)
 
     #
     # set outlet
@@ -573,8 +573,8 @@ class Watershed(NoDbBase, LogMixin):
                                   distance_from_requested=distance, pixel_coords=(o_x, o_y))
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('set_outlet')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.set_outlet)
         except FileNotFoundError:
             pass
 
@@ -684,8 +684,8 @@ class Watershed(NoDbBase, LogMixin):
             self._build_multiple_ofe()
        
         try: 
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('abstract_watershed')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.abstract_watershed)
         except FileNotFoundError:
             pass
 

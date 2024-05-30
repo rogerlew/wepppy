@@ -13,6 +13,8 @@ import jsonpickle
 from os.path import join as _join
 from os.path import exists as _exists
 
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+
 from osgeo import gdal
 
 import numpy as np
@@ -32,7 +34,7 @@ from wepppy.landcover.rap import (
     RangelandAnalysisPlatformV3Dataset
 )
 
-from ...redis_prep import RedisPrep as Prep
+from ...redis_prep import RedisPrep, TaskEnum
 
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_median_single_raster_key
@@ -160,9 +162,18 @@ class RAP_TS(NoDbBase, LogMixin):
 
     def acquire_rasters(self, start_year=None, end_year=None):
 
+        def retrieve_rap_year(year):
+            self.log(f'  retrieving rap {year}...')
+            rap_mgr.retrieve([year])
+            self.log_done()
+            return year
+
+        def oncomplete(future):
+            year = future.result()
+            self.log(f'  retrieving rap {year} completed.\n')
+
         self.lock()
 
-        # noinspection PyBroadException
         try:
             if start_year is not None:
                 self._rap_start_year = start_year
@@ -177,10 +188,14 @@ class RAP_TS(NoDbBase, LogMixin):
             _map = Ron.getInstance(self.wd).map
             rap_mgr = RangelandAnalysisPlatformV3(wd=self.rap_dir, bbox=_map.extent, cellsize=_map.cellsize)
 
-            for year in range(start_year, end_year+1):
-                self.log(f'  retrieving rap {year}...')
-                rap_mgr.retrieve([year])
-                self.log_done()
+            futures = []
+            with ThreadPoolExecutor() as pool:
+                for year in range(start_year, end_year + 1):
+                    future = pool.submit(retrieve_rap_year, year)
+                    future.add_done_callback(oncomplete)
+                    futures.append(future)
+
+                wait(futures, return_when=FIRST_EXCEPTION)
 
             self._rap_mgr = rap_mgr
             self.dump_and_unlock()
@@ -204,8 +219,7 @@ class RAP_TS(NoDbBase, LogMixin):
             cover += self.data[band][str(year)][str(topaz_id)]
         return cover
 
-    def analyze(self, use_sbs=False, verbose=True):
-
+    def analyze(self, use_sbs=False, verbose=False):
         from wepppy.nodb import Ron
         from wepppy.nodb.mods import Disturbed
 
@@ -213,56 +227,54 @@ class RAP_TS(NoDbBase, LogMixin):
         end_year = self.rap_end_year
 
         wd = self.wd
-
-
         watershed = Watershed.getInstance(wd)
-        ron = Ron.getInstance(wd)
-
         rap_mgr = self._rap_mgr
 
         self.lock()
         try:
-
-            if ron.has_sbs and use_sbs:
-                disturbed = Disturbed.getInstance(wd)
-                sbs = disturbed.get_sbs_4class()
-                disturbed_fn = disturbed.sbs_4class_path
-            else:
-                disturbed_fn = None
-
             data_ds = {}
-            px_counts = None
 
-            for year in range(start_year, end_year+1):
+            def analyze_band_year(year, band):
                 if verbose:
-                    print(year)
+                    print(year, band)
+
+                if band not in data_ds:
+                    data_ds[band] = {}
+
+                self.log(f'  analyzing rap {year} {band}...')
+
                 rap_ds_fn = rap_mgr.get_dataset_fn(year=year)
+                if self.multi_ofe:
+                    result = identify_median_intersecting_raster_keys(
+                        key_fn=watershed.subwta, key2_fn=watershed.mofe_map, parameter_fn=rap_ds_fn, band_indx=band)
+                else:
+                    result = identify_median_single_raster_key(
+                        key_fn=watershed.subwta, parameter_fn=rap_ds_fn, band_indx=band)
 
-                for i, band in enumerate([RAP_Band.ANNUAL_FORB_AND_GRASS,
-                                          RAP_Band.BARE_GROUND,
-                                          RAP_Band.LITTER,
-                                          RAP_Band.PERENNIAL_FORB_AND_GRASS,
-                                          RAP_Band.SHRUB,
-                                          RAP_Band.TREE]):
-                    if verbose:
-                        print(band)
+                data_ds[band][year] = result
+                self.log_done()
+                return year, band
 
-                    if band not in data_ds:
-                        data_ds[band] = {}
+            def oncomplete(future):
+                year, band = future.result()
+                self.log(f'  analyzing rap {year} {band} completed.\n')
 
-                    self.log(f'  analyzing rap {year} {band}...')
+            futures = []
+            with ThreadPoolExecutor() as pool:
+                for year in range(start_year, end_year + 1):
+                    for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
+                                 RAP_Band.BARE_GROUND,
+                                 RAP_Band.LITTER,
+                                 RAP_Band.PERENNIAL_FORB_AND_GRASS,
+                                 RAP_Band.SHRUB,
+                                 RAP_Band.TREE]:
+                        future = pool.submit(analyze_band_year, year, band)
+                        future.add_done_callback(oncomplete)
+                        futures.append(future)
 
-                    if self.multi_ofe:
-                        data_ds[band][year] = identify_median_intersecting_raster_keys(
-                            key_fn=watershed.subwta,key2_fn=watershed.mofe_map, parameter_fn=rap_ds_fn, band_indx=band)
-                    else:
-                        data_ds[band][year] = identify_median_single_raster_key(
-                            key_fn=watershed.subwta, parameter_fn=rap_ds_fn, band_indx=band)
-
-                    self.log_done()
+                wait(futures, return_when=FIRST_EXCEPTION)
 
             self.data = data_ds
-
             self.dump_and_unlock()
 
             self.log('analysis complete...')
@@ -271,10 +283,9 @@ class RAP_TS(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
-
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('build_rap_ts')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.fetch_rap_ts)
         except FileNotFoundError:
             pass
 

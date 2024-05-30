@@ -1,4 +1,3 @@
-from wepppy.nodb import Prep
 
 
 def _safe_gt(a, b):
@@ -10,6 +9,7 @@ def _safe_gt(a, b):
 
 def preflight_check(wd):
     try:
+        from wepppy.nodb.prep import Prep
         prep = Prep.getInstance(wd)
     except:
         return None

@@ -33,7 +33,7 @@ from wepppy.nodb.climate import Climate
 from wepppy.nodb.mods import Baer, Disturbed
 from wepppy.nodb.wepp import Wepp
 from wepppy.nodb.ron import Ron
-from wepppy.nodb.prep import Prep
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.all_your_base.dateutils import YearlessDate
 
@@ -910,10 +910,14 @@ class Ash(NoDbBase, LogMixin):
         ashpost.run_post()
 
         try:
-            prep = Prep.getInstance(wd)
-            prep.timestamp('run_watar')
+            prep = RedisPrep.getInstance(wd)
+            prep.timestamp(TaskEnum.run_watar)
         except FileNotFoundError:
             pass
+
+    @property
+    def _status_channel(self):
+        return f'{self.runid}:ash'
 
     def get_ash_type(self, topaz_id):
         if 'multi' not in self.model:

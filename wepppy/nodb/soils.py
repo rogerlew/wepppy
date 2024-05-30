@@ -46,7 +46,7 @@ from .base import (
 
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep, TaskEnum
 from .mixins.log_mixin import LogMixin
 
 try:
@@ -657,8 +657,8 @@ class Soils(NoDbBase, LogMixin):
         self.dump_soils_parquet()
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('build_soils')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.build_soils)
         except FileNotFoundError:
             pass
 

@@ -36,7 +36,7 @@ from ...soils import Soils
 from ...watershed import Watershed
 from ...ron import Ron
 from ...topaz import Topaz
-from ...redis_prep import RedisPrep as Prep
+from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
 
@@ -461,8 +461,8 @@ class Disturbed(NoDbBase):
         self.validate(self.disturbed_path, breaks, nodata_vals)
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass
@@ -472,8 +472,8 @@ class Disturbed(NoDbBase):
         self.validate(self.disturbed_path, color_map=color_map)
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass
@@ -517,8 +517,8 @@ class Disturbed(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = False
         except FileNotFoundError:
             pass
@@ -558,8 +558,8 @@ class Disturbed(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass

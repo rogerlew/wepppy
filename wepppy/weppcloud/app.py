@@ -32,6 +32,9 @@ import awesome_codename
 
 from werkzeug.utils import secure_filename
 
+from deprecated import deprecated
+
+
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort, make_response,
@@ -66,6 +69,7 @@ from wepppy.nodb.mods.disturbed import write_disturbed_land_soil_lookup
 from wepppy.nodb.preflight import preflight_check
 
 from wepppy.soils.ssurgo import NoValidSoilsException
+
 from wepppy.topo.topaz import (
     WatershedBoundaryTouchesEdgeError,
     MinimumChannelLengthTooShortError
@@ -2156,8 +2160,9 @@ def report_outlet(runid, config):
 
 
 # noinspection PyBroadException
-@app.route('/runs/<string:runid>/<config>/tasks/setoutlet/', methods=['POST'])
-def task_setoutlet(runid, config):
+@deprecated
+@app.route('/runs/<string:runid>/<config>/tasks/set_outlet/', methods=['POST'])
+def task_set_outlet(runid, config):
     try:
         lat = float(request.form.get('latitude', None))
         lng = float(request.form.get('longitude', None))
@@ -2222,6 +2227,8 @@ def _parse_map_change(form):
 
 
 # noinspection PyBroadException
+
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/fetch_dem/', methods=['POST'])
 def task_fetch_dem(runid, config):
     error, args = _parse_map_change(request.form)
@@ -2335,6 +2342,7 @@ def export_winwepp(runid, config):
 
 
 # noinspection PyBroadException
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/build_channels/', methods=['POST'])
 def task_build_channels(runid, config):
 
@@ -2381,6 +2389,7 @@ def task_build_channels(runid, config):
     return success_factory()
 
 
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/build_subcatchments/', methods=['POST'])
 def task_build_subcatchments(runid, config):
 
@@ -2781,7 +2790,7 @@ def view_channel_def(runid, config, chn_key):
 
     return jsonify(chn_d)
 
-
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/build_landuse/', methods=['POST'])
 def task_build_landuse(runid, config):
     mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
@@ -2937,6 +2946,7 @@ def report_soils(runid, config):
         return exception_factory('Building Soil Failed', runid=runid)
 
 
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/build_soil/', methods=['POST'])
 def task_build_soil(runid, config):
     wd = get_wd(runid)
@@ -3233,6 +3243,7 @@ def view_climate_monthlies(runid, config):
 
 
 # noinspection PyBroadException
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/build_climate', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/build_climate/', methods=['POST'])
 def task_build_climate(runid, config):
@@ -4611,6 +4622,7 @@ def set_firedate(runid, config):
 
 
 # noinspection PyBroadException
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/acquire_rap_ts/', methods=['POST'])
 def task_rap_ts_acquire(runid, config):
     from wepppy.nodb.mods import RAP_TS
@@ -4739,7 +4751,7 @@ def task_build_uniform_sbs(runid, config, value):
 
     return success_factory()
 
-
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_debris_flow/', methods=['POST'])
 def run_debris_flow(runid, config):
@@ -4755,6 +4767,7 @@ def run_debris_flow(runid, config):
         return exception_factory('Error Running Debris Flow', runid=runid)
 
 
+@deprecated
 def _task_upload_ash_map(wd, request, file_input_id):
     ash = Ash.getInstance(wd)
 
@@ -4774,7 +4787,7 @@ def _task_upload_ash_map(wd, request, file_input_id):
 
     return filename
 
-
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/run_ash', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_ash/', methods=['POST'])
 def run_ash(runid, config):
@@ -5196,6 +5209,7 @@ def dev_access():
         return error_factory('not authorized')
 
 # noinspection PyBroadException
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/run_rhem', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_rhem/', methods=['POST'])
 def submit_task_run_rhem(runid, config):

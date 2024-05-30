@@ -532,7 +532,7 @@ def api_run_ash(runid, config):
         ash.ash_depth_mode = 1
 
         prep = RedisPrep.getInstance(wd)
-        prep.remove_timestamp(TaskEnum.run_ash)
+        prep.remove_timestamp(TaskEnum.run_watar)
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)

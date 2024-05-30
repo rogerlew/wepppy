@@ -39,7 +39,7 @@ from .base import (
 )
 from .ron import Ron
 from .watershed import Watershed, WatershedNotAbstractedError
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep, TaskEnum
 from .mixins.log_mixin import LogMixin
 
 
@@ -548,8 +548,8 @@ class Landuse(NoDbBase, LogMixin):
         self.dump_landuse_parquet()
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('build_landuse')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.build_landuse)
         except FileNotFoundError:
             pass
 
