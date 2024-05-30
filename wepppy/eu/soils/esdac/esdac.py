@@ -341,8 +341,15 @@ class ESDAC:
         s.append('#  Code\tDepth\tksat')
         s.append('#  ' + '-' * 120)
         for i, (code, (_depth, _ks)) in enumerate(ks.items()):
-            _ksat = _ks * 0.004166667
+            if _ks is None:
+                _ksat = None
+            else:
+                _ksat = _ks * 0.004166667
+
             s.append('#  {}  \t{}  \t{}'.format(code, _depth, _ksat))
+            if _ksat is None:
+                continue
+
             if _ksat < ksat_min:
                 ksat_min = _ksat    
 
@@ -351,6 +358,9 @@ class ESDAC:
                 res_lyr_ksat = ksat_min
     
             ksat_last = _ksat
+
+        if ksat_last is None:
+            ksat_last = 0.001
 
         s.append('#')
         s.append(f'#  res_lyr_ksat_threshold = {res_lyr_ksat_threshold}')
@@ -363,7 +373,6 @@ class ESDAC:
         s.append(f'1 {ksflag}')
 
         description = d_esdb['fao90lev1'][2]
-
 
         if h1.depth <= 0:
             num_layers = 1
@@ -388,7 +397,6 @@ class ESDAC:
              '{9:>7}\t{10:>7}'.format(*s2.split())
                  
         s.append('\t' + s2)
-
 
         if num_layers == 2:
             s2 = f'{h1.depth:0.03f}\t{h1.bd:0.02f}\t{h1.ks:0.04f}\t'\
