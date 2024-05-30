@@ -8,12 +8,8 @@ from .ron import (
     RonNoDbLockedException
 )
 
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep
 
-#from .prep import (
-#    Prep,
-#    PrepNoDbLockedException
-#)
 from .topaz import (
     Topaz,
     TopazNoDbLockedException

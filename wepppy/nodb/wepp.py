@@ -107,7 +107,7 @@ from .soils import Soils
 from .climate import Climate, ClimateMode
 from .watershed import Watershed
 from .wepppost import WeppPost
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep, TaskEnum
 
 from wepppy.wepp.soils.utils import simple_texture
 
@@ -1935,7 +1935,7 @@ class Wepp(NoDbBase, LogMixin):
 
         try:
             prep = Prep.getInstance(self.wd)
-            prep.timestamp('run_wepp')
+            prep.timestamp(TaskEnum.run_wepp)
         except FileNotFoundError:
             pass
 

@@ -13,19 +13,19 @@ from os.path import join as _join
 from os.path import exists as _exists
 import time
 
+from deprecated import deprecated
+
 # non-standard
 import jsonpickle
 
 # weppy submodules
 from .base import NoDbBase
 
-from wepppy.all_your_base import isfloat
-
-
+@deprecated
 class PrepNoDbLockedException(Exception):
     pass
 
-
+@deprecated
 class Prep(NoDbBase):
     __name__ = 'Prep'
 

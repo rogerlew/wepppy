@@ -27,7 +27,7 @@ from wepppy.wepp.out import TotalWatSed2, Chanwb, Ebe
 from wepppy.all_your_base.hydro.objective_functions import calculate_all_functions
 
 from .base import NoDbBase
-from .redis_prep import RedisPrep as Prep
+from .redis_prep import RedisPrep, TaskEnum
 
 
 def validate(Qm, Qo):
@@ -203,8 +203,8 @@ class Observed(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('run_observed')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.run_observed)
         except FileNotFoundError:
             pass
 

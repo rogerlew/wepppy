@@ -34,7 +34,7 @@ from ...ron import Ron
 from ...topaz import Topaz
 from ...mods.rred import Rred
 from ...base import NoDbBase, TriggerEvents
-from ...prep import Prep
+from ...redis_prep import RedisPrep, TaskEnum
 
 from .sbs_map import SoilBurnSeverityMap
 
@@ -344,8 +344,8 @@ class Baer(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass
@@ -373,8 +373,8 @@ class Baer(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = False
         except FileNotFoundError:
             pass
@@ -463,8 +463,8 @@ class Baer(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('landuse_map')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.landuse_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass

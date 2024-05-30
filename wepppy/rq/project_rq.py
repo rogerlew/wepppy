@@ -386,7 +386,7 @@ def run_ash_rq(runid: str, fire_date: str, ini_white_ash_depth_mm: float, ini_bl
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   ash ASH_RUN_TASK_COMPLETED')
 
         prep = RedisPrep.getInstance(wd)
-        prep.timestamp(TaskEnum.run_ash)
+        prep.timestamp(TaskEnum.run_watar)
 
 
     except Exception:
@@ -408,7 +408,7 @@ def run_debris_flow_rq(runid: str):
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   debris_flow DEBRIS_FLOW_RUN_TASK_COMPLETED')
 
         prep = RedisPrep.getInstance(wd)
-        prep.timestamp(TaskEnum.run_ash)
+        prep.timestamp(TaskEnum.run_watar)
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -444,7 +444,7 @@ def fetch_and_analyze_rap_ts_rq(runid: str):
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:rhem'
+        status_channel = f'{runid}:rap_ts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
         climate = Climate.getInstance(wd)
@@ -464,3 +464,5 @@ def fetch_and_analyze_rap_ts_rq(runid: str):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+# todo: observed

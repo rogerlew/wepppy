@@ -1,108 +1,112 @@
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>{{ ron.configname }}{% if ron.name != '' %} - {{ ron.name }}{% endif %}</title>
-    <!-- Style Sheets -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin="anonymous"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-      integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <!--link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.css" /i-->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}?20180731">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap-toc-weppcloud.css') }}?20220706">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css"/>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-    <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
-    <script   src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" crossorigin=""></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-     integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.js"></script>
-    <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/preflight.js') }}"></script>
-    {% include 'js/on_document_ready.j2'%}
-  </head>
 
-  <body>
-    {% include 'header.htm'%}
-    <div>
-      {% include 'controls/poweruser_panel.htm'%}
-      <div class="py-5">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content>
+  <meta name="author" content>
+  <title>{{ ron.configname }}{% if ron.name != '' %} - {{ ron.name }}{% endif
+    %}</title>
+  <!-- Style Sheets -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+    integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <!--link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.css" /i-->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}?20180731">
+  <link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/bootstrap-toc-weppcloud.css') }}?20220706">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/datatables.min.css" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
+  <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
+  <script src="https://code.jquery.com/jquery-3.5.1.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet-src.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.js"></script>
+  <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/preflight.js') }}"></script>
+  {% include 'js/on_document_ready.j2'%}
+</head>
 
-        <div class="main-content container-fluid">
-          <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
-              <nav id="toc" class="fixed-top" style="width:320px; margin-top: 60px;"></nav>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-7">
-                {% include 'controls/map.htm'%}
-                {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
-                {% if 'lt' not in ron.mods %}
-                {% include 'controls/baer_upload.htm'%}
-                {% endif %}
-                {% endif %}
-                {% if 'salvage' in ron.mods %}
-                {% include 'controls/road_upload.htm'%}
-                {% endif %}
-                {% include 'controls/channel_delineation.htm'%}
-                {% include 'controls/set_outlet.htm'%}
-                {% include 'controls/subcatchments.htm'%}
-                {% if 'rangeland_cover' in ron.mods %}
-                {% include 'controls/rangeland_cover.htm'%}
-                {% endif %}
-                {% include 'controls/landuse.htm'%}
-                {% include 'controls/soil.htm'%}
-                {% include 'controls/climate.htm'%}
-                {% if 'rap_ts' in ron.mods %}
-                {% include 'controls/rap_ts.htm'%}
-                {% endif %}
+<body>
+  {% include 'header.htm'%}
+  <div>
+    {% include 'controls/poweruser_panel.htm'%}
+    <div class="py-5">
 
-                {% if 'rhem' not in ron.mods %}
-                {% include 'controls/prep.htm'%}
-                {% include 'controls/wepp.htm'%}
-                <div id="wepp-results"></div>
-                {% else %}
-                {% include 'controls/rhem.htm'%}
-                <div id="rhem-results"></div>
-                {% endif %}
+      <div class="main-content container-fluid">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3">
+            <nav id="toc" class="fixed-top" style="width:320px; margin-top: 60px;"></nav>
+          </div>
+          <div class="col-xs-12 col-sm-12 col-md-8 col-lg-7">
+            {% include 'controls/map.htm'%}
+            {% if 'baer' in ron.mods or 'disturbed' in ron.mods %}
+            {% if 'lt' not in ron.mods %}
+            {% include 'controls/baer_upload.htm'%}
+            {% endif %}
+            {% endif %}
+            {% if 'salvage' in ron.mods %}
+            {% include 'controls/road_upload.htm'%}
+            {% endif %}
+            {% include 'controls/channel_delineation.htm'%}
+            {% include 'controls/set_outlet.htm'%}
+            {% include 'controls/subcatchments.htm'%}
+            {% if 'rangeland_cover' in ron.mods %}
+            {% include 'controls/rangeland_cover.htm'%}
+            {% endif %}
+            {% include 'controls/landuse.htm'%}
+            {% include 'controls/soil.htm'%}
+            {% include 'controls/climate.htm'%}
+            {% if 'rap_ts' in ron.mods %}
+            {% include 'controls/rap_ts.htm'%}
+            {% endif %}
 
-                {% if climate.has_observed and 'rhem' not in ron.mods %}
-                {% include 'controls/observed.htm'%}
-                {% endif %}
+            {% if 'rhem' not in ron.mods %}
+            {% include 'controls/prep.htm'%}
+            {% include 'controls/wepp.htm'%}
+            <div id="wepp-results"></div>
+            {% else %}
+            {% include 'controls/rhem.htm'%}
+            <div id="rhem-results"></div>
+            {% endif %}
 
-                {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
-                {% include 'controls/debris_flow.htm'%}
-                {% endif %}
+            {% if climate.has_observed and 'rhem' not in ron.mods %}
+            {% include 'controls/observed.htm'%}
+            {% endif %}
 
-                {% if 'ash' in ron.mods %}
-                {% include 'controls/ash.htm'%}
-                {% endif %}
+            {% if 'debris_flow' in ron.mods and user.has_role('PowerUser') %}
+            {% include 'controls/debris_flow.htm'%}
+            {% endif %}
 
-                {% include 'controls/export.htm'%}
-                {% if user.is_authenticated %}
-                {% include 'controls/team.htm'%}
-                {% endif %}
-                {% include 'controls/unitizer_modal.htm'%}
-                <!-- Placed at the end of the document so the pages load faster -->
-                <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
-                <script type="text/javascript" src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/plotty.js"></script>
-                <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
-                <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff-vector-arrows.js') }}"></script> -->
-                <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
-            </div>
+            {% if 'ash' in ron.mods %}
+            {% include 'controls/ash.htm'%}
+            {% endif %}
+
+            {% include 'controls/export.htm'%}
+            {% if user.is_authenticated %}
+            {% include 'controls/team.htm'%}
+            {% endif %}
+            {% include 'controls/unitizer_modal.htm'%}
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/polylabel.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/underscore.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/colormap.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff.js') }}"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/geotiff.js') }}"></script>
+            <script type="text/javascript"
+              src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/plotty.js"></script>
+            <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-ajax.js') }}"></script>
+            <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/leaflet-geotiff-vector-arrows.js') }}"></script> -->
+            <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
           </div>
         </div>
-
       </div>
+
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
-
-

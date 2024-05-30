@@ -29,7 +29,7 @@ from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.soils import Soils
 from wepppy.nodb.topaz import Topaz
 from wepppy.nodb.mods import Baer, Disturbed
-from wepppy.nodb.prep import Prep
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 
 def _duration_in_hours(duration):
@@ -298,8 +298,8 @@ class DebrisFlow(NoDbBase):
             raise
 
         try:
-            prep = Prep.getInstance(self.wd)
-            prep.timestamp('run_debris')
+            prep = RedisPrep.getInstance(self.wd)
+            prep.timestamp(TaskEnum.run_debris)
         except FileNotFoundError:
             pass
 
