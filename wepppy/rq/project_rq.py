@@ -39,6 +39,9 @@ _hostname = socket.gethostname()
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
+TIMEOUT = 43_200
+
+
 DEFAULT_ZOOM = 12
 
 def new_project_rq(runid: str, project_def: dict):
@@ -301,11 +304,11 @@ def build_subcatchments_and_abstract_watershed_rq(runid: str):
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
             
-            ajob = q.enqueue_call(build_subcatchments_rq, (runid,))
+            ajob = q.enqueue_call(build_subcatchments_rq, (runid,), timeout=TIMEOUT)
             job.meta['jobs:0,func:build_subcatchments_rq'] = ajob.id
             job.save()
 
-            bjob = q.enqueue_call(abstract_watershed_rq, (runid,),  depends_on=ajob)
+            bjob = q.enqueue_call(abstract_watershed_rq, (runid,), timeout=TIMEOUT, depends_on=ajob)
             job.meta['jobs:1,func:abstract_watershed_rq'] = bjob.id
             job.save()
         
