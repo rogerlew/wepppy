@@ -695,18 +695,18 @@ class Disturbed(NoDbBase):
 
                 if burn_class in ['131', '132', '133']:
                     if man.disturbed_class in ['forest', 'young forest']:
-                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup('forest_low_sev_fire'), 
-                                                     '132': disturbed_key_lookup('forest_moderate_sev_fire'), 
-                                                     '133': disturbed_key_lookup('forest_high_sev_fire')}[burn_class]
+                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
+                                                     '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
+                                                     '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
 
                     elif man.disturbed_class == 'shrub':
-                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup('shrub_low_sev_fire'), 
-                                                     '132': disturbed_key_lookup('shrub_moderate_sev_fire'), 
-                                                     '133': disturbed_key_lookup('shrub_high_sev_fire')}[burn_class]
+                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
+                                                     '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
+                                                     '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
                     elif man.disturbed_class in ['tall grass']:
-                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup('grass_low_sev_fire'), 
-                                                     '132': disturbed_key_lookup('grass_moderate_sev_fire'), 
-                                                     '133': disturbed_key_lookup('grass_high_sev_fire')}[burn_class]
+                        landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
+                                                     '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
+                                                     '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
 
                 meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
