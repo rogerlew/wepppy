@@ -115,17 +115,6 @@ def write_disturbed_land_soil_lookup(fname, data):
             wtr.writerow({k: v for k, v in zip(fieldnames, row)})
 
 
-def _replace_parameter(original, replacement):
-    if replacement is None:
-        return original
-
-    elif replacement.strip().startswith('*'):
-        return str(float(original) * float(replacement.replace('*', '')))
-
-    else:
-        return replacement
-
-
 class DisturbedNoDbLockedException(Exception):
     pass
 
@@ -648,10 +637,9 @@ class Disturbed(NoDbBase):
         mapping_dict = self.landuse_instance.get_mapping_dict()
         d = {}
         for key in mapping_dict:
-            disturbed_class = mapping_dict[key]['DisturbedClass'].replace(' ', '')
+            disturbed_class = mapping_dict[key]['DisturbedClass'].replace(' ', '_')
             if not disturbed_class:  # filter '' and None
                 continue
-
             if disturbed_class not in d:
                 d[disturbed_class] = key
 
