@@ -25,7 +25,7 @@ from wepp_runner import (
 )
 
 from wepppy.nodb import Disturbed, Ron, Wepp, Watershed, Climate, ClimateMode, WeppPost
-from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.status_messenger import StatusMessenger
 
@@ -192,9 +192,9 @@ def run_wepp_rq(runid):
                 jobs0_hillslopes_prep.append(_job)
                 job.save()
 
-                _job = q.enqueue_call(_prep_soils_rq, (runid,), timeout='1h')
-                job.meta['jobs:0,func:_prep_soils_rq'] = _job.id
-                jobs0_hillslopes_prep.append(_job)
+                job_prep_soils = q.enqueue_call(_prep_soils_rq, (runid,), timeout='1h')
+                job.meta['jobs:0,func:_prep_soils_rq'] = job_prep_soils.id
+                jobs0_hillslopes_prep.append(job_prep_soils)
                 job.save()
 
             _job = q.enqueue_call(_prep_climates_rq, (runid,), timeout='1h')
@@ -202,14 +202,13 @@ def run_wepp_rq(runid):
             jobs0_hillslopes_prep.append(_job)
             job.save()
 
-            _job = q.enqueue_call(_prep_remaining_rq, (runid,), timeout='1h')
-            job.meta['jobs:0,func:_prep_remaining_rq'] = _job.id
-            jobs0_hillslopes_prep.append(_job)
+            job_prep_remaining = q.enqueue_call(_prep_remaining_rq, (runid,), timeout='1h', depends_on=job_prep_soils)
+            job.meta['jobs:0,func:_prep_remaining_rq'] = job_prep_remaining.id
             job.save()
 
             # jobs:1
 
-            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=TIMEOUT, depends_on=jobs0_hillslopes_prep)]
+            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)]
             job.meta['jobs:1,func:run_hillslopes_rq'] = jobs1_hillslopes[-1].id
             job.save()
 
@@ -718,7 +717,7 @@ def _log_complete_rq(runid):
 
         try:
             prep = RedisPrep.getInstance(wd)
-            prep.timestamp('run_wepp')
+            prep.timestamp(TaskEnum.run_wepp)
         except FileNotFoundError:
             pass
 
@@ -740,7 +739,7 @@ def _log_complete_rq(runid):
             send_discord_message(f':fireworks: [{link}](https://wepp.cloud/weppcloud/runs/{runid}/{config}/)')
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER  Wepp WEPP_RUN_TASK_COMPLETED')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   wepp WEPP_RUN_TASK_COMPLETED')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
