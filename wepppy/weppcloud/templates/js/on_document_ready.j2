@@ -966,7 +966,7 @@ function onReady() {
 
     {% if 'ash' in ron.mods %}
         ash.set_rq_job_id(ash, {{ rq_job_ids.get("run_ash_rq") | tojson }});
-        
+
         $("[name='ash_depth_mode']").change(function () {
             ash.setAshDepthMode();
         });
@@ -1085,7 +1085,7 @@ $(window).on('load', function() {
     $(window).on('resize', window_resize);
     setTimeout(function(){
         window_resize();
-    }, 2000);
+    }, 100);
 
     initPreflight("{{run_id}}");
 });
