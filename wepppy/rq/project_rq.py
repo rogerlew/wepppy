@@ -21,12 +21,17 @@ from wepppy.nodb import (
     Wepp, Watershed, 
     Climate, ClimateMode, ClimateSpatialMode,
     WeppPost, Landuse, LanduseMode, 
-    Soils, SoilsMode
+    Soils, SoilsMode, Ash, DebrisFlow,
+    Rhem, RAP_TS
 )
-from wepppy.nodb.redis_prep import RedisPrep
 
+from wepppy.topo.topaz import (
+    WatershedBoundaryTouchesEdgeError,
+    MinimumChannelLengthTooShortError
+)
+
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
-
 from .wepp_rq import run_wepp_rq
 
 _hostname = socket.gethostname()
@@ -35,24 +40,6 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
 DEFAULT_ZOOM = 12
-
-project_def = {
-    "config": "wepp",
-    "name": "test",
-    "scenario": "test",
-    "map": {
-        "extent": [-122.7, 45.5, -122.4, 45.7],
-        "center": [-122.55, 45.6],
-        "zoom": 12
-    },
-    "watershed": {
-        "outlet": [-122.5, 45.6]
-    },
-    "disturbed": {
-        "sbs_map": "sbs_map.tif"
-    }
-
-}
 
 def new_project_rq(runid: str, project_def: dict):
     """
@@ -160,6 +147,7 @@ def new_project_rq(runid: str, project_def: dict):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+
 def init_sbs_map_rq(runid: str, sbs_map: str):
     try:
         job = get_current_job()
@@ -171,6 +159,8 @@ def init_sbs_map_rq(runid: str, sbs_map: str):
         ron = Ron.getInstance(wd)
         ron.init_sbs_map(sbs_map, ron.disturbed)
         
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.init_sbs_map)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -182,7 +172,7 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:watershed'
+        status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         
         if center is None:
@@ -195,38 +185,88 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
         ron.set_map(extent, center, zoom)
         ron.fetch_dem()
         
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.fetch_dem)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-
-def build_channels_rq(runid: str, outlet_lng: float, outlet_lat: float):
+def build_channels_rq(runid: str, csa: float, mcl: float):
     try:
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:watershed'
+        status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         watershed = Watershed.getInstance(wd)
-        watershed.set_outlet(outlet_lng, outlet_lat)
-        watershed.build_channels()
+        watershed.build_channels(csa, mcl)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   channel_delineation BUILD_CHANNELS_TASK_COMPLETED')
+        
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_channels)
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl):
+    try:
+        job = get_current_job()
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:channel_delineation'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            
+            ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom))
+            job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
+            job.save()
+
+            bjob = q.enqueue_call(build_channels_rq, (runid, csa, mcl),  depends_on=ajob)
+            job.meta['jobs:1,func:build_channels_rq'] = bjob.id
+            job.save()
+        
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+
+def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:outlet'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        watershed = Watershed.getInstance(wd)
+        watershed.set_outlet(outlet_lng, outlet_lat)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   outlet SET_OUTLET_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.set_outlet)
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
 
 def build_subcatchments_rq(runid: str):
     try:
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:watershed'
+        status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         watershed = Watershed.getInstance(wd)
         watershed.build_subcatchments()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_subcatchments)
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
@@ -237,10 +277,38 @@ def abstract_watershed_rq(runid: str):
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:watershed'
+        status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         watershed = Watershed.getInstance(wd)
         watershed.abstract_watershed()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation WATERSHED_ABSTRACTION_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.abstract_watershed)
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def build_subcatchments_and_abstract_watershed_rq(runid: str):
+    try:
+        job = get_current_job()
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:subcatchment_delineation'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            
+            ajob = q.enqueue_call(build_subcatchments_rq, (runid,))
+            job.meta['jobs:0,func:build_subcatchments_rq'] = ajob.id
+            job.save()
+
+            bjob = q.enqueue_call(abstract_watershed_rq, (runid,),  depends_on=ajob)
+            job.meta['jobs:1,func:abstract_watershed_rq'] = bjob.id
+            job.save()
+        
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
@@ -257,6 +325,10 @@ def build_landuse_rq(runid: str):
         landuse = Landuse.getInstance(wd)
         landuse.build()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   landuse LANDUSE_BUILD_TASK_COMPLETED')
+        
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_landuse)
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
@@ -267,11 +339,15 @@ def build_soils_rq(runid: str):
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:climate'
+        status_channel = f'{runid}:soils'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         soils = Soils.getInstance(wd)
         soils.build()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   soils SOILS_BUILD_TASK_COMPLETED')
+        
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_soils)
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
@@ -287,6 +363,104 @@ def build_climate_rq(runid: str):
         climate = Climate.getInstance(wd)
         climate.build()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   climate CLIMATE_BUILD_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.build_climate)
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def run_ash_rq(runid: str, fire_date: str, ini_white_ash_depth_mm: float, ini_black_ash_depth_mm: float):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:ash'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        ash = Ash.getInstance(wd)
+        ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm)
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   ash ASH_RUN_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.run_ash)
+
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def run_debris_flow_rq(runid: str):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:debris_flow'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        debris = DebrisFlow.getInstance(wd)
+        debris.run_debris_flow()
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   debris_flow DEBRIS_FLOW_RUN_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.run_ash)
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def run_rhem_rq(runid: str):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:rhem'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        rhem = Rhem.getInstance(wd)
+        rhem.clean()
+        rhem.prep_hillslopes()
+        rhem.run_hillslopes()
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   rhem RHEM_RUN_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.run_rhem)
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+def fetch_and_analyze_rap_ts_rq(runid: str):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:rhem'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        climate = Climate.getInstance(wd)
+        assert climate.observed_start_year is not None
+        assert climate.observed_end_year is not None
+
+        rap_ts = RAP_TS.getInstance(wd)
+        rap_ts.acquire_rasters(start_year=climate.observed_start_year,
+                               end_year=climate.observed_end_year)
+        rap_ts.analyze()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   rap_ts RAP_TS_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.run_rhem)
+
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
