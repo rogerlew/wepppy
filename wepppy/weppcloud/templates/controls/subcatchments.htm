@@ -110,6 +110,7 @@
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
         <button id="btn_build_subcatchments"
+            onclick="debounceButton('btn_build_subcatchments', 'build_subcatchments_lock', () => SubcatchmentDelineation.getInstance().build())()"
             class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
             type="button">
             <img id="build_subcatchments_lock" style="display:none;"

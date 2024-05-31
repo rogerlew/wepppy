@@ -2,15 +2,18 @@
 {% block form_id %}debris_flow_form{% endblock %}
 {% block form_title %}Debris Flow Analysis{% endblock %}
 {% block inputs %}
-    <div>This uses the 2010 model described by Cannon et al. Results may differ from new models such as Staley (2016, 2017, ...).<br/></div>
-    <div class="form-group row hide-readonly">
-      <div class="col-sm-4">
-        <button class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-                type="button"
-                onclick="DebrisFlow.getInstance().run_model();">Run Model</button>
-      </div>
-      <div class="col-sm-5">
-        <small id="hint_run_wepp"></small>
-      </div>
-    </div>
+<div>This uses the 2010 model described by Cannon et al. Results may differ from new models such as Staley (2016, 2017,
+  ...).<br /></div>
+<div class="form-group row hide-readonly">
+  <div class="col-sm-4">
+    <button 
+      onclick="debounceButton('btn_build_subcatchments', 'build_subcatchments_lock', ()=>DebrisFlow.getInstance().run_model())()"
+      class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+      Run Model
+    </button>
+  </div>
+  <div class="col-sm-5">
+    <small id="hint_run_wepp"></small>
+  </div>
+</div>
 {% endblock %}
