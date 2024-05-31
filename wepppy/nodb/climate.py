@@ -388,7 +388,7 @@ def cli_revision(cli: ClimateFile, ws_ppts: np.array, ws_tmaxs: np.array, ws_tmi
                           ws_ppts, ws_tmaxs, ws_tmins,
                           hill_ppts, hill_tmaxs, hill_tmins)
         assert _exists(new_cli_path), 'wepppyo3.climate.cli_revision failed'
-        return
+        return new_cli_path
 
 
     cli2 = deepcopy(cli)
@@ -1612,7 +1612,7 @@ class Climate(NoDbBase, LogMixin):
             jobs = []
 
             def callback(res):
-                self.log('job completed.')
+                self.log(f'_prism_revision() -> {res}')
                 self.log_done()
 
             # build a climate for each subcatchment
