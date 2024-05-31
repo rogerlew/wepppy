@@ -7,6 +7,7 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 import inspect
+import time
 
 from functools import wraps
 from subprocess import Popen, PIPE, call
@@ -277,6 +278,7 @@ def build_subcatchments_rq(runid: str):
 
 def abstract_watershed_rq(runid: str):
     try:
+        time.sleep(0.05)  # race condition where SUBWTA.ARC is not yet written
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
