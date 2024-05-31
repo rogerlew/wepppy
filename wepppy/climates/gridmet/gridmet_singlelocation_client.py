@@ -75,7 +75,10 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
     response = requests.get(url, headers=headers)
 
-    response_data = response.json()
+    try:
+        response_data = response.json()
+    except:
+        raise Exception(response.text)
 
     data = response_data['data'][0]
 
