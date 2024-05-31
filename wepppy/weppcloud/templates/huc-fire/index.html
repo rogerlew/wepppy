@@ -27,13 +27,35 @@
 <div id="map"></div>
 
 <script>
-    const map = L.map('map');
+    
+    var map = L.map('map');
+
+    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"]
+    });
+
+    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"]
+    });
+
+    var baseMaps = {
+      "Satellite": googleSat,
+      "Terrain": googleTerrain
+    };
+
+    var overlayMaps = {};
+
     var geojsonLayer;
 
-    L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png', {
-        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 18
-    }).addTo(map);
+    googleSat.addTo(map);
+    googleTerrain.addTo(map);
+
+    var ctrls = L.control.layers(baseMaps, overlayMaps);
+    ctrls.addTo(map);
+
+
 
 function uploadFile() {
     let formData = new FormData();
