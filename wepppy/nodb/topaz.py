@@ -183,7 +183,10 @@ class Topaz(NoDbBase):
             self.mcl = mcl    
 
             data, transform, proj = read_arc(self.netful_arc)
-            n, m = data.shape_load_channel_mask
+            n, m = data.shape
+            self.num_cols = n
+            self.num_rows = m
+            self.cellsize = top_runner.cellsize
             
             xmin = transform[0]
             ymin = transform[3] + transform[5] * m
