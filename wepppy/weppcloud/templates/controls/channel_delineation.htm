@@ -67,6 +67,7 @@
     <div class="form-group row hide-readonly">
         <div class="col-sm-4">
             <button id="btn_build_channels_en" 
+                onclick="debounceButton('btn_build_channels_en', 'build_channels_en_lock')()"
                 class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
               <img  id="build_channels_en_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
               Build Channels

@@ -24,6 +24,28 @@ function window_resize() {
 };
 
 
+function debounceButton(buttonId, lockImageId, onclickCall) {
+    const button = document.getElementById(buttonId);
+    const lockImage = document.getElementById(lockImageId);
+
+    return function() {
+        // Disable the button and show the lock image
+        button.disabled = true;
+        lockImage.style.display = 'inline';
+
+        // Run the original function if provided
+        if (onclickCall && typeof onclickCall === 'function') {
+            onclickCall();
+        }
+
+        // Re-enable the button and hide the lock image after 5 seconds
+        setTimeout(() => {
+            button.disabled = false;
+            lockImage.style.display = 'none';
+        }, 5000);
+    };
+}
+
 function upload_cover_transform() {
     var fileInput = document.getElementById('input_upload_cover_transform');
     var file = fileInput.files[0]; // Get the file from the input
@@ -100,6 +122,14 @@ function onReady() {
 
     // kick off websocket clients if the nodb is locked. Likely building or running is in progress
 
+    if ({{ (watershed.islocked()) | tojson }}) {
+        sub_ctrl.ws_client.connect();
+    }
+    
+    if ({{ (landuse.islocked()) | tojson }}) {
+        landuse.ws_client.connect();
+    }
+
     if ({{ (soils.islocked()) | tojson }}) {
         soil.ws_client.connect();
     }
@@ -122,6 +152,10 @@ function onReady() {
 
     try {
         ash.hideStacktrace();
+    } catch (e) { }
+
+    try {
+        rap_ts.hideStacktrace();
     } catch (e) { }
 
 
@@ -489,9 +523,6 @@ function onReady() {
         }
     });
 
-    $("#btn_build_subcatchments").click(sub_ctrl.build);
-    $("#btn_build_subcatchments_en").click(sub_ctrl.build);
-
     // Bind radio to change subcatchment appearance
     // radios live in the map.htm template
     $("[name='sub_cmap_radio']").change(function () {
@@ -709,8 +740,6 @@ function onReady() {
         landuse.setMode();
     });
 
-    $("#btn_build_landuse").click(landuse.build);
-
     //
     // Landuse Event Bindings
     //
@@ -774,8 +803,6 @@ function onReady() {
         soil.setMode();
     });
 
-    $("#btn_build_soil").click(soil.build);
-
     //
     // Subcatchment Event Bindings
     //
@@ -830,8 +857,6 @@ function onReady() {
     $("#climate_station_selection").on("change", function () {
         climate.setStation();
     });
-
-    $("#btn_build_climate").click(climate.build);
 
     //
     // Climate Event Bindings
