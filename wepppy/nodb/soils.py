@@ -636,10 +636,10 @@ class Soils(NoDbBase, LogMixin):
                 self.build_isric(initial_sat=initial_sat, ksflag=ksflag)
             elif 'eu' in self.locales:
                 from wepppy.eu.soils import build_esdac_soils
-                self._build_by_identify(build_esdac_soils, status_channel)
+                self._build_by_identify(build_esdac_soils, self._status_channel)
             elif 'au' in self.locales:
                 from wepppy.au.soils import build_asris_soils
-                self._build_by_identify(build_asris_soils, status_channel)
+                self._build_by_identify(build_asris_soils, self._status_channel)
             else:
                 self._build_gridded(initial_sat=initial_sat, ksflag=ksflag)
         elif self.mode == SoilsMode.Single:
