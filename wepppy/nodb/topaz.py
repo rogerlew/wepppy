@@ -183,11 +183,7 @@ class Topaz(NoDbBase):
             self.mcl = mcl    
 
             data, transform, proj = read_arc(self.netful_arc)
-            n, m = data.shape
-
-            self.num_cols = n
-            self.num_rows = m
-            self.cellsize = top_runner.cellsize
+            n, m = data.shape_load_channel_maskslsize = top_runner.cellsize
             
             xmin = transform[0]
             ymin = transform[3] + transform[5] * m
@@ -230,7 +226,7 @@ class Topaz(NoDbBase):
             if da>0:
                 (x, y), distance = top_runner.find_closest_da_match(lng, lat, da, pixelcoords=pixelcoords)
             else:
-                (x, y), distance = top_runner.find_closest_channel(lng, lat, pixelcoords=pixelcoords)
+                (x, y), distance = top_runner.find_closest_channel2(lng, lat, pixelcoords=pixelcoords)
             
             _lng, _lat = top_runner.pixel_to_lnglat(x, y)
 

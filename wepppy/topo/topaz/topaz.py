@@ -8,8 +8,8 @@
 
 import math
 import os
-from os.path import exists as _exists
 import json
+from os.path import exists as _exists
 from os.path import exists
 from os.path import join as _join
 import sys
@@ -18,6 +18,7 @@ import time
 from glob import glob
 import shutil
 import warnings
+from collections import deque
 
 from imageio import imread
 
@@ -522,6 +523,50 @@ class TopazRunner:
 
         return (_x, _y), distance
 
+    def find_closest_channel2(self, lng, lat, pixelcoords=False):
+        """
+        Find the closest channel given a lng and lat or pixel coords (pixelcoords=True).
+
+        Returns (x, y), distance
+        where (x, y) are pixel coords and distance is the distance from the
+        specified lng, lat in pixels.
+        """
+
+        # Unpack variables for instance
+        if self.junction_mask is None:
+            self._load_channel_masks()
+
+        # Transpose the mask for the algorithm
+        mask = self.junction_mask.T
+        num_cols, num_rows = self.num_cols, self.num_rows
+
+        if pixelcoords:
+            x, y = lng, lat
+        else:
+            x, y = self.lnglat_to_pixel(lng, lat)
+
+        # Early return if the starting pixel is already a channel
+        if mask[y, x] == 2:
+            return (x, y), 0
+
+        # Spiral out from the starting point
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        queue = deque([(x, y, 0)])
+        visited = set((x, y))
+
+        while queue:
+            cx, cy, dist = queue.popleft()
+
+            for dx, dy in directions:
+                nx, ny = cx + dx, cy + dy
+
+                if 0 <= nx < num_cols and 0 <= ny < num_rows and (nx, ny) not in visited:
+                    if mask[ny, nx] == 2:
+                        return (nx, ny), math.sqrt((nx - x) ** 2 + (ny - y) ** 2)
+                    visited.add((nx, ny))
+                    queue.append((nx, ny, dist + 1))
+
+        return None, math.inf
 
     def find_closest_channel(self, lng, lat, pixelcoords=False):
         """
