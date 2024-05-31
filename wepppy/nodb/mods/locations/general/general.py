@@ -14,6 +14,8 @@ from os.path import exists as _exists
 import jsonpickle
 from copy import deepcopy
 
+from deprecated import deprecated
+
 from ....base import NoDbBase, TriggerEvents
 from ....soils import Soils
 from ....watershed import Watershed
@@ -26,10 +28,11 @@ _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
 
+@deprecated
 class GeneralModNoDbLockedException(Exception):
     pass
 
-
+@deprecated
 class GeneralMod(NoDbBase, LocationMixin):
     __name__ = 'General'
 
