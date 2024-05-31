@@ -183,6 +183,12 @@ class Watershed(NoDbBase, LogMixin):
 
         return db
 
+    @staticmethod
+    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
+        from wepppy.weppcloud.utils.helpers import get_wd
+        return Watershed.getInstance(
+            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
+
     @property
     def _status_channel(self):
         return f'{self.runid}:watershed'
