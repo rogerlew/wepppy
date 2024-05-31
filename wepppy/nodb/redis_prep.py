@@ -52,10 +52,16 @@ class RedisPrep:
             self._set_bool_config('loaded', True)
 
     @staticmethod
-    def getInstance(wd):
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
         instance = RedisPrep(wd)
         instance.lazy_load()
         return instance
+
+    @staticmethod
+    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
+        from wepppy.weppcloud.utils.helpers import get_wd
+        return RedisPrep.getInstance(
+            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
 
     @property
     def dump_filepath(self):

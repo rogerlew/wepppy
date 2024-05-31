@@ -67,7 +67,7 @@ class Rred(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd):
+    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
         with open(_join(wd, 'rred.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Rred), db
@@ -82,6 +82,12 @@ class Rred(NoDbBase):
                 db.dump_and_unlock()
 
             return db
+
+    @staticmethod
+    def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
+        from wepppy.weppcloud.utils.helpers import get_wd
+        return Rred.getInstance(
+            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
 
     @property
     def _nodb(self):
