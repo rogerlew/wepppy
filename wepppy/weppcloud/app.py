@@ -1034,6 +1034,9 @@ def seattle_static(file):
     
 
 @app.route('/create')
+def create_redirect():
+    return redirect(url_for('create_index'))
+
 @app.route('/create/')
 def create_index():
     configs = get_configs()
