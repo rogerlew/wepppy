@@ -157,7 +157,7 @@ def fetch_isric_soil_layers(wgs_bbox, soils_dir='./'):
             tasks.append(task)
 
     # Execute tasks in parallel
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=16) as executor:
         futures = [executor.submit(fetch_layer, *task) for task in tasks]
         futures.append(executor.submit(fetch_isric_wrb, wgs_bbox, soils_dir))
         for future in futures:
