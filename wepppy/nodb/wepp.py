@@ -2207,7 +2207,14 @@ class Wepp(NoDbBase, LogMixin):
     def make_loss_grid(self):
         watershed = Watershed.getInstance(self.wd)
         loss_grid_path = _join(self.plot_dir, 'loss.tif')
+        print(watershed.subwta, watershed.discha, self.output_dir, loss_grid_path)
+
+        assert _exists(watershed.subwta), f"{watershed.subwta} does not exist"
+        assert _exists(watershed.discha), f"{watershed.discha} does not exist"
+        assert len(glob(_join(self.output_dir, 'H*'))) > 0, f"{self.output_dir} does not contain outputs"
+
         make_soil_loss_grid(watershed.subwta, watershed.discha, self.output_dir, loss_grid_path)
+        
         assert _exists(loss_grid_path)
 
         loss_grid_wgs = _join(self.plot_dir, 'loss.WGS.tif')
