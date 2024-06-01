@@ -67,15 +67,6 @@ function updateLock(btn_id, lock_id, lock_status) {
     }
 }
 
-function updateLocks(lock_statuses) {
-    
-    updateLock("btn_build_landuse", "build_landuse_lock", lock_statuses.landuse);
-    updateLock("btn_build_soil", "build_soil_lock", lock_statuses.soils);
-    updateLock("btn_build_channels_en", "build_channels_en_lock", lock_statuses.watershed);
-    updateLock("btn_build_subcatchments", "build_subcatchments_lock", lock_statuses.watershed);
-    updateLock("btn_build_climate", "build_climate_lock", lock_statuses.climate);
-    updateLock("btn_run_wepp", "run_wepp_lock", lock_statuses.wepp);
-}
 
 function updateUI(checklist) {
     for (var key in checklist) {

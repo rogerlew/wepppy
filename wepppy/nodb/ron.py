@@ -505,7 +505,6 @@ class Ron(NoDbBase):
         return Ron.getInstance(
             get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
 
-
     @property
     def _nodb(self):
         return _join(self.wd, 'ron.nodb')
