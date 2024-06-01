@@ -124,8 +124,8 @@ class Watershed(NoDbBase, LogMixin):
                 if not _exists(taudem_wd):
                     os.mkdir(taudem_wd)
 
-                self._csa = self.config_get_float('watershed', 'csa')
-                self._pkcsa = self.config_get_str('watershed', 'pkcsa')
+                self._csa = self.config_get_float('taudem', 'csa')
+                self._pkcsa = self.config_get_str('taudem', 'pkcsa')
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
