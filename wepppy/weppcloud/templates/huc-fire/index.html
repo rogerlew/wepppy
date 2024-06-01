@@ -27,33 +27,33 @@
 <div id="map"></div>
 
 <script>
-    
-    var map = L.map('map');
 
-    var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
-      maxZoom: 20,
-      subdomains: ["mt0", "mt1", "mt2", "mt3"]
-    });
+var map = L.map('map');
 
-    var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
-      maxZoom: 20,
-      subdomains: ["mt0", "mt1", "mt2", "mt3"]
-    });
+var googleTerrain = L.tileLayer("https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}", {
+    maxZoom: 20,
+    subdomains: ["mt0", "mt1", "mt2", "mt3"]
+});
 
-    var baseMaps = {
-      "Satellite": googleSat,
-      "Terrain": googleTerrain
-    };
+var googleSat = L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+    maxZoom: 20,
+    subdomains: ["mt0", "mt1", "mt2", "mt3"]
+});
 
-    var overlayMaps = {};
+var baseMaps = {
+    "Satellite": googleSat,
+    "Terrain": googleTerrain
+};
 
-    var geojsonLayer;
+var overlayMaps = {};
 
-    googleSat.addTo(map);
-    googleTerrain.addTo(map);
+var geojsonLayer;
 
-    var ctrls = L.control.layers(baseMaps, overlayMaps);
-    ctrls.addTo(map);
+googleSat.addTo(map);
+googleTerrain.addTo(map);
+
+var ctrls = L.control.layers(baseMaps, overlayMaps);
+ctrls.addTo(map);
 
 
 
