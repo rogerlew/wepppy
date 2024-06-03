@@ -52,7 +52,7 @@ var mySpreadsheet = jspreadsheet(document.getElementById('spreadsheet1'), {
 document.getElementById('save').onclick = function () {
     var data = mySpreadsheet.getData();
     $.post({
-                url: "../tasks/modify_disturbed/",
+                url: "tasks/modify_disturbed/",
                 data: JSON.stringify(data), 
                 contentType: "application/text",
                 dataType: "json",
