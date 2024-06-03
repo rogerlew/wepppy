@@ -177,9 +177,9 @@ def run_wepp_rq(runid):
             jobs0_hillslopes_prep = []
 
             if wepp.multi_ofe:
-                _job = q.enqueue_call(_prep_multi_ofe_rq, (runid,), timeout='1h')
-                job.meta['jobs:0,func:_prep_multi_ofe_rq'] = _job.id
-                jobs0_hillslopes_prep.append(_job)
+                job_prep_soils = q.enqueue_call(_prep_multi_ofe_rq, (runid,), timeout='1h')
+                job.meta['jobs:0,func:_prep_multi_ofe_rq'] = job_prep_soils.id
+                jobs0_hillslopes_prep.append(job_prep_soils)
                 job.save()
             else:
                 _job = q.enqueue_call(_prep_slopes_rq, (runid,), timeout='1h')
