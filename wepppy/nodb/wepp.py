@@ -1073,7 +1073,11 @@ class Wepp(NoDbBase, LogMixin):
             raise
 
     def _prep_baseflow(self):
-        baseflow_opts = self.baseflow_opts
+        climate = Climate.getInstance(self.wd)
+        if climate.is_single_storm:
+            baseflow_opts = BaseflowOpts(gwstorage=0.0, bfcoeff=0.0)
+        else:
+            baseflow_opts = self.baseflow_opts
 
         fn = _join(self.runs_dir, 'gwcoeff.txt')
         with open(fn, 'w') as fp:
