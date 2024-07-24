@@ -692,7 +692,19 @@ class ClimateFile(object):
         df = self.as_dataframe()
         years = [int(v) for v in sorted(set(df['year']))]
         return years
+    
+    @property
+    def is_observed(self):
+        years = self.years
+        y0 = min(years)
+        return y0 > 1900
 
+    @property
+    def is_future(self):
+        years = self.years
+        yend= max(years)
+        return yend > datetime.datetime.now().year
+    
     @property
     def input_years(self):
         df = self.as_dataframe()
@@ -1038,7 +1050,7 @@ class StationMeta:
         self.lat_distance = None
         self.rank = None
 
-        self.id = par.replace('.par', '')
+        self.id = par.replace('.par', '').replace('.PAR', '')
         #assert len(self.id) == 6
 
         self.desc = desc.split(str(self.id))[0].strip()
@@ -1094,12 +1106,53 @@ class StationMeta:
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.__dict__)
 
+    def build_ghcn_daily_climate(self, prn_fn, cli_fn):
+        from wepppy.climates.cligen.ghcn_daily import find_ghcn_id, acquire_ghcn_daily_data
+
+        try:
+            ghcn_id = find_ghcn_id(self)
+        except ValueError:
+            return None
+        
+        df = acquire_ghcn_daily_data(ghcn_id)
+
+        if df is None:
+            return None
+
+        df_to_prn(df, prn_fn, 'PRCP (mm)', 'TMAX (C)', 'TMIN (C)')
+
+        shutil.copyfile(self.parpath, self.par)
+
+        if _exists(cli_fn):
+            os.remove(cli_fn)
+
+        cmd = [_join(_bin_dir, ('cligen532', 'cligen532.exe')[IS_WINDOWS]),
+            f"-i{self.par}",
+            f"-O{prn_fn}",
+            f"-o{cli_fn}",
+            "-t6", "-I2"]
+        
+        print(cmd)
+        
+        # run cligen
+        _log = open("cligen.log", "w")
+        p = Popen(cmd, stdin=PIPE, stdout=_log, stderr=_log)
+        p.wait()
+        _log.close()
+
+        return _exists(cli_fn)
+
+
 
 class CligenStationsManager:
     def __init__(self, version=None):
 
         # connect to sqlite3 db
         global _db, _stations_dir
+
+        if 'legacy' in str(version):
+            _db = _join(_thisdir, 'stations.db')
+            _stations_dir = _join(_thisdir, 'stations')
 
         if '2015' in str(version):
             _db = _join(_thisdir, '2015_stations.db')
@@ -1113,6 +1166,7 @@ class CligenStationsManager:
             _db = _join(_thisdir, 'ghcn_stations.db')
             _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations', 'all_years')
 
+        print(_db)
         conn = sqlite3.connect(_db)
         c = conn.cursor()
 
