@@ -734,6 +734,35 @@ class ClimateFile(object):
                 fp.write('{0:<8}{1:<6}{2:<6}{3:<6}{4:<7}{5:<7}{6:<7}{7:<7}\n'
                          .format(i+1, da, mo, year, prcp, dur, tp, ip))
 
+    @property
+    def input_years(self):
+        df = self.as_dataframe()
+        years = [int(v) for v in sorted(set(df['year']))]
+        return max(years) -  min(years) + 1
+
+    def make_storm_file(self, dst_fn):
+        header_template = """\
+{num_rain_events} # The number of rain events
+0 # Breakpoint data? (0 for no, 1 for yes)
+#  id     day  month  year  Rain   Dur    Tp     Ip
+#                           (mm)   (h)
+"""
+        y0 = self.years[0]
+
+        storms = []
+        df = self.as_dataframe()
+        for i, row in df.iterrows():
+            if row.prcp > 0:
+                storms.append([int(row.da), int(row.mo), int(row.year), row.prcp, row.dur, row.tp, row.ip])
+
+        with open(dst_fn, 'w') as fp:
+            fp.write(header_template.format(num_rain_events=len(storms)))
+
+            for i, (da, mo, year, prcp, dur, tp, ip) in enumerate(storms):
+                year = year - y0 + 1
+                fp.write('{0:<8}{1:<6}{2:<6}{3:<6}{4:<7}{5:<7}{6:<7}{7:<7}\n'
+                         .format(i+1, da, mo, year, prcp, dur, tp, ip))
+
     def as_dataframe(self, calc_peak_intensities=False):
         intensities_csv_fn = self.cli_fn[:-4] + '.intensities.csv'
         if _exists(intensities_csv_fn):
@@ -1051,7 +1080,6 @@ class StationMeta:
         self.rank = None
 
         self.id = par.replace('.par', '').replace('.PAR', '')
-        #assert len(self.id) == 6
 
         self.desc = desc.split(str(self.id))[0].strip()
 
@@ -1166,7 +1194,6 @@ class CligenStationsManager:
             _db = _join(_thisdir, 'ghcn_stations.db')
             _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations', 'all_years')
 
-        print(_db)
         conn = sqlite3.connect(_db)
         c = conn.cursor()
 

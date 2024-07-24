@@ -1421,7 +1421,6 @@ class Climate(NoDbBase, LogMixin):
             # build a climate for the channels.
             lng, lat = watershed.centroid
 
-
             self.par_fn = '.par'
             self.cli_fn = cli_fn = f'{lng:.02f}x{lat:.02f}.cli'
             url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}'
