@@ -205,6 +205,22 @@ class TopazRunner:
         # if the channel dataset is found, load the channel and junction masks
         self.junction_mask = None
 
+    @property
+    def dednm_path(self):
+        return os.path.abspath(_join(topaz_bin, 'dednm'))
+    
+    @property
+    def rasbin_path(self):
+        return os.path.abspath(_join(topaz_bin, 'rasbin'))
+    
+    @property
+    def raspro_path(self):
+        return os.path.abspath(_join(topaz_bin, 'raspro'))
+    
+    @property
+    def rasfor_path(self):
+        return os.path.abspath(_join(topaz_bin, 'rasfor'))
+
     def _clean_dir(self, empty_only=False):
         """
         Remove topaz related files from the working directory
@@ -231,11 +247,6 @@ class TopazRunner:
             # _cp_chmod(_join(topaz_bin, 'rasbin'), _join(wd, 'rasbin'), 0o755)
             _cp_chmod(_join(topaz_bin, 'raspro.exe'), _join(wd, 'raspro.exe'), 0o755)
             _cp_chmod(_join(topaz_bin, 'rasfor.exe'), _join(wd, 'rasfor.exe'), 0o755)
-        else:
-            _cp_chmod(_join(topaz_bin, 'dednm'), _join(wd, 'dednm'), 0o755)
-            # _cp_chmod(_join(topaz_bin, 'rasbin'), _join(wd, 'rasbin'), 0o755)
-            _cp_chmod(_join(topaz_bin, 'raspro'), _join(wd, 'raspro'), 0o755)
-            _cp_chmod(_join(topaz_bin, 'rasfor'), _join(wd, 'rasfor'), 0o755)
 
         shutil.copyfile(_join(topaz_templates, 'RASFOR.INP'), _join(wd, 'RASFOR.INP'))
         shutil.copyfile(_join(topaz_templates, 'RASPRO.INP'), _join(wd, 'RASPRO.INP'))
@@ -913,7 +924,7 @@ class TopazRunner:
         if IS_WINDOWS:
             output = self._run_subprocess(_join(topaz_wd, 'dednm.exe'), (None, '1')[_pass == 2], verbose)
         else:
-            output = self._run_subprocess('./dednm', (None, '1')[_pass == 2], verbose)
+            output = self._run_subprocess(self.dednm_path, (None, '1')[_pass == 2], verbose)
 
         with open(_join(topaz_wd, 'dednm.log'), 'w') as fp:
             fp.write('\n'.join(output))
@@ -967,7 +978,7 @@ class TopazRunner:
         if IS_WINDOWS:
             output = self._run_subprocess(_join(topaz_wd, 'rasfor.exe'), None, verbose)
         else:
-            output = self._run_subprocess('./rasfor', None, verbose)
+            output = self._run_subprocess(self.rasfor_path, None, verbose)
 
         with open(_join(self.topaz_wd, 'rasfor.log'), 'w') as fp:
             fp.write('\n'.join(output))
@@ -990,7 +1001,7 @@ class TopazRunner:
         if IS_WINDOWS:
             output = self._run_subprocess(_join(topaz_wd, 'rasbin.exe'), None, verbose)
         else:
-            output = self._run_subprocess('./rasbin', None, verbose)
+            output = self._run_subprocess(self.rasbin_path, None, verbose)
 
         with open(_join(self.topaz_wd, 'rasbin.log'), 'w') as fp:
             fp.write('\n'.join(output))
@@ -1010,7 +1021,7 @@ class TopazRunner:
         if IS_WINDOWS:
             output = self._run_subprocess(_join(topaz_wd, 'raspro.exe'), None, verbose)
         else:
-            output = self._run_subprocess('./raspro', None, verbose)
+            output = self._run_subprocess(self.raspro_path, None, verbose)
 
         with open(_join(self.topaz_wd, 'raspro.log'), 'w') as fp:
             fp.write('\n'.join(output))
