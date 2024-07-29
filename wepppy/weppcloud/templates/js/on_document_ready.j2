@@ -470,7 +470,7 @@ function onReady() {
         var lng = parseFloat(loc[0]);
         var lat = parseFloat(loc[1]);
         var ev = { latlng: L.latLng(lat, lng) };
-        outlet.put(ev);
+        outlet.set_outlet(ev);
     });
 
     // Bind radio to the set outlet mode on change
