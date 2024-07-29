@@ -198,7 +198,7 @@ $(document).ready(function () {
             cmap = function (v) {
                 return cmapperRunoff.map(v / r);
             };
-            vmin = -tolerance;
+            vmin = 0.0;
             vmax = tolerance;
             cmapname = 'winter';
             units = 'mm';
@@ -219,7 +219,7 @@ $(document).ready(function () {
             cmap = function (v) {
                 return cmapperPhosphorus.map(v / r);
             };
-            vmin = -tolerance;
+            vmin = 0.0;
             vmax = tolerance;
             cmapname = 'viridis';
             units = 'kg/ha';
