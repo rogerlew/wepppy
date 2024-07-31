@@ -22,7 +22,7 @@ function delete_run(runid, res) {
   if (res === true)
   {
       $.post({
-          url: runid + "/0/tasks/delete/",
+          url: "/weppcloud/runs/" + runid + "/0/tasks/delete/",
           success: function success(response) {
               console.log("run has been deleted");
               $("#" + runid).hide();
