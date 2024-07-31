@@ -36,6 +36,8 @@ from flask import (
     stream_with_context, url_for
 )
 
+from sqlalchemy import func
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import (
     RegisterForm,
@@ -344,13 +346,15 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
         SQLAlchemyUserDatastore.__init__(self, _db, user_model, role_model)
         self.run_model = run_model
 
-    def create_run(self, runid, config, user: User):
+    def create_run(self, runid, config, user: User, date_created=None):
         if user.is_anonymous:
             owner_id = None
         else:
             owner_id = user.id
 
-        date_created = datetime.now()
+        if date_created is None:
+            date_created = datetime.now()
+
         run = self.run_model(runid=runid, config=config,
                              owner_id=owner_id, date_created=date_created)
         run0 = self.put(run)
@@ -558,7 +562,7 @@ def task_usermod():
         if user_id is not None:
             user = User.query.filter(User.id == user_id).first()
         else:
-            user = User.query.filter(User.email == user_email).first()
+            user = User.query.filter(func.lower(User.email) == user_email.lower()).first()
 
         if user is None:
             return error_factory("user not found")
@@ -1125,8 +1129,8 @@ def view_access_log(runid, config):
     return f'<html><pre>{contents}</pre></html>'
 
 
-@app.route('/runs/<string:runid>/<config>/fork-console')
-@app.route('/runs/<string:runid>/<config>/fork-console/')
+@app.route('/runs/<string:runid>/<config>/fork-console', strict_slashes=False)
+@app.route('/runs/<string:runid>/<config>/fork-console/', strict_slashes=False)
 def fork_console(runid, config):
     undisturbify = ('false', 'true')[bool(request.args.get('undisturbify', False))]
 
@@ -1265,11 +1269,17 @@ def fork(runid, config):
             if not run_right.endswith('/'):
                 run_right += '/'
 
-            cmd = ['rsync', '-av', '--progress', run_left, run_right]
+            cmd = ['rsync', '-av', '--progress', '.', run_right]
+
+            if undisturbify:
+                cmd.append('--exclude')
+                cmd.append('wepp/runs')
+                cmd.append('--exclude')
+                cmd.append('wepp/output')
 
             yield '\n   cmd: {}\n'.format(' '.join(cmd))
 
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=run_left)
 
             while p.poll() is None:
                 output = p.stdout.readline()
@@ -1346,6 +1356,10 @@ def fork(runid, config):
                 wepp.run_watershed()
                 yield ' done.\n\n'
 
+            if undisturbify:
+                ron = Ron.getInstance(new_wd)
+                ron.scenario = 'Undisturbed'
+
             url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], new_runid, config)
 
             yield '        </pre>\n\nProceed to <a href="{url}">{url}</a>\n'.format(url=url)
@@ -1361,7 +1375,6 @@ def fork(runid, config):
 
 
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')
-@app.route('/runs/<string:runid>/<config>/modify_disturbed/')
 def modify_disturbed(runid, config):
     assert config is not None
 
@@ -1885,23 +1898,27 @@ def task_adduser(runid, config):
     if should_abort:
         return error_factory('Authentication Error')
 
-    email = request.form.get('adduser-email')
-    user = User.query.filter(User.email == email).first()
+    try:
+        email = request.form.get('adduser-email')
+        user = User.query.filter(func.lower(User.email) == email.lower()).first()
 
-    if user is None:
-        return error_factory('{} does not have a WeppCloud account.'
-                             .format(email))
+        if user is None:
+            return error_factory('{} does not have a WeppCloud account.'
+                                 .format(email))
 
-    run = Run.query.filter(Run.runid == runid).first()
-    run = user_datastore.create_run(runid, config, user)
+        run = Run.query.filter(Run.runid == runid).first()
 
-    assert user not in owners
-    assert run is not None
+        if run is None:
+            run = user_datastore.create_run(runid, config, user)
 
-    user_datastore.add_run_to_user(user, run)
+        assert user not in owners
+        assert run is not None
 
-    return success_factory()
+        user_datastore.add_run_to_user(user, run)
 
+        return success_factory()
+    except:
+        return exception_factory()
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/removeuser/', methods=['POST'])
