@@ -48,7 +48,8 @@ def gpkg_export(wd: str):
     lc_hill_fn = _join(wd, 'landuse/landuse.parquet')
     if _exists(lc_hill_fn):
         lc_hill_df = pd.read_parquet(lc_hill_fn)
-        columns_to_drop = ['man_dir', 'area', 'cancov_override', 'inrcov_override', 'rilcov_override']
+        columns_to_drop = ['man_dir', 'area', 'cancov_override', 'inrcov_override', 'rilcov_override', '_map', 'man_fn', 'pct_coverage', 'WeppID']
+        columns_to_drop = [c for c in columns_to_drop if c in lc_hill_df.columns]
         lc_hill_df.drop(columns=columns_to_drop, inplace=True)
         lc_hill_df.rename(columns={'key': 'dom'}, inplace=True)
         lc_hill_df = esri_compatible_colnames(lc_hill_df)
@@ -63,7 +64,8 @@ def gpkg_export(wd: str):
         soils_hill_df = Soils.getInstance(wd).hill_table
 
     if soils_hill_df is not None:
-        columns_to_drop = ['soils_dir', 'area', 'color', 'build_date', 'desc',  'pct_coverage', 'avke', 'bd']
+        columns_to_drop = ['soils_dir', 'area', 'color', 'build_date', 'desc', 'avke', 'bd', 'fname', 'pct_coverage', 'WeppID']
+        columns_to_drop = [c for c in columns_to_drop if c in soils_hill_df.columns]
         soils_hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_gdf = hill_gdf.merge(soils_hill_df, on='TopazID', how='left')
 
@@ -71,10 +73,38 @@ def gpkg_export(wd: str):
     if _exists(hill_loss_fn):
         hill_df = pd.read_parquet(hill_loss_fn)
         # filter single storm
-        columns_to_drop = [c for c in ('Type', 'Hillslopes', 'Length', 'Landuse') if c in hill_df.columns]
+        columns_to_drop = [c for c in ('Type', 'Hillslopes', 'Length', 'Landuse', 'WeppID') if c in hill_df.columns]
+        columns_to_drop.extend([c for c in hill_df.columns if 'Density' in c])
         hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_df = esri_compatible_colnames(hill_df)
         hill_gdf = hill_gdf.merge(hill_df, on='TopazID', how='left')
+        
+    hill_gdf = esri_compatible_colnames(hill_gdf)
+    columns_to_drop = ['topaz_id', 'pct_coverage', 'Hillslope_Area']
+    columns_to_drop = [c for c in columns_to_drop if c in hill_gdf.columns]
+    hill_gdf.drop(columns=columns_to_drop, inplace=True)
+
+    units_d = {'length': 'm',
+               'width': 'm',
+               'area': 'm2',
+               'elevation': 'm',
+               'Runoff': 'mm',
+               'Subrunoff': 'mm',
+               'Baseflow': 'mm',
+               'Runoff_Volume': 'm3',
+               'Subrunoff_Volume': 'm3',
+               'Baseflow_Volume': 'm3',
+               'Soil_Loss': 'kg',
+               'Sediment_Deposition': 'kg',
+               'DepLoss': 'kg',
+               'Sediment_Yield': 'kg',
+               'Solub_React_Phosphorus': 'kg',
+               'Particulate_Phosphorus': 'kg',
+               'Total_Phosphorus': 'kg',
+               }
+    
+    units_d = {k: f'{k}_{v}' for k, v in units_d.items()}
+    hill_gdf.rename(columns=units_d, inplace=True)
 
     hill_gdf = esri_compatible_colnames(hill_gdf)
 #    hill_gdf.to_file(_join(wd, 'export/subcatchments.geojson'), driver='GeoJSON')
@@ -86,20 +116,46 @@ def gpkg_export(wd: str):
     wat_chn_fn = _join(wd, 'watershed/channels.csv')
     wat_chn_df = pd.read_csv(wat_chn_fn)
     wat_chn_df = esri_compatible_colnames(wat_chn_df)
+    columns_to_drop = ['WeppID']
+    columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
+    wat_chn_df.drop(columns=columns_to_drop, inplace=True)
     chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
     if _exists(chn_loss_fn):
         chn_df = pd.read_parquet(chn_loss_fn)
-        columns_to_drop = ['Channels and Impoundments', 'Length', 'Area']
+        columns_to_drop = ['Channels and Impoundments', 'Length', 'Area', 'WeppID']
+        columns_to_drop.extend([c for c in chn_df.columns if 'Density' in c])
+        columns_to_drop = [c for c in columns_to_drop if c in chn_df.columns]
         chn_df.drop(columns=columns_to_drop, inplace=True)
         chn_df = esri_compatible_colnames(chn_df)
         chn_gdf = chn_gdf.merge(chn_df, on='TopazID', how='left')
 
     chn_gdf = esri_compatible_colnames(chn_gdf)
-#    chn_gdf.to_file(_join(wd, 'export/channels.geojson'), driver='GeoJSON')
+    columns_to_drop = ['Type']
+    columns_to_drop = [c for c in columns_to_drop if c in chn_gdf.columns]
+    chn_gdf.drop(columns=columns_to_drop, inplace=True)
+    
+    units_d = {'length': 'm',
+               'width': 'm',
+               'area': 'm2',
+               'elevation': 'm',
+               'Discharge_Volume': 'm3',
+               'Sediment_Yield': 'tonne',
+               'Soil_Loss': 'kg',
+               'Upland_Charge': 'm3',
+               'Subsurface_Flow_Volume': 'm3',
+               'Contributing_Area': 'ha',
+               'Solub_React_Phosphorus': 'kg',
+               'Particulate_Phosphorus': 'kg',
+               'Total_Phosphorus': 'kg',
+               }
+    
+    units_d = {k: f'{k}_{v}' for k, v in units_d.items()}
+    chn_gdf.rename(columns=units_d, inplace=True)
+
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
 if __name__ == '__main__':
-    gpkg_export('/geodata/weppcloud_runs//bacterial-anorexia')
+    gpkg_export('/geodata/weppcloud_runs/bacterial-anorexia')
 
