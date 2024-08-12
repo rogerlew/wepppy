@@ -4,19 +4,19 @@
 <h3>WEPPcloud Return Period Analysis</h3>
 
 <select id="yearSelection" class="form-control" style="width: 200px;" onchange="window.location.href=this.value">
-  <option value="./"
+  <option value="./?extraneous={{ extraneous | tojson }}"
     {{ 'selected' if report.exclude_yr_indxs is none }}>
     All years included
   </option>
-  <option value="./?exclude_yr_indxs=0"
+  <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0"
     {{ 'selected' if report.exclude_yr_indxs == [0] }}>
     Exclude first year
   </option>
-  <option value="./?exclude_yr_indxs=0,1"
+  <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1"
     {{ 'selected' if report.exclude_yr_indxs == [0, 1] }}>
     Exclude first two years
   </option>
-  <option value="./?exclude_yr_indxs=0,1,2,3,4"
+  <option value="./?extraneous={{ extraneous | tojson }}&exclude_yr_indxs=0,1,2,3,4"
     {{ 'selected' if report.exclude_yr_indxs == [0, 1, 2, 3, 4] }}>
     Exclude first five years
   </option>
@@ -52,9 +52,9 @@ based on statistical analysis of historical data and does not imply that such an
     The gray column denotes the recurrence for the parameter.
     The white columns provide corresponding information for each event.
 </div>
-<a href="./?extraneous=false">Hide extraneous parameters in tables.</a>
+<a href="./?extraneous=false&exclude_yr_indxs=0,1">Hide extraneous parameters in tables.</a>
 {% else %}
-<a href="./?extraneous=true">Show extraneous parameters in tables.</a>
+<a href="./?extraneous=true&exclude_yr_indxs=0,1">Show extraneous parameters in tables.</a>
 {% endif %}
 <br/>
 <br/>
