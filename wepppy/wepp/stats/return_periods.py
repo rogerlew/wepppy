@@ -70,7 +70,6 @@ class ReturnPeriods:
             results[colname] = {}
 
             for retperiod, indx in rec.items():
-
                 _row = dict(df2.iloc[indx])
 
                 row = {}
@@ -85,8 +84,10 @@ class ReturnPeriods:
 
                     row[cname] = v
 
-                row['weibull_rank'] = indx + 1
                 row['Runoff'] = round(row['Runoff'] / (wsarea * 10000.0) * 1000.0, 2)
+                row['weibull_rank'] = indx + 1
+                row['Sediment Yield'] /= 1000.0
+
                 results[colname][retperiod] = row
 
         self.return_periods = results
