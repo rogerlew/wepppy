@@ -79,7 +79,7 @@
     </tbody>
 </table>
 
-<h5>{% if not is_singlestorm %} Average Annual Summary for Channels for Years for All Years{% else %} Summary for Subcatchments for Storm {% endif %}
+<h5>{% if not is_singlestorm %} Average Annual Summary for Channels for Years for All Years{% else %} Summary for Channels for Storm {% endif %}
     <a onclick="javascript:copytable('chn_tbl')"><img src="{{ url_for('static', filename='open-iconic/png/clipboard-2x.png') }}"/></a>
 </h5>
 <table class="table table-condensed sortable" id="chn_tbl">
