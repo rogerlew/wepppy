@@ -269,11 +269,7 @@
     <label for="landuse_single_selection">Select landuse:</label>
     <select class="form-control disable-readonly" id="landuse_single_selection">
       {% for opt in landuseoptions %}
-<<<<<<< HEAD
       <option value="{{ opt['Key'] }}">{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
-=======
-      <option value="{{ opt[" Key"] }}">{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
->>>>>>> d156e7995da682472cafe5bee673db1ba540bebe
       {% endfor %}
     </select>
   </div>
@@ -294,11 +290,7 @@
       <label for="mofe_buffer_selection">Select landuse for buffer:</label>
       <select class="form-control disable-readonly" id="mofe_buffer_selection" name="mofe_buffer_selection">
         {% for opt in landuseoptions %}
-<<<<<<< HEAD
         <option value="{{ opt['Key'] }}" {%if opt["key"]==(landuse.mofe_buffer_selection | int) %}selected{% endif %}>
-=======
-        <option value="{{ opt[" Key"] }}" {%if opt["key"]==(landuse.mofe_buffer_selection | int) %}selected{% endif %}>
->>>>>>> d156e7995da682472cafe5bee673db1ba540bebe
           {{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
         {% endfor %}
       </select>
