@@ -40,6 +40,10 @@ def fetch_monthly_point_timeseries(lon: float, lat: float, start_date: date, end
         url="https://openet-api.org/raster/timeseries/point",
         timeout=60
     )
+
+    if resp.status_code != 200:
+        print(resp.text)
+
     return resp.json()
 
 
@@ -73,10 +77,13 @@ def fetch_monthly_polygon_timeseries(coordinates: list, start_date: date, end_da
         timeout=60
     )
 
+    if resp.status_code != 200:
+        print(resp.text)
+
     return resp.json()
 
 
-def fetch_monthly_multipolygon_timeseries(geojson_fn: str, start_date: date, end_date: date, variable='ET', properties_key='TopazID'):
+def fetch_monthly_multipolygon_timeseries(geojson_fn: str, start_date: date, end_date: date, variable='ET', properties_key='TopazID', outdir='./'):
     global header
 
     # use fetch_monthly_polygon_timeseries method to query the api
@@ -87,12 +94,24 @@ def fetch_monthly_multipolygon_timeseries(geojson_fn: str, start_date: date, end
     d = {} # dictionary to store results by properties_key
     for feature in features:
         properties = feature['properties']
+        out_fn = _join(outdir, f"openet-{properties[properties_key]}.json")
+        if _exists(out_fn):
+            print(f"Skipping {properties[properties_key]}")
+            continue
+
         coordinates = feature['geometry']['coordinates']
         try:
             result = fetch_monthly_polygon_timeseries(coordinates, start_date, end_date, variable)
             d[properties[properties_key]] = result
+            
+            with open(out_fn, 'w') as fp:
+                json.dump(result, fp)
+
         except Exception as e:
             print(f"Error fetching {properties[properties_key]}: {e}")
+
+    with open(_join(outdir, 'openet.json'), 'w') as fp:
+        json.dump(d, fp)
 
     return d
 
@@ -132,7 +151,7 @@ def _test_fetch_monthly_polygon_timeseries():
 
 
 def _test_fetch_monthly_multipolygon_timeseries():
-    js = fetch_monthly_multipolygon_timeseries(geojson_fn='/geodata/weppcloud_runs/rlew-incisive-archdeacon/dem/topaz/SUBCATCHMENTS.WGS.JSON', start_date=date(2019,1,1), end_date=date(2023,12,21), variable='ET', properties_key='TopazID')
+    js = fetch_monthly_multipolygon_timeseries(geojson_fn='/geodata/weppcloud_runs/mdobre-anadromous-cartridge/dem/topaz/SUBCATCHMENTS.WGS.JSON', start_date=date(2019,1,1), end_date=date(2023,12,21), variable='ET', properties_key='TopazID', outdir='/geodata/weppcloud_runs/mdobre-anadromous-cartridge/openet')
     print(js)
 
 
