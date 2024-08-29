@@ -41,14 +41,11 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
 TIMEOUT = 43_200
-
-
 DEFAULT_ZOOM = 12
 
 def new_project_rq(runid: str, project_def: dict):
     """
     assumes a runid has been assigned and an empty wd has been created.
-
     """
     try:
         job = get_current_job()
@@ -443,6 +440,102 @@ def run_rhem_rq(runid: str):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+def fork_rq(runid: str, new_runid: str, undisturbify=False):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:fork'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        new_wd = get_wd(new_runid)
+
+        run_left = wd
+        if not run_left.endswith('/'):
+            run_left += '/'
+
+        run_right = new_wd
+        if not run_right.endswith('/'):
+            run_right += '/'
+
+        cmd = ['rsync', '-av', '--progress', '.', run_right]
+
+        if undisturbify:
+            cmd.append('--exclude')
+            cmd.append('wepp/runs')
+            cmd.append('--exclude')
+            cmd.append('wepp/output')
+
+        _cmd = ' '.join(cmd)
+        StatusMessenger.publish(status_channel, f'cmd: {_cmd}')
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=run_left)
+
+        while p.poll() is None:
+            output = p.stdout.readline()
+            StatusMessenger.publish(status_channel, output.decode('UTF-8'))
+            
+        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs...')
+
+        # replace the runid in the nodb files
+        nodbs = glob(_join(new_wd, '*.nodb'))
+        for fn in nodbs:
+            StatusMessenger.publish(status_channel, f'  {fn}')
+            with open(fn) as fp:
+                s = fp.read()
+
+            s = s.replace(runid, new_runid)
+            with open(fn, 'w') as fp:
+                fp.write(s)
+                
+        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs... done.')
+
+        StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC...')
+
+        # delete any active locks
+        locks = glob(_join(new_wd, '*.lock'))
+        for fn in locks:
+            os.remove(fn)
+
+        fn = _join(new_wd, 'READONLY')
+        if _exists(fn):
+            os.remove(fn)
+
+        fn = _join(new_wd, 'PUBLIC')
+        if _exists(fn):
+            os.remove(fn)
+
+        StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC... done.')
+
+        if undisturbify:
+            StatusMessenger.publish(status_channel, 'Undisturbifying Project...')
+            ron = Ron.getInstance(new_wd)
+            ron.scenario = 'Undisturbed'
+            
+            StatusMessenger.publish(status_channel, 'Removing SBS...')
+            disturbed = Disturbed.getInstance(new_wd)
+            disturbed.remove_sbs()
+            StatusMessenger.publish(status_channel, 'Removing SBS... done.')
+
+            StatusMessenger.publish(status_channel, 'Rebuilding Landuse...')
+            landuse = Landuse.getInstance(new_wd)
+            landuse.build()
+            StatusMessenger.publish(status_channel, 'Rebuilding Landuse... done.')
+
+            StatusMessenger.publish(status_channel, 'Rebuilding Soils...')
+            soils = Soils.getInstance(new_wd)
+            soils.build()
+            StatusMessenger.publish(status_channel, 'Rebuilding Soils... done.')
+
+            StatusMessenger.publish(status_channel, 'Running WEPP...')
+            run_wepp_rq(new_runid)
+            StatusMessenger.publish(status_channel, 'Running WEPP... done')
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
 
 def fetch_and_analyze_rap_ts_rq(runid: str):
     try:

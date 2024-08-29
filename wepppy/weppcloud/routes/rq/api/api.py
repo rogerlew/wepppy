@@ -6,9 +6,14 @@ from os.path import split as _split
 from os.path import exists as _exists
 from subprocess import check_output
 
+import awesome_codename
+
 import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify
+
+from flask_security import current_user
+
 from werkzeug.utils import secure_filename
 
 from utils.helpers import get_wd, success_factory, error_factory, exception_factory
@@ -32,7 +37,8 @@ from wepppy.rq.project_rq import (
     run_ash_rq,
     run_debris_flow_rq,
     run_rhem_rq,
-    fetch_and_analyze_rap_ts_rq
+    fetch_and_analyze_rap_ts_rq,
+    fork_rq
 )
 from wepppy.rq.wepp_rq import run_wepp_rq
 
@@ -603,3 +609,69 @@ def api_rap_ts_acquire(runid, config):
         return exception_factory('Error Running RAP_TS', runid=runid)
         
     return jsonify({'Success': True, 'job_id': job.id})
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fork', methods=['POST'])
+def api_fork(runid, config):
+    from wepppy.weppcloud.app import get_run_owners
+    try:
+        wd = get_wd(runid)
+        
+        undisturbify = request.args.get('undisturbify', 'false').lower().startswith('true')
+
+        owners = get_run_owners(runid)
+
+        should_abort = True
+
+        if current_user in owners:
+            should_abort = False
+
+        if current_user.has_role('Admin'):
+            should_abort = False
+
+        if len(owners) == 0:
+            should_abort = False
+
+        else:
+            ron = Ron.getInstance(wd)
+            if ron.public:
+                should_abort = False
+
+        if should_abort:
+            abort(404)
+
+        dir_created = False
+        while not dir_created:
+            new_runid = awesome_codename.generate_codename().replace(' ', '-')
+
+            email = getattr(current_user, 'email', '')
+            if email.startswith('rogerlew@'):
+                new_runid = 'rlew-' + new_runid
+            elif email.startswith('mdobre@'):
+                new_runid = 'mdobre-' + new_runid
+            elif email.startswith('srivas42@'):
+                new_runid = 'srivas42-' + new_runid
+            elif request.remote_addr == '127.0.0.1':
+                new_runid = 'devvm-' + new_runid
+
+            new_wd = get_wd(new_runid)
+            if _exists(new_wd):
+                continue
+
+            dir_created = True
+
+        assert not _exists(new_wd)
+
+        prep = RedisPrep.getInstance(wd)
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(fork_rq, (runid, new_runid, undisturbify), timeout=TIMEOUT)
+            prep.set_rq_job_id('fork_rq', job.id)
+
+    except Exception:
+        return exception_factory('Error forking project', runid=runid)
+        
+    return jsonify({'Success': True, 'job_id': job.id, 'new_runid': new_runid})
+
+
