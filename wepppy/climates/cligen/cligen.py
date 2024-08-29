@@ -188,8 +188,14 @@ def _make_clinp(wd, cliver, years, cli_fname, par, clinp_fn='clinp.txt'):
 
     return clinp
 
+def is_date(year, mo, da):
+    try:
+        datetime.date(year, mo, da)
+        return True
+    except:
+        return False
 
-def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
+def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key, pad_to_end_of_year=True):
     """
     creates a prn file containing daily timeseries data for input to
     cligen
@@ -228,6 +234,21 @@ def df_to_prn(df, prn_fn, p_key, tmax_key, tmin_key):
 
         fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
                  .format(mo, da, yr, p, tmax, tmin))
+        
+    if pad_to_end_of_year:
+        # determine if mo, da, yr is last day of year and pad to end of year if it isn't
+        if mo != 12 and da != 31:
+            for j in range(da, 32):
+                if is_date(yr, mo, j):
+                    fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                            .format(mo, j, yr, 9999, 9999, 9999))
+                    
+            # rest of year
+            for i in range(mo + 1, 13):
+                for j in range(1, 32):
+                    if is_date(yr, i, j):
+                        fp.write("{0:<5}{1:<5}{2:<5}{3:<5}{4:<5}{5:<5}\r\n"
+                                .format(i, j, yr, 9999, 9999, 9999))
 
     fp.close()
 
