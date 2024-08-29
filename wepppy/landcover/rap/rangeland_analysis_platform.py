@@ -12,6 +12,7 @@ from collections import Counter
 
 import numpy as np
 import rasterio
+from osgeo import gdal
 
 from wepppy.all_your_base.geo import read_raster
 
@@ -48,40 +49,83 @@ class RangelandAnalysisPlatform(object):
 
         ul_x, ul_y, utm_number, utm_letter = utm.from_latlon(bbox[3], bbox[0])
         lr_x, lr_y, _, _ = utm.from_latlon(bbox[1], bbox[2],
-                                       force_zone_number=utm_number)
+                                           force_zone_number=utm_number)
         proj4 = "+proj=utm +zone={zone} +{hemisphere} +datum=WGS84 +ellps=WGS84" \
             .format(zone=utm_number, hemisphere=('south', 'north')[bbox[3] > 0])
 
         for year in years:
             year = str(year)
             dst_fn = _join(self.wd, f'_rap_{version}_{year}.tif')
+            max_retries = 3
+            retries = 0
+            success = False
 
-            cmd = ['gdalwarp',
-                   '-co', 'compress=lzw',
-                   '-co', 'tiled=yes',
-                   '-co', 'bigtiff=yes',
-                   '-t_srs', proj4,
-                   '-te', str(ul_x), str(lr_y), str(lr_x), str(ul_y),
-                   '-r', 'near',
-                   '-tr', str(cellsize), str(cellsize),
-                   f'/vsicurl/http://rangeland.ntsg.umt.edu/data/rap/rap-vegetation-cover/{version}/vegetation-cover-{version}-{year}.tif',
-                   dst_fn]
+            while retries < max_retries and not success:
+                cmd = ['gdalwarp',
+                       '-co', 'compress=lzw',
+                       '-co', 'tiled=yes',
+                       '-co', 'bigtiff=yes',
+                       '-t_srs', proj4,
+                       '-te', str(ul_x), str(lr_y), str(lr_x), str(ul_y),
+                       '-r', 'near',
+                       '-tr', str(cellsize), str(cellsize),
+                       f'/vsicurl/http://rangeland.ntsg.umt.edu/data/rap/rap-vegetation-cover/{version}/vegetation-cover-{version}-{year}.tif',
+                       dst_fn]
 
-            if _exists(dst_fn):
-                os.remove(dst_fn)
+                if _exists(dst_fn):
+                    os.remove(dst_fn)
 
-            # run command, check_output returns standard output
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output, errors = p.communicate(input=('0\n', '0\r\n')[IS_WINDOWS], timeout=15)
+                # Run command
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                output, errors = p.communicate(input=('0\n', '0\r\n')[IS_WINDOWS], timeout=15)
 
-            if not _exists(dst_fn):
-                raise Exception((cmd, output, errors))
+                if _exists(dst_fn) and self.validate_raster(dst_fn):
+                    success = True
+                else:
+                    retries += 1
+                    print(f"Validation failed for year {year}, retrying... ({retries}/{max_retries})")
+
+                if retries == max_retries and not success:
+                    raise Exception(f"Failed to retrieve valid data for year {year} after {max_retries} retries.")
 
             self.ds[year] = dst_fn
 
         self.proj4 = proj4
         self.ul_x, self.ul_y = float(ul_x), float(ul_y)
         self.lr_x, self.lr_y = float(lr_x), float(lr_y)
+
+        return retries
+        
+    def validate_raster(self, filename):
+        """
+        Validates if the raster file contains non-zero, non-masked data.
+        
+        :param filename: Path to the raster file.
+        :return: True if the raster contains valid data, False otherwise.
+        """
+        try:
+            dataset = gdal.Open(filename, gdal.GA_ReadOnly)
+            if not dataset:
+                return False
+            
+            band = dataset.GetRasterBand(1)
+            if not band:
+                return False
+            
+            # Read the data as a NumPy array
+            data = band.ReadAsArray()
+            
+            # Check if there are any non-zero, non-masked values
+            if np.any(data):
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(f"Error validating raster {filename}: {e}")
+            return False
+        finally:
+            if dataset:
+                dataset = None
 
     def get_dataset_fn(self, year):
         year = str(year)

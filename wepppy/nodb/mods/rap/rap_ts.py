@@ -171,7 +171,9 @@ class RAP_TS(NoDbBase, LogMixin):
 
         def retrieve_rap_year(year):
             self.log(f'  retrieving rap {year}...')
-            rap_mgr.retrieve([year])
+            retries = rap_mgr.retrieve([year])
+            if retries > 0:
+                self.log(f'  retries: {retries}\n')
             self.log_done()
             return year
 
@@ -217,13 +219,16 @@ class RAP_TS(NoDbBase, LogMixin):
         #if evt == TriggerEvents.WATERSHED_ABSTRACTION_COMPLETE:
         #    self.acquire_rasters()
 
-    def get_cover(self, topaz_id, year):
+    def get_cover(self, topaz_id, year, fallback=True):
         cover = 0.0
         for band in [RAP_Band.ANNUAL_FORB_AND_GRASS,
                      RAP_Band.PERENNIAL_FORB_AND_GRASS,
                      RAP_Band.SHRUB,
                      RAP_Band.TREE]:
-            cover += self.data[band][str(year)][str(topaz_id)]
+            _cover = self.data[band][str(year)].get(str(topaz_id), None)
+            if _cover is not None and fallback:
+                _cover = self.data[band][str(year)].get(str(topaz_id), 0.0)
+            cover += _cover
         return cover
 
     def analyze(self, use_sbs=False, verbose=False):
@@ -302,7 +307,7 @@ class RAP_TS(NoDbBase, LogMixin):
         for topaz_id in self.data:
             yield topaz_id, RAPPointData(**{band.name.lower(): v for band, v in self.data[topaz_id].items()})
 
-    def prep_cover(self, runs_dir):
+    def prep_cover(self, runs_dir, fallback=True):
         from wepppy.nodb.mods.disturbed import Disturbed
         from wepppy.nodb.mods.revegetation import Revegetation
 
@@ -324,7 +329,6 @@ class RAP_TS(NoDbBase, LogMixin):
 
         if fire_date is not None and  cover_transform is not None:
             return self._prep_transformed_cover(runs_dir)
-
 
         self.log('RAP_TS::prep_cover\n')
         data = self.data
@@ -368,7 +372,15 @@ class RAP_TS(NoDbBase, LogMixin):
                                  RAP_Band.LITTER,
                                  RAP_Band.BARE_GROUND,
                                  ]:
-                        fp.write(' \t'.join([str(data[band][yr][str(topaz_id)]) for yr in years]))
+                        _covers = []
+                        for yr in years:
+                            _cover = data[band][yr].get(topaz_id, None)
+                            if _cover is None and yr-1 in data[band] and fallback:
+                                _cover = data[band][yr-1].get(topaz_id, 0.0)
+                            if _cover is None:
+                                _cover = 0.0
+                            _covers.append(_cover)
+                        fp.write(' \t'.join([str(_cover) for _cover in _covers]))
                         fp.write('\n')
 
     def _prep_transformed_cover(self, runs_dir):
