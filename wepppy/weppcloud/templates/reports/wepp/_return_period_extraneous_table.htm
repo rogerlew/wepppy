@@ -22,6 +22,7 @@
         <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
         <th class="{{ 'table-active' if key == 'Particulate P' }}">Particulate P</th>
         <th class="{{ 'table-active' if key == 'Total P' }}">Total P</th>
+        <th>Rank</th>
         {% endif %}
       </tr>
     </thead>
@@ -43,6 +44,8 @@
         <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer_units(report.units_d['Particulate P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
+        <td> </td>
+        
         {% endif %}
       </tr>
     {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
@@ -74,6 +77,10 @@
                         report.units_d['Particulate P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Total P'],
                         report.units_d['Total P']) | safe }}</td>
+        {% if "weibull_rank" in report.return_periods[key][rec_interval]%}
+        <td>{{ report.return_periods[key][rec_interval]['rank'] }}</td>
+        {% else %}
+        <td> </td>
         {% endif %}
       </tr>
     {% endfor %}
