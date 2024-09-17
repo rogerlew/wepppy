@@ -422,6 +422,7 @@ class Wepp(NoDbBase, LogMixin):
             self._prep_details_on_run_completion = self.config_get_bool('wepp', 'prep_details_on_run_completion', False)
             self._arc_export_on_run_completion = self.config_get_bool('wepp', 'arc_export_on_run_completion', True)
             self._legacy_arc_export_on_run_completion = self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False)
+            self._dss_export_on_run_completion = self.config_get_bool('wepp', 'dss_export_on_run_completion', False)
 
             self.run_flowpaths = False
             self.loss_grid_d_path = None
@@ -533,6 +534,11 @@ class Wepp(NoDbBase, LogMixin):
     def legacy_arc_export_on_run_completion(self):
         return getattr(self, '_legacy_arc_export_on_run_completion',
                        self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False))
+
+    @property
+    def dss_export_on_run_completion(self):
+        return getattr(self, '_dss_export_on_run_completion',
+                       self.config_get_bool('wepp', 'dss_export_on_run_completion', False))
 
     @property
     def status_log(self):
@@ -1986,6 +1992,12 @@ class Wepp(NoDbBase, LogMixin):
         totwatsed2 = TotalWatSed2(self.wd)
         fn = _join(self.export_dir, 'totalwatsed2.csv')
         totwatsed2.export(fn)
+        self.log_done()
+
+    def _export_partitioned_totalwatsed2_dss(self):
+        self.log('Exporting totalwatsed2.dss... ')
+        from wepppy.wepp.out import totalwatsed_partitioned_dss_export
+        totalwatsed_partitioned_dss_export(self.wd)
         self.log_done()
 
     def report_loss(self, exclude_yr_indxs=None):

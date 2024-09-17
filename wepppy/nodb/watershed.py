@@ -645,6 +645,14 @@ class Watershed(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    @property
+    def network(self):
+        if self.abstraction_backend_is_peridot:
+            network = read_network(_join(self.wat_dir, 'network.txt'))
+            return network
+        else:
+            raise NotImplementedError('network not implemented')
+        
     #
     # abstract watershed
     #
@@ -671,7 +679,7 @@ class Watershed(NoDbBase, LogMixin):
                 self._wsarea = sum(summary.area for summary in self._subs_summary.values()) + \
                                sum(summary.area for summary in self._chns_summary.values())
 
-                network = read_network(_join(self.wat_dir, 'network.txt'))
+                network = self.network
                 translator = self.translator_factory()
                 self._structure = translator.build_structure(network)
 

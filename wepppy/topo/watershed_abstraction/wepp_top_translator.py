@@ -7,6 +7,29 @@
 # from the NSF Idaho EPSCoR Program and by the National Science Foundation.
 
 
+
+def upland_hillslopes(chn_id, network, top_translator):
+    """
+    Given a channel id, return the upland hillslopes
+
+    network is a dictionary of channel_ids with list of channels that drain into them
+    """
+
+    # need to recursively find the upland hillslopes by looking at the channels in
+    # network[chn_id] and then checking for right, left, and top hillslopes by calling top_translator.channel_hillslopes(chn_id)
+    
+    assert top_translator.is_channel(top=chn_id), f"{chn_id} is not a channel"
+
+    hillslopes = top_translator.channel_hillslopes(chn_id)
+    
+    for _chn_id in network.get(chn_id, []):
+        if chn_id == _chn_id:
+            continue
+        hillslopes += upland_hillslopes(_chn_id, network, top_translator)
+
+    return hillslopes
+
+
 class WeppTopTranslator:
     """
     Utility class to translate between sub_ids, wepp_ids, 
@@ -167,6 +190,30 @@ class WeppTopTranslator:
         for wepp_id in sorted(wepp_ids):
             yield wepp_id
 
+
+    def channel_hillslopes(self, chn_id):
+        if isinstance(chn_id, str):
+            chn_id = int(chn_id.split('_')[1])
+            
+        hillslopes = []
+
+        # right subcatchments end in 2
+        hright = int(chn_id) - 2
+        if self.has_top(hright):
+            hillslopes.append(hright)
+
+        # left subcatchments end in 3
+        hleft = int(chn_id) - 1
+        if self.has_top(hleft):
+            hillslopes.append(hleft)
+
+        # center subcatchments end in 1
+        hcenter = int(chn_id) - 3
+        if self.has_top(hcenter):
+            hillslopes.append(hcenter)
+
+        return hillslopes
+
     def build_structure(self, network):
         # now we are going to define the lines of the structure file
         # this doesn't handle impoundments
@@ -213,3 +260,20 @@ class WeppTopTranslator:
             structure.append([int(v) for v in _structure])
 
         return structure
+
+if __name__ == '__main__':
+    wd = '/geodata/weppcloud_runs/insomniac-boatload/'
+
+    from wepppy.nodb import Watershed
+
+    watershed = Watershed.getInstance(wd)
+
+    translator = watershed.translator_factory()
+
+    from wepppy.topo.watershed_abstraction import upland_hillslopes
+
+    network = watershed.network
+    print(network)
+
+    hills = upland_hillslopes(chn_id=194, network=network, top_translator=translator)
+    print(hills)

@@ -14,6 +14,7 @@ The calculations were provided by Mariana Dobre.
 """
 
 from abc import ABC, abstractmethod
+import os
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
@@ -33,10 +34,16 @@ import pyarrow.parquet as pq
 
 from deprecated import deprecated
 
+from datetime import datetime
+from pydsstools.heclib.dss import HecDss
+from pydsstools.core import TimeSeriesContainer,UNDEFINED
+
+from wepppy.all_your_base import isint
 from wepppy.all_your_base.hydro import determine_wateryear
 from wepppy.wepp.out import watershed_swe
 from wepppy.all_your_base import NCPU
 
+from wepppy.topo.watershed_abstraction import upland_hillslopes
 
 NCPU = math.ceil(NCPU * 0.6)
 
@@ -67,8 +74,13 @@ def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
 
     totarea_ha = totarea_m2 / 10000.0
 
-    d['Cumulative Sed Del (tonnes)'] = np.cumsum(d['Sed Del (kg)'] / 1000.0)
-    d['Sed Del Density (tonne/ha)'] = (d['Sed Del (kg)'] / 1000.0) / totarea_ha
+    if d['Sed Del (kg)'] is None:
+        d['Cumulative Sed Del (tonnes)'] = None
+        d['Sed Del Density (tonne/ha)'] = None
+    else:
+        d['Cumulative Sed Del (tonnes)'] = np.cumsum(d['Sed Del (kg)'] / 1000.0)
+        d['Sed Del Density (tonne/ha)'] = (d['Sed Del (kg)'] / 1000.0) / totarea_ha
+
     d['Precipitation (mm)'] = d['P (m^3)'] / totarea_m2 * 1000.0
     d['Rain + Melt (mm)'] = d['RM (m^3)'] / totarea_m2 * 1000.0
     d['Transpiration (mm)'] = d['Ep (m^3)'] / totarea_m2 * 1000.0
@@ -127,11 +139,23 @@ def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
 
 
 class AbstractTotalWatSed2(ABC):
-    def __init__(self, wd, baseflow_opts=None, phos_opts=None):
+    def __init__(self, wd, baseflow_opts=None, phos_opts=None, chn_id=None):
         self.wd = wd
         self.baseflow_opts = baseflow_opts
         self.phos_opts = phos_opts
+
+        if isinstance(chn_id, str):
+            chn_id = int(chn_id.split('_')[1])
+
+        if isint(chn_id):
+            chn_id = int(chn_id)
+
+        self._chn_id = chn_id
         self.load_data()
+
+    @property
+    def chn_id(self):
+        return getattr(self, '_chn_id', None)
 
     @property
     @abstractmethod
@@ -147,6 +171,7 @@ class AbstractTotalWatSed2(ABC):
         output_dir = _join(self.wd, 'wepp/output')
         parquet_fn = self.parquet_fn
         pkl_fn = self.pickle_fn
+        chn_id = self.chn_id
 
         # deserialize if possible
         if _exists(parquet_fn):
@@ -180,7 +205,20 @@ class AbstractTotalWatSed2(ABC):
                 self.phos_opts = wepp.phosphorus_opts
 
         # load the data
-        pass_fns = glob(_join(output_dir, 'H*.pass.dat'))
+        if chn_id is not None:
+            from wepppy.nodb import Watershed
+            watershed = Watershed.getInstance(self.wd)
+            translator = watershed.translator_factory()
+            network = watershed.network
+            hillslopes = upland_hillslopes(chn_id, network, translator)
+            pass_fns = []
+            for top_id in hillslopes:
+                wepp_id = translator.wepp(top_id)
+                pass_fns.append(_join(output_dir, f'H{wepp_id}.pass.dat'))
+        else:
+            pass_fns = glob(_join(output_dir, 'H*.pass.dat'))
+
+        assert len(pass_fns) > 0, 'No pass files found'
 
         pool = Pool(processes=NCPU)
         results = pool.map(_read_hill_wat_sed, pass_fns)
@@ -246,11 +284,45 @@ class AbstractTotalWatSed2(ABC):
         # Write the table to a Parquet file
         pq.write_table(table, self.parquet_fn)
 
+    def to_dss(self, fn):
+
+        start_date = datetime(self.d['Year'][0], 1, 1)
+
+        # iterate over the series in the DataFrame and write to the DSS file
+        for measure, series in self.d.items():
+            series = series.to_numpy()
+
+            # measure contains measure name and units in ()
+            _measure = measure.split('(')[0].strip()
+            try:
+                units = measure.split('(')[1].split(')')[0].strip()
+            except IndexError:
+                units = ''
+
+            pathname = f"/WEPP/TOTALWATSED/{_measure}//1DAY/{self.chn_id}/"
+            tsc = TimeSeriesContainer()
+            tsc.pathname = pathname
+            tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
+            tsc.numberValues = len(series)
+            tsc.units = units
+            tsc.type = "INST"
+            tsc.interval = 1440  # 1 day in minutes
+            tsc.values = series
+
+            with HecDss.Open(fn) as fid:
+                fid.deletePathname(tsc.pathname)
+                fid.put_ts(tsc)
+                fid.close()
+
 
 class TotalWatSed2(AbstractTotalWatSed2):
-
+    
     @property
     def parquet_fn(self):
+        chn_id = self.chn_id
+        if chn_id is not None:
+            return _join(self.wd, f'wepp/output/totalwatsed2_{chn_id}.parquet')
+        
         return _join(self.wd, 'wepp/output/totwatsed2.parquet')
 
     @property
@@ -275,7 +347,7 @@ class TotalWatSed2(AbstractTotalWatSed2):
         # process the single data frame
         d = process_measures_df(d, totarea_m2, self.baseflow_opts, self.phos_opts)
 
-        self.to_parquet(d, metadata={'wsarea': totarea_m2})
+        self.to_parquet(d, metadata={'wsarea': totarea_m2, '_chn_id': self.chn_id})
 
         # save attributes
         self.wsarea = totarea_m2
@@ -346,7 +418,6 @@ class DisturbedTotalWatSed2(AbstractTotalWatSed2):
                     d[dom][col] += watsed[col]
 
         for dom in d:
-            print(dom)
             if d[dom] is None:
                 continue
 
@@ -355,7 +426,7 @@ class DisturbedTotalWatSed2(AbstractTotalWatSed2):
 
         # Concatenate all the DataFrames together
         d = pd.concat(d.values())
-        self.to_parquet(d, metadata={'d_m2': d_m2, 'wsarea': totarea_m2})
+        self.to_parquet(d, metadata={'d_m2': d_m2, 'wsarea': totarea_m2, '_chn_id': self.chn_id})
 
         self.wsarea = totarea_m2
         self.d_m2 = d_m2
@@ -562,7 +633,26 @@ class TotalWatSed(object):
                 wtr.writerow(OrderedDict([(k, d[k][i]) for k in d]))
 
 
+def totalwatsed_partitioned_dss_export(wd):
+    from wepppy.nodb import Watershed
+    watershed = Watershed.getInstance(wd)
+    translator = watershed.translator_factory()
+    dss_file = _join(wd, 'wepp', 'output', 'totwatsed2.dss')
+
+    if _exists(dss_file):
+        os.remove(dss_file)
+
+    for chn_id in translator.iter_chn_ids():
+        totwatsed = TotalWatSed2(wd, chn_id=chn_id)
+        totwatsed.to_dss(dss_file)
+
+
 if __name__ == "__main__":
+
+
+    import sys
+    sys.exit()
+
     from pprint import pprint
     fn = '/geodata/weppcloud_runs/srivas42-greatest-ballad/wepp/output/totalwatsed.txt'
     from wepppy.nodb import PhosphorusOpts, BaseflowOpts

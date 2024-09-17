@@ -489,7 +489,6 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
                 fp.write(s)
                 
         StatusMessenger.publish(status_channel, 'Setting wd in .nodbs... done.')
-
         StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC...')
 
         # delete any active locks
