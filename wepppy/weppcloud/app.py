@@ -3788,6 +3788,11 @@ def submit_task_run_wepp(runid, config):
         legacy_arc_export_on_run_completion = None
 
     try:
+        dss_export_on_run_completion = request.form.get('dss_export_on_run_completion') == 'on'
+    except:
+        dss_export_on_run_completion = None
+
+    try:
         wepp.lock()
         if prep_details_on_run_completion is not None:
             wepp._prep_details_on_run_completion = prep_details_on_run_completion
