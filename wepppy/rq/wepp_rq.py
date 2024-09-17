@@ -323,6 +323,12 @@ def run_wepp_rq(runid):
                 jobs5_post.append(_job)
                 job.save()
 
+            if wepp.dss_export_on_run_completion:
+                _job = q.enqueue_call(_export_partitioned_totalwatsed_dss, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                job.meta['jobs:5,func:_export_partitioned_totalwatsed_dss'] = _job.id
+                jobs5_post.append(_job)
+                job.save()
+
             # jobs:5
             job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs5_post)
             job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
@@ -383,6 +389,25 @@ def _run_hillslopes_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+
+def _run_flowpaths_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        watershed = Watershed.getInstance(wd)
+        translator = watershed.translator_factory()
+        wepp.run_flowpaths()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
 
 
 def _prep_managements_rq(runid):
@@ -585,6 +610,19 @@ def _build_totalwatsed2_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+def _export_partitioned_totalwatsed_dss(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        wepp._export_partitioned_totalwatsed2_dss()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
 
 def _run_hillslope_watbal_rq(runid):
     try:
