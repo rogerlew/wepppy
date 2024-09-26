@@ -68,7 +68,7 @@ for fn in fns:
     if '?' in config:
         config = config.split('?')
 
-    if first_access > datetime(2023, 1, 1):
+    if first_access > datetime(2024, 1, 1):
         if 'rhem' in config and 'eu' not in config:
             runs_counter['rhem_projects'] += 1
             runs_counter['rhem_hillruns'] += slopes
