@@ -32,6 +32,7 @@ class ReturnPeriods:
         df['30-min Peak Rainfall Intensity'] = cli_df['30-min Peak Rainfall Intensity (mm/hour)']
 
         _years = sorted(set(df['year']))
+        _y0 = _years[0]
         if exclude_yr_indxs is not None:
             __years = []
 
@@ -48,7 +49,7 @@ class ReturnPeriods:
         header.remove('year')
 
         self.header = header
-        self.y0 = _years[0]
+        self.y0 = _y0
         self.years = years = len(_years)
         self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
