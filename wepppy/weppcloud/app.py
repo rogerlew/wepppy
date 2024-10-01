@@ -115,7 +115,8 @@ from wepppy.nodb import (
     Disturbed,
     DebrisFlow,
     Ash, AshPost, AshSpatialMode,
-    get_configs
+    get_configs,
+    get_legacy_configs
 )
 
 from wepppy.nodb.mods.ash_transport import ( 
@@ -1053,6 +1054,25 @@ def create_index():
            'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
            'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
            '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
+
+
+@app.route('/create-legacy')
+def create_legacy_redirect():
+    return redirect(url_for('create_legacy_index'))
+
+@app.route('/create-legacy/')
+def create_legacy_index():
+    configs = get_legacy_configs()
+    x = ['<tr><td><a href="{0}">{0}</a></td>'
+         '<td><a href="{0}?general:dem_db=ned1/2016">{0} ned1/2016</a></td>'
+         '<td><a href="{0}?watershed:delineation_backend=taudem">{0} TauDEM</a></td></tr>'
+         .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
+    return '<html><body>'\
+           '<link rel="stylesheet" '\
+           'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
+           'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
+           '\n<table class="table">{}</table>\n</body></html>'.format('\n'.join(x))
+
 
 def create_run_dir(current_user):
     wd = None
@@ -3803,6 +3823,10 @@ def submit_task_run_wepp(runid, config):
         if legacy_arc_export_on_run_completion is not None:
             wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
 
+
+        if dss_export_on_run_completion is not None:
+            wepp._dss_export_on_run_completion = dss_export_on_run_completion
+
         wepp.dump_and_unlock()
     except:
         wepp.unlock('-f')
@@ -4278,6 +4302,13 @@ def report_wepp_return_periods(runid, config):
     except:
         exclude_yr_indxs = None
 
+    # get method and gringorten_correction
+    # method default is cta gringorten_correction default is False
+    method = request.args.get('method', 'cta')
+    if method not in ['cta', 'am']:
+        return error_factory('method must be either cta or am')
+    
+    gringorten_correction = request.args.get('gringorten_correction', 'false').lower() == 'true'
 
     try:
         wd = get_wd(runid)
@@ -4288,7 +4319,9 @@ def report_wepp_return_periods(runid, config):
 
         ron = Ron.getInstance(wd)
         report = Wepp.getInstance(wd).report_return_periods(
-            rec_intervals=rec_intervals, exclude_yr_indxs=exclude_yr_indxs)
+            rec_intervals=rec_intervals, exclude_yr_indxs=exclude_yr_indxs,
+            method=method, gringorten_correction=gringorten_correction)
+        
         translator = Watershed.getInstance(wd).translator_factory()
 
         unitizer = Unitizer.getInstance(wd)
