@@ -22,8 +22,9 @@
         <th class="{{ 'table-active' if key == 'Soluble Reactive P' }}">Soluble Reactive P</th>
         <th class="{{ 'table-active' if key == 'Particulate P' }}">Particulate P</th>
         <th class="{{ 'table-active' if key == 'Total P' }}">Total P</th>
-        <th>Rank</th>
         {% endif %}
+        <th>Rank</th>
+        <th>Weibull T</th>
       </tr>
     </thead>
     <tbody>
@@ -44,13 +45,13 @@
         <td class="{{ 'table-active' if key == 'Soluble Reactive P' }}">{{ unitizer_units(report.units_d['Soluble Reactive P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Particulate P' }}">{{ unitizer_units(report.units_d['Particulate P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer_units(report.units_d['Total P']) | safe }}</td>
-        <td> </td>
-        
         {% endif %}
+        <td> </td>
+        <td> </td>
       </tr>
     {% for rec_interval in report.intervals | sort_numeric(reverse=True) %}
       <tr>
-        <td>{{ rec_interval }}</td>
+        <td>&quot;{{ rec_interval }}&quot;</td>
         <td>{{ '%02d' % (report.return_periods[key][rec_interval]['mo'] | int) }}/{{ 
                                   '%02d' % (report.return_periods[key][rec_interval]['da'] | int) }}/{{ 
                                   '%04d' % (report.return_periods[key][rec_interval]['year'] + report.y0 - 1 | int) }}</td>
@@ -77,11 +78,18 @@
                         report.units_d['Particulate P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Total P'],
                         report.units_d['Total P']) | safe }}</td>
-        {% if "weibull_rank" in report.return_periods[key][rec_interval]%}
-        <td>{{ report.return_periods[key][rec_interval]['rank'] }}</td>
+        {% if "weibull_rank" in report.return_periods[key][rec_interval] %}
+        <td>{{ report.return_periods[key][rec_interval]['weibull_rank'] }}</td>
         {% else %}
         <td> </td>
         {% endif %}
+
+        {% if "weibull_T" in report.return_periods[key][rec_interval] %}
+        <td>{{ report.return_periods[key][rec_interval]['weibull_T'] }}</td>
+        {% else %}
+        <td> </td>
+        {% endif %}
+
       </tr>
     {% endfor %}
     </tbody>
