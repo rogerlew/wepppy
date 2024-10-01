@@ -19,7 +19,18 @@ class ReturnPeriods:
     def __init__(self, ebe: Ebe = None, loss: Loss = None, 
                  cli_df: DataFrame = None, 
                  recurrence=(2, 5, 10, 20, 25),
-                 exclude_yr_indxs=None):
+                 exclude_yr_indxs=None,
+                 method='cta', gringorten_correction=False):
+        """
+        Args:
+            ebe (Ebe): The event by event  report.
+            loss (Loss): The WEPP loss report.
+            cli_df (DataFrame): The climate data.
+            recurrence (tuple): The recurrence intervals in years.
+            exclude_yr_indxs (list): A list of year indexes to exclude from the analysis.
+            method (str): The method used to calculate the return periods. Options are 'cta' (default) complete time series analysis or 'am' or annual maxima.
+            gringorten_correction (bool): If True, applies the Gringorten correction to the Weibull formula.
+        """
 
         if ebe is None or loss is None or cli_df is None:
             return
@@ -49,18 +60,26 @@ class ReturnPeriods:
         header.remove('year')
 
         self.header = header
+        self.method = method
+        self.gringorten_correction = gringorten_correction
         self.y0 = _y0
         self.years = years = len(_years)
         self.wsarea = wsarea = loss.wsarea
         self.recurrence = recurrence = sorted(recurrence)
         self.exclude_yr_indxs = exclude_yr_indxs
 
-        rec = weibull_series(recurrence, years)
+        rec = weibull_series(recurrence, years, 
+                             method=method, gringorten_correction=gringorten_correction)
+
+        days_in_year = len(df) / years
 
         results = {}
         for colname in header:
 
-            df2 = df.sort_values(by=colname, ascending=False)
+            if method == 'cta':
+                df2 = df.sort_values(by=colname, ascending=False)
+            else:
+                df2 = df.groupby('year').max().sort_values(by=colname, ascending=False)
 
             colname = parse_name(colname)
             if colname == 'Runoff Volume':
@@ -87,6 +106,7 @@ class ReturnPeriods:
 
                 row['Runoff'] = round(row['Runoff'] / (wsarea * 10000.0) * 1000.0, 2)
                 row['weibull_rank'] = indx + 1
+                row['weibull_T'] = ((len(df) + 1) / (indx + 1)) / days_in_year # T = (n + 1)  / m, where m is the rank and n is the number of observations
                 row['Sediment Yield'] /= 1000.0
 
                 results[colname][retperiod] = row
@@ -104,6 +124,8 @@ class ReturnPeriods:
         return {
             'has_phosphorus': self.has_phosphorus,
             'header': self.header,
+            'method': self.method,
+            'gringorten_correction': self.gringorten_correction,
             'y0': self.y0,
             'years': self.years,
             'wsarea': self.wsarea,
@@ -121,6 +143,8 @@ class ReturnPeriods:
 
         rp.has_phosphorus = data['has_phosphorus']
         rp.header = data['header']
+        rp.method = data['method']
+        rp.gringorten_correction = data['gringorten_correction']
         rp.y0 = data['y0']
         rp.years = data['years']
         rp.wsarea = data['wsarea']
