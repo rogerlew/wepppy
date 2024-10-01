@@ -66,6 +66,65 @@ def _read_hill_wat_sed(pass_fn):
             continue
         watbal[col] = sed_df[col]
 
+
+    #  #   Column                          Non-Null Count  Dtype
+    # ---  ------                          --------------  -----
+    #  0   fire_year (yr)                  365 non-null    uint16
+    #  1   year0                           365 non-null    uint16
+    #  2   year                            365 non-null    uint16
+    #  3   da                              365 non-null    uint16
+    #  4   mo                              365 non-null    uint16
+    #  5   julian                          365 non-null    int16
+    #  6   days_from_fire (days)           365 non-null    int64
+    #  7   precip (mm)                     365 non-null    float32
+    #  8   rainmelt (mm)                   365 non-null    float32
+    #  9   snow_water_equivalent (mm)      365 non-null    float32
+    #  10  runoff (mm)                     365 non-null    float32
+    #  11  tot_soil_water (mm)             365 non-null    float32
+    #  12  infiltration (mm)               365 non-null    float32
+    #  13  cum_infiltration (mm)           365 non-null    float32
+    #  14  cum_runoff (mm)                 365 non-null    float32
+    #  15  bulk_density (gm/cm3)           365 non-null    float64
+    #  16  porosity                        365 non-null    float64
+    #  17  remaining_ash (tonne/ha)        365 non-null    float64
+    #  18  transportable_ash (tonne/ha)    365 non-null    float64
+    #  19  ash_depth (mm)                  365 non-null    float64
+    #  20  ash_runoff (mm)                 365 non-null    float64
+    #  21  transport (tonne/ha)            365 non-null    float64
+    #  22  cum_ash_runoff (mm)             365 non-null    float64
+    #  23  water_transport (tonne/ha)      365 non-null    float64
+    #  24  wind_transport (tonne/ha)       365 non-null    float64
+    #  25  ash_transport (tonne/ha)        365 non-null    float64
+    #  26  ash_decomp (tonne/ha)           365 non-null    float64
+    #  27  cum_water_transport (tonne/ha)  365 non-null    float64
+    #  28  cum_wind_transport (tonne/ha)   365 non-null    float64
+    #  29  cum_ash_transport (tonne/ha)    365 non-null    float64
+    #  30  cum_ash_decomp (tonne/ha)       365 non-null    float64
+
+    output_dir = _split(pass_fn)[0]
+    ash_fn = f'{output_dir}/../../ash/H{wepp_id}_ash.parquet'
+    if _exists(ash_fn):
+        ash = pd.read_parquet(ash_fn)
+        for col in ['water_transport (tonne/ha)', 'wind_transport (tonne/ha)', 'ash_transport (tonne/ha)']:
+            
+            # copy over the values from the ash DataFrame where watbal['Year'] == ash['year0'] and watbal['Julian'] == ash['julian'] the ash might not have all the julian days
+            # Merge watbal and ash DataFrames on 'Year' and 'Julian' columns
+            merged_df = watbal.merge(ash, left_on=['Year', 'Julian'], right_on=['year0', 'julian'], how='left')
+
+            # Copy over the values from the merged DataFrame to the watbal DataFrame
+            for col in ['water_transport (tonne/ha)', 'wind_transport (tonne/ha)', 'ash_transport (tonne/ha)']:
+                if not col.startswith('ash_'):
+                    _col = f'ash_{col}'
+                else:
+                    _col = col
+
+                if col in merged_df.columns:
+                    watbal[_col] = merged_df[col].fillna(0).values
+                else:
+                    # hillslope unburned
+                    watbal[_col] = np.zeros(watbal.shape[0])
+
+
     return watbal, hill_wat.total_area, wepp_id
 
 
@@ -139,7 +198,7 @@ def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
 
 
 class AbstractTotalWatSed2(ABC):
-    def __init__(self, wd, baseflow_opts=None, phos_opts=None, chn_id=None):
+    def __init__(self, wd, baseflow_opts=None, phos_opts=None, chn_id=None, rebuild=False):
         self.wd = wd
         self.baseflow_opts = baseflow_opts
         self.phos_opts = phos_opts
@@ -151,6 +210,13 @@ class AbstractTotalWatSed2(ABC):
             chn_id = int(chn_id)
 
         self._chn_id = chn_id
+
+        if rebuild:
+            if _exists(self.parquet_fn):
+                os.remove(self.parquet_fn)  
+            if _exists(self.pickle_fn):
+                os.remove(self.pickle_fn)
+                
         self.load_data()
 
     @property
@@ -342,7 +408,11 @@ class TotalWatSed2(AbstractTotalWatSed2):
                 for col in watsed.columns:
                     if col in ['Year', 'Month', 'Day', 'Julian']:
                         continue
-                    d[col] += watsed[col]
+
+                    if col not in d.columns:
+                        d[col] = watsed[col]
+                    else:
+                        d[col] += watsed[col]
 
         # process the single data frame
         d = process_measures_df(d, totarea_m2, self.baseflow_opts, self.phos_opts)
