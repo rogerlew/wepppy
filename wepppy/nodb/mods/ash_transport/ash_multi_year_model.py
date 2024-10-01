@@ -273,7 +273,7 @@ class AshModel(object):
         i += 1
 
         # No transport on the day of the fire!
-        while transportable_ash_tonspha[i-1] > 0 and i < 366:
+        while transportable_ash_tonspha[i-1] > 0 and i < s_len:
             # determine fire year
             if (mo[i] == fire_date.month and da[i] == fire_date.day):
                 _fire_year += 1
