@@ -1988,8 +1988,8 @@ class Wepp(NoDbBase, LogMixin):
         self.log_done()
 
     def _build_totalwatsed2(self):
-        self.log('Building totalwatsed2.pkl... ')
-        totwatsed2 = TotalWatSed2(self.wd)
+        self.log('Building totalwatsed2.parquet... ')
+        totwatsed2 = TotalWatSed2(self.wd, rebuild=True)
         fn = _join(self.export_dir, 'totalwatsed2.csv')
         totwatsed2.export(fn)
         self.log_done()
@@ -2005,25 +2005,29 @@ class Wepp(NoDbBase, LogMixin):
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd, exclude_yr_indxs=exclude_yr_indxs)
 
-    def report_return_periods(self, rec_intervals=(25, 20, 10, 5, 2), exclude_yr_indxs=None):
+    def report_return_periods(self, rec_intervals=(25, 20, 10, 5, 2), 
+                              exclude_yr_indxs=None, 
+                              method='cta', gringorten_correction=False, 
+                              meoization=False):
 
         output_dir = self.output_dir
 
-        if exclude_yr_indxs is None:
-            return_periods_fn = _join(output_dir, 'return_periods.json')
-        else:
-            x = ','.join(str(v) for v in exclude_yr_indxs)
-            return_periods_fn = _join(output_dir, f'return_periods__exclude_yr_indxs={x}.json')
+        if meoization:
+            if exclude_yr_indxs is None:
+                return_periods_fn = _join(output_dir, 'return_periods.json')
+            else:
+                x = ','.join(str(v) for v in exclude_yr_indxs)
+                return_periods_fn = _join(output_dir, f'return_periods__exclude_yr_indxs={x}.json')
 
-        if _exists(return_periods_fn):
-            with open(return_periods_fn) as fp:
-                report = ReturnPeriods.from_dict(json.load(fp))
-                if exclude_yr_indxs is None and report.exclude_yr_indxs is None:
-                    return report
-                elif exclude_yr_indxs is None or report.exclude_yr_indxs is None:
-                    pass
-                elif list(sorted(exclude_yr_indxs)) == list(sorted(report.exclude_yr_indxs)):
-                    return report
+            if _exists(return_periods_fn):
+                with open(return_periods_fn) as fp:
+                    report = ReturnPeriods.from_dict(json.load(fp))
+                    if exclude_yr_indxs is None and report.exclude_yr_indxs is None:
+                        return report
+                    elif exclude_yr_indxs is None or report.exclude_yr_indxs is None:
+                        pass
+                    elif list(sorted(exclude_yr_indxs)) == list(sorted(report.exclude_yr_indxs)):
+                        return report
 
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         loss_rpt = Loss(loss_pw0, self.has_phosphorus, self.wd)
@@ -2036,7 +2040,8 @@ class Wepp(NoDbBase, LogMixin):
         cli_df = cli.as_dataframe(calc_peak_intensities=True)
 
         return_periods = ReturnPeriods(ebe_rpt, loss_rpt, cli_df, recurrence=rec_intervals,
-                                       exclude_yr_indxs=exclude_yr_indxs)
+                                       exclude_yr_indxs=exclude_yr_indxs,
+                                       method=method, gringorten_correction=gringorten_correction)
 
         with open(return_periods_fn, 'w') as fp:
             json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
