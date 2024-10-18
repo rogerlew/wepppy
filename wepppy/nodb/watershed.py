@@ -140,6 +140,7 @@ class Watershed(NoDbBase, LogMixin):
             self._mofe_target_length = self.config_get_float('watershed', 'mofe_target_length')
             self._mofe_buffer = self.config_get_bool('watershed', 'mofe_buffer')
             self._mofe_buffer_length = self.config_get_float('watershed', 'mofe_buffer_length')
+            self._mofe_max_ofes = self.config_get_float('watershed', 'mofe_max_ofes')
 
             self.dump_and_unlock()
 
@@ -762,6 +763,25 @@ class Watershed(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+
+    @property
+    def mofe_max_ofes(self):
+        return getattr(self, '_mofe_max_ofes', 19)
+
+    @mofe_max_ofes.setter
+    def mofe_max_ofes(self, value):
+
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mofe_max_ofes = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     @property
     def mofe_buffer_length(self):
         return getattr(self, '_mofe_buffer_length', 15)
@@ -789,7 +809,8 @@ class Watershed(NoDbBase, LogMixin):
             _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(
                 target_length=self.mofe_target_length,
                 apply_buffer=self.mofe_buffer and not_top,
-                buffer_length=self.mofe_buffer_length)
+                buffer_length=self.mofe_buffer_length,
+                max_ofes=self.mofe_max_ofes)
             
         self.lock()
 
