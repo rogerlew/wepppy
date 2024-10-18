@@ -1950,7 +1950,7 @@ class Wepp(NoDbBase, LogMixin):
         self.log('Watershed Run Complete')
 
         try:
-            prep = Prep.getInstance(self.wd)
+            prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.run_wepp)
         except FileNotFoundError:
             pass
@@ -2005,9 +2005,9 @@ class Wepp(NoDbBase, LogMixin):
         loss_pw0 = _join(output_dir, 'loss_pw0.txt')
         return Loss(loss_pw0, self.has_phosphorus, self.wd, exclude_yr_indxs=exclude_yr_indxs)
 
-    def report_return_periods(self, rec_intervals=(25, 20, 10, 5, 2), 
+    def report_return_periods(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
                               exclude_yr_indxs=None, 
-                              method='cta', gringorten_correction=False, 
+                              method='cta', gringorten_correction=True, 
                               meoization=False):
 
         output_dir = self.output_dir
