@@ -6,7 +6,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from subprocess import Popen, PIPE
 
-from wepppy.climates.cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
+from cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
 
 from datetime import datetime
 import requests
