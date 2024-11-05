@@ -140,7 +140,7 @@ class Watershed(NoDbBase, LogMixin):
             self._mofe_target_length = self.config_get_float('watershed', 'mofe_target_length')
             self._mofe_buffer = self.config_get_bool('watershed', 'mofe_buffer')
             self._mofe_buffer_length = self.config_get_float('watershed', 'mofe_buffer_length')
-            self._mofe_max_ofes = self.config_get_float('watershed', 'mofe_max_ofes')
+            self._mofe_max_ofes = self.config_get_int('watershed', 'mofe_max_ofes', 19)
 
             self.dump_and_unlock()
 
