@@ -116,6 +116,8 @@ class SlopeFile(object):
         min_length=10,
         max_ofes=19):
 
+        max_ofes = int(max_ofes)
+
         length = self.length
         azm = self.azm
         fwidth = self.fwidth
