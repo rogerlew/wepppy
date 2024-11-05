@@ -128,7 +128,6 @@ class RedisPrep:
         return int(v)
     
     def set_locked_status(self, key, status: bool):
-        print(self.run_id, f'locked:{key}', status)
         self.redis.hset(self.run_id, f'locked:{key}', str(bool(status)).lower())
         self.dump()
 
