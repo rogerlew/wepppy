@@ -219,7 +219,7 @@ class HillWat:
 
         d = watbal.pivot_table(index='Water Year', 
                                values=[f'{m} (mm)' for m in watbal_measures], 
-                               aggfunc=np.sum)
+                               aggfunc='sum')
         return d 
 
 
