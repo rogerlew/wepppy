@@ -1426,15 +1426,25 @@ class SurgoSoilCollection(object):
 
         query = 'DROP TABLE IF EXISTS {bad_tbl}'\
                 .format(bad_tbl=bad_tbl)
-        cur.execute(query)
+        try:
+            cur.execute(query)
+        except:
+            pass
 
         query = 'CREATE TABLE {bad_tbl} ({keyname} INTEGER)'\
                 .format(bad_tbl=bad_tbl, keyname=keyname)
-        cur.execute(query)
+        try:
+            cur.execute(query)
+        except:
+            pass
 
         query = 'INSERT INTO {bad_tbl} VALUES (?)'\
                 .format(bad_tbl=bad_tbl)
-        cur.executemany(query, [[int(v)] for v in sorted(bad)])
+        try:
+            cur.executemany(query, [[int(v)] for v in sorted(bad)])
+        except:
+            pass
+
         conn.commit()
 
         return len(needed)
