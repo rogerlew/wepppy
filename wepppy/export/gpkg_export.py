@@ -8,9 +8,15 @@ from os.path import exists as _exists
 
 from wepppy.nodb.soils import Soils
 
-from wepppy.all_your_base.geo import has_f_esri, f_esri_gpkg_to_gdb
-
-
+try:
+    import f_esri
+except ImportError:
+    class FEsri:
+        @staticmethod
+        def has_f_esri():
+            return False
+    f_esri = FEsri()
+    
 def esri_compatible_colnames(df):
     # Create a dictionary to hold the mappings from original to new names
     rename_dict = {col: col.replace(' ', '_')
@@ -158,8 +164,9 @@ def gpkg_export(wd: str):
 
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
-    if has_f_esri():
-        f_esri_gpkg_to_gdb(gpkg_fn, gpkg_fn.replace('.gpkg', '.gdb'))
+    if f_esri.has_f_esri():
+        f_esri.gpkg_to_gdb(gpkg_fn, gpkg_fn.replace('.gpkg', '.gdb'))
+
 
 if __name__ == '__main__':
     gpkg_export('/geodata/weppcloud_runs/bacterial-anorexia')
