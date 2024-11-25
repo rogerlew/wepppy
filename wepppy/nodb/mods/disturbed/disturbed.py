@@ -434,7 +434,7 @@ class Disturbed(NoDbBase):
 
     @property
     def class_map(self):
-        sbs = SoilBurnSeverityMap(self.disturbed_path)
+        sbs = SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self.nodata_vals)
         return sbs.class_map
 
     def modify_burn_class(self, breaks, nodata_vals):
@@ -632,12 +632,12 @@ class Disturbed(NoDbBase):
 
         assert _exists(disturbed_cropped), ' '.join(cmd)
 
-        return SoilBurnSeverityMap(disturbed_cropped, self.breaks, self._nodata_vals)
+        return SoilBurnSeverityMap(disturbed_cropped, breaks=self.breaks, nodata_vals=self.nodata_vals)
      
     def get_sbs_4class(self):
         sbs = self.get_sbs()
         sbs.export_4class_map(self.sbs_4class_path)
-        return SoilBurnSeverityMap(self.sbs_4class_path)
+        return SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self.nodata_vals)
     
     def get_disturbed_key_lookup(self):
         mapping_dict = self.landuse_instance.get_mapping_dict()
