@@ -68,18 +68,29 @@ def query_asris(lng, lat):
 
     else:
         r = requests.get(_url.format(lat=lat, lng=lng))
-        assert r.status_code == 200
+        assert r.status_code == 200, r.text
         d = json.loads(r.text)
         d = d['results']
 
         with open(fn, 'w') as fp:
             json.dump(d, fp, allow_nan=False)
 
+    if len(d) == 0:
+        raise Exception('No soil information is available from ASRIS 2001 database')
+
+#    print(d)
+
     _d = {row['layerName'].replace(' (value/1000)', ''): row for row in d}
     for name in _d:
-        if isfloat(_d[name]['attributes']['Pixel Value']):
-            _d[name]['Value'] = float(_d[name]['attributes']['Pixel Value']) / 1000
+        v = _d[name]['attributes']['Classify.Pixel Value']
+        if isfloat(v):
+            _d[name]['Value'] = float(v) / 1000
         else:
             _d[name]['Value'] = _defaults[name]
 
     return _d
+
+if __name__ == "__main__":
+    #query_asris(151.1436, -8.35522)
+    query_asris(146, -38.472)
+
