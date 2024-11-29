@@ -32,6 +32,7 @@ from wepppy.nodb.watershed import Watershed
 from wepppy.nodb.climate import Climate
 from wepppy.nodb.mods import Baer, Disturbed
 from wepppy.nodb.wepp import Wepp
+from wepppy.nodb.landuse import Landuse
 from wepppy.nodb.ron import Ron
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
@@ -70,7 +71,7 @@ def run_ash_model(kwds):
 
     del kwds['logger']
 
-    logger.log(f'  starting ash model for {prefix}...')
+    logger.log(f'  starting ash model for {prefix} ({ash_model}:{ash_type})...')
     out_fn = ash_model.run_model(**kwds)
     logger.log_done()
 
@@ -465,7 +466,6 @@ class Ash(NoDbBase, LogMixin):
         if pars is None:
             try:
                 from .ash_multi_year_model import AshType, WhiteAshModel, BlackAshModel
-                 
                 self.lock()
                 pars = self._anu_white_ash_model_pars = WhiteAshModel()
                 
@@ -746,24 +746,10 @@ class Ash(NoDbBase, LogMixin):
             watershed = Watershed.getInstance(wd)
             climate = Climate.getInstance(wd)
             wepp = Wepp.getInstance(wd)
+            landuse = Landuse.getInstance(wd)
 
             cli_path = climate.cli_path
             cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=False)
-
-            # make a 4class raster SBS
-            if 'baer' in self.mods:
-                baer = Baer.getInstance(wd)
-                sbs = SoilBurnSeverityMap(baer.baer_cropped, baer.breaks, baer.nodata_vals)
-                baer_4class = baer.baer_cropped.replace('.tif', '.4class.tif')
-            else:
-                disturbed = Disturbed.getInstance(wd)
-                sbs = SoilBurnSeverityMap(disturbed.disturbed_cropped, disturbed.breaks, disturbed.nodata_vals)
-                baer_4class = disturbed.disturbed_cropped.replace('.tif', '.4class.tif')
-
-            sbs.export_4class_map(baer_4class)
-
-            lc = LandcoverMap(baer_4class)
-            sbs_d = lc.build_lcgrid(watershed.subwta)
 
             if self.ash_load_fn is not None:
                 reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
@@ -790,7 +776,8 @@ class Ash(NoDbBase, LogMixin):
                 meta[topaz_id] = {}
                 wepp_id = translator.wepp(top=topaz_id)
                 area_ha = sub.area / 10000
-                burn_class = int(sbs_d[topaz_id])
+                burn_class = landuse.identify_burn_class(topaz_id)
+                burn_class = ['Unburned', 'Low', 'Moderate', 'High'].index(burn_class)
 
                 if burn_class == 255:
                     burn_class = 0
