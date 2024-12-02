@@ -36,7 +36,7 @@ from collections import namedtuple
 from wepppy.all_your_base import isfloat, clamp, IS_WINDOWS
 
 from wepppy.all_your_base.geo.webclients import elevationquery
-from wepppy.all_your_base.geo import haversine, RasterDatasetInterpolator
+from wepppy.all_your_base.geo import haversine
 
 from wepppy.climates.metquery_client import (
     get_prism_monthly_tmin,
@@ -56,9 +56,7 @@ from wepppy.climates.metquery_client import (
     get_daymet_srld_mean,
     get_prism_monthly_tdmean,
     c_to_f
-
 )
-
 
 _thisdir = os.path.dirname(__file__)
 _db = _join(_thisdir, '2015_stations.db')

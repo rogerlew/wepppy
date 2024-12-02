@@ -247,8 +247,9 @@ from datetime import datetime
 
 def process_location(location, models, scenarios):
     for model in models:
-        for scenario in scenarios:
-            _, y0, yend = scenario.split('_')
+        for scenario_d in scenarios:
+            scenario = scenario_d['scenario']
+            y0, yend = scenario_d['y0'], scenario_d['yend']
             start_date = datetime(int(y0), 1, 1)
             end_date = datetime(int(yend), 12, 31)
 
@@ -266,7 +267,12 @@ if __name__ == '__main__':
               'GFDL-ESM2G', 'GFDL-ESM2M', 'HadGEM2-CC365', 'HadGEM2-ES365', 'inmcm4', 'IPSL-CM5A-MR', 'IPSL-CM5A-LR',
               'IPSL-CM5B-LR', 'MIROC5', 'MIROC-ESM', 'MIROC-ESM-CHEM', 'MRI-CGCM3', 'NorESM1-M')
 
-    scenarios = ("historical_1950_2005", "rcp45_2006_2099", "rcp85_2006_2099")
+    scenarios = ({"scenario": "historical_1950_2005", 
+                  "y0": 1990, 
+                  "yend": 2005},
+                  {"scenario": "rcp85_2006_2099", 
+                  "y0": 2006, 
+                  "yend": 2099})
 
     locations = [
         {'lng': -117, 'lat': 46.73, 'identifier': "Moscow"},
