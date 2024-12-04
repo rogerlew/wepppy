@@ -339,9 +339,9 @@
             76,
             255
         ],
-        "DisturbedClass": "",
+        "DisturbedClass": "shrub",
         "Description": "Sclerophyllous vegetation",
-        "ManagementFile": "GeoWEPP/grass.man"
+        "ManagementFile": "UnDisturbed/Shrub.man"
     },
     "29": {
         "Key": 29,
