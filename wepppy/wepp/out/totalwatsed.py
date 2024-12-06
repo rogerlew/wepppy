@@ -14,6 +14,7 @@ The calculations were provided by Mariana Dobre.
 """
 
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 import os
 from os.path import exists as _exists
 from os.path import join as _join
@@ -35,8 +36,6 @@ import pyarrow.parquet as pq
 from deprecated import deprecated
 
 from datetime import datetime
-from pydsstools.heclib.dss import HecDss
-from pydsstools.core import TimeSeriesContainer,UNDEFINED
 
 from wepppy.all_your_base import isint
 from wepppy.all_your_base.hydro import determine_wateryear
@@ -103,27 +102,27 @@ def _read_hill_wat_sed(pass_fn):
 
     output_dir = _split(pass_fn)[0]
     ash_fn = f'{output_dir}/../../ash/H{wepp_id}_ash.parquet'
+        
     if _exists(ash_fn):
         ash = pd.read_parquet(ash_fn)
-        for col in ['water_transport (tonne/ha)', 'wind_transport (tonne/ha)', 'ash_transport (tonne/ha)']:
-            
-            # copy over the values from the ash DataFrame where watbal['Year'] == ash['year0'] and watbal['Julian'] == ash['julian'] the ash might not have all the julian days
-            # Merge watbal and ash DataFrames on 'Year' and 'Julian' columns
-            merged_df = watbal.merge(ash, left_on=['Year', 'Julian'], right_on=['year0', 'julian'], how='left')
+        ash = ash[ash['year0'] == ash['year']]
 
-            # Copy over the values from the merged DataFrame to the watbal DataFrame
-            for col in ['water_transport (tonne/ha)', 'wind_transport (tonne/ha)', 'ash_transport (tonne/ha)']:
-                if not col.startswith('ash_'):
-                    _col = f'ash_{col}'
-                else:
-                    _col = col
+        # Define the transport columns we want to transfer from ash to watbal
+        transport_columns = ['water_transport (tonne/ha)', 'wind_transport (tonne/ha)', 'ash_transport (tonne/ha)']
 
-                if col in merged_df.columns:
-                    watbal[_col] = merged_df[col].fillna(0).values
-                else:
-                    # hillslope unburned
-                    watbal[_col] = np.zeros(watbal.shape[0])
+        # Merge watbal and ash DataFrames on 'Year' and 'Julian' columns with a left join to maintain watbal rows
+        merged_df = watbal.merge(ash[['year0', 'julian'] + transport_columns], 
+                                left_on=['Year', 'Julian'], 
+                                right_on=['year0', 'julian'], 
+                                how='left')
 
+        # Replace NaN values with 0 after merging
+        merged_df.fillna(0, inplace=True)
+
+        # Ensure that watbal gets new columns with prefix `ash_`
+        for col in transport_columns:
+            new_col_name = f'ash_{col}' if not col.startswith('ash_') else col
+            watbal[new_col_name] = merged_df[col].values
 
     return watbal, hill_wat.total_area, wepp_id
 
@@ -286,10 +285,8 @@ class AbstractTotalWatSed2(ABC):
 
         assert len(pass_fns) > 0, 'No pass files found'
 
-        pool = Pool(processes=NCPU)
-        results = pool.map(_read_hill_wat_sed, pass_fns)
-        pool.close()
-        pool.join()
+        with ThreadPoolExecutor(max_workers=NCPU) as executor:
+            results = list(executor.map(_read_hill_wat_sed, pass_fns))
 
         self.compile_data(results)
 
@@ -351,7 +348,9 @@ class AbstractTotalWatSed2(ABC):
         pq.write_table(table, self.parquet_fn)
 
     def to_dss(self, fn):
-
+        from pydsstools.heclib.dss import HecDss
+        from pydsstools.core import TimeSeriesContainer
+        
         start_date = datetime(self.d['Year'][0], 1, 1)
 
         # iterate over the series in the DataFrame and write to the DSS file
