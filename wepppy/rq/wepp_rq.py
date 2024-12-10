@@ -202,7 +202,7 @@ def run_wepp_rq(runid):
             jobs0_hillslopes_prep.append(_job)
             job.save()
 
-            job_prep_remaining = q.enqueue_call(_prep_remaining_rq, (runid,), timeout='1h', depends_on=job_prep_soils)
+            job_prep_remaining = q.enqueue_call(_prep_remaining_rq, (runid,), timeout='1h', depends_on=jobs0_hillslopes_prep)
             job.meta['jobs:0,func:_prep_remaining_rq'] = job_prep_remaining.id
             job.save()
 
@@ -311,26 +311,25 @@ def run_wepp_rq(runid):
             jobs5_post.append(_job)
             job.save()
 
+            jobs51_post = []
             if wepp.legacy_arc_export_on_run_completion:
-                _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_legacy_arc_export_rq, (runid,), timeout=TIMEOUT, depends_on=jobs5_post)
                 job.meta['jobs:5,func:_post_legacy_arc_export_rq'] = _job.id
-                jobs5_post.append(_job)
+                jobs51_post.append(_job)
                 job.save()
 
             if wepp.arc_export_on_run_completion:
-                _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
+                _job = q.enqueue_call(_post_gpkg_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs5_post)
                 job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
-                jobs5_post.append(_job)
-                job.save()
-
-            if wepp.dss_export_on_run_completion:
-                _job = q.enqueue_call(_export_partitioned_totalwatsed_dss, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
-                job.meta['jobs:5,func:_export_partitioned_totalwatsed_dss'] = _job.id
-                jobs5_post.append(_job)
+                jobs51_post.append(_job)
                 job.save()
 
             # jobs:5
-            job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs5_post)
+            if len(jobs51_post) > 0:
+                job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs51_post)
+            else:
+                job6_finalfinal = q.enqueue_call(_log_complete_rq, (runid,), depends_on=jobs5_post)
+                
             job.meta['jobs:6,func:_log_complete_rq'] = job6_finalfinal.id
             job.save()
          
@@ -389,25 +388,6 @@ def _run_hillslopes_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
-
-
-def _run_flowpaths_rq(runid):
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
-        translator = watershed.translator_factory()
-        wepp.run_flowpaths()
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-
 
 
 def _prep_managements_rq(runid):
@@ -610,19 +590,6 @@ def _build_totalwatsed2_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _export_partitioned_totalwatsed_dss(runid):
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        wepp = Wepp.getInstance(wd)
-        wepp._export_partitioned_totalwatsed2_dss()
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
 
 def _run_hillslope_watbal_rq(runid):
     try:
