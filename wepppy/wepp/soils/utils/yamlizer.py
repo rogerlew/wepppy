@@ -508,7 +508,7 @@ class WeppSoilUtil(object):
         _ki = replacements.get('ki', None)
         _kr = replacements.get('kr', None)
         _ksat = replacements.get('avke', None)
-        if not _ksat:
+        if _ksat is None:
             _ksat = replacements.get('ksat', None)
         _shcrit = replacements.get('shcrit', None)
         _kslast = replacements.get('kslast', None)
@@ -530,7 +530,8 @@ class WeppSoilUtil(object):
                 if j == 0 and h0_min_depth is not None:
                     solthk = horizon['solthk'] = _replace_parameter(solthk, max(solthk, h0_min_depth))
 
-                if solthk < 200:
+                solthk = float(solthk)
+                if solthk <= 200:
                     horizon['ksat'] = _replace_parameter(horizon['ksat'], _ksat)
                 elif solthk > 200 and cur_depth < 200:
                     new_horizon = deepcopy(horizon)
@@ -654,7 +655,9 @@ class WeppSoilUtil(object):
                 if j == 0 and h0_min_depth is not None:
                     solthk = horizon['solthk'] = _replace_parameter(solthk, max(solthk, h0_min_depth))
 
-                if solthk < 200:
+                solthk = float(solthk)
+
+                if solthk <= 200:
                     horizon['ksat'] = _replace_parameter(horizon['ksat'], _ksat)
                 elif solthk > 200 and cur_depth < 200:
                     new_horizon = deepcopy(horizon)
