@@ -10,6 +10,7 @@ from typing import Union
 from collections.abc import Iterable
 
 import os
+import json
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -1082,7 +1083,7 @@ class Station:
 
 class StationMeta:
     def __init__(self, state, desc, par, latitude, longitude, years, _type,
-                 elevation, tp5, tp6, _distance=None):
+                 elevation, tp5, tp6, annual_ppt, _distance=None):
 
         par0, par1 = _split(par)
         self.state = state
@@ -1094,6 +1095,7 @@ class StationMeta:
         self.elevation = elevation
         self.tp5 = tp5
         self.tp6 = tp6
+        self.annual_ppt = annual_ppt
         self.distance = None
         self.lat_distance = None
         self.rank = None
@@ -1119,7 +1121,6 @@ class StationMeta:
         self.distance = haversine(location, (self.longitude, self.latitude))
 
     def as_dict(self, include_monthlies=False):
-
         d = {
             "state": self.state,
             "desc": self.desc,
@@ -1131,6 +1132,7 @@ class StationMeta:
             "elevation": self.elevation,
             "tp5": self.tp5,
             "tp6": self.tp6,
+            "annual_ppt": self.annual_ppt,
             "distance_to_query_location": self.distance,
             "rank_based_on_query_location": self.rank,
             "id": self.id
@@ -1192,7 +1194,10 @@ class StationMeta:
 
 
 class CligenStationsManager:
-    def __init__(self, version=None):
+    def __init__(self, version=None, bbox=None):
+        """
+        bbox: ul_x, ul_y, lr_x, lr_y
+        """
 
         # connect to sqlite3 db
         global _db, _stations_dir
@@ -1218,7 +1223,15 @@ class CligenStationsManager:
 
         # load station meta data
         self.stations = []
-        c.execute("SELECT * FROM stations")
+        if bbox is None:
+            c.execute("SELECT * FROM stations")
+        else:
+            ul_x, ul_y, lr_x, lr_y = bbox
+            assert lr_x > ul_x, (ul_x, lr_x)
+            assert ul_y > lr_y, (ul_y, lr_y)
+            query = """SELECT * FROM stations WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?;"""
+            c.execute(query, (lr_y, ul_y, ul_x,  lr_x, ))
+            
         for row in c:
             self.stations.append(StationMeta(*row))
 
@@ -1413,6 +1426,32 @@ class CligenStationsManager:
             _stations[-1].calculate_lat_distance(location[1])
         return _stations
 
+    def export_to_geojson(self, geojson_fn):
+        """
+        Convert the stations to a GeoJSON file.
+        
+        Args:
+            geojson_fn (str): The output GeoJSON file name.
+        """
+        features = []
+        for station in self.stations:
+            feature = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [station.longitude, station.latitude]
+                },
+                "properties": {k:v for k,v in station.as_dict().items() if v is not None}
+            }
+            features.append(feature)
+        
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+        
+        with open(geojson_fn, "w") as f:
+            json.dump(geojson, f, indent=2)
 
 class Cligen:
     def __init__(self, station, wd='./', cliver="5.3.2"):
