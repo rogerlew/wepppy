@@ -1438,6 +1438,12 @@ class CligenStationsManager:
         return _stations
 
     def export_to_geojson(self, geojson_fn):
+        geojson = self.to_geojson()
+        
+        with open(geojson_fn, "w") as f:
+            json.dump(geojson, f, indent=2)
+
+    def to_geojson(self):
         """
         Convert the stations to a GeoJSON file.
         
@@ -1461,9 +1467,9 @@ class CligenStationsManager:
             "features": features
         }
         
-        with open(geojson_fn, "w") as f:
-            json.dump(geojson, f, indent=2)
-
+        return geojson
+    
+    
 class Cligen:
     def __init__(self, station, wd='./', cliver="5.3.2"):
         assert _exists(wd), 'Working dir does not exist'
