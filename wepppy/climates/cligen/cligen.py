@@ -1234,6 +1234,14 @@ class CligenStationsManager:
             
         for row in c:
             self.stations.append(StationMeta(*row))
+            
+        # read this table
+        self.states = {}
+        c.execute("SELECT * FROM states")
+        for row in c:
+            self.states[row[0]] = row[1]
+        
+        conn.close()
 
     def order_by_distance_to_location(self, location):
         """
