@@ -98,3 +98,25 @@ with open('/geodata/weppcloud_runs/runs_counter.json', 'w') as fp:
     json.dump(runs_counter, fp)
 
 os.chmod('/geodata/weppcloud_runs/runs_counter.json', 0o777)
+
+import pandas as pd
+
+# Load the CSV file
+input_file = "/geodata/weppcloud_runs/access.csv"  # Replace with your actual file path
+output_file = "/geodata/weppcloud_runs/run_counts.csv"
+
+# Read the data
+df = pd.read_csv(input_file)
+
+# Group by 'runid' and calculate the sum of 'hillslopes' and 'ash_hillslopes'
+grouped = df.groupby('runid', as_index=False).agg(
+    hillslopes=('hillslopes', 'max'),
+    ash_hillslopes=('ash_hillslopes', 'max'),
+    year=('year', 'max'),
+    config=('config', 'first')  # Takes the first 'config' value in each group
+)
+
+# Save the result to a new CSV file
+grouped.to_csv(output_file, index=False)
+
+print(f"File with unique runids saved to {output_file}")
