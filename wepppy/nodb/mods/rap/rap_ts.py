@@ -339,7 +339,7 @@ class RAP_TS(NoDbBase, LogMixin):
         with open(_join(runs_dir, 'cancov.txt'), 'w') as fp:
             fp.write("")
 
-        years = [yr for yr in data[RAP_Band.TREE]]
+        years = sorted([yr for yr in data[RAP_Band.TREE]])
 
         for wepp_id in translator.iter_wepp_sub_ids():
             topaz_id = str(translator.top(wepp=wepp_id))
@@ -411,7 +411,7 @@ class RAP_TS(NoDbBase, LogMixin):
         with open(_join(runs_dir, 'cancov.txt'), 'w') as fp:
             fp.write("")
 
-        years = [yr for yr in data[RAP_Band.TREE]]
+        years = sorted([yr for yr in data[RAP_Band.TREE]])
         fire_mo, fire_da, fire_year = fire_date.replace('-', ' ').replace('/', ' ').split()
         fire_year = int(fire_year)
         fire_years = {str(yr): int(yr) - fire_year for yr in years}
