@@ -349,7 +349,7 @@ class RAP_TS(NoDbBase, LogMixin):
                 fp.write('\n')
 
                 if self.multi_ofe:
-                    for fp_id in data[RAP_Band.TREE][years[0]][str(topaz_id)]:
+                    for fp_id in sorted(data[RAP_Band.TREE][years[0]][str(topaz_id)]):
                         self.log(f'  topaz_id={topaz_id}, fp_id={fp_id}\n')
 
                         for band in [RAP_Band.TREE,
@@ -424,7 +424,7 @@ class RAP_TS(NoDbBase, LogMixin):
                 fp.write('\n')
 
                 if self.multi_ofe:
-                    for mofe_id in data[RAP_Band.TREE][years[0]][str(topaz_id)]:
+                    for mofe_id in sorted(data[RAP_Band.TREE][years[0]][str(topaz_id)]):
 
                         burn_class = landuse.identify_burn_class(topaz_id, mofe_id)
 
