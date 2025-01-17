@@ -1595,7 +1595,7 @@ class Climate(NoDbBase, LogMixin):
             tmax_fn = _join(cli_dir, 'tmax.tif')
 
             # Get NLCD 2011 from wmesque webservice
-            wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='cubic')
+            wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear')
             wmesque_retrieve('prism/tmin', _map.extent, _join(cli_dir, 'tmin.tif'), _map.cellsize, resample='cubic')
             wmesque_retrieve('prism/tmax', _map.extent, _join(cli_dir, 'tmax.tif'), _map.cellsize, resample='cubic')
 
