@@ -7,6 +7,7 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 import inspect
+import time
 
 from functools import wraps
 from subprocess import Popen, PIPE, call
@@ -276,6 +277,8 @@ def run_wepp_rq(runid):
                 job.save()
 
             if not climate.is_single_storm:
+                
+                
                 _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_run_wepp_post_rq'] = _job.id
                 jobs5_post.append(_job)
@@ -628,6 +631,7 @@ def _post_run_wepp_post_rq(runid):
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        time.sleep(1)
         wepppost = WeppPost.getInstance(wd)
         wepppost.run_post()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
