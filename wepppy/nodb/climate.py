@@ -12,6 +12,8 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
+from all_your_base.geo import read_raster
+
 from datetime import datetime, date
 
 from subprocess import Popen, PIPE
@@ -1594,15 +1596,20 @@ class Climate(NoDbBase, LogMixin):
             tmin_fn = _join(cli_dir, 'tmin.tif')
             tmax_fn = _join(cli_dir, 'tmax.tif')
 
-            # Get NLCD 2011 from wmesque webservice
+            wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='cubic')
+            ppt_data, _transform, _proj = read_raster(ppt_fn)
+                    
+            if np.any(ppt_data < 0):
+                self.log('    prism/ppt contains < values do to cubic resampling, reacquiring with bilinear resampling... ')
+                wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear')
+                self.done()
+            
             wmesque_retrieve('prism/ppt', _map.extent, ppt_fn, _map.cellsize, resample='bilinear')
             wmesque_retrieve('prism/tmin', _map.extent, _join(cli_dir, 'tmin.tif'), _map.cellsize, resample='cubic')
             wmesque_retrieve('prism/tmax', _map.extent, _join(cli_dir, 'tmax.tif'), _map.cellsize, resample='cubic')
 
             watershed = Watershed.getInstance(wd)
-
             ws_lng, ws_lat = watershed.centroid
-
             ws_ppts = get_monthlies(ppt_fn, ws_lng, ws_lat)
             ws_tmins = get_monthlies(tmin_fn, ws_lng, ws_lat)
             ws_tmaxs = get_monthlies(tmax_fn, ws_lng, ws_lat)
