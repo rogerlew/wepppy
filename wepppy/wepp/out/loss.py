@@ -97,7 +97,10 @@ def _parse_tbl(lines, hdr):
                     # catches the '********' case
                     row.append(int(v))
                 except Exception:
-                    row.append(v)
+                    if 'NaN' in v:
+                        row.append(float('nan'))
+                    else:
+                        row.append(v.strip())
 
         assert len(hdr) == len(row), (hdr, row, lines[0])
         data.append(OrderedDict(zip(hdr, row)))
@@ -133,7 +136,10 @@ def _parse_out(lines):
             try:
                 v = int(v)
             except Exception:
-                v = v.strip()
+                if 'NaN' in v:
+                    v = float('nan')
+                else:
+                    v = v.strip()
 
         data.append(dict(key=key, v=v, units=units))
 
