@@ -42,6 +42,8 @@
       {% elif 'virgin_islands' in ron.locales %}
       <option value="locales/virgin_islands/landcover" {% if landuse.nlcd_db=="locales/virgin_islands/landcover"
         %}selected{% endif %}>USVI Landcover 2018</option>
+      <option value="locales/virgin_islands/landcover/2023" {% if landuse.nlcd_db=="locales/virgin_islands/landcover/2023"
+        %}selected{% endif %}>USVI Landcover 2023</option>
       {% elif 'eu' in ron.locales %}
       <option value="eu/CORINE_LandCover/1990" {% if landuse.nlcd_db=="eu/CORINE_LandCover/1990" %}selected{% endif %}>
         CORINE 1990</option>
