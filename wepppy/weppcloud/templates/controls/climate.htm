@@ -205,6 +205,12 @@
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
+                <label class="radio">
+                    <input type="radio" value="2" class="disable-readonly" 
+                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }}> Multiple Interpolated (DAYMET only, Slow)
+                    <a data-toggle="tooltip" data-placement="top" title="One for each hillslope, interpolates climate grid. Slow.">
+                      <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                </label><br/>
             </div>
         </div>
     </div>

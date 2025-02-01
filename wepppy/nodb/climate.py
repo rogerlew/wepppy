@@ -18,7 +18,9 @@ from datetime import datetime, date
 
 from subprocess import Popen, PIPE
 
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_EXCEPTION
+from concurrent.futures import (
+    ThreadPoolExecutor, wait, FIRST_EXCEPTION, ProcessPoolExecutor, as_completed
+)
 
 import json
 from enum import IntEnum
@@ -61,6 +63,9 @@ import numpy as np
 
 from copy import deepcopy
 
+import pyproj
+from pyproj import Proj
+
 # wepppy submodules
 from .base import NoDbBase, TriggerEvents
 from .watershed import Watershed, WatershedNotAbstractedError
@@ -76,6 +81,97 @@ try:
     from wepppyo3.climate import cli_revision as pyo3_cli_revision
 except:
     wepppyo3 = None
+
+
+def lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height):
+    # Create a projection object for the raster
+    raster_proj = Proj(proj4)
+
+    # Create a projection object for WGS84 (lat/long)
+    wgs84_proj = Proj(proj='latlong', datum='WGS84')
+
+    # Convert the input lng/lat to the raster's projection
+    x, y = pyproj.transform(wgs84_proj, raster_proj, lng, lat)
+
+    # Apply the affine transformation to get pixel coordinates
+    # Note: Affine transform is in the form of (a, b, c, d, e, f)
+    # where x' = a * x + b * y + c and y' = d * x + e * y + f
+    a, b, c, d, e, f = transform
+    col = (x - a) / b
+    row = (y - d) / f
+
+    # Get nearest pixel center
+    col, row = round(col), round(row)
+
+    # Check if the pixel is within the bounds of the raster
+    if 0 <= col < width and 0 <= row < height:
+        # Convert the pixel position back to geographic coordinates
+        lng, lat = pyproj.transform(raster_proj, wgs84_proj, col * b + a, row * f + d)
+        return lng, lat
+    else:
+        return None, None
+
+
+def daymet_pixel_center(lng, lat):
+    width, height = (7814, 8075)
+    proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
+    transform = (-4560750.0, 1000.0, 0.0, 4984500.0, 0.0, -1000.0)
+
+    return lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height)
+
+
+def daymet_pixel_center_ne(lng, lat):
+    width, height = (7814, 8075)
+    proj4 = '+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs'
+    transform = (-4560750.0, 1000.0, 0.0, 4984500.0, 0.0, -1000.0)
+
+    # Create a projection object for the raster
+    raster_proj = Proj(proj4)
+
+    # Create a projection object for WGS84 (lat/long)
+    wgs84_proj = Proj(proj='latlong', datum='WGS84')
+
+    # Convert the input lng/lat to the raster's projection
+    x, y = pyproj.transform(wgs84_proj, raster_proj, lng, lat)
+
+    # Apply the affine transformation to get pixel coordinates
+    # Note: Affine transform is in the form of (a, b, c, d, e, f)
+    # where x' = a * x + b * y + c and y' = d * x + e * y + f
+    a, b, c, d, e, f = transform
+    col = (x - a) / b
+    row = (y - d) / f
+
+    # Get nearest pixel center
+    col, row = round(col), round(row)
+
+    # Check if the pixel is within the bounds of the raster
+    if 0 <= col < width and 0 <= row < height:
+        easting = a + (col + 0.5) * b + (row + 0.5) * c
+        northing = d + (col + 0.5) * e + (row + 0.5) * f
+        return easting, northing
+    else:
+        return None, None
+    
+    
+def gridmet_pixel_center(lng, lat):
+    width, height = (1386, 585)
+    proj4 = '+proj=longlat +datum=WGS84 +no_defs'
+    transform = (-124.79299639760372, 0.04166601298087771, 0.0, 49.41685580390774, 0.0, -0.041666014553749395)
+
+    return lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height)
+
+
+def prism4k_pixel_center(lng, lat):
+    width, height = (1405, 621)
+    proj4 = '+proj=longlat +datum=NAD83 +no_defs'
+    transform = (-125.02083333333336, 0.0416666666667, 0.0, 49.93749999999975, 0.0, -0.0416666666667)
+
+    return lng_lat_to_pixel_center(lng, lat, proj4, transform, width, height)
+
+
+def nexrad_pixel_center(lng, lat):
+    return round(lng * 4.0) / 4.0, round(lat * 4.0) / 4.0
+
 
 
 def download_file(url, dst):
@@ -163,7 +259,7 @@ class ClimateMode(IntEnum):
     DepNexrad = 13
     SingleStormBatch = 14 # Single Only
     UserDefinedSingleStorm = 15 # Single Only
-    DaymetMultiple = 16
+    Another = 16 # Single Only
 
     @staticmethod
     def parse(x):
@@ -197,8 +293,6 @@ class ClimateMode(IntEnum):
             return ClimateMode.DepNexrad
         elif x == 'user_defined_single_storm':
             return ClimateMode.UserDefinedSingleStorm
-        elif x == 'daymet_multiple':
-            return ClimateMode.DaymetMultiple
         raise KeyError
 
 
@@ -206,6 +300,7 @@ class ClimateSpatialMode(IntEnum):
     Undefined = -1
     Single = 0
     Multiple = 1
+    MultipleInterpolated = 2
 
     @staticmethod
     def parse(x):
@@ -215,11 +310,13 @@ class ClimateSpatialMode(IntEnum):
             return ClimateSpatialMode.Single
         elif x == 'multiple':
             return ClimateSpatialMode.Multiple
+        elif x == 'multiple_interpolated':
+            return ClimateSpatialMode.MultipleInterpolated
         raise KeyError
 
 
 def build_observed_prism(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
-    df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
     df_to_prn(df, _join(cli_dir, prn_fn), 'ppt(mm)', 'tmax(degc)', 'tmin(degc)')
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
 
@@ -231,25 +328,16 @@ def build_observed_prism(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn
     climate.replace_var('tdew', dates, df['tdmean(degc)'])
 
     if gridmet_wind:
-        wind_df = gridmet_retrieve_historical_wind(lng, lat, start_year, end_year)
+        climate.replace_var('w-vl', dates, df['vs(m/s)'])
+        climate.replace_var('w-dir', dates, df['th(DegreesClockwisefromnorth)'])
 
-        wind_dates = wind_df.index
-
-        climate.replace_var('w-vl', wind_dates, wind_df['vs(m/s)'])
-        climate.replace_var('w-dir', wind_dates, wind_df['th(DegreesClockwisefromnorth)'])
-
-        df['vs(m/s)'] = wind_df['vs(m/s)']
-        df['vs(m/s)'] = wind_df['th(DegreesClockwisefromnorth)']
-
-        df.to_parquet(_join(cli_dir, f'prism_gridmetwind_{start_year}-{end_year}.parquet'))
-    else:
-        df.to_parquet(_join(cli_dir, f'prism_{start_year}-{end_year}.parquet'))
+    df.to_parquet(_join(cli_dir, f'prism_{start_year}-{end_year}.parquet'))
 
     climate.write(cli_path)
 
 
 def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
-    df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
+    df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
     df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
     df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
     cligen.run_observed(prn_fn, cli_fn=cli_fn)
@@ -263,24 +351,15 @@ def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_f
     climate.replace_var('tdew', dates, df['tdew(degc)'])
 
     if gridmet_wind:
-        wind_df = gridmet_retrieve_historical_wind(lng, lat, start_year, end_year)
+        climate.replace_var('w-vl', dates, df['vs(m/s)'])
+        climate.replace_var('w-dir', dates, df['th(DegreesClockwisefromnorth)'])
 
-        wind_dates = wind_df.index
-
-        climate.replace_var('w-vl', wind_dates, wind_df['vs(m/s)'])
-        climate.replace_var('w-dir', wind_dates, wind_df['th(DegreesClockwisefromnorth)'])
-
-        df['vs(m/s)'] = wind_df['vs(m/s)']
-        df['vs(m/s)'] = wind_df['th(DegreesClockwisefromnorth)']
-
-        df.to_parquet(_join(cli_dir, f'daymet_gridmetwind_{start_year}-{end_year}.parquet'))
-    else:
-        df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
+    df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
 
     climate.write(cli_path)
 
 
-def build_observed_daymet_interpolated(cligen, topaz_id, lng, lat, start_year, end_year, cli_dir, cli_fn, prn_fn, gridmet_wind=True):
+def build_observed_daymet_interpolated(cligen, topaz_id, lng, lat, start_year, end_year, cli_dir, cli_fn, prn_fn, wind_vs=None, wind_dir=None):
     # uses .prn files generated by wepppy.climates.daymet.daily_interpolated
 
     _parquet_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet'
@@ -296,22 +375,15 @@ def build_observed_daymet_interpolated(cligen, topaz_id, lng, lat, start_year, e
     climate.replace_var('rad', dates, df['srad(l/day)'])
     climate.replace_var('tdew', dates, df['tdew(degc)'])
 
-    if gridmet_wind:
-        wind_df = gridmet_retrieve_historical_wind(lng, lat, start_year, end_year)
+    if wind_vs:
+        climate.replace_var('w-vl', dates, wind_vl)
 
-        wind_dates = wind_df.index
-
-        climate.replace_var('w-vl', wind_dates, wind_df['vs(m/s)'])
-        climate.replace_var('w-dir', wind_dates, wind_df['th(DegreesClockwisefromnorth)'])
-
-        df['vs(m/s)'] = wind_df['vs(m/s)']
-        df['vs(m/s)'] = wind_df['th(DegreesClockwisefromnorth)']
-
-        df.to_parquet(_join(cli_dir, f'daymet_gridmetwind_{start_year}-{end_year}.parquet'))
-    else:
-        df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
+    if wind_dir:
+        climate.replace_var('w-dir', dates, wind_dir)
 
     climate.write(cli_path)
+
+    return topaz_id
 
 
 def build_observed_snotel(cligen, lng, lat, snotel_id, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_supplement=True):
@@ -502,7 +574,7 @@ class Climate(NoDbBase, LogMixin):
             self._daymet_precip_scale_factor =  self.config_get_float('climate', 'daymet_precip_scale_factor', None)
             self._daymet_precip_scale_factor_map =  self.config_get_path('climate', 'daymet_precip_scale_factor_map', None)
 
-            self._daymet_version = self.config_get_str('climate', 'daymet_version', 'v4') # only applies to DaymetMultiple (selects grids on server)
+            #self._daymet_version = self.config_get_str('climate', 'daymet_version', 'v4') # only applies to DaymetMultiple (selects grids on server)
 
             self._climate_daily_temp_ds = None
 
@@ -1328,9 +1400,15 @@ class Climate(NoDbBase, LogMixin):
 
         # observed
         elif climate_mode == ClimateMode.ObservedPRISM:
-            self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
-            if self.climate_spatialmode == ClimateSpatialMode.Multiple:
-                self._prism_revision(verbose=verbose)
+
+            if self.climate_spatialmode == ClimateSpatialMode.MultipleInterpolated:
+                # the climate_mode naming is kind of shitty, this doesn't use prism at all
+                # but kind of stuck with it for backwards compatibility
+                self._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs) 
+            else:
+                self._build_climate_observed_daymet(verbose=verbose, attrs=attrs)
+                if self.climate_spatialmode == ClimateSpatialMode.Multiple:
+                    self._prism_revision(verbose=verbose)
 
             if self.daymet_precip_scale_factor is not None:
                 self._scale_precip(self.daymet_precip_scale_factor)
@@ -1383,10 +1461,6 @@ class Climate(NoDbBase, LogMixin):
 
             if self.gridmet_precip_scale_factor_map is not None:
                 self._spatial_scale_precip(self.gridmet_precip_scale_factor_map)
-
-        # DAYMET Multiple (slow)
-        elif climate_mode == ClimateMode.DaymetMultiple:
-            self._build_climate_observed_daymet_multiple(verbose=verbose, attrs=attrs)
 
         if self.precip_scale_factor is not None:
             self._scale_precip(self.precip_scale_factor)
@@ -1967,8 +2041,10 @@ class Climate(NoDbBase, LogMixin):
 
     def _build_climate_observed_daymet_multiple(self, verbose=False, attrs=None):
         from wepppy.climates.daymet.daily_interpolation import (
-            interpolate_daily_timeseries, 
             identify_pixel_coords
+        )
+        from wepppy.climates.daymet.daymet_singlelocation_client import (
+            interpolate_daily_timeseries
         )
 
         self.lock()
@@ -1996,14 +2072,12 @@ class Climate(NoDbBase, LogMixin):
 
             hillslope_locations = {'0': {'longitude': ws_lng, 'latitude': ws_lat}}
             for topaz_id, ss in watershed._subs_summary.items():
-                self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
-
                 _lng, _lat = ss.centroid.lnglat
                 hillslope_locations[topaz_id] = {'longitude': _lng, 'latitude': _lat}
 
             hillslope_locations = identify_pixel_coords(hillslope_locations, daymet_version=self.daymet_version)
 
-            self.log('  interpolating daymet grids... ')
+            self.log('  interpolating daymet grids...\n')
 
             # this retrieves concurrently
             interpolate_daily_timeseries(hillslope_locations, 
@@ -2012,21 +2086,13 @@ class Climate(NoDbBase, LogMixin):
                                          output_type='prn parquet',
                                          status_channel=self._status_channel)
 
-            prn_fn = 'ws.prn'
-            cli_fn = 'wepp.cli'
-            os.rename(_join(cli_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'), 
-                      _join(cli_dir, prn_fn))
-            self.log('  building {}... '.format(cli_fn))
-            cligen.run_observed(prn_fn, cli_fn)
 
-            climate = ClimateFile(_join(cli_dir, cli_fn))
-            self.monthlies = climate.calc_monthlies()
-            self.cli_fn = cli_fn
-            self.par_fn = par_fn
+            self.log('  fetching gridmet wind...\n')
+            wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year)
 
             sub_par_fns = {}
             sub_cli_fns = {}
-            with ThreadPoolExecutor(max_workers=28) as executor:
+            with ProcessPoolExecutor(max_workers=40) as executor:
                 futures = []
                 for topaz_id, ss in watershed._subs_summary.items():
 
@@ -2034,18 +2100,34 @@ class Climate(NoDbBase, LogMixin):
                     _prn_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'
                     _cli_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.cli'
                     
-                    self.log('submitting climate build for {} ... '.format(topaz_id))
+                    self.log(f'submitting climate build for {topaz_id} ...\n')
 
                     futures.append(
                         executor.submit(
                             build_observed_daymet_interpolated, 
-                            cligen, topaz_id, _lng, _lat, start_year, end_year, cli_dir, _cli_fn, _prn_fn))
+                            cligen, topaz_id, _lng, _lat, start_year, end_year, cli_dir, _cli_fn, _prn_fn, 
+                            wind_vs=wind_df['vs(m/s)'], wind_dir=wind_df['th(DegreesClockwisefromnorth)']))
                     
-                    sub_par_fns[topaz_id] = _prn_fn
-                    sub_cli_fns[topaz_id] = _cli_fn
+                    if topaz_id != '0': # this is for the watershed run
+                        sub_par_fns[topaz_id] = _prn_fn
+                        sub_cli_fns[topaz_id] = _cli_fn
 
-                wait(futures, return_when=FIRST_EXCEPTION)
+                for future in as_completed(futures):
+                    topaz_id = future.result()
+                    self.log(f'  climate for {topaz_id} done.\n')
 
+            prn_fn = 'ws.prn'
+            cli_fn = 'wepp.cli'
+            os.rename(_join(cli_dir, f'daymet_observed_0_{start_year}-{end_year}.prn'), 
+                      _join(cli_dir, prn_fn))
+
+            os.rename(_join(cli_dir, f'daymet_observed_0_{start_year}-{end_year}.cli'), 
+                      _join(cli_dir, cli_fn))
+
+            climate = ClimateFile(_join(cli_dir, cli_fn))
+            self.monthlies = climate.calc_monthlies()
+            self.cli_fn = cli_fn
+            self.par_fn = par_fn
 
             self.sub_par_fns = sub_par_fns
             self.sub_cli_fns = sub_cli_fns
