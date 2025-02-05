@@ -28,6 +28,8 @@ from pyproj import Proj
 from metpy.calc import dewpoint
 from metpy.units import units
 
+from wepppyo3.climate import interpolate_geospatial
+
 from wepppy.climates.cligen import df_to_prn
 
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -153,9 +155,7 @@ def interpolate_daily_timeseries(
     output_type='prn parquet',
     status_channel=None):
 
-    from wepppy.nodb.climate import daymet_pixel_center, daymet_pixel_center_ne
-
-    debug = 0
+    debug = 1
     gridmet_wind = False
 
 
@@ -174,7 +174,7 @@ def interpolate_daily_timeseries(
             'method': 'cubic',
         },
         'srad(l/day)':{
-            'method': 'bilinear',
+            'method': 'linear',
             'a_min': 0.0, # clip to 0.0
         }
     }
@@ -182,7 +182,7 @@ def interpolate_daily_timeseries(
     if gridmet_wind:
         interpolation_spec.update({
             'vs(m/s)':{
-                'method': 'bilinear',
+                'method': 'linear',
                 'a_min': 0.0, # clip to 0.0
             },
             'th(DegreesClockwisefromnorth)':{
@@ -231,15 +231,15 @@ def interpolate_daily_timeseries(
     rows = range(ur_py - pad, ll_py + pad + 1)
 
     # Generate grid eastings and northings
-    eastings = sorted({a + col * b for col in cols})
-    northings = sorted({d + row * f for row in rows}, reverse=True)
+    eastings = np.array([a + col * b for col in cols])
+    northings = np.array([d + row * f for row in rows][::-1])
 
     if debug:
         # Validate all hillslope locations are within the grid
         for topaz_id, loc in hillslope_locations.items():
             assert (loc['easting'] >= eastings[0] and loc['easting'] <= eastings[-1]), \
                 f"Easting {loc['easting']} out of grid range [{eastings[0]}, {eastings[-1]}]"
-            assert (loc['northing'] <= northings[0] and loc['northing'] >= northings[-1]), \
+            assert (loc['northing'] <= northings[-1] and loc['northing'] >= northings[0]), \
                 f"Northing {loc['northing']} out of grid range [{northings[-1]}, {northings[0]}]"
 
     pixel_locations = {}
@@ -288,21 +288,6 @@ def interpolate_daily_timeseries(
 
     dates = pd.date_range(start=f'{start_year}-01-01', end=f'{end_year}-12-31')
 
-    for measure, spec in interpolation_spec.items():
-        method = spec['method']
-        a_min = spec.get('a_min', None)
-
-        if method == 'bilinear':
-            interpolator = RegularGridInterpolator((eastings, northings, dates), raw_data[measure], method='linear', bounds_error=True)
-        elif method == 'cubic':
-            interpolator = RegularGridInterpolator((eastings, northings, dates), raw_data[measure], method='cubic', bounds_error=True)
-        elif method == 'nearest':
-            interpolator = RegularGridInterpolator((eastings, northings, dates), raw_data[measure], method='nearest', bounds_error=True)
-        else:
-            raise ValueError(f'Unknown interpolation method: {method}')
-        
-        interpolation_spec[measure]['interpolator'] = interpolator
-
 
     with ProcessPoolExecutor(max_workers=28) as executor:
         futures = []
@@ -311,41 +296,35 @@ def interpolate_daily_timeseries(
             if status_channel is not None:
                 StatusMessenger.publish(status_channel, f'  interpolating topaz_id {topaz_id}...\n')
                 
+            # this interpolates the 3d grid using rust pyo3 and builds prn to be used by cligen
             futures.append(
                 executor.submit(interpolate_daily_timeseries_for_location, 
-                                topaz_id, loc, dates, interpolation_spec, output_dir, start_year, end_year))
+                                topaz_id, loc, dates, 
+                                eastings, northings, raw_data, interpolation_spec, 
+                                output_dir, start_year, end_year))
 
-        for i, future in enumerate(futures):
-            res = future.result(timeout=3600)
+        for future in as_completed(futures):
+            topaz_id = future.result(timeout=3600)
 
             if status_channel is not None:
                 StatusMessenger.publish(status_channel, f'  interpolating topaz_id {topaz_id}... done.\n')
 
-            for measure in raw_data.keys():
-                raw_data[measure][col - px0, row - py0, :] = df[measure].values
 
-
-def interpolate_daily_timeseries_for_location(topaz_id, loc, dates, interpolation_spec, output_dir, start_year, end_year, output_type='prn parquet'):
+def interpolate_daily_timeseries_for_location(topaz_id, loc, dates, 
+                                              eastings, northings, raw_data, interpolation_spec, output_dir, 
+                                              start_year, end_year, output_type='prn parquet'):
 
     df = pd.DataFrame(index=dates)
     hillslope_easting = loc['easting']
     hillslope_northing = loc['northing']
     npts = len(dates)
 
-    # create pts array for RegularGridInterpolator (easting, northing, dates)
-    pts = np.zeros((npts, 3))
-    pts[:, 0] = hillslope_easting
-    pts[:, 1] = hillslope_northing
-    pts[:, 2] = dates
-
     for measure, spec in interpolation_spec.items():
-        interpolator = spec['interpolator']
+        
         a_min = spec.get('a_min', None)
 
-        values = interpolator(pts)
-
-        if a_min is not None:
-            values = np.clip(values, a_min, None)
+        values = interpolate_geospatial(
+            hillslope_easting, hillslope_northing, eastings, northings, raw_data[measure], spec['method'], a_min=a_min)
 
         df[measure] = values
 
@@ -356,6 +335,8 @@ def interpolate_daily_timeseries_for_location(topaz_id, loc, dates, interpolatio
         df_to_prn(df, _join(output_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'), 
                     'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
     
+    return topaz_id
+
 
 if __name__ == "__main__":
 
