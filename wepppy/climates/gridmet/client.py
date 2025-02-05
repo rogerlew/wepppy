@@ -11,8 +11,32 @@ import numpy as np
 
 import netCDF4
 
-from wepppy.all_your_base import SCRATCH
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+import datetime
+import numpy as np
+import pandas as pd
+import requests
+
+from calendar import isleap
+
+from wepppy.all_your_base import SCRATCH, isint
 from wepppy.all_your_base.geo import RasterDatasetInterpolator
+
+from scipy.interpolate import RegularGridInterpolator
+
+import pyproj
+from pyproj import Proj
+
+from metpy.calc import  dewpoint_from_relative_humidity
+from metpy.units import units
+
+from wepppyo3.climate import interpolate_geospatial
+
+from wepppy.climates.cligen import df_to_prn
+
+from wepppy.nodb.status_messenger import StatusMessenger
+
 
 
 class GridMetVariable(Enum):
@@ -31,12 +55,48 @@ class GridMetVariable(Enum):
 # http://www.climatologylab.org/gridmet.html
 # The variable names can be obtained by downloading the dataset for a year and looking at the attributes using HDFView
 
+
+interpolation_spec = {
+    'pr': {
+        'method': 'cubic',
+        'a_min': 0.0, # clip to 0.0
+    },
+    'tmmn':{
+        'method': 'cubic',
+    },
+    'tmmx(degc)':{
+        'method': 'cubic',
+    },
+    'rmin':{
+        'method': 'cubic',
+    },
+    'rmax':{
+        'method': 'cubic',
+    },
+    'srad':{
+        'method': 'linear',
+        'a_min': 0.0, # clip to 0.0
+    },
+    'srad':{
+        'method': 'linear',
+        'a_min': 0.0, # clip to 0.0
+    },
+    'vs':{
+        'method': 'linear',
+        'a_min': 0.0, # clip to 0.0
+    },
+    'th':{
+        'method': 'nearest'
+    }
+}
+
+
 _var_meta = {
     GridMetVariable.Precipitation: ('pr', 'precipitation_amount'),
     GridMetVariable.MinimumTemperature: ('tmmn', 'air_temperature'),
     GridMetVariable.MaximumTemperature: ('tmmx', 'air_temperature'),
-    GridMetVariable.MinimumRelativeHumidity: ('rmin', 'air_temperature'),
-    GridMetVariable.MaximumRelativeHumidity: ('rmax', 'air_temperature'),
+    GridMetVariable.MinimumRelativeHumidity: ('rmin', 'relative_humidity'),
+    GridMetVariable.MaximumRelativeHumidity: ('rmax', 'relative_humidity'),
     GridMetVariable.SurfaceRadiation: ('srad', 'surface_downwelling_shortwave_flux_in_air'),
     GridMetVariable.PalmarDroughtSeverityIndex: ('pdsi', 'palmer_drought_severity_index'),
     GridMetVariable.PotentialEvapotranspiration: ('pet', 'potential_evapotranspiration'),
@@ -75,11 +135,10 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
           'disableProjSubset=on&horizStride=1&' \
           'time_start={year}-01-01T00%3A00%3A00Z&' \
           'time_end={year}-12-31T00%3A00%3A00Z&' \
-          'timeStride=1&accept=netcdf' \
-        .format(year=year, east=east, west=west, south=south, north=north,
-                abbrv=abbrv, variable_name=variable_name)
+          'timeStride=1&accept=netcdf'\
+          .format(abbrv=abbrv, year=year, variable_name=variable_name, north=north, west=west, east=east, south=south)
 
-    referer = 'https://rangesat.nkn.uidaho.edu'
+    referer = 'https://wepp.cloud'
     s = requests.Session()
     response = s.get(url, headers={'referer': referer}, stream=True)
     if _id is None:
@@ -92,6 +151,36 @@ def retrieve_nc(gridvariable: GridMetVariable, bbox, year, met_dir=None, _id=Non
     del response
 
     return _id
+
+
+def read_nc_longlat(fn):
+    ds = netCDF4.Dataset(fn)
+    longitudes = ds.variables['lon'][:]
+    latitudes = ds.variables['lat'][:]
+    return longitudes, latitudes
+
+
+def read_nc(fn, gridvariable):
+    abbrv, variable_name = _var_meta[gridvariable]
+    ds = netCDF4.Dataset(fn)
+    variable = ds.variables[variable_name]
+    desc = variable.description
+    units = variable.units
+    scale_factor = getattr(variable, 'scale_factor', 1.0)
+    add_offset = getattr(variable, 'add_offset', 0.0)
+
+    ts = variable[:]
+
+    ts = np.array(ts, dtype=np.float64)
+
+#    ts *= scale_factor
+#    ts += add_offset
+    if 'K' == units:
+        ts -= 273.15
+        units = 'degc'
+
+    # ts is dates, lats, longs
+    return ts, abbrv, units.replace(' ', '')
 
 
 def dump(abbrv, year, key, ts, desc, units, met_dir):
@@ -143,11 +232,11 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
                 if _d is not None:
                     for key, ts in _d.items():
                         ts = np.array(ts, dtype=np.float64)
-                        ts *= scale_factor
-                        ts += add_offset
+#                        ts *= scale_factor
+#                        ts += add_offset
                         if 'K' == units:
                             ts -= 273.15
-                            units = 'C'
+                            units = 'degc'
 
                         # print(desc, ts)
 
@@ -160,6 +249,49 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
                 os.remove(fn)
                 raise
     #return d
+
+
+def interpolate_daily_timeseries_for_location(topaz_id, loc, dates, 
+                                              longitudes, latitudes, raw_data, interpolation_spec, output_dir, 
+                                              start_year, end_year, output_type='prn parquet'):
+
+    df = pd.DataFrame(index=dates)
+    hillslope_lng = loc['longitude']
+    hillslope_lat = loc['latitude']
+    npts = len(dates)
+
+    for measure, spec in interpolation_spec.items():
+        
+        a_min = spec.get('a_min', None)
+
+        values = interpolate_geospatial(
+            hillslope_lng, hillslope_lat, longitudes, latitudes, raw_data[measure], spec['method'], a_min=a_min)
+
+        df[measure] = values
+
+ 
+    df['srad(l/day)'] = df['srad(Wm-2)'] * 2.06362996638
+    
+    df['tavg(degc)'] = (df['tmmx(degc)'] + df['tmmn(degc)']) / 2
+    df['vs(m/s)'] = pd.Series(df['vs(m/s)']).astype(float)
+    df['th(DegreesClockwisefromnorth)'] = pd.Series(df['th(DegreesClockwisefromnorth)']).astype(float)
+    df['rmax(%)'] = pd.Series(df['rmax(%)']).astype(float)
+    df['rmin(%)'] = pd.Series(df['rmin(%)']).astype(float)
+    df['ravg(%)'] = (df['rmax(%)'] + df['rmin(%)']) / 2
+    df['tdew(degc)'] = dewpoint_from_relative_humidity(df['tavg(degc)'].values * units.degC,
+                                                       df['ravg(%)'].values * units.percent).magnitude
+    df['tdew(degc)'] = np.clip(df['tdew(degc)'], df['tmmn(degc)'], None)
+
+
+    if 'parquet' in output_type:
+        df.to_parquet(_join(output_dir, f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.parquet'))
+
+    if 'prn' in output_type:
+        df_to_prn(df, _join(output_dir, f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.prn'), 
+                    'pr(mm)', 'tmmx(degc)', 'tmmn(degc)')
+    
+    return topaz_id
+
 
 
 if __name__ == "__main__":

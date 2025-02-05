@@ -37,7 +37,13 @@ def retrieve_historical_wind(lon, lat, start_year, end_year):
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
     response = requests.get(url, headers=headers)
 
-    response_data = response.json()
+    if response.status_code != 200:
+        raise Exception(response.text)
+    
+    try:
+        response_data = response.json()
+    except:
+        raise Exception(response.text)
 
     data = response_data['data'][0]
 
