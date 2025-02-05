@@ -11,7 +11,7 @@ import traceback
 import redis
 
 import rq
-from rq import Worker
+from rq import Worker, Queue, Connection
 from rq.job import Job
 from rq.registry import StartedJobRegistry
 
