@@ -5,6 +5,8 @@ from datetime import datetime
 from os.path import join as _join
 from os.path import exists as _exists
 from subprocess import Popen, PIPE
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 from cligen import ClimateFile, CligenStationsManager, df_to_prn, _bin_dir
 
@@ -242,9 +244,6 @@ def build_climate(lng, lat, start_date, end_date, model, scenario, identifier=No
 
     assert _exists(cli_fn)
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
-
 def process_location(location, models, scenarios):
     for model in models:
         for scenario_d in scenarios:
@@ -283,6 +282,5 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(process_location, location, models, scenarios) for location in locations]
         
-        # Optional: Wait for all futures to complete if needed
-        for future in futures:
+        for future in as_completed(futures):
             future.result()
