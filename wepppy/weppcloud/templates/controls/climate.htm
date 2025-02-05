@@ -122,13 +122,13 @@
             </label><br/>
 
             {% if 'alaska' not in ron.locales and 'hawaii' not in ron.locales and 'nigeria' not in ron.locales and 'eu' not in ron.locales and 'au' not in ron.locales %}
-                <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> PRISM Modified
+                <label class="radio"><input type="radio" value="5" class="disable-readonly" id="climate_mode5" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 5] }}> Stochastic PRISM Modified
                     <a data-toggle="tooltip" data-placement="top" title="Recommended. Does spatial interpolation."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET (GRIDMET wind) with PRISM Revision [1980 - {{ climate.daymet_last_available_year }}]
+                <label class="radio"><input type="radio" value="9" class="disable-readonly" id="climate_mode9" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 9] }}> Observed DAYMET (GRIDMET wind) [1980 - {{ climate.daymet_last_available_year }}]
                     <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to 2019."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
-                <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET with PRISM Revision [1980 - Present]
+                <label class="radio"><input type="radio" value="11" class="disable-readonly" id="climate_mode11" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 11] }}> Observed GRIDMET [1980 - Present]
                     <a data-toggle="tooltip" data-placement="top" title="Recommended only when streamflow data is available. Does spatial interpolation. Available up to the day before yesterday. (For current year data to the end of the year is stochastically generated to allow WEPP to run.)"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
                 <label class="radio"><input type="radio" value="13" class="disable-readonly" id="climate_mode13" name="climate_mode" {{ ('', 'checked')[climate.climate_mode == 13] }}> DEP NEXRAD Breakpoint files (0.01 deg grid) [2007 - Present]
@@ -201,13 +201,13 @@
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="1" class="disable-readonly" 
-                      id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple Climates
+                      id="climate_spatialmode1" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 1] }}> Multiple PRISM Revision
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
                 <label class="radio">
                     <input type="radio" value="2" class="disable-readonly" 
-                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }}> Multiple Interpolated (DAYMET only, Slow)
+                      id="climate_spatialmode2" name="climate_spatialmode" {{ ('', 'checked')[climate.climate_spatialmode == 2] }}> Multiple Interpolated (Slow)
                     <a data-toggle="tooltip" data-placement="top" title="One for each hillslope, interpolates climate grid. Slow.">
                       <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
                 </label><br/>
