@@ -1,3 +1,13 @@
+
+"""
+Deprecated Module
+This entire file has been marked as deprecated. Any functionality previously
+provided by this code may no longer be maintained or supported. Users are
+encouraged to refrain from relying on it in new or existing projects and to
+migrate to updated solutions as they become available.
+"""
+
+
 import pandas as pd
 import numpy as np
 from calendar import isleap
