@@ -1,6 +1,6 @@
 from .mods import *
 
-from .base import TriggerEvents, get_configs
+from .base import TriggerEvents, get_configs, get_legacy_configs
 
 from .ron import (
     Ron, 
