@@ -1069,6 +1069,14 @@ class Soils(NoDbBase, LogMixin):
         Dumps the subs_summary to a Parquet file using Pandas.
         """
         self.log('creating soils parquet table')
+        df = self.hill_table
+        df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
+        
+    @property
+    def hill_table(self):
+        """
+        Returns a pandas DataFrame with the hill table.
+        """
         subs_summary = self.subs_summary
         assert subs_summary is not None
 
@@ -1077,9 +1085,8 @@ class Soils(NoDbBase, LogMixin):
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
         df['mukey'] = df['mukey'].astype(str)
-
-        df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
-
+        
+        return df
 
     def sub_iter(self):
         domsoil_d = self.domsoil_d
