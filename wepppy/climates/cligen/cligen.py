@@ -1547,7 +1547,7 @@ class Cligen:
         _clinp.close()
         _log.close()
 
-        assert _exists(cli_path)
+        assert _exists(cli_path), cli_path
 
         return cli_fname
 
@@ -1589,14 +1589,14 @@ class Cligen:
         if not _exists(par_fn):
             shutil.copyfile(station_meta.parpath, par_fn)
 
-        assert _exists(par_fn)
+        assert _exists(par_fn), par_fn
         _, par = os.path.split(par_fn)
 
         # change to working directory
         cli_dir = self.wd
 
         prn_path = _join(cli_dir, prn_fn)
-        assert _exists(prn_path), f'{prn} does not exist, must be specified relative to wd of Cligen'
+        assert _exists(prn_path), f'{prn_fn} does not exist, must be specified relative to wd of Cligen'
 
         # delete cli file if it exists
         if _exists(_join(cli_dir, cli_fn)):
@@ -1617,7 +1617,7 @@ class Cligen:
         p.wait(timeout=50)
         _log.close()
 
-        assert _exists(_join(cli_dir, cli_fn))
+        assert _exists(_join(cli_dir, cli_fn)), cli_fn
 
 
 def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_dataset='prism',
