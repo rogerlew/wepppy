@@ -14,3 +14,4 @@ wepppy/taudem/tests/*/*
 .ipynb_checkpoints/*
 .env
 wepppy/locales/global/soils/isric/test
+wepppy/climates/cligen/_scripts/*.db
