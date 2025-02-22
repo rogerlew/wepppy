@@ -392,5 +392,210 @@
         </div>
     </div>
 </div>
+
+<a href="#climate_advanced_opts_con" data-toggle="collapse" class
+    aria-expanded="true">Advanced Options</a>
+<div id="climate_advanced_opts_con" class="collapse">
+    <h5>Post CLIGEN Precipitation Scaling</h5>
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <label class="radio">
+                <input type="radio" value="0" class="disable-readonly" id="climate_precipscaling_mode0" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 0] }}> No Scaling
+                <a data-toggle="tooltip" data-placement="top" title="No Scaling.">
+                  <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio">
+                <input type="radio" value="1" class="disable-readonly" id="climate_precipscaling_mode1" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 1] }}> Scalar Scaling
+                <a data-toggle="tooltip" data-placement="top" title="Scalar.">
+                  <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio">
+                <input type="radio" value="2" class="disable-readonly" id="climate_precipscaling_mode2" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 2] }}> Monthly Scaling (requires Observed Climate)
+                <a data-toggle="tooltip" data-placement="top" title="Vector of monthly scale values.">
+                  <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio">
+                <input type="radio" value="3" class="disable-readonly" id="climate_precipscaling_mode3" name="precip_scaling_mode" {{ ('', 'checked')[climate.precip_scaling_mode == 3] }}> Reference Scaling
+                <a data-toggle="tooltip" data-placement="top" title="Scale to reference dataset month-by-month.">
+                  <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+            <label class="radio">
+                <input type="radio" value="4" class="disable-readonly" id="climate_precipscaling_mode4" name="precip_scaling_mode" disabled {{ ('', 'checked')[climate.precip_scaling_mode == 4] }}> Spatial Scaling from Map (config dependent)
+                <a data-toggle="tooltip" data-placement="top" title="Queries map for scale value for each hillslope.">
+                  <img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+            </label><br/>
+        </div>
+    </div>
+
+    <div id="climate_precipscaling_mode1_controls">
+        <h5>Scalar Scaling</h5>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="precip_scale_factor">Multiplier (e.g. 1.1 is 10% more precip): </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_scale_factor"
+                name="precip_scale_factor" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_scale_factor }}" aria-label="Scalar Value">
+            </div>
+        </div>
+    </div>
+
+    <div id="climate_precipscaling_mode2_controls">
+        <h5>Monthly Scaling</h5>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">January: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_0"
+                name="precip_monthly_scale_factors_0" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[0] }}" aria-label="January">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">February: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_1"
+                name="precip_monthly_scale_factors_1" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[1] }}" aria-label="February">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">March: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_2"
+                name="precip_monthly_scale_factors_2" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[2] }}" aria-label="March">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">April: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_3"
+                name="precip_monthly_scale_factors_3" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[3] }}" aria-label="April">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">May: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_4"
+                name="precip_monthly_scale_factors_4" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[4] }}" aria-label="May">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">June: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_5"
+                name="precip_monthly_scale_factors_5" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[5] }}" aria-label="June">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">July: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_6"
+                name="precip_monthly_scale_factors_6" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[6] }}" aria-label="July">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">August: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_7"
+                name="precip_monthly_scale_factors_7" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[7] }}" aria-label="August">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">September: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_8"
+                name="precip_monthly_scale_factors_8" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[8] }}" aria-label="September">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">October: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_9"
+                name="precip_monthly_scale_factors_9" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[9] }}" aria-label="October">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">November: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_10"
+                name="precip_monthly_scale_factors_10" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[10] }}" aria-label="November">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="pr">December: </label>
+            </div>
+            <div class="col-sm-4">
+                <input id="precip_monthly_scale_factors_11"
+                name="precip_monthly_scale_factors_11" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_monthly_scale_factors[11] }}" aria-label="December">
+            </div>
+        </div>
+    </div>
+
+    <div id="climate_precipscaling_mode3_controls">
+        <h5>Reference Scaling</h5>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="precip_scale_reference">Reference Dataset: </label>
+            </div>
+            <div class="col-sm-4">
+                <select id="precip_scale_reference" name="precip_scale_reference" class="form-control mr-sm-3 disable-readonly">
+                    <option value="prism" {{ ('', 'selected')[climate.precip_scale_reference == 'prism'] }}>PRISM (1981-2024)</option>
+                    <option value="daymet" {{ ('', 'selected')[climate.precip_scale_reference == 'daymet'] }}>DAYMET</option>
+                    <option value="gridmet" {{ ('', 'selected')[climate.precip_scale_reference == 'gridmet'] }}>GRIDMET</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="climate_precipscaling_mode4_controls">
+        <h5>Spatial Scaling</h5>
+        <div class="form-group row">
+            <div class="col-sm-3">
+                <label for="precip_scale_factor_map">Map: </label>
+            </div>
+            <div class="col-sm-5">
+                <input id="precip_scale_factor_map"
+                name="precip_scale_factor_map" class="form-control mr-sm-3 disable-readonly" type="text"
+                value="{{ climate.precip_scale_factor_map }}" aria-label="Map" readonly>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="height: 1em;"></div>
+
 {% endblock %}
 

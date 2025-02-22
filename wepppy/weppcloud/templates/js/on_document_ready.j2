@@ -858,6 +858,29 @@ function onReady() {
         climate.setStation();
     });
 
+    function togglePrecipScalingControls() {
+        var mode = $('input[name="precip_scaling_mode"]:checked').val();
+        // Hide all control divs first
+        $('#climate_precipscaling_mode1_controls, #climate_precipscaling_mode2_controls, #climate_precipscaling_mode3_controls, #climate_precipscaling_mode4_controls').hide();
+        
+        // Show the relevant control div if mode is not "No Scaling"
+        if (mode === "1") {
+        $('#climate_precipscaling_mode1_controls').show();
+        } else if (mode === "2") {
+        $('#climate_precipscaling_mode2_controls').show();
+        } else if (mode === "3") {
+        $('#climate_precipscaling_mode3_controls').show();
+        } else if (mode === "4") {
+        $('#climate_precipscaling_mode4_controls').show();
+        }
+    }
+
+    // Bind change event to radio buttons
+    $('input[name="precip_scaling_mode"]').on('change', togglePrecipScalingControls);
+    
+    // Initialize on page load
+    togglePrecipScalingControls();
+    
     //
     // Climate Event Bindings
     //

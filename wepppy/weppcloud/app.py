@@ -1243,48 +1243,7 @@ def rq_fork_console(runid, config):
     if should_abort:
         abort(403)
 
-    return Response('''\
-<html>
-  <head>
-    <title>fork</title>
-    <script type="text/javascript">
-window.onload = function(e){
-
-    var bottom = document.getElementById("bottom");
-    var the_console = document.getElementById("the_console");
-            
-    $.post({
-        url: "rq/api/fork",
-        data: {undisturbify: __undisturbify__},
-        success: function success(response) {
-            if (response.Success === true) {
-                the_console.html(`fork job submitted: ${response.job_id}\n\nnew_runid: ${response.new_runid}`);
-            } else {
-                the_console.html(`Error: ${response.Error}`);
-            }
-        },
-        error: function error(jqXHR)  {
-            the_console.html(`Error: ${jqXHR.responseText}`);
-        },
-        fail: function fail(jqXHR, textStatus, errorThrown) {
-            the_console.html(`Error: ${errorThrown}`);
-        }
-    });
-            
-}
-    </script>
-  </head>
-  <body>
-    <div style="margin-left:2em;">
-      <h1><h1>
-      <pre>
-      <span id="the_console"></span>
-      </pre
-    </div>
-    <div id="bottom"></div>
-  </body>
-</html>  
-'''.replace('__undisturbify__', undisturbify))
+    return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
 
 
 @app.route('/runs/<string:runid>/<config>/fork')
@@ -3341,6 +3300,12 @@ def task_build_climate(runid, config):
     climate = Climate.getInstance(wd)
 
     try:
+        if request.form.get('precip_monthly_scale_factors_7', None) is not None:
+            precip_monthly_scale_factors = []
+            for i in range(12):
+                precip_monthly_scale_factors.append(
+                    float(request.form.get('precip_monthly_scale_factors_%d' % i)))
+            request.form['precip_monthly_scale_factors'] = precip_monthly_scale_factors
         climate.parse_inputs(request.form)
     except Exception:
         return exception_factory('Error parsing climate inputs', runid=runid)

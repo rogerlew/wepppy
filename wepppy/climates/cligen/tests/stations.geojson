@@ -1,0 +1,1301 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.13,
+          45.93
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "GRANGEVILLE ID                          103771 0",
+        "par": "id103771.par",
+        "latitude": 45.93,
+        "longitude": -116.13,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3410.0,
+        "tp5": 0.74,
+        "tp6": 1.9,
+        "annual_ppt": 22.803502688773786,
+        "id": "id103771"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.95,
+          43.8
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "PARMA EXP STA ID                        106844 0",
+        "par": "id106844.par",
+        "latitude": 43.8,
+        "longitude": -116.95,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2280.0,
+        "tp5": 0.68,
+        "tp6": 1.63,
+        "annual_ppt": 9.850900040685229,
+        "id": "id106844"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.68,
+          43.48
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "SQUAW BUTTE EXP STA OR                  358029 0",
+        "par": "or358029.par",
+        "latitude": 43.48,
+        "longitude": -119.68,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 4680.0,
+        "tp5": 0.99,
+        "tp6": 1.6,
+        "annual_ppt": 9.693577808234538,
+        "id": "or358029"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.55,
+          45.35
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "HEPPNER OR                              353827 0",
+        "par": "or353827.par",
+        "latitude": 45.35,
+        "longitude": -119.55,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1950.0,
+        "tp5": 0.84,
+        "tp6": 1.56,
+        "annual_ppt": 13.755409136031988,
+        "id": "or353827"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.97,
+          44.15
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "SENECA OR                               357675 0",
+        "par": "or357675.par",
+        "latitude": 44.15,
+        "longitude": -118.97,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 4700.0,
+        "tp5": 1.02,
+        "tp6": 1.68,
+        "annual_ppt": 12.842237022627664,
+        "id": "or357675"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.83,
+          43.83
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "IDAHO CITY ID                           104442 0",
+        "par": "id104442.par",
+        "latitude": 43.83,
+        "longitude": -115.83,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3940.0,
+        "tp5": 0.95,
+        "tp6": 1.95,
+        "annual_ppt": 21.578419348407248,
+        "id": "id104442"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.2,
+          46.25
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "NEZPERCE 2 E ID                         106424 0",
+        "par": "id106424.par",
+        "latitude": 46.25,
+        "longitude": -116.2,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3250.0,
+        "tp5": 0.69,
+        "tp6": 1.87,
+        "annual_ppt": 18.1398461359573,
+        "id": "id106424"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.07,
+          43.53
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "BOISE LUCKY PEAK DM ID                  101018 0",
+        "par": "id101018.par",
+        "latitude": 43.53,
+        "longitude": -116.07,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2830.0,
+        "tp5": 0.6,
+        "tp6": 1.78,
+        "annual_ppt": 10.269271687868667,
+        "id": "id101018"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.3,
+          42.95
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "GLENNS FERRY ID                         103631 0",
+        "par": "id103631.par",
+        "latitude": 42.95,
+        "longitude": -115.3,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2570.0,
+        "tp5": 0.94,
+        "tp6": 1.47,
+        "annual_ppt": 7.590201895278637,
+        "id": "id103631"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.02,
+          46.38
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "LEWISTON WB AP ID                       105241 0",
+        "par": "id105241.par",
+        "latitude": 46.38,
+        "longitude": -117.02,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1410.0,
+        "tp5": 0.73,
+        "tp6": 2.03,
+        "annual_ppt": 12.202987279047925,
+        "id": "id105241"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.22,
+          43.57
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "BOISE WB AP ID                          101022 0",
+        "par": "id101022.par",
+        "latitude": 43.57,
+        "longitude": -116.22,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2840.0,
+        "tp5": 0.71,
+        "tp6": 1.85,
+        "annual_ppt": 11.93425391054396,
+        "id": "id101022"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.17,
+          46.78
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "ELK RIVER 1 S ID                        102892 0",
+        "par": "id102892.par",
+        "latitude": 46.78,
+        "longitude": -116.17,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2910.0,
+        "tp5": 1.4,
+        "tp6": 2.16,
+        "annual_ppt": 32.55371401438167,
+        "id": "id102892"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.05,
+          44.53
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "CASCADE 1 NW ID                         101514 0",
+        "par": "id101514.par",
+        "latitude": 44.53,
+        "longitude": -116.05,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 4870.0,
+        "tp5": 0.7,
+        "tp6": 2.06,
+        "annual_ppt": 22.71958578618208,
+        "id": "id101514"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.38,
+          43.25
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "SWAN FALLS PW HOUSE ID                  108928 0",
+        "par": "id108928.par",
+        "latitude": 43.25,
+        "longitude": -116.38,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2320.0,
+        "tp5": 0.76,
+        "tp6": 1.89,
+        "annual_ppt": 7.762084153341316,
+        "id": "id108928"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.72,
+          42.0
+        ]
+      },
+      "properties": {
+        "state": "NV",
+        "desc": "MCDERMITT NV                            264935 0",
+        "par": "nv264935.par",
+        "latitude": 42.0,
+        "longitude": -117.72,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 4520.0,
+        "tp5": 0.76,
+        "tp6": 1.54,
+        "annual_ppt": 7.819788264618185,
+        "id": "nv264935"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.2,
+          46.77
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "PULLMAN 2 NW WA                         456789 0",
+        "par": "wa456789.par",
+        "latitude": 46.77,
+        "longitude": -117.2,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2550.0,
+        "tp5": 0.75,
+        "tp6": 1.83,
+        "annual_ppt": 20.235407798195247,
+        "id": "wa456789"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.95,
+          44.42
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "JOHN DAY OR                             354291 0",
+        "par": "or354291.par",
+        "latitude": 44.42,
+        "longitude": -118.95,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3070.0,
+        "tp5": 1.23,
+        "tp6": 1.73,
+        "annual_ppt": 12.993767978325305,
+        "id": "or354291"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.25,
+          43.98
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "VALE OR                                 358797 0",
+        "par": "or358797.par",
+        "latitude": 43.98,
+        "longitude": -117.25,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2240.0,
+        "tp5": 1.18,
+        "tp6": 1.67,
+        "annual_ppt": 9.088062042647788,
+        "id": "or358797"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.83,
+          43.28
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "MALHEUR REFUGE HDQ OR                   355162 0",
+        "par": "or355162.par",
+        "latitude": 43.28,
+        "longitude": -118.83,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 4100.0,
+        "tp5": 0.89,
+        "tp6": 1.66,
+        "annual_ppt": 7.585702720883567,
+        "id": "or355162"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.4,
+          45.93
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "MILTON OR                               355593 0",
+        "par": "or355593.par",
+        "latitude": 45.93,
+        "longitude": -118.4,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1060.0,
+        "tp5": 0.97,
+        "tp6": 2.06,
+        "annual_ppt": 15.552760535192505,
+        "id": "or355593"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.82,
+          44.83
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "BAKER CAA AP OR                         35 412 0",
+        "par": "or350412.par",
+        "latitude": 44.83,
+        "longitude": -117.82,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3370.0,
+        "tp5": 1.44,
+        "tp6": 1.6,
+        "annual_ppt": 10.138677753280751,
+        "id": "or350412"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.68,
+          44.57
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "CAMBRIDGE ID                            101408 0",
+        "par": "id101408.par",
+        "latitude": 44.57,
+        "longitude": -116.68,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2650.0,
+        "tp5": 1.19,
+        "tp6": 1.86,
+        "annual_ppt": 20.23589316087198,
+        "id": "id101408"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.43,
+          45.82
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "ELK CITY ID                             102875 0",
+        "par": "id102875.par",
+        "latitude": 45.82,
+        "longitude": -115.43,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3980.0,
+        "tp5": 0.84,
+        "tp6": 1.93,
+        "annual_ppt": 29.2417339827454,
+        "id": "id102875"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.47,
+          43.87
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "EMMETT 2 E ID                           102942 0",
+        "par": "id102942.par",
+        "latitude": 43.87,
+        "longitude": -116.47,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2500.0,
+        "tp5": 0.67,
+        "tp6": 1.65,
+        "annual_ppt": 13.370589549048274,
+        "id": "id102942"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.62,
+          46.75
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "HATTON 10 E WA                          453546 0",
+        "par": "wa453546.par",
+        "latitude": 46.75,
+        "longitude": -118.62,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1370.0,
+        "tp5": 0.96,
+        "tp6": 1.46,
+        "annual_ppt": 10.171746273496925,
+        "id": "wa453546"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.25,
+          43.65
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "OWYHEE DAM OR                           356405 0",
+        "par": "or356405.par",
+        "latitude": 43.65,
+        "longitude": -117.25,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2400.0,
+        "tp5": 0.7,
+        "tp6": 2.07,
+        "annual_ppt": 9.421372989389962,
+        "id": "or356405"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.02,
+          44.02
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "ONTARIO CAA AP OR                       356294 0",
+        "par": "or356294.par",
+        "latitude": 44.02,
+        "longitude": -117.02,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2190.0,
+        "tp5": 1.15,
+        "tp6": 1.74,
+        "annual_ppt": 9.284875419139212,
+        "id": "or356294"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.63,
+          42.83
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "ROME OR                                 357310 0",
+        "par": "or357310.par",
+        "latitude": 42.83,
+        "longitude": -117.63,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3400.0,
+        "tp5": 0.91,
+        "tp6": 1.69,
+        "annual_ppt": 7.931228571392005,
+        "id": "or357310"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.88,
+          46.92
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "POTLATCH ID                             107301 0",
+        "par": "id107301.par",
+        "latitude": 46.92,
+        "longitude": -116.88,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2550.0,
+        "tp5": 0.81,
+        "tp6": 1.92,
+        "annual_ppt": 21.848743537953553,
+        "id": "id107301"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.12,
+          44.88
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "HALFWAY OR                              353604 0",
+        "par": "or353604.par",
+        "latitude": 44.88,
+        "longitude": -117.12,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2680.0,
+        "tp5": 1.4,
+        "tp6": 1.6,
+        "annual_ppt": 20.720593125379928,
+        "id": "or353604"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.58,
+          47.0
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "LIND 3 NE EXP STA WA                    454679 0",
+        "par": "wa454679.par",
+        "latitude": 47.0,
+        "longitude": -118.58,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1630.0,
+        "tp5": 1.0,
+        "tp6": 1.38,
+        "annual_ppt": 9.25537169166081,
+        "id": "wa454679"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.42,
+          44.82
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "MONUMENT 2 OR                           355711 0",
+        "par": "or355711.par",
+        "latitude": 44.82,
+        "longitude": -119.42,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1990.0,
+        "tp5": 1.31,
+        "tp6": 1.63,
+        "annual_ppt": 11.84541696200326,
+        "id": "or355711"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.3,
+          46.3
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "RICHLAND 2 NW WA                        457015 0",
+        "par": "wa457015.par",
+        "latitude": 46.3,
+        "longitude": -119.3,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 400.0,
+        "tp5": 0.85,
+        "tp6": 1.43,
+        "annual_ppt": 7.176721775380779,
+        "id": "wa457015"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.13,
+          46.22
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "KENNEWICK WA                            454154 0",
+        "par": "wa454154.par",
+        "latitude": 46.22,
+        "longitude": -119.13,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 390.0,
+        "tp5": 0.86,
+        "tp6": 1.85,
+        "annual_ppt": 7.492492066931579,
+        "id": "wa454154"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0,
+          46.73
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "MOSCOW U OF I ID                        106152 0",
+        "par": "id106152.par",
+        "latitude": 46.73,
+        "longitude": -117.0,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2630.0,
+        "tp5": 0.71,
+        "tp6": 1.99,
+        "annual_ppt": 26.67945045943446,
+        "id": "id106152"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.28,
+          44.97
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "NEW MEADOWS R S ID                      106388 0",
+        "par": "id106388.par",
+        "latitude": 44.97,
+        "longitude": -116.28,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3860.0,
+        "tp5": 1.26,
+        "tp6": 2.05,
+        "annual_ppt": 19.618191598772526,
+        "id": "id106388"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.95,
+          46.3
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "DAYTON 2 SE WA                          452030 0",
+        "par": "wa452030.par",
+        "latitude": 46.3,
+        "longitude": -117.95,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1750.0,
+        "tp5": 0.99,
+        "tp6": 1.76,
+        "annual_ppt": 18.39210633983421,
+        "id": "wa452030"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.83,
+          45.48
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "PILOT ROCK OR                           356634 0",
+        "par": "or356634.par",
+        "latitude": 45.48,
+        "longitude": -118.83,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1640.0,
+        "tp5": 1.26,
+        "tp6": 1.78,
+        "annual_ppt": 14.141932209871785,
+        "id": "or356634"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0,
+          43.87
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "NYSSA OR                                356179 0",
+        "par": "or356179.par",
+        "latitude": 43.87,
+        "longitude": -117.0,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2190.0,
+        "tp5": 0.7,
+        "tp6": 2.07,
+        "annual_ppt": 9.629545912064337,
+        "id": "or356179"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.92,
+          44.07
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "GARDEN VALLEY RS ID                     103448 0",
+        "par": "id103448.par",
+        "latitude": 44.07,
+        "longitude": -115.92,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3150.0,
+        "tp5": 0.96,
+        "tp6": 2.06,
+        "annual_ppt": 22.422433831177926,
+        "id": "id103448"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.42,
+          44.75
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "COUNCIL 2 NNE ID                        102187 0",
+        "par": "id102187.par",
+        "latitude": 44.75,
+        "longitude": -116.42,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3150.0,
+        "tp5": 1.2,
+        "tp6": 2.03,
+        "annual_ppt": 16.27628513071698,
+        "id": "id102187"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.12,
+          44.9
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "MC CALL ID                              105708 0",
+        "par": "id105708.par",
+        "latitude": 44.9,
+        "longitude": -116.12,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 5030.0,
+        "tp5": 1.37,
+        "tp6": 2.1,
+        "annual_ppt": 25.389399337082164,
+        "id": "id105708"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.75,
+          43.58
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "DEER FLAT DAM ID                        102444 0",
+        "par": "id102444.par",
+        "latitude": 43.58,
+        "longitude": -116.75,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2510.0,
+        "tp5": 0.67,
+        "tp6": 1.64,
+        "annual_ppt": 9.239965619944757,
+        "id": "id102444"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.53,
+          45.57
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "WALLOWA OR                              358997 0",
+        "par": "or358997.par",
+        "latitude": 45.57,
+        "longitude": -117.53,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2950.0,
+        "tp5": 1.19,
+        "tp6": 2.01,
+        "annual_ppt": 16.5265481104085,
+        "id": "or358997"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.93,
+          44.07
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "PAYETTE ID                              106891 0",
+        "par": "id106891.par",
+        "latitude": 44.07,
+        "longitude": -116.93,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2160.0,
+        "tp5": 1.02,
+        "tp6": 1.85,
+        "annual_ppt": 9.618686012688485,
+        "id": "id106891"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -120.0,
+          46.32
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "SUNNYSIDE WA                            458207 0",
+        "par": "wa458207.par",
+        "latitude": 46.32,
+        "longitude": -120.0,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 750.0,
+        "tp5": 0.87,
+        "tp6": 1.42,
+        "annual_ppt": 6.756104891353291,
+        "id": "wa458207"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.55,
+          46.1
+        ]
+      },
+      "properties": {
+        "state": "ID",
+        "desc": "FENN RS ID                              103143 0",
+        "par": "id103143.par",
+        "latitude": 46.1,
+        "longitude": -115.55,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1600.0,
+        "tp5": 0.8,
+        "tp6": 2.05,
+        "annual_ppt": 38.346676882014776,
+        "id": "id103143"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.85,
+          45.68
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "PENDLETON WB AP OR                      356546 0",
+        "par": "or356546.par",
+        "latitude": 45.68,
+        "longitude": -118.85,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1490.0,
+        "tp5": 1.13,
+        "tp6": 1.59,
+        "annual_ppt": 12.519302419661305,
+        "id": "or356546"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.65,
+          42.55
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "HART MOUNTAIN REF OR                    353692 0",
+        "par": "or353692.par",
+        "latitude": 42.55,
+        "longitude": -119.65,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 5620.0,
+        "tp5": 0.66,
+        "tp6": 1.65,
+        "annual_ppt": 11.388434474939444,
+        "id": "or353692"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.28,
+          46.1
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "WALLA WALLA 9A AP WA                    458928 0",
+        "par": "wa458928.par",
+        "latitude": 46.1,
+        "longitude": -118.28,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1190.0,
+        "tp5": 1.07,
+        "tp6": 2.14,
+        "annual_ppt": 17.72460604489114,
+        "id": "wa458928"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.02,
+          43.97
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "MALHEUR BRANCH EXP OR                   355160 0",
+        "par": "or355160.par",
+        "latitude": 43.97,
+        "longitude": -117.02,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 2250.0,
+        "tp5": 0.86,
+        "tp6": 1.62,
+        "annual_ppt": 10.22594432213592,
+        "id": "or355160"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.82,
+          46.8
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "LACCROSSE 3 ESE WA                      454338 0",
+        "par": "wa454338.par",
+        "latitude": 46.8,
+        "longitude": -117.82,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1550.0,
+        "tp5": 0.91,
+        "tp6": 1.69,
+        "annual_ppt": 14.397640222853711,
+        "id": "wa454338"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.38,
+          43.8
+        ]
+      },
+      "properties": {
+        "state": "OR",
+        "desc": "DREWSEY OR                              352415 0",
+        "par": "or352415.par",
+        "latitude": 43.8,
+        "longitude": -118.38,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 3520.0,
+        "tp5": 1.29,
+        "tp6": 2.07,
+        "annual_ppt": 10.3718980437489,
+        "id": "or352415"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.58,
+          46.48
+        ]
+      },
+      "properties": {
+        "state": "WA",
+        "desc": "POMEROY WA                              456610 0",
+        "par": "wa456610.par",
+        "latitude": 46.48,
+        "longitude": -117.58,
+        "years": 40.0,
+        "type": 3,
+        "elevation": 1900.0,
+        "tp5": 0.92,
+        "tp6": 1.96,
+        "annual_ppt": 16.53458630115047,
+        "id": "wa456610"
+      }
+    }
+  ]
+}

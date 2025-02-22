@@ -6,7 +6,7 @@ import json
 from pprint import pprint
 
 
-def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2022, end_year=2022, gridmet_wind=False):
+def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2000, end_year=2024, gridmet_wind=False):
     
     start_date = f'{start_year}0101'
     end_date = f'{end_year}1231'
@@ -67,7 +67,7 @@ def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2022, end_ye
 
     if gridmet_wind:
         from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
-        wind_df = gridmet_retrieve_historical_wind(lon, lat, start_year, end_year)
+        wind_df = gridmet_retrieve_historical_wind(lng, lat, start_year, end_year)
 
         df['vs(m/s)'] = wind_df['vs(m/s)']
         df['th(DegreesClockwisefromnorth)'] = wind_df['th(DegreesClockwisefromnorth)']
@@ -76,4 +76,4 @@ def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2022, end_ye
 
 if __name__ == "__main__":
     d = retrieve_historical_timeseries(lng=-122.0, lat=44.5)
-    print(d)
+#    print(d)

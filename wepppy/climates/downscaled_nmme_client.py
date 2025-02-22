@@ -72,7 +72,7 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
     start_date = parse_datetime(start_date)
     end_date = parse_datetime(end_date)
     
-    assert model in ['GFDL-ESM2G', 'GFDL-ESM2M']
+ #   assert model in ['GFDL-ESM2G', 'GFDL-ESM2M']
     
     assert scenario in ["rcp45_2006_2099",
                         "rcp85_2006_2099",
@@ -139,7 +139,7 @@ def _retrieve(lng, lat, start_date, end_date, model, scenario, variable_name, ve
 
 
 def retrieve_timeseries(lng, lat, start_date, end_date,
-                        model='GFDL-ESM2G', scenario='rcp85_2006_2099', verbose=False):
+                        model='GFDL-ESM2G', scenario='rcp85_2006_2099', verbose=True):
     result = None
     for variable_name in variables_d:
         df = _retrieve(lng, lat, start_date, end_date, 
@@ -189,6 +189,26 @@ def retrieve_historical_timeseries(lng, lat, start_date, end_date,
 
 if __name__ == "__main__":
     from time import time
+    import sys
+
+    models=('bcc-csm1-1','bcc-csm1-1-m','BNU-ESM','CanESM2','CCSM4','CNRM-CM5','CSIRO-Mk3-6-0',
+               'GFDL-ESM2G','GFDL-ESM2M','HadGEM2-CC365','HadGEM2-ES365','inmcm4','IPSL-CM5A-MR','IPSL-CM5A-LR','IPSL-CM5B-LR','MIROC5','MIROC-ESM','MIROC-ESM-CHEM','MRI-CGCM3','NorESM1-M')
+
+    scenes =("historical_1950_2005","rcp45_2006_2099","rcp85_2006_2099") 
+
+    for model in models:
+        for scene in scenes:
+            print(model, scene)
+            t0 = time()
+            try:
+                df = retrieve_timeseries(-116, 47, datetime(2018, 1, 1), datetime(2018, 1, 31), model=model, verbose=True)
+                print(df.info())
+            except Exception as e:
+                print(e)
+
+            print(time() - t0)
+
+    sys.exit()
     
     t0 = time()
     df2 = retrieve_rcp85_timeseries(-116, 47, datetime(2018, 1, 1), datetime(2018, 1, 31), verbose=True)

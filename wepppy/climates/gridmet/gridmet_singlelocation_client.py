@@ -21,6 +21,38 @@ from calendar import isleap
 from wepppy.all_your_base import isint
 
 
+def retrieve_historical_precip(lon, lat, start_year, end_year):
+    yesterday = datetime.now() - timedelta(2)
+    if end_year == yesterday.year:
+        end_date = datetime.strftime(yesterday, '%Y-%m-%d')
+    else:
+        end_date = f'{end_year}-12-31'
+
+    url = f"https://climate-dev.nkn.uidaho.edu/Services/get-netcdf-data/?decimal-precision=8&request-JSON=True&"\
+          f"lat={lat}&lon={lon}&positive-east-longitude=False&"\
+          f"data-path=http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_pr_1979_CurrentYear_CONUS.nc&variable=precipitation_amount&variable-name=pr&start-date={start_year}-01-01&end-date={end_date}&"\
+          f"filename=gridmet_ts.shaw"
+
+    headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        raise Exception(response.text)
+    
+    try:
+        response_data = response.json()
+    except:
+        raise Exception(response.text)
+
+    data = response_data['data'][0]
+
+    df = pd.DataFrame()
+    df['pr(mm/day)'] = pd.Series(data['pr(mm)']).astype(float)
+    df.index = pd.to_datetime(data['yyyy-mm-dd'], format='%Y-%m-%d')
+
+    return df
+
+
 def retrieve_historical_wind(lon, lat, start_year, end_year):
     yesterday = datetime.now() - timedelta(2)
     if end_year == yesterday.year:
@@ -81,6 +113,9 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
     headers = {'Accept': 'application/json', 'referer': 'https://wepp.cloud'}
     response = requests.get(url, headers=headers)
 
+    if response.status_code != 200:
+        raise Exception(response.text)
+    
     try:
         response_data = response.json()
     except:

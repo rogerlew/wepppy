@@ -4734,6 +4734,7 @@ var Climate = function () {
             // show the appropriate controls
             if (mode === -1) {
                 // none selected
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").hide();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4749,7 +4750,8 @@ var Climate = function () {
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").hide();
             } else if (mode === 0) {
-                // single
+                // vanilla
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").hide();
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").show();
@@ -4765,7 +4767,8 @@ var Climate = function () {
                 $("#climate_mode14_controls").hide();
                 $("#btn_build_climate_container").show();
             } else if ((mode === 2) || (mode === 11)) {
-                // observed
+                // observed daymet or gridmet
+                $("#climate_spatialmode2").prop("disabled", false);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4782,6 +4785,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 3) {
                 // future
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4798,6 +4802,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 4) {
                 // single storm
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").hide();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4814,6 +4819,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 14) {
                 // single storm
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").hide();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4830,6 +4836,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 5) {
                 // prism
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
@@ -4846,6 +4853,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 6) {
                 // observed database
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4862,6 +4870,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 7) {
                 // future database
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4878,6 +4887,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             }  else if (mode === 8) {
                 // EOBS (EU)
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
@@ -4894,6 +4904,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 9) {
                 // observed PRISM
+                $("#climate_spatialmode2").prop("disabled", false);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4910,6 +4921,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 10) {
                 // AGDC (AU)
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").show();
                 $("#climate_mode0_controls").hide();
@@ -4926,6 +4938,7 @@ var Climate = function () {
                 $("#btn_build_climate_container").show();
             } else if (mode === 13) {
                 // NEXRAD
+                $("#climate_spatialmode2").prop("disabled", true);
                 $("#climate_spatialmode_controls").show();
                 $("#input_years_container").hide();
                 $("#climate_mode0_controls").hide();
@@ -4976,6 +4989,7 @@ var Climate = function () {
                 }
             });
         };
+
 
 
         return that;

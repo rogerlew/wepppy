@@ -1617,7 +1617,8 @@ class Cligen:
         p.wait(timeout=50)
         _log.close()
 
-        assert _exists(_join(cli_dir, cli_fn)), cli_fn
+        if not _exists(_join(cli_dir, cli_fn)): 
+            raise AssertionError(f'Failed to create {cli_fn}')
 
 
 def par_mod(par: int, years: int, lng: float, lat: float, wd: str, monthly_dataset='prism',
