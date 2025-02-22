@@ -355,8 +355,18 @@ def get_daymet_p_annual_monthlies(lng, lat, start_year, end_year):
 def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
     df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
-    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
-    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+    df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')    
+
+    max_retries = 3
+    for retry in range(max_retries):
+        try:
+            cligen.run_observed(prn_fn, cli_fn=cli_fn)
+            break
+        except AssertionError:
+            if retry == max_retries - 1:
+                raise
+            import time
+            time.sleep(0.5 * (retry + 1))
 
     dates = df.index
 
@@ -471,7 +481,17 @@ def build_observed_gridmet(cligen, lng, lat, start_year, end_year, cli_dir, prn_
     df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
     df.to_parquet(_join(cli_dir, f'gridmet_{start_year}-{end_year}.parquet'))
     df_to_prn(df, _join(cli_dir, prn_fn), 'pr(mm/day)', 'tmmx(degc)', 'tmmn(degc)')
-    cligen.run_observed(prn_fn, cli_fn=cli_fn)
+    
+    max_retries = 3
+    for retry in range(max_retries):
+        try:
+            cligen.run_observed(prn_fn, cli_fn=cli_fn)
+            break
+        except AssertionError:
+            if retry == max_retries - 1:
+                raise
+            import time
+            time.sleep(0.5 * (retry + 1))
 
     dates = df.index
 
