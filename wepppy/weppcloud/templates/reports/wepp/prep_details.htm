@@ -136,7 +136,7 @@
       <td>{{ d.meta.topaz_id }}</td>
       <td>{{ d.meta.wepp_id }}</td>
       <td>{{ d.meta.chn_enum }}</td>
-      <td>{{ unitizer(d.watershed.chn_wepp_width,"m") | safe }}</td>
+      <td>{{ unitizer(d.meta.width,"m") | safe }}</td>
       <td>{{ d.watershed.order }}</td>
       <td>{{ unitizer(d.watershed.length,"m") | safe }}</td>
       <td>{{ unitizer(d.watershed.area * 0.0001, "ha") | safe }}</td>
