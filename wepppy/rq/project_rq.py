@@ -531,6 +531,8 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
             StatusMessenger.publish(status_channel, 'Running WEPP... done')
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
