@@ -46,8 +46,7 @@ class WeppSoilUtil(object):
             try:
                 self._parse_sol(fn)
             except:
-                print(fn)
-                raise
+                raise Exception(f"Error opening {fn}")
         elif fn.endswith('.yaml'):
             self._load_yaml(fn)
 
