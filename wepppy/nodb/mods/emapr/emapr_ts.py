@@ -66,7 +66,7 @@ class OSUeMapR_TS(NoDbBase):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
         with open(_join(wd, 'emapr_ts.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, OSUeMapR_TS), db

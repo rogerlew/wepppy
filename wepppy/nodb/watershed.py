@@ -153,7 +153,7 @@ class Watershed(NoDbBase, LogMixin):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
         filepath = _join(wd, 'watershed.nodb')
 
         if not os.path.exists(filepath):
@@ -457,20 +457,21 @@ class Watershed(NoDbBase, LogMixin):
     @property
     def csa(self):
         csa = getattr(self, '_csa', None)
-        if csa is None:
-            csa = Topaz.getInstance(self.wd).csa
+        if csa is None and self.delineation_backend_is_topaz:
+                csa = Topaz.getInstance(self.wd).csa
+            
         return csa
 
     @property
     def mcl(self):
-        
+        mcl = getattr(self, '_mcl', None)
         if self.delineation_backend_is_topaz:
-            mcl = getattr(self, '_mcl', None)
+            
             if mcl is None:
                 mcl = Topaz.getInstance(self.wd).mcl
             return mcl
         
-        return None
+        return mcl
 
     @property
     def outlet(self):

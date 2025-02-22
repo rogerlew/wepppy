@@ -52,7 +52,7 @@ class RedisPrep:
             self._set_bool_config('loaded', True)
 
     @staticmethod
-    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
         instance = RedisPrep(wd)
         instance.lazy_load()
         return instance

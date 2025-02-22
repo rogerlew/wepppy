@@ -422,7 +422,7 @@ class Ash(NoDbBase, LogMixin):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
         with open(_join(wd, 'ash.nodb')) as fp:
             db = jsonpickle.decode(fp.read())
             assert isinstance(db, Ash), db

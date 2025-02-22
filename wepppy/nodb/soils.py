@@ -120,7 +120,7 @@ class Soils(NoDbBase, LogMixin):
 
     # noinspection PyPep8Naming
     @staticmethod
-    def getInstance(wd, allow_nonexistent=False, ignore_lock=False):
+    def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
         filepath = _join(wd, 'soils.nodb')
 
         if not os.path.exists(filepath):

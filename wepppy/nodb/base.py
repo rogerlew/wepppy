@@ -36,11 +36,14 @@ from wepppy.all_your_base import isfloat, isint, isbool
 
 _thisdir = os.path.dirname(__file__)
 _config_dir = _join(_thisdir, 'configs')
-_default_config = _join(_config_dir, '_defaults.cfg')
+_default_config = _join(_config_dir, '_defaults.toml')
 
 
 def get_configs():
-    return [_split(fn)[-1][:-4] for fn in glob(_join(_config_dir, '*.cfg'))]
+    return [_split(fn)[-1][:-4] for fn in glob(_join(_config_dir, '*.toml'))]
+
+def get_legacy_configs():
+    return [_split(fn)[-1][:-4] for fn in glob(_join(_config_dir, 'legacy', '*.toml'))]
 
 
 class TriggerEvents(Enum):
@@ -52,6 +55,7 @@ class TriggerEvents(Enum):
     WATERSHED_ABSTRACTION_COMPLETE = 5
     CLIMATE_BUILD_COMPLETE = 6
     WEPP_PREP_WATERSHED_COMPLETE = 7
+    FORK_COMPLETE = 8
 
 
 class NoDbBase(object):
