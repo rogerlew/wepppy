@@ -1845,12 +1845,17 @@ class ManagementSummary(object):
 
             if self.cancov_override is not None:
                 m.inis[0].data.cancov = self.cancov_override
-
+                
             if self.inrcov_override is not None:
                 m.inis[0].data.inrcov = self.inrcov_override
 
             if self.rilcov_override is not None:
                 m.inis[0].data.rilcov = self.rilcov_override
+                
+        for i in range(len(m.plants)):
+            if self.cancov_override is not None:
+                # modify xmxlai based on cancov
+                m.plants[i].data.xmxlai *= self.cancov_override
 
         return m
 

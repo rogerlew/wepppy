@@ -1300,7 +1300,7 @@ class Wepp(NoDbBase, LogMixin):
 
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
-
+            
             meoization_key = (mukey,)
             if disturbed:
                 disturbed_class = man_summary.disturbed_class
@@ -1339,7 +1339,10 @@ class Wepp(NoDbBase, LogMixin):
                         xmxlai = None
                     else:
                         rdmax = _land_soil_replacements_d[(texid, disturbed_class)]['rdmax']
-                        xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+                        if man_summary.cancov_override is None:
+                            xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
+                        else:
+                            rdmax = None
 
                     if isfloat(rdmax):
                         management.set_rdmax(float(rdmax))
