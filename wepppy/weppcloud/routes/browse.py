@@ -1,24 +1,17 @@
 import os
 import subprocess
-import time
-from os import listdir, sep
-from os.path import abspath, basename, isdir, isfile
-
 import re
-
 import math
 import json
 
-import fnmatch
 from urllib.parse import urlencode
 
-from os.path import abspath, basename, sep
-import itertools
 from concurrent.futures import ThreadPoolExecutor
 
 from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
+from os.path import abspath, basename
 
 import pandas as pd
 import gzip
@@ -26,6 +19,97 @@ import gzip
 from flask import abort, Blueprint, request, Response, send_file, jsonify, redirect
 
 from utils.helpers import get_wd, error_factory
+
+"""
+Browse Blueprint
+================
+
+This Flask Blueprint provides a web-based file explorer for project directories, allowing users to browse, filter, 
+view, download, and compare files and directories associated with project runs.
+
+Routes
+------
+- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/`  
+- `/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>`  
+- `/runs/<string:runid>/<config>/browse/`  
+- `/runs/<string:runid>/<config>/browse/<path:subpath>`  
+
+Functionality
+-------------
+- **Directory Browsing**: Navigate project directories with pagination and wildcard filtering.
+- **File Interaction**: View text-based file contents in the browser or download files via query parameters or headers.
+- **File Type Support**: Render JSON, XML, CSV, Parquet, and Pickle files appropriately, with HTML tables for tabular data.
+- **Directory Comparison**: Compare the current directory with another project run's directory using the `diff` parameter.
+- **Security**: Prevent directory traversal and validate filter patterns to avoid shell injection.
+
+Logical Flow
+------------
+1. **Route Handling**:
+   - Routes `wp_browse_tree` and `browse_tree` capture URL parameters (`runid`, `config`, optional `wepp`, and `subpath`).
+   - They determine the project's working directory (`wd`) using `get_wd(runid)` and delegate to `_browse_tree_helper`.
+
+2. **Path and Filter Processing**:
+   - `_browse_tree_helper` constructs the full path from `wd` and `subpath`.
+   - If the path is a file, it calls `browse_response` directly.
+   - If it’s a directory, it extracts any wildcard filter from the subpath (e.g., `*.txt`) or uses a default filter, then 
+     passes control to `browse_response`.
+
+3. **Security Validation**:
+   - `_browse_tree_helper` ensures the path stays within `wd` to prevent directory traversal (aborts with 403 if not).
+   - Validates the filter pattern with `_validate_filter_pattern` (aborts with 400 if invalid).
+
+4. **Response Generation**:
+   - For files, `browse_response`:
+     - Checks for `raw` or `download` parameters/headers to serve raw content or trigger downloads.
+     - Handles special file types (e.g., JSON, CSV) with appropriate rendering.
+     - Falls back to plain text or binary download for unreadable files.
+   - For directories, `browse_response`:
+     - Calls `html_dir_list` to generate an HTML listing with pagination, file details, and action links.
+     - Incorporates pagination controls and a diff comparison form.
+
+5. **Directory Listing**:
+   - `get_page_entries` uses `get_entries` and `get_total_items` concurrently via `ThreadPoolExecutor`:
+     - `get_entries` runs `ls -l` with ISO time style to fetch paginated entries, parsing output into file details.
+     - `get_total_items` counts total items with `ls | wc -l`.
+   - Returns entries and total count for the current page.
+
+6. **HTML Rendering**:
+   - `html_dir_list` constructs an HTML string with directory contents, including navigation links, file sizes, 
+     modification times, and action links (download, diff, etc.), respecting pagination and filters.
+
+7. **Final Response**:
+   - `browse_response` wraps the directory listing in a full HTML page with a diff comparison form and pagination, 
+     or serves file content with the correct MIME type.
+
+Key Functions
+-------------
+- **_validate_filter_pattern(pattern)**:
+  Validates wildcard patterns (e.g., `*.txt`) using a regex, allowing safe characters and rejecting shell metacharacters.
+
+- **_browse_tree_helper(runid, subpath, wd, request, filter_pattern_default='')**:
+  Processes the request by parsing the path, enforcing security, and delegating to `browse_response`.
+
+- **get_entries(directory, filter_pattern, start, end, page_size)**:
+  Executes `ls -l` with pagination and filtering, parsing output into a list of entry tuples (name, is_dir, etc.).
+
+- **get_total_items(directory)**:
+  Counts total directory items using `ls | wc -l`.
+
+- **get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='')**:
+  Concurrently retrieves paginated entries and total count using `ThreadPoolExecutor`.
+
+- **html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, page=1, page_size=MAX_FILE_LIMIT, filter_pattern='')**:
+  Generates an HTML directory listing with file details, action links, and diff support.
+
+- **browse_response(path, runid, wd, request, filter_pattern='')**:
+  Handles file serving (raw, download, or rendered) or directory listing generation, including pagination and UI elements.
+
+Notes
+-----
+- Uses `MAX_FILE_LIMIT = 100` as the default page size for pagination.
+- Employs subprocess calls for efficiency, with concurrent execution for listing and counting.
+- Assumes `get_wd(runid)` (from `utils.helpers`) returns the project’s working directory.
+"""
 
 MAX_FILE_LIMIT = 100
 
@@ -139,6 +223,8 @@ def get_entries(directory, filter_pattern, start, end, page_size):
         return []
     
     entries = []
+    dir_indices = []
+    index = 0
     for line in result.stdout.splitlines():
         if line == '':
             break
@@ -169,6 +255,7 @@ def get_entries(directory, filter_pattern, start, end, page_size):
         # Calculate human-readable size for files (not directories)
         if is_dir:
             hr_size = ""
+            dir_indices.append((index, _join(directory, name)))
         else:
             try:
                 size_bytes = int(parts[4])
@@ -185,7 +272,19 @@ def get_entries(directory, filter_pattern, start, end, page_size):
         
         # Add entry to the list
         entries.append((name, is_dir, modified_time, hr_size, is_symlink, sym_target))
+        index += 1
     
+    if dir_indices:
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            # Call get_total_items for each subdirectory, without filter_pattern
+            futures = {executor.submit(get_total_items, dir_path): i for i, dir_path in dir_indices}
+            for future in futures:
+                index = futures[future]
+                total_items = future.result()
+                entry = entries[index]
+                # Replace the entry with updated total items
+                entries[index] = (entry[0], entry[1], entry[2], f"{total_items} items", entry[4], entry[5])
+                
     return entries
 
 
@@ -268,7 +367,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
         last_modified_time = entry[2]
         
         if is_dir:
-            item_count = f'{total_items} items'
+            item_count = entry[3]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
             s.append(_padding + f'+-<a href="{_file}/{diff_arg}">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}\n')
