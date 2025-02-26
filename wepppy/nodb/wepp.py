@@ -2015,6 +2015,7 @@ class Wepp(NoDbBase, LogMixin):
 
         output_dir = self.output_dir
 
+        return_periods_fn = None
         if meoization:
             if exclude_yr_indxs is None:
                 return_periods_fn = _join(output_dir, 'return_periods.json')
@@ -2046,8 +2047,9 @@ class Wepp(NoDbBase, LogMixin):
                                        exclude_yr_indxs=exclude_yr_indxs,
                                        method=method, gringorten_correction=gringorten_correction)
 
-        with open(return_periods_fn, 'w') as fp:
-            json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
+        if return_periods_fn is not None:
+            with open(return_periods_fn, 'w') as fp:
+                json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
 
         return return_periods
 
