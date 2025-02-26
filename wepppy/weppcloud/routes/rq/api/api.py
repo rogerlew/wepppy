@@ -617,6 +617,9 @@ def api_fork(runid, config):
     try:
         wd = get_wd(runid)
         
+        if not _exists(wd):
+            return exception_factory('Error forking project, run_id={runid} does not exist', runid=runid)
+        
         undisturbify = request.args.get('undisturbify', 'false').lower().startswith('true')
 
         owners = get_run_owners(runid)
