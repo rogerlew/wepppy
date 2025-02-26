@@ -197,8 +197,8 @@ New runid: <a href="https://${window.location.host}/weppcloud/runs/${new_runid}/
       <!-- Fork form with runid and undisturbify options -->
       <form id="fork_form" onsubmit="forkProject(); return false;">
         <div class="form-group">
-          <label for="runid_input">Run ID:</label>
-          <input type="text" class="form-control" id="runid_input" placeholder="Enter runid" required>
+          <label for="runid_input">Source Project Run ID:</label>
+          <input type="text" class="form-control" id="runid_input" placeholder="Enter runid" required readonly style="background-color: #e9ecef; cursor: not-allowed;">
         </div>
         <div class="form-group form-check">
           <input type="checkbox" class="form-check-input" id="undisturbify_checkbox">
