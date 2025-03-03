@@ -1,0 +1,14 @@
+<h5>Flowpaths</h5>
+    <p>Flowpaths can be ran to build a flowpath loss grid.</p>
+    <div class="form-group row">
+        <div class="col-sm-5">
+            <div style="margin-left:2em;">
+                <input id="run_flowpaths"
+                       name="run_flowpaths"
+                       type="checkbox"
+                       class="form-check-input disable-readonly"
+                   {% if wepp.run_flowpaths %}checked{% endif %}>
+            </div>
+            <label for="run_flowpaths" style="margin-left:3em;">Run Flowpaths</label>
+        </div>
+    </div>
