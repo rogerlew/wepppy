@@ -20,10 +20,6 @@
                     <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.mcl | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
-            {% else %}
-            <input type="hidden" id="input_mcl" value="-1" name="mcl" />
-            {% endif %}
-
             <div class="form-group row">
                 <div class="col-sm-5">
                     <label for="input_csa">Critical Source Area (ha)
@@ -34,6 +30,21 @@
                     <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.csa | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
+            {% else %}
+            <input type="hidden" id="input_mcl" value="-1" name="mcl" />
+            
+            <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_csa">Critical Source Area
+                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                    </label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="Lon, Lat">
+                </div>
+            </div>
+            {% endif %}
+
         </div>
         <div class="unitizer units-ft">
             {% if watershed.delineation_backend_is_topaz %}
@@ -47,9 +58,6 @@
                     <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ (watershed.mcl * 3.28084) | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
-            {% else %}
-            <input type="hidden" id="input_mcl_en" value="-1" name="mcl_en" />
-            {% endif %}
             <div class="form-group row">
                 <div class="col-sm-5">
                     <label for="input_csa_en">Critical Source Area (acre)
@@ -60,6 +68,19 @@
                     <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ (watershed.csa * 2.47105) | round | int }}" aria-label="Lon, Lat">
                 </div>
             </div>
+            {% else %}
+            <input type="hidden" id="input_mcl_en" value="-1" name="mcl_en" />
+            <div class="form-group row">
+                <div class="col-sm-5">
+                    <label for="input_csa">Critical Source Area
+                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
+                    </label>
+                </div>
+                <div class="col-sm-3">
+                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="Lon, Lat">
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div> <!-- close Unitzer -->
 
