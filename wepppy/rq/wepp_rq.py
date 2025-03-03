@@ -209,13 +209,14 @@ def run_wepp_rq(runid):
 
             # jobs:1
 
-            jobs1_hillslopes = [q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)]
-            job.meta['jobs:1,func:run_hillslopes_rq'] = jobs1_hillslopes[-1].id
+            jobs1_hillslopes = q.enqueue_call(_run_hillslopes_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)
+            job.meta['jobs:1,func:run_hillslopes_rq'] = jobs1_hillslopes.id
             job.save()
 
-            #
-            # TODO: flowpaths would go here
-            # watershed would not be dependent on flowpaths
+            if wepp.run_flowpaths:
+                jobs1_flowpaths = q.enqueue_call(_run_flowpaths_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)
+                job.meta['jobs:1,func:run_flowpaths_rq'] = jobs1_flowpaths.id
+                job.save()
 
             #
             # Prep Watershed
@@ -277,8 +278,6 @@ def run_wepp_rq(runid):
                 job.save()
 
             if not climate.is_single_storm:
-                
-                
                 _job = q.enqueue_call(_post_run_wepp_post_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_post_run_wepp_post_rq'] = _job.id
                 jobs5_post.append(_job)
@@ -384,13 +383,26 @@ def _run_hillslopes_rq(runid):
         status_channel = f'{runid}:wepp'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
-        watershed = Watershed.getInstance(wd)
-        translator = watershed.translator_factory()
         wepp.run_hillslopes()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+def _run_flowpaths_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        wepp = Wepp.getInstance(wd)
+        wepp.prep_and_run_flowpaths()
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
 
 
 def _prep_managements_rq(runid):

@@ -39,8 +39,7 @@ from osgeo import gdal
 from osgeo.gdalconst import *
 
 
-from wepppyo3.wepp_viz import make_soil_loss_grid
-
+from wepppyo3.wepp_viz import make_soil_loss_grid, make_soil_loss_grid_fps
 
 
 try:
@@ -61,7 +60,9 @@ from wepp_runner.wepp_runner import (
     make_ss_watershed_run,
     make_ss_batch_watershed_run,
     run_watershed,
-    run_ss_batch_watershed
+    run_ss_batch_watershed,
+    make_flowpath_run,
+    run_flowpath
 )
 from wepppy.wepp.management import (
     get_channel,
@@ -348,6 +349,25 @@ def prep_soil(args):
 
 class WeppNoDbLockedException(Exception):
     pass
+
+
+def extract_slps_fn(slps_fn, fp_runs_dir):
+    f = None
+    with open(slps_fn) as fp:
+        
+        for line in fp:
+            if line.startswith('# fp_') and line.endswith('.slp\n'):
+                fp_fn = line.split()[1].strip()
+                if f is not None:
+                    f.close()
+
+                f = open(_join(fp_runs_dir, fp_fn), 'w')
+
+            else:
+                f.write(line)
+
+        if f is not None:
+            f.close()
 
 
 class Wepp(NoDbBase, LogMixin):
@@ -1121,6 +1141,69 @@ class Wepp(NoDbBase, LogMixin):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
+    def prep_and_run_flowpaths(self):
+        self.log('  Prepping _prep_flowpaths... ')
+        wat_dir = self.wat_dir
+
+        fp_slps_fns = glob(_join(self.wat_dir, 'slope_files/flowpaths/*.slps'))
+        
+        futures = []
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            for fp_slps_fn in fp_slps_fns:
+                futures.append(pool.submit(extract_slps_fn, fp_slps_fn, self.fp_runs_dir))
+
+            wait(futures, return_when=FIRST_EXCEPTION)
+
+
+        self.log('  Creating flowpath run files... ')
+
+        watershed = Watershed.getInstance(self.wd)
+        sim_years = Climate.getInstance(self.wd).input_years
+
+        futures = []
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            for wepp_id in watershed._fps_summary:
+                for fp_enum  in watershed._fps_summary[wepp_id]:
+                    fp_id = f'fp_{wepp_id}_{fp_enum}'
+                    self.log(f'  Creating {fp_id}.run... ')
+                    futures.append(pool.submit(make_flowpath_run, fp_id, wepp_id, sim_years, self.fp_runs_dir))
+
+            wait(futures, return_when=FIRST_EXCEPTION)
+
+        self.log('  Running _run_flowpaths... ')
+
+        futures = []
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            for wepp_id in watershed._fps_summary:
+                for fp_enum  in watershed._fps_summary[wepp_id]:
+                    fp_id = f'fp_{wepp_id}_{fp_enum}'
+                    self.log(f'  Running {fp_id}... ')
+                    futures.append(pool.submit(run_flowpath, fp_id, wepp_id, self.runs_dir, self.fp_runs_dir, self.wepp_bin))
+
+            wait(futures, return_when=FIRST_EXCEPTION)
+
+        loss_grid_path = _join(self.plot_dir, 'flowpaths_loss.tif')
+
+        self.log(f'  Creating flowpaths loss grid... ')
+        make_soil_loss_grid_fps(watershed.discha, self.fp_runs_dir, loss_grid_path)
+ 
+        assert _exists(loss_grid_path)
+
+        loss_grid_wgs = _join(self.plot_dir, 'flowpaths_loss.WGS.tif')
+
+        if _exists(loss_grid_wgs):
+            os.remove(loss_grid_wgs)
+            time.sleep(1)
+
+        cmd = ['gdalwarp', '-t_srs', wgs84_proj4,
+               '-srcnodata', '-9999', '-dstnodata', '-9999',
+               '-r', 'near', loss_grid_path, loss_grid_wgs]
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        p.wait()
+
+        assert _exists(loss_grid_wgs)
+
+        self.log_done()
 
     def _prep_slopes_peridot(self, watershed, translator, clip_hillslopes, clip_hillslope_length):
         self.log('    Prepping _prep_slopes_peridot... ')
