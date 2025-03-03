@@ -377,20 +377,6 @@
             <textarea id="ss_batch" name="ss_batch" class="form-control mr-sm-3 disable-readonly" rows="20" placeholder="mo da year prcp dur tp ip" aria-label="Storm Date">{{ climate.ss_batch }}</textarea>
         </div>
     </div>
-    <div class="form-group row hide-readonly" id="btn_build_climate_container">
-        <div class="col-sm-4">
-            <button 
-                onclick="debounceButton('btn_build_climate', 'build_climate_lock', () => Climate.getInstance().build())()"
-                id="btn_build_climate" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
-
-              <img  id="build_climate_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
-              Build Climate
-            </button>
-        </div>
-        <div class="col-sm-5">
-            <small id="hint_build_climate"></small>
-        </div>
-    </div>
 </div>
 
 <a href="#climate_advanced_opts_con" data-toggle="collapse" class
@@ -596,6 +582,21 @@
     </div>
 </div>
 <div style="height: 1em;"></div>
+
+<div class="form-group row hide-readonly" id="btn_build_climate_container">
+    <div class="col-sm-4">
+        <button 
+            onclick="debounceButton('btn_build_climate', 'build_climate_lock', () => Climate.getInstance().build())()"
+            id="btn_build_climate" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+
+          <img  id="build_climate_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
+          Build Climate
+        </button>
+    </div>
+    <div class="col-sm-5">
+        <small id="hint_build_climate"></small>
+    </div>
+</div>
 
 {% endblock %}
 
