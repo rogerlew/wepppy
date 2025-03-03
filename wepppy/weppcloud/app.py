@@ -3704,6 +3704,12 @@ def submit_task_run_wepp(runid, config):
     soils = Soils.getInstance(wd)
 
     try:
+        run_flowpaths = request.form.get('run_flowpaths') == 'on'
+        wepp.set_run_flowpaths(run_flowpaths)
+    except:
+        run_flowpaths = None
+
+    try:
         clip_soils = request.form.get('clip_soils') == 'on'
     except:
         clip_soils = None
