@@ -1411,8 +1411,14 @@ class Climate(NoDbBase, LogMixin):
                 if isfloat(kwds['precip_scale_factor']):
                     self._precip_scale_factor = float(kwds['precip_scale_factor'])
                 
-            if kwds.get('precip_monthly_scale_factors', None) is not None:
-                self._precip_monthly_scale_factors = [float(x) for x in kwds['precip_monthly_scale_factors']]
+
+                    
+            if kwds.get('precip_monthly_scale_factors_7', None) is not None:
+                precip_monthly_scale_factors = []
+                for i in range(12):
+                    precip_monthly_scale_factors.append(
+                        float(kwds.get('precip_monthly_scale_factors_%d' % i)))
+                self._precip_monthly_scale_factors = precip_monthly_scale_factors
 
             if kwds.get('precip_scale_reference', None) is not None:
                 self._precip_scaling_reference = kwds['precip_scale_reference']
