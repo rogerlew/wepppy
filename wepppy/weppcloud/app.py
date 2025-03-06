@@ -3300,12 +3300,6 @@ def task_build_climate(runid, config):
     climate = Climate.getInstance(wd)
 
     try:
-        if request.form.get('precip_monthly_scale_factors_7', None) is not None:
-            precip_monthly_scale_factors = []
-            for i in range(12):
-                precip_monthly_scale_factors.append(
-                    float(request.form.get('precip_monthly_scale_factors_%d' % i)))
-            request.form['precip_monthly_scale_factors'] = precip_monthly_scale_factors
         climate.parse_inputs(request.form)
     except Exception:
         return exception_factory('Error parsing climate inputs', runid=runid)
