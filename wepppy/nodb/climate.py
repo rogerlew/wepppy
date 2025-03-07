@@ -1858,8 +1858,8 @@ class Climate(NoDbBase, LogMixin):
                 sub_cli_fns = {}
                 for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
                     scale_func(
-                        _join(cli_dir, self.cli_fn), 
-                        _join(cli_dir, f'adj_{self.cli_fn}' ),
+                        _join(cli_dir, sub_cli_fn), 
+                        _join(cli_dir, f'adj_{sub_cli_fn' ),
                         monthly_scale_factors)
                     sub_cli_fns[topaz_id] = f'adj_{sub_cli_fn}'
                     
