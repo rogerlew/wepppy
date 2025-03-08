@@ -43,7 +43,6 @@ from wepppy.climates.downscaled_nmme_client import retrieve_rcp85_timeseries
 # wepppy
 from wepppy.climates import cligen_client as cc
 from wepppy.climates.prism import prism_mod
-from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_timeseries as gridmet_retrieve_historical_timeseries
 from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
 from wepppy.climates.gridmet import retrieve_historical_precip as gridmet_retrieve_historical_precip
@@ -346,6 +345,8 @@ def build_observed_prism(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn
 
 
 def get_daymet_p_annual_monthlies(lng, lat, start_year, end_year):
+    from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
+
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=False)
     months = df.index.month
     precip = df['prcp(mm/day)'].values
@@ -353,6 +354,8 @@ def get_daymet_p_annual_monthlies(lng, lat, start_year, end_year):
 
 
 def build_observed_daymet(cligen, lng, lat, start_year, end_year, cli_dir, prn_fn, cli_fn, gridmet_wind=True):
+    from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
+
     df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
     df.to_parquet(_join(cli_dir, f'daymet_{start_year}-{end_year}.parquet'))
     df_to_prn(df, _join(cli_dir, prn_fn), 'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')    
@@ -1416,8 +1419,15 @@ class Climate(NoDbBase, LogMixin):
             if kwds.get('precip_monthly_scale_factors_7', None) is not None:
                 precip_monthly_scale_factors = []
                 for i in range(12):
-                    precip_monthly_scale_factors.append(
-                        float(kwds.get('precip_monthly_scale_factors_%d' % i)))
+                     
+                    v = None
+                    try:
+                        float(kwds.get('precip_monthly_scale_factors_%d' % i))
+                    except ValueError:
+                        pass
+                    if v is not None:
+                        precip_monthly_scale_factors.append(float(v))
+
                 self._precip_monthly_scale_factors = precip_monthly_scale_factors
 
             if kwds.get('precip_scale_reference', None) is not None:
@@ -1793,12 +1803,6 @@ class Climate(NoDbBase, LogMixin):
         self.log('Climate Build Successful.')
         self.trigger(TriggerEvents.CLIMATE_BUILD_COMPLETE)
         
-# from wepppyo3.climate import calculate_monthlies as pyo3_cli_calculate_monthlies
-# from wepppyo3.climate import calculate_p_annual_monthlies as pyo3_cli_calculate_annual_monthlies
-# from wepppyo3.climate import rust_cli_p_scale as pyo3_cli_p_scale
-# from wepppyo3.climate import rust_cli_p_scale_monthlies as pyo3_cli_p_scale_monthlies
-# from wepppyo3.climate import rust_cli_p_scale_annual_monthlies as pyo3_cli_p_scale_annual_monthlies
-
     def _scale_precip(self, scale_factor):
         """
         scalar scaling of precipitation
@@ -1859,7 +1863,7 @@ class Climate(NoDbBase, LogMixin):
                 for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
                     scale_func(
                         _join(cli_dir, sub_cli_fn), 
-                        _join(cli_dir, f'adj_{sub_cli_fn' ),
+                        _join(cli_dir, f'adj_{sub_cli_fn}' ),
                         monthly_scale_factors)
                     sub_cli_fns[topaz_id] = f'adj_{sub_cli_fn}'
                     
@@ -1980,6 +1984,8 @@ class Climate(NoDbBase, LogMixin):
 
             if self.climate_daily_temp_ds == 'daymet':
                 from wepppy.all_your_base import c_to_f
+                from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
+
                 df = daymet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
 
                 dates = df.index
