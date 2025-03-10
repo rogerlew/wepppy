@@ -226,7 +226,7 @@ def interpolate_daily_timeseries(
     ll_py = round((ll_n - d) / f)
 
     # Apply padding
-    pad = 2
+    pad = 3
     cols = range(ll_px - pad, ur_px + pad + 1)
     rows = range(ur_py - pad, ll_py + pad + 1)
 
