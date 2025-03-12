@@ -1422,7 +1422,7 @@ class Climate(NoDbBase, LogMixin):
                      
                     v = None
                     try:
-                        float(kwds.get('precip_monthly_scale_factors_%d' % i))
+                        v = float(kwds.get('precip_monthly_scale_factors_%d' % i))
                     except ValueError:
                         pass
                     if v is not None:
@@ -2497,7 +2497,7 @@ class Climate(NoDbBase, LogMixin):
 
             extent = ron.extent
             cellsize = 0.04166601298087771
-            pad = cellsize * 2
+            pad = cellsize * 3
             extent = [extent[0] - pad, extent[1] - pad, extent[2] + pad, extent[3] + pad]
             dates = pd.date_range(f'{start_year}-01-01', f'{end_year}-12-31')
             ndates = len(dates)
