@@ -5,8 +5,14 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import isdir
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from functools import partial
+
+from copy import deepcopy
+from glob import glob
 import json
 import shutil
+from time import sleep
 
 # non-standard
 import jsonpickle
@@ -16,14 +22,65 @@ import what3words
 # wepppy
 import requests
 
+from wepppy.export.gpkg_export import extract_soil_erosion
 
 from .base import (
     NoDbBase,
     TriggerEvents
 )
 
+def _run_contrast(contrast_name, contrasts, wd, wepp_bin='wepp_726fbd5'):
+    from wepppy.nodb import Landuse, Soils, Wepp
+
+    omni_dir = _join(wd, 'omni', 'contrasts', contrast_name)
+
+    if _exists(omni_dir):
+        shutil.rmtree(omni_dir)
+
+    os.makedirs(omni_dir)
+
+    for fn in os.listdir(wd):
+        if fn in ['climate', 'watershed', 'climate.nodb', 'watershed.nodb']:
+            src = _join(wd, fn)
+            dst = _join(omni_dir, fn)
+            if not _exists(dst):
+                os.symlink(src, dst)
+
+    for nodb_fn in ['wepp.nodb']:
+        src = _join(wd, nodb_fn)
+        dst = _join(omni_dir, nodb_fn)
+        if not _exists(dst):
+            shutil.copy(src, dst)
+
+        with open(dst, 'r') as f:
+            d = json.load(f)
+
+        d['wd'] = omni_dir
+
+        with open(dst, 'w') as f:
+            json.dump(d, f)
+
+    wepp = Wepp.getInstance(omni_dir)
+    wepp.wepp_bin = wepp_bin
+    wepp.clean()  # this creates the directories in the {omni_dir}/wepp
+
+    # symlink the other wepp watershed input files
+    og_runs_dir = _join(wd, 'wepp', 'runs/')
+    omni_runs_dir = _join(omni_dir, 'wepp', 'runs/')
+    for fn in os.listdir(og_runs_dir):
+        _fn = _split(fn)[-1]
+        if _fn.startswith('pw0') or _fn.endswith('.txt') or _fn.endswith('.inp'):
+            src = _join(og_runs_dir, fn)
+            dst = _join(omni_runs_dir, fn)
+            if not _exists(dst):
+                os.symlink(src, dst)
+
+    wepp.make_watershed_run(wepp_id_paths=list(contrasts.values()))
+    wepp.run_watershed()
+
+
 def _omni_clone(scenario, wd):
-    omni_dir = _join(wd, 'omni', 'scenarios', scenario.replace(' ', '_'))
+    omni_dir = _join(wd, 'omni', 'scenarios', scenario)
 
     if _exists(omni_dir):
         shutil.rmtree(omni_dir)
@@ -38,6 +95,9 @@ def _omni_clone(scenario, wd):
                 os.symlink(src, dst)
 
         elif fn.endswith('.nodb'):
+            if fn == 'omni.nodb':
+                continue
+
             src = _join(wd, fn)
             dst = _join(omni_dir, fn)
             if not _exists(dst):
@@ -51,7 +111,6 @@ def _omni_clone(scenario, wd):
             with open(dst, 'w') as f:
                 json.dump(d, f)
     
-
     for fn in os.listdir(wd):
         if fn == 'omni':
             continue
@@ -85,44 +144,65 @@ def _build_scenario(scenario, wd):
     from wepppy.nodb import Landuse, Soils, Wepp
     from wepppy.nodb.mods import Disturbed
 
-    assert scenario in ['uniform low', 'uniform high', 'uniform moderate', 'uniform high', 'thinning']
+    os.chdir(wd)
+    
+    assert scenario in ['uniform_low', 'uniform_high', 'uniform_moderate', 'uniform_high', 'thinning']
     new_wd = _omni_clone(scenario, wd)
 
-
-    if scenario == 'uniform low':
-        value = 1
-    elif scenario == 'uniform moderate':
-        value = 2
-    elif scenario == 'uniform high':
-        value = 3
+    sbs = None
+    if scenario == 'uniform_low':
+        sbs = 1
+    elif scenario == 'uniform_moderate':
+        sbs = 2
+    elif scenario == 'uniform_high':
+        sbs = 3
 
     disturbed = Disturbed.getInstance(new_wd)
-    sbs_fn = disturbed.build_uniform_sbs(int(value))
-    res = disturbed.validate(sbs_fn)
-
     landuse = Landuse.getInstance(new_wd)
-    landuse.build()
+    
+    if sbs in [1, 2, 3]:
+        sbs_fn = disturbed.build_uniform_sbs(int(sbs))
+        res = disturbed.validate(sbs_fn)
+
+        landuse.build()
+
+    else:
+        disturbed_key = disturbed.get_disturbed_key_lookup()
+        lc_key = disturbed_key[scenario]
+
+        forest_keys = []
+        for key, value in disturbed_key.items():
+            if 'forest' in value:
+                forest_keys.append(int(key))
+
+        modify_list = []
+        for topaz_id, dom in landuse.domlc_d.items():
+            if int(dom) in forest_keys:
+                modify_list.append(topaz_id)
+
+        # this modifies the landuses and builds managements
+        landuse.modify(modify_list, lc_key)
 
     soils = Soils.getInstance(new_wd)
     soils.build()
 
     wepp = Wepp.getInstance(new_wd)
-    wepp.prep_hillslopes()
-    wepp.run_hillslopes()
+    # todo: implement omni_hillslope_prep that uses symlinks
+
+    wepp.prep_hillslopes(omni=True)
+    wepp.run_hillslopes(omni=True)
 
     wepp.prep_watershed()
     wepp.run_watershed()
 
 
-
-
-
+class OmniNoDbLockedException(Exception):
+    pass
 
 
 class Omni(NoDbBase):
     """
-    Manager that keeps track of project details
-    and coordinates access of NoDb instances.
+    Runs scenarios inside of a parent scenario
     """
     __name__ = 'Omni'
 
@@ -144,6 +224,9 @@ class Omni(NoDbBase):
                 os.makedirs(self.omni_dir)
 
             self._scenarios = self.config_get_list('omni', 'scenarios')
+            self._contrasts = self.config_get_list('omni', 'contrasts')
+
+            self.dump_and_unlock()
 
         except Exception:
             self.unlock('-f')
@@ -155,11 +238,114 @@ class Omni(NoDbBase):
     
     @scenarios.setter
     def scenarios(self, value):
-        self._scenarios = value
+
+        self.lock()
+        try:
+            self._scenarios = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def contrasts(self):
+        return self._contrasts
+    
+    @contrasts.setter
+    def contrasts(self, value):
+
+        self.lock()
+        try:
+            self._contrasts = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def omni_dir(self):
         return _join(self.wd, 'omni')
+    
+    @property
+    def status_log(self):
+        return os.path.abspath(_join(self.omni_dir, 'status.log'))
+
+    def clean(self):
+        shutil.rmtree(self.omni_dir)
+        sleep(1)
+        os.makedirs(self.omni_dir)
+
+    def get_soil_erosion_from_gpkg(self, scenario=None):
+        if scenario is None:
+            gpkg_fn = glob(_join(self.wd, 'export/arcmap/*.gpkg'))[0]
+        else:
+            gpkg_fn = glob(_join(self.wd, f'omni/scenarios/{scenario}/export/arcmap/*.gpkg'))[0]
+
+        soils_erosion_descending, total_erosion_kg = extract_soil_erosion(gpkg_fn)
+        return soils_erosion_descending, total_erosion_kg
+    
+    def build_contrasts(self, control_scenario='uniform_high', contrast_scenario='thinning',
+                        cumulative_erosion_threshold_fraction=0.8,
+                        contrast_hillslope_limit=None):
+        from wepppy.nodb import Watershed
+
+        wd = self.wd
+
+        watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
+        top2wepp = {k: v for k, v in translator.top2wepp.items() if not (str(k).endswith('4') or int(k) == 0)}
+
+        # find hillslopes with the most erosion from the control scenario
+        # soils_erosion_descending is a list of SoilLoss named_tuples with fields: topaz_id, wepp_id, and soil_loss_kg
+        soils_erosion_descending, total_erosion_kg = self.get_soil_erosion_from_gpkg(control_scenario)
+
+        if len(soils_erosion_descending) == 0:
+            raise Exception('No soil erosion data found!')
+        
+        contrasts = {}
+        running_soil_loss_kg = 0.0
+        for i, d in enumerate(soils_erosion_descending):
+            if contrast_hillslope_limit is not None and i >= contrast_hillslope_limit:
+                break
+
+            running_soil_loss_kg += d.soil_loss_kg
+            if running_soil_loss_kg / total_erosion_kg > cumulative_erosion_threshold_fraction:
+                break
+
+            topaz_id = d.topaz_id
+            wepp_id = d.wepp_id
+            if contrast_scenario is None:
+                contrast_name = f'{control_scenario},{topaz_id}_to_undisturbed'
+            
+            else:
+                contrast_name = f'{control_scenario},{topaz_id}_to_{contrast_scenario}'
+            
+            contrast_dir = _join(wd, f'omni/contrasts/{contrast_name}/wepp/runs/')
+            
+            contrast = {}
+            for _topaz_id, _wepp_id in top2wepp.items():
+
+                # need to do it this way so the wepp_ids stay ordered.
+                if _topaz_id == topaz_id:
+                    if contrast_scenario is None:
+                        wepp_id_path = _join(wd, f'wepp/output/H{wepp_id}')   
+                    else: 
+                        wepp_id_path = _join(wd, f'omni/scenarios/{contrast_scenario}/wepp/output/{Hwepp_id}')
+                else:
+                    if control_scenario is None:
+                        wepp_id_path = _join(wd, f'wepp/output/H{_wepp_id}')
+                    else:
+                        wepp_id_path = _join(wd, f'omni/scenarios/{control_scenario}/wepp/output/H{_wepp_id}')
+                contrast[_topaz_id] = wepp_id_path  # os.path.relpath(wepp_id_path, contrast_dir)
+
+            contrasts[contrast_name] = contrast
+
+        self.contrasts = contrasts
+
+
+    def run_omni_contrasts(self):
+        for contrast_name, _contrasts in self.contrasts.items():
+            _run_contrast(contrast_name, _contrasts, self.wd)
 
     #
     # Required for NoDbBase Subclass
@@ -168,7 +354,7 @@ class Omni(NoDbBase):
     # noinspection PyPep8Naming
     @staticmethod
     def getInstance(wd='.', allow_nonexistent=False, ignore_lock=False):
-        filepath = _join(wd, 'Omni.nodb')
+        filepath = _join(wd, 'omni.nodb')
 
         if not _exists(filepath):
             if allow_nonexistent:
@@ -199,16 +385,12 @@ class Omni(NoDbBase):
 
     @property
     def _nodb(self):
-        return _join(self.wd, 'Omni.nodb')
+        return _join(self.wd, 'omni.nodb')
 
     @property
     def _lock(self):
-        return _join(self.wd, 'Omni.nodb.lock')
+        return _join(self.wd, 'omni.nodb.lock')
 
-    def _omni_builder(self):
+    def run_omni_scenarios(self):
         for scenario in self.scenarios:
-            _build_scenario(scenario, self.runid)
-
-
-if __name__ == '__main__':
-     _build_scenario('uniform low', '/geodata/weppcloud_runs/rlew-discretionary-pulsar/')
+            _build_scenario(scenario, self.wd)
