@@ -128,8 +128,8 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year):
 
     df = pd.DataFrame()
     df['pr(mm/day)'] = pd.Series(data['pr(mm)']).astype(float)
-    df['srad(Wm-2)'] = pd.Series(data['srad(Wm-2)']).astype(float)
-    df['srad(l/day)'] = df['srad(Wm-2)'] * 0.0864
+    df['srad(Wm-2)'] = pd.Series(data['srad(Wm-2)']).astype(float) # srad is daily mean solar radation in W/m^2
+    df['srad(l/day)'] = df['srad(Wm-2)'] * 2.0645   # 2.0645 = (86400 / 41840)
     df['tmmx(degc)'] = pd.Series(data['tmmx(K)']).astype(float) - 273.15
     df['tmmn(degc)'] = pd.Series(data['tmmn(K)']).astype(float) - 273.15
     df['tavg(degc)'] = (df['tmmx(degc)'] + df['tmmn(degc)']) / 2
