@@ -161,10 +161,10 @@ def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_defa
             abort(403)  # Prevent directory traversal
             
         if not os.path.isdir(dir_path):
-            abort(404, "Directory not found")
+            abort(404, f"Directory not found: {dir_path}")
             
         if not _validate_filter_pattern(filter_pattern):
-            abort(400, "Invalid filter pattern")
+            abort(400, f"Invalid filter pattern: {filter_pattern}")
             
         return browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
 
@@ -372,11 +372,12 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
         last_modified_time = entry[2]
         
         if is_dir:
+            file_link = '/weppcloud' + _join(request_path, _file)
             item_count = entry[3]
             sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
-            s.append(_padding + f'+-<a href="{_file}/{diff_arg}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}\n')
+            s.append(_padding + f'+-<a href="{file_link}/{diff_arg}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}\n')
         else:
             file_link = '/weppcloud' + _join(request_path, _file)
             is_symlink = entry[4]
