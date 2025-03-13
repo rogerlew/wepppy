@@ -128,7 +128,7 @@ def _validate_filter_pattern(pattern):
     safe_pattern = r'^[a-zA-Z0-9_*?[\]\-\.]+$'
     return bool(re.match(safe_pattern, pattern))
 
-def _browse_tree_helper(runid, subpath, wd, request, filter_pattern_default=''):
+def _browse_tree_helper(runid, subpath, wd, request, config, filter_pattern_default=''):
     """
     Helper function to handle common browse tree logic.
     Returns the response for a file or directory browse request.
@@ -137,7 +137,7 @@ def _browse_tree_helper(runid, subpath, wd, request, filter_pattern_default=''):
     
     if os.path.isfile(full_path):
         # If subpath points to a file, serve it
-        return browse_response(full_path, runid, wd, request)
+        return browse_response(full_path, runid, wd, request, config)
     else:
         # Parse subpath for directory and filter
         if subpath.endswith('/'):
@@ -166,20 +166,20 @@ def _browse_tree_helper(runid, subpath, wd, request, filter_pattern_default=''):
         if not _validate_filter_pattern(filter_pattern):
             abort(400, "Invalid filter pattern")
             
-        return browse_response(dir_path, runid, wd, request, filter_pattern=filter_pattern)
+        return browse_response(dir_path, runid, wd, request, config, filter_pattern=filter_pattern)
 
 
 @browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/', defaults={'subpath': ''}, strict_slashes=False)
 @browse_bp.route('/runs/<string:runid>/<config>/report/<string:wepp>/browse/<path:subpath>', strict_slashes=False)
 def wp_browse_tree(runid, config, wepp, subpath):
     wd = os.path.abspath(get_wd(runid))  # Assume get_wd retrieves the working directory
-    return _browse_tree_helper(runid, subpath, wd, request)
+    return _browse_tree_helper(runid, subpath, wd, request, config)
 
 @browse_bp.route('/runs/<string:runid>/<config>/browse/', defaults={'subpath': ''}, strict_slashes=False)
 @browse_bp.route('/runs/<string:runid>/<config>/browse/<path:subpath>', strict_slashes=False)
 def browse_tree(runid, config, subpath):
     wd = os.path.abspath(get_wd(runid))  # Assume get_wd retrieves the working directory
-    return _browse_tree_helper(runid, subpath, wd, request)
+    return _browse_tree_helper(runid, subpath, wd, request, config)
 
 
 def get_entries(directory, filter_pattern, start, end, page_size):
@@ -288,11 +288,15 @@ def get_entries(directory, filter_pattern, start, end, page_size):
     return entries
 
 
-def get_total_items(directory):
+def get_total_items(directory, filter_pattern=''):
     """
     Count total items in the directory, respecting the filter_pattern.
     """
-    total_cmd = "ls | wc -l"
+
+    if filter_pattern == '':
+        total_cmd = "ls | wc -l"
+    else:
+        total_cmd = f"ls {filter_pattern} | wc -l"
     
     total_result = subprocess.run(
         total_cmd,
@@ -324,7 +328,8 @@ def get_page_entries(directory, page=1, page_size=MAX_FILE_LIMIT, filter_pattern
     with ThreadPoolExecutor(max_workers=2) as executor:
         # Submit both subprocess tasks concurrently
         future_entries = executor.submit(get_entries, directory, filter_pattern, start, end, page_size)
-        future_total = executor.submit(get_total_items, directory)
+
+        future_total = executor.submit(get_total_items, directory, filter_pattern)
         
         # Retrieve results (blocks until both are complete)
         entries = future_entries.result()
@@ -368,9 +373,10 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
         
         if is_dir:
             item_count = entry[3]
+            sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
-            s.append(_padding + f'+-<a href="{_file}/{diff_arg}">{_file}</a> {ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}\n')
+            s.append(_padding + f'+-<a href="{_file}/{diff_arg}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}\n')
         else:
             file_link = '/weppcloud' + _join(request_path, _file)
             is_symlink = entry[4]
@@ -394,7 +400,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 if _exists(_join(_diff_dir, _file)):
                     diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
-            s.append(_padding + f'>-<a href="{file_link}">{_file}</a>{sym_target} {ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}\n')
+            s.append(_padding + f'>-<a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
         
         if i % 2:
             s[-1] = f'<span style="background-color:#f6f6f6;">{s[-1]}</span>'
@@ -402,7 +408,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
     return ''.join(s), total_items
 
 
-def browse_response(path, runid, wd, request, filter_pattern=''):
+def browse_response(path, runid, wd, request, config, filter_pattern=''):
     args = request.args
     headers = request.headers
     
@@ -417,12 +423,24 @@ def browse_response(path, runid, wd, request, filter_pattern=''):
         return error_factory('path does not exist')
     
     path_lower = path.lower()
+
+    rel_path = os.path.relpath(path, wd)
+    breadcrumbs = ''
     
+
     if os.path.isdir(path):
-        up = ''
-        if path != wd:
-            up = f'\n<a href="../{diff_arg}">Up</a>\n'
-        
+        # build bread crumb links
+        _url = f'/weppcloud/runs/{runid}/{config}/browse/'
+        breadcrumbs = [f'<a href="{_url}">{runid}</a>']
+
+        if rel_path != '.':
+            parts = rel_path.split('/')
+            for part in parts:
+                _url = f'/weppcloud/runs/{runid}/{config}/browse/{part}'
+                breadcrumbs.append(f'<a href="{_url}">{part}</a>')
+
+        breadcrumbs = ' / '.join(breadcrumbs)
+
         # Get page and filter from query parameters
         page = request.args.get('page', 1, type=int)
         
@@ -486,7 +504,7 @@ def browse_response(path, runid, wd, request, filter_pattern=''):
                         if total_items > 0 else '<p>No items to display</p>')
         
         # Combine UI elements
-        tree = f'<pre>{showing_text}{pagination_html}{up}{listing_html}\n{pagination_html}</pre>'
+        tree = f'<pre>{showing_text}{pagination_html}{breadcrumbs}\n\n{listing_html}\n{pagination_html}</pre>'
         
         return Response('''
 <!DOCTYPE html>
