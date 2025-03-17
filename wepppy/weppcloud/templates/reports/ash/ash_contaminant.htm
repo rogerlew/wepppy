@@ -98,7 +98,7 @@
 <tr>
     <td>High</td>
     <td>{{ unitizer(burn_class_summary[3], 'ha') | safe }}</td>
-    <td>{{ unitizer(high_ash, 'tonne') | safe }}</td>
+    <td>{{ unitizer(high_ash, 'kg') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
         {% if high_ash is not none%}
@@ -117,7 +117,7 @@
 <tr>
     <td>Moderate</td>
     <td>{{ unitizer(burn_class_summary[2], 'ha') | safe }}</td>
-    <td>{{ unitizer(mod_ash, 'tonne') | safe }}</td>
+    <td>{{ unitizer(mod_ash, 'kg') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
         {% if mod_ash is not none%}
@@ -136,7 +136,7 @@
 <tr>
     <td>Low</td>
     <td>{{ unitizer(burn_class_summary[1], 'ha') | safe }}</td>
-    <td>{{ unitizer(low_ash, 'tonne') | safe }}</td>
+    <td>{{ unitizer(low_ash, 'kg') | safe }}</td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
         {% if low_ash is not none%}
@@ -170,7 +170,7 @@
 </tr>
 <tr>
     <td>years</td>
-    <td style="width:100px; text-align: right;" >{{ unitizer_units('tonne') | safe }} </td>
+    <td style="width:100px; text-align: right;" >{{ unitizer_units('kg') | safe }} </td>
     {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
       {% if contaminant in contaminants %}
         <td style="width:100px; text-align: right;" >
@@ -188,7 +188,7 @@
     {% if _delivery > 0.0 %}
     <tr>
         <td>{{ rec }}</td>
-        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery, 'tonne') | safe }} </td>
+        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery, 'kg') | safe }} </td>
         {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
           {% if contaminant in contaminants %}
             <td style="width:100px; text-align: right;" >
@@ -303,7 +303,7 @@
     {% if _delivery > 0.0 %}
     <tr>
         <td>{{ rec }}</td>
-        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery / reservoir_current_volume_m3, 'tonne') | safe }} </td>
+        <td style="width:100px; text-align: right;" >{{ unitizer(_delivery * 1000.0 / reservoir_current_volume_m3, 'g/L') | safe }} </td>
         {% for contaminant, high, mod, low, units in ash.contaminants_iter() %}
           {% if contaminant in contaminants %}
             <td style="width:100px; text-align: right;" >
