@@ -614,6 +614,7 @@ def api_rap_ts_acquire(runid, config):
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fork', methods=['POST'])
 def api_fork(runid, config):
     from wepppy.weppcloud.app import get_run_owners
+    from wepppy.weppcloud import user_datastore
     try:
         wd = get_wd(runid)
         
@@ -663,7 +664,14 @@ def api_fork(runid, config):
 
             dir_created = True
 
-        assert not _exists(new_wd)
+        assert not _exists(new_wd), new_wd
+
+        # add run to database
+        if not current_user.is_anonymous:
+            try:
+                user_datastore.create_run(new_runid, config, current_user)
+            except Exception:
+                return exception_factory('Could not add run to user database')
 
         prep = RedisPrep.getInstance(wd)
 
