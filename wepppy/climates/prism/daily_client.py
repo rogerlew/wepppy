@@ -63,7 +63,9 @@ def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2000, end_ye
     _start_date = pd.to_datetime(start_date, format='%Y%m%d')
     _end_date = pd.to_datetime(end_date, format='%Y%m%d')
     df['date'] = pd.date_range(start=_start_date, end=_end_date)
+    df['date'] = pd.to_datetime(df['date'])
     df.set_index('date', inplace=True)
+    df['date'] = df.index
 
     if gridmet_wind:
         from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
@@ -76,4 +78,5 @@ def retrieve_historical_timeseries(lng=-116.5, lat=46.5, start_year=2000, end_ye
 
 if __name__ == "__main__":
     d = retrieve_historical_timeseries(lng=-122.0, lat=44.5)
-#    print(d)
+    d.info()
+    print(d.index.month)
