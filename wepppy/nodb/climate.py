@@ -1672,7 +1672,7 @@ class Climate(NoDbBase, LogMixin):
                 raise ValueError('climate_spatialmode is MultipleInterpolated but climate_mode is not ObservedPRISM or GridMetPRISM')
 
         # vanilla Cligen
-        elif climate_mode == ClimateMode.Vanilla:
+        if climate_mode == ClimateMode.Vanilla:
             self._build_climate_vanilla(verbose=verbose, attrs=attrs)
             if self.climate_spatialmode == ClimateSpatialMode.Multiple:
                 self._prism_revision(verbose=verbose)
