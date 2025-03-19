@@ -308,7 +308,7 @@ class ClimatePrecipScalingMode(IntEnum):
 
 def get_prism_p_annual_monthlies(lng, lat, start_year, end_year):
     df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year)
-    months = df['date'].month
+    months = df.index.month
     precip = df['ppt(mm)'].values
     return pyo3_cli_calculate_annual_monthlies(months=months, ppts=precip)
 
