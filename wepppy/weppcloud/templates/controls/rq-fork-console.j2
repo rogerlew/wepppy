@@ -206,8 +206,8 @@ New runid: <a href="https://${window.location.host}/weppcloud/runs/${new_runid}/
             <a data-toggle="tooltip" data-placement="top" title="Removes SBS Map (if applicable), rebuilds landuse, soils, and runs WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
           </label>
         </div>
-        <button type="submit" class="btn btn-primary" id="submit_button">Fork Project</button>
-        
+        <button type="submit" class="btn btn-primary" id="submit_button" rel="nofollow" data-purpose="human-interaction">Fork Project</button>
+        <!-- This button is intended for human interaction only, not for bots or crawlers -->
         <!-- Cancel button; hidden until a job is submitted -->
         <button type="button" class="btn btn-warning" id="cancel_button" onclick="cancelJob()" style="display:none;">Cancel Job</button>
 
