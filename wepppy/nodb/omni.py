@@ -22,17 +22,17 @@ import what3words
 # wepppy
 import requests
 
-from wepppy.export.gpkg_export import extract_soil_erosion
+from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from .base import (
     NoDbBase,
     TriggerEvents
 )
 
-def _run_contrast(contrast_name, contrasts, wd, wepp_bin='wepp_726fbd5'):
+def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557997'):
     from wepppy.nodb import Landuse, Soils, Wepp
 
-    omni_dir = _join(wd, 'omni', 'contrasts', contrast_name)
+    omni_dir = _join(wd, 'omni', 'contrasts', contrast_id)
 
     if _exists(omni_dir):
         shutil.rmtree(omni_dir)
@@ -144,11 +144,14 @@ def _build_scenario(scenario, wd):
     from wepppy.nodb import Landuse, Soils, Wepp
     from wepppy.nodb.mods import Disturbed
 
+    # change to working dir of parent weppcloud project
     os.chdir(wd)
     
+    # assert we know how to handle the scenario
     assert scenario in ['uniform_low', 'uniform_high', 'uniform_moderate', 'uniform_high', 'thinning']
     new_wd = _omni_clone(scenario, wd)
 
+    # identify burn class
     sbs = None
     if scenario == 'uniform_low':
         sbs = 1
@@ -157,18 +160,22 @@ def _build_scenario(scenario, wd):
     elif scenario == 'uniform_high':
         sbs = 3
 
+
+    # get disturbed and landuse instances
     disturbed = Disturbed.getInstance(new_wd)
     landuse = Landuse.getInstance(new_wd)
     
+    # handle uniform burn severity cases
     if sbs in [1, 2, 3]:
         sbs_fn = disturbed.build_uniform_sbs(int(sbs))
         res = disturbed.validate(sbs_fn)
 
         landuse.build()
 
+    # handle other cases
     else:
         disturbed_key = disturbed.get_disturbed_key_lookup()
-        lc_key = disturbed_key[scenario]
+        lc_key = disturbed_key[scenario]  # assumes scenario is a key in the disturbed map wepp/managements/*.json
 
         forest_keys = []
         for key, value in disturbed_key.items():
@@ -275,19 +282,62 @@ class Omni(NoDbBase):
         sleep(1)
         os.makedirs(self.omni_dir)
 
-    def get_soil_erosion_from_gpkg(self, scenario=None):
+    def get_objective_parameter_from_gpkg(self, objective_parameter, scenario=None):
         if scenario is None:
             gpkg_fn = glob(_join(self.wd, 'export/arcmap/*.gpkg'))[0]
         else:
             gpkg_fn = glob(_join(self.wd, f'omni/scenarios/{scenario}/export/arcmap/*.gpkg'))[0]
 
-        soils_erosion_descending, total_erosion_kg = extract_soil_erosion(gpkg_fn)
-        return soils_erosion_descending, total_erosion_kg
+        objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn)
+        return objective_parameter_descending, total_objective_parameter
     
     def build_contrasts(self, control_scenario='uniform_high', contrast_scenario='thinning',
-                        cumulative_erosion_threshold_fraction=0.8,
-                        contrast_hillslope_limit=None):
+                        obj_param='runoff',
+                        cumulative_obj_param_threshold_fraction=0.8,
+                        contrast_hillslope_limit=None,
+                        hill_min_slope=None, hill_max_slope=None,
+                        select_burn_severities=None,
+                        select_topaz_ids=None):
+        """
+        Extracts the specified objective parameter from the specified GeoPackage file.
+
+        Parameters
+        ----------
+        control_scenario : str
+            The control scenario to use for the contrast. Must be one of the following:
+            'uniform_low', 'uniform_moderate', 'uniform_high', 'thinning', 'mulching30', 'mulching60', None
+        contrast_scenario : str
+            The contrast scenario to use for the contrast. Must be one of the following:
+            'uniform_low', 'uniform_moderate', 'uniform_high', 'thinning', 'mulching30', 'mulching60', None
+        obj_param : str
+            The objective parameter to extract. Must be one of the following:
+            'Soil_Loss_kg', 'Runoff_mm', 'Runoff_Volume_m3', 'Subrunoff_mm', 'Subrunoff_Volume_m3', 'Total_Phosphorus_kg'
+        cumulative_obj_param_threshold_fraction : float
+            The fraction of the total objective parameter to use as a threshold for the cumulative objective parameter.
+            No more contrasts are created after this threshold is reached.
+        contrast_hillslope_limit : int
+            The maximum number of hillslopes to use for the contrast. If None, all hillslopes are selected.
+        hill_min_slope : float
+            The minimum slope of the hillslope to use for the contrast. If None, all hillslopes are selected.
+        hill_max_slope : float
+            The maximum slope of the hillslope to use for the contrast. If None, all hillslopes are selected.
+        select_burn_severities : list
+            A list of burn severities to use for the contrast. If None, all burn severities are selected.
+            The burn severities must be one of the following: 1, 2, 3
+        select_topaz_ids : list
+            A list of topaz_ids to use for the contrast. If None, all topaz_ids are selected.
+        """
         from wepppy.nodb import Watershed
+
+        # TODO
+        # filter
+        #   hillslope slope steepness criteria < 60%
+        #   slope length, aspect, etc.
+        #   manually defined topaz_ids
+        #   burn severity filter 
+
+        # filter and selection report
+
 
         wd = self.wd
 
@@ -296,20 +346,20 @@ class Omni(NoDbBase):
         top2wepp = {k: v for k, v in translator.top2wepp.items() if not (str(k).endswith('4') or int(k) == 0)}
 
         # find hillslopes with the most erosion from the control scenario
-        # soils_erosion_descending is a list of SoilLoss named_tuples with fields: topaz_id, wepp_id, and soil_loss_kg
-        soils_erosion_descending, total_erosion_kg = self.get_soil_erosion_from_gpkg(control_scenario)
+        # soils_erosion_descending is a list of ObjectiveParameter named_tuples with fields: topaz_id, wepp_id, and value
+        obj_param_descending, total_erosion_kg = self.get_objective_parameter_from_gpkg(obj_param, scene=control_scenario)
 
-        if len(soils_erosion_descending) == 0:
+        if len(obj_param_descending) == 0:
             raise Exception('No soil erosion data found!')
         
         contrasts = {}
-        running_soil_loss_kg = 0.0
-        for i, d in enumerate(soils_erosion_descending):
+        running_obj_param = 0.0
+        for i, d in enumerate(obj_param_descending):
             if contrast_hillslope_limit is not None and i >= contrast_hillslope_limit:
                 break
 
-            running_soil_loss_kg += d.soil_loss_kg
-            if running_soil_loss_kg / total_erosion_kg > cumulative_erosion_threshold_fraction:
+            running_obj_param += d.soil_loss_kg
+            if running_obj_param / total_erosion_kg > cumulative_obj_param_threshold_fraction:
                 break
 
             topaz_id = d.topaz_id
@@ -326,11 +376,11 @@ class Omni(NoDbBase):
             for _topaz_id, _wepp_id in top2wepp.items():
 
                 # need to do it this way so the wepp_ids stay ordered.
-                if _topaz_id == topaz_id:
+                if str(_topaz_id) == str(topaz_id):
                     if contrast_scenario is None:
                         wepp_id_path = _join(wd, f'wepp/output/H{wepp_id}')   
                     else: 
-                        wepp_id_path = _join(wd, f'omni/scenarios/{contrast_scenario}/wepp/output/{Hwepp_id}')
+                        wepp_id_path = _join(wd, f'omni/scenarios/{contrast_scenario}/wepp/output/H{wepp_id}')
                 else:
                     if control_scenario is None:
                         wepp_id_path = _join(wd, f'wepp/output/H{_wepp_id}')
@@ -342,10 +392,12 @@ class Omni(NoDbBase):
 
         self.contrasts = contrasts
 
+        # save parameters for defining contrasts
+        
 
     def run_omni_contrasts(self):
-        for contrast_name, _contrasts in self.contrasts.items():
-            _run_contrast(contrast_name, _contrasts, self.wd)
+        for contrast_id, (contrast_name, _contrasts) in enumerate(self.contrasts.items()):
+            _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
 
     #
     # Required for NoDbBase Subclass
