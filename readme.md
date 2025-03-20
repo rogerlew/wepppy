@@ -5,14 +5,8 @@ Wepppy is Python package for running WEPP (Water Erosion Prediction Project) and
 
 
 
-### Linux Installation
-
-See [wepppy install with conda](https://github.com/rogerlew/wepppy/tree/master/install/conda)
-
 
 ### Docker
-
-(has not been recently tested)
 
 A docker base image is provided though wepppy, though wepppy works better on a bare metal linux install
 https://github.com/rogerlew/wepppy-docker-base
