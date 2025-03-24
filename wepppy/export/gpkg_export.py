@@ -1,7 +1,4 @@
-import geopandas as gpd
-import pandas as pd
-import numpy as np
-
+from typing import List, Tuple
 import json
 
 import os
@@ -9,7 +6,15 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
+import geopandas as gpd
+import pandas as pd
+import numpy as np
+
+from pandas.core.series import Series
+from collections import namedtuple
+
 from wepppy.nodb.soils import Soils
+
 
 try:
     import f_esri
@@ -20,6 +25,7 @@ except ImportError:
             return False
     f_esri = FEsri()
     
+
 def esri_compatible_colnames(df):
     # Create a dictionary to hold the mappings from original to new names
     rename_dict = {col: col.replace(' ', '_')
@@ -29,6 +35,65 @@ def esri_compatible_colnames(df):
 
     # Rename the columns and return the modified dataframe
     return df.rename(columns=rename_dict)
+
+
+ObjectiveParameter = namedtuple('ObjectiveParameter', ['topaz_id', 'wepp_id', 'value'])
+
+def gpkg_extract_objective_parameter(gpkg_fn: str, obj_param: str) -> Tuple[List[ObjectiveParameter], float]:
+    """
+    Extracts the specified objective parameter from the specified GeoPackage file."
+
+    Parameters
+    ----------
+    gpkg_fn : str
+        The path to the GeoPackage file.
+    obj_param : str
+        The objective parameter to extract. Must be one of the following:
+        'Soil_Loss_kg', 'Runoff_mm', 'Runoff_Volume_m3', 'Subrunoff_mm', 'Subrunoff_Volume_m3', 'Total_Phosphorus_kg'.
+
+    Returns
+    -------
+    List[ObjectiveParameter
+        A tuple containing a list of ObjectiveParameter named tuples
+    float
+        Total value of the parameter
+
+    Raises
+    ------
+    ValueError
+        If the specified objective parameter is invalid.
+
+    """
+
+    if obj_param not in ['Soil_Loss_kg', 'Runoff_mm', 'Runoff_Volume_m3', 
+                         'Subrunoff_mm', 'Subrunoff_Volume_m3', 
+                         'Total_Phosphorus_kg']:
+        
+        raise ValueError(f"Invalid objective parameter: {obj_param}")
+                                                         
+    # Read the GeoPackage file, 'subcatchments' layer
+    gdf = gpd.read_file(gpkg_fn, layer='subcatchments')
+
+    # Filter features where the specified parameter is greater than 0
+    param_features = gdf[gdf[obj_param] > 0.0]
+
+    # Sort in descending order based on the parameter
+    sorted_param = param_features.sort_values(obj_param, ascending=False)
+
+    # Calculate the total value of the parameter
+    total_param = float(sorted_param[obj_param].sum())
+
+    # Create a list of ObjectiveParameter named tuples if there are features
+    if len(sorted_param) > 0:
+        result_list: List[ObjectiveParameter] = [
+            ObjectiveParameter(str(row['TopazID']), str(row['WeppID']), float(row[obj_param]))
+            for _, row in sorted_param.iterrows()
+        ]
+    else:
+        result_list = []
+
+    # Return the list and the total
+    return result_list, total_param
 
 
 def gpkg_export(wd: str):
@@ -168,7 +233,6 @@ def gpkg_export(wd: str):
     if f_esri.has_f_esri():
         f_esri.gpkg_to_gdb(gpkg_fn, gpkg_fn.replace('.gpkg', '.gdb'))
 
-from pandas.core.series import Series
 
 def create_difference_map(scenario1_gpkg_fn, scenario2_gpkg_fn, difference_attributes, output_geojson_fn,  meta_attributes=None):
     layer_name = "subcatchments"
