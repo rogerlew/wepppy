@@ -48,7 +48,7 @@ from flask_security import (
 
 import re
 
-from flask_security.forms import Required
+from wtforms.validators import DataRequired as Required
 from flask_mail import Mail
 from flask_migrate import Migrate
 
@@ -125,6 +125,8 @@ from wepppy.nodb.mods.ash_transport import (
 
 from wepppy.nodb.redis_prep import RedisPrep
 
+from wepppy.weppcloud.utils.helpers import get_wd
+
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
 except:
@@ -134,7 +136,7 @@ except:
 # load app configuration based on deployment
 import socket
 _hostname = socket.gethostname()
-if 'wepp1' in _hostname:
+if 'wepp1' in _hostname or 'forest' in _hostname:
     from wepppy.weppcloud.wepp1_config import config_app
 elif 'wepp2' in _hostname:
     from wepppy.weppcloud.wepp2_config import config_app
@@ -411,6 +413,12 @@ def get_run_owners(runid):
     return User.query.filter(User.runs.any(Run.runid == runid)).all()
 
 
+
+from wepppy.weppcloud.wepp1_config import _init
+_init(app, db, user_datastore)
+
+
+
 @app.route('/health')
 def health():
     return jsonify('OK')
@@ -586,14 +594,6 @@ def task_usermod():
 _thisdir = os.path.dirname(__file__)
 
 static_dir = _join(_thisdir, 'static')
-
-
-def get_wd(runid):
-    return _join('/geodata/weppcloud_runs', runid)
-
-
-def get_last():
-    return _join('/geodata/weppcloud_runs', 'last')
 
 
 def error_factory(msg='Error Handling Request'):
@@ -1094,7 +1094,7 @@ def create_run_dir(current_user):
         if _exists(wd):
             continue
 
-        os.mkdir(wd)
+        os.makedirs(wd)
         dir_created = True
 
     return runid, wd
