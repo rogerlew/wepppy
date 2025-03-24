@@ -136,7 +136,7 @@ except:
 # load app configuration based on deployment
 import socket
 _hostname = socket.gethostname()
-if 'wepp1' in _hostname or 'forest' in _hostname:
+if 'wepp1' in _hostname or 'forest.' in _hostname:
     from wepppy.weppcloud.wepp1_config import config_app
 elif 'wepp2' in _hostname:
     from wepppy.weppcloud.wepp2_config import config_app
@@ -414,8 +414,8 @@ def get_run_owners(runid):
 
 
 
-from wepppy.weppcloud.wepp1_config import _init
-_init(app, db, user_datastore)
+# from wepppy.weppcloud.wepp1_config import _init
+# _init(app, db, user_datastore)
 
 
 
