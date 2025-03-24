@@ -85,7 +85,7 @@ dependencies:
   - proj=9.6.0=h0054346_0
   - python=3.10.16=he725a3c_1_cpython
   - python-dateutil=2.9.0.post0=pyhff2d567_1
-  - python-tzdata=2025.1=pyhd8ed1ab_0
+  - python-tzdata
   - python_abi=3.10=5_cp310
   - rav1e=0.6.6=he8a937b_2
   - readline=8.2=h8c095d6_2
@@ -143,7 +143,7 @@ dependencies:
       - click-repl==0.3.0
       - cligj==0.7.2
       - cloudpickle==2.0.0
-      - comm==0.2.2
+      - comm
       - contourpy==1.2.1
       - cryptography==44.0.2
       - cycler==0.11.0
@@ -191,19 +191,16 @@ dependencies:
       - importlib-metadata==8.6.1
       - importlib-resources==6.5.2
       - iniconfig==1.1.1
-      - ipykernel==6.29.5
-      - ipython==8.34.0
-      - ipython-genutils==0.2.0
+      - ipykernel
+      - ipython
+      - ipython-genutils
       - isort==5.6.4
-      - itsdangerous==2.2.0
+      - itsdangerous
       - jedi==0.18.0
       - jeepney==0.7.1
       - jinja2==3.1.6
       - jsonpickle==3.0.4
       - jsonschema==3.2.0
-      - jupyter-client==8.6.3
-      - jupyter-core==5.7.2
-      - jupyterlab-pygments==0.3.0
       - keyring==23.5.0
       - kiwisolver==1.4.8
       - kombu==5.5.0
@@ -219,7 +216,6 @@ dependencies:
       - metpy==1.6.2
       - mistune==3.1.3
       - mizani==0.11.4
-      - mod-wsgi==5.0.2
       - monotonic==1.6
       - more-itertools==8.10.0
       - mpmath==1.3.0
@@ -282,7 +278,7 @@ dependencies:
       - pythran==0.10.0
       - pytz==2022.1
       - pyyaml==6.0.2
-      - pyzmq==22.3.0
+      - pyzmq
       - rasterio==1.3.10
       - redis==5.0.4
       - requests==2.25.1
@@ -319,9 +315,8 @@ dependencies:
       - tomli==2.2.1
       - toolz==0.11.2
       - tornado==6.4.1
-      - traitlets==5.1.1
+      - traitlets
       - typing-extensions==4.12.0
-      - tzdata==2024.1
       - ufolib2==0.13.1
       - urllib3==1.26.20
       - utm==0.8.1
