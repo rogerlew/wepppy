@@ -1205,6 +1205,10 @@ class Climate(NoDbBase, LogMixin):
     #
 
     def find_closest_stations(self, num_stations=10):
+
+        if self.is_locked() and self._closest_stations is not None:
+            return self.closest_stations
+        
         self.lock()
 
         # noinspection PyBroadInspection
@@ -1235,6 +1239,10 @@ class Climate(NoDbBase, LogMixin):
         return [s.as_dict() for s in self._closest_stations]
 
     def find_heuristic_stations(self, num_stations=10):
+
+        if self.is_locked() and self._heuristic_stations is not None:
+            return self.heuristic_stations
+        
         if 'eu' in self.locales:
             return self.find_eu_heuristic_stations(num_stations=num_stations)
         if 'au' in self.locales:
@@ -1413,9 +1421,7 @@ class Climate(NoDbBase, LogMixin):
             if kwds.get('precip_scale_factor', None) is not None:
                 if isfloat(kwds['precip_scale_factor']):
                     self._precip_scale_factor = float(kwds['precip_scale_factor'])
-                
-
-                    
+                                    
             if kwds.get('precip_monthly_scale_factors_7', None) is not None:
                 precip_monthly_scale_factors = []
                 for i in range(12):
@@ -1423,6 +1429,9 @@ class Climate(NoDbBase, LogMixin):
                     v = None
                     try:
                         v = float(kwds.get('precip_monthly_scale_factors_%d' % i))
+
+                        if v < 0.0:
+                            v = 0.0
                     except ValueError:
                         pass
                     if v is not None:
