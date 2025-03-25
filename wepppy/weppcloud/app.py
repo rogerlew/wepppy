@@ -136,13 +136,19 @@ except:
 # load app configuration based on deployment
 import socket
 _hostname = socket.gethostname()
-if 'wepp1' in _hostname or 'forest.' in _hostname:
-    from wepppy.weppcloud.wepp1_config import config_app
+config_app = None
+if 'wepp1' in _hostname or 'forest' in _hostname:
+    try:
+        from wepppy.weppcloud.wepp1_config import config_app
+    except:
+        pass
 elif 'wepp2' in _hostname:
     from wepppy.weppcloud.wepp2_config import config_app
 elif 'wepp3' in _hostname:
     from wepppy.weppcloud.wepp3_config import config_app
-else:
+
+
+if config_app is None:
     from wepppy.weppcloud.standalone_config import config_app
 
 
