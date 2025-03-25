@@ -1206,7 +1206,7 @@ class Climate(NoDbBase, LogMixin):
 
     def find_closest_stations(self, num_stations=10):
 
-        if self.is_locked() and self._closest_stations is not None:
+        if self.islocked() and self._closest_stations is not None:
             return self.closest_stations
         
         self.lock()
@@ -1240,7 +1240,7 @@ class Climate(NoDbBase, LogMixin):
 
     def find_heuristic_stations(self, num_stations=10):
 
-        if self.is_locked() and self._heuristic_stations is not None:
+        if self.islocked() and self._heuristic_stations is not None:
             return self.heuristic_stations
         
         if 'eu' in self.locales:
