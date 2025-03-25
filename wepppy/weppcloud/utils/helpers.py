@@ -11,9 +11,16 @@ from flask import jsonify, make_response
 
 from datetime import datetime
 
-def get_wd(runid):
-    return _join('/geodata/weppcloud_runs', runid)
 
+
+def get_wd(runid):
+    legacy = _join('/geodata/weppcloud_runs', runid)
+    if _exists(legacy):
+        return legacy
+        
+    prefix = runid[:2]
+    return _join('/wc/runs', prefix, runid)
+    
 
 def error_factory(msg='Error Handling Request'):
     return jsonify({'Success': False,

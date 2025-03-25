@@ -37,6 +37,11 @@ from .wepp_rq import run_wepp_rq
 
 _hostname = socket.gethostname()
 
+from dotenv import load_dotenv
+_thisdir = os.path.dirname(__file__)
+
+load_dotenv(_join(_thisdir, '.env'))
+
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
