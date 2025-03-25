@@ -11,10 +11,14 @@ from.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
 
 
 _thisdir = os.path.dirname(__file__)
-_bin = _join(_thisdir, 'bin', 'abstract_watershed')
 
 
 def _get_bin():
+    if _exists('/lib/libgdal.so.30'):
+        _bin = _join(_thisdir, 'bin', 'abstract_watershed')
+    else:
+        _bin = _join(_thisdir, 'bin', 'abstract_watershed.conda310.ub2404') 
+
     if not _exists(_bin):
         raise RuntimeError('abstract_watershed binary not found')
     return _bin
