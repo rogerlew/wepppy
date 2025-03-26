@@ -24,7 +24,7 @@ from rq.job import Job
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 
-from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode
+from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, Omni
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.rq.project_rq import (
@@ -65,6 +65,7 @@ from wepppy.nodb.watershed import (
 
 from wepppy.all_your_base import isint, isfloat
 
+from wepppy.weppcloud.utils.archive import has_archive
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
@@ -471,6 +472,19 @@ def _task_upload_ash_map(wd, request, file_input_id):
 
     return filename
 
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni', methods=['POST'])
+def api_run_omni(runid, config):
+
+    wd = get_wd(runid)
+    omni = Omni.getInstance(wd)
+
+    try:
+        omni.parse_inputs(request.form)
+    except Exception:
+        return exception_factory('Error parsing climate inputs', runid=runid)
+
+
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_ash', methods=['POST'])
 def api_run_ash(runid, config):
     # get working dir of original directory
@@ -660,6 +674,9 @@ def api_fork(runid, config):
 
             new_wd = get_wd(new_runid)
             if _exists(new_wd):
+                continue
+
+            if has_archive(runid):
                 continue
 
             dir_created = True
