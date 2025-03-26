@@ -80,7 +80,9 @@ rsync -av --progress /workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo
 sudo chown -R roger:webgroup /workdir/miniconda3/
 ```
 
-14. OPENTOPOGRAPHY_API_KEY
+14. some additional config
+
+14.1 OPENTOPOGRAPHY_API_KEY
 you have to have the .env file. you don't have to have a key if you don't use earth
 
 
@@ -101,10 +103,9 @@ OPENTOPOGRAPHY_API_KEY=<YOUR_KEY_HERE>
 ```
 
 
-
 15. for apache2 (weppcloud webserver only)
 
-14.1 configure mpm_event
+15.1 configure mpm_event
 ```bash
 sudo a2dismod mpm_prefork
 sudo a2enmod mpm_event
@@ -195,10 +196,61 @@ sudo apachectl stop
 sudo apachctl start
 ```
 
+16. config for slave rq workers (not no machine with rq server)
 
-16. launching rq workers
+16.1 nfs share
 
-16.1 get byobu www-data shell
+all workers need to find the weppcloud runs at `/wc/runs` and the archives at `/wc/archive` (as of 3-23-2025)
+
+to share nfs
+
+16.1.1 server
+
+install nfs server
+```bash
+sudo apt install nfs-kernel-server
+```
+
+configure share by editing `/etc/exports`. my homelab has raid array mounted as `/home/`
+```
+/home/weppcloud  192.168.1.0/24(rw,sync,no_subtree_check)
+```
+
+16.1.2 nfs clients
+edit `/etc/fstab` to mount nfs share automatically
+```
+192.168.1.107:/home/weppcloud /wc   nfs    vers=4.1,rw,sync,hard,timeo=600,retrans=3  0 0
+```
+
+create `/wc` folder and chown to www-data:webgroup
+```bash
+sudo mkdir /wc
+sudo chown www-data:webgroup /wc
+```
+
+to hot-reload
+```bash
+sudo systemctl daemon-reload
+sudo mount -a
+```
+
+
+
+
+16.2 rq .env ini file for rq status messenger
+
+this is needed to proxy status messenges back to the web clients for rq worker not on master
+
+`/workdir/wepppy/wepppy/nodb/.env`
+```ini
+REDIS_HOST=192.168.1.107
+REDIS_URL=redis://192.168.1.107
+```
+
+17. launching rq workers
+
+
+17.1 get byobu www-data shell
 ```bash
 sudo -u www-data bash
 byobu
@@ -210,3 +262,17 @@ run
 ```bash
 rq worker-pool -n 32 -u redis://192.168.1.107:6379/9 --worker-class 'wepppy.rq.WepppyRqWorker' high default low
 ```
+
+
+18. compiling peridot from source (in wepppy310-env)
+```bash
+conda install -c conda-forge rust
+cd /workdir
+git clone https://github.com/wepp-in-the-woods/peridot
+cd peridot
+cargo clean
+cargo build --release
+```
+
+19. f-esri for .gdb creation with gpkg export
+see https://github.com/rogerlew/f-esri
