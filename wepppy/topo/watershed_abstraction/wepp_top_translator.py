@@ -89,6 +89,14 @@ class WeppTopTranslator:
         self.channel_n = len(top_chn_ids)
         self.n = self.hillslope_n + self.channel_n
 
+    @property
+    def top2wepp(self):
+        return self._top2wepp
+
+    @property
+    def wepp2top(self):
+        return self._wepp2top
+
     def top(self, wepp=None, sub_id=None, chn_id=None, chn_enum=None):
         assert sum([v is not None for v in [wepp, sub_id, chn_id, chn_enum]]) == 1
         _wepp2top = self._wepp2top
