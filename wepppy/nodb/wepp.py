@@ -57,6 +57,7 @@ from wepp_runner.wepp_runner import (
     run_hillslope,
     run_ss_batch_hillslope,
     make_watershed_run,
+    make_watershed_omni_contrasts_run,
     make_ss_watershed_run,
     make_ss_batch_watershed_run,
     run_watershed,
@@ -608,6 +609,11 @@ class Wepp(NoDbBase, LogMixin):
     def channel_2006_avke(self):
         return getattr(self, '_channel_2006_avke', self.config_get_float('wepp', 'channel_2006_avke'))
 
+    @property
+    def is_omni_contrasts_run(self):
+        run_dir = os.path.abspath(self.runs_dir)
+        return 'omni/contrasts' in run_dir
+
     def set_baseflow_opts(self, gwstorage=None, bfcoeff=None, dscoeff=None, bfthreshold=None):
         self.lock()
 
@@ -718,7 +724,7 @@ class Wepp(NoDbBase, LogMixin):
     #
     # hillslopes
     #
-    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None):
+    def prep_hillslopes(self, frost=None, baseflow=None, wepp_ui=None, pmet=None, snow=None, omni=False):
         self.log('Prepping Hillslopes... ')
 
         # get translator
@@ -732,14 +738,17 @@ class Wepp(NoDbBase, LogMixin):
                 reveg = True
 
         if self.multi_ofe:
-            self._prep_multi_ofe(translator)
+            self._prep_multi_ofe(translator, omni=omni)
         else:
-            self._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
+            if not omni:
+                self._prep_slopes(translator, watershed.clip_hillslopes, watershed.clip_hillslope_length)
             self._prep_managements(translator)
             self._prep_soils(translator)
 
-        self._prep_climates(translator)
-        self._make_hillslope_runs(translator, reveg=reveg)
+        if not omni:
+            self._prep_climates(translator)
+
+        self._make_hillslope_runs(translator, reveg=reveg, omni=omni)
 
         if (frost is None and self.run_frost) or frost:
             self._prep_frost()
@@ -1246,7 +1255,7 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
-    def _prep_multi_ofe(self, translator):
+    def _prep_multi_ofe(self, translator, omni=False):
         self.log('    Prepping _prep_multi_ofe... ')
         wd = self.wd
 
@@ -1283,9 +1292,10 @@ class Wepp(NoDbBase, LogMixin):
             wepp_id = translator.wepp(top=int(topaz_id))
 
             # slope files
-            src_fn = _join(wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
-            dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            _copyfile(src_fn, dst_fn)
+            if not omni:
+                src_fn = _join(wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
+                dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
+                _copyfile(src_fn, dst_fn)
 
             # soils
             src_fn = _join(soils_dir, f'hill_{topaz_id}.mofe.sol')
@@ -1426,6 +1436,7 @@ class Wepp(NoDbBase, LogMixin):
                             xmxlai = _land_soil_replacements_d[(texid, disturbed_class)]['xmxlai']
                         else:
                             rdmax = None
+                            xmxlai = None
 
                     if isfloat(rdmax):
                         management.set_rdmax(float(rdmax))
@@ -1572,7 +1583,7 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
-    def _make_hillslope_runs(self, translator, reveg=False):
+    def _make_hillslope_runs(self, translator, reveg=False, omni=False):
         self.log('    Prepping _make_hillslope_runs... ')
         watershed = Watershed.getInstance(self.wd)
         runs_dir = self.runs_dir
@@ -1584,7 +1595,7 @@ class Wepp(NoDbBase, LogMixin):
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
 
-                make_ss_hillslope_run(wepp_id, runs_dir)
+                make_ss_hillslope_run(wepp_id, runs_dir, omni=omni)
 
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
             for topaz_id, _ in watershed.sub_iter():
@@ -1593,17 +1604,17 @@ class Wepp(NoDbBase, LogMixin):
                 for d in climate.ss_batch_storms:
                     ss_batch_id = d['ss_batch_id']
                     ss_batch_key = d['ss_batch_key']
-                    make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key)
+                    make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key, omni=omni)
 
         else:
             for topaz_id, _ in watershed.sub_iter():
                 wepp_id = translator.wepp(top=int(topaz_id))
-                make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg)
+                make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg, omni=omni)
 
         self.log_done()
 
 
-    def run_hillslopes(self):
+    def run_hillslopes(self, omni=False):
         self.log('Running Hillslopes\n')
         watershed = Watershed.getInstance(self.wd)
         translator = watershed.translator_factory()
@@ -1612,16 +1623,18 @@ class Wepp(NoDbBase, LogMixin):
         fp_runs_dir = self.fp_runs_dir
         wepp_bin = self.wepp_bin
 
-        self.log('    wepp_bin:{}'.format(wepp_bin))
+        self.log(f'    wepp_bin:{wepp_bin}')
+        self.log(f'    omni: {omni}')
 
         def oncomplete(wepprun):
             status, _id, elapsed_time = wepprun.result()
             assert status
             self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
+        sub_n = watershed.sub_n
+
         with ThreadPoolExecutor(NCPU) as pool:
             futures = []
-            sub_n = watershed.sub_n
             if climate.climate_mode == ClimateMode.SingleStormBatch:
                 for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
 
@@ -1632,14 +1645,26 @@ class Wepp(NoDbBase, LogMixin):
 
                         self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
                         wepp_id = translator.wepp(top=int(topaz_id))
-                        futures.append(pool.submit(lambda p: run_ss_batch_hillslope(*p), (wepp_id, runs_dir, wepp_bin, ss_batch_id)))
+                        futures.append(pool.submit(lambda: run_ss_batch_hillslope(
+                            wepp_id=wepp_id,
+                            runs_dir=runs_dir,
+                            wepp_bin=wepp_bin,
+                            ss_batch_id=ss_batch_id,
+                            omni=omni
+                        )))
                         futures[-1].add_done_callback(oncomplete)
 
             else:
                 for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
                     self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
                     wepp_id = translator.wepp(top=int(topaz_id))
-                    futures.append(pool.submit(lambda p: run_hillslope(*p), (wepp_id, runs_dir, wepp_bin)))
+                    futures.append(pool.submit(
+                        run_hillslope,
+                        wepp_id=wepp_id,
+                        runs_dir=runs_dir,
+                        wepp_bin=wepp_bin,
+                        omni=omni
+                    ))
                     futures[-1].add_done_callback(oncomplete)
 
             wait(futures, return_when=FIRST_EXCEPTION)
@@ -1928,9 +1953,13 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         dst_fn = _join(runs_dir, 'pw0.cli')
         src_fn = _join(self.cli_dir, climate.cli_fn)
-        _copyfile(src_fn, dst_fn) 
+        _copyfile(src_fn, dst_fn)
 
-    def _make_watershed_run(self, translator):
+    def make_watershed_run(self, wepp_id_paths=None):
+        translator = Watershed.getInstance(self.wd).translator_factory()
+        self._make_watershed_run(translator, wepp_id_paths=wepp_id_paths)
+
+    def _make_watershed_run(self, translator, wepp_id_paths=None):
         runs_dir = self.runs_dir
         wepp_ids = list(translator.iter_wepp_sub_ids())
         wepp_ids.sort()
@@ -1938,7 +1967,9 @@ class Wepp(NoDbBase, LogMixin):
         climate = Climate.getInstance(self.wd)
         years = climate.input_years
 
-        if climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
+        if wepp_id_paths is not None:
+            make_watershed_omni_contrasts_run(years, wepp_id_paths, runs_dir)
+        elif climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
             make_ss_watershed_run(wepp_ids, runs_dir)
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
             for d in climate.ss_batch_storms:
@@ -1984,54 +2015,56 @@ class Wepp(NoDbBase, LogMixin):
 
         self.log_done()
 
-        if self.prep_details_on_run_completion:
-            self.log('    exporting prep details...')
-            export_channels_prep_details(wd)
-            export_hillslopes_prep_details(wd)
-            self.log_done()
-
-        if not _exists(_join(wd, 'wepppost.nodb')):
-            WeppPost(wd, '0.cfg')
-
-        climate = Climate.getInstance(wd)
-
-        if not climate.is_single_storm:
-            self.log(' running wepppost... ')
-            self._run_wepppost()
-            self.log_done()
-
-            self.log(' running totalwatsed2... ')
-            self._build_totalwatsed2()
-            self.log_done()
-
-            self.log(' running hillslope_watbal... ')
-            self._run_hillslope_watbal()
-            self.log_done()
-
-            self.log(' compressing pass_pw0.txt... ')
-            compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
-            self.log_done()
-
-            self.log(' compressing soil_pw0.txt... ')
-            compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
-            self.log_done()
-
-            if self.legacy_arc_export_on_run_completion:
-                self.log(' running legacy arcexport... ')
-                from wepppy.export import  legacy_arc_export
-                legacy_arc_export(self.wd)
+        if not self.is_omni_contrasts_run:
+            if self.prep_details_on_run_completion:
+                self.log('    exporting prep details...')
+                export_channels_prep_details(wd)
+                export_hillslopes_prep_details(wd)
                 self.log_done()
 
+            if not _exists(_join(wd, 'wepppost.nodb')):
+                WeppPost(wd, '0.cfg')
 
-        _ = self.loss_report # make the .parquet files for loss report
+            climate = Climate.getInstance(wd)
 
-        if self.arc_export_on_run_completion:
-            self.log(' running gpkg_export... ')
-            from wepppy.export.gpkg_export import gpkg_export
-            gpkg_export(self.wd)
-            self.log_done()
+            if not climate.is_single_storm:
+                self.log(' running wepppost... ')
+                self._run_wepppost()
+                self.log_done()
 
-            self.make_loss_grid()
+                self.log(' running totalwatsed2... ')
+                self._build_totalwatsed2()
+                self.log_done()
+
+                self.log(' running hillslope_watbal... ')
+                self._run_hillslope_watbal()
+                self.log_done()
+
+                self.log(' compressing pass_pw0.txt... ')
+                compress_fn(_join(self.output_dir, 'pass_pw0.txt'))
+                self.log_done()
+
+                self.log(' compressing soil_pw0.txt... ')
+                compress_fn(_join(self.output_dir, 'soil_pw0.txt'))
+                self.log_done()
+
+                if self.legacy_arc_export_on_run_completion:
+                    self.log(' running legacy arcexport... ')
+                    from wepppy.export import  legacy_arc_export
+                    legacy_arc_export(self.wd)
+                    self.log_done()
+
+
+            _ = self.loss_report # make the .parquet files for loss report
+
+
+            if self.arc_export_on_run_completion:
+                self.log(' running gpkg_export... ')
+                from wepppy.export.gpkg_export import gpkg_export
+                gpkg_export(self.wd)
+                self.log_done()
+
+                self.make_loss_grid()
 
         self.log('Watershed Run Complete')
 
