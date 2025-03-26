@@ -1637,6 +1637,17 @@ class Climate(NoDbBase, LogMixin):
         if not _exists(cli_dir):
             os.mkdir(cli_dir)
 
+        self.lock()
+        try:
+            self.cli_fn = None
+            self.par_fn = None
+            self.sub_cli_fns = None
+            self.sub_par_fns = None
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
         climate_mode = self.climate_mode
 
         if climate_mode == ClimateMode.Undefined:
@@ -2953,11 +2964,18 @@ class Climate(NoDbBase, LogMixin):
         if not self.has_climate:
             return None
 
-        if self._climate_spatialmode == ClimateSpatialMode.Multiple:
-            return dict(cli_fn=self.sub_cli_fns[str(topaz_id)],
-                        par_fn=self.sub_par_fns[str(topaz_id)])
+        if self.sub_cli_fns is None:
+            cli_fn = self.cli_fn
         else:
-            return dict(cli_fn=self.cli_fn, par_fn=self.par_fn)
+            cli_fn = self.sub_cli_fns.get(str(topaz_id), self.cli_fn)
+
+
+        if self.sub_par_fns is None:
+            par_fn = self.cli_fn
+        else:
+            par_fn = self.sub_par_fns.get(str(topaz_id), self.par_fn)
+
+        return dict(cli_fn=cli_fn, par_fn=par_fn)
 
     def chn_summary(self, topaz_id):
         if not is_channel(topaz_id):
