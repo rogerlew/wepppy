@@ -428,6 +428,9 @@ class Ron(NoDbBase):
             if 'skid_trails' in self.mods:
                 wepppy.nodb.mods.SkidTrails(wd, cfg_fn)
 
+            if 'omni' in self.mods:
+                wepppy.nodb.Omni(wd, cfg_fn)
+
             self.dump_and_unlock()
 
             self.trigger(TriggerEvents.ON_INIT_FINISH)
