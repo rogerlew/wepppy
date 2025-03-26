@@ -84,6 +84,10 @@
             {% include 'controls/ash.htm'%}
             {% endif %}
 
+            {% if 'omni' in ron.mods %}
+            {% include 'controls/omni.htm'%}
+            {% endif %}
+
             {% include 'controls/export.htm'%}
             {% if user.is_authenticated %}
             {% include 'controls/team.htm'%}

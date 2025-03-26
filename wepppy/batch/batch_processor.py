@@ -13,6 +13,7 @@ from wepppy.nodb import Ron, Watershed, Landuse, Soils, Climate
 from wepppy.nodb.climate import ClimateSpatialMode
 from wepppy.nodb.mods import RangelandCover
 from wepppy.weppcloud.app import get_wd
+from wepppy.weppcloud.utils.archive import has_archive
 
 
 class BatchProcessor(object):
@@ -73,6 +74,9 @@ class BatchProcessor(object):
 
             wd = get_wd(runid)
             if _exists(wd):
+                continue
+
+            if has_archive(runid):
                 continue
 
             os.mkdir(wd)
