@@ -58,3 +58,12 @@ from .unitizer import (
     UnitizerNoDbLockedException
 )
 
+from .subbasins import (
+    Subbasins,
+    SubbasinsNoDbLockedException
+)
+
+from .omni import (
+    Omni,
+    OmniNoDbLockedException
+)
