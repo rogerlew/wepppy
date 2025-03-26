@@ -126,6 +126,7 @@ from wepppy.nodb.mods.ash_transport import (
 from wepppy.nodb.redis_prep import RedisPrep
 
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.utils.archive import has_archive, restore_archive, archive_run
 
 try:
     from weppcloud2.discord_bot.discord_client import send_discord_message
@@ -1098,6 +1099,9 @@ def create_run_dir(current_user):
 
         wd = get_wd(runid)
         if _exists(wd):
+            continue
+
+        if has_archive(runid):
             continue
 
         os.makedirs(wd)
