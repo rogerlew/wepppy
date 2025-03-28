@@ -87,3 +87,20 @@ nav[data-toggle="toc"] .nav .nav > li > .active:focus {
 nav[data-toggle="toc"] .nav-link.active + ul {
   display: block;
 }
+
+nav[data-toggle="toc"] {
+  top: 42px;
+}
+
+/* small screens */
+@media (max-width: 768px) {
+  nav[data-toggle="toc"] {
+    position: static !important;  /* Overrides inline position: fixed; */
+    width: 100% !important;      /* Adjusts width to fit mobile screen */
+    margin-top: 10 !important;    /* Removes offset, as it’s no longer fixed */
+    margin-bottom: 42px;         /* Maintains spacing below TOC */
+  }
+  nav[data-toggle='toc'] .nav .nav {
+    display: block;              /* Ensures nested items stack vertically */
+  }
+}
