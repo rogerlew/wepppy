@@ -5690,10 +5690,17 @@ var Omni = function () {
 
     function createInstance() {
         var that = controlBase();
+        that.form = $("#omni_form");
+        that.info = $("#omni_form #info");
+        that.status = $("#omni_form  #status");
+        that.stacktrace = $("#omni_form #stacktrace");
+        that.ws_client = new WSClient('omni_form', 'omni');
+        that.rq_job_id = null;
+        that.rq_job = $("#omni_form #rq_job");
 
-        that.run_omni = function () {
+        that.run_omni_scenarios = function () {
             var self = instance;
-            var task_msg = "Submitting wepp run";
+            var task_msg = "Submitting omni run";
 
             self.info.text("");
             self.status.html(task_msg + "...");
@@ -5722,6 +5729,10 @@ var Omni = function () {
             });
         };
 
+        that.report_scenarios = function () {
+            var self = instance;
+            self.status.html("Omni Scenarios Completed")
+        };
 
         return that;
     }

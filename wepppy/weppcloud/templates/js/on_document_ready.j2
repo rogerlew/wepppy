@@ -107,6 +107,7 @@ function onReady() {
     var ash = Ash.getInstance();
     var rap_ts = RAP_TS.getInstance();
     var disturbed = Disturbed.getInstance();
+    var omni = Omni.getInstance();
 
 
     team.hideStacktrace();
@@ -971,6 +972,15 @@ function onReady() {
         observed.onWeppRunCompleted();
     });
 
+
+    {% if 'omni' in ron.mods %}
+
+    omni.form.on("OMNI_SCENARIO_RUN_TASK_COMPLETED", function () {
+        omni.ws_client.disconnect();
+        omni.report_scenarios();
+    });
+
+    {% endif %}
 
     {% if 'rhem' in ron.mods %}
     /*
