@@ -65,5 +65,6 @@ from .subbasins import (
 
 from .omni import (
     Omni,
-    OmniNoDbLockedException
+    OmniNoDbLockedException,
+    OmniScenario
 )

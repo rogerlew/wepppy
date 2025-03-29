@@ -35,9 +35,18 @@ omni.run_omni_scenarios()
 ```
 
 
-#### 4. Erosion analysis
+#### 4. Objective parameter analysis to idenfity contrast hillslopes
 
-Omni uses the gpkg exports to find hillslopes with high sediment, runoff, lateral flow
+Omni uses the gpkg exports to find hillslopes with high sediment, runoff, lateral flow, ...
+
+Applies filter to limit selection of hillslopes
+
+
+#### 5. Run Contrast Scenarios
+
+Omni uses the gpkg exports to find hillslopes with high sediment, runoff, lateral flow, ...
+
+Applies filter to limit selection of hillslopes
 
 
 ## Meeting with Bill and Pete (3/13/2025)
@@ -75,7 +84,7 @@ e.g. start with 80% bare (from burn severity)
   - Moderate 35% -> 95% 
   - Low 60% -> 100%
 
-Could be regionally dependent, more veg before fire results in more after fire (Lewis)
+Initial burn covers could be regionally dependent. More veg before fire results in more after fire (Lewis)
 
 #### Mulching Treatments
 

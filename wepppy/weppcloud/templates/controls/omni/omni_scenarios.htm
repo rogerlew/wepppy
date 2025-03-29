@@ -3,51 +3,48 @@
 {% block form_title %}OMNI Scenario Runner{% endblock %}
 {% block inputs %}
 <h5>Uniform Scenarios</h5>
+
 <p>Select Uniform Scenarios</p>
 <div class="form-group row">
     <div class="col-sm-5">
         <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_low_severity_fire"
-                   name="omni_run_uniform_scenario_low_severity_fire"
-                   type="checkbox"
-                   class="form-check-input disable-readonly"
-               {% if omni.run_uniform_scenario_low_severity_fire %}checked{% endif %}>
+            <input id="omni_run_uniform_scenario_low_severity_fire" name="omni_run_uniform_scenario_low_severity_fire"
+                type="checkbox" class="form-check-input disable-readonly" {% if OmniScenario.UniformLow in
+                omni.scenarios %}checked{% endif %}>
         </div>
-        <label for="omni_run_uniform_scenario_low_severity_fire" style="margin-left:3em;">Uniform Low Severity Fire</label>
+        <label for="omni_run_uniform_scenario_low_severity_fire" style="margin-left:3em;">Uniform Low Severity
+            Fire</label>
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-5">
         <div style="margin-left:2em;">
             <input id="omni_run_uniform_scenario_moderate_severity_fire"
-                   name="omni_run_uniform_scenario_moderate_severity_fire"
-                   type="checkbox"
-                   class="form-check-input disable-readonly"
-               {% if omni.run_uniform_scenario_moderate_severity_fire %}checked{% endif %}>
+                name="omni_run_uniform_scenario_moderate_severity_fire" type="checkbox"
+                class="form-check-input disable-readonly" {% if OmniScenario.UniformModerate in omni.scenarios
+                %}checked{% endif %}>
         </div>
-        <label for="omni_run_uniform_scenario_moderate_severity_fire" style="margin-left:3em;">Uniform Moderate Severity Fire</label>
+        <label for="omni_run_uniform_scenario_moderate_severity_fire" style="margin-left:3em;">Uniform Moderate Severity
+            Fire</label>
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-5">
         <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_high_severity_fire"
-                   name="omni_run_uniform_scenario_high_severity_fire"
-                   type="checkbox"
-                   class="form-check-input disable-readonly"
-               {% if omni.run_uniform_scenario_high_severity_fire %}checked{% endif %}>
+            <input id="omni_run_uniform_scenario_high_severity_fire" name="omni_run_uniform_scenario_high_severity_fire"
+                type="checkbox" class="form-check-input disable-readonly" {% if OmniScenario.UniformHigh in
+                omni.scenarios %}checked{% endif %}>
         </div>
-        <label for="omni_run_uniform_scenario_high_severity_fire" style="margin-left:3em;">Uniform High Severity Fire</label>
+        <label for="omni_run_uniform_scenario_high_severity_fire" style="margin-left:3em;">Uniform High Severity
+            Fire</label>
     </div>
 </div>
 <div class="form-group row">
     <div class="col-sm-5">
         <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_thinning"
-                   name="omni_run_uniform_scenario_thinning"
-                   type="checkbox"
-                   class="form-check-input disable-readonly"
-               {% if omni.run_uniform_scenario_thinning %}checked{% endif %}>
+            <input id="omni_run_uniform_scenario_thinning" name="omni_run_uniform_scenario_thinning" type="checkbox"
+                class="form-check-input disable-readonly" {% if OmniScenario.UniformThinning in omni.scenarios
+                %}checked{% endif %}>
         </div>
         <label for="omni_run_uniform_scenario_thinning" style="margin-left:3em;">Uniform Thinning</label>
     </div>
@@ -55,27 +52,32 @@
 <div class="form-group row">
     <div class="col-sm-5">
         <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_mulching"
-                   name="omni_run_uniform_scenario_mulching"
-                   type="checkbox"
-                   class="form-check-input disable-readonly"
-               {% if omni.run_uniform_scenario_mulching %}checked{% endif %}>
+            <input id="omni_run_uniform_scenario_mulching30" name="omni_run_uniform_scenario_mulching30" type="checkbox"
+                class="form-check-input disable-readonly" {% if OmniScenario.UniformMulching30 in
+                omni.scenarios%}checked{% endif %}>
         </div>
-        <label for="omni_run_uniform_scenario_mulching" style="margin-left:3em;">Uniform Mulching</label>
+        <label for="omni_run_uniform_scenario_mulching30" style="margin-left:3em;">Uniform Mulching 30%</label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-5">
+        <div style="margin-left:2em;">
+            <input id="omni_run_uniform_scenario_mulching60" name="omni_run_uniform_scenario_mulching60" type="checkbox"
+                class="form-check-input disable-readonly" {% if OmniScenario.UniformMulching60 in
+                omni.scenarios%}checked{% endif %}>
+        </div>
+        <label for="omni_run_uniform_scenario_mulching60" style="margin-left:3em;">Uniform Mulching 60%</label>
     </div>
 </div>
 
 <div style="height:1em;"> </div>
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
-        <button id="btn_build_rap_ts"
-        class="btn btn-outline-success my-2 my-sm-0 col-sm-12"
-        type="button"
-        onclick="Omni.getInstance().run_omni()">Run Omni</button>
+        <button id="btn_build_rap_ts" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
+            onclick="Omni.getInstance().run_omni_scenarios()">Run Omni</button>
     </div>
     <div class="col-sm-5">
         <small id="hint_run_omni"></small>
     </div>
 </div>
 {% endblock %}
-

@@ -35,6 +35,7 @@ class TaskEnum(Enum):
     fetch_dem = 'fetch_dem'
     landuse_map = 'landuse_map'
     init_sbs_map = 'init_sbs_map'
+    run_omni = 'run_omni'
 
     def __str__(self):
         return self.value.replace('TaskEnum.', '')

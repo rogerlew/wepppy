@@ -493,7 +493,16 @@ class Wepp(NoDbBase, LogMixin):
 
     @property
     def _status_channel(self):
-        return f'{self.runid}:wepp'
+        __status_channel = getattr(self, '__status_channel', None)
+        
+        run_dir = os.path.abspath(self.runs_dir)
+        if 'omni' in run_dir:
+            _parent_runid = run_dir.split('/omni/')[0].split('/')[-1]
+            self.__status_channel = __status_channel = f'{_parent_runid}:omni'
+        else:
+            self.__status_channel = __status_channel = f'{self.runid}:wepp'
+
+        return  __status_channel
 
     @property
     def multi_ofe(self):

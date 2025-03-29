@@ -8,6 +8,7 @@ from os.path import isdir
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
 
+from enum import IntEnum
 from copy import deepcopy
 from glob import glob
 import json
@@ -17,17 +18,61 @@ from time import sleep
 # non-standard
 import jsonpickle
 import utm
-import what3words
 
 # wepppy
-import requests
-
+from wepppy.nodb.mixins.log_mixin import LogMixin
 from wepppy.export.gpkg_export import gpkg_extract_objective_parameter
 
 from .base import (
     NoDbBase,
     TriggerEvents
 )
+
+class OmniScenario(IntEnum):
+    UniformLow = 1
+    UniformModerate = 2
+    UniformHigh = 3
+    Thinning = 4
+    Mulching30 = 5
+    Mulching60 = 6
+    SBSmap = 7
+
+    @staticmethod
+    def parse(x):
+        if x == 'uniform_low':
+            return OmniScenario.UniformLow
+        elif x == 'uniform_moderate':
+            return OmniScenario.UniformModerate
+        elif x == 'uniform_high':
+            return OmniScenario.UniformHigh
+        elif x == 'thinning':
+            return OmniScenario.Thinning
+        elif x == 'mulching30':
+            return OmniScenario.Mulching30
+        elif x == 'mulching60':
+            return OmniScenario.Mulching60
+        elif x == 'sbsmap':
+            return OmniScenario.SBSmap
+        raise KeyError
+
+    def __str__(self):
+        if self == OmniScenario.UniformLow:
+            return 'uniform_low'
+        elif self == OmniScenario.UniformModerate:
+            return 'uniform_moderate'
+        elif self == OmniScenario.UniformHigh:
+            return 'uniform_high'
+        elif self == OmniScenario.Thinning:
+            return 'thinning'
+        elif self == OmniScenario.Mulching30:
+            return 'mulching30'
+        elif self == OmniScenario.Mulching60:
+            return 'mulching60'
+        elif self == OmniScenario.SBSmap:
+            return 'sbsmap'
+        
+        raise KeyError
+    
 
 def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557997'):
     from wepppy.nodb import Landuse, Soils, Wepp
@@ -79,8 +124,9 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
     wepp.run_watershed()
 
 
-def _omni_clone(scenario, wd):
-    omni_dir = _join(wd, 'omni', 'scenarios', scenario)
+def _omni_clone(scenario: OmniScenario, wd):
+    _scenario = str(scenario)
+    omni_dir = _join(wd, 'omni', 'scenarios', _scenario)
 
     if _exists(omni_dir):
         shutil.rmtree(omni_dir)
@@ -139,27 +185,27 @@ def _omni_clone(scenario, wd):
 
     return omni_dir
 
-
-def _build_scenario(scenario, wd):
+def _build_scenario(scenario: OmniScenario, wd):
     from wepppy.nodb import Landuse, Soils, Wepp
     from wepppy.nodb.mods import Disturbed
+
+    _scenario = str(scenario)
 
     # change to working dir of parent weppcloud project
     os.chdir(wd)
     
     # assert we know how to handle the scenario
-    assert scenario in ['uniform_low', 'uniform_high', 'uniform_moderate', 'uniform_high', 'thinning']
+    assert isinstance(scenario, OmniScenario)
     new_wd = _omni_clone(scenario, wd)
 
     # identify burn class
     sbs = None
-    if scenario == 'uniform_low':
+    if scenario == OmniScenario.UniformLow:
         sbs = 1
-    elif scenario == 'uniform_moderate':
+    elif scenario == OmniScenario.UniformModerate:
         sbs = 2
-    elif scenario == 'uniform_high':
+    elif scenario == OmniScenario.UniformHigh:
         sbs = 3
-
 
     # get disturbed and landuse instances
     disturbed = Disturbed.getInstance(new_wd)
@@ -172,10 +218,14 @@ def _build_scenario(scenario, wd):
 
         landuse.build()
 
+    elif scenario == OmniScenario.SBSmap:
+        raise NotImplementedError
+
     # handle other cases
     else:
         disturbed_key = disturbed.get_disturbed_key_lookup()
-        lc_key = disturbed_key[scenario]  # assumes scenario is a key in the disturbed map wepp/managements/*.json
+        # TODO: and mulching30, mulching60, landcover map
+        lc_key = disturbed_key[_scenario]  # assumes scenario is a key in the disturbed map wepp/managements/*.json
 
         forest_keys = []
         for key, value in disturbed_key.items():
@@ -207,7 +257,7 @@ class OmniNoDbLockedException(Exception):
     pass
 
 
-class Omni(NoDbBase):
+class Omni(NoDbBase, LogMixin):
     """
     Runs scenarios inside of a parent scenario
     """
@@ -230,8 +280,18 @@ class Omni(NoDbBase):
             if not _exists(self.omni_dir):
                 os.makedirs(self.omni_dir)
 
-            self._scenarios = self.config_get_list('omni', 'scenarios')
+            self._scenarios = {OmniScenario.parse(v) for v in self.config_get_list('omni', 'scenarios')}
             self._contrasts = self.config_get_list('omni', 'contrasts')
+
+            self._contrast_scenario = None
+            self._control_scenario = None
+            self._contrast_object_param = None
+            self._contrast_cumulative_obj_param_threshold_fraction = None
+            self._contrast_hillslope_limit = None
+            self._contrast_hill_min_slope = None
+            self._contrast_hill_max_slope = None
+            self._contrast_select_burn_severities = None
+            self._contrast_select_topaz_ids = None
 
             self.dump_and_unlock()
 
@@ -244,12 +304,86 @@ class Omni(NoDbBase):
         return self._scenarios
     
     @scenarios.setter
-    def scenarios(self, value):
+    def scenarios(self, value: set[OmniScenario]):
 
         self.lock()
         try:
             self._scenarios = value
             self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
+
+    def parse_inputs(self, kwds):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:        
+
+            _scenarios = set()
+
+            if kwds.get('omni_run_uniform_scenario_low_severity_fire', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.UniformLow)
+
+            if kwds.get('omni_run_uniform_scenario_moderate_severity_fire', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.UniformModerate)
+
+            if kwds.get('omni_run_uniform_scenario_high_severity_fire', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.UniformHigh)
+
+            if kwds.get('omni_run_uniform_scenario_thinning', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.Thinning)
+
+            if kwds.get('omni_run_uniform_scenario_mulching30', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.Mulching30)
+
+            if kwds.get('omni_run_uniform_scenario_mulching60', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.Mulching60)
+
+            if kwds.get('omni_run_uniform_scenario_sbsmap', 'off').lower().startswith('on'):
+                _scenarios.add(OmniScenario.SBSmap)
+
+            self._scenarios = _scenarios
+
+            control_scenario = kwds.get('omni_control_scenario', None)
+            if control_scenario is not None:
+                self._control_scenario =OmniScenario.parse(control_scenario)
+
+            contrast_scenario = kwds.get('omni_contrast_scenario', None)
+            if contrast_scenario is not None:
+                self._contrast_scenario = OmniScenario.parse(contrast_scenario)
+
+            omni_contrast_objective_parameter = kwds.get('omni_contrast_objective_parameter', None)
+            if omni_contrast_objective_parameter is not None:
+                self._contrast_object_param = omni_contrast_objective_parameter
+
+            contrast_cumulative_obj_param_threshold_fraction = kwds.get('omni_contrast_cumulative_obj_param_threshold_fraction', None)
+            if contrast_cumulative_obj_param_threshold_fraction is not None:
+                self._contrast_cumulative_obj_param_threshold_fraction = contrast_cumulative_obj_param_threshold_fraction
+                
+            contrast_hillslope_limit = kwds.get('omni_contrast_hillslope_limit', None)
+            if contrast_hillslope_limit is not None:
+                self._contrast_hillslope_limit = contrast_hillslope_limit
+                
+            hill_min_slope = kwds.get('omni_contrast_hill_min_slope', None)
+            if hill_min_slope is not None:
+                self._contrast_hill_min_slope = hill_min_slope
+
+            hill_max_slope = kwds.get('ommni_contrast_hill_max_slope', None)
+            if hill_max_slope is not None:
+                self._contrast_hill_max_slope = hill_max_slope
+                
+            select_burn_severities = kwds.get('omni_contrast_select_burn_severities', None)
+            if select_burn_severities is not None:
+                self._contrast_select_burn_severities = select_burn_severities
+            
+            select_topaz_ids = kwds.get('omni_contrast_select_topaz_ids', None)
+            if select_topaz_ids is not None:
+                self._contrast_select_topaz_ids = select_topaz_ids
+
+            self.dump_and_unlock()
+
         except Exception:
             self.unlock('-f')
             raise
@@ -291,9 +425,9 @@ class Omni(NoDbBase):
         objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn)
         return objective_parameter_descending, total_objective_parameter
     
-    def build_contrasts(self, control_scenario='uniform_high', contrast_scenario='thinning',
-                        obj_param='runoff',
-                        cumulative_obj_param_threshold_fraction=0.8,
+    def build_contrasts(self, control_scenario=OmniScenario.UniformHigh, contrast_scenario=OmniScenario.Thinning,
+                        obj_param='Runoff_mm',
+                        contrast_cumulative_obj_param_threshold_fraction=0.8,
                         contrast_hillslope_limit=None,
                         hill_min_slope=None, hill_max_slope=None,
                         select_burn_severities=None,
@@ -303,10 +437,10 @@ class Omni(NoDbBase):
 
         Parameters
         ----------
-        control_scenario : str
+        control_scenario : OmniScenario
             The control scenario to use for the contrast. Must be one of the following:
             'uniform_low', 'uniform_moderate', 'uniform_high', 'thinning', 'mulching30', 'mulching60', None
-        contrast_scenario : str
+        contrast_scenario : OmniScenario
             The contrast scenario to use for the contrast. Must be one of the following:
             'uniform_low', 'uniform_moderate', 'uniform_high', 'thinning', 'mulching30', 'mulching60', None
         obj_param : str
@@ -327,7 +461,40 @@ class Omni(NoDbBase):
         select_topaz_ids : list
             A list of topaz_ids to use for the contrast. If None, all topaz_ids are selected.
         """
-        from wepppy.nodb import Watershed
+
+        self.log('Omni::build_contrasts')
+
+        # save parameters for defining contrasts
+        self.lock()
+        try:
+            self._contrast_scenario = contrast_scenario
+            self._control_scenario = control_scenario
+            self._contrast_object_param = obj_param
+            self._contrast_cumulative_obj_param_threshold_fraction = contrast_cumulative_obj_param_threshold_fraction
+            self._contrast_hillslope_limit = contrast_hillslope_limit
+            self._contrast_hill_min_slope = hill_min_slope
+            self._contrast_hill_max_slope = hill_max_slope
+            self._contrast_select_burn_severities = select_burn_severities
+            self._contrast_select_topaz_ids = select_topaz_ids
+
+            self.dump_and_unlock()
+        except:
+            self.unlock('-f')
+            raise
+
+        self._build_contrasts()
+
+    def _build_contrasts(self):
+        obj_param = self._contrast_object_param
+        contrast_cumulative_obj_param_threshold_fraction = self._contrast_cumulative_obj_param_threshold_fraction
+        contrast_hillslope_limit = self._contrast_hillslope_limit
+        contrast_hill_min_slope = self._contrast_hill_min_slope
+        contrast_hill_max_slope = self._contrast_hill_max_slope
+        contrast_select_burn_severities = self._contrast_select_burn_severities
+        contrast_select_topaz_ids = self._contrast_select_topaz_ids
+        contrast_scenario = self._contrast_scenario
+        control_scenario = self._control_scenario
+
 
         # TODO
         # filter
@@ -338,6 +505,8 @@ class Omni(NoDbBase):
 
         # filter and selection report
 
+
+        from wepppy.nodb import Watershed
 
         wd = self.wd
 
@@ -359,7 +528,7 @@ class Omni(NoDbBase):
                 break
 
             running_obj_param += d.soil_loss_kg
-            if running_obj_param / total_erosion_kg > cumulative_obj_param_threshold_fraction:
+            if running_obj_param / total_erosion_kg > contrast_cumulative_obj_param_threshold_fraction:
                 break
 
             topaz_id = d.topaz_id
@@ -392,10 +561,11 @@ class Omni(NoDbBase):
 
         self.contrasts = contrasts
 
-        # save parameters for defining contrasts
-        
-
+      
     def run_omni_contrasts(self):
+
+        self.log('Omni::run_omni_contrasts')
+
         for contrast_id, (contrast_name, _contrasts) in enumerate(self.contrasts.items()):
             _run_contrast(str(contrast_id), contrast_name, _contrasts, self.wd)
 
@@ -436,6 +606,10 @@ class Omni(NoDbBase):
             get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
 
     @property
+    def _status_channel(self):
+        return f'{self.runid}:omni'
+
+    @property
     def _nodb(self):
         return _join(self.wd, 'omni.nodb')
 
@@ -444,5 +618,12 @@ class Omni(NoDbBase):
         return _join(self.wd, 'omni.nodb.lock')
 
     def run_omni_scenarios(self):
+        self.log('Omni::run_omni_scenarios\n')
+
+        if not self.scenarios:
+            self.log('  Omni::run_omni_scenarios: No scenarios to run\n')
+            raise Exception('No scenarios to run')
+
         for scenario in self.scenarios:
+            self.log(f'  Omni::run_omni_scenarios: {scenario}\n')
             _build_scenario(scenario, self.wd)

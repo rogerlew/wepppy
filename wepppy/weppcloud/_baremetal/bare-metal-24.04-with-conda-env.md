@@ -276,3 +276,7 @@ cargo build --release
 
 19. f-esri for .gdb creation with gpkg export
 see https://github.com/rogerlew/f-esri
+
+20. discord bot 
+
+TODO

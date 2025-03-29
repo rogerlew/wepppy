@@ -41,6 +41,7 @@ from wepppy.rq.project_rq import (
     fork_rq
 )
 from wepppy.rq.wepp_rq import run_wepp_rq
+from wepppy.rq.omni_rq import run_omni_rq
 
 from wepppy.topo.watershed_abstraction import (
     ChannelRoutingError,
@@ -359,7 +360,7 @@ def api_run_wepp(runid, config):
     try:
         wepp.parse_inputs(request.form)
     except Exception:
-        return exception_factory('Error parsing climate inputs', runid=runid)
+        return exception_factory('Error parsing wepp inputs', runid=runid)
 
     soils = Soils.getInstance(wd)
 
@@ -482,7 +483,20 @@ def api_run_omni(runid, config):
     try:
         omni.parse_inputs(request.form)
     except Exception:
-        return exception_factory('Error parsing climate inputs', runid=runid)
+        return exception_factory('Error parsing omni inputs', runid=runid)
+
+    try:
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.run_omni)
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(run_omni_rq, (runid,), timeout=TIMEOUT)
+            prep.set_rq_job_id('run_omni_rq', job.id)
+    except Exception:
+        return exception_factory()
+
+    return jsonify({'Success': True, 'job_id': job.id})
 
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_ash', methods=['POST'])
@@ -502,7 +516,6 @@ def api_run_ash(runid, config):
       "ini_white_depth": "15", 
       "ini_white_load": "0.7000000000000001"
     }
-    
     '''
 
     fire_date = request.form.get('fire_date', None)

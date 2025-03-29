@@ -123,6 +123,12 @@ from wepppy.nodb.mods.ash_transport import (
     AshType, 
 )
 
+from wepppy.nodb.omni import (
+    Omni,
+    OmniNoDbLockedException,
+    OmniScenario # IntEnum
+)
+
 from wepppy.nodb.redis_prep import RedisPrep
 
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -1542,6 +1548,11 @@ def runs0(runid, config):
             reveg = None
 
         try:
+            omni = Omni.getInstance(wd)
+        except:
+            omni = None
+
+        try:
             redis_prep = RedisPrep.getInstance(wd)
         except:
             redis_prep = None
@@ -1579,6 +1590,8 @@ def runs0(runid, config):
                                unitizer_nodb=unitizer,
                                observed=observed,
                                rangeland_cover=rangeland_cover,
+                               omni=omni,
+                               OmniScenario=OmniScenario,
                                rq_job_ids=rq_job_ids,
                                landuseoptions=landuseoptions,
                                soildboptions=soildboptions,
