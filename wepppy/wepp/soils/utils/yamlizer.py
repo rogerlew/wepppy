@@ -463,6 +463,107 @@ class WeppSoilUtil(object):
 
         return '\n'.join(s) + '\n'
         
+
+    def __repr__(self):
+        from rosetta import Rosetta3
+        r3 = Rosetta3()
+
+        header = self.obj['header'] 
+        header = [f'# {L}' for L in header]
+
+        datver = self.obj['datver'] 
+        solcom = self.obj['solcom'] 
+        ntemp = self.obj['ntemp']
+        ksflag = self.obj['ksflag']
+        ofes = self.obj['ofes']
+
+        assert datver in (7778.0, 9001.0, 9002.0, 9003.0, 9005.0), datver
+
+        s = [f'datver:{int(datver)}'] 
+        s += header
+        s.append(f'solcom:{solcom}')
+        s.append(f'ntemp:{ntemp} ksflag:{ksflag}')
+
+        for i in range(ntemp):
+            ofe = ofes[i]
+
+            _luse = None
+            # build its over 9000 header
+            if datver > 9000:
+                _luse = ofe['luse']
+                if _luse is None:
+                    _luse = ()
+
+                _burn_code = 0
+                if 'agriculture' in _luse:
+                    _burn_code = 100
+                elif 'shrub' in _luse:
+                    _burn_code = 200
+                elif 'forest' in _luse:
+                    _burn_code = 300
+                    if 'young' in _luse:
+                        _burn_code += 6
+                elif 'grass' in _luse:
+                    _burn_code = 400
+
+                if 'low sev' in _luse:
+                    _burn_code += 1
+                elif 'moderate sev' in _luse:
+                    _burn_code += 2
+                elif 'high sev' in _luse:
+                    _burn_code += 3
+
+
+            if not _luse:
+                _luse = "N/A"
+
+            if datver > 9000.0 and datver < 9003.0:
+                _ksatadj = ofe['ksatadj']
+                _ksatfac = ofe['ksatfac']
+                _ksatrec = ofe['ksatrec']
+                _stext = ofe['stext']
+                s.append(f"ksatadj:{_ksatadj}\t luse:'{_luse}'\t stext:'{_stext}'\t ksatfac:{_ksatfac} \t ksatrec:{_ksatrec}")
+
+            elif datver == 9003.0:
+                _ksatadj = ofe['']
+                _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
+                s.append(f"ksatadj:{_ksatadj}\t luse:'{_luse}'\t burn_code:{_burn_code}\t stext:'{_stext}'\t lkeff:{_lkeff}")
+
+            elif datver == 9005.0:
+                _ksatadj = ofe['ksatadj']
+                _stext = ofe['stext']
+                _lkeff = ofe['lkeff']
+                _uksat = ofe['uksat']
+                _texid_enum = self.simple_texture_enum
+                s.append(f"ksatadj:{_ksatadj}\t luse:'{_luse}'\t burn_code:{_burn_code}\t stext:'{_stext}'\t texid_enum:{_texid_enum}\t uksat:{_uksat}\t lkeff:{_lkeff}")
+
+            L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])
+            pars = 'nsl salb sat ki kr shcrit'.split()
+            L2 = ('\t '.join([f'{p}:{ofe[p]}' for p in pars]))
+            s.append(f'{L}\t {L2}')
+
+            for j, horizon in enumerate(ofe['horizons']):
+                pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
+                s.append('\t' + '\t '.join([ f'{p}:{horizon[p]}' for p in pars]))
+
+                if datver >= 9002.0:
+                    clay = horizon['clay']
+                    sand = horizon['sand']
+                    silt = 100.0 - clay - sand
+                    bd = horizon['bd']
+                    res = r3.predict_kwargs(clay=clay, sand=sand, silt=silt, bd=bd)
+                    vg_pars = 'theta_r theta_s alpha npar ks wp fc'.split()
+                    s[-1] += '\t ' + '\t '.join([f'{p}:{res[p]:.4}' for p in vg_pars])
+
+            res_lyr = ofe['res_lyr']
+            if res_lyr is not None:
+                s.append(f'slflag:{res_lyr["slflag"]} ui_bdrkth:{res_lyr["ui_bdrkth"]} kslast:{res_lyr["kslast"]}')
+            else:
+                s.append('0 0.0 0.0')
+
+        return '\n'.join(s) + '\n'
+    
     def write(self, fn):
         s = self.__str__()
 

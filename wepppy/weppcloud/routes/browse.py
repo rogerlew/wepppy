@@ -393,7 +393,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/gdalinfo/')
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
             repr_link = '           '
-            if file_lower.endswith('.man'):
+            if file_lower.endswith('.man') or  file_lower.endswith('.sol'):
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
             diff_link = '    '
