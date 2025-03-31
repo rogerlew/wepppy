@@ -10,7 +10,7 @@ import pandas as pd
 
 from flask import abort, Blueprint, request, Response, jsonify
 
-from utils.helpers import get_wd, htmltree, error_factory
+from utils.helpers import get_wd, htmltree, error_factory, exception_factory
 
 
 repr_bp = Blueprint('repr', __name__)
@@ -58,6 +58,18 @@ def repr_response(path):
 
         except Exception:
             return exception_factory('Error retrieving management', runid=runid)
+
+    if path_lower.endswith('.sol'):
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+        try:
+            wsu = WeppSoilUtil(path)
+            contents = repr(wsu)
+
+            r = Response(response=contents, status=200, mimetype="text/plain")
+            r.headers["Content-Type"] = "text/plain; charset=utf-8"
+            return r
+        except Exception:
+            return exception_factory('Error retrieving soil', runid=runid)
 
     abort(404)
 
