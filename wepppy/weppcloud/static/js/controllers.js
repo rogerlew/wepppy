@@ -2464,7 +2464,7 @@ var SubcatchmentDelineation = function () {
             self.removeGrid();
 
             self.grid = L.leafletGeotiff(
-                'resources/wepp_loss.tif',
+                'resources/flowpaths_loss.tif',
                 {
                     band: 0,
                     displayMin: 0,

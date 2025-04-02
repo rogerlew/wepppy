@@ -213,17 +213,24 @@ def run_wepp_rq(runid):
             job.meta['jobs:1,func:run_hillslopes_rq'] = jobs1_hillslopes.id
             job.save()
 
-            if wepp.run_flowpaths:
-                jobs1_flowpaths = q.enqueue_call(_run_flowpaths_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)
-                job.meta['jobs:1,func:run_flowpaths_rq'] = jobs1_flowpaths.id
-                job.save()
-
             #
             # Prep Watershed
             job2_watershed_prep = q.enqueue_call(_prep_watershed_rq, (runid,),
                                   timeout=TIMEOUT,
                                   depends_on=jobs1_hillslopes)
             job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
+
+            job2_totalwatsed2 = None
+            if not climate.is_single_storm:
+                job2_totalwatsed2 = q.enqueue_call(_build_totalwatsed2_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
+                job.meta['jobs:2,func:_build_totalwatsed2_rq'] = job2_totalwatsed2.id
+                job.save()
+
+            jobs2_flowpaths = None
+            if wepp.run_flowpaths:
+                jobs2_flowpaths = q.enqueue_call(_run_flowpaths_rq, (runid,), timeout=TIMEOUT, depends_on=job_prep_remaining)
+                job.meta['jobs:2,func:run_flowpaths_rq'] = jobs2_flowpaths.id
+                job.save()
 
             #
             # Run Watershed
@@ -283,11 +290,6 @@ def run_wepp_rq(runid):
                 jobs5_post.append(_job)
                 job.save()
                 
-                _job = q.enqueue_call(_build_totalwatsed2_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
-                job.meta['jobs:5,func:_build_totalwatsed2_rq'] = _job.id
-                jobs5_post.append(_job)
-                job.save()
-                
                 _job = q.enqueue_call(_run_hillslope_watbal_rq, (runid,),  timeout=TIMEOUT, depends_on=job4_on_run_completed)
                 job.meta['jobs:5,func:_run_hillslope_watbal_rq'] = _job.id
                 jobs5_post.append(_job)
@@ -325,6 +327,12 @@ def run_wepp_rq(runid):
                 job.meta['jobs:5,func:_post_gpkg_export_rq'] = _job.id
                 jobs51_post.append(_job)
                 job.save()
+
+            if job2_totalwatsed2 is not None:
+                jobs51_post.append(job2_totalwatsed2)
+
+            if jobs2_flowpaths is not None:
+                jobs51_post.append(jobs2_flowpaths)
 
             # jobs:5
             if len(jobs51_post) > 0:
@@ -389,6 +397,7 @@ def _run_hillslopes_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+
 def _run_flowpaths_rq(runid):
     try:
         job = get_current_job()
@@ -402,7 +411,6 @@ def _run_flowpaths_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
-
 
 
 def _prep_managements_rq(runid):
