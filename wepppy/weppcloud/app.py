@@ -3136,8 +3136,8 @@ def task_set_hourly_seepage(runid, config):
     if routine is None:
         return error_factory('routine is None')
 
-    if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow']:
-        return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow']")
+    if routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']:
+        return error_factory("routine not in ['wepp_ui', 'pmet', 'frost', 'tcr', 'snow', 'run_flowpaths']")
 
     try:
         state = request.json.get('state', None)
@@ -3161,6 +3161,8 @@ def task_set_hourly_seepage(runid, config):
             wepp.set_run_tcr(state)
         elif routine == 'snow':
             wepp.set_run_snow(state)
+        elif routine == 'run_flowpaths':
+            wepp.set_run_flowpaths(state)
 
     except Exception:
         return exception_factory('Error setting state', runid=runid)
@@ -4251,6 +4253,23 @@ def resources_wepp_loss(runid, config):
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
         loss_grid_wgs = _join(ron.plot_dir, 'loss.WGS.tif')
+
+        if _exists(loss_grid_wgs):
+            return send_file(loss_grid_wgs, mimetype='image/tiff')
+
+        return error_factory('loss_grid_wgs does not exist')
+
+    except Exception:
+        return exception_factory(runid=runid)
+
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/resources/flowpaths_loss.tif')
+def resources_flowpaths_loss(runid, config):
+    try:
+        wd = get_wd(runid)
+        ron = Ron.getInstance(wd)
+        loss_grid_wgs = _join(ron.plot_dir, 'flowpaths_loss.WGS.tif')
 
         if _exists(loss_grid_wgs):
             return send_file(loss_grid_wgs, mimetype='image/tiff')

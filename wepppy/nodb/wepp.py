@@ -1159,7 +1159,7 @@ class Wepp(NoDbBase, LogMixin):
                 if not _exists(ss_batch_dir):
                     os.makedirs(ss_batch_dir)
 
-    def prep_and_run_flowpaths(self):
+    def prep_and_run_flowpaths(self, clean_after_run=True):
         self.log('  Prepping _prep_flowpaths... ')
         wat_dir = self.wat_dir
 
@@ -1202,6 +1202,10 @@ class Wepp(NoDbBase, LogMixin):
 
         loss_grid_path = _join(self.plot_dir, 'flowpaths_loss.tif')
 
+        if _exists(loss_grid_path):
+            os.remove(loss_grid_path)
+            time.sleep(1)
+
         self.log(f'  Creating flowpaths loss grid... ')
         make_soil_loss_grid_fps(watershed.discha, self.fp_runs_dir, loss_grid_path)
  
@@ -1220,6 +1224,14 @@ class Wepp(NoDbBase, LogMixin):
         p.wait()
 
         assert _exists(loss_grid_wgs)
+
+        if clean_after_run:
+            self.log('  Cleaning up flowpath run files... ')
+            shutil.rmtree(self.fp_runs_dir)
+            shutil.rmtree(self.fp_output_dir)
+
+            os.makedirs(self.fp_runs_dir)
+            os.makedirs(self.fp_output_dir)
 
         self.log_done()
 
