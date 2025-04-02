@@ -70,10 +70,8 @@ def run_ash_model(kwds):
     prefix = kwds['prefix']
 
     del kwds['logger']
-
-    logger.log(f'  starting ash model for {prefix} ({ash_model}:{ash_type})...')
     out_fn = ash_model.run_model(**kwds)
-    logger.log_done()
+    logger.log(f'  finished ash model for {prefix}\n')
 
     return out_fn
 
@@ -708,11 +706,13 @@ class Ash(NoDbBase, LogMixin):
     def run_ash(self, fire_date='8/4', ini_white_ash_depth_mm=3.0, ini_black_ash_depth_mm=5.0):
         run_wind_transport=self.run_wind_transport
 
+        self.clean_log()
+
         self.lock()
 
         # noinspection PyBroadException
         try:
-            self.log('Prepping ash run...')
+            self.log(f"Ash::run_ash(fire_date='{fire_date}', ini_white_ash_depth_mm={ini_white_ash_depth_mm}, ini_black_ash_depth_mm={ini_black_ash_depth_mm}\n")
             self.fire_date = fire_date = YearlessDate.from_string(fire_date)
             self.ini_white_ash_depth_mm = ini_white_ash_depth_mm
             self.ini_black_ash_depth_mm = ini_black_ash_depth_mm
@@ -732,12 +732,15 @@ class Ash(NoDbBase, LogMixin):
             if _exists(ash_dir):
 
                 for fn in glob(_join(ash_dir, '*.parquet')):
+                    self.log(f"  Removing {fn}\n")
                     os.remove(fn)
 
                 for fn in glob(_join(ash_dir, '*.png')):
+                    self.log(f"  Removing {fn}\n")
                     os.remove(fn)
 
                 for fn in glob(_join(ash_dir, 'post', '*.pkl')):
+                    self.log(f"  Removing {fn}\n")
                     os.remove(fn)
 
             if not _exists(ash_dir):
@@ -752,40 +755,53 @@ class Ash(NoDbBase, LogMixin):
             cli_df = ClimateFile(cli_path).as_dataframe(calc_peak_intensities=False)
 
             if self.ash_load_fn is not None:
+                self.log(f"  Reading ash load map {self.ash_load_fn}\n")
                 reproject_map(wd, self.ash_load_fn, self.ash_load_cropped_fn)
                 load_map = ParameterMap(self.ash_load_cropped_fn)
                 load_d = load_map.build_ave_grid(watershed.subwta)
             else:
+                self.log(f"  No ash load map found\n")
                 load_d = None
 
             if self.ash_type_map_fn is not None:
+                self.log(f"  Reading ash type map {self.ash_type_map_fn}\n")
                 reproject_map(wd, self.ash_type_map_fn, self.ash_type_map_cropped_fn)
                 bd_map = ParameterMap(self.ash_type_map_cropped_fn)
                 ash_type_d = bd_map.build_ave_grid(watershed.subwta)
             else:
+                self.log(f"  No ash type map found\n")
                 ash_type_d = None
 
             translator = watershed.translator_factory()
 
             self.log_done()
 
-            self.log('Running Hillslopes\n')
+            self.log('  Running Hillslopes\n')
             meta = {}
             args = []
             for topaz_id, sub in watershed.sub_iter():
+                self.log(f'    Running Hillslope {topaz_id}\n')
+
                 meta[topaz_id] = {}
                 wepp_id = translator.wepp(top=topaz_id)
                 area_ha = sub.area / 10000
+
                 burn_class = landuse.identify_burn_class(topaz_id)
                 burn_class = ['Unburned', 'Low', 'Moderate', 'High'].index(burn_class)
-
                 if burn_class == 255:
                     burn_class = 0
 
+                self.log(f'      burn_class: {burn_class}\n')
+
                 if ash_type_d is None:
+                    self.log('      ash_type_d is None. Assigning ash type from burn_class\n')
                     ash_type = (None, AshType.BLACK, AshType.BLACK, AshType.WHITE)[burn_class]
                 else:
+                    self.log(f'      ash_type_d: {ash_type_d[topaz_id]}\n')
                     ash_type = (None, AshType.BLACK, AshType.WHITE)[int(ash_type_d[topaz_id])]
+
+                self.log(f'      ash_type: {ash_type}\n')
+
 
                 meta[topaz_id]['ash_type'] = ash_type
                 meta[topaz_id]['burn_class'] = burn_class
@@ -813,6 +829,7 @@ class Ash(NoDbBase, LogMixin):
                 assert field_black_ash_bulkdensity > 0.0, field_black_ash_bulkdensity
 
                 if load_d is None:
+                    self.log('      load_d is None. Using initial ash depth\n')
                     white_ash_depth = ini_white_ash_depth_mm
                     black_ash_depth = ini_black_ash_depth_mm
 
@@ -820,9 +837,15 @@ class Ash(NoDbBase, LogMixin):
                     black_ash_load = ini_black_ash_depth_mm * field_black_ash_bulkdensity * 10
 
                 else:
+                    self.log(f'      load_d: {load_d[topaz_id]} tonne/ha\n')
                     _load_kg_m2 = load_d[topaz_id] * 0.1
+
                     white_ash_depth = _load_kg_m2 / field_white_ash_bulkdensity
                     black_ash_depth = _load_kg_m2 / field_black_ash_bulkdensity
+
+                    self.log('      setting ash depth based on load_d and field bulk densities\n')
+                    self.log(f'        white_ash_depth: {white_ash_depth}\n')
+                    self.log(f'        black_ash_depth: {black_ash_depth}\n')
 
                     white_ash_load = black_ash_load = load_d[topaz_id]
 
@@ -874,7 +897,7 @@ class Ash(NoDbBase, LogMixin):
 
             else:
                 for kwds in args:
-                    self.log('  running {}\n'.format(kwds['prefix']))
+                    self.log(f"  running {kwds['prefix']}\n")
                     run_ash_model(kwds)
                     self.log_done()
 

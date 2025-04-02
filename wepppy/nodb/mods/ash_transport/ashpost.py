@@ -40,7 +40,6 @@ out_cols = ['year0', 'year', 'julian', 'days_from_fire (days)',
 
 def calculate_return_periods(df, measure, recurrence, num_fire_years, cols_to_extract):
 
-
     measure_rank = measure.replace(' (tonne)', '_rank')\
                           .replace(' (days)', '_rank')
     measure_ri = measure.replace(' (tonne)', '_ri')\
@@ -125,19 +124,30 @@ def calculate_cumulative_transport(df, recurrence, ash_post_dir):
     return cum_return_periods
 
 
-def calculate_hillslope_statistics(df, ash, ash_post_dir):
+def calculate_hillslope_statistics(df, ash, ash_post_dir, first_year_only=False):
     agg_d = { 'wind_transport (tonne/ha)': 'sum',
               'water_transport (tonne/ha)': 'sum',
               'ash_transport (tonne/ha)': 'sum' }
 
     # group the dataframe by topaz_id and year, and calculate the sum of x within each group
+
+#    print(len(df.index), 'rows in hillslope data frame')
+    if first_year_only:
+        df = df[df['days_from_fire (days)'] <= 365]
+
+#    df.to_parquet(_join(ash_post_dir, 'sanity_check_first_year.parquet'), index=False)
+#    print(len(df.index), 'rows in hillslope data frame')
+
     df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
     df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean().reset_index()
     df_hillslope_average_annuals.drop('year', axis=1, inplace=True)
     df_hillslope_average_annuals.to_pickle(_join(ash_post_dir, 'hillslope_annuals.pkl'))
 
 
-def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1, 2, 3]):
+def calculate_watershed_statisics(df, ash_post_dir, recurrence, burn_classes=[1, 2, 3], first_year_only=False):
+    if first_year_only:
+        df = df[df['days_from_fire (days)'] <= 365]
+
     global common_cols
 
     #df.to_pickle(_join(ash_post_dir, 'full.pkl'))
@@ -319,7 +329,6 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
             hill_data_frames.append(read_hillslope_out_fn(out_fn,
                 meta_data=meta,
                 meta_data_types=meta_dtypes))
-    print('hill_data_frames', hill_data_frames)
 
     if hill_data_frames == []:
         return None
@@ -328,9 +337,9 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
     # Combine all data into a single DataFrame
     df = pd.concat(hill_data_frames, ignore_index=True)
 
-    calculate_hillslope_statistics(df, ash, ash_post_dir)
+    calculate_hillslope_statistics(deepcopy(df), ash, ash_post_dir, first_year_only=True)
 
-    return_periods, burn_class_return_periods = calculate_watershed_statisics(df, ash_post_dir, recurrence)
+    return_periods, burn_class_return_periods = calculate_watershed_statisics(deepcopy(df), ash_post_dir, recurrence, first_year_only=True)
 
     del df
     del hill_data_frames

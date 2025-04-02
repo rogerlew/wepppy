@@ -29,6 +29,14 @@ class AshType(enum.IntEnum):
     BLACK = 0
     WHITE = 1
 
+    def __str__(self):
+        if self == AshType.BLACK:
+            return 'Black'
+        elif self == AshType.WHITE:
+            return 'White'
+        else:
+            raise ValueError(f'Unknown ash type {self}')
+        
 
 class AshNoDbLockedException(Exception):
     pass
@@ -92,7 +100,8 @@ class AshModel(object):
                   recurrence=[100, 50, 25, 20, 10, 5, 2],
                   area_ha: Optional[float] = None,
                   ini_ash_depth: Optional[float] = None,
-                  ini_ash_load: Optional[float] = None, run_wind_transport=True):
+                  ini_ash_load: Optional[float] = None, 
+                  run_wind_transport=True):
 
         """
         Runs the ash model for a hillslope
