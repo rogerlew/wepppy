@@ -109,6 +109,10 @@ def calculate_hillslope_statistics(df, ash, ash_post_dir):
               'water_transport (tonne/ha)': 'sum',
               'ash_transport (tonne/ha)': 'sum' }
 
+
+    # TODO: this doesn't know that ash is ran until it is all transported. this could take several years and causes the
+    # average annuals to be incorrect
+
     # group the dataframe by topaz_id and year, and calculate the sum of x within each group
     df_hillslope_annuals = df.groupby(['topaz_id', 'year']).agg(agg_d).reset_index()
     df_hillslope_average_annuals = df_hillslope_annuals.groupby('topaz_id').mean().reset_index()
