@@ -1386,13 +1386,13 @@ class Climate(NoDbBase, LogMixin):
             climate_mode = kwds['climate_mode']
             climate_mode = ClimateMode(int(climate_mode))
 
-            climate_spatialmode = kwds['climate_spatialmode']
+            climate_spatialmode = kwds.get('climate_spatialmode', ClimateSpatialMode.Single)
             climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
 
             if climate_mode == ClimateMode.SingleStorm:
                 climate_spatialmode = ClimateSpatialMode.Single
 
-            input_years = kwds['input_years']
+            input_years = kwds.get('input_years', None)
             if isint(input_years):
                 input_years = int(input_years)
 
