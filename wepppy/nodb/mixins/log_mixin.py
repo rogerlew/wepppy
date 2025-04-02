@@ -57,6 +57,13 @@ class LogMixin(object):
             return '{} ({:.2f}s | {:.2f}s)'.format(s, t_elapsed.total_seconds(), r_elapsed.total_seconds())
         else:
             return s
+        
+    def clean_log(self):
+        try:
+            with open(self.status_log, 'w') as fp:
+                fp.write('')
+        except FileNotFoundError:
+            warnings.warn('FileNotFoundError: "%s"' % self.status_log)
 
     def log(self, msg):
         t0 = datetime.strftime(datetime.now(), '%Y-%m-%dT%H:%M:%S.%f')
