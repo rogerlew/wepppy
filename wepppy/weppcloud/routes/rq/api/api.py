@@ -68,12 +68,45 @@ from wepppy.all_your_base import isint, isfloat
 
 from wepppy.weppcloud.utils.archive import has_archive
 
+from wepppy.nodb.status_messenger import StatusMessenger
+
+import inspect
+import time
+from rq import Queue, get_current_job
+
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
 TIMEOUT = 43_200
 
 rq_api_bp = Blueprint('rq_api', __name__)
+
+
+def hello_world_rq(runid: str):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:hello_world'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/hello_world', methods=['GET', 'POST'])
+def hello_world(runid, config):
+    try:
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(hello_world_rq, (runid), timeout=TIMEOUT)
+    except Exception as e:
+        return exception_factory('hello_world Failed', runid=runid)
+
+    return jsonify({'Success': True, 'job_id': job.id})
+
+
 
 def _parse_map_change(form):
 
