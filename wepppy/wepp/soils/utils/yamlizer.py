@@ -484,6 +484,7 @@ class WeppSoilUtil(object):
         s.append(f'solcom:{solcom}')
         s.append(f'ntemp:{ntemp} ksflag:{ksflag}')
 
+        s.append('<OFEs>')
         for i in range(ntemp):
             ofe = ofes[i]
 
@@ -525,7 +526,7 @@ class WeppSoilUtil(object):
                 s.append(f"ksatadj:{_ksatadj}\t luse:'{_luse}'\t stext:'{_stext}'\t ksatfac:{_ksatfac} \t ksatrec:{_ksatrec}")
 
             elif datver == 9003.0:
-                _ksatadj = ofe['']
+                _ksatadj = ofe['ksatadj']
                 _stext = ofe['stext']
                 _lkeff = ofe['lkeff']
                 s.append(f"ksatadj:{_ksatadj}\t luse:'{_luse}'\t burn_code:{_burn_code}\t stext:'{_stext}'\t lkeff:{_lkeff}")
@@ -543,6 +544,7 @@ class WeppSoilUtil(object):
             L2 = ('\t '.join([f'{p}:{ofe[p]}' for p in pars]))
             s.append(f'{L}\t {L2}')
 
+            s.append('\t<Horizons>')
             for j, horizon in enumerate(ofe['horizons']):
                 pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
                 s.append('\t' + '\t '.join([ f'{p}:{horizon[p]}' for p in pars]))
@@ -556,12 +558,15 @@ class WeppSoilUtil(object):
                     vg_pars = 'theta_r theta_s alpha npar ks wp fc'.split()
                     s[-1] += '\t ' + '\t '.join([f'{p}:{res[p]:.4}' for p in vg_pars])
 
+            s.append('\t</Horizons>')
+            s.append('<Restrictive Layer>')
             res_lyr = ofe['res_lyr']
             if res_lyr is not None:
                 s.append(f'slflag:{res_lyr["slflag"]} ui_bdrkth:{res_lyr["ui_bdrkth"]} kslast:{res_lyr["kslast"]}')
             else:
                 s.append('0 0.0 0.0')
-
+            s.append('</Restrictive Layer>')
+        s.append('</OFEs>')
         return '\n'.join(s) + '\n'
     
     def write(self, fn):
