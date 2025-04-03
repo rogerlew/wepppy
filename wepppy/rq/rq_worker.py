@@ -13,7 +13,7 @@ import traceback
 import redis
 
 import rq
-from rq import Worker, Queue, Connection
+from rq import Worker, Queue
 from rq.job import Job
 from rq.registry import StartedJobRegistry
 from rq.exceptions import NoSuchJobError
@@ -88,7 +88,8 @@ class WepppyRqWorker(Worker):
 
 
 def start_worker():
-    with Connection(redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB)):
+    from redis import Connection as RedisConnection
+    with RedisConnection(redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB)):
         qs = [Queue('high'), Queue('default'), Queue('low')]
         w = WepppyRqWorker(qs)
         w.work()
