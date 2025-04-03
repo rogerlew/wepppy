@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 from utils.helpers import get_wd, success_factory, error_factory, exception_factory
 
 import redis
-from rq import Queue
+from rq import Queue, Callback
 from rq.job import Job
 
 from wepppy.soils.ssurgo import NoValidSoilsException
@@ -83,6 +83,11 @@ rq_api_bp = Blueprint('rq_api', __name__)
 
 
 def hello_world_rq(runid: str):
+    print("====================================================")
+    print("hello_world_rq")
+    print("====================================================")
+    return
+
     job = get_current_job()
     wd = get_wd(runid)
     func_name = inspect.currentframe().f_code.co_name
@@ -91,12 +96,43 @@ def hello_world_rq(runid: str):
     print("====================================================")
 
 
+def report_success(job, connection, result, *args, **kwargs):
+    print("====================================================")
+    print("report_success")
+    print("====================================================")
+    print(f'Job {job.id} completed successfully')
+    print(f'Result: {result}')
+    return result
+
+
+def report_failure(job, connection, type, value, traceback):
+    print("====================================================")
+    print("report_failure")
+    print("====================================================")
+    print(f'Job {job.id} failed')
+    print(f'Type: {type}')
+    print(f'Value: {value}')
+    print(f'Traceback: {traceback}')
+    return traceback
+
+
+def report_stopped(job, connection):
+    print("====================================================")
+    print("report_stopped")
+    print("====================================================")
+    print(f'Job {job.id} stopped')
+    return job.exc_info
+
+
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/hello_world', methods=['GET', 'POST'])
 def hello_world(runid, config):
     try:
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
-            q = Queue(connection=redis_conn)
-            job = q.enqueue_call(hello_world_rq, (runid,), timeout=TIMEOUT)
+            q = Queue('m4', connection=redis_conn)
+            job = q.enqueue_call(hello_world_rq, (runid,), timeout=TIMEOUT,
+              on_success=Callback(report_success),  # default callback timeout (60 seconds)
+              on_failure=Callback(report_failure, timeout=10), # 10 seconds timeout
+              on_stopped=Callback(report_stopped, timeout="2m")) # 2 minute timeout
     except Exception as e:
         return exception_factory('hello_world Failed', runid=runid)
     
