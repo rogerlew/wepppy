@@ -16,7 +16,7 @@ from flask_security import current_user
 
 from werkzeug.utils import secure_filename
 
-from utils.helpers import get_wd, success_factory, error_factory, exception_factory
+from wepppy.weppcloud.utils.helpers import get_wd, success_factory, error_factory, exception_factory
 
 import redis
 from rq import Queue, Callback
