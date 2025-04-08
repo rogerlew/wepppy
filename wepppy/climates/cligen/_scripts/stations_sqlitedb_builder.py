@@ -109,6 +109,7 @@ def build_db(db_fn, par_dir, state_code_wildcards):
                 (state_code text, state_name text)''')
     
     for state_code in all_state_codes:
+        print('state_code', state_code)
         state_name = get_state_name(state_code, state_code_wildcards)
         
         assert state_name is not None, state_code
@@ -120,6 +121,9 @@ def build_db(db_fn, par_dir, state_code_wildcards):
     
     os.chmod(db_fn, 0o755)
 
+chile_state_code_wildcards = {
+    "NUEVAALDEA": "Chile"
+}
 
 ghcn_state_code_wildcards = {
   "IT": "Italy",
@@ -319,25 +323,30 @@ australia_state_code_wildcards = {
 }
 
 database_defs = [
+    # dict(
+    #    db_fn= '2015_stations.db',
+    #    par_dir= '../2015_par_files/',
+    #    state_code_wildcards=us_state_code_wildcards
+    # ),
+    # dict(
+    #     db_fn= 'au_stations.db',
+    #     par_dir= '../au_par_files/',
+    #     state_code_wildcards=australia_state_code_wildcards
+    # ),
+    # dict(
+    #     db_fn= 'stations.db',
+    #     par_dir= '../stations/',
+    #     state_code_wildcards=us_state_code_wildcards
+    # ),
+    # dict(
+    #     db_fn= 'ghcn_stations.db',
+    #     par_dir= '../GHCN_Intl_Stations/',
+    #     state_code_wildcards=ghcn_state_code_wildcards
+    # ),
     dict(
-       db_fn= '2015_stations.db',
-       par_dir= '../2015_par_files/',
-       state_code_wildcards=us_state_code_wildcards
-    ),
-    dict(
-        db_fn= 'au_stations.db',
-        par_dir= '../au_par_files/',
-        state_code_wildcards=australia_state_code_wildcards
-    ),
-    dict(
-        db_fn= 'stations.db',
-        par_dir= '../stations/',
-        state_code_wildcards=us_state_code_wildcards
-    ),
-    dict(
-        db_fn= 'ghcn_stations.db',
-        par_dir= '../GHCN_Intl_Stations/',
-        state_code_wildcards=ghcn_state_code_wildcards
+       db_fn= 'chile.db',
+       par_dir= os.path.abspath('../chile/'),
+       state_code_wildcards=chile_state_code_wildcards
     ),
 ]
 
