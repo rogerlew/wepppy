@@ -755,10 +755,6 @@ function onReady() {
     //
     landuse.set_rq_job_id(landuse, {{ rq_job_ids.get("build_landuse_rq") | tojson }});
 
-    landuse.restore({{ landuse.mode | int }}, 0);
-
-    $('#landuse_single_selection').val('{{ landuse.single_selection }}').prop('selected', true);
-
     // load landuse
     if ( {{ landuse.has_landuse | tojson }} ) {
         landuse.form.trigger("LANDUSE_BUILD_TASK_COMPLETED");
@@ -906,6 +902,7 @@ function onReady() {
 
     observed.hideControl();
     climate.showHideControls({{ climate.climate_mode | int }});
+
     // load climate
     if ( {{ climate.has_station | tojson }} ) {
         climate.refreshStationSelection();
@@ -1117,6 +1114,8 @@ function onReady() {
     Mousetrap.bind('f8', function() {
         window.scrollTo(0, 0);
     });
+
+    landuse.restore({{ landuse.mode | int }}, {{ landuse.single_selection | int }});
 
 
 $(function () {

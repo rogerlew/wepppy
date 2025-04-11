@@ -1596,7 +1596,7 @@ def runs0(runid, config):
         critical_shear_options = management.load_channel_d50_cs()
 
         from wepp_runner.wepp_runner import linux_wepp_bin_opts
-
+        from wepppy.wepp.management.managements import landuse_management_mapping_options
 
         log_access(wd, current_user, request.remote_addr)
         return render_template('0.html',
@@ -1622,6 +1622,7 @@ def runs0(runid, config):
                                OmniScenario=OmniScenario,
                                rq_job_ids=rq_job_ids,
                                landuseoptions=landuseoptions,
+                               landuse_management_mapping_options=landuse_management_mapping_options,
                                soildboptions=soildboptions,
                                critical_shear_options=critical_shear_options,
                                precisions=wepppy.nodb.unitizer.precisions,
@@ -2661,6 +2662,44 @@ def task_build_landuse(runid, config):
 
     if mofe_buffer_selection is not None:
         landuse.mofe_buffer_selection = mofe_buffer_selection
+
+    # check for file for mode 4, mode is set asynchronously
+
+    if landuse.mode == LanduseMode.UserDefined:
+        from wepppy.all_your_base.geo import raster_stacker
+
+        mapping = request.form.get('landuse_management_mapping_selection', None)
+        if mapping is None:
+            return error_factory('landuse_management_mapping_selection must be provided')
+        else:
+            landuse.management_mapping = mapping
+        
+        try:
+            file = request.files['input_upload_landuse']
+        except Exception:
+            return exception_factory('Could not find file', runid=runid)
+
+        try:
+            if file.filename == '':
+                return error_factory('no filename specified')
+
+            filename = secure_filename(file.filename)
+        except Exception:
+            return exception_factory('Could not obtain filename', runid=runid)
+
+        user_defined_fn = _join(landuse.lc_dir, f'_{filename}')
+        try:
+            file.save(_join(landuse.lc_dir, f'_{filename}'))
+        except Exception:
+            return exception_factory('Could not save file', runid=runid)
+
+        try:
+            raster_stacker(user_defined_fn, landuse.subwta, landuse.lc_fn)
+        except Exception:
+            return exception_factory('Failed validating file', runid=runid)
+
+        if not _exists(landuse.lc_fn):
+            return error_factory('Failed creating landuse file')
 
     try:
         landuse.build()

@@ -3,13 +3,17 @@
 {% block form_title %}Landuse Options{% endblock %}
 {% block inputs %}
 <div class="form-group row">
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="0" id="landuse_mode0"
         name="landuse_mode"> Determine Per Hillslope</label>
   </div>
-  <div class="col-sm-6">
+  <div class="col-sm-3">
     <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="landuse_mode1"
         name="landuse_mode"> Single Landuse for Watershed</label>
+  </div>
+  <div class="col-sm-3">
+    <label class="radio-inline"><input type="radio" class="disable-readonly" value="4" id="landuse_mode4"
+        name="landuse_mode"> Upload Landcover Map</label>
   </div>
   {% if 'rred' in ron.mods %}
   <div class="d-none">
@@ -25,7 +29,6 @@
   {% endif %}
 </div>
 <div id="landuse_mode0_controls" class="form-group row hide-readonly">
-
   <div class="col-sm-5">
     <label for="nlcd_db">Select Landcover DB: </label>
   </div>
@@ -313,7 +316,7 @@
   </div>
 </div>
 
-<div id="landuse_mode1_controls" class="form-group row">
+<div id="landuse_mode1_controls" class="form-group row hide-readonly">
   <div class="col-sm-5">
     <label for="landuse_single_selection">Select landuse:</label>
     <select class="form-control disable-readonly" id="landuse_single_selection">
@@ -327,6 +330,26 @@
 </div>
 <div id="landuse_mode3_controls" class="form-group row hide-readonly">
 </div>
+<div id="landuse_mode4_controls" class="form-group row hide-readonly">
+  <p>Upload a raster Landuse Map (.img or .tif). The map should be a thematic map with values cooresponding to the selected management map</p>
+  <div class="form-group row hide-readonly">
+      <div class="col-md-12">
+          <input id="input_upload_landuse" name="input_upload_landuse" type="file" class="file">
+      </div>
+  </div>
+  <div class="w-100"></div>
+  <div class="form-group row hide-readonly">
+    <div class="col-md-12">
+      <label for="landuse_management_mapping_selection">Select management mapping:</label>
+      <select class="form-control disable-readonly" name="landuse_management_mapping_selection" id="landuse_management_mapping_selection">
+        {% for opt in landuse_management_mapping_options %}
+        <option value="{{ opt['Key'] }}" {% if landuse.mapping == opt["Key"] %} selected {% endif %}>{{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
+        {% endfor %}
+      </select>
+      <p>See <a href="https://github.com/rogerlew/wepppy/tree/master/wepppy/wepp/management/data"></a> for management mapping definitions</p>
+    </div>
+  </div>
+</div>
 
 <a href="#landuse_advanced_opts_con" data-toggle="collapse" class="" aria-expanded="true">Advanced Options</a>
 <div id="landuse_advanced_opts_con" class="collapse">
@@ -339,7 +362,7 @@
       <label for="mofe_buffer_selection">Select landuse for buffer:</label>
       <select class="form-control disable-readonly" id="mofe_buffer_selection" name="mofe_buffer_selection">
         {% for opt in landuseoptions %}
-        <option value="{{ opt['Key'] }}" {%if opt["key"]==(landuse.mofe_buffer_selection | int) %}selected{% endif %}>
+        <option value="{{ opt['Key'] }}" {%if opt["key"]==(landuse.mofe_buffer_selection | int) %} selected{% endif %}>
           {{ opt["Key"] }} &mdash; {{ opt["Description"] }}</option>
         {% endfor %}
       </select>
