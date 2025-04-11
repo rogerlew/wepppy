@@ -1218,6 +1218,10 @@ class CligenStationsManager:
             _db = _join(_thisdir, 'ghcn_stations.db')
             _stations_dir = _join(_thisdir, 'GHCN_Intl_Stations', 'all_years')
 
+        if 'chile' in str(version):
+            _db = _join(_thisdir, 'chile.db')
+            _stations_dir = _join(_thisdir, 'chile')
+
         conn = sqlite3.connect(_db)
         c = conn.cursor()
 

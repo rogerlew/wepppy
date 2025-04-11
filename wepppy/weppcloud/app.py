@@ -1144,6 +1144,34 @@ def create(config):
 
     return redirect(url)
 
+@app.route('/create-legacy/<config>')
+@app.route('/create-legacy/<config>/')
+def create_legacy(config):
+
+    cfg = "legacy/%s.toml" % config
+
+    overrides = '&'.join(['{}={}'.format(k, v) for k, v in request.args.items()])
+
+    if len(overrides) > 0:
+        cfg += '?%s' % overrides
+
+    runid, wd = create_run_dir(current_user)
+
+    try:
+        Ron(wd, cfg)
+    except Exception:
+        return exception_factory('Could not create run')
+
+    url = '%s/runs/%s/%s/' % (app.config['SITE_PREFIX'], runid, config)
+
+    if not current_user.is_anonymous:
+        try:
+            user_datastore.create_run(runid, config, current_user)
+        except Exception:
+            return exception_factory('Could not add run to user database: proceed to https://wepp.cloud' + url)
+
+    return redirect(url)
+
 
 @app.route('/runs/<string:runid>/<config>/access-log')
 @app.route('/runs/<string:runid>/<config>/access-log/')

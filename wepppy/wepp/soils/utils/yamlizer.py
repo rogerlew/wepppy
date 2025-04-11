@@ -153,9 +153,12 @@ class WeppSoilUtil(object):
                         from wepppy.wepp.soils.horizon_mixin import compute_erodibilities
                         vfs = 100.0 - float(clay) - float(sand)
                         res = compute_erodibilities(clay=float(clay), sand=float(sand), vfs=vfs, om=float(orgmat))
+
                         ki = round(res['interrill'])
                         kr = round(res['rill'], 5)
                         shcrit = round(res['shear'], 1)
+
+                        header.append(f'ofe={ofe_counter},horizon={j} calculated ki, kr, and shcrit from clay, sand, vfs, and om')
 
                 if self.compute_conductivity:
                     from wepppy.wepp.soils.horizon_mixin import compute_conductivity
@@ -163,6 +166,8 @@ class WeppSoilUtil(object):
 
                     if ksat is not None:
                         ksat = round(ksat, 4)
+
+                        header.append(f'ofe={ofe_counter},horizon={j} calculated ksat from clay, sand, and cec')
 
                 horizons.append(
                     dict(solthk=try_parse(solthk),
@@ -316,26 +321,26 @@ class WeppSoilUtil(object):
 
                 if not isfloat(horizon['bd']):
                     horizon['bd'] = 1.4
-                    header.append(f'ofe={i},horizon{j} bd default value of 1.4')
+                    header.append(f'ofe={i},horizon={j} bd default value of 1.4')
 
                 if not isfloat(horizon['fc']):
                     horizon['fc'] = round(res_dict['fc'], 4)
-                    header.append(f'ofe={i},horizon{j} fc estimated using {ros_model}')
+                    header.append(f'ofe={i},horizon={j} fc estimated using {ros_model}')
 
                 if not isfloat(horizon['wp']):
                     horizon['wp'] = round(res_dict['wp'], 4)
-                    header.append(f'ofe={i},horizon{j} wp estimated using {ros_model}')
+                    header.append(f'ofe={i},horizon={j} wp estimated using {ros_model}')
 
                 if not isfloat(horizon['ksat']):
                     horizon['ksat'] = round(res_dict['ks'] * 10 / 24, 4)  # convert from cm/day to mm/hour
-                    header.append(f'ofe={i},horizon{j} ksat estimated using {ros_model}')
+                    header.append(f'ofe={i},horizon={j} ksat estimated using {ros_model}')
 
                 if not isfloat(horizon['anisotropy']):
                     if horizon['solthk'] > 50:
                         horizon['anisotropy'] = 1.0
                     else:
                         horizon['anisotropy'] = 10.0
-                    header.append(f'ofe={i},horizon{j} anisotropy estimated using {ros_model}')
+                    header.append(f'ofe={i},horizon={j} anisotropy estimated using {ros_model}')
 
                 kslast = horizon['ksat']
                 horizons.append(horizon)

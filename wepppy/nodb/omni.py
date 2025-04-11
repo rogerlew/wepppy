@@ -185,7 +185,7 @@ def _omni_clone(scenario: OmniScenario, wd):
 
     return omni_dir
 
-def _build_scenario(scenario: OmniScenario, wd):
+def _build_scenario(scenario: OmniScenario, wd, mulching_base_scenario=None):
     from wepppy.nodb import Landuse, Soils, Wepp
     from wepppy.nodb.mods import Disturbed
 
@@ -220,6 +220,23 @@ def _build_scenario(scenario: OmniScenario, wd):
 
     elif scenario == OmniScenario.SBSmap:
         raise NotImplementedError
+
+
+    elif scenario == OmniScenario.Mulching30 or \
+         scenario == OmniScenario.Mulching60:
+        
+        assert mulching_base_scenario is not None, \
+            'Mulching scenario requires a base scenario'
+        assert mulching_base_scenario in [OmniScenario.UniformLow, 
+                                          OmniScenario.UniformModerate, 
+                                          OmniScenario.UniformHigh, 
+                                          OmniScenario.SBSmap], \
+            'Mulching scenario requires a base scenario' 
+        
+        for topaz_id, dom in landuse.domlc_d.items():
+            # treat burned forest, shrub, and grass with mulching by increasing cover
+            pass
+
 
     # handle other cases
     else:
@@ -422,7 +439,7 @@ class Omni(NoDbBase, LogMixin):
         else:
             gpkg_fn = glob(_join(self.wd, f'omni/scenarios/{scenario}/export/arcmap/*.gpkg'))[0]
 
-        objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn)
+        objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn, obj_param=objective_parameter)
         return objective_parameter_descending, total_objective_parameter
     
     def build_contrasts(self, control_scenario=OmniScenario.UniformHigh, contrast_scenario=OmniScenario.Thinning,
@@ -516,7 +533,10 @@ class Omni(NoDbBase, LogMixin):
 
         # find hillslopes with the most erosion from the control scenario
         # soils_erosion_descending is a list of ObjectiveParameter named_tuples with fields: topaz_id, wepp_id, and value
-        obj_param_descending, total_erosion_kg = self.get_objective_parameter_from_gpkg(obj_param, scene=control_scenario)
+        obj_param_descending, total_erosion_kg = self.get_objective_parameter_from_gpkg(obj_param, scenario=control_scenario)
+
+        from pprint import pprint
+        pprint(obj_param_descending)
 
         if len(obj_param_descending) == 0:
             raise Exception('No soil erosion data found!')
@@ -527,7 +547,7 @@ class Omni(NoDbBase, LogMixin):
             if contrast_hillslope_limit is not None and i >= contrast_hillslope_limit:
                 break
 
-            running_obj_param += d.soil_loss_kg
+            running_obj_param += d.value
             if running_obj_param / total_erosion_kg > contrast_cumulative_obj_param_threshold_fraction:
                 break
 
@@ -539,7 +559,7 @@ class Omni(NoDbBase, LogMixin):
             else:
                 contrast_name = f'{control_scenario},{topaz_id}_to_{contrast_scenario}'
             
-            contrast_dir = _join(wd, f'omni/contrasts/{contrast_name}/wepp/runs/')
+#            contrast_dir = _join(wd, f'omni/contrasts/{contrast_name}/wepp/runs/')
             
             contrast = {}
             for _topaz_id, _wepp_id in top2wepp.items():
