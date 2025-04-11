@@ -278,5 +278,63 @@ cargo build --release
 see https://github.com/rogerlew/f-esri
 
 20. discord bot 
-
 TODO
+
+
+
+
+# Optimization
+
+
+Blackwood pool on forest.local ZFS share on forest1.local over 1Gb/s
+
+forest1.local:/wc1/supernatant-exaction/
+https://forest.local/weppcloud/runs/supernatant-exaction/disturbed9002/
+Channel Delineation 60/5          8 s
+Subcatchment and Abstraction     31 s
+Landuse                          24 s
+Soils                           127 s
+Climate PRISM Multiple 100 yr    98 s
+WEPP                           3913 s
+  Watershed                    1888 s
+
+
+Blackwood pool on forest.local ZFS share on forest1.local over 10Gb/s
+
+forest1.local:/wc1/fogged-legate/
+https://forest.local/weppcloud/runs/fogged-legate/disturbed9002/
+Channel Delineation 60/5          8 s
+Subcatchment and Abstraction     36 s
+Landuse                          24 s
+Soils                           127 s
+Climate PRISM Multiple 100 yr    97 s
+WEPP                           3913 s
+  Watershed                    1888 s
+
+
+
+
+Blackwood pool on 1forest.local with local ZFS
+
+forest1.local:/wc1/onstage-thirst/
+https://forest.local/weppcloud/runs/onstage-thirst/disturbed9002/
+Channel Delineation 60/5          4 s
+Subcatchment and Abstraction     12 s
+Landuse                          24 s
+Soils                           114 s
+Climate PRISM Multiple 100 yr    45 s
+WEPP                                s
+  Watershed                         s
+
+
+Blackwood on wepp.cloud
+
+https://wepp.cloud/weppcloud/runs/rlew-outfitted-gneiss/disturbed9002/
+Channel Delineation 60/5          4 s
+Subcatchment and Abstraction     10 s
+Landuse                           4 s
+Soils                           100 s
+Climate PRISM Multiple 100 yr    93 s
+WEPP                                s
+  Watershed                         s
+
