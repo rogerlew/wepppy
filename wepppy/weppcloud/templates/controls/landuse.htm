@@ -32,7 +32,10 @@
   <div class="col-sm-8">
     <select class="form-control disable-readonly" id="landuse_db" name="landuse_db"
       onchange="Landuse.getInstance().setLanduseDb(this.value)">
-      {% if 'alaska' in ron.locales %}
+      {% if 'ChileCayumanque' in ron.locales %}
+      <option value="locales/ChileCayumanque/landuse" {% if landuse.nlcd_db=="locales/ChileCayumanque/landuse" %}selected{% endif %}>ChileCayumanque/landuse
+      </option>
+      {% elif 'alaska' in ron.locales %}
       <option value="alaska/nlcd/2001" {% if landuse.nlcd_db=="alaska/nlcd/2001" %}selected{% endif %}>NLCD/2001
       </option>
       <option value="alaska/nlcd/2011" {% if landuse.nlcd_db=="alaska/nlcd/2011" %}selected{% endif %}>NLCD/2011
@@ -47,12 +50,12 @@
       <option value="nlcd/2006" {% if landuse.nlcd_db=="nlcd/2006" %}selected{% endif %}>NLCD/2006</option>
       <option value="nlcd/2001" {% if landuse.nlcd_db=="nlcd/2001" %}selected{% endif %}>NLCD/2001</option>
       <option value="nlcd/1996" {% if landuse.nlcd_db=="nlcd/1996" %}selected{% endif %}>NLCD/1996</option>
-      <option value="/locales/oyster-creek/landuse/1993" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1993" %}selected{% endif %}>Himmelstein/1993</option>
-      <option value="/locales/oyster-creek/landuse/1982" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1982" %}selected{% endif %}>Himmelstein/1982</option>
-      <option value="/locales/oyster-creek/landuse/1975" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1975" %}selected{% endif %}>Himmelstein/1975</option>
-      <option value="/locales/oyster-creek/landuse/1970" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1970" %}selected{% endif %}>Himmelstein/1970</option>
-      <option value="/locales/oyster-creek/landuse/1964" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1964" %}selected{% endif %}>Himmelstein/1964</option>
-      <option value="/locales/oyster-creek/landuse/1959" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1959" %}selected{% endif %}>Himmelstein/1959</option>
+      <option value="locales/oyster-creek/landuse/1993" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1993" %}selected{% endif %}>Himmelstein/1993</option>
+      <option value="locales/oyster-creek/landuse/1982" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1982" %}selected{% endif %}>Himmelstein/1982</option>
+      <option value="locales/oyster-creek/landuse/1975" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1975" %}selected{% endif %}>Himmelstein/1975</option>
+      <option value="locales/oyster-creek/landuse/1970" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1970" %}selected{% endif %}>Himmelstein/1970</option>
+      <option value="locales/oyster-creek/landuse/1964" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1964" %}selected{% endif %}>Himmelstein/1964</option>
+      <option value="locales/oyster-creek/landuse/1959" {% if landuse.nlcd_db=="locales/oyster-creek/landuse/1959" %}selected{% endif %}>Himmelstein/1959</option>
       {% elif 'virgin_islands' in ron.locales %}
       <option value="locales/virgin_islands/landcover" {% if landuse.nlcd_db=="locales/virgin_islands/landcover"
         %}selected{% endif %}>USVI Landcover 2018</option>

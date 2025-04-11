@@ -348,7 +348,83 @@ class Soils(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def build_chile(self, initial_sat=None, ksflag=None):
+        self.log("wepp.nodb.Soils.build_chile()...\n")
+        from wepppy.locales.chile.soils import get_soil_fn
+        from wepppy.wepp.soils.utils import WeppSoilUtil
+
+        wd = self.wd
+        watershed = Watershed.getInstance(wd)
+        if not watershed.is_abstracted:
+            raise WatershedNotAbstractedError()
+
+        ron = Ron.getInstance(wd)
+        _map = ron.map 
+
+        soils_dir = self.soils_dir
+
+        self.lock()
+        # noinspection PyBroadException
+        try:
+            if initial_sat is not None:
+                self._initial_sat = initial_sat
+            if ksflag is not None:
+                self._ksflag = bool(ksflag)
+
+            ssurgo_fn = self.ssurgo_fn
+            wmesque_retrieve(self.soils_map, _map.extent, ssurgo_fn, _map.cellsize)
+
+            domsoil_d = identify_mode_single_raster_key(
+                key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
+            domsoil_d = {str(k): str(v) for k, v in domsoil_d.items()}
+
+            self.log(f'domsoil_d: {repr(domsoil_d)}')
+
+            soils = {}
+            for topaz_id, mukey in domsoil_d.items():
+                src_sol_fn, soil_id = get_soil_fn(mukey)
+                sol_fn = _join(soils_dir, f'{soil_id}.sol')
+                if not _exists(sol_fn):
+                    shutil.copyfile(src_sol_fn, sol_fn)
+
+                if mukey not in soils:
+                    wsu = WeppSoilUtil(sol_fn)
+                    soils[mukey] = SoilSummary(
+                        mukey=mukey,
+                        fname=f'{soil_id}.sol',
+                        soils_dir=soils_dir,
+                        build_date=str(datetime.now()),
+                        desc=wsu.obj['ofes'][0]['slid'],
+                        pct_coverage=0.0
+                    )
+
+            self.log(repr(soils))
+
+            for topaz_id, k in domsoil_d.items():
+                soils[k].area += watershed.area_of(topaz_id)
+
+            for k in soils:
+                coverage = 100.0 * soils[k].area / watershed.sub_area
+                soils[k].pct_coverage = coverage
+
+            # store the soils dict
+            self.domsoil_d = domsoil_d
+            self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+            self.soils = soils
+
+            self.dump_and_unlock()
+
+            self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
+
+            # noinspection PyMethodFirstArgAssignment
+            self = self.getInstance(self.wd)  # reload instance from .nodb
+
+        except:
+            self.unlock('-f')
+            raise
+
     def build_isric(self, initial_sat=None, ksflag=None):
+        self.log("wepp.nodb.Soils.build_isric()...\n")
         from wepppy.locales.earth.soils.isric import ISRICSoilData
 
         wd = self.wd
@@ -439,6 +515,7 @@ class Soils(NoDbBase, LogMixin):
 
 
     def build_statsgo(self, initial_sat=None, ksflag=None):
+        self.log("wepp.nodb.Soils.build_statsgo()...\n")
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
@@ -515,6 +592,7 @@ class Soils(NoDbBase, LogMixin):
             raise
 
     def _build_by_identify(self, build_func, status_channel):
+        self.log("wepp.nodb.Soils._build_by_identify()...\n")
         soils_dir = self.soils_dir
         wd = self.wd
         self.lock()
@@ -556,6 +634,7 @@ class Soils(NoDbBase, LogMixin):
 
 
     def _build_from_map_db(self):
+        self.log("wepp.nodb.Soils._build_from_map_db()...\n")
         from wepppy.wepp.soils.utils import WeppSoilUtil
 
         wd = self.wd
@@ -627,14 +706,17 @@ class Soils(NoDbBase, LogMixin):
 
 
     def build(self, initial_sat=None, ksflag=None):
+        self.log("wepp.nodb.Soils.build()...\n")
 
         wd = self.wd
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
             raise WatershedNotAbstractedError()
 
-        if self.soils_map is not None:
-             self._build_from_map_db()
+        if 'ChileCayumanque' in self.locales:
+            self.build_chile(initial_sat=initial_sat, ksflag=ksflag)
+        elif self.soils_map is not None:
+            self._build_from_map_db()
         elif self.config_stem.startswith('ak'):
             self._build_ak()
         elif self.mode == SoilsMode.Gridded:

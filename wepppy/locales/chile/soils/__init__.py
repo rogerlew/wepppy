@@ -21,11 +21,14 @@ def get_soil_fn(soil_id):
     """
     Get the soil file name for a given soil ID.
     """
-    if soil_id in _map:
-        soil_path = os.path.abspath(_join(_thisdir, _map[soil_id] + '.sol'))
+    k = int(soil_id)
+
+    if k in _map:
+        mukey = _map[k]
+        soil_path = os.path.abspath(_join(_thisdir, f'{mukey}.sol'))
         if not _exists(soil_path):
             raise FileNotFoundError(f"File not found: {soil_path}")
-        return soil_path
+        return soil_path, mukey
 
     else:
         raise ValueError(f"Unknown soil ID: {soil_id}")

@@ -30,6 +30,8 @@ from configparser import (
     NoSectionError
 )
 
+from pathlib import Path
+
 
 from .redis_prep import RedisPrep
 from wepppy.all_your_base import isfloat, isint, isbool
@@ -40,10 +42,10 @@ _default_config = _join(_config_dir, '_defaults.toml')
 
 
 def get_configs():
-    return [_split(fn)[-1][:-4] for fn in glob(_join(_config_dir, '*.toml'))]
+    return [Path(fn).stem for fn in glob(_join(_config_dir, '*.toml'))]
 
 def get_legacy_configs():
-    return [_split(fn)[-1][:-4] for fn in glob(_join(_config_dir, 'legacy', '*.toml'))]
+    return [Path(fn).stem for fn in glob(_join(_config_dir, 'legacy', '*.toml'))]
 
 
 class TriggerEvents(Enum):
