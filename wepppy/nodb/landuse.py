@@ -63,6 +63,7 @@ class LanduseMode(IntEnum):
     Single = 1
     RRED_Unburned = 2
     RRED_Burned = 3
+    UserDefined = 4
 
 
 def read_cover_defaults(fn):
@@ -387,14 +388,19 @@ class Landuse(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def _build_NLCD(self):
+    def _build_NLCD(self, retrieve_nlcd=True):
         global wepppyo3
 
         _map = Ron.getInstance(self.wd).map
 
         # Get NLCD 2011 from wmesque webservice
         lc_fn = self.lc_fn
-        wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
+
+        if retrieve_nlcd:
+            wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
+        elif not _exists(lc_fn):
+            raise FileNotFoundError(f"'{lc_fn}' not found!")
+            
 
         subwta_fn = Watershed.getInstance(self.wd).subwta
 
@@ -446,9 +452,13 @@ class Landuse(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
-            self.clean()
+            if self._mode != LanduseMode.UserDefined:
+                self.clean()
 
-            if self._mode == LanduseMode.Gridded:
+            if self._mode == LanduseMode.UserDefined:
+                self._build_NLCD(retrieve_nlcd=False)
+
+            elif self._mode == LanduseMode.Gridded:
                 if 'au' in self.locales:
                     self._build_lu10v5ua()
                 else:

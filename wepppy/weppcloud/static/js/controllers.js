@@ -3314,9 +3314,14 @@ var Landuse = function () {
             self.stacktrace.text("");
             self.ws_client.connect();
 
+            var formData = new FormData($('#landuse_form')[0]);
+            
             $.post({
                 url: "rq/api/build_landuse",
-                data: self.form.serialize(),
+                data: formData,
+                contentType: false,
+                cache: false,
+                processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(`build_landuse job submitted: ${response.job_id}`);
@@ -3400,9 +3405,11 @@ var Landuse = function () {
         };
 
         that.restore = function (landuse_mode, landuse_single_selection) {
+            console.log("restore landuse mode: " + landuse_mode);
             var self = instance;
             $("#landuse_mode" + landuse_mode).prop("checked", true);
-            $("#landuse_single_selection").val("" + landuse_single_selection);
+
+            $('#landuse_single_selection').val('{{ landuse.single_selection }}').prop('selected', true);
 
             self.showHideControls(landuse_mode);
         };
@@ -3487,30 +3494,42 @@ var Landuse = function () {
                 $("#landuse_mode1_controls").hide();
                 $("#landuse_mode2_controls").hide();
                 $("#landuse_mode3_controls").hide();
+                $("#landuse_mode4_controls").hide();
             } else if (mode === 0) {
                 // gridded
                 $("#landuse_mode0_controls").show();
                 $("#landuse_mode1_controls").hide();
                 $("#landuse_mode2_controls").hide();
                 $("#landuse_mode3_controls").hide();
+                $("#landuse_mode4_controls").hide();
             } else if (mode === 1) {
                 // single
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").show();
                 $("#landuse_mode2_controls").hide();
                 $("#landuse_mode3_controls").hide();
+                $("#landuse_mode4_controls").hide();
             } else if (mode === 2) {
                 // single
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").hide();
                 $("#landuse_mode2_controls").show();
                 $("#landuse_mode3_controls").hide();
+                $("#landuse_mode4_controls").hide();
             } else if (mode === 3) {
                 // single
                 $("#landuse_mode0_controls").hide();
                 $("#landuse_mode1_controls").hide();
                 $("#landuse_mode2_controls").hide();
                 $("#landuse_mode3_controls").show();
+                $("#landuse_mode4_controls").hide();
+            } else if (mode === 4) {
+                // single
+                $("#landuse_mode0_controls").hide();
+                $("#landuse_mode1_controls").hide();
+                $("#landuse_mode2_controls").hide();
+                $("#landuse_mode3_controls").hide();
+                $("#landuse_mode4_controls").show();
             } else {
                 throw "ValueError: unknown mode";
             }

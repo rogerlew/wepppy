@@ -53,7 +53,6 @@ _lu10v5ua_map_fn = _join(_management_dir, "lu10v5ua_map.json")
 _turkey_map_fn = _join(_management_dir, "turkey_map.json")
 _palouse_map_fn = _join(_management_dir, "palouse_map.json")
 
-
 def _parse_julian(x):
     foo = int(x)
     if foo == 0:
@@ -2301,6 +2300,21 @@ def merge_managements(mans):
         man0 = man0.merge_loops(mans[i])
     return man0
 
+
+landuse_management_mapping_options = [
+    dict(Key='rred', Description='RRED'),
+    dict(Key='palouse', Description='palouse'),
+    dict(Key='esdac', Description='esdac'),
+    dict(Key='lu10v5ua', Description='lu10v5ua'),
+    dict(Key='c3s-disturbed-nigeria', Description='Nigeria-c3s-disturbed'),
+    dict(Key='c3s-disturbed', Description='Earth-cs3-disturbed'),
+    dict(Key='eu-disturbed', Description='EU-disturbed'),
+    dict(Key='au-disturbed', Description='Australia-disturbed'),
+    dict(Key='ca-disturbed', Description='Canada-disturbed'),
+    dict(Key='vi-disturbed', Description='Virgin Islands-disturbed'),
+    dict(Key='disturbed', Description='Disturbed'),
+    dict(Key='revegetation', Description='Revegetation')
+]
 
 def load_map(_map=None):
 
