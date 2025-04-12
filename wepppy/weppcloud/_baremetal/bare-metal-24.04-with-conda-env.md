@@ -15,7 +15,14 @@ rm gcc-6-base_6.4.0-17ubuntu1_amd64.deb
 rm libgfortran3_6.4.0-17ubuntu1_amd64.deb
 ```
 
-4. Install miniconda3 to /workdir/miniconda3
+4. Install miniconda3 to `/workdir/miniconda3`
+
+I have a `group` called `webgroup` and have my local user and teh `www-data` user as members of this group. My local user owns /workdir and all the subdirectories e.g.
+```bash
+chown -R roger:webgroup /workdir
+```
+
+
 ```bash
 mkdir -p /workdir/miniconda3
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /workdir/miniconda3/miniconda.sh
