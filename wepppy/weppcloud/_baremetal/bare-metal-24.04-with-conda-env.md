@@ -25,12 +25,20 @@ chown -R roger:webgroup /workdir
 
 ```bash
 mkdir -p /workdir/miniconda3
+cd /workdir/miniconda3
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /workdir/miniconda3/miniconda.sh
 bash /workdir/miniconda3/miniconda.sh -b -u -p /workdir/miniconda3
 rm /workdir/miniconda3/miniconda.sh
 conda config --add envs_dirs /workdir/miniconda3/envs
 sudo chown -R roger:webgroup /workdir/miniconda3/
 ```
+
+to add `conda` to bash on login
+```bash
+bin/conda init
+source ~/.bashrc
+```
+
 
 5. Build wepppy310-env conda environment
 ```bash
