@@ -3,7 +3,8 @@
 1. Install Ubuntu 24.04
 1.1 Create webgroup with gid 1002 and add user to webgroup
 2. Install dependencies based on [wepppy-docker-base](https://github.com/rogerlew/wepppy-docker-base/)
-3. Install libfortran3
+3. Install libfortran3 (probably don't have to do this if using the recent wepp bins that have been compiled with Intel OneAPI e.g. any of the wepp binaries that have the `wepp_<commit_hash>` naming convention)
+ 
 ```bash
 cd ~
 wget http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-6/gcc-6-base_6.4.0-17ubuntu1_amd64.deb
