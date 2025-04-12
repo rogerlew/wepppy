@@ -2,7 +2,7 @@
 
 1. Install Ubuntu 24.04
 1.1 Create webgroup with gid 1002 and add user to webgroup
-2. Install dependendeecies based on wepppy-docker-base
+2. Install dependencies based on [wepppy-docker-base](https://github.com/rogerlew/wepppy-docker-base/)
 3. Install libfortran3
 ```bash
 cd ~
