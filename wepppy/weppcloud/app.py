@@ -3533,6 +3533,7 @@ def get_wepp_prep_details(runid, config):
 
 
 # noinspection PyBroadException
+@deprecated
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/run_wepp/', methods=['POST'])
 def submit_task_run_wepp(runid, config):

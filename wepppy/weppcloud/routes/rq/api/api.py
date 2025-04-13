@@ -538,6 +538,11 @@ def api_run_wepp(runid, config):
         legacy_arc_export_on_run_completion = None
 
     try:
+        dss_export_on_run_completion = request.form.get('dss_export_on_run_completion') == 'on'
+    except:
+        dss_export_on_run_completion = None
+
+    try:
         wepp.lock()
         if prep_details_on_run_completion is not None:
             wepp._prep_details_on_run_completion = prep_details_on_run_completion
@@ -547,6 +552,9 @@ def api_run_wepp(runid, config):
 
         if legacy_arc_export_on_run_completion is not None:
             wepp._legacy_arc_export_on_run_completion = legacy_arc_export_on_run_completion
+
+        if dss_export_on_run_completion is not None:
+            wepp._dss_export_on_run_completion = dss_export_on_run_completion
 
         wepp.dump_and_unlock()
     except:
