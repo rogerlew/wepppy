@@ -170,7 +170,7 @@ sudo vim /etc/apache2/mods-available/wsgi.conf
 ```
 
 ```conf
-LoadModule wsgi_module "/workdir/miniconda3/envs/wepppy-env/lib/python3.12/site-packages/mod_wsgi/server/mod_wsgi-py312.cpython-312-x86_64-linux-gnu.so"
+LoadModule wsgi_module "/workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/mod_wsgi/server/mod_wsgi-py310.cpython-310-x86_64-linux-gnu.so"
 ```
 
 ```bash
