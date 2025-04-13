@@ -4,6 +4,7 @@ channels:
   - https://repo.anaconda.com/pkgs/main
   - https://repo.anaconda.com/pkgs/r
 dependencies:
+  - cmake=3.5
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
   - aom=3.9.1=hac33072_0
@@ -123,7 +124,6 @@ dependencies:
       - billiard==3.6.4.0
       - bleach==6.1.0
       - blinker==1.9.0
-      - blosc==1.9.2
       - bokeh==3.5.0
       - bottleneck==1.3.8
       - brotli==1.0.9
