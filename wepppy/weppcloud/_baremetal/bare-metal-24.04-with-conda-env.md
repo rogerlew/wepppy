@@ -228,7 +228,6 @@ edit `/etc/passwd` to give `www-data` bash access
 
 ##### /var/www/.bash_profile
 ```sh
-(base) roger@wepp1:/var/www$ cat .bash_profile
 # /var/www/.bash_profile
 if [ -f ~/.bashrc ]; then
     . ~/.bashrc
