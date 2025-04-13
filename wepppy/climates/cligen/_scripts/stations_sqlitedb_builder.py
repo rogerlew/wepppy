@@ -85,7 +85,7 @@ def build_db(db_fn, par_dir, state_code_wildcards):
     c = conn.cursor()
     c.execute('''CREATE TABLE stations
                 (state text, desc text, par text, latitude real, longitude real, years real, type integer, elevation real, tp5 real, tp6 real, annual_ppt real)''')
-
+    
     par_files = glob.glob(_join(par_dir, "**/*.par"), recursive=True)
     par_files += glob.glob(_join(par_dir, "**/*.PAR"), recursive=True)
 
