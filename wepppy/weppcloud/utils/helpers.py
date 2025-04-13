@@ -19,7 +19,7 @@ def get_wd(runid):
         return legacy
         
     prefix = runid[:2]
-    return _join('/wc1/runs', prefix, runid)
+    return _join('/geodata/wc1/runs', prefix, runid)
     
 
 def error_factory(msg='Error Handling Request'):
