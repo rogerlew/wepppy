@@ -208,10 +208,12 @@ application.secret_key = <YOUR SECRET KEY HERE>
 
 15.7 openssl library
 
-add the following line to `/etc/apache2/envvars`
+add the following lines to `/etc/apache2/envvars`
 
 ```
 export LD_LIBRARY_PATH="/workdir/miniconda3/envs/wepppy310-env/lib:$LD_LIBRARY_PATH"
+export PATH="/workdir/miniconda3/envs/wepppy310-env/bin:$PATH"
+export PROJ_DATA="/workdir/miniconda3/envs/wepppy310-env/share/proj"
 ```
 
 15.8 launch apache
