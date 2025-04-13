@@ -42,7 +42,7 @@ _default_config = _join(_config_dir, '_defaults.toml')
 
 
 def get_configs():
-    return [Path(fn).stem for fn in glob(_join(_config_dir, '*.toml'))]
+    return [Path(fn).stem for fn in glob(_join(_config_dir, '*.cfg'))]
 
 def get_legacy_configs():
     return [Path(fn).stem for fn in glob(_join(_config_dir, 'legacy', '*.toml'))]
