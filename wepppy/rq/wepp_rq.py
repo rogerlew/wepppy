@@ -221,10 +221,17 @@ def run_wepp_rq(runid):
             job.meta[f'jobs:2,func:_prep_watershed_rq'] = job2_watershed_prep.id
 
             job2_totalwatsed2 = None
+            job2_post_dss_export = None
             if not climate.is_single_storm:
                 job2_totalwatsed2 = q.enqueue_call(_build_totalwatsed2_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
                 job.meta['jobs:2,func:_build_totalwatsed2_rq'] = job2_totalwatsed2.id
                 job.save()
+
+                if wepp.dss_export_on_run_completion:
+                    job2_post_dss_export = q.enqueue_call(_post_dss_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
+                    job.meta['jobs:2,func:_post_dss_export_rq'] = job2_post_dss_export.id
+                    job.save()
+
 
             jobs2_flowpaths = None
             if wepp.run_flowpaths:
@@ -330,6 +337,9 @@ def run_wepp_rq(runid):
 
             if job2_totalwatsed2 is not None:
                 jobs51_post.append(job2_totalwatsed2)
+
+            if job2_post_dss_export is not None:
+                jobs51_post.append(job2_post_dss_export)
 
             if jobs2_flowpaths is not None:
                 jobs51_post.append(jobs2_flowpaths)
@@ -719,6 +729,21 @@ def _post_gpkg_export_rq(runid):
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+def _post_dss_export_rq(runid):
+    try:
+        from wepppy.wepp.out import totalwatsed_partitioned_dss_export
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        totalwatsed_partitioned_dss_export(wd)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
 
 
 def _post_make_loss_grid_rq(runid):
