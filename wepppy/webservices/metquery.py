@@ -36,8 +36,8 @@ from wepppy.all_your_base.geo import wgs84_proj4
 import numpy as np
 import xarray as xr
 
-from .locationinfo import  RasterDatasetInterpolator
-from .geo_transformer import GeoTransformer
+from wepppy.all_your_base.geo.locationinfo import  RasterDatasetInterpolator
+from wepppy.all_your_base.geo.geo_transformer import GeoTransformer
 
 from glob import glob
 
@@ -470,6 +470,11 @@ def query_monthly():
     if not _exists(fname):
         return jsonify({'Error': 'could not find dataset "%s"' % fname})
         
+    print('metquery::query_monthly fname', fname)
+    print('metquery::query_monthly lat', lat)
+    print('metquery::query_monthly lng', lng)
+    print('metquery::query_monthly method', method)
+    print('metquery::query_monthly dataset', dataset)
     rds = RasterDatasetInterpolator(fname)
     data = rds.get_location_info(lng, lat, method)
     
