@@ -222,6 +222,34 @@ sudo apachectl stop
 sudo apachctl start
 ```
 
+15.9 www-data user
+
+edit `/etc/passwd` to give `www-data` bash access
+
+##### /var/www/.bash_profile
+```sh
+(base) roger@wepp1:/var/www$ cat .bash_profile
+# /var/www/.bash_profile
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+```
+
+##### /var/www/.condarc
+```sh
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+envs_dirs:
+  - /workdir/miniconda3/envs
+```
+
+##### /var/www/.bashrc
+```sh
+source /workdir/miniconda3/etc/profile.d/conda.sh
+conda activate wepppy310-env
+```
+
 16. config for slave rq workers (not no machine with rq server)
 
 16.1 nfs share
