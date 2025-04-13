@@ -202,11 +202,19 @@ import logging
 logging.basicConfig(stream=sys.stderr)
 sys.path.insert(0,"/var/www/weppcloud/")
 
-from wepppy.weppcloud import app as application
+from wepppy.weppcloud.app import app as application
 application.secret_key = <YOUR SECRET KEY HERE>
 ```
 
-15.7 launch apache
+15.7 openssl library
+
+add the following line to `/etc/apache2/envvars`
+
+```
+export LD_LIBRARY_PATH="/workdir/miniconda3/envs/wepppy310-env/lib:$LD_LIBRARY_PATH"
+```
+
+15.8 launch apache
 ```bash
 sudo apachectl stop
 sudo apachctl start
