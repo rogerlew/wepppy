@@ -194,9 +194,7 @@ def identify_pixel_coords(hillslope_locations, srs=4326, daymet_version='v4'):
     y = np.array([d['latitude'] for d in hillslope_locations.values()])
 
     if daymet_version == 'v4':
-        daymet_dir = '/ssd1/daymet/v4'
-        if not _exists(daymet_dir):
-            daymet_dir = '/geodata/daymet/v4'
+        daymet_dir = '/geodata/daymet/v4'
         filename_or_ds = _join(daymet_dir, 'prcp', 'daymet_v4_daily_na_prcp_2020.nc')
     elif daymet_version == 'v3':
         daymet_dir = '/geodata/daymet'
