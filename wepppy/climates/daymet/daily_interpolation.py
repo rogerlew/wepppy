@@ -65,9 +65,7 @@ from pprint import pprint
 def process_measure(year, measure, hillslope_locations, daymet_version='v4'):
 
     if daymet_version == 'v4':
-        daymet_dir = '/ssd1/daymet/v4' # location on wepp1
-        if not _exists(daymet_dir):
-            daymet_dir = '/geodata/daymet/v4'
+        daymet_dir = '/geodata/daymet/v4'
         dataset_fn = _join(daymet_dir, measure, f'daymet_v4_daily_na_{measure}_{year}.nc')
     elif daymet_version == 'v3':
         daymet_dir = '/geodata/daymet'
