@@ -46,6 +46,17 @@ wget https://raw.githubusercontent.com/rogerlew/wepppy/refs/heads/master/wepppy3
 conda env create -f wepppy310-env.yaml
 ```
 
+to export env
+```bash
+conda env export > wepppy310-env.yaml
+```
+
+to update env from env file
+```bash
+conda env update --file wepppy310-env.yaml --name wepppy310-env
+```
+
+
 6. clone wepppy
 ```bash
 cd /workdir
