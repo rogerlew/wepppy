@@ -382,7 +382,7 @@ class Soils(NoDbBase, LogMixin):
 
             soils = {}
             for topaz_id in watershed.subs_summary:
-                mukey = domsoil_d.get(str(topaz_id), '1-sand loam-forest')
+                mukey = domsoil_d.get(str(topaz_id), 1)
 
                 src_sol_fn, soil_id = get_soil_fn(mukey)
                 sol_fn = _join(soils_dir, f'{soil_id}.sol')
