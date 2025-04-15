@@ -11,14 +11,18 @@ from flask import jsonify, make_response
 
 from datetime import datetime
 
-
+import socket
+_hostname = socket.gethostname()
 
 def get_wd(runid):
     legacy = _join('/geodata/weppcloud_runs', runid)
     if _exists(legacy):
         return legacy
-        
+
     prefix = runid[:2]
+    if _hostname.startswith('forest'):
+        return _join('/wc1/runs', prefix, runid)
+ 
     return _join('/geodata/wc1/runs', prefix, runid)
     
 
