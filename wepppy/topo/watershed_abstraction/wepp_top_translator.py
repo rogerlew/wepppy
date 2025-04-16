@@ -91,6 +91,9 @@ class WeppTopTranslator:
 
     @property
     def top2wepp(self):
+        """
+        dictionary of topazids (int) to weppids (int)
+        """
         return self._top2wepp
 
     @property
