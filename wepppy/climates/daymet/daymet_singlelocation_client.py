@@ -119,6 +119,7 @@ def retrieve_historical_timeseries(lon, lat, start_year, end_year, fill_leap_yea
 
     if gridmet_wind:
         from wepppy.climates.gridmet import retrieve_historical_wind as gridmet_retrieve_historical_wind
+
         wind_df = gridmet_retrieve_historical_wind(lon, lat, start_year, end_year)
 
         df['vs(m/s)'] = wind_df['vs(m/s)']

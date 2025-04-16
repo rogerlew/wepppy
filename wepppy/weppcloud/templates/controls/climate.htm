@@ -382,6 +382,18 @@
 <a href="#climate_advanced_opts_con" data-toggle="collapse" class
     aria-expanded="true">Advanced Options</a>
 <div id="climate_advanced_opts_con" class="collapse">
+    <h5>Use GRIDMET Wind when Applicable</h5>
+    <div class="form-group row">
+        <div class="col-sm-4" style="padding-left: 3em;">
+            <label class="form-check-label">
+                <input id="checkbox_use_gridmet_wind_when_applicable" type="checkbox" class="form-check-input disable-readonly"
+                    onchange="Climate.getInstance().set_use_gridmet_wind_when_applicable(this.checked);" {% if climate.use_gridmet_wind_when_applicable
+                    %}checked{% endif %}>
+                Use GRIDMET Wind When Applicable (e.g. DAYMET Observed)
+            </label>
+        </div>
+    </div>
+
     <h5>Post CLIGEN Precipitation Scaling</h5>
     <div class="form-group row">
         <div class="col-sm-6">

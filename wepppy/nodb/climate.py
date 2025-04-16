@@ -713,6 +713,8 @@ class Climate(NoDbBase, LogMixin):
             self._observed_clis_wc = _observed_clis_wc
             self._future_clis_wc = _future_clis_wc
 
+            self._use_gridmet_wind_when_applicable = self.config_get_bool('climate', 'use_gridmet_wind_when_applicable')
+
             self.dump_and_unlock()
 
         except Exception:
@@ -762,6 +764,22 @@ class Climate(NoDbBase, LogMixin):
     @property
     def daymet_last_available_year(self):
         return 2023
+
+    @property
+    def use_gridmet_wind_when_applicable(self):
+        return getattr(self, '_use_gridmet_wind_when_applicable', True)
+    
+    @use_gridmet_wind_when_applicable.setter
+    def use_gridmet_wind_when_applicable(self, value: bool):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._use_gridmet_wind_when_applicable = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def precip_scale_reference(self):
@@ -2419,7 +2437,9 @@ class Climate(NoDbBase, LogMixin):
             prn_fn = 'ws.prn'
             self.log('  building {}... '.format(cli_fn))
 
-            build_observed_daymet(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn)
+            
+            build_observed_daymet(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn,
+                                  gridmet_wind=self.use_gridmet_wind_when_applicable)
 
             climate = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = climate.calc_monthlies()
@@ -2708,9 +2728,14 @@ class Climate(NoDbBase, LogMixin):
                                          output_type='prn parquet',
                                          status_channel=self._status_channel)
 
-
-            self.log('  fetching gridmet wind...\n')
-            wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year)
+            wind_df = None
+            wind_vs = None
+            wind_dir = None
+            if self.use_gridmet_wind_when_applicable:
+                self.log('  fetching gridmet wind...\n')
+                wind_df = gridmet_retrieve_historical_wind(ws_lng, ws_lat, start_year, end_year)
+                wind_vs = wind_df['vs(m/s)']
+                wind_dir = wind_df['th(DegreesClockwisefromnorth)']
 
             sub_par_fns = {}
             sub_cli_fns = {}
@@ -2728,7 +2753,7 @@ class Climate(NoDbBase, LogMixin):
                         executor.submit(
                             build_observed_daymet_interpolated, 
                             cligen, topaz_id, _lng, _lat, start_year, end_year, cli_dir, _cli_fn, _prn_fn, 
-                            wind_vs=wind_df['vs(m/s)'], wind_dir=wind_df['th(DegreesClockwisefromnorth)']))
+                            wind_vs=wind_vs, wind_dir=wind_dir))
                 
                     sub_par_fns[topaz_id] = _prn_fn
                     sub_cli_fns[topaz_id] = _cli_fn
@@ -2740,7 +2765,7 @@ class Climate(NoDbBase, LogMixin):
                     executor.submit(
                         build_observed_daymet_interpolated, 
                         cligen, topaz_id, ws_lng, ws_lat, start_year, end_year, cli_dir, cli_fn, prn_fn, 
-                        wind_vs=wind_df['vs(m/s)'], wind_dir=wind_df['th(DegreesClockwisefromnorth)']))
+                        wind_vs=wind_vs, wind_dir=wind_dir))
 
                 try:
                     for future in as_completed(futures):
