@@ -14,6 +14,7 @@ The calculations were provided by Mariana Dobre.
 """
 
 from abc import ABC, abstractmethod
+import threading
 from concurrent.futures import ThreadPoolExecutor
 import os
 from os.path import exists as _exists
@@ -46,8 +47,16 @@ from wepppy.topo.watershed_abstraction import upland_hillslopes
 
 NCPU = math.ceil(NCPU * 0.6)
 
+# Define a cache dictionary at module level
+_hill_wat_sed_cache = {}
+_cache_lock = threading.Lock()
 
 def _read_hill_wat_sed(pass_fn):
+    # Check if result is in cache using thread-safe approach
+    with _cache_lock:
+        if pass_fn in _hill_wat_sed_cache:
+            return _hill_wat_sed_cache[pass_fn]
+        
     from .hill_pass import HillPass
     from .hill_wat import HillWat
 
@@ -65,9 +74,8 @@ def _read_hill_wat_sed(pass_fn):
             continue
         watbal[col] = sed_df[col]
 
-
     #  #   Column                          Non-Null Count  Dtype
-    # ---  ------                          --------------  -----
+    # ---  -----                      --------------  -----
     #  0   fire_year (yr)                  365 non-null    uint16
     #  1   year0                           365 non-null    uint16
     #  2   year                            365 non-null    uint16
@@ -124,8 +132,12 @@ def _read_hill_wat_sed(pass_fn):
             new_col_name = f'ash_{col}' if not col.startswith('ash_') else col
             watbal[new_col_name] = merged_df[col].values
 
-    return watbal, hill_wat.total_area, wepp_id
-
+    # Store result in cache with thread safety
+    result = (watbal, hill_wat.total_area, wepp_id)
+    with _cache_lock:
+        _hill_wat_sed_cache[pass_fn] = result
+    
+    return result
 
 def process_measures_df(d, totarea_m2, baseflow_opts, phos_opts):
     from wepppy.nodb import PhosphorusOpts
@@ -353,28 +365,28 @@ class AbstractTotalWatSed2(ABC):
         
         start_date = datetime(self.d['Year'][0], 1, 1)
 
-        # iterate over the series in the DataFrame and write to the DSS file
-        for measure, series in self.d.items():
-            series = series.to_numpy()
+        with HecDss.Open(fn) as fid:
+            # iterate over the series in the DataFrame and write to the DSS file
+            for measure, series in self.d.items():
+                series = series.to_numpy()
 
-            # measure contains measure name and units in ()
-            _measure = measure.split('(')[0].strip()
-            try:
-                units = measure.split('(')[1].split(')')[0].strip()
-            except IndexError:
-                units = ''
+                # measure contains measure name and units in ()
+                _measure = measure.split('(')[0].strip()
+                try:
+                    units = measure.split('(')[1].split(')')[0].strip()
+                except IndexError:
+                    units = ''
 
-            pathname = f"/WEPP/TOTALWATSED/{_measure}//1DAY/{self.chn_id}/"
-            tsc = TimeSeriesContainer()
-            tsc.pathname = pathname
-            tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
-            tsc.numberValues = len(series)
-            tsc.units = units
-            tsc.type = "INST"
-            tsc.interval = 1440  # 1 day in minutes
-            tsc.values = series
+                pathname = f"/WEPP/TOTALWATSED/{_measure}//1DAY/{self.chn_id}/"
+                tsc = TimeSeriesContainer()
+                tsc.pathname = pathname
+                tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
+                tsc.numberValues = len(series)
+                tsc.units = units
+                tsc.type = "INST"
+                tsc.interval = 1440  # 1 day in minutes
+                tsc.values = series
 
-            with HecDss.Open(fn) as fid:
                 fid.deletePathname(tsc.pathname)
                 fid.put_ts(tsc)
                 fid.close()
