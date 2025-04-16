@@ -6,7 +6,7 @@ import redis
 import json
 
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -49,7 +49,7 @@ def get_job_details(job, redis_conn, now):
 
 
 def get_run_wepp_rq_job_info(job_id: str) -> dict:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
         job = Job.fetch(job_id, connection=redis_conn)
 
