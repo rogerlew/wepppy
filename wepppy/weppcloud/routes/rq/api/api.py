@@ -77,7 +77,7 @@ from rq import Queue, get_current_job
 REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 RQ_DB = 9
 
-TIMEOUT = 43_200
+TIMEOUT = 216_000
 
 rq_api_bp = Blueprint('rq_api', __name__)
 
@@ -755,7 +755,7 @@ def api_rap_ts_acquire(runid, config):
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fork', methods=['POST'])
 def api_fork(runid, config):
     from wepppy.weppcloud.app import get_run_owners
-    from wepppy.weppcloud import user_datastore
+    from wepppy.weppcloud.app import user_datastore
     try:
         wd = get_wd(runid)
         
