@@ -235,6 +235,15 @@ function onReady() {
         // Split the sanitized input by any sequence of spaces or commas
         var loc = sanitizedInput.split(/[\s,]+/);
 
+        // through away empty strings
+        loc = loc.filter(function (item) {
+            return item !== "";
+        });
+        if (loc.length < 2) {
+            alert("Please enter a valid location.");
+            return;
+        }
+
         var lon = parseFloat(loc[0]);
         var lat = parseFloat(loc[1]);
 
