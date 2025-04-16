@@ -5009,6 +5009,35 @@ var Climate = function () {
             });
         };
 
+        that.set_use_gridmet_wind_when_applicable = function (state) {
+            var self = instance;
+            var task_msg = "Setting " + routine + " (" + state + ")";
+
+            self.status.html(task_msg + "...");
+            self.stacktrace.text("");
+
+            $.post({
+                url: "tasks/set_use_gridmet_wind_when_applicable/",
+                data: JSON.stringify({state: state }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function success(response) {
+                    if (response.Success === true) {
+                        self.status.html(task_msg + "... Success");
+                    } else {
+                        self.pushResponseStacktrace(self, response);
+                    }
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(error) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
+        };
+
+
 
 
         return that;

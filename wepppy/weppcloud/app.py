@@ -3190,6 +3190,31 @@ def task_set_wepp_bin(runid, config):
 
     return success_factory()
 
+
+# noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable', methods=['POST'])
+@app.route('/runs/<string:runid>/<config>/tasks/set_use_gridmet_wind_when_applicable/', methods=['POST'])
+def task_set_use_gridmet_wind_when_applicable(runid, config):
+
+    try:
+        state = request.json.get('state', None)
+    except Exception:
+        return exception_factory('Error parsing state', runid=runid)
+
+    if state is None:
+        return error_factory('state is None')
+
+    try:
+        wd = get_wd(runid)
+        climate = Climate.getInstance(wd)
+        climate.use_gridmet_wind_when_applicable = state
+
+    except Exception:
+        return exception_factory('Error setting state', runid=runid)
+
+    return success_factory()
+
+
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine', methods=['POST'])
 @app.route('/runs/<string:runid>/<config>/tasks/set_run_wepp_routine/', methods=['POST'])
