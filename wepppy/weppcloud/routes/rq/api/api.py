@@ -494,7 +494,7 @@ def api_post_dss_export_rq(runid, config):
             order = int(chn_summary['order'])
             if order in dss_excluded_channel_orders:
                 continue
-            dss_export_channel_ids.append(chn_id)
+            dss_export_channel_ids.append(int(chn_id))
 
     wepp.lock()
 
