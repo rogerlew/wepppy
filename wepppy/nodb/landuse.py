@@ -203,7 +203,10 @@ class Landuse(NoDbBase, LogMixin):
 
         return _mapping
     
-    def get_mapping_dict(self):
+    def get_mapping_dict(self) -> dict[str, dict]:
+        """
+        Returns the management mapping dictionary
+        """
         from wepppy.wepp.management import load_map
         mapping = self.mapping
         assert mapping is not None

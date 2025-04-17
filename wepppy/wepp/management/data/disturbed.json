@@ -40,5 +40,8 @@
 "129": {"Key": 129, "Color": [161,2,0,255],     "DisturbedClass": "grass high sev fire", "Description": "Grass High Severity Fire", "ManagementFile": "UnDisturbed/Grass_High_Severity_Fire.man"},
 "130": {"Key": 130, "Color": [234,204,0,255],   "DisturbedClass": "grass moderate sev fire", "Description": "Grass Moderate Severity Fire", "ManagementFile": "UnDisturbed/Grass_Moderate_Severity_Fire.man"},
 "131": {"Key": 131, "Color": [48,153,0,255],    "DisturbedClass": "grass low sev fire", "Description": "Grass Low Severity Fire", "ManagementFile": "UnDisturbed/Grass_Low_Severity_Fire.man"},
-"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Grass_Low_Severity_Fire.man"}
+"132": {"Key": 132, "Color": [44,145,0,255],    "DisturbedClass": "grass prescribed fire", "Description": "Grass Prescribed Fire", "ManagementFile": "UnDisturbed/Grass_Low_Severity_Fire.man"},
+"140": {"Key": 140, "Color": [0,240,197,255],   "DisturbedClass": "mulch30", "Description": "Mulch 30", "ManagementFile": "UnDisturbed/null.man"},
+"141": {"Key": 141, "Color": [0,240,197,255],   "DisturbedClass": "mulch60", "Description": "Mulch 60", "ManagementFile": "UnDisturbed/null.man"},
+"142": {"Key": 142, "Color": [0,240,197,255],   "DisturbedClass": "prescribed_fire", "Description": "Thinning 70 Cover", "ManagementFile": "UnDisturbed/null.man"}
 }

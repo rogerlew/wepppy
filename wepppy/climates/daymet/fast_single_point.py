@@ -11,7 +11,6 @@ from calendar import isleap
 
 from multiprocessing import Pool
 
-from numba import njit
 
 # access over nas is slower than retrieving using daymet api
 

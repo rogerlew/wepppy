@@ -2316,7 +2316,10 @@ landuse_management_mapping_options = [
     dict(Key='revegetation', Description='Revegetation')
 ]
 
-def load_map(_map=None):
+def load_map(_map=None) -> dict[str, dict]:
+    """
+    json.load the management map file and return
+    """
 
     if _map is None:
         with open(_map_fn) as fp:
