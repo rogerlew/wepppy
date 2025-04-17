@@ -188,7 +188,13 @@ class NoDbBase(object):
         val = self._configparser.get(section, option, fallback=default)
 
         if val is not None:
-            val = ast.literal_eval(val)
+            # if val is a list return val
+            if isinstance(val, list):
+                return val
+            
+            # if val is a string, try to convert it to a list
+            if isinstance(val, str):
+                val = ast.literal_eval(val)
 
         if val is None:
             val = []
