@@ -367,28 +367,28 @@ class AbstractTotalWatSed2(ABC):
         
         start_date = datetime(self.d['Year'][0], 1, 1)
 
-        with HecDss.Open(fn) as fid:
-            # iterate over the series in the DataFrame and write to the DSS file
-            for measure, series in self.d.items():
-                series = series.to_numpy()
+        # iterate over the series in the DataFrame and write to the DSS file
+        for measure, series in self.d.items():
+            series = series.to_numpy()
 
-                # measure contains measure name and units in ()
-                _measure = measure.split('(')[0].strip()
-                try:
-                    units = measure.split('(')[1].split(')')[0].strip()
-                except IndexError:
-                    units = ''
+            # measure contains measure name and units in ()
+            _measure = measure.split('(')[0].strip()
+            try:
+                units = measure.split('(')[1].split(')')[0].strip()
+            except IndexError:
+                units = ''
 
-                pathname = f"/WEPP/TOTALWATSED/{_measure}//1DAY/{self.chn_id}/"
-                tsc = TimeSeriesContainer()
-                tsc.pathname = pathname
-                tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
-                tsc.numberValues = len(series)
-                tsc.units = units
-                tsc.type = "INST"
-                tsc.interval = 1440  # 1 day in minutes
-                tsc.values = series
+            pathname = f"/WEPP/TOTALWATSED/{_measure}//1DAY/{self.chn_id}/"
+            tsc = TimeSeriesContainer()
+            tsc.pathname = pathname
+            tsc.startDateTime = start_date.strftime("%d%b%Y %H:%M:%S").upper()
+            tsc.numberValues = len(series)
+            tsc.units = units
+            tsc.type = "INST"
+            tsc.interval = 1440  # 1 day in minutes
+            tsc.values = series
 
+            with HecDss.Open(fn) as fid:
                 fid.deletePathname(tsc.pathname)
                 fid.put_ts(tsc)
                 fid.close()
@@ -737,7 +737,7 @@ def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_chann
 
     for chn_id in translator.iter_chn_ids():  # yields `chn_{id}` strings
         if export_channel_ids is not None:
-            if int(chn_id.split('_')[1]) not in export_channel_ids:
+            if int(chn_id.split(_)[1]) not in export_channel_ids:
                 continue
 
         if status_channel is not None:

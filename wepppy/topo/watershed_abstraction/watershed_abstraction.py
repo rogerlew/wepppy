@@ -16,7 +16,6 @@ from collections import Counter
 from math import pi, atan2
 import warnings
 
-from numba import njit
 import numpy as np
 from scipy.stats import circmean
 
@@ -61,7 +60,6 @@ def transform_px_to_wgs(args):
     return properties, coordinates
 
 
-@njit
 def _walk_flowpath(subwta, flopat, flovec, fvslop, sub_id: int, c: int, r: int, warn=False) -> Tuple[np.array, np.array, np.array]:
     """
     walk down the gradient until we reach a channel
@@ -151,7 +149,6 @@ def _walk_flowpath(subwta, flopat, flovec, fvslop, sub_id: int, c: int, r: int, 
     return flowpath, slope, distance
 
 
-@njit
 def weighted_slope_average_from_fps(flowpaths, slopes, distances, max_points=99) -> Tuple[np.array, np.array]:
     """
     calculates weighted slopes based on the flowpaths contained on the hillslope
