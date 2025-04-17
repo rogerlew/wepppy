@@ -1149,6 +1149,10 @@ function onReady() {
 
     dss_export.setMode({{ wepp.dss_export_mode | int }});
 
+    if ( {{ wepp.has_dss_zip | tojson }} ) {
+        dss_export.report();
+    }
+
 $(function () {
     var navSelector = "#toc";
     var $myNav = $(navSelector);
