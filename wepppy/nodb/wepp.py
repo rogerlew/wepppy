@@ -560,6 +560,10 @@ class Wepp(NoDbBase, LogMixin):
             raise
 
     @property
+    def has_dss_zip(self):
+        return _exists(_join(self.export_dir, 'dss.zip'))
+
+    @property
     def multi_ofe(self):
         return getattr(self, "_multi_ofe", False)
 
