@@ -737,7 +737,7 @@ def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_chann
 
     for chn_id in translator.iter_chn_ids():  # yields `chn_{id}` strings
         if export_channel_ids is not None:
-            if int(chn_id.split(_)[1]) not in export_channel_ids:
+            if int(chn_id.split('_')[1]) not in export_channel_ids:
                 continue
 
         if status_channel is not None:
