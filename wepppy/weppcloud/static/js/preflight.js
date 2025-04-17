@@ -102,7 +102,8 @@ function getSelectorForKey(key) {
         "wepp": 'a[href="#wepp"]',
         "observed": 'a[href="#observed-data-model-fit"]',
         "debris": 'a[href="#debris-flow-analysis"]',
-        "watar": 'a[href="#wildfire-ash-transport-and-risk-watar"]'
+        "watar": 'a[href="#wildfire-ash-transport-and-risk-watar"]',
+        "dss_export": 'a[href="#partitioned-dss-export-for-hec"]'
     };
 
     return mapping[key];

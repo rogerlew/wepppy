@@ -101,6 +101,11 @@ cd /workdir && git clone https://github.com/wepp-in-the-woods/wepppyo3
 rsync -av --progress /workdir/wepppyo3/release/linux/py310-wepppy310-env/wepppyo3/  /workdir/miniconda3/envs/wepppy310-env/lib/python3.10/site-packages/wepppyo3/
 ```
 
+13. install pydsstools
+```bash
+cd /workdir && git clone https://github.com/rogerlew/pydsstools/
+cd /workdir/pydsstools && pip3 install .
+```
 
 13. set permissions for miniconda
 ```bash

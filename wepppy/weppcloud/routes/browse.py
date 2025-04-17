@@ -574,7 +574,10 @@ function redirectToDiff() {{
             html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
 
         if path_lower.endswith('.csv'):
-            df = pd.read_csv(path)
+            skiprows = 0
+            if 'totalwatsed2' in path_lower:
+                skiprows = 1
+            df = pd.read_csv(path, skiprows=skiprows)
             html = df.to_html(classes=['sortable table table-nonfluid'], border=0, justify='left')
             #html = csv_to_html(path)
 

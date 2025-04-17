@@ -228,7 +228,7 @@ def run_wepp_rq(runid):
                 job.save()
 
                 if wepp.dss_export_on_run_completion:
-                    job2_post_dss_export = q.enqueue_call(_post_dss_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
+                    job2_post_dss_export = q.enqueue_call(post_dss_export_rq, (runid,),  timeout=TIMEOUT, depends_on=jobs1_hillslopes)
                     job.meta['jobs:2,func:_post_dss_export_rq'] = job2_post_dss_export.id
                     job.save()
 
@@ -730,16 +730,27 @@ def _post_gpkg_export_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _post_dss_export_rq(runid):
+def post_dss_export_rq(runid):
     try:
         from wepppy.wepp.out import totalwatsed_partitioned_dss_export
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
+        status_channel = f'{runid}:dss_export'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        totalwatsed_partitioned_dss_export(wd)
+        wepp = Wepp.getInstance(wd)
+        
+        totalwatsed_partitioned_dss_export(wd, wepp._dss_export_channel_ids, status_channel=status_channel)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+
+        try:
+            prep = RedisPrep.getInstance(wd)
+            prep.timestamp(TaskEnum.dss_export)
+        except FileNotFoundError:
+            pass
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   dss_export DSS_EXPORT_TASK_COMPLETED')
+        
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise

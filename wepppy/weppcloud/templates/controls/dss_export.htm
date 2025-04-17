@@ -1,0 +1,96 @@
+{% extends "controls/_base.htm" %}
+{% block form_id %}dss_export_form{% endblock %}
+{% block form_title %}Partitioned DSS Export for HEC{% endblock %}
+{% block inputs %}
+<div class="form-group row">
+  <div class="col-sm-3">
+    <label class="radio-inline"><input type="radio" class="disable-readonly" value="1" id="dss_export_mode1"
+        name="dss_export_mode" onchange="if(this.checked) DssExport.getInstance().setMode(1)" 
+        {% if wepp.dss_export_mode == 1 %} checked {% endif %}> Export Select Channels</label>
+  </div>
+  <div class="col-sm-3">
+    <label class="radio-inline"><input type="radio" class="disable-readonly" value="2" id="dss_export_mode2"
+        name="dss_export_mode" onchange="if(this.checked) DssExport.getInstance().setMode(2)"
+        {% if wepp.dss_export_mode == 2 %} checked {% endif %}> Export Based on Channel Order</label>
+  </div>
+</div>
+
+<div id="dss_export_mode1_controls" class="form-group row hide-readonly">
+  <div class="col-sm-5">
+    <label for="dss_export_channel_ids">Enter Topaz IDs for channels to export:</label>
+    <input type="text" class="form-control disable-readonly" id="dss_export_channel_ids" name="dss_export_channel_ids"
+        placeholder="e.g. 24, 54, 224" value="{{ wepp.dss_export_channel_ids | join(', ') }}"/>
+  </div>
+</div>
+
+<div id="dss_export_mode2_controls" class="form-group row hide-readonly">
+  <div class="col-sm-5">
+    <label>Exclude channel orders:</label>
+
+    <div style="margin-left:4em;">
+      <div class="d-flex mt-2">
+          <div class="mr-5">
+              <input id="dss_export_exclude_order_1"
+                    name="dss_export_exclude_order_1"
+                    type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if 1 in wepp.dss_excluded_channel_orders %}checked{% endif %}>
+              <label for="dss_export_exclude_order_1">1</label>
+          </div>
+          <div class="mr-5">
+              <input id="dss_export_exclude_order_2"
+                    name="dss_export_exclude_order_2"
+                    type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if 2 in wepp.dss_excluded_channel_orders %}checked{% endif %}>
+              <label for="dss_export_exclude_order_2">2</label>
+          </div>
+          <div class="mr-5">
+              <input id="dss_export_exclude_order_3"
+                    name="dss_export_exclude_order_3"
+                    type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if 3 in wepp.dss_excluded_channel_orders %}checked{% endif %}>
+              <label for="dss_export_exclude_order_3">3</label>
+          </div>
+          <div class="mr-5">
+              <input id="dss_export_exclude_order_4"
+                    name="dss_export_exclude_order_4"
+                    type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if 4 in wepp.dss_excluded_channel_orders %}checked{% endif %}>
+              <label for="dss_export_exclude_order_4">4</label>
+          </div>
+          <div class="mr-5">
+              <input id="dss_export_exclude_order_5"
+                    name="dss_export_exclude_order_5"
+                    type="checkbox"
+                    class="form-check-input disable-readonly"
+                    {% if 5 in wepp.dss_excluded_channel_orders %}checked{% endif %}>
+              <label for="dss_export_exclude_order_5">5</label>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div style="height:1em;"> </div>
+
+<div class="form-group row hide-readonly" id="btn_export_dss_container">
+    <div class="col-sm-4">
+        <button 
+            onclick="debounceButton('btn_export_dss', 'btn_export_dss_lock', () => DssExport.getInstance().export())()"
+            id="btn_export_dss" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+
+          <img  id="btn_export_dss_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
+          Export DSS
+        </button>
+    </div>
+    <div class="col-sm-5">
+        <small id="hint_export_dss"></small>
+    </div>
+</div>
+
+{% endblock %}
+

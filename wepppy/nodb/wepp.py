@@ -443,7 +443,10 @@ class Wepp(NoDbBase, LogMixin):
             self._prep_details_on_run_completion = self.config_get_bool('wepp', 'prep_details_on_run_completion', False)
             self._arc_export_on_run_completion = self.config_get_bool('wepp', 'arc_export_on_run_completion', True)
             self._legacy_arc_export_on_run_completion = self.config_get_bool('wepp', 'legacy_arc_export_on_run_completion', False)
-            self._dss_export_on_run_completion = self.config_get_bool('wepp', 'dss_export_on_run_completion', False)
+            self._dss_export_mode = self.config_get_int('wepp', 'dss_export_mode', 2)  # view model property
+            self._dss_export_on_run_completion = self.config_get_bool('wepp', 'dss_export_on_run_completion', False)  # view model property
+            self._dss_excluded_channel_orders = self.config_get_list('wepp', 'dss_excluded_channel_orders', [1, 2])  # view model property
+            self._dss_export_channel_ids = [] # specifies which channels are exported
 
             self.run_flowpaths = False
             self.loss_grid_d_path = None
@@ -503,6 +506,58 @@ class Wepp(NoDbBase, LogMixin):
             self.__status_channel = __status_channel = f'{self.runid}:wepp'
 
         return  __status_channel
+
+    @property
+    def dss_export_mode(self) -> int:
+        return getattr(self, '_dss_export_mode', self.config_get_int('wepp', 'dss_export_mode', 2))
+    
+    @dss_export_mode.setter
+    def dss_export_mode(self, value: isint):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._dss_export_mode = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def dss_excluded_channel_orders(self) -> list:
+        return getattr(self, '_dss_excluded_channel_orders', 
+                       self.config_get_list('wepp', 'dss_excluded_channel_orders'))
+
+    @dss_excluded_channel_orders.setter
+    def dss_excluded_channel_orders(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._dss_excluded_channel_orders = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def dss_export_channel_ids(self) -> list:
+        return getattr(self, '_dss_export_channel_ids', [])
+
+    @dss_export_channel_ids.setter
+    def dss_export_channel_ids(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._dss_export_channel_ids = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def multi_ofe(self):
