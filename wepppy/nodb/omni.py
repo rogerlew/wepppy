@@ -33,10 +33,11 @@ class OmniScenario(IntEnum):
     UniformModerate = 2
     UniformHigh = 3
     Thinning = 4
-    Mulching30 = 5
-    Mulching60 = 6
+    Mulch30 = 5
+    Mulch60 = 6
     SBSmap = 7
 
+    # TODO: search for references to mulching30 and mulching60
     @staticmethod
     def parse(x):
         if x == 'uniform_low':
@@ -47,10 +48,10 @@ class OmniScenario(IntEnum):
             return OmniScenario.UniformHigh
         elif x == 'thinning':
             return OmniScenario.Thinning
-        elif x == 'mulching30':
-            return OmniScenario.Mulching30
-        elif x == 'mulching60':
-            return OmniScenario.Mulching60
+        elif x == 'mulch30':
+            return OmniScenario.Mulch30
+        elif x == 'mulch60':
+            return OmniScenario.Mulch60
         elif x == 'sbsmap':
             return OmniScenario.SBSmap
         raise KeyError
@@ -64,9 +65,9 @@ class OmniScenario(IntEnum):
             return 'uniform_high'
         elif self == OmniScenario.Thinning:
             return 'thinning'
-        elif self == OmniScenario.Mulching30:
+        elif self == OmniScenario.Mulch30:
             return 'mulching30'
-        elif self == OmniScenario.Mulching60:
+        elif self == OmniScenario.Mulch60:
             return 'mulching60'
         elif self == OmniScenario.SBSmap:
             return 'sbsmap'
@@ -222,8 +223,8 @@ def _build_scenario(scenario: OmniScenario, wd, mulching_base_scenario=None):
         raise NotImplementedError
 
 
-    elif scenario == OmniScenario.Mulching30 or \
-         scenario == OmniScenario.Mulching60:
+    elif scenario == OmniScenario.Mulch30 or \
+         scenario == OmniScenario.Mulch60:
         
         assert mulching_base_scenario is not None, \
             'Mulching scenario requires a base scenario'
@@ -353,10 +354,10 @@ class Omni(NoDbBase, LogMixin):
                 _scenarios.add(OmniScenario.Thinning)
 
             if kwds.get('omni_run_uniform_scenario_mulching30', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Mulching30)
+                _scenarios.add(OmniScenario.Mulch30)
 
             if kwds.get('omni_run_uniform_scenario_mulching60', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Mulching60)
+                _scenarios.add(OmniScenario.Mulch60)
 
             if kwds.get('omni_run_uniform_scenario_sbsmap', 'off').lower().startswith('on'):
                 _scenarios.add(OmniScenario.SBSmap)
