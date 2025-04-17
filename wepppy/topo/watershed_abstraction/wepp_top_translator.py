@@ -39,7 +39,6 @@ class WeppTopTranslator:
         sub_id
             string in the "hill_%i" % top format
 
-
         chn_id
             string in the "chn_%i" % top  format
 

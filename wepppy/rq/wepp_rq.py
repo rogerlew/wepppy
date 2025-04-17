@@ -740,7 +740,7 @@ def post_dss_export_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
         
-        totalwatsed_partitioned_dss_export(wd, wepp._dss_export_channel_ids, status_channel=status_channel)
+        totalwatsed_partitioned_dss_export(wd, wepp.dss_export_channel_ids, status_channel=status_channel)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
 
         try:
