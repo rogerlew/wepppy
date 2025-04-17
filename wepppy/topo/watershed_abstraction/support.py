@@ -6,8 +6,6 @@ from os.path import exists as _exists
 
 import subprocess
 
-from numba import njit
-
 import numpy as np
 import utm
 from osgeo import gdal, osr, ogr
@@ -23,7 +21,6 @@ gdal.UseExceptions()
 def is_channel(topaz_id: Union[int, str]) -> bool:
     return str(topaz_id).endswith('4')
 
-@njit
 def garbrecht_length(distances: List[List[float]]) -> float:
     """
     calculates the length of a subcatchment from the flowpaths
@@ -40,7 +37,6 @@ def garbrecht_length(distances: List[List[float]]) -> float:
     return float(np.sum(x * a) / np.sum(a))
 
 
-@njit
 def cummnorm_distance(distance: List[float]) -> np.array:
     """
     builds and returns cumulative normalized distance array from an array
@@ -59,7 +55,6 @@ def cummnorm_distance(distance: List[float]) -> np.array:
     distance_p /= distance_p[-1]
     return distance_p
 
-@njit
 def representative_normalized_elevations(x: List[float], dy: List[float]) -> List[float]:
     """
     x should be a normed distance array between 0 and 1
@@ -85,7 +80,6 @@ def representative_normalized_elevations(x: List[float], dy: List[float]) -> Lis
     return y
 
 
-@njit
 def read_geojson(fname):
     data = json.loads(open(fname).read())
 
