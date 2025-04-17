@@ -1,5 +1,6 @@
 from .baer import Baer
 from .disturbed import Disturbed
+from .treatments import Treatments
 from .rred import Rred
 from .debris_flow import DebrisFlow
 from .ash_transport import Ash, AshPost, AshSpatialMode

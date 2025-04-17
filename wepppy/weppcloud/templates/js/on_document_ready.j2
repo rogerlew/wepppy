@@ -108,6 +108,7 @@ function onReady() {
     var rap_ts = RAP_TS.getInstance();
     var disturbed = Disturbed.getInstance();
     var omni = Omni.getInstance();
+    var dss_export = DssExport.getInstance();
 
 
     team.hideStacktrace();
@@ -119,6 +120,7 @@ function onReady() {
     soil.hideStacktrace();
     climate.hideStacktrace();
     wepp.hideStacktrace();
+    dss_export.hideStacktrace();
 
 
     // kick off websocket clients if the nodb is locked. Likely building or running is in progress
@@ -157,6 +159,14 @@ function onReady() {
 
     try {
         rap_ts.hideStacktrace();
+    } catch (e) { }
+
+    try {
+        omni.hideStacktrace();
+    } catch (e) { }
+
+    try {
+        dss_export.hideStacktrace();
     } catch (e) { }
 
 
@@ -988,6 +998,17 @@ function onReady() {
 
     {% endif %}
 
+    dss_export.form.on("DSS_EXPORT_TASK_COMPLETED", function () {
+        omni.ws_client.disconnect();
+        omni.report_scenarios();
+    });
+
+
+    dss_export.form.on("DSS_EXPORT_TASK_COMPLETED", function () {
+        dss_export.ws_client.disconnect();
+        dss_export.report();
+    });
+
     {% if 'rhem' in ron.mods %}
     /*
     * Rhem Initialization
@@ -1126,6 +1147,7 @@ function onReady() {
 
     landuse.restore({{ landuse.mode | int }}, {{ landuse.single_selection | int }});
 
+    dss_export.setMode({{ wepp.dss_export_mode | int }});
 
 $(function () {
     var navSelector = "#toc";
@@ -1145,6 +1167,7 @@ $('.nav li a').click(function(event) {
     scrollBy(0, -offset);
 });
 
+
 }$(document).ready(onReady);
 
 $(window).on('load', function() {
@@ -1154,5 +1177,11 @@ $(window).on('load', function() {
     }, 100);
 
     initPreflight("{{run_id}}");
+
+    // this has to happen after Toc.init
+    {% if 'dss_export' not in ron.mods %}
+        DssExport.getInstance().hide();
+    {% endif %}
+
 });
 </script>

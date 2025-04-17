@@ -40,7 +40,7 @@ from wepppy.rq.project_rq import (
     fetch_and_analyze_rap_ts_rq,
     fork_rq
 )
-from wepppy.rq.wepp_rq import run_wepp_rq
+from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
 from wepppy.rq.omni_rq import run_omni_rq
 
 from wepppy.topo.watershed_abstraction import (
@@ -457,6 +457,73 @@ def api_build_climate(runid, config):
     return jsonify({'Success': True, 'job_id': job.id})
 
 
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/post_dss_export_rq', methods=['POST'])
+def api_post_dss_export_rq(runid, config):
+
+    wd = get_wd(runid)
+    wepp = Wepp.getInstance(wd)
+
+    try:
+        dss_export_mode = request.form.get('dss_export_mode', None)
+        if dss_export_mode is not None:
+            dss_export_mode = int(dss_export_mode)
+    except:
+        dss_export_mode = None
+
+    try:
+        dss_excluded_channel_orders = []
+        for i in range(1, 6):
+            if request.form.get(f'dss_export_exclude_order_{i}') == 'on':
+                dss_excluded_channel_orders.append(i)
+    except:
+        dss_excluded_channel_orders = None
+
+    try:
+        dss_export_channel_ids = request.form.get('dss_export_channel_ids', None)
+        if dss_export_channel_ids is not None:
+            dss_export_channel_ids = [int(i) for i in dss_export_channel_ids.split(',')]
+    except:
+        dss_export_channel_ids = None
+
+
+    if dss_export_mode == 2:
+        dss_export_channel_ids = []
+
+        watershed = Watershed.getInstance(wd)
+        for chn_id, chn_summary in watershed.chns_summary.items():
+            order = int(chn_summary['order'])
+            if order in dss_excluded_channel_orders:
+                continue
+            dss_export_channel_ids.append(chn_id)
+
+    wepp.lock()
+
+    try:
+        if dss_export_mode is not None:
+            wepp._dss_export_mode = dss_export_mode
+        if dss_excluded_channel_orders is not None:
+            wepp._dss_excluded_channel_orders = dss_excluded_channel_orders
+        if dss_export_channel_ids is not None:
+            wepp._dss_export_channel_ids = dss_export_channel_ids
+        wepp.dump_and_unlock()
+    except Exception:
+        wepp.unlock('-f')
+        return exception_factory('Error setting dss export mode', runid=runid)
+    
+    try:
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.run_wepp)
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(post_dss_export_rq, (runid,), timeout=TIMEOUT)
+            prep.set_rq_job_id('post_dss_export_rq', job.id)
+    except Exception:
+        return exception_factory()
+
+    return jsonify({'Success': True, 'job_id': job.id})
+
+
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_wepp', methods=['POST'])
 def api_run_wepp(runid, config):
 
@@ -542,6 +609,15 @@ def api_run_wepp(runid, config):
     except:
         dss_export_on_run_completion = None
 
+
+    try:
+        dss_export_exclude_orders = []
+        for i in range(1, 6):
+            if request.form.get(f'dss_export_exclude_order_{i}') == 'on':
+                dss_export_exclude_orders.append(i)
+    except:
+        dss_export_exclude_orders = None
+
     try:
         wepp.lock()
         if prep_details_on_run_completion is not None:
@@ -555,6 +631,9 @@ def api_run_wepp(runid, config):
 
         if dss_export_on_run_completion is not None:
             wepp._dss_export_on_run_completion = dss_export_on_run_completion
+
+        if dss_export_exclude_orders is not None:
+            wepp._dss_export_exclude_orders = dss_export_exclude_orders
 
         wepp.dump_and_unlock()
     except:

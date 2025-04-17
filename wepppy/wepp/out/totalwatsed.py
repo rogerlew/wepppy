@@ -20,6 +20,7 @@ import os
 from os.path import exists as _exists
 from os.path import join as _join
 from os.path import split as _split
+import shutil
 
 from copy import deepcopy
 from collections import OrderedDict
@@ -33,6 +34,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+import zipfile
 
 from deprecated import deprecated
 
@@ -75,7 +77,7 @@ def _read_hill_wat_sed(pass_fn):
         watbal[col] = sed_df[col]
 
     #  #   Column                          Non-Null Count  Dtype
-    # ---  -----                      --------------  -----
+    # ---  -----                           --------------  -----
     #  0   fire_year (yr)                  365 non-null    uint16
     #  1   year0                           365 non-null    uint16
     #  2   year                            365 non-null    uint16
@@ -714,23 +716,51 @@ class TotalWatSed(object):
                 wtr.writerow(OrderedDict([(k, d[k][i]) for k in d]))
 
 
-def totalwatsed_partitioned_dss_export(wd):
+def totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_channel=None):
+    from wepppy.nodb.status_messenger import StatusMessenger
     from wepppy.nodb import Watershed
+
     watershed = Watershed.getInstance(wd)
     translator = watershed.translator_factory()
-    dss_file = _join(wd, 'wepp', 'output', 'totwatsed2.dss')
+    dss_export_dir = _join(wd, 'export/dss')
 
-    if _exists(dss_file):
-        os.remove(dss_file)
+    if status_channel is not None:
+        StatusMessenger.publish(status_channel, 'totalwatsed_partitioned_dss_export()...\n')
+
+    if _exists(dss_export_dir):
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, 'cleaning export/dss\n')
+        shutil.rmtree(dss_export_dir)
+
+    if not _exists(dss_export_dir):
+        os.makedirs(dss_export_dir, exist_ok=True)
 
     for chn_id in translator.iter_chn_ids():
+        if export_channel_ids is not None:
+            if chn_id not in export_channel_ids:
+                continue
+
+        if status_channel is not None:
+            StatusMessenger.publish(status_channel, f'processing channel {chn_id}...\n')
+
+        dss_file = _join(dss_export_dir, f'totwatsed2_chn_{chn_id}.dss')
         totwatsed = TotalWatSed2(wd, chn_id=chn_id)
         totwatsed.to_dss(dss_file)
 
+        
+    if status_channel is not None:
+        StatusMessenger.publish(status_channel, 'zipping export/dss\n')
+        
+    # zip the dss_export_dir to a zip file
+    zip_file = _join(wd, 'export/dss.zip')
+    with zipfile.ZipFile(zip_file, 'w') as zipf:
+        for root, dirs, files in os.walk(dss_export_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                zipf.write(file_path, os.path.relpath(file_path, dss_export_dir))
+
 
 if __name__ == "__main__":
-
-
     import sys
     sys.exit()
 
