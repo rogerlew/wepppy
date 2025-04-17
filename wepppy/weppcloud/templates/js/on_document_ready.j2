@@ -1177,10 +1177,16 @@ $(window).on('load', function() {
     }, 100);
 
     initPreflight("{{run_id}}");
-
-    // this has to happen after Toc.init
     {% if 'dss_export' not in ron.mods %}
-        DssExport.getInstance().hide();
+        // Ensure this runs after all other initialization
+        setTimeout(function() {
+            // Check if DssExport instance exists before trying to hide it
+            var dssExport = DssExport.getInstance();
+            if (dssExport && typeof dssExport.hide === 'function') {
+                dssExport.hide();
+                console.log("DssExport component hidden");
+            }
+        }, 300);
     {% endif %}
 
 });
