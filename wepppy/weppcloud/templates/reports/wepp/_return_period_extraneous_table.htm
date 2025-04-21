@@ -78,6 +78,7 @@
                         report.units_d['Particulate P']) | safe }}</td>
         <td class="{{ 'table-active' if key == 'Total P' }}">{{ unitizer(report.return_periods[key][rec_interval]['Total P'],
                         report.units_d['Total P']) | safe }}</td>
+        {% endif %}
         {% if "weibull_rank" in report.return_periods[key][rec_interval] %}
         <td>{{ report.return_periods[key][rec_interval]['weibull_rank'] }}</td>
         {% else %}
