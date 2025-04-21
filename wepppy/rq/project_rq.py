@@ -453,6 +453,9 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         status_channel = f'{runid}:fork'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
+
+        StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
+
         new_wd = get_wd(new_runid)
 
         run_left = wd
@@ -462,6 +465,10 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         run_right = new_wd
         if not run_right.endswith('/'):
             run_right += '/'
+
+        right_parent = _split(run_right)[0]
+        if not _exists(right_parent):
+            os.makedirs(right_parent)
 
         cmd = ['rsync', '-av', '--progress', '.', run_right]
 
@@ -474,11 +481,20 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         _cmd = ' '.join(cmd)
         StatusMessenger.publish(status_channel, f'cmd: {_cmd}')
 
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=run_left)
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=run_left, bufsize=1, universal_newlines=True)
 
-        while p.poll() is None:
-            output = p.stdout.readline()
-            StatusMessenger.publish(status_channel, output.decode('UTF-8'))
+        # Process stdout in real-time
+        for line in iter(p.stdout.readline, ''):
+            StatusMessenger.publish(status_channel, line.strip())
+        
+        # Wait for process to complete
+        p.wait()
+        
+        # Check for any errors
+        if p.returncode != 0:
+            for line in iter(p.stderr.readline, ''):
+                StatusMessenger.publish(status_channel, f"ERROR: {line.strip()}")
+            raise Exception(f"rsync command failed with return code {p.returncode}")
             
         StatusMessenger.publish(status_channel, 'Setting wd in .nodbs...')
 

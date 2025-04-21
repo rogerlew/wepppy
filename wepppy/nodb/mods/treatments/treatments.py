@@ -16,7 +16,7 @@ from collections import Counter
 import math
 import numpy as np
 from osgeo import gdal
-
+from enum import IntEnum
 from deprecated import deprecated
 
 from wepppy.all_your_base import isint, isfloat
@@ -42,6 +42,15 @@ gdal.UseExceptions()
 _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
+class TreatmentsNoDbLockedException(Exception):
+    pass
+
+class TreatmentsMode(IntEnum):
+    Undefined = -1
+    UserDefinedSelection = 1
+    UserDefinedMap = 4
+
+
 class Treatments(NoDbBase, LogMixin):
     __name__ = 'Treatments'
 
@@ -56,6 +65,7 @@ class Treatments(NoDbBase, LogMixin):
 
             self._treatments_domlc_d = {}
             self._treatments = {}
+            self._mode = TreatmentsMode.Undefined
             
             self.dump_and_unlock()
 
@@ -107,6 +117,32 @@ class Treatments(NoDbBase, LogMixin):
     @property
     def _lock(self):
         return _join(self.wd, 'treatments.nodb.lock')
+    
+    @property
+    def mode(self) -> TreatmentsMode:
+        return self._mode
+    
+    @mode.setter
+    def mode(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            if isinstance(value, TreatmentsMode):
+                self._mode = value
+
+            elif isinstance(value, int):
+                self._mode = TreatmentsMode(value)
+
+            else:
+                raise ValueError('most be TreatmentsMode or int')
+
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     
     @property
     def treatments_dir(self):
@@ -232,6 +268,22 @@ class Treatments(NoDbBase, LogMixin):
                 valid_keys.append(k)
 
         return valid_keys
+
+    def valid_treatments_d(self) -> Dict[str, str]:
+        """
+        Returns a dictioannary of valid treatment keys with their descriptions.
+
+        for viewmodel templates/controls/treatments.htm
+        """
+        landuse = Landuse.getInstance(self.wd)
+        mapping = landuse.get_mapping_dict()
+
+        valid_treatments = {}
+        for k, v in mapping.items():
+            if v['ManagementFile'].endswith('null.man'):
+                valid_treatments[k] = v['Description']
+
+        return valid_treatments
 
 
     def build_treatments(self):

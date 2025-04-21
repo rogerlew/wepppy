@@ -136,16 +136,18 @@
 
           $.post({
               url: fork_url,
-              data: { undisturbify: undisturbify },
+              data: { undisturbify: undisturbify},
               success: function(response) {
                   if (response.Success === true) {
-                      // Update global runid and job_id with values from the response
+                      // Update global runid and job_id values with values from the response
                       new_runid = response.new_runid;
                       job_id = response.job_id;
+                      var _undisturbify = response.undisturbify;
 
                       the_console.html(`
 Fork job submitted: <a href="https://${window.location.host}/weppcloud/rq/job-dashboard/${job_id}" target="_blank">${job_id}</a><br>
-New runid: <a href="https://${window.location.host}/weppcloud/runs/${new_runid}/cfg" target="_blank">${new_runid}</a>
+New runid: <a href="https://${window.location.host}/weppcloud/runs/${new_runid}/cfg" target="_blank">${new_runid}</a><br>
+Undisturbify: ${_undisturbify}<br>
                     `);
                       // Show the Cancel button after submission
                       $('#submit_button').hide();
@@ -201,7 +203,7 @@ New runid: <a href="https://${window.location.host}/weppcloud/runs/${new_runid}/
           <input type="text" class="form-control" id="runid_input" placeholder="Enter runid" required readonly style="background-color: #e9ecef; cursor: not-allowed;">
         </div>
         <div class="form-group form-check">
-          <input type="checkbox" class="form-check-input" id="undisturbify_checkbox">
+          <input type="checkbox" class="form-check-input" id="undisturbify_checkbox" name="undisturbify_checkbox">
           <label class="form-check-label" for="undisturbify_checkbox">Undisturbify
             <a data-toggle="tooltip" data-placement="top" title="Removes SBS Map (if applicable), rebuilds landuse, soils, and runs WEPP"><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
           </label>
