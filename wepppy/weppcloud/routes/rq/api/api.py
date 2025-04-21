@@ -329,22 +329,84 @@ def api_build_subcatchments_and_abstract_watershed(runid, config):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_landuse', methods=['POST'])
 def api_build_landuse(runid, config):
-
-    mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
-    try:
-        mofe_buffer_selection = int(mofe_buffer_selection)
-    except:
-        pass
-
     try:
         wd = get_wd(runid)
         landuse = Landuse.getInstance(wd)
+
+        mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
+        try:
+            mofe_buffer_selection = int(mofe_buffer_selection)
+        except:
+            pass
 
         if mofe_buffer_selection is not None:
             landuse.mofe_buffer_selection = mofe_buffer_selection
 
         # check for file for mode 4, mode is set asynchronously
         if landuse.mode == LanduseMode.UserDefined:
+            from wepppy.all_your_base.geo import raster_stacker
+            watershed = Watershed.getInstance(wd)
+
+            mapping = request.form.get('landuse_management_mapping_selection', None)
+            if mapping is None:
+                return error_factory('landuse_management_mapping_selection must be provided')
+            else:
+                landuse.management_mapping = mapping
+            
+            try:
+                file = request.files['input_upload_landuse']
+            except Exception:
+                return exception_factory('Could not find file', runid=runid)
+
+            try:
+                if file.filename == '':
+                    return error_factory('no filename specified')
+
+                filename = secure_filename(file.filename)
+            except Exception:
+                return exception_factory('Could not obtain filename', runid=runid)
+
+            user_defined_fn = _join(landuse.lc_dir, f'_{filename}')
+            try:
+                file.save(_join(landuse.lc_dir, f'_{filename}'))
+            except Exception:
+                return exception_factory('Could not save file', runid=runid)
+
+            try:
+                raster_stacker(user_defined_fn, watershed.subwta, landuse.lc_fn)
+            except Exception:
+                return exception_factory('Failed validating file', runid=runid)
+
+            if not _exists(landuse.lc_fn):
+                return error_factory('Failed creating landuse file')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.build_landuse)
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(build_landuse_rq, (runid,), timeout=TIMEOUT)
+            prep.set_rq_job_id('build_landuse_rq', job.id)
+        
+    except Exception as e:
+        if isinstance(e, WatershedNotAbstractedError):
+            return exception_factory(e.__name__, e.__doc__, runid=runid)
+        else:
+            return exception_factory('Building Landuse Failed', runid=runid)
+        
+    return jsonify({'Success': True, 'job_id': job.id})
+
+
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/build_treatments', methods=['POST'])
+def api_build_treatments(runid, config):
+    from wepppy.nodb.mods.treatments import Treatments, TreatmentsMode
+
+    try:
+        wd = get_wd(runid)
+        treatments = Treatments.getInstance(wd)
+
+        # check for file for mode 4, mode is set asynchronously
+        if treatments.mode == TreatmentsMode.UserDefinedMap:
             from wepppy.all_your_base.geo import raster_stacker
             watershed = Watershed.getInstance(wd)
 
@@ -841,10 +903,12 @@ def api_fork(runid, config):
         if not _exists(wd):
             return exception_factory('Error forking project, run_id={runid} does not exist', runid=runid)
         
-        undisturbify = request.args.get('undisturbify', 'false').lower().startswith('true')
+        undisturbify_str = request.form.get("undisturbify", "false")
+        undisturbify = undisturbify_str.lower() == "true"
 
+        print(f'undisturbify={undisturbify}')
+            
         owners = get_run_owners(runid)
-
         should_abort = True
 
         if current_user in owners:
@@ -906,6 +970,6 @@ def api_fork(runid, config):
     except Exception:
         return exception_factory('Error forking project', runid=runid)
         
-    return jsonify({'Success': True, 'job_id': job.id, 'new_runid': new_runid})
+    return jsonify({'Success': True, 'job_id': job.id, 'new_runid': new_runid, 'undisturbify': undisturbify})
 
 

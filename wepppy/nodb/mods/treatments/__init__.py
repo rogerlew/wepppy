@@ -1,1 +1,1 @@
-from .treatments import Treatments
+from .treatments import Treatments, TreatmentsMode

@@ -2459,6 +2459,29 @@ def set_landuse_mode(runid, config):
 
 
 # noinspection PyBroadException
+@app.route('/runs/<string:runid>/<config>/tasks/set_treatments_mode/', methods=['POST'])
+def set_treatments_mode(runid, config):
+    from wepppy.nodb.mods.treatments import TreatmentsMode, Treatments
+
+    mode = None
+    single_selection = None
+    try:
+        mode = int(request.form.get('treatments_mode', None))
+    except Exception:
+        exception_factory('mode and landuse_single_selection must be provided', runid=runid)
+
+    wd = get_wd(runid)
+    treatments = Treatments.getInstance(wd)
+
+    try:
+        treatments.mode = TreatmentsMode(mode)
+    except Exception:
+        exception_factory('error setting landuse mode', runid=runid)
+
+    return success_factory()
+
+
+# noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_landuse_db/', methods=['POST'])
 def set_landuse_db(runid, config):
 
