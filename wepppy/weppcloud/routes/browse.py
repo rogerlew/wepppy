@@ -349,13 +349,6 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
     
     page_entries, total_items = get_page_entries(_dir, page, page_size, filter_pattern)
     
-    # Handle diff directory
-    _diff_dir = None
-    if diff_runid:
-        _diff_dir = _dir.replace(runid, diff_runid)
-        if not _exists(_diff_dir):
-            _diff_dir = None
-    
     # Adjust column width based on current page entries
     n = max(36, max(len(entry[0]) for entry in page_entries) + 2) if page_entries else 36
     
@@ -397,8 +390,8 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
             diff_link = '    '
-            if _diff_dir and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
-                if _exists(_join(_diff_dir, _file)):
+            if diff_wd and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
+                if _exists(_join(diff_wd, _file)):
                     diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
             s.append(_padding + f'>-<a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
