@@ -184,9 +184,6 @@ class Landuse(NoDbBase, LogMixin):
     def _lock(self):
         return _join(self.wd, 'landuse.nodb.lock')
 
-    @property
-    def mode(self):
-        return self._mode
 
     @property
     def mapping(self):
@@ -212,6 +209,10 @@ class Landuse(NoDbBase, LogMixin):
         assert mapping is not None
         return load_map(mapping)
 
+    @property
+    def mode(self):
+        return self._mode
+    
     @mode.setter
     def mode(self, value):
         self.lock()
