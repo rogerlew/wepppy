@@ -163,6 +163,7 @@ dependencies:
   - pthread-stubs=0.3=h0ce48e5_1
   - python=3.10.16=he725a3c_1_cpython
   - python-dateutil=2.9.0.post0=pyhff2d567_1
+  - python-duckdb
   - python_abi=3.10=5_cp310
   - rav1e=0.6.6=he8a937b_2
   - re2=2024.07.02=h9925aae_3
