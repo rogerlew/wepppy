@@ -391,7 +391,8 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 repr_link = f'  <a href="{repr_url}">annotated</a>'
             diff_link = '    '
             if diff_wd and not file_lower.endswith(('.tif', '.parquet', '.gz', '.img')):
-                if _exists(_join(diff_wd, _file)):
+                diff_path = _join(diff_wd, os.path.relpath(path, wd))
+                if _exists(diff_path):
                     diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
             s.append(_padding + f'>-<a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
@@ -425,13 +426,13 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
     if os.path.isdir(path):
         # build bread crumb links
         _url = f'/weppcloud/runs/{runid}/{config}/browse/'
-        breadcrumbs = [f'<a href="{_url}">{runid}</a>']
+        breadcrumbs = [f'<a href="{_url}{diff_arg}">{runid}</a>']
 
         if rel_path != '.':
             parts = rel_path.split('/')
             for part in parts:
                 _url = f'/weppcloud/runs/{runid}/{config}/browse/{part}'
-                breadcrumbs.append(f'<a href="{_url}">{part}</a>')
+                breadcrumbs.append(f'<a href="{_url}{diff_arg}">{part}</a>')
 
         breadcrumbs = ' / '.join(breadcrumbs)
 
@@ -487,7 +488,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
             else:
                 query = {**base_query, 'page': item}
                 href = "?" + urlencode(query)
-                pagination_html += f'<a href="{href}">[{starting_item}]</a> '
+                pagination_html += f'<a href="{href}{diff_arg}">[{starting_item}]</a> '
         pagination_html += '</div>'
         
         # Calculate showing range
