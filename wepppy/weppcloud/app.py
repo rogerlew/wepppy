@@ -1494,6 +1494,7 @@ def runs0_nocfg(runid):
 def runs0(runid, config):
 
     from wepppy.nodb.mods.revegetation import Revegetation
+    from wepppy.nodb.mods.treatments import Treatments
 
     assert config is not None
 
@@ -1581,6 +1582,11 @@ def runs0(runid, config):
             omni = None
 
         try:
+            treatments = Treatments.getInstance(wd)
+        except:
+            treatments = None
+
+        try:
             redis_prep = RedisPrep.getInstance(wd)
         except:
             redis_prep = None
@@ -1620,6 +1626,7 @@ def runs0(runid, config):
                                rangeland_cover=rangeland_cover,
                                omni=omni,
                                OmniScenario=OmniScenario,
+                               treatments=treatments,
                                rq_job_ids=rq_job_ids,
                                landuseoptions=landuseoptions,
                                landuse_management_mapping_options=landuse_management_mapping_options,
@@ -2695,7 +2702,7 @@ def task_build_landuse(runid, config):
         if mapping is None:
             return error_factory('landuse_management_mapping_selection must be provided')
         else:
-            landuse.management_mapping = mapping
+            landuse.mapping = mapping
         
         try:
             file = request.files['input_upload_landuse']

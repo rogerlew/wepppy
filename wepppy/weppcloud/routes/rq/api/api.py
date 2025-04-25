@@ -333,6 +333,12 @@ def api_build_landuse(runid, config):
         wd = get_wd(runid)
         landuse = Landuse.getInstance(wd)
 
+#        for k,v in request.form.items():
+#            print(f'{k}={v}')
+#[Fri Apr 25 12:13:11.207539 2025] [wsgi:error] [pid 2459502:tid 137065371985600] [remote 192.168.1.1:26513] landuse_mode=4
+#[Fri Apr 25 12:13:11.207675 2025] [wsgi:error] [pid 2459502:tid 137065371985600] [remote 192.168.1.1:26513] landuse_db=locales/earth/C3Slandcover/2020
+#[Fri Apr 25 12:13:11.207702 2025] [wsgi:error] [pid 2459502:tid 137065371985600] [remote 192.168.1.1:26513] landuse_management_mapping_selection=disturbed
+
         mofe_buffer_selection = request.form.get('mofe_buffer_selection', None)
         try:
             mofe_buffer_selection = int(mofe_buffer_selection)
@@ -342,16 +348,18 @@ def api_build_landuse(runid, config):
         if mofe_buffer_selection is not None:
             landuse.mofe_buffer_selection = mofe_buffer_selection
 
+        # get mapping selection for user-defined landuse
+        mapping = request.form.get('landuse_management_mapping_selection', None)
+
         # check for file for mode 4, mode is set asynchronously
         if landuse.mode == LanduseMode.UserDefined:
             from wepppy.all_your_base.geo import raster_stacker
             watershed = Watershed.getInstance(wd)
 
-            mapping = request.form.get('landuse_management_mapping_selection', None)
             if mapping is None:
                 return error_factory('landuse_management_mapping_selection must be provided')
             else:
-                landuse.management_mapping = mapping
+                landuse.mapping = mapping
             
             try:
                 file = request.files['input_upload_landuse']

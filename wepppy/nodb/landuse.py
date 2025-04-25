@@ -184,7 +184,6 @@ class Landuse(NoDbBase, LogMixin):
     def _lock(self):
         return _join(self.wd, 'landuse.nodb.lock')
 
-
     @property
     def mapping(self):
         if hasattr(self, '_mapping'):
@@ -200,6 +199,19 @@ class Landuse(NoDbBase, LogMixin):
 
         return _mapping
     
+    @mapping.setter
+    def mapping(self, value: str):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._mapping = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def get_mapping_dict(self) -> dict[str, dict]:
         """
         Returns the management mapping dictionary

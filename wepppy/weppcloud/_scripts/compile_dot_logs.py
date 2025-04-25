@@ -12,7 +12,7 @@ from datetime import datetime
 from wepppy.nodb import Ron
 
 fns = glob('/geodata/weppcloud_runs/.*')
-print(fns)
+fns += glob('/geodata/wc1/runs/*/.*')
 
 fp = open('/geodata/weppcloud_runs/access.csv', 'w')
 

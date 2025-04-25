@@ -1907,7 +1907,7 @@ class Wepp(NoDbBase, LogMixin):
             # 1 is the Peak Flow time and rate, 600s is the interval
             # 2 Daily average discharge, 600 probably doesn't do anything
 
-            fp.write(f'{flag} {rate}\n0\n1\n{total}\n')
+            fp.write(f'{flag} {rate}\n0\n1\n{total}\n') ## TODO: specify multiple channel ids for dss
 
     def _prep_channel_soils(self, translator, erodibility, critical_shear, avke=None):
 
