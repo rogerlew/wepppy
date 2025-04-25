@@ -505,7 +505,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
             with open(fn) as fp:
                 s = fp.read()
 
-            s = s.replace(runid, new_runid)
+            s = s.replace(wd, new_wd).replace(runid, new_runid)
             with open(fn, 'w') as fp:
                 fp.write(s)
                 

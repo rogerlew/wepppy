@@ -563,15 +563,8 @@ class Ron(NoDbBase):
         # noinspection PyBroadException
         try:
             self._map = Map(extent, center, zoom, self.cellsize)
-            w3w_api_key = self.config_get_str('general', 'w3w_api_key')
-
             lng, lat = self.map.center
-            w3w_geocoder = what3words.Geocoder(w3w_api_key)
-            try:
-                self._w3w = w3w_geocoder.reverse(lat=lat, lng=lng)
-            except:
-                coord = what3words.Coordinates(lat=lat, lng=lng)
-                self._w3w = w3w_geocoder.convert_to_3wa(coord)
+            self._w3w = None
 
             self.dump_and_unlock()
 

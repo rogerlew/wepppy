@@ -269,6 +269,7 @@ class Treatments(NoDbBase, LogMixin):
 
         return valid_keys
 
+    @property
     def valid_treatments_d(self) -> Dict[str, str]:
         """
         Returns a dictioannary of valid treatment keys with their descriptions.
