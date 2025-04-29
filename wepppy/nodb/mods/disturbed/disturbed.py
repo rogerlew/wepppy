@@ -982,7 +982,7 @@ class Disturbed(NoDbBase):
 
             total_area = 0.0
             for topaz_id, k in soils.domsoil_d.items():
-                sub_area = watershed.area_of(topaz_id)
+                sub_area = watershed.hillslope_area(topaz_id)
                 soils.soils[k].area += sub_area
                 total_area += sub_area
 
@@ -1088,7 +1088,7 @@ class Disturbed(NoDbBase):
 
             total_area = 0.0
             for topaz_id, k in soils.domsoil_d.items():
-                sub_area = watershed.area_of(topaz_id)
+                sub_area = watershed.hillslope_area(topaz_id)
                 soils.soils[k].area += sub_area
                 total_area += sub_area
 

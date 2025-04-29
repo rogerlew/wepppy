@@ -380,7 +380,7 @@ class RangelandCover(NoDbBase):
         try:
             watershed = Watershed.getInstance(wd)
             covers = {}
-            for topaz_id, summary in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 cover = dict(bunchgrass=self._bunchgrass_cover_default,
                              forbs=self._forbs_cover_default,
                              sodgrass=self._sodgrass_cover_default,

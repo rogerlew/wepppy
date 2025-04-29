@@ -368,6 +368,7 @@ colors = [
     '#253949', '#fb5858', '#f37735', '#a47c48', '#afb064', '#91cfec', '#5c596d', '#d0e596',
     '#259ed9', '#014a01', '#00aedb', '#95c485']
 
+TRANSIENT_FIELDS = ['_weppsoilutil']
 
 class SoilSummary(object):
     def __init__(self, **kwargs):
@@ -408,7 +409,15 @@ class SoilSummary(object):
 
         self._meta_fn = kwargs.get('meta_fn', None)
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        for field in TRANSIENT_FIELDS:
+            state.pop(field, None)
+        return state
 
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        
     @property
     def simple_texture(self):
         if not (isfloat(self.sand) and isfloat(self.clay)):
@@ -442,20 +451,16 @@ class SoilSummary(object):
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage)
 
-        ll = getattr(self, 'll', None)
-
-        weppsoilutil = self.get_weppsoilutil()
-        wsu7778 = weppsoilutil.to7778()
-        
         return dict(mukey=self.mukey, fname=self.fname,
                     soils_dir=self.soils_dir,
                     build_date=self.build_date, desc=self.desc,
                     color=self.color, area=self.area,
                     pct_coverage=self.pct_coverage,
-                    clay=wsu7778.clay,
-                    sand=wsu7778.sand,
-                    avke=wsu7778.avke,
-                    ll=ll, bd=wsu7778.bd,
+                    clay=self.clay,
+                    sand=self.sand,
+                    avke=self.avke,
+                    ll=self.ll,
+                    bd=self.bd,
                     simple_texture=self.simple_texture)
 
     @property
@@ -482,7 +487,12 @@ class SoilSummary(object):
 
     def get_weppsoilutil(self):
         from wepppy.wepp.soils.utils import WeppSoilUtil
-        return WeppSoilUtil(self.path)
+
+        if hasattr(self, '_weppsoilutil'):
+            return self._weppsoilutil
+        
+        self._weppsoilutil = WeppSoilUtil(self.path)
+        return self._weppsoilutil
     
     @property
     def avke(self):

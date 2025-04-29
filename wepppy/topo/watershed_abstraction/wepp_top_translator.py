@@ -224,7 +224,7 @@ class WeppTopTranslator:
 
         return hillslopes
 
-    def build_structure(self, network):
+    def build_structure(self, network, pickle_fn=None):
         # now we are going to define the lines of the structure file
         # this doesn't handle impoundments
 
@@ -268,6 +268,12 @@ class WeppTopTranslator:
 
             # and translate topaz to wepp
             structure.append([int(v) for v in _structure])
+
+            if pickle_fn is not None:
+                import pickle
+                with open(pickle_fn, 'wb') as f:
+                    pickle.dump(structure, f)
+                return None
 
         return structure
 

@@ -152,7 +152,7 @@ class GeneralMod(NoDbBase, LocationMixin):
         _domsoil_d = soils.domsoil_d
         _soils = soils.soils
         # noinspection PyProtectedMember
-        for topaz_id, ss in watershed._subs_summary.items():
+        for topaz_id, ss in watershed.subs_summary.items():
             # lng, lat = ss.centroid.lnglat
 
             dom = _domsoil_d[str(topaz_id)]

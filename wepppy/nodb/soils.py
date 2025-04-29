@@ -23,8 +23,9 @@ from collections import Counter
 
 # non-standard
 import jsonpickle
-
 import pandas as pd
+from deprecated import deprecated
+import duckdb
 
 # wepppy
 from wepppy.soils.ssurgo import (
@@ -132,12 +133,13 @@ class Soils(NoDbBase, LogMixin):
         with open(filepath) as fp:
             db = jsonpickle.decode(fp.read().replace('"simple_texture"', '"_simple_texture"')
                                             .replace('"texture"', '"_texture"')
-                                            .replace('"clay_pct"', '"_deprecated_clay_pct"')
-                                            .replace('"sand"', '"_deprecated_sand"')
-                                            .replace('"avke"', '"_deprecated_avke"')
-                                            .replace('"ll"', '"_deprecated_ll"')
-                                            .replace('"liquid_limit"', '"_deprecated_liquid_limit"')
-                                            .replace('"clay"', '"_deprecated_clay"'))
+                                            .replace('"clay_pct"', '"_old_clay_pct"')
+                                            .replace('"sand"', '"_old_sand"')
+                                            .replace('"avke"', '"_old_avke"')
+                                            .replace('"ll"', '"_old_ll"')
+                                            .replace('"liquid_limit"', '"_old_liquid_limit"')
+                                            .replace('"clay"', '"_old_clay"')
+                                            )
             assert isinstance(db, Soils)
 
         if _exists(_join(wd, 'READONLY')) or ignore_lock:
@@ -381,7 +383,7 @@ class Soils(NoDbBase, LogMixin):
             self.log(f'domsoil_d: {repr(domsoil_d)}')
 
             soils = {}
-            for topaz_id in watershed.subs_summary:
+            for topaz_id in watershed._subs_summary:
                 mukey = domsoil_d.get(str(topaz_id), None)
 
                 if mukey is None:
@@ -406,7 +408,7 @@ class Soils(NoDbBase, LogMixin):
             self.log(repr(soils))
 
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.sub_area
@@ -466,8 +468,7 @@ class Soils(NoDbBase, LogMixin):
             # Execute in parallel
             with ProcessPoolExecutor(max_workers=max(os.cpu_count(), 16)) as executor:
                 futures = []
-                for topaz_id, sub in watershed.sub_iter():
-                    lng, lat = sub.centroid.lnglat
+                for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                     futures.append(
                         executor.submit(
                             isric.build_soil, lng, lat,
@@ -482,21 +483,21 @@ class Soils(NoDbBase, LogMixin):
                     topaz_id = meta['topaz_id']
                     if mukey is not None:
                         domsoil_d[str(topaz_id)] = mukey
-                        valid_k_counts[mukey] += watershed.area_of(topaz_id)
+                        valid_k_counts[mukey] += watershed.hillslope_area(topaz_id)
                         soils[mukey] = soil_summary
 
             self.log_done()
 
             # now assign hillslopes with invalid mukeys the most common valid mukey
             most_common_k = valid_k_counts.most_common()[0][0]
-            for topaz_id, sub in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 if topaz_id not in domsoil_d:
                    domsoil_d[topaz_id] = most_common_k
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.sub_area
@@ -541,13 +542,7 @@ class Soils(NoDbBase, LogMixin):
             watershed = Watershed.getInstance(wd)
 
             domsoil_d = {}
-            for topaz_id, sub in watershed.sub_iter():
-                lng, lat = sub.centroid.lnglat
-                mukey = statsgoSpatial.identify_mukey_point(lng, lat)
-                domsoil_d[str(topaz_id)] = str(mukey)
-
-            for topaz_id, chn in watershed.chn_iter():
-                lng, lat = chn.centroid.lnglat
+            for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                 mukey = statsgoSpatial.identify_mukey_point(lng, lat)
                 domsoil_d[str(topaz_id)] = str(mukey)
 
@@ -573,7 +568,7 @@ class Soils(NoDbBase, LogMixin):
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.sub_area
@@ -607,15 +602,12 @@ class Soils(NoDbBase, LogMixin):
             watershed = Watershed.getInstance(wd)
 
             orders = []
-            for topaz_id, sub in watershed.sub_iter():
-                orders.append([topaz_id, sub.centroid.lnglat])
-
-            for topaz_id, chn in watershed.chn_iter():
-                orders.append([topaz_id, chn.centroid.lnglat])
+            for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
+                orders.append([topaz_id, (lng, lat)])
 
             soils, domsoil_d = build_func(orders, soils_dir, status_channel=status_channel)
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.sub_area
@@ -686,7 +678,7 @@ class Soils(NoDbBase, LogMixin):
             self.log(repr(soils))
 
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / watershed.sub_area
@@ -745,7 +737,6 @@ class Soils(NoDbBase, LogMixin):
             rred.build_soils(self._mode)
             return
 
-        self = Soils.getInstance(self.wd)
         self.dump_soils_parquet()
 
         try:
@@ -756,6 +747,16 @@ class Soils(NoDbBase, LogMixin):
 
     @property
     def bd_d(self):
+        parquet_fn = _join(self.wd, 'soils.parquet')
+        if _exists(parquet_fn):
+            with duckdb.connect() as con:
+                result = con.execute(parquet_fn=f"SELECT TopazID, bd FROM '{parquet_fn}'").fetchall()
+                return {row[0]: row[1] for row in result}
+
+        return self._deprecated_bd_d()
+
+    @deprecated
+    def _deprecated_bd_d(self):
         d = {}
         for mukey, sol_summary in self.soils.items():
             d[mukey] = sol_summary.bd
@@ -763,6 +764,16 @@ class Soils(NoDbBase, LogMixin):
 
     @property
     def clay_d(self):
+        parquet_fn = _join(self.wd, 'soils.parquet')
+        if _exists(parquet_fn):
+            with duckdb.connect() as con:
+                result = con.execute(parquet_fn=f"SELECT TopazID, clay FROM '{parquet_fn}'").fetchall()
+                return {row[0]: row[1] for row in result}
+
+        return self._deprecated_clay_d()
+
+    @deprecated
+    def _deprecated_clay_d(self):
         d = {}
         for mukey, sol_summary in self.soils.items():
             d[mukey] = sol_summary.clay
@@ -770,6 +781,16 @@ class Soils(NoDbBase, LogMixin):
 
     @property
     def sand_d(self):
+        parquet_fn = _join(self.wd, 'soils.parquet')
+        if _exists(parquet_fn):
+            with duckdb.connect() as con:
+                result = con.execute(parquet_fn=f"SELECT TopazID, sand FROM '{parquet_fn}'").fetchall()
+                return {row[0]: row[1] for row in result}
+            
+        return self._deprecated_sand_d()
+
+    @deprecated
+    def _deprecated_sand_d(self):
         d = {}
         for mukey, sol_summary in self.soils.items():
             d[mukey] = sol_summary.clay
@@ -777,6 +798,16 @@ class Soils(NoDbBase, LogMixin):
 
     @property
     def ll_d(self):
+        parquet_fn = _join(self.wd, 'soils.parquet')
+        if _exists(parquet_fn):
+            with duckdb.connect() as con:
+                result = con.execute(parquet_fn=f"SELECT TopazID, ll FROM '{parquet_fn}'").fetchall()
+                return {row[0]: row[1] for row in result}
+    
+        return self._deprecated_ll_d()
+
+    @deprecated
+    def _deprecated_ll_d(self):
         d = {}
         for mukey, sol_summary in self.soils.items():
             d[mukey] = sol_summary.liquid_limit
@@ -784,6 +815,22 @@ class Soils(NoDbBase, LogMixin):
 
     @property
     def clay_pct(self):
+
+        parquet_fn = _join(self.wd, 'soils.parquet')
+        if _exists(parquet_fn):
+            with duckdb.connect() as con:
+                result = con.execute(parquet_fn=f"SELECT TopazID, clay, area FROM '{parquet_fn}'").fetchall()
+                totalarea = sum([row[2] for row in result])
+                wsum = sum([row[1] * row[2] for row in result])
+                clay_pct = wsum / totalarea
+                return clay_pct
+
+        return self._deprecated_clay_pct()
+    
+    @deprecated
+    def _deprecated_clay_pct(self):
+        # if we are not using parquet, then we need to calculate the clay_pct
+        # from the soils dict
         clay_d = self.clay_d
         domsoil_d = self.ssurgo_domsoil_d
 
@@ -792,10 +839,11 @@ class Soils(NoDbBase, LogMixin):
         totalarea = 0.0
         wsum = 0.0
         watershed = Watershed.getInstance(self.wd)
-        for topaz_id, ss in watershed.sub_iter():
+
+        for topaz_id in watershed._subs_summary:
             mukey = domsoil_d[str(topaz_id)]
             clay = clay_d[str(mukey)]
-            area = ss.area
+            area = watershed.hillslope_area(topaz_id)
             wsum += area * clay
             totalarea += area
 
@@ -813,13 +861,13 @@ class Soils(NoDbBase, LogMixin):
         totalarea = 0.0
         wsum = 0.0
         watershed = Watershed.getInstance(self.wd)
-        for topaz_id, ss in watershed.sub_iter():
+        for topaz_id in watershed._subs_summary:
             mukey = domsoil_d[str(topaz_id)]
             ll = ll_d[str(mukey)]
             if ll is None:
                 continue
 
-            area = ss.area
+            area = watershed.hillslope_area(topaz_id)
             wsum += area * ll
             totalarea += area
 
@@ -847,10 +895,7 @@ class Soils(NoDbBase, LogMixin):
                         pct_coverage=100.0
                     )}
 
-            for topaz_id, sub in watershed.sub_iter():
-                domsoil_d[str(topaz_id)] = str(mukey)
-
-            for topaz_id, chn in watershed.chn_iter():
+            for topaz_id in watershed._subs_summary:
                 domsoil_d[str(topaz_id)] = str(mukey)
 
             soils[str(mukey)].pct_coverage = 100.0
@@ -896,10 +941,7 @@ class Soils(NoDbBase, LogMixin):
 
 
             domsoil_d = {}
-            for topaz_id, sub in watershed.sub_iter():
-                domsoil_d[str(topaz_id)] = str(mukey)
-
-            for topaz_id, chn in watershed.chn_iter():
+            for topaz_id in watershed._subs_summary:
                 domsoil_d[str(topaz_id)] = str(mukey)
 
             soils[str(mukey)].pct_coverage = 100.0
@@ -907,7 +949,7 @@ class Soils(NoDbBase, LogMixin):
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -959,18 +1001,15 @@ class Soils(NoDbBase, LogMixin):
             shutil.copyfile(sol, _join(soils_dir, fn))
 
             domsoil_d = {}
-            for topaz_id, sub in watershed.sub_iter():
-                domsoil_d[str(topaz_id)] = mukey
-
-            for topaz_id, chn in watershed.chn_iter():
+            for topaz_id, in watershed._subs_summary:
                 domsoil_d[str(topaz_id)] = mukey
 
             soils[mukey].pct_coverage = 100.0
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
-            for topaz_id, sub in watershed.sub_iter():
-                soils[mukey].area += watershed.area_of(topaz_id)
+            for topaz_id in watershed._subs_summary:
+                soils[mukey].area += watershed.hillslope_area(topaz_id)
 
             # store the soils dict
             self.domsoil_d = domsoil_d
@@ -1074,7 +1113,7 @@ class Soils(NoDbBase, LogMixin):
 
             total_area = watershed.wsarea
             for topaz_id, k in domsoil_d.items():
-                soils[k].area += watershed.area_of(topaz_id)
+                soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in soils:
                 coverage = 100.0 * soils[k].area / total_area
@@ -1110,6 +1149,11 @@ class Soils(NoDbBase, LogMixin):
         return [soil.as_dict(abbreviated=True) for soil in report]
 
     def _x_summary(self, topaz_id, abbreviated=False):
+
+        if _exists(_join(self.soils_dir, 'soils.parquet')):
+            from .duckdb_agents import get_soil_sub_summary
+            return get_soil_sub_summary(self.wd, topaz_id)
+        
         domsoil_d = self.domsoil_d
 
         if domsoil_d is None:
@@ -1132,6 +1176,16 @@ class Soils(NoDbBase, LogMixin):
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
+        if _exists(_join(self.soils_dir, 'soils.parquet')):
+
+            from .duckdb_agents import get_soil_subs_summary
+            return get_soil_subs_summary(self.wd)
+            
+        return self._subs_summary_gen()
+
+
+    def _subs_summary_gen(self):
+
         domsoil_d = self.domsoil_d
 
         if domsoil_d is None:
@@ -1156,7 +1210,12 @@ class Soils(NoDbBase, LogMixin):
         Dumps the subs_summary to a Parquet file using Pandas.
         """
         self.log('creating soils parquet table')
-        df = self.hill_table
+        
+        dict_result = self._subs_summary_gen()
+        df = pd.DataFrame.from_dict(dict_result, orient='index')
+        df.index.name = 'TopazID'
+        df.reset_index(inplace=True)
+        df['TopazID'] = df['TopazID'].astype(str).astype('int64')
         df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
         
     @property
@@ -1164,10 +1223,12 @@ class Soils(NoDbBase, LogMixin):
         """
         Returns a pandas DataFrame with the hill table.
         """
-        subs_summary = self.subs_summary
-        assert subs_summary is not None
-
-        df = pd.DataFrame.from_dict(subs_summary, orient='index')
+        if _exists(_join(self.soils_dir, 'soils.parquet')):
+            from .duckdb_agents import get_soil_subs_summary
+            return get_soil_subs_summary(self.wd, return_as_df=True)
+        
+        result_dict = self._subs_summary_gen()
+        df = pd.DataFrame.from_dict(result_dict, orient='index')
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')

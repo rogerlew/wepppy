@@ -322,7 +322,7 @@ class WatershedBoundaryDataset:
 
             # is_gwc2 = is_gwc6 = False
 
-            for topaz_id, hill_summary in wat.sub_iter():
+            for topaz_id, hill_summary in wat.sub_summaries:
                 print(topaz_id)
                 _wat = hill_summary.as_dict()
                 # _landuse = landuse_summaries[str(topaz_id)]
@@ -439,7 +439,7 @@ class WatershedBoundaryDataset:
                 _sev_annuals = ash_summary['sev_annuals']
                 ash_out = ashpost.ash_out
 
-                for topaz_id, hill_summary in wat.sub_iter():
+                for topaz_id, hill_summary in wat.sub_summaries:
                     print(topaz_id)
                     _wat = hill_summary.as_dict()
                     _landuse = landuse_summaries[str(topaz_id)]

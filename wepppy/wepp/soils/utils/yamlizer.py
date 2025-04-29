@@ -42,6 +42,8 @@ class WeppSoilUtil(object):
         self.compute_erodibilities = compute_erodibilities
         self.compute_conductivity = compute_conductivity
 
+        print(f'WeppSoilUtil:: {fn}')
+
         if fn.endswith('.sol'):
             try:
                 self._parse_sol(fn)
@@ -168,7 +170,7 @@ class WeppSoilUtil(object):
                         ksat = round(ksat, 4)
 
                         header.append(f'ofe={ofe_counter},horizon={j} calculated ksat from clay, sand, and cec')
-
+             
                 horizons.append(
                     dict(solthk=try_parse(solthk),
                          bd=try_parse(bd),
@@ -818,7 +820,12 @@ class WeppSoilUtil(object):
 
     @property
     def clay(self):
-        clay = self.obj['ofes'][0]['horizons'][0]['clay']
+        try:
+            clay = self.obj['ofes'][0]['horizons'][0]['clay']
+        except KeyError:
+            raise Exception(repr(self.obj)) 
+            clay = None
+
         if clay is None:
             s7778 = self.to7778()
             clay = s7778.obj['ofes'][0]['horizons'][0]['clay']
@@ -827,12 +834,7 @@ class WeppSoilUtil(object):
 
     @property
     def avke(self):
-        avke = self.obj['ofes'][0]['avke']
-        if avke is None:
-            s7778 = self.to7778()
-            avke = s7778.obj['ofes'][0]['avke']
-#        assert avke is not None
-        return avke
+        return self.obj['ofes'][0].get('avke')
 
     @property
     def bd(self):

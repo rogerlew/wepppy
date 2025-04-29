@@ -152,7 +152,7 @@ def create_ermit_input(wd):
     dictWriter = csv.DictWriter(fp, fieldnames=header, lineterminator='\r\n')
     dictWriter.writeheader()
 
-    for topaz_id, sub in watershed.sub_iter():
+    for topaz_id in watershed._subs_summary:
         wepp_id = translator.wepp(top=int(topaz_id))
         dom = landuse.domlc_d[str(topaz_id)]
         man = landuse.managements[dom]
@@ -179,7 +179,7 @@ def create_ermit_input(wd):
                              'TOPAZ_ID': topaz_id,
                              'UNIT_ID': '',
                              'SOIL_TYPE': soil_type,
-                             'AREA': sub.area / 10000.0,
+                             'AREA': watershed.hillslope_area(topaz_id) / 10000.0,
                              'UTREAT': man.desc,
                              'USLP_LNG': v['Length'] / 2.0,
                              'LTREAT': man.desc,

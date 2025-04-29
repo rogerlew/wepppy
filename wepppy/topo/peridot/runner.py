@@ -3,6 +3,7 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import exists as _exists
 
+import numpy as np
 import pandas as pd
 
 from subprocess import Popen, PIPE
@@ -50,37 +51,55 @@ def run_peridot_abstract_watershed(
     p.wait()
 
 
-
 def post_abstract_watershed(wd: str, verbose: bool = True):
-    df = pd.read_csv(_join(wd, 'watershed/hillslopes.csv'))
-    df['topaz_id'] = df['topaz_id'].astype(str)
-    subs_summary = {rec['topaz_id']: PeridotHillslope.from_dict(rec) for rec in df.to_dict('records')}
-    del df
+    """
+    Post-process the output of the Peridot abstract watershed tool.
 
-    df = pd.read_csv(_join(wd, 'watershed/channels.csv'))
-    df['topaz_id'] = df['topaz_id'].astype(str)
-    chns_summary = {rec['topaz_id']: PeridotChannel.from_dict(rec) for rec in df.to_dict('records')}
-    del df
+    calculate and return ws_cenroid and ws_area
+    """
 
+    from wepppy.topo.watershed_abstraction import WeppTopTranslator
 
-    fp_fn = _join(wd, 'watershed/flowpaths.csv')
-    if _exists(fp_fn):
-        df = pd.read_csv(_join(wd, 'watershed/flowpaths.csv'))
-        df['topaz_id'] = df['topaz_id'].astype(str)
-        df['fp_id'] = df['fp_id'].astype(str)
+    hill_df = pd.read_csv(_join(wd, 'watershed/hillslopes.csv'))
+    sub_ids = sorted([int(x) for x in hill_df['topaz_id']])
 
-        # Create the dictionary structure
-        fp_summary = {}
-        for rec in df.to_dict('records'):
-            topaz_id = rec['topaz_id']
-            fp_id = rec['fp_id']
-            fp = PeridotFlowpath.from_dict(rec)
-            if topaz_id not in fp_summary:
-                fp_summary[topaz_id] = {}
-            fp_summary[topaz_id][fp_id] = fp
-        del df
+    chn_df = pd.read_csv(_join(wd, 'watershed/channels.csv'))
+    chn_ids = sorted([int(x) for x in  chn_df['topaz_id']])
 
-    return subs_summary, chns_summary, fp_summary
+    translator = WeppTopTranslator(sub_ids, chn_ids)
+    get_wepp_id = lambda topaz_id: translator.wepp(topaz_id)
+    get_chn_enum = lambda topaz_id: translator.chn_enum(top=topaz_id)
+    
+    hill_df['topaz_id'] = hill_df['topaz_id'].astype(str)
+    hill_df['wepp_id'] = hill_df['topaz_id'].apply(get_wepp_id)
+
+    hill_df['TopazID'] = hill_df['topaz_id'].astype(np.int64)
+    hill_df.to_parquet(_join(wd, 'watershed/hillslopes.parquet'), index=False)
+    sub_area = float(hill_df['area'].sum())
+    lngs = hill_df['centroid_lon'].to_numpy()
+    lats = hill_df['centroid_lat'].to_numpy()
+
+    chn_df['topaz_id'] = chn_df['topaz_id'].astype(str)
+    chn_df['wepp_id'] = chn_df['topaz_id'].apply(get_wepp_id)
+    chn_df['chn_enum'] = chn_df['topaz_id'].apply(get_chn_enum)
+
+    chn_df['TopazID'] = chn_df['topaz_id'].astype(np.int64)
+    chn_df.to_parquet(_join(wd, 'watershed/channels.parquet'), index=False)
+    chn_area = float(chn_df['area'].sum())
+    lngs = np.concatenate((lngs, chn_df['centroid_lon'].to_numpy()))
+    lats = np.concatenate((lats, chn_df['centroid_lat'].to_numpy()))
+
+    fps_df = pd.read_csv(_join(wd, 'watershed/flowpaths.csv'))
+    fps_df['topaz_id'] = fps_df['topaz_id'].astype(str)
+    fps_df['fp_id'] = fps_df['fp_id'].astype(str)
+    fps_df.to_parquet(_join(wd, 'watershed/flowpaths.parquet'), index=False)
+
+    os.remove(_join(wd, 'watershed/hillslopes.csv'))
+    os.remove(_join(wd, 'watershed/channels.csv')) 
+    os.remove(_join(wd, 'watershed/flowpaths.csv'))
+
+    ws_centroid = float(np.mean(lngs)), float(np.mean(lats))
+    return sub_area, chn_area, ws_centroid, sub_ids, chn_ids
 
 
 def read_network(fname):

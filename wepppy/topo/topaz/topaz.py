@@ -63,6 +63,58 @@ nodata_value     {no_data}
 _TIMEOUT = 60
 
 
+def _read_chn_order_from_netw_tab(subwta_fn, netw_tab_fn) -> dict[str, int]:
+    """
+    read the channel order from the NETW.TAB file
+    
+    returns a dictionary of channel ids and their orders
+    """
+
+    subwta, _transform, _proj = read_arc(subwta_fn, dtype=np.int64)
+
+    ret_dict = {}
+
+    keys = "chnum order row col row1 col1 outr outc chnlen elevvup " \
+            "elevdn areaup areadn1 areadn dda node1 node2 node3 node4 " \
+            "node5 node6 node7 slopedirect slopesmoothed".split()
+
+    types = [int, int, int, int, int, int, int, int,
+                float, float, float, float, float, float,
+                float, int, int, int, int, int, int, int,
+                float, float]
+
+
+    with open(netw_tab_fn) as fid:
+        lines = fid.readlines()
+
+    last = [i for i, v in enumerate(lines) if v.strip().startswith("-1")][0]
+    lines = lines[27:last]
+    lines = [[_t(v) for _t, v in zip(types, l.split())] for l in lines]
+    assert all([len(l) == 24 for l in lines])
+    data = {l[0]: dict(zip(keys, l)) for l in lines}
+
+    for chnum in data:
+        head = data[chnum]["col"] - 1, data[chnum]["row"] - 1
+        center = data[chnum]["col1"] - 1, data[chnum]["row1"] - 1
+        tail = data[chnum]["outc"] - 1, data[chnum]["outr"] - 1
+
+        chn_id0 = subwta[head]
+        chn_id1 = subwta[center]
+        chnout_id = subwta[tail]
+
+        assert chn_id0 != 0, chn_id0
+        assert chn_id1 != 0, chn_id1
+        assert chnout_id != 0, chnout_id
+        assert chn_id0 == chn_id1
+        assert str(chn_id0).endswith("4"), chn_id0
+        assert str(chnout_id).endswith("4"), chnout_id
+        assert chn_id0 >= chnout_id, "%i %i" % (chnout_id, chn_id0)
+
+        ret_dict[str(chnout_id)] = int(data[chnum]["order"])
+
+    return ret_dict
+
+
 def _str_dem_val(f):
     """
     helper function to stringify the elevation values
@@ -1048,6 +1100,9 @@ class TopazRunner:
 
     def _polygonize_channels(self):
         subwta_fn = _join(self.topaz_wd, "SUBWTA.ARC")
+        netw_tab_fn = _join(self.topaz_wd, "NETW.TAB")
+
+        chn_order_dict = _read_chn_order_from_netw_tab(subwta_fn, netw_tab_fn)
 
         assert _exists(subwta_fn)
         src_ds = gdal.Open(subwta_fn)
@@ -1091,6 +1146,9 @@ class TopazRunner:
 
             wepp_id = translator.wepp(top=topaz_id)
             f['properties']['WeppID'] = wepp_id
+
+            # get order from somewhere and add it to the properties
+            f['properties']['Order'] = chn_order_dict.get(topaz_id, 1)
 
         js['features'] = _features
 

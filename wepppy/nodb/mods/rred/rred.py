@@ -225,7 +225,7 @@ class Rred(NoDbBase):
             watershed = Watershed.getInstance(self.wd)
             total_area += watershed.wsarea
             for topaz_id, k in _domsoil_d.items():
-                _soils[k].area += watershed.area_of(topaz_id)
+                _soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in _soils:
                 coverage = 100.0 * _soils[k].area / total_area

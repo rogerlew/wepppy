@@ -1969,9 +1969,15 @@ def task_set_unit_preferences(runid, config):
 def query_topaz_pass(runid, config):
     try:
         wd = get_wd(runid)
-        watershed = Watershed.getInstance(wd)
-        has_channels = watershed.has_channels
-        has_subcatchments = watershed.has_subcatchments
+        #watershed = Watershed.getInstance(wd)
+        #has_channels = watershed.has_channels
+        #has_subcatchments = watershed.has_subcatchments
+
+        has_channels = _exists(_join(wd, 'dem/topaz/NETFUL.ARC')) 
+        # TODO: find relevant taudem file
+        
+        has_subcatchments = _exists(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON')) or \
+                            _exists(_join(wd, 'dem/taudem/subcatchments.WGS.geojson'))
 
         if not has_channels:
             return jsonify(0)

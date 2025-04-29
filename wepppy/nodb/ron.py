@@ -721,8 +721,36 @@ class Ron(NoDbBase):
     # summary
     #
     def subs_summary(self, abbreviated=False):
-        wd = self.wd
         import wepppy.nodb
+        wd = self.wd
+        climate = wepppy.nodb.Climate.getInstance(wd)
+
+        if  _exists(_join(wd, 'watershed/hillslopes.parquet')) and \
+            _exists(_join(wd, 'soils/soils.parquet')) and \
+            _exists(_join(wd, 'landuse/landuse.parquet')):  
+            from .duckdb_agents import get_watershed_subs_summary, get_soil_subs_summary, get_landuse_subs_summary
+
+            _watershed_summaries =  get_watershed_subs_summary(wd, return_as_df=False)
+            _soils_summaries = get_soil_subs_summary(wd, return_as_df=False)
+            _landuse_summaries = get_landuse_subs_summary(wd, return_as_df=False)
+
+            summaries = []
+            for topaz_id, wat_d in _watershed_summaries.items():
+                soils_d = _soils_summaries[topaz_id]
+                landuse_d = _landuse_summaries[topaz_id]
+
+                summaries.append(
+                    dict(meta=dict(hill_type='Hillslope',
+                                   topaz_id=topaz_id,
+                                   wepp_id=wat_d['WeppID']),
+                         watershed=wat_d,
+                         soil=soils_d,
+                         climate=climate.sub_summary(topaz_id),
+                         landuse=landuse_d))
+                
+            return summaries
+        
+        # slower deprecated option
         watershed = wepppy.nodb.Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         soils = wepppy.nodb.Soils.getInstance(wd)
@@ -745,37 +773,98 @@ class Ron(NoDbBase):
         return summaries
 
     def sub_summary(self, topaz_id=None, wepp_id=None):
-        wd = self.wd
         import wepppy.nodb
-        watershed = wepppy.nodb.Watershed.getInstance(wd)
-        translator = watershed.translator_factory()
-        soils = wepppy.nodb.Soils.getInstance(wd)
+
+        wd = self.wd
+
+        _watershed = None
+        # use parquet if availablem they are faster and have topaz_id and wepp_id
+        if _exists(_join(wd, 'watershed/hillslopes.parquet')): 
+            from .duckdb_agents import get_watershed_sub_summary
+            _watershed = get_watershed_sub_summary(wd, topaz_id=topaz_id)
+
+            topaz_id = str(_watershed['TopazID'])
+            wepp_id = str(_watershed['wepp_id'])
+        else:
+            # get Watershed instance
+            # and translator to get topaz_id and wepp_id
+            watershed = wepppy.nodb.Watershed.getInstance(wd)
+            translator = watershed.translator_factory()
+
+            if topaz_id is None:
+                topaz_id = translator.top(wepp=wepp_id)
+
+            if wepp_id is None:
+                wepp_id = translator.wepp(top=topaz_id)
+
+            # get watershed summary from hillslopes.csv if it exists
+            if _exists(_join(wd, 'watershed/hillslopes.csv')):
+                import duckdb
+                csv_fn = _join(wd, 'watershed/hillslopes.csv')
+                with duckdb.connect() as con:
+                    result = con.execute(f"SELECT * FROM read_csv('{csv_fn}') WHERE topaz_id = ?", [topaz_id]).fetchall()
+                    
+                    columns = [desc[0] for desc in con.description]
+                    result = [dict(zip(columns, row)) for row in result]
+                    _watershed = result[0]
+
+            # slowest option, but works for all projects
+            else:
+                _watershed = watershed.sub_summary(topaz_id)
+
+        _soils = None
+        if _exists(_join(wd, 'soils/soils.parquet')):
+            from .duckdb_agents import get_soil_sub_summary
+            _soils = get_soil_sub_summary(wd, topaz_id=topaz_id)
+        else:
+            soils = wepppy.nodb.Soils.getInstance(wd)
+            _soils = soils.sub_summary(topaz_id)
+
+
+        _landuse = None
+        if _exists(_join(wd, 'landuse/landuse.parquet')):
+            from .duckdb_agents import get_landuse_sub_summary
+            _landuse = get_landuse_sub_summary(wd, topaz_id=topaz_id)
+        else:
+            landuse = wepppy.nodb.Landuse.getInstance(wd)
+            _landuse = landuse.sub_summary(topaz_id)        
+
         climate = wepppy.nodb.Climate.getInstance(wd)
-        landuse = wepppy.nodb.Landuse.getInstance(wd)
-
-        if topaz_id is None:
-            topaz_id = translator.top(wepp=wepp_id)
-
-        if wepp_id is None:
-            wepp_id = translator.wepp(top=topaz_id)
 
         return dict(
             meta=dict(hill_type='Hillslope', topaz_id=topaz_id,
                       wepp_id=wepp_id),
-            watershed=watershed.sub_summary(topaz_id),
-            soil=soils.sub_summary(topaz_id),
+            watershed=_watershed,
+            soil=_soils,
             climate=climate.sub_summary(topaz_id),
-            landuse=landuse.sub_summary(topaz_id)
+            landuse=_landuse
         )
 
     def chns_summary(self, abbreviated=False):
         wd = self.wd
         import wepppy.nodb
+
+        # use parquet if available, they are faster and have topaz_id and wepp_id
+        if _exists(_join(wd, 'watershed/channels.parquet')):
+            from .duckdb_agents import get_watershed_chns_summary
+            chns_summary =  get_watershed_chns_summary(wd)
+
+            summaries = []
+            for d in chns_summary.values():
+                summaries.append(
+                    dict(meta=dict(hill_type='Channel',
+                               topaz_id=d['topaz_id'],
+                               wepp_id=d['wepp_id'],
+                               chn_enum=d['chn_enum']),
+                     watershed=d
+                    )
+                )
+            return summaries
+
+
+        # slower deprecated option
         watershed = wepppy.nodb.Watershed.getInstance(wd)
         translator = watershed.translator_factory()
-        soils = wepppy.nodb.Soils.getInstance(wd)
-        climate = wepppy.nodb.Climate.getInstance(wd)
-        landuse = wepppy.nodb.Landuse.getInstance(wd)
 
         summaries = []
         for wepp_id in translator.iter_wepp_chn_ids():
@@ -787,35 +876,45 @@ class Ron(NoDbBase):
                                topaz_id=topaz_id,
                                wepp_id=wepp_id,
                                chn_enum=chn_enum),
-                     watershed=watershed.chn_summary(topaz_id),
-                     soil=soils.chn_summary(topaz_id, abbreviated=abbreviated),
-                     climate=climate.chn_summary(topaz_id),
-                     landuse=landuse.chn_summary(topaz_id)))
+                     watershed=watershed.chn_summary(topaz_id))
+            )
 
         return summaries
 
     def chn_summary(self, topaz_id=None, wepp_id=None):
         wd = self.wd
         import wepppy.nodb
-        watershed = wepppy.nodb.Watershed.getInstance(wd)
-        translator = watershed.translator_factory()
-        soils = wepppy.nodb.Soils.getInstance(wd)
-        climate = wepppy.nodb.Climate.getInstance(wd)
-        landuse = wepppy.nodb.Landuse.getInstance(wd)
+        _watershed = None
+        if _exists(_join(wd, 'watershed/channels.parquet')):
+            from .duckdb_agents import get_watershed_chn_summary
+            _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id)
+        else:
+            watershed = wepppy.nodb.Watershed.getInstance(wd)
+            translator = watershed.translator_factory()
 
-        if topaz_id is None:
-            topaz_id = translator.top(wepp=wepp_id)
+            if topaz_id is None:
+                topaz_id = translator.top(wepp=wepp_id)
 
-        if wepp_id is None:
-            wepp_id = translator.wepp(top=topaz_id)
+            if wepp_id is None:
+                wepp_id = translator.wepp(top=topaz_id)
 
+            elif _exists(_join(wd, 'watershed/channels.csv')): # provide support for older projects without parquet files
+                import duckdb
+                csv_fn = _join(wd, 'watershed/channels.csv')
+                with duckdb.connect() as con:
+                    result = con.execute(f"SELECT * FROM read_csv('{csv_fn}') WHERE topaz_id = ?", [topaz_id]).fetchall()
+                    
+                    columns = [desc[0] for desc in con.description]
+                    result = [dict(zip(columns, row)) for row in result]
+                    _watershed = result[0]
+
+            else:
+                _watershed = watershed.sub_summary(topaz_id)
+            
         chn_enum = translator.chn_enum(top=topaz_id)
 
         return dict(
             meta=dict(hill_type='Channel', topaz_id=topaz_id,
                       wepp_id=wepp_id, chn_enum=chn_enum),
-            watershed=watershed.chn_summary(topaz_id),
-            soil=soils.chn_summary(topaz_id),
-            climate=climate.chn_summary(topaz_id),
-            landuse=landuse.chn_summary(topaz_id)
+            watershed=_watershed
         )

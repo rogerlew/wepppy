@@ -288,7 +288,7 @@ if __name__ == '__main__':
 
             _domsoil_d = soils.domsoil_d
             _soils = soils.soils
-            for topaz_id, ss in watershed._subs_summary.items():
+            for topaz_id, ss in watershed.subs_summary.items():
                 lng, lat = ss.centroid.lnglat
 
                 if ksat_mod == 'l':
@@ -367,7 +367,7 @@ if __name__ == '__main__':
 
                     sub_par_fns = {}
                     sub_cli_fns = {}
-                    for topaz_id, ss in watershed._subs_summary.items():
+                    for topaz_id, ss in watershed.subs_summary.items():
                         log_print(topaz_id)
                     lng, lat = ss.centroid.lnglat
 
