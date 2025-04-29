@@ -15,6 +15,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 
 import jsonpickle
+import pandas as pd
 import numpy as np
 
 import multiprocessing
@@ -22,12 +23,15 @@ import multiprocessing
 from osgeo import gdal, osr
 from osgeo.gdalconst import *
 
+from deprecated import deprecated
+
 from wepppy.topo.watershed_abstraction import (
     WatershedAbstraction,
     WeppTopTranslator
 )
 from wepppy.topo.taudem import TauDEMTopazEmulator
 from wepppy.topo.peridot.runner import run_peridot_abstract_watershed, post_abstract_watershed, read_network
+from wepppy.topo.peridot.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
 from wepppy.topo.watershed_abstraction import SlopeFile
 from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
@@ -70,13 +74,13 @@ class WatershedNotAbstractedError(Exception):
 class WatershedNoDbLockedException(Exception):
     pass
 
-
+@deprecated
 def process_channel(args):
     wat_abs, chn_id = args
     chn_summary, chn_paths = wat_abs.abstract_channel(chn_id)
     return chn_id, chn_summary, chn_paths
 
-
+@deprecated
 def process_subcatchment(args):
     wat_abs, sub_id, clip_hillslopes, clip_hillslope_length, max_points  = args
 
@@ -89,6 +93,8 @@ def process_subcatchment(args):
     return sub_id, sub_summary, fp_d
 
 
+TRANSIENT_FIELDS = ['_sub_area_lookup']
+
 class Watershed(NoDbBase, LogMixin):
     __name__ = 'Watershed'
 
@@ -99,10 +105,10 @@ class Watershed(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:
-            self._subs_summary = None
-            self._fps_summary = None
+            self._subs_summary = None  # deprecated watershed/hillslopes.csv
+            self._fps_summary = None   # deprecated watershed/flowpaths.csv
             self._structure = None
-            self._chns_summary = None
+            self._chns_summary = None  # deprecated watershed/channels.csv
             self._wsarea = None
             self._impoundment_n = 0
             self._centroid = None
@@ -147,6 +153,16 @@ class Watershed(NoDbBase, LogMixin):
         except Exception:
             self.unlock('-f')
             raise
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        for field in TRANSIENT_FIELDS:
+            state.pop(field, None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
     #
     # Required for NoDbBase Subclass
     #
@@ -452,6 +468,11 @@ class Watershed(NoDbBase, LogMixin):
 
     @property
     def structure(self):
+        if _exists(_join(self.wat_dir, 'structure.pkl')):
+            import pickle
+            with open(self._structure, 'rb') as fp:
+                return pickle.load(fp)
+
         return self._structure
 
     @property
@@ -672,18 +693,21 @@ class Watershed(NoDbBase, LogMixin):
 
             self.lock()
             try:
-                self._subs_summary, self._chns_summary, self._fps_summary = post_abstract_watershed(self.wd)
+                sub_area, chn_area, ws_centroid, sub_ids, chn_ids = post_abstract_watershed(self.wd)
+                self._centroid = ws_centroid
+                self._sub_area = sub_area
+                self._chn_area = chn_area
+                self._wsarea = sub_area + chn_area
 
-                lnglat = np.array([summary.centroid.lnglat for summary in self._subs_summary.values()])
-                lnglat = np.mean(lnglat, axis=0)
-                self._centroid = [float(x) for x in lnglat]
-
-                self._wsarea = sum(summary.area for summary in self._subs_summary.values()) + \
-                               sum(summary.area for summary in self._chns_summary.values())
+                # this is the shit you have to support projects over 8 years of CI/CD
+                self._subs_summary = {str(topaz_id): None for topaz_id in sub_ids}  
+                self._chns_summary = {str(topaz_id): None for topaz_id in chn_ids}
 
                 network = self.network
+                structure_fn = _join(self.wat_dir, 'structure.pkl')
                 translator = self.translator_factory()
-                self._structure = translator.build_structure(network)
+                translator.build_structure(network, pickle_fn=structure_fn)
+                self._structure = structure_fn
 
                 self.dump_and_unlock()
             except:
@@ -803,10 +827,15 @@ class Watershed(NoDbBase, LogMixin):
 
     def _build_multiple_ofe(self):
         _mofe_nsegments = {}
-        for topaz_id, sub in self.sub_iter():
+        for topaz_id, wat_ss in self.subs_summary.items():
             not_top = not str(topaz_id).endswith('1')
 
-            slp = SlopeFile(_join(self.wat_dir, sub.fname))
+            if isinstance(wat_ss, HillSummary):
+                slp_fn = _join(self.wat_dir, wat_ss.fname)
+            else:
+                slp_fn =  _join(self.wat_dir, wat_ss.slp_rel_path)
+                
+            slp = SlopeFile(slp_fn)
             _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(
                 target_length=self.mofe_target_length,
                 apply_buffer=self.mofe_buffer and not_top,
@@ -835,12 +864,17 @@ class Watershed(NoDbBase, LogMixin):
         mofe_nsegments = self.mofe_nsegments
 
         mofe_map = np.zeros(subwta.shape, np.int32)
-        for topaz_id, sub in self.sub_iter():
+        for topaz_id, wat_ss in self.subs_summary.items():
             indices = np.where(subwta == int(topaz_id))
             _discha_vals = discha[indices]
             max_discha = np.max(_discha_vals)
 
-            mofe_slp_fn = _join(self.wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
+            if isinstance(wat_ss, HillSummary):
+                slp_fn = _join(self.wat_dir, wat_ss.fname)
+            else:
+                slp_fn =  _join(self.wat_dir, wat_ss.slp_rel_path)
+                
+            mofe_slp_fn = _join(self.wat_dir, slp_fn.replace('.slp', '.mofe.slp'))
             d_fractions = mofe_distance_fractions(mofe_slp_fn)
 
             n_ofe = len(d_fractions) - 1
@@ -891,10 +925,6 @@ class Watershed(NoDbBase, LogMixin):
 
         assert _exists(self.mofe_map)
 
-#        mofe_map2, transform_m, proj_m = read_raster(self.mofe_map)
-#        assert subwta.shape == mofe_map2.shape
-
-
     def _taudem_abstract_watershed(self):
         from wepppy.nodb import Wepp
 
@@ -943,6 +973,7 @@ class Watershed(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    @deprecated
     def _topaz_abstract_watershed(self):
         self.lock()
 
@@ -1045,6 +1076,24 @@ class Watershed(NoDbBase, LogMixin):
         return self._centroid
 
     def sub_summary(self, topaz_id) -> Union[Dict, None]:
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            from .duckdb_agents import get_watershed_sub_summary
+            return get_watershed_sub_summary(self.wd, topaz_id)
+        
+        if _exists(_join(self.wat_dir, 'hillslopes.csv')):
+            import duckdb
+            csv_fn = _join(self.wat_dir, 'hillslopes.csv')
+            with duckdb.connect() as con:
+                result = con.execute(f"SELECT * FROM read_csv('{csv_fn}') WHERE topaz_id = ?", [topaz_id]).fetchall()
+                
+                columns = [desc[0] for desc in con.description]
+                result = [dict(zip(columns, row)) for row in result]
+                return result[0]  
+            
+        return self._deprecated_sub_summary(topaz_id)
+
+    @deprecated
+    def _deprecated_sub_summary(self, topaz_id) -> Union[Dict, None]:
         if self._subs_summary is None:
             return None
 
@@ -1058,6 +1107,31 @@ class Watershed(NoDbBase, LogMixin):
             return None
 
     def fps_summary(self, topaz_id):
+        if _exists(_join(self.wat_dir, 'flowpaths.csv')) or \
+           _exists(_join(self.wat_dir, 'flowpaths.parquet')):
+            import pandas as pd
+            from wepppy.topo.peridot import PeridotFlowpath
+        
+            if _exists(_join(self.wat_dir, 'flowpaths.parquet')):
+                df = pd.read_parquet(_join(self.wat_dir, 'flowpaths.parquet'))
+            else:
+                df = pd.read_csv(_join(self.wat_dir, 'flowpaths.csv'))
+                df['topaz_id'] = df['topaz_id'].astype(str)
+                df['fp_id'] = df['fp_id'].astype(str)
+
+            # Create the dictionary structure
+            fps_summary = {}
+            for rec in df.to_dict('records'):
+                topaz_id = rec['topaz_id']
+                fp_id = rec['fp_id']
+                fp = PeridotFlowpath.from_dict(rec)
+                if topaz_id not in fps_summary:
+                    fps_summary[topaz_id] = {}
+                fps_summary[topaz_id][fp_id] = fp
+            del df
+
+            return fps_summary
+
         if self._fps_summary is None:
             return None
 
@@ -1080,14 +1154,38 @@ class Watershed(NoDbBase, LogMixin):
 
     @property
     def subs_summary(self) -> Dict[str, Dict]:
+        if _exists(_join(self.wat_dir, 'hillslopes.csv')) or \
+           _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+        
+            if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+                df = pd.read_parquet(_join(self.wat_dir, 'hillslopes.parquet'))
+            else:
+                df = pd.read_csv(_join(self.wat_dir, 'hillslopes.csv'))
+                df['topaz_id'] = df['topaz_id'].astype(str)
+
+            return {rec['topaz_id']: PeridotHillslope.from_dict(rec) for rec in df.to_dict('records')}
+
         return {k: v.as_dict() for k, v in self._subs_summary.items()}
 
-    def sub_iter(self) -> Generator[HillSummary, None, None]:
-        if self.sub_n > 0:
-            for topaz_id, v in self._subs_summary.items():
-                yield topaz_id, v
-
-    def chn_summary(self, topaz_id) -> Union[Generator[ChannelSummary, None, None], None]:
+    def chn_summary(self, topaz_id) -> Union[Dict, None]:
+        if _exists(_join(self.wat_dir, 'channels.parquet')):
+            from .duckdb_agents import get_watershed_chn_summary
+            return get_watershed_chn_summary(self.wd, topaz_id)
+        
+        if _exists(_join(self.wat_dir, 'channels.csv')):
+            import duckdb
+            csv_fn = _join(self.wat_dir, 'channels.csv')
+            with duckdb.connect() as con:
+                result = con.execute(f"SELECT * FROM read_csv('{csv_fn}') WHERE topaz_id = ?", [topaz_id]).fetchall()
+                
+                columns = [desc[0] for desc in con.description]
+                result = [dict(zip(columns, row)) for row in result]
+                return result[0]  
+            
+        return self._deprecated_chn_summary(topaz_id)
+        
+    @deprecated
+    def _deprecated_chn_summary(self, topaz_id):
         if str(topaz_id) in self._chns_summary:
             d =  self._chns_summary[str(topaz_id)]
             if isinstance(d, dict):
@@ -1099,6 +1197,19 @@ class Watershed(NoDbBase, LogMixin):
 
     @property
     def chns_summary(self) -> Dict[str, Dict]:
+        if _exists(_join(self.wat_dir, 'channels.csv')) or \
+           _exists(_join(self.wat_dir, 'channels.parquet')):
+            import pandas as pd
+            from wepppy.topo.peridot import PeridotChannel
+        
+            if _exists(_join(self.wat_dir, 'channels.parquet')):
+                df = pd.read_parquet(_join(self.wat_dir, 'channels.parquet'))
+            else:
+                df = pd.read_csv(_join(self.wat_dir, 'channels.csv'))
+                df['topaz_id'] = df['topaz_id'].astype(str)
+
+            return {rec['topaz_id']: PeridotChannel.from_dict(rec) for rec in df.to_dict('records')}
+        
         return {k: v.as_dict() for k, v in self._chns_summary.items()}
 
     def chn_iter(self) -> Generator[ChannelSummary, None, None]:
@@ -1106,12 +1217,61 @@ class Watershed(NoDbBase, LogMixin):
             for topaz_id, v in self._chns_summary.items():
                 yield topaz_id, v
 
-    def area_of(self, topaz_id):
+    def hillslope_area(self, topaz_id):
+        if hasattr(self, '_sub_area_lookup'):
+            return self._sub_area_lookup[str(topaz_id)]
+        
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            import duckdb
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, 'hillslopes.parquet')
+                # lazy load self._sub_area_lookup with duckdb
+                result = con.execute(f"SELECT topaz_id, area FROM read_parquet('{parquet_fn}')").fetchall()
+                self._sub_area_lookup = {str(row[0]): row[1] for row in result}
+                return self._sub_area_lookup[str(topaz_id)]
+            
+        return self._deprecated_area_of(topaz_id)
+
+    @deprecated
+    def _deprecated_area_of(self, topaz_id):
         topaz_id = str(topaz_id)
         if topaz_id.endswith('4'):
             return self._chns_summary[topaz_id].area
         else:
             return self._subs_summary[topaz_id].area
+
+    def hillslope_centroid_lnglat(self, topaz_id):
+        wat_ss = self.subs_summary[topaz_id]
+        lng, lat = wat_ss.centroid.lnglat
+        return lng, lat
+    
+    def hillslope_slp_fn(self, topaz_id):
+        wat_ss = self.subs_summary[topaz_id]
+        if isinstance(wat_ss, HillSummary): # deprecated
+            slp_fn = _join(self.wat_dir, wat_ss.fname)
+        elif isinstance(wat_ss, PeridotHillslope):
+            slp_fn =  _join(self.wat_dir, wat_ss.slp_rel_path)
+
+        return slp_fn
+
+    def centroid_hillslope_iter(self):
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            import duckdb
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, 'hillslopes.parquet')
+                # lazy load self._sub_area_lookup with duckdb
+                result = con.execute(f"SELECT topaz_id, centroid_lon, centroid_lat FROM read_parquet('{parquet_fn}')").fetchall()
+                for row in result:
+                    yield row[0], (row[1], row[2])
+
+        else:
+            return self._deprecated_centroid_hillslope_iter()
+
+    @deprecated
+    def _deprecated_centroid_hillslope_iter(self):
+        for topaz_id, wat_ss in self._subs_summary.items():
+            yield topaz_id, wat_ss.centroid.lnglat
+
 
 
 class Outlet(object):

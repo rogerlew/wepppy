@@ -1939,7 +1939,7 @@ class Climate(NoDbBase, LogMixin):
             if self.sub_cli_fns is not None:
                 sub_cli_fns = {}
                 for topaz_id, sub_cli_fn in self.sub_cli_fns.items():
-                    lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
+                    lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     scale_factor = rdi.get_location_info(lng, lat)
                     if scale_factor is not None:
                         if scale_factor > 0:
@@ -2046,10 +2046,10 @@ class Climate(NoDbBase, LogMixin):
                 # build a climate for each subcatchment
                 sub_par_fns = {}
                 sub_cli_fns = {}
-                for topaz_id, ss in watershed._subs_summary.items():
+                for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
                     self.log('submitting climate build for {}... '.format(topaz_id))
 
-                    lng, lat = ss.centroid.lnglat
+                    lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
 
                     cli_fn = f'{lng:.02f}x{lat:.02f}.cli'
                     url = f'https://mesonet-dep.agron.iastate.edu/dl/climatefile.py?lon={lng:.02f}&lat={lat:.02f}'
@@ -2181,10 +2181,10 @@ class Climate(NoDbBase, LogMixin):
             # build a climate for each subcatchment
             sub_par_fns = {}
             sub_cli_fns = {}
-            for topaz_id, ss in watershed._subs_summary.items():
+            for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
                 self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
 
-                hill_lng, hill_lat = ss.centroid.lnglat
+                hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
                 suffix = f'_{topaz_id}'
                 new_cli_fn = f'{suffix}.cli'
                 args = (cli, ws_ppts, ws_tmaxs, ws_tmins,
@@ -2309,14 +2309,14 @@ class Climate(NoDbBase, LogMixin):
                 # build a climate for each subcatchment
                 sub_par_fns = {}
                 sub_cli_fns = {}
-                for topaz_id, ss in watershed._subs_summary.items():
+                for topaz_id, (hill_lng, hill_lat) in watershed.centroid_hillslope_iter():
                     self.log('submitting climate build for {} to worker pool... '.format(topaz_id))
 
-                    lng, lat = ss.centroid.lnglat
+                    hill_lng, hill_lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     suffix = f'_{topaz_id}'
 
                     kwds = dict(par=climatestation,
-                                 years=years, lng=lng, lat=lat, wd=cli_dir,
+                                 years=years, lng=hill_lng, lat=hill_lat, wd=cli_dir,
                                  suffix=suffix, logger=None, nwds_method='')
 
                     sub_par_fns[topaz_id] = '{}{}.par'.format(climatestation, suffix)
@@ -2531,8 +2531,8 @@ class Climate(NoDbBase, LogMixin):
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             hillslope_locations = {'ws': {'longitude': ws_lng, 'latitude': ws_lat}}
-            for topaz_id, ss in watershed._subs_summary.items():
-                _lng, _lat = ss.centroid.lnglat
+            for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
+                _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
                 hillslope_locations[topaz_id] = {'longitude': _lng, 'latitude': _lat}
 
             extent = ron.extent
@@ -2628,9 +2628,9 @@ class Climate(NoDbBase, LogMixin):
             sub_cli_fns = {}
             with ProcessPoolExecutor(max_workers=NCPU) as executor:
                 futures = []
-                for topaz_id, ss in watershed._subs_summary.items():
+                for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
 
-                    _lng, _lat = ss.centroid.lnglat
+                    _lng, _lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     _prn_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.prn'
                     _cli_fn = f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.cli'
                     
@@ -2713,8 +2713,7 @@ class Climate(NoDbBase, LogMixin):
             cligen = Cligen(stationMeta, wd=cli_dir)
 
             hillslope_locations = {'ws': {'longitude': ws_lng, 'latitude': ws_lat}}
-            for topaz_id, ss in watershed._subs_summary.items():
-                _lng, _lat = ss.centroid.lnglat
+            for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
                 hillslope_locations[topaz_id] = {'longitude': _lng, 'latitude': _lat}
 
             hillslope_locations = identify_pixel_coords(hillslope_locations, daymet_version=self.daymet_version)
@@ -2741,9 +2740,7 @@ class Climate(NoDbBase, LogMixin):
             sub_cli_fns = {}
             with ProcessPoolExecutor(max_workers=40) as executor:
                 futures = []
-                for topaz_id, ss in watershed._subs_summary.items():
-
-                    _lng, _lat = ss.centroid.lnglat
+                for topaz_id, (_lng, _lat) in watershed.centroid_hillslope_iter():
                     _prn_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'
                     _cli_fn = f'daymet_observed_{topaz_id}_{start_year}-{end_year}.cli'
                     

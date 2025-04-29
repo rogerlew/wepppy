@@ -87,6 +87,7 @@ if __name__ == "__main__":
         print('skidid', skidid)
         for topaz_id in skid_subwta_x[skidid]:
             print('  topaz_id', topaz_id)
+            # breaking this on 4/28/2025 so fps_summary is for all flowpaths
             _flowpaths = watershed.fps_summary(topaz_id)
             for fp_id, fp_summary in _flowpaths.items():
                 x = False

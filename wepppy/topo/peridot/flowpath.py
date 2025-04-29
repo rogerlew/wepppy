@@ -77,6 +77,10 @@ class PeridotHillslope:
     width: int
     color: str
 
+    @property
+    def slp_rel_path(self):
+        return f'slope_files/hillslopes/hill_{self.topaz_id}.slp'
+
     @classmethod
     def from_dict(cls, d):
         slope = float(d['slope_scalar'])

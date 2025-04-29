@@ -1196,13 +1196,33 @@ var ChannelDelineation = function () {
         that.topIds = [];
         that.labels = L.layerGroup();
 
-        that.style = function () {
+        that.style = function(feature) {
+            let order = parseInt(feature.properties.Order, 7);
+
+            if (order > 7) {
+                order = 7;
+            }
+
+            // simple map for Orders 1–6
+            const colors = {
+              0: "#B0F9FE",
+              1: "#8AE5FE",
+              2: "#65C8FE",
+              3: "#479EFF",
+              4: "#306EFE",
+              5: "#2500F4",
+              6: "#2838FE",
+              7: "#1F00CF",
+            };
+            // default for everything else (>6 or missing)
+            const stroke = colors[order] || "#1F00CF";
+            const fill = colors[order-1] || "#2838FE";
             return {
-                color: "#0010FF",
-                opacity: 1,
-                weight: 1,
-                fillColor: "#0010FF",
-                fillOpacity: 0.9
+              color:      stroke,
+              weight:     1,
+              opacity:    1,
+              fillColor:  fill,
+              fillOpacity: 0.9
             };
         };
 

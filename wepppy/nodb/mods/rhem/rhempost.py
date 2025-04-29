@@ -121,8 +121,8 @@ class RhemPost(NoDbBase):
 
             missing_sum = 0
 
-            for topaz_id, summary in watershed.sub_iter():
-                area_ha = summary.area / 10000
+            for topaz_id in watershed._subs_summary:
+                area_ha = watershed.hillslope_area(topaz_id) / 10000
                 total_area += area_ha
                 summary_fn = _join(out_dir, 'hill_{}.sum'.format(topaz_id))
                 hill_summaries[topaz_id] = RhemSummary(summary_fn, area_ha)

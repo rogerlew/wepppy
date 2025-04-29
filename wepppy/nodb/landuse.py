@@ -24,6 +24,8 @@ import jsonpickle
 import numpy as np
 import pandas as pd
 
+from deprecated import deprecated
+
 # wepppy
 from wepppy.landcover import LandcoverMap
 from wepppy.wepp.management import get_management_summary
@@ -51,7 +53,6 @@ try:
     from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
 except:
     wepppyo3 = None
-
 
 class LanduseNoDbLockedException(Exception):
     pass
@@ -334,16 +335,9 @@ class Landuse(NoDbBase, LogMixin):
         domlc_d = {}
 
         watershed = Watershed.getInstance(self.wd)
-        for topaz_id, summary in watershed.sub_iter():
-            lng, lat = summary.centroid.lnglat
+        for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
             d = esd.query(lng, lat, ['usedo'])
             assert 'usedom' in d, d
-            dom = d['usedom'][1]
-            domlc_d[topaz_id] = str(dom)
-
-        for topaz_id, _ in watershed.chn_iter():
-            lng, lat = summary.centroid.lnglat
-            d = esd.query(lng, lat, ['usedo'])
             dom = d['usedom'][1]
             domlc_d[topaz_id] = str(dom)
 
@@ -357,13 +351,7 @@ class Landuse(NoDbBase, LogMixin):
         domlc_d = {}
 
         watershed = Watershed.getInstance(self.wd)
-        for topaz_id, summary in watershed.sub_iter():
-            lng, lat = summary.centroid.lnglat
-            dom = lu.query_dom(lng, lat)
-            domlc_d[topaz_id] = dom
-
-        for topaz_id, _ in watershed.chn_iter():
-            lng, lat = summary.centroid.lnglat
+        for topaz_id, (lng, lat) in watershed.centroid_hillslope_iter():
             dom = lu.query_dom(lng, lat)
             domlc_d[topaz_id] = dom
 
@@ -439,10 +427,7 @@ class Landuse(NoDbBase, LogMixin):
         domlc_d = {}
 
         watershed = Watershed.getInstance(self.wd)
-        for topaz_id, _ in watershed.sub_iter():
-            domlc_d[topaz_id] = str(self.single_selection)
-
-        for topaz_id, _ in watershed.chn_iter():
+        for topaz_id in watershed._subs_summary:
             domlc_d[topaz_id] = str(self.single_selection)
 
         self.domlc_d = domlc_d
@@ -561,7 +546,7 @@ class Landuse(NoDbBase, LogMixin):
                 if dom not in area_data:
                     area_data[dom] = []
 
-                area = watershed.area_of(topaz_id)
+                area = watershed.hillslope_area(topaz_id)
                 _cancov=cancov_d.get(topaz_id, None)
                 if _cancov is not None:
                     area_data[dom].append(dict(area=area, cancov=_cancov))
@@ -675,7 +660,7 @@ class Landuse(NoDbBase, LogMixin):
 
         watershed = Watershed.getInstance(self.wd)
         cancov_d = {}
-        for topaz_id, ss in watershed.sub_iter():
+        for topaz_id in watershed._subs_summary:
             if rap is not None:
                 cancov_d[topaz_id] = {}
 
@@ -1025,6 +1010,15 @@ class Landuse(NoDbBase, LogMixin):
             raise
 
     def _x_summary(self, topaz_id: str):
+        
+        if _exists(_join(self.lc_dir, 'landuse.parquet')):
+            from .duckdb_agents import get_landuse_sub_summary
+            return get_landuse_sub_summary(self.wd, topaz_id)
+        
+        return self._deprecated_x_summary(topaz_id)
+        
+    @deprecated
+    def _deprecated_x_summary(self, topaz_id: str):
         topaz_id = str(topaz_id)
         domlc_d = self.domlc_d
 
@@ -1083,6 +1077,15 @@ class Landuse(NoDbBase, LogMixin):
         """
         Returns a dictionary with topaz_id keys and dictionary soils values.
         """
+        if _exists(_join(self.lc_dir, 'landuse.parquet')):
+
+            from .duckdb_agents import get_landuse_subs_summary
+            return get_landuse_subs_summary(self.wd)
+            
+        return self._subs_summary_gen()
+        
+    def _subs_summary_gen(self):
+
         domlc_d = self.domlc_d
         mans = self.managements
 
@@ -1110,7 +1113,11 @@ class Landuse(NoDbBase, LogMixin):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
-        df = self.hill_table
+        dict_result = self._subs_summary_gen()
+        df = pd.DataFrame.from_dict(dict_result, orient='index')
+        df.index.name = 'TopazID'
+        df.reset_index(inplace=True)
+        df['TopazID'] = df['TopazID'].astype(str).astype('int64')
         df.to_parquet(_join(self.lc_dir, 'landuse.parquet'))
 
     @property
@@ -1118,14 +1125,20 @@ class Landuse(NoDbBase, LogMixin):
         """
         Returns a pandas DataFrame with the hill table.
         """
-        subs_summary = self.subs_summary
-        assert subs_summary is not None
+        if _exists(_join(self.lc_dir, 'landuse.parquet')):
+            from .duckdb_agents import get_landuse_subs_summary
+            return get_landuse_subs_summary(self.wd, return_as_df=True)
+        
+        return self._deprecated_hill_table()
 
-        df = pd.DataFrame.from_dict(subs_summary, orient='index')
+    @deprecated
+    def _deprecated_hill_table(self):
+        
+        dict_result = self._subs_summary_gen()
+        df = pd.DataFrame.from_dict(dict_result, orient='index')
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
-        #df['dom'] = df['dom'].astype(str)
         
         return df
     

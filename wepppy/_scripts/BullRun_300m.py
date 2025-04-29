@@ -415,7 +415,7 @@ if __name__ == '__main__':
 
                 sub_par_fns = {}
                 sub_cli_fns = {}
-                for topaz_id, ss in watershed._subs_summary.items():
+                for topaz_id, ss in watershed.subs_summary.items():
                     log_print(topaz_id)
                 lng, lat = ss.centroid.lnglat
 

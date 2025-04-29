@@ -412,6 +412,7 @@ def api_build_treatments(runid, config):
     try:
         wd = get_wd(runid)
         treatments = Treatments.getInstance(wd)
+        landuse = Landuse.getInstance(wd)
 
         # check for file for mode 4, mode is set asynchronously
         if treatments.mode == TreatmentsMode.UserDefinedMap:
@@ -422,7 +423,7 @@ def api_build_treatments(runid, config):
             if mapping is None:
                 return error_factory('landuse_management_mapping_selection must be provided')
             else:
-                landuse.management_mapping = mapping
+                landuse.mapping = mapping
             
             try:
                 file = request.files['input_upload_landuse']

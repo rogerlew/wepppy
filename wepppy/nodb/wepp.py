@@ -1300,7 +1300,7 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
-        for topaz_id, _ in watershed.sub_iter():
+        for topaz_id in watershed._subs_summary:
             wepp_id = translator.wepp(top=int(topaz_id))
 
             src_fn = _join(wat_dir, 'slope_files/hillslopes/hill_{}.slp'.format(topaz_id))
@@ -1323,7 +1323,7 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
-        for topaz_id, _ in watershed.sub_iter():
+        for topaz_id in watershed._subs_summary:
             wepp_id = translator.wepp(top=int(topaz_id))
 
             src_fn = _join(wat_dir, 'hill_{}.slp'.format(topaz_id))
@@ -1336,6 +1336,8 @@ class Wepp(NoDbBase, LogMixin):
         self.log_done()
 
     def _prep_multi_ofe(self, translator, omni=False):
+        from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
+
         self.log('    Prepping _prep_multi_ofe... ')
         wd = self.wd
 
@@ -1368,12 +1370,13 @@ class Wepp(NoDbBase, LogMixin):
         if kslast_map_fn is not None:
             kslast_map = RasterDatasetInterpolator(kslast_map_fn)
 
-        for topaz_id, sub in watershed.sub_iter():
+        for topaz_id, ss in watershed.subs_summary.items():
             wepp_id = translator.wepp(top=int(topaz_id))
+            lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
 
             # slope files
             if not omni:
-                src_fn = _join(wat_dir, sub.fname.replace('.slp', '.mofe.slp'))
+                src_fn = _join(wat_dir, slp_fn.replace('.slp', '.mofe.slp'))
                 dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
                 _copyfile(src_fn, dst_fn)
 
@@ -1384,8 +1387,6 @@ class Wepp(NoDbBase, LogMixin):
             _kslast = None
 
             if kslast_map is not None:
-                lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
-
                 try:
                     _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
                 except RDIOutOfBoundsException:
@@ -1584,7 +1585,7 @@ class Wepp(NoDbBase, LogMixin):
                 modify_kslast_pars = None
 
                 if kslast_map is not None:
-                    lng, lat = watershed._subs_summary[topaz_id].centroid.lnglat
+                    lng, lat = watershed.subs_summary[topaz_id].centroid.lnglat
                     try:
                         _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
                         modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
@@ -1619,7 +1620,7 @@ class Wepp(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         fp_runs_dir = self.fp_runs_dir
 
-        for topaz_id, _ in watershed.sub_iter():
+        for topaz_id in watershed._subs_summary:
             self.log(f'    _prep_climates:{topaz_id}... ')
 
             wepp_id = translator.wepp(top=int(topaz_id))
@@ -1646,7 +1647,7 @@ class Wepp(NoDbBase, LogMixin):
             ss_batch_key = d['ss_batch_key']
             cli_fn = d['cli_fn']
 
-            for topaz_id, _ in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 self.log(f'    _prep_climates:{topaz_id}... ')
 
                 wepp_id = translator.wepp(top=int(topaz_id))
@@ -1672,13 +1673,13 @@ class Wepp(NoDbBase, LogMixin):
         years = climate.input_years
 
         if climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
-            for topaz_id, _ in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
 
                 make_ss_hillslope_run(wepp_id, runs_dir, omni=omni)
 
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
-            for topaz_id, _ in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
 
                 for d in climate.ss_batch_storms:
@@ -1687,7 +1688,7 @@ class Wepp(NoDbBase, LogMixin):
                     make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key, omni=omni)
 
         else:
-            for topaz_id, _ in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 wepp_id = translator.wepp(top=int(topaz_id))
                 make_hillslope_run(wepp_id, years, runs_dir, reveg=reveg, omni=omni)
 
@@ -1716,7 +1717,7 @@ class Wepp(NoDbBase, LogMixin):
         with ThreadPoolExecutor(NCPU) as pool:
             futures = []
             if climate.climate_mode == ClimateMode.SingleStormBatch:
-                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                for i, topaz_id in enumerate(watershed._subs_summary):
 
                     ss_n = len(climate.ss_batch_storms)
                     for d in climate.ss_batch_storms:
@@ -1735,7 +1736,7 @@ class Wepp(NoDbBase, LogMixin):
                         futures[-1].add_done_callback(oncomplete)
 
             else:
-                for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+                for i, topaz_id in enumerate(watershed._subs_summary):
                     self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})')
                     wepp_id = translator.wepp(top=int(topaz_id))
                     futures.append(pool.submit(

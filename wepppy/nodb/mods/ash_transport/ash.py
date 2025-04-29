@@ -779,12 +779,12 @@ class Ash(NoDbBase, LogMixin):
             self.log('  Running Hillslopes\n')
             meta = {}
             args = []
-            for topaz_id, sub in watershed.sub_iter():
+            for topaz_id in watershed._subs_summary:
                 self.log(f'    Running Hillslope {topaz_id}\n')
 
                 meta[topaz_id] = {}
                 wepp_id = translator.wepp(top=topaz_id)
-                area_ha = sub.area / 10000
+                area_ha = watershed.hillslope_area(topaz_id) / 10000
 
                 burn_class = landuse.identify_burn_class(topaz_id)
                 burn_class = ['Unburned', 'Low', 'Moderate', 'High'].index(burn_class)

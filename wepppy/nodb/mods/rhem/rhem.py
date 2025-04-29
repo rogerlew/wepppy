@@ -157,7 +157,7 @@ class Rhem(NoDbBase, LogMixin):
         runs_dir = self.runs_dir
         out_dir = self.output_dir
 
-        for topaz_id, summary in watershed.sub_iter():
+        for topaz_id in watershed._subs_summary:
             mukey = soils.domsoil_d[topaz_id]
             soil_texture = soils.soils[mukey].texture
 
@@ -186,7 +186,7 @@ class Rhem(NoDbBase, LogMixin):
                                          slope_steepness=slp.slope_scalar,
                                          sl=slp.slopes,
                                          sx=slp.distances,
-                                         width=summary.width,
+                                         width=watershed.width_of(topaz_id),
                                          model_version='WEPPcloud')
 
             stm_fn = _join(runs_dir, 'hill_{}.stm'.format(topaz_id))
@@ -241,7 +241,7 @@ class Rhem(NoDbBase, LogMixin):
             self.log('  {} completed run in {}s\n'.format(_id, elapsed_time))
 
         sub_n = watershed.sub_n
-        for i, (topaz_id, _) in enumerate(watershed.sub_iter()):
+        for i, topaz_id in enumerate(watershed._subs_summary):
             self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n})\n')
             self.log(f'      runs_dir: {runs_dir}\n')
 

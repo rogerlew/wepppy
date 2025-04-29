@@ -513,22 +513,7 @@ class WatershedAbstraction:
             data[chnum]["chn_id"] = chn_id0
             data[chnum]["chnout_id"] = chnout_id
 
-            # node_indexes = [data[chnum]["node%i" % i] for i in range(1, 8)]
-            # node_indexes = [indx for indx in node_indexes if indx != 0]
             self.watershed["channels"][chnout_id].order = int(data[chnum]["order"])
-
-            # Old broken order assignment
-            # for chn_enum in node_indexes:
-            #     if chn_enum > translator.channel_n:
-            #         continue
-            #
-            #    chn_id = "chn_%i" % translator.top(chn_enum=chn_enum)
-            #     if chn_id not in self.watershed["channels"]:
-            #       self.watershed["channels"][chn_id] = {}
-            #
-            #    order = data[chnum]["order"]
-            #    self.watershed["channels"][chn_id].order = order
-            #    # self.watershed["channels"][chn_id].width = self.cellsize / order
 
             if chnout_id == chn_id0:
                 continue

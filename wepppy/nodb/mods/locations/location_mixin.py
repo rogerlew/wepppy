@@ -123,7 +123,7 @@ class LocationMixin(object):
             # need to recalculate the pct_coverages
             watershed = Watershed.getInstance(self.wd)
             for topaz_id, k in domsoil_d.items():
-                _soils[k].area += watershed.area_of(topaz_id)
+                _soils[k].area += watershed.hillslope_area(topaz_id)
 
             for k in _soils:
                 coverage = 100.0 * _soils[k].area / watershed.wsarea
