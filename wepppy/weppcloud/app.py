@@ -1058,9 +1058,9 @@ def create_redirect():
 @app.route('/create/')
 def create_index():
     configs = get_configs()
-    x = ['<tr><td><a href="{0}">{0}</a></td>'
-         '<td><a href="{0}?general:dem_db=ned1/2016">{0} ned1/2016</a></td>'
-         '<td><a href="{0}?watershed:delineation_backend=taudem">{0} TauDEM</a></td></tr>'
+    x = ['<tr><td><a href="{0}" rel="nofollow">{0}</a></td>'
+         '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
+         '<td><a href="{0}?watershed:delineation_backend=taudem" rel="nofollow">{0} TauDEM</a></td></tr>'
          .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
     return '<html><body>'\
            '<link rel="stylesheet" '\
@@ -1527,7 +1527,6 @@ def runs0(runid, config):
 
     try:
 
-
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
         climate = Climate.getInstance(wd)
@@ -1860,6 +1859,9 @@ def resources_subcatchments_geojson(runid, config):
         if not _exists(fn):
             fn = _join(wd, 'dem/taudem/subcatchments.WGS.geojson')
 
+        if _exists(fn):
+            return send_file(fn, mimetype='application/json')
+
         js = json.load(open(fn))
         ron = Ron.getInstance(wd)
         name = ron.name
@@ -1919,6 +1921,10 @@ def resources_bounds_geojson(runid, config):
 def resources_channels_geojson(runid, config):
     try:
         wd = get_wd(runid)
+        channels_fn = _join(wd, '/dem/topaz/CHANNELS.WGS.JSON')
+        if _exists(channels_fn):
+            return send_file(_join(self.topaz_wd, 'CHANNELS.WGS.JSON'), mimetype='application/json')
+
         watershed = Watershed.getInstance(wd)
         fn = watershed.channels_shp
 

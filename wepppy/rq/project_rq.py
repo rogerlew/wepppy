@@ -496,7 +496,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
                 StatusMessenger.publish(status_channel, f"ERROR: {line.strip()}")
             raise Exception(f"rsync command failed with return code {p.returncode}")
             
-        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs...')
+        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs...\n')
 
         # replace the runid in the nodb files
         nodbs = glob(_join(new_wd, '*.nodb'))
@@ -509,8 +509,8 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
             with open(fn, 'w') as fp:
                 fp.write(s)
                 
-        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs... done.')
-        StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC...')
+        StatusMessenger.publish(status_channel, 'Setting wd in .nodbs... done.\n')
+        StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC...\n')
 
         # delete any active locks
         locks = glob(_join(new_wd, '*.lock'))
@@ -525,31 +525,31 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         if _exists(fn):
             os.remove(fn)
 
-        StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC... done.')
+        StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC... done.\n')
 
         if undisturbify:
-            StatusMessenger.publish(status_channel, 'Undisturbifying Project...')
+            StatusMessenger.publish(status_channel, 'Undisturbifying Project...\n')
             ron = Ron.getInstance(new_wd)
             ron.scenario = 'Undisturbed'
             
-            StatusMessenger.publish(status_channel, 'Removing SBS...')
+            StatusMessenger.publish(status_channel, 'Removing SBS...\n')
             disturbed = Disturbed.getInstance(new_wd)
             disturbed.remove_sbs()
-            StatusMessenger.publish(status_channel, 'Removing SBS... done.')
+            StatusMessenger.publish(status_channel, 'Removing SBS... done.\n')
 
-            StatusMessenger.publish(status_channel, 'Rebuilding Landuse...')
+            StatusMessenger.publish(status_channel, 'Rebuilding Landuse...\n')
             landuse = Landuse.getInstance(new_wd)
             landuse.build()
-            StatusMessenger.publish(status_channel, 'Rebuilding Landuse... done.')
+            StatusMessenger.publish(status_channel, 'Rebuilding Landuse... done.\n')
 
-            StatusMessenger.publish(status_channel, 'Rebuilding Soils...')
+            StatusMessenger.publish(status_channel, 'Rebuilding Soils...\n')
             soils = Soils.getInstance(new_wd)
             soils.build()
-            StatusMessenger.publish(status_channel, 'Rebuilding Soils... done.')
+            StatusMessenger.publish(status_channel, 'Rebuilding Soils... done.\n')
 
-            StatusMessenger.publish(status_channel, 'Running WEPP...')
+            StatusMessenger.publish(status_channel, 'Running WEPP...\n')
             run_wepp_rq(new_runid)
-            StatusMessenger.publish(status_channel, 'Running WEPP... done')
+            StatusMessenger.publish(status_channel, 'Running WEPP... done\n')
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         

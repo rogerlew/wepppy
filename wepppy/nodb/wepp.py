@@ -1867,7 +1867,7 @@ class Wepp(NoDbBase, LogMixin):
             fp.write('99.1\r\n{chn_n}\r\n2\r\n1.00000\r\n'
                      .format(chn_n=chn_n))
 
-        for topaz_id, chn_summary in watershed.chn_iter():
+        for topaz_id, chn_summary in watershed.chns_summary.items():
             # need to do this incase someone tries to run a pre peridot project
             if isinstance(chn_summary, dict):
                 chn_key = chn_summary.get('channel_type', 'Default')

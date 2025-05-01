@@ -470,11 +470,6 @@ def query_monthly():
     if not _exists(fname):
         return jsonify({'Error': 'could not find dataset "%s"' % fname})
         
-    print('metquery::query_monthly fname', fname)
-    print('metquery::query_monthly lat', lat)
-    print('metquery::query_monthly lng', lng)
-    print('metquery::query_monthly method', method)
-    print('metquery::query_monthly dataset', dataset)
     rds = RasterDatasetInterpolator(fname)
     data = rds.get_location_info(lng, lat, method)
     

@@ -310,16 +310,15 @@ class Loss(object):
                 wepp_id = row['Hillslopes']
 
                 topaz_id = translator.top(wepp=wepp_id)
-                sub_summary = watershed.sub_summary(str(topaz_id))
                 area = row['Hillslope Area']
                 if area == 0.0:
-                    area = sub_summary['area'] * 1e-4
+                    area = watershed.hillslope_area(topaz_id) * 1e-4
 
                 hill_tbl[i]['WeppID'] = wepp_id
                 hill_tbl[i]['TopazID'] = topaz_id
                 hill_tbl[i]['Landuse'] = landuse.domlc_d[str(topaz_id)]
                 hill_tbl[i]['Soil'] = soils.domsoil_d[str(topaz_id)]
-                hill_tbl[i]['Length'] = sub_summary['length']
+                hill_tbl[i]['Length'] = watershed.hillslope_length(topaz_id) 
 
                 if isfloat(row['Runoff Volume']):
                     hill_tbl[i]['Runoff'] = 100 * float(row['Runoff Volume']) / (area * 1000.0)
@@ -384,14 +383,13 @@ class Loss(object):
                 topaz_id = translator.top(chn_enum=chn_id)
                 wepp_id = translator.wepp(chn_enum=chn_id)
 
-                chn_summary = watershed.chn_summary(str(topaz_id))
-                area = chn_summary['area'] / 10000.0
+                area = watershed.channel_area(topaz_id) / 10000.0
                 chn_tbl[i]['WeppID'] = chn_id
                 chn_tbl[i]['WeppChnID'] = wepp_id
                 chn_tbl[i]['TopazID'] = topaz_id
                 chn_tbl[i]['Area'] = area
                 chn_tbl[i]['Contributing Area'] = row['Contributing Area']
-                chn_tbl[i]['Length'] = chn_summary['length']
+                chn_tbl[i]['Length'] = watershed.channel_length(topaz_id)
 
                 if isfloat(row['Sediment Yield']):
                     chn_tbl[i]['Sediment Yield Density'] = float(row['Sediment Yield']) / area
@@ -430,8 +428,6 @@ class Loss(object):
         chn_tbl = pd.DataFrame(chn_tbl)
         out_tbl = pd.DataFrame(out_tbl)
         class_data = pd.DataFrame(class_data)
-
-
 
         for key in (
             'Type',

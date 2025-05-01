@@ -252,7 +252,7 @@ UTREAT
     - description of management: OldForest, YoungForest, Shrub, Bunchgrass, Sod, LowFire, HighFire, Skid
     
 USLP_LNG
-    - length of the upper slope (50% of total slope)
+    - length of the upper slope (50% of total slope) in meters
 
 LTREAT
     - description of management: OldForest, YoungForest, Shrub, Bunchgrass, Sod, LowFire, HighFire, Skid
@@ -270,7 +270,7 @@ LGRD_BTM
     - Lower bottom slope (%)
     
 LSLP_LNG
-    - length of the lower slope (50% of total slope)
+    - length of the lower slope (50% of total slope) in meters
     
 Slope parameters for ERMiT WEPP Batch File
 ----------------------------------------------

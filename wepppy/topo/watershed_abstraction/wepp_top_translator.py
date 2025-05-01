@@ -269,11 +269,11 @@ class WeppTopTranslator:
             # and translate topaz to wepp
             structure.append([int(v) for v in _structure])
 
-            if pickle_fn is not None:
-                import pickle
-                with open(pickle_fn, 'wb') as f:
-                    pickle.dump(structure, f)
-                return None
+        if pickle_fn is not None:
+            import pickle
+            with open(pickle_fn, 'wb') as f:
+                pickle.dump(structure, f)
+            return None
 
         return structure
 

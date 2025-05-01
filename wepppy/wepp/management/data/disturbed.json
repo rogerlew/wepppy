@@ -10,6 +10,7 @@
  "41": {"Key": 41,  "Color": [104,170,99,255],  "DisturbedClass": "forest", "Description": "Deciduous Forest", "ManagementFile": "UnDisturbed/Old_Forest.man"},
  "42": {"Key": 42,  "Color": [28,99,48,255],    "DisturbedClass": "forest", "Description": "Evergreen Forest", "ManagementFile": "UnDisturbed/Old_Forest.man"},
  "43": {"Key": 43,  "Color": [181,201,142,255], "DisturbedClass": "forest", "Description": "Mixed Forest", "ManagementFile": "UnDisturbed/Old_Forest.man"},
+ "44": {"Key": 44,  "Color": [181,201,142,255], "DisturbedClass": "young forest", "Description": "Young Forest", "ManagementFile": "UnDisturbed/Young_Forest.man"},
  "51": {"Key": 51,  "Color": [165,140,48,255],  "DisturbedClass": "shrub", "Description": "Shrubland", "ManagementFile": "UnDisturbed/Shrub.man"},
  "52": {"Key": 52,  "Color": [204,186,124,255], "DisturbedClass": "shrub", "Description": "Shrub/Scrub", "ManagementFile": "UnDisturbed/Shrub.man"},
  "61": {"Key": 61,  "Color": [252,163,205,255], "DisturbedClass": "young forest", "Description": "Orchards/Vineyards/Other", "ManagementFile": "GeoWEPP/grass.man"},
