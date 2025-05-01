@@ -42,8 +42,6 @@ class WeppSoilUtil(object):
         self.compute_erodibilities = compute_erodibilities
         self.compute_conductivity = compute_conductivity
 
-        print(f'WeppSoilUtil:: {fn}')
-
         if fn.endswith('.sol'):
             try:
                 self._parse_sol(fn)

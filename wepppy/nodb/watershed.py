@@ -93,7 +93,7 @@ def process_subcatchment(args):
     return sub_id, sub_summary, fp_d
 
 
-TRANSIENT_FIELDS = ['_sub_area_lookup']
+TRANSIENT_FIELDS = ['_sub_area_lookup', '_sub_length_lookup']
 
 class Watershed(NoDbBase, LogMixin):
     __name__ = 'Watershed'
@@ -1075,10 +1075,10 @@ class Watershed(NoDbBase, LogMixin):
     def centroid(self) -> Tuple[float, float]:
         return self._centroid
 
-    def sub_summary(self, topaz_id) -> Union[Dict, None]:
+    def sub_summary(self, topaz_id) -> Union[PeridotHillslope, None]:
         if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
             from .duckdb_agents import get_watershed_sub_summary
-            return get_watershed_sub_summary(self.wd, topaz_id)
+            return PeridotHillslope.from_dict(get_watershed_sub_summary(self.wd, topaz_id))
         
         if _exists(_join(self.wat_dir, 'hillslopes.csv')):
             import duckdb
@@ -1107,11 +1107,8 @@ class Watershed(NoDbBase, LogMixin):
             return None
 
     def fps_summary(self, topaz_id):
-        if _exists(_join(self.wat_dir, 'flowpaths.csv')) or \
-           _exists(_join(self.wat_dir, 'flowpaths.parquet')):
+        if _exists(_join(self.wat_dir, 'flowpaths.parquet')):
             import pandas as pd
-            from wepppy.topo.peridot import PeridotFlowpath
-        
             if _exists(_join(self.wat_dir, 'flowpaths.parquet')):
                 df = pd.read_parquet(_join(self.wat_dir, 'flowpaths.parquet'))
             else:
@@ -1154,23 +1151,17 @@ class Watershed(NoDbBase, LogMixin):
 
     @property
     def subs_summary(self) -> Dict[str, Dict]:
-        if _exists(_join(self.wat_dir, 'hillslopes.csv')) or \
-           _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            from .duckdb_agents import get_watershed_subs_summary
+            summaries = get_watershed_subs_summary(self.wd)
+            return {topaz_id: PeridotHillslope.from_dict(d) for topaz_id, d in summaries.items()}
         
-            if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
-                df = pd.read_parquet(_join(self.wat_dir, 'hillslopes.parquet'))
-            else:
-                df = pd.read_csv(_join(self.wat_dir, 'hillslopes.csv'))
-                df['topaz_id'] = df['topaz_id'].astype(str)
-
-            return {rec['topaz_id']: PeridotHillslope.from_dict(rec) for rec in df.to_dict('records')}
-
         return {k: v.as_dict() for k, v in self._subs_summary.items()}
 
     def chn_summary(self, topaz_id) -> Union[Dict, None]:
         if _exists(_join(self.wat_dir, 'channels.parquet')):
             from .duckdb_agents import get_watershed_chn_summary
-            return get_watershed_chn_summary(self.wd, topaz_id)
+            return PeridotChannel.from_dict(get_watershed_chn_summary(self.wd, topaz_id))
         
         if _exists(_join(self.wat_dir, 'channels.csv')):
             import duckdb
@@ -1196,26 +1187,13 @@ class Watershed(NoDbBase, LogMixin):
             return None
 
     @property
-    def chns_summary(self) -> Dict[str, Dict]:
-        if _exists(_join(self.wat_dir, 'channels.csv')) or \
-           _exists(_join(self.wat_dir, 'channels.parquet')):
-            import pandas as pd
-            from wepppy.topo.peridot import PeridotChannel
-        
-            if _exists(_join(self.wat_dir, 'channels.parquet')):
-                df = pd.read_parquet(_join(self.wat_dir, 'channels.parquet'))
-            else:
-                df = pd.read_csv(_join(self.wat_dir, 'channels.csv'))
-                df['topaz_id'] = df['topaz_id'].astype(str)
-
-            return {rec['topaz_id']: PeridotChannel.from_dict(rec) for rec in df.to_dict('records')}
+    def chns_summary(self) -> Dict[str, PeridotChannel]:
+        if _exists(_join(self.wat_dir, 'channels.parquet')):
+            from .duckdb_agents import get_watershed_chns_summary
+            summaries = get_watershed_chns_summary(self.wd)
+            return {topaz_id: PeridotChannel.from_dict(d) for topaz_id, d in summaries.items()}
         
         return {k: v.as_dict() for k, v in self._chns_summary.items()}
-
-    def chn_iter(self) -> Generator[ChannelSummary, None, None]:
-        if self.chn_n > 0:
-            for topaz_id, v in self._chns_summary.items():
-                yield topaz_id, v
 
     def hillslope_area(self, topaz_id):
         if hasattr(self, '_sub_area_lookup'):
@@ -1232,6 +1210,21 @@ class Watershed(NoDbBase, LogMixin):
             
         return self._deprecated_area_of(topaz_id)
 
+    def channel_area(self, topaz_id):
+        if hasattr(self, '_chn_area_lookup'):
+            return self._chn_area_lookup[str(topaz_id)]
+        
+        if _exists(_join(self.wat_dir, 'channels.parquet')):
+            import duckdb
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, 'channels.parquet')
+                # lazy load self._sub_area_lookup with duckdb
+                result = con.execute(f"SELECT topaz_id, area FROM read_parquet('{parquet_fn}')").fetchall()
+                self._chn_area_lookup = {str(row[0]): row[1] for row in result}
+                return self._chn_area_lookup[str(topaz_id)]
+            
+        return self._deprecated_area_of(topaz_id)
+    
     @deprecated
     def _deprecated_area_of(self, topaz_id):
         topaz_id = str(topaz_id)
@@ -1239,6 +1232,44 @@ class Watershed(NoDbBase, LogMixin):
             return self._chns_summary[topaz_id].area
         else:
             return self._subs_summary[topaz_id].area
+
+    def hillslope_length(self, topaz_id):
+        if hasattr(self, '_sub_length_lookup'):
+            return self._sub_length_lookup[str(topaz_id)]
+        
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            import duckdb
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, 'hillslopes.parquet')
+                # lazy load self._sub_area_lookup with duckdb
+                result = con.execute(f"SELECT topaz_id, length FROM read_parquet('{parquet_fn}')").fetchall()
+                self._sub_length_lookup = {str(row[0]): row[1] for row in result}
+                return self._sub_length_lookup[str(topaz_id)]
+            
+        return self._deprecated_length_of(topaz_id)
+
+    def channel_length(self, topaz_id):
+        if hasattr(self, '_chn_length_lookup'):
+            return self._chn_length_lookup[str(topaz_id)]
+        
+        if _exists(_join(self.wat_dir, 'channels.parquet')):
+            import duckdb
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, 'channels.parquet')
+                # lazy load self._chn_area_lookup with duckdb
+                result = con.execute(f"SELECT topaz_id, length FROM read_parquet('{parquet_fn}')").fetchall()
+                self._chn_length_lookup = {str(row[0]): row[1] for row in result}
+                return self._chn_length_lookup[str(topaz_id)]
+            
+        return self._deprecated_length_of(topaz_id)
+
+    @deprecated
+    def _deprecated_length_of(self, topaz_id):
+        topaz_id = str(topaz_id)
+        if topaz_id.endswith('4'):
+            return self._chns_summary[topaz_id].length
+        else:
+            return self._subs_summary[topaz_id].length
 
     def hillslope_centroid_lnglat(self, topaz_id):
         wat_ss = self.subs_summary[topaz_id]

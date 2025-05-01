@@ -67,6 +67,7 @@ class PeridotFlowpath:
 @dataclass
 class PeridotHillslope:
     topaz_id: str
+    wepp_id: str
     area: float
     centroid: Centroid
     direction: float
@@ -88,6 +89,7 @@ class PeridotHillslope:
         color = slp_asp_color(slope, aspect)
         return cls(
             topaz_id=d['topaz_id'],
+            wepp_id=d.get('wepp_id', None),
             area=d['area'],
             centroid=Centroid(lnglat=[d['centroid_lon'], d['centroid_lat']],
                               px=[d['centroid_px'], d['centroid_py']]),
@@ -103,6 +105,7 @@ class PeridotHillslope:
     def as_dict(self):
         d = dict(
             topaz_id=self.topaz_id,
+            wepp_id=getattr(self, 'wepp_id', None),
             length=self.length,
             width=self.width,
             area=self.area,
@@ -129,6 +132,7 @@ class PeridotHillslope:
 @dataclass
 class PeridotChannel:
     topaz_id: str
+    wepp_id: str
     area: float
     centroid: Centroid
     direction: float
@@ -147,6 +151,7 @@ class PeridotChannel:
         color = slp_asp_color(slope, aspect)
         return cls(
             topaz_id=d['topaz_id'],
+            wepp_id=d.get('wepp_id', None),
             area=d['area'],
             centroid=Centroid(lnglat=[d['centroid_lon'], d['centroid_lat']],
                               px=[d['centroid_px'], d['centroid_py']]),
@@ -167,6 +172,7 @@ class PeridotChannel:
     def as_dict(self):
         d = dict(
             topaz_id=self.topaz_id,
+            wepp_id=getattr(self, 'wepp_id', None),
             length=self.length,
             width=self.width,
             area=self.area,

@@ -735,15 +735,15 @@ class Ron(NoDbBase):
             _landuse_summaries = get_landuse_subs_summary(wd, return_as_df=False)
 
             summaries = []
-            for topaz_id, wat_d in _watershed_summaries.items():
+            for topaz_id, wat_ss in _watershed_summaries.items():
                 soils_d = _soils_summaries[topaz_id]
                 landuse_d = _landuse_summaries[topaz_id]
 
                 summaries.append(
                     dict(meta=dict(hill_type='Hillslope',
                                    topaz_id=topaz_id,
-                                   wepp_id=wat_d['WeppID']),
-                         watershed=wat_d,
+                                   wepp_id=wat_ss.wepp_id),
+                         watershed=wat_ss,
                          soil=soils_d,
                          climate=climate.sub_summary(topaz_id),
                          landuse=landuse_d))
@@ -834,7 +834,7 @@ class Ron(NoDbBase):
         return dict(
             meta=dict(hill_type='Hillslope', topaz_id=topaz_id,
                       wepp_id=wepp_id),
-            watershed=_watershed,
+            watershed=_watershed.as_dict(),
             soil=_soils,
             climate=climate.sub_summary(topaz_id),
             landuse=_landuse
@@ -876,7 +876,10 @@ class Ron(NoDbBase):
                                topaz_id=topaz_id,
                                wepp_id=wepp_id,
                                chn_enum=chn_enum),
-                     watershed=watershed.chn_summary(topaz_id))
+                     watershed=watershed.chn_summary(topaz_id),
+                     soil=None,
+                     climate=None,
+                     landuse=None)
             )
 
         return summaries
@@ -887,7 +890,9 @@ class Ron(NoDbBase):
         _watershed = None
         if _exists(_join(wd, 'watershed/channels.parquet')):
             from .duckdb_agents import get_watershed_chn_summary
-            _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id)
+            _watershed = get_watershed_chn_summary(wd, topaz_id=topaz_id).as_dict()
+            chn_enum = _watershed['chn_enum']
+            wepp_id = _watershed['wepp_id']
         else:
             watershed = wepppy.nodb.Watershed.getInstance(wd)
             translator = watershed.translator_factory()
@@ -911,10 +916,13 @@ class Ron(NoDbBase):
             else:
                 _watershed = watershed.sub_summary(topaz_id)
             
-        chn_enum = translator.chn_enum(top=topaz_id)
+            chn_enum = translator.chn_enum(top=topaz_id)
 
         return dict(
             meta=dict(hill_type='Channel', topaz_id=topaz_id,
                       wepp_id=wepp_id, chn_enum=chn_enum),
-            watershed=_watershed
-        )
+            watershed=_watershed,
+            landuse=None,
+            soil=None,
+            climate=None)
+        
