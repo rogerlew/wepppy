@@ -408,6 +408,9 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
     headers = request.headers
     
     diff_runid = args.get('diff', '')
+    if '?' in diff_runid:
+        diff_runid = diff_runid.split('?')[0]
+
     diff_wd = None
     diff_arg = ''
     if diff_runid:
@@ -430,9 +433,13 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
 
         if rel_path != '.':
             parts = rel_path.split('/')
-            for part in parts:
-                _url = f'/weppcloud/runs/{runid}/{config}/browse/{part}'
+
+            _rel_path = ''
+            for part in parts[:-1]:
+                _rel_path = _join(_rel_path, part)
+                _url = f'/weppcloud/runs/{runid}/{config}/browse/{_rel_path}/'
                 breadcrumbs.append(f'<a href="{_url}{diff_arg}">{part}</a>')
+            breadcrumbs.append(parts[-1])
 
         breadcrumbs = ' / '.join(breadcrumbs)
 
@@ -488,7 +495,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
             else:
                 query = {**base_query, 'page': item}
                 href = "?" + urlencode(query)
-                pagination_html += f'<a href="{href}{diff_arg}">[{starting_item}]</a> '
+                pagination_html += f'<a href="{href}">[{starting_item}]</a> '
         pagination_html += '</div>'
         
         # Calculate showing range
