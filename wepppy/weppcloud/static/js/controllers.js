@@ -180,7 +180,7 @@ var Disturbed = function () {
 
         that.reset_land_soil_lookup =  function() {
             $.get({
-                url: "reset_disturbed/",
+                url: "tasks/reset_disturbed/",
                 cache: false,
                 success: function success(response) {
                     if (response.Success == true) {

@@ -1,5 +1,47 @@
 <!-- Modal -->
 <div class="modal fade" id="puModal" role="dialog">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+reset_land_soil_lookup =  function() {
+  $.get({
+      url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/reset_disturbed/",
+      cache: false,
+      success: function success(response) {
+          if (response.Success == true) {
+              alert("Land Soil Lookup has been reset");
+          } else {
+              alert("Error resetting Land Soil Lookup");
+          }
+      },
+      error: function error(jqXHR)  {
+          console.log(jqXHR.responseJSON);
+      },
+      fail: function fail(error) {
+          alert("Error clearing locks");
+      }
+  });
+};
+
+clear_locks = function() {
+  $.get({
+      url: "{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/clear_locks/",
+      cache: false,
+      success: function success(response) {
+          if (response.Success == true) {
+              alert("Locks have been cleared");
+          } else {
+              alert("Error clearing locks");
+          }
+      },
+      error: function error(jqXHR)  {
+          console.log(jqXHR.responseJSON);
+      },
+      fail: function fail(error) {
+          alert("Error clearing locks");
+      }
+  });
+};
+</script>
 <div class="modal-dialog">
   <!-- Modal content-->
   <div class="modal-content">
@@ -56,7 +98,7 @@
             </div>
             <br>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action text-danger" onclick="Project.getInstance().clear_locks()" href="#">Clear Locks</a>
+              <a class="list-group-item list-group-item-action text-danger" onclick="clear_locks()" href="#">Clear Locks</a>
             </div>
           </div>
           <div class="col-md-6">
@@ -89,8 +131,8 @@
             {% if 'disturbed' in ron.mods %}
             <h5>Disturbed</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" href="modify_disturbed" target="_blank">Modify Disturbed Parameters</a>
-              <a class="list-group-item list-group-item-action" onclick="Disturbed.getInstance().reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
+              <a class="list-group-item list-group-item-action" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/modify_disturbed" target="_blank">Modify Disturbed Parameters</a>
+              <a class="list-group-item list-group-item-action" onclick="reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
             </div>
             {% endif %}
           </div>

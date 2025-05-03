@@ -1258,8 +1258,8 @@ def modify_disturbed(runid, config):
         return exception_factory('Error Clearing Locks', runid=runid)
 
 
-@app.route('/runs/<string:runid>/<config>/reset_disturbed')
-@app.route('/runs/<string:runid>/<config>/reset_disturbed/')
+@app.route('/runs/<string:runid>/<config>/tasks/reset_disturbed')
+@app.route('/runs/<string:runid>/<config>/tasks/reset_disturbed/')
 def reset_disturbed(runid, config):
     assert config is not None
 
