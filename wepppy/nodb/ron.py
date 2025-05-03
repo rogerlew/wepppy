@@ -831,10 +831,12 @@ class Ron(NoDbBase):
 
         climate = wepppy.nodb.Climate.getInstance(wd)
 
+        if not isinstance(_watershed, dict):
+            _watershed = _watershed.as_dict()
         return dict(
             meta=dict(hill_type='Hillslope', topaz_id=topaz_id,
                       wepp_id=wepp_id),
-            watershed=_watershed.as_dict(),
+            watershed=_watershed,
             soil=_soils,
             climate=climate.sub_summary(topaz_id),
             landuse=_landuse

@@ -691,28 +691,7 @@ class Watershed(NoDbBase, LogMixin):
                                            clip_hillslope_length=self.clip_hillslope_length,
                                            bieger2015_widths=self.bieger2015_widths)
 
-            self.lock()
-            try:
-                sub_area, chn_area, ws_centroid, sub_ids, chn_ids = post_abstract_watershed(self.wd)
-                self._centroid = ws_centroid
-                self._sub_area = sub_area
-                self._chn_area = chn_area
-                self._wsarea = sub_area + chn_area
-
-                # this is the shit you have to support projects over 8 years of CI/CD
-                self._subs_summary = {str(topaz_id): None for topaz_id in sub_ids}  
-                self._chns_summary = {str(topaz_id): None for topaz_id in chn_ids}
-
-                network = self.network
-                structure_fn = _join(self.wat_dir, 'structure.pkl')
-                translator = self.translator_factory()
-                translator.build_structure(network, pickle_fn=structure_fn)
-                self._structure = structure_fn
-
-                self.dump_and_unlock()
-            except:
-                self.unlock('-f')
-                raise
+            self._peridot_post_abstract_watershed()
 
         else:
             if self.delineation_backend_is_topaz:
@@ -728,6 +707,32 @@ class Watershed(NoDbBase, LogMixin):
             prep.timestamp(TaskEnum.abstract_watershed)
         except FileNotFoundError:
             pass
+
+    def _peridot_post_abstract_watershed(self):
+        self.log('_peridot_post_abstract_watershed')
+
+        self.lock()
+        try:
+            sub_area, chn_area, ws_centroid, sub_ids, chn_ids = post_abstract_watershed(self.wd)
+            self._centroid = ws_centroid
+            self._sub_area = sub_area
+            self._chn_area = chn_area
+            self._wsarea = sub_area + chn_area
+
+            # this is the shit you have to support projects over 8 years of CI/CD
+            self._subs_summary = {str(topaz_id): None for topaz_id in sub_ids}  
+            self._chns_summary = {str(topaz_id): None for topaz_id in chn_ids}
+
+            network = self.network
+            structure_fn = _join(self.wat_dir, 'structure.pkl')
+            translator = self.translator_factory()
+            translator.build_structure(network, pickle_fn=structure_fn)
+            self._structure = structure_fn
+
+            self.dump_and_unlock()
+        except:
+            self.unlock('-f')
+            raise
 
 
     @property
