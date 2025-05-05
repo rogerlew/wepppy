@@ -35,7 +35,26 @@ RQ_DB = 9
 
 TIMEOUT = 43_200
 
+def run_omni_scenario_rq(runid, scenario):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:omni'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        t0 = time.time()
 
+        omni = Omni.getInstance(wd)
+        # parameters should have been set by weppcloud
+        omni.run_omni_scenario(scenario)
+
+        status = True
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {time})')
+        return status, time.time() - t0
+    
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
 
 def run_omni_rq(runid):
     try:
@@ -47,13 +66,36 @@ def run_omni_rq(runid):
         t0 = time.time()
 
         omni = Omni.getInstance(wd)
-        # parameters should have been set by weppcloud
         omni.run_omni_scenarios()
+
+        try:
+            prep = RedisPrep.getInstance(wd)
+            prep.timestamp(TaskEnum.run_omni)
+        except FileNotFoundError:
+            pass
+
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
+def _log_omni_scenarios_complete_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:wepp'
+        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        try:
+            prep = RedisPrep.getInstance(wd)
+            prep.timestamp(TaskEnum.run_omni)
+        except FileNotFoundError:
+            pass
 
         status = True
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {time})')
-        return status, time.time() - t0
-    
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
 
     except Exception:

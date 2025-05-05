@@ -45,10 +45,10 @@
             </tr>
         </thead>
         <tbody>
-            {% for class_value, description in treatments.valid_treatments_d.items() %}
+            {% for disturbed_class, class_value in treatments.treatments_lookup.items() %}
             <tr>
                 <td>{{ class_value }}</td>
-                <td>{{ description }}</td>
+                <td>{{ disturbed_class }}</td>
             </tr>
             {% endfor %}
         </tbody>
