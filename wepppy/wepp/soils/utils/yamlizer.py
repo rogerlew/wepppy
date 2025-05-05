@@ -49,6 +49,8 @@ class WeppSoilUtil(object):
                 raise Exception(f"Error opening {fn}")
         elif fn.endswith('.yaml'):
             self._load_yaml(fn)
+        elif fn.endswith('.bson'):
+            self._load_bson(fn)
 
         self.fn = fn
 
@@ -802,6 +804,17 @@ class WeppSoilUtil(object):
     def dump_yaml(self, dst):
         with open(dst, 'w') as fp:
             fp.write(yaml.dump(self.obj))
+
+    def _load_bson(self, fn):
+        import bson
+        with open(fn, 'rb') as fp:
+            bson_txt = fp.read()
+            self.obj = bson.loads(bson_txt)
+
+    def dump_bson(self, dst):
+        import bson
+        with open(dst, 'wb') as fp:
+            fp.write(bson.dumps(self.obj))
 
     @property
     def datver(self):

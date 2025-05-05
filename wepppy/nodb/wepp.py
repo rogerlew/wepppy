@@ -1235,12 +1235,16 @@ class Wepp(NoDbBase, LogMixin):
         self.log('  Creating flowpath run files... ')
 
         watershed = Watershed.getInstance(self.wd)
+        translator = watershed.translator_factory()
         sim_years = Climate.getInstance(self.wd).input_years
+
+        fps_summary = watershed.fps_summary
 
         futures = []
         with ThreadPoolExecutor(max_workers=10) as pool:
-            for wepp_id in watershed._fps_summary:
-                for fp_enum  in watershed._fps_summary[wepp_id]:
+            for topaz_id in fps_summary:
+                wepp_id = translator.wepp(top=int(topaz_id))
+                for fp_enum  in fps_summary[topaz_id]:
                     fp_id = f'fp_{wepp_id}_{fp_enum}'
                     self.log(f'  Creating {fp_id}.run... ')
                     futures.append(pool.submit(make_flowpath_run, fp_id, wepp_id, sim_years, self.fp_runs_dir))
@@ -1251,8 +1255,9 @@ class Wepp(NoDbBase, LogMixin):
 
         futures = []
         with ThreadPoolExecutor(max_workers=10) as pool:
-            for wepp_id in watershed._fps_summary:
-                for fp_enum  in watershed._fps_summary[wepp_id]:
+            for topaz_id in fps_summary:
+                wepp_id = translator.wepp(top=int(topaz_id))
+                for fp_enum  in fps_summary[topaz_id]:
                     fp_id = f'fp_{wepp_id}_{fp_enum}'
                     self.log(f'  Running {fp_id}... ')
                     futures.append(pool.submit(run_flowpath, fp_id, wepp_id, self.runs_dir, self.fp_runs_dir, self.wepp_bin))

@@ -307,7 +307,7 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
 
     # loop over the hillslopes and read their ash output files.
     hill_data_frames = []
-    for topaz_id, summary in watershed.subs_summary.items():
+    for topaz_id in watershed._subs_summary:
         # get the wepp_id
         wepp_id = translator.wepp(top=topaz_id)
 
@@ -315,7 +315,7 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
         burn_class = ash.meta[topaz_id]['burn_class']
 
         # get the area in hectares
-        area_m2 = summary['area']
+        area_m2 = watershed.hillslope_area(topaz_id)
         area_ha = area_m2 / 10000
 
 
@@ -347,7 +347,7 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
     # Calculate cumulative return periods
     # read the last day of each fire run
     hill_data_frames = []
-    for topaz_id, summary in watershed.subs_summary.items():
+    for topaz_id in watershed._subs_summary:
         # get the wepp_id
         wepp_id = translator.wepp(top=topaz_id)
 
@@ -355,7 +355,7 @@ def watershed_daily_aggregated(wd,  recurrence=(1000, 500, 200, 100, 50, 25, 20,
         burn_class = ash.meta[topaz_id]['burn_class']
 
         # get the area in hectares
-        area_m2 = summary['area']
+        area_m2 = watershed.hillslope_area(topaz_id)
         area_ha = area_m2 / 10000
 
         # get the list of output files
