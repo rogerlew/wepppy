@@ -33,6 +33,7 @@ from ...topaz import Topaz
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents
 from ..baer.sbs_map import SoilBurnSeverityMap
+from ..disturbed import Disturbed
 from ...mixins.log_mixin import LogMixin
 
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
@@ -52,6 +53,11 @@ class TreatmentsMode(IntEnum):
 
 
 class Treatments(NoDbBase, LogMixin):
+    """
+    Treatments class for WEPPcloud.
+
+    Treatments are applied to the hillslopes based on the landuse and sbs state, after building the landuse and applying disturbed adjustments.
+    """
     __name__ = 'Treatments'
 
     def __init__(self, wd, cfg_fn):
@@ -118,6 +124,10 @@ class Treatments(NoDbBase, LogMixin):
     def _lock(self):
         return _join(self.wd, 'treatments.nodb.lock')
     
+    @property
+    def status_log(self):
+        return os.path.abspath(_join(self.treatments_dir, 'status.log'))
+
     @property
     def mode(self) -> TreatmentsMode:
         return self._mode
@@ -204,8 +214,8 @@ class Treatments(NoDbBase, LogMixin):
             raise FileNotFoundError(f"'{fn}' not found!")
         
         # check it is in the treatments_dir
-        if not _exists(_join(self.disturbed_dir, fn)):
-            raise FileNotFoundError(f"'{fn}' not found in '{self.disturbed_dir}'!")
+        if not _exists(_join(self.treatments_dir, fn)):
+            raise FileNotFoundError(f"'{fn}' not found in '{self.treatments_dir}'!")
 
         # check it is a gdal friendly raster
         try:
@@ -264,15 +274,15 @@ class Treatments(NoDbBase, LogMixin):
 
         valid_keys = []
         for k, v in mapping.items():
-            if v['ManagementFile'].endswith('null.man'):
+            if v.get('IsTreatment', False):
                 valid_keys.append(k)
 
         return valid_keys
 
     @property
-    def valid_treatments_d(self) -> Dict[str, str]:
+    def treatments_lookup(self) -> Dict[str, str]:
         """
-        Returns a dictioannary of valid treatment keys with their descriptions.
+        Returns a dictionary of treatment disturbed_classes (e.g. mulch15, mulch30, mulch60, prescribed_fire and their valid treatment keys).
 
         for viewmodel templates/controls/treatments.htm
         """
@@ -281,12 +291,11 @@ class Treatments(NoDbBase, LogMixin):
 
         valid_treatments = {}
         for k, v in mapping.items():
-            if v['ManagementFile'].endswith('null.man'):
-                valid_treatments[k] = v['Description']
+            if v.get('IsTreatment', False):
+                valid_treatments[v['DisturbedClass']] = k
 
         return valid_treatments
-
-
+    
     def build_treatments(self):
         """
         Apply and build the treatments to the project.
@@ -312,6 +321,8 @@ class Treatments(NoDbBase, LogMixin):
         landuse = Landuse.getInstance(self.wd)
         mapping = landuse.get_mapping_dict()
 
+        disturbed = Disturbed.getInstance(self.wd)
+
         landuse.lock()
         try:
             # loop over the treatments_domlc_d and apply the treatments to the hillslope based on it's
@@ -323,7 +334,7 @@ class Treatments(NoDbBase, LogMixin):
 
                 man_summary = landuse.managements[dom]  # -> ManagementSummary instance
                 disturbed_class = getattr(man_summary, 'disturbed_class', None)  # 'tall grass', 'shrub', 'forest', 'forest high sev' etc.
-                self._apply_treatment(landuse, topaz_id, treatment, man_summary, disturbed_class)
+                self._apply_treatment(landuse, disturbed, topaz_id, treatment, man_summary, disturbed_class)
 
             landuse.dump_and_unlock()
         except Exception:
@@ -332,6 +343,7 @@ class Treatments(NoDbBase, LogMixin):
     
     def _apply_treatment(self, 
                          landuse_instance: Landuse, 
+                         disturbed_instance: Disturbed,
                          topaz_id: str, 
                          treatment: str, 
                          man_summary: ManagementSummary, 
@@ -343,22 +355,20 @@ class Treatments(NoDbBase, LogMixin):
         if not landuse_instance.islocked():
             raise RuntimeError("Treatments.nodb is not locked!")
         
-        if treatment not in ['mulch30', 'mulch60', 'prescribed_fire']:
-            raise NotImplementedError(f"Treatment '{treatment}' not implemented!")
-
         if topaz_id.endswith('4'):
             self.log(f"Skipping treatment for {topaz_id} because it is a channel.")
             return
         self.log(f'topaz_id: {topaz_id}\t treatment:{treatment}\t disturbed_class: {disturbed_class}\n')
 
         if 'mulch' in treatment:
-            return self._apply_mulch(landuse_instance, topaz_id, treatment, man_summary, disturbed_class)
+            return self._apply_mulch(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
         if 'prescribed_fire' in treatment:
-            return self._apply_prescribed_fire(landuse_instance, topaz_id, treatment, man_summary, disturbed_class)
+            return self._apply_prescribed_fire(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
     def _apply_mulch(self, 
                      landuse_instance: Landuse, 
+                     disturbed_instance: Disturbed,
                      topaz_id: str, 
                      treatment: str, 
                      man_summary: ManagementSummary, 
@@ -377,15 +387,17 @@ class Treatments(NoDbBase, LogMixin):
         mulch_cover_change = treatment.replace('mulch', '')
         mulch_cover_change = int(mulch_cover_change) / 100.0
 
-        if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
-                               'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire',
-                               'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+#        if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
+#                               'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire',
+#                               'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+
+        if disturbed_class in ['grass high sev fire', 'shrub high sev fire',  'forest high sev fire']:
  
-            cancov = man.inis[0].data.cancov
-            new_cancov = max(1.0, cancov + mulch_cover_change)
+            inrcov = man.inis[0].data.inrcov
+            new_inrcov = min(1.0, inrcov + mulch_cover_change)
             self.log(f'Applying mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
-            self.log(f'Old cancov: {cancov}\t New cancov: {new_cancov}\n')
-            man.inis[0].data.cancov = new_cancov
+            self.log(f'Old inrcov: {inrcov}\t New inrcov: {new_inrcov}\n')
+            man.inis[0].data.inrcov = new_inrcov
 
             # write the management to disk
             new_man_fn = _split(man_summary.man_fn)[-1][:-4] + f'_{treatment}.man'
@@ -395,6 +407,7 @@ class Treatments(NoDbBase, LogMixin):
 
             # update the management summary
             new_man_summary = deepcopy(man_summary)
+            new_man_summary.man_dir = _join(self.wd, 'landuse')
             new_man_summary.man_fn = new_man_fn
             new_man_summary.desc += f' - {treatment}'
 
@@ -411,6 +424,7 @@ class Treatments(NoDbBase, LogMixin):
 
     def _apply_prescribed_fire(self, 
                      landuse_instance: Landuse, 
+                     disturbed_instance: Disturbed,
                      topaz_id: str, 
                      treatment: str, 
                      man_summary: ManagementSummary, 
@@ -421,10 +435,10 @@ class Treatments(NoDbBase, LogMixin):
         if not landuse_instance.islocked():
             raise RuntimeError("Treatments.nodb is not locked!")
 
-        man = man_summary.get_management()  # Management instance, reads from disk
+        disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
+        forest_low_sev_fire_key = disturbed_key_lookup['forest_low_sev_fire']
 
-        if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
-                               'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire',
-                               'forest', 'young forest', 'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
-            # TODO
-            raise NotImplementedError(f"Prescribed fire treatment not implemented for {disturbed_class}!")
+        if disturbed_class in ['forest']:
+            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            landuse_instance.domlc_d[topaz_id] = forest_low_sev_fire_key
+

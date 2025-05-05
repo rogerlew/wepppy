@@ -118,6 +118,25 @@ class NoDbBase(object):
         return WeppPost.getInstance(self.wd)
     
     @property
+    def has_sbs(self):
+        from wepppy.nodb.mods import Disturbed
+        from wepppy.nodb.mods import Baer
+
+        try:
+            baer = Disturbed.getInstance(self.wd)
+            return baer.has_map
+        except:
+            pass
+
+        try:
+            baer = Baer.getInstance(self.wd)
+            return baer.has_map
+        except:
+            pass
+
+        return False
+
+    @property
     def config_stem(self):
         return self._config.split('.cfg')[0]
 

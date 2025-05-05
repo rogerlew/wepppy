@@ -647,19 +647,6 @@ class Ron(NoDbBase):
         return ash.has_ash_results
 
     @property
-    def has_sbs(self):
-        if 'baer' in self.mods:
-            from wepppy.nodb.mods import Baer
-            baer = Baer.getInstance(self.wd)
-            return baer.has_map
-        elif 'disturbed' in self.mods:
-            from wepppy.nodb.mods import Disturbed
-            baer = Disturbed.getInstance(self.wd)
-            return baer.has_map
-
-        return False
-
-    @property
     def dem_db(self):
         return getattr(self, '_dem_db', self.config_get_str('general', 'dem_db'))
 
@@ -742,7 +729,7 @@ class Ron(NoDbBase):
                 summaries.append(
                     dict(meta=dict(hill_type='Hillslope',
                                    topaz_id=topaz_id,
-                                   wepp_id=wat_ss.wepp_id),
+                                   wepp_id=wat_ss['wepp_id']),
                          watershed=wat_ss,
                          soil=soils_d,
                          climate=climate.sub_summary(topaz_id),
