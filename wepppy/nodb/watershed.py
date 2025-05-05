@@ -93,7 +93,7 @@ def process_subcatchment(args):
     return sub_id, sub_summary, fp_d
 
 
-TRANSIENT_FIELDS = ['_sub_area_lookup', '_sub_length_lookup']
+TRANSIENT_FIELDS = ['_sub_area_lookup', '_sub_length_lookup', '_sub_centroid_lookup']
 
 class Watershed(NoDbBase, LogMixin):
     __name__ = 'Watershed'
@@ -434,6 +434,14 @@ class Watershed(NoDbBase, LogMixin):
     def greater300_n(self) -> int:
         if self._subs_summary is None:
             return 0
+
+        # use duckdb
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            import duckdb
+            with duckdb.connect(_join(self.wat_dir, 'hillslopes.parquet')) as con:
+                sql = 'SELECT COUNT(*) FROM hillslopes WHERE length > 300'
+                result = con.execute(sql).fetchone()
+                return result[0]
 
         return sum(sub.length > 300 for sub in self._subs_summary.values())
 
@@ -1111,36 +1119,22 @@ class Watershed(NoDbBase, LogMixin):
         else:
             return None
 
-    def fps_summary(self, topaz_id):
+    @property
+    def fps_summary(self):
         if _exists(_join(self.wat_dir, 'flowpaths.parquet')):
-            import pandas as pd
-            if _exists(_join(self.wat_dir, 'flowpaths.parquet')):
-                df = pd.read_parquet(_join(self.wat_dir, 'flowpaths.parquet'))
-            else:
-                df = pd.read_csv(_join(self.wat_dir, 'flowpaths.csv'))
-                df['topaz_id'] = df['topaz_id'].astype(str)
-                df['fp_id'] = df['fp_id'].astype(str)
-
-            # Create the dictionary structure
+            import duckdb
             fps_summary = {}
-            for rec in df.to_dict('records'):
-                topaz_id = rec['topaz_id']
-                fp_id = rec['fp_id']
-                fp = PeridotFlowpath.from_dict(rec)
-                if topaz_id not in fps_summary:
-                    fps_summary[topaz_id] = {}
-                fps_summary[topaz_id][fp_id] = fp
-            del df
-
+            with duckdb.connect() as con:
+                result = con.execute(f"SELECT topaz_id, fp_id FROM read_parquet('{self.wat_dir}/flowpaths.parquet')").fetchall()
+                
+                for row in result:
+                    topaz_id = str(row[0])
+                    fp_id = str(row[1])
+                    if topaz_id not in fps_summary:
+                        fps_summary[topaz_id] = []
+                    fps_summary[topaz_id].append(fp_id)
             return fps_summary
-
-        if self._fps_summary is None:
-            return None
-
-        if str(topaz_id) in self._fps_summary:
-            return self._fps_summary[str(topaz_id)]
-        else:
-            return None
+            
 
     # gotcha: using __getitem__ breaks jinja's attribute lookup, so...
     def _(self, wepp_id) -> Union[HillSummary, ChannelSummary]:
@@ -1159,9 +1153,9 @@ class Watershed(NoDbBase, LogMixin):
         if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
             from .duckdb_agents import get_watershed_subs_summary
             summaries = get_watershed_subs_summary(self.wd)
-            return {topaz_id: PeridotHillslope.from_dict(d) for topaz_id, d in summaries.items()}
+            return {str(topaz_id): PeridotHillslope.from_dict(d) for topaz_id, d in summaries.items()}
         
-        return {k: v.as_dict() for k, v in self._subs_summary.items()}
+        return {str(k): v.as_dict() for k, v in self._subs_summary.items()}
 
     def chn_summary(self, topaz_id) -> Union[Dict, None]:
         if _exists(_join(self.wat_dir, 'channels.parquet')):
@@ -1277,6 +1271,18 @@ class Watershed(NoDbBase, LogMixin):
             return self._subs_summary[topaz_id].length
 
     def hillslope_centroid_lnglat(self, topaz_id):
+        if hasattr(self, '_sub_centroid_lookup'):
+            return self._sub_centroid_lookup[str(topaz_id)]
+        
+        if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
+            import duckdb
+            with duckdb.connect() as con:
+                parquet_fn = _join(self.wat_dir, 'hillslopes.parquet')
+                # lazy load self._sub_area_lookup with duckdb
+                result = con.execute(f"SELECT topaz_id, centroid_lon, centroid_lat FROM read_parquet('{parquet_fn}')").fetchall()
+                self._sub_centroid_lookup = {str(row[0]): (row[1], row[2]) for row in result}
+                return self._sub_centroid_lookup[str(topaz_id)]
+            
         wat_ss = self.subs_summary[topaz_id]
         lng, lat = wat_ss.centroid.lnglat
         return lng, lat
