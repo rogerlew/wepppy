@@ -2,74 +2,155 @@
 {% block form_id %}omni_form{% endblock %}
 {% block form_title %}OMNI Scenario Runner{% endblock %}
 {% block inputs %}
-<h5>Uniform Scenarios</h5>
-
-<p>Select Uniform Scenarios</p>
-<div class="form-group row">
-    <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_low_severity_fire" name="omni_run_uniform_scenario_low_severity_fire"
-                type="checkbox" class="form-check-input disable-readonly" {% if OmniScenario.UniformLow in
-                omni.scenarios %}checked{% endif %}>
+<style>
+    .scenario-item {
+        position: relative;
+        width: 100%;
+    }
+    .remove-btn-col {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+    }
+    .scenario-controls .form-group {
+        flex: 1;
+        min-width: 0;
+    }
+</style>
+<h5>Scenario Builder</h5>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <button class="btn btn-success mb-3" onclick="addScenario()">+</button>
+            <div id="scenario-container"></div>
         </div>
-        <label for="omni_run_uniform_scenario_low_severity_fire" style="margin-left:3em;">Uniform Low Severity
-            Fire</label>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_moderate_severity_fire"
-                name="omni_run_uniform_scenario_moderate_severity_fire" type="checkbox"
-                class="form-check-input disable-readonly" {% if OmniScenario.UniformModerate in omni.scenarios
-                %}checked{% endif %}>
-        </div>
-        <label for="omni_run_uniform_scenario_moderate_severity_fire" style="margin-left:3em;">Uniform Moderate Severity
-            Fire</label>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_high_severity_fire" name="omni_run_uniform_scenario_high_severity_fire"
-                type="checkbox" class="form-check-input disable-readonly" {% if OmniScenario.UniformHigh in
-                omni.scenarios %}checked{% endif %}>
-        </div>
-        <label for="omni_run_uniform_scenario_high_severity_fire" style="margin-left:3em;">Uniform High Severity
-            Fire</label>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_thinning" name="omni_run_uniform_scenario_thinning" type="checkbox"
-                class="form-check-input disable-readonly" {% if OmniScenario.UniformThinning in omni.scenarios
-                %}checked{% endif %}>
-        </div>
-        <label for="omni_run_uniform_scenario_thinning" style="margin-left:3em;">Uniform Thinning</label>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_mulching30" name="omni_run_uniform_scenario_mulching30" type="checkbox"
-                class="form-check-input disable-readonly" {% if OmniScenario.UniformMulching30 in
-                omni.scenarios%}checked{% endif %}>
-        </div>
-        <label for="omni_run_uniform_scenario_mulching30" style="margin-left:3em;">Uniform Mulching 30%</label>
-    </div>
-</div>
-<div class="form-group row">
-    <div class="col-sm-5">
-        <div style="margin-left:2em;">
-            <input id="omni_run_uniform_scenario_mulching60" name="omni_run_uniform_scenario_mulching60" type="checkbox"
-                class="form-check-input disable-readonly" {% if OmniScenario.UniformMulching60 in
-                omni.scenarios%}checked{% endif %}>
-        </div>
-        <label for="omni_run_uniform_scenario_mulching60" style="margin-left:3em;">Uniform Mulching 60%</label>
     </div>
 </div>
 
+<script>
+    // Configuration for scenarios and their controls
+    const scenarios = {
+        uniform_low: {
+            label: "Uniform Low Severity Fire",
+            controls: []
+        },
+        uniform_moderate: {
+            label: "Uniform Moderate Severity Fire",
+            controls: []
+        },
+        uniform_high: {
+            label: "Uniform High Severity Fire",
+            controls: []
+        },
+        sbs_map: {
+            label: "SBS Map",
+            controls: [
+                { type: "file", name: "sbs_file", label: "Upload SBS File" }
+            ]
+        },
+        undisturbed: {
+            label: "Undisturbed",
+            controls: [],
+            condition: () => window.omni?.has_sbs || false
+        },
+        prescribed_fire: {
+            label: "Prescribed Fire",
+            controls: [],
+            condition: () => {
+                const hasUndisturbed = document.querySelector('select[name="scenario"] option[value="undisturbed"]:checked');
+                return hasUndisturbed || !window.omni?.has_sbs;
+            }
+        },
+        thinning: {
+            label: "Thinning",
+            controls: [
+                { type: "select", name: "canopy_cover", label: "Canopy Cover Reduction", options: ["40%", "65%"] },
+                { type: "select", name: "ground_cover", label: "Ground Cover", options: ["93%", "90%", "75%"] }
+            ]
+        },
+        mulching: {
+            label: "Mulching",
+            controls: [
+                { type: "select", name: "ground_cover_increase", label: "Ground Cover Increase", options: ["15%", "30%", "60%"] },
+                { 
+                    type: "select", 
+                    name: "base_scenario", 
+                    label: "Base Scenario", 
+                    options: ["uniform_low", "uniform_moderate", "uniform_high", "sbs_map"],
+                    optionLabels: {
+                        uniform_low: "Uniform Low Severity Fire",
+                        uniform_moderate: "Uniform Moderate Severity Fire",
+                        uniform_high: "Uniform High Severity Fire",
+                        sbs_map: "SBS Map"
+                    }
+                }
+            ]
+        }
+    };
+
+    // Mock omni object for testing (replace with actual Flask-provided value)
+    window.omni = { has_sbs: true };
+
+    function addScenario() {
+        const container = document.getElementById('scenario-container');
+        const scenarioItem = document.createElement('div');
+        scenarioItem.className = 'row align-items-end mb-3 pb-3 border-bottom scenario-item';
+        scenarioItem.innerHTML = `
+            <div class="col pr-5">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="scenario-select">Scenario</label>
+                            <select class="form-control" id="scenario-select" name="scenario" onchange="updateControls(this)">
+                                <option value="">Select Scenario</option>
+                                ${Object.entries(scenarios)
+                                    .filter(([key, config]) => !config.condition || config.condition())
+                                    .map(([key, config]) => `<option value="${key}">${config.label}</option>`)
+                                    .join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-8 scenario-controls d-flex"></div>
+                </div>
+            </div>
+            <div class="remove-btn-col">
+                <button class="btn btn-danger btn-sm w-100" onclick="this.parentElement.parentElement.remove()">-</button>
+            </div>
+        `;
+        container.appendChild(scenarioItem);
+    }
+
+    function updateControls(selectElement) {
+        const scenarioKey = selectElement.value;
+        const controlsDiv = selectElement.parentElement.parentElement.parentElement.querySelector('.scenario-controls');
+        controlsDiv.innerHTML = '';
+
+        if (scenarioKey && scenarios[scenarioKey]) {
+            const config = scenarios[scenarioKey];
+            config.controls.forEach(control => {
+                let html = `
+                    <div class="form-group px-2">
+                        <label for="${control.name}">${control.label}</label>
+                `;
+                if (control.type === 'select') {
+                    html += `
+                        <select class="form-control" id="${control.name}" name="${control.name}">
+                            ${control.options.map(opt => 
+                                `<option value="${opt}">${control.optionLabels?.[opt] || opt}</option>`
+                            ).join('')}
+                        </select>
+                    `;
+                } else if (control.type === 'file') {
+                    html += `<input type="file" class="form-control-file" id="${control.name}" name="${control.name}" accept=".tif,.img">`;
+                }
+                html += `</div>`;
+                controlsDiv.insertAdjacentHTML('beforeend', html);
+            });
+        }
+    }
+</script>
 <div style="height:1em;"> </div>
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
