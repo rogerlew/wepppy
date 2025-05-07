@@ -202,7 +202,7 @@ def build_landuse_and_soils():
 
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(land_and_soil_rq, (extent, cfg, nlcd_db, ssurgo_db), timeout=TIMEOUT)
+            job = q.enqueue_call(land_and_soil_rq, (None, extent, cfg, nlcd_db, ssurgo_db), timeout=TIMEOUT)
             uuid = job.id
     except Exception as e:
         return exception_factory('land_and_soil_rq Failed', runid=uuid)
@@ -210,14 +210,14 @@ def build_landuse_and_soils():
     return jsonify({'Success': True, 'job_id': job.id})
 
 
-@rq_api_bp.route('/rq/api/landuse_and_soils/{uuid}')
+@rq_api_bp.route('/rq/api/landuse_and_soils/<string:uuid>.tar.gz')
 def download_landuse_and_soils(uuid):
 
     if '.' in uuid or '/' in uuid:
         return error_factory('Invalid uuid')
     
     if _exists(f'/wc1/land_and_soil_rq/{uuid}.tar.gz'):
-        return send_file(f'/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True)
+        return send_file(f'/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True, download_name=f'{uuid}.tar.gz')
         
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fetch_dem_and_build_channels', methods=['POST'])
