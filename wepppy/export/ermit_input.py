@@ -79,7 +79,8 @@ def readSlopeFile(fname):
         lines = fid.readlines()
 
     assert int(lines[1]), 'expecting 1 ofe'
-
+    _line2 = lines[2].split()
+    aspect = float(_line2[0])
     nSegments, length = lines[3].split()
     nSegments = int(nSegments)
     length = float(length)
@@ -109,7 +110,11 @@ def readSlopeFile(fname):
 
     top, middle, bottom  = calc_ERMiT_grads(hillslope_model)
 
+    if length > 300.0:
+        length = 300.0
+
     return dict(Length=length,
+                Aspect=aspect,
                 TopSlope=top * 100.0,
                 MiddleSlope=middle * 100.0,
                 BottomSlope=bottom * 100.0,
@@ -118,8 +123,48 @@ def readSlopeFile(fname):
                 LowerTopSlope=lower_top * 100.0,
                 LowerBottomSlope=lower_bottom * 100.0)
 
+"""
+# ERMIT parser
+     For r = HillslopeStartRow To LastRow
+            E.hs_code = Trim(.Cells(r, 1))
+            E.Area = .Cells(r, 4)
+            E.SoilType = Trim(LCase(.Cells(r, 6)))
+            E.RockPercent = .Cells(r, 7)
+            E.VegType = Trim(.Cells(r, 8))
+            E.TopGradient = .Cells(r, 9)
+            E.MidGradient = .Cells(r, 10)
+            E.ToeGradient = .Cells(r, 11)
+            E.ShrubPercent = .Cells(r, 12)
+            E.GrassPercent = .Cells(r, 13)
+            E.BarePercent = .Cells(r, 14)
+            E.HorizontalSlopeLength = .Cells(r, 15)
+            E.BurnClass = Trim(LCase(.Cells(r, 17)))
+
+
+# Disturbed Batch parser ()
+   For i = 0 To UBound(headers)
+     'fields(headers(i)) = i
+     If (headers(i) = "Rowid_1") Then Rowid_1 = i   '
+     If (headers(i) = "ROWID_") Then ROWID_ = i     '
+     If (headers(i) = "OID_") Then OID_ = i         '
+     If (headers(i) = "HS_ID") Then HS_ID = i       '
+     If (headers(i) = "UNIT_ID") Then UNIT_ID = i   '
+     If (headers(i) = "SOIL_TYPE") Then SOIL_TYPE = i ' - GIS soil ype
+     If (headers(i) = "AREA") Then Area_ = i        ' - area
+     If (headers(i) = "UTREAT") Then Utreat = i     ' - upper treatment
+     If (headers(i) = "USLP_LNG") Then USLP_LNG = i ' - upper slope length
+     If (headers(i) = "UGRD_TP") Then UGRD_TP = i   ' - upper top gradient %
+     If (headers(i) = "UGRD_BTM") Then UGRD_BTM = i ' - upper bottom gradient %
+     If (headers(i) = "LTREAT") Then Ltreat = i     ' - lower treatment
+     If (headers(i) = "LSLP_LNG") Then LSLP_LNG = i ' - lower length
+     If (headers(i) = "LGRD_TP") Then LGRD_TP = i   ' - lower section top gradient %
+     If (headers(i) = "LGRD_BTM") Then LGRD_BTM = i ' - lower section bottom gradient %
+     If (headers(i) = "ROCK_PCT") Then ROCK_PCT = i ' - rock pct %
+"""
 
 def create_ermit_input(wd):
+
+    _log = [f'Creating ERMiT input for {wd}']
 
     watershed = Watershed.getInstance(wd)
     landuse = Landuse.getInstance(wd)
@@ -131,6 +176,7 @@ def create_ermit_input(wd):
     climatestation_meta = climate.climatestation_meta
 
     if climatestation_meta is None:
+        _log.append('No climate station found')
         climatestation_meta = nullStation
 
     soils = Soils.getInstance(wd)
@@ -138,10 +184,34 @@ def create_ermit_input(wd):
     if name == '':
         name = _split(wd)[-1]
 
-    # write ermit input file
-    header = 'HS_ID TOPAZ_ID UNIT_ID SOIL_TYPE AREA UTREAT USLP_LNG LTREAT UGRD_TP UGRD_BTM LGRD_TP LGRD_BTM LSLP_LNG '\
-             'ERM_TSLP ERM_MSLP ERM_BSLP BURNCLASS ROCK_PCT'.split()
 
+    #         header         index     ERMiT                                     Disturbed                                          Description
+    header = ['HS_ID',     #     1     E.hs_code = Trim(.Cells(r, 1))            If (headers(i) = "HS_ID") Then HS_ID = i           wepp id
+              'TOPAZ_ID',  #     2                                                                                                  topaz_id (not used)
+              'UNIT_ID',   #     3                                               If (headers(i) = "UNIT_ID") Then UNIT_ID = i       unit_id (empty, don't know what this is for. it is read by disturbed)
+              'AREA',      #     4     E.Area = .Cells(r, 4)                     If (headers(i) = "AREA") Then Area_ = i            area (ha)
+              'ROWID_',    #     5                                               If (headers(i) = "ROWID_") Then ROWID_ = i         row_id
+              'SOIL_TYPE', #     6     E.SoilType = Trim(LCase(.Cells(r, 6)))    If (headers(i) = "SOIL_TYPE") Then SOIL_TYPE = i   4 class soil texture
+              'ROCK_PCT',  #     7     E.RockPercent = .Cells(r, 7)              If (headers(i) = "ROCK_PCT") Then ROCK_PCT = i     rock content in percent
+              'VEG_TYPE',  #     8     E.VegType = Trim(.Cells(r, 8))                                                               vegetation/landuse from weppcloud undisturbed
+              'ERM_TSLP',  #     9     E.TopGradient = .Cells(r, 9)                                                                 top gradient for ERmiT
+              'ERM_MSLP',  #    10     E.MidGradient = .Cells(r, 10)                                                                middle gradient from ERmiT
+              'ERM_BSLP',  #    11     E.ToeGradient = .Cells(r, 11)                                                                bottom gradient for ERmiT
+              'SHRUB_PCT', #    12     E.ShrubPercent = .Cells(r, 12)                                                               shrub percentage for ERmiT
+              'GRASS_PCT', #    13     E.GrassPercent = .Cells(r, 13)                                                               grass percentage for ERmiT
+              'BARE_PCT',  #    14     E.BarePercent = .Cells(r, 14)                                                                bare percentage for ERmiT
+              'LENGTH',    #    15     E.HorizontalSlopeLength = .Cells(r, 15)                                                      horizontal slope length from ERmiT (m)
+              'ASPECT',    #    16                                                                                                  aspect (not used)
+              'BURNCLASS', #    17     E.BurnClass = Trim(LCase(.Cells(r, 17)))                                                     burn class for ERMiT
+              'UTREAT',    #    18                                               If (headers(i) = "UTREAT") Then Utreat = i         upper treatment (management) for disturbed batch
+              'USLP_LNG',  #    19                                               If (headers(i) = "USLP_LNG") Then USLP_LNG = i     upper slope length for disturbed batch (m)
+              'UGRD_TP',   #    20                                               If (headers(i) = "UGRD_TP") Then UGRD_TP = i       upper top gradient for disturbed batch
+              'UGRD_BTM',  #    21                                               If (headers(i) = "UGRD_BTM") Then UGRD_BTM = i     upper bottom gradient for disturbed batch
+              'LTREAT',    #    22                                               If (headers(i) = "LTREAT") Then Ltreat = i         lower treatment (management) for disturbed batch
+              'LSLP_LNG',  #    23                                               If (headers(i) = "LSLP_LNG") Then LSLP_LNG = i     lower slope length for disturbed batch (m)
+              'LGRD_TP',   #    24                                               If (headers(i) = "LGRD_TP") Then LGRD_TP = i       lower top gradient for disturbed batch
+              'LGRD_BTM']  #    25                                               If (headers(i) = "LGRD_BTM") Then LGRD_BTM = i     lower bottom gradient for disturbed batch
+              
     export_dir = watershed.export_dir
 
     if not _exists(export_dir):
@@ -152,14 +222,33 @@ def create_ermit_input(wd):
     dictWriter = csv.DictWriter(fp, fieldnames=header, lineterminator='\r\n')
     dictWriter.writeheader()
 
+    row_id = 1
     for topaz_id in watershed._subs_summary:
+        _log.append(f'  processing {topaz_id}')
         wepp_id = translator.wepp(top=int(topaz_id))
         dom = landuse.domlc_d[str(topaz_id)]
         man = landuse.managements[dom]
+
+        veg_type = ''
+
+        if hasattr(man, 'disturbed_class'):
+            veg_type = man.disturbed_class
+
+        shrub_pct = ''
+        grass_pct = ''
+        bare_pct = ''
+        if _exists(_join(wd, 'rap.nodb')):
+            # load cover from rap
+            pass
+        
         burn_class = landuse.identify_burn_class(topaz_id)
         mukey = soils.domsoil_d[topaz_id]
         soil_type = soils.soils[mukey].simple_texture
         rock_pct = soils.soils[mukey].smr
+
+        if rock_pct < 10:
+            _log.append(f'    {topaz_id} rock_pct = {rock_pct} < 10')
+            rock_pct = 10
 
         if soil_type is None:
             try:
@@ -173,138 +262,168 @@ def create_ermit_input(wd):
         if not _exists(slp_file):
             slp_file = _join(wat_dir, 'slope_files', 'hillslopes', 'hill_{}.slp'.format(topaz_id))
 
+        _log.append(f'    reading {slp_file}')
         v = readSlopeFile(slp_file)
 
-        dictWriter.writerow({'HS_ID': wepp_id,
-                             'TOPAZ_ID': topaz_id,
-                             'UNIT_ID': '',
-                             'SOIL_TYPE': soil_type,
-                             'AREA': watershed.hillslope_area(topaz_id) / 10000.0,
-                             'UTREAT': man.desc,
-                             'USLP_LNG': v['Length'] / 2.0,
-                             'LTREAT': man.desc,
-                             'LSLP_LNG': v['Length'] / 2.0,
-                             'ERM_TSLP': v['TopSlope'],
-                             'ERM_MSLP': v['MiddleSlope'],
-                             'ERM_BSLP': v['BottomSlope'],
-                             'UGRD_TP': v['UpperTopSlope'],
-                             'UGRD_BTM': v['UpperBottomSlope'],
-                             'LGRD_TP': v['LowerTopSlope'],
-                             'LGRD_BTM': v['LowerBottomSlope'],
-                             'BURNCLASS': burn_class,
-                             'ROCK_PCT': rock_pct
-                             })
+        # ermit length
+        dictWriter.writerow(
+             {'HS_ID': wepp_id,
+              'TOPAZ_ID': topaz_id,
+              'UNIT_ID': '',
+              'AREA': watershed.hillslope_area(topaz_id) / 10000.0, 
+              'ROWID_': row_id, 
+              'SOIL_TYPE': soil_type, 
+              'ROCK_PCT': rock_pct, 
+              'VEG_TYPE': veg_type, 
+              'ERM_TSLP': v['TopSlope'],
+              'ERM_MSLP': v['MiddleSlope'],
+              'ERM_BSLP': v['BottomSlope'],
+              'SHRUB_PCT': shrub_pct,
+              'GRASS_PCT': grass_pct, 
+              'BARE_PCT': bare_pct,
+              'LENGTH': v['Length'],
+              'ASPECT': v['Aspect'],
+              'BURNCLASS': burn_class, 
+              'UTREAT': man.desc,
+              'USLP_LNG': v['Length'] / 2.0,
+              'UGRD_TP': v['UpperTopSlope'], 
+              'UGRD_BTM': v['UpperBottomSlope'],
+              'LTREAT': man.desc,
+              'LSLP_LNG': v['Length'] / 2.0,
+              'LGRD_TP': v['LowerTopSlope'],
+              'LGRD_BTM': v['LowerBottomSlope']})
+
+        row_id += 1
 
     fp.close()
+    
+    fn1 = _join(export_dir, 'ERMiT_input_{}_log.txt'.format(name))
+    fp1 = open(fn1, 'w')
+    fp1.write('\n'.join(_log))
+    fp1.close()
 
-    fn2 = _join(export_dir, 'ERMiT_input_{}_meta.txt'.format(name))
-    fp2 = open(fn2, 'w')
-    fp2.write('''\
+    fn2 = _join(export_dir, f'ERMiT_input_{name}_meta.txt')
+    with open(fn2, 'w') as fp2:
+        # header
+        fp2.write(f"""\
 ERMiT/Disturbed WEPP GIS Hillslope File
 =======================================
 
 Created by WeppCloud
-Date: {date}
+Date: {datetime.now():%Y-%m-%d}
 
 Watershed Name: {name}
-# of Hillslopes: {num_hills}
-# of Channels: {num_chns}
+# of Hillslopes: {watershed.sub_n}
+# of Channels: {watershed.chn_n}
 
 Watershed Centroid Location
-   Latitude: {centroid_lat}
-   Longitude: {centroid_lng}   
-   
+   Latitude: {watershed.centroid[1]}
+   Longitude: {watershed.centroid[0]}
+
 Climate Station
-   State: {station.state}
-   Station: {station.desc}
-   PAR: {station.par}
-   Elevation: {station.elevation}
-   Latitude: {station.latitude}
-   Longitude: {station.longitude}
+   State: {climatestation_meta.state}
+   Station: {climatestation_meta.desc}
+   PAR: {climatestation_meta.par}
+   Elevation: {climatestation_meta.elevation}
+   Latitude: {climatestation_meta.latitude}
+   Longitude: {climatestation_meta.longitude}
 
-Column Descriptions
-++++++++++++++++++++
 
-   
-HS_ID
-    Wepp hillslope ID
-    
-TOPAZ_ID
-    TOPAZ hillslope ID
-    
-UNIT_ID
-    - (Don't know)
-    
-SOIL_TYPE
-    - Soil texture classified from ssurgo/statsgo
-    
-AREA
-    - Area in hectares
+Column Order & Descriptions
+---------------------------
+""")
+
+        # your new ordered list of (header, description)
+        cols = [
+            ('HS_ID',     'WEPP hillslope ID'),
+            ('TOPAZ_ID',  'TOPAZ hillslope ID (not used)'),
+            ('UNIT_ID',   'Unit ID (empty; read by disturbed)'),
+            ('AREA',      'Area in hectares'),
+            ('ROWID_',    'Row identifier'),
+            ('SOIL_TYPE', 'Soil texture class (4-class; from SSURGO/STATSGO)'),
+            ('ROCK_PCT',  'Percent rock in soil'),
+            ('VEG_TYPE',  'Vegetation/landuse (undisturbed)'),
+            ('ERM_TSLP',  'Top gradient (%) for ERMiT'),
+            ('ERM_MSLP',  'Middle gradient (%) for ERMiT'),
+            ('ERM_BSLP',  'Bottom gradient (%) for ERMiT'),
+            ('SHRUB_PCT', 'Shrub cover (%) for ERMiT'),
+            ('GRASS_PCT', 'Grass cover (%) for ERMiT'),
+            ('BARE_PCT',  'Bare ground (%) for ERMiT'),
+            ('LENGTH',    'Horizontal slope length (m) from ERMiT'),
+            ('ASPECT',    'Aspect (°; not used)'),
+            ('BURNCLASS', 'Burn class for ERMiT: Unburned, Low, Moderate, High'),
+            ('UTREAT',    'Upper treatment (disturbed batch)'),
+            ('USLP_LNG',  'Upper slope length (m; disturbed batch)'),
+            ('UGRD_TP',   'Upper top gradient (%) (disturbed batch)'),
+            ('UGRD_BTM',  'Upper bottom gradient (%) (disturbed batch)'),
+            ('LTREAT',    'Lower treatment (disturbed batch)'),
+            ('LSLP_LNG',  'Lower slope length (m; disturbed batch)'),
+            ('LGRD_TP',   'Lower top gradient (%) (disturbed batch)'),
+            ('LGRD_BTM',  'Lower bottom gradient (%) (disturbed batch)'),
+        ]
+
+        # write them in order
+        for hdr, desc in cols:
+            fp2.write(f"{hdr:<10} {desc}\n")
+
+        # now the two slope‐parameter sections
+        fp2.write("""
 
 Slope parameters for Disturbed WEPP Batch File
 ----------------------------------------------
-
 Slope is divided into four segments each 25% of total slope
-    
 "U" is for Upper, "L" is for Lower
-    
+
 UTREAT
     - description of management: OldForest, YoungForest, Shrub, Bunchgrass, Sod, LowFire, HighFire, Skid
-    
+
 USLP_LNG
     - length of the upper slope (50% of total slope) in meters
 
 LTREAT
     - description of management: OldForest, YoungForest, Shrub, Bunchgrass, Sod, LowFire, HighFire, Skid
-    
+
 UGRD_TP
     - Upper top slope (%)
-    
+
 UGRD_BTM
     - Upper bottom slope (%)
-    
+
 LGRD_TP
     - Lower top slope (%)
 
 LGRD_BTM
     - Lower bottom slope (%)
-    
+
 LSLP_LNG
     - length of the lower slope (50% of total slope) in meters
-    
-Slope parameters for ERMiT WEPP Batch File
-----------------------------------------------
 
+
+Slope parameters for ERMiT WEPP Batch File
+------------------------------------------
 According to ERMiT documentation the slope is divided into 
-3 segments representing the top 10% middle 80% and bottom 10%.
+3 segments representing the top 10%, middle 80% and bottom 10%.
 
 ERM_TSLP
     - Top slope (%)
-    
+
 ERM_MSLP
     - Middle slope (%)
-    
+
 ERM_BSLP
     - Bottom slope (%)
-    
+
 BURNCLASS
     - Burn class as Unburned, Low, Moderate, High
 
 ROCK_PCT
-    - Calcuated percent rock from soil file
-'''.format(date=datetime.now(),
-           name=name,
-           num_hills=watershed.sub_n,
-           num_chns=watershed.chn_n,
-           centroid_lat=watershed.centroid[1],
-           centroid_lng=watershed.centroid[0],
-           station=climatestation_meta))
-
-    fp2.close()
+    - Calculated percent rock from soil file
+""")
 
     zipfn = _join(export_dir, 'ERMiT_input_{}.zip'.format(name))
     zipf = zipfile.ZipFile(zipfn, 'w', zipfile.ZIP_DEFLATED)
     zipf.write(fn, _split(fn)[-1])
+    zipf.write(fn1, _split(fn1)[-1])
     zipf.write(fn2, _split(fn2)[-1])
     zipf.close()
 
