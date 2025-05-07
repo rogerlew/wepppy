@@ -37,12 +37,11 @@ RQ_DB = 9
 
 TIMEOUT = 43_200
 
-def land_and_soil_rq(extent, cfg, nlcd_db, ssurgo_db):
+def land_and_soil_rq(runid, extent, cfg, nlcd_db, ssurgo_db):
     print(f'land_and_soil_rq(extent={extent}, cfg={cfg}, nlcd_db={nlcd_db}, ssurgo_db={ssurgo_db})')
 
     status_channel = 'land_and_soil_rq:-'
-    return status_channel, 1.0
-
+    
     try:
         job = get_current_job()
 

@@ -50,9 +50,11 @@ class WepppyRqWorker(Worker):
         job.meta['runid'] = runid
         job.save()
 
-        wd = get_wd(runid)
-        file_handler = None
+        wd = None
+        if runid is not None:
+            wd = get_wd(runid)
 
+        file_handler = None
         if wd:
             file_handler = logging.FileHandler(_join(wd, 'rq.log'))
             self.log.addHandler(file_handler)
