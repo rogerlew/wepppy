@@ -5923,6 +5923,36 @@ var Omni = function () {
         that.rq_job_id = null;
         that.rq_job = $("#omni_form #rq_job");
 
+        that.serializeScenarios = function () {
+            const formData = new FormData();
+            const scenarioItems = document.querySelectorAll('#omni_form #scenario-container .scenario-item');
+            const scenariosList = [];
+
+            scenarioItems.forEach((item, index) => {
+                const scenarioSelect = item.querySelector('select[name="scenario"]');
+                if (!scenarioSelect || !scenarioSelect.value) return;
+
+                const scenario = {
+                    type: scenarioSelect.value
+                };
+
+                const controls = item.querySelectorAll('.scenario-controls [name]');
+                controls.forEach(control => {
+                    if (control.type === 'file' && control.files.length > 0) {
+                        formData.append(`scenarios[${index}][${control.name}]`, control.files[0]);
+                        scenario[control.name] = control.files[0].name;
+                    } else if (control.value) {
+                        scenario[control.name] = control.value;
+                    }
+                });
+
+                scenariosList.push(scenario);
+            });
+
+            formData.append('scenarios', JSON.stringify(scenariosList));
+            return formData;
+        };
+
         that.run_omni_scenarios = function () {
             var self = instance;
             var task_msg = "Submitting omni run";
@@ -5932,11 +5962,17 @@ var Omni = function () {
             self.stacktrace.text("");
             self.ws_client.connect();
 
-            var data = self.form.serialize();
+            const data = self.serializeScenarios();
+            console.log('Serialized FormData:');
+            for (let [key, value] of data.entries()) {
+                console.log(`${key}: ${value instanceof File ? value.name : value}`);
+            }
 
             $.post({
                 url: "rq/api/run_omni",
                 data: data,
+                contentType: false,
+                processData: false,
                 success: function success(response) {
                     if (response.Success === true) {
                         self.status.html(`run_omni_rq job submitted: ${response.job_id}`);
@@ -5945,15 +5981,12 @@ var Omni = function () {
                         self.pushResponseStacktrace(self, response);
                     }
                 },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                error: function error(jqXHR) {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON || { error: "Unknown error occurred" });
                 }
             });
         };
-
+        
         that.report_scenarios = function () {
             var self = instance;
             self.status.html("Omni Scenarios Completed")

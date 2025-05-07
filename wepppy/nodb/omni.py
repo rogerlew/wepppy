@@ -38,9 +38,7 @@ class OmniScenario(IntEnum):
     UniformModerate = 2
     UniformHigh = 3
     Thinning = 4
-    Mulch15 = 5
-    Mulch30 = 6
-    Mulch60 = 7
+    Mulch = 5
     SBSmap = 8
     Undisturbed = 9
     PrescribedFire = 10
@@ -56,19 +54,15 @@ class OmniScenario(IntEnum):
             return OmniScenario.UniformHigh
         elif x == 'thinning':
             return OmniScenario.Thinning
-        elif x == 'mulch15':
-            return OmniScenario.Mulch15
-        elif x == 'mulch30':
-            return OmniScenario.Mulch30
-        elif x == 'mulch60':
-            return OmniScenario.Mulch60
+        elif x == 'mulch':
+            return OmniScenario.Mulch
         elif x == 'sbs_map':
             return OmniScenario.SBSmap
         elif x == 'undisturbed':
             return OmniScenario.Undisturbed
         elif x == 'prescribed_fire':
             return OmniScenario.PrescribedFire
-        raise KeyError
+        raise KeyError(f"Invalid scenario: {x}")
 
     def __str__(self):
         """
@@ -82,12 +76,8 @@ class OmniScenario(IntEnum):
             return 'uniform_high'
         elif self == OmniScenario.Thinning:
             return 'thinning'
-        elif self == OmniScenario.Mulch15:
-            return 'mulch15'
-        elif self == OmniScenario.Mulch30:
-            return 'mulch30'
-        elif self == OmniScenario.Mulch60:
-            return 'mulch60'
+        elif self == OmniScenario.Mulch:
+            return 'mulch'
         elif self == OmniScenario.SBSmap:
             return 'sbs_map'
         elif self == OmniScenario.Undisturbed:
@@ -95,6 +85,15 @@ class OmniScenario(IntEnum):
         elif self == OmniScenario.PrescribedFire:
             return 'prescribed_fire'
         raise KeyError
+
+    def __eq__(self, other):
+        if isinstance(other, OmniScenario):
+            return self.value == other.value
+        if isinstance(other, int):
+            return self.value == other
+        if isinstance(other, str):
+            return self.value == OmniScenario.parse(other).value
+        return False
     
 
 def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557997'):
@@ -296,9 +295,7 @@ def _build_scenario(
     elif scenario == OmniScenario.SBSmap:
         raise NotImplementedError
 
-    elif scenario == OmniScenario.Mulch15 or \
-         scenario == OmniScenario.Mulch30 or \
-         scenario == OmniScenario.Mulch60:
+    elif scenario == OmniScenario.Mulch:
         assert mulching_base_scenario is not None, \
             'Mulching scenario requires a base scenario'
         assert mulching_base_scenario in [OmniScenario.UniformLow, 
@@ -429,6 +426,61 @@ class Omni(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def parse_scenarios(self, parsed_inputs):
+        """
+        Parse the scenarios and their parameters into the NoDb structure.
+        :param parsed_inputs: List of (scenario_enum, params) tuples
+        """
+        self.lock()
+
+        try:
+            self._scenarios = []  # Reset scenarios
+
+            for scenario_enum, params in parsed_inputs:
+                scenario_type = params.get('type')
+                
+                # Handle scenarios with parameters
+                if scenario_enum == OmniScenario.Thinning:
+                    canopy_cover = params.get('canopy_cover')
+                    ground_cover = params.get('ground_cover')
+                    if not canopy_cover or not ground_cover:
+                        raise ValueError('Thinning requires canopy_cover and ground_cover')
+                    self._scenarios.append({
+                        'type': scenario_type,
+                        'canopy_cover': canopy_cover,
+                        'ground_cover': ground_cover
+                    })
+                elif scenario_enum == OmniScenario.Mulch:
+                    ground_cover_increase = params.get('ground_cover_increase')
+                    base_scenario = params.get('base_scenario')
+                    if not ground_cover_increase or not base_scenario:
+                        raise ValueError('Mulching requires ground_cover_increase and base_scenario')
+                    
+                    self._scenarios.append({
+                        'type': scenario_type,
+                        'ground_cover_increase': ground_cover_increase,
+                        'base_scenario': base_scenario
+                    })
+                elif scenario_enum == OmniScenario.SBSmap:
+                    sbs_file_path = params.get('sbs_file_path')
+                    if not sbs_file_path:
+                        raise ValueError('SBS Map requires a file path')
+                    self._scenarios.append({
+                        'type': scenario_type,
+                        'sbs_file_path': sbs_file_path
+                    })
+                else:
+                    # Scenarios without parameters (UniformLow, UniformModerate, etc.)
+                    self._scenarios.append({
+                        'type': scenario_type
+                    })
+
+        except Exception as e:
+            self.unlock()
+            raise Exception(f'Failed to parse inputs: {str(e)}')
+        finally:
+            self.unlock()
+
 
     def parse_inputs(self, kwds):
         """
@@ -438,41 +490,6 @@ class Omni(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:        
-
-            _scenarios = set()
-
-            if kwds.get('omni_run_uniform_scenario_low_severity_fire', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.UniformLow)
-
-            if kwds.get('omni_run_uniform_scenario_moderate_severity_fire', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.UniformModerate)
-
-            if kwds.get('omni_run_uniform_scenario_high_severity_fire', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.UniformHigh)
-
-            if kwds.get('omni_run_uniform_scenario_thinning', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Thinning)
-
-            if kwds.get('omni_run_uniform_scenario_sbsmap', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.SBSmap)
-
-            if kwds.get('omni_run_uniform_scenario_undisturbed', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Undisturbed)
-
-            if kwds.get('omni_run_uniform_scenario_mulching15', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Mulch15)
-
-            if kwds.get('omni_run_uniform_scenario_mulching30', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Mulch30)
-
-            if kwds.get('omni_run_uniform_scenario_mulching60', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.Mulch60)
-
-            if kwds.get('omni_run_uniform_scenario_prescribed_fire', 'off').lower().startswith('on'):
-                _scenarios.add(OmniScenario.PrescribedFire)
-
-            self._scenarios = _scenarios
-
 
             _omni_mulching_base_scenario= kwds.get('omni_mulching_base_scenario', None)
             if _omni_mulching_base_scenario is not None:
@@ -757,19 +774,18 @@ class Omni(NoDbBase, LogMixin):
     def _lock(self):
         return _join(self.wd, 'omni.nodb.lock')
     
-    def run_omni_scenario(self, scenario: OmniScenario):
+    def run_omni_scenario(self, scenario_def: dict):
+        scenario = scenario_def.get('type')
+
         self.log(f'Omni::run_scenario({scenario})\n')
 
         if not isinstance(scenario, OmniScenario):
             raise TypeError('scenario must be an instance of OmniScenario')
 
-        if scenario not in self.scenarios:
-            raise ValueError(f'scenario {scenario} not in scenarios')
-
-        _build_scenario(scenario, self.wd, self.base_scenario, self.mulching_base_scenario)
+        _build_scenario(scenario_def, self.wd, self.base_scenario)
 
         if scenario not in self.scenarios:
-            self.scenarios = self.scenarios + [scenario]
+            self.scenarios = self.scenarios + [scenario_def]
             
         self.log(f'  Omni::run_scenario({scenario}): {scenario} completed\n')
 
@@ -782,17 +798,19 @@ class Omni(NoDbBase, LogMixin):
             self.log('  Omni::run_omni_scenarios: No scenarios to run\n')
             raise Exception('No scenarios to run')
 
-        for scenario in self.scenarios:
+        for scenario_def in self.scenarios:
+            scenario = scenario_def.get('type')
             if scenario in [OmniScenario.Mulch15, OmniScenario.Mulch30, OmniScenario.Mulch60, OmniScenario.PrescribedFire]:
                 continue
-            self.log(f'  Omni::run_omni_scenarios: {scenario}\n')
-            _build_scenario(scenario, self.wd, self.base_scenario)
+
+            self.log(f'  Omni::run_omni_scenarios: {scenario_def}\n')
+            _build_scenario(scenario_def, self.wd, self.base_scenario)
 
         for scenario in self.scenarios:
             if scenario not in [OmniScenario.Mulch15, OmniScenario.Mulch30, OmniScenario.Mulch60, OmniScenario.PrescribedFire]:
                 continue
             self.log(f'  Omni::run_omni_scenarios: {scenario}\n')
-            _build_scenario(scenario, self.wd, self.base_scenario, self.mulching_base_scenario)
+            _build_scenario(scenario_def, self.wd, self.base_scenario)
 
     def scenarios_report(self):
         """
@@ -801,7 +819,8 @@ class Omni(NoDbBase, LogMixin):
 
         parquet_files = {self.base_scenario: _join(self.wd, 'wepp', 'output', 'loss_pw0.out.parquet')}
 
-        for scenario in self.scenarios:
+        for scenario_def in self.scenarios:
+            scenario = scenario_def.get('type')
             parquet_files[scenario] = _join(self.wd, 'omni', 'scenarios', str(scenario), 'wepp', 'output', 'loss_pw0.out.parquet')
 
         dfs = []

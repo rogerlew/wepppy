@@ -69,6 +69,7 @@ class SoilsMode(IntEnum):
     SingleDb = 2
     RRED_Unburned = 3
     RRED_Burned = 4
+    SpatialAPI = 9
 
 
 # noinspection PyPep8Naming
@@ -700,10 +701,64 @@ class Soils(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def _build_spatial_api(self):
+        # fetch landcover map
 
+        _map = Ron.getInstance(self.wd).map
 
+        ssurgo_fn = self.ssurgo_fn
+        soils_dir = self.soils_dir
+
+        wmesque_retrieve(self.ssurgo_db, _map.extent,
+                            ssurgo_fn, _map.cellsize)
+
+        # Make SSURGO Soils
+        sm = SurgoMap(ssurgo_fn)
+        mukeys = set(sm.mukeys)
+        self.log(f"ssurgo mukeys: {mukeys}")
+        self.log_done()
+
+        surgo_c = SurgoSoilCollection(mukeys)
+        surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
+
+        soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+        soils = {str(k): v for k, v in soils.items()}
+        surgo_c.logInvalidSoils(wd=soils_dir)
+
+        self.log(f"valid mukeys: {soils.keys()}")
+        self.log_done()
+
+        valid = list(int(v) for v in soils.keys())
+
+        if len(valid) == 0:
+            # falling back to statsgo
+            self.log(f"falling back to statsgo")
+
+            statsgoSpatial = StatsgoSpatial()
+
+            mukeys = statsgoSpatial.identify_mukeys_extent(_map.extent)
+            surgo_c = SurgoSoilCollection(mukeys, use_statsgo=True)
+            surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
+            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+            soils = {str(k): v for k, v in soils.items()}
+            surgo_c.logInvalidSoils(wd=soils_dir)
+
+        self.lock()
+        try:
+            self._soils = soils
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+        
     def build(self, initial_sat=None, ksflag=None):
         self.log("wepp.nodb.Soils.build()...\n")
+
+        if self._mode == SoilsMode.SpatialAPI:
+            self._build_spatial_api()
+            return
 
         wd = self.wd
         watershed = Watershed.getInstance(wd)

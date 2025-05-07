@@ -23,8 +23,8 @@
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
-            <button class="btn btn-success mb-3" onclick="addScenario()">+</button>
             <div id="scenario-container"></div>
+            <button class="btn btn-success mb-3" onclick="addScenario()">+</button>
         </div>
     </div>
 </div>
@@ -70,7 +70,7 @@
                 { type: "select", name: "ground_cover", label: "Ground Cover", options: ["93%", "90%", "75%"] }
             ]
         },
-        mulching: {
+        mulch: {
             label: "Mulching",
             controls: [
                 { type: "select", name: "ground_cover_increase", label: "Ground Cover Increase", options: ["15%", "30%", "60%"] },
@@ -150,12 +150,45 @@
             });
         }
     }
+
+    function serializeScenarios() {
+        const formData = new FormData();
+        const scenarioItems = document.querySelectorAll('#scenario-container .scenario-item');
+        const scenariosList = [];
+
+        scenarioItems.forEach((item, index) => {
+            const scenarioSelect = item.querySelector('select[name="scenario"]');
+            if (!scenarioSelect || !scenarioSelect.value) return;
+
+            const scenario = {
+                type: scenarioSelect.value
+            };
+
+            const controls = item.querySelectorAll('.scenario-controls [name]');
+            controls.forEach(control => {
+                if (control.type === 'file' && control.files.length > 0) {
+                    // Append the file with a unique key based on the scenario index
+                    formData.append(`scenarios[${index}][${control.name}]`, control.files[0]);
+                    scenario[control.name] = control.files[0].name; // Store filename in the JSON structure
+                } else if (control.value) {
+                    scenario[control.name] = control.value;
+                }
+            });
+
+            scenariosList.push(scenario);
+        });
+
+        // Append the scenarios list as a JSON string
+        formData.append('scenarios', JSON.stringify(scenariosList));
+        return formData;
+    }
+    
 </script>
-<div style="height:1em;"> </div>
+
+<div style="height:1em;"></div>
 <div class="form-group row hide-readonly">
     <div class="col-sm-4">
-        <button id="btn_build_rap_ts" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button"
-            onclick="Omni.getInstance().run_omni_scenarios()">Run Omni</button>
+        <button id="btn_build_rap_ts" class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button" onclick="Omni.getInstance().run_omni_scenarios()">Run Omni</button>
     </div>
     <div class="col-sm-5">
         <small id="hint_run_omni"></small>

@@ -12,6 +12,7 @@ import json
 
 import os
 from os.path import join as _join
+from os.path import split as _split
 from os.path import exists as _exists
 import shutil
 from enum import IntEnum
@@ -65,6 +66,7 @@ class LanduseMode(IntEnum):
     RRED_Unburned = 2
     RRED_Burned = 3
     UserDefined = 4
+    SpatialAPI = 9
 
 
 def read_cover_defaults(fn):
@@ -432,11 +434,48 @@ class Landuse(NoDbBase, LogMixin):
 
         self.domlc_d = domlc_d
 
+    def _build_spatial_api(self):
+        # fetch landcover map
+
+        _map = Ron.getInstance(self.wd).map
+
+        # Get NLCD 2011 from wmesque webservice
+        lc_fn = self.lc_fn
+
+        wmesque_retrieve(self.nlcd_db, _map.extent, lc_fn, _map.cellsize)
+
+        # read the keys out of the raster
+        nlcd, transform, proj = read_raster(lc_fn, dtype=np.int32)
+
+        doms = set([int(x) for x in nlcd.flatten()])
+        doms = sorted(doms)
+
+        managements = {}
+        for dom in doms:
+            man = managements[dom] = get_management_summary(dom, self.mapping)
+
+            # copy the management file to landuse directory
+            shutil.copyfile(_join(man.man_dir, man.man_fn), _join(self.lc_dir, _split(man.man_fn)[-1]))
+            managements[dom].man_dir = self.lc_dir
+
+        self.lock()
+        try:
+            self._managements = managements
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
+
     def build(self):
         assert not self.islocked()
         self.log('Building landuse')
 
         wd = self.wd
+
+        if self._mode == LanduseMode.SpatialAPI:
+            self._build_spatial_api()
+            return
+
         watershed = Watershed.getInstance(wd)
         if not watershed.is_abstracted:
             raise WatershedNotAbstractedError()
