@@ -10,7 +10,7 @@ import awesome_codename
 
 import pandas as pd
 
-from flask import abort, Blueprint, request, Response, jsonify
+from flask import abort, Blueprint, request, Response, jsonify, send_file
 
 from flask_security import current_user
 
@@ -24,7 +24,7 @@ from rq.job import Job
 
 from wepppy.soils.ssurgo import NoValidSoilsException
 
-from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, Omni, LanduseMode
+from wepppy.nodb import Wepp, Soils, Watershed, Climate, Disturbed, Landuse, Ron, Ash, AshSpatialMode, Omni, LanduseMode, OmniScenario
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.rq.project_rq import (
@@ -42,6 +42,7 @@ from wepppy.rq.project_rq import (
 )
 from wepppy.rq.wepp_rq import run_wepp_rq, post_dss_export_rq
 from wepppy.rq.omni_rq import run_omni_rq
+from wepppy.rq.land_and_soil_rq import land_and_soil_rq
 
 from wepppy.topo.watershed_abstraction import (
     ChannelRoutingError,
@@ -126,6 +127,9 @@ def report_stopped(job, connection):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/hello_world', methods=['GET', 'POST'])
 def hello_world(runid, config):
+    """
+    This is useful for debugging rq worker issues
+    """
     try:
         with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
             q = Queue('m4', connection=redis_conn)
@@ -139,7 +143,6 @@ def hello_world(runid, config):
     time.sleep(2)
 
     return jsonify({'Success': True, 'job_id': job.id, 'exc_info': job.exc_info, 'is_failed': job.is_failed})
-
 
 
 def _parse_map_change(form):
@@ -179,6 +182,43 @@ def _parse_map_change(form):
 
     return None,  [extent, center, zoom, mcl, csa]
 
+
+@rq_api_bp.route('/rq/api/landuse_and_soils', methods=['POST'])
+def build_landuse_and_soils():
+    uuid = None
+    try:
+        # assume this POST request has json data. extract extent, cfg (optional), nlcd_db (optional), ssurgo_db (optional)
+        data = request.get_json()
+        extent = data.get('extent', None)
+
+        print(f'extent: {extent}')
+        
+        if extent is None:
+            return error_factory('Expecting extent')
+        
+        cfg = data.get('cfg', None)
+        nlcd_db = data.get('nlcd_db', None)
+        ssurgo_db = data.get('ssurgo_db', None)
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(land_and_soil_rq, (extent, cfg, nlcd_db, ssurgo_db), timeout=TIMEOUT)
+            uuid = job.id
+    except Exception as e:
+        return exception_factory('land_and_soil_rq Failed', runid=uuid)
+
+    return jsonify({'Success': True, 'job_id': job.id})
+
+
+@rq_api_bp.route('/rq/api/landuse_and_soils/{uuid}')
+def download_landuse_and_soils(uuid):
+
+    if '.' in uuid or '/' in uuid:
+        return error_factory('Invalid uuid')
+    
+    if _exists(f'/wc1/land_and_soil_rq/{uuid}.tar.gz'):
+        return send_file(f'/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True)
+        
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fetch_dem_and_build_channels', methods=['POST'])
 def fetch_dem_and_build_channels(runid, config):
@@ -740,14 +780,61 @@ def _task_upload_ash_map(wd, request, file_input_id):
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni', methods=['POST'])
 def api_run_omni(runid, config):
-
     wd = get_wd(runid)
     omni = Omni.getInstance(wd)
 
     try:
-        omni.parse_inputs(request.form)
-    except Exception:
-        return exception_factory('Error parsing omni inputs', runid=runid)
+        # Ensure the .limbo directory exists
+        limbo_dir = _join(wd, 'omni', '_limbo')
+        os.makedirs(limbo_dir, exist_ok=True)
+
+        # Parse the scenarios JSON from FormData
+        if 'scenarios' not in request.form:
+            return exception_factory('Missing scenarios data', runid=runid)
+        
+        scenarios_data = json.loads(request.form['scenarios'])
+        if not isinstance(scenarios_data, list):
+            return exception_factory('Scenarios data must be a list', runid=runid)
+
+        # Process each scenario and handle file uploads
+        parsed_inputs = []
+        for idx, scenario in enumerate(scenarios_data):
+            scenario_type = scenario.get('type')
+            if not scenario_type:
+                continue  # Skip invalid scenarios
+
+            # Map scenario type to OmniScenario enum
+            scenario_enum = OmniScenario.parse(scenario_type)
+
+            # Handle file uploads for SBS Map scenario
+            # place the maps in {wd}/omni/.limbo/{idx:02d} so they are available for Omni
+            scenario_params = scenario.copy()
+            if scenario_enum == OmniScenario.SBSmap:
+                file_key = f'scenarios[{idx}][sbs_file]'
+                if file_key not in request.files:
+                    return exception_factory(f'Missing SBS file for scenario {idx}', runid=runid)
+
+                file = request.files[file_key]
+                if file.filename == '':
+                    return error_factory('No filename specified for SBS file')
+
+                # Securely save the file to wd/omni/.limbo/SBSmap
+                filename = secure_filename(file.filename)
+                scenario_dir = os.path.join(limbo_dir, f'{idx:02d}')
+                os.makedirs(scenario_dir, exist_ok=True)
+                file_path = os.path.join(scenario_dir, filename)
+                file.save(file_path)
+
+                # Update scenario params with the file path
+                scenario_params['sbs_file_path'] = file_path
+
+            parsed_inputs.append((scenario_enum, scenario_params))
+
+        # Pass the parsed scenarios to omni.parse_inputs
+        omni.parse_scenarios(parsed_inputs)
+
+    except Exception as e:
+        return exception_factory(f'Error parsing omni inputs: {str(e)}', runid=runid)
 
     try:
         prep = RedisPrep.getInstance(wd)
