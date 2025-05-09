@@ -129,6 +129,8 @@ from wepppy.nodb.omni import (
     OmniScenario # IntEnum
 )
 
+from wepppy.nodb.mods.treatments import TreatmentsMode, Treatments
+
 from wepppy.nodb.redis_prep import RedisPrep
 
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -543,6 +545,7 @@ def upload_sbs():
     try:
         res = disturbed.validate(filename)
     except Exception:
+        os.remove(file_path)
         return exception_factory('Failed validating file')
 
     return jsonify(dict(runid=runid))
@@ -1295,6 +1298,62 @@ def reset_disturbed(runid, config):
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
 
 
+@app.route('/runs/<string:runid>/<config>/tasks/omni_migration')
+@app.route('/runs/<string:runid>/<config>/tasks/omni_migration/')
+def omni_migration(runid, config):
+    
+    assert config is not None
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    try:
+        ron = Ron.getInstance(wd)
+        if 'omni' in ron._mods:
+            return error_factory('omni already in mods')
+        
+        ron.lock()
+        try:
+            ron._mods.append('omni')
+
+            if 'treatments' not in ron._mods:
+                ron._mods.append('treatments')
+
+            ron.dump_and_unlock()
+        except:
+            ron.unlock('-f')
+            return exception_factory('Error adding omni to mods', runid=runid)
+    
+        cfg_fn = f'{config}.cfg'
+        Omni(wd, cfg_fn)
+
+        if not _exists(_join(wd, 'treatments.nodb')):
+            Treatments(wd, cfg_fn)
+
+        return success_factory("Reload project to continue")
+    except:
+        return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
+
 
 @app.route('/runs/<string:runid>/<config>/tasks/preflight/', methods=['POST'])
 def task_preflight(runid, config):
@@ -1494,7 +1553,6 @@ def runs0_nocfg(runid):
 def runs0(runid, config):
 
     from wepppy.nodb.mods.revegetation import Revegetation
-    from wepppy.nodb.mods.treatments import Treatments
 
     assert config is not None
 
@@ -2480,7 +2538,6 @@ def set_landuse_mode(runid, config):
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/tasks/set_treatments_mode/', methods=['POST'])
 def set_treatments_mode(runid, config):
-    from wepppy.nodb.mods.treatments import TreatmentsMode, Treatments
 
     mode = None
     single_selection = None

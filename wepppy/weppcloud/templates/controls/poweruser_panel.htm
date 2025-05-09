@@ -135,6 +135,13 @@ clear_locks = function() {
               <a class="list-group-item list-group-item-action" onclick="reset_land_soil_lookup()" href="#">Reset Disturbed Parameters</a>
             </div>
             {% endif %}
+            <br>
+            <h5>Omni</h5>
+            {% if 'omni' not in ron.mods %}
+            <div class="list-group">
+              <a class="list-group-item list-group-item-action" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/omni_migration" target="_blank">Omni Migration</a>
+            </div>
+            {% endif %}
           </div>
         </div>
     </div>

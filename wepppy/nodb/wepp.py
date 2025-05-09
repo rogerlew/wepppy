@@ -952,7 +952,7 @@ class Wepp(NoDbBase, LogMixin):
 
     @property
     def pmet_kcb_map(self):
-        return getattr(self, '_pmet_kcb_map', self.config_get_path('wepp', 'pmet_kcb_map'))
+        return getattr(self, '_pmet_kcb_map', None)
 
     @pmet_kcb.setter
     def pmet_kcb(self, value):
