@@ -4173,7 +4173,7 @@ def resources_wepp_totalwatsed2(runid, config):
         totwatsed.export(fn)
     assert _exists(fn)
 
-    return send_file(fn, mimetype='text/csv', download_name='totalwatsed2.csv')
+    return send_file(fn, mimetype='text/csv', download_name='totalwatsed2.csv', as_attachment=True)
 
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow')
 @app.route('/runs/<string:runid>/<config>/plot/wepp/streamflow/')
