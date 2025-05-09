@@ -357,8 +357,8 @@ class Ron(NoDbBase):
             wepppy.nodb.Unitizer(wd, cfg_fn)
             wepppy.nodb.WeppPost(wd, cfg_fn)
             wepppy.nodb.Observed(wd, cfg_fn)
-            prep = wepppy.nodb.redis_prep.RedisPrep(wd, cfg_fn)
-            prep.timestamp(wepppy.nodb.redis_prep.TaskEnum.project_init)
+            prep = wepppy.nodb.RedisPrep(wd, cfg_fn)
+            prep.timestamp(wepppy.nodb.TaskEnum.project_init)
 
             if 'lt' in self.mods:
                 wepppy.nodb.mods.locations.LakeTahoe(wd, cfg_fn)
