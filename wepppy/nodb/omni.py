@@ -8,6 +8,8 @@ from os.path import join as _join
 from os.path import split as _split
 from os.path import isdir
 
+import base64
+
 import pandas as pd
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -146,12 +148,11 @@ def _run_contrast(contrast_id, contrast_name, contrasts, wd, wepp_bin='wepp_a557
     wepp.run_watershed()
 
 
-def _omni_clone(
-        scenario: OmniScenario, 
-        wd: str):
+def _omni_clone(scenario_def: dict, wd: str):
     
-    _scenario = str(scenario)
-    omni_dir = _join(wd, 'omni', 'scenarios', _scenario)
+    scenario = scenario_def.get('type')
+    _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+    omni_dir = _join(wd, 'omni', 'scenarios', _scenario_name)
 
     if _exists(omni_dir):
         shutil.rmtree(omni_dir)
@@ -211,10 +212,22 @@ def _omni_clone(
     return omni_dir
 
 
-def _omni_clone_sibling(new_wd, sibling_scenario):
+def _omni_clone_sibling(new_wd: str, sibling_scenario: OmniScenario):
+    """
+    after _omni_clone copies watershed, climates, wepp from the base_scenario (parent)
+
+    we copy the sibling scenario's disturbed, landuse, and soils so that managements/treatments
+    are applied to the correct scenario.
+    """
     sibling_wd = _join(new_wd, '..', str(sibling_scenario))
     if not _exists(sibling_wd):
-        raise FileNotFoundError(f"'{sibling_wd}' not found!")
+        if sibling_scenario.startswith('sbs_map'):
+            try:
+                sibling_wd = glob(_join(new_wd, '..', 'sbs_map*'))[0]
+            except IndexError:
+                raise FileNotFoundError(f"'{sibling_wd}' not found!")
+        else:   
+            raise FileNotFoundError(f"'{sibling_wd}' not found!")
     
     # replace disturbed, landuse, and soils
     os.remove(_join(new_wd, 'disturbed.nodb'))
@@ -236,31 +249,59 @@ def _omni_clone_sibling(new_wd, sibling_scenario):
     shutil.copytree(_join(sibling_wd, 'soils'), _join(new_wd, 'soils'))
 
 
+def _scenario_name_from_scenario_definition(scenario_def):
+    """
+    Get the scenario name from the scenario definition.
+    :param scenario_def: The scenario definition.
+    :return: The scenario name.
+    """
+    _scenario = scenario_def.get('type')
+
+    if _scenario == OmniScenario.Thinning:
+        canopy_cover = scenario_def.get('canopy_cover')
+        ground_cover = scenario_def.get('ground_cover')
+        return f'{_scenario}_{canopy_cover}_{ground_cover}'
+    elif _scenario == OmniScenario.Mulch:
+        ground_cover_increase = scenario_def.get('ground_cover_increase')
+        base_scenario = scenario_def.get('base_scenario')
+        return f'{_scenario}_{ground_cover_increase}_{base_scenario}'
+    elif _scenario == OmniScenario.SBSmap:
+        sbs_file_path = scenario_def.get('sbs_file_path')
+        sbs_hash = base64.b64encode(bytes(sbs_file_path, 'utf-8')).rstrip('=')
+        return f'{_scenario}_{sbs_hash}'
+    else:
+        return str(_scenario)
+
+
 def _build_scenario(
-        scenario: OmniScenario, 
+        scenario_def: dict, 
         wd: str, 
-        base_scenario: OmniScenario, 
-        mulching_base_scenario: Optional[OmniScenario] = None):
+        base_scenario: OmniScenario):
     from wepppy.nodb import Landuse, Soils, Wepp
     from wepppy.nodb.mods import Disturbed
     from wepppy.nodb.mods import Treatments
 
+    scenario = OmniScenario.parse(scenario_def.get('type'))
     _scenario = str(scenario)
+    omni_base_scenario = scenario_def.get('base_scenario', None)
+    if omni_base_scenario is not None:
+        omni_base_scenario = OmniScenario.parse(omni_base_scenario)
 
-    if scenario == OmniScenario.PrescribedFire:  # prescribed fire has to be applied to undisturbed
-        if base_scenario != OmniScenario.Undisturbed:  # if the base scenario is not undisturbed, we need to clone it from the undisturbed sibling
-            mulching_base_scenario = OmniScenario.Undisturbed
+    if scenario in [OmniScenario.PrescribedFire, OmniScenario.Thinning]:  # prescribed fire and thining has to be applied to undisturbed
+        if base_scenario != OmniScenario.Undisturbed:  # if the base scenario is SBSmap, we need to clone it from the undisturbed sibling
+            omni_base_scenario = OmniScenario.Undisturbed
 
     # change to working dir of parent weppcloud project
     os.chdir(wd)
     
     # assert we know how to handle the scenario
     assert isinstance(scenario, OmniScenario)
-    new_wd = _omni_clone(scenario, wd)
+    new_wd = _omni_clone(scenario_def, wd)
 
-    if mulching_base_scenario is not None:
-        if not mulching_base_scenario == base_scenario:
-            _omni_clone_sibling(new_wd, mulching_base_scenario)
+    if omni_base_scenario is not None:
+        if not omni_base_scenario == base_scenario:
+            # e.g. scenario is mulch and omni_base_scenario is uniform_low, uniform_moderate, uniform_high, or sbs_map
+            _omni_clone_sibling(new_wd, omni_base_scenario)
             return
 
     # get disturbed and landuse instances
@@ -282,8 +323,7 @@ def _build_scenario(
             sbs = 3
 
         sbs_fn = disturbed.build_uniform_sbs(int(sbs))
-        res = disturbed.validate(sbs_fn)
-
+        disturbed.validate(sbs_fn)
         landuse.build()
 
     elif scenario == OmniScenario.Undisturbed:
@@ -293,12 +333,23 @@ def _build_scenario(
         landuse.build()
 
     elif scenario == OmniScenario.SBSmap:
-        raise NotImplementedError
+        sbs_file_path = scenario_def.get('sbs_file_path')
+        if not _exists(sbs_file_path):
+            raise FileNotFoundError(f"'{sbs_file_path}' not found!")
+        
+        # move from _limbo to new_wd/disturbed and validate
+        sbs_fn = _split(sbs_file_path)[-1]
+        new_sbs_file_path = _join(disturbed.disturbed_dir, sbs_fn)
+        shutil.copyfile(sbs_file_path, new_sbs_file_path)
+        os.remove(sbs_file_path)
+
+        disturbed.validate(sbs_fn)
+        landuse.build()
 
     elif scenario == OmniScenario.Mulch:
-        assert mulching_base_scenario is not None, \
+        assert omni_base_scenario is not None, \
             'Mulching scenario requires a base scenario'
-        assert mulching_base_scenario in [OmniScenario.UniformLow, 
+        assert omni_base_scenario in [OmniScenario.UniformLow, 
                                           OmniScenario.UniformModerate, 
                                           OmniScenario.UniformHigh, 
                                           OmniScenario.SBSmap], \
@@ -319,7 +370,25 @@ def _build_scenario(
         treatments.treatments_domlc_d = treatments_domlc_d
         treatments.build_treatments()
         
-    elif scenario == OmniScenario.PrescribedFire:
+    elif scenario in OmniScenario.PrescribedFire:
+        # should have cloned undisturbed
+        if disturbed.has_sbs:
+            raise Exception('Cloned omni scenario should be undisturbed')
+
+        treatments = Treatments.getInstance(new_wd)
+        treatment_key = treatments.treatments_lookup[str(scenario)]
+
+        treatments_domlc_d = {}
+        for topaz_id, dom in landuse.domlc_d.items():
+            man_summary = landuse.managements[dom]
+            disturbed_class = getattr(man_summary, 'disturbed_class', '')
+            if 'forest' in disturbed_class and 'young' not in disturbed_class:
+                treatments_domlc_d[topaz_id] = treatment_key
+
+        treatments.treatments_domlc_d = treatments_domlc_d
+        treatments.build_treatments()
+
+    elif scenario in OmniScenario.Thinning:
         # should have cloned undisturbed
         if disturbed.has_sbs:
             raise Exception('Cloned omni scenario should be undisturbed')
@@ -398,20 +467,6 @@ class Omni(NoDbBase, LogMixin):
             raise
 
     @property
-    def mulching_base_scenario(self):
-        return self._mulching_base_scenario
-    
-    @mulching_base_scenario.setter
-    def mulching_base_scenario(self, value: OmniScenario):
-        self.lock()
-        try:
-            self._mulching_base_scenario = value
-            self.dump_and_unlock()
-        except Exception:
-            self.unlock('-f')
-            raise
-
-    @property
     def scenarios(self):
         return self._scenarios
     
@@ -475,11 +530,11 @@ class Omni(NoDbBase, LogMixin):
                         'type': scenario_type
                     })
 
+            self.dump_and_unlock()
+
         except Exception as e:
             self.unlock()
             raise Exception(f'Failed to parse inputs: {str(e)}')
-        finally:
-            self.unlock()
 
 
     def parse_inputs(self, kwds):
@@ -490,10 +545,6 @@ class Omni(NoDbBase, LogMixin):
 
         # noinspection PyBroadException
         try:        
-
-            _omni_mulching_base_scenario= kwds.get('omni_mulching_base_scenario', None)
-            if _omni_mulching_base_scenario is not None:
-                self._mulching_base_scenario = OmniScenario.parse(_omni_mulching_base_scenario)
 
             control_scenario = kwds.get('omni_control_scenario', None)
             if control_scenario is not None:
@@ -574,7 +625,7 @@ class Omni(NoDbBase, LogMixin):
         objective_parameter_descending, total_objective_parameter = gpkg_extract_objective_parameter(gpkg_fn, obj_param=objective_parameter)
         return objective_parameter_descending, total_objective_parameter
     
-    def build_contrasts(self, control_scenario=OmniScenario.UniformHigh, contrast_scenario=OmniScenario.Thinning,
+    def build_contrasts(self, control_scenario_def, contrast_scenario_def,
                         obj_param='Runoff_mm',
                         contrast_cumulative_obj_param_threshold_fraction=0.8,
                         contrast_hillslope_limit=None,
@@ -612,6 +663,9 @@ class Omni(NoDbBase, LogMixin):
         """
 
         self.log('Omni::build_contrasts')
+
+        control_scenario = OmniScenario.parse(control_scenario_def.get('type'))
+        contrast_scenario = OmniScenario.parse(contrast_scenario_def.get('type'))
 
         # save parameters for defining contrasts
         self.lock()
@@ -800,14 +854,14 @@ class Omni(NoDbBase, LogMixin):
 
         for scenario_def in self.scenarios:
             scenario = scenario_def.get('type')
-            if scenario in [OmniScenario.Mulch15, OmniScenario.Mulch30, OmniScenario.Mulch60, OmniScenario.PrescribedFire]:
+            if scenario in [OmniScenario.Mulch, OmniScenario.PrescribedFire]:
                 continue
 
             self.log(f'  Omni::run_omni_scenarios: {scenario_def}\n')
             _build_scenario(scenario_def, self.wd, self.base_scenario)
 
         for scenario in self.scenarios:
-            if scenario not in [OmniScenario.Mulch15, OmniScenario.Mulch30, OmniScenario.Mulch60, OmniScenario.PrescribedFire]:
+            if scenario not in [OmniScenario.Mulch, OmniScenario.PrescribedFire]:
                 continue
             self.log(f'  Omni::run_omni_scenarios: {scenario}\n')
             _build_scenario(scenario_def, self.wd, self.base_scenario)

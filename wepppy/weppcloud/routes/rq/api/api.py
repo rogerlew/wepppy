@@ -784,7 +784,7 @@ def api_run_omni(runid, config):
     omni = Omni.getInstance(wd)
 
     try:
-        # Ensure the .limbo directory exists
+        # Ensure the _limbo directory exists
         limbo_dir = _join(wd, 'omni', '_limbo')
         os.makedirs(limbo_dir, exist_ok=True)
 
