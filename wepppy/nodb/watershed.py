@@ -1283,11 +1283,11 @@ class Watershed(NoDbBase, LogMixin):
                 self._sub_centroid_lookup = {str(row[0]): (row[1], row[2]) for row in result}
                 return self._sub_centroid_lookup[str(topaz_id)]
             
-        wat_ss = self.subs_summary[topaz_id]
+        wat_ss = self._subs_summary[topaz_id]
         if isinstance(wat_ss, HillSummary): # deprecated
             lng, lat = wat_ss.centroid.lnglat
         elif isinstance(wat_ss, dict):
-            lng, lat = wat_ss['centroid']['lnglat']
+            lng, lat = wat_ss['centroid']
         return lng, lat
     
     def hillslope_slp_fn(self, topaz_id):
