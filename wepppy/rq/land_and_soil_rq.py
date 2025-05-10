@@ -91,9 +91,9 @@ def land_and_soil_rq(runid, extent, cfg, nlcd_db, ssurgo_db):
         if _exists(tarfile):
             os.remove(tarfile)
         
-        cmd = ['tar', '-I', 'pigz', '-cf', tarfile, wd]
+        cmd = ["tar", "-I", "pigz", "-cf", tarfile, "."]
         StatusMessenger.publish(status_channel, f'Creating tar archive')
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        p = Popen(cmd, cwd=wd, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
         if p.returncode != 0:
             raise RuntimeError(f'Error creating tar file: {tarfile}, {p.returncode}: {err.decode()}')
