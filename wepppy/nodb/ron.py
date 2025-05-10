@@ -35,6 +35,8 @@ from .base import (
     TriggerEvents
 )
 
+from .redis_prep import TaskEnum
+
 
 _thisdir = os.path.dirname(__file__)
 
@@ -358,7 +360,7 @@ class Ron(NoDbBase):
             wepppy.nodb.WeppPost(wd, cfg_fn)
             wepppy.nodb.Observed(wd, cfg_fn)
             prep = wepppy.nodb.RedisPrep(wd, cfg_fn)
-            prep.timestamp(wepppy.nodb.TaskEnum.project_init)
+            prep.timestamp(TaskEnum.project_init)
 
             if 'lt' in self.mods:
                 wepppy.nodb.mods.locations.LakeTahoe(wd, cfg_fn)

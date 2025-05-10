@@ -15,6 +15,7 @@ from wepppy.rq.cancel_job import cancel_jobs
 rq_jobinfo_bp = Blueprint('rq_jobinfo', __name__)
 
 
+@rq_jobinfo_bp.route('/rq/api/jobinfo/<string:job_id>')
 @rq_jobinfo_bp.route('/rq/jobinfo/<string:job_id>')
 def jobinfo_route(job_id):
     try:
@@ -24,6 +25,7 @@ def jobinfo_route(job_id):
         return exception_factory()
 
 
+@rq_jobinfo_bp.route('/rq/api/canceljob/<string:job_id>')
 @rq_jobinfo_bp.route('/rq/canceljob/<string:job_id>')
 def canceljob_route(job_id):
     try:
