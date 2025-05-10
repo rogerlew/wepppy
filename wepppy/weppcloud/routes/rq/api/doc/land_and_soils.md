@@ -56,14 +56,16 @@ _Success_ = true indicates the job has been succesfully submitted to the job eng
 
 ### 2. Check Job Status
 
-**GET** `/rq/jobinfo/{job_id}`
+**GET** `/rq/api/jobinfo/{job_id}`
 
 Returns JSON status and progress for the submitted job.
+
+_Note:_ The jobinfo is tied to redis is only available for up to 7 days as currently configured.
 
 #### Sample Request
 
 ```bash
-curl https://wepp.cloud/weppcloud/rq/jobinfo/12b801f6-2148-48c4-b058-c6f9e410e8b5
+curl https://wepp.cloud/weppcloud/rq/api/jobinfo/12b801f6-2148-48c4-b058-c6f9e410e8b5
 ```
 
 ---
@@ -107,7 +109,7 @@ soils/
 - **Defaults**: if not supplied, uses `nlcd/2019` and `ssurgo/gNATSGO/2025`.
 - **NLCD**: annual maps available from 1985 through 2023.
 - **Fallback**: if SSURGO data is unavailable, the endpoint will not return a raster when falling back to STATSGO.
-- **Performance**: job submission takes only a few seconds for typical watershed extents.
+- **Performance**: job submission takes only a few seconds for a small watershed and a minute or several minutes for a large watershed.
 - **Webhooks (TODO)**: support to callback when job completes for clients with public endpoints.
 - **Multi-year rotations (TODO)**: current managements are single-year; future support may include `nyears` parameter to append rotations.
 
