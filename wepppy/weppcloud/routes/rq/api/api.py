@@ -218,6 +218,11 @@ def download_landuse_and_soils(uuid):
     
     if _exists(f'/wc1/land_and_soil_rq/{uuid}.tar.gz'):
         return send_file(f'/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True, download_name=f'{uuid}.tar.gz')
+    
+    if _exists(f'/geodata/wc1/land_and_soil_rq/{uuid}.tar.gz'):
+        return send_file(f'/geodata/wc1/land_and_soil_rq/{uuid}.tar.gz', as_attachment=True, download_name=f'{uuid}.tar.gz')
+    
+    return error_factory('File not found')
         
 
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/fetch_dem_and_build_channels', methods=['POST'])
