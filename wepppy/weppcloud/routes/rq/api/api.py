@@ -191,7 +191,7 @@ def build_landuse_and_soils():
         data = request.get_json()
         extent = data.get('extent', None)
 
-        print(f'extent: {extent}')
+        print(f'extent: {extent} {type(extent)}')
         
         if extent is None:
             return error_factory('Expecting extent')

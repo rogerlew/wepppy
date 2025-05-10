@@ -41,18 +41,18 @@ def land_and_soil_rq(runid, extent, cfg, nlcd_db, ssurgo_db):
     print(f'land_and_soil_rq(extent={extent}, cfg={cfg}, nlcd_db={nlcd_db}, ssurgo_db={ssurgo_db})')
 
     status_channel = 'land_and_soil_rq:-'
-    
+    func_name = inspect.currentframe().f_code.co_name
+    job = get_current_job()
+    uuid = job.id
+
     try:
-        job = get_current_job()
 
         if cfg is None:
-            cfg = 'disturbed'
+            cfg = 'disturbed9002'
         
         config = f'{cfg}.cfg'
         center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]
-        uuid = job.id
         status_channel = f'land_and_soil_rq:{job.id}'
-        func_name = inspect.currentframe().f_code.co_name
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({uuid})')
         t0 = time.time()
 
