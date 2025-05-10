@@ -56,7 +56,10 @@ def land_and_soil_rq(runid, extent, cfg, nlcd_db, ssurgo_db):
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({uuid})')
         t0 = time.time()
 
-        wd = f'/wc1/land_and_soil_rq/{uuid}'
+        if _exists('/wc1/land_and_soil_rq/'):
+            wd = f'/wc1/land_and_soil_rq/{uuid}'
+        else:
+            wd = f'/geodata/wc1/land_and_soil_rq/{uuid}'
 
         StatusMessenger.publish(status_channel, f'Creating wd {wd}')
         if not _exists(wd):
