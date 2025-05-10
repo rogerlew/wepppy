@@ -46,7 +46,7 @@ curl -X POST https://wepp.cloud/weppcloud/rq/api/landuse_and_soils \
 ```json
 {
   "Success": true,
-  "job_id": "12b801f6-2148-48c4-b058-c6f9e410e8b5"
+  "job_id": "cc4a620e-473f-478e-b33b-71f56fd6b544"
 }
 ```
 
@@ -65,7 +65,7 @@ _Note:_ The jobinfo is tied to redis is only available for up to 7 days as curre
 #### Sample Request
 
 ```bash
-curl https://wepp.cloud/weppcloud/rq/api/jobinfo/12b801f6-2148-48c4-b058-c6f9e410e8b5
+curl https://wepp.cloud/weppcloud/rq/api/jobinfo/cc4a620e-473f-478e-b33b-71f56fd6b544
 ```
 
 ---
@@ -79,7 +79,9 @@ Once the job is complete, download the resulting WEPPcloud project as a `.tar.gz
 #### Sample Request
 
 ```bash
-wget https://wepp.cloud/weppcloud/rq/api/landuse_and_soils/e3b0c442-98fc-1fc6-9a2c-4a4f5f6e7d8c.tar.gz
+wget https://wepp.cloud/weppcloud/rq/api/landuse_and_soils/cc4a620e-473f-478e-b33b-71f56fd6b544.tar.gz
+mkdir <output_dir>
+tar -xvzf cc4a620e-473f-478e-b33b-71f56fd6b544.tar.gz -C <output_dir>
 ```
 
 ---
