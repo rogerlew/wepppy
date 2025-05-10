@@ -1590,7 +1590,7 @@ class Wepp(NoDbBase, LogMixin):
                 modify_kslast_pars = None
 
                 if kslast_map is not None:
-                    lng, lat = watershed.subs_summary[topaz_id].centroid.lnglat
+                    lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
                     try:
                         _kslast = kslast_map.get_location_info(lng, lat, method='nearest')
                         modify_kslast_pars = dict(map_fn=kslast_map, lng=lng, lat=lat, kslast=_kslast)
