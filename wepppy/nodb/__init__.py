@@ -8,7 +8,7 @@ from .ron import (
     RonNoDbLockedException
 )
 
-from .redis_prep import RedisPrep
+from .redis_prep import RedisPrep, TaskEnum
 
 from .topaz import (
     Topaz,
