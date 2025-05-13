@@ -47,11 +47,6 @@ from wepppy.all_your_base import (
     NCPU
 )
 
-
-# https://dev.wepp.cloud/weppcloud/runs/combatant-fixer/disturbed9002/
-# https://dev.wepp.cloud/weppcloud/runs/waking-clang/disturbed9002/
-
-
 NCPU = multiprocessing.cpu_count() - 2
 
 class DelineationBackend(IntEnum):
@@ -438,10 +433,18 @@ class Watershed(NoDbBase, LogMixin):
         # use duckdb
         if _exists(_join(self.wat_dir, 'hillslopes.parquet')):
             import duckdb
-            with duckdb.connect(_join(self.wat_dir, 'hillslopes.parquet')) as con:
-                sql = 'SELECT COUNT(*) FROM hillslopes WHERE length > 300'
-                result = con.execute(sql).fetchone()
-                return result[0]
+
+            try:
+                with duckdb.connect(_join(self.wat_dir, 'hillslopes.parquet')) as con:
+                    sql = 'SELECT COUNT(*) FROM hillslopes WHERE length > 300'
+                    result = con.execute(sql).fetchone()
+                    return result[0]
+            except duckdb.duckdb.IOException:
+                time.sleep(2)  # fix for slow NAS after abstraction
+                with duckdb.connect(_join(self.wat_dir, 'hillslopes.parquet')) as con:
+                    sql = 'SELECT COUNT(*) FROM hillslopes WHERE length > 300'
+                    result = con.execute(sql).fetchone()
+                    return result[0]
 
         return sum(sub.length > 300 for sub in self._subs_summary.values())
 
