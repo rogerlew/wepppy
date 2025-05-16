@@ -111,12 +111,18 @@ def gpkg_export(wd: str):
 
     hill_gdf = gpd.read_file(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON'))
     hill_gdf.set_crs("EPSG:4326", inplace=True)
-    
-    wat_hill_fn = _join(wd, 'watershed/hillslopes.csv')
+
+    wat_hill_fn = _join(wd, 'watershed/hillslopes.parquet')
     if _exists(wat_hill_fn):
-        wat_hill_df = pd.read_csv(wat_hill_fn)
+        wat_hill_df = pd.read_parquet(wat_hill_fn)
         wat_hill_df = esri_compatible_colnames(wat_hill_df)
         hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='topaz_id', how='left')
+    else:  # deprecated
+        wat_hill_fn = _join(wd, 'watershed/hillslopes.csv')
+        if _exists(wat_hill_fn):  # even more deprecated
+            wat_hill_df = pd.read_csv(wat_hill_fn)
+            wat_hill_df = esri_compatible_colnames(wat_hill_df)
+            hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     lc_hill_fn = _join(wd, 'landuse/landuse.parquet')
     if _exists(lc_hill_fn):
@@ -186,14 +192,23 @@ def gpkg_export(wd: str):
     chn_gdf = gpd.read_file(_join(wd, 'dem/topaz/CHANNELS.WGS.JSON'))
     chn_gdf.set_crs("EPSG:4326", inplace=True)
 
-    wat_chn_fn = _join(wd, 'watershed/channels.csv')
+    wat_chn_fn = _join(wd, 'watershed/channels.parquet')
     if _exists(wat_chn_fn):
-        wat_chn_df = pd.read_csv(wat_chn_fn)
+        wat_chn_df = pd.read_parquet(wat_chn_fn)
         wat_chn_df = esri_compatible_colnames(wat_chn_df)
         columns_to_drop = ['WeppID']
         columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
         wat_chn_df.drop(columns=columns_to_drop, inplace=True)
         chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='topaz_id', how='left')
+    else:  # deprecated
+        wat_chn_fn = _join(wd, 'watershed/channels.csv')
+        if _exists(wat_chn_fn):  # even more deprecated
+            wat_chn_df = pd.read_csv(wat_chn_fn)
+            wat_chn_df = esri_compatible_colnames(wat_chn_df)
+            columns_to_drop = ['WeppID']
+            columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
+            wat_chn_df.drop(columns=columns_to_drop, inplace=True)
+            chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
     if _exists(chn_loss_fn):
@@ -229,6 +244,9 @@ def gpkg_export(wd: str):
     chn_gdf.rename(columns=units_d, inplace=True)
 
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
+
+    # get boundary and export return period repor to the shape
+
 
     if f_esri.has_f_esri():
         f_esri.gpkg_to_gdb(gpkg_fn, gpkg_fn.replace('.gpkg', '.gdb'))
