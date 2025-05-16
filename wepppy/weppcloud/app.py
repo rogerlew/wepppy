@@ -164,7 +164,18 @@ if config_app is None:
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 import hashlib
+import logging
 
+class HealthFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        return not ("OPTIONS /health" in msg or "Closing connection" in msg)
+
+# apply to both access & error loggers
+for name in ("gunicorn.access", "gunicorn.error"):
+    logger = logging.getLogger(name)
+    logger.addFilter(HealthFilter())
+    
 
 def sort_numeric_keys(value, reverse=False):
     return sorted(value.items(), key=lambda x: int(x[0]), reverse=reverse)
@@ -203,6 +214,7 @@ def get_file_sha1(file_path):
 # noinspection PyBroadException
 
 app = Flask(__name__)
+
 app.jinja_env.filters['zip'] = zip
 app.jinja_env.filters['sort_numeric'] = sort_numeric
 app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
@@ -424,14 +436,13 @@ security = Security(app, user_datastore,
                     register_form=ExtendedRegisterForm,
                     confirm_register_form=ExtendedRegisterForm)
 
+
 def get_run_owners(runid):
     return User.query.filter(User.runs.any(Run.runid == runid)).all()
 
 
-
 # from wepppy.weppcloud.wepp1_config import _init
 # _init(app, db, user_datastore)
-
 
 
 @app.route('/health')
@@ -608,9 +619,6 @@ def task_usermod():
 
 
 _thisdir = os.path.dirname(__file__)
-
-static_dir = _join(_thisdir, 'static')
-
 
 def error_factory(msg='Error Handling Request'):
     return jsonify({'Success': False,
@@ -1296,8 +1304,74 @@ def reset_disturbed(runid, config):
         return success_factory()
     except:
         return exception_factory('Error Resetting Disturbed Land Soil Lookup', runid=runid)
+    
 
+@app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs')
+@app.route('/runs/<string:runid>/<config>/api/disturbed/has_sbs/')
+def has_sbs(runid, config):
+    
+    assert config is not None
 
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    disturbed = Disturbed.getInstance(wd)
+    return jsonify(dict(has_sbs=disturbed.has_sbs))
+
+@app.route('/runs/<string:runid>/<config>/api/omni/get_scenarios')
+def get_scenarios(runid, config):
+    
+    assert config is not None
+
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+    try:
+        ron = Ron.getInstance(wd)
+    except FileNotFoundError:
+        abort(404)
+
+    should_abort = True
+    if current_user in owners:
+        should_abort = False
+
+    if not owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if ron.public:
+        should_abort = False
+
+    if should_abort:
+        abort(404)
+
+    omni = Omni.getInstance(wd)
+    scenarios = omni.scenarios
+    
+    return jsonify(scenarios)
+
+    
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration')
 @app.route('/runs/<string:runid>/<config>/tasks/omni_migration/')
 def omni_migration(runid, config):
