@@ -345,7 +345,7 @@ def get_pad(x):
 
 def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, page=1, page_size=MAX_FILE_LIMIT, filter_pattern=''):
     _padding = ' '
-    s = ['+-' + basename(abspath(_dir)) + '\n']
+    s = []
     
     page_entries, total_items = get_page_entries(_dir, page, page_size, filter_pattern)
     
@@ -363,6 +363,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
         path = _join(_dir, _file)
         ts_pad = get_pad(n - len(_file))
         last_modified_time = entry[2]
+        _tree_char = '├└'[i == len(page_entries) - 1]
         
         if is_dir:
             file_link = '/weppcloud' + _join(request_path, _file)
@@ -370,7 +371,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
             sym_target = entry[5]
             item_pad = get_pad(8 - len(item_count.split()[0]))
             end_pad = ' ' * 32
-            s.append(_padding + f'+-<a href="{file_link}/{diff_arg}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}\n')
+            s.append(_padding + f'{_tree_char} <a href="{file_link}/{diff_arg}"><b>{_file}</b></a>{ts_pad}{last_modified_time} {item_pad}{item_count}{end_pad}{sym_target}  \n')
         else:
             file_link = '/weppcloud' + _join(request_path, _file)
             is_symlink = entry[4]
@@ -395,7 +396,7 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
                 if _exists(diff_path):
                     diff_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/diff/') + diff_arg
                     diff_link = f'  <a href="{diff_url}">diff</a>'
-            s.append(_padding + f'>-<a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
+            s.append(_padding + f'{_tree_char} <a href="{file_link}">{_file}</a>{ts_pad}{last_modified_time} {item_pad}{file_size}{dl_link}{gl_link}{repr_link}{diff_link}{sym_target}\n')
         
         if i % 2:
             s[-1] = f'<span style="background-color:#f6f6f6;">{s[-1]}</span>'
@@ -429,7 +430,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
     if os.path.isdir(path):
         # build bread crumb links
         _url = f'/weppcloud/runs/{runid}/{config}/browse/'
-        breadcrumbs = [f'<a href="{_url}{diff_arg}">{runid}</a>']
+        breadcrumbs = [f'<a href="{_url}{diff_arg}"><b>{runid}</b></a>']
 
         if rel_path != '.':
             parts = rel_path.split('/')
@@ -438,10 +439,10 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
             for part in parts[:-1]:
                 _rel_path = _join(_rel_path, part)
                 _url = f'/weppcloud/runs/{runid}/{config}/browse/{_rel_path}/'
-                breadcrumbs.append(f'<a href="{_url}{diff_arg}">{part}</a>')
-            breadcrumbs.append(parts[-1])
+                breadcrumbs.append(f'<a href="{_url}{diff_arg}"><b>{part}</b></a>')
+            breadcrumbs.append(f'<b>{parts[-1]}</b>')
 
-        breadcrumbs = ' / '.join(breadcrumbs)
+        breadcrumbs = ' ❯ '.join(breadcrumbs)
 
         # Get page and filter from query parameters
         page = request.args.get('page', 1, type=int)
@@ -506,7 +507,7 @@ def browse_response(path, runid, wd, request, config, filter_pattern=''):
                         if total_items > 0 else '<p>No items to display</p>')
         
         # Combine UI elements
-        tree = f'<pre>{showing_text}{pagination_html}{breadcrumbs}\n\n{listing_html}\n{pagination_html}</pre>'
+        tree = f'<pre>{showing_text}{pagination_html}\n{breadcrumbs}\n{listing_html}\n{pagination_html}</pre>'
         
         return Response('''
 <!DOCTYPE html>
