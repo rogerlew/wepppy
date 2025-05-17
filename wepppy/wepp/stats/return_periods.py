@@ -137,6 +137,56 @@ class ReturnPeriods:
             'exclude_yr_indxs': self.exclude_yr_indxs
         }
 
+
+    def export_tsv_summary(self, summary_path):
+        """
+        Export the return periods summary to a TSV file.
+
+        Args:
+            summary_path (str): Path to save the TSV file.
+        """
+        with open(summary_path, 'w', encoding='utf-8') as f:
+            # Write simulation summary
+            f.write("WEPPcloud Return Period Analysis\n")
+            f.write(f"Years in Simulation\t{self.years}\n")
+            f.write(f"Events in Simulation\t{self.num_events}\n")
+            if self.exclude_yr_indxs:
+                f.write(f"Excluded Year Indexes\t{', '.join(map(str, self.exclude_yr_indxs))}\n")
+                
+            if self.gringorten_correction:
+                f.write(f"Using Gringorten Correction for Weibull fomula\n")
+
+            f.write("\n")
+
+            # Define measures to include
+            measures = [
+                'Precipitation Depth',
+                'Runoff',
+                'Peak Discharge',
+                '10-min Peak Rainfall Intensity',
+                '30-min Peak Rainfall Intensity',
+                'Sediment Yield'
+            ]
+            if self.has_phosphorus:
+                measures.extend(['Soluble Reactive P', 'Particulate P', 'Total P'])
+
+            # Write tables for each measure
+            for key in measures:
+                if key in self.return_periods:
+                    # Write table header
+                    f.write(f"{key}\n")
+                    header = ["Recurrence Interval (years)", "Date (mm/dd/yyyy)", f"{key} ({self.units_d.get(key, '')})"]
+                    f.write("\t".join(header) + "\n")
+                    
+                    # Write table rows
+                    for rec_interval in sorted(self.intervals, reverse=True):
+                        data = self.return_periods[key][rec_interval]
+                        date = f"{int(data['mo']):02d}/{int(data['da']):02d}/{int(data['year'] + self.y0 - 1):04d}"
+                        value = f"{data[key]:.2f}"
+                        row = [str(rec_interval), date, value]
+                        f.write("\t".join(row) + "\n")
+                    f.write("\n")
+
     @classmethod
     def from_dict(cls, data):
         rp = cls()

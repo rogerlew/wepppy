@@ -492,7 +492,7 @@ class Wepp(NoDbBase, LogMixin):
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
         return Wepp.getInstance(
-            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):
@@ -2213,7 +2213,7 @@ class Wepp(NoDbBase, LogMixin):
     def report_return_periods(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
                               exclude_yr_indxs=None, 
                               method='cta', gringorten_correction=True, 
-                              meoization=False):
+                              meoization=True):
 
         output_dir = self.output_dir
 
@@ -2254,6 +2254,24 @@ class Wepp(NoDbBase, LogMixin):
                 json.dump(return_periods.to_dict(), fp, cls=NumpyEncoder)
 
         return return_periods
+
+    def export_return_periods_tsv_summary(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
+                           exclude_yr_indxs=None, 
+                           method='cta', gringorten_correction=True, 
+                           meoization=True):
+        return_periods = self.report_return_periods(
+            rec_intervals=rec_intervals, 
+            exclude_yr_indxs=exclude_yr_indxs,
+            method=method,
+            gringorten_correction=gringorten_correction,
+            meoization=meoization)
+
+        if exclude_yr_indxs is not None:
+            x = ','.join(str(v) for v in exclude_yr_indxs)
+            fn = f'return_periods__exclude_yr_indxs={x}.tsv'
+        else:
+            fn = 'return_periods.tsv'
+        return_periods.export_tsv_summary(_join(self.export_dir, fn))
 
     def report_frq_flood(self):
         output_dir = self.output_dir
