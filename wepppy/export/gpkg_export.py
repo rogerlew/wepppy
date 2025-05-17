@@ -115,13 +115,19 @@ def gpkg_export(wd: str):
     wat_hill_fn = _join(wd, 'watershed/hillslopes.parquet')
     if _exists(wat_hill_fn):
         wat_hill_df = pd.read_parquet(wat_hill_fn)
+        if 'topaz_id' in wat_hill_df.columns:
+            wat_hill_df = wat_hill_df.drop(columns=['topaz_id'])
         wat_hill_df = esri_compatible_colnames(wat_hill_df)
-        hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='topaz_id', how='left')
+        wat_hill_df['TopazID'] = wat_hill_df['TopazID'].astype('int64')
+        hill_gdf['TopazID'] = hill_gdf['TopazID'].astype('int64')
+        hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='TopazID', how='left')
     else:  # deprecated
         wat_hill_fn = _join(wd, 'watershed/hillslopes.csv')
         if _exists(wat_hill_fn):  # even more deprecated
             wat_hill_df = pd.read_csv(wat_hill_fn)
             wat_hill_df = esri_compatible_colnames(wat_hill_df)
+            wat_hill_df['TopazID'] = wat_hill_df['TopazID'].astype('int64')
+            hill_gdf['TopazID'] = hill_gdf['TopazID'].astype('int64')
             hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     lc_hill_fn = _join(wd, 'landuse/landuse.parquet')
@@ -132,7 +138,8 @@ def gpkg_export(wd: str):
         lc_hill_df.drop(columns=columns_to_drop, inplace=True)
         lc_hill_df.rename(columns={'key': 'dom'}, inplace=True)
         lc_hill_df = esri_compatible_colnames(lc_hill_df)
-        hill_gdf = hill_gdf.merge(lc_hill_df, on='TopazID', how='left')
+        lc_hill_df['TopazID'] = lc_hill_df['TopazID'].astype('int64')
+        hill_gdf = hill_gdf.merge(lc_hill_df, left_on='TopazID', right_on='TopazID', how='left')
 
     soils_hill_fn = _join(wd, 'soils/soils.parquet')
     soils_hill_df = None
@@ -146,7 +153,8 @@ def gpkg_export(wd: str):
         columns_to_drop = ['soils_dir', 'area', 'color', 'build_date', 'desc', 'avke', 'bd', 'fname', 'pct_coverage', 'WeppID']
         columns_to_drop = [c for c in columns_to_drop if c in soils_hill_df.columns]
         soils_hill_df.drop(columns=columns_to_drop, inplace=True)
-        hill_gdf = hill_gdf.merge(soils_hill_df, on='TopazID', how='left')
+        soils_hill_df['TopazID'] = soils_hill_df['TopazID'].astype('int64')
+        hill_gdf = hill_gdf.merge(soils_hill_df, left_on='TopazID', right_on='TopazID', how='left')
 
     hill_loss_fn = _join(wd, 'wepp/output/loss_pw0.hill.parquet')
     if _exists(hill_loss_fn):
@@ -156,7 +164,8 @@ def gpkg_export(wd: str):
         columns_to_drop.extend([c for c in hill_df.columns if 'Density' in c])
         hill_df.drop(columns=columns_to_drop, inplace=True)
         hill_df = esri_compatible_colnames(hill_df)
-        hill_gdf = hill_gdf.merge(hill_df, on='TopazID', how='left')
+        hill_df['TopazID'] = hill_df['TopazID'].astype('int64')
+        hill_gdf = hill_gdf.merge(hill_df, left_on='TopazID', right_on='TopazID', how='left')
         
     hill_gdf = esri_compatible_colnames(hill_gdf)
     columns_to_drop = ['topaz_id', 'pct_coverage', 'Hillslope_Area']
@@ -196,10 +205,12 @@ def gpkg_export(wd: str):
     if _exists(wat_chn_fn):
         wat_chn_df = pd.read_parquet(wat_chn_fn)
         wat_chn_df = esri_compatible_colnames(wat_chn_df)
-        columns_to_drop = ['WeppID']
+        columns_to_drop = ['WeppID', 'order']
         columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
         wat_chn_df.drop(columns=columns_to_drop, inplace=True)
-        chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='topaz_id', how='left')
+        wat_chn_df['TopazID'] = wat_chn_df['TopazID'].astype('int64')
+        chn_gdf['TopazID'] = chn_gdf['TopazID'].astype('int64')
+        chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='TopazID', how='left')
     else:  # deprecated
         wat_chn_fn = _join(wd, 'watershed/channels.csv')
         if _exists(wat_chn_fn):  # even more deprecated
@@ -208,6 +219,8 @@ def gpkg_export(wd: str):
             columns_to_drop = ['WeppID']
             columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
             wat_chn_df.drop(columns=columns_to_drop, inplace=True)
+            wat_chn_df['topaz_id'] = wat_chn_df['topaz_id'].astype('int64')
+            chn_gdf['TopazID'] = chn_gdf['TopazID'].astype('int64')
             chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='topaz_id', how='left')
 
     chn_loss_fn = _join(wd, 'wepp/output/loss_pw0.chn.parquet')
@@ -218,7 +231,8 @@ def gpkg_export(wd: str):
         columns_to_drop = [c for c in columns_to_drop if c in chn_df.columns]
         chn_df.drop(columns=columns_to_drop, inplace=True)
         chn_df = esri_compatible_colnames(chn_df)
-        chn_gdf = chn_gdf.merge(chn_df, on='TopazID', how='left')
+        chn_df['TopazID'] = chn_df['TopazID'].astype('int64')
+        chn_gdf = chn_gdf.merge(chn_df, left_on='TopazID', right_on='TopazID', how='left')
 
     chn_gdf = esri_compatible_colnames(chn_gdf)
     columns_to_drop = ['Type']
