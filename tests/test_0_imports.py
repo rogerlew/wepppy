@@ -28,9 +28,15 @@ class TestImports(unittest.TestCase):
     def test_f_esri(self):
         import f_esri
 
+    def test_f_esri_has_f_esri(self):
+        from wepppy.all_your_base.geo import has_f_esri
+        res = has_f_esri()
+        self.assertTrue(res)
+
     def test_wepppyo3(self):
         import wepppyo3
     
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
+    
