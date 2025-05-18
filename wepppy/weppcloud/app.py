@@ -2272,6 +2272,40 @@ def export_ermit(runid, config):
         return exception_factory('Error exporting ERMiT', runid=runid)
 
 
+@app.route('/runs/<string:runid>/<config>/export/geopackage')
+def export_geopackage(runid, config):
+    from wepppy.export import gpkg_export, archive_project, legacy_arc_export
+
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    try:
+        if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
+            gpkg_export(wd)
+        gpkg_fn = glob(_join(ron.export_arc_dir, '*.gpkg'))[0]
+        return send_file(gpkg_fn, as_attachment=True, download_name=f'{runid}.gpkg')
+        
+    except Exception:
+        return exception_factory('Error running gpkg_export', runid=runid)
+
+@app.route('/runs/<string:runid>/<config>/export/geodatabase')
+def export_geodatabase(runid, config):
+    from wepppy.export import gpkg_export, archive_project, legacy_arc_export
+
+    wd = get_wd(runid)
+    ron = Ron.getInstance(wd)
+
+    try:
+        if len(glob(_join(ron.export_arc_dir, '*.gdb.zip'))) == 0:
+            gpkg_export(wd)
+        gdb_fn = glob(_join(ron.export_arc_dir, '*.gdb.zip'))[0]
+        return send_file(gdb_fn, as_attachment=True, download_name=f'{runid}.gdb.zip')
+        
+    except Exception:
+        return exception_factory('Error running gpkg_export', runid=runid)
+
+
+@deprecated
 @app.route('/runs/<string:runid>/<config>/export/arcmap')
 @app.route('/runs/<string:runid>/<config>/export/arcmap/')
 def export_arcmap(runid, config):
