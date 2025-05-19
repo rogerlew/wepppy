@@ -303,7 +303,10 @@ class SoilBurnSeverityMap(LandcoverMap):
             else:
                 k = ct_classify(v, ct, offset=130, nodata_val=255)
 
-            class_map[str(v)] = str(k)
+            _v = str(v)
+            if _v.endswith('.0'):
+                _v = _v[:-2]
+            class_map[_v] = str(k)
 
         return class_map
 

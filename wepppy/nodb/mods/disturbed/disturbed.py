@@ -530,11 +530,6 @@ class Disturbed(NoDbBase):
 
             sbs = SoilBurnSeverityMap(disturbed_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
 
-            if not sbs.ct:
-                sbs.export_4class_map(self.sbs_4class_path)
-                self._disturbed_fn = _split(self.sbs_4class_path)[1]
-                sbs = SoilBurnSeverityMap(self.sbs_4class_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
-
             self._bounds = sbs.export_wgs_map(self.disturbed_wgs)
             sbs.export_rgb_map(self.disturbed_wgs, self.disturbed_rgb, self.disturbed_rgb_png)
 
