@@ -227,7 +227,7 @@ class Disturbed(NoDbBase):
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
         return Disturbed.getInstance(
-            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _nodb(self):
@@ -519,6 +519,7 @@ class Disturbed(NoDbBase):
         # noinspection PyBroadException
         try:
             self._disturbed_fn = fn
+            
             self._nodata_vals = nodata_vals
 
             disturbed_path = self.disturbed_path
@@ -528,6 +529,12 @@ class Disturbed(NoDbBase):
                 raise InvalidProjection("Map contains an invalid projection. Try reprojecting to UTM.")
 
             sbs = SoilBurnSeverityMap(disturbed_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
+
+            if not sbs.ct:
+                sbs.export_4class_map(self.sbs_4class_path)
+                self._disturbed_fn = _split(self.sbs_4class_path)[1]
+                sbs = SoilBurnSeverityMap(self.sbs_4class_path, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
+
             self._bounds = sbs.export_wgs_map(self.disturbed_wgs)
             sbs.export_rgb_map(self.disturbed_wgs, self.disturbed_rgb, self.disturbed_rgb_png)
 

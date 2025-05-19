@@ -98,7 +98,7 @@ class Treecanopy(NoDbBase):
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
         return Treecanopy.getInstance(
-            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
     
     @property
     def _nodb(self):

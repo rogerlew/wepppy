@@ -200,7 +200,7 @@ class Watershed(NoDbBase, LogMixin):
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
         return Watershed.getInstance(
-            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):
@@ -441,7 +441,7 @@ class Watershed(NoDbBase, LogMixin):
                     result = con.execute(sql).fetchone()
                     return result[0]
             except duckdb.duckdb.IOException:
-                time.sleep(2)  # fix for slow NAS after abstraction
+                time.sleep(4)  # fix for slow NAS after abstraction
                 with duckdb.connect(_join(self.wat_dir, 'hillslopes.parquet')) as con:
                     sql = 'SELECT COUNT(*) FROM hillslopes WHERE length > 300'
                     result = con.execute(sql).fetchone()

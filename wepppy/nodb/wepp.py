@@ -2257,8 +2257,11 @@ class Wepp(NoDbBase, LogMixin):
 
     def export_return_periods_tsv_summary(self, rec_intervals=(50, 25, 20, 10, 5, 2), 
                            exclude_yr_indxs=None, 
-                           method='cta', gringorten_correction=True, 
-                           meoization=True):
+                           method='cta', 
+                           gringorten_correction=True, 
+                           meoization=True,
+                           extraneous=False):
+
         return_periods = self.report_return_periods(
             rec_intervals=rec_intervals, 
             exclude_yr_indxs=exclude_yr_indxs,
@@ -2271,7 +2274,11 @@ class Wepp(NoDbBase, LogMixin):
             fn = f'return_periods__exclude_yr_indxs={x}.tsv'
         else:
             fn = 'return_periods.tsv'
-        return_periods.export_tsv_summary(_join(self.export_dir, fn))
+
+        if extraneous:
+            fn = fn.replace('.tsv', '_extraneous.tsv')
+            
+        return_periods.export_tsv_summary(_join(self.export_dir, fn), extraneous=extraneous)
 
     def report_frq_flood(self):
         output_dir = self.output_dir

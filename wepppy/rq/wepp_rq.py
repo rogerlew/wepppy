@@ -604,6 +604,7 @@ def _analyze_return_periods_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         wepp = Wepp.getInstance(wd)
         wepp.export_return_periods_tsv_summary(meoization=True)
+        wepp.export_return_periods_tsv_summary(meoization=True, extraneous=True)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
