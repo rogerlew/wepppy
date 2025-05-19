@@ -1,0 +1,18 @@
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Scenario</th>
+            <th>Avg. Ann. Water Discharge from Outlet (m³/yr)</th>
+            <th>Avg. Ann. Total Hillslope Soil Loss (tonne/yr)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for scenario in scenarios %}
+        <tr>
+            <td>{{ scenario.name }}</td>
+            <td>{{ scenario.water_discharge.value|float|round(2) }}</td>
+            <td>{{ scenario.soil_loss.value|float|round(2) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

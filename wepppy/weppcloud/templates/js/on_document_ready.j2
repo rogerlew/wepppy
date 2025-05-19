@@ -990,11 +990,17 @@ function onReady() {
 
 
     {% if 'omni' in ron.mods %}
-
+    
     omni.form.on("OMNI_SCENARIO_RUN_TASK_COMPLETED", function () {
         omni.ws_client.disconnect();
         omni.report_scenarios();
     });
+
+    omni.load_scenarios_from_backend();
+
+    if ({{ omni.has_ran_scenarios | tojson }}) {
+        omni.report_scenarios()
+    }
 
     {% endif %}
 
@@ -1157,10 +1163,6 @@ $(function () {
     var navSelector = "#toc";
     var $myNav = $(navSelector);
     Toc.init($myNav);
-    $("body").scrollspy({
-      target: navSelector,
-      offset: 60
-    });
 });
 
   var offset = 80;

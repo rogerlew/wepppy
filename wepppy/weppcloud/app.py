@@ -2537,6 +2537,62 @@ def query_watershed_summary_channels(runid, config):
     return jsonify(Watershed.getInstance(wd).chns_summary)
 
 
+@app.route('/runs/<string:runid>/<config>/report/omni_scenarios')
+@app.route('/runs/<string:runid>/<config>/report/omni_scenarios/')
+def query_omni_scenarios_report(runid, config):
+    try:
+        wd = get_wd(runid)
+        omni = Omni.getInstance(wd)
+        df_report = omni.scenarios_report()
+
+        # Convert DataFrame to dictionary if needed (assuming df_report is a DataFrame-like object)
+        report_dict = df_report.to_dict()
+
+        # Initialize result list for scenarios
+        scenarios = []
+
+        # Get unique scenarios
+        unique_scenarios = set(report_dict['scenario'].values())
+
+        # Define target metrics
+        water_discharge_key = "Avg. Ann. water discharge from outlet"
+        soil_loss_key = "Avg. Ann. total hillslope soil loss"
+
+        # Process each scenario
+        for scenario in unique_scenarios:
+            scenario_data = {'name': scenario, 'water_discharge': None, 'soil_loss': None}
+
+            # Iterate through report entries
+            for idx in report_dict['scenario']:
+                if report_dict['scenario'][idx] == scenario:
+                    key_desc = report_dict['key'][idx]
+                    if key_desc == water_discharge_key:
+                        scenario_data['water_discharge'] = {
+                            'value': report_dict['v'][idx],
+                            'unit': report_dict['units'][idx]
+                        }
+                    elif key_desc == soil_loss_key:
+                        scenario_data['soil_loss'] = {
+                            'value': report_dict['v'][idx],
+                            'unit': report_dict['units'][idx]
+                        }
+
+            # Only add scenario if both metrics are found
+            if scenario_data['water_discharge'] and scenario_data['soil_loss']:
+                scenarios.append(scenario_data)
+
+        # Sort scenarios for consistent display
+        scenarios.sort(key=lambda x: x['name'])
+
+        return render_template('reports/omni/omni_scenarios_summary.htm',
+                               user=current_user,
+                               watershed=Watershed.getInstance(wd),
+                               scenarios=scenarios)
+
+    except:
+        return exception_factory(runid=runid)
+
+
 @app.route('/runs/<string:runid>/<config>/report/watershed')
 @app.route('/runs/<string:runid>/<config>/report/watershed/')
 def query_watershed_summary(runid, config):
