@@ -137,8 +137,20 @@ class ReturnPeriods:
             'exclude_yr_indxs': self.exclude_yr_indxs
         }
 
+    def export_tsv_summary(self, summary_path, extraneous=False):
+        """
+        Export the return periods summary to a TSV file.
 
-    def export_tsv_summary(self, summary_path):
+        Args:
+            summary_path (str): Path to save the TSV file.
+        """
+
+        if extraneous:
+            self._export_tsv_summary_extraneous(summary_path)
+        else:
+            self._export_tsv_summary_simple(summary_path)
+
+    def _export_tsv_summary_simple(self, summary_path):
         """
         Export the return periods summary to a TSV file.
 
@@ -184,6 +196,91 @@ class ReturnPeriods:
                         date = f"{int(data['mo']):02d}/{int(data['da']):02d}/{int(data['year'] + self.y0 - 1):04d}"
                         value = f"{data[key]:.2f}"
                         row = [str(rec_interval), date, value]
+                        f.write("\t".join(row) + "\n")
+                    f.write("\n")
+
+    def _export_tsv_summary_extraneous(self, summary_path):
+        """
+        Export the return periods summary with extraneous variables to a TSV file.
+
+        Args:
+            summary_path (str): Path to save the TSV file.
+        """
+        with open(summary_path, 'w', encoding='utf-8') as f:
+            # Write simulation summary
+            f.write("WEPPcloud Return Period Analysis\n")
+            f.write(f"Years in Simulation\t{self.years}\n")
+            f.write(f"Events in Simulation\t{self.num_events}\n")
+            if self.exclude_yr_indxs:
+                f.write(f"Excluded Year Indexes\t{', '.join(map(str, self.exclude_yr_indxs))}\n")
+            else:
+                f.write("Excluded Year Indexes\tNone\n")
+            f.write("\n")
+
+            # Define measures to include
+            measures = [
+                'Precipitation Depth',
+                'Runoff',
+                'Peak Discharge',
+                '10-min Peak Rainfall Intensity',
+                '30-min Peak Rainfall Intensity',
+                'Sediment Yield'
+            ]
+            if self.has_phosphorus:
+                measures.extend(['Soluble Reactive P', 'Particulate P', 'Total P'])
+
+            # Write tables for each measure
+            for miar in measures:
+                if miar in self.return_periods:
+                    # Write table header
+                    f.write(f"{miar}\n")
+                    headers = [
+                        "Recurrence Interval (years)",
+                        "Date (mm/dd/yyyy)",
+                        f"Precipitation Depth ({self.units_d.get('Precipitation Depth', '')})",
+                        f"Runoff ({self.units_d.get('Runoff', '')})",
+                        f"Peak Discharge ({self.units_d.get('Peak Discharge', '')})"
+                    ]
+                    if '10-min Peak Rainfall Intensity' in self.return_periods:
+                        headers.append(f"10-min Peak Rainfall Intensity ({self.units_d.get('10-min Peak Rainfall Intensity', '')})")
+                    if '30-min Peak Rainfall Intensity' in self.return_periods:
+                        headers.append(f"30-min Peak Rainfall Intensity ({self.units_d.get('30-min Peak Rainfall Intensity', '')})")
+                    headers.append(f"Sediment Yield ({self.units_d.get('Sediment Yield', '')})")
+                    if self.has_phosphorus:
+                        headers.extend([
+                            f"Soluble Reactive P ({self.units_d.get('Soluble Reactive P', '')})",
+                            f"Particulate P ({self.units_d.get('Particulate P', '')})",
+                            f"Total P ({self.units_d.get('Total P', '')})"
+                        ])
+                    headers.extend(["Rank", "Weibull T"])
+                    f.write("\t".join(headers) + "\n")
+
+                    # Write table rows
+                    for rec_interval in sorted(self.intervals, reverse=True):
+                        data = self.return_periods[miar][rec_interval]
+                        date = f"{int(data['mo']):02d}/{int(data['da']):02d}/{int(data['year'] + self.y0 - 1):04d}"
+                        row = [
+                            str(rec_interval),
+                            date,
+                            f"{data.get('Precipitation Depth', 0):.2f}",
+                            f"{data.get('Runoff', 0):.2f}",
+                            f"{data.get('Peak Discharge', 0):.2f}"
+                        ]
+                        if '10-min Peak Rainfall Intensity' in self.return_periods:
+                            row.append(f"{data.get('10-min Peak Rainfall Intensity', 0):.2f}")
+                        if '30-min Peak Rainfall Intensity' in self.return_periods:
+                            row.append(f"{data.get('30-min Peak Rainfall Intensity', 0):.2f}")
+                        row.append(f"{data.get('Sediment Yield', 0):.2f}")
+                        if self.has_phosphorus:
+                            row.extend([
+                                f"{data.get('Soluble Reactive P', 0):.2f}",
+                                f"{data.get('Particulate P', 0):.2f}",
+                                f"{data.get('Total P', 0):.2f}"
+                            ])
+                        row.extend([
+                            str(data.get('weibull_rank', '')),
+                            f"{data.get('weibull_T', 0):.2f}"
+                        ])
                         f.write("\t".join(row) + "\n")
                     f.write("\n")
 

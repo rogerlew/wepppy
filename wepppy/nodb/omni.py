@@ -673,7 +673,7 @@ class Omni(NoDbBase, LogMixin):
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
         return Omni.getInstance(
-            get_wd(runid, allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock))
+            get_wd(runid), allow_nonexistent=allow_nonexistent, ignore_lock=ignore_lock)
 
     @property
     def _status_channel(self):
@@ -868,7 +868,7 @@ class Omni(NoDbBase, LogMixin):
 
         elif scenario in OmniScenario.Thinning:
             self.log(f'  Omni::_build_scenario: thinning\n')
-            
+
             # should have cloned undisturbed
             if disturbed.has_sbs:
                 raise Exception('Cloned omni scenario should be undisturbed')

@@ -402,13 +402,12 @@ class SoilBurnSeverityMap(LandcoverMap):
         num_cols, num_rows = _data.shape
         driver = gdal.GetDriverByName("GTiff")
         dst = driver.Create(fn, num_cols, num_rows,
-                            1, GDT_Byte)
+                            1, GDT_Byte,
+                            ["COMPRESS=LZW", "PHOTOMETRIC=PALETTE"])
 
         dst.SetProjection(wkt)
         dst.SetGeoTransform(transform)
         band = dst.GetRasterBand(1)
-        band.WriteArray(data.T)
-        band.SetNoDataValue(255)
 
         color_table = gdal.ColorTable()
         color_table.SetColorEntry(0, (0, 100, 0, 255))  # unburned
@@ -417,6 +416,9 @@ class SoilBurnSeverityMap(LandcoverMap):
         color_table.SetColorEntry(3, (255, 0, 0, 255))  # high
         color_table.SetColorEntry(255, (255, 255, 255, 0))  # n/a
         band.SetColorTable(color_table)
+        band.SetNoDataValue(255)
+
+        band.WriteArray(data.T)
 
         del dst
 
