@@ -198,6 +198,23 @@ var Disturbed = function () {
             });
         };
 
+        that.has_sbs = function () {
+            var result;
+            $.ajax({
+                url: "api/disturbed/has_sbs/",
+                async: false,  // Makes the request synchronous
+                dataType: 'json',  // Ensures response is parsed as JSON
+                success: function(response) {
+                    result = response.has_sbs;
+                },
+                error: function(jqXHR) {
+                    console.log(jqXHR.responseJSON);
+                    result = false;  // Returns false if the request fails
+                }
+            });
+            return result;
+        };
+
         return that;
     }
 
@@ -5953,6 +5970,7 @@ var Omni = function () {
             return formData;
         };
 
+        
         that.run_omni_scenarios = function () {
             var self = instance;
             var task_msg = "Submitting omni run";
@@ -5986,10 +6004,64 @@ var Omni = function () {
                 }
             });
         };
+
+        that.load_scenarios_from_backend = function () {
+            fetch("api/omni/get_scenarios")
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to fetch scenarios");
+                    return response.json();
+                })
+                .then(data => {
+                    if (!Array.isArray(data)) throw new Error("Invalid scenario format");
+
+                    data.forEach(scenario => {
+                        addScenario();
+                        const container = document.querySelectorAll('#scenario-container .scenario-item');
+                        const latestItem = container[container.length - 1];
+                        const scenarioSelect = latestItem.querySelector('select[name="scenario"]');
+                        scenarioSelect.value = scenario.type;
+
+                        // Trigger controls to be rendered
+                        updateControls(scenarioSelect);
+
+                        // Populate the controls with values
+                        Object.entries(scenario).forEach(([key, value]) => {
+                            if (key === "type") return;
+                            const input = latestItem.querySelector(`[name="${key}"]`);
+                            if (input) {
+                                input.value = value;
+                            }
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading scenarios:", err);
+                });
+        };
         
         that.report_scenarios = function () {
             var self = instance;
             self.status.html("Omni Scenarios Completed")
+        };
+
+
+
+        that.report_scenarios = function () {
+            var self = instance;
+
+            $.get({
+                url: "report/omni_scenarios/",
+                cache: false,
+                success: function success(response) {
+                    self.info.html(response);
+                },
+                error: function error(jqXHR)  {
+                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
+                },
+                fail: function fail(jqXHR, textStatus, errorThrown) {
+                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
+                }
+            });
         };
 
         return that;

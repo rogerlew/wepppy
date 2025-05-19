@@ -53,14 +53,14 @@
         undisturbed: {
             label: "Undisturbed",
             controls: [],
-            condition: () => window.omni?.has_sbs || false
+            condition: () => Disturbed.getInstance()?.has_sbs() || false
         },
         prescribed_fire: {
             label: "Prescribed Fire",
             controls: [],
             condition: () => {
                 const hasUndisturbed = document.querySelector('select[name="scenario"] option[value="undisturbed"]:checked');
-                return hasUndisturbed || !window.omni?.has_sbs;
+                return hasUndisturbed || !Disturbed.getInstance()?.has_sbs();
             }
         },
         thinning: {
@@ -89,9 +89,6 @@
             ]
         }
     };
-
-    // Mock omni object for testing (replace with actual Flask-provided value)
-    window.omni = { has_sbs: true };
 
     function addScenario() {
         const container = document.getElementById('scenario-container');
@@ -151,37 +148,6 @@
         }
     }
 
-    function serializeScenarios() {
-        const formData = new FormData();
-        const scenarioItems = document.querySelectorAll('#scenario-container .scenario-item');
-        const scenariosList = [];
-
-        scenarioItems.forEach((item, index) => {
-            const scenarioSelect = item.querySelector('select[name="scenario"]');
-            if (!scenarioSelect || !scenarioSelect.value) return;
-
-            const scenario = {
-                type: scenarioSelect.value
-            };
-
-            const controls = item.querySelectorAll('.scenario-controls [name]');
-            controls.forEach(control => {
-                if (control.type === 'file' && control.files.length > 0) {
-                    // Append the file with a unique key based on the scenario index
-                    formData.append(`scenarios[${index}][${control.name}]`, control.files[0]);
-                    scenario[control.name] = control.files[0].name; // Store filename in the JSON structure
-                } else if (control.value) {
-                    scenario[control.name] = control.value;
-                }
-            });
-
-            scenariosList.push(scenario);
-        });
-
-        // Append the scenarios list as a JSON string
-        formData.append('scenarios', JSON.stringify(scenariosList));
-        return formData;
-    }
     
 </script>
 
