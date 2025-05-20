@@ -75,28 +75,7 @@ def run_omni_rq(runid):
             pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-
-    except Exception:
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
-        raise
-
-def _log_omni_scenarios_complete_rq(runid):
-    try:
-        job = get_current_job()
-        wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:wepp'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-
-        try:
-            prep = RedisPrep.getInstance(wd)
-            prep.timestamp(TaskEnum.run_omni)
-        except FileNotFoundError:
-            pass
-
-        status = True
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid}) -> ({status}, {time})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni OMNI_SCENARIO_RUN_TASK_COMPLETED')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
