@@ -805,8 +805,6 @@ def api_run_omni(runid, config):
         parsed_inputs = []
         for idx, scenario in enumerate(scenarios_data):
             scenario_type = scenario.get('type')
-            if not scenario_type:
-                continue  # Skip invalid scenarios
 
             # Map scenario type to OmniScenario enum
             scenario_enum = OmniScenario.parse(scenario_type)

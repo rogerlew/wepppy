@@ -379,7 +379,7 @@ class Treatments(NoDbBase, LogMixin):
             return self._apply_prescribed_fire(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
         elif 'thinning' in treatment:
-            return self._apply_thinnin(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            return self._apply_thinning(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
     def _apply_mulch(self, 
                      landuse_instance: Landuse, 
@@ -498,7 +498,7 @@ class Treatments(NoDbBase, LogMixin):
         if disturbed_class in ['forest']:
             self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             landuse_instance.domlc_d[topaz_id] = treatment_dom
-            self.log(f'  _apply_thinning: {topaz_id} -> {prescribed_dom}\n')
+            self.log(f'  _apply_thinning: {topaz_id} -> {treatment_dom}\n')
 
         if treatment_dom is not None and treatment_dom not in landuse_instance.managements:
             man = get_management_summary(treatment_dom, landuse_instance.mapping)
