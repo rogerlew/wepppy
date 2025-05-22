@@ -23,7 +23,7 @@ from wepppy.all_your_base import isint, isfloat
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker, validate_srs
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
-from wepppy.wepp.management import ManagementSummary, Management
+from wepppy.wepp.management import ManagementSummary, Management, get_management_summary
 
 from ...landuse import Landuse, LanduseMode
 from ...soils import Soils
@@ -329,7 +329,7 @@ class Treatments(NoDbBase, LogMixin):
             # existing landuse and sbs state
 
             for topaz_id, treatment_dom in treatments_domlc_d.items():
-                treatment = mapping[treatment_dom]['DisturbedClass']  # 'mulch30', 'mulch60', 'prescribed_fire'
+                treatment = mapping[treatment_dom]['DisturbedClass']  # 'mulch_30', 'mulch_60', 'thinning_40_90', 'prescribed_fire'
                 dom = landuse.domlc_d[topaz_id]  # -> key from map
 
                 man_summary = landuse.managements[dom]  # -> ManagementSummary instance
@@ -340,7 +340,19 @@ class Treatments(NoDbBase, LogMixin):
         except Exception:
             landuse.unlock('-f')
             raise
-    
+
+        land_soil_replacements_d = disturbed.land_soil_replacements_d
+        soils = Soils.getInstance(self.wd)
+        soils.lock()
+        try:
+            for topaz_id, treatment_dom in treatments_domlc_d.items():
+                self._modify_soil(landuse, soils, disturbed, topaz_id)
+
+            soils.dump_and_unlock()
+        except Exception:
+            soils.unlock('-f')
+            raise
+
     def _apply_treatment(self, 
                          landuse_instance: Landuse, 
                          disturbed_instance: Disturbed,
@@ -363,8 +375,11 @@ class Treatments(NoDbBase, LogMixin):
         if 'mulch' in treatment:
             return self._apply_mulch(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
-        if 'prescribed_fire' in treatment:
+        elif 'prescribed_fire' in treatment:
             return self._apply_prescribed_fire(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+
+        elif 'thinning' in treatment:
+            return self._apply_thinning(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
     def _apply_mulch(self, 
                      landuse_instance: Landuse, 
@@ -384,7 +399,7 @@ class Treatments(NoDbBase, LogMixin):
 
         man = man_summary.get_management()  # Management instance, reads from disk
 
-        mulch_cover_change = treatment.replace('mulch', '')
+        mulch_cover_change = treatment.replace('mulch_', '')
         mulch_cover_change = int(mulch_cover_change) / 100.0
 
 #        if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
@@ -402,17 +417,21 @@ class Treatments(NoDbBase, LogMixin):
             # write the management to disk
             new_man_fn = _split(man_summary.man_fn)[-1][:-4] + f'_{treatment}.man'
             new_man_path = _join(self.wd, 'landuse', new_man_fn)
-            with open(new_man_path, 'w') as f:
-                f.write(str(man))
+
+            if not _exists(new_man_path):
+                with open(new_man_path, 'w') as f:
+                    f.write(str(man))
 
             # update the management summary
             new_man_summary = deepcopy(man_summary)
             new_man_summary.man_dir = _join(self.wd, 'landuse')
             new_man_summary.man_fn = new_man_fn
-            new_man_summary.desc += f' - {treatment}'
+            new_man_summary.disturbed_class = f'{disturbed_class}-{treatment}'
+            new_man_summary.desc += f'{man_summary.desc} - {treatment}'
 
             new_dom = f'{landuse_instance.domlc_d[topaz_id]}-{treatment}'
             landuse_instance.domlc_d[topaz_id] = new_dom
+            self.log(f'  _apply_mulch: {topaz_id} -> {new_dom}\n')
 
             if new_dom not in landuse_instance.managements:
                 landuse_instance.managements[new_dom] = new_man_summary
@@ -436,9 +455,128 @@ class Treatments(NoDbBase, LogMixin):
             raise RuntimeError("Treatments.nodb is not locked!")
 
         disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
-        forest_low_sev_fire_key = disturbed_key_lookup['forest_low_sev_fire']
+
+        prescribed_dom = None
+        if 'forest' in disturbed_class:
+            prescribed_dom = disturbed_key_lookup['forest_prescribed_fire']
+            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            landuse_instance.domlc_d[topaz_id] = prescribed_dom
+            self.log(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
+
+        elif 'shrub' in disturbed_class:
+            prescribed_dom = disturbed_key_lookup['shrub_prescribed_fire']
+            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            landuse_instance.domlc_d[topaz_id] = prescribed_dom
+            self.log(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
+
+        elif 'grass' in disturbed_class:
+            prescribed_dom = disturbed_key_lookup['grass_prescribed_fire']
+            self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
+            landuse_instance.domlc_d[topaz_id] = prescribed_dom
+            self.log(f'  _apply_prescribed_fire: {topaz_id} -> {prescribed_dom}\n')
+
+        if prescribed_dom is not None and prescribed_dom not in landuse_instance.managements:
+            man = get_management_summary(prescribed_dom, landuse_instance.mapping)
+            landuse_instance.managements[prescribed_dom] = man
+
+    def _apply_thinning(self, 
+                     landuse_instance: Landuse, 
+                     disturbed_instance: Disturbed,
+                     topaz_id: str, 
+                     treatment: str, 
+                     man_summary: ManagementSummary, 
+                     disturbed_class: str):
+        """
+        Apply the prescribed fire treatment to the hillslope.
+        """
+        if not landuse_instance.islocked():
+            raise RuntimeError("landuse.nodb is not locked!")
+
+        disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
+        treatment_dom = disturbed_key_lookup[treatment]
 
         if disturbed_class in ['forest']:
             self.log(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
-            landuse_instance.domlc_d[topaz_id] = forest_low_sev_fire_key
+            landuse_instance.domlc_d[topaz_id] = treatment_dom
+            self.log(f'  _apply_thinning: {topaz_id} -> {treatment_dom}\n')
 
+        if treatment_dom is not None and treatment_dom not in landuse_instance.managements:
+            man = get_management_summary(treatment_dom, landuse_instance.mapping)
+            landuse_instance.managements[treatment_dom] = man
+
+    def _modify_soil(self, 
+                     landuse_instance: Landuse, 
+                     soils_instance: Soils,
+                     disturbed_instance: Disturbed,
+                     topaz_id: str):
+
+        sol_ver = disturbed_instance.sol_ver
+        land_soil_replacements_d = disturbed_instance.land_soil_replacements_d
+        
+        if not soils_instance.islocked():
+            raise RuntimeError("soils.nodb is not locked!")
+
+        mukey = soils_instance.domsoil_d[topaz_id]
+
+        if '-' in mukey:
+            mukey = mukey.split('-')[0]
+
+        _soil = soils_instance.soils[mukey]
+        clay = _soil.clay
+        sand = _soil.sand
+
+        assert isfloat(clay), clay
+        assert isfloat(sand), sand
+
+        texid = simple_texture(clay=clay, sand=sand)
+
+        dom = landuse_instance.domlc_d[topaz_id]
+
+        if 'mulch' in dom:
+            disturbed_class = 'mulch'
+        elif 'thinning' in dom:
+            disturbed_class = 'thinning'
+        else:
+            man = get_management_summary(dom, landuse_instance.mapping)
+            disturbed_class = man.disturbed_class
+
+        key = (texid, disturbed_class)
+
+        if key not in land_soil_replacements_d:
+            texid = 'all'
+            key = (texid, disturbed_class)
+
+        if key not in land_soil_replacements_d:
+            self.log(f'No soil replacements for {key} in {land_soil_replacements_d}')
+            return
+
+        disturbed_mukey = f'{mukey}-{texid}-{disturbed_class}'
+
+        if disturbed_mukey not in soils_instance.soils:
+            disturbed_fn = disturbed_mukey + '.sol'
+            replacements = land_soil_replacements_d[key]
+
+            if 'fire' in disturbed_class:
+                _h0_max_om = disturbed_instance.h0_max_om
+            else:
+                _h0_max_om = None
+
+            soil_u = WeppSoilUtil(_join(soils_instance.soils_dir, _soil.fname))
+            if sol_ver == 7778.0:
+                new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+            else:
+                new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om,
+                                        version=sol_ver)
+
+            new.write(_join(soils_instance.soils_dir, disturbed_fn))
+
+            desc = f'{_soil.desc} - {disturbed_class}'
+            soils_instance.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
+                                                        fname=disturbed_fn,
+                                                        soils_dir=soils_instance.soils_dir,
+                                                        desc=desc,
+                                                        meta_fn=_soil.meta_fn,
+                                                        build_date=str(datetime.now()))
+
+        soils_instance.domsoil_d[topaz_id] = disturbed_mukey
+        self.log(f'  _modify_soil: {topaz_id} -> {disturbed_mukey}\n')
