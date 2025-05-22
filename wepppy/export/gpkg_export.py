@@ -127,6 +127,7 @@ def gpkg_export(wd: str):
             wat_hill_df = pd.read_csv(wat_hill_fn)
             wat_hill_df = esri_compatible_colnames(wat_hill_df)
             wat_hill_df['TopazID'] = wat_hill_df['topaz_id'].astype('int64')
+            wat_hill_df = wat_hill_df.drop(columns=['topaz_id'])
             hill_gdf['TopazID'] = hill_gdf['TopazID'].astype('int64')
             hill_gdf = hill_gdf.merge(wat_hill_df, left_on='TopazID', right_on='TopazID', how='left')
 
@@ -220,6 +221,7 @@ def gpkg_export(wd: str):
             columns_to_drop = [c for c in columns_to_drop if c in wat_chn_df.columns]
             wat_chn_df.drop(columns=columns_to_drop, inplace=True)
             wat_chn_df['TopazID'] = wat_chn_df['topaz_id'].astype('int64')
+            wat_chn_df = wat_chn_df.drop(columns=['topaz_id'])
             chn_gdf['TopazID'] = chn_gdf['TopazID'].astype('int64')
             chn_gdf = chn_gdf.merge(wat_chn_df, left_on='TopazID', right_on='TopazID', how='left')
 
