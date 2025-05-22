@@ -3302,7 +3302,6 @@ var RangelandCover = function () {
             } else {
                 $("#rangeland_cover_form #rangeland_cover_rap_year_div").hide();
             }
-
        };
 
         return that;
@@ -3520,7 +3519,7 @@ var Landuse = function () {
                     self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
                 }
             });
-            self.showHideControls(mode);
+            self.showHideControls(self.mode);
         };
 
         that.showHideControls = function (mode) {

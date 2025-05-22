@@ -869,6 +869,11 @@ class Disturbed(NoDbBase):
                 texid = simple_texture(clay=clay, sand=sand)
                 disturbed_class = man_summary.disturbed_class
 
+                if 'mulch' in disturbed_class:
+                    disturbed_class = 'mulch'
+                elif 'thinning' in disturbed_class:
+                    disturbed_class = 'thinning'
+
                 if (texid, disturbed_class) not in _land_soil_replacements_d:
                     texid = 'all'
 

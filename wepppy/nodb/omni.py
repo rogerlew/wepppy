@@ -166,6 +166,12 @@ def _omni_clone(scenario_def: dict, wd: str):
             if not _exists(dst):
                 os.symlink(src, dst)
 
+        elif fn in ['disturbed', 'soils']:
+            src = _join(wd, fn)
+            dst = _join(omni_dir, fn)
+            if not _exists(dst):
+                shutil.copytree(src, dst)
+
         elif fn.endswith('.nodb'):
             if fn == 'omni.nodb':
                 continue
@@ -725,7 +731,7 @@ class Omni(NoDbBase, LogMixin):
 
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
             self.log(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
-            _build_scenario(scenario_def, self.wd, self.base_scenario)
+            self._build_scenario(scenario_def)
             ran_scenarios.append(_scenario_name)
 
         for scenario_def in self.scenarios:
@@ -823,21 +829,20 @@ class Omni(NoDbBase, LogMixin):
         elif scenario == OmniScenario.Mulch:
             self.log(f'  Omni::_build_scenario: mulch\n')
 
-            assert omni_base_scenario is not None, \
+            assert omni_base_scenario_name is not None, \
                 'Mulching scenario requires a base scenario'
-            assert omni_base_scenario in [OmniScenario.UniformLow, 
-                                            OmniScenario.UniformModerate, 
-                                            OmniScenario.UniformHigh, 
-                                            OmniScenario.SBSmap], \
-                'Mulching scenario requires fire base scenario' 
-            
+
             treatments = Treatments.getInstance(new_wd)
-            treatment_key = treatments.treatments_lookup[str(scenario)]
+
+            ground_cover_increase = scenario_def.get('ground_cover_increase')
+            treatment_key = treatments.treatments_lookup[f'mulch_{ground_cover_increase}'.replace('%', '')]
 
             treatments_domlc_d = {}
             for topaz_id, dom in landuse.domlc_d.items():
-                # treat burned forest, shrub, and grass with mulching by increasing cover
+                if str(topaz_id).endswith('4'):
+                    continue
 
+                # treat burned forest, shrub, and grass with mulching by increasing cover
                 man_summary = landuse.managements[dom]
                 disturbed_class = getattr(man_summary, 'disturbed_class', '')
                 if 'fire' in disturbed_class:
@@ -846,7 +851,7 @@ class Omni(NoDbBase, LogMixin):
             treatments.treatments_domlc_d = treatments_domlc_d
             treatments.build_treatments()
             
-        elif scenario in OmniScenario.PrescribedFire:
+        elif scenario == OmniScenario.PrescribedFire:
             self.log(f'  Omni::_build_scenario: prescribed fire\n')
 
             # should have cloned undisturbed
@@ -858,6 +863,9 @@ class Omni(NoDbBase, LogMixin):
 
             treatments_domlc_d = {}
             for topaz_id, dom in landuse.domlc_d.items():
+                if str(topaz_id).endswith('4'):
+                    continue
+
                 man_summary = landuse.managements[dom]
                 disturbed_class = getattr(man_summary, 'disturbed_class', '')
                 if 'forest' in disturbed_class and 'young' not in disturbed_class:
@@ -866,7 +874,7 @@ class Omni(NoDbBase, LogMixin):
             treatments.treatments_domlc_d = treatments_domlc_d
             treatments.build_treatments()
 
-        elif scenario in OmniScenario.Thinning:
+        elif scenario == OmniScenario.Thinning:
             self.log(f'  Omni::_build_scenario: thinning\n')
 
             # should have cloned undisturbed
@@ -874,10 +882,14 @@ class Omni(NoDbBase, LogMixin):
                 raise Exception('Cloned omni scenario should be undisturbed')
 
             treatments = Treatments.getInstance(new_wd)
-            treatment_key = treatments.treatments_lookup[str(scenario)]
+            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            treatment_key = treatments.treatments_lookup[_scenario_name]
 
             treatments_domlc_d = {}
             for topaz_id, dom in landuse.domlc_d.items():
+                if str(topaz_id).endswith('4'):
+                    continue
+                    
                 man_summary = landuse.managements[dom]
                 disturbed_class = getattr(man_summary, 'disturbed_class', '')
                 if 'forest' in disturbed_class and 'young' not in disturbed_class:

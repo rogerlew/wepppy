@@ -1499,7 +1499,11 @@ class Wepp(NoDbBase, LogMixin):
 
                 # probably isn't the right location for this code. should be in nodb.disturbed
                 if disturbed is not None:
-                    disturbed_class = man_summary.disturbed_class
+                  
+                    if 'mulch' in disturbed_class:
+                        disturbed_class = 'mulch'
+                    elif 'thinning' in disturbed_class:
+                        disturbed_class = 'thinning'
 
                     if hillslope_cancovs is not None and 'mulch' not in disturbed_class and 'thinning' not in disturbed_class:
                         assert rap_ts is None, 'project has rap and rap_ts'
@@ -2277,7 +2281,7 @@ class Wepp(NoDbBase, LogMixin):
 
         if extraneous:
             fn = fn.replace('.tsv', '_extraneous.tsv')
-            
+
         return_periods.export_tsv_summary(_join(self.export_dir, fn), extraneous=extraneous)
 
     def report_frq_flood(self):
