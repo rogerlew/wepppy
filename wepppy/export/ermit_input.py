@@ -162,6 +162,17 @@ def readSlopeFile(fname):
      If (headers(i) = "ROCK_PCT") Then ROCK_PCT = i ' - rock pct %
 """
 
+def fmt(x):
+    """
+    Format anything that should be numeric to one decimal place.
+    Safely handles None/''/already-formatted strings.
+    """
+    try:
+        return f'{float(x):.1f}'
+    except (TypeError, ValueError):
+        return x            # leave it untouched if it isn't numeric
+        
+
 def create_ermit_input(wd):
 
     _log = [f'Creating ERMiT input for {wd}']
@@ -265,33 +276,33 @@ def create_ermit_input(wd):
         _log.append(f'    reading {slp_file}')
         v = readSlopeFile(slp_file)
 
-        # ermit length
-        dictWriter.writerow(
-             {'HS_ID': wepp_id,
-              'TOPAZ_ID': topaz_id,
-              'UNIT_ID': '',
-              'AREA': watershed.hillslope_area(topaz_id) / 10000.0, 
-              'ROWID_': row_id, 
-              'SOIL_TYPE': soil_type, 
-              'ROCK_PCT': rock_pct, 
-              'VEG_TYPE': veg_type, 
-              'ERM_TSLP': v['TopSlope'],
-              'ERM_MSLP': v['MiddleSlope'],
-              'ERM_BSLP': v['BottomSlope'],
-              'SHRUB_PCT': shrub_pct,
-              'GRASS_PCT': grass_pct, 
-              'BARE_PCT': bare_pct,
-              'LENGTH': v['Length'],
-              'ASPECT': v['Aspect'],
-              'BURNCLASS': burn_class, 
-              'UTREAT': man.desc,
-              'USLP_LNG': v['Length'] / 2.0,
-              'UGRD_TP': v['UpperTopSlope'], 
-              'UGRD_BTM': v['UpperBottomSlope'],
-              'LTREAT': man.desc,
-              'LSLP_LNG': v['Length'] / 2.0,
-              'LGRD_TP': v['LowerTopSlope'],
-              'LGRD_BTM': v['LowerBottomSlope']})
+        dictWriter.writerow({
+            'HS_ID'     : wepp_id,
+            'TOPAZ_ID'  : topaz_id,
+            'UNIT_ID'   : '',
+            'AREA'      : watershed.hillslope_area(topaz_id) / 1e4,
+            'ROWID_'    : row_id,
+            'SOIL_TYPE' : soil_type,
+            'ROCK_PCT'  : fmt(rock_pct),
+            'VEG_TYPE'  : veg_type,
+            'ERM_TSLP'  : fmt(v['TopSlope']),
+            'ERM_MSLP'  : fmt(v['MiddleSlope']),
+            'ERM_BSLP'  : fmt(v['BottomSlope']),
+            'SHRUB_PCT' : fmt(shrub_pct),
+            'GRASS_PCT' : fmt(grass_pct),
+            'BARE_PCT'  : fmt(bare_pct),
+            'LENGTH'    : fmt(v['Length']),
+            'ASPECT'    : fmt(v['Aspect']),
+            'BURNCLASS' : burn_class,
+            'UTREAT'    : man.desc,
+            'USLP_LNG'  : fmt(v['Length'] / 2.0),
+            'UGRD_TP'   : fmt(v['UpperTopSlope']),
+            'UGRD_BTM'  : fmt(v['UpperBottomSlope']),
+            'LTREAT'    : man.desc,
+            'LSLP_LNG'  : fmt(v['Length'] / 2.0),
+            'LGRD_TP'   : fmt(v['LowerTopSlope']),
+            'LGRD_BTM'  : fmt(v['LowerBottomSlope']),
+        })
 
         row_id += 1
 
