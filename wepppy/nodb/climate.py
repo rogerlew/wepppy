@@ -638,7 +638,7 @@ class Climate(NoDbBase, LogMixin):
             self._ss_storm_date = '4 15 01'
             self._ss_design_storm_amount_inches = 6.3
             self._ss_duration_of_storm_in_hours = 6.0
-            self._ss_time_to_peak_intensity_pct = 0.4
+            self._ss_time_to_peak_intensity_pct = 40
             self._ss_max_intensity_inches_per_hour = 3.0
             self._ss_batch = ''
             self._ss_batch_storms = None
