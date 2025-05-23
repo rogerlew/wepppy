@@ -4864,7 +4864,6 @@ def task_upload_sbs(runid, config):
     try:
         if file.filename == '':
             return error_factory('no filename specified')
-
         filename = secure_filename(file.filename)
     except Exception:
         return exception_factory('Could not obtain filename', runid=runid)
@@ -4873,6 +4872,15 @@ def task_upload_sbs(runid, config):
         file.save(_join(baer.baer_dir, filename))
     except Exception:
         return exception_factory('Could not save file', runid=runid)
+
+    from wepppy.nodb.mods.baer.sbs_map import sbs_map_sanity_check
+
+    try:
+        ret, description = sbs_map_sanity_check(_join(baer.baer_dir, filename))
+        if ret != 0:
+            return exception_factory(description, runid=runid)
+    except Exception:
+        return exception_factory('Failed validating file', runid=runid)
 
     try:
         res = baer.validate(filename)

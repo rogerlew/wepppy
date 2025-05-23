@@ -1,6 +1,6 @@
 {% extends "controls/_base.htm" %}
 {% block form_id %}omni_form{% endblock %}
-{% block form_title %}OMNI Scenario Runner{% endblock %}
+{% block form_title %}Omni Scenario Runner{% endblock %}
 {% block inputs %}
 <style>
     .scenario-item {
@@ -66,14 +66,33 @@
         thinning: {
             label: "Thinning",
             controls: [
-                { type: "select", name: "canopy_cover", label: "Canopy Cover Reduction", options: ["40%", "65%"] },
-                { type: "select", name: "ground_cover", label: "Ground Cover", options: ["93%", "90%", "75%"] }
+                { type: "select", name: "canopy_cover", label: "Canopy Cover Reduction to", options: ["40%", "65%"] },
+                {   type: "select", 
+                    name: "ground_cover", 
+                    label: "Ground Cover", 
+                    options: ["93%", "90%", "85%", "75%"],
+                    optionLabels: {
+                        "93%": "93% - Cable",
+                        "90%": "90% - Forward",
+                        "85%": "85% - Skidder",
+                        "75%": "75%"
+                    } 
+                }
             ]
         },
         mulch: {
             label: "Mulching",
             controls: [
-                { type: "select", name: "ground_cover_increase", label: "Ground Cover Increase", options: ["15%", "30%", "60%"] },
+                {   type: "select", 
+                    name: "ground_cover_increase", 
+                    label: "Ground Cover Increase", 
+                    options: ["15%", "30%", "60%"],
+                    optionLabels: {
+                        "15%": "15% - ½ tons/acre",
+                        "30%": "30% - 1 tons/acre",
+                        "60%": "60% - 2 tons/acre"
+                    }
+                },
                 { 
                     type: "select", 
                     name: "base_scenario", 
