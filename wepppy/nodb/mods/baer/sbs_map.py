@@ -22,7 +22,7 @@ from osgeo.gdalconst import GDT_Byte
 from subprocess import Popen, PIPE
 
 from wepppy.all_your_base import isint
-from wepppy.all_your_base.geo import read_raster, wgs84_proj4
+from wepppy.all_your_base.geo import read_raster, wgs84_proj4, validate_srs
 
 from wepppy.landcover import LandcoverMap
 
@@ -39,9 +39,9 @@ def get_sbs_color_table(fn, color_to_severity_map=None):
                                       ((0, 115, 74), 'unburned'),
                                       ((0, 175, 166), 'unburned'),
                                       ((102, 204, 204), 'low'),
+                                      ((102, 205, 205), 'low'),
                                       ((115, 255, 223), 'low'),
                                       ((127, 255, 212), 'low'),
-                                      ((102, 204, 204), 'low'),
                                       ((0, 255, 255), 'low'),
                                       ((102, 205, 205), 'low'),
                                       ((77, 230, 0), 'low'),
@@ -115,7 +115,37 @@ def ct_classify(v, ct, offset=0, nodata_val=255):
     args = make_hashable_ct(v, ct, offset, nodata_val)
     return memoized_ct_classify(args)
 
+def sbs_map_sanity_check(fname):
+    if not _exists(fname):
+        return 1, 'File does not exist'
 
+    if not validate_srs(fname):
+        return 1, 'Map contains an invalid projection. Try reprojecting to UTM.'
+
+    ds = gdal.Open(fname)
+    band = ds.GetRasterBand(1)
+    data = band.ReadAsArray(0, 0, ds.RasterXSize, ds.RasterYSize)
+    classes = np.unique(data)
+    ds = None
+
+    if len(classes) > 256:
+        return 1, 'Map has more than 256 classes'
+
+    for v in classes:
+        if not isint(v):
+            return 1, 'Map has non-integer classes'
+
+    ct, counts, color_map = get_sbs_color_table(fname, color_to_severity_map=None)
+    if ct is not None:
+        for entry, sev in color_map.items():
+            if sev in ('low', 'mod', 'high'):
+                return 0, 'Map has valid color table'
+
+        return 1, 'Map has no valid color table'
+
+    return 0, 'Map has valid classes'
+
+    
 class SoilBurnSeverityMap(LandcoverMap):
     def __init__(self, fname, breaks=None, nodata_vals=None, color_map=None, ignore_ct=False):
         if nodata_vals is None:
@@ -127,7 +157,10 @@ class SoilBurnSeverityMap(LandcoverMap):
             ds = None
 
             if _nodata is not None:
-                nodata_vals.append(_nodata)
+                if isint(_nodata):
+                    nodata_vals.append(int(_nodata))
+                else:
+                    nodata_vals.append(_nodata)
 
         assert _exists(fname)
 
@@ -135,12 +168,23 @@ class SoilBurnSeverityMap(LandcoverMap):
         if ignore_ct:
             ct = None
 
-        nodata_vals = [int(v) for v in nodata_vals]
-        classes = set(int(v) for v, c in counts if int(v) not in nodata_vals)
+        classes = set()
+        for v, c in counts:
+            if isint(v):
+                if isinstance(nodata_vals, list):
+                    if int(v) in nodata_vals:
+                        continue
+                classes.add(int(v))
+            else:
+                if isinstance(nodata_vals, list):
+                    if v in nodata_vals:
+                        continue
+                classes.add(v)
+
         is256 = None
 
+        classes = sorted(classes)
         if ct is None:
-
             if breaks is None:
                 # need to intuit breaks
 
@@ -160,7 +204,7 @@ class SoilBurnSeverityMap(LandcoverMap):
                 else:
                     breaks = [max_run_val - i for i in range(3, -1, -1)]
 
-                if max_val not in breaks and not is256:
+                if max_val not in breaks and not is256 and max_val-1 not in classes:
                     nodata_vals.append(max_val)
                     classes.remove(max_val)
 
