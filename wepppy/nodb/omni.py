@@ -781,7 +781,8 @@ class Omni(NoDbBase, LogMixin):
         # get disturbed and landuse instances
         disturbed = Disturbed.getInstance(new_wd)
         landuse = Landuse.getInstance(new_wd)
-        
+        soils = Soils.getInstance(new_wd)
+
         # handle uniform burn severity cases
         if scenario == OmniScenario.UniformLow or \
             scenario == OmniScenario.UniformModerate or \
@@ -801,6 +802,7 @@ class Omni(NoDbBase, LogMixin):
             sbs_fn = disturbed.build_uniform_sbs(int(sbs))
             disturbed.validate(sbs_fn)
             landuse.build()
+            soils.build()
 
         elif scenario == OmniScenario.Undisturbed:
             self.log(f'  Omni::_build_scenario: undisturbed\n')
@@ -809,6 +811,7 @@ class Omni(NoDbBase, LogMixin):
                 raise Exception('Undisturbed scenario requires a base scenario with sbs')
             disturbed.remove_sbs()
             landuse.build()
+            soils.build()
 
         elif scenario == OmniScenario.SBSmap:
             self.log(f'  Omni::_build_scenario: sbs\n')
@@ -825,12 +828,15 @@ class Omni(NoDbBase, LogMixin):
 
             disturbed.validate(sbs_fn)
             landuse.build()
+            soils.build()
 
         elif scenario == OmniScenario.Mulch:
             self.log(f'  Omni::_build_scenario: mulch\n')
 
             assert omni_base_scenario_name is not None, \
                 'Mulching scenario requires a base scenario'
+
+            soils.build()
 
             treatments = Treatments.getInstance(new_wd)
 
@@ -858,6 +864,8 @@ class Omni(NoDbBase, LogMixin):
             if disturbed.has_sbs:
                 raise Exception('Cloned omni scenario should be undisturbed')
 
+            soils.build()
+            
             treatments = Treatments.getInstance(new_wd)
             treatment_key = treatments.treatments_lookup[str(scenario)]
 
@@ -881,6 +889,8 @@ class Omni(NoDbBase, LogMixin):
             if disturbed.has_sbs:
                 raise Exception('Cloned omni scenario should be undisturbed')
 
+            soils.build()
+            
             treatments = Treatments.getInstance(new_wd)
             _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
             treatment_key = treatments.treatments_lookup[_scenario_name]
@@ -898,11 +908,7 @@ class Omni(NoDbBase, LogMixin):
             treatments.treatments_domlc_d = treatments_domlc_d
             treatments.build_treatments()
 
-        soils = Soils.getInstance(new_wd)
-        soils.build()
-
         wepp = Wepp.getInstance(new_wd)
-        # todo: implement omni_hillslope_prep that uses symlinks
 
         wepp.prep_hillslopes(omni=True)
         wepp.run_hillslopes(omni=True)
