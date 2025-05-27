@@ -2280,9 +2280,11 @@ def export_geopackage(runid, config):
     ron = Ron.getInstance(wd)
 
     try:
-        if len(glob(_join(ron.export_arc_dir, '*.gpkg'))) == 0:
+        gpkg_fn = _join(ron.export_arc_dir, '{runid}.gpkg')
+        if _exists(gpkg_fn):
             gpkg_export(wd)
-        gpkg_fn = glob(_join(ron.export_arc_dir, '*.gpkg'))[0]
+        if not _exists(gpkg_fn):
+            raise Error('GeoPackage file does not exist')
         return send_file(gpkg_fn, as_attachment=True, download_name=f'{runid}.gpkg')
         
     except Exception:
@@ -2293,12 +2295,15 @@ def export_geodatabase(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
 
     wd = get_wd(runid)
+
     ron = Ron.getInstance(wd)
 
     try:
-        if len(glob(_join(ron.export_arc_dir, '*.gdb.zip'))) == 0:
+        gdb_fn = _join(ron.export_arc_dir, '{runid}.gdb')
+        if _exists(gdb_fn):
             gpkg_export(wd)
-        gdb_fn = glob(_join(ron.export_arc_dir, '*.gdb.zip'))[0]
+        if not _exists(gdb_fn):
+            raise Error('Geodatabase file does not exist')
         return send_file(gdb_fn, as_attachment=True, download_name=f'{runid}.gdb.zip')
         
     except Exception:
