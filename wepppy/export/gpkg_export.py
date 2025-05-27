@@ -109,6 +109,10 @@ def gpkg_export(wd: str):
     if _exists(gpkg_fn):
         os.remove(gpkg_fn)
 
+    gdb_fn.replace('.gpkg', '.gdb')
+    if _exists(gdb_fn):
+        os.remove(gdb_fn)
+
     hill_gdf = gpd.read_file(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON'))
     hill_gdf.set_crs("EPSG:4326", inplace=True)
 
@@ -262,7 +266,7 @@ def gpkg_export(wd: str):
     chn_gdf.to_file(gpkg_fn, driver='GPKG', layer='channels')
 
     if f_esri.has_f_esri():
-        f_esri.gpkg_to_gdb(gpkg_fn, gpkg_fn.replace('.gpkg', '.gdb'), user='www-data', group='webgroup')
+        f_esri.gpkg_to_gdb(gpkg_fn, gdb_fn, user='www-data', group='webgroup')
 
 
 def create_difference_map(scenario1_gpkg_fn, scenario2_gpkg_fn, difference_attributes, output_geojson_fn,  meta_attributes=None):
