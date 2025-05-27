@@ -2295,7 +2295,6 @@ def export_geodatabase(runid, config):
     from wepppy.export import gpkg_export, archive_project, legacy_arc_export
 
     wd = get_wd(runid)
-
     ron = Ron.getInstance(wd)
 
     try:
