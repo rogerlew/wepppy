@@ -851,7 +851,7 @@ class Omni(NoDbBase, LogMixin):
                 # treat burned forest, shrub, and grass with mulching by increasing cover
                 man_summary = landuse.managements[dom]
                 disturbed_class = getattr(man_summary, 'disturbed_class', '')
-                if 'fire' in disturbed_class:
+                if isinstance(disturbed_class, str) and 'fire' in disturbed_class:
                     treatments_domlc_d[topaz_id] = treatment_key
 
             treatments.treatments_domlc_d = treatments_domlc_d

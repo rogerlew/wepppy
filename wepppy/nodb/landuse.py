@@ -796,6 +796,9 @@ class Landuse(NoDbBase, LogMixin):
             dom = self.domlc_mofe_d[str(topaz_id)][str(mofe_id)]
 
         man = self.managements[dom]
+        if disturbed_class is None:
+            return ''
+            
         disturbed_class = man.disturbed_class.lower()
 
         if 'forest' in disturbed_class:
