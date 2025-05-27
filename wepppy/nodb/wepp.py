@@ -1499,11 +1499,11 @@ class Wepp(NoDbBase, LogMixin):
 
                 # probably isn't the right location for this code. should be in nodb.disturbed
                 if disturbed is not None:
-                  
-                    if 'mulch' in disturbed_class:
-                        disturbed_class = 'mulch'
-                    elif 'thinning' in disturbed_class:
-                        disturbed_class = 'thinning'
+                    if isinstance(disturbed_class, str):  # occured with No Data class with c3s-disturbed map
+                        if 'mulch' in disturbed_class:
+                            disturbed_class = 'mulch'
+                        elif 'thinning' in disturbed_class:
+                            disturbed_class = 'thinning'
 
                     if hillslope_cancovs is not None and 'mulch' not in disturbed_class and 'thinning' not in disturbed_class:
                         assert rap_ts is None, 'project has rap and rap_ts'
