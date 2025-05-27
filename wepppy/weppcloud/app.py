@@ -2299,7 +2299,7 @@ def export_geodatabase(runid, config):
     ron = Ron.getInstance(wd)
 
     try:
-        gdb_fn = _join(ron.export_arc_dir, '{runid}.gdb')
+        gdb_fn = _join(ron.export_arc_dir, '{runid}.gdb.zip')
         if _exists(gdb_fn):
             gpkg_export(wd)
         if not _exists(gdb_fn):
