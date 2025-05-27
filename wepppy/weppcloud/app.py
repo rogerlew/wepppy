@@ -2284,7 +2284,7 @@ def export_geopackage(runid, config):
         if _exists(gpkg_fn):
             gpkg_export(wd)
         if not _exists(gpkg_fn):
-            raise Error('GeoPackage file does not exist')
+            raise Exception('GeoPackage file does not exist')
         return send_file(gpkg_fn, as_attachment=True, download_name=f'{runid}.gpkg')
         
     except Exception:
@@ -2303,7 +2303,7 @@ def export_geodatabase(runid, config):
         if _exists(gdb_fn):
             gpkg_export(wd)
         if not _exists(gdb_fn):
-            raise Error('Geodatabase file does not exist')
+            raise Exception('Geodatabase file does not exist')
         return send_file(gdb_fn, as_attachment=True, download_name=f'{runid}.gdb.zip')
         
     except Exception:
