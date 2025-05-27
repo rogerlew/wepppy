@@ -111,8 +111,12 @@ def gpkg_export(wd: str):
 
     gdb_fn = gpkg_fn.replace('.gpkg', '.gdb')
     if _exists(gdb_fn):
-        os.remove(gdb_fn)
+        shutil.rmtree(gdb_fn)
 
+    gdb_zip_fn = gpkg_fn.replace('.gpkg', '.gdb.zip')
+    if _exists(gdb_zip_fn):
+        os.remove(gdb_zip_fn)
+    
     hill_gdf = gpd.read_file(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON'))
     hill_gdf.set_crs("EPSG:4326", inplace=True)
 

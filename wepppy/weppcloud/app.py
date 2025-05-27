@@ -2281,7 +2281,7 @@ def export_geopackage(runid, config):
 
     try:
         gpkg_fn = _join(ron.export_arc_dir, f'{runid}.gpkg')
-        if _exists(gpkg_fn):
+        if not _exists(gpkg_fn):
             gpkg_export(wd)
         if not _exists(gpkg_fn):
             raise Exception('GeoPackage file does not exist')
@@ -2299,7 +2299,7 @@ def export_geodatabase(runid, config):
 
     try:
         gdb_fn = _join(ron.export_arc_dir, f'{runid}.gdb.zip')
-        if _exists(gdb_fn):
+        if not _exists(gdb_fn):
             gpkg_export(wd)
         if not _exists(gdb_fn):
             raise Exception('Geodatabase file does not exist')
