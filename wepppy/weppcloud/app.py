@@ -2280,7 +2280,7 @@ def export_geopackage(runid, config):
     ron = Ron.getInstance(wd)
 
     try:
-        gpkg_fn = _join(ron.export_arc_dir, '{runid}.gpkg')
+        gpkg_fn = _join(ron.export_arc_dir, f'{runid}.gpkg')
         if _exists(gpkg_fn):
             gpkg_export(wd)
         if not _exists(gpkg_fn):
@@ -2298,7 +2298,7 @@ def export_geodatabase(runid, config):
     ron = Ron.getInstance(wd)
 
     try:
-        gdb_fn = _join(ron.export_arc_dir, '{runid}.gdb.zip')
+        gdb_fn = _join(ron.export_arc_dir, f'{runid}.gdb.zip')
         if _exists(gdb_fn):
             gpkg_export(wd)
         if not _exists(gdb_fn):
