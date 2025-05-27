@@ -109,7 +109,7 @@ def gpkg_export(wd: str):
     if _exists(gpkg_fn):
         os.remove(gpkg_fn)
 
-    gdb_fn.replace('.gpkg', '.gdb')
+    gdb_fn = gpkg_fn.replace('.gpkg', '.gdb')
     if _exists(gdb_fn):
         os.remove(gdb_fn)
 
