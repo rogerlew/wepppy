@@ -878,7 +878,7 @@ class Disturbed(NoDbBase):
                 if (texid, disturbed_class) not in _land_soil_replacements_d:
                     texid = 'all'
 
-                if disturbed_class is None or 'developed' in disturbed_class:
+                if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
                     kcb = 0.95
                     rawb = 0.80
                 else:

@@ -559,7 +559,7 @@ class Landuse(NoDbBase, LogMixin):
                 self.log(f'topaz_id: {topaz_id}\t dom:{dom}\t disturbed_class: {disturbed_class}')
                 self.log_done()
 
-                if disturbed_class is None:
+                if disturbed_class is None or disturbed_class == '':
                     continue
 
                 cancov = 0.0
@@ -728,7 +728,7 @@ class Landuse(NoDbBase, LogMixin):
                 disturbed_class = managements[dom].disturbed_class
                 texid = 'sand loam'
 
-                if disturbed_class is None:
+                if disturbed_class is None or disturbed_class == '':
                     rdmax = None
                     xmxlai = None
                 else:
@@ -796,7 +796,7 @@ class Landuse(NoDbBase, LogMixin):
             dom = self.domlc_mofe_d[str(topaz_id)][str(mofe_id)]
 
         man = self.managements[dom]
-        if disturbed_class is None:
+        if disturbed_class is None or disturbed_class == '':
             return ''
             
         disturbed_class = man.disturbed_class.lower()
