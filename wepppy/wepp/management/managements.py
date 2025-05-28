@@ -1794,12 +1794,12 @@ class ManagementSummary(object):
 
         if "DisturbedClass" in kwargs:
             disturbed_class = kwargs["DisturbedClass"]
-            if disturbed_class == '':
-                disturbed_class = None
 
             assert disturbed_class in get_disturbed_classes(), disturbed_class
 
             self.disturbed_class = disturbed_class
+        else:
+            self.disturbed_class = ''
 
         self.area = None
 
