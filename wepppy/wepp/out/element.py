@@ -31,9 +31,13 @@ class Element(object):
         units = [int, int, int, int, _float, _float, _float, _float, _float, _float, _float, _float,
                  _float, _float, _float, _float, _float, _float, _float, _float, _float, _float, _float, _float]
 
-        data = []
-        for i, L in enumerate(lines):
-            data.append([u(v) for v, u in zip(L.split(), units)])
+        data = [[u_func(v) for v, u_func in zip(lines[0].split(), units)]]
+        for j, v in enumerate(data0):
+            if v is None:
+                data[0][j] = 0.0  # replace first line with zeros
+
+        for i, L in enumerate(lines[1:]):
+            data.append([u_func(v) for v, u_func in zip(L.split(), units)])
 
             # replace ****** values with previous day
             for j, v in enumerate(data[-1]):
