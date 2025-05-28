@@ -1517,7 +1517,7 @@ class Wepp(NoDbBase, LogMixin):
                     if (texid, disturbed_class) not in _land_soil_replacements_d:
                         texid = 'all'
 
-                    if disturbed_class is None or 'developed' in disturbed_class:
+                    if disturbed_class is None or 'developed' in disturbed_class or disturbed_class == '':
                         rdmax = None
                         xmxlai = None
                     else:
