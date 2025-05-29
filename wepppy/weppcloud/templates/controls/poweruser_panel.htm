@@ -122,8 +122,8 @@ clear_locks = function() {
             <br>
             <h5>Data Tables</h5>
             <div class="list-group">
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/hillslopes.csv/">Hillslope</a>
-              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/channels.csv">Channels</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/hillslopes.parquet/">Hillslope</a>
+              <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/watershed/channels.parquet">Channels</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/landuse/landuse.parquet/">Landuse</a>
               <a class="list-group-item list-group-item-action" target="_blank" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/browse/soils/soils.parquet/">Soils</a>
             </div>
@@ -136,7 +136,7 @@ clear_locks = function() {
             </div>
             {% endif %}
             <br>
-            <h5>Omni</h5>
+            <h5>Omni (Experimental)</h5>
             {% if 'omni' not in ron.mods %}
             <div class="list-group">
               <a class="list-group-item list-group-item-action" href="{{site_prefix}}/runs/{{ ron.runid }}/{{ ron.config_stem }}/tasks/omni_migration" target="_blank">Omni Migration</a>

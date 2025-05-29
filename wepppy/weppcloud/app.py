@@ -4548,7 +4548,7 @@ def query_wepp_sub_baseflow(runid, config):
 def query_wepp_sub_loss(runid, config):
     wd = get_wd(runid)
     wepp = Wepp.getInstance(wd)
-    return jsonify(wepp.query_sub_val('DepLoss'))
+    return jsonify(wepp.query_sub_val('Soil Loss Density'))
 
 
 @app.route('/runs/<string:runid>/<config>/query/wepp/phosphorus/subcatchments')
