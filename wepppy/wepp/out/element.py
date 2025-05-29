@@ -32,7 +32,7 @@ class Element(object):
                  _float, _float, _float, _float, _float, _float, _float, _float, _float, _float, _float, _float]
 
         data = [[u_func(v) for v, u_func in zip(lines[0].split(), units)]]
-        for j, v in enumerate(data0):
+        for j, v in enumerate(data[0]):
             if v is None:
                 data[0][j] = 0.0  # replace first line with zeros
 

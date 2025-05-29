@@ -17,3 +17,6 @@ class TestWeppOut(unittest.TestCase):
         element_fn = '/workdir/wepppy/tests/wepp/out/H2.element.dat'
         ebe = Element(element_fn)
         self.assertIsInstance(ebe, Element)
+
+if __name__ == '__main__':
+    unittest.main()
