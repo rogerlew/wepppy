@@ -2377,7 +2377,7 @@ var SubcatchmentDelineation = function () {
         that.labelLossMin = $('#wepp_sub_cmap_canvas_loss_min');
         that.labelLossMax = $('#wepp_sub_cmap_canvas_loss_max');
         that.labelLossUnits = $('#wepp_sub_cmap_canvas_loss_units');
-        that.cmapperLoss = createColormap({ colormap: "electric", nshades: 64 });
+        that.cmapperLoss = createColormap({ colormap: "electric-boogaloo", nshades: 64 });
 
         that.cmapLoss = function () {
             var self = instance;
@@ -2404,22 +2404,7 @@ var SubcatchmentDelineation = function () {
             var self = instance;
 
             var r = parseFloat(self.rangeLoss.val());
-
-            $.get({
-                url: "unitizer/",
-                data: {value: -1.0 * r, in_units: 'kg/ha'},
-                cache: false,
-                success: function success(response) {
-                    self.labelLossMin.html(response.Content);
-                    Project.getInstance().set_preferred_units();
-                },
-                error: function error(jqXHR)  {
-                    self.pushResponseStacktrace(self, jqXHR.responseJSON);
-                },
-                fail: function fail(jqXHR, textStatus, errorThrown) {
-                    self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-                }
-            });
+            self.labelLossMin.html("0.000");
 
             $.get({
                 url: "unitizer/",
@@ -2461,7 +2446,7 @@ var SubcatchmentDelineation = function () {
             self.polys.eachLayer(function (layer) {
                 var topId = layer.feature.properties.TopazID;
                 var v = parseFloat(self.dataLoss[topId].value);
-                var c = self.cmapperLoss.map(v / (2.0 * r) + 0.5);
+                var c = self.cmapperLoss.map(v / r);
 
                 layer.setStyle({
                     color: c,
