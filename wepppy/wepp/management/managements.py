@@ -1795,11 +1795,12 @@ class ManagementSummary(object):
         if "DisturbedClass" in kwargs:
             disturbed_class = kwargs["DisturbedClass"]
 
-            if disturbed_class not in get_disturbed_classes():
-                raise ValueError(
-                    f"Disturbed class '{disturbed_class}' is not valid. "
-                    f"Valid classes are: {get_disturbed_classes()}"
-                )
+            if disturbed_class != '':
+                if disturbed_class not in get_disturbed_classes():
+                    raise ValueError(
+                        f"Disturbed class '{disturbed_class}' is not valid. "
+                        f"Valid classes are: {get_disturbed_classes()}"
+                    )
 
             self.disturbed_class = disturbed_class
         else:
