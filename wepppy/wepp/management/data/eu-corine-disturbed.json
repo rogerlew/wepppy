@@ -447,7 +447,7 @@
             255,
             255
         ],
-        "DisturbedClass": "wetland",
+        "DisturbedClass": "",
         "Description": "Salt marshes",
         "ManagementFile": "GeoWEPP/grass.man"
     },
@@ -495,7 +495,7 @@
             229,
             255
         ],
-        "DisturbedClass": "water",
+        "DisturbedClass": "",
         "Description": "Water bodies",
         "ManagementFile": "GeoWEPP/grass.man"
     },
