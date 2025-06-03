@@ -806,6 +806,7 @@ class ClimateFile(object):
 
         if calc_peak_intensities:
             d['10-min Peak Rainfall Intensity (mm/hour)'] = []
+            d['15-min Peak Rainfall Intensity (mm/hour)'] = []
             d['30-min Peak Rainfall Intensity (mm/hour)'] = []
             d['60-min Peak Rainfall Intensity (mm/hour)'] = []
 
@@ -851,7 +852,7 @@ class ClimateFile(object):
                 elif self.breakpoint:
                     intensities = [-1, -1, -1]
                 else:
-                    max_time = [10, 30, 60]
+                    max_time = [10, 15, 30, 60]
                     intensities = cli2pat(prcp=d['prcp'][-1],
                                           dur=d['dur'][-1],
                                           tp=d['tp'][-1],
@@ -859,8 +860,9 @@ class ClimateFile(object):
                                           max_time=max_time)
 
                 d['10-min Peak Rainfall Intensity (mm/hour)'].append(intensities[0])
-                d['30-min Peak Rainfall Intensity (mm/hour)'].append(intensities[1])
-                d['60-min Peak Rainfall Intensity (mm/hour)'].append(intensities[2])
+                d['15-min Peak Rainfall Intensity (mm/hour)'].append(intensities[1])
+                d['30-min Peak Rainfall Intensity (mm/hour)'].append(intensities[2])
+                d['60-min Peak Rainfall Intensity (mm/hour)'].append(intensities[3])
 
         return pd.DataFrame(data=d)
 

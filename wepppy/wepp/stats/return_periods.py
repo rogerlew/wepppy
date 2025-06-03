@@ -39,7 +39,10 @@ class ReturnPeriods:
 
         df = deepcopy(ebe.df)
 
+
         df['10-min Peak Rainfall Intensity'] = cli_df['10-min Peak Rainfall Intensity (mm/hour)']
+        if '15-min Peak Rainfall Intensity (mm/hour)' in cli_df:
+            df['15-min Peak Rainfall Intensity'] = cli_df['15-min Peak Rainfall Intensity (mm/hour)']
         df['30-min Peak Rainfall Intensity'] = cli_df['30-min Peak Rainfall Intensity (mm/hour)']
 
         _years = sorted(set(df['year']))
@@ -116,6 +119,8 @@ class ReturnPeriods:
         self.intervals = sorted(rec.keys())
         self.units_d = ebe.units_d
         self.units_d['10-min Peak Rainfall Intensity'] = 'mm/hour'
+        if '15-min Peak Rainfall Intensity (mm/hour)' in cli_df:
+            self.units_d['15-min Peak Rainfall Intensity'] = 'mm/hour'
         self.units_d['30-min Peak Rainfall Intensity'] = 'mm/hour'
         self.units_d['Peak Discharge'] = 'm^3/s'
         self.units_d['Sediment Yield'] = 'tonne'
@@ -176,6 +181,7 @@ class ReturnPeriods:
                 'Runoff',
                 'Peak Discharge',
                 '10-min Peak Rainfall Intensity',
+                '15-min Peak Rainfall Intensity',
                 '30-min Peak Rainfall Intensity',
                 'Sediment Yield'
             ]
@@ -223,6 +229,7 @@ class ReturnPeriods:
                 'Runoff',
                 'Peak Discharge',
                 '10-min Peak Rainfall Intensity',
+                '15-min Peak Rainfall Intensity',
                 '30-min Peak Rainfall Intensity',
                 'Sediment Yield'
             ]
@@ -243,6 +250,8 @@ class ReturnPeriods:
                     ]
                     if '10-min Peak Rainfall Intensity' in self.return_periods:
                         headers.append(f"10-min Peak Rainfall Intensity ({self.units_d.get('10-min Peak Rainfall Intensity', '')})")
+                    if '15-min Peak Rainfall Intensity' in self.return_periods:
+                        headers.append(f"15-min Peak Rainfall Intensity ({self.units_d.get('15-min Peak Rainfall Intensity', '')})")
                     if '30-min Peak Rainfall Intensity' in self.return_periods:
                         headers.append(f"30-min Peak Rainfall Intensity ({self.units_d.get('30-min Peak Rainfall Intensity', '')})")
                     headers.append(f"Sediment Yield ({self.units_d.get('Sediment Yield', '')})")
@@ -268,6 +277,8 @@ class ReturnPeriods:
                         ]
                         if '10-min Peak Rainfall Intensity' in self.return_periods:
                             row.append(f"{data.get('10-min Peak Rainfall Intensity', 0):.2f}")
+                        if '15-min Peak Rainfall Intensity' in self.return_periods:
+                            row.append(f"{data.get('15-min Peak Rainfall Intensity', 0):.2f}")
                         if '30-min Peak Rainfall Intensity' in self.return_periods:
                             row.append(f"{data.get('30-min Peak Rainfall Intensity', 0):.2f}")
                         row.append(f"{data.get('Sediment Yield', 0):.2f}")
