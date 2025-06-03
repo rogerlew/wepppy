@@ -20,7 +20,7 @@ def combined_watershed_viewer_generator(runids, title, units=None, varopts=None,
     subrunoff = varopts.get('subrunoff', (0.1, 10)[units == 'SI'])  # in, mm
     baseflow = varopts.get('baseflow', (0.1, 10)[units == 'SI'])  # in, mm
     loss = varopts.get('loss', (0.1, 10)[units == 'SI'])  # in, mm
-    phosphorus = varopts.get('loss', (0.1, 10)[units == 'SI'])  # in, mm
+    phosphorus = varopts.get('phosphorus', (0.1, 10)[units == 'SI'])  # in, mm
 
     ws = []
     extents = None

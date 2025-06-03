@@ -14,6 +14,9 @@
         {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
           <th class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">10-min Peak Rainfall Intensity</th>
         {% endif %}
+        {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
+          <th class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">15-min Peak Rainfall Intensity</th>
+        {% endif %}
         {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
           <th class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">30-min Peak Rainfall Intensity</th>
         {% endif %}
@@ -36,6 +39,9 @@
         <td class="{{ 'table-active' if key == 'Peak Discharge' }}">{{ unitizer_units(report.units_d['Peak Discharge']) | safe }}</td>
         {% if '10-min Peak Rainfall Intensity' in report.return_periods %}
           <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
+        {% endif %}        
+        {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
+          <td class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['15-min Peak Rainfall Intensity']) | safe }}</td>
         {% endif %}
         {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
           <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer_units(report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
@@ -65,6 +71,10 @@
           <td class="{{ 'table-active' if key == '10-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['10-min Peak Rainfall Intensity'],
                         report.units_d['10-min Peak Rainfall Intensity']) | safe }}</td>
         {% endif %}
+        {% if '15-min Peak Rainfall Intensity' in report.return_periods %}
+          <td class="{{ 'table-active' if key == '15-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['15-min Peak Rainfall Intensity'],
+                        report.units_d['15-min Peak Rainfall Intensity']) | safe }}</td>
+        {% endif %}
         {% if '30-min Peak Rainfall Intensity' in report.return_periods %}
           <td class="{{ 'table-active' if key == '30-min Peak Rainfall Intensity' }}">{{ unitizer(report.return_periods[key][rec_interval]['30-min Peak Rainfall Intensity'],
                         report.units_d['30-min Peak Rainfall Intensity']) | safe }}</td>
@@ -86,7 +96,7 @@
         {% endif %}
 
         {% if "weibull_T" in report.return_periods[key][rec_interval] %}
-        <td>{{ report.return_periods[key][rec_interval]['weibull_T'] }}</td>
+        <td>{{ report.return_periods[key][rec_interval]['weibull_T'] | round(5)}}</td>
         {% else %}
         <td> </td>
         {% endif %}
