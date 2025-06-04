@@ -907,7 +907,7 @@ class Landuse(NoDbBase, LogMixin):
             # noinspection PyMethodFirstArgAssignment
             self = self.getInstance(self.wd)  # reload instance from .nodb
             self.build_managements()
-            self.dump_and_unlock()
+            self.dump_landuse_parquet()
 
         except Exception:
             self.unlock('-f')
