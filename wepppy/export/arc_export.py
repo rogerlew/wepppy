@@ -644,13 +644,6 @@ def arc_export(wd, verbose=False):
     with open(geojson_fn, 'w') as fp:
         fp.write(json_txt)
 
-    cmd = ['ogr2ogr', '-f', 'GPKG', '-append', '-update', '-s_srs', 'epsg:%s' % map.srid, '-t_srs', 'epsg:%s' % map.srid,
-           f'{runid}.gpkg', 'channels.json', '-nln', 'channels']
-    if verbose:
-        print(cmd)
-    subprocess.check_call(cmd, cwd=export_dir)
-
-
 if __name__ == '__main__':
     wd = '/geodata/weppcloud_runs/CurCond_Watershed_1'
     arc_export(wd)
