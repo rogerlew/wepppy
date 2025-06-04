@@ -607,8 +607,6 @@ class Landuse(NoDbBase, LogMixin):
                 self.unlock('-f')
                 raise
 
-        self.dump_landuse_parquet()
-
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.build_landuse)
@@ -1027,6 +1025,7 @@ class Landuse(NoDbBase, LogMixin):
             # noinspection PyUnresolvedReferences
             nodb.getInstance(self.wd)
 
+
         self.dump_landuse_parquet()
 
     @property
@@ -1167,6 +1166,8 @@ class Landuse(NoDbBase, LogMixin):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
+        self = Landuse.getInstance(self.wd)
+
         dict_result = self._subs_summary_gen()
         df = pd.DataFrame.from_dict(dict_result, orient='index')
         df.index.name = 'TopazID'
