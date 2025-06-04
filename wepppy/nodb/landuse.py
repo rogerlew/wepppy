@@ -131,6 +131,7 @@ class Landuse(NoDbBase, LogMixin):
             self._hillslope_mofe_cancovs = None
 
             self.dump_and_unlock()
+            self.dump_landuse_parquet()
 
         except Exception:
             self.unlock('-f')
@@ -1015,19 +1016,6 @@ class Landuse(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
-    def dump_and_unlock(self, validate=True):
-        self.dump()
-        self.unlock()
-
-        if validate:
-            nodb = type(self)
-
-            # noinspection PyUnresolvedReferences
-            nodb.getInstance(self.wd)
-
-
-        self.dump_landuse_parquet()
-
     @property
     def report(self):
         """
@@ -1116,6 +1104,7 @@ class Landuse(NoDbBase, LogMixin):
         try:
             self._hillslope_cancovs = value
             self.dump_and_unlock()
+            self.dump_landuse_parquet()
 
         except Exception:
             self.unlock('-f')
@@ -1166,8 +1155,6 @@ class Landuse(NoDbBase, LogMixin):
         """
         Dumps the subs_summary to a Parquet file using Pandas.
         """
-        self = Landuse.getInstance(self.wd)
-
         dict_result = self._subs_summary_gen()
         df = pd.DataFrame.from_dict(dict_result, orient='index')
         df.index.name = 'TopazID'

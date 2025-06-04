@@ -337,6 +337,7 @@ class Treatments(NoDbBase, LogMixin):
                 self._apply_treatment(landuse, disturbed, topaz_id, treatment, man_summary, disturbed_class)
 
             landuse.dump_and_unlock()
+            landuse.dump_landuse_parquet()
         except Exception:
             landuse.unlock('-f')
             raise
