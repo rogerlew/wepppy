@@ -13,6 +13,7 @@ from wepppy.all_your_base import isnan, isinf
 from wepppy.nodb import Ron, Wepp, Watershed, Ash
 from wepppy.topo.watershed_abstraction.support import json_to_wgs
 
+from wepppy.topo.peridot.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
 
 @deprecated()
 def has_arc_export(wd):
@@ -436,6 +437,9 @@ def arc_export(wd, verbose=False):
     for i, f in enumerate(js['features']):
         topaz_id = str(f['properties']['TopazID'])
         ss = subs_summary[topaz_id]
+
+        if isinstance(ss, PeridotHillslope):
+            ss = ss.as_dict()
 
         f['properties']['watershed'] = name
         f['properties']['topaz_id'] = topaz_id
