@@ -154,6 +154,19 @@ class Soils(NoDbBase, LogMixin):
 
         return db
 
+
+    def dump_and_unlock(self, validate=True):
+        self.dump()
+        self.unlock()
+
+        if validate:
+            nodb = type(self)
+
+            # noinspection PyUnresolvedReferences
+            nodb.getInstance(self.wd)
+
+        self.dump_soils_parquet()
+
     @staticmethod
     def getInstanceFromRunID(runid, allow_nonexistent=False, ignore_lock=False):
         from wepppy.weppcloud.utils.helpers import get_wd
@@ -791,8 +804,6 @@ class Soils(NoDbBase, LogMixin):
             rred = wepppy.nodb.mods.Rred.getInstance(self.wd)
             rred.build_soils(self._mode)
             return
-
-        self.dump_soils_parquet()
 
         try:
             prep = RedisPrep.getInstance(self.wd)
