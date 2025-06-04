@@ -5631,9 +5631,8 @@ def weppcloudr_runner(runid, config, routine, user):
 def deval_details(runid, config):
     try:
         wd = get_wd(runid)
-        if not _exists(_join(wd, 'export', 'arcmap', 'subcatchments.WGS.json')):
-            from wepppy.export import arc_export
-            arc_export(wd)
+        from wepppy.export import arc_export
+        arc_export(wd)
     except:
         return exception_factory('Error running script', runid=runid)
 
