@@ -1017,6 +1017,18 @@ class Landuse(NoDbBase, LogMixin):
             self.unlock('-f')
             raise
 
+    def dump_and_unlock(self, validate=True):
+        self.dump()
+        self.unlock()
+
+        if validate:
+            nodb = type(self)
+
+            # noinspection PyUnresolvedReferences
+            nodb.getInstance(self.wd)
+
+        self.dump_landuse_parquet()
+
     @property
     def report(self):
         """
