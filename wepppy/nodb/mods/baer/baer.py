@@ -566,9 +566,9 @@ class Baer(NoDbBase):
                     landuse.domlc_d = domlc_d
 
             landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
             landuse = landuse.getInstance(wd)
             landuse.build_managements(_map='default')
+            landuse.dump_landuse_parquet()
 
         except Exception:
             landuse.unlock('-f')

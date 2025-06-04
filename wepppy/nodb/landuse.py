@@ -131,7 +131,6 @@ class Landuse(NoDbBase, LogMixin):
             self._hillslope_mofe_cancovs = None
 
             self.dump_and_unlock()
-            self.dump_landuse_parquet()
 
         except Exception:
             self.unlock('-f')
@@ -1104,7 +1103,6 @@ class Landuse(NoDbBase, LogMixin):
         try:
             self._hillslope_cancovs = value
             self.dump_and_unlock()
-            self.dump_landuse_parquet()
 
         except Exception:
             self.unlock('-f')

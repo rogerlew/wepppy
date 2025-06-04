@@ -602,7 +602,6 @@ class Disturbed(NoDbBase):
                     landuse.managements[_dom] = _man
 
             landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
             
         except Exception:
             landuse.unlock('-f')
@@ -720,7 +719,6 @@ class Disturbed(NoDbBase):
                 meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
             landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
 
         except Exception:
             landuse.unlock('-f')
@@ -737,6 +735,7 @@ class Disturbed(NoDbBase):
 
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
+        landuse.dump_landuse_parquet()
 
     @property
     def meta(self):
@@ -784,7 +783,6 @@ class Disturbed(NoDbBase):
                             landuse.domlc_mofe_d[topaz_id][_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
 
             landuse.dump_and_unlock()
-            landuse.dump_landuse_parquet()
 
         except Exception:
             landuse.unlock('-f')
@@ -792,6 +790,7 @@ class Disturbed(NoDbBase):
 
         landuse = landuse.getInstance(wd)
         landuse.build_managements()
+        landuse.dump_landuse_parquet()
 
     @property
     def lookup_fn(self):
