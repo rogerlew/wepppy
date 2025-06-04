@@ -1235,6 +1235,36 @@ def rq_fork_console(runid, config):
     return render_template('controls/rq-fork-console.j2', runid=runid, config=config, undisturbify=undisturbify)
 
 
+@app.route('/runs/<string:runid>/<config>/rq-archive-console', strict_slashes=False)
+@app.route('/runs/<string:runid>/<config>/rq-archive-console/', strict_slashes=False)
+def rq_archive_console(runid, config):
+    
+    # get working dir of original directory
+    wd = get_wd(runid)
+    owners = get_run_owners(runid)
+
+    should_abort = True
+
+    if current_user in owners:
+        should_abort = False
+
+    if current_user.has_role('Admin'):
+        should_abort = False
+
+    if len(owners) == 0:
+        should_abort = False
+
+    else:
+        ron = Ron.getInstance(wd)
+        if ron.public:
+            should_abort = False
+
+    if should_abort:
+        abort(403)
+
+    return render_template('controls/rq-archive-console.j2', runid=runid, config=config, undisturbify=undisturbify)
+
+
 @app.route('/runs/<string:runid>/<config>/modify_disturbed')
 def modify_disturbed(runid, config):
     assert config is not None
@@ -5553,26 +5583,28 @@ def weppcloudr_runner(runid, config, routine, user):
         r_format = routine.split('.')[-1] 
         rpt_fn = _join(viz_export_dir, f'{routine}.{sub_sha}.htm')
 
+        if _exists(rpt_fn):
+            os.remove(rpt_fn)
+
+        rscript = _weppcloudr_script_locator(routine, user=user)
+        assert _exists(rscript)
+
+        if r_format.lower() == 'r':
+            cmd = ['Rscript', rscript, runid]
+        elif r_format.lower() == "rmd":
+            cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        output, errors = p.communicate()
+        output = output.decode('utf-8')
+        errors = errors.decode('utf-8')
+        with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
+            fp.write(output)
+        with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
+            fp.write(errors)
+
         if not _exists(rpt_fn):
-            rscript = _weppcloudr_script_locator(routine, user=user)
-            assert _exists(rscript)
-
-            if r_format.lower() == 'r':
-                cmd = ['Rscript', rscript, runid]
-            elif r_format.lower() == "rmd":
-                cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
-
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            output, errors = p.communicate()
-            output = output.decode('utf-8')
-            errors = errors.decode('utf-8')
-            with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
-                fp.write(output)
-            with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
-                fp.write(errors)
-
-            if not _exists(rpt_fn):
-                return f'''
+            return f'''
 <html>
 <h3>Error running script</h3>
 
