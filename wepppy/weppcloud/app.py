@@ -5573,7 +5573,7 @@ def weppcloudr_runner(runid, config, routine, user):
     if not _exists(viz_export_dir):
         os.mkdir(viz_export_dir)
         
-    sub_fn = _join(wd, 'export', 'arcmap', 'subcatchments.WGS.json')
+    sub_fn = _join(wd, 'export', 'totalwatsed2.csv')
     sub_sha = get_file_sha1(sub_fn)
 
     try:
