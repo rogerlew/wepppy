@@ -1276,10 +1276,12 @@ class Soils(NoDbBase, LogMixin):
         Dumps the subs_summary to a Parquet file using Pandas.
         """
         self.log('creating soils parquet table')
-
-        self = Soils.getInstance(self.wd)
         
         dict_result = self._subs_summary_gen()
+        if dict_result is None or len(dict_result) == 0:
+            return
+        
+
         df = pd.DataFrame.from_dict(dict_result, orient='index')
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
