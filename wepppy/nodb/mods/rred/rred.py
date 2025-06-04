@@ -159,6 +159,7 @@ class Rred(NoDbBase):
             landuse._mode = landuse_mode
             landuse.domlc_d = lc.build_lcgrid(watershed.subwta, None)
             landuse.dump_and_unlock()
+            landuse.dump_landuse_parquet()
         except Exception:
             landuse.unlock('-f')
             raise

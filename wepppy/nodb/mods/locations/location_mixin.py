@@ -59,6 +59,7 @@ class LocationMixin(object):
                     landuse.domlc_d[topaz_id] = lc_map[dom]
 
             landuse.dump_and_unlock()
+            landuse.dump_landuse_parquet()
 
         except Exception:
             landuse.unlock('-f')
