@@ -5583,25 +5583,23 @@ def weppcloudr_runner(runid, config, routine, user):
         r_format = routine.split('.')[-1] 
         rpt_fn = _join(viz_export_dir, f'{routine}.{sub_sha}.htm')
 
-        if _exists(rpt_fn):
-            os.remove(rpt_fn)
+        if not _exists(rpt_fn):
+            rscript = _weppcloudr_script_locator(routine, user=user)
+            assert _exists(rscript)
 
-        rscript = _weppcloudr_script_locator(routine, user=user)
-        assert _exists(rscript)
+            if r_format.lower() == 'r':
+                cmd = ['Rscript', rscript, runid]
+            elif r_format.lower() == "rmd":
+                cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
 
-        if r_format.lower() == 'r':
-            cmd = ['Rscript', rscript, runid]
-        elif r_format.lower() == "rmd":
-            cmd = ['R', '-e', f'library("rmarkdown"); rmarkdown::render("{rscript}", params=list(proj_runid="{runid}"), output_file="{rpt_fn}", output_dir="{viz_export_dir}")']
-
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        output, errors = p.communicate()
-        output = output.decode('utf-8')
-        errors = errors.decode('utf-8')
-        with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
-            fp.write(output)
-        with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
-            fp.write(errors)
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            output, errors = p.communicate()
+            output = output.decode('utf-8')
+            errors = errors.decode('utf-8')
+            with open(_join(viz_export_dir, f'{routine}.stdout'), 'w') as fp:
+                fp.write(output)
+            with open(_join(viz_export_dir, f'{routine}.stderr'), 'w') as fp:
+                fp.write(errors)
 
         if not _exists(rpt_fn):
             return f'''
