@@ -99,7 +99,7 @@ class AshModel(object):
     def run_model(self, fire_date: YearlessDate, element_d, cli_df: pd.DataFrame, hill_wat: HillWat, out_dir, prefix,
                   recurrence=[100, 50, 25, 20, 10, 5, 2],
                   area_ha: Optional[float] = None,
-                  ini_ash_depth: Optional[float] = None,
+                  ini_ash_depth: Optional[float] = None,  # not used
                   ini_ash_load: Optional[float] = None, 
                   run_wind_transport=True):
 
