@@ -44,6 +44,8 @@ _data_dir = _join(_thisdir, 'data')
 
 MULTIPROCESSING = True
 
+from wepppy.nodb.mods.ash_transport.ash_multi_year_model import WHITE_ASH_BD, BLACK_ASH_BD
+
 ContaminantConcentrations = namedtuple('ContaminantConcentrations',
                                        ['C', 'N', 'K',
                                         'PO4', 'Al', 'Si', 'Ca', 'Pb', 'Na', 'Mg', 'P',
@@ -121,8 +123,8 @@ class Ash(NoDbBase, LogMixin):
         try:
             # config = self.config
             self.fire_date = YearlessDate(8, 4) 
-            self.ini_black_ash_depth_mm = 5
-            self.ini_white_ash_depth_mm = 5
+            self.ini_black_ash_depth_mm = 5.0
+            self.ini_white_ash_depth_mm = 5.0
             self.meta = None
             self.fire_years = None
             self._reservoir_capacity_m3 = 1000000
@@ -137,11 +139,11 @@ class Ash(NoDbBase, LogMixin):
             self._ash_load_d = None
             self._ash_type_d = None
             
-            self._field_black_ash_bulkdensity = self.config_get_float('ash', 'field_black_ash_bulkdensity')
-            self._field_white_ash_bulkdensity = self.config_get_float('ash', 'field_white_ash_bulkdensity')
+            self._field_black_ash_bulkdensity = BLACK_ASH_BD
+            self._field_white_ash_bulkdensity = WHITE_ASH_BD
 
-            self._black_ash_bulkdensity = self.config_get_float('ash', 'black_ash_bulkdensity')
-            self._white_ash_bulkdensity = self.config_get_float('ash', 'white_ash_bulkdensity')
+            self._black_ash_bulkdensity = BLACK_ASH_BD
+            self._white_ash_bulkdensity = WHITE_ASH_BD
 
             self._run_wind_transport = self.config_get_bool('ash', 'run_wind_transport')
             self._model = 'multi' #: self.config_get_str('ash', 'model')
@@ -832,7 +834,7 @@ class Ash(NoDbBase, LogMixin):
                     self.log('      load_d is None. Using initial ash depth\n')
                     white_ash_depth = ini_white_ash_depth_mm
                     black_ash_depth = ini_black_ash_depth_mm
-
+                    
                     white_ash_load = ini_white_ash_depth_mm * field_white_ash_bulkdensity * 10
                     black_ash_load = ini_black_ash_depth_mm * field_black_ash_bulkdensity * 10
 
@@ -863,14 +865,20 @@ class Ash(NoDbBase, LogMixin):
                 assert ini_ash_load > 0.0, (ini_ash_load, ini_white_ash_depth_mm, ini_black_ash_depth_mm, field_white_ash_bulkdensity, field_black_ash_bulkdensity)
 
                 if ash_type == AshType.BLACK:
-                    ash_model = self._anu_black_ash_model_pars
+                    ash_model = self.anu_black_ash_model_pars  # BlackAshModel instance with properties set by parse_inputs
                 else:
-                    ash_model = self._anu_white_ash_model_pars
+                    ash_model = self.anu_white_ash_model_pars  # WhiteAshModel instance with properties set by parse_inputs
 
                 meta[topaz_id]['ini_ash_depth'] = ini_ash_depth
                 meta[topaz_id]['field_ash_bulkdensity'] = field_ash_bulkdensity
                 meta[topaz_id]['ini_ash_load'] = ini_ash_load
                 meta[topaz_id]['ash_bulkdensity'] = ash_bulkdensity
+
+                self.log(f'      ash parameters\n')
+                self.log(f'        ini_ash_depth: {ini_ash_depth}\n')
+                self.log(f'        field_ash_bulkdensity: {field_ash_bulkdensity}\n')
+                self.log(f'        ini_ash_load: {ini_ash_load}\n')
+                self.log(f'        ash_bulkdensity: {ash_bulkdensity}\n')
 
                 kwds = dict(ash_type=ash_type,
                             ini_ash_load=ini_ash_load,
@@ -990,13 +998,11 @@ class Ash(NoDbBase, LogMixin):
 
     @property
     def field_black_ash_bulkdensity(self):
-        return getattr(self, '_field_black_ash_bulkdensity', 
-                       self.config_get_float('ash', 'field_black_ash_bulkdensity'))
+        return getattr(self, '_field_black_ash_bulkdensity', BLACK_ASH_BD)
 
     @property
     def field_white_ash_bulkdensity(self):
-        return getattr(self, '_field_white_ash_bulkdensity', 
-                       self.config_get_float('ash', 'field_white_ash_bulkdensity'))
+        return getattr(self, '_field_white_ash_bulkdensity', WHITE_ASH_BD)
 
     @property
     def ini_black_ash_load(self):

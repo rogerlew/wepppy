@@ -70,8 +70,4 @@ nch=1.0
 
 [ash]
 run_wind_transport=false
-field_black_ash_bulkdensity=0.31
-field_white_ash_bulkdensity=0.14
-black_ash_bulkdensity=0.31
-white_ash_bulkdensity=0.14
 
