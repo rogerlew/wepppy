@@ -82,7 +82,7 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
 
     if nodata_vals is not None:
         if v in np.array(nodata_vals):
-            return nodata_val
+            return i + offset
 
     for i, brk in enumerate(breaks):
         if v <= brk:
