@@ -27,6 +27,8 @@ import utm
 
 import numpy as np
 
+from deprecated import deprecated
+
 from wepppy.all_your_base import isfloat, IS_WINDOWS
 from wepppy.all_your_base.geo import read_arc, get_utm_zone, utm_srid
 
@@ -631,6 +633,7 @@ class TopazRunner:
 
         return None, math.inf
 
+    @deprecated
     def find_closest_channel(self, lng, lat, pixelcoords=False):
         """
         find the closest channel give a lng and lat or pixel coords
