@@ -81,8 +81,9 @@ def _classify(v, breaks, nodata_vals, offset=0, nodata_val=255):
     i = 0
 
     if nodata_vals is not None:
-        if v in np.array(nodata_vals):
-            return i + offset
+        for _no_data in nodata_vals:
+            if int(v) == int(_no_data):
+                return i + offset
 
     for i, brk in enumerate(breaks):
         if v <= brk:
@@ -148,6 +149,9 @@ def sbs_map_sanity_check(fname):
     
 class SoilBurnSeverityMap(LandcoverMap):
     def __init__(self, fname, breaks=None, nodata_vals=None, color_map=None, ignore_ct=False):
+        if isinstance(nodata_vals, str):
+            raise ValueError('nodata_vals should be a None or list, not a string')
+
         if nodata_vals is None:
             nodata_vals = []
 

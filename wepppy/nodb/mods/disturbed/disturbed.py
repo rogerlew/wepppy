@@ -434,7 +434,7 @@ class Disturbed(NoDbBase):
 
     @property
     def class_map(self):
-        sbs = SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self.nodata_vals)
+        sbs = SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self._nodata_vals)
         return sbs.class_map
 
     def modify_burn_class(self, breaks, nodata_vals):
@@ -476,7 +476,7 @@ class Disturbed(NoDbBase):
         color_map = getattr(self, '_color_map', None)
 
         if color_map is None:
-            self.validate(self.disturbed_path, self.breaks, self.nodata_vals)
+            self.validate(self.disturbed_path, self.breaks, self._nodata_vals)
             color_map = getattr(self, '_color_map', None)
 
         return {tuple(rgb.split('_')): v for rgb, v in color_map.items()}
@@ -514,6 +514,10 @@ class Disturbed(NoDbBase):
             pass
 
     def validate(self, fn, breaks=None, nodata_vals=None, color_map=None):
+
+        assert nodata_vals is None or isinstance(nodata_vals, (list, tuple)), nodata_vals
+        assert not isinstance(nodata_vals, str), nodata_vals
+
         self.lock()
 
         # noinspection PyBroadException
@@ -634,12 +638,12 @@ class Disturbed(NoDbBase):
 
         assert _exists(disturbed_cropped), ' '.join(cmd)
 
-        return SoilBurnSeverityMap(disturbed_cropped, breaks=self.breaks, nodata_vals=self.nodata_vals)
+        return SoilBurnSeverityMap(disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals)
      
     def get_sbs_4class(self):
         sbs = self.get_sbs()
         sbs.export_4class_map(self.sbs_4class_path)
-        return SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self.nodata_vals)
+        return SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self._nodata_vals)
     
     def get_disturbed_key_lookup(self):
         mapping_dict = self.landuse_instance.get_mapping_dict()
@@ -689,7 +693,7 @@ class Disturbed(NoDbBase):
             sbs_lc_d = identify_mode_single_raster_key(
                 key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
             sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
-
+           
             class_pixel_map = sbs.class_pixel_map
 
             for topaz_id, val in sbs_lc_d.items():
