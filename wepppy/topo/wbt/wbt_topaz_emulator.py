@@ -202,6 +202,27 @@ class WhiteboxToolsTopazEmulator:
         """
         return _join(self.wbt_wd, 'netw0.tif')
 
+    @property
+    def strahler(self):
+        """
+        Returns the path to the Strahler order raster file.
+        """
+        return _join(self.wbt_wd, 'strahler.tif')
+    
+    @property
+    def subwta(self):
+        """
+        Returns the path to the subcatchments raster file.
+        """
+        return _join(self.wbt_wd, 'subwta.tif')
+    
+    @property
+    def netw_tab(self):
+        """
+        Returns the path to the netw table file.
+        """
+        return _join(self.wbt_wd, 'netw.tsv')
+
     def _parse_dem(self, dem_fn):
         """
         Uses gdal to extract elevation values from dem and puts them in a
@@ -689,6 +710,56 @@ class WhiteboxToolsTopazEmulator:
 
         return discha_fn
     
+    def _create_strahler_order(self):
+        """
+        Create a Strahler order raster from the stream network using WBT.
+        """
+        strahler_fn = self.strahler
+
+        remove_if_exists(strahler_fn)
+
+        self.wbt.strahler_stream_order(
+            d8_pntr=self.flovec, 
+            streams=self.netw0, 
+            output=strahler_fn
+        )
+
+        if not exists(strahler_fn):
+            raise Exception(f"Strahler order file was not created: {strahler_fn}")
+
+        if self.verbose:
+            print(f"Strahler order file created successfully: {strahler_fn}")
+
+        return strahler_fn
+    
+    def _create_subcatchments(self):
+        """
+        Create subcatchments from the stream network.
+        """
+        subwta_fn = self.subwta
+
+        remove_if_exists(subwta_fn)
+
+        self.wbt.hillslopes_topaz(
+            dem=self.relief, 
+            d8_pntr=self.flovec, 
+            streams=self.netw0, 
+            pour_pts=self.outlet_geojson,
+            watershed=self.bounds,
+            chnjnt=self.chnjnt,
+            subwta=subwta_fn,
+            order=self.strahler,
+            netw=self.netw_tab
+        )
+
+        if not exists(subwta_fn):
+            raise Exception(f"Subcatchments file was not created: {subwta_fn}")
+
+        if self.verbose:
+            print(f"Subcatchments file created successfully: {subwta_fn}")
+
+        return subwta_fn
+    
     def delineate_subcatchments(self):
         """
         Delineate subcatchments from the stream network and outlet.
@@ -698,7 +769,9 @@ class WhiteboxToolsTopazEmulator:
         self._create_aspect()
         self._create_flow_vector_slope()
         self._create_netw0()
+        self._create_strahler_order()
         self._create_distance_to_channel()
+        self._create_subcatchments()
 
 
 
