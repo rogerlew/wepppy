@@ -1471,25 +1471,27 @@ class Wepp(NoDbBase, LogMixin):
         for i, (topaz_id, mukey) in enumerate(soils.domsoil_d.items()):
             if (int(topaz_id) - 4) % 10 == 0:
                 continue
-
-            self.log(f'    _prep_managements:{topaz_id}:{mukey}... ')
-
             dom = landuse.domlc_d[topaz_id]
+
+            self.log(f'    _prep_managements:{topaz_id}:{mukey} - {dom}... ')
+
             man_summary = landuse.managements[dom]
 
             wepp_id = translator.wepp(top=int(topaz_id))
             dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
             
-            meoization_key = (mukey,)
+            meoization_key = (mukey, dom)
             if disturbed:
                 disturbed_class = man_summary.disturbed_class
-                meoization_key = (mukey, disturbed_class)
+                meoization_key = (mukey, dom, disturbed_class)
 
             if rap_ts is not None:
-                meoization_key = (topaz_id, mukey)
+                meoization_key = (topaz_id, mukey, dom)
 
             if meoization_key in build_d:
                 shutil.copyfile(build_d[meoization_key], dst_fn)
+
+                self.log(f"     copying build_d['{meoization_key}'] -> {dst_fn}")
                 self.log_done()
 
             else:
@@ -1534,7 +1536,7 @@ class Wepp(NoDbBase, LogMixin):
                     if isfloat(xmxlai):
                         management.set_xmxlai(float(xmxlai))
 
-                    meoization_key = (mukey, disturbed_class)
+                    meoization_key = (mukey, dom, disturbed_class)
 
                 if rap_ts is not None:
                     if year0 >= rap_ts.rap_start_year and year0 <= rap_ts.rap_end_year:
@@ -1549,6 +1551,7 @@ class Wepp(NoDbBase, LogMixin):
                     fp.write(fn_contents)
 
                 build_d[meoization_key] = dst_fn
+                self.log(f'     meoization_key: {meoization_key} -> {dst_fn}')
 
                 self.log_done()
 
