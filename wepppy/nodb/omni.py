@@ -918,7 +918,7 @@ class Omni(NoDbBase, LogMixin):
 
     @property
     def has_ran_scenarios(self):
-        if not self.scenarios:
+        if not hasattr(self, scenarios):
             return False
 
         for scenario_def in self.scenarios:

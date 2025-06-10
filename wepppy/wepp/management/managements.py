@@ -1810,7 +1810,7 @@ class ManagementSummary(object):
 
         self.pct_coverage = None
 
-        m = get_management(self.key, _map=self._map)
+        m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color)
         assert len(m.inis) >= 1, m.inis
         assert m.inis[0].landuse == 1
         assert isinstance(m.inis[0].data, IniLoopCropland)
@@ -1838,7 +1838,7 @@ class ManagementSummary(object):
         if hasattr(self, "_map"):
             _map = self._map
 
-        m = get_management(self.key, _map=_map)
+        m = Management.load(key=self.key, man_fn=self.man_fn, man_dir=self.man_dir, desc=self.desc, color=self.color)
         assert len(m.inis) >= 1
 
         for i in range(len(m.inis)):
@@ -1907,6 +1907,21 @@ class Management(object):
 
         self._parse()
 
+    @staticmethod
+    def load(key, man_fn, man_dir, desc, color=None):
+        
+        kwargs = {
+            "Key": key,
+            "ManagementFile": man_fn,
+            "ManagementDir": man_dir,
+            "Description": desc
+        }
+
+        if color is not None:
+            kwargs["Color"] = color
+
+        return Management(**kwargs)
+        
     def _parse(self):
         """
         Parses a .man file in the 95.7 format
