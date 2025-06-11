@@ -150,8 +150,8 @@ class Map(object):
     def num_rows(self):
         if hasattr(self, '_num_rows'):
             return self._num_rows
-
-        self._num_rows = int(round((self.lr_x - self.ul_x) / self.cellsize))
+            
+        self._num_rows = int(round((self.ul_y - self.lr_y) / self.cellsize))
         return self._num_rows
 
     @property
