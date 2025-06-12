@@ -415,6 +415,11 @@ class Treatments(NoDbBase, LogMixin):
             self.log(f'Old inrcov: {inrcov}\t New inrcov: {new_inrcov}\n')
             man.inis[0].data.inrcov = new_inrcov
 
+            rilcov = man.inis[0].data.rilcov
+            self.log(f'Old rilcov: {inrcov}\t New rilcov: {new_inrcov}\n')
+            new_rilcov = min(1.0, rilcov + mulch_cover_change)
+            man.inis[0].data.rilcov = new_rilcov
+
             # write the management to disk
             new_man_fn = _split(man_summary.man_fn)[-1][:-4] + f'_{treatment}.man'
             new_man_path = _join(self.wd, 'landuse', new_man_fn)
