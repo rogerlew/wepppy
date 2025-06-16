@@ -195,7 +195,7 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the path to the aspect raster file.
         """
-        return _join(self.wbt_wd, 'aspect.tif')
+        return _join(self.wbt_wd, 'taspec.tif')
     
     @property
     def discha(self):
