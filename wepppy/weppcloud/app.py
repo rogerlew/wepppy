@@ -33,8 +33,10 @@ from deprecated import deprecated
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort, make_response,
-    stream_with_context, url_for
+    stream_with_context, url_for, current_app
 )
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from sqlalchemy import func
 
@@ -459,23 +461,35 @@ def profile():
     except:
         return exception_factory()
 
+def _build_meta(run):
+    # Push app-ctx only if you still touch Flask globals in meta()
+    with current_app.app_context():
+        return run.meta
 
-@app.route('/runs')
-@app.route('/runs/')
+@app.route("/runs")
+@app.route("/runs/")
 @login_required
 def runs():
-    try:
-        user_runs = [run.meta for run in current_user.runs]
-        user_runs = [meta for meta in user_runs if meta is not None]
-        user_runs.sort(key=lambda meta: meta['last_modified'], reverse=True)
+    runs = list(current_user.runs)          # materialise once
+    metas = []
 
-        return render_template('user/runs.html', 
-                               user=current_user, 
-                               user_runs=user_runs, 
-                               show_owner=False)
-    except:
-        return exception_factory()
+    # Pick a sane cap; adjust to your storage / CPU
+    max_workers = min(20, len(runs))
 
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = [pool.submit(_build_meta, r) for r in runs]
+        for f in as_completed(futures):
+            m = f.result()
+            if m:                         # skip failed Ron loads
+                metas.append(m)
+
+    metas.sort(key=lambda m: m["last_modified"], reverse=True)
+    return render_template(
+        "user/runs.html",
+        user=current_user,
+        user_runs=metas,
+        show_owner=False,
+    )
 
 @app.route('/allruns')
 @app.route('/allruns/')
@@ -1073,7 +1087,7 @@ def create_index():
          '<td><a href="{0}?general:dem_db=ned1/2016" rel="nofollow">{0} ned1/2016</a></td>'
          '<td><a href="{0}?watershed:delineation_backend=taudem" rel="nofollow">{0} TauDEM</a></td></tr>'
          .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
-    return '<html><body>'\
+    return '<!DOCTYPE html><html><body>'\
            '<link rel="stylesheet" '\
            'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
            'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
@@ -1091,7 +1105,7 @@ def create_legacy_index():
          '<td><a href="{0}?general:dem_db=ned1/2016">{0} ned1/2016</a></td>'
          '<td><a href="{0}?watershed:delineation_backend=taudem">{0} TauDEM</a></td></tr>'
          .format(cfg) for cfg in sorted(configs) if cfg != '_defaults']
-    return '<html><body>'\
+    return '<!DOCTYPE html><html><body>'\
            '<link rel="stylesheet" '\
            'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" '\
            'integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">'\
@@ -1201,7 +1215,7 @@ def view_access_log(runid, config):
         with open(access_fn) as fp:
             contents = fp.read()
 
-    return f'<html><pre>{contents}</pre></html>'
+    return f'<!DOCTYPE html><html><pre>{contents}</pre></html>'
 
 
 @app.route('/runs/<string:runid>/<config>/rq-fork-console', strict_slashes=False)
@@ -2879,6 +2893,13 @@ def resources_usgs_gage_locations():
     bbox = request.args.get('bbox')
     bbox = literal_eval(bbox)
     return jsonify(crop_geojson(_join(_thisdir, 'static/resources/usgs/usgs_gage_locations.geojson'), bbox=bbox))
+
+
+@app.route('/resources/snotel/snotel_locations/')
+def resources_snotel_locations():
+    bbox = request.args.get('bbox')
+    bbox = literal_eval(bbox)
+    return jsonify(crop_geojson(_join(_thisdir, 'static/resources/snotel/snotel_2024_anu.geojson'), bbox=bbox))
 
 
 @app.route('/runs/<string:runid>/<config>/query/landuse/subcatchments')

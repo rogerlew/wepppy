@@ -698,22 +698,40 @@ var Map = function () {
 //            format: "image/png",
 //            transparent: true
 //        });
-
-        that.usgs_gage = L.geoJson.ajax(null,
-            {onEachFeature: (function (feature, layer) {
+        that.usgs_gage = L.geoJson.ajax("", {
+            onEachFeature: (feature, layer) => {
                 if (feature.properties && feature.properties.Description) {
-                    layer.bindPopup(feature.properties.Description);
+                layer.bindPopup(feature.properties.Description);
                 }
-             }),
-             pointToLayer: (function (feature, latlng) {
-                 return L.circleMarker(latlng,
-                     { radius: 8, 
-                       fillColor: "#ff7800", 
-                       color: "#000", 
-                       weight: 1, 
-                       opacity: 1, 
-                       fillOpacity: 0.8});
-             })
+            },
+            pointToLayer: (feature, latlng) => {
+                return L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+                });
+            }
+        });
+
+        that.snotel_locations = L.geoJson.ajax("", {
+            onEachFeature: (feature, layer) => {
+                if (feature.properties && feature.properties.Description) {
+                layer.bindPopup(feature.properties.Description);
+                }
+            },
+            pointToLayer: (feature, latlng) => {
+                return L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: "#000078",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+                });
+            }
         });
 
         that.baseMaps = {
@@ -721,7 +739,11 @@ var Map = function () {
             "Terrain": that.googleTerrain,
 //            "2016 NLCD": that.nlcd
         };
-        that.overlayMaps = {'USGS Gage Locations': that.usgs_gage };
+
+        that.overlayMaps = {
+            'USGS Gage Locations': that.usgs_gage,
+            'SNOTEL Locations': that.snotel_locations
+         };
 
         that.googleSat.addTo(that);
         that.googleTerrain.addTo(that);
@@ -796,33 +818,25 @@ var Map = function () {
 
             self.usgs_gage.refresh(
                 [ site_prefix + '/resources/usgs/gage_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
+        };
 
-            // $.post({
-            //     url: "/resources/usgs/gage_locations/",
-            //     data: JSON.stringify({ bbox: extent }),
-            //     contentType: "application/json; charset=utf-8",
-            //     success: function success(response) {
-            //
-            //         self.usgs_gage = L.geoJson(response, {
-            //             style: {
-            //                 "color": "#ff7800",
-            //                 "weight": 5,
-            //                 "opacity": 0.65
-            //             },
-            //             onEachFeature: (function (feature, layer) {
-            //                 // does this feature have a property named popupContent?
-            //                 if (feature.properties && feature.properties.Description) {
-            //                     layer.bindPopup(feature.properties.Description);
-            //                 }
-            //             }),
-            //         });
-            //         self.usgs_gage.addTo(self);
-            //         self.ctrls.addOverlay(self.usgs_gage, "USGS Gage Locations");
-            //     },
-            //     fail: function fail(jqXHR, textStatus, errorThrown) {
-            //         self.pushErrorStacktrace(self, jqXHR, textStatus, errorThrown);
-            //     }
-            // });
+        that.loadSnotelLocations = function () {
+            var self = instance;
+            if (self.getZoom() < 9) {
+                return;
+            }
+
+            if (!self.hasLayer(self.snotel_locations)) {
+                return;
+            }
+
+            var bounds = self.getBounds();
+            var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            var extent = [parseFloat(sw.lng), parseFloat(sw.lat), parseFloat(ne.lng), parseFloat(ne.lat)];
+
+            self.snotel_locations.refresh(
+                [ site_prefix + '/resources/snotel/snotel_locations/?&bbox=' + self.getBounds().toBBoxString() + '']);
         };
 
         return that;
