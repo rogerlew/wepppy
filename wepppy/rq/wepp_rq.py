@@ -359,6 +359,8 @@ def run_wepp_rq(runid):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+    return job6_finalfinal
+
 def _prep_multi_ofe_rq(runid):
     try:
         job = get_current_job()

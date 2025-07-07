@@ -445,6 +445,19 @@ def run_rhem_rq(runid: str):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
+def _finish_fork_rq(runid):
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f'{runid}:fork'
+        StatusMessenger.publish(status_channel, 'Running WEPP... done\n')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
+    except Exception:
+        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        raise
+
 def fork_rq(runid: str, new_runid: str, undisturbify=False):
     try:
         job = get_current_job()
@@ -452,7 +465,6 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:fork'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-
 
         StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
 
@@ -466,40 +478,33 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         if not run_right.endswith('/'):
             run_right += '/'
 
-        right_parent = _split(run_right)[0]
-        if not _exists(right_parent):
+        right_parent = os.path.dirname(run_right.rstrip('/'))
+        if not os.path.exists(right_parent):
             os.makedirs(right_parent)
 
         cmd = ['rsync', '-av', '--progress', '.', run_right]
 
         if undisturbify:
-            cmd.append('--exclude')
-            cmd.append('wepp/runs')
-            cmd.append('--exclude')
-            cmd.append('wepp/output')
+            cmd.extend(['--exclude', 'wepp/runs', '--exclude', 'wepp/output'])
 
         _cmd = ' '.join(cmd)
         StatusMessenger.publish(status_channel, f'cmd: {_cmd}')
 
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, cwd=run_left, bufsize=1, universal_newlines=True)
 
-        # Process stdout in real-time
         for line in iter(p.stdout.readline, ''):
             StatusMessenger.publish(status_channel, line.strip())
         
-        # Wait for process to complete
         p.wait()
         
-        # Check for any errors
         if p.returncode != 0:
-            for line in iter(p.stderr.readline, ''):
-                StatusMessenger.publish(status_channel, f"ERROR: {line.strip()}")
+            error_output = "".join(iter(p.stderr.readline, ''))
+            StatusMessenger.publish(status_channel, f"ERROR: {error_output.strip()}")
             raise Exception(f"rsync command failed with return code {p.returncode}")
             
         StatusMessenger.publish(status_channel, 'Setting wd in .nodbs...\n')
 
-        # replace the runid in the nodb files
-        nodbs = glob(_join(new_wd, '*.nodb'))
+        nodbs = glob(os.path.join(new_wd, '*.nodb'))
         for fn in nodbs:
             StatusMessenger.publish(status_channel, f'  {fn}')
             with open(fn) as fp:
@@ -512,18 +517,13 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
         StatusMessenger.publish(status_channel, 'Setting wd in .nodbs... done.\n')
         StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC...\n')
 
-        # delete any active locks
-        locks = glob(_join(new_wd, '*.lock'))
-        for fn in locks:
-            os.remove(fn)
+        for lock_file in glob(os.path.join(new_wd, '*.lock')):
+            os.remove(lock_file)
 
-        fn = _join(new_wd, 'READONLY')
-        if _exists(fn):
-            os.remove(fn)
-
-        fn = _join(new_wd, 'PUBLIC')
-        if _exists(fn):
-            os.remove(fn)
+        for special_file in ['READONLY', 'PUBLIC']:
+            fn = os.path.join(new_wd, special_file)
+            if os.path.exists(fn):
+                os.remove(fn)
 
         StatusMessenger.publish(status_channel, 'Cleanup locks, READONLY, PUBLIC... done.\n')
 
@@ -547,13 +547,25 @@ def fork_rq(runid: str, new_runid: str, undisturbify=False):
             soils.build()
             StatusMessenger.publish(status_channel, 'Rebuilding Soils... done.\n')
 
-            StatusMessenger.publish(status_channel, 'Running WEPP...\n')
-            run_wepp_rq(new_runid)
-            StatusMessenger.publish(status_channel, 'Running WEPP... done\n')
+            StatusMessenger.publish(status_channel, 'Rerunning WEPP...\n')
+            
+            # Connect to Redis and enqueue the jobs
+            final_wepp_job = run_wepp_rq(new_runid)
 
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
+            with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+                q = Queue(connection=redis_conn)
+            
+                # Enqueue the final completion message job, dependent on the WEPP run
+                q.enqueue(
+                    _finish_fork_rq,
+                    args=[runid], 
+                    depends_on=final_wepp_job
+                )
+
+        else:
+            # If not undisturbify, complete synchronously as before
+            StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
 
     except Exception:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
