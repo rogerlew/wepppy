@@ -584,7 +584,8 @@ function redirectToDiff() {{
             #html = csv_to_html(path)
 
         if html is not None:
-            c = ['<html>',
+            c = ['<!DOCTYPE html>',
+                 '<html>',
                  '<head>',
                  '<link rel="stylesheet" '
                  'href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"'
