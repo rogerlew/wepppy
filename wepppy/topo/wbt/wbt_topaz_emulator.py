@@ -60,7 +60,7 @@ def remove_if_exists(fn):
 
 
 class WhiteboxToolsTopazEmulator:
-    def __init__(self, dem_fn, wbt_wd, verbose=False):
+    def __init__(self, dem_fn, wbt_wd, verbose=False, raise_on_error=True):
         dem_fn = os.path.abspath(dem_fn)
         if not exists(dem_fn):
             raise FileNotFoundError(f"DEM file does not exist: {dem_fn}")
@@ -76,8 +76,25 @@ class WhiteboxToolsTopazEmulator:
         self.mcl = None  # Minimum Channel Length
         self.csa = None  # Channel Source Area
         self._wbt = None
+        self._raise_on_error = raise_on_error
 
         self._outlet = None  # Outlet object
+
+    @property
+    def raise_on_error(self):
+        """
+        Returns whether to raise an error on failure.
+        """
+        return self._raise_on_error
+    
+    @raise_on_error.setter
+    def raise_on_error(self, value: bool):
+        """
+        Sets whether to raise an error on failure.
+        """
+        if not isinstance(value, bool):
+            raise ValueError("raise_on_error must be a boolean value")
+        self._raise_on_error = value
 
     @property
     def wbt(self):
@@ -85,8 +102,7 @@ class WhiteboxToolsTopazEmulator:
         Returns the WhiteboxTools instance.
         """
         if self._wbt is None:
-            self._wbt = WhiteboxTools()
-            self._wbt.verbose = self.verbose
+            self._wbt = WhiteboxTools(verbose=self.verbose, raise_on_error=self.raise_on_error)
         return self._wbt
 
     @property
@@ -179,7 +195,7 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the path to the aspect raster file.
         """
-        return _join(self.wbt_wd, 'aspect.tif')
+        return _join(self.wbt_wd, 'taspec.tif')
     
     @property
     def discha(self):
@@ -777,19 +793,20 @@ class WhiteboxToolsTopazEmulator:
 
 if __name__ == "__main__":
 
-    dem = '/Users/roger/src/wepppy/tests/wbt/supine-disputant/dem/dem.tif' 
-    wbt_wd = '/Users/roger/src/wepppy/tests/wbt/supine-disputant/dem/wbt'
-    verbose = True
-    csa = 10.0
-    mcl = 100.0
-    fill_or_breach = 'fill'  # or 'breach'
+    dem = '/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/dem.tif' 
+    wbt_wd = '/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/wbt'
+    #outlet = [-116.43008003513219, 45.93324289199021]
+    outlet = [-120.16561014556784, 39.10885618748438]
+    verbose = False
+    csa = 4.0
+    mcl = 60.0
+    fill_or_breach = 'breach'
 
     emulator = WhiteboxToolsTopazEmulator(dem, wbt_wd, verbose=verbose)
     emulator.delineate_channels(csa=csa,
                                 mcl=mcl,
                                 fill_or_breach=fill_or_breach)
     
-    outlet = [-116.43008003513219, 45.93324289199021]
     emulator.set_outlet(outlet[0], outlet[1], pixelcoords=False)
     print(f"Outlet set at: {emulator._outlet.actual_loc} with distance {emulator._outlet.distance_from_requested} pixels from requested location {emulator._outlet.requested_loc}")
     
