@@ -1201,10 +1201,12 @@ function onReady() {
 
     map.on("moveend", function (ev) {
         map.loadUSGSGageLocations();
+        map.loadSnotelLocations();
     });
 
     map.on("zoomend", function (ev) {
         map.loadUSGSGageLocations();
+        map.loadSnotelLocations();
     });
 
 

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>fork</title>
@@ -7,20 +8,21 @@
       integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
       crossorigin="anonymous"></script>
     <script type="text/javascript">
-
-
 function WSClient(formId, channel) {
-    // global runid
     this.formId = formId;
     this.channel = channel;
     this.wsUrl = "wss://" + window.location.host + "/weppcloud-microservices/status/" + runid + ":" + channel;
     this.ws = null;
     this.shouldReconnect = true;
-//    this.connect();
+    this.connect();
+
+    // Add event listeners for network and visibility changes
+    window.addEventListener('online', () => this.handleSystemWake());
+    document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
 }
 
 WSClient.prototype.connect = function() {
-    if (this.ws) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         return; // If already connected, do nothing
     }
 
@@ -59,9 +61,8 @@ WSClient.prototype.connect = function() {
                 var job_id = data.split(' ')[0].slice(3);
                 var job_url = `https://${window.location.host}/weppcloud/rq/jobinfo/${job_id}`;
 
-                // need a short delay here to avoid race condition
-                setTimeout(function() {
-                    $.get(job_url, function(job_info, status) {
+                setTimeout(() => {
+                    $.get(job_url, (job_info, status) => {
                         if (status === 'success') {
                             stacktrace.append(`<pre><small class="text-muted">${job_info.exc_info}</small></pre>`);
                         }
@@ -80,9 +81,7 @@ WSClient.prototype.connect = function() {
                 if (controller == this.channel) {
                     $("#" + this.formId).trigger(event);
                 }
-
-            }
-            else {
+            } else {
                 $("#" + this.formId + " #status").html(data);
             }
         }
@@ -94,7 +93,7 @@ WSClient.prototype.connect = function() {
     };
 
     this.ws.onclose = () => {
-//        $("#" + this.formId + " #status").html("Connection Closed");
+        $("#" + this.formId + " #status").html("Connection Closed");
         this.ws = null;
         if (this.shouldReconnect) {
             setTimeout(() => { this.connect(); }, 5000);
@@ -110,35 +109,47 @@ WSClient.prototype.disconnect = function() {
     }
 };
 
-window.onload = function(e){
+WSClient.prototype.handleSystemWake = function() {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        console.log("Network online, attempting to reconnect WebSocket...");
+        this.connect();
+    }
+};
 
+WSClient.prototype.handleVisibilityChange = function() {
+    if (document.visibilityState === 'visible' && (!this.ws || this.ws.readyState !== WebSocket.OPEN)) {
+        console.log("Page visible, attempting to reconnect WebSocket...");
+        this.connect();
+    }
+};
+
+window.onload = function() {
     var the_console = $("#the_console");
             
     $.post({
         url: "rq/api/fork",
         data: {undisturbify: __undisturbify__},
-        success: function success(response) {
+        success: function(response) {
             if (response.Success === true) {
                 the_console.html(`fork job submitted: ${response.job_id}\n\nnew_runid: ${response.new_runid}`);
             } else {
                 the_console.html(`Error: ${response.Error}`);
             }
         },
-        error: function error(jqXHR)  {
+        error: function(jqXHR) {
             the_console.html(`Error: ${jqXHR.responseText}`);
         },
-        fail: function fail(jqXHR, textStatus, errorThrown) {
+        fail: function(jqXHR, textStatus, errorThrown) {
             the_console.html(`Error: ${errorThrown}`);
         }
     });
-            
 }
     </script>
   </head>
   <body>
     <div style="margin-left:2em;">
-    <h1>fork-console<h1>
-    <form  id="the_console" action="javascript:void(0);">
+    <h1>fork-console</h1>
+    <form id="the_console" action="javascript:void(0);">
         <div class="form-group row">
             <h3 style="margin-left: 0.5em; padding-top: 80px;">fork-console</h3>
         </div>
