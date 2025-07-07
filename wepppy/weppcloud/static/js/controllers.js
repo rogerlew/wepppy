@@ -701,7 +701,7 @@ var Map = function () {
         that.usgs_gage = L.geoJson.ajax("", {
             onEachFeature: (feature, layer) => {
                 if (feature.properties && feature.properties.Description) {
-                layer.bindPopup(feature.properties.Description);
+                    layer.bindPopup(feature.properties.Description, { autoPan: false });
                 }
             },
             pointToLayer: (feature, latlng) => {
@@ -719,7 +719,7 @@ var Map = function () {
         that.snotel_locations = L.geoJson.ajax("", {
             onEachFeature: (feature, layer) => {
                 if (feature.properties && feature.properties.Description) {
-                layer.bindPopup(feature.properties.Description);
+                    layer.bindPopup(feature.properties.Description, { autoPan: false });
                 }
             },
             pointToLayer: (feature, latlng) => {
