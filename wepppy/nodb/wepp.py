@@ -1568,7 +1568,8 @@ class Wepp(NoDbBase, LogMixin):
             self.log_done()
 
     def _prep_soils(self, translator):
-        # Remove logging
+        self.log('    _prep_soils... ')
+
         soils = Soils.getInstance(self.wd)
         soils_dir = self.soils_dir
         watershed = Watershed.getInstance(self.wd)
@@ -1738,13 +1739,14 @@ class Wepp(NoDbBase, LogMixin):
 
                         self.log(f'  submitting topaz={topaz_id} (hill {i+1} of {sub_n}, ss {ss_batch_id}  of {ss_n}).\n')
                         wepp_id = translator.wepp(top=int(topaz_id))
-                        futures.append(pool.submit(lambda: run_ss_batch_hillslope(
+                        futures.append(pool.submit(
+                            run_ss_batch_hillslope,
                             wepp_id=wepp_id,
                             runs_dir=runs_dir,
                             wepp_bin=wepp_bin,
                             ss_batch_id=ss_batch_id,
                             omni=omni
-                        )))
+                        ))
                         futures[-1].add_done_callback(oncomplete)
 
             else:
