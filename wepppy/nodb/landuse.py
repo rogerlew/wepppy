@@ -919,26 +919,22 @@ class Landuse(NoDbBase, LogMixin):
         # TODO: filter landuse options for baer and for the landsoil map
         from wepppy.wepp import management
 
-        landuseoptions = management.load_map(self.mapping).values()
+        _landuseoptions = management.load_map(self.mapping).values()
 
-        if all(isinstance(d['Key'], int) for d in landuseoptions):
-            landuseoptions = sorted(landuseoptions, key=lambda d: int(d['Key']))
-        else:
-            landuseoptions = sorted(landuseoptions, key=lambda d: str(d['Key']))
+        landuseoptions = []  
+        for opt in _landuseoptions:
+            if opt.get('IsTreatment', False):
+                continue
 
-        # landuseoptions = [opt for opt in landuseoptions if 'DisturbedWEPPManagement' not in opt['ManagementFile']]
+            landuseoptions.append(opt)
+
+        landuseoptions = sorted(landuseoptions, key=lambda d: str(d['Key']))
 
         if 'baer' in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Agriculture' not in opt['ManagementFile']]
 
         if "lt" in self.mods or "portland" in self.mods or "seattle" in self.mods:
             landuseoptions = [opt for opt in landuseoptions if 'Tahoe' in opt['ManagementFile']]
-
-#        if 'disturbed' in self.mods:
-#            import wepppy
-#            disturbed = wepppy.nodb.mods.Disturbed.getInstance(self.wd)
-#            _lookup = disturbed.land_soil_replacements_d
-#            landuseoptions = [opt for opt in landuseoptions if opt.get('DisturbedClass') != '']
 
         return landuseoptions
 
