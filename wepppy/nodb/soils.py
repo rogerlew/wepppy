@@ -1286,6 +1286,7 @@ class Soils(NoDbBase, LogMixin):
         df.index.name = 'TopazID'
         df.reset_index(inplace=True)
         df['TopazID'] = df['TopazID'].astype(str).astype('int64')
+        df['mukey'] = df['mukey'].astype(str)
         df.to_parquet(_join(self.soils_dir, 'soils.parquet'))
         
     @property
