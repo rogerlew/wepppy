@@ -109,6 +109,9 @@ def legacy_arc_export(wd, verbose=False):
         topaz_id = str(f['properties']['TopazID'])
         ss = subs_summary[topaz_id]
 
+        if isinstance(ss, PeridotHillslope):
+            ss = ss.as_dict()
+
         f['properties']['watershed'] = name
         f['properties']['topaz_id'] = topaz_id
         f['properties']['wepp_id'] = ss['meta']['wepp_id']
