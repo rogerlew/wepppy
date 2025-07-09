@@ -916,7 +916,6 @@ class Landuse(NoDbBase, LogMixin):
     @property
     def landuseoptions(self):
 
-        # TODO: filter landuse options for baer and for the landsoil map
         from wepppy.wepp import management
 
         _landuseoptions = management.load_map(self.mapping).values()
