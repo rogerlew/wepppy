@@ -48,6 +48,13 @@ _thisdir = os.path.dirname(__file__)
 _data_dir = _join(_thisdir, 'data')
 
 
+disturbed_class_aliases = {
+    'forest prescribed fire': 'prescribed fire',
+    'forest high sev fire': 'high sev fire',
+    'forest moderate sev fire': 'moderate sev fire',
+    'forest low sev fire': 'low sev fire',
+}
+
 def read_disturbed_land_soil_lookup(fname):
     d = {}
 
@@ -72,6 +79,11 @@ def read_disturbed_land_soil_lookup(fname):
 
             if texid != '' and disturbed_class != '':
                 d[(texid, disturbed_class)] = row
+
+            if disturbed_class in disturbed_class_aliases:
+                alias = disturbed_class_aliases[disturbed_class]
+                if texid != '' and alias != '':
+                    d[(texid, alias)] = row
 
     return d
 
