@@ -4236,7 +4236,6 @@ def report_wepp_loss(runid, config):
         translator = Watershed.getInstance(wd).translator_factory()
         unitizer = Unitizer.getInstance(wd)
 
-
         return render_template('reports/wepp/summary.htm',
                                extraneous=extraneous,
                                out_rpt=out_rpt,
