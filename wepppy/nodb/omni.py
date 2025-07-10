@@ -959,6 +959,51 @@ class Omni(NoDbBase, LogMixin):
 
         return combined
 
+    def compile_hillslope_summaries(self):
+
+        scenario_wds = {str(self.base_scenario): self.wd}
+
+        for scenario_def in self.scenarios:
+            scenario = scenario_def.get('type')
+            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            scenario_wds[_scenario_name] = _join(self.wd, 'omni', 'scenarios', _scenario_name)
+
+        dfs = []
+        for scenario, wd in scenario_wds.items():
+            loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+            is_singlestorm = loss.is_singlestorm
+            hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
+            df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
+            df['scenario'] = scenario
+            dfs.append(df)
 
 
+        combined = pd.concat(dfs, ignore_index=True)
+        out_path = _join(self.wd, 'omni', 'scenarios.out.parquet')
+        combined.to_parquet(out_path)
 
+        return combined
+
+    def compile_hillslope_summaries(self, exclude_yr_indxs=None):
+        from wepppy.nodb import Wepp
+        from wepppy.wepp.stats import HillSummary
+
+        scenario_wds = {str(self.base_scenario): self.wd}
+
+        for scenario_def in self.scenarios:
+            scenario = scenario_def.get('type')
+            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            scenario_wds[_scenario_name] = _join(self.wd, 'omni', 'scenarios', _scenario_name)
+
+        dfs = []
+        for scenario, wd in scenario_wds.items():
+            loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
+            is_singlestorm = loss.is_singlestorm
+            hill_rpt = HillSummary(loss)
+            df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
+            df['scenario'] = scenario
+            dfs.append(df)
+
+        combined = pd.concat(dfs, ignore_index=True)
+        out_path = _join(self.wd, 'omni', 'scenarios.hillslope_summaries.parquet')
+        combined.to_parquet(out_path)

@@ -915,7 +915,6 @@ class Landuse(NoDbBase, LogMixin):
 
     @property
     def landuseoptions(self):
-
         from wepppy.wepp import management
 
         _landuseoptions = management.load_map(self.mapping).values()
