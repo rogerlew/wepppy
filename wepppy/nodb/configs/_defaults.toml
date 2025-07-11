@@ -1,5 +1,6 @@
 [general]
 dem_db = "ned1/2022"
+w3w_api_key = "xbl7lv7i"
 
 [unitizer]
 is_english=false
@@ -18,7 +19,7 @@ walk_flowpaths=true
 mofe_target_length=60
 mofe_buffer=false
 mofe_buffer_length=30
-mofe_max_ofes=19
+mofe_max_ofes=3
 abstraction_backend = "peridot"
 
 [nodb]
@@ -30,13 +31,14 @@ fractionals=[]
 mofe_buffer_selection=42
 
 [soils]
-ssurgo_db = "ssurgo/2023"
+ssurgo_db = "ssurgo/gNATSGO/2025"
 wepp_chn_type = "default"
 ksflag=false
 
 [climate]
 cligen_db = "2015_stations.db"
 daymet_observed  = "daymet/v4"
+use_gridmet_wind_when_applicable = true
 
 [disturbed]
 sol_ver=7778
@@ -62,8 +64,11 @@ pmet_rawp=0.8
 prep_details_on_run_completion=false
 arc_export_on_run_completion=true
 legacy_arc_export_on_run_completion=false
-dss_export_on_run_completion=false
+dss_excluded_channel_orders=[1,2]
+bin=wepp_dcc52a6
 
+[baseflow_opts]
+gwstorage=0.0
 
 [tcr_opts]
 taumin=35.0
