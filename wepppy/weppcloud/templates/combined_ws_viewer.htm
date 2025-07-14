@@ -92,7 +92,7 @@ $(document).ready(function () {
     var defaultStyle;
 
     var cmapperRunoff = createColormap({ colormap: 'winter', nshades: 64 });
-    var cmapperLoss = createColormap({ colormap: "electric-boogaloo", nshades: 64 });
+    var cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
     var cmapperPhosphorus = createColormap({ colormap: 'viridis', nshades: 64 });
 
     var cmap, r;
@@ -210,7 +210,7 @@ $(document).ready(function () {
             };
             vmin = 0.0;
             vmax = tolerance;
-            cmapname = 'electric-boogaloo';
+            cmapname = 'jet2';
             units = 'kg/ha';
         } else if (varname === 'phosphorus') {
             r = tolerance;

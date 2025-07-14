@@ -853,6 +853,76 @@ def api_run_omni(runid, config):
     return jsonify({'Success': True, 'job_id': job.id})
 
 
+@rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_omni_contrasts', methods=['POST'])
+def run_omni_contrasts(runid, config):
+    wd = get_wd(runid)
+    omni = Omni.getInstance(wd)
+
+    try:
+        # Ensure the _limbo directory exists
+        limbo_dir = _join(wd, 'omni', '_limbo')
+        os.makedirs(limbo_dir, exist_ok=True)
+
+        # Parse the scenarios JSON from FormData
+        if 'scenarios' not in request.form:
+            return exception_factory('Missing scenarios data', runid=runid)
+        
+        scenarios_data = json.loads(request.form['scenarios'])
+        if not isinstance(scenarios_data, list):
+            return exception_factory('Scenarios data must be a list', runid=runid)
+
+        # Process each scenario and handle file uploads
+        parsed_inputs = []
+        for idx, scenario in enumerate(scenarios_data):
+            scenario_type = scenario.get('type')
+
+            # Map scenario type to OmniScenario enum
+            scenario_enum = OmniScenario.parse(scenario_type)
+
+            # Handle file uploads for SBS Map scenario
+            # place the maps in {wd}/omni/.limbo/{idx:02d} so they are available for Omni
+            scenario_params = scenario.copy()
+            if scenario_enum == OmniScenario.SBSmap:
+                file_key = f'scenarios[{idx}][sbs_file]'
+                if file_key not in request.files:
+                    return exception_factory(f'Missing SBS file for scenario {idx}', runid=runid)
+
+                file = request.files[file_key]
+                if file.filename == '':
+                    return error_factory('No filename specified for SBS file')
+
+                # Securely save the file to wd/omni/.limbo/SBSmap
+                filename = secure_filename(file.filename)
+                scenario_dir = os.path.join(limbo_dir, f'{idx:02d}')
+                os.makedirs(scenario_dir, exist_ok=True)
+                file_path = os.path.join(scenario_dir, filename)
+                file.save(file_path)
+
+                # Update scenario params with the file path
+                scenario_params['sbs_file_path'] = file_path
+
+            parsed_inputs.append((scenario_enum, scenario_params))
+
+        # Pass the parsed scenarios to omni.parse_inputs
+        omni.parse_scenarios(parsed_inputs)
+
+    except Exception as e:
+        return exception_factory(f'Error parsing omni inputs: {str(e)}', runid=runid)
+
+    try:
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.run_omni)
+
+        with redis.Redis(host=REDIS_HOST, port=6379, db=RQ_DB) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(run_omni_rq, (runid,), timeout=TIMEOUT)
+            prep.set_rq_job_id('run_omni_rq', job.id)
+    except Exception:
+        return exception_factory()
+
+    return jsonify({'Success': True, 'job_id': job.id})
+
+
 @rq_api_bp.route('/runs/<string:runid>/<config>/rq/api/run_ash', methods=['POST'])
 def api_run_ash(runid, config):
     # get working dir of original directory

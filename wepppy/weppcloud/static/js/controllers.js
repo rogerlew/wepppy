@@ -2391,7 +2391,7 @@ var SubcatchmentDelineation = function () {
         that.labelLossMin = $('#wepp_sub_cmap_canvas_loss_min');
         that.labelLossMax = $('#wepp_sub_cmap_canvas_loss_max');
         that.labelLossUnits = $('#wepp_sub_cmap_canvas_loss_units');
-        that.cmapperLoss = createColormap({ colormap: "electric-boogaloo", nshades: 64 });
+        that.cmapperLoss = createColormap({ colormap: "jet2", nshades: 64 });
 
         that.cmapLoss = function () {
             var self = instance;
@@ -2506,7 +2506,7 @@ var SubcatchmentDelineation = function () {
                     displayMin: 0,
                     displayMax: 1,
                     name: self.gridlabel,
-                    colorScale: "electric",
+                    colorScale: "jet2",
                     opacity: 1.0,
                     clampLow: true,
                     clampHigh: true,
@@ -2793,7 +2793,7 @@ var SubcatchmentDelineation = function () {
         that.labelAshLoadMin = $('#ash_sub_cmap_canvas_load_min');
         that.labelAshLoadMax = $('#ash_sub_cmap_canvas_load_max');
         that.labelAshLoadUnits = $('#ash_sub_cmap_canvas_load_units');
-        that.cmapperAshLoad = createColormap({ colormap: "electric", nshades: 64 });
+        that.cmapperAshLoad = createColormap({ colormap: "jet2", nshades: 64 });
 
         that.cmapAshLoad = function () {
             var self = instance;
@@ -2899,7 +2899,7 @@ var SubcatchmentDelineation = function () {
         that.labelAshTransportMin = $('#ash_sub_cmap_canvas_transport_min');
         that.labelAshTransportMax = $('#ash_sub_cmap_canvas_transport_max');
         that.labelAshTransportUnits = $('#ash_sub_cmap_canvas_transport_units');
-        that.cmapperAshTransport = createColormap({ colormap: "electric", nshades: 64 });
+        that.cmapperAshTransport = createColormap({ colormap: "jet2", nshades: 64 });
 
         that.cmapAshTransport = function () {
             var self = instance;
@@ -3009,7 +3009,7 @@ var SubcatchmentDelineation = function () {
         that.labelRhemSoilLossMin = $('#rhem_sub_cmap_canvas_soil_loss_min');
         that.labelRhemSoilLossMax = $('#rhem_sub_cmap_canvas_soil_loss_max');
         that.labelRhemSoilLossUnits = $('#rhem_sub_cmap_canvas_soil_loss_units');
-        that.cmapperRhemSoilLoss = createColormap({ colormap: "electric", nshades: 64 });
+        that.cmapperRhemSoilLoss = createColormap({ colormap: "jet2", nshades: 64 });
 
         that.cmapRhemSoilLoss = function () {
             var self = instance;
