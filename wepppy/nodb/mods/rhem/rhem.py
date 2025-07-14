@@ -248,7 +248,7 @@ class Rhem(NoDbBase, LogMixin):
 #            run_hillslope(topaz_id, runs_dir)
 #            self.log(f'  {topaz_id} completed run\n')
 
-            futures.append(pool.submit(lambda p: run_hillslope(*p), (topaz_id, runs_dir)))
+            futures.append(pool.submit(run_hillslope, topaz_id, runs_dir))
             futures[-1].add_done_callback(oncomplete)
 
         wait(futures, return_when=FIRST_EXCEPTION)
