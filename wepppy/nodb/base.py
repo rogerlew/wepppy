@@ -258,6 +258,13 @@ class NoDbBase(object):
         with open(self._nodb, 'w') as fp:
             fp.write(js)
 
+        try:
+            from wepppy.weppcloud.db_api import update_last_modified
+            update_last_modified(self.runid)
+        except:
+            pass
+
+
     @property
     def locales(self):
         from .ron import Ron
