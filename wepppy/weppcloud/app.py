@@ -221,6 +221,8 @@ app.jinja_env.filters['zip'] = zip
 app.jinja_env.filters['sort_numeric'] = sort_numeric
 app.jinja_env.filters['sort_numeric_keys'] = sort_numeric_keys
 
+app.jinja_env.globals.update(max=max, min=min)
+
 app = config_app(app)
 
 # this xsendfile mod is broken on wepp.cloud
@@ -253,7 +255,7 @@ mail = Mail(app)
 # Setup Flask-Security
 # Create database connection object
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, directory='/workdir/wepppy/wepppy/weppcloud/migrations')
 
 @app.context_processor
 def inject_site_prefix():
@@ -279,6 +281,8 @@ class Run(db.Model):
     date_created = db.Column(db.DateTime())
     owner_id = db.Column(db.String(255))
     config = db.Column(db.String(255))
+    last_modified = db.Column(db.DateTime(), nullable=True)
+    last_accessed = db.Column(db.DateTime(), nullable=True)
 
     @property
     def valid(self):
@@ -304,10 +308,6 @@ class Run(db.Model):
     @property
     def wd(self):
         return get_wd(self.runid)
-
-    @property
-    def last_modified(self):
-        return _get_last_modified(self.wd)       
 
     @property
     def _owner(self):
@@ -481,36 +481,89 @@ def _build_meta(wd, attrs: dict):
 @app.route("/runs/")
 @login_required
 def runs():
-    runs = list(current_user.runs)   # materialise once
-    metas = []
+    try:
+        runs = list(current_user.runs)   # materialise once
+        metas = []
 
-    max_workers = min(20, len(runs))
-    with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = []
-        for r in runs:
-            attrs = {
-                "owner":         r.owner,
-                "runid":         r.runid,
-                "date_created":  r.date_created,
-                "last_modified": r.last_modified,
-                "owner_id":      r.owner_id,
-                "config":        r.config,
-            }
-            futures.append(pool.submit(_build_meta, r.wd, attrs))
+        max_workers = max(min(10, len(runs)), 1)
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = []
+            for r in runs:
+                attrs = {
+                    "owner":         r.owner,
+                    "runid":         r.runid,
+                    "date_created":  r.date_created,
+                    "last_modified": r.last_modified,
+                    "owner_id":      r.owner_id,
+                    "config":        r.config,
+                }
+                futures.append(pool.submit(_build_meta, r.wd, attrs))
 
-        for f in as_completed(futures):
-            m = f.result()
-            if m:
-                metas.append(m)
+            for f in as_completed(futures):
+                m = f.result()
+                if m:
+                    metas.append(m)
 
-    metas.sort(key=lambda m: m["last_modified"], reverse=True)
-    return render_template(
-        "user/runs.html",
-        user=current_user,
-        user_runs=metas,
-        show_owner=False,
-    )
+        metas.sort(key=lambda m: m["last_modified"], reverse=True)
+        return render_template(
+            "user/runs.html",
+            user=current_user,
+            user_runs=metas,
+            show_owner=False,
+        )
+    except:
+        return exception_factory()
 
+
+@app.route("/runs2")
+@app.route("/runs2/")
+@login_required
+def runs2():
+    try:
+        page     = request.args.get('page', 1, type=int)
+        per_page = 100
+
+        # Query & order by the DB column:
+        pagination = (
+            Run.query
+            .join(runs_users)                  # make sure to filter by current_user
+            .filter(runs_users.c.user_id == current_user.id)
+            .order_by(Run.last_modified.desc())
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )
+
+        # Only build RON-meta for this page’s runs:
+        items   = pagination.items     # list of Run objects
+        metas   = []
+
+        max_workers = max(min(10, len(items)), 1)
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = [
+                pool.submit(_build_meta, r.wd, {
+                    "owner":        r.owner,
+                    "runid":        r.runid,
+                    "date_created": r.date_created,
+                    "last_modified":r.last_modified,
+                    "owner_id":     r.owner_id,
+                    "config":       r.config,
+                })
+                for r in items
+            ]
+            for f in as_completed(futures):
+                m = f.result()
+                if m:
+                    metas.append(m)
+
+        # metas roughly in DB order already
+        return render_template(
+            "user/runs2.html",
+            user=current_user,
+            user_runs=metas,
+            pagination=pagination,
+            show_owner=False,
+        )
+    except:
+        return exception_factory()
 
 @app.route('/allruns')
 @app.route('/allruns/')
@@ -1674,6 +1727,8 @@ def log_access(wd, current_user, ip):
         email = getattr(current_user, 'email', '<anonymous>')
         fp.write('{},{},{}\n'.format(email, ip, datetime.now()))
 
+    
+
 
 @app.route('/runs/<string:runid>/')
 def runs0_nocfg(runid):
@@ -1801,6 +1856,10 @@ def runs0(runid, config):
         from wepppy.wepp.management.managements import landuse_management_mapping_options
 
         log_access(wd, current_user, request.remote_addr)
+        timestamp = datetime.now()
+        Run.query.filter_by(runid=runid).update({'last_accessed': timestamp})
+        db.session.commit()
+
         return render_template('0.html',
                                user=current_user,
                                site_prefix=site_prefix,
