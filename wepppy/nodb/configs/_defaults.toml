@@ -31,7 +31,7 @@ fractionals=[]
 mofe_buffer_selection=42
 
 [soils]
-ssurgo_db = "ssurgo/gNATSGO/2025"
+ssurgo_db = "ssurgo/gNATSGSO/2025"
 wepp_chn_type = "default"
 ksflag=false
 
