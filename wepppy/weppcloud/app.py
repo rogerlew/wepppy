@@ -478,6 +478,7 @@ def _build_meta(wd, attrs: dict):
 
 
 @app.route("/runs")
+@app.route("/runs/")
 @login_required
 def runs():
     runs = list(current_user.runs)   # materialise once
