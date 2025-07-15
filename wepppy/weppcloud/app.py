@@ -33,8 +33,8 @@ from deprecated import deprecated
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort, make_response,
-    stream_with_context, url_for, current_app, copy_current_app_context
-) 
+    stream_with_context, url_for, current_app
+)
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -461,11 +461,10 @@ def profile():
     except:
         return exception_factory()
 
-@copy_current_app_context
 def _build_meta(run):
-    # this decorator “freezes” and pushes the current app (and request)
-    # context whenever _build_meta is invoked
-    return run.meta
+    # Push app-ctx only if you still touch Flask globals in meta()
+    with current_app.app_context():
+        return run.meta
 
 @app.route("/runs")
 @app.route("/runs/")
@@ -475,13 +474,16 @@ def runs():
     metas = []
 
     # Pick a sane cap; adjust to your storage / CPU
-
     max_workers = min(20, len(runs))
+
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = [pool.submit(_build_meta, r) for r in runs]
-        metas = [f.result() for f in as_completed(futures) if f.result()]
+        for f in as_completed(futures):
+            m = f.result()
+            if m:                         # skip failed Ron loads
+                metas.append(m)
+
     metas.sort(key=lambda m: m["last_modified"], reverse=True)
-    
     return render_template(
         "user/runs.html",
         user=current_user,
