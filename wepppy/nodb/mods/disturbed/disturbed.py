@@ -166,7 +166,43 @@ class Disturbed(NoDbBase):
             self._sol_ver = self.config_get_float('disturbed', 'sol_ver')
 
             self._fire_date = self.config_get_str('disturbed', 'fire_date')
+            self._burn_shrubs = self.config_get_bool('disturbed', 'burn_shrubs', True)
+            self._burn_grass = self.config_get_bool('disturbed', 'burn_grass', False)
 
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def burn_shrubs(self):
+        return getattr(self, '_burn_shrubs', True)
+    
+    @burn_shrubs.setter
+    def burn_shrubs(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._burn_shrubs = bool(value)
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
+
+    @property
+    def burn_grass(self):
+        return getattr(self, '_burn_grass', False)
+    
+    @burn_grass.setter
+    def burn_grass(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            self._burn_grass = bool(value)
             self.dump_and_unlock()
 
         except Exception:
@@ -688,6 +724,9 @@ class Disturbed(NoDbBase):
         disturbed_key_lookup = self.get_disturbed_key_lookup()
         #assert landuse.mode != LanduseMode.Single
 
+        burn_shrubs = self.burn_shrubs
+        burn_grass = self.burn_grass
+
         watershed = Watershed.getInstance(wd)
 
         sbs = self.get_sbs()
@@ -723,11 +762,12 @@ class Disturbed(NoDbBase):
                                                      '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
 
-                    elif man.disturbed_class == 'shrub':
+                    elif man.disturbed_class == 'shrub' and burn_shrubs:
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
-                    elif man.disturbed_class in ['tall grass']:
+                        
+                    elif man.disturbed_class in ['tall grass'] and burn_grass:
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]

@@ -393,6 +393,20 @@ def api_build_landuse(runid, config):
         if mofe_buffer_selection is not None:
             landuse.mofe_buffer_selection = mofe_buffer_selection
 
+        if 'disturbed' in landuse.mods:
+            disturbed = Disturbed.getInstance(wd)
+            burn_shrubs = request.form.get('burn_shrubs', 'off')
+            if burn_shrubs.lower().startswith('on'):
+                disturbed.burn_shrubs = True
+            else:
+                disturbed.burn_shrubs = False
+
+            burn_grass = request.form.get('burn_grass', 'off')
+            if burn_grass.lower().startswith('on'):
+                disturbed.burn_grass = True
+            else:
+                disturbed.burn_grass = False
+
         # get mapping selection for user-defined landuse
         mapping = request.form.get('landuse_management_mapping_selection', None)
 
