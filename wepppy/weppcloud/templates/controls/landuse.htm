@@ -368,9 +368,32 @@
       </select>
     </div>
   </div>
-  {% else %}
-  <div><i>no advanced options currently available</i></div>
   {% endif %}
+  {% if 'disturbed' in ron.mods %}
+  <div class="form-group row">
+      <div class="col-sm-5">
+          <div style="margin-left:2em;"><input id="checkbox_burn_shrubs"
+                  name="burn_shrubs" type="checkbox"
+                  class="form-check-input disable-readonly"
+                  {% if disturbed.burn_shrubs %}checked{% endif %}>
+          </div>
+          <label for="checkbox_burn_shrubs"
+              style="margin-left:3em;">Burn Shrubs based on SBS</label>
+      </div>
+  </div>
+  <div class="form-group row">
+      <div class="col-sm-5">
+          <div style="margin-left:2em;"><input id="checkbox_burn_grass"
+                  name="burn_grass" type="checkbox"
+                  class="form-check-input disable-readonly"
+                  {% if disturbed.burn_grass %}checked{% endif %}>
+          </div>
+          <label for="checkbox_burn_grass"
+              style="margin-left:3em;">Burn Grass based on SBS</label>
+      </div>
+  </div>
+  {% endif %}
+
 </div>
 <div style="height:1em;"> </div>
 <div class="form-group row hide-readonly">
