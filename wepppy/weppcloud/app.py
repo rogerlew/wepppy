@@ -461,26 +461,45 @@ def profile():
     except:
         return exception_factory()
 
-def _build_meta(run):
-    # Push app-ctx only if you still touch Flask globals in meta()
-    with current_app.app_context():
-        return run.meta
+
+def _build_meta(wd, attrs: dict):
+        try:
+            ron = Ron.getInstance(wd)
+        except:
+            return None
+
+        meta = dict(name=ron.name,
+                    scenario=ron.scenario,
+                    w3w=ron.w3w,
+                    readonly=ron.readonly)
+        meta.update(attrs)
+
+        return meta
+
 
 @app.route("/runs")
-@app.route("/runs/")
 @login_required
 def runs():
-    runs = list(current_user.runs)          # materialise once
+    runs = list(current_user.runs)   # materialise once
     metas = []
 
-    # Pick a sane cap; adjust to your storage / CPU
     max_workers = min(20, len(runs))
-
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
-        futures = [pool.submit(_build_meta, r) for r in runs]
+        futures = []
+        for r in runs:
+            attrs = {
+                "owner":         r.owner,
+                "runid":         r.runid,
+                "date_created":  r.date_created,
+                "last_modified": r.last_modified,
+                "owner_id":      r.owner_id,
+                "config":        r.config,
+            }
+            futures.append(pool.submit(_build_meta, r.wd, attrs))
+
         for f in as_completed(futures):
             m = f.result()
-            if m:                         # skip failed Ron loads
+            if m:
                 metas.append(m)
 
     metas.sort(key=lambda m: m["last_modified"], reverse=True)
@@ -490,6 +509,7 @@ def runs():
         user_runs=metas,
         show_owner=False,
     )
+
 
 @app.route('/allruns')
 @app.route('/allruns/')
