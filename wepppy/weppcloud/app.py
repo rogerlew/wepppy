@@ -33,8 +33,8 @@ from deprecated import deprecated
 from flask import (
     Flask, jsonify, request, render_template,
     redirect, send_file, Response, abort, make_response,
-    stream_with_context, url_for, current_app
-)
+    stream_with_context, url_for, current_app, copy_current_app_context
+) 
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -461,10 +461,11 @@ def profile():
     except:
         return exception_factory()
 
+@copy_current_app_context
 def _build_meta(run):
-    # Push app-ctx only if you still touch Flask globals in meta()
-    with current_app.app_context():
-        return run.meta
+    # this decorator “freezes” and pushes the current app (and request)
+    # context whenever _build_meta is invoked
+    return run.meta
 
 @app.route("/runs")
 @app.route("/runs/")
@@ -474,16 +475,13 @@ def runs():
     metas = []
 
     # Pick a sane cap; adjust to your storage / CPU
-    max_workers = min(20, len(runs))
 
+    max_workers = min(20, len(runs))
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = [pool.submit(_build_meta, r) for r in runs]
-        for f in as_completed(futures):
-            m = f.result()
-            if m:                         # skip failed Ron loads
-                metas.append(m)
-
+        metas = [f.result() for f in as_completed(futures) if f.result()]
     metas.sort(key=lambda m: m["last_modified"], reverse=True)
+    
     return render_template(
         "user/runs.html",
         user=current_user,
@@ -2730,8 +2728,11 @@ def set_landuse_mode(runid, config):
     single_selection = None
     try:
         mode = int(request.form.get('mode', None))
-        single_selection = \
-            int(request.form.get('landuse_single_selection', None))
+        single_selection = request.form.get('landuse_single_selection', None)
+
+        if single_selection is None:
+            return success_factory()
+
     except Exception:
         exception_factory('mode and landuse_single_selection must be provided', runid=runid)
 
