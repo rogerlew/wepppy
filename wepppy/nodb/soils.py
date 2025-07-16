@@ -349,7 +349,7 @@ class Soils(NoDbBase, LogMixin):
 
     @property
     def ssurgo_db(self):
-        return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db'))
+        return getattr(self, '_ssurgo_db', self.config_get_str('soils', 'ssurgo_db')).replace('gNATSGO', 'gNATSGSO')
 
     @ssurgo_db.setter
     def ssurgo_db(self, value):
