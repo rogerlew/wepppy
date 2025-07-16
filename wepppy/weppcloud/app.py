@@ -482,44 +482,6 @@ def _build_meta(wd, attrs: dict):
 @login_required
 def runs():
     try:
-        runs = list(current_user.runs)   # materialise once
-        metas = []
-
-        max_workers = max(min(10, len(runs)), 1)
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = []
-            for r in runs:
-                attrs = {
-                    "owner":         r.owner,
-                    "runid":         r.runid,
-                    "date_created":  r.date_created,
-                    "last_modified": r.last_modified,
-                    "owner_id":      r.owner_id,
-                    "config":        r.config,
-                }
-                futures.append(pool.submit(_build_meta, r.wd, attrs))
-
-            for f in as_completed(futures):
-                m = f.result()
-                if m:
-                    metas.append(m)
-
-        metas.sort(key=lambda m: m["last_modified"], reverse=True)
-        return render_template(
-            "user/runs.html",
-            user=current_user,
-            user_runs=metas,
-            show_owner=False,
-        )
-    except:
-        return exception_factory()
-
-
-@app.route("/runs2")
-@app.route("/runs2/")
-@login_required
-def runs2():
-    try:
         page     = request.args.get('page', 1, type=int)
         per_page = 100
 
