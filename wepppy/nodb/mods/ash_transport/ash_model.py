@@ -64,8 +64,6 @@ class AshModel(object):
 
     @property
     def ini_material_available_mm(self):
-        print('proportion', self.proportion, type(self.proportion))
-        print('ini_ash_depth_mm', self.ini_ash_depth_mm, type(self.ini_ash_depth_mm))
         return self.proportion * self.ini_ash_depth_mm
 
     @property
