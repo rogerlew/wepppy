@@ -1062,88 +1062,96 @@ class Disturbed(NoDbBase):
             soils.unlock('-f')
             raise
 
-    def modify_soils(self):
+    def modify_soil(self, topaz_id: str, landuse_instance: Landuse, soils_instance: Soils, _land_soil_replacements_d) -> str:
+
         wd = self.wd
         sol_ver = self.sol_ver
 
-        ron = Ron.getInstance(wd)
+        mukey = soils_instance.domsoil_d[topaz_id]
+        dom = landuse_instance.domlc_d[topaz_id]
+        man = landuse_instance.managements[dom]
+
+        if man.sol_path:
+            disturbed_mukey = _split(man.sol_fn)[-1].replace('.sol', '')
+            sol_fn =  f'{disturbed_mukey}.sol'
+            new_sol_path = _join(soils_instance.soils_dir, sol_fn)
+
+            if not _exists(new_sol_path):
+                shutil.copyfile(man.sol_path, new_sol_path)
+
+            if disturbed_mukey not in soils_instance.soils:
+                soils_instance.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
+                                                            fname=sol_fn,
+                                                            soils_dir=soils_instance.soils_dir,
+                                                            desc=disturbed_mukey,
+                                                            meta_fn=None,
+                                                            build_date=str(datetime.now()))
+        else:
+            _soil = soils_instance.soils[mukey]
+            clay = _soil.clay
+            sand = _soil.sand
+
+            assert isfloat(clay), clay
+            assert isfloat(sand), sand
+
+            texid = simple_texture(clay=clay, sand=sand)
+
+            key = (texid, man.disturbed_class)
+
+            if key not in _land_soil_replacements_d:
+                texid = 'all'
+                key = (texid, man.disturbed_class)
+
+            if key not in _land_soil_replacements_d:
+                return
+
+            disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
+
+            if disturbed_mukey not in soils_instance.soils:
+                disturbed_fn = disturbed_mukey + '.sol'
+                replacements = _land_soil_replacements_d[key]
+
+                if 'fire' in man.disturbed_class:
+                    _h0_max_om = self.h0_max_om
+                else:
+                    _h0_max_om = None
+
+                soil_u = WeppSoilUtil(_join(soils_instance.soils_dir, _soil.fname))
+                if sol_ver == 7778.0:
+                    new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
+                else:
+                    new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om,
+                                                version=sol_ver)
+
+                new.write(_join(soils_instance.soils_dir, disturbed_fn))
+
+                desc = f'{_soil.desc} - {man.disturbed_class}'
+                soils_instance.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
+                                                            fname=disturbed_fn,
+                                                            soils_dir=soils_instance.soils_dir,
+                                                            desc=desc,
+                                                            meta_fn=_soil.meta_fn,
+                                                            build_date=str(datetime.now()))
+
+        return disturbed_mukey
+
+
+    def modify_soils(self):
+        wd = self.wd
         landuse = Landuse.getInstance(wd)
         soils = Soils.getInstance(wd)
-
         _land_soil_replacements_d = self.land_soil_replacements_d
 
         try:
             soils.lock()
 
             for topaz_id, mukey in soils.domsoil_d.items():
+
+                # if is channel skip
                 if (int(topaz_id) - 4) % 10 == 0:
                     continue
 
-                dom = landuse.domlc_d[topaz_id]
-                man = landuse.managements[dom]
-
-                if man.sol_path:
-                    disturbed_mukey = _split(man.sol_fn)[-1].replace('.sol', '')
-                    sol_fn =  f'{disturbed_mukey}.sol'
-                    new_sol_path = _join(soils.soils_dir, sol_fn)
-
-                    if not _exists(new_sol_path):
-                        shutil.copyfile(man.sol_path, new_sol_path)
-
-                    if disturbed_mukey not in soils.soils:
-                        soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
-                                                                   fname=sol_fn,
-                                                                   soils_dir=soils.soils_dir,
-                                                                   desc=disturbed_mukey,
-                                                                   meta_fn=None,
-                                                                   build_date=str(datetime.now()))
-                else:
-                    _soil = soils.soils[mukey]
-                    clay = _soil.clay
-                    sand = _soil.sand
-
-                    assert isfloat(clay), clay
-                    assert isfloat(sand), sand
-
-                    texid = simple_texture(clay=clay, sand=sand)
-
-                    key = (texid, man.disturbed_class)
-
-                    if key not in _land_soil_replacements_d:
-                        texid = 'all'
-                        key = (texid, man.disturbed_class)
-
-                    if key not in _land_soil_replacements_d:
-                        continue
-
-                    disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
-
-                    if disturbed_mukey not in soils.soils:
-                        disturbed_fn = disturbed_mukey + '.sol'
-                        replacements = _land_soil_replacements_d[key]
-
-                        if 'fire' in man.disturbed_class:
-                            _h0_max_om = self.h0_max_om
-                        else:
-                            _h0_max_om = None
-
-                        soil_u = WeppSoilUtil(_join(soils.soils_dir, _soil.fname))
-                        if sol_ver == 7778.0:
-                            new = soil_u.to_7778disturbed(replacements, h0_max_om=_h0_max_om)
-                        else:
-                            new = soil_u.to_over9000(replacements, h0_max_om=_h0_max_om,
-                                                     version=sol_ver)
-
-                        new.write(_join(soils.soils_dir, disturbed_fn))
-
-                        desc = f'{_soil.desc} - {man.disturbed_class}'
-                        soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
-                                                                   fname=disturbed_fn,
-                                                                   soils_dir=soils.soils_dir,
-                                                                   desc=desc,
-                                                                   meta_fn=_soil.meta_fn,
-                                                                   build_date=str(datetime.now()))
-
+                disturbed_mukey = self.modify_soil(topaz_id, landuse, soils, _land_soil_replacements_d)
                 soils.domsoil_d[topaz_id] = disturbed_mukey
 
             # need to recalculate the pct_coverages

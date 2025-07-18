@@ -71,22 +71,7 @@ class ReportBase(object):
             Passed through to pandas.DataFrame.to_parquet().
         """
         # build the display column names
-        base_cols = list(self.header)  # e.g. ['Area', 'Sediment Yield', …]
-        units    = list(self.units)   # e.g. ['ha', 'kg/ha', …]
-        cols_with_units = []
-        for name, unit in zip(base_cols, units):
-            if unit:
-                short = unit.split(',')[0]
-                cols_with_units.append(f"{name} ({short})")
-            else:
-                cols_with_units.append(name)
-
-        # if run_descriptors supplied, extract their names
-        if write_header and run_descriptors:
-            desc_names = [c for c, _ in run_descriptors]
-            cols_full = desc_names + cols_with_units
-        else:
-            cols_full = cols_with_units
+        cols_full = list(self.header)
 
         # collect all rows into a list of dicts
         records = []
