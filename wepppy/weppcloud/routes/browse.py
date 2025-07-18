@@ -386,6 +386,9 @@ def html_dir_list(_dir, runid, wd, request_path, diff_runid, diff_wd, diff_arg, 
             if file_lower.endswith(('.arc', '.tif', '.img', '.nc')):
                 gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/gdalinfo/')
                 gl_link = f'  <a href="{gl_url}">gdalinfo</a>'
+            if file_lower.endswith('.parquet'):
+                gl_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/download/') + '?as_csv=1'
+                gl_link = f'  <a href="{gl_url}">.csv</a>'
             repr_link = '           '
             if file_lower.endswith('.man') or  file_lower.endswith('.sol'):
                 repr_url = '/weppcloud' + _join(request_path, _file).replace('/browse/', '/repr/')
