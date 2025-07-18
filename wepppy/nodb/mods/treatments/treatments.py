@@ -373,15 +373,21 @@ class Treatments(NoDbBase, LogMixin):
             return
         self.log(f'topaz_id: {topaz_id}\t treatment:{treatment}\t disturbed_class: {disturbed_class}\n')
 
+        retcode = 0
         if 'mulch' in treatment:
-            return self._apply_mulch(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            retcode = self._apply_mulch(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
         elif 'prescribed_fire' in treatment:
-            return self._apply_prescribed_fire(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            retcode = self._apply_prescribed_fire(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
         elif 'thinning' in treatment:
-            return self._apply_thinning(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
+            retcode = self._apply_thinning(landuse_instance, disturbed_instance, topaz_id, treatment, man_summary, disturbed_class)
 
+            
+        self.log(f'  _apply_treatment: {topaz_id} -> {landuse_instance.domlc_d[topaz_id]}\n')
+
+        return retcode
+    
     def _apply_mulch(self, 
                      landuse_instance: Landuse, 
                      disturbed_instance: Disturbed,

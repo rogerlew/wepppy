@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import List, Optional
 
 import os
 
@@ -281,7 +281,59 @@ class OmniNoDbLockedException(Exception):
 
 class Omni(NoDbBase, LogMixin):
     """
-    Runs scenarios inside of a parent scenario
+    Omni: Manage and execute nested WEPP scenarios and contrasts without a database.
+    This class persists its state in a NoDb file (omni.nodb) and provides a high-level
+    interface for:
+        - Defining multiple scenarios (e.g., thinning, prescribed fire, uniform burns, mulch, SBS map)
+        - Parsing user inputs from a web backend or CLI into scenario definitions
+        - Building and running individual scenarios or batches of scenarios
+        - Defining and executing contrast analyses between a control scenario and one or more 
+            contrast scenarios based on objective parameters (e.g., runoff, soil loss)
+        - Generating summary reports and parquet outputs for scenarios and contrasts
+    Key Responsibilities:
+        • Initialization & Locking
+            – __init__(wd, cfg_fn='0.cfg'): load or create omni.nodb, set up working directory,
+                acquire a lock during modifications
+            – getInstance / getInstanceFromRunID: load a persisted Omni instance, honoring locks
+        • Scenario Management
+            – scenarios (property): list of scenario definitions (dicts)
+            – parse_scenarios(parsed_inputs): validate and store a list of (scenario_enum, params)
+            – run_omni_scenario(scenario_def): build and run one scenario, append to scenarios list
+            – run_omni_scenarios(): execute all parsed scenarios in a consistent order
+            – clean_scenarios(): remove and recreate the omni/scenarios directory
+        • Contrast Management
+            – contrasts (property): mapping of contrast_name → per-hillslope path dict
+            – parse_inputs(kwds): read control/contrast scenario parameters from keyword dict
+            – build_contrasts(control_scenario_def, contrast_scenario_def, …): compute and save
+                per-hillslope contrasts up to a cumulative objective-parameter fraction
+            – run_omni_contrasts(): invoke _run_contrast for each saved contrast
+        • Reporting
+            – scenarios_report(): concatenate per-scenario loss_pw0 parquet files into one DataFrame
+            – compile_hillslope_summaries(exclude_yr_indxs=None): build and save detailed
+                hillslope summaries across base and all parsed scenarios
+    Public Attributes (stored in omni.nodb):
+        – wd: working directory for WEPP inputs/outputs
+        – _scenarios: list of scenario definition dicts
+        – _contrasts: dict mapping contrast names to input/output path mappings
+        – _control_scenario, _contrast_scenario: OmniScenario enums
+        – _contrast_object_param, _contrast_cumulative_obj_param_threshold_fraction, etc.: parameters
+            controlling contrast selection and filtering
+    Usage Example:
+            omni = Omni.getInstance(wd="/path/to/project")
+            omni.parse_scenarios([
+                    (OmniScenario.Thinning, {"type": "thinning", "canopy_cover": 0.80, "ground_cover": 0.50}),
+                    (OmniScenario.UniformHigh, {"type": "uniform_high"})
+            ])
+            omni.run_omni_scenarios()
+            report_df = omni.scenarios_report()
+            omni.build_contrasts(
+                    control_scenario_def={"type": "uniform_high"},
+                    contrast_scenario_def={"type": "thinning"},
+                    obj_param="Runoff_mm",
+                    contrast_cumulative_obj_param_threshold_fraction=0.75
+            )
+            omni.run_omni_contrasts()
+            contrasts_df = pd.read_parquet(os.path.join(omni.wd, "omni", "contrasts.out.parquet"))
     """
     __name__ = 'Omni'
 
@@ -701,13 +753,27 @@ class Omni(NoDbBase, LogMixin):
         if not isinstance(scenario, OmniScenario):
             raise TypeError('scenario must be an instance of OmniScenario')
 
-        _build_scenario(scenario_def, self.wd, self.base_scenario)
+        self._build_scenario(scenario_def, self.wd, self.base_scenario)
 
         if scenario not in self.scenarios:
             self.scenarios = self.scenarios + [scenario_def]
             
         self.log(f'  Omni::run_scenario({scenario}): {scenario} completed\n')
 
+    @property
+    def ran_scenarios(self) -> List[str]:
+        """
+        Returns a list of scenario names that have been run.
+        :return: List of scenario names.
+        """
+        ran_scenarios = []
+        for scenario_def in self.scenarios:
+            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
+            if _exists(_join(self.wd, 'omni', 'scenarios', _scenario_name, 'wepp', 'output', 'loss_pw0.out.parquet')):
+                ran_scenarios.append(_scenario_name)
+                
+        return ran_scenarios
+    
     def run_omni_scenarios(self):
         self.log('Omni::run_omni_scenarios\n')
 
@@ -716,7 +782,6 @@ class Omni(NoDbBase, LogMixin):
         if not self.scenarios:
             self.log('  Omni::run_omni_scenarios: No scenarios to run\n')
             raise Exception('No scenarios to run')
-
 
         ran_scenarios = []
         for scenario_def in self.scenarios:
@@ -743,17 +808,21 @@ class Omni(NoDbBase, LogMixin):
 
             self.log(f'  Omni::run_omni_scenarios: {_scenario_name}\n')
             self._build_scenario(scenario_def)
+            self.log_done()
+
+        self.log('  Omni::run_omni_scenarios: compiling hillslope summaries\n')
+        self.compile_hillslope_summaries()
+        self.log_done()
 
     def _build_scenario(
             self,
             scenario_def: dict):
-            
-        wd = self.wd
-        base_scenario = self.base_scenario
-
         from wepppy.nodb import Landuse, Soils, Wepp
         from wepppy.nodb.mods import Disturbed
         from wepppy.nodb.mods import Treatments
+            
+        wd = self.wd
+        base_scenario = self.base_scenario
 
         scenario = OmniScenario.parse(scenario_def.get('type'))
         _scenario = str(scenario)
@@ -957,30 +1026,7 @@ class Omni(NoDbBase, LogMixin):
         out_path = _join(self.wd, 'omni', 'scenarios.out.parquet')
         combined.to_parquet(out_path)
 
-        return combined
-
-    def compile_hillslope_summaries(self):
-
-        scenario_wds = {str(self.base_scenario): self.wd}
-
-        for scenario_def in self.scenarios:
-            scenario = scenario_def.get('type')
-            _scenario_name = _scenario_name_from_scenario_definition(scenario_def)
-            scenario_wds[_scenario_name] = _join(self.wd, 'omni', 'scenarios', _scenario_name)
-
-        dfs = []
-        for scenario, wd in scenario_wds.items():
-            loss = Wepp.getInstance(wd).report_loss(exclude_yr_indxs=exclude_yr_indxs)
-            is_singlestorm = loss.is_singlestorm
-            hill_rpt = HillSummary(loss, class_fractions=class_fractions, fraction_under=fraction_under)
-            df = hill_rpt.to_dataframe()  # returns a DataFrame with columns: key, v, units
-            df['scenario'] = scenario
-            dfs.append(df)
-
-
-        combined = pd.concat(dfs, ignore_index=True)
-        out_path = _join(self.wd, 'omni', 'scenarios.out.parquet')
-        combined.to_parquet(out_path)
+        # todo: add turbidity
 
         return combined
 
@@ -1005,5 +1051,26 @@ class Omni(NoDbBase, LogMixin):
             dfs.append(df)
 
         combined = pd.concat(dfs, ignore_index=True)
+
+        # WeppID,TopazID,Landuse,Soil,Length (m),Hillslope Area (ha),Runoff (mm),Lateral Flow (mm),Baseflow (mm),Soil Loss (kg/ha),Sediment Deposition (kg/ha),Sediment Yield (kg/ha),scenario
+
+
+        # 1. Convert depths (mm) over area (ha) → volumes in m³:
+        #    1 mm over 1 ha = 0.001 m * 10 000 m² = 10 m³
+        combined['Runoff (m^3)']       = combined['Runoff (mm)']       * combined['Hillslope Area (ha)'] * 10
+        combined['Lateral Flow (m^3)'] = combined['Lateral Flow (mm)'] * combined['Hillslope Area (ha)'] * 10
+        combined['Baseflow (m^3)']     = combined['Baseflow (mm)']     * combined['Hillslope Area (ha)'] * 10
+
+        # 2. Convert per‐area masses (kg/ha) over area (ha) → total mass in tonnes:
+        #    (kg/ha * ha) gives kg; divide by 1 000 → tonnes
+        combined['Soil Loss (t)']             = combined['Soil Loss (kg/ha)']             * combined['Hillslope Area (ha)'] / 1_000
+        combined['Sediment Deposition (t)']   = combined['Sediment Deposition (kg/ha)']   * combined['Hillslope Area (ha)'] / 1_000
+        combined['Sediment Yield (t)']        = combined['Sediment Yield (kg/ha)']        * combined['Hillslope Area (ha)'] / 1_000
+
         out_path = _join(self.wd, 'omni', 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
+
+
+# sediment going up with mulching
+# add NTU
+# calculate soil loss (kg) and soil dep/yield (kg)
