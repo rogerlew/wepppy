@@ -204,11 +204,12 @@ class WeppPost(NoDbBase):
             data = self.hill_streamflow
 
         fp = open(fn, 'w')
-        fp.write('date,Runoff,Baseflow,Lateral Flow\n')
+        fp.write('date,Runoff,Baseflow,Lateral Flow,Precipitation\n')
 
         runoff = data['Daily Runoff (mm)']
         latqcc = data['Daily Lateral Flow (mm)']
         baseflow = data['Daily Baseflow (mm)']
+        precip = data['Daily Precipitation (mm)']
 
         assert ndays == len(runoff)
         assert ndays == len(latqcc)
@@ -220,7 +221,7 @@ class WeppPost(NoDbBase):
             for indx in exclude_yr_indxs:
                 exclude_years.append(years[indx])
 
-        for yr, mo, da, r, lf, b in zip(self._years, self._months, self._days, runoff, latqcc, baseflow):
+        for yr, mo, da, r, lf, b, p in zip(self._years, self._months, self._days, runoff, latqcc, baseflow, precip):
             if yr in exclude_years:
                 continue
 
@@ -230,7 +231,7 @@ class WeppPost(NoDbBase):
                 lf += b
                 r += lf
 
-            fp.write('{},{},{},{}\n'.format(d, r, b, lf))
+            fp.write('{},{},{},{},{}\n'.format(d, r, b, lf, p))
         fp.close()
 
     def get_indx(self, year, day=None, month=None, julian=None):
@@ -276,6 +277,7 @@ class WeppPost(NoDbBase):
         self._hill_streamflow['Daily Sediment (tonne/ha)'] = watsed_d['Sed Del Density (tonne/ha)']
         self._hill_streamflow['Daily Lateral Flow (mm)'] = watsed_d['Lateral Flow (mm)']
         self._hill_streamflow['Daily Baseflow (mm)'] = watsed_d['Baseflow (mm)']
+        self._hill_streamflow['Daily Precipitation (mm)'] = watsed_d['Precipitation (mm)']
 
         if 'Total P (kg)' in watsed_d:
             self._hill_streamflow['Daily Total P (kg)'] = watsed_d['Total P (kg)']
@@ -318,13 +320,14 @@ class WeppPost(NoDbBase):
 
         ebe_fn = _join(output_dir, 'ebe_pw0.txt')
 
-        sed_yield, solub_reactive_p, particulate_p, total_p = [], [], [], []
+        precip, sed_yield, solub_reactive_p, particulate_p, total_p = [], [], [], [], []
         with open(ebe_fn) as fp:
             for line in fp.readlines()[9:]:
                 line = line.split()
                 day, mo, year, p, _runoff, peak_runoff, _sed_yield, _solub_reactive_p, _particulate_p, _total_p = \
                     line[:10]
 
+                precip.append(float(p))
                 sed_yield.append(float(_sed_yield) / 1000.0 / ws_ha)
                 solub_reactive_p.append(float(_solub_reactive_p))
                 particulate_p.append(float(_particulate_p))
@@ -361,6 +364,7 @@ class WeppPost(NoDbBase):
 
         self.lock()
         self._chn_streamflow = {
+            'Daily Precipitation (mm)': precip,
             'Daily Runoff (mm)': runoff,
             'Daily Sediment (tonne/ha)': sed_yield,
             'Daily Soluble Reactive P (kg)': solub_reactive_p,
