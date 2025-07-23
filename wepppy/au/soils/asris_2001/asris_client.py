@@ -8,7 +8,7 @@ from os.path import exists as _exists
 from wepppy.all_your_base import isfloat
 
 _thisdir = os.path.dirname(__file__)
-_cache_dir = './cache'
+_cache_dir = _join(_thisdir, 'cache')
 
 if not _exists(_cache_dir):
     _join(_thisdir, 'cache')
