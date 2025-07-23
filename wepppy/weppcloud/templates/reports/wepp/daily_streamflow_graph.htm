@@ -77,9 +77,9 @@
     <div role="main" class="container-full">
         <h2>Daily Runoff/Lateral Flow/Baseflow for {{ ron.runid }}</h2>
 
-            <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-            <div id="area1"></div>
-            <!--
+        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+        <div id="area1"></div>
+        <!--
                 File: daily_streamflow_graph.htm
                 Purpose:
                     Renders an interactive time-series visualization of daily streamflow components
@@ -136,286 +136,301 @@
                     - Adjust margins or color scheme via D3 scale config.
                     - Change data filters via exclude_yr_indxs template variable.
             -->
-            <script>
-                const margin = { top: 10, right: 100, bottom: (window.innerHeight - 80) * 0.2, left: 40 },
-                    margin2 = { top: (window.innerHeight - 80) * 0.80, right: 100, bottom: 70, left: 40 },
-                    width = window.innerWidth * 0.95 - margin.left - margin.right,
-                    height = window.innerHeight * 0.95 - 80 - margin.top - margin.bottom,
-                    height2 = window.innerHeight * 0.95 - 80 - margin2.top - margin2.bottom;
+        <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+        <div id="area1"></div>
+        <script>
+            /* ---------- Layout / sizing ---------- */
+            const margin = { top: 10, right: 100, bottom: (window.innerHeight - 80) * 0.2, left: 40 },
+                margin2 = { top: (window.innerHeight - 80) * 0.80, right: 100, bottom: 70, left: 40 },
+                width = window.innerWidth * 0.95 - margin.left - margin.right,
+                height = window.innerHeight * 0.95 - 80 - margin.top - margin.bottom,
+                height2 = window.innerHeight * 0.95 - 80 - margin2.top - margin2.bottom;
 
-                const parseDate = d3.timeParse("%Y%m%d");
+            /* ---------- Parsers / formatters ---------- */
+            const parseDate = d3.timeParse("%Y%m%d");
+            const fmtDate = d3.timeFormat("%Y-%m-%d");
 
-                const x = d3.scaleTime().range([0, width]);
-                const xC = d3.scaleTime().range([0, width]);
-                const y = d3.scaleLinear().range([height, 0]);
-                const yC = d3.scaleLinear().range([height2, 0]);
+            /* ---------- Scales (focus + context) ---------- */
+            const x = d3.scaleTime().range([0, width]);
+            const xC = d3.scaleTime().range([0, width]);
 
-                const color = d3.scaleOrdinal(d3.schemeCategory10);
+            const y = d3.scaleLinear().range([height, 0]);    // streamflow (focus)
+            const yC = d3.scaleLinear().range([height2, 0]);   // streamflow (context)
 
-                const xAxis = d3.axisBottom(x);
-                const xAxisC = d3.axisBottom(xC);
-                const yAxis = d3.axisLeft(y);
-                const yAxisC = d3.axisLeft(yC).ticks(2);
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-                const brush = d3.brushX()
-                    .extent([[0, 0], [width, height2]])
-                    .on("brush end", brushed);
+            /* ---------- Axes ---------- */
+            const xAxis = d3.axisBottom(x);
+            const xAxisC = d3.axisBottom(xC);
+            const yAxis = d3.axisLeft(y);
+            const yAxisC = d3.axisLeft(yC).ticks(2);
 
-                const line = d3.line()
-                    .defined(d => d.datavalue !== -9999)
-                    .x(d => x(d.date))
-                    .y(d => y(d.datavalue));
+            /* ---------- Brush (on context) ---------- */
+            const brush = d3.brushX()
+                .extent([[0, 0], [width, height2]])
+                .on("brush end", brushed);
 
-                const lineC = d3.line()
-                    .defined(d => d.datavalue !== -9999)
-                    .x(d => x(d.date)) // same x scale (focus updated on brush)
-                    .y(d => yC(d.datavalue));
+            /* ---------- Line generators (focus/context) ---------- */
+            const line = d3.line()
+                .defined(d => d.datavalue !== -9999)
+                .x(d => x(d.date))
+                .y(d => y(d.datavalue));
 
-                const svg = d3.select("#area1").append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom);
+            const lineC = d3.line()
+                .defined(d => d.datavalue !== -9999)
+                .x(d => x(d.date))
+                .y(d => yC(d.datavalue));
 
-                svg.append("defs").append("clipPath")
-                    .attr("id", "clip")
-                    .append("rect")
-                    .attr("width", width)
-                    .attr("height", height);
+            /* ---------- Root SVG + groups ---------- */
+            const svg = d3.select("#area1").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
 
-                const focus = svg.append("g")
-                    .attr("class", "focus")
-                    .attr("transform", `translate(${margin.left},${margin.top})`);
+            svg.append("defs").append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                .attr("width", width)
+                .attr("height", height);
 
-                const context = svg.append("g")
-                    .attr("class", "context")
-                    .attr("transform", `translate(${margin2.left},${margin2.top})`);
+            const focus = svg.append("g")
+                .attr("class", "focus")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
 
+            const context = svg.append("g")
+                .attr("class", "context")
+                .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
-                // Tooltip div
-                const fmtDate = d3.timeFormat("%Y-%m-%d");
-                const tooltip = d3.select("body")
-                    .append("div")
-                    .attr("class", "d3-tooltip")
-                    .style("position", "fixed")
-                    .style("pointer-events", "none")
-                    .style("padding", "4px 8px")
-                    .style("background", "rgba(0,0,0,0.8)")
-                    .style("color", "#fff")
-                    .style("font", "12px sans-serif")
-                    .style("border-radius", "3px")
-                    .style("opacity", 0);
+            /* ---------- Tooltip (for precip bars) ---------- */
+            const tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "d3-tooltip")
+                .style("position", "fixed")
+                .style("pointer-events", "none")
+                .style("padding", "4px 8px")
+                .style("background", "rgba(0,0,0,0.8)")
+                .style("color", "#fff")
+                .style("font", "12px sans-serif")
+                .style("border-radius", "3px")
+                .style("opacity", 0);
 
-                let barsG, precip, drawBars, barWidth;
+            /* ---------- Globals used outside CSV scope ---------- */
+            let barsG, precip, drawBars, barWidth;
 
-                d3.csv(
-                    `../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}&stacked=true`,
-                    d => { d.date = parseDate(d.date); return d; }
-                ).then(data => {
+            /* ---------- Load & render data ---------- */
+            d3.csv(
+                `../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}&stacked=true`,
+                d => { d.date = parseDate(d.date); return d; }
+            ).then(data => {
 
-                    // --- new scales / axes
-                    const precipKey = "Precipitation";
-                    const yP = d3.scaleLinear().range([height, 0]);
-                    const yPC = d3.scaleLinear().range([height2, 0]);
+                /* ----- Scales for precipitation (focus/context) ----- */
+                const precipKey = "Precipitation";
+                const yP = d3.scaleLinear().range([height, 0]);     // for axis calc
+                const yPC = d3.scaleLinear().range([height2, 0]);    // context bars
+                precip = data.map(d => ({ date: d.date, value: +d[precipKey] }));
 
-                    precip = data.map(d => ({ date: d.date, value: +d[precipKey] }));
-                    const pMax = d3.max(precip, d => d.value);
-                    const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);
-                    const yPAxis = yPbar;
-                    const yAxisRight = d3.axisRight(yPAxis).ticks(3);
+                const pMax = d3.max(precip, d => d.value);
+                const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]); // bars grow downward
+                const yPAxis = yPbar;                                                 // use same inverted range for axis
+                const yAxisRight = d3.axisRight(yPAxis).ticks(3);
 
-                    const allCols = Object.keys(data[0]).filter(k => k !== "date");
-                    const wanted = allCols.filter(k => /^(Runoff|Lateral Flow|Baseflow)$/i.test(k));
+                /* ----- Filter which streamflow columns to plot ----- */
+                const allCols = Object.keys(data[0]).filter(k => k !== "date");
+                const wanted = allCols.filter(k => /^(Runoff|Lateral Flow|Baseflow)$/i.test(k));
 
-                    color.domain(wanted);
+                color.domain(wanted);
 
-                    const sites = wanted.map(name => ({
-                        name,
-                        values: data.map(d => ({ date: d.date, datavalue: +d[name] }))
-                    }));
+                const sites = wanted.map(name => ({
+                    name,
+                    values: data.map(d => ({ date: d.date, datavalue: +d[name] }))
+                }));
 
-                    // domains
-                    x.domain(d3.extent(data, d => d.date));
-                    xC.domain(x.domain());
+                /* ----- Set domains ----- */
+                x.domain(d3.extent(data, d => d.date));
+                xC.domain(x.domain());
 
-                    const yMin = d3.min(sites, c => d3.min(c.values, v => v.datavalue >= 0 ? v.datavalue : 0));
-                    const yMax = d3.max(sites, c => d3.max(c.values, v => v.datavalue));
-                    y.domain([yMin, yMax]);
-                    yC.domain(y.domain());
+                const yMin = d3.min(sites, c => d3.min(c.values, v => v.datavalue >= 0 ? v.datavalue : 0));
+                const yMax = d3.max(sites, c => d3.max(c.values, v => v.datavalue));
+                y.domain([yMin, yMax]);
+                yC.domain(y.domain());
 
-                    yP.domain([0, d3.max(precip, d => d.value)]);
-                    yPC.domain(yP.domain());
+                yP.domain([0, pMax]);
+                yPC.domain(yP.domain());
 
-                    focus.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", `translate(0,${height})`)
-                        .call(xAxis);
+                /* ----- Axes (focus) ----- */
+                focus.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(xAxis);
 
-                    focus.append("g")
-                        .attr("class", "y axis")
-                        .call(yAxis)
-                        .append("text")
-                        .attr("transform", "rotate(-90)")
-                        .attr("y", 6).attr("dy", ".71em")
-                        .style("text-anchor", "end")
-                        .text("Streamflow (mm)");
+                focus.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("Streamflow (mm)");
 
-                    focus.append("g")                                // right axis for precip
-                        .attr("class", "y axis precip-axis")
-                        .attr("transform", `translate(${width},0)`)
-                        .call(yAxisRight)
-                        .append("text")
-                        .attr("transform", "rotate(-90)")
-                        .attr("y", -12)
-                        .attr("dy", ".71em")
-                        .style("text-anchor", "end")
-                        .text("Precip (mm)");
+                // right-side precip axis
+                focus.append("g")
+                    .attr("class", "y axis precip-axis")
+                    .attr("transform", `translate(${width},0)`)
+                    .call(yAxisRight)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", -12)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("Precip (mm)");
 
-                    const site = focus.selectAll(".site")
-                        .data(sites)
-                        .enter().append("g")
-                        .attr("class", "site");
+                /* ----- Streamflow lines (focus) ----- */
+                const site = focus.selectAll(".site")
+                    .data(sites)
+                    .enter().append("g")
+                    .attr("class", "site");
 
-                    site.append("path")
-                        .attr("class", "line")
-                        .attr("d", d => line(d.values))
-                        .style("stroke", d => color(d.name));
+                site.append("path")
+                    .attr("class", "line")
+                    .attr("d", d => line(d.values))
+                    .style("stroke", d => color(d.name));
 
+                // right-anchored text labels for each line (focus)
+                let c = 0;
+                site.append("text")
+                    .datum(d => ({ name: d.name, value: d.values[d.values.length - 1] }))
+                    .attr("transform", d => {
+                        c += 1;
+                        return `translate(${x(d.value.date)},${y(d.value.datavalue) - c * 20})`;
+                    })
+                    .attr("x", 3)
+                    .attr("dy", ".35em")
+                    .style("stroke", d => color(d.name))
+                    .text(d => d.name);
 
-                    barWidth = function () {
-                        // assume daily data; compute from first delta
-                        const d0 = data[0].date, d1 = data[1].date;
-                        const px = x(d1) - x(d0);
-                        return Math.max(1, px * 0.8);
-                    };
+                /* ----- Precip bars (focus) ----- */
+                barsG = focus.append("g")
+                    .attr("class", "precip")
+                    .attr("clip-path", "url(#clip)");
 
-                    drawBars = function () {
-                        const w = barWidth();
+                barWidth = function () {
+                    // width based on first two dates; adjust on zoom
+                    const px = data.length > 1 ? x(data[1].date) - x(data[0].date) : 2;
+                    return Math.max(1, px * 0.8);
+                };
 
-                        const bars = barsG.selectAll("rect")
-                            .data(precip, d => d.date);   // key by date
+                drawBars = function () {
+                    const w = barWidth();
 
-                        bars.join(
-                            enter => enter.append("rect")
-                                .attr("x", d => x(d.date) - w / 2)
-                                .attr("y", 0)
-                                .attr("width", w)
-                                .attr("height", d => height - yP(d.value))
-                                .attr("fill", "#1f77b4")
-                                .attr("opacity", 0.35)
-                                .on("mouseenter", function (event, d) {
-                                    d3.select(this).attr("opacity", 0.8);
-                                    tooltip
-                                        .style("opacity", 1)
-                                        .html(`${fmtDate(d.date)}<br>${d.value.toFixed(2)} mm`);
-                                })
-                                .on("mousemove", function (event) {
-                                    tooltip
-                                        .style("left", (event.clientX + 12) + "px")
-                                        .style("top", (event.clientY - 28) + "px");
-                                })
-                                .on("mouseleave", function () {
-                                    d3.select(this).attr("opacity", 0.35);
-                                    tooltip.style("opacity", 0);
-                                }),
-                            update => update
-                                .attr("x", d => x(d.date) - w / 2)
-                                .attr("width", w)
-                                .attr("height", d => height - yP(d.value)),
-                            exit => exit.remove()
-                        );
-                    }
+                    const bars = barsG.selectAll("rect")
+                        .data(precip, d => d.date); // key by date
 
-                    let c = 0;
-                    site.append("text")
-                        .datum(d => ({ name: d.name, value: d.values[d.values.length - 1] }))
-                        .attr("transform", d => {
-                            c += 1;
-                            return `translate(${x(d.value.date)},${y(d.value.datavalue) - c * 20})`;
-                        })
-                        .attr("x", 3)
-                        .attr("dy", ".35em")
-                        .style("stroke", d => color(d.name))
-                        .text(d => d.name);
-
-
-                    barsG = focus.append("g")
-                        .attr("class", "precip")
-                        .attr("clip-path", "url(#clip)");
-
-                    drawBars();
-
-                    context.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", `translate(0,${height2})`)
-                        .call(xAxisC);
-
-                    context.append("g")
-                        .attr("class", "y axis")
-                        .call(yAxisC);
-
-                    const siteC = context.selectAll(".site")
-                        .data(sites)
-                        .enter().append("g")
-                        .attr("class", "site");
-
-                    siteC.append("path")
-                        .attr("class", "line")
-                        .attr("d", d => lineC(d.values))
-                        .style("stroke", d => color(d.name));
-
-                    context.append("g")
-                        .attr("class", "x brush")
-                        .call(brush)
-                        .call(brush.move, x.range());
-
-                    context.select(".x.brush").selectAll(".handle").attr("display", null);
-
-                    context.append("text")
-                        .attr("class", "y axis")
-                        .attr("transform", `translate(${width / 2},${height2 + margin2.bottom})`)
-                        .style("text-anchor", "middle")
-                        .text("Date");
-
-                    const barsGC = context.append("g")
-                        .attr("class", "precipC");
-
-                    function drawBarsC() {
-                        const w = barWidth(); // reuse; same dates
-                        barsGC.selectAll("rect")
-                            .data(precip)
-                            .join("rect")
-                            .attr("x", d => xC(d.date) - w / 2)
+                    bars.join(
+                        enter => enter.append("rect")
+                            .attr("x", d => x(d.date) - w / 2)
                             .attr("y", 0)
                             .attr("width", w)
-                            .attr("height", d => height2 - yPC(d.value))
+                            .attr("height", d => yPbar(d.value))      // grow downward
                             .attr("fill", "#1f77b4")
-                            .attr("opacity", 0.25);
-                    }
-                    drawBarsC();
+                            .attr("opacity", 0.35)
+                            .on("mouseenter", function (event, d) {
+                                d3.select(this).attr("opacity", 0.8);
+                                tooltip.style("opacity", 1)
+                                    .html(`${fmtDate(d.date)}<br>${d.value.toFixed(2)} mm`);
+                            })
+                            .on("mousemove", function (event) {
+                                tooltip.style("left", (event.clientX + 12) + "px")
+                                    .style("top", (event.clientY - 28) + "px");
+                            })
+                            .on("mouseleave", function () {
+                                d3.select(this).attr("opacity", 0.35);
+                                tooltip.style("opacity", 0);
+                            }),
+                        update => update
+                            .attr("x", d => x(d.date) - w / 2)
+                            .attr("width", w)
+                            .attr("height", d => yPbar(d.value)),
+                        exit => exit.remove()
+                    );
+                };
 
-                });
+                drawBars();
 
-                function brushed(event) {
-                    const sel = event.selection;
-                    x.domain(sel ? sel.map(xC.invert) : xC.domain());
+                /* ----- Context panel (axes, lines, bars, brush) ----- */
+                context.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", `translate(0,${height2})`)
+                    .call(xAxisC);
 
-                    // lines
-                    focus.selectAll('.line').attr("d", d => line(d.values));
-                    focus.select(".x.axis").call(xAxis);
+                context.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxisC);
 
-                    // bars
-                    redrawBars();
-                }
+                const siteC = context.selectAll(".site")
+                    .data(sites)
+                    .enter().append("g")
+                    .attr("class", "site");
 
-                function redrawBars() {
+                siteC.append("path")
+                    .attr("class", "line")
+                    .attr("d", d => lineC(d.values))
+                    .style("stroke", d => color(d.name));
+
+                // context precip bars (no tooltip)
+                const barsGC = context.append("g").attr("class", "precipC");
+                function drawBarsC() {
                     const w = barWidth();
-                    barsG.selectAll("rect")
-                        .attr("x", d => x(d.date) - w / 2)
-                        .attr("width", w);
+                    barsGC.selectAll("rect")
+                        .data(precip)
+                        .join("rect")
+                        .attr("x", d => xC(d.date) - w / 2)
+                        .attr("y", 0)
+                        .attr("width", w)
+                        .attr("height", d => height2 - yPC(d.value))
+                        .attr("fill", "#1f77b4")
+                        .attr("opacity", 0.25);
                 }
+                drawBarsC();
 
-            </script>
-            {% include 'controls/unitizer_modal.htm'%}
-            {% include 'controls/poweruser_panel.htm'%}
+                // brush group (+ initial full-range selection)
+                context.append("g")
+                    .attr("class", "x brush")
+                    .call(brush)
+                    .call(brush.move, x.range())
+                    .selectAll(".handle")
+                    .attr("display", null);
+
+                // x-axis label under context
+                context.append("text")
+                    .attr("class", "y axis")
+                    .attr("transform", `translate(${width / 2},${height2 + margin2.bottom})`)
+                    .style("text-anchor", "middle")
+                    .text("Date");
+            });
+
+            /* ---------- Brush handler (updates focus view) ---------- */
+            function brushed(event) {
+                const sel = event.selection;
+                x.domain(sel ? sel.map(xC.invert) : xC.domain());
+
+                // redraw lines
+                focus.selectAll('.line').attr("d", d => line(d.values));
+                focus.select(".x.axis").call(xAxis);
+
+                // redraw precip bars
+                redrawBars();
+            }
+
+            /* ---------- Helper: update bar positions/widths on zoom ---------- */
+            function redrawBars() {
+                const w = barWidth();
+                barsG.selectAll("rect")
+                    .attr("x", d => x(d.date) - w / 2)
+                    .attr("width", w);
+            }
+        </script>
+        {% include 'controls/unitizer_modal.htm'%}
+        {% include 'controls/poweruser_panel.htm'%}
     </div>
 
     <!-- Placed at the end of the document so the pages load faster -->
@@ -427,7 +442,6 @@
         integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
         crossorigin="anonymous"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/mousetrap.js') }}"></script>
-    <script src="/weppcloud/static/js/sorttable.js"></script>
 </body>
 
 </html>
