@@ -8,12 +8,12 @@ from os.path import exists as _exists
 from wepppy.all_your_base import isfloat
 
 _thisdir = os.path.dirname(__file__)
-_cache_dir = '/geodata/au/asris_2001/cache'
+_cache_dir = './cache'
 
 if not _exists(_cache_dir):
     _join(_thisdir, 'cache')
 
-_url = 'http://www.asris.csiro.au/arcgis/rest/services/ASRIS/ASRIS_2001/MapServer/' \
+_url = 'https://www.asris.csiro.au/arcgis/rest/services/ASRIS/ASRIS_2001/MapServer/' \
        'identify?geometry={{x:{lng},y:{lat}}}&geometryType=esriGeometryPoint&' \
        'sr=4283&layers=all&layerDefs=&time=&layerTimeOptions=&tolerance=2&' \
        'mapExtent=110.43000000000004,-37.782905983857944,+156.07999999999905,-5.434188035140686&' \
@@ -91,6 +91,7 @@ def query_asris(lng, lat):
     return _d
 
 if __name__ == "__main__":
+    from pprint import pprint
     #query_asris(151.1436, -8.35522)
-    query_asris(146, -38.472)
+    pprint(query_asris(146, -38.472))
 
