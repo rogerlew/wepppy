@@ -1067,10 +1067,14 @@ class Omni(NoDbBase, LogMixin):
         combined['Sediment Deposition (t)']   = combined['Sediment Deposition (kg/ha)']   * combined['Hillslope Area (ha)'] / 1_000
         combined['Sediment Yield (t)']        = combined['Sediment Yield (kg/ha)']        * combined['Hillslope Area (ha)'] / 1_000
 
+        # Calculate NTU in g/L (combined['Sediment Yield (t)'] * 1_000_000) / (combined['Runoff (m^3)'] * 1_000)
+        combined['NTU (g/L)'] = (combined['Sediment Yield (t)'] * 1_000) / combined['Runoff (m^3)']
+
         out_path = _join(self.wd, 'omni', 'scenarios.hillslope_summaries.parquet')
         combined.to_parquet(out_path)
 
 
-# sediment going up with mulching
-# add NTU
-# calculate soil loss (kg) and soil dep/yield (kg)
+# [x] add NTU
+# [ ] add peak runoff (50 yr)
+# [x] treat low and moderate severity conditions
+# [ ] rerun https://wepp.cloud/weppcloud/runs/rlew-indecorous-vest/disturbed9002/
