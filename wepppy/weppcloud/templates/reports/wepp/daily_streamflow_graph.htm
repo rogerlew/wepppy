@@ -214,7 +214,7 @@
                 .style("opacity", 0);
 
             /* ---------- Globals used outside CSV scope ---------- */
-            let barsG, precip, drawBars, barWidth;
+            let barsG, meteo, rainMelt, drawBars, barWidth;
 
             /* ---------- Load & render data ---------- */
             d3.csv(
@@ -222,13 +222,23 @@
                 d => { d.date = parseDate(d.date); return d; }
             ).then(data => {
 
-                /* ----- Scales for precipitation (focus/context) ----- */
+                /* ---------- In the CSV .then(...) ---------- */
                 const precipKey = "Precipitation";
+                const rainMeltKey = "Rain + Melt";
+
+                // one record per day, both values
+                meteo = data.map(d => ({
+                    date: d.date,
+                    p: +d[precipKey],
+                    rm: +d[rainMeltKey]
+                }));
+
+                // scale uses the larger series (rm)
+                const pMax = d3.max(meteo, d => d.rm);
+
+                /* ----- Scales for precipitation (focus/context) ----- */
                 const yP = d3.scaleLinear().range([height, 0]);     // for axis calc
                 const yPC = d3.scaleLinear().range([height2, 0]);    // context bars
-                precip = data.map(d => ({ date: d.date, value: +d[precipKey] }));
-
-                const pMax = d3.max(precip, d => d.value);
                 const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]); // bars grow downward
                 const yPAxis = yPbar;                                                 // use same inverted range for axis
                 const yAxisRight = d3.axisRight(yPAxis).ticks(3);
@@ -323,20 +333,22 @@
                     const w = barWidth();
 
                     const bars = barsG.selectAll("rect")
-                        .data(precip, d => d.date); // key by date
+                        .data(meteo, d => d.date);
 
                     bars.join(
                         enter => enter.append("rect")
                             .attr("x", d => x(d.date) - w / 2)
                             .attr("y", 0)
                             .attr("width", w)
-                            .attr("height", d => yPbar(d.value))      // grow downward
-                            .attr("fill", "#1f77b4")
+                            .attr("height", d => yPbar(d.rm))                       // height from rain+melt
+                            .attr("fill", d => d.rm > d.p ? "#ff69b4" : "#1f77b4")   // pink if rm > precip
                             .attr("opacity", 0.35)
                             .on("mouseenter", function (event, d) {
                                 d3.select(this).attr("opacity", 0.8);
                                 tooltip.style("opacity", 1)
-                                    .html(`${fmtDate(d.date)}<br>${d.value.toFixed(2)} mm`);
+                                    .html(`${fmtDate(d.date)}<br>`
+                                        + `Precip: ${d.p.toFixed(2)} mm<br>`
+                                        + `Rain+Melt: ${d.rm.toFixed(2)} mm`);
                             })
                             .on("mousemove", function (event) {
                                 tooltip.style("left", (event.clientX + 12) + "px")
@@ -349,7 +361,8 @@
                         update => update
                             .attr("x", d => x(d.date) - w / 2)
                             .attr("width", w)
-                            .attr("height", d => yPbar(d.value)),
+                            .attr("height", d => yPbar(d.rm))
+                            .attr("fill", d => d.rm > d.p ? "#ff69b4" : "#1f77b4"),
                         exit => exit.remove()
                     );
                 };
@@ -378,19 +391,21 @@
 
                 // context precip bars (no tooltip)
                 const barsGC = context.append("g").attr("class", "precipC");
+
                 function drawBarsC() {
                     const w = barWidth();
                     barsGC.selectAll("rect")
-                        .data(precip)
+                        .data(meteo)
                         .join("rect")
                         .attr("x", d => xC(d.date) - w / 2)
                         .attr("y", 0)
                         .attr("width", w)
-                        .attr("height", d => height2 - yPC(d.value))
-                        .attr("fill", "#1f77b4")
+                        .attr("height", d => height2 - yPC(d.rm))
+                        .attr("fill", d => d.rm > d.p ? "#ff69b4" : "#1f77b4")
                         .attr("opacity", 0.25);
                 }
                 drawBarsC();
+
 
                 // brush group (+ initial full-range selection)
                 context.append("g")
@@ -413,13 +428,12 @@
                 const sel = event.selection;
                 x.domain(sel ? sel.map(xC.invert) : xC.domain());
 
-                // redraw lines
                 focus.selectAll('.line').attr("d", d => line(d.values));
                 focus.select(".x.axis").call(xAxis);
 
-                // redraw precip bars
                 redrawBars();
             }
+
 
             /* ---------- Helper: update bar positions/widths on zoom ---------- */
             function redrawBars() {
@@ -428,6 +442,9 @@
                     .attr("x", d => x(d.date) - w / 2)
                     .attr("width", w);
             }
+            // add rain + snowmelt as pink
+            // stack baseflow (dark blue), lateral flow (green), runoff (red or orange)
+            // show tooltip values for basefloow, lateral flow, and runoff
         </script>
         {% include 'controls/unitizer_modal.htm'%}
         {% include 'controls/poweruser_panel.htm'%}
