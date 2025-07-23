@@ -34,8 +34,29 @@
         }
 
         .brush .handle {
-            fill: #666;
-            stroke: #000;
+            fill: var(--handle-fill, #999);
+            stroke: var(--handle-stroke, #515050);
+            stroke-width: var(--handle-stroke-width, 1);
+            opacity: var(--handle-opacity, 0.8);
+            rx: 2px;
+            ry: 2px;
+            transition: fill 0.2s ease;
+        }
+
+        .brush .handle:hover {
+            fill: var(--handle-fill-hover, #777);
+        }
+
+        .brush .handle--w,
+        .brush .handle--e {
+            cursor: ew-resize;
+            width: var(--handle-size, 4px);
+        }
+
+        .brush .handle--n,
+        .brush .handle--s {
+            cursor: ns-resize;
+            height: var(--handle-size, 4px);
         }
 
         .x.axis path {
@@ -54,10 +75,67 @@
 <body>
     {% include 'header.htm'%}
     <div role="main" class="container-full">
-        <h2>Daily Runoff/Lateral Flow/Baseflow</h5>
+        <h2>Daily Runoff/Lateral Flow/Baseflow for {{ ron.runid }}</h2>
 
             <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
             <div id="area1"></div>
+            <!--
+                File: daily_streamflow_graph.htm
+                Purpose:
+                    Renders an interactive time-series visualization of daily streamflow components
+                    (Runoff, Lateral Flow, Baseflow) along with precipitation bars. Provides a
+                    focus+context brush for zooming and panning over time.
+
+                Dependencies:
+                    - D3.js v6+ for scales, axes, line generators, brushing, and CSV loading.
+
+                Data Input:
+                    - CSV at ../../../resources/wepp/daily_streamflow.csv
+                    - Query parameters: exclude_yr_indxs, stacked
+                    - CSV fields: date (YYYYMMDD), Precipitation, Runoff, Lateral Flow, Baseflow
+
+                Main Components:
+                    1. Margins & Dimensions
+                         • margin, margin2: spacing for focus and context panels
+                         • width, height, height2: computed from window.innerWidth/innerHeight
+
+                    2. Scales & Axes
+                         • x, xC: time scales for focus and context
+                         • y, yC: linear scales for streamflow (focus/context)
+                         • yP, yPC: linear scales for precipitation (focus/context)
+                         • xAxis, xAxisC: bottom axes
+                         • yAxis: left axis for streamflow
+                         • yAxisRight: right axis for precipitation
+                         • yAxisC: left axis ticks for context
+
+                    3. SVG Structure
+                         • <defs><clipPath> for clipping focus bars
+                         • <g class="focus">: detailed view
+                         • <g class="context">: overview + brush selector
+
+                    4. Line & Bar Generators
+                         • line, lineC: path generators for streamflow series
+                         • drawBars(): daily precipitation bars in focus with tooltip
+                         • drawBarsC(): precipitation bars in context
+
+                    5. Brush Interaction
+                         • d3.brushX() on context panel
+                         • brushed(event): updates x.domain(), redraws lines/bars in focus
+
+                    6. Tooltip
+                         • Styled fixed-position div showing date & precipitation on hover
+
+                Workflow:
+                    a. Load CSV, parse dates, cast numeric values.
+                    b. Compute domains for all scales.
+                    c. Render focus panel: axes, lines, precipitation bars, labels.
+                    d. Render context panel: axes, lines, bars, brush.
+                    e. Initialize brush to full extent; handle brush events for zooming.
+
+                Customization:
+                    - Adjust margins or color scheme via D3 scale config.
+                    - Change data filters via exclude_yr_indxs template variable.
+            -->
             <script>
                 const margin = { top: 10, right: 100, bottom: (window.innerHeight - 80) * 0.2, left: 40 },
                     margin2 = { top: (window.innerHeight - 80) * 0.80, right: 100, bottom: 70, left: 40 },
@@ -202,14 +280,14 @@
                         .style("stroke", d => color(d.name));
 
 
-                    barWidth = function() {
+                    barWidth = function () {
                         // assume daily data; compute from first delta
                         const d0 = data[0].date, d1 = data[1].date;
                         const px = x(d1) - x(d0);
                         return Math.max(1, px * 0.8);
                     };
 
-                    drawBars = function() {
+                    drawBars = function () {
                         const w = barWidth();
 
                         const bars = barsG.selectAll("rect")
@@ -295,7 +373,7 @@
                         .attr("class", "y axis")
                         .attr("transform", `translate(${width / 2},${height2 + margin2.bottom})`)
                         .style("text-anchor", "middle")
-                        .text("Year");
+                        .text("Date");
 
                     const barsGC = context.append("g")
                         .attr("class", "precipC");
