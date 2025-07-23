@@ -409,11 +409,11 @@ class Treatments(NoDbBase, LogMixin):
         mulch_cover_change = treatment.replace('mulch_', '')
         mulch_cover_change = int(mulch_cover_change) / 100.0
 
-#        if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
-#                               'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire',
-#                               'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+        if disturbed_class in ['grass high sev fire', 'grass moderate sev fire', 'grass low sev fire',
+                               'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire',
+                               'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
 
-        if disturbed_class in ['grass high sev fire', 'shrub high sev fire',  'forest high sev fire']:
+ #       if disturbed_class in ['grass high sev fire', 'shrub high sev fire',  'forest high sev fire']:
  
             inrcov = man.inis[0].data.inrcov
             new_inrcov = min(1.0, inrcov + mulch_cover_change)
