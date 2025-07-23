@@ -159,13 +159,42 @@
                     .attr("class", "context")
                     .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
+
+                // Tooltip div
+                const fmtDate = d3.timeFormat("%Y-%m-%d");
+                const tooltip = d3.select("body")
+                    .append("div")
+                    .attr("class", "d3-tooltip")
+                    .style("position", "fixed")
+                    .style("pointer-events", "none")
+                    .style("padding", "4px 8px")
+                    .style("background", "rgba(0,0,0,0.8)")
+                    .style("color", "#fff")
+                    .style("font", "12px sans-serif")
+                    .style("border-radius", "3px")
+                    .style("opacity", 0);
+
                 d3.csv(
                     `../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}&stacked=true`,
                     d => { d.date = parseDate(d.date); return d; }
                 ).then(data => {
 
+                    // --- new scales / axes
+                    const precipKey = "Precipitation";
+                    const yP = d3.scaleLinear().range([height, 0]);
+                    const yPC = d3.scaleLinear().range([height2, 0]);
+
+                    const pMax = d3.max(data, d => +d[precipKey]);
+                    const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);
+                    const yPAxis = yPbar;
+                    const yAxisRight = d3.axisRight(yPAxis).ticks(3);
+
+
+                    // --- after csv load
                     const allCols = Object.keys(data[0]).filter(k => k !== "date");
-                    const wanted = allCols.filter(k => /^(Runoff|LateralFlow|Baseflow)$/i.test(k));  // adjust names
+                    const wanted = allCols.filter(k => /^(Runoff|Lateral Flow|Baseflow)$/i.test(k));
+
+                    const precip = data.map(d => ({ date: d.date, value: +d[precipKey] }));
 
                     color.domain(wanted);
 
@@ -174,12 +203,17 @@
                         values: data.map(d => ({ date: d.date, datavalue: +d[name] }))
                     }));
 
+                    // domains
                     x.domain(d3.extent(data, d => d.date));
+                    xC.domain(x.domain());
+
                     const yMin = d3.min(sites, c => d3.min(c.values, v => v.datavalue >= 0 ? v.datavalue : 0));
                     const yMax = d3.max(sites, c => d3.max(c.values, v => v.datavalue));
                     y.domain([yMin, yMax]);
-                    xC.domain(x.domain());
                     yC.domain(y.domain());
+
+                    yP.domain([0, d3.max(precip, d => d.value)]);
+                    yPC.domain(yP.domain());
 
                     focus.append("g")
                         .attr("class", "x axis")
@@ -191,10 +225,20 @@
                         .call(yAxis)
                         .append("text")
                         .attr("transform", "rotate(-90)")
-                        .attr("y", 6)
-                        .attr("dy", ".71em")
+                        .attr("y", 6).attr("dy", ".71em")
                         .style("text-anchor", "end")
                         .text("Streamflow (mm)");
+
+                    focus.append("g")                                // right axis for precip
+                        .attr("class", "y axis precip-axis")
+                        .attr("transform", `translate(${width},0)`)
+                        .call(yAxisRight)
+                        .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", -12)
+                        .attr("dy", ".71em")
+                        .style("text-anchor", "end")
+                        .text("Precip (mm)");
 
                     const site = focus.selectAll(".site")
                         .data(sites)
@@ -205,6 +249,51 @@
                         .attr("class", "line")
                         .attr("d", d => line(d.values))
                         .style("stroke", d => color(d.name));
+
+
+                    function barWidth() {
+                        // assume daily data; compute from first delta
+                        const d0 = data[0].date, d1 = data[1].date;
+                        const px = x(d1) - x(d0);
+                        return Math.max(1, px * 0.8);
+                    }
+
+                    function drawBars() {
+                        const w = barWidth();
+
+                        const bars = barsG.selectAll("rect")
+                            .data(precip, d => d.date);   // key by date
+
+                        bars.join(
+                            enter => enter.append("rect")
+                                .attr("x", d => x(d.date) - w / 2)
+                                .attr("y", 0)
+                                .attr("width", w)
+                                .attr("height", d => height - yP(d.value))
+                                .attr("fill", "#1f77b4")
+                                .attr("opacity", 0.35)
+                                .on("mouseenter", function (event, d) {
+                                    d3.select(this).attr("opacity", 0.8);
+                                    tooltip
+                                        .style("opacity", 1)
+                                        .html(`${fmtDate(d.date)}<br>${d.value.toFixed(2)} mm`);
+                                })
+                                .on("mousemove", function (event) {
+                                    tooltip
+                                        .style("left", (event.clientX + 12) + "px")
+                                        .style("top", (event.clientY - 28) + "px");
+                                })
+                                .on("mouseleave", function () {
+                                    d3.select(this).attr("opacity", 0.35);
+                                    tooltip.style("opacity", 0);
+                                }),
+                            update => update
+                                .attr("x", d => x(d.date) - w / 2)
+                                .attr("width", w)
+                                .attr("height", d => height - yP(d.value)),
+                            exit => exit.remove()
+                        );
+                    }
 
                     let c = 0;
                     site.append("text")
@@ -217,6 +306,13 @@
                         .attr("dy", ".35em")
                         .style("stroke", d => color(d.name))
                         .text(d => d.name);
+
+
+                    const barsG = focus.append("g")
+                        .attr("class", "precip")
+                        .attr("clip-path", "url(#clip)");
+
+                    drawBars();
 
                     context.append("g")
                         .attr("class", "x axis")
@@ -249,23 +345,48 @@
                         .attr("transform", `translate(${width / 2},${height2 + margin2.bottom})`)
                         .style("text-anchor", "middle")
                         .text("Year");
+
+                    const barsGC = context.append("g")
+                        .attr("class", "precipC");
+
+                    function drawBarsC() {
+                        const w = barWidth(); // reuse; same dates
+                        barsGC.selectAll("rect")
+                            .data(precip)
+                            .join("rect")
+                            .attr("x", d => xC(d.date) - w / 2)
+                            .attr("y", 0)
+                            .attr("width", w)
+                            .attr("height", d => height2 - yPC(d.value))
+                            .attr("fill", "#1f77b4")
+                            .attr("opacity", 0.25);
+                    }
+                    drawBarsC();
+
                 });
 
                 function brushed(event) {
                     const sel = event.selection;
-                    if (sel) {
-                        const domain = sel.map(xC.invert);
-                        x.domain(domain);
-                    } else {
-                        x.domain(xC.domain());
-                    }
+                    x.domain(sel ? sel.map(xC.invert) : xC.domain());
+
+                    // lines
                     focus.selectAll('.line').attr("d", d => line(d.values));
                     focus.select(".x.axis").call(xAxis);
+
+                    // bars
+                    redrawBars();
+                }
+
+                function redrawBars() {
+                    const w = barWidth();
+                    barsG.selectAll("rect")
+                        .attr("x", d => x(d.date) - w / 2)
+                        .attr("width", w);
                 }
             </script>
             {% include 'controls/unitizer_modal.htm'%}
             {% include 'controls/poweruser_panel.htm'%}
-    </div> <!--main container -->
+    </div>
 
     <!-- Placed at the end of the document so the pages load faster -->
     <script type="text/javascript" src="{{ url_for('static', filename='js/tinyqueue.js') }}"></script>
