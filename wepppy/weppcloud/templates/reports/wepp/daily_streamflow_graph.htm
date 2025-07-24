@@ -167,8 +167,8 @@
             /* ===== Scales ===== */
             const x = d3.scaleTime().range([0, width]);
             const xC = d3.scaleTime().range([0, width]);
-            const y = d3.scaleLinear().range([height, 0]);    // stacked flows (focus)
-            const yC = d3.scaleLinear().range([height2, 0]);   // stacked flows (context)
+            const y = d3.scaleLinear().range([height, 0]);
+            const yC = d3.scaleLinear().range([height2, 0]);
 
             /* ===== Axes ===== */
             const xAxis = d3.axisBottom(x);
@@ -200,7 +200,7 @@
                 .attr("class", "context")
                 .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
-            /* ===== Tooltip for precip bars ===== */
+            /* ===== Tooltip ===== */
             const tooltip = d3.select("body")
                 .append("div")
                 .attr("class", "d3-tooltip")
@@ -213,31 +213,22 @@
                 .style("border-radius", "3px")
                 .style("opacity", 0);
 
-            /* ===== Globals needed outside the .then() ===== */
-            let barsG, barWidth, redrawBars;
-            let flowsG, area;   // stacked areas (focus)
-            let meteo;          // precip + rain/melt array
-            let flowRows, bisectDate, hoverLine, hoverCapture, showHover; // for future hover functionality
-            let precipAxisG, barsGC;
-
+            /* ===== Globals for handlers ===== */
+            let flowsG, redrawAreas, barsG, barsGC, redrawBars, hoverLine;
             const flowColors = {
-                "Baseflow": "#1e90ff",    // Dodger Blue
-                "Lateral Flow": "#32cd32", // Lime Green
-                "Runoff": "#ff6347"       // Tomato
+                "Baseflow": "#1e90ff",
+                "Lateral Flow": "#32cd32",
+                "Runoff": "#ff6347"
             };
 
             /* ===== Load data ===== */
-            d3.csv(
-                `../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}&stacked=true`,
+            d3.csv("../../../resources/wepp/daily_streamflow.csv?exclude_yr_indxs={{ exclude_yr_indxs }}",
                 d => { d.date = parseDate(d.date); return d; }
             ).then(data => {
 
-                /* --- Keys / colors for stacked hydrograph (bottom→top) --- */
-                const flowKeys = ["Baseflow", "Lateral Flow", "Runoff"];
-
-
-                /* --- Build tidy array for flows --- */
-                flowRows = data.map(d => ({
+                /* --- Keys and tidy rows --- */
+                const flowKeys = ["Runoff", "Lateral Flow", "Baseflow"];   // draw order = z-order
+                const flowRows = data.map(d => ({
                     date: d.date,
                     "Precipitation": +d["Precipitation"],
                     "Rain + Melt": +d["Rain + Melt"],
@@ -245,78 +236,20 @@
                     "Lateral Flow": +d["Lateral Flow"],
                     "Runoff": +d["Runoff"]
                 }));
-                bisectDate = d3.bisector(d => d.date).left;
-                function moved(event) {
-                    const [mx] = d3.pointer(event, this);
-                    const date = x.invert(mx);
-                    let i = bisectDate(flowRows, date);
-                    if (i >= flowRows.length) i = flowRows.length - 1;
-                    const d0 = flowRows[Math.max(i - 1, 0)];
-                    const d1 = flowRows[i];
-                    // choose closer
-                    const d = (!d1 || (date - d0.date) < (d1.date - date)) ? d0 : d1;
 
-                    // position rule
-                    const xPos = x(d.date);
-                    hoverLine
-                        .attr("x1", xPos)
-                        .attr("x2", xPos)
-                        .style("opacity", 1);
-
-                    // show tooltip
-                    tooltip
-                        .style("opacity", 1)
-                        .html(`${fmtDate(d.date)}<br>
-                                Precipitation: ${d["Precipitation"].toFixed(2)} mm<br>
-                                Rain + Melt: ${d["Precipitation"].toFixed(2)} mm<br>
-                                Runoff: ${d["Runoff"].toFixed(2)} mm<br>
-                                Lateral Flow: ${d["Lateral Flow"].toFixed(2)} mm<br>
-                                Baseflow: ${d["Baseflow"].toFixed(2)} mm`);
-
-                    // place tooltip near cursor
-                    tooltip
-                        .style("left", (event.clientX + 12) + "px")
-                        .style("top", (event.clientY - 28) + "px");
-                }
-
-                function left() {
-                    hoverLine.style("opacity", 0);
-                    tooltip.style("opacity", 0);
-                }
-                /* --- Precip / Rain+Melt arrays --- */
-                const precipKey = "Precipitation";
-                const rainMeltKey = "Rain + Melt";
-                meteo = data.map(d => ({
-                    date: d.date,
-                    p: +d[precipKey],
-                    rm: +d[rainMeltKey]
-                }));
-
-                const pMax = d3.max(meteo, d => d.rm);
-
-                /* --- Scales for precip --- */
-                const yP = d3.scaleLinear().range([height, 0]);      // (only for completeness)
-                const yPC = d3.scaleLinear().range([height2, 0]);
-                const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);  // bars downward
-                const yAxisRight = d3.axisRight(yPbar).ticks(3);
-                yP.domain([0, pMax]);
-                yPC.domain(yP.domain());
-
-                /* --- Stack generator --- */
-                const stack = d3.stack()
-                    .keys(flowKeys)
-                    .order(d3.stackOrderNone)
-                    .offset(d3.stackOffsetNone);
-
-                const stacked = stack(flowRows);  // array of layers
-
-                /* --- Domains for x & y using stacked total --- */
-                x.domain(d3.extent(data, d => d.date));
+                /* --- Domains --- */
+                x.domain(d3.extent(flowRows, d => d.date));
                 xC.domain(x.domain());
 
-                const yMaxStack = d3.max(stacked[stacked.length - 1], d => d[1]);
-                y.domain([0, yMaxStack]);
+                const yMax = d3.max(flowRows, d => d3.max(flowKeys, k => d[k]));
+                y.domain([0, yMax]);
                 yC.domain(y.domain());
+
+                const meteo = flowRows.map(d => ({ date: d.date, p: d["Precipitation"], rm: d["Rain + Melt"] }));
+                const pMax = d3.max(meteo, d => d.rm);
+                const yPbar = d3.scaleLinear().domain([0, pMax]).range([0, height]);
+                const yPC = d3.scaleLinear().domain([0, pMax]).range([height2, 0]);
+                const yAxisRight = d3.axisRight(yPbar).ticks(3);
 
                 /* --- Axes (focus) --- */
                 focus.append("g")
@@ -333,8 +266,7 @@
                     .style("text-anchor", "end")
                     .text("Streamflow (mm)");
 
-                // right precip axis
-                precipAxisG = focus.append("g")
+                const precipAxisG = focus.append("g")
                     .attr("class", "y axis precip-axis")
                     .attr("transform", `translate(${width},0)`)
                     .call(yAxisRight);
@@ -345,29 +277,32 @@
                     .style("text-anchor", "end")
                     .text("Precip / Rain+Melt (mm)");
 
-                /* --- Area generators --- */
-                area = d3.area()
-                    .x(d => x(d.data.date))
-                    .y0(d => y(d[0]))
-                    .y1(d => y(d[1]));
+                /* --- Draw flow areas (focus) --- */
+                flowsG = focus.append("g")
+                    .attr("clip-path", "url(#clip)")
+                    .attr("class", "flows");
 
-                const areaC = d3.area()
-                    .x(d => xC(d.data.date))
-                    .y0(d => yC(d[0]))
-                    .y1(d => yC(d[1]));
+                function areaGen(key, xScale, yScale) {         // helper to build an area generator for a key
+                    return d3.area()
+                        .x(d => xScale(d.date))
+                        .y0(yScale(0))
+                        .y1(d => yScale(d[key]));
+                }
 
-                /* --- Draw stacked areas (focus) --- */
-                flowsG = focus.append("g").attr("class", "flows").attr("clip-path", "url(#clip)");
+                redrawAreas = function () {
+                    flowsG.selectAll("path")
+                        .attr("d", key => areaGen(key, x, y)(flowRows));
+                };
+
                 flowsG.selectAll("path")
-                    .data(stacked)
+                    .data(flowKeys)
                     .enter().append("path")
-                    .attr("class", "flow-area")
-                    .attr("fill", d => flowColors[d.key])
-                    .attr("opacity", 0.6)
-                    .attr("d", area);
+                    .attr("fill", d => flowColors[d])
+                    .attr("opacity", 1.0)
+                    .attr("d", key => areaGen(key, x, y)(flowRows));
 
-
-                // vertical hover line
+                /* --- Hover line --- */
+                const bisectDate = d3.bisector(d => d.date).left;
                 hoverLine = focus.append("line")
                     .attr("class", "hover-line")
                     .attr("y1", 0)
@@ -377,33 +312,44 @@
                     .style("pointer-events", "none")
                     .style("opacity", 0);
 
-                // transparent capture rect on top of everything
-                hoverCapture = focus.append("rect")
-                    .attr("class", "hover-capture")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .style("fill", "none")
-                    .style("pointer-events", "all")
-                    .on("mousemove", moved)
-                    .on("mouseleave", left);
+                function moved(event) {
+                    const [mx] = d3.pointer(event, this);
+                    const date = x.invert(mx);
+                    let i = bisectDate(flowRows, date);
+                    if (i >= flowRows.length) i = flowRows.length - 1;
+                    const d0 = flowRows[Math.max(i - 1, 0)];
+                    const d1 = flowRows[i];
+                    const d = (!d1 || (date - d0.date) < (d1.date - date)) ? d0 : d1;
 
+                    const xPos = x(d.date);
+                    hoverLine.attr("x1", xPos).attr("x2", xPos).style("opacity", 1);
+
+                    tooltip
+                        .style("opacity", 1)
+                        .html(`${fmtDate(d.date)}<br>
+               Precipitation: ${d["Precipitation"].toFixed(2)} mm<br>
+               Rain + Melt: ${d["Rain + Melt"].toFixed(2)} mm<br>
+               Runoff: ${d["Runoff"].toFixed(2)} mm<br>
+               Lateral Flow: ${d["Lateral Flow"].toFixed(2)} mm<br>
+               Baseflow: ${d["Baseflow"].toFixed(2)} mm`)
+                        .style("left", (event.clientX + 12) + "px")
+                        .style("top", (event.clientY - 28) + "px");
+                }
+                function left() { hoverLine.style("opacity", 0); tooltip.style("opacity", 0); }
 
                 /* --- Precip / Rain+Melt bars (focus) --- */
                 barsG = focus.append("g")
                     .attr("class", "precip")
                     .attr("clip-path", "url(#clip)");
 
-                barWidth = function () {
-                    const px = data.length > 1 ? x(data[1].date) - x(data[0].date) : 2;
+                const barWidth = () => {
+                    const px = flowRows.length > 1 ? x(flowRows[1].date) - x(flowRows[0].date) : 2;
                     return Math.max(1, px * 0.8);
                 };
 
                 function drawBars() {
                     const w = barWidth();
-
-                    const bars = barsG.selectAll("rect")
-                        .data(meteo, d => d.date);
-
+                    const bars = barsG.selectAll("rect").data(meteo, d => d.date);
                     bars.join(
                         enter => enter.append("rect")
                             .attr("x", d => x(d.date) - w / 2)
@@ -415,18 +361,13 @@
                             .on("mouseenter", function (event, d) {
                                 d3.select(this).attr("opacity", 0.8);
                                 tooltip.style("opacity", 1)
-                                    .html(`${fmtDate(d.date)}<br>`
-                                        + `Precip: ${d.p.toFixed(2)} mm<br>`
-                                        + `Rain+Melt: ${d.rm.toFixed(2)} mm`);
+                                    .html(`${fmtDate(d.date)}<br>
+                          Precip: ${d.p.toFixed(2)} mm<br>
+                          Rain+Melt: ${d.rm.toFixed(2)} mm`);
                             })
-                            .on("mousemove", function (event) {
-                                tooltip.style("left", (event.clientX + 12) + "px")
-                                    .style("top", (event.clientY - 28) + "px");
-                            })
-                            .on("mouseleave", function () {
-                                d3.select(this).attr("opacity", 0.35);
-                                tooltip.style("opacity", 0);
-                            }),
+                            .on("mousemove", event => tooltip.style("left", (event.clientX + 12) + "px")
+                                .style("top", (event.clientY - 28) + "px"))
+                            .on("mouseleave", function () { d3.select(this).attr("opacity", 0.35); tooltip.style("opacity", 0); }),
                         update => update
                             .attr("x", d => x(d.date) - w / 2)
                             .attr("width", w)
@@ -437,26 +378,35 @@
                 }
                 drawBars();
 
-                /* --- Context panel: axes --- */
+                /* --- Hover capture rectangle --- */
+                focus.append("rect")
+                    .attr("class", "hover-capture")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .style("fill", "none")
+                    .style("pointer-events", "all")
+                    .on("mousemove", moved)
+                    .on("mouseleave", left);
+
+                /* --- Context axes --- */
                 context.append("g")
                     .attr("class", "x axis")
                     .attr("transform", `translate(0,${height2})`)
                     .call(xAxisC);
-
                 context.append("g")
                     .attr("class", "y axis")
                     .call(yAxisC);
 
-                /* --- Context stacked areas --- */
+                /* --- Context flow areas --- */
                 const flowsGC = context.append("g").attr("class", "flowsC");
                 flowsGC.selectAll("path")
-                    .data(stacked)
+                    .data(flowKeys)
                     .enter().append("path")
-                    .attr("fill", d => flowColors[d.key])
-                    .attr("d", areaC)
-                    .attr("opacity", 0.7);
+                    .attr("fill", d => flowColors[d])
+                    .attr("opacity", 0.7)
+                    .attr("d", key => areaGen(key, xC, yC)(flowRows));
 
-                /* --- Context precip bars (no tooltip) --- */
+                /* --- Context precip bars --- */
                 barsGC = context.append("g").attr("class", "precipC");
                 function drawBarsC() {
                     const w = barWidth();
@@ -472,7 +422,7 @@
                 }
                 drawBarsC();
 
-                /* --- Brush group --- */
+                /* --- Brush --- */
                 context.append("g")
                     .attr("class", "x brush")
                     .call(brush)
@@ -480,12 +430,16 @@
                     .selectAll(".handle")
                     .attr("display", null);
 
-                /* --- Context x label --- */
+                /* --- Context x-label --- */
                 context.append("text")
                     .attr("class", "y axis")
                     .attr("transform", `translate(${width / 2},${height2 + margin2.bottom})`)
                     .style("text-anchor", "middle")
                     .text("Date");
+
+                /* --- Legend --- */
+                buildLegend();
+
             });
 
             /* ===== Brush handler ===== */
@@ -493,21 +447,15 @@
                 const sel = event.selection;
                 x.domain(sel ? sel.map(xC.invert) : xC.domain());
 
-                // update axes
                 focus.select(".x.axis").call(xAxis);
+                redrawAreas && redrawAreas();
 
-                // update stacked areas
-                flowsG.selectAll("path").attr("d", area);
-
-                // keep hover line in sync if visible
-                hoverLine && hoverLine.style("opacity", 0); // optional hide
-
-                // update precip bars
+                hoverLine && hoverLine.style("opacity", 0);
                 redrawBars();
             }
 
-            /* ===== Reposition bars on zoom ===== */
-            redrawBars = function () {
+            /* ===== Re-position precip bars on zoom ===== */
+            redrawBars = () => {
                 const w = barWidth();
                 barsG.selectAll("rect")
                     .attr("x", d => x(d.date) - w / 2)
@@ -515,10 +463,7 @@
             };
 
             /* ===== Legend ===== */
-            buildLegend();
-
             function buildLegend() {
-                // Include bar colors too, if you want them in the legend
                 const legendData = [
                     { label: "Runoff (mm)", color: flowColors["Runoff"], type: "area" },
                     { label: "Lateral Flow (mm)", color: flowColors["Lateral Flow"], type: "area" },
@@ -526,12 +471,11 @@
                     { label: "Rain+Melt (mm)", color: "#ff69b4", type: "bar" },
                     { label: "Precip (mm)", color: "#1f77b4", type: "bar" }
                 ];
-
                 const itemH = 18, itemW = 18, gap = 6;
 
                 const svgLeg = d3.select("#legend").append("svg")
                     .attr("height", legendData.length * (itemH + gap))
-                    .attr("width", 240);  // tweak as needed
+                    .attr("width", 240);
 
                 const g = svgLeg.selectAll("g.legend-item")
                     .data(legendData)
@@ -544,7 +488,7 @@
                     .attr("height", itemH)
                     .attr("rx", 2).attr("ry", 2)
                     .attr("fill", d => d.color)
-                    .attr("fill-opacity", d => d.type === "area" ? 0.6 : 0.35)
+                    .attr("fill-opacity", d => d.type === "area" ? 1.0 : 0.35)
                     .attr("stroke", "#444");
 
                 g.append("text")
@@ -560,7 +504,7 @@
                 const show = this.checked;
                 barsG.style("display", show ? null : "none");
                 barsGC.style("display", show ? null : "none");
-                d3.select(precipAxisG).style("display", show ? null : "none");
+                d3.selectAll(".precip-axis").style("display", show ? null : "none");
             });
         </script>
         {% include 'controls/unitizer_modal.htm'%}
