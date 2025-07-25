@@ -12,10 +12,11 @@ from dotenv import load_dotenv
 _thisdir = os.path.dirname(__file__)
 load_dotenv(_join(_thisdir, '.env'))
 OPENTOPOGRAPHY_API_KEY = os.environ.get('OPENTOPOGRAPHY_API_KEY', None)
-assert OPENTOPOGRAPHY_API_KEY is not None, 'You must set OPENTOPOGRAPHY_API_KEY in .env file'
 
 
 def opentopo_retrieve(extent, dst_fn, cellsize, dataset='SRTMGL1_E', resample='bilinear'):
+    assert OPENTOPOGRAPHY_API_KEY is not None, 'You must set OPENTOPOGRAPHY_API_KEY in .env file'
+
     dataset = dataset.replace('opentopo://', '').upper()
 
     data_dir, fname = _split(os.path.abspath(dst_fn))
