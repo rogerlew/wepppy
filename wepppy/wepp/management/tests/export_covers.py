@@ -67,7 +67,31 @@ with open(extended_landsoil_lookup, 'w') as f:
             continue
 
         _d.update(man_d[disturbed_class])
-        
+
+        sev_enum = 0
+        disturbed_class = _d.get('luse', '')
+        if 'high sev' in disturbed_class:
+            sev_enum = 4
+        elif 'moderate sev' in disturbed_class:
+            sev_enum = 3
+        elif 'low sev' in disturbed_class:
+            sev_enum = 2
+        elif 'prescribed' in disturbed_class:
+            sev_enum = 1
+
+        luse = f'{disturbed_class}'
+
+        if 'forest' in luse:
+            luse = 'forest'
+        elif 'grass' in luse and 'short' not in luse:
+            luse = 'tall grass'
+        elif 'shrub' in luse:
+            luse = 'shrub'
+
+        del _d['luse']
+
+        _d = {'sev_enum': sev_enum,  'luse': luse, 'disturbed_class': disturbed_class, **_d}
+
         if wtr is None:
             wtr = csv.DictWriter(f, fieldnames=_d.keys())
             wtr.writeheader()
