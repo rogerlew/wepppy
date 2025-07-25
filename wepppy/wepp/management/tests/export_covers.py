@@ -1,5 +1,12 @@
 import csv
 from wepppy.wepp.management import load_map, get_management, IniLoopCropland
+from wepppy.nodb.mods.disturbed import read_disturbed_land_soil_lookup
+
+import os
+import json
+
+_thisdir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(_thisdir)
 
 db = 'disturbed'  # None  # 'lu10v5ua' #'esdac' # 'rred' # 'disturbed
 d = load_map(db)
@@ -25,6 +32,7 @@ hdr = ['key', 'desc', 'man', 'disturbed_class',
 
 wtr.writerow([v.replace('.data', '') for v in  hdr])
 
+man_d = {}
 for k in d:
     m = get_management(k, _map=db)
     # Ini.loop.landuse.cropland (6.6 inrcov), (9.3 rilcov)
@@ -40,8 +48,28 @@ for k in d:
                                disturbed_class=disturbed_class,
                                ini=m.inis[0],
                                plant=m.plants[0]) for v in hdr]
-    print(row)
 
+    man_d[disturbed_class] = dict(zip(hdr, row))
     wtr.writerow(row)
 
 fp.close()
+
+landsoil_lookup_fn = '/workdir/wepppy/wepppy/nodb/mods/disturbed/data/disturbed_land_soil_lookup.csv'
+landsoil_lookup = read_disturbed_land_soil_lookup(landsoil_lookup_fn)
+
+extended_landsoil_lookup = 'extended_disturbed_land_soil_lookup.csv'
+
+wtr = None
+with open(extended_landsoil_lookup, 'w') as f:
+    for (texid, disturbed_class), _d in landsoil_lookup.items():
+        if disturbed_class not in man_d:
+            print(f'No management found for {disturbed_class} in man_d')
+            continue
+
+        _d.update(man_d[disturbed_class])
+        
+        if wtr is None:
+            wtr = csv.DictWriter(f, fieldnames=_d.keys())
+            wtr.writeheader()
+
+        wtr.writerow(_d)
