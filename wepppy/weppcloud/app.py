@@ -2070,15 +2070,8 @@ def resources_netful_geojson(runid, config):
 def resources_subcatchments_geojson(runid, config):
     try:
         wd = get_wd(runid)
-#        watershed = Watershed.getInstance(wd)
-#        fn = watershed.subwta_shp
-
-        fn = _join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON')
-        if not _exists(fn):
-            fn = _join(wd, 'dem/taudem/subcatchments.WGS.geojson')
-
-        if _exists(fn):
-            return send_file(fn, mimetype='application/json')
+        watershed = Watershed.getInstance(wd)
+        fn = watershed.subwta_shp
 
         js = json.load(open(fn))
         ron = Ron.getInstance(wd)
@@ -2099,10 +2092,8 @@ def resources_subcatchments_geojson(runid, config):
 def resources_bounds_geojson(runid, config):
     try:
         wd = get_wd(runid)
-#        watershed = Watershed.getInstance(wd)
-        fn = _join(wd, 'dem/topaz/BOUND.WGS.JSON')
-        if not _exists(fn):
-            fn = _join(wd, 'dem/taudem/bound.WGS.geojson')
+        watershed = Watershed.getInstance(wd)
+        fn = watershed.bound_shp
 
         fn2 = fn.split('.')
         fn2.insert(-1, 'opt')
@@ -2138,11 +2129,8 @@ def resources_bounds_geojson(runid, config):
 @app.route('/runs/<string:runid>/<config>/resources/channels.json')
 def resources_channels_geojson(runid, config):
     try:
-        wd = get_wd(runid)
-        channels_fn = _join(wd, '/dem/topaz/CHANNELS.WGS.JSON')
-        if _exists(channels_fn):
-            return send_file(_join(self.topaz_wd, 'CHANNELS.WGS.JSON'), mimetype='application/json')
 
+        wd = get_wd(runid)
         watershed = Watershed.getInstance(wd)
         fn = watershed.channels_shp
 
@@ -2193,15 +2181,9 @@ def task_set_unit_preferences(runid, config):
 def query_topaz_pass(runid, config):
     try:
         wd = get_wd(runid)
-        #watershed = Watershed.getInstance(wd)
-        #has_channels = watershed.has_channels
-        #has_subcatchments = watershed.has_subcatchments
-
-        has_channels = _exists(_join(wd, 'dem/topaz/NETFUL.ARC')) 
-        # TODO: find relevant taudem file
-        
-        has_subcatchments = _exists(_join(wd, 'dem/topaz/SUBCATCHMENTS.WGS.JSON')) or \
-                            _exists(_join(wd, 'dem/taudem/subcatchments.WGS.geojson'))
+        watershed = Watershed.getInstance(wd)
+        has_channels = watershed.has_channels
+        has_subcatchments = watershed.has_subcatchments
 
         if not has_channels:
             return jsonify(0)

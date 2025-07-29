@@ -5,7 +5,7 @@
 <a href="#sub_advanced_opts_con" data-toggle="collapse" class
     aria-expanded="true">Advanced Options</a>
 <div id="sub_advanced_opts_con" class="collapse">
-    {% if watershed.delineation_backend_is_topaz %}
+    {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
     <input type="hidden" id="input_pkcsa" value="-1" name="pkcsa" />
     <input type="hidden" id="input_pkcsa_en" value="-1" name="pkcsa_en" />
     {% else %}

@@ -24,6 +24,12 @@ def _get_bin():
         raise RuntimeError('abstract_watershed binary not found')
     return _bin
 
+def _get_wbt_bin():
+    _bin = _join(_thisdir, 'bin', 'wbt_abstract_watershed')
+
+    if not _exists(_bin):
+        raise RuntimeError('wbt_abstract_watershed binary not found')
+    return _bin
 
 def run_peridot_abstract_watershed(
     wd: str,
@@ -35,6 +41,41 @@ def run_peridot_abstract_watershed(
     assert _exists(_join(wd, 'dem/topaz/SUBWTA.ARC'))
 
     cmd = [_get_bin(), wd, '--ncpu', '24']
+
+    if clip_hillslopes:
+        assert clip_hillslope_length > 0.0
+        cmd += ['--clip-hillslopes', '--clip-hillslope-length', str(clip_hillslope_length)]
+
+    if bieger2015_widths:
+        cmd += ['--bieger2015-widths']
+
+    if verbose:
+        print(' '.join(cmd))
+
+    _log = open(_join(wd, '_peridot.log'), 'w')
+    p = Popen(cmd, stdout=_log, stderr=_log)
+    p.wait()
+
+def run_peridot_wbt_abstract_watershed(
+    wd: str,
+    clip_hillslopes: bool = True,
+    clip_hillslope_length: float = 300.0,
+    bieger2015_widths: bool = False,
+    verbose: bool = True
+):
+    """
+    Run the Peridot abstract watershed tool using WhiteboxTools.
+    
+    Parameters:
+        wd (str): Working directory where the Topaz data is located.
+        clip_hillslopes (bool): Whether to clip hillslopes.
+        clip_hillslope_length (float): Length to clip hillslopes.
+        bieger2015_widths (bool): Whether to use Bieger 2015 widths.
+        verbose (bool): If True, print command details.
+    """
+    assert _exists(_join(wd, 'dem/wbt/subwta.tif'))
+
+    cmd = [_get_wbt_bin(), wd, '--ncpu', '24']
 
     if clip_hillslopes:
         assert clip_hillslope_length > 0.0

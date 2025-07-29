@@ -31,11 +31,12 @@ from wepppy.topo.watershed_abstraction import (
     WeppTopTranslator
 )
 from wepppy.topo.taudem import TauDEMTopazEmulator
-from wepppy.topo.peridot.runner import run_peridot_abstract_watershed, post_abstract_watershed, read_network
+from wepppy.topo.peridot.runner import run_peridot_abstract_watershed, run_peridot_wbt_abstract_watershed, post_abstract_watershed, read_network
 from wepppy.topo.peridot.flowpath import PeridotFlowpath, PeridotHillslope, PeridotChannel
 from wepppy.topo.watershed_abstraction import SlopeFile
 from wepppy.topo.watershed_abstraction.support import HillSummary, ChannelSummary
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
+from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base.geo import read_raster, haversine
 
 from .ron import Ron
@@ -53,6 +54,7 @@ NCPU = multiprocessing.cpu_count() - 2
 class DelineationBackend(IntEnum):
     TOPAZ = 1
     TauDEM = 2
+    WBT = 3
 
 
 class WatershedNotAbstractedError(Exception):
@@ -128,6 +130,15 @@ class Watershed(NoDbBase, LogMixin):
 
                 self._csa = self.config_get_float('taudem', 'csa')
                 self._pkcsa = self.config_get_str('taudem', 'pkcsa')
+
+            elif delineation_backend.lower().startswith('wbt'):
+                self._delineation_backend = DelineationBackend.WBT
+                wbt_dir = self.wbt_wd
+                if not _exists(wbt_dir):
+                    os.mkdir(wbt_dir)
+                self._wbt = None
+                self._csa = self.config_get_float('watershed.wbt', 'csa')
+                self._mcl = self.config_get_float('watershed.wbt', 'mcl')
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
@@ -319,6 +330,13 @@ class Watershed(NoDbBase, LogMixin):
         return delineation_backend == DelineationBackend.TauDEM
 
     @property
+    def delineation_backend_is_wbt(self):
+        delineation_backend = getattr(self, '_delineation_backend', None)
+        if delineation_backend is None:
+            return False
+        return delineation_backend == DelineationBackend.WBT
+
+    @property
     def is_abstracted(self):
         return self._subs_summary is not None and self._chns_summary is not None
 
@@ -338,6 +356,8 @@ class Watershed(NoDbBase, LogMixin):
     def subwta(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'SUBWTA.ARC')
+        elif self.delineation_backend_is_wbt:
+            return self.wbt.subwta
         else:
             return _join(self.taudem_wd, 'subwta.tif')
 
@@ -353,6 +373,11 @@ class Watershed(NoDbBase, LogMixin):
     def subwta_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'SUBCATCHMENTS.WGS.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.subcatchments_wgs_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'subcatchments.WGS.geojson')
 
@@ -360,6 +385,11 @@ class Watershed(NoDbBase, LogMixin):
     def subwta_utm_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'SUBCATCHMENTS.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.subcatchments_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'subcatchments.geojson')
 
@@ -367,6 +397,11 @@ class Watershed(NoDbBase, LogMixin):
     def bound(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'BOUND.ARC')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.bound
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'bound.tif')
 
@@ -374,6 +409,11 @@ class Watershed(NoDbBase, LogMixin):
     def bound_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'BOUND.WGS.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.bound_wgs_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'bound.WGS.geojson')
 
@@ -388,6 +428,11 @@ class Watershed(NoDbBase, LogMixin):
     def netful(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'NETFUL.ARC')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.netful
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'src.tif')
 
@@ -395,6 +440,11 @@ class Watershed(NoDbBase, LogMixin):
     def netful_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'NETFUL.WGS.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.netful_wgs_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'netful.WGS.geojson')
 
@@ -402,6 +452,11 @@ class Watershed(NoDbBase, LogMixin):
     def netful_utm_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'NETFUL.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.netful_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'netful.geojson')
 
@@ -409,6 +464,11 @@ class Watershed(NoDbBase, LogMixin):
     def channels_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'CHANNELS.WGS.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.channels_wgs_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'net.WGS.geojson')
 
@@ -416,6 +476,11 @@ class Watershed(NoDbBase, LogMixin):
     def channels_utm_shp(self):
         if self.delineation_backend_is_topaz:
             return _join(self.topaz_wd, 'CHANNELS.JSON')
+        elif self.delineation_backend_is_wbt:
+            if self.wbt is not None:
+                return self.wbt.channels_json
+            else:
+                return None
         else:
             return _join(self.taudem_wd, 'net.geojson')
 
@@ -533,16 +598,31 @@ class Watershed(NoDbBase, LogMixin):
         return self.outlet is not None
 
     @property
-    def has_channels(self):
+    def has_channels(self) -> bool:
+        if self.delineation_backend_is_wbt and self.wbt is None:
+            return False
+        
         return _exists(self.netful)
 
     @property
-    def has_subcatchments(self):
+    def has_subcatchments(self) -> bool:
+        if self.delineation_backend_is_wbt and self.wbt is None:
+            return False
+        
         return _exists(self.subwta)
 
     @property
     def outlet_top_id(self):
         return self._outlet_top_id
+
+    @property
+    def relief(self):
+        if self.delineation_backend_is_topaz:
+            return Topaz.getInstance(self.wd).relief
+        elif self.wbt is not None:
+            return self.wbt.relief
+        
+        return None
 
     def translator_factory(self):
         if self._chns_summary is None:
@@ -580,6 +660,11 @@ class Watershed(NoDbBase, LogMixin):
 
         if self.delineation_backend_is_topaz:      
             Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
+        elif self.delineation_backend_is_wbt:
+            wbt = WhiteboxToolsTopazEmulator(self.wbt_wd, self.dem_fn)
+            wbt.delineate_channels(csa=self.csa, mcl=self.mcl)
+            self.wbt = wbt
+
         else:
             TauDEMTopazEmulator(self.taudem_wd, self.dem_fn).build_channels(csa=self.csa)
 
@@ -588,6 +673,26 @@ class Watershed(NoDbBase, LogMixin):
 
         prep = RedisPrep.getInstance(self.wd)
         prep.timestamp(TaskEnum.build_channels)
+
+    @property
+    def wbt(self):
+        return self._wbt
+    
+    @wbt.setter
+    def wbt(self, value):
+        assert isinstance(value, WhiteboxToolsTopazEmulator)
+
+        self.lock()
+        try:
+            if value is None:
+                self._wbt = None
+            else:
+                assert isinstance(value, WhiteboxToolsTopazEmulator)
+                self._wbt = value
+            self.dump_and_unlock()
+        except Exception:
+            self.unlock('-f')
+            raise
 
     #
     # set outlet
@@ -603,6 +708,10 @@ class Watershed(NoDbBase, LogMixin):
             topaz = Topaz.getInstance(self.wd)
             topaz.set_outlet(lng=lng, lat=lat, da=da)
             self.outlet = topaz.outlet
+        elif self.delineation_backend_is_wbt:
+            wbt = self.wbt
+            self.outlet = wbt.set_outlet(lng=lng, lat=lat)
+            self.wbt = wbt
         else:
             taudem = TauDEMTopazEmulator(self.taudem_wd, self.dem_fn)
             taudem.set_outlet(lng=lng, lat=lat)
@@ -631,6 +740,9 @@ class Watershed(NoDbBase, LogMixin):
 
         if self.delineation_backend_is_topaz:
             Topaz.getInstance(self.wd).build_subcatchments()
+        elif self.delineation_backend_is_wbt:
+            wbt = self.wbt
+            wbt.delineate_subcatchments()
         else:
             self.lock()
             try:
@@ -697,11 +809,16 @@ class Watershed(NoDbBase, LogMixin):
         self.log('Abstracting Watershed')
 
         if self.abstraction_backend_is_peridot:
-            assert self.delineation_backend_is_topaz
-            run_peridot_abstract_watershed(self.wd,
-                                           clip_hillslopes=False,
-                                           clip_hillslope_length=self.clip_hillslope_length,
-                                           bieger2015_widths=self.bieger2015_widths)
+            if self.delineation_backend_is_topaz:
+                run_peridot_abstract_watershed(self.wd,
+                                            clip_hillslopes=False,
+                                            clip_hillslope_length=self.clip_hillslope_length,
+                                            bieger2015_widths=self.bieger2015_widths)
+            elif self.delineation_backend_is_wbt:
+                run_peridot_wbt_abstract_watershed(self.wd,
+                                            clip_hillslopes=self.clip_hillslopes,
+                                            clip_hillslope_length=self.clip_hillslope_length,
+                                            bieger2015_widths=self.bieger2015_widths)
 
             self._peridot_post_abstract_watershed()
 
