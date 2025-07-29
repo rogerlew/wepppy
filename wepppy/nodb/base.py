@@ -541,6 +541,10 @@ class NoDbBase(object):
         return _join(self.wd, 'dem', 'taudem')
 
     @property
+    def wbt_wd(self):
+        return _join(self.wd, 'dem', 'wbt')
+
+    @property
     def wat_dir(self):
         return _join(self.wd, 'watershed')
 

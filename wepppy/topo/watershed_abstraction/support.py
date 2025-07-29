@@ -451,6 +451,27 @@ def polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2=None):
     src_ds = gdal.Open(subwta_fn)
     srcband = src_ds.GetRasterBand(1)
 
+    # build a mask for the subcatchments
+    arr = srcband.ReadAsArray().astype(np.float32)
+    arr[~np.isfinite(arr)] = 0        # -inf / +inf / nan  → 0
+    arr[arr <= 0] = 0                 # force <=0 values to 0
+    arr = arr.astype(np.int32)
+
+    drv_mem = gdal.GetDriverByName('MEM')
+    mem_ds  = drv_mem.Create(
+        '', src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_CFloat32
+    )
+    mem_ds.SetGeoTransform(src_ds.GetGeoTransform())
+    mem_ds.SetProjection(src_ds.GetProjection())
+    mem_ds.GetRasterBand(1).WriteArray(arr)
+
+    # mask: 255 where arr>0, 0 otherwise
+    mask_ds = drv_mem.Create(
+        '', src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_Byte
+    )
+    mask_ds.GetRasterBand(1).WriteArray((arr > 0).astype(np.uint8) * 255)
+
+
     drv = ogr.GetDriverByName("GeoJSON")
     dst_ds = drv.CreateDataSource(dst_fn)
 
@@ -468,16 +489,18 @@ def polygonize_subcatchments(subwta_fn, dst_fn, dst_fn2=None):
 
     prog_func = None
 
-    gdal.Polygonize(srcband, None, dst_layer, dst_field, [],
-                    callback=prog_func)
+    gdal.Polygonize(
+        mem_ds.GetRasterBand(1),               # src band
+        mask_ds.GetRasterBand(1),              # mask band → ignore zeros
+        dst_layer, dst_field, [], callback=prog_func
+    )
 
-    ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int64).flatten()])
+    ids = set([str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int64).flatten() if v > 0])
+
     top_sub_ids = []
     top_chn_ids = []
 
     for id in ids:
-        if id[-1] == '0':
-            continue
         if id[-1] == '4':
             top_chn_ids.append(int(id))
         else:

@@ -171,7 +171,7 @@ class Topaz(NoDbBase):
     # channels
     #
     @property
-    def has_channels(self):
+    def has_channels(self) -> bool:
         return _exists(self.netful_arc)
 
     def build_channels(self, csa=4, mcl=60):

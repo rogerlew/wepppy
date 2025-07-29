@@ -9,7 +9,7 @@
     <div style="height:150px;" class="unitizer-wrapper">
 
         <div class="unitizer units-m">
-            {% if watershed.delineation_backend_is_topaz %}
+            {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
             <div class="form-group row">
                 <div class="col-sm-5">
                     <label for="input_mcl">Minimum Channel Length (m)
@@ -47,7 +47,7 @@
 
         </div>
         <div class="unitizer units-ft">
-            {% if watershed.delineation_backend_is_topaz %}
+            {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
             <div class="form-group row">
                 <div class="col-sm-5">
                     <label for="input_mcl_en">Minimum Channel Length (ft)

@@ -1,4 +1,4 @@
-from os.path import join as _join, exists, split as _split
+from os.path import join as _join, split as _split
 import os
 import sys
 import rasterio
@@ -7,15 +7,31 @@ from collections import deque
 import math
 from osgeo import gdal, osr
 import utm
+from os.path import exists as _exists
+import numpy as np
+import pandas as pd
+import json
+
 from wepppy.all_your_base.geo import get_utm_zone, utm_srid
 
 from wepppy.topo.watershed_abstraction.support import (
-    cummnorm_distance, compute_direction, representative_normalized_elevations,
-    weighted_slope_average, rect_to_polar, write_slp, HillSummary, ChannelSummary, CentroidSummary,
-    slp_asp_color, polygonize_netful, polygonize_bound, polygonize_subcatchments, json_to_wgs
+    cummnorm_distance,
+    compute_direction,
+    representative_normalized_elevations,
+    weighted_slope_average,
+    rect_to_polar,
+    write_slp,
+    HillSummary,
+    ChannelSummary,
+    CentroidSummary,
+    slp_asp_color,
+    polygonize_netful,
+    polygonize_bound,
+    polygonize_subcatchments,
+    json_to_wgs,
 )
 
-sys.path.append('/Users/roger/src/whitebox-tools/WBT/')
+sys.path.append("/Users/roger/src/whitebox-tools/WBT/")
 from whitebox_tools import WhiteboxTools
 
 _outlet_template_geojson = """{{
@@ -51,31 +67,34 @@ def isfloat(value):
     except ValueError:
         return False
 
+
 def remove_if_exists(fn):
     """
     Remove a file if it exists.
     """
-    if exists(fn):
+    if _exists(fn):
         os.remove(fn)
 
 
 class WhiteboxToolsTopazEmulator:
-    def __init__(self, dem_fn, wbt_wd, verbose=False, raise_on_error=True):
-        dem_fn = os.path.abspath(dem_fn)
-        if not exists(dem_fn):
-            raise FileNotFoundError(f"DEM file does not exist: {dem_fn}")
+    def __init__(self, wbt_wd, dem_fn=None, verbose=False, raise_on_error=True):
 
-        self._parse_dem(dem_fn)
+        if dem_fn is not None:
+            dem_fn = os.path.abspath(dem_fn)
+            if not _exists(dem_fn):
+                raise FileNotFoundError(f"DEM file does not exist: {dem_fn}")
+
+            self._parse_dem(dem_fn)
 
         self.wbt_wd = os.path.abspath(wbt_wd)
-        if not exists(self.wbt_wd):
+        if not _exists(self.wbt_wd):
             os.makedirs(self.wbt_wd)
 
         self.verbose = verbose
 
         self.mcl = None  # Minimum Channel Length
         self.csa = None  # Channel Source Area
-        self._wbt = None
+        self._wbt_runner = None  # WhiteboxTools instance 
         self._raise_on_error = raise_on_error
 
         self._outlet = None  # Outlet object
@@ -86,7 +105,7 @@ class WhiteboxToolsTopazEmulator:
         Returns whether to raise an error on failure.
         """
         return self._raise_on_error
-    
+
     @raise_on_error.setter
     def raise_on_error(self, value: bool):
         """
@@ -101,22 +120,23 @@ class WhiteboxToolsTopazEmulator:
         """
         Returns the WhiteboxTools instance.
         """
-        if self._wbt is None:
-            self._wbt = WhiteboxTools(verbose=self.verbose, raise_on_error=self.raise_on_error)
-        return self._wbt
+        if self._wbt_runner is None:
+            self._wbt_runner = WhiteboxTools(verbose=self.verbose, raise_on_error=self.raise_on_error)
+
+        return self._wbt_runner
 
     @property
     def dem(self):
-        if not exists(self._dem):
+        if not _exists(self._dem):
             raise FileNotFoundError(f"DEM file does not exist: {self._dem}")
         return self._dem
 
     @property
     def relief(self):
         """
-        Returns the path to the relief file. 
+        Returns the path to the relief file.
         """
-        return _join(self.wbt_wd, 'relief.tif')
+        return _join(self.wbt_wd, "relief.tif")
 
     @property
     def flovec(self):
@@ -128,7 +148,7 @@ class WhiteboxToolsTopazEmulator:
 
         https://www.whiteboxgeo.com/manual/wbt_book/available_tools/hydrological_analysis.html#d8pointer
         """
-        return _join(self.wbt_wd, 'flovec.tif')
+        return _join(self.wbt_wd, "flovec.tif")
 
     @property
     def floaccum(self):
@@ -137,138 +157,153 @@ class WhiteboxToolsTopazEmulator:
 
         Units: number of inflowing grid cells
         """
-        return _join(self.wbt_wd, 'floaccum.tif')
+        return _join(self.wbt_wd, "floaccum.tif")
 
     @property
     def netful0(self):
         """
         Returns the path to the stream network file before applying short stream removal.
         """
-        return _join(self.wbt_wd, 'netful0.tif')
+        return _join(self.wbt_wd, "netful0.tif")
 
     @property
     def netful(self):
         """
         Returns the path to the stream network file.
         """
-        return _join(self.wbt_wd, 'netful.tif')
-    
+        return _join(self.wbt_wd, "netful.tif")
+
     @property
     def netful_json(self):
         """
         Returns the path to the stream network file in JSON format.
         """
-        return _join(self.wbt_wd, 'netful.json')
-    
+        return _join(self.wbt_wd, "netful.json")
+
     @property
     def netful_wgs_json(self):
         """
         Returns the path to the stream network file in WGS84 JSON format.
         """
-        return _join(self.wbt_wd, 'netful.WGS.json')
-    
+        return _join(self.wbt_wd, "netful.WGS.json")
+
     @property
     def chnjnt(self):
         """
         Returns the path to the stream junction file.
         """
-        return _join(self.wbt_wd, 'chnjnt.tif')
+        return _join(self.wbt_wd, "chnjnt.tif")
 
     @property
     def outlet_geojson(self):
         """
         Returns the path to the outlet geojson file.
         """
-        return _join(self.wbt_wd, 'outlet.geojson')
-    
+        return _join(self.wbt_wd, "outlet.geojson")
+
     @property
-    def bounds(self):
+    def bound(self):
         """
-        Returns the path to the bounds raster file.
+        Returns the path to the bound raster file.
 
         1 for the watershed area, nodata outside.
         """
-        return _join(self.wbt_wd, 'bounds.tif')
+        return _join(self.wbt_wd, "bound.tif")
+
+    @property
+    def bound_json(self):
+        """
+        Returns the path to the bound raster file in JSON format.
+        """
+        return _join(self.wbt_wd, "bound.geojson")
     
+    @property
+    def bound_wgs_json(self):
+        """
+        Returns the path to the bound raster file in WGS84 JSON format.
+        """
+        return _join(self.wbt_wd, "bound.WGS.geojson")
+
     @property
     def aspect(self):
         """
         Returns the path to the aspect raster file.
         """
-        return _join(self.wbt_wd, 'taspec.tif')
-    
+        return _join(self.wbt_wd, "taspec.tif")
+
     @property
     def discha(self):
         """
         Returns the path to the distannce to channel raster file.
         """
-        return _join(self.wbt_wd, 'discha.tif')
-    
+        return _join(self.wbt_wd, "discha.tif")
+
     @property
     def fvslop(self):
         """
         Returns the path to the flow vector slope file.
         """
-        return _join(self.wbt_wd, 'fvslop.tif')
-    
+        return _join(self.wbt_wd, "fvslop.tif")
+
     @property
     def netw0(self):
         """
-        Returns the path to the netw file 0. this is the netful masked to the watershed bounds.
+        Returns the path to the netw file 0. this is the netful masked to the watershed bound.
         """
-        return _join(self.wbt_wd, 'netw0.tif')
+        return _join(self.wbt_wd, "netw0.tif")
 
     @property
     def strahler(self):
         """
         Returns the path to the Strahler order raster file.
         """
-        return _join(self.wbt_wd, 'strahler.tif')
-    
+        return _join(self.wbt_wd, "strahler.tif")
+
     @property
     def subwta(self):
         """
         Returns the path to the subcatchments raster file.
         """
-        return _join(self.wbt_wd, 'subwta.tif')
-    
+        return _join(self.wbt_wd, "subwta.tif")
+
     @property
     def netw_tab(self):
         """
         Returns the path to the netw table file.
         """
-        return _join(self.wbt_wd, 'netw.tsv')
+        return _join(self.wbt_wd, "netw.tsv")
 
     def _parse_dem(self, dem_fn):
-        """
-        Uses gdal to extract elevation values from dem and puts them in a
-        single column ascii file named DEDNM.INP for topaz
-        """
         # open the dataset
         ds = gdal.Open(dem_fn)
 
         # read and verify the num_cols and num_rows
         num_cols = ds.RasterXSize
-        num_rows = ds.RasterYSize
+        num_rows = ds.RasterYSize  # this is correct
 
         if num_cols <= 0 or num_rows <= 0:
-            raise Exception('input is empty')
+            raise Exception("input is empty")
 
         # read and verify the _transform
+        #  0,        1,            2,          3,        4,          5
+        # (x_origin, x_pixel_size, x_rotation, y_origin, y_rotation, y_pixel_size)
         _transform = ds.GetGeoTransform()
 
         if abs(_transform[1]) != abs(_transform[5]):
-            raise Exception('input cells are not square')
+            raise Exception("input cells are not square")
 
         cellsize = abs(_transform[1])
-        ul_x = int(round(_transform[0]))
-        ul_y = int(round(_transform[3]))
+        ul_x = float(_transform[0])  # easting, correct
+        ul_y = float(_transform[3])  # northing, correct
 
-        lr_x = ul_x + cellsize * num_cols
-        lr_y = ul_y - cellsize * num_rows
+        lr_x = ul_x + cellsize * num_cols  # correct
+        lr_y = ul_y - cellsize * num_rows  # correct
 
-        ll_x = int(ul_x)
-        ll_y = int(lr_y)
+        ll_x = float(ul_x)  # correct
+        ll_y = float(lr_y)  # correct
+
+        ur_x = float(lr_x)
+        ur_y = float(ul_y)
 
         # read the projection and verify dataset is in utm
         srs = osr.SpatialReference()
@@ -276,7 +311,7 @@ class WhiteboxToolsTopazEmulator:
 
         datum, utm_zone, hemisphere = get_utm_zone(srs)
         if utm_zone is None:
-            raise Exception('input is not in utm')
+            raise Exception("input is not in utm")
 
         # get band
         band = ds.GetRasterBand(1)
@@ -284,8 +319,8 @@ class WhiteboxToolsTopazEmulator:
         # get band dtype
         dtype = gdal.GetDataTypeName(band.DataType)
 
-        if 'float' not in dtype.lower():
-            raise Exception('dem dtype does not contain float data')
+        if "float" not in dtype.lower():
+            raise Exception("dem dtype does not contain float data")
 
         # extract min and max elevation
         stats = band.GetStatistics(True, True)
@@ -294,29 +329,31 @@ class WhiteboxToolsTopazEmulator:
 
         # store the relevant variables to the class
         self._dem = dem_fn
-        self.transform = _transform
-        self.num_cols = num_cols
-        self.num_rows = num_rows
-        self.cellsize = cellsize
-        self.ul_x = ul_x
-        self.ul_y = ul_y
-        self.lr_x = lr_x
-        self.lr_y = lr_y
-        self.ll_x = ll_x
-        self.ll_y = ll_y
+        self.transform = [float(x) for x in _transform]
+        self.num_cols = int(num_cols)
+        self.num_rows = int(num_rows)
+        self.cellsize = float(cellsize)
+        self.ul_x = float(ul_x)
+        self.ul_y = float(ul_y)
+        self.ur_x = float(ur_x)
+        self.ur_y = float(ur_y)
+        self.lr_x = float(lr_x)
+        self.lr_y = float(lr_y)
+        self.ll_x = float(ll_x)
+        self.ll_y = float(ll_y)
         self.datum = datum
         self.hemisphere = hemisphere
-        self.epsg = utm_srid(utm_zone, hemisphere == 'N')
+        self.epsg = utm_srid(utm_zone, hemisphere == "N")
         self.utm_zone = utm_zone
         self.srs_proj4 = srs.ExportToProj4()
         srs.MorphToESRI()
         self.srs_wkt = srs.ExportToWkt()
-        self.minimum_elevation = minimum_elevation
-        self.maximum_elevation = maximum_elevation
+        self.minimum_elevation = float(minimum_elevation)
+        self.maximum_elevation = float(maximum_elevation)
 
         del ds
 
-    def _create_relief(self, fill_or_breach='fill'):
+    def _create_relief(self, fill_or_breach="fill"):
         """
         Create a relief file from the DEM using WBT using either fill or breach method.
         """
@@ -324,16 +361,15 @@ class WhiteboxToolsTopazEmulator:
 
         remove_if_exists(relief_fn)
 
-        if fill_or_breach == 'fill':
-            self.wbt.fill_depressions(dem=self.dem, output=relief_fn)
-        elif fill_or_breach == 'breach':
-            self.wbt.breach_depressions(dem=self.dem, output=relief_fn)
+        if fill_or_breach == "fill":
+            ret = self.wbt.fill_depressions(dem=self.dem, output=relief_fn)
+        elif fill_or_breach == "breach":
+            ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn)
         else:
-            raise ValueError(
-                "fill_or_breach must be either 'fill' or 'breach'")
+            raise ValueError("fill_or_breach must be either 'fill' or 'breach'")
 
-        if not exists(relief_fn):
-            raise Exception(f"Relief file was not created: {relief_fn}")
+        if not _exists(relief_fn):
+            raise Exception(f"Relief file was not created: {relief_fn}, ret = {ret}")
 
         if self.verbose:
             print(f"Relief file created successfully: {relief_fn}")
@@ -344,7 +380,7 @@ class WhiteboxToolsTopazEmulator:
         """
         relief_fn = self.relief
 
-        if not exists(relief_fn):
+        if not _exists(relief_fn):
             raise FileNotFoundError(f"Relief file does not exist: {relief_fn}")
 
         flovec_fn = self.flovec
@@ -353,7 +389,7 @@ class WhiteboxToolsTopazEmulator:
 
         self.wbt.d8_pointer(dem=relief_fn, output=flovec_fn, esri_pntr=False)
 
-        if not exists(flovec_fn):
+        if not _exists(flovec_fn):
             raise Exception(f"Flow vector file was not created: {flovec_fn}")
 
         if self.verbose:
@@ -365,29 +401,28 @@ class WhiteboxToolsTopazEmulator:
         """
         flovec_fn = self.flovec
 
-        if not exists(flovec_fn):
-            raise FileNotFoundError(
-                f"Flow vector file does not exist: {flovec_fn}")
+        if not _exists(flovec_fn):
+            raise FileNotFoundError(f"Flow vector file does not exist: {flovec_fn}")
 
         floaccum_fn = self.floaccum
 
         remove_if_exists(floaccum_fn)
 
-        self.wbt.d8_flow_accumulation(i=flovec_fn,
-                                      output=floaccum_fn,
-                                      out_type="cells",
-                                      log=False,
-                                      clip=False,
-                                      pntr=True,
-                                      esri_pntr=False)
+        self.wbt.d8_flow_accumulation(
+            i=flovec_fn,
+            output=floaccum_fn,
+            out_type="cells",
+            log=False,
+            clip=False,
+            pntr=True,
+            esri_pntr=False,
+        )
 
-        if not exists(floaccum_fn):
-            raise Exception(
-                f"Flow accumulation file was not created: {floaccum_fn}")
+        if not _exists(floaccum_fn):
+            raise Exception(f"Flow accumulation file was not created: {floaccum_fn}")
 
         if self.verbose:
-            print(
-                f"Flow accumulation file created successfully: {floaccum_fn}")
+            print(f"Flow accumulation file created successfully: {floaccum_fn}")
 
     def _extract_streams(self):
         """
@@ -401,14 +436,14 @@ class WhiteboxToolsTopazEmulator:
         """
 
         if self.csa is None or self.mcl is None:
-            raise ValueError(
-                "csa and mcl must be set before extracting streams")
+            raise ValueError("csa and mcl must be set before extracting streams")
 
         floaccum_fn = self.floaccum
 
-        if not exists(floaccum_fn):
+        if not _exists(floaccum_fn):
             raise FileNotFoundError(
-                f"Flow accumulation file does not exist: {floaccum_fn}")
+                f"Flow accumulation file does not exist: {floaccum_fn}"
+            )
 
         netful0_fn = self.netful0
 
@@ -419,9 +454,8 @@ class WhiteboxToolsTopazEmulator:
 
         self.wbt.extract_streams(floaccum_fn, netful0_fn, threshold=threshold)
 
-        if not exists(netful0_fn):
-            raise Exception(
-                f"Stream network file 0 was not created: {netful0_fn}")
+        if not _exists(netful0_fn):
+            raise Exception(f"Stream network file 0 was not created: {netful0_fn}")
 
         if self.verbose:
             print(f"Stream network file 0 created successfully: {netful0_fn}")
@@ -429,19 +463,20 @@ class WhiteboxToolsTopazEmulator:
         netful_fn = self.netful
         remove_if_exists(netful_fn)
         self.wbt.remove_short_streams(
-            d8_pntr=self.flovec, 
-            streams=netful0_fn, 
+            d8_pntr=self.flovec,
+            streams=netful0_fn,
             output=netful_fn,
             min_length=self.mcl,
-            esri_pntr=False)
-        
+            esri_pntr=False,
+        )
+
     def _identify_stream_junctions(self):
         """
         Identify stream junctions from the stream network file using WBT.
         """
         netful_fn = self.netful
 
-        if not exists(netful_fn):
+        if not _exists(netful_fn):
             raise FileNotFoundError(f"Stream network file does not exist: {netful_fn}")
 
         chnjnt_fn = self.chnjnt
@@ -449,17 +484,16 @@ class WhiteboxToolsTopazEmulator:
         remove_if_exists(chnjnt_fn)
 
         self.wbt.stream_junction_identifier(
-            d8_pntr=self.flovec, 
-            streams=self.netful, 
-            output=chnjnt_fn)
+            d8_pntr=self.flovec, streams=self.netful, output=chnjnt_fn
+        )
 
-        if not exists(chnjnt_fn):
+        if not _exists(chnjnt_fn):
             raise Exception(f"Stream junction file was not created: {chnjnt_fn}")
 
         if self.verbose:
             print(f"Stream junction file created successfully: {chnjnt_fn}")
-        
-    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach='fill'):
+
+    def delineate_channels(self, csa=5.0, mcl=60.0, fill_or_breach="fill"):
         """
         Delineate channels from the DEM using WBT.
         """
@@ -475,36 +509,41 @@ class WhiteboxToolsTopazEmulator:
         polygonize_netful(self.netful, self.netful_json)
         json_to_wgs(self.netful_json)
 
-    def _make_outlet_geojson(self, lng=None, lat=None, dst=None, easting=None, northing=None):
+    def _make_outlet_geojson(self, dst=None, easting=None, northing=None):
         assert dst is not None
-
-        if lng is not None and lat is not None:
-            easting, northing = self.lnglat_to_utm(long=lng, lat=lat)
 
         assert isfloat(easting), easting
         assert isfloat(northing), northing
 
-        with open(dst, 'w') as fp:
-            fp.write(_outlet_template_geojson
-                     .format(epsg=self.epsg, easting=easting, northing=northing))
+        with open(dst, "w") as fp:
+            fp.write(
+                _outlet_template_geojson.format(
+                    epsg=self.epsg, easting=easting, northing=northing
+                )
+            )
 
-        assert exists(dst), dst
+        assert _exists(dst), dst
         return dst
 
     def _make_multiple_outlets_geojson(self, dst, en_points_dict):
         points = []
         for id, (easting, northing) in en_points_dict.items():
-            points.append(_point_template_geojson
-                          .format(id=id, easting=easting, northing=northing))
+            points.append(
+                _point_template_geojson.format(
+                    id=id, easting=easting, northing=northing
+                )
+            )
 
-        with open(dst, 'w') as fp:
-            fp.write(_multi_outlet_template_geojson
-                     .format(epsg=self.epsg, points=',\n'.join(points)))
+        with open(dst, "w") as fp:
+            fp.write(
+                _multi_outlet_template_geojson.format(
+                    epsg=self.epsg, points=",\n".join(points)
+                )
+            )
 
-        assert exists(dst), dst
+        assert _exists(dst), dst
         return dst
 
-        
     def set_outlet(self, lng, lat, pixelcoords=False):
         from wepppy.nodb.watershed import Outlet
 
@@ -514,9 +553,13 @@ class WhiteboxToolsTopazEmulator:
         _e, _n = self.pixel_to_utm(x, y)
         self._make_outlet_geojson(easting=_e, northing=_n, dst=self.outlet_geojson)
 
-        self._outlet = Outlet(requested_loc=(lng, lat), actual_loc=(_lng, _lat),
-                              distance_from_requested=distance, pixel_coords=(x, y))
-        
+        self._outlet = Outlet(
+            requested_loc=(lng, lat),
+            actual_loc=(_lng, _lat),
+            distance_from_requested=distance,
+            pixel_coords=(x, y),
+        )
+
         return self._outlet
 
     def find_closest_channel2(self, lng, lat, pixelcoords=False):
@@ -543,13 +586,22 @@ class WhiteboxToolsTopazEmulator:
             x, y = self.lnglat_to_pixel(lng, lat)
 
         # Early return if the starting pixel is already a channel
-        if junction_mask[x, y] == 1:
+        if junction_mask[y, x] == 1:
             return (x, y), 0
 
         # Spiral out from the starting point
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        directions = [
+            (-1, 0),
+            (1, 0),
+            (0, -1),
+            (0, 1),
+            (-1, -1),
+            (-1, 1),
+            (1, -1),
+            (1, 1),
+        ]
         queue = deque([(x, y, 0)])
-        visited = set((x, y))
+        visited = {(x, y)}
 
         while queue:
             cx, cy, dist = queue.popleft()
@@ -557,14 +609,18 @@ class WhiteboxToolsTopazEmulator:
             for dx, dy in directions:
                 nx, ny = cx + dx, cy + dy
 
-                if 0 <= nx < num_cols and 0 <= ny < num_rows and (nx, ny) not in visited:
+                if (
+                    0 <= nx < num_cols
+                    and 0 <= ny < num_rows
+                    and (nx, ny) not in visited
+                ):
                     if junction_mask[ny, nx] == 1:
                         return (nx, ny), math.sqrt((nx - x) ** 2 + (ny - y) ** 2)
                     visited.add((nx, ny))
                     queue.append((nx, ny, dist + 1))
 
         return None, math.inf
-    
+
     def lnglat_to_pixel(self, lng, lat):
         """
         return the x,y pixel coords of lng, lat
@@ -582,66 +638,76 @@ class WhiteboxToolsTopazEmulator:
         assert round(x) >= round(ul_x), (x, ul_x)
         assert round(x) <= round(lr_x), (x, lr_x)
         assert round(y) >= round(lr_y), (y, lr_y)
-        assert round(y) <= round(y), (y, ul_y)
+        assert round(y) <= round(ul_y), (y, ul_y)
 
         # determine pixel coords
         _x = int(round((x - ul_x) / cellsize))
         _y = int(round((ul_y - y) / cellsize))
 
         # sanity check on the coords
-        assert 0 <= _x < num_cols, str(x)
-        assert 0 <= _y < num_rows, str(y)
+        assert 0 <= _x < num_cols, f"{_x} not in range 0 to {num_cols}"
+        assert 0 <= _y < num_rows, f"{_y} not in range 0 to {num_rows}"
 
         return _x, _y
-    
-    def pixel_to_utm(self, x, y):
+
+    def pixel_to_utm(self, col, row, centre=True):
         """
-        return the utm coords from pixel coords
+        Convert a raster (col,row) index to UTM easting / northing
+        using the GeoTransform stored in ``self.transform``.
+
+        Parameters
+        ----------
+        col, row : int
+            Pixel indices (0-based).
+        centre : bool, default True
+            If True, returns the centre of the cell; if False, the
+            upper-left (GDAL) corner.
+
+        Returns
+        -------
+        (easting, northing) : tuple[float, float]
         """
+        gt = self.transform  # (x0, dx, rx, y0, ry, dy)
+        off = 0.5 if centre else 0.0  # shift to cell centre if requested
 
-        # unpack variables for instance
-        cellsize, num_cols, num_rows = self.cellsize, self.num_cols, self.num_rows
-        ul_x, ul_y, lr_x, lr_y = self.ul_x, self.ul_y, self.lr_x, self.lr_y
-
-        assert 0 <= x < num_cols
-        assert 0 <= y < num_rows
-
-        easting = ul_x + cellsize * x
-        northing = ul_y - cellsize * y
-
+        easting = gt[0] + gt[1] * (col + off) + gt[2] * (row + off)
+        northing = gt[3] + gt[4] * (col + off) + gt[5] * (row + off)
         return easting, northing
-    
+
     def pixel_to_lnglat(self, x, y):
         """
         return the lng/lat (WGS84) coords from pixel coords
         """
         easting, northing = self.pixel_to_utm(x, y)
-        lat, lng = utm.to_latlon(easting=easting, northing=northing,
-                             zone_number=self.utm_zone, northern=self.hemisphere == 'N')
+        lat, lng = utm.to_latlon(
+            easting=easting,
+            northing=northing,
+            zone_number=self.utm_zone,
+            northern=self.hemisphere == "N",
+        )
         lng, lat = float(lng), float(lat)
         return lng, lat
-    
-    def _create_bounds(self):
-        """
-        Create a bounds raster from the DEM using WBT.
-        """
-        bounds_fn = self.bounds
 
-        remove_if_exists(bounds_fn)
+    def _create_bound(self):
+        """
+        Create a bound raster from the DEM using WBT.
+        """
+        bound_fn = self.bound
+
+        remove_if_exists(bound_fn)
 
         self.wbt.watershed(
-            d8_pntr=self.flovec, 
-            pour_pts=self.outlet_geojson, 
-            output=self.bounds)
+            d8_pntr=self.flovec, pour_pts=self.outlet_geojson, output=self.bound
+        )
 
-        if not exists(bounds_fn):
-            raise Exception(f"Bounds file was not created: {bounds_fn}")
+        if not _exists(bound_fn):
+            raise Exception(f"bound file was not created: {bound_fn}")
 
         if self.verbose:
-            print(f"Bounds file created successfully: {bounds_fn}")
+            print(f"bound file created successfully: {bound_fn}")
 
-        return bounds_fn
-    
+        return bound_fn
+
     def _create_aspect(self):
         """
         Create an aspect raster from the DEM using WBT.
@@ -652,14 +718,14 @@ class WhiteboxToolsTopazEmulator:
 
         self.wbt.aspect(dem=self.dem, output=aspect_fn)
 
-        if not exists(aspect_fn):
+        if not _exists(aspect_fn):
             raise Exception(f"Aspect file was not created: {aspect_fn}")
 
         if self.verbose:
             print(f"Aspect file created successfully: {aspect_fn}")
 
         return aspect_fn
-    
+
     def _create_flow_vector_slope(self):
         """
         Create a flow vector slope raster from the flow vector file using WBT.
@@ -668,35 +734,28 @@ class WhiteboxToolsTopazEmulator:
 
         remove_if_exists(fvslop_fn)
 
-        self.wbt.slope(
-            dem=self.dem, 
-            output=fvslop_fn
-        )
+        self.wbt.slope(dem=self.dem, output=fvslop_fn)
 
-        if not exists(fvslop_fn):
+        if not _exists(fvslop_fn):
             raise Exception(f"Flow vector slope file was not created: {fvslop_fn}")
 
         if self.verbose:
             print(f"Flow vector slope file created successfully: {fvslop_fn}")
 
         return fvslop_fn
-    
+
     def _create_netw0(self):
         """
-        Create a netw0 raster from the stream network and bounds using WBT.
-        This is the stream network masked to the watershed bounds.
+        Create a netw0 raster from the stream network and bound using WBT.
+        This is the stream network masked to the watershed bound.
         """
         netw0_fn = self.netw0
 
         remove_if_exists(netw0_fn)
 
-        self.wbt.clip_raster_to_raster(
-            i=self.netful, 
-            mask=self.bounds, 
-            output=netw0_fn
-        )
+        self.wbt.clip_raster_to_raster(i=self.netful, mask=self.bound, output=netw0_fn)
 
-        if not exists(netw0_fn):
+        if not _exists(netw0_fn):
             raise Exception(f"Netw0 file was not created: {netw0_fn}")
 
         if self.verbose:
@@ -713,19 +772,17 @@ class WhiteboxToolsTopazEmulator:
         remove_if_exists(discha_fn)
 
         self.wbt.downslope_distance_to_stream(
-            dem=self.dem, 
-            streams=self.netw0, 
-            output=discha_fn
+            dem=self.dem, streams=self.netw0, output=discha_fn
         )
 
-        if not exists(discha_fn):
+        if not _exists(discha_fn):
             raise Exception(f"Distance to channel file was not created: {discha_fn}")
 
         if self.verbose:
             print(f"Distance to channel file created successfully: {discha_fn}")
 
         return discha_fn
-    
+
     def _create_strahler_order(self):
         """
         Create a Strahler order raster from the stream network using WBT.
@@ -735,82 +792,209 @@ class WhiteboxToolsTopazEmulator:
         remove_if_exists(strahler_fn)
 
         self.wbt.strahler_stream_order(
-            d8_pntr=self.flovec, 
-            streams=self.netw0, 
-            output=strahler_fn
+            d8_pntr=self.flovec, streams=self.netw0, output=strahler_fn
         )
 
-        if not exists(strahler_fn):
+        if not _exists(strahler_fn):
             raise Exception(f"Strahler order file was not created: {strahler_fn}")
 
         if self.verbose:
             print(f"Strahler order file created successfully: {strahler_fn}")
 
         return strahler_fn
-    
+
     def _create_subcatchments(self):
         """
         Create subcatchments from the stream network.
         """
         subwta_fn = self.subwta
+        subwta_f32_fn = subwta_fn.replace('.tif', '.f32.tif')
 
-        remove_if_exists(subwta_fn)
+        remove_if_exists(subwta_f32_fn)
 
         self.wbt.hillslopes_topaz(
-            dem=self.relief, 
-            d8_pntr=self.flovec, 
-            streams=self.netw0, 
+            dem=self.relief,
+            d8_pntr=self.flovec,
+            streams=self.netw0,
             pour_pts=self.outlet_geojson,
-            watershed=self.bounds,
+            watershed=self.bound,
             chnjnt=self.chnjnt,
-            subwta=subwta_fn,
+            subwta=subwta_f32_fn,
             order=self.strahler,
-            netw=self.netw_tab
+            netw=self.netw_tab,
         )
 
-        if not exists(subwta_fn):
+        if not _exists(subwta_f32_fn):
             raise Exception(f"Subcatchments file was not created: {subwta_fn}")
+
+        # convert the subcatchments to uint32 using rasterio
+        # clip negative values to 0 and set 0 as nodata
+       
+        remove_if_exists(subwta_fn)
+
+        with rasterio.open(subwta_f32_fn) as src:
+            profile = src.profile
+            data = src.read(1).astype(np.uint32)
+            data[data < 0] = 0
+            profile['dtype'] = 'uint32'
+            profile['nodata'] = 0
+        with rasterio.open(subwta_fn, 'w', **profile) as dst:
+            dst.write(data, 1)
 
         if self.verbose:
             print(f"Subcatchments file created successfully: {subwta_fn}")
 
         return subwta_fn
+
+    @property
+    def subwta_json(self):
+        """
+        Returns the path to the subcatchments file in JSON format.
+        """
+        return _join(self.wbt_wd, "subwta.geojson")
+
+    @property
+    def subcatchments_json(self):
+        """
+        Returns the path to the subcatchments file in WGS84 JSON format.
+        """
+        return _join(self.wbt_wd, "subcatchments.geojson")
+
+    @property
+    def subcatchments_wgs_json(self):
+        """
+        Returns the path to the subcatchments file in WGS84 JSON format.
+        """
+        return _join(self.wbt_wd, "subcatchments.WGS.geojson")
     
+    @property
+    def channels_json(self):
+        """
+        Returns the path to the channels file in JSON format.
+        """
+        return _join(self.wbt_wd, "channels.geojson")
+    
+    @property
+    def channels_wgs_json(self):
+        """
+        Returns the path to the channels file in WGS84 JSON format.
+        """
+        return _join(self.wbt_wd, "channels.WGS.geojson")
+
     def delineate_subcatchments(self):
         """
         Delineate subcatchments from the stream network and outlet.
         """
-        
-        self._create_bounds()
+
+        self._create_bound()
         self._create_aspect()
         self._create_flow_vector_slope()
         self._create_netw0()
         self._create_strahler_order()
         self._create_distance_to_channel()
         self._create_subcatchments()
+        polygonize_subcatchments(self.subwta, self.subwta_json, self.subcatchments_json)
+        self._polygonize_channels()
 
+    def _read_chn_order_from_netw_tab(self):
+        """
+        returns a dictionary of topaz ids strings and their order
+        """
+
+        tbl = pd.read_table(self.netw_tab)
+
+        # tbl columns: id	topaz_id	ds_x	ds_y	us_x	us_y	inflow0_id	inflow1_id	inflow2_id	length_m	ds_z	us_z	drop_m	order	areaup	is_headwater	is_outlet
+        return dict(zip([str(v) for v in tbl["topaz_id"]], 
+                        [int(v) for v in tbl["order"]]))
+
+    def _polygonize_channels(self):
+        from wepppy.topo.watershed_abstraction import WeppTopTranslator
+
+        subwta_fn = self.subwta
+
+        chn_order_dict = self._read_chn_order_from_netw_tab()
+
+        assert _exists(subwta_fn)
+        src_ds = gdal.Open(subwta_fn)
+        srs = osr.SpatialReference()
+        srs.ImportFromWkt(src_ds.GetProjectionRef())
+        datum, utm_zone, hemisphere = get_utm_zone(srs)
+        epsg = utm_srid(utm_zone, hemisphere == "N")
+        srcband = src_ds.GetRasterBand(1)
+        ids = set(
+            [str(v) for v in np.array(srcband.ReadAsArray(), dtype=np.int32).flatten() if v > 0]
+        )
+        top_sub_ids = []
+        top_chn_ids = []
+
+        for id in ids:
+            if id[-1] == "4":
+                top_chn_ids.append(int(id))
+            else:
+                top_sub_ids.append(int(id))
+
+        translator = WeppTopTranslator(top_chn_ids=top_chn_ids, top_sub_ids=top_sub_ids)
+
+        subwta_json = self.subwta_json
+        assert _exists(subwta_json), "polygonize SUBWTA first"
+
+        # remove the TopazID = 0 feature defining a bounding box
+        # and the channels
+        with open(subwta_json) as fp:
+            js = json.load(fp)
+
+        if "crs" not in js:
+            js["crs"] = {
+                "type": "name",
+                "properties": {"name": "urn:ogc:def:crs:EPSG::%s" % epsg},
+            }
+
+        _features = []
+        for f in js["features"]:
+            topaz_id = str(f["properties"]["TopazID"])
+
+            if topaz_id[-1] != "4":
+                continue
+
+            wepp_id = translator.wepp(top=topaz_id)
+            f["properties"]["WeppID"] = wepp_id
+
+            # get order from somewhere and add it to the properties
+            f["properties"]["Order"] = chn_order_dict[str(topaz_id)]
+
+            _features.append(f)
+
+        js["features"] = _features
+
+        dst_fn2 = self.channels_json
+        with open(dst_fn2, "w") as fp:
+            json.dump(js, fp, allow_nan=False)
+
+        # create a version in WGS 1984 (lng/lat)
+        json_to_wgs(dst_fn2)
+        assert _exists(self.channels_wgs_json), "failed to create WGS84 channels JSON"
 
 
 if __name__ == "__main__":
 
-    dem = '/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/dem.tif' 
-    wbt_wd = '/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/wbt'
-    #outlet = [-116.43008003513219, 45.93324289199021]
+    dem = "/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/dem.tif"
+    wbt_wd = "/Users/roger/src/wepppy/tests/wbt/rlew-intercontinental-prawn/dem/wbt"
+    # outlet = [-116.43008003513219, 45.93324289199021]
     outlet = [-120.16561014556784, 39.10885618748438]
     verbose = False
     csa = 4.0
     mcl = 60.0
-    fill_or_breach = 'breach'
+    fill_or_breach = "breach"
 
     emulator = WhiteboxToolsTopazEmulator(dem, wbt_wd, verbose=verbose)
-    emulator.delineate_channels(csa=csa,
-                                mcl=mcl,
-                                fill_or_breach=fill_or_breach)
-    
+    emulator.delineate_channels(csa=csa, mcl=mcl, fill_or_breach=fill_or_breach)
+
     emulator.set_outlet(outlet[0], outlet[1], pixelcoords=False)
-    print(f"Outlet set at: {emulator._outlet.actual_loc} with distance {emulator._outlet.distance_from_requested} pixels from requested location {emulator._outlet.requested_loc}")
-    
+    print(
+        f"Outlet set at: {emulator._outlet.actual_loc} with distance {emulator._outlet.distance_from_requested} pixels from requested location {emulator._outlet.requested_loc}"
+    )
+
     emulator.delineate_subcatchments()
 
-# Example usage:    
+# Example usage:
 # (wepppy310-env) roger@m4air32:/Users/roger/src/wepppy/wepppy/topo/wbt$ python3 wbt_topaz_emulator.py  /Users/roger/src/wepppy/tests/wbt/supine-disputant/dem/dem.tif /Users/roger/src/wepppy/tests/wbt/supine-disputant/dem/wbt --csa 10 --mcl 100 --verbose
