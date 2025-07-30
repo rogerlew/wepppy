@@ -51,8 +51,9 @@ from wepppy.landcover.rap import RAP_Band
 try:
     import wepppyo3
     from wepppyo3.raster_characteristics import identify_mode_single_raster_key
-    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
-except:
+    from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+except ImportError:
+    print("wepppyo3 not found, using fallback methods.")
     wepppyo3 = None
 
 class LanduseNoDbLockedException(Exception):
@@ -411,6 +412,7 @@ class Landuse(NoDbBase, LogMixin):
         subwta_fn = Watershed.getInstance(self.wd).subwta
 
         if wepppyo3 is None:
+            self.log('Building landcover grid from NLCD raster using LandcoverMap.build_lcgrid')
             # create LandcoverMap instance
             lc = LandcoverMap(lc_fn)
 
@@ -419,6 +421,7 @@ class Landuse(NoDbBase, LogMixin):
             # domlc_d is a dictionary with topaz_id keys
             self.domlc_d = lc.build_lcgrid(subwta_fn, None)
         else:
+            self.log('Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key')
             domlc_d = identify_mode_single_raster_key(
                 key_fn=subwta_fn, parameter_fn=lc_fn, ignore_channels=True, ignore_keys=set())
             self.domlc_d = {k: str(v) for k, v in domlc_d.items()}
