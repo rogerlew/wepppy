@@ -808,9 +808,7 @@ class WhiteboxToolsTopazEmulator:
         Create subcatchments from the stream network.
         """
         subwta_fn = self.subwta
-        subwta_f32_fn = subwta_fn.replace('.tif', '.f32.tif')
-
-        remove_if_exists(subwta_f32_fn)
+        remove_if_exists(subwta_fn)
 
         self.wbt.hillslopes_topaz(
             dem=self.relief,
@@ -819,27 +817,13 @@ class WhiteboxToolsTopazEmulator:
             pour_pts=self.outlet_geojson,
             watershed=self.bound,
             chnjnt=self.chnjnt,
-            subwta=subwta_f32_fn,
+            subwta=subwta_fn,
             order=self.strahler,
             netw=self.netw_tab,
         )
 
-        if not _exists(subwta_f32_fn):
+        if not _exists(subwta_fn):
             raise Exception(f"Subcatchments file was not created: {subwta_fn}")
-
-        # convert the subcatchments to uint32 using rasterio
-        # clip negative values to 0 and set 0 as nodata
-       
-        remove_if_exists(subwta_fn)
-
-        with rasterio.open(subwta_f32_fn) as src:
-            profile = src.profile
-            data = src.read(1).astype(np.uint32)
-            data[data < 0] = 0
-            profile['dtype'] = 'uint32'
-            profile['nodata'] = 0
-        with rasterio.open(subwta_fn, 'w', **profile) as dst:
-            dst.write(data, 1)
 
         if self.verbose:
             print(f"Subcatchments file created successfully: {subwta_fn}")
