@@ -53,10 +53,10 @@ from .mixins.log_mixin import LogMixin
 try:
     import wepppyo3
     from wepppyo3.raster_characteristics import identify_mode_single_raster_key
-    from wepppyo3.raster_characteristics import identify_mode_multiple_raster_key
-except:
+    from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+except ImportError:
+    print("wepppyo3 not found, using fallback methods.")
     wepppyo3 = None
-
 
 class SoilsNoDbLockedException(Exception):
     pass
@@ -1145,8 +1145,8 @@ class Soils(NoDbBase, LogMixin):
             else:
                 self.log(f"using wepppyo3 {valid}")
                 domsoil_d = identify_mode_single_raster_key(
-                    key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys=set())
-                domsoil_d = {k: str(v) for k, v in domsoil_d.items()}
+                    key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys={-2147483648,})
+                domsoil_d = {k: str(v) for k, v in domsoil_d.items() if int(k) > 0}
                 self.log_done()
 
             dom_mukey = None
