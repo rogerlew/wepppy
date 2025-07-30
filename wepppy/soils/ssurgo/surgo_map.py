@@ -18,6 +18,8 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import GDT_UInt32
 
+from deprecated import deprecated
+
 from wepppy.all_your_base.geo import read_raster, raster_stacker
 
 __version__ = 'v.0.1.0'
@@ -72,6 +74,7 @@ class SurgoMap:
                 
         return None
         
+    @deprecated("Use wepppyo3 instead")
     def build_soilgrid(self, subwta_fn, soilgrid_fn=None, bounds_fn=None, valid_mukeys=None):
         """
         Generates a dominant soil map based on the subcatchment
@@ -103,7 +106,7 @@ class SurgoMap:
 
         assert self.data.shape == subwta.shape, [self.data.shape, subwta.shape]
 
-        top_ids = sorted(list(set(subwta.flatten())))
+        top_ids = sorted([v for v in set(subwta.flatten()) if v > 0])
 
         # assert sum([(0, 1)[str(k).endswith('4')] for k in top_ids]) > 0, 'subwta does not contain channels: %s' % str(top_ids)
         

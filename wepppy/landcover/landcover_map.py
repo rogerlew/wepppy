@@ -14,6 +14,8 @@ from osgeo import osr
 from osgeo import gdal
 from osgeo.gdalconst import *
 
+from deprecated import deprecated
+
 from wepppy.all_your_base.geo import read_raster, raster_stacker
 
 
@@ -61,6 +63,7 @@ class LandcoverMap:
 
         return frac_d
             
+    @deprecated("Use wepppyo3 instead")
     def build_lcgrid(self, subwta_fn, mofe_fn=None):
         """
         Generates a dominant lc map based on the subcatchment
@@ -81,8 +84,8 @@ class LandcoverMap:
         else:
             mofe_map, transform_m, proj_m = read_raster(mofe_fn, dtype=np.int32)
 
-        _ids = sorted(list(set(subwta.flatten())))
-        
+        _ids = sorted([v for v in set(subwta.flatten()) if v > 0])
+
         domlc_d = {}
         for _id in _ids:
             if _id == 0:
