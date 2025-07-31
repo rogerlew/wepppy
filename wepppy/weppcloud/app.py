@@ -2264,68 +2264,6 @@ def query_has_dem(runid, config):
     return jsonify(Ron.getInstance(wd).has_dem)
 
 
-# noinspection PyBroadException
-def _parse_map_change(form):
-
-    center = form.get('map_center', None)
-    zoom = form.get('map_zoom', None)
-    bounds = form.get('map_bounds', None)
-    mcl = form.get('mcl', None)
-    csa = form.get('csa', None)
-
-    if center is None or zoom is None or bounds is None \
-            or mcl is None or csa is None:
-        error = error_factory('Expecting center, zoom, bounds, mcl, and csa')
-        return error, None
-    try:
-        center = [float(v) for v in center.split(',')]
-        zoom = float(zoom)
-        extent = [float(v) for v in bounds.split(',')]
-        assert len(extent) == 4
-        l, b, r, t = extent
-        assert l < r and b < t, (l, b, r, t)
-    except Exception:
-        error = exception_factory('Could not parse center, zoom, and/or bounds')
-        return error, None
-
-    try:
-        mcl = float(mcl)
-    except Exception:
-        error = exception_factory('Could not parse mcl')
-        return error, None
-
-    try:
-        csa = float(csa)
-    except Exception:
-        error = exception_factory('Could not parse csa')
-        return error, None
-
-    return None,  [extent, center, zoom, mcl, csa]
-
-
-# noinspection PyBroadException
-
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/fetch_dem/', methods=['POST'])
-def task_fetch_dem(runid, config):
-    error, args = _parse_map_change(request.form)
-
-    if error is not None:
-        return jsonify(error)
-
-    extent, center, zoom, mcl, csa = args
-
-    # Acquire DEM from wmesque server
-    try:
-        wd = get_wd(runid)
-        ron = Ron.getInstance(wd)
-        ron.set_map(extent, center, zoom)
-        ron.fetch_dem()
-    except Exception:
-        return exception_factory('Fetching DEM Failed', runid=runid)
-
-    return success_factory()
-
 
 # noinspection PyBroadException
 @app.route('/runs/<string:runid>/<config>/export/ermit/')
@@ -2456,52 +2394,6 @@ def export_winwepp(runid, config):
     return send_file(export_winwepp_path, as_attachment=True, download_name='{}_winwepp.zip'.format(runid))
 
 
-# noinspection PyBroadException
-@deprecated
-@app.route('/runs/<string:runid>/<config>/tasks/build_channels/', methods=['POST'])
-def task_build_channels(runid, config):
-
-    error, args = _parse_map_change(request.form)
-
-    if error is not None:
-        return jsonify(error)
-
-    extent, center, zoom, mcl, csa = args
-
-    wd = get_wd(runid)
-    ron = Ron.getInstance(wd)
-
-    set_and_fetch = False
-    if ron.map is None:
-        set_and_fetch = True
-
-    # determine whether we need to fetch dem
-    elif ''.join(['%.7f' % v for v in ron.map.extent]) != \
-       ''.join(['%.7f' % v for v in extent]):
-        set_and_fetch = True
-
-    if set_and_fetch:
-        ron.set_map(extent, center, zoom)
-
-        if not ron.dem_map:
-            # Acquire DEM from WMesque server
-            try:
-                ron.fetch_dem()
-            except Exception:
-                return exception_factory('Fetching DEM Failed', runid=runid)
-
-    # Delineate channels
-    watershed = Watershed.getInstance(wd)
-    try:
-        watershed.build_channels(csa=csa, mcl=mcl)
-
-    except Exception as e:
-        if isinstance(e, MinimumChannelLengthTooShortError):
-            return exception_factory(e.__name__, e.__doc__, runid=runid)
-        else:
-            return exception_factory('Building Channels Failed', runid=runid)
-
-    return success_factory()
 
 
 @deprecated

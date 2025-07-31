@@ -189,6 +189,10 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
             
         ron = Ron.getInstance(wd)
         ron.set_map(extent, center, zoom)
+
+        if ron.map.num_cols > ron.max_map_dimension_px or ron.map.num_rows > ron.max_map_dimension_px:
+            raise Exception(f'Map size too large: {ron.map.num_cols}x{ron.map.num_rows}. Maximum is {ron.max_map_dimension_px}x{ron.max_map_dimension_px}.')
+        
         ron.fetch_dem()
         
         prep = RedisPrep.getInstance(wd)
@@ -198,7 +202,7 @@ def fetch_dem_rq(runid: str, extent, center, zoom):
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def build_channels_rq(runid: str, csa: float, mcl: float):
+def build_channels_rq(runid: str, csa: float, mcl: float, wbt_fill_or_breach: None|str):
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -206,6 +210,10 @@ def build_channels_rq(runid: str, csa: float, mcl: float):
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         watershed = Watershed.getInstance(wd)
+        if watershed.delineation_backend_is_wbt:
+            if wbt_fill_or_breach is not None:
+                StatusMessenger.publish(status_channel, f'Setting wbt_fill_or_breach to {wbt_fill_or_breach}')
+                watershed.wbt_fill_or_breach = wbt_fill_or_breach
         watershed.build_channels(csa, mcl)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   channel_delineation BUILD_CHANNELS_TASK_COMPLETED')
@@ -217,7 +225,7 @@ def build_channels_rq(runid: str, csa: float, mcl: float):
         raise
 
 
-def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl):
+def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl, wbt_fill_or_breach):
     try:
         job = get_current_job()
         func_name = inspect.currentframe().f_code.co_name
@@ -230,7 +238,7 @@ def fetch_dem_and_build_channels_rq(runid: str, extent, center, zoom, csa, mcl):
             job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
             job.save()
 
-            bjob = q.enqueue_call(build_channels_rq, (runid, csa, mcl),  depends_on=ajob)
+            bjob = q.enqueue_call(build_channels_rq, (runid, csa, mcl, wbt_fill_or_breach),  depends_on=ajob)
             job.meta['jobs:1,func:build_channels_rq'] = bjob.id
             job.save()
         
