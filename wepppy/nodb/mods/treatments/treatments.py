@@ -417,6 +417,15 @@ class Treatments(NoDbBase, LogMixin):
  
             inrcov = man.inis[0].data.inrcov
             new_inrcov = min(1.0, inrcov + mulch_cover_change)
+
+            # TODO: use matrix to determine ground cover change
+            # high sev forest fire, 0.5 -> final cover
+            # high sev forest fire, 1 -> final cover = 0.5
+            # high sev forest fire, 2 -> final cover = 0.8
+            
+            
+
+
             self.log(f'Applying mulch treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             self.log(f'Old inrcov: {inrcov}\t New inrcov: {new_inrcov}\n')
             man.inis[0].data.inrcov = new_inrcov

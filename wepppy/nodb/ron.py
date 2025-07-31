@@ -527,6 +527,13 @@ class Ron(NoDbBase):
         return self._configname
 
     @property
+    def max_map_dimension_px(self) -> int:
+        """
+        Maximum map dimension in pixels.
+        """
+        return 8192
+
+    @property
     def enable_landuse_change(self) -> bool:
         return self._enable_landuse_change
 

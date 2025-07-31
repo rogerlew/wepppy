@@ -139,6 +139,7 @@ class Watershed(NoDbBase, LogMixin):
                 self._wbt = None
                 self._csa = self.config_get_float('watershed.wbt', 'csa')
                 self._mcl = self.config_get_float('watershed.wbt', 'mcl')
+                self._wbt_fill_or_breach = self.config_get_str('watershed.wbt', 'fill_or_breach', 'fill')
 
             else:
                 self._delineation_backend = DelineationBackend.TOPAZ
@@ -234,6 +235,24 @@ class Watershed(NoDbBase, LogMixin):
         if delineation_backend is None:
             return True
         return delineation_backend == DelineationBackend.TOPAZ
+
+    @property
+    def wbt_fill_or_breach(self):
+        return getattr(self, '_wbt_fill_or_breach', 'fill')
+    
+    @wbt_fill_or_breach.setter
+    def wbt_fill_or_breach(self, value):
+        self.lock()
+
+        # noinspection PyBroadException
+        try:
+            assert value in ['fill', 'breach'], f'Invalid wbt_fill_or_breach value: {value}'
+            self._wbt_fill_or_breach = value
+            self.dump_and_unlock()
+
+        except Exception:
+            self.unlock('-f')
+            raise
 
     @property
     def max_points(self):
@@ -662,7 +681,7 @@ class Watershed(NoDbBase, LogMixin):
             Topaz.getInstance(self.wd).build_channels(csa=self.csa, mcl=self.mcl)
         elif self.delineation_backend_is_wbt:
             wbt = WhiteboxToolsTopazEmulator(self.wbt_wd, self.dem_fn)
-            wbt.delineate_channels(csa=self.csa, mcl=self.mcl)
+            wbt.delineate_channels(csa=self.csa, mcl=self.mcl, fill_or_breach=self.wbt_fill_or_breach)
             self.wbt = wbt
 
         else:

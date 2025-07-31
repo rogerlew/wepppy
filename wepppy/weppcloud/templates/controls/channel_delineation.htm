@@ -2,102 +2,134 @@
 {% block form_id %}build_channels_form{% endblock %}
 {% block form_title %}Channel Delineation{% endblock %}
 {% block inputs %}
-    <input type="hidden" id="map_center" name="map_center" />
-    <input type="hidden" id="map_zoom" name="map_zoom" />
-    <input type="hidden" id="map_bounds" name="map_bounds" />
-    <input type="hidden" id="map_distance" name="map_distance" />
-    <div style="height:150px;" class="unitizer-wrapper">
+<input type="hidden" id="map_center" name="map_center" />
+<input type="hidden" id="map_zoom" name="map_zoom" />
+<input type="hidden" id="map_bounds" name="map_bounds" />
+<input type="hidden" id="map_distance" name="map_distance" />
+<div style="height:150px;" class="unitizer-wrapper">
 
-        <div class="unitizer units-m">
-            {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <label for="input_mcl">Minimum Channel Length (m)
-                        <a data-toggle="tooltip" data-placement="top" title="Recommended to use default value."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                    </label>
-                </div>
-                <div class="col-sm-3">
-                    <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.mcl | round | int }}" aria-label="Lon, Lat">
-                </div>
+    <div class="unitizer units-m">
+        {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_mcl">Minimum Channel Length (m)
+                    <a data-toggle="tooltip" data-placement="top" title="Recommended to use default value."><img
+                            src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+                </label>
             </div>
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <label for="input_csa">Critical Source Area (ha)
-                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                    </label>
-                </div>
-                <div class="col-sm-3">
-                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.csa | round | int }}" aria-label="Lon, Lat">
-                </div>
+            <div class="col-sm-3">
+                <input id="input_mcl" name="mcl" class="form-control mr-sm-3 disable-readonly" type="text"
+                    value="{{ watershed.mcl | round | int }}" aria-label="Lon, Lat">
             </div>
-            {% else %}
-            <input type="hidden" id="input_mcl" value="-1" name="mcl" />
-            
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <label for="input_csa">Critical Source Area
-                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                    </label>
-                </div>
-                <div class="col-sm-3">
-                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="Lon, Lat">
-                </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_csa">Critical Source Area (ha)
+                    <a data-toggle="tooltip" data-placement="top"
+                        title="The minimum drainage area below which a permanent channel forms."><img
+                            src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+                </label>
             </div>
-            {% endif %}
+            <div class="col-sm-3">
+                <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text"
+                    value="{{ watershed.csa | round | int }}" aria-label="Lon, Lat">
+            </div>
+        </div>
+        {% else %}
+        <input type="hidden" id="input_mcl" value="-1" name="mcl" />
 
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_csa">Critical Source Area
+                    <a data-toggle="tooltip" data-placement="top"
+                        title="The minimum drainage area below which a permanent channel forms."><img
+                            src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+                </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text"
+                    value="{{ watershed.pkcsa }}" aria-label="Lon, Lat">
+            </div>
         </div>
-        <div class="unitizer units-ft">
-            {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <label for="input_mcl_en">Minimum Channel Length (ft)
-                        <a data-toggle="tooltip" data-placement="top" title="Recommended to use default value."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                    </label>
-                </div>
-                <div class="col-sm-3">
-                    <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ (watershed.mcl * 3.28084) | round | int }}" aria-label="Lon, Lat">
-                </div>
-            </div>
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <label for="input_csa_en">Critical Source Area (acre)
-                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                    </label>
-                </div>
-                <div class="col-sm-3">
-                    <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ (watershed.csa * 2.47105) | round | int }}" aria-label="Lon, Lat">
-                </div>
-            </div>
-            {% else %}
-            <input type="hidden" id="input_mcl_en" value="-1" name="mcl_en" />
-            <div class="form-group row">
-                <div class="col-sm-5">
-                    <label for="input_csa">Critical Source Area
-                        <a data-toggle="tooltip" data-placement="top" title="The minimum drainage area below which a permanent channel forms."><img src="{{ url_for('static', filename='images/61692-200-24.png') }}"/></a>
-                    </label>
-                </div>
-                <div class="col-sm-3">
-                    <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text" value="{{ watershed.pkcsa }}" aria-label="Lon, Lat">
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div> <!-- close Unitzer -->
+        {% endif %}
 
-    <div style="height:1em;"> </div>
-    <div class="form-group row hide-readonly">
-        <div class="col-sm-4">
-            <button id="btn_build_channels_en" 
-                onclick="debounceButton('btn_build_channels_en', 'build_channels_en_lock')()"
-                class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
-              <img  id="build_channels_en_lock" style="display:none;" src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
-              Build Channels
-            </button>
-            <small id="hint_build_channels_en" class="text-muted"></small>
-        </div>
-        <div class="col-sm-5">
-            <small id="hint_build_channels_en" class="text-muted"></small>
-        </div>
     </div>
-{% endblock %}
+    <div class="unitizer units-ft">
+        {% if watershed.delineation_backend_is_topaz or watershed.delineation_backend_is_wbt %}
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_mcl_en">Minimum Channel Length (ft)
+                    <a data-toggle="tooltip" data-placement="top" title="Recommended to use default value."><img
+                            src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+                </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_mcl_en" name="mcl_en" class="form-control mr-sm-3 disable-readonly" type="text"
+                    value="{{ (watershed.mcl * 3.28084) | round | int }}" aria-label="Lon, Lat">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_csa_en">Critical Source Area (acre)
+                    <a data-toggle="tooltip" data-placement="top"
+                        title="The minimum drainage area below which a permanent channel forms."><img
+                            src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+                </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_csa_en" name="csa_en" class="form-control mr-sm-3 disable-readonly" type="text"
+                    value="{{ (watershed.csa * 2.47105) | round | int }}" aria-label="Lon, Lat">
+            </div>
+        </div>
+        {% else %}
+        <input type="hidden" id="input_mcl_en" value="-1" name="mcl_en" />
+        <div class="form-group row">
+            <div class="col-sm-5">
+                <label for="input_csa">Critical Source Area
+                    <a data-toggle="tooltip" data-placement="top"
+                        title="The minimum drainage area below which a permanent channel forms."><img
+                            src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+                </label>
+            </div>
+            <div class="col-sm-3">
+                <input id="input_csa" name="csa" class="form-control mr-sm-3 disable-readonly" type="text"
+                    value="{{ watershed.pkcsa }}" aria-label="Lon, Lat">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div> <!-- close Unitzer -->
 
+{% if watershed.delineation_backend_is_wbt %}
+<div class="form-group row">
+    <div class="col-sm-5">
+        <label for="input_wbt_fill_or_breach">Depression Smoothing Algorithm
+            <a data-toggle="tooltip" data-placement="top" title="Specify whether DEM should be filled or breached."><img
+                    src="{{ url_for('static', filename='images/61692-200-24.png') }}" /></a>
+        </label>
+    </div>
+    <div class="col-sm-3">
+        <select id="input_wbt_fill_or_breach" name="wbt_fill_or_breach" class="form-control mr-sm-3 disable-readonly">
+            <option value="fill" {% if watershed.wbt_fill_or_breach=='fill' %}selected{% endif %}>Fill</option>
+            <option value="breach" {% if watershed.wbt_fill_or_breach=='breach' %}selected{% endif %}>Breach</option>
+        </select>
+    </div>
+</div>
+{% endif %}
+
+<div style="height:1em;"> </div>
+<div class="form-group row hide-readonly">
+    <div class="col-sm-4">
+        <button id="btn_build_channels_en" onclick="debounceButton('btn_build_channels_en', 'build_channels_en_lock')()"
+            class="btn btn-outline-success my-2 my-sm-0 col-sm-12" type="button">
+            <img id="build_channels_en_lock" style="display:none;"
+                src="{{ url_for('static', filename='open-iconic/png/lock-locked-2x.png') }}" />
+            Build Channels
+        </button>
+        <small id="hint_build_channels_en" class="text-muted"></small>
+    </div>
+    <div class="col-sm-5">
+        <small id="hint_build_channels_en" class="text-muted"></small>
+    </div>
+</div>
+{% endblock %}
